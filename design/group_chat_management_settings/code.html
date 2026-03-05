@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Group Chat Management Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#161e27] sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-xl">forum</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight hidden md:block">Host Console</h2>
+</div>
+<div class="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-400 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 placeholder:text-slate-500" placeholder="Search chats..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-white text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-primary dark:text-white text-sm font-semibold border-b-2 border-primary py-5" href="#">Groups</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-white text-sm font-medium transition-colors" href="#">Guests</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-white text-sm font-medium transition-colors" href="#">Analytics</a>
+</nav>
+<div class="flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-6">
+<div class="size-9 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Avatar of the host administrator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUR8vaxPluBc-dyhPCegkfWsAP1X7MeDPAhayRcSGR4a3pVTS_XMNUthZf42NTRhfxKFC8CsN2NFW_Fx0JQYdIpn_6HIXNWo8LWz9ZRJAvZlr8ZVJfTjdXc3NpJM2TelQM7GhYvKI7Nlxvp_IpzXDsxCPrtzhd2aaSb4ztCNpU9xhyQ02KTIobneCQviX_f2PBH4uEGuI9tsV2P4CwECMmgwhK4Z8NGzHfxPMxPCJIYlo2klkMX5_TL9KJFv-n7covT8VblVNt6Tw"/>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-4 py-10">
+<!-- Page Heading -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-xl">
+<nav class="flex items-center gap-2 text-sm text-slate-500 mb-4">
+<a class="hover:text-primary" href="#">Groups</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-300">Settings</span>
+</nav>
+<h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Group Settings</h1>
+<p class="text-slate-500 dark:text-slate-400 text-lg">Manage your subdomain's active group chat, members, and permissions.</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">person_add</span>
+                Add Member
+            </button>
+</div>
+<!-- Settings Content Card -->
+<div class="space-y-8">
+<!-- Group Info Section -->
+<section class="bg-white dark:bg-[#161e27] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+<h2 class="text-lg font-bold">General Information</h2>
+</div>
+<div class="p-6 space-y-6">
+<div class="flex flex-col gap-2 max-w-md">
+<label class="text-sm font-semibold text-slate-600 dark:text-slate-400">Group Name</label>
+<div class="flex gap-3">
+<input class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Enter group name" type="text" value="Product Strategy Hub"/>
+<button class="bg-slate-900 dark:bg-slate-700 text-white px-5 rounded-lg font-medium hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors">Save</button>
+</div>
+<p class="text-xs text-slate-500">Visible to all subdomain guests in this group.</p>
+</div>
+</div>
+</section>
+<!-- Member Management Section -->
+<section class="bg-white dark:bg-[#161e27] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+<div class="flex items-center gap-2">
+<h2 class="text-lg font-bold">Members</h2>
+<span class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full font-bold">12 Total</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500">
+<span class="material-symbols-outlined text-base">filter_list</span>
+<span>Filter</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-100 dark:border-slate-800">
+<th class="px-6 py-4 font-semibold">User Profile</th>
+<th class="px-6 py-4 font-semibold">Access Level</th>
+<th class="px-6 py-4 font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Member 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of Alex Rivera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy4gEfwQ22mWDjtvOAYlSDr5hx-1kOiIVGDnZumfD90wNvxAwZ1_wMWCgOePDXS7wR86GB1Vr49OIsuQO3QvT84i9rwvIvuIoXH2SjT8JOAz_vk9E-10SybPSYynV_1Fj7BrrxMCkUnioEHhKtt-DU2ogiRks3pDW10wUubQ2UW94zbUmwWeGH2p0UQ2aVo_GFdRgL4laL5R0ogFOv7eL-2uuybZckiBLYXiTWFdHgLEdo51Qf3GPLgL7sqA7Ok3BfEGiSRp6-UlE"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Alex Rivera</div>
+<div class="text-xs text-slate-500">alex.r@subdomain.cloud</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+                                        ADMIN
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-red-500 font-medium text-sm transition-colors flex items-center justify-end gap-1 ml-auto">
+<span class="material-symbols-outlined text-lg">person_remove</span>
+<span>Remove</span>
+</button>
+</td>
+</tr>
+<!-- Member 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of Jordan Smith" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaWOIhPSIMXG6Gz_ouw4SNjeaLvuT_CqS1hYS58RH4g-b2R3MqFKU3wMo8Rew76kEERdbhevnO3kfQcFSkFyCbXpIeMPpV1-Igj_D33rkfcTRzY92th9bJosGSkygugHF4ucHQt00PGI4O8sa6_w1x6-e1AWMwV2CMxqPWLHjWSxlHYLYqC01c5pmvOS10QVVMP_JjzLgLeeBj11INrTK75sLPfFAkbSAQBEYP31ACYGOTl5VWeqANa2R-qRfj1oZUTuuFEFnJ5kA"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Jordan Smith</div>
+<div class="text-xs text-slate-500">jsmith@company.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-700">
+                                        GUEST
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-red-500 font-medium text-sm transition-colors flex items-center justify-end gap-1 ml-auto">
+<span class="material-symbols-outlined text-lg">person_remove</span>
+<span>Remove</span>
+</button>
+</td>
+</tr>
+<!-- Member 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of Casey Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbqHyK1V7FnZAsLJXbUFuX5uWuxEoNegRF3ec-zuzC7yMZiW8O7z3iWvdH20LNsid2Kjxyd1nWegLb0CIii0zNdLKXytnB5kqK2nwJss0j3r8oa1GnCtf94Dhdq0NgAGVScZLGyRhQOaxtmw9aXAm74WkQv1j4IdXxRDj-rX4GRqo3uAquezpt67iNMkMG0qz9tIKv3Jf9V92ThDS6iCo8Nr2_8h3LSlovw-lTJiTn0LK0rfc4gIKZIL-bJYG5eu80cBoTAPH-yh4"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Casey Chen</div>
+<div class="text-xs text-slate-500">casey.chen@design.io</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-700">
+                                        GUEST
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-red-500 font-medium text-sm transition-colors flex items-center justify-end gap-1 ml-auto">
+<span class="material-symbols-outlined text-lg">person_remove</span>
+<span>Remove</span>
+</button>
+</td>
+</tr>
+<!-- Member 4 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of Taylor Vane" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEs6R4wapXJkXbIbg4NTbqx0n8PBMv5nJJVp14AmP2m95uacCbznS4MnDLUsmtZVhstNQj4EwpCYBMN47zLbWBTBu16CoT294prCXndx0Ahnw8lsMmoK7OFcL_NkKJ-OChn5tcjFcP52jGnuj5HJ4joNf0hKo8LODEEaX6vgUN8-C50Ds9Y62DQWZhq7UFT5B-n75M0SORBKnol1oiqXrXhYl4v-zI0Es0YnAomkGQyS7JnysbLECW2TJwpKKAqiJLLg4XbVs0OLE"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Taylor Vane</div>
+<div class="text-xs text-slate-500">t.vane@enterprise.net</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+                                        ADMIN
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-red-500 font-medium text-sm transition-colors flex items-center justify-end gap-1 ml-auto">
+<span class="material-symbols-outlined text-lg">person_remove</span>
+<span>Remove</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 text-center">
+<button class="text-primary hover:text-primary/80 text-sm font-semibold">Load more members</button>
+</div>
+</section>
+<!-- Danger Zone Section -->
+<section class="bg-red-50/30 dark:bg-red-900/10 border border-red-200/50 dark:border-red-900/30 rounded-xl p-6">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div>
+<h2 class="text-lg font-bold text-red-600 dark:text-red-500 flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined">warning</span>
+                            Danger Zone
+                        </h2>
+<p class="text-slate-600 dark:text-slate-400 max-w-md">Deleting this group is permanent. All message history, shared files, and member access for this subdomain group will be instantly revoked.</p>
+</div>
+<button class="bg-white dark:bg-background-dark text-red-600 border border-red-200 dark:border-red-900 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 px-6 py-3 rounded-lg font-bold transition-all shadow-sm">
+                        Delete Group Chat
+                    </button>
+</div>
+</section>
+</div>
+</main>
+<!-- Side Drawer (Add Member Mockup) -->
+<!-- This would normally be toggled by JS, included here for visual representation of the UI request -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 pointer-events-none opacity-0">
+<div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-[#161e27] shadow-2xl p-6 transform translate-x-full transition-transform">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-2xl font-bold">Add Member</h3>
+<button class="size-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="space-y-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-primary" placeholder="Search guests by name or email" type="text"/>
+</div>
+<div class="space-y-4">
+<h4 class="text-xs font-bold text-slate-500 uppercase">Suggested Guests</h4>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of Jamie" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5d1N8u7DRQdB554E3HlghmiDWXp1U3Et4pry84J_adyFF9hIyvz5wt2mkpf1aXmgg3isv0NdzM22I6-w8poWjEaBT-O2c_S90Jv6SckLAmrBCS0l8aYOHdPH5B3P9dUPQQohVi1cGM2BCtYk0W2y7aDYrzGlAlJexfmMazJvpb8ziAVCYCJ4cXwQ6zpMCiKRb2piBufyk6X-rdKchXODA0RHQo7ASS0Hs-t5HHTxdIFi3smiKJMQ7EgKTCjpH3D6msGzccWrwVKg"/>
+</div>
+<div>
+<div class="font-medium">Jamie Lannister</div>
+<div class="text-xs text-slate-500">jamie.l@kings.net</div>
+</div>
+</div>
+<button class="bg-primary text-white size-8 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Pattern -->
+<div class="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-background-dark">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-transparent opacity-50"></div>
+</div>
+</body></html>

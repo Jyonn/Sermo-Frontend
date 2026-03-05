@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Host Profile &amp; Integration Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+<div class="flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#283039] px-6 py-3 bg-white dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Admin Console</h2>
+</div>
+<div class="flex gap-3">
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-[#283039] text-slate-600 dark:text-white hover:bg-slate-200 dark:hover:bg-[#343d48] transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-[#283039] text-slate-600 dark:text-white hover:bg-slate-200 dark:hover:bg-[#343d48] transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 max-w-[1440px] mx-auto w-full">
+<!-- SideNavBar -->
+<aside class="w-64 border-r border-slate-200 dark:border-[#283039] hidden md:flex flex-col p-4 bg-white dark:bg-background-dark">
+<div class="flex flex-col gap-6">
+<div class="px-3">
+<h1 class="text-slate-900 dark:text-white text-base font-semibold leading-normal">Host Admin</h1>
+<p class="text-slate-500 dark:text-[#9dabb9] text-xs font-normal leading-normal">Manage your instance</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-sm">Profile</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">extension</span>
+<p class="text-sm">Integrations</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">security</span>
+<p class="text-sm">Security</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<p class="text-sm">Notifications</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<p class="text-sm">Billing</p>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-y-auto">
+<div class="p-8 max-w-[800px] w-full mx-auto">
+<!-- PageHeading -->
+<div class="mb-8">
+<p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Host Profile &amp; Integration Settings</p>
+<p class="text-slate-500 dark:text-[#9dabb9] text-base font-normal leading-normal mt-2">Update your administrative credentials and push notification service keys.</p>
+</div>
+<div class="space-y-10">
+<!-- Profile Section -->
+<section>
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] border-b border-slate-200 dark:border-[#283039] pb-4 mb-6">Basic Information</h2>
+<!-- Email Field with Error State -->
+<div class="flex flex-col gap-4 max-w-[520px]">
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-white text-sm font-semibold pb-2">Email Address</p>
+<div class="flex w-full items-stretch rounded-lg shadow-sm">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg rounded-r-none border-r-0 text-slate-900 dark:text-white focus:outline-0 focus:ring-1 focus:ring-red-500 border-red-500 bg-white dark:bg-[#1c2127] h-12 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-4 text-base font-normal leading-normal" value="host-example-domain"/>
+<div class="text-red-500 flex border border-red-500 bg-white dark:bg-[#1c2127] items-center justify-center px-3 rounded-r-lg border-l-0">
+<span class="material-symbols-outlined text-[20px]">error</span>
+</div>
+</div>
+<p class="text-red-500 text-xs mt-1.5 font-medium">Please enter a valid email address.</p>
+</label>
+</div>
+</section>
+<!-- Integration Section -->
+<section>
+<div class="flex items-center gap-2 mb-6 border-b border-slate-200 dark:border-[#283039] pb-4">
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">Bark Integration</h2>
+<span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Push Notifications</span>
+</div>
+<div class="flex flex-col gap-6 max-w-[520px]">
+<label class="flex flex-col w-full">
+<div class="flex justify-between items-end pb-2">
+<p class="text-slate-700 dark:text-white text-sm font-semibold">Bark Key</p>
+<a class="text-primary text-xs font-medium hover:underline" href="#">How do I find this?</a>
+</div>
+<div class="flex w-full items-stretch rounded-lg shadow-sm relative">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-1 focus:ring-primary border border-slate-300 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] h-12 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] px-4 pr-12 text-base font-normal leading-normal" placeholder="Enter your Bark device key" type="password" value="••••••••••••••••"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<p class="text-slate-500 dark:text-[#9dabb9] text-xs mt-2 leading-relaxed">Your Bark Key is used to send instant push notifications to your iOS devices when guests initiate a chat.</p>
+</label>
+</div>
+</section>
+<!-- Actions -->
+<div class="pt-6 flex flex-col sm:flex-row gap-4">
+<button class="flex items-center justify-center gap-2 px-6 h-12 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all shadow-md active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">save</span>
+                                Update Profile
+                            </button>
+<button class="flex items-center justify-center gap-2 px-6 h-12 bg-slate-200 dark:bg-[#283039] text-slate-700 dark:text-white font-bold rounded-lg hover:bg-slate-300 dark:hover:bg-[#343d48] transition-all">
+                                Cancel
+                            </button>
+</div>
+</div>
+</div>
+<!-- Subtle Toast/Notification example (Hidden or visible as needed) -->
+<div class="fixed bottom-8 right-8 bg-slate-900 dark:bg-slate-800 text-white px-4 py-3 rounded-lg shadow-2xl border border-slate-700 flex items-center gap-3 max-w-sm pointer-events-none opacity-0 translate-y-4">
+<div class="bg-green-500 p-1 rounded-full">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<p class="text-sm font-medium">Profile successfully updated.</p>
+</div>
+</main>
+</div>
+</div>
+</body></html>

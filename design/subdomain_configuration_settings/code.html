@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Subdomain Configuration Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-10 py-3 bg-white dark:bg-background-dark">
+<div class="flex items-center gap-4">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M39.5563 34.1455V13.8546C39.5563 15.708 36.8773 17.3437 32.7927 18.3189C30.2914 18.916 27.263 19.2655 24 19.2655C20.737 19.2655 17.7086 18.916 15.2073 18.3189C11.1227 17.3437 8.44365 15.708 8.44365 13.8546V34.1455C8.44365 35.9988 11.1227 37.6346 15.2073 38.6098C17.7086 39.2069 20.737 39.5564 24 39.5564C27.263 39.5564 30.2914 39.2069 32.7927 38.6098C36.8773 37.6346 39.5563 35.9988 39.5563 34.1455Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M10.4485 13.8519C10.4749 13.9271 10.6203 14.246 11.379 14.7361C12.298 15.3298 13.7492 15.9145 15.6717 16.3735C18.0007 16.9296 20.8712 17.2655 24 17.2655C27.1288 17.2655 29.9993 16.9296 32.3283 16.3735C34.2508 15.9145 35.702 15.3298 36.621 14.7361C37.3796 14.246 37.5251 13.9271 37.5515 13.8519C37.5287 13.7876 37.4333 13.5973 37.0635 13.2931C36.5266 12.8516 35.6288 12.3647 34.343 11.9175C31.79 11.0295 28.1333 10.4437 24 10.4437C19.8667 10.4437 16.2099 11.0295 13.657 11.9175C12.3712 12.3647 11.4734 12.8516 10.9365 13.2931C10.5667 13.5973 10.4713 13.7876 10.4485 13.8519ZM37.5563 18.7877C36.3176 19.3925 34.8502 19.8839 33.2571 20.2642C30.5836 20.9025 27.3973 21.2655 24 21.2655C20.6027 21.2655 17.4164 20.9025 14.7429 20.2642C13.1498 19.8839 11.6824 19.3925 10.4436 18.7877V34.1275C10.4515 34.1545 10.5427 34.4867 11.379 35.027C12.298 35.6207 13.7492 36.2054 15.6717 36.6644C18.0007 37.2205 20.8712 37.5564 24 37.5564C27.1288 37.5564 29.9993 37.2205 32.3283 36.6644C34.2508 36.2054 35.702 35.6207 36.621 35.027C37.4573 34.4867 37.5485 34.1546 37.5563 34.1275V18.7877ZM41.5563 13.8546V34.1455C41.5563 36.1078 40.158 37.5042 38.7915 38.3869C37.3498 39.3182 35.4192 40.0389 33.2571 40.5551C30.5836 41.1934 27.3973 41.5564 24 41.5564C20.6027 41.5564 17.4164 41.1934 14.7429 40.5551C12.5808 40.0389 10.6502 39.3182 9.20848 38.3869C7.84205 37.5042 6.44365 36.1078 6.44365 34.1455L6.44365 13.8546C6.44365 12.2684 7.37223 11.0454 8.39581 10.2036C9.43325 9.3505 10.8137 8.67141 12.343 8.13948C15.4203 7.06909 19.5418 6.44366 24 6.44366C28.4582 6.44366 32.5797 7.06909 35.657 8.13948C37.1863 8.67141 38.5667 9.3505 39.6042 10.2036C40.6278 11.0454 41.5563 12.2684 41.5563 13.8546Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Sermo Host</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-slate-600 dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Chats</a>
+<a class="text-slate-600 dark:text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Guests</a>
+<a class="text-primary text-sm font-bold leading-normal border-b-2 border-primary" href="#">Settings</a>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD2krYwzA3vQDW8YjBzWv5y7vGa_rkPV66W49Pvw-wmJIcIZXYOQ57lVWToib4tbYh0Lg-42qV5Y8legFb32bqmoEHapYIFkTLuOzW6LySmTh28r6sTWwyKu5XD0dMvcPATEb26ejO67EelamMawl5u73TcIm9yCY-DEqv7AY5bTkc6SsTdoM7Qc3ZnhL39qTNtukYM-uFhe3AVWV0ochggcwZxE8YtNjBjPld40KdDSIUW4qWyoIC9GPq6_wXzkAb85Yode4RZ8ss");'></div>
+</div>
+</header>
+<div class="flex flex-1 justify-center py-10 px-4">
+<div class="flex w-full max-w-[1200px] gap-8">
+<!-- Side Navigation Bar -->
+<aside class="flex w-64 flex-col gap-6 shrink-0">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-lg font-bold">Workspace Settings</h1>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm leading-normal">Configure your host portal environment</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-sm font-medium">General</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">link</span>
+<span class="text-sm font-semibold">Subdomain</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">group</span>
+<span class="text-sm font-medium">Team Members</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">extension</span>
+<span class="text-sm font-medium">Integrations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">payments</span>
+<span class="text-sm font-medium">Billing</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col gap-6">
+<!-- Page Heading -->
+<div class="flex flex-col gap-2">
+<h2 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Subdomain Configuration</h2>
+<p class="text-slate-500 dark:text-[#9dabb9] text-base font-normal leading-normal max-w-2xl">
+                                Set a unique address for your guests to access your chat system. This brand identity will be visible in every guest interaction.
+                            </p>
+</div>
+<!-- Success Alert (Simulated) -->
+<div class="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="text-sm font-medium">Subdomain saved successfully! Your guests can now connect via the new link.</span>
+</div>
+<!-- Configuration Card -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 md:p-8 flex flex-col gap-8">
+<div class="flex flex-col gap-4">
+<h3 class="text-slate-900 dark:text-white text-xl font-bold">Assign Your Address</h3>
+<!-- TextField Component with Button -->
+<div class="flex flex-col gap-4 max-w-xl">
+<label class="flex flex-col">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-semibold mb-2">Workspace Name</p>
+<div class="flex items-stretch rounded-lg shadow-sm">
+<input class="flex-1 min-w-0 rounded-l-lg text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 text-base font-medium" placeholder="my-awesome-brand" value="nexus-creative"/>
+<div class="flex items-center px-4 bg-slate-100 dark:bg-slate-800 border-y border-r border-slate-300 dark:border-slate-700 text-slate-500 font-medium rounded-r-lg">
+                                                    .sermo.com
+                                                </div>
+</div>
+</label>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-emerald-500">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="text-xs font-bold uppercase tracking-wider">Available!</span>
+</div>
+<!-- Availability Check Button with simulated loading -->
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold transition-all uppercase tracking-wide">
+<span class="material-symbols-outlined animate-spin text-[16px]">refresh</span>
+                                                Re-check Availability
+                                            </button>
+</div>
+</div>
+</div>
+<div class="h-px bg-slate-200 dark:bg-slate-800"></div>
+<!-- Live Preview Card -->
+<div class="flex flex-col gap-4">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">visibility</span>
+                                        Guest Link Preview
+                                    </h3>
+<div class="p-6 rounded-xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-300 dark:border-slate-700">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<p class="text-slate-400 dark:text-slate-500 text-xs font-medium uppercase tracking-widest">Share this link with your guests</p>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 dark:text-slate-500 text-lg">https://</span>
+<span class="text-primary text-xl font-bold">nexus-creative</span>
+<span class="text-slate-400 dark:text-slate-500 text-lg">.sermo.com</span>
+</div>
+</div>
+<button class="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined">content_copy</span>
+                                                Copy Invite Link
+                                            </button>
+</div>
+</div>
+</div>
+<!-- Warning Footer -->
+<div class="flex gap-4 p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-500/80">
+<span class="material-symbols-outlined shrink-0">warning</span>
+<p class="text-sm leading-relaxed">
+                                        Changing your subdomain will immediately invalidate all previously shared links. Existing guests will need the new URL to re-join your session.
+                                    </p>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-6 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-800">
+<button class="px-6 py-3 text-slate-600 dark:text-slate-400 font-bold hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</button>
+<button class="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:brightness-110 transition-all">Save Subdomain</button>
+</div>
+</div>
+<!-- Additional Information Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-4 items-start">
+<div class="bg-primary/10 p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined">language</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white font-bold">Custom Domains</p>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm">Want to use chat.yourcompany.com? Upgrade to Pro to connect your own domain.</p>
+<a class="text-primary text-sm font-bold mt-2 hover:underline" href="#">Learn about Pro →</a>
+</div>
+</div>
+<div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-4 items-start">
+<div class="bg-primary/10 p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white font-bold">Secure Access</p>
+<p class="text-slate-500 dark:text-[#9dabb9] text-sm">All subdomains are automatically protected with enterprise-grade SSL certificates.</p>
+<a class="text-primary text-sm font-bold mt-2 hover:underline" href="#">Security overview →</a>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</div>
+</body></html>

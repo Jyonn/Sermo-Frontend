@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Host Portal Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-1 {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden h-screen">
+<!-- Main Layout Container -->
+<div class="flex h-full w-full flex-col">
+<!-- Header / TopNavBar -->
+<header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 bg-white dark:bg-[#111418]">
+<div class="flex items-center gap-4">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<h1 class="text-lg font-bold leading-tight tracking-tight">Host Portal Chat</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-lg bg-slate-100 dark:bg-[#283039] hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-lg bg-slate-100 dark:bg-[#283039] hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+</div>
+<div class="h-10 w-10 rounded-full bg-cover bg-center border border-slate-200 dark:border-slate-700" data-alt="Host profile avatar circular thumbnail" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCTrfpoeXjgkjOD5DUG-iFolSgcPS-GPzJSzkiy9niLG0f6HVXBY6f5K9f8o921Yhqb13oCfxzU7qtLzMYqGf0icm-TH0kbXxAtWesINYI8yDKaFqeTs_V97zzfcFeN3V7OdXon8b8gfYvBwat_KcbIwn0-VrVwb826JJhsfNNTSFEa2M8xbcf_-Eq0gmmKYLFnxGhojXpmc4hlShWUJwiCRTaeUnF8dVD-R16czHy6u6VgipHv9uYzXzGrHi_L6T-_wqneUyKpl0I");'>
+</div>
+</div>
+</header>
+<!-- Main Content Area (Split View) -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Side Navigation (Narrow Left) -->
+<nav class="w-16 md:w-64 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-[#111418] shrink-0">
+<div class="p-4 hidden md:block">
+<h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Dashboard</h2>
+</div>
+<div class="flex flex-col gap-1 p-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium hidden md:block">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined fill-1">chat</span>
+<span class="text-sm font-medium hidden md:block">Inbox</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">home_work</span>
+<span class="text-sm font-medium hidden md:block">Properties</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium hidden md:block">Guests</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm font-medium hidden md:block">Reports</span>
+</a>
+</div>
+</nav>
+<!-- Chat List Sidebar -->
+<aside class="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-[#111418] shrink-0">
+<!-- Search Bar -->
+<div class="p-4">
+<label class="flex flex-col w-full">
+<div class="flex w-full items-stretch rounded-lg h-10 bg-slate-100 dark:bg-[#283039]">
+<div class="text-slate-400 flex items-center justify-center pl-3">
+<span class="material-symbols-outlined text-lg">search</span>
+</div>
+<input class="w-full border-none bg-transparent focus:ring-0 text-sm placeholder:text-slate-500 px-3" placeholder="Search conversations..."/>
+</div>
+</label>
+</div>
+<!-- Conversations List -->
+<div class="flex-1 overflow-y-auto">
+<!-- Active Chat Item -->
+<div class="flex items-center gap-3 px-4 py-4 bg-primary/5 border-l-4 border-primary cursor-pointer">
+<div class="relative">
+<div class="size-12 rounded-full bg-cover bg-center" data-alt="Guest profile picture John Doe" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA1Idfz_q99Z6nLCP-rsJw8c5cyT2anb0oUNYd-A-f5HaCJuMQFN4v_6G9_UYzXfBxycPO7okYorexcTULutrrSnATPB8rcy73H3gsK0vExsTdmBmVauDCZ1wMPYdm-o34KzS7FNcfzp9AjorePx3p_NC1MEugzpFyFObZQiYvJMyBcfj59IRVxW4rkvkKxL-gIy9VqMQijwOjk1IUUyoIJ0ntyWS1CUlw32DfkQZa33ZlRx4fWflKHIIJVeZx8jbUO7lYZlk4CC5w");'></div>
+<div class="absolute bottom-0 right-0 size-3 rounded-full border-2 border-white dark:border-[#111418] bg-[#0bda5b]"></div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<p class="text-sm font-semibold truncate">John Doe (Guest)</p>
+<span class="text-[10px] text-slate-500 font-medium uppercase">10:45 AM</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">Can I check in early tomorrow?</p>
+</div>
+</div>
+<!-- Unread Chat Item -->
+<div class="flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-[#283039]/30 transition-colors cursor-pointer border-l-4 border-transparent">
+<div class="relative">
+<div class="size-12 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center" data-alt="Maintenance group icon placeholder">
+<span class="material-symbols-outlined text-slate-500">handyman</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<p class="text-sm font-semibold truncate">Maintenance Group</p>
+<span class="text-[10px] text-slate-500 font-medium uppercase">Yesterday</span>
+</div>
+<div class="flex items-center justify-between mt-0.5">
+<p class="text-xs font-semibold text-slate-900 dark:text-white truncate">The faucet in Room 402 is fixed.</p>
+<span class="flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold shrink-0 ml-2">2</span>
+</div>
+</div>
+</div>
+<!-- Standard Chat Item -->
+<div class="flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-[#283039]/30 transition-colors cursor-pointer border-l-4 border-transparent">
+<div class="relative">
+<div class="size-12 rounded-full bg-cover bg-center" data-alt="Guest profile Sarah Jenkins" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDtUNQs-_o1Mhs4zn-VqVgirTj3zwStPM8iG-4wNyeKCOH5BPCb8f7huEVpBtfogRw5yJziRIds4ZmGWaaOCSYYsN9AZB2pPPzWG6yW0m5kQwNYfJeVYajFSnS1Xpcsv18h86wKSkcXbrtXAVAPmRYo5BMm3FJcrzqAEv92voG7nCiewlrvz2zi4PYKuMdzpp6TmQvz4Fj1Ox1-j70V4zFbH2M8vqZXnLseNcKPNOA_tEOMtwgpHVWu1-1dJd7v-gYOs659ylN-0mU");'></div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400 truncate">Sarah Jenkins</p>
+<span class="text-[10px] text-slate-500 font-medium uppercase">Tuesday</span>
+</div>
+<p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">Thank you for the recommendation!</p>
+</div>
+</div>
+<!-- Offline Chat Item -->
+<div class="flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-[#283039]/30 transition-colors cursor-pointer border-l-4 border-transparent opacity-80">
+<div class="relative">
+<div class="size-12 rounded-full bg-cover bg-center" data-alt="Guest profile Michael Chen" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuANz4FFbOeEf6UGM5bbjh9AiCnP5ZO758JDJP_-v_inZ3QOHMJPcFU834Ij8MWP8JZB458fO-DI-RabKEjy45ZLAIYbhVAUzGtlgl8aswiJmCoKkboGSlSISWq0Z8t5Kk0fZOjIvZt4WIkQGPJBXthrmY6A8WHSWhTgml0tFe-0JaqQBaCQ3HGZF3J4GVpHziuusFyp-XSwZlZBMVq6TJ6TJD_R7JoncdqYfOokeIhD82g7Bpe2QPg1MNcl-euqkdnyFC5LhnoRi2c");'></div>
+<div class="absolute bottom-0 right-0 size-3 rounded-full border-2 border-white dark:border-[#111418] bg-slate-400"></div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-baseline">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400 truncate">Michael Chen</p>
+<span class="text-[10px] text-slate-500 font-medium uppercase">Mar 12</span>
+</div>
+<p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">I have arrived at the airport.</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Messaging Area (Main Right) -->
+<main class="flex-1 flex flex-col bg-slate-50 dark:bg-background-dark min-w-0">
+<!-- Chat Header -->
+<header class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111418] shrink-0 sticky top-0 z-10">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Active chat profile thumbnail John Doe" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCwxB8BAInUlBQ9o6i8n4LpuVK0oU-YMJimmYyRmnEfM0uh6Gxbrrp0v5IcatZi40qiMOH3K0tMCJCcV19b-JRZcznnP0211aufhp_mQPGHcEWbnfIO4OIAxPCj6yLwl6yUWuCUNScDYS5j2wLVEDE6JB__hXOyPNm8MgP52X9KewwvhpxlDTKEuFq-kGETdLWFmGjHkyHViRdR8cS8YTuTTtALbvSsYCP8uyjUW0mE3rsjhXi9u4s6h2KdAKkYeZzMDRTHDTnlk_U");'></div>
+<div class="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white dark:border-[#111418] bg-[#0bda5b]"></div>
+</div>
+<div class="flex flex-col">
+<h3 class="text-sm font-bold">John Doe</h3>
+<p class="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-emerald-500"></span> 
+                                Guest • Staying at Modern Loft
+                            </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-[#283039] transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Message History -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+<!-- Date Group -->
+<div class="flex justify-center">
+<span class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Yesterday</span>
+</div>
+<!-- Received Message -->
+<div class="flex items-start gap-3 max-w-[80%]">
+<div class="size-8 rounded-full bg-cover bg-center shrink-0 mt-1" data-alt="Message sender thumbnail John Doe" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCKkXRfje6lwZ5Zfst6wasbcAvT_iWo9BCDzj3HM8Op6smcVgnMquAe4YR7muhlb9R-O_gEihPk9wew5Cr2Y3HnHmBwN8Prg5Eb-sjE8qjI1GFTND0Gjgzey25tjhS_U65e4GrN8ZPLe1egIn9JkogRnIFeckq3fLzSOBkxvIFAL7qEFBTozY-NH_5uNiraVbDYRaUZw0Xx4Hm-IbboL04wpQYRqRxAzZeXHEOFgzpf0HhhSaBF9O6JhXxt3PyGH95p4yP3emsnpDE");'></div>
+<div class="flex flex-col gap-1">
+<div class="p-3 bg-white dark:bg-[#1c252e] rounded-xl rounded-tl-none shadow-sm border border-slate-200 dark:border-slate-800">
+<p class="text-sm leading-relaxed">Hi, I'm checking the details for my booking tomorrow. Is there a code for the front door?</p>
+</div>
+<span class="text-[10px] text-slate-400">09:15 PM</span>
+</div>
+</div>
+<!-- Sent Message -->
+<div class="flex items-start gap-3 max-w-[80%] ml-auto flex-row-reverse">
+<div class="flex flex-col gap-1 items-end">
+<div class="p-3 bg-primary text-white rounded-xl rounded-tr-none shadow-md">
+<p class="text-sm leading-relaxed">Hello John! Yes, the door code is 4829#. You'll receive a detailed check-in guide in your email as well.</p>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-[10px] text-slate-400">09:18 PM</span>
+<span class="material-symbols-outlined text-sm text-primary">done_all</span>
+</div>
+</div>
+</div>
+<!-- New Messages Divider -->
+<div class="relative flex items-center py-4">
+<div class="flex-grow border-t border-red-500/30"></div>
+<span class="flex-shrink mx-4 text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded">New Messages</span>
+<div class="flex-grow border-t border-red-500/30"></div>
+</div>
+<!-- Received Message (Unread) -->
+<div class="flex items-start gap-3 max-w-[80%]">
+<div class="size-8 rounded-full bg-cover bg-center shrink-0 mt-1" data-alt="Message sender thumbnail John Doe" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAJ8GDa1dkL97kj8PnnOLma_QClWqIlWMVNlB4H75b13ZVpdrvC5TwQPwBEvbFmrDd3MXJgqp4k2E82XthEWn1VyuV_U2QvGkOCh7GJEIUFyYcXsI5kS3Ob9yyU7-Ebc9EoAj4dCFHQIWpPCAD425WqNFbrMPn__-ZVwQTAGuc6XOzrnJAtl5jCzR3Gjqj8AoSFYEJzJcQVZ-k5vnOMWOPcnhG9UiRcdr_2jVifDk-AOJsvXCtUWVocRG8eoNafjukENOcrMp4vT8A");'></div>
+<div class="flex flex-col gap-1">
+<div class="p-3 bg-white dark:bg-[#1c252e] rounded-xl rounded-tl-none shadow-sm border border-slate-200 dark:border-slate-800">
+<p class="text-sm leading-relaxed">Got it! Also, can I check in early tomorrow? Around 11 AM if possible?</p>
+</div>
+<span class="text-[10px] text-slate-400">10:45 AM</span>
+</div>
+</div>
+<!-- Typing Indicator -->
+<div class="flex items-center gap-2 text-slate-400 dark:text-slate-500">
+<div class="flex gap-1">
+<span class="size-1 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce"></span>
+<span class="size-1 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+<span class="size-1 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+</div>
+<span class="text-[10px] font-medium italic">John is typing...</span>
+</div>
+</div>
+<!-- Message Input Area -->
+<div class="p-4 bg-white dark:bg-[#111418] border-t border-slate-200 dark:border-slate-800">
+<div class="flex flex-col gap-2 bg-slate-50 dark:bg-[#1c252e] rounded-xl border border-slate-200 dark:border-slate-700 p-2">
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-sm resize-none min-h-[60px] placeholder:text-slate-500" placeholder="Type a message or drop files here..."></textarea>
+<div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
+<div class="flex items-center gap-1">
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-[#283039] transition-colors">
+<span class="material-symbols-outlined text-lg">attach_file</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-[#283039] transition-colors">
+<span class="material-symbols-outlined text-lg">image</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-[#283039] transition-colors">
+<span class="material-symbols-outlined text-lg">mood</span>
+</button>
+</div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-lg shadow-primary/20">
+                                SEND
+                                <span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
