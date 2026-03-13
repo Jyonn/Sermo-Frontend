@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sermo Space IM - Enter the Cosmos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#00d184",
+                "background-light": "#f5f4ef",
+                "background-dark": "#0f231c",
+              },
+              fontFamily: {
+                "display": ["Space Grotesk", "sans-serif"]
+              },
+              borderRadius: {
+                "DEFAULT": "0.5rem",
+                "lg": "0.875rem", // 14px as requested
+                "xl": "1.5rem",
+                "full": "9999px"
+              },
+            },
+          },
+        }
+    </script>
+<style>.grain-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAWW2Gr186X1UUUZMmv8B0CTXNghMJ3T0jUVcRaYwPuF8ztkhKS4z3GVme37ThJX-AfqPUjFpjEcFHHi_83rxOOnCLZ03zfZbZ9j57f_0WboEkGIJMn1zAnlY6D5qpcTk4iRCM4cRM-3NFxVaw7jvhZUbvSogIBFsLjAWcNJV9inv9cNsVdv729FqH8kmPZCqmNIyu0dflsZpwpcV6p_MX2-uaO2_9gmYOJtMUtb70erVlo58EYWu1fCzvgC30193vc2qrOIhFqn7C3);
+    opacity: 0.05
+    }
+.abstract-shape-1 {
+    background: radial-gradient(circle, rgba(0, 208, 132, 0.15) 0%, rgba(245, 244, 239, 0) 70%)
+    }
+.abstract-shape-2 {
+    background: radial-gradient(circle, rgba(0, 208, 132, 0.1) 0%, rgba(245, 244, 239, 0) 60%)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen relative overflow-hidden">
+<!-- Background Decor -->
+<div class="fixed inset-0 pointer-events-none">
+<div class="grain-texture absolute inset-0"></div>
+<div class="abstract-shape-1 absolute -top-20 -right-20 w-96 h-96 rounded-full blur-3xl"></div>
+<div class="abstract-shape-2 absolute bottom-1/4 -left-20 w-80 h-80 rounded-full blur-3xl"></div>
+</div>
+<div class="relative z-10 flex min-h-screen flex-col items-center justify-center p-6">
+<!-- Logo Section -->
+<div class="mb-10 text-center">
+<div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-xl mb-4 text-primary">
+<span class="material-symbols-outlined text-4xl">rocket_launch</span>
+</div>
+<h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Sermo</h1>
+<p class="text-primary font-medium tracking-widest uppercase text-xs mt-1">Space IM Collective</p>
+</div>
+<!-- Main Login Card -->
+<div class="w-full max-w-md bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-xl p-8 shadow-xl shadow-primary/5 border border-slate-200 dark:border-slate-800">
+<div class="mb-8">
+<h2 class="text-2xl font-bold mb-2">Initialize Connection</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Enter your cosmic credentials to join the frequency.</p>
+</div>
+<form class="space-y-6">
+<!-- Phone/Email Input -->
+<div class="space-y-2">
+<label class="text-sm font-semibold ml-1 text-slate-700 dark:text-slate-300">Identity Tag</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">alternate_email</span>
+<input class="w-full pl-12 pr-4 py-4 bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary transition-all outline-none" placeholder="Username or Frequency ID" type="text"/>
+</div>
+</div>
+<!-- 6-digit code field -->
+<div class="space-y-3">
+<div class="flex justify-between items-center px-1">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Verification Link</label>
+<button class="text-xs text-primary font-bold hover:underline" type="button">Resend Signal</button>
+</div>
+<div class="flex justify-between gap-2">
+<input class="w-full h-14 text-center text-xl font-bold bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary outline-none" maxlength="1" type="text"/>
+<input class="w-full h-14 text-center text-xl font-bold bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary outline-none" maxlength="1" type="text"/>
+<input class="w-full h-14 text-center text-xl font-bold bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary outline-none" maxlength="1" type="text"/>
+<input class="w-full h-14 text-center text-xl font-bold bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary outline-none" maxlength="1" type="text"/>
+<input class="w-full h-14 text-center text-xl font-bold bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary outline-none" maxlength="1" type="text"/>
+<input class="w-full h-14 text-center text-xl font-bold bg-background-light dark:bg-background-dark border-none ring-1 ring-slate-200 dark:ring-slate-800 rounded-lg focus:ring-2 focus:ring-primary outline-none" maxlength="1" type="text"/>
+</div>
+</div>
+<!-- CTA -->
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4" type="submit">
+<span>Enter Space</span>
+<span class="material-symbols-outlined">east</span>
+</button>
+</form>
+<!-- Secondary Actions -->
+<div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+<p class="text-sm text-slate-500">New to the cosmos? <a class="text-primary font-bold" href="#">Request Access</a></p>
+</div>
+</div>
+<!-- Footer Visual -->
+<div class="mt-12 flex gap-8 items-center opacity-40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">language</span>
+<span class="text-xs font-medium uppercase tracking-widest">Global Node</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">security</span>
+<span class="text-xs font-medium uppercase tracking-widest">Encrypted</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Component (Modified for Auth Context) -->
+<div class="fixed bottom-0 left-0 right-0 p-4 pointer-events-none">
+<div class="max-w-md mx-auto pointer-events-auto">
+<div class="flex gap-2 border border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-4 py-3 rounded-full shadow-2xl">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 rounded-full text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+</div>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">explore</span>
+</div>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</div>
+</a>
+</div>
+</div>
+</div>
+<!-- Visual Element -->
+<div class="absolute top-10 left-10 hidden lg:block opacity-20">
+<div class="w-32 h-32 border-2 border-primary rounded-full animate-pulse"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border border-primary/50 rounded-full"></div>
+</div>
+</body></html>

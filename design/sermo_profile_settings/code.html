@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00d184",
+                        "background-light": "#f5f8f7",
+                        "background-dark": "#0f231c",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark border-x border-primary/10">
+<!-- Header -->
+<div class="flex items-center p-4 pb-2 justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-10">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Settings</h2>
+<div class="flex size-10 items-center justify-end">
+<button class="flex items-center justify-center text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto">
+<!-- Account Upgrade Card -->
+<div class="p-4 @container">
+<div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm border border-primary/10 bg-white dark:bg-slate-900/50 overflow-hidden">
+<div class="w-full h-32 bg-gradient-to-br from-primary via-primary/80 to-teal-600 relative overflow-hidden" data-alt="Abstract green and teal gradient pattern">
+<div class="absolute inset-0 opacity-20 flex items-center justify-center">
+<span class="material-symbols-outlined text-white scale-[5]">verified</span>
+</div>
+<div class="absolute bottom-4 left-4 flex items-center gap-2">
+<div class="size-12 rounded-full border-2 border-white bg-slate-200 overflow-hidden" data-alt="User profile avatar placeholder">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz9UqtjE7nex-Gr8AVYMbwjwZEt4g1yPVx8L0Tp6CHtjqIstbCgDMlqDhk7y4Fi19z3-XZUqS2DY3hv793beT6nEBbKvtXntYYGWeq4piav4t08IMlMA4CCViNXnlZswup6uV0XIiCD-Gi4UP0rceNKF_SdmuM_w8uuhKLPCJTEd6qP-cj-lj3Csd9JTMJ-DhA353jBmbsQESSfj1j94yEt0A7jJAFCreRx8BP2fphfeeIsAnUzo4QGZE9c9rJz-_t8j04bRrz3s-w"/>
+</div>
+<div>
+<h4 class="text-white font-bold leading-none">Alex Rivers</h4>
+<p class="text-white/80 text-xs font-mono mt-1">@alex_sermo_0x</p>
+</div>
+</div>
+</div>
+<div class="flex w-full flex-col items-stretch justify-center gap-2 p-5">
+<div class="flex justify-between items-center">
+<p class="text-primary text-xs font-bold uppercase tracking-wider">Current Plan</p>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-mono">BASIC_V1.2</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Basic Account</p>
+<div class="flex flex-col gap-4 mt-1">
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Upgrade to <span class="text-primary font-semibold">Verified</span> for exclusive end-to-end features, a blue badge, and priority space access.</p>
+<button class="flex w-full cursor-pointer items-center justify-center rounded-lg h-11 bg-primary text-slate-900 text-sm font-bold transition-transform active:scale-95">
+<span class="truncate">Upgrade to Verified</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Status Section -->
+<h3 class="text-slate-400 dark:text-slate-500 text-[11px] font-bold uppercase tracking-[0.1em] px-5 pb-2 pt-4">Connectivity</h3>
+<div class="mx-4 rounded-xl bg-white dark:bg-slate-900/50 border border-primary/5 divide-y divide-primary/5 overflow-hidden">
+<div class="flex items-center gap-4 px-4 min-h-[60px] justify-between">
+<div class="flex items-center gap-4">
+<div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-10">
+<span class="material-symbols-outlined">circle</span>
+</div>
+<div class="flex flex-col">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-medium">Online Status</p>
+<p class="text-slate-400 text-xs">Visible to Space members</p>
+</div>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-7 w-12 cursor-pointer items-center rounded-full border-none bg-slate-200 dark:bg-slate-800 p-1 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-5 w-5 rounded-full bg-white shadow-md"></div>
+<input checked="" class="invisible absolute peer" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Main Navigation -->
+<h3 class="text-slate-400 dark:text-slate-500 text-[11px] font-bold uppercase tracking-[0.1em] px-5 pb-2 pt-6">Preferences</h3>
+<div class="mx-4 space-y-2">
+<!-- Profile -->
+<a class="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-primary/5 hover:border-primary/20 transition-colors group" href="#">
+<div class="text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center justify-center rounded-lg shrink-0 size-10 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-medium">Profile Information</p>
+<p class="text-slate-400 text-xs">Name, bio, and space avatar</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<!-- Notifications -->
+<a class="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-primary/5 hover:border-primary/20 transition-colors group" href="#">
+<div class="text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center justify-center rounded-lg shrink-0 size-10 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-medium">Notifications</p>
+<p class="text-slate-400 text-xs">Push, sound, and mention alerts</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<!-- Security -->
+<a class="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-primary/5 hover:border-primary/20 transition-colors group" href="#">
+<div class="text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center justify-center rounded-lg shrink-0 size-10 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">shield</span>
+</div>
+<div class="flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-medium">Security &amp; Privacy</p>
+<p class="text-slate-400 text-xs">2FA and session management</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+</div>
+<!-- Danger Zone -->
+<div class="px-5 py-8 text-center">
+<button class="text-rose-500 text-sm font-medium hover:underline">Log out from all devices</button>
+<div class="mt-4 flex flex-col items-center gap-1 opacity-40">
+<p class="font-mono text-[10px] text-slate-500 uppercase">Sermo Space IM Desktop v4.22.0</p>
+<p class="font-mono text-[10px] text-slate-500 uppercase">Node ID: sermo-us-east-81x</p>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="mt-auto flex gap-2 border-t border-primary/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 pb-6 pt-3">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Chats</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">tag</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Channels</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">public</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Spaces</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-[1]">settings</span>
+<p class="text-[10px] font-bold uppercase tracking-widest">Settings</p>
+</a>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00d184",
+                        "background-light": "#f5f8f7",
+                        "background-dark": "#0f231c",
+                        "other-bubble": "#e8ebf2",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.125rem", // 18px as requested
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Space IM - Chat</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-screen w-full flex-col overflow-hidden max-w-md mx-auto bg-white dark:bg-background-dark shadow-2xl">
+<header class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-10">
+<div class="flex items-center gap-3">
+<div class="text-slate-600 dark:text-slate-400 cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<div class="relative">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Portrait of a smiling young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBr4nllXbak-fLTPZjG11S2r2yJQv8inhQAeNv1TgHUIFGXG9eNabi6G8k2X9ZQuBju4uW2x0Aw22uzADudAay0SLYrY0_qi0cmgkyORbyFt3gKdXUp1QvWS5vrckGMdsJbazBgYKwU4WjXcbChs__oarO4BoUVsgv-B6Av8Atr7EvFZzINPM84LJFiy1t9eAAgYwNsHFpaGpMRYJ4Q0hsjnl2h3crnBT_85EmkD8xJ8ktP3gDjOzcMzsyEeEhY7F6YSPOWLgXYaGs"/>
+</div>
+<div class="absolute bottom-0 right-0 size-3 bg-primary border-2 border-white dark:border-background-dark rounded-full"></div>
+</div>
+<div>
+<h1 class="text-base font-bold leading-none">Alex Rivera</h1>
+<p class="text-[11px] text-primary font-medium mt-1 uppercase tracking-wider">Online</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors">
+<span class="material-symbols-outlined">videocam</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-4 space-y-6 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-bold rounded-full uppercase tracking-widest">Today</span>
+</div>
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="size-8 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Small round user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6ZATJAEdDJyZ4ptzWAql3Ict1IxwkNXWABAFIQk_GZ1aoFvW6KwRl9FB0itxP0O6bX_8QGMymh2qVBmQKKKmwKF7dIIXwoOC9fw6UJio-yL_FnIJvSdrfnQymhcBiGPkivJqAB4h8nJStDRW5-42_vfLN5_dY8DU5JNHXowQX5OG6l9AQyxGtYilplYAhLdqntlTob4sDnuRRyZKHGnOb3huemPDoFozHrir28XFRpsAyDNh25ry_0MGSsVhbX8cgzkClu-lS5ykQ"/>
+</div>
+<div class="flex flex-col gap-1">
+<div class="bg-other-bubble dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-xl rounded-bl-none text-sm shadow-sm leading-relaxed">
+                        Hey! Did you check the new designs for the Space IM? I've updated the components to match the brand.
+                    </div>
+<span class="text-[10px] text-slate-400 ml-1">10:42 AM</span>
+</div>
+</div>
+<div class="flex items-end gap-2 max-w-[85%] ml-auto flex-row-reverse">
+<div class="size-8 rounded-full bg-primary/20 shrink-0 overflow-hidden">
+<img alt="Self" class="w-full h-full object-cover" data-alt="Self portrait profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbFE5f0_6-T90e-Fw40KSC9Weg0yAU61T7ZyLPsE9miWFocw9I74A21KLMTnFftlrpAikhPVuPzpkedhtaHkVYaH200AYwtv52RwcAdGVx3MRfPVlXh3KqlQik_Nq8ACbmSfr24bkIKntips2k3YxgU-ZWGYDOPoqFXs4TuS8igEgla6vKotz_7T219z_ftoRiYwprg3q9D-bHvjyznxGZZC0ZMQI4unbI7HvBVX4rPDeHhZ42ESCThHTqldKSC_glVtJaEBsVTS2U"/>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="bg-primary text-slate-900 font-medium px-4 py-3 rounded-xl rounded-br-none text-sm shadow-md shadow-primary/10 leading-relaxed">
+                        Working on them right now. The light mode looks very clean. Just finishing the input bar elevation.
+                    </div>
+<div class="flex items-center gap-1 mr-1">
+<span class="text-[10px] text-slate-400">10:45 AM</span>
+<span class="material-symbols-outlined text-[14px] text-primary">done_all</span>
+</div>
+</div>
+</div>
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="size-8 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Small round user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHcDpOsK03qaqwTFPfuXoGoptv1dWBzV2nfrlc22xAekkouHOp-HGv5dDBPTodrxjcc4ujAgk9x0vP2VvhgYnVcyTvV7tP-Q0IF2VkTTh-UbT6lkXBtFLioo0YdXu4nY7AogIJsFVjZ4meVM0isd7sYFEedKy7G6mN0lPR09OiRHmL3yje2X9Wuddwd96_qqjeENE0FlO9WmgUDfOuE2-AGj-MwC-5MLlHqVm6LthhG-1aO2_z3Dko6ARQYvp3vQRG0zb__SKSzWUd"/>
+</div>
+<div class="flex flex-col gap-1">
+<div class="bg-other-bubble dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-xl rounded-bl-none text-sm shadow-sm leading-relaxed">
+                        Great! Let me know when you've uploaded the assets to the shared drive. 🚀
+                    </div>
+<span class="text-[10px] text-slate-400 ml-1">10:46 AM</span>
+</div>
+</div>
+<div class="relative flex items-center justify-center my-8">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-100 dark:border-slate-800"></div>
+</div>
+<div class="relative px-4 bg-white dark:bg-background-dark flex items-center gap-2">
+<span class="text-[11px] font-bold text-primary uppercase tracking-widest">New Messages</span>
+<span class="flex items-center justify-center bg-primary text-slate-900 text-[10px] font-bold h-5 px-1.5 rounded-full min-w-[20px]">3</span>
+</div>
+</div>
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="size-8 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Small round user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVZuoZMMhEcxlqtUJJwurfG_uGP7RzFG8k8w4z3w9tu_LVO0jDwbF9pVGKJL5dnDMGDM6hUtwBDQwmJb8ouDBTOhz5zgiunnGHCckxx7M26kNXnMDXKGWzWL3fBB8ZIbSS4lhU30F8ppXhnIrLqEuCnyYHw-VSy2o5sEIF88QoEZflABdf3EgB8Fso_i1WrrlI0fV2BIK_IRMZvS_00hVHknTDP5VMi36QV2T3wS9FgAwTI4D9quY6ZU7ynHS7jPAy_604qQYX1Rub"/>
+</div>
+<div class="flex flex-col gap-1">
+<div class="bg-other-bubble dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-xl rounded-bl-none text-sm shadow-sm leading-relaxed">
+                        Also, did we decide on the 18px radius for all message bubbles?
+                    </div>
+<span class="text-[10px] text-slate-400 ml-1">11:02 AM</span>
+</div>
+</div>
+</main>
+<footer class="p-4 bg-white dark:bg-background-dark border-t border-slate-50 dark:border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<div class="flex-1 relative flex items-center">
+<input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full py-3 px-5 text-sm focus:ring-2 focus:ring-primary/50 placeholder:text-slate-400 text-slate-800 dark:text-slate-200" placeholder="Type a message..." type="text"/>
+<div class="absolute right-3 flex items-center gap-2">
+<button class="text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]">sticky_note_2</span>
+</button>
+<button class="text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+</div>
+</div>
+<button class="size-11 rounded-full bg-primary text-slate-900 flex items-center justify-center shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+<span class="material-symbols-outlined fill-1">send</span>
+</button>
+</div>
+<div class="mt-2 h-1 w-24 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto"></div>
+</footer>
+</div>
+</body></html>
