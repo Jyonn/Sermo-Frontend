@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { api, configureApiAuth } from "./api";
+import { buildJoinPath, getDetectedSpaceSlug } from "./spaceEntry";
 import { authStorage } from "./storage";
 import type { AuthSession, JoinResponseDTO } from "../types";
 
@@ -85,7 +86,8 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (!session) {
-    return <Navigate replace state={{ from: location.pathname }} to="/space/join" />;
+    const detectedSlug = getDetectedSpaceSlug();
+    return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? buildJoinPath(detectedSlug) : "/space"} />;
   }
 
   return children;

@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
+import { BottomSheet } from "../components/BottomSheet";
+import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
+import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 
 function avatarLabel(name: string) {
@@ -12,28 +16,18 @@ function tabFromPath(pathname: string): FriendTab {
   return pathname === "/app/friends" ? "accepted" : "incoming";
 }
 
-function timeAgo(timestamp: number) {
-  const delta = Math.max(1, Math.floor((Date.now() / 1000 - timestamp) / 60));
-  if (delta < 60) return `${delta} 分钟前`;
-  if (delta < 1440) return `${Math.floor(delta / 60)} 小时前`;
-  return `${Math.floor(delta / 1440)} 天前`;
-}
-
 function mapFriend(user: UserDTO): FriendAccepted {
   return {
     id: user.user_id,
     name: user.name,
     status: user.is_alive ? "在线" : "离线",
-    mood: user.verified ? "Verified 用户" : "Basic 用户",
+    mood: user.verified ? "已验证成员" : "成员",
+    verified: user.verified,
   };
 }
 
-function requestTitle(request: FriendshipRequestDTO, tab: FriendTab) {
+function requestName(request: FriendshipRequestDTO, tab: FriendTab) {
   return tab === "incoming" ? request.from_user.name : request.to_user.name;
-}
-
-function requestLevel(request: FriendshipRequestDTO, tab: FriendTab) {
-  return tab === "incoming" ? "来自对方发起" : "由你发起";
 }
 
 export default function FriendsPage() {
@@ -45,13 +39,12 @@ export default function FriendsPage() {
   const [friends, setFriends] = useState<FriendAccepted[]>([]);
   const [incoming, setIncoming] = useState<FriendshipRequestDTO[]>([]);
   const [outgoing, setOutgoing] = useState<FriendshipRequestDTO[]>([]);
+  const [sheetFriend, setSheetFriend] = useState<FriendAccepted | null>(null);
+  const [sheetRequest, setSheetRequest] = useState<FriendshipRequestDTO | null>(null);
 
   useEffect(() => {
-    if (location.pathname === "/app/friends") {
-      setTab("accepted");
-    } else if (location.pathname === "/app/friends/requests") {
-      setTab("incoming");
-    }
+    if (location.pathname === "/app/friends") setTab("accepted");
+    if (location.pathname === "/app/friends/requests") setTab("incoming");
   }, [location.pathname]);
 
   useEffect(() => {
@@ -83,12 +76,11 @@ export default function FriendsPage() {
   }, [incoming, outgoing, tab]);
 
   const actOnRequest = async (requestId: number, accept?: boolean) => {
+    if (accept === undefined && !confirmDangerAction("确认撤回这条好友申请？")) return;
+
     try {
-      if (accept === undefined) {
-        await api.removeFriendRequest(requestId);
-      } else {
-        await api.respondFriendRequest(requestId, accept);
-      }
+      if (accept === undefined) await api.removeFriendRequest(requestId);
+      else await api.respondFriendRequest(requestId, accept);
 
       const requests = await api.getFriendRequests();
       setIncoming(requests.incoming);
@@ -97,144 +89,154 @@ export default function FriendsPage() {
         const refreshedFriends = await api.getFriends();
         setFriends(refreshedFriends.map(mapFriend));
       }
+      setSheetRequest(null);
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "操作失败";
       setError(message);
     }
   };
 
+  const startDirectChat = async (userId: number) => {
+    try {
+      const chat = await api.createDirectChat(userId);
+      navigate(`/app/chats/${chat.chat_id}`);
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : "发起私聊失败";
+      setError(message);
+    }
+  };
+
   return (
-    <AppChrome mobileNav="friends">
-      <section className="friend-shell">
-        <div className="panel">
-          <div className="panel-header" style={{ padding: 0, borderBottom: "1px solid rgba(232,235,242,.9)" }}>
-            <p className="eyebrow">Friends</p>
-            <h2 className="panel-title">好友与申请</h2>
-            <p className="card-subtitle">好友列表和申请列表已经接入真实接口；限制态仍按产品规范前置展示。</p>
-          </div>
-
-          <div className="tab-row" style={{ padding: "18px 0" }}>
-            <Link className={`tab-chip ${tab === "incoming" ? "active" : ""}`} to="/app/friends/requests">
-              Incoming ({incoming.length})
-            </Link>
-            <button className={`tab-chip ${tab === "outgoing" ? "active" : ""}`} onClick={() => setTab("outgoing")} type="button">
-              Outgoing ({outgoing.length})
-            </button>
-            <Link className={`tab-chip ${tab === "accepted" ? "active" : ""}`} to="/app/friends">
-              Friends ({friends.length})
-            </Link>
-          </div>
-
-          {viewState === "loading" ? <div className="empty-state">好友数据加载中...</div> : null}
-          {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
-
-          <div className={tab === "accepted" ? "settings-list" : "request-list"}>
-            {tab === "accepted"
-              ? friends.map((friend) => (
-                  <div key={friend.id} className="request-card">
-                    <div className="request-head">
-                      <div className="request-profile">
-                        <div className={`mini-avatar ${friend.status === "在线" ? "status-online" : ""}`}>{avatarLabel(friend.name)}</div>
-                        <div>
-                          <strong>{friend.name}</strong>
-                          <div className="detail-text">{friend.status}</div>
-                        </div>
-                      </div>
-                      <div className="request-actions">
-                        <button className="ghost-button" type="button">
-                          发起私聊
-                        </button>
-                      </div>
-                    </div>
-                    <div className="detail-text" style={{ marginTop: 12 }}>
-                      {friend.mood}
-                    </div>
-                  </div>
-                ))
-              : activeRequests.map((request) => (
-                  <div key={request.request_id} className="request-card">
-                    <div className="request-head">
-                      <div className="request-profile">
-                        <div className="mini-avatar">{avatarLabel(requestTitle(request, tab))}</div>
-                        <div>
-                          <strong>{requestTitle(request, tab)}</strong>
-                          <div className="detail-text">
-                            {requestLevel(request, tab)} · {timeAgo(request.updated_at)}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="status-chip">{tab === "incoming" ? "待处理" : "挂起中"}</span>
-                    </div>
-                    <div className="detail-text" style={{ margin: "14px 0" }}>
-                      请求 ID: {request.request_id} · {request.is_system_locked ? "系统锁定" : "普通关系请求"}
-                    </div>
-                    <div className="request-actions">
-                      {tab === "incoming" ? (
-                        <>
-                          <button className="button" onClick={() => void actOnRequest(request.request_id, true)} type="button">
-                            同意
-                          </button>
-                          <button className="ghost-button" onClick={() => void actOnRequest(request.request_id, false)} type="button">
-                            拒绝
-                          </button>
-                        </>
-                      ) : (
-                        <button className="danger-button" onClick={() => void actOnRequest(request.request_id)} type="button">
-                          撤回
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-            {!friends.length && tab === "accepted" && viewState === "ready" ? <div className="empty-state">还没有好友。</div> : null}
-            {!activeRequests.length && tab !== "accepted" && viewState === "ready" ? <div className="empty-state">当前没有待处理申请。</div> : null}
-          </div>
+    <AppChrome title="好友" mobileNav="menu" hideTopbar topbarAction={<Link className="ghost-chip" to="/app/space-users/online">在线成员</Link>}>
+      <section className="page-stack">
+        <div className="page-tabs">
+          <Link className={`tab-chip ${tab === "incoming" ? "active" : ""}`} to="/app/friends/requests">
+            收到的 {incoming.length ? `(${incoming.length})` : ""}
+          </Link>
+          <button className={`tab-chip ${tab === "outgoing" ? "active" : ""}`} onClick={() => setTab("outgoing")} type="button">
+            发出的 {outgoing.length ? `(${outgoing.length})` : ""}
+          </button>
+          <Link className={`tab-chip ${tab === "accepted" ? "active" : ""}`} to="/app/friends">
+            好友 {friends.length ? `(${friends.length})` : ""}
+          </Link>
         </div>
 
-        <div className="settings-list">
-          <div className="restriction-banner">
-            <span className="material-symbols-outlined" style={{ color: "var(--brand-primary)" }}>
-              lock_open
-            </span>
-            <div>
-              <strong>Basic 限制态</strong>
-              <div className="detail-text" style={{ marginTop: 6 }}>
-                当前账号只能保留 5 个挂起中的 outgoing request。若后端返回禁止错误，前端应引导升级。
-              </div>
-              <div className="button-row" style={{ marginTop: 14 }}>
-                <button className="button" onClick={() => navigate("/app/settings/account")} type="button">
-                  升级到 Verified
-                </button>
-                <button className="ghost-button" onClick={() => navigate("/app/space-users/online")} type="button">
-                  去在线用户页
-                </button>
-              </div>
+        {viewState === "loading" ? <FeedbackState title="好友加载中" description="正在同步好友和申请。" tone="loading" /> : null}
+        {tab === "accepted" ? (
+          <section className="list-section">
+            <div className="simple-list">
+              {friends.map((friend) => (
+                <div key={friend.id} className="simple-row person-row">
+                  <div className={`mini-avatar ${friend.status === "在线" ? "status-online" : ""}`}>{avatarLabel(friend.name)}</div>
+                  <div className="row-main">
+                    <strong>{friend.name}</strong>
+                    <div className="row-subtle">{friend.status}</div>
+                  </div>
+                  <button className="ghost-button row-button" onClick={() => void startDirectChat(friend.id)} type="button">
+                    发消息
+                  </button>
+                  <button className="icon-button row-trailing-button" onClick={() => setSheetFriend(friend)} type="button">
+                    <span className="material-symbols-outlined">more_horiz</span>
+                  </button>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
+        ) : (
+          <section className="list-section">
+            <div className="simple-list">
+              {activeRequests.map((request) => (
+                <div key={request.request_id} className="simple-row request-row">
+                  <div className="mini-avatar">{avatarLabel(requestName(request, tab))}</div>
+                  <div className="row-main">
+                    <strong>{requestName(request, tab)}</strong>
+                    <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
+                  </div>
+                  {tab === "incoming" ? (
+                    <div className="row-actions">
+                      <button className="button row-button" onClick={() => void actOnRequest(request.request_id, true)} type="button">
+                        同意
+                      </button>
+                      <button className="icon-button" onClick={() => setSheetRequest(request)} type="button">
+                        <span className="material-symbols-outlined">more_horiz</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.request_id)} type="button">
+                      撤回
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-          <div className="settings-card">
-            <p className="eyebrow">Permissions</p>
-            <h3 className="settings-headline">受限交互说明</h3>
-            <div className="detail-list" style={{ marginTop: 14 }}>
-              <div className="detail-row">
-                <div>
-                  <strong>主动加好友</strong>
-                  <div className="detail-text">后端仅允许 Verified 账号发起申请</div>
-                </div>
-                <span className="small-badge">LOCKED</span>
-              </div>
-              <div className="detail-row">
-                <div>
-                  <strong>响应申请</strong>
-                  <div className="detail-text">所有等级均可处理 incoming request</div>
-                </div>
-                <span className="status-chip">OPEN</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {!friends.length && tab === "accepted" && viewState === "ready" ? (
+          <FeedbackState
+            title="还没有好友"
+            description="从成员里开始第一段对话后，再把想保留的人加进来。"
+            action={
+              <Link className="button" to="/app/space-users/online">
+                去成员页
+              </Link>
+            }
+          />
+        ) : null}
+
+        {!activeRequests.length && tab !== "accepted" && viewState === "ready" ? (
+          <FeedbackState
+            title={tab === "incoming" ? "没有待处理申请" : "你还没发出申请"}
+            description={tab === "incoming" ? "有新的好友申请时，这里会直接出现。" : "想主动建立关系时，先去成员页。"}
+            action={
+              <Link className="button" to="/app/space-users">
+                去成员页
+              </Link>
+            }
+          />
+        ) : null}
       </section>
+
+      <BottomSheet
+        open={Boolean(sheetFriend || sheetRequest)}
+        title={sheetFriend?.name ?? (sheetRequest ? requestName(sheetRequest, tab === "accepted" ? "incoming" : tab) : "更多")}
+        description="选择一个动作"
+        onClose={() => {
+          setSheetFriend(null);
+          setSheetRequest(null);
+        }}
+      >
+        {sheetFriend ? (
+          <div className="sheet-action-list">
+            <button className="button" onClick={() => void startDirectChat(sheetFriend.id)} type="button">
+              发消息
+            </button>
+            <Link className="ghost-button" to="/app/space-users/online">
+              去成员页
+            </Link>
+          </div>
+        ) : null}
+
+        {sheetRequest ? (
+          <div className="sheet-action-list">
+            {tab === "incoming" ? (
+              <>
+                <button className="button" onClick={() => void actOnRequest(sheetRequest.request_id, true)} type="button">
+                  同意
+                </button>
+                <button className="ghost-button" onClick={() => void actOnRequest(sheetRequest.request_id, false)} type="button">
+                  忽略
+                </button>
+              </>
+            ) : (
+              <button className="danger-button" onClick={() => void actOnRequest(sheetRequest.request_id)} type="button">
+                撤回申请
+              </button>
+            )}
+          </div>
+        ) : null}
+      </BottomSheet>
+      <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>
   );
 }

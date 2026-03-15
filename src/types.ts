@@ -1,6 +1,5 @@
-export type EntryMode = "create" | "login" | "join";
 export type NotificationChannel = "email" | "sms" | "bark";
-export type MobileNavKey = "chats" | "friends" | "space" | "settings";
+export type MobileNavKey = "chats" | "square" | "notifications" | "menu";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 
@@ -110,6 +109,7 @@ export interface ChatMessage {
   from: "self" | "other";
   name: string;
   time: string;
+  createdAt: number;
   text: string;
 }
 
@@ -117,6 +117,7 @@ export interface ChatDetail {
   summary: string;
   relation: string;
   actions: string[];
+  members: string[];
 }
 
 export interface Chat {
@@ -125,8 +126,10 @@ export interface Chat {
   subtitle: string;
   preview: string;
   time: string;
+  lastActivity: number;
   unread: number;
   online: boolean;
+  verified: boolean;
   members: number;
   type: "direct" | "group";
   detail: ChatDetail;
@@ -146,6 +149,7 @@ export interface FriendAccepted {
   name: string;
   status: string;
   mood: string;
+  verified: boolean;
 }
 
 export interface FriendRequestState {
