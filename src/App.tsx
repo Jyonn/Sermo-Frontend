@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation, useSearchParams } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
+import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { RequireAuth } from "./lib/auth";
 import AdminSpacePage from "./pages/AdminSpacePage";
 import ChatsPage from "./pages/ChatsPage";
@@ -141,6 +142,7 @@ export default function App() {
         />
         <Route path="*" element={<RootEntryRedirect />} />
       </Routes>
+      <GlobalMessageSync />
       <AppBottomNav />
     </>
   );

@@ -78,7 +78,7 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome title="广场" mobileNav="square" hideTopbar>
+    <AppChrome title="广场" hideTopbar>
       <section className="page-stack">
         <label className="search-box page-search">
           <span className="material-symbols-outlined">search</span>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { flushSync } from "react-dom";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -6,8 +7,12 @@ import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { buildChatCacheScope, chatCache } from "../lib/chatCache";
+import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, UserDTO } from "../types";
+
+const DEBUG_CHAT_SEND = import.meta.env.DEV;
 
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -18,6 +23,21 @@ function formatTime(value: number) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatThreadDivider(value: number) {
+  const date = new Date(value * 1000);
+  const now = new Date();
+  const isSameDay = date.toDateString() === now.toDateString();
+
+  if (isSameDay) return formatTime(value);
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function formatChatListTime(value: number) {
@@ -50,17 +70,111 @@ function formatPresence(user: UserDTO | null) {
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
   return {
     id: message.message_id,
+    clientId: `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
     name: message.user.name,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
     text: message.content,
+    status: "sent",
+  };
+}
+
+function sortMessages(items: ChatMessage[]) {
+  return [...items].sort((left, right) => {
+    if (left.createdAt !== right.createdAt) return left.createdAt - right.createdAt;
+
+    const leftId = typeof left.id === "number" ? left.id : Number.MAX_SAFE_INTEGER;
+    const rightId = typeof right.id === "number" ? right.id : Number.MAX_SAFE_INTEGER;
+    return leftId - rightId;
+  });
+}
+
+function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
+  return (
+    source.from === "self" &&
+    target.from === "self" &&
+    source.status !== "sent" &&
+    target.status === "sent" &&
+    source.text === target.text &&
+    Math.abs(source.createdAt - target.createdAt) <= 30
+  );
+}
+
+function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
+  const bucket = new Map<number | string, ChatMessage>();
+
+  current.forEach((message) => bucket.set(message.id, message));
+  incoming.forEach((message) => {
+    const existingByClientId = [...bucket.values()].find((existing) => existing.clientId === message.clientId);
+    if (existingByClientId && existingByClientId.id !== message.id) {
+      bucket.delete(existingByClientId.id);
+    }
+
+    if (message.status === "sent") {
+      const optimisticMatch = [...bucket.values()].find((existing) => isOptimisticSelfMatch(existing, message));
+      if (optimisticMatch) {
+        bucket.delete(optimisticMatch.id);
+      }
+    }
+
+    if (message.status !== "sent") {
+      const deliveredMatch = [...bucket.values()].find((existing) => isOptimisticSelfMatch(message, existing));
+      if (deliveredMatch) return;
+    }
+
+    bucket.set(message.id, message);
+  });
+
+  return sortMessages([...bucket.values()]);
+}
+
+function createPendingMessage(text: string, name: string): ChatMessage {
+  const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+  const createdAt = Math.floor(Date.now() / 1000);
+  return {
+    id: clientId,
+    clientId,
+    from: "self",
+    name,
+    time: formatTime(createdAt),
+    createdAt,
+    text,
+    status: "pending",
+  };
+}
+
+function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
+  return {
+    ...chat,
+    preview,
+    time: "刚刚",
+    lastActivity,
+    unread: 0,
   };
 }
 
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
   return current.from === neighbor.from && Math.abs(current.createdAt - neighbor.createdAt) < 5 * 60;
+}
+
+function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
+  if (!previous) return true;
+
+  const currentDate = new Date(current.createdAt * 1000);
+  const previousDate = new Date(previous.createdAt * 1000);
+  if (currentDate.toDateString() !== previousDate.toDateString()) return true;
+
+  return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
+}
+
+interface MessageGroup {
+  key: string;
+  from: "self" | "other";
+  name: string;
+  dividerLabel?: string;
+  messages: ChatMessage[];
 }
 
 function getDirectPeer(chat: ChatDTO, currentUserId: number) {
@@ -98,6 +212,20 @@ function sortChats(items: Chat[]) {
   return [...items].sort((left, right) => right.lastActivity - left.lastActivity);
 }
 
+function scrollThreadToBottom(element: HTMLDivElement | null) {
+  if (!element) return;
+
+  requestAnimationFrame(() => {
+    const target = element;
+    target.scrollTop = target.scrollHeight;
+  });
+}
+
+function isNearThreadBottom(element: HTMLDivElement | null, threshold = 72) {
+  if (!element) return true;
+  return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
+}
+
 export default function ChatsPage() {
   const navigate = useNavigate();
   const { chatId } = useParams();
@@ -106,37 +234,69 @@ export default function ChatsPage() {
   const [draft, setDraft] = useState("");
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null);
   const [sendState, setSendState] = useState<"idle" | "sending">("idle");
   const [chats, setChats] = useState<Chat[]>([]);
   const [messages, setMessages] = useState<Record<number, ChatMessage[]>>({});
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [olderState, setOlderState] = useState<"idle" | "loading">("idle");
+  const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
+  const messageScrollRef = useRef<HTMLDivElement | null>(null);
+  const initialScrollDoneRef = useRef<number | null>(null);
+  const stickToBottomRef = useRef(true);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
+  const currentUserName = session?.user.name ?? "我";
+  const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
+
+  const triggerMessageEntrance = (messageId: number | string) => {
+    const key = String(messageId);
+    setEnteringMessageIds((current) => (current.includes(key) ? current : [...current, key]));
+    window.setTimeout(() => {
+      setEnteringMessageIds((current) => current.filter((item) => item !== key));
+    }, 260);
+  };
 
   useEffect(() => {
+    if (!cacheScope) return;
     const controller = new AbortController();
+    let didLoadNetwork = false;
     setViewState("loading");
-    setError(null);
+    setPageError(null);
+
+    const memoryRecord = chatCache.getChatList(cacheScope);
+    if (memoryRecord?.chats.length) {
+      setChats(memoryRecord.chats);
+      setViewState("ready");
+    } else {
+      void chatCache.hydrateChatList(cacheScope).then((cached) => {
+        if (controller.signal.aborted || didLoadNetwork || !cached?.chats.length) return;
+        setChats(cached.chats);
+        setViewState("ready");
+      });
+    }
 
     api
       .getChats(controller.signal)
       .then((rows) => {
+        didLoadNetwork = true;
         const nextChats = sortChats(rows.map((item) => mapChat(item, currentUserId)));
         setChats(nextChats);
         setViewState("ready");
+        void chatCache.persistChatList(cacheScope, nextChats);
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         const message = apiError instanceof ApiError ? apiError.message : "加载会话失败";
-        setError(message);
+        setPageError(message);
         setViewState("error");
       });
 
     return () => controller.abort();
-  }, [currentUserId]);
+  }, [cacheScope, currentUserId]);
 
   const selectedChat = useMemo(() => {
     const numericChatId = Number(chatId);
@@ -144,11 +304,95 @@ export default function ChatsPage() {
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
 
-  useEffect(() => {
-    if (!selectedChat) return;
-    const controller = new AbortController();
+  const selectedMessages = useMemo(
+    () => (selectedChat ? sortMessages(messages[selectedChat.id] ?? []) : []),
+    [messages, selectedChat]
+  );
 
-    const loadMessages = async () => {
+  useEffect(() => {
+    if (!DEBUG_CHAT_SEND || !selectedChat) return;
+    console.log("[chat] selectedMessages", {
+      chatId: selectedChat.id,
+      count: selectedMessages.length,
+      items: selectedMessages.map((message) => ({
+        id: message.id,
+        clientId: message.clientId,
+        status: message.status,
+        text: message.text,
+      })),
+    });
+  }, [selectedChat, selectedMessages]);
+
+  const messageGroups = useMemo<MessageGroup[]>(() => {
+    const groups: MessageGroup[] = [];
+
+    selectedMessages.forEach((message, index) => {
+      const previous = selectedMessages[index - 1];
+      const dividerLabel = shouldShowThreadDivider(message, previous) ? formatThreadDivider(message.createdAt) : undefined;
+      const lastGroup = groups[groups.length - 1];
+      const canJoinLastGroup =
+        lastGroup &&
+        !dividerLabel &&
+        shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1]);
+
+      if (canJoinLastGroup) {
+        lastGroup.messages.push(message);
+        lastGroup.key = `${String(lastGroup.messages[0]?.id)}-${String(message.id)}`;
+        return;
+      }
+
+      groups.push({
+        key: `${String(message.id)}`,
+        from: message.from,
+        name: message.name,
+        dividerLabel,
+        messages: [message],
+      });
+    });
+
+    return groups;
+  }, [selectedMessages]);
+
+  useEffect(() => {
+    if (!selectedChat || !cacheScope) return;
+    const controller = new AbortController();
+    let didLoadNetwork = false;
+    setOlderState("idle");
+    setHasOlderMessages(false);
+
+    const restoreScroll = (scrollTop: number) => {
+      requestAnimationFrame(() => {
+        const element = messageScrollRef.current;
+        if (!element) return;
+        if (scrollTop > 0) {
+          element.scrollTop = scrollTop;
+          return;
+        }
+        element.scrollTop = element.scrollHeight;
+      });
+    };
+
+    const memoryThread = chatCache.getThread(cacheScope, selectedChat.id);
+    if (memoryThread?.messages.length) {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(memoryThread.messages)),
+      }));
+      setHasOlderMessages(memoryThread.hasOlderMessages);
+      restoreScroll(memoryThread.scrollTop);
+    } else {
+      void chatCache.hydrateThread(cacheScope, selectedChat.id).then((cached) => {
+        if (controller.signal.aborted || didLoadNetwork || !cached?.messages.length) return;
+        setMessages((current) => ({
+          ...current,
+          [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(cached.messages)),
+        }));
+        setHasOlderMessages(cached.hasOlderMessages);
+        restoreScroll(cached.scrollTop);
+      });
+    }
+
+    const loadLatestMessages = async () => {
       try {
         const rows = await api.getMessages(
           {
@@ -157,29 +401,200 @@ export default function ChatsPage() {
           },
           controller.signal
         );
-        setMessages((current) => ({
-          ...current,
-          [selectedChat.id]: rows.map((row) => mapChatMessage(row, currentUserId)),
-        }));
+        const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
+        const existingThread = chatCache.getThread(cacheScope, selectedChat.id);
+        let mergedMessages = mergeMessages(existingThread?.messages ?? [], normalized);
+        didLoadNetwork = true;
+        if (DEBUG_CHAT_SEND) {
+          console.log("[chat] loadLatestMessages response", {
+            chatId: selectedChat.id,
+            normalized: normalized.map((message) => ({
+              id: message.id,
+              clientId: message.clientId,
+              status: message.status,
+              text: message.text,
+            })),
+            cachedCount: existingThread?.messages.length ?? 0,
+          });
+        }
+        setMessages((current) => {
+          const currentThreadMessages = current[selectedChat.id] ?? [];
+          mergedMessages = mergeMessages(currentThreadMessages, normalized);
+          if (DEBUG_CHAT_SEND) {
+            console.log("[chat] loadLatestMessages merge", {
+              chatId: selectedChat.id,
+              currentCount: currentThreadMessages.length,
+              mergedCount: mergedMessages.length,
+            });
+          }
+          return {
+            ...current,
+            [selectedChat.id]: mergedMessages,
+          };
+        });
+        setHasOlderMessages(rows.length >= 30 || memoryThread?.hasOlderMessages || false);
+        chatCache.setThread(cacheScope, selectedChat.id, {
+          messages: mergedMessages,
+          hasOlderMessages: rows.length >= 30 || memoryThread?.hasOlderMessages || false,
+          scrollTop: memoryThread?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        });
+        void chatCache.persistThread(cacheScope, selectedChat.id, {
+          messages: mergedMessages,
+          hasOlderMessages: rows.length >= 30 || memoryThread?.hasOlderMessages || false,
+          scrollTop: memoryThread?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        });
+        if (!memoryThread?.messages.length) restoreScroll(0);
         void api.markChatRead(selectedChat.id);
       } catch (apiError) {
         if (!controller.signal.aborted) {
-          const message = apiError instanceof ApiError ? apiError.message : "加载消息失败";
-          setError(message);
+          const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || memoryThread?.messages.length);
+          if (!hasLocalMessages) {
+            const message = apiError instanceof ApiError ? apiError.message : "加载消息失败";
+            setPageError(message);
+          }
         }
       }
     };
 
-    void loadMessages();
-    const timer = window.setInterval(() => void loadMessages(), 3_000);
+    void loadLatestMessages();
     return () => {
+      const element = messageScrollRef.current;
+      chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
       controller.abort();
-      window.clearInterval(timer);
     };
-  }, [currentUserId, selectedChat]);
+  }, [cacheScope, currentUserId, selectedChat]);
+
+  useEffect(() => {
+    if (!selectedChat) {
+      initialScrollDoneRef.current = null;
+      stickToBottomRef.current = true;
+      return;
+    }
+
+    if (!selectedMessages.length) return;
+    if (initialScrollDoneRef.current === selectedChat.id) return;
+
+    scrollThreadToBottom(messageScrollRef.current);
+    initialScrollDoneRef.current = selectedChat.id;
+    stickToBottomRef.current = true;
+  }, [selectedChat, selectedMessages.length]);
+
+  useEffect(() => {
+    if (!selectedChat) return;
+    if (!stickToBottomRef.current) return;
+
+    scrollThreadToBottom(messageScrollRef.current);
+  }, [composerHeight, keyboardOffset, selectedChat]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const shouldLockViewport = Boolean(selectedChat) && typeof window !== "undefined" && window.innerWidth <= 900;
+    if (!shouldLockViewport) {
+      delete document.body.dataset.chatDetail;
+      return;
+    }
+
+    document.body.dataset.chatDetail = "true";
+
+    return () => {
+      delete document.body.dataset.chatDetail;
+    };
+  }, [selectedChat]);
+
+  useEffect(() => {
+    const handleSync = (event: Event) => {
+      const detail = (event as CustomEvent<ChatSyncEventDetail>).detail;
+      if (!detail?.items.length) return;
+
+      const grouped = new Map<number, ChatSyncEventDetail["items"]>();
+      detail.items.forEach((item) => {
+        const bucket = grouped.get(item.chatId) ?? [];
+        bucket.push(item);
+        grouped.set(item.chatId, bucket);
+      });
+
+      setMessages((current) => {
+        const next = { ...current };
+        for (const [chatId, items] of grouped) {
+          next[chatId] = mergeMessages(current[chatId] ?? [], items.map((item) => item.message));
+        }
+        return next;
+      });
+
+      setChats((currentChats) =>
+        sortChats(
+          currentChats.map((chat) => {
+            const incoming = grouped.get(chat.id);
+            if (!incoming?.length) return chat;
+            const newest = incoming[incoming.length - 1].message;
+            const unreadIncrement = chat.id === selectedChat?.id ? 0 : incoming.filter((item) => item.message.from === "other").length;
+            return {
+              ...chat,
+              preview: newest.text,
+              time: formatChatListTime(newest.createdAt),
+              lastActivity: newest.createdAt,
+              unread: chat.id === selectedChat?.id ? 0 : chat.unread + unreadIncrement,
+            };
+          })
+        )
+      );
+
+      if (!selectedChat) return;
+      const selectedIncoming = grouped.get(selectedChat.id);
+      if (!selectedIncoming?.length) return;
+
+      if (selectedIncoming.some((item) => item.message.from === "other")) {
+        void api.markChatRead(selectedChat.id);
+      }
+      requestAnimationFrame(() => {
+        const element = messageScrollRef.current;
+        if (!element) return;
+        const nearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 120;
+        if (nearBottom) element.scrollTop = element.scrollHeight;
+      });
+    };
+
+    window.addEventListener(CHAT_SYNC_EVENT, handleSync as EventListener);
+    return () => {
+      window.removeEventListener(CHAT_SYNC_EVENT, handleSync as EventListener);
+    };
+  }, [selectedChat]);
+
+  useEffect(() => {
+    if (!cacheScope || !chats.length) return;
+    chatCache.setChatList(cacheScope, chats);
+    const timer = window.setTimeout(() => {
+      void chatCache.persistChatList(cacheScope, chats);
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [cacheScope, chats]);
+
+  useEffect(() => {
+    if (!cacheScope || !selectedChat) return;
+
+    const timer = window.setTimeout(() => {
+      chatCache.setThread(cacheScope, selectedChat.id, {
+        messages: selectedMessages,
+        hasOlderMessages,
+        scrollTop: messageScrollRef.current?.scrollTop ?? 0,
+        updatedAt: Date.now(),
+      });
+      void chatCache.persistThread(cacheScope, selectedChat.id, {
+        messages: selectedMessages,
+        hasOlderMessages,
+        scrollTop: messageScrollRef.current?.scrollTop ?? 0,
+        updatedAt: Date.now(),
+      });
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [cacheScope, hasOlderMessages, selectedChat, selectedMessages]);
 
   const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(query.trim().toLowerCase()));
-  const selectedMessages = selectedChat ? messages[selectedChat.id] ?? [] : [];
 
   useEffect(() => {
     const element = textareaRef.current;
@@ -243,12 +658,119 @@ export default function ChatsPage() {
     const message = draft.trim();
     if (!message) return;
 
+    const optimisticMessage = createPendingMessage(message, currentUserName);
+
     try {
       setSendState("sending");
+      if (DEBUG_CHAT_SEND) {
+        console.log("[chat] submit start", {
+          chatId: selectedChat.id,
+          optimisticId: optimisticMessage.id,
+          optimisticClientId: optimisticMessage.clientId,
+          text: optimisticMessage.text,
+        });
+      }
+      flushSync(() => {
+        setMessages((current) => ({
+          ...current,
+          [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), optimisticMessage]),
+        }));
+        setChats((currentChats) =>
+          sortChats(
+            currentChats.map((chat) =>
+              chat.id === selectedChat.id ? updateChatSummary(chat, message, optimisticMessage.createdAt) : chat
+            )
+          )
+        );
+        setDraft("");
+      });
+      if (DEBUG_CHAT_SEND) {
+        console.log("[chat] optimistic inserted", {
+          chatId: selectedChat.id,
+          optimisticId: optimisticMessage.id,
+        });
+      }
+      triggerMessageEntrance(optimisticMessage.id);
+      stickToBottomRef.current = true;
+      scrollThreadToBottom(messageScrollRef.current);
       const created = await api.sendMessage(selectedChat.id, message);
+      const deliveredMessage = mapChatMessage(created, currentUserId);
+      if (DEBUG_CHAT_SEND) {
+        console.log("[chat] send success", {
+          chatId: selectedChat.id,
+          optimisticId: optimisticMessage.id,
+          serverId: deliveredMessage.id,
+          serverClientId: deliveredMessage.clientId,
+          text: deliveredMessage.text,
+        });
+      }
+      triggerMessageEntrance(deliveredMessage.id);
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: [...(current[selectedChat.id] ?? []), mapChatMessage(created, currentUserId)],
+        [selectedChat.id]: mergeMessages(
+          (current[selectedChat.id] ?? []).filter((item) => item.id !== optimisticMessage.id),
+          [deliveredMessage]
+        ),
+      }));
+      setChats((currentChats) =>
+        sortChats(
+          currentChats.map((chat) =>
+            chat.id === selectedChat.id ? updateChatSummary(chat, deliveredMessage.text, deliveredMessage.createdAt) : chat
+          )
+        )
+      );
+    } catch (apiError) {
+      if (DEBUG_CHAT_SEND) {
+        console.log("[chat] send failed", {
+          chatId: selectedChat.id,
+          optimisticId: optimisticMessage.id,
+          error: apiError instanceof Error ? apiError.message : String(apiError),
+        });
+      }
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: (current[selectedChat.id] ?? []).map((item) =>
+          item.id === optimisticMessage.id
+            ? {
+                ...item,
+                status: "failed",
+              }
+            : item
+        ),
+      }));
+    } finally {
+      setSendState("idle");
+    }
+  };
+
+  const retryFailedMessage = async (message: ChatMessage) => {
+    if (!selectedChat || message.status !== "failed") return;
+
+    const retryMessage: ChatMessage = {
+      ...message,
+      status: "pending",
+      createdAt: Math.floor(Date.now() / 1000),
+      time: formatTime(Math.floor(Date.now() / 1000)),
+    };
+
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: (current[selectedChat.id] ?? []).map((item) => (item.id === message.id ? retryMessage : item)),
+    }));
+    triggerMessageEntrance(retryMessage.id);
+    stickToBottomRef.current = true;
+    scrollThreadToBottom(messageScrollRef.current);
+
+    try {
+      const created = await api.sendMessage(selectedChat.id, retryMessage.text);
+      const deliveredMessage = mapChatMessage(created, currentUserId);
+      triggerMessageEntrance(deliveredMessage.id);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: mergeMessages(
+          (current[selectedChat.id] ?? []).filter((item) => item.id !== retryMessage.id),
+          [deliveredMessage]
+        ),
       }));
       setChats((currentChats) =>
         sortChats(
@@ -256,21 +778,76 @@ export default function ChatsPage() {
             chat.id === selectedChat.id
               ? {
                   ...chat,
-                  preview: message,
+                  preview: deliveredMessage.text,
                   time: "刚刚",
-                  lastActivity: created.created_at,
+                  lastActivity: deliveredMessage.createdAt,
                   unread: 0,
                 }
               : chat
           )
         )
       );
-      setDraft("");
+    } catch {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: (current[selectedChat.id] ?? []).map((item) =>
+          item.id === retryMessage.id
+            ? {
+                ...item,
+                status: "failed",
+              }
+            : item
+        ),
+      }));
+    }
+  };
+
+  const loadOlderMessages = async () => {
+    if (!selectedChat || !selectedMessages.length || olderState === "loading" || !cacheScope) return;
+
+    const oldestMessage = selectedMessages[0];
+    const scroller = messageScrollRef.current;
+    const previousHeight = scroller?.scrollHeight ?? 0;
+
+    try {
+      setOlderState("loading");
+      const rows = await api.getMessages({
+        chat_id: selectedChat.id,
+        limit: 30,
+        before: Number(oldestMessage.id),
+      });
+      const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
+
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: mergeMessages(normalized, current[selectedChat.id] ?? []),
+      }));
+      const mergedMessages = mergeMessages(normalized, selectedMessages);
+      setHasOlderMessages(rows.length >= 30);
+      chatCache.setThread(cacheScope, selectedChat.id, {
+        messages: mergedMessages,
+        hasOlderMessages: rows.length >= 30,
+        scrollTop: scroller?.scrollTop ?? 0,
+        updatedAt: Date.now(),
+      });
+      void chatCache.persistThread(cacheScope, selectedChat.id, {
+        messages: mergedMessages,
+        hasOlderMessages: rows.length >= 30,
+        scrollTop: scroller?.scrollTop ?? 0,
+        updatedAt: Date.now(),
+      });
+
+      requestAnimationFrame(() => {
+        const element = messageScrollRef.current;
+        if (!element) return;
+        const nextHeight = element.scrollHeight;
+        element.scrollTop = nextHeight - previousHeight + element.scrollTop;
+      });
     } catch (apiError) {
-      const messageText = apiError instanceof ApiError ? apiError.message : "发送消息失败";
-      setError(messageText);
+      const message = apiError instanceof ApiError ? apiError.message : "加载历史消息失败";
+      setPageError(message);
     } finally {
-      setSendState("idle");
+      setOlderState("idle");
     }
   };
 
@@ -285,14 +862,7 @@ export default function ChatsPage() {
         <div className={`avatar ${chat.online ? "status-online" : ""}`}>{avatarLabel(chat.title)}</div>
       </div>
       <div style={{ textAlign: "left" }}>
-        <div className="title-row">
-          <p className="chat-name">{chat.title}</p>
-          {chat.verified ? <span className="verified-badge">Verified</span> : null}
-        </div>
-        <div className="meta-row">
-          {chat.type === "group" ? <span className="count-badge">{chat.members} 人</span> : null}
-          {chat.online ? <span className="presence-badge">在线</span> : null}
-        </div>
+        <p className="chat-name">{chat.title}</p>
         <div className="chat-preview">{chat.preview}</div>
       </div>
       <div>
@@ -348,10 +918,8 @@ export default function ChatsPage() {
   return (
     <AppChrome
       title="聊天"
-      mobileNav="chats"
       hideTopbar={!selectedChat}
       hideMobileNav={Boolean(selectedChat)}
-      hideSessionAction={Boolean(selectedChat)}
       hidePageTitle={Boolean(selectedChat)}
       topbarClassName={selectedChat ? "conversation-topbar" : undefined}
       topbarLeading={
@@ -380,11 +948,7 @@ export default function ChatsPage() {
               <span className="material-symbols-outlined">more_vert</span>
             </button>
           </div>
-        ) : (
-          <Link className="ghost-chip" to="/app/square">
-            广场
-          </Link>
-        )
+        ) : undefined
       }
     >
       <section className={`app-layout chat-mobile-layout ${selectedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
@@ -395,39 +959,72 @@ export default function ChatsPage() {
         <section className={`message-pane chat-main-pane ${selectedChat ? "" : "desktop-pane"}`}>
           {selectedChat ? (
             <>
-              <div className="message-scroll">
-                <div className="day-divider">今天</div>
-                {selectedMessages.map((message, index) => {
-                  const previous = selectedMessages[index - 1];
-                  const next = selectedMessages[index + 1];
-                  const groupedWithPrevious = shouldGroupMessages(message, previous);
-                  const groupedWithNext = shouldGroupMessages(message, next);
+              <div
+                ref={messageScrollRef}
+                className="message-scroll"
+                onScroll={() => {
+                  const element = messageScrollRef.current;
+                  stickToBottomRef.current = isNearThreadBottom(element);
+                  if (!cacheScope || !selectedChat) return;
+                  chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
+                }}
+              >
+                {hasOlderMessages ? (
+                  <div className="message-history-actions">
+                    <button className="ghost-button" disabled={olderState === "loading"} onClick={() => void loadOlderMessages()} type="button">
+                      {olderState === "loading" ? "加载中..." : "查看更多消息"}
+                    </button>
+                  </div>
+                ) : null}
+                {messageGroups.map((group) => (
+                  <div key={group.key}>
+                    {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
+                    <div className={`message-group ${group.from}`}>
+                      {group.from === "other" ? <div className="avatar message-avatar">{avatarLabel(group.name)}</div> : null}
+                      <div className="message-bubbles">
+                        {group.messages.map((message, index) => {
+                          const isFirst = index === 0;
+                          const isLast = index === group.messages.length - 1;
+                          const isEntering = enteringMessageIds.includes(String(message.id));
+                          const showRetry = group.from === "self" && message.status === "failed";
 
-                  return (
-                  <div
-                    key={String(message.id)}
-                    className={`message-group ${message.from === "self" ? "self" : ""} ${groupedWithPrevious ? "stacked" : ""}`}
-                  >
-                    {message.from === "other" && !groupedWithPrevious ? (
-                      <div className="avatar" style={{ width: 36, height: 36, borderRadius: 12, fontSize: ".78rem" }}>
-                        {avatarLabel(message.name)}
+                          return (
+                            <div
+                              key={String(message.id)}
+                              className={`message-bubble-wrap ${group.from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}
+                            >
+                              <div className={`message-bubble-shell ${group.from}`}>
+                                {showRetry ? (
+                                  <button
+                                    aria-label="重试发送"
+                                    className="message-retry-icon"
+                                    onClick={() => void retryFailedMessage(message)}
+                                    type="button"
+                                  >
+                                    <span className="material-symbols-outlined">refresh</span>
+                                  </button>
+                                ) : null}
+                                <div
+                                  className={[
+                                    "message-bubble",
+                                    group.from === "self" ? "self" : "other",
+                                    message.status !== "sent" ? `is-${message.status}` : "",
+                                    isFirst ? "group-start" : "",
+                                    isLast ? "group-end" : "",
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                                >
+                                  {message.text}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ) : message.from === "other" ? <div className="message-spacer" /> : null}
-                    <div className="message-bubbles">
-                      <div className={`message-bubble ${message.from === "self" ? "self" : "other"}`}>{message.text}</div>
-                      {!groupedWithNext ? (
-                        <div className="message-meta">
-                          <span>{message.time}</span>
-                          {message.from === "self" ? (
-                            <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--brand-primary)" }}>
-                              done_all
-                            </span>
-                          ) : null}
-                        </div>
-                      ) : null}
                     </div>
                   </div>
-                )})}
+                ))}
               </div>
 
               <form ref={composerRef} className="composer" onSubmit={submit}>
@@ -605,7 +1202,7 @@ export default function ChatsPage() {
           </div>
         ) : null}
       </BottomSheet>
-      <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
+      <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
   );
 }

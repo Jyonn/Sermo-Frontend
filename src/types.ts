@@ -1,5 +1,4 @@
 export type NotificationChannel = "email" | "sms" | "bark";
-export type MobileNavKey = "chats" | "square" | "notifications" | "menu";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 
@@ -84,6 +83,18 @@ export interface ChatMessageDTO {
   created_at: number;
 }
 
+export interface ChatSyncItemDTO {
+  chat_id: number;
+  message: ChatMessageDTO;
+}
+
+export interface ChatSyncResponseDTO {
+  after_message_id?: number;
+  next_after?: number;
+  items: ChatSyncItemDTO[];
+  has_more: boolean;
+}
+
 export interface ChatDTO {
   chat_id: number;
   chat_type: number;
@@ -106,11 +117,13 @@ export interface AuthSession {
 
 export interface ChatMessage {
   id: number | string;
+  clientId: string;
   from: "self" | "other";
   name: string;
   time: string;
   createdAt: number;
   text: string;
+  status: "sent" | "pending" | "failed";
 }
 
 export interface ChatDetail {
@@ -136,14 +149,6 @@ export interface Chat {
   messages: ChatMessage[];
 }
 
-export interface FriendRequest {
-  id: number;
-  name: string;
-  time: string;
-  level: "Basic" | "Verified";
-  note: string;
-}
-
 export interface FriendAccepted {
   id: number;
   name: string;
@@ -152,25 +157,9 @@ export interface FriendAccepted {
   verified: boolean;
 }
 
-export interface FriendRequestState {
-  incoming: FriendRequest[];
-  outgoing: FriendRequest[];
-  accepted: FriendAccepted[];
-}
-
-export interface SpaceUser {
-  id: number;
-  name: string;
-  level: "Basic" | "Verified";
-  online: boolean;
-  bio: string;
-}
-
 export interface NotificationPreference {
   enabled: boolean;
   threshold: number;
 }
 
 export type NotificationPreferences = Record<NotificationChannel, NotificationPreference>;
-
-export type Contacts = Record<NotificationChannel, string>;

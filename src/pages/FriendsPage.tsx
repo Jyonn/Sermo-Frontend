@@ -107,7 +107,7 @@ export default function FriendsPage() {
   };
 
   return (
-    <AppChrome title="好友" mobileNav="menu" hideTopbar topbarAction={<Link className="ghost-chip" to="/app/space-users/online">在线成员</Link>}>
+    <AppChrome title="好友" hideTopbar>
       <section className="page-stack">
         <div className="page-tabs">
           <Link className={`tab-chip ${tab === "incoming" ? "active" : ""}`} to="/app/friends/requests">

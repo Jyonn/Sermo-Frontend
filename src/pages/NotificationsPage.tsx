@@ -62,16 +62,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <AppChrome
-      title="通知"
-      mobileNav="notifications"
-      hideTopbar
-      topbarAction={
-        <Link className="ghost-chip" to="/app/settings/notifications">
-          设置
-        </Link>
-      }
-    >
+    <AppChrome title="通知" hideTopbar>
       <section className="page-stack">
         <div className="page-toolbar">
           <strong>{totalCount ? `${totalCount} 条更新` : "通知"}</strong>

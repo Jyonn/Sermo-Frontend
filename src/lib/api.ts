@@ -3,6 +3,7 @@ import type {
   AuthSession,
   ChatDTO,
   ChatMessageDTO,
+  ChatSyncResponseDTO,
   FriendshipRequestDTO,
   JoinResponseDTO,
   LoginAuthDTO,
@@ -44,6 +45,7 @@ let authConfig: AuthConfig = {
   getSession: () => null,
   setSession: () => undefined,
 };
+let refreshInFlight: Promise<AuthSession> | null = null;
 
 export function configureApiAuth(config: AuthConfig) {
   authConfig = config;
@@ -105,6 +107,16 @@ async function refreshSession(currentSession: AuthSession) {
   return nextSession;
 }
 
+function refreshSessionSingleFlight(currentSession: AuthSession) {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshSession(currentSession).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+
+  return refreshInFlight;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, retryOn401 = true, signal } = options;
   const session = auth ? authConfig.getSession() : null;
@@ -126,7 +138,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (response.status === 401 && auth && retryOn401 && session?.refreshToken) {
     try {
-      const nextSession = await refreshSession(session);
+      const latestSession = authConfig.getSession();
+      const nextSession =
+        latestSession?.refreshToken && latestSession.refreshToken !== session.refreshToken
+          ? latestSession
+          : await refreshSessionSingleFlight(session);
       const retryHeaders = new Headers(headers);
       retryHeaders.set("Authorization", `Bearer ${nextSession.accessToken}`);
       const retryResponse = await fetch(`${API_BASE_URL}${withQuery(path, query)}`, {
@@ -219,6 +235,14 @@ export const api = {
 
   getMessages(params: { chat_id: number; limit: number; before?: number; after?: number }, signal?: AbortSignal) {
     return request<ChatMessageDTO[]>("/messages/", {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  getMessagesSync(params: { after: number; limit: number }, signal?: AbortSignal) {
+    return request<ChatSyncResponseDTO>("/messages/sync", {
       auth: true,
       query: params,
       signal,

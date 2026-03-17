@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { api, configureApiAuth } from "./api";
 import { buildJoinPath, getDetectedSpaceSlug } from "./spaceEntry";
@@ -25,6 +25,7 @@ function toSession(payload: JoinResponseDTO): AuthSession {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSessionState] = useState<AuthSession | null>(() => authStorage.get());
+  const heartbeatInFlightRef = useRef(false);
 
   useEffect(() => {
     authStorage.set(session);
@@ -43,9 +44,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!session) return;
     const timer = window.setInterval(() => {
-      api.heartbeat().catch(() => undefined);
+      if (heartbeatInFlightRef.current) return;
+      heartbeatInFlightRef.current = true;
+      api
+        .heartbeat()
+        .catch(() => undefined)
+        .finally(() => {
+          heartbeatInFlightRef.current = false;
+        });
     }, 60_000);
-    return () => window.clearInterval(timer);
+    return () => {
+      heartbeatInFlightRef.current = false;
+      window.clearInterval(timer);
+    };
   }, [session]);
 
   const value = useMemo<AuthContextValue>(

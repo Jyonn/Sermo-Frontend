@@ -1,17 +1,14 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import type { MobileNavKey } from "../types";
 
 interface AppChromeProps {
   children: ReactNode;
   title: string;
-  mobileNav?: MobileNavKey;
   topbarAction?: ReactNode;
   topbarLeading?: ReactNode;
   hideTopbar?: boolean;
   hideMobileNav?: boolean;
-  hideSessionAction?: boolean;
   hidePageTitle?: boolean;
   topbarClassName?: string;
 }
@@ -23,7 +20,6 @@ export function AppChrome({
   topbarLeading,
   hideTopbar = false,
   hideMobileNav = false,
-  hideSessionAction = false,
   hidePageTitle = false,
   topbarClassName,
 }: AppChromeProps) {

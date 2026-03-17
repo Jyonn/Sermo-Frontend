@@ -45,7 +45,7 @@ export default function MenuPage() {
   };
 
   return (
-    <AppChrome title="菜单" mobileNav="menu" hideTopbar>
+    <AppChrome title="菜单" hideTopbar>
       <section className="page-stack">
         <div className="profile-strip">
           <div className="avatar-large">{avatarLabel(session?.user.name ?? "Sermo")}</div>

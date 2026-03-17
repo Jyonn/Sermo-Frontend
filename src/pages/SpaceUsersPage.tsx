@@ -80,7 +80,7 @@ export default function SpaceUsersPage() {
   };
 
   return (
-    <AppChrome title={onlineOnly ? "在线成员" : "成员"} mobileNav="square" hideTopbar>
+    <AppChrome title={onlineOnly ? "在线成员" : "成员"} hideTopbar>
       <section className="page-stack">
         <div className="page-tabs">
           <Link className={`tab-chip ${!onlineOnly ? "active" : ""}`} to="/app/space-users">

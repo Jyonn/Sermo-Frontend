@@ -153,7 +153,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <AppChrome title="设置" mobileNav="menu" hideTopbar>
+    <AppChrome title="设置" hideTopbar>
       <section className="page-stack">
         <div className="page-tabs">
           <Link className={`tab-chip ${tab === "account" ? "active" : ""}`} to="/app/settings/account">
