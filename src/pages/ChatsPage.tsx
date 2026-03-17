@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -144,6 +144,27 @@ function createPendingMessage(text: string, name: string): ChatMessage {
   };
 }
 
+function updateMessageStatus(messages: ChatMessage[], clientId: string, status: ChatMessage["status"]) {
+  return messages.map((message) => (message.clientId === clientId ? { ...message, status } : message));
+}
+
+function confirmPendingMessage(messages: ChatMessage[], clientId: string, delivered: ChatMessage) {
+  let confirmed = false;
+  const nextMessages = messages.map((message) => {
+    if (message.clientId !== clientId) return message;
+    confirmed = true;
+    return {
+      ...message,
+      id: delivered.id,
+      name: delivered.name,
+      text: delivered.text,
+      status: "sent" as const,
+    };
+  });
+
+  return confirmed ? sortMessages(nextMessages) : mergeMessages(messages, [{ ...delivered, clientId }]);
+}
+
 function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
   return {
     ...chat,
@@ -169,12 +190,101 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
 }
 
+function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[]) {
+  const entering = group.messages.filter((message) => enteringMessageIds.includes(message.clientId)).map((message) => message.clientId);
+  return JSON.stringify({
+    key: group.key,
+    dividerLabel: group.dividerLabel,
+    messages: group.messages.map((message) => ({
+      clientId: message.clientId,
+      status: message.status,
+      text: message.text,
+    })),
+    entering,
+  });
+}
+
+const MessageBubbleRow = memo(function MessageBubbleRow({
+  from,
+  isEntering,
+  isFirst,
+  isLast,
+  message,
+  onRetry,
+}: MessageBubbleRowProps) {
+  const showRetry = from === "self" && message.status === "failed";
+
+  return (
+    <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}>
+      <div className={`message-bubble-shell ${from}`}>
+        {showRetry ? (
+          <button aria-label="重试发送" className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
+            <span className="material-symbols-outlined">refresh</span>
+          </button>
+        ) : null}
+        <div
+          className={[
+            "message-bubble",
+            from === "self" ? "self" : "other",
+            message.status !== "sent" ? `is-${message.status}` : "",
+            isFirst ? "group-start" : "",
+            isLast ? "group-end" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {message.text}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onRetry }: MessageGroupBlockProps) {
+  return (
+    <div>
+      {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
+      <div className={`message-group ${group.from}`}>
+        {group.from === "other" ? <div className="avatar message-avatar">{avatarLabel(group.name)}</div> : null}
+        <div className="message-bubbles">
+          {group.messages.map((message, index) => (
+            <MessageBubbleRow
+              key={message.clientId}
+              from={group.from}
+              isEntering={enteringMessageIds.includes(message.clientId)}
+              isFirst={index === 0}
+              isLast={index === group.messages.length - 1}
+              message={message}
+              onRetry={onRetry}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}, (prev, next) => groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds));
+
 interface MessageGroup {
   key: string;
   from: "self" | "other";
   name: string;
   dividerLabel?: string;
   messages: ChatMessage[];
+}
+
+interface MessageBubbleRowProps {
+  from: "self" | "other";
+  isEntering: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  message: ChatMessage;
+  onRetry: (message: ChatMessage) => void;
+}
+
+interface MessageGroupBlockProps {
+  enteringMessageIds: string[];
+  group: MessageGroup;
+  onRetry: (message: ChatMessage) => void;
 }
 
 function getDirectPeer(chat: ChatDTO, currentUserId: number) {
@@ -221,6 +331,30 @@ function scrollThreadToBottom(element: HTMLDivElement | null) {
   });
 }
 
+function animateThreadScroll(element: HTMLDivElement, targetTop: number, duration = 220) {
+  const startTop = element.scrollTop;
+  const distance = targetTop - startTop;
+  if (Math.abs(distance) < 1) {
+    element.scrollTop = targetTop;
+    return () => {};
+  }
+
+  let frameId = 0;
+  const startAt = performance.now();
+  const easeOutCubic = (value: number) => 1 - (1 - value) ** 3;
+
+  const tick = (now: number) => {
+    const progress = Math.min(1, (now - startAt) / duration);
+    element.scrollTop = startTop + distance * easeOutCubic(progress);
+    if (progress < 1) {
+      frameId = requestAnimationFrame(tick);
+    }
+  };
+
+  frameId = requestAnimationFrame(tick);
+  return () => cancelAnimationFrame(frameId);
+}
+
 function isNearThreadBottom(element: HTMLDivElement | null, threshold = 72) {
   if (!element) return true;
   return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
@@ -246,6 +380,9 @@ export default function ChatsPage() {
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
   const stickToBottomRef = useRef(true);
+  const pendingRevealRef = useRef<{ chatId: number; previousHeight: number; previousScrollTop: number } | null>(null);
+  const cancelScrollAnimationRef = useRef<(() => void) | null>(null);
+  const revealAnimatingRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
@@ -258,6 +395,17 @@ export default function ChatsPage() {
     window.setTimeout(() => {
       setEnteringMessageIds((current) => current.filter((item) => item !== key));
     }, 260);
+  };
+
+  const queueThreadReveal = (chatId: number) => {
+    const element = messageScrollRef.current;
+    if (!element) return;
+    revealAnimatingRef.current = true;
+    pendingRevealRef.current = {
+      chatId,
+      previousHeight: element.scrollHeight,
+      previousScrollTop: element.scrollTop,
+    };
   };
 
   useEffect(() => {
@@ -337,12 +485,12 @@ export default function ChatsPage() {
 
       if (canJoinLastGroup) {
         lastGroup.messages.push(message);
-        lastGroup.key = `${String(lastGroup.messages[0]?.id)}-${String(message.id)}`;
+        lastGroup.key = `${lastGroup.messages[0]?.clientId}-${message.clientId}`;
         return;
       }
 
       groups.push({
-        key: `${String(message.id)}`,
+        key: message.clientId,
         from: message.from,
         name: message.name,
         dividerLabel,
@@ -481,9 +629,45 @@ export default function ChatsPage() {
     stickToBottomRef.current = true;
   }, [selectedChat, selectedMessages.length]);
 
+  useLayoutEffect(() => {
+    if (!selectedChat) {
+      pendingRevealRef.current = null;
+      return;
+    }
+
+    const pendingReveal = pendingRevealRef.current;
+    if (!pendingReveal || pendingReveal.chatId !== selectedChat.id) return;
+
+    const element = messageScrollRef.current;
+    pendingRevealRef.current = null;
+    if (!element) {
+      revealAnimatingRef.current = false;
+      return;
+    }
+
+    const delta = element.scrollHeight - pendingReveal.previousHeight;
+    const targetTop = Math.max(0, pendingReveal.previousScrollTop + delta);
+    cancelScrollAnimationRef.current?.();
+    if (DEBUG_CHAT_SEND) {
+      console.log("[chat] reveal start", {
+        chatId: selectedChat.id,
+        previousHeight: pendingReveal.previousHeight,
+        nextHeight: element.scrollHeight,
+        previousScrollTop: pendingReveal.previousScrollTop,
+        targetTop,
+        delta,
+      });
+    }
+    cancelScrollAnimationRef.current = animateThreadScroll(element, targetTop);
+    window.setTimeout(() => {
+      revealAnimatingRef.current = false;
+    }, 240);
+  }, [selectedChat, selectedMessages.length]);
+
   useEffect(() => {
     if (!selectedChat) return;
     if (!stickToBottomRef.current) return;
+    if (revealAnimatingRef.current) return;
 
     scrollThreadToBottom(messageScrollRef.current);
   }, [composerHeight, keyboardOffset, selectedChat]);
@@ -505,6 +689,13 @@ export default function ChatsPage() {
   }, [selectedChat]);
 
   useEffect(() => {
+    return () => {
+      cancelScrollAnimationRef.current?.();
+      revealAnimatingRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const handleSync = (event: Event) => {
       const detail = (event as CustomEvent<ChatSyncEventDetail>).detail;
       if (!detail?.items.length) return;
@@ -515,6 +706,12 @@ export default function ChatsPage() {
         bucket.push(item);
         grouped.set(item.chatId, bucket);
       });
+
+      const currentChatIncoming = selectedChat ? grouped.get(selectedChat.id) : undefined;
+      const shouldRevealCurrentChat = Boolean(currentChatIncoming?.length) && isNearThreadBottom(messageScrollRef.current, 120);
+      if (selectedChat && shouldRevealCurrentChat) {
+        queueThreadReveal(selectedChat.id);
+      }
 
       setMessages((current) => {
         const next = { ...current };
@@ -549,12 +746,6 @@ export default function ChatsPage() {
       if (selectedIncoming.some((item) => item.message.from === "other")) {
         void api.markChatRead(selectedChat.id);
       }
-      requestAnimationFrame(() => {
-        const element = messageScrollRef.current;
-        if (!element) return;
-        const nearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 120;
-        if (nearBottom) element.scrollTop = element.scrollHeight;
-      });
     };
 
     window.addEventListener(CHAT_SYNC_EVENT, handleSync as EventListener);
@@ -659,6 +850,7 @@ export default function ChatsPage() {
     if (!message) return;
 
     const optimisticMessage = createPendingMessage(message, currentUserName);
+    queueThreadReveal(selectedChat.id);
 
     try {
       setSendState("sending");
@@ -690,9 +882,8 @@ export default function ChatsPage() {
           optimisticId: optimisticMessage.id,
         });
       }
-      triggerMessageEntrance(optimisticMessage.id);
+      triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
-      scrollThreadToBottom(messageScrollRef.current);
       const created = await api.sendMessage(selectedChat.id, message);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {
@@ -704,13 +895,9 @@ export default function ChatsPage() {
           text: deliveredMessage.text,
         });
       }
-      triggerMessageEntrance(deliveredMessage.id);
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: mergeMessages(
-          (current[selectedChat.id] ?? []).filter((item) => item.id !== optimisticMessage.id),
-          [deliveredMessage]
-        ),
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], optimisticMessage.clientId, deliveredMessage),
       }));
       setChats((currentChats) =>
         sortChats(
@@ -729,14 +916,7 @@ export default function ChatsPage() {
       }
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: (current[selectedChat.id] ?? []).map((item) =>
-          item.id === optimisticMessage.id
-            ? {
-                ...item,
-                status: "failed",
-              }
-            : item
-        ),
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
       }));
     } finally {
       setSendState("idle");
@@ -757,20 +937,15 @@ export default function ChatsPage() {
       ...current,
       [selectedChat.id]: (current[selectedChat.id] ?? []).map((item) => (item.id === message.id ? retryMessage : item)),
     }));
-    triggerMessageEntrance(retryMessage.id);
     stickToBottomRef.current = true;
-    scrollThreadToBottom(messageScrollRef.current);
+    triggerMessageEntrance(retryMessage.clientId);
 
     try {
       const created = await api.sendMessage(selectedChat.id, retryMessage.text);
       const deliveredMessage = mapChatMessage(created, currentUserId);
-      triggerMessageEntrance(deliveredMessage.id);
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: mergeMessages(
-          (current[selectedChat.id] ?? []).filter((item) => item.id !== retryMessage.id),
-          [deliveredMessage]
-        ),
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], retryMessage.clientId, deliveredMessage),
       }));
       setChats((currentChats) =>
         sortChats(
@@ -790,14 +965,7 @@ export default function ChatsPage() {
     } catch {
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: (current[selectedChat.id] ?? []).map((item) =>
-          item.id === retryMessage.id
-            ? {
-                ...item,
-                status: "failed",
-              }
-            : item
-        ),
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], retryMessage.clientId, "failed"),
       }));
     }
   };
@@ -977,53 +1145,7 @@ export default function ChatsPage() {
                   </div>
                 ) : null}
                 {messageGroups.map((group) => (
-                  <div key={group.key}>
-                    {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-                    <div className={`message-group ${group.from}`}>
-                      {group.from === "other" ? <div className="avatar message-avatar">{avatarLabel(group.name)}</div> : null}
-                      <div className="message-bubbles">
-                        {group.messages.map((message, index) => {
-                          const isFirst = index === 0;
-                          const isLast = index === group.messages.length - 1;
-                          const isEntering = enteringMessageIds.includes(String(message.id));
-                          const showRetry = group.from === "self" && message.status === "failed";
-
-                          return (
-                            <div
-                              key={String(message.id)}
-                              className={`message-bubble-wrap ${group.from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}
-                            >
-                              <div className={`message-bubble-shell ${group.from}`}>
-                                {showRetry ? (
-                                  <button
-                                    aria-label="重试发送"
-                                    className="message-retry-icon"
-                                    onClick={() => void retryFailedMessage(message)}
-                                    type="button"
-                                  >
-                                    <span className="material-symbols-outlined">refresh</span>
-                                  </button>
-                                ) : null}
-                                <div
-                                  className={[
-                                    "message-bubble",
-                                    group.from === "self" ? "self" : "other",
-                                    message.status !== "sent" ? `is-${message.status}` : "",
-                                    isFirst ? "group-start" : "",
-                                    isLast ? "group-end" : "",
-                                  ]
-                                    .filter(Boolean)
-                                    .join(" ")}
-                                >
-                                  {message.text}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
+                  <MessageGroupBlock enteringMessageIds={enteringMessageIds} group={group} key={group.key} onRetry={retryFailedMessage} />
                 ))}
               </div>
 

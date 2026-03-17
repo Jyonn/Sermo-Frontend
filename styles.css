@@ -1025,6 +1025,7 @@ img {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overflow-anchor: none;
   padding: 24px 24px 14px;
   display: flex;
   flex-direction: column;
@@ -1093,6 +1094,10 @@ img {
   animation: message-rise-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.message-bubble-wrap.is-entering .message-bubble {
+  animation: message-bounce 180ms ease-out;
+}
+
 .message-bubble-shell {
   display: flex;
   align-items: center;
@@ -1118,9 +1123,14 @@ img {
   line-height: 1.52;
   font-size: 0.98rem;
   box-shadow: 0 4px 16px rgba(17, 19, 24, 0.05);
-  animation: message-bounce 160ms ease-out;
   word-break: break-word;
   max-width: min(68vw, 320px);
+  transition:
+    border-radius 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    opacity 160ms ease,
+    transform 180ms ease;
 }
 
 .message-bubble.other {
@@ -1210,12 +1220,12 @@ img {
 
 @keyframes message-rise-in {
   from {
-    opacity: 0.55;
-    transform: translateY(24px) scale(0.985);
+    opacity: 0.35;
+    transform: scale(0.985);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
 }
 
