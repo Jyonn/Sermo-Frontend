@@ -141,6 +141,7 @@ export interface ChatDetail {
     name: string;
     avatarUri?: string;
     isSelf: boolean;
+    isOwner: boolean;
   }>;
 }
 

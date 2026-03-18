@@ -1,10 +1,13 @@
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { flushSync } from "react-dom";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
+import { InputDialog } from "../components/InputDialog";
+import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -14,6 +17,7 @@ import { formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
+const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -364,6 +368,22 @@ function getDirectPeer(chat: ChatDTO, currentUserId: number) {
   return chat.members.find((member) => member.user_id !== currentUserId) ?? chat.members[0] ?? null;
 }
 
+function sortChatDetailMembers(
+  members: Array<{
+    userId: number;
+    name: string;
+    avatarUri?: string;
+    isSelf: boolean;
+    isOwner: boolean;
+  }>
+) {
+  return [...members].sort((left, right) => {
+    if (left.isOwner !== right.isOwner) return left.isOwner ? -1 : 1;
+    if (left.isSelf !== right.isSelf) return left.isSelf ? -1 : 1;
+    return left.name.localeCompare(right.name, "zh-CN");
+  });
+}
+
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
   const title = chat.title || peer?.name || "未命名会话";
@@ -388,12 +408,15 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
       summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
       relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
       actions: chat.group ? (isOwner ? ["邀请成员", "解散群聊"] : ["退出群聊"]) : ["发起好友申请", "静音通知"],
-      members: chat.members.map((member) => ({
-        userId: member.user_id,
-        name: member.name,
-        avatarUri: member.avatar_uri,
-        isSelf: member.user_id === currentUserId,
-      })),
+      members: sortChatDetailMembers(
+        chat.members.map((member) => ({
+          userId: member.user_id,
+          name: member.name,
+          avatarUri: member.avatar_uri,
+          isSelf: member.user_id === currentUserId,
+          isOwner: Boolean(chat.owner?.user_id === member.user_id),
+        }))
+      ),
     },
     messages: [],
   };
@@ -449,12 +472,14 @@ function filterUsersByName(rows: UserDTO[], query: string) {
 
 export default function ChatsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { chatId } = useParams();
   const { session } = useAuth();
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
+  const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [pageError, setPageError] = useState<string | null>(null);
   const [sendState, setSendState] = useState<"idle" | "sending">("idle");
@@ -466,19 +491,25 @@ export default function ChatsPage() {
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
   const [messageDeleteState, setMessageDeleteState] = useState<"idle" | "deleting">("idle");
+  const [closingChatSnapshot, setClosingChatSnapshot] = useState<Chat | null>(null);
+  const [isClosingChatView, setIsClosingChatView] = useState(false);
   const [groupTitle, setGroupTitle] = useState("");
   const [groupQuery, setGroupQuery] = useState("");
   const [groupCandidates, setGroupCandidates] = useState<UserDTO[]>([]);
   const [groupFriendPool, setGroupFriendPool] = useState<UserDTO[]>([]);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
+  const [chatMemberLockedIds, setChatMemberLockedIds] = useState<number[]>([]);
   const [groupRenameOpen, setGroupRenameOpen] = useState(false);
-  const [groupInviteOpen, setGroupInviteOpen] = useState(false);
   const [groupRenameValue, setGroupRenameValue] = useState("");
   const [groupManageState, setGroupManageState] = useState<"idle" | "saving" | "loading-candidates">("idle");
   const [currentUserVerified, setCurrentUserVerified] = useState<boolean | null>(null);
+  const [detailMemberLimit, setDetailMemberLimit] = useState(CHAT_DETAIL_MEMBER_PAGE_SIZE);
+  const [groupDangerConfirmOpen, setGroupDangerConfirmOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
+  const chatLayoutRef = useRef<HTMLElement | null>(null);
+  const chatMainPaneRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
   const stickToBottomRef = useRef(true);
   const pendingRevealRef = useRef<{ chatId: number; previousHeight: number; previousScrollTop: number } | null>(null);
@@ -570,10 +601,35 @@ export default function ChatsPage() {
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
 
+  const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
+  const conversationTitle =
+    displayedChat?.type === "group" ? `${displayedChat.title} (${displayedChat.members})` : (displayedChat?.title ?? "");
+
   const selectedMessages = useMemo(
-    () => (selectedChat ? sortMessages(messages[selectedChat.id] ?? []) : []),
-    [messages, selectedChat]
+    () => (displayedChat ? sortMessages(messages[displayedChat.id] ?? []) : []),
+    [displayedChat, messages]
   );
+
+  useEffect(() => {
+    if (!DEBUG_CHAT_SEND) return;
+    console.log("[chat-close] location", location.pathname);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (selectedChat) {
+      setClosingChatSnapshot(null);
+      setIsClosingChatView(false);
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
+    if (!detailsSheetOpen) return;
+    setDetailMemberLimit(CHAT_DETAIL_MEMBER_PAGE_SIZE);
+  }, [detailsSheetOpen, selectedChat?.id]);
+
+  useEffect(() => {
+    return;
+  }, []);
 
   useEffect(() => {
     if (!DEBUG_CHAT_SEND || !selectedChat) return;
@@ -619,6 +675,26 @@ export default function ChatsPage() {
 
     return groups;
   }, [selectedMessages]);
+
+  const closeChatView = () => {
+    if (!selectedChat) {
+      if (DEBUG_CHAT_SEND) {
+        console.log("[chat-close] no selectedChat, navigate immediately");
+      }
+      navigate("/app/chats");
+      return;
+    }
+
+    if (DEBUG_CHAT_SEND) {
+      console.log("[chat-close] start closing", {
+        chatId: selectedChat.id,
+      });
+    }
+    setDetailsSheetOpen(false);
+    setMessageMenu(null);
+    setClosingChatSnapshot(selectedChat);
+    setIsClosingChatView(true);
+  };
 
   useEffect(() => {
     if (!selectedChat || !cacheScope) return;
@@ -753,6 +829,10 @@ export default function ChatsPage() {
   useEffect(() => {
     if (!selectedChat) return;
     setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
+  }, [selectedChat]);
+
+  useEffect(() => {
+    return;
   }, [selectedChat]);
 
   useEffect(() => {
@@ -937,15 +1017,54 @@ export default function ChatsPage() {
   }, [cacheScope, hasOlderMessages, selectedChat, selectedMessages]);
 
   const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(query.trim().toLowerCase()));
+  const detailMembers = selectedChat?.detail.members ?? [];
+  const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
+  const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
+  const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
+
+  const ensureCurrentUserVerified = async () => {
+    if (currentUserVerified !== null) return currentUserVerified;
+    const users = await api.getSpaceUsers({ limit: 200, offset: 0 });
+    const verified = users.find((user) => user.user_id === currentUserId)?.verified ?? false;
+    setCurrentUserVerified(verified);
+    return verified;
+  };
+
+  const openChatMemberAdder = async () => {
+    if (!selectedChat) return;
+    const verified = await ensureCurrentUserVerified();
+    if (!verified) {
+      setPageError("完成认证后才能添加聊天成员。");
+      return;
+    }
+    setDetailsSheetOpen(false);
+    setGroupQuery("");
+    const lockedIds = selectedChat.detail.members.filter((member) => !member.isSelf).map((member) => member.userId);
+    setChatMemberLockedIds(lockedIds);
+    setGroupSelectedIds(lockedIds);
+    setChatMemberPickerOpen(true);
+  };
+
+  const closeChatMemberPicker = () => {
+    if (groupManageState === "saving") return;
+    setChatMemberPickerOpen(false);
+    setGroupQuery("");
+    setGroupSelectedIds([]);
+    setChatMemberLockedIds([]);
+  };
+
+  const removeFriend = () => {
+    setPageError("删除好友功能暂未接入。");
+  };
 
   useEffect(() => {
-    if (!groupCreateOpen && !groupInviteOpen) return;
+    if (!groupCreateOpen && !chatMemberPickerOpen) return;
 
     const controller = new AbortController();
     if (groupCreateOpen) {
       setGroupCreateState((current) => (current === "creating" ? current : "loading-users"));
     }
-    if (groupInviteOpen) {
+    if (chatMemberPickerOpen) {
       setGroupManageState("loading-candidates");
     }
 
@@ -969,21 +1088,40 @@ export default function ChatsPage() {
       });
 
     return () => controller.abort();
-  }, [currentUserId, currentUserVerified, groupCreateOpen, groupInviteOpen]);
+  }, [chatMemberPickerOpen, currentUserId, currentUserVerified, groupCreateOpen]);
 
   useEffect(() => {
-    if (!groupCreateOpen && !groupInviteOpen) {
+    if (!groupCreateOpen && !chatMemberPickerOpen) {
       setGroupCandidates([]);
       return;
     }
 
-    const baseCandidates =
-      groupInviteOpen && selectedChat && selectedChat.type === "group"
-        ? groupFriendPool.filter((user) => !new Set(selectedChat.detail.members.map((member) => member.userId)).has(user.user_id))
-        : groupFriendPool;
+    const chatMemberRows =
+      chatMemberPickerOpen && selectedChat
+        ? selectedChat.detail.members
+            .filter((member) => !member.isSelf)
+            .map(
+              (member) =>
+                ({
+                  user_id: member.userId,
+                  name: member.name,
+                  avatar_uri: member.avatarUri,
+                  avatar_type: member.avatarUri ? "preset" : null,
+                  is_alive: false,
+                  last_heartbeat: 0,
+                  verified: true,
+                  email_verified_at: null,
+                  phone_verified_at: null,
+                  bark_verified_at: null,
+                }) as UserDTO
+            )
+        : [];
+    const baseCandidates = [...chatMemberRows, ...groupFriendPool].filter(
+      (user, index, rows) => rows.findIndex((item) => item.user_id === user.user_id) === index
+    );
 
     setGroupCandidates(filterUsersByName(baseCandidates, groupQuery));
-  }, [groupCreateOpen, groupFriendPool, groupInviteOpen, groupQuery, selectedChat]);
+  }, [chatMemberPickerOpen, groupCreateOpen, groupFriendPool, groupQuery, selectedChat]);
 
   useEffect(() => {
     const element = textareaRef.current;
@@ -1216,6 +1354,7 @@ export default function ChatsPage() {
   };
 
   const toggleGroupCandidate = (userId: number) => {
+    if (chatMemberLockedIds.includes(userId)) return;
     setGroupSelectedIds((current) => (current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId]));
   };
 
@@ -1266,21 +1405,24 @@ export default function ChatsPage() {
     }
   };
 
-  const inviteMembersToGroup = async () => {
-    if (!currentUserVerified) {
-      setPageError("完成认证后才可以邀请成员。");
-      return;
-    }
-    if (!selectedChat || !groupSelectedIds.length) return;
+  const submitChatMemberPicker = async () => {
+    if (!selectedChat) return;
+    if (!chatMemberNewIds.length) return;
+
     try {
       setGroupManageState("saving");
-      const updated = await api.addGroupMembers(selectedChat.id, groupSelectedIds);
-      applyUpdatedGroupChat(updated);
-      setGroupSelectedIds([]);
-      setGroupQuery("");
-      setGroupInviteOpen(false);
+      if (selectedChat.type === "group") {
+        const updated = await api.addGroupMembers(selectedChat.id, chatMemberNewIds);
+        applyUpdatedGroupChat(updated);
+      } else {
+        const created = await api.createGroupChat(groupSelectedIds);
+        const nextChat = mapChat(created, currentUserId);
+        setChats((currentChats) => sortChats([nextChat, ...currentChats.filter((chat) => chat.id !== nextChat.id)]));
+        navigate(`/app/chats/${created.chat_id}`);
+      }
+      closeChatMemberPicker();
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "邀请成员失败";
+      const message = apiError instanceof ApiError ? apiError.message : "添加聊天成员失败";
       setPageError(message);
     } finally {
       setGroupManageState("idle");
@@ -1312,6 +1454,7 @@ export default function ChatsPage() {
       }
       setChats((currentChats) => currentChats.filter((chat) => chat.id !== selectedChat.id));
       setDetailsSheetOpen(false);
+      setGroupDangerConfirmOpen(false);
       navigate("/app/chats");
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败";
@@ -1442,35 +1585,35 @@ export default function ChatsPage() {
   return (
     <AppChrome
       title="聊天"
-      hideTopbar={!selectedChat}
-      hideMobileNav={Boolean(selectedChat)}
-      hidePageTitle={Boolean(selectedChat)}
-      topbarClassName={selectedChat ? "conversation-topbar" : undefined}
+      hideTopbar={!displayedChat}
+      hideMobileNav={Boolean(displayedChat)}
+      hidePageTitle={Boolean(displayedChat)}
+      topbarClassName={displayedChat ? `conversation-topbar${isClosingChatView ? " is-closing" : ""}` : undefined}
       topbarLeading={
-        selectedChat ? (
+        displayedChat ? (
           <div className="chat-conversation-topbar">
-            <button className="chat-back-button" onClick={() => navigate("/app/chats")} type="button">
+            <button className="chat-back-button" onClick={closeChatView} type="button">
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <div className="avatar-wrap">
               <UserAvatar
-                className={`avatar ${selectedChat.online ? "status-online" : ""}`}
-                name={selectedChat.title}
-                uri={selectedChat.avatarUri}
+                className={`avatar ${displayedChat.online ? "status-online" : ""}`}
+                name={displayedChat.title}
+                uri={displayedChat.avatarUri}
               />
             </div>
             <div className="chat-topbar-meta">
-              <strong className="chat-topbar-name">{selectedChat.title}</strong>
-              <div className="chat-topbar-status">{selectedChat.type === "group" ? `${selectedChat.members} 人` : selectedChat.subtitle}</div>
+              <strong className="chat-topbar-name">{conversationTitle}</strong>
+              <div className="chat-topbar-status">{displayedChat.type === "group" ? `${displayedChat.members} 人` : displayedChat.subtitle}</div>
             </div>
           </div>
         ) : undefined
       }
       topbarAction={
-        selectedChat ? (
+        displayedChat ? (
           <div className="button-row message-actions">
             <button className="icon-button desktop-only-action" type="button">
-              <span className="material-symbols-outlined">{selectedChat.type === "group" ? "group_add" : "videocam"}</span>
+              <span className="material-symbols-outlined">{displayedChat.type === "group" ? "group_add" : "videocam"}</span>
             </button>
             <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
               <span className="material-symbols-outlined">more_vert</span>
@@ -1479,14 +1622,28 @@ export default function ChatsPage() {
         ) : undefined
       }
     >
-      <section className={`app-layout chat-mobile-layout ${selectedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
+      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <aside className="desktop-pane list-screen desktop-chat-list">{renderChatList("desktop")}</aside>
 
-        <section className={`list-screen mobile-chat-list-screen ${selectedChat ? "is-background" : "is-active"}`}>{renderChatList("mobile")}</section>
+        <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList("mobile")}</section>
 
-        <section className={`message-pane chat-main-pane ${selectedChat ? "is-open" : "desktop-pane is-closed"}`}>
-          {selectedChat ? (
-            <>
+        <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>
+          {displayedChat ? (
+            <div
+              className={`chat-detail-scene ${isClosingChatView ? "is-closing" : ""}`}
+              onAnimationEnd={(event) => {
+                if (!isClosingChatView) return;
+                if (!(event.target instanceof HTMLElement) || !event.target.classList.contains("chat-detail-scene")) return;
+                if (DEBUG_CHAT_SEND) {
+                  console.log("[chat-close] animation end, navigate", {
+                    animationName: event.animationName,
+                  });
+                }
+                navigate("/app/chats");
+                setIsClosingChatView(false);
+                setClosingChatSnapshot(null);
+              }}
+            >
               <div
                 ref={messageScrollRef}
                 className="message-scroll"
@@ -1541,7 +1698,7 @@ export default function ChatsPage() {
                   </button>
                 </div>
               </form>
-            </>
+            </div>
           ) : (
             <FeedbackState
               title="先选一个会话"
@@ -1633,12 +1790,12 @@ export default function ChatsPage() {
                               >
                                 重命名群聊
                               </button>
-                              <button className="ghost-button" onClick={() => setGroupInviteOpen(true)} type="button">
+                              <button className="ghost-button" onClick={() => void openChatMemberAdder()} type="button">
                                 邀请成员
                               </button>
                             </>
                           ) : null}
-                          <button className="danger-button" onClick={() => void leaveOrDeleteGroup()} type="button">
+                          <button className="danger-button" onClick={() => setGroupDangerConfirmOpen(true)} type="button">
                             {selectedChat.isOwner ? "解散群聊" : "退出群聊"}
                           </button>
                         </>
@@ -1708,168 +1865,171 @@ export default function ChatsPage() {
         </div>
       </BottomSheet>
 
-      <BottomSheet
-        open={detailsSheetOpen}
-        title={selectedChat?.type === "direct" ? "会话资料" : "群聊资料"}
-        description="把资料和动作放进独立抽屉，避免挤占聊天主屏。"
-        onClose={() => setDetailsSheetOpen(false)}
-      >
+      <SideDrawer open={detailsSheetOpen} title="聊天详情" onClose={() => setDetailsSheetOpen(false)}>
         {selectedChat ? (
           <div className="detail-list">
-            <div className="detail-card">
-              {selectedChat.type === "direct" ? (
-                <div className="request-profile" style={{ marginBottom: 14 }}>
-                  <UserAvatar
-                    className={`mini-avatar ${selectedChat.online ? "status-online" : ""}`}
-                    name={selectedChat.title}
-                    uri={selectedChat.avatarUri}
-                  />
-                  <div>
-                    <strong>{selectedChat.title}</strong>
-                    <div className="meta-row">
-                      {selectedChat.verified ? <span className="verified-badge">Verified</span> : null}
-                      <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{selectedChat.subtitle}</span>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              <div className="detail-row">
-                <div>
-                  <strong>{selectedChat.type === "direct" ? "当前状态" : "你的身份"}</strong>
-                  <div className="detail-text">{selectedChat.detail.relation}</div>
-                </div>
-                {selectedChat.type === "direct" ? (
-                  <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{selectedChat.subtitle}</span>
-                ) : (
-                  <span className="count-badge">{selectedChat.members} 人</span>
-                )}
-              </div>
-            </div>
-
-            <div className="detail-card">
-              <strong>{selectedChat.type === "direct" ? "会话成员" : "群成员"}</strong>
-              <div className="member-list">
-                {selectedChat.detail.members.map((member) => (
-                  <div key={`sheet-member-${member.userId}`} className="member-line">
-                    <div className="member-line-main">
-                      <UserAvatar className="mini-avatar" name={member.name} uri={member.avatarUri} />
-                      <span>{member.name}</span>
-                    </div>
-                    {member.isSelf ? <span className="count-badge">你</span> : null}
-                    {selectedChat.type === "group" && selectedChat.isOwner && !member.isSelf ? (
-                      <button className="ghost-button member-line-action" onClick={() => void removeGroupMember(member.userId)} type="button">
-                        移除
-                      </button>
-                    ) : null}
+            <section className="list-section">
+              <div className="section-label">聊天成员</div>
+              <div className="chat-detail-member-grid">
+                {visibleDetailMembers.map((member) => (
+                  <div
+                    key={`sheet-member-${member.userId}`}
+                    className={`chat-detail-member-item ${member.isOwner ? "is-owner" : ""}`}
+                    title={member.name}
+                  >
+                    <UserAvatar className="chat-detail-member-avatar" name={member.name} uri={member.avatarUri} />
+                    <span className="chat-detail-member-name">
+                      <span className="chat-detail-member-label">{member.name}</span>
+                      {member.isOwner ? <span className="chat-detail-owner-badge">群主</span> : null}
+                    </span>
                   </div>
                 ))}
+                <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberAdder} type="button">
+                  <span className="chat-detail-member-avatar chat-detail-member-avatar-add">
+                    <span className="material-symbols-outlined">add</span>
+                  </span>
+                  <span className="chat-detail-member-name">添加</span>
+                </button>
               </div>
-            </div>
+              {hasMoreDetailMembers ? (
+                <button className="ghost-button chat-detail-more-button" onClick={() => setDetailMemberLimit((current) => current + CHAT_DETAIL_MEMBER_PAGE_SIZE)} type="button">
+                  更多群成员
+                </button>
+              ) : null}
+            </section>
 
-            <div className="detail-card">
-              <strong>快捷操作</strong>
-              <div className="settings-actions" style={{ marginTop: 12 }}>
-                {selectedChat.type === "group" ? (
-                  <>
-                    {selectedChat.isOwner ? (
-                      <>
-                        <button
-                          className="ghost-button"
-                          onClick={() => {
-                            setDetailsSheetOpen(false);
-                            setGroupRenameValue(selectedChat.title);
-                            setGroupRenameOpen(true);
-                          }}
-                          type="button"
-                        >
-                          重命名群聊
-                        </button>
-                        <button
-                          className="ghost-button"
-                          onClick={() => {
-                            setDetailsSheetOpen(false);
-                            setGroupInviteOpen(true);
-                          }}
-                          type="button"
-                        >
-                          邀请成员
-                        </button>
-                      </>
-                    ) : null}
-                    <button className="danger-button" onClick={() => void leaveOrDeleteGroup()} type="button">
-                      {selectedChat.isOwner ? "解散群聊" : "退出群聊"}
+            {selectedChat.type === "group" ? (
+              <section className="list-section">
+                <div className="section-label">群聊名称</div>
+                <div className="simple-list">
+                  <div className="simple-row form-row chat-detail-title-row">
+                    <div className="row-main chat-detail-title-main">
+                      <strong>{selectedChat.title}</strong>
+                    </div>
+                    <button
+                      className="ghost-button chat-detail-edit-button"
+                      onClick={() => {
+                        setGroupRenameValue(selectedChat.title);
+                        setGroupRenameOpen(true);
+                      }}
+                      aria-label="编辑群聊名称"
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined">edit</span>
                     </button>
-                  </>
-                ) : (
-                  selectedChat.detail.actions.map((action) => (
-                    <button key={`sheet-action-${action}`} className="ghost-button" type="button">
-                      {action}
-                    </button>
-                  ))
-                )}
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            <section className="list-section">
+              <div className="section-label">操作</div>
+              <div className="simple-list">
+                <button
+                  className="simple-row menu-link-row danger-row"
+                  onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : removeFriend())}
+                  type="button"
+                >
+                  <div className="row-main">
+                    <strong>{selectedChat.type === "group" ? (selectedChat.isOwner ? "解散群聊" : "退出群聊") : "删除好友"}</strong>
+                    <div className="row-subtle">{selectedChat.type === "group" ? "离开当前聊天" : "解除当前好友关系"}</div>
+                  </div>
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </button>
               </div>
-            </div>
+            </section>
           </div>
         ) : null}
-      </BottomSheet>
-      <BottomSheet
+      </SideDrawer>
+      <InputDialog
         open={groupRenameOpen}
-        title="重命名群聊"
-        description="只会更新当前群聊名称。"
+        title="编辑群聊名称"
+        value={groupRenameValue}
+        placeholder="输入群聊名称"
+        confirmLabel="保存"
+        busy={groupManageState === "saving"}
+        onChange={setGroupRenameValue}
         onClose={() => setGroupRenameOpen(false)}
-      >
-        <div className="simple-form">
-          <label className="field-label">群聊名称</label>
-          <input className="input" value={groupRenameValue} onChange={(event) => setGroupRenameValue(event.target.value)} />
-          <div className="button-row">
-            <button className="ghost-button" onClick={() => setGroupRenameOpen(false)} type="button">
+        onConfirm={() => void renameGroup()}
+      />
+      <ConfirmDialog
+        open={groupDangerConfirmOpen}
+        title={selectedChat?.isOwner ? "确认解散群聊？" : "确认退出群聊？"}
+        description={selectedChat?.isOwner ? "解散后群聊会被永久移除，成员将无法继续访问。" : "退出后你将离开当前群聊，之后需要重新被邀请才能加入。"}
+        confirmLabel={selectedChat?.isOwner ? "解散群聊" : "退出群聊"}
+        busy={groupManageState === "saving"}
+        danger
+        onClose={() => {
+          if (groupManageState === "saving") return;
+          setGroupDangerConfirmOpen(false);
+        }}
+        onConfirm={() => void leaveOrDeleteGroup()}
+      />
+      <BottomSheet
+        open={chatMemberPickerOpen}
+        title=""
+        onClose={() => {
+          closeChatMemberPicker();
+        }}
+        showCloseButton={false}
+        header={
+          <div className="sheet-toolbar">
+            <button
+              className="ghost-button sheet-toolbar-button"
+              onClick={closeChatMemberPicker}
+              type="button"
+            >
               取消
             </button>
-            <button className="button" disabled={groupManageState === "saving"} onClick={() => void renameGroup()} type="button">
-              {groupManageState === "saving" ? "保存中..." : "保存名称"}
+            <div className="sheet-toolbar-title">
+              <strong>{selectedChat?.type === "group" ? "添加群成员" : "添加聊天成员"}</strong>
+            </div>
+            <button
+              className="button sheet-toolbar-button"
+              disabled={groupManageState === "saving" || !chatMemberNewIds.length}
+              onClick={() => void submitChatMemberPicker()}
+              type="button"
+            >
+              {groupManageState === "saving" ? "处理中..." : selectedChat?.type === "group" ? "添加" : "完成"}
             </button>
           </div>
-        </div>
-      </BottomSheet>
-      <BottomSheet
-        open={groupInviteOpen}
-        title="邀请成员"
-        description="选择还没加入这个群的人。"
-        onClose={() => setGroupInviteOpen(false)}
+        }
       >
         <div className="simple-form">
-          <div className="row-subtle">只能邀请自己的好友加入群聊。</div>
-          {currentUserVerified === false ? (
-            <FeedbackState title="完成认证后再邀请成员" description="群聊邀请人需要先完成认证。" />
-          ) : (
-            <>
-              <label className="field-label">搜索好友</label>
-              <input className="input" value={groupQuery} onChange={(event) => setGroupQuery(event.target.value)} />
-              <div className="row-subtle">已选择 {groupSelectedIds.length} 人</div>
-              <div className="simple-list">
-                {groupCandidates.map((user) => {
-                  const selected = groupSelectedIds.includes(user.user_id);
-                  return (
-                    <button key={`invite-user-${user.user_id}`} className="simple-row person-row" onClick={() => toggleGroupCandidate(user.user_id)} type="button">
-                      <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
-                      <div className="row-main">
-                        <strong>{user.name}</strong>
-                        <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>
-                      </div>
-                      {selected ? <span className="small-badge">已选</span> : <span className="count-badge">选择</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-          <div className="button-row">
-            <button className="ghost-button" onClick={() => setGroupInviteOpen(false)} type="button">
-              取消
-            </button>
-            <button className="button" disabled={groupManageState === "saving" || currentUserVerified === false} onClick={() => void inviteMembersToGroup()} type="button">
-              {groupManageState === "saving" ? "邀请中..." : "发出邀请"}
-            </button>
+          <label className="search-box page-search chat-member-picker-search">
+            <span className="material-symbols-outlined">search</span>
+            <input
+              className="input"
+              style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
+              placeholder="搜索好友"
+              value={groupQuery}
+              onChange={(event) => setGroupQuery(event.target.value)}
+            />
+          </label>
+          <div className="simple-list">
+            {groupCandidates.map((user) => {
+              const selected = groupSelectedIds.includes(user.user_id);
+              const locked = chatMemberLockedIds.includes(user.user_id);
+              return (
+                <button
+                  key={`picker-user-${user.user_id}`}
+                  className={`simple-row person-row checkbox-person-row ${locked ? "is-locked" : ""}`}
+                  onClick={() => toggleGroupCandidate(user.user_id)}
+                  type="button"
+                >
+                  <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
+                  <div className="row-main">
+                    <strong>{user.name}</strong>
+                    <div className="row-subtle">{locked ? "已在当前聊天中" : user.is_alive ? "在线" : "离线"}</div>
+                  </div>
+                  {locked ? (
+                    <span className="member-picker-status member-picker-status-locked">已在群聊</span>
+                  ) : (
+                    <span className={`member-picker-check ${selected ? "is-selected" : ""}`} aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </BottomSheet>

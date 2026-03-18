@@ -84,6 +84,19 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const title = chat.title || peer?.name || "未命名会话";
   const presence = formatPresence(peer);
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
+  const members = [...chat.members]
+    .map((member) => ({
+      userId: member.user_id,
+      name: member.name,
+      avatarUri: member.avatar_uri,
+      isSelf: member.user_id === currentUserId,
+      isOwner: Boolean(chat.owner?.user_id === member.user_id),
+    }))
+    .sort((left, right) => {
+      if (left.isOwner !== right.isOwner) return left.isOwner ? -1 : 1;
+      if (left.isSelf !== right.isSelf) return left.isSelf ? -1 : 1;
+      return left.name.localeCompare(right.name, "zh-CN");
+    });
 
   return {
     id: chat.chat_id,
@@ -103,12 +116,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
       summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
       relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
       actions: chat.group ? (isOwner ? ["邀请成员", "解散群聊"] : ["退出群聊"]) : ["发起好友申请", "静音通知"],
-      members: chat.members.map((member) => ({
-        userId: member.user_id,
-        name: member.name,
-        avatarUri: member.avatar_uri,
-        isSelf: member.user_id === currentUserId,
-      })),
+      members,
     },
     messages: [],
   };

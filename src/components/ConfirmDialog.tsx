@@ -1,0 +1,63 @@
+import { useEffect } from "react";
+import { useBodyScrollLock } from "../lib/bodyLock";
+
+interface ConfirmDialogProps {
+  open: boolean;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  busy?: boolean;
+  danger?: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+export function ConfirmDialog({
+  open,
+  title,
+  description,
+  confirmLabel = "确认",
+  cancelLabel = "取消",
+  busy = false,
+  danger = false,
+  onClose,
+  onConfirm,
+}: ConfirmDialogProps) {
+  useBodyScrollLock(open);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "Enter") {
+        event.preventDefault();
+        onConfirm();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose, onConfirm, open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+      <section aria-modal="true" className="confirm-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
+        <div className="confirm-dialog-copy">
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+        <div className="confirm-dialog-actions">
+          <button className="ghost-button" disabled={busy} onClick={onClose} type="button">
+            {cancelLabel}
+          </button>
+          <button className={danger ? "danger-button" : "button"} disabled={busy} onClick={onConfirm} type="button">
+            {busy ? "处理中..." : confirmLabel}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}

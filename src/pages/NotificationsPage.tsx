@@ -202,8 +202,13 @@ export default function NotificationsPage() {
         ) : null}
       </section>
 
-      <SideDrawer open={requestSheetOpen} title="好友申请" description="处理收到的申请，或查看你发出的申请。" onClose={() => setRequestSheetOpen(false)}>
-        <div className="detail-list">
+      <SideDrawer
+        open={requestSheetOpen}
+        title="好友申请"
+        description="处理收到的申请，或查看你发出的申请。"
+        onClose={() => setRequestSheetOpen(false)}
+      >
+        <section className="list-section">
           <div className="section-label">收到的</div>
           {filteredIncoming.length ? (
             <div className="simple-list">
@@ -228,7 +233,9 @@ export default function NotificationsPage() {
           ) : (
             <FeedbackState title="没有收到新的申请" description="有人想和你建立联系时，这里会出现。" />
           )}
+        </section>
 
+        <section className="list-section">
           <div className="section-label">发出的</div>
           {filteredOutgoing.length ? (
             <div className="simple-list">
@@ -248,37 +255,45 @@ export default function NotificationsPage() {
           ) : (
             <FeedbackState title="没有发出的申请" description="想建立关系时，可以先从广场里发起。" />
           )}
-        </div>
+        </section>
       </SideDrawer>
 
-      <SideDrawer open={groupSheetOpen} title="群聊" description="查看你已加入的群聊。" onClose={() => setGroupSheetOpen(false)}>
-        {filteredGroups.length ? (
-          <div className="simple-list">
-            {filteredGroups.map((chat) => {
-              const avatar = notificationChatAvatar(chat);
-              return (
-                <button
-                  key={chat.chat_id}
-                  className="simple-row notification-row"
-                  onClick={() => {
-                    setGroupSheetOpen(false);
-                    navigate(`/app/chats/${chat.chat_id}`);
-                  }}
-                  type="button"
-                >
-                  <UserAvatar className="mini-avatar" name={avatar.name} uri={avatar.uri} />
-                  <div className="row-main">
-                    <strong>{chat.title ?? "未命名群聊"}</strong>
-                    <div className="row-subtle">{chat.last_message?.content || "打开群聊继续讨论"}</div>
-                  </div>
-                  <span className="count-badge">{chat.members.length} 人</span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <FeedbackState title={normalizedQuery ? "没有匹配的群聊" : "还没有群聊"} description={normalizedQuery ? "换个关键词试试。" : "你创建或加入群聊后，这里会出现。"} />
-        )}
+      <SideDrawer
+        open={groupSheetOpen}
+        title="群聊"
+        description="查看你已加入的群聊。"
+        onClose={() => setGroupSheetOpen(false)}
+      >
+        <section className="list-section">
+          <div className="section-label">已加入的群聊</div>
+          {filteredGroups.length ? (
+            <div className="simple-list">
+              {filteredGroups.map((chat) => {
+                const avatar = notificationChatAvatar(chat);
+                return (
+                  <button
+                    key={chat.chat_id}
+                    className="simple-row notification-row"
+                    onClick={() => {
+                      setGroupSheetOpen(false);
+                      navigate(`/app/chats/${chat.chat_id}`);
+                    }}
+                    type="button"
+                  >
+                    <UserAvatar className="mini-avatar" name={avatar.name} uri={avatar.uri} />
+                    <div className="row-main">
+                      <strong>{chat.title ?? "未命名群聊"}</strong>
+                      <div className="row-subtle">{chat.last_message?.content || "打开群聊继续讨论"}</div>
+                    </div>
+                    <span className="count-badge">{chat.members.length} 人</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <FeedbackState title={normalizedQuery ? "没有匹配的群聊" : "还没有群聊"} description={normalizedQuery ? "换个关键词试试。" : "你创建或加入群聊后，这里会出现。"} />
+          )}
+        </section>
       </SideDrawer>
 
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />

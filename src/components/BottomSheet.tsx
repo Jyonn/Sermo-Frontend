@@ -7,9 +7,11 @@ interface BottomSheetProps {
   description?: string;
   onClose: () => void;
   children: ReactNode;
+  header?: ReactNode;
+  showCloseButton?: boolean;
 }
 
-export function BottomSheet({ open, title, description, onClose, children }: BottomSheetProps) {
+export function BottomSheet({ open, title, description, onClose, children, header, showCloseButton = true }: BottomSheetProps) {
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [startY, setStartY] = useState<number | null>(null);
@@ -71,9 +73,11 @@ export function BottomSheet({ open, title, description, onClose, children }: Bot
         aria-modal="true"
         role="dialog"
       >
-        <button className="sheet-close" onClick={onClose} type="button" aria-label="关闭面板">
-          <span className="material-symbols-outlined">close</span>
-        </button>
+        {showCloseButton ? (
+          <button className="sheet-close" onClick={onClose} type="button" aria-label="关闭面板">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        ) : null}
         <button
           className="sheet-drag-zone"
           onMouseDown={(event) => startDrag(event.clientY)}
@@ -83,15 +87,19 @@ export function BottomSheet({ open, title, description, onClose, children }: Bot
         >
           <div className="sheet-handle" />
         </button>
-        <div
-          className="sheet-header"
-          onMouseDown={(event) => startDrag(event.clientY)}
-          onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
-        >
-          <p className="eyebrow">Sheet</p>
-          <h3 className="panel-title">{title}</h3>
-          {description ? <p className="card-subtitle">{description}</p> : null}
-        </div>
+        {header ? (
+          <div className="sheet-header custom-sheet-header">{header}</div>
+        ) : (
+          <div
+            className="sheet-header"
+            onMouseDown={(event) => startDrag(event.clientY)}
+            onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
+          >
+            <p className="eyebrow">Sheet</p>
+            <h3 className="panel-title">{title}</h3>
+            {description ? <p className="card-subtitle">{description}</p> : null}
+          </div>
+        )}
         <div className="sheet-body">{children}</div>
       </section>
     </div>
