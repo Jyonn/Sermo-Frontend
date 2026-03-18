@@ -1,10 +1,11 @@
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { flushSync } from "react-dom";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
@@ -73,6 +74,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     clientId: `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
     name: message.user.name,
+    avatarUri: message.user.avatar_uri,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
     text: message.content,
@@ -175,6 +177,14 @@ function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
   };
 }
 
+function clearChatUnread(chat: Chat) {
+  if (chat.unread === 0) return chat;
+  return {
+    ...chat,
+    unread: 0,
+  };
+}
+
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
   return current.from === neighbor.from && Math.abs(current.createdAt - neighbor.createdAt) < 5 * 60;
@@ -210,9 +220,45 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   isFirst,
   isLast,
   message,
+  onOpenActions,
   onRetry,
 }: MessageBubbleRowProps) {
   const showRetry = from === "self" && message.status === "failed";
+  const canOpenActions = message.status === "sent";
+  const bubbleRef = useRef<HTMLDivElement | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const clearLongPress = () => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    pointerStartRef.current = null;
+  };
+
+  useEffect(() => clearLongPress, []);
+
+  const openActions = () => {
+    clearLongPress();
+    if (!canOpenActions || !bubbleRef.current) return;
+    onOpenActions(message, bubbleRef.current);
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!canOpenActions) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    clearLongPress();
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+    longPressTimerRef.current = window.setTimeout(openActions, 380);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!pointerStartRef.current) return;
+    const deltaX = Math.abs(event.clientX - pointerStartRef.current.x);
+    const deltaY = Math.abs(event.clientY - pointerStartRef.current.y);
+    if (deltaX > 8 || deltaY > 8) clearLongPress();
+  };
 
   return (
     <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}>
@@ -223,15 +269,30 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           </button>
         ) : null}
         <div
+          ref={bubbleRef}
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
             isLast ? "group-end" : "",
+            canOpenActions ? "message-bubble-actionable" : "",
           ]
             .filter(Boolean)
             .join(" ")}
+          onContextMenu={
+            canOpenActions
+              ? (event) => {
+                  event.preventDefault();
+                  openActions();
+                }
+              : undefined
+          }
+          onPointerCancel={clearLongPress}
+          onPointerDown={canOpenActions ? handlePointerDown : undefined}
+          onPointerLeave={clearLongPress}
+          onPointerMove={canOpenActions ? handlePointerMove : undefined}
+          onPointerUp={clearLongPress}
         >
           {message.text}
         </div>
@@ -240,12 +301,12 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   );
 });
 
-const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onRetry }: MessageGroupBlockProps) {
+const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenActions, onRetry }: MessageGroupBlockProps) {
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
       <div className={`message-group ${group.from}`}>
-        {group.from === "other" ? <div className="avatar message-avatar">{avatarLabel(group.name)}</div> : null}
+        {group.from === "other" ? <UserAvatar className="avatar message-avatar" name={group.name} uri={group.avatarUri} /> : null}
         <div className="message-bubbles">
           {group.messages.map((message, index) => (
             <MessageBubbleRow
@@ -255,6 +316,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
               isFirst={index === 0}
               isLast={index === group.messages.length - 1}
               message={message}
+              onOpenActions={onOpenActions}
               onRetry={onRetry}
             />
           ))}
@@ -268,6 +330,7 @@ interface MessageGroup {
   key: string;
   from: "self" | "other";
   name: string;
+  avatarUri?: string;
   dividerLabel?: string;
   messages: ChatMessage[];
 }
@@ -278,13 +341,23 @@ interface MessageBubbleRowProps {
   isFirst: boolean;
   isLast: boolean;
   message: ChatMessage;
+  onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
 }
 
 interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
+  onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
+}
+
+interface MessageMenuState {
+  message: ChatMessage;
+  anchorX: number;
+  anchorY: number;
+  placement: "top" | "bottom";
+  confirmDelete: boolean;
 }
 
 function getDirectPeer(chat: ChatDTO, currentUserId: number) {
@@ -295,10 +368,12 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
   const title = chat.title || peer?.name || "未命名会话";
   const presence = formatPresence(peer);
+  const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
 
   return {
     id: chat.chat_id,
     title,
+    avatarUri: peer?.avatar_uri,
     subtitle: chat.group ? `${chat.members.length} 人` : presence,
     preview: chat.last_message?.content || "暂无消息",
     time: formatChatListTime(chat.last_chat_at),
@@ -308,11 +383,17 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     verified: Boolean(peer?.verified),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
+    isOwner,
     detail: {
       summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
-      relation: chat.group ? (chat.owner?.user_id === currentUserId ? "你是群主" : "你已加入该群聊") : "一对一会话",
-      actions: chat.group ? ["邀请成员", "退出群聊"] : ["发起好友申请", "静音通知"],
-      members: chat.members.map((member) => member.name),
+      relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
+      actions: chat.group ? (isOwner ? ["邀请成员", "解散群聊"] : ["退出群聊"]) : ["发起好友申请", "静音通知"],
+      members: chat.members.map((member) => ({
+        userId: member.user_id,
+        name: member.name,
+        avatarUri: member.avatar_uri,
+        isSelf: member.user_id === currentUserId,
+      })),
     },
     messages: [],
   };
@@ -360,6 +441,12 @@ function isNearThreadBottom(element: HTMLDivElement | null, threshold = 72) {
   return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
 }
 
+function filterUsersByName(rows: UserDTO[], query: string) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return rows;
+  return rows.filter((user) => user.name.toLowerCase().includes(normalized));
+}
+
 export default function ChatsPage() {
   const navigate = useNavigate();
   const { chatId } = useParams();
@@ -367,14 +454,28 @@ export default function ChatsPage() {
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
+  const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [pageError, setPageError] = useState<string | null>(null);
   const [sendState, setSendState] = useState<"idle" | "sending">("idle");
+  const [groupCreateState, setGroupCreateState] = useState<"idle" | "loading-users" | "creating">("idle");
   const [chats, setChats] = useState<Chat[]>([]);
   const [messages, setMessages] = useState<Record<number, ChatMessage[]>>({});
   const [hasOlderMessages, setHasOlderMessages] = useState(false);
   const [olderState, setOlderState] = useState<"idle" | "loading">("idle");
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
+  const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
+  const [messageDeleteState, setMessageDeleteState] = useState<"idle" | "deleting">("idle");
+  const [groupTitle, setGroupTitle] = useState("");
+  const [groupQuery, setGroupQuery] = useState("");
+  const [groupCandidates, setGroupCandidates] = useState<UserDTO[]>([]);
+  const [groupFriendPool, setGroupFriendPool] = useState<UserDTO[]>([]);
+  const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
+  const [groupRenameOpen, setGroupRenameOpen] = useState(false);
+  const [groupInviteOpen, setGroupInviteOpen] = useState(false);
+  const [groupRenameValue, setGroupRenameValue] = useState("");
+  const [groupManageState, setGroupManageState] = useState<"idle" | "saving" | "loading-candidates">("idle");
+  const [currentUserVerified, setCurrentUserVerified] = useState<boolean | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
@@ -406,6 +507,23 @@ export default function ChatsPage() {
       previousHeight: element.scrollHeight,
       previousScrollTop: element.scrollTop,
     };
+  };
+
+  const closeMessageMenu = () => {
+    if (messageDeleteState === "deleting") return;
+    setMessageMenu(null);
+  };
+
+  const openMessageMenu = (message: ChatMessage, element: HTMLDivElement) => {
+    const rect = element.getBoundingClientRect();
+    const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
+    setMessageMenu({
+      message,
+      anchorX: rect.left + rect.width / 2,
+      anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
+      placement,
+      confirmDelete: false,
+    });
   };
 
   useEffect(() => {
@@ -493,6 +611,7 @@ export default function ChatsPage() {
         key: message.clientId,
         from: message.from,
         name: message.name,
+        avatarUri: message.avatarUri,
         dividerLabel,
         messages: [message],
       });
@@ -594,7 +713,9 @@ export default function ChatsPage() {
           updatedAt: Date.now(),
         });
         if (!memoryThread?.messages.length) restoreScroll(0);
-        void api.markChatRead(selectedChat.id);
+        void api.markChatRead(selectedChat.id).then(() => {
+          setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
+        });
       } catch (apiError) {
         if (!controller.signal.aborted) {
           const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || memoryThread?.messages.length);
@@ -628,6 +749,34 @@ export default function ChatsPage() {
     initialScrollDoneRef.current = selectedChat.id;
     stickToBottomRef.current = true;
   }, [selectedChat, selectedMessages.length]);
+
+  useEffect(() => {
+    if (!selectedChat) return;
+    setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
+  }, [selectedChat]);
+
+  useEffect(() => {
+    setMessageMenu(null);
+  }, [selectedChat?.id]);
+
+  useEffect(() => {
+    if (!messageMenu) return;
+
+    const close = () => setMessageMenu(null);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [messageMenu]);
 
   useLayoutEffect(() => {
     if (!selectedChat) {
@@ -744,7 +893,9 @@ export default function ChatsPage() {
       if (!selectedIncoming?.length) return;
 
       if (selectedIncoming.some((item) => item.message.from === "other")) {
-        void api.markChatRead(selectedChat.id);
+        void api.markChatRead(selectedChat.id).then(() => {
+          setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
+        });
       }
     };
 
@@ -786,6 +937,53 @@ export default function ChatsPage() {
   }, [cacheScope, hasOlderMessages, selectedChat, selectedMessages]);
 
   const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(query.trim().toLowerCase()));
+
+  useEffect(() => {
+    if (!groupCreateOpen && !groupInviteOpen) return;
+
+    const controller = new AbortController();
+    if (groupCreateOpen) {
+      setGroupCreateState((current) => (current === "creating" ? current : "loading-users"));
+    }
+    if (groupInviteOpen) {
+      setGroupManageState("loading-candidates");
+    }
+
+    Promise.all([
+      api.getFriends(controller.signal),
+      currentUserVerified === null ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : Promise.resolve([] as UserDTO[]),
+    ])
+      .then(([friendRows, spaceUsers]) => {
+        const verified = currentUserVerified ?? spaceUsers.find((user) => user.user_id === currentUserId)?.verified ?? false;
+        setCurrentUserVerified(verified);
+        setGroupFriendPool(friendRows.filter((user) => user.user_id !== currentUserId));
+        setGroupCreateState((current) => (current === "creating" ? current : "idle"));
+        setGroupManageState((current) => (current === "saving" ? current : "idle"));
+      })
+      .catch((apiError) => {
+        if (controller.signal.aborted) return;
+        const message = apiError instanceof ApiError ? apiError.message : "加载群聊候选成员失败";
+        setPageError(message);
+        setGroupCreateState((current) => (current === "creating" ? current : "idle"));
+        setGroupManageState((current) => (current === "saving" ? current : "idle"));
+      });
+
+    return () => controller.abort();
+  }, [currentUserId, currentUserVerified, groupCreateOpen, groupInviteOpen]);
+
+  useEffect(() => {
+    if (!groupCreateOpen && !groupInviteOpen) {
+      setGroupCandidates([]);
+      return;
+    }
+
+    const baseCandidates =
+      groupInviteOpen && selectedChat && selectedChat.type === "group"
+        ? groupFriendPool.filter((user) => !new Set(selectedChat.detail.members.map((member) => member.userId)).has(user.user_id))
+        : groupFriendPool;
+
+    setGroupCandidates(filterUsersByName(baseCandidates, groupQuery));
+  }, [groupCreateOpen, groupFriendPool, groupInviteOpen, groupQuery, selectedChat]);
 
   useEffect(() => {
     const element = textareaRef.current;
@@ -970,6 +1168,159 @@ export default function ChatsPage() {
     }
   };
 
+  const refreshChats = async () => {
+    const rows = await api.getChats();
+    setChats(sortChats(rows.map((item) => mapChat(item, currentUserId))));
+  };
+
+  const copyMessageText = async () => {
+    if (!messageMenu) return;
+    try {
+      await navigator.clipboard.writeText(messageMenu.message.text);
+      setMessageMenu(null);
+    } catch (apiError) {
+      const message = apiError instanceof Error ? apiError.message : "复制失败";
+      setPageError(message);
+    }
+  };
+
+  const deleteMessage = async () => {
+    if (!selectedChat || !messageMenu || typeof messageMenu.message.id !== "number") return;
+
+    try {
+      setMessageDeleteState("deleting");
+      await api.deleteMessage(messageMenu.message.id);
+      const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== messageMenu.message.clientId);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: nextThreadMessages,
+      }));
+      if (cacheScope) {
+        const nextSnapshot = {
+          messages: nextThreadMessages,
+          hasOlderMessages,
+          scrollTop: messageScrollRef.current?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        };
+        chatCache.setThread(cacheScope, selectedChat.id, nextSnapshot);
+        void chatCache.persistThread(cacheScope, selectedChat.id, nextSnapshot);
+      }
+      setMessageMenu(null);
+      await refreshChats();
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : "删除消息失败";
+      setPageError(message);
+    } finally {
+      setMessageDeleteState("idle");
+    }
+  };
+
+  const toggleGroupCandidate = (userId: number) => {
+    setGroupSelectedIds((current) => (current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId]));
+  };
+
+  const createGroup = async () => {
+    if (!currentUserVerified) {
+      setPageError("完成认证后才可以创建群聊。");
+      return;
+    }
+    if (!groupSelectedIds.length) {
+      setPageError("请至少选择一位成员。");
+      return;
+    }
+
+    try {
+      setGroupCreateState("creating");
+      const created = await api.createGroupChat(groupSelectedIds, groupTitle.trim() || undefined);
+      const nextChat = mapChat(created, currentUserId);
+      setChats((currentChats) => sortChats([nextChat, ...currentChats.filter((chat) => chat.id !== nextChat.id)]));
+      setGroupCreateOpen(false);
+      setGroupTitle("");
+      setGroupQuery("");
+      setGroupSelectedIds([]);
+      navigate(`/app/chats/${created.chat_id}`);
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : "创建群聊失败";
+      setPageError(message);
+      setGroupCreateState("idle");
+    }
+  };
+
+  const applyUpdatedGroupChat = (chatRow: ChatDTO) => {
+    const nextChat = mapChat(chatRow, currentUserId);
+    setChats((currentChats) => sortChats(currentChats.map((chat) => (chat.id === nextChat.id ? nextChat : chat))));
+  };
+
+  const renameGroup = async () => {
+    if (!selectedChat) return;
+    try {
+      setGroupManageState("saving");
+      const updated = await api.renameGroupChat(selectedChat.id, groupRenameValue.trim());
+      applyUpdatedGroupChat(updated);
+      setGroupRenameOpen(false);
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : "重命名群聊失败";
+      setPageError(message);
+    } finally {
+      setGroupManageState("idle");
+    }
+  };
+
+  const inviteMembersToGroup = async () => {
+    if (!currentUserVerified) {
+      setPageError("完成认证后才可以邀请成员。");
+      return;
+    }
+    if (!selectedChat || !groupSelectedIds.length) return;
+    try {
+      setGroupManageState("saving");
+      const updated = await api.addGroupMembers(selectedChat.id, groupSelectedIds);
+      applyUpdatedGroupChat(updated);
+      setGroupSelectedIds([]);
+      setGroupQuery("");
+      setGroupInviteOpen(false);
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : "邀请成员失败";
+      setPageError(message);
+    } finally {
+      setGroupManageState("idle");
+    }
+  };
+
+  const removeGroupMember = async (userId: number) => {
+    if (!selectedChat) return;
+    try {
+      setGroupManageState("saving");
+      const updated = await api.removeGroupMembers(selectedChat.id, [userId]);
+      applyUpdatedGroupChat(updated);
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : "移除成员失败";
+      setPageError(message);
+    } finally {
+      setGroupManageState("idle");
+    }
+  };
+
+  const leaveOrDeleteGroup = async () => {
+    if (!selectedChat || selectedChat.type !== "group") return;
+    try {
+      setGroupManageState("saving");
+      if (selectedChat.isOwner) {
+        await api.deleteGroupChat(selectedChat.id);
+      } else {
+        await api.leaveGroupChat(selectedChat.id);
+      }
+      setChats((currentChats) => currentChats.filter((chat) => chat.id !== selectedChat.id));
+      setDetailsSheetOpen(false);
+      navigate("/app/chats");
+    } catch (apiError) {
+      const message = apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败";
+      setPageError(message);
+    } finally {
+      setGroupManageState("idle");
+    }
+  };
+
   const loadOlderMessages = async () => {
     if (!selectedChat || !selectedMessages.length || olderState === "loading" || !cacheScope) return;
 
@@ -1027,7 +1378,7 @@ export default function ChatsPage() {
       type="button"
     >
       <div className="avatar-wrap">
-        <div className={`avatar ${chat.online ? "status-online" : ""}`}>{avatarLabel(chat.title)}</div>
+        <UserAvatar className={`avatar ${chat.online ? "status-online" : ""}`} name={chat.title} uri={chat.avatarUri} />
       </div>
       <div style={{ textAlign: "left" }}>
         <p className="chat-name">{chat.title}</p>
@@ -1043,7 +1394,12 @@ export default function ChatsPage() {
   const renderChatList = (variant: "desktop" | "mobile") => (
     <>
       <div className={variant === "desktop" ? "sidebar-header minimal-page-header" : "chat-list-screen-header minimal-page-header"}>
-        <h2 className="panel-title">聊天</h2>
+        <div className="page-toolbar">
+          <h2 className="panel-title">聊天</h2>
+          <button className="icon-button" onClick={() => setGroupCreateOpen(true)} type="button">
+            <span className="material-symbols-outlined">group_add</span>
+          </button>
+        </div>
         <label className="search-box">
           <span className="material-symbols-outlined">search</span>
           <input
@@ -1097,7 +1453,11 @@ export default function ChatsPage() {
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <div className="avatar-wrap">
-              <div className={`avatar ${selectedChat.online ? "status-online" : ""}`}>{avatarLabel(selectedChat.title)}</div>
+              <UserAvatar
+                className={`avatar ${selectedChat.online ? "status-online" : ""}`}
+                name={selectedChat.title}
+                uri={selectedChat.avatarUri}
+              />
             </div>
             <div className="chat-topbar-meta">
               <strong className="chat-topbar-name">{selectedChat.title}</strong>
@@ -1122,9 +1482,9 @@ export default function ChatsPage() {
       <section className={`app-layout chat-mobile-layout ${selectedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <aside className="desktop-pane list-screen desktop-chat-list">{renderChatList("desktop")}</aside>
 
-        {!selectedChat ? <section className="list-screen mobile-chat-list-screen">{renderChatList("mobile")}</section> : null}
+        <section className={`list-screen mobile-chat-list-screen ${selectedChat ? "is-background" : "is-active"}`}>{renderChatList("mobile")}</section>
 
-        <section className={`message-pane chat-main-pane ${selectedChat ? "" : "desktop-pane"}`}>
+        <section className={`message-pane chat-main-pane ${selectedChat ? "is-open" : "desktop-pane is-closed"}`}>
           {selectedChat ? (
             <>
               <div
@@ -1145,7 +1505,13 @@ export default function ChatsPage() {
                   </div>
                 ) : null}
                 {messageGroups.map((group) => (
-                  <MessageGroupBlock enteringMessageIds={enteringMessageIds} group={group} key={group.key} onRetry={retryFailedMessage} />
+                  <MessageGroupBlock
+                    enteringMessageIds={enteringMessageIds}
+                    group={group}
+                    key={group.key}
+                    onOpenActions={openMessageMenu}
+                    onRetry={retryFailedMessage}
+                  />
                 ))}
               </div>
 
@@ -1203,7 +1569,11 @@ export default function ChatsPage() {
                   <div className="detail-card">
                     {selectedChat.type === "direct" ? (
                       <div className="request-profile" style={{ marginBottom: 14 }}>
-                        <div className={`mini-avatar ${selectedChat.online ? "status-online" : ""}`}>{avatarLabel(selectedChat.title)}</div>
+                        <UserAvatar
+                          className={`mini-avatar ${selectedChat.online ? "status-online" : ""}`}
+                          name={selectedChat.title}
+                          uri={selectedChat.avatarUri}
+                        />
                         <div>
                           <strong>{selectedChat.title}</strong>
                           <div className="meta-row">
@@ -1230,9 +1600,17 @@ export default function ChatsPage() {
                     <strong>{selectedChat.type === "direct" ? "会话成员" : "群成员"}</strong>
                     <div className="member-list">
                       {selectedChat.detail.members.map((member) => (
-                        <div key={member} className="member-line">
-                          <span>{member}</span>
-                          {member === session?.user.name ? <span className="count-badge">你</span> : null}
+                        <div key={member.userId} className="member-line">
+                          <div className="member-line-main">
+                            <UserAvatar className="mini-avatar" name={member.name} uri={member.avatarUri} />
+                            <span>{member.name}</span>
+                          </div>
+                          {member.isSelf ? <span className="count-badge">你</span> : null}
+                          {selectedChat.type === "group" && selectedChat.isOwner && !member.isSelf ? (
+                            <button className="ghost-button member-line-action" onClick={() => void removeGroupMember(member.userId)} type="button">
+                              移除
+                            </button>
+                          ) : null}
                         </div>
                       ))}
                     </div>
@@ -1241,15 +1619,36 @@ export default function ChatsPage() {
                   <div className="detail-card">
                     <strong>快捷操作</strong>
                     <div className="settings-actions" style={{ marginTop: 12 }}>
-                      {selectedChat.detail.actions.map((action, index) => (
-                        <button
-                          key={action}
-                          className={selectedChat.type === "group" && index === selectedChat.detail.actions.length - 1 ? "danger-button" : "ghost-button"}
-                          type="button"
-                        >
-                          {action}
-                        </button>
-                      ))}
+                      {selectedChat.type === "group" ? (
+                        <>
+                          {selectedChat.isOwner ? (
+                            <>
+                              <button
+                                className="ghost-button"
+                                onClick={() => {
+                                  setGroupRenameValue(selectedChat.title);
+                                  setGroupRenameOpen(true);
+                                }}
+                                type="button"
+                              >
+                                重命名群聊
+                              </button>
+                              <button className="ghost-button" onClick={() => setGroupInviteOpen(true)} type="button">
+                                邀请成员
+                              </button>
+                            </>
+                          ) : null}
+                          <button className="danger-button" onClick={() => void leaveOrDeleteGroup()} type="button">
+                            {selectedChat.isOwner ? "解散群聊" : "退出群聊"}
+                          </button>
+                        </>
+                      ) : (
+                        selectedChat.detail.actions.map((action) => (
+                          <button key={action} className="ghost-button" type="button">
+                            {action}
+                          </button>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1262,6 +1661,54 @@ export default function ChatsPage() {
       </section>
 
       <BottomSheet
+        open={groupCreateOpen}
+        title="新建群聊"
+        description="先选成员，再决定要不要写群名。"
+        onClose={() => {
+          if (groupCreateState === "creating") return;
+          setGroupCreateOpen(false);
+        }}
+      >
+        <div className="simple-form">
+          <label className="field-label">群聊名称</label>
+          <input className="input" placeholder="例如：产品讨论组" value={groupTitle} onChange={(event) => setGroupTitle(event.target.value)} />
+          <label className="field-label">选择成员</label>
+          <div className="row-subtle">仅认证用户可创建群聊，且只能邀请自己的好友。</div>
+          {currentUserVerified === false ? (
+            <FeedbackState title="完成认证后再创建群聊" description="群聊发起人需要先完成认证。" />
+          ) : (
+            <>
+              <input className="input" placeholder="搜索好友" value={groupQuery} onChange={(event) => setGroupQuery(event.target.value)} />
+              <div className="row-subtle">已选择 {groupSelectedIds.length} 人</div>
+              <div className="simple-list">
+                {groupCandidates.map((user) => {
+                  const selected = groupSelectedIds.includes(user.user_id);
+                  return (
+                    <button key={`group-user-${user.user_id}`} className="simple-row person-row" onClick={() => toggleGroupCandidate(user.user_id)} type="button">
+                      <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
+                      <div className="row-main">
+                        <strong>{user.name}</strong>
+                        <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>
+                      </div>
+                      {selected ? <span className="small-badge">已选</span> : <span className="count-badge">选择</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          <div className="button-row">
+            <button className="ghost-button" onClick={() => setGroupCreateOpen(false)} type="button">
+              取消
+            </button>
+            <button className="button" disabled={groupCreateState === "creating" || currentUserVerified === false} onClick={() => void createGroup()} type="button">
+              {groupCreateState === "creating" ? "创建中..." : "创建群聊"}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
+
+      <BottomSheet
         open={detailsSheetOpen}
         title={selectedChat?.type === "direct" ? "会话资料" : "群聊资料"}
         description="把资料和动作放进独立抽屉，避免挤占聊天主屏。"
@@ -1272,7 +1719,11 @@ export default function ChatsPage() {
             <div className="detail-card">
               {selectedChat.type === "direct" ? (
                 <div className="request-profile" style={{ marginBottom: 14 }}>
-                  <div className={`mini-avatar ${selectedChat.online ? "status-online" : ""}`}>{avatarLabel(selectedChat.title)}</div>
+                  <UserAvatar
+                    className={`mini-avatar ${selectedChat.online ? "status-online" : ""}`}
+                    name={selectedChat.title}
+                    uri={selectedChat.avatarUri}
+                  />
                   <div>
                     <strong>{selectedChat.title}</strong>
                     <div className="meta-row">
@@ -1299,9 +1750,17 @@ export default function ChatsPage() {
               <strong>{selectedChat.type === "direct" ? "会话成员" : "群成员"}</strong>
               <div className="member-list">
                 {selectedChat.detail.members.map((member) => (
-                  <div key={`sheet-member-${member}`} className="member-line">
-                    <span>{member}</span>
-                    {member === session?.user.name ? <span className="count-badge">你</span> : null}
+                  <div key={`sheet-member-${member.userId}`} className="member-line">
+                    <div className="member-line-main">
+                      <UserAvatar className="mini-avatar" name={member.name} uri={member.avatarUri} />
+                      <span>{member.name}</span>
+                    </div>
+                    {member.isSelf ? <span className="count-badge">你</span> : null}
+                    {selectedChat.type === "group" && selectedChat.isOwner && !member.isSelf ? (
+                      <button className="ghost-button member-line-action" onClick={() => void removeGroupMember(member.userId)} type="button">
+                        移除
+                      </button>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -1310,20 +1769,156 @@ export default function ChatsPage() {
             <div className="detail-card">
               <strong>快捷操作</strong>
               <div className="settings-actions" style={{ marginTop: 12 }}>
-                {selectedChat.detail.actions.map((action, index) => (
-                  <button
-                    key={`sheet-action-${action}`}
-                    className={selectedChat.type === "group" && index === selectedChat.detail.actions.length - 1 ? "danger-button" : "ghost-button"}
-                    type="button"
-                  >
-                    {action}
-                  </button>
-                ))}
+                {selectedChat.type === "group" ? (
+                  <>
+                    {selectedChat.isOwner ? (
+                      <>
+                        <button
+                          className="ghost-button"
+                          onClick={() => {
+                            setDetailsSheetOpen(false);
+                            setGroupRenameValue(selectedChat.title);
+                            setGroupRenameOpen(true);
+                          }}
+                          type="button"
+                        >
+                          重命名群聊
+                        </button>
+                        <button
+                          className="ghost-button"
+                          onClick={() => {
+                            setDetailsSheetOpen(false);
+                            setGroupInviteOpen(true);
+                          }}
+                          type="button"
+                        >
+                          邀请成员
+                        </button>
+                      </>
+                    ) : null}
+                    <button className="danger-button" onClick={() => void leaveOrDeleteGroup()} type="button">
+                      {selectedChat.isOwner ? "解散群聊" : "退出群聊"}
+                    </button>
+                  </>
+                ) : (
+                  selectedChat.detail.actions.map((action) => (
+                    <button key={`sheet-action-${action}`} className="ghost-button" type="button">
+                      {action}
+                    </button>
+                  ))
+                )}
               </div>
             </div>
           </div>
         ) : null}
       </BottomSheet>
+      <BottomSheet
+        open={groupRenameOpen}
+        title="重命名群聊"
+        description="只会更新当前群聊名称。"
+        onClose={() => setGroupRenameOpen(false)}
+      >
+        <div className="simple-form">
+          <label className="field-label">群聊名称</label>
+          <input className="input" value={groupRenameValue} onChange={(event) => setGroupRenameValue(event.target.value)} />
+          <div className="button-row">
+            <button className="ghost-button" onClick={() => setGroupRenameOpen(false)} type="button">
+              取消
+            </button>
+            <button className="button" disabled={groupManageState === "saving"} onClick={() => void renameGroup()} type="button">
+              {groupManageState === "saving" ? "保存中..." : "保存名称"}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
+      <BottomSheet
+        open={groupInviteOpen}
+        title="邀请成员"
+        description="选择还没加入这个群的人。"
+        onClose={() => setGroupInviteOpen(false)}
+      >
+        <div className="simple-form">
+          <div className="row-subtle">只能邀请自己的好友加入群聊。</div>
+          {currentUserVerified === false ? (
+            <FeedbackState title="完成认证后再邀请成员" description="群聊邀请人需要先完成认证。" />
+          ) : (
+            <>
+              <label className="field-label">搜索好友</label>
+              <input className="input" value={groupQuery} onChange={(event) => setGroupQuery(event.target.value)} />
+              <div className="row-subtle">已选择 {groupSelectedIds.length} 人</div>
+              <div className="simple-list">
+                {groupCandidates.map((user) => {
+                  const selected = groupSelectedIds.includes(user.user_id);
+                  return (
+                    <button key={`invite-user-${user.user_id}`} className="simple-row person-row" onClick={() => toggleGroupCandidate(user.user_id)} type="button">
+                      <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
+                      <div className="row-main">
+                        <strong>{user.name}</strong>
+                        <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>
+                      </div>
+                      {selected ? <span className="small-badge">已选</span> : <span className="count-badge">选择</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          <div className="button-row">
+            <button className="ghost-button" onClick={() => setGroupInviteOpen(false)} type="button">
+              取消
+            </button>
+            <button className="button" disabled={groupManageState === "saving" || currentUserVerified === false} onClick={() => void inviteMembersToGroup()} type="button">
+              {groupManageState === "saving" ? "邀请中..." : "发出邀请"}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
+      {messageMenu ? (
+        <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
+          <div
+            className={`message-context-menu ${messageMenu.placement === "bottom" ? "below" : "above"} ${messageMenu.confirmDelete ? "confirming" : ""}`}
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              left: messageMenu.anchorX,
+              top: messageMenu.anchorY,
+            }}
+          >
+            {messageMenu.confirmDelete ? (
+              <>
+                <div className="message-context-title">删除这条消息？</div>
+                <div className="message-context-actions is-confirm">
+                  <button
+                    className="message-context-button"
+                    disabled={messageDeleteState === "deleting"}
+                    onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: false } : current))}
+                    type="button"
+                  >
+                    取消
+                  </button>
+                  <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage()} type="button">
+                    {messageDeleteState === "deleting" ? "删除中..." : "确认删除"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className={`message-context-actions ${messageMenu.message.from === "self" && typeof messageMenu.message.id === "number" ? "" : "is-single"}`}>
+                <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
+                  复制
+                </button>
+                {messageMenu.message.from === "self" && typeof messageMenu.message.id === "number" ? (
+                  <button
+                    className="message-context-button danger"
+                    onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: true } : current))}
+                    type="button"
+                  >
+                    删除
+                  </button>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
       <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
   );

@@ -9,6 +9,7 @@ import type { AuthSession, JoinResponseDTO } from "../types";
 interface AuthContextValue {
   session: AuthSession | null;
   setSession: (session: AuthSession | null) => void;
+  patchSessionUser: (patch: Partial<AuthSession["user"]>) => void;
   loginFromJoin: (payload: JoinResponseDTO) => void;
   logout: () => Promise<void>;
 }
@@ -63,6 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       session,
       setSession: setSessionState,
+      patchSessionUser(patch) {
+        setSessionState((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            user: {
+              ...current.user,
+              ...patch,
+            },
+          };
+        });
+      },
       loginFromJoin(payload) {
         setSessionState(toSession(payload));
       },

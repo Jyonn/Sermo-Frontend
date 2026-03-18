@@ -4,13 +4,10 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
-
-function avatarLabel(name: string) {
-  return name.slice(0, 2).toUpperCase();
-}
 
 function tabFromPath(pathname: string): FriendTab {
   return pathname === "/app/friends" ? "accepted" : "incoming";
@@ -20,6 +17,7 @@ function mapFriend(user: UserDTO): FriendAccepted {
   return {
     id: user.user_id,
     name: user.name,
+    avatarUri: user.avatar_uri,
     status: user.is_alive ? "在线" : "离线",
     mood: user.verified ? "已验证成员" : "成员",
     verified: user.verified,
@@ -127,7 +125,11 @@ export default function FriendsPage() {
             <div className="simple-list">
               {friends.map((friend) => (
                 <div key={friend.id} className="simple-row person-row">
-                  <div className={`mini-avatar ${friend.status === "在线" ? "status-online" : ""}`}>{avatarLabel(friend.name)}</div>
+                  <UserAvatar
+                    className={`mini-avatar friend-avatar-neutral ${friend.status === "在线" ? "status-online" : ""}`}
+                    name={friend.name}
+                    uri={friend.avatarUri}
+                  />
                   <div className="row-main">
                     <strong>{friend.name}</strong>
                     <div className="row-subtle">{friend.status}</div>
@@ -147,7 +149,11 @@ export default function FriendsPage() {
             <div className="simple-list">
               {activeRequests.map((request) => (
                 <div key={request.request_id} className="simple-row request-row">
-                  <div className="mini-avatar">{avatarLabel(requestName(request, tab))}</div>
+                  <UserAvatar
+                    className="mini-avatar"
+                    name={requestName(request, tab)}
+                    uri={tab === "incoming" ? request.from_user.avatar_uri : request.to_user.avatar_uri}
+                  />
                   <div className="row-main">
                     <strong>{requestName(request, tab)}</strong>
                     <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>

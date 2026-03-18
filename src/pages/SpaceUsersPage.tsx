@@ -4,12 +4,9 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import type { AppViewState, UserDTO } from "../types";
-
-function avatarLabel(name: string) {
-  return name.slice(0, 2).toUpperCase();
-}
 
 function productizeFriendRequestError(message: string) {
   if (/verified|认证|验证|权限|forbidden/i.test(message)) {
@@ -107,7 +104,7 @@ export default function SpaceUsersPage() {
           <div className="simple-list">
             {users.map((user) => (
               <div key={user.user_id} className="simple-row person-row">
-                <div className={`mini-avatar ${user.is_alive ? "status-online" : ""}`}>{avatarLabel(user.name)}</div>
+                <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
                 <div className="row-main">
                   <strong>{user.name}</strong>
                   <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>

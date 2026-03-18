@@ -8,7 +8,7 @@ import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserD
 
 const SYNC_LIMIT = 50;
 const CURSOR_KEY_PREFIX = "sermo-sync-cursor:";
-const DEBUG_SYNC = import.meta.env.DEV;
+const DEBUG_SYNC = false;
 
 interface PopupState {
   chatId: number | null;
@@ -52,6 +52,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     clientId: `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
     name: message.user.name,
+    avatarUri: message.user.avatar_uri,
     time: "",
     createdAt: message.created_at,
     text: message.content,
@@ -82,10 +83,12 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
   const title = chat.title || peer?.name || "未命名会话";
   const presence = formatPresence(peer);
+  const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
 
   return {
     id: chat.chat_id,
     title,
+    avatarUri: peer?.avatar_uri,
     subtitle: chat.group ? `${chat.members.length} 人` : presence,
     preview: chat.last_message?.content || "暂无消息",
     time: formatChatListTime(chat.last_chat_at),
@@ -95,11 +98,17 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     verified: Boolean(peer?.verified),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
+    isOwner,
     detail: {
       summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
-      relation: chat.group ? (chat.owner?.user_id === currentUserId ? "你是群主" : "你已加入该群聊") : "一对一会话",
-      actions: chat.group ? ["邀请成员", "退出群聊"] : ["发起好友申请", "静音通知"],
-      members: chat.members.map((member) => member.name),
+      relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
+      actions: chat.group ? (isOwner ? ["邀请成员", "解散群聊"] : ["退出群聊"]) : ["发起好友申请", "静音通知"],
+      members: chat.members.map((member) => ({
+        userId: member.user_id,
+        name: member.name,
+        avatarUri: member.avatar_uri,
+        isSelf: member.user_id === currentUserId,
+      })),
     },
     messages: [],
   };

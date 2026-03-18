@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences } from "../types";
@@ -34,7 +36,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
 
 export default function SettingsPage() {
   const location = useLocation();
-  const { session } = useAuth();
+  const { session, patchSessionUser } = useAuth();
   const pathname = location.pathname;
   const tab = pathname.split("/").pop() ?? "account";
   const [viewState, setViewState] = useState<AppViewState>("idle");
@@ -43,6 +45,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState("");
   const [emailCode, setEmailCode] = useState("");
   const [password, setPassword] = useState("");
+  const [welcomeMessage, setWelcomeMessage] = useState("");
   const [contactTarget, setContactTarget] = useState("");
   const [contactCode, setContactCode] = useState("");
   const [contactChannel, setContactChannel] = useState<NotificationChannel>("email");
@@ -55,6 +58,9 @@ export default function SettingsPage() {
   const [accountSheet, setAccountSheet] = useState<"code" | "verify" | null>(null);
   const [prefSheetChannel, setPrefSheetChannel] = useState<NotificationChannel | null>(null);
   const [contactSheetChannel, setContactSheetChannel] = useState<NotificationChannel | null>(null);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [avatarSaving, setAvatarSaving] = useState(false);
+  const [welcomeSaving, setWelcomeSaving] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -72,6 +78,23 @@ export default function SettingsPage() {
         const message = apiError instanceof ApiError ? apiError.message : "加载设置失败";
         setError(message);
         setViewState("error");
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    api
+      .getWelcomeMessage(controller.signal)
+      .then((payload) => {
+        setWelcomeMessage(payload.welcome_message ?? "");
+      })
+      .catch((apiError) => {
+        if (controller.signal.aborted) return;
+        const message = apiError instanceof ApiError ? apiError.message : "加载欢迎语失败";
+        setError((current) => current ?? message);
       });
 
     return () => controller.abort();
@@ -152,9 +175,48 @@ export default function SettingsPage() {
     }
   };
 
+  const savePresetAvatar = async (presetId: number) => {
+    setError(null);
+    try {
+      setAvatarSaving(true);
+      const payload = await api.setPresetAvatar(presetId);
+      patchSessionUser({
+        avatar_type: payload.avatar_type,
+        avatar_uri: payload.avatar_uri,
+      });
+      setSuccessMessage("头像已更新。");
+      setAvatarDialogOpen(false);
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : "头像更新失败");
+    } finally {
+      setAvatarSaving(false);
+    }
+  };
+
+  const saveWelcomeMessage = async () => {
+    setError(null);
+    setSuccessMessage(null);
+    try {
+      setWelcomeSaving(true);
+      const payload = await api.updateWelcomeMessage(welcomeMessage.trim());
+      setWelcomeMessage(payload.welcome_message ?? "");
+      setSuccessMessage("欢迎语已更新。");
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : "欢迎语保存失败");
+    } finally {
+      setWelcomeSaving(false);
+    }
+  };
+
   return (
     <AppChrome title="设置" hideTopbar>
       <section className="page-stack">
+        <div className="settings-back-row">
+          <Link className="ghost-button settings-back-button" to="/app/menu">
+            <span className="material-symbols-outlined">arrow_back</span>
+            返回菜单
+          </Link>
+        </div>
         <div className="page-tabs">
           <Link className={`tab-chip ${tab === "account" ? "active" : ""}`} to="/app/settings/account">
             账号
@@ -174,6 +236,18 @@ export default function SettingsPage() {
             <div className="simple-list">
               <div className="simple-row form-row">
                 <div className="row-main">
+                  <strong>头像</strong>
+                  <div className="row-subtle">从 80 组预设头像中选择</div>
+                </div>
+                <div className="settings-avatar-inline">
+                  <UserAvatar className="mini-avatar" name={session?.user.name ?? "Sermo User"} uri={session?.user.avatar_uri} />
+                  <button className="ghost-button row-button" onClick={() => setAvatarDialogOpen(true)} type="button">
+                    更换
+                  </button>
+                </div>
+              </div>
+              <div className="simple-row form-row">
+                <div className="row-main">
                   <strong>当前状态</strong>
                   <div className="row-subtle">{accountLevelLabel}</div>
                 </div>
@@ -181,6 +255,19 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="simple-form">
+              <label className="field-label">欢迎语</label>
+              <textarea
+                className="textarea"
+                placeholder="好友通过后，将自动发送这段欢迎语。"
+                rows={4}
+                value={welcomeMessage}
+                onChange={(event) => setWelcomeMessage(event.target.value)}
+              />
+              <div className="button-row">
+                <button className="button" disabled={welcomeSaving} onClick={() => void saveWelcomeMessage()} type="button">
+                  {welcomeSaving ? "保存中..." : "保存欢迎语"}
+                </button>
+              </div>
               <label className="field-label">验证邮箱</label>
               <input className="input" placeholder="you@sermo.space" value={email} onChange={(event) => setEmail(event.target.value)} />
               <label className="field-label">验证码</label>
@@ -360,6 +447,14 @@ export default function SettingsPage() {
           </div>
         ) : null}
       </BottomSheet>
+      <AvatarPresetDialog
+        currentAvatarUri={session?.user.avatar_uri}
+        displayName={session?.user.name ?? "Sermo User"}
+        onClose={() => setAvatarDialogOpen(false)}
+        onSave={savePresetAvatar}
+        open={avatarDialogOpen}
+        saving={avatarSaving}
+      />
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>
   );

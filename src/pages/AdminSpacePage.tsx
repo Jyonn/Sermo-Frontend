@@ -4,6 +4,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { getBrowserJoinLanguage } from "../lib/language";
 import { buildJoinPath, normalizeSlug } from "../lib/spaceEntry";
 
 type AdminMode = "create" | "login";
@@ -100,6 +101,7 @@ export default function AdminSpacePage() {
           slug,
           email: email.trim().toLowerCase(),
           code: code.trim(),
+          language: getBrowserJoinLanguage(),
         });
       } else {
         await api.loginSpace({

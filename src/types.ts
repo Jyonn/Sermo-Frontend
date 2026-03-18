@@ -12,6 +12,8 @@ export interface ApiEnvelope<T> {
 export interface TinyUserDTO {
   user_id: number;
   name: string;
+  avatar_type?: "preset" | "custom";
+  avatar_uri?: string;
 }
 
 export interface UserDTO extends TinyUserDTO {
@@ -37,9 +39,12 @@ export interface AccessPayload {
   user_id: number;
   name: string;
   space_id: number;
+  avatar_type?: "preset" | "custom";
+  avatar_uri?: string;
   expire?: number;
   time?: number;
   type?: string;
+  language?: string;
 }
 
 export interface LoginAuthDTO {
@@ -120,6 +125,7 @@ export interface ChatMessage {
   clientId: string;
   from: "self" | "other";
   name: string;
+  avatarUri?: string;
   time: string;
   createdAt: number;
   text: string;
@@ -130,12 +136,18 @@ export interface ChatDetail {
   summary: string;
   relation: string;
   actions: string[];
-  members: string[];
+  members: Array<{
+    userId: number;
+    name: string;
+    avatarUri?: string;
+    isSelf: boolean;
+  }>;
 }
 
 export interface Chat {
   id: number;
   title: string;
+  avatarUri?: string;
   subtitle: string;
   preview: string;
   time: string;
@@ -145,6 +157,7 @@ export interface Chat {
   verified: boolean;
   members: number;
   type: "direct" | "group";
+  isOwner: boolean;
   detail: ChatDetail;
   messages: ChatMessage[];
 }
@@ -152,6 +165,7 @@ export interface Chat {
 export interface FriendAccepted {
   id: number;
   name: string;
+  avatarUri?: string;
   status: string;
   mood: string;
   verified: boolean;

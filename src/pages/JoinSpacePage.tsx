@@ -4,6 +4,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { getBrowserJoinLanguage } from "../lib/language";
 import { buildAdminHrefForCurrentHost, buildAdminPath, normalizeSlug } from "../lib/spaceEntry";
 
 function displaySlug(value: string) {
@@ -46,6 +47,7 @@ export default function JoinSpacePage() {
         slug,
         name: nickname.trim(),
         password: password.trim() || undefined,
+        language: getBrowserJoinLanguage(),
       });
       loginFromJoin(payload);
       navigate("/app/chats", { replace: true });

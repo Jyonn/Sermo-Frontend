@@ -31,6 +31,8 @@ export interface ChatThreadSnapshot {
 const memoryLists = new Map<string, ChatListRecord>();
 const memoryThreads = new Map<string, ChatThreadRecord>();
 
+export const CHAT_LIST_UPDATED_EVENT = "sermo:chat-list-updated";
+
 function normalizeMessages(messages: ChatMessage[]) {
   return [...messages].sort((left, right) => Number(left.id) - Number(right.id));
 }
@@ -57,6 +59,18 @@ function runRequest<T>(request: IDBRequest<T>) {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
+}
+
+function emitChatListUpdated(scope: string, chats: Chat[]) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(CHAT_LIST_UPDATED_EVENT, {
+      detail: {
+        scope,
+        chats,
+      },
+    })
+  );
 }
 
 let dbPromise: Promise<IDBDatabase | null> | null = null;
@@ -127,6 +141,7 @@ export const chatCache = {
       updatedAt: Date.now(),
     };
     memoryLists.set(record.key, record);
+    emitChatListUpdated(scope, record.chats);
   },
 
   async hydrateChatList(scope: string) {
@@ -143,6 +158,7 @@ export const chatCache = {
       updatedAt: Date.now(),
     };
     memoryLists.set(record.key, record);
+    emitChatListUpdated(scope, record.chats);
     await writeRecord(LIST_STORE, record);
   },
 

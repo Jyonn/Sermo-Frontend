@@ -169,7 +169,7 @@ export const api = {
     });
   },
 
-  createSpace(payload: { name: string; slug: string; email: string; code: string }) {
+  createSpace(payload: { name: string; slug: string; email: string; code: string; language: "en" | "zh-CN" }) {
     return request<{ space: SpaceDTO; auth: SpaceAuthDTO }>("/spaces/", {
       method: "POST",
       body: payload,
@@ -183,7 +183,7 @@ export const api = {
     });
   },
 
-  joinSpace(payload: { slug: string; name: string; password?: string }) {
+  joinSpace(payload: { slug: string; name: string; password?: string; language: "en" | "zh-CN" }) {
     return request<JoinResponseDTO>("/spaces/join", {
       method: "POST",
       body: payload,
@@ -225,6 +225,57 @@ export const api = {
     });
   },
 
+  createGroupChat(users: number[], title?: string) {
+    return request<ChatDTO>("/chats/group", {
+      method: "POST",
+      auth: true,
+      body: { users, title: title?.trim() || undefined },
+    });
+  },
+
+  renameGroupChat(chat_id: number, title: string) {
+    return request<ChatDTO>("/chats/group/name", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: { title },
+    });
+  },
+
+  addGroupMembers(chat_id: number, users: number[]) {
+    return request<ChatDTO>("/chats/group/members", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: { users },
+    });
+  },
+
+  removeGroupMembers(chat_id: number, users: number[]) {
+    return request<ChatDTO>("/chats/group/members", {
+      method: "DELETE",
+      auth: true,
+      query: { chat_id },
+      body: { users },
+    });
+  },
+
+  deleteGroupChat(chat_id: number) {
+    return request<Record<string, never>>("/chats/group", {
+      method: "DELETE",
+      auth: true,
+      query: { chat_id },
+    });
+  },
+
+  leaveGroupChat(chat_id: number) {
+    return request<Record<string, never>>("/chats/group/leave", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+    });
+  },
+
   markChatRead(chat_id: number) {
     return request<{ last_read_at: number }>("/chats/read", {
       method: "POST",
@@ -255,6 +306,14 @@ export const api = {
       auth: true,
       query: { chat_id },
       body: { content, type: 0 },
+    });
+  },
+
+  deleteMessage(message_id: number) {
+    return request<Record<string, never>>("/messages/", {
+      method: "DELETE",
+      auth: true,
+      query: { message_id },
     });
   },
 
@@ -342,6 +401,29 @@ export const api = {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  getWelcomeMessage(signal?: AbortSignal) {
+    return request<{ welcome_message: string }>("/users/me/welcome-message", {
+      auth: true,
+      signal,
+    });
+  },
+
+  updateWelcomeMessage(welcome_message: string) {
+    return request<{ welcome_message: string }>("/users/me/welcome-message", {
+      method: "POST",
+      auth: true,
+      body: { welcome_message },
+    });
+  },
+
+  setPresetAvatar(avatar_preset_id: number) {
+    return request<{ avatar_type: "preset" | "custom"; avatar_uri: string }>("/users/me/avatar/preset", {
+      method: "POST",
+      auth: true,
+      body: { avatar_preset_id },
     });
   },
 };
