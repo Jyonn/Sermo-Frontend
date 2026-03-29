@@ -5,6 +5,7 @@ const ADMIN_AUTH_STORAGE_KEY = "sermo.admin.session";
 
 export const authStorage = {
   get(): AuthSession | null {
+    if (typeof window === "undefined") return null;
     const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return null;
 
@@ -17,6 +18,7 @@ export const authStorage = {
   },
 
   set(session: AuthSession | null) {
+    if (typeof window === "undefined") return;
     if (!session) {
       window.localStorage.removeItem(AUTH_STORAGE_KEY);
       return;
@@ -27,6 +29,7 @@ export const authStorage = {
 
 export const adminAuthStorage = {
   get(): SpaceAdminSession | null {
+    if (typeof window === "undefined") return null;
     const raw = window.localStorage.getItem(ADMIN_AUTH_STORAGE_KEY);
     if (!raw) return null;
 
@@ -39,6 +42,7 @@ export const adminAuthStorage = {
   },
 
   set(session: SpaceAdminSession | null) {
+    if (typeof window === "undefined") return;
     if (!session) {
       window.localStorage.removeItem(ADMIN_AUTH_STORAGE_KEY);
       return;

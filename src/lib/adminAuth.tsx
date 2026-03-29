@@ -15,6 +15,13 @@ interface AdminAuthContextValue {
 
 const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
 
+configureAdminApiAuth({
+  getSession: () => adminAuthStorage.get(),
+  setSession: (nextSession) => {
+    adminAuthStorage.set(nextSession);
+  },
+});
+
 function toSession(space: SpaceDTO, auth: SpaceAuthDTO): SpaceAdminSession {
   return {
     accessToken: auth.auth,
@@ -25,40 +32,46 @@ function toSession(space: SpaceDTO, auth: SpaceAuthDTO): SpaceAdminSession {
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSessionState] = useState<SpaceAdminSession | null>(() => adminAuthStorage.get());
 
+  configureAdminApiAuth({
+    getSession: () => adminAuthStorage.get(),
+    setSession: (nextSession) => {
+      adminAuthStorage.set(nextSession);
+      setSessionState(nextSession);
+    },
+  });
+
   useEffect(() => {
     adminAuthStorage.set(session);
   }, [session]);
 
-  useEffect(() => {
-    configureAdminApiAuth({
-      getSession: () => adminAuthStorage.get(),
-      setSession: (nextSession) => {
-        adminAuthStorage.set(nextSession);
-        setSessionState(nextSession);
-      },
-    });
-  }, []);
-
   const value = useMemo<AdminAuthContextValue>(
     () => ({
       session,
-      setSession: setSessionState,
+      setSession(nextSession) {
+        adminAuthStorage.set(nextSession);
+        setSessionState(nextSession);
+      },
       login(space, auth) {
-        setSessionState(toSession(space, auth));
+        const nextSession = toSession(space, auth);
+        adminAuthStorage.set(nextSession);
+        setSessionState(nextSession);
       },
       patchSpace(patch) {
         setSessionState((current) => {
           if (!current) return current;
-          return {
+          const nextSession = {
             ...current,
             space: {
               ...current.space,
               ...patch,
             },
           };
+          adminAuthStorage.set(nextSession);
+          return nextSession;
         });
       },
       logout() {
+        adminAuthStorage.set(null);
         setSessionState(null);
       },
     }),

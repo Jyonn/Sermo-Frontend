@@ -17,6 +17,13 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+configureApiAuth({
+  getSession: () => authStorage.get(),
+  setSession: (nextSession) => {
+    authStorage.set(nextSession);
+  },
+});
+
 function toSession(payload: JoinResponseDTO): AuthSession {
   return {
     accessToken: payload.auth.auth,
@@ -29,19 +36,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSessionState] = useState<AuthSession | null>(() => authStorage.get());
   const heartbeatInFlightRef = useRef(false);
 
+  configureApiAuth({
+    getSession: () => authStorage.get(),
+    setSession: (nextSession) => {
+      authStorage.set(nextSession);
+      setSessionState(nextSession);
+    },
+  });
+
   useEffect(() => {
     authStorage.set(session);
   }, [session]);
-
-  useEffect(() => {
-    configureApiAuth({
-      getSession: () => authStorage.get(),
-      setSession: (nextSession) => {
-        authStorage.set(nextSession);
-        setSessionState(nextSession);
-      },
-    });
-  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -64,22 +69,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
-      setSession: setSessionState,
+      setSession(nextSession) {
+        authStorage.set(nextSession);
+        setSessionState(nextSession);
+      },
       patchSessionUser(patch) {
         setSessionState((current) => {
           if (!current) return current;
-          return {
+          const nextSession = {
             ...current,
             user: {
               ...current.user,
               ...patch,
             },
           };
+          authStorage.set(nextSession);
+          return nextSession;
         });
       },
       loginFromJoin(payload) {
         rememberRecentSpace(payload.space);
-        setSessionState(toSession(payload));
+        const nextSession = toSession(payload);
+        authStorage.set(nextSession);
+        setSessionState(nextSession);
       },
       async logout() {
         const current = authStorage.get();
@@ -90,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Best-effort logout; local cleanup still proceeds.
           }
         }
+        authStorage.set(null);
         setSessionState(null);
       },
     }),
