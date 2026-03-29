@@ -3890,6 +3890,10 @@ img {
   display: grid;
 }
 
+.menu-share-mode-switch {
+  justify-content: center;
+}
+
 .menu-danger-row {
   border-color: rgba(255, 77, 109, 0.14);
   background: rgba(255, 77, 109, 0.06);

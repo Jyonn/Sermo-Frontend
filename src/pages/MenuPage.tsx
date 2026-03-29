@@ -110,6 +110,7 @@ export default function MenuPage() {
   const [friendInviteQrUri, setFriendInviteQrUri] = useState("");
   const [friendInviteLoading, setFriendInviteLoading] = useState(false);
   const [friendInviteExpire, setFriendInviteExpire] = useState<number | null>(null);
+  const [friendInviteMode, setFriendInviteMode] = useState<"limited" | "permanent">("limited");
   const [statusModal, setStatusModal] = useState<{
     open: boolean;
     phase: "loading" | "success" | "error";
@@ -192,7 +193,7 @@ export default function MenuPage() {
     setFriendInviteExpire(null);
 
     api
-      .createFriendInviteToken()
+      .createFriendInviteToken(friendInviteMode === "permanent")
       .then(async (payload) => {
         if (cancelled) return;
         const link = buildSpaceHrefForCurrentHost(space.slug, "/friend-invite", "", `token=${encodeURIComponent(payload.token)}`);
@@ -223,7 +224,7 @@ export default function MenuPage() {
     return () => {
       cancelled = true;
     };
-  }, [inviteDrawerOpen, space?.slug]);
+  }, [friendInviteMode, inviteDrawerOpen, space?.slug]);
 
   const openAuthSheet = (channel: NotificationChannel) => {
     if (!hasPassword) {
@@ -589,6 +590,8 @@ export default function MenuPage() {
     });
   }, [friendInviteExpire]);
 
+  const friendInviteValidityText = friendInviteMode === "permanent" ? "长期有效" : friendInviteExpireText ? `有效期至 ${friendInviteExpireText}` : "7 天有效";
+
   const canUseFriendInvite = Boolean(me?.verified ?? session?.user?.verified);
 
   const openFriendInviteDrawer = () => {
@@ -820,7 +823,7 @@ export default function MenuPage() {
 
               <div className="menu-share-meta">
                 <strong>{session?.user.name ?? "Sermo User"} 的好友邀请</strong>
-                <div className="row-subtle">仅限当前空间内使用{friendInviteExpireText ? `，有效期至 ${friendInviteExpireText}` : ""}</div>
+                <div className="row-subtle">仅限当前空间内使用，{friendInviteValidityText}</div>
               </div>
 
               <div className="menu-share-link-box">
@@ -830,6 +833,23 @@ export default function MenuPage() {
               <div className="menu-share-actions">
                 <button className="button" onClick={() => void copyFriendInviteLink()} type="button">
                   复制链接
+                </button>
+              </div>
+
+              <div className="mode-switch menu-share-mode-switch">
+                <button
+                  className={`mode-pill ${friendInviteMode === "limited" ? "active" : ""}`}
+                  onClick={() => setFriendInviteMode("limited")}
+                  type="button"
+                >
+                  7天有效
+                </button>
+                <button
+                  className={`mode-pill ${friendInviteMode === "permanent" ? "active" : ""}`}
+                  onClick={() => setFriendInviteMode("permanent")}
+                  type="button"
+                >
+                  无限期
                 </button>
               </div>
             </div>

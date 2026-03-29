@@ -28,6 +28,11 @@ function formatExpire(value?: number) {
   });
 }
 
+function inviteValidityLabel(preview: FriendInvitePreviewDTO) {
+  if (preview.permanent) return "长期有效";
+  return preview.expire ? `有效期至 ${formatExpire(preview.expire)}` : "";
+}
+
 interface FriendInvitePageProps {
   overlay?: boolean;
 }
@@ -107,7 +112,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
             <span>所在空间</span>
             <strong>{preview.space.name}</strong>
           </div>
-          {preview.expire ? <div className="count-badge">有效期至 {formatExpire(preview.expire)}</div> : null}
+          {inviteValidityLabel(preview) ? <div className="count-badge">{inviteValidityLabel(preview)}</div> : null}
         </div>
 
         {!session ? (

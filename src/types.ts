@@ -166,7 +166,8 @@ export interface FriendshipStatusDTO {
 export interface FriendInvitePreviewDTO {
   inviter: TinyUserDTO;
   space: SpaceDTO;
-  expire: number;
+  expire: number | null;
+  permanent: boolean;
 }
 
 export interface ChatMessageDTO {

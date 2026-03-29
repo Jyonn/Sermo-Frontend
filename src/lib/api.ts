@@ -462,10 +462,11 @@ export const api = {
     });
   },
 
-  createFriendInviteToken() {
-    return request<{ token: string; expire: number }>("/friends/invites/token", {
+  createFriendInviteToken(permanent = false) {
+    return request<{ token: string; expire: number | null; permanent: boolean }>("/friends/invites/token", {
       method: "POST",
       auth: true,
+      body: { permanent: permanent ? 1 : 0 },
     });
   },
 
