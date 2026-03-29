@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ApiError, api } from "../lib/api";
+import { useAdminAuth } from "../lib/adminAuth";
 import { useAuth } from "../lib/auth";
 import { getBrowserJoinLanguage } from "../lib/language";
 import { buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
@@ -15,12 +16,13 @@ function routeMode(value: string | null): AdminMode {
 
 export default function AdminSpacePage() {
   const { session } = useAuth();
+  const { session: adminSession, login: loginAdmin } = useAdminAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState<AdminMode>(routeMode(searchParams.get("mode")));
-  const [spaceName, setSpaceName] = useState("Neon Corner");
+  const [spaceName, setSpaceName] = useState("");
   const [slug, setSlug] = useState(normalizeSlug(searchParams.get("slug") ?? ""));
-  const [email, setEmail] = useState("team@sermo.space");
+  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState<{ slug?: string }>({});
@@ -29,8 +31,8 @@ export default function AdminSpacePage() {
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "code">("idle");
 
   useEffect(() => {
-    if (session) navigate("/app/chats", { replace: true });
-  }, [navigate, session]);
+    if (adminSession) navigate("/space/dashboard", { replace: true });
+  }, [adminSession, navigate]);
 
   useEffect(() => {
     setMode(routeMode(searchParams.get("mode")));
@@ -43,9 +45,14 @@ export default function AdminSpacePage() {
     return () => window.clearTimeout(timer);
   }, [countdown]);
 
+  useEffect(() => {
+    setCountdown(0);
+    setSuccessMessage(null);
+  }, [email, mode, slug]);
+
   const canSendCode = useMemo(() => {
     if (mode === "create") return email.trim().length > 3;
-    return slug.length > 0 && email.trim().length > 3;
+    return slug.length > 0;
   }, [email, mode, slug]);
 
   const updateMode = (nextMode: AdminMode) => {
@@ -58,7 +65,7 @@ export default function AdminSpacePage() {
 
   const sendCode = async () => {
     if (!canSendCode) {
-      setSubmitError(mode === "create" ? "请先输入可用邮箱。" : "请先输入 slug 和邮箱。");
+      setSubmitError(mode === "create" ? "请先输入可用邮箱。" : "请先输入空间标识。");
       return;
     }
 
@@ -67,12 +74,12 @@ export default function AdminSpacePage() {
     setSubmitState("code");
 
     try {
-      await api.postSpaceEmailCode({
+      const payload = await api.postSpaceEmailCode({
         slug: mode === "create" ? undefined : slug,
-        email: email.trim().toLowerCase(),
+        email: mode === "create" ? email.trim().toLowerCase() : undefined,
       });
       setCountdown(60);
-      setSuccessMessage("验证码已发送。");
+      setSuccessMessage(`验证码已发送到 ${payload.masked_email}。`);
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "验证码发送失败";
       setSubmitError(message);
@@ -96,22 +103,23 @@ export default function AdminSpacePage() {
 
     try {
       if (mode === "create") {
-        await api.createSpace({
+        const payload = await api.createSpace({
           name: spaceName.trim(),
           slug,
           email: email.trim().toLowerCase(),
           code: code.trim(),
           language: getBrowserJoinLanguage(),
         });
+        loginAdmin(payload.space, payload.auth);
       } else {
-        await api.loginSpace({
+        const payload = await api.loginSpace({
           slug,
-          email: email.trim().toLowerCase(),
           code: code.trim(),
         });
+        loginAdmin(payload.space, payload.auth);
       }
 
-      window.location.replace(buildJoinHrefForCurrentHost(slug));
+      navigate("/space/dashboard", { replace: true });
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "请求失败";
       setSubmitError(message);
@@ -128,6 +136,10 @@ export default function AdminSpacePage() {
           <a className="ghost-chip" href={buildJoinHrefForCurrentHost(slug)}>
             成员加入页
           </a>
+        ) : session ? (
+          <button className="ghost-chip" onClick={() => navigate("/app/chats")} type="button">
+            返回聊天
+          </button>
         ) : null
       }
     >
@@ -149,7 +161,7 @@ export default function AdminSpacePage() {
               <div className="field-stack">
                 <div>
                   <label className="field-label">空间名称</label>
-                  <input className="input" value={spaceName} onChange={(event) => setSpaceName(event.target.value)} />
+                  <input className="input" placeholder="输入空间名称" value={spaceName} onChange={(event) => setSpaceName(event.target.value)} />
                 </div>
                 <div>
                   <label className="field-label">空间标识</label>
@@ -157,7 +169,7 @@ export default function AdminSpacePage() {
                     className="input"
                     value={slug}
                     onChange={(event) => setSlug(normalizeSlug(event.target.value))}
-                    placeholder="sermo-lab"
+                    placeholder="输入空间标识"
                   />
                   {errors.slug ? <div className="validation-error">{errors.slug}</div> : null}
                 </div>
@@ -171,25 +183,44 @@ export default function AdminSpacePage() {
                   className="input"
                   value={slug}
                   onChange={(event) => setSlug(normalizeSlug(event.target.value))}
-                  placeholder="sermo-lab"
+                  placeholder="输入空间标识"
                 />
                 {errors.slug ? <div className="validation-error">{errors.slug}</div> : null}
               </div>
             ) : null}
 
-            <div>
-              <label className="field-label">
-                <span>管理员邮箱</span>
-                <button className="ghost-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
-                  {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s` : "发送验证码"}
-                </button>
-              </label>
-              <input className="input" value={email} onChange={(event) => setEmail(event.target.value)} />
-            </div>
+            {mode === "create" ? (
+              <div>
+                <label className="field-label">
+                  <span>管理员邮箱</span>
+                  <button className="ghost-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
+                    {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s` : "发送验证码"}
+                  </button>
+                </label>
+                <input
+                  className="input"
+                  inputMode="email"
+                  placeholder="输入管理员邮箱"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </div>
+            ) : (
+              <div className="auth-assist-block">
+                <label className="field-label">
+                  <span>管理员邮箱</span>
+                  <button className="ghost-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
+                    {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s` : "发送验证码"}
+                  </button>
+                </label>
+                <div className="inline-note">输入空间标识后，我们会自动向该空间管理员邮箱发送验证码。</div>
+              </div>
+            )}
 
             <div>
               <label className="field-label">验证码</label>
-              <input className="input mono" inputMode="numeric" value={code} onChange={(event) => setCode(event.target.value)} />
+              <input className="input mono" inputMode="numeric" placeholder="输入验证码" value={code} onChange={(event) => setCode(event.target.value)} />
             </div>
 
             <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">

@@ -10,6 +10,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "https://api.sermo.jyonn.space",
+        // target: "http://127.0.0.1:8000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },

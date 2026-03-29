@@ -57,13 +57,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-entry-panel">
-          <div className="landing-entry-copy">
-            <p className="landing-eyebrow">My Entrances</p>
-            <h2>我的入口</h2>
-            <p>你最近进入过的空间会显示在这里，下次可以直接跳转。</p>
-          </div>
-          {recentSpaces.length ? (
+        {recentSpaces.length ? (
+          <section className="landing-entry-panel">
+            <div className="landing-entry-copy">
+              <p className="landing-eyebrow">My Entrances</p>
+              <h2>我的入口</h2>
+              <p>你最近进入过的空间会显示在这里，下次可以直接跳转。</p>
+            </div>
             <div className="landing-entry-list">
               {recentSpaces.map((space) => (
                 <a className="landing-entry-item" href={`https://${space.domain}`} key={space.slug}>
@@ -75,13 +75,8 @@ export default function LandingPage() {
                 </a>
               ))}
             </div>
-          ) : (
-            <div className="landing-entry-empty">
-              <strong>还没有记录</strong>
-              <p>当你在任意子域名成功进入一个空间后，它会出现在这里。</p>
-            </div>
-          )}
-        </section>
+          </section>
+        ) : null}
       </div>
 
       <InputDialog
@@ -90,7 +85,7 @@ export default function LandingPage() {
         onClose={() => setJoinDialogOpen(false)}
         onConfirm={joinSpace}
         open={joinDialogOpen}
-        placeholder="输入空间标识，例如 yuanmeng"
+        placeholder="输入空间标识"
         title="加入空间"
         value={slugInput}
       />

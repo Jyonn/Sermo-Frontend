@@ -3,15 +3,19 @@ import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from
 import { AppBottomNav } from "./components/AppBottomNav";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
-import { RequireAuth } from "./lib/auth";
+import { RequireAdminAuth } from "./lib/adminAuth";
+import { RequireAuth, useAuth } from "./lib/auth";
 import AdminSpacePage from "./pages/AdminSpacePage";
 import ChatsPage from "./pages/ChatsPage";
+import FriendInvitePage from "./pages/FriendInvitePage";
 import FriendProfilePage from "./pages/FriendProfilePage";
 import FriendsPage from "./pages/FriendsPage";
 import JoinSpacePage from "./pages/JoinSpacePage";
 import LandingPage from "./pages/LandingPage";
 import MenuPage from "./pages/MenuPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import OfficialLoginPage from "./pages/OfficialLoginPage";
+import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
 import SettingsPage from "./pages/SettingsPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
@@ -49,12 +53,35 @@ function LegacySlugRedirect() {
 }
 
 export default function App() {
+  const location = useLocation();
+  const { session } = useAuth();
+  const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
+  const routeLocation = showFriendInviteOverlay
+    ? {
+        ...location,
+        pathname: "/app/chats",
+        search: "",
+        hash: "",
+        key: `${location.key}-invite-background`,
+      }
+    : location;
+
   return (
     <>
-      <Routes>
+      <Routes location={routeLocation}>
         <Route path="/" element={<RootEntryRedirect />} />
         <Route path="/entry" element={<RootEntryRedirect />} />
+        <Route path="/friend-invite" element={<FriendInvitePage />} />
+        <Route path="/official-login" element={<OfficialLoginPage />} />
         <Route path="/space" element={<AdminSpacePage />} />
+        <Route
+          path="/space/dashboard"
+          element={
+            <RequireAdminAuth>
+              <SpaceAdminDashboardPage />
+            </RequireAdminAuth>
+          }
+        />
         <Route path="/space/create" element={<LegacyAdminRedirect mode="create" />} />
         <Route path="/space/login" element={<LegacyAdminRedirect mode="login" />} />
         <Route path="/space/join" element={<LegacyJoinRedirect />} />
@@ -167,6 +194,11 @@ export default function App() {
         />
         <Route path="*" element={<RootEntryRedirect />} />
       </Routes>
+      {showFriendInviteOverlay ? (
+        <Routes>
+          <Route path="/friend-invite" element={<FriendInvitePage overlay />} />
+        </Routes>
+      ) : null}
       <GlobalMessageSync />
       <AppBottomNav />
     </>

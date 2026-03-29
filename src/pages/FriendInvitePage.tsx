@@ -1,0 +1,157 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AppChrome } from "../components/AppChrome";
+import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
+import { FeedbackState } from "../components/FeedbackState";
+import { UserAvatar } from "../components/UserAvatar";
+import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { FriendInvitePreviewDTO } from "../types";
+
+function readInviteToken() {
+  if (typeof window === "undefined") return "";
+  const search = new URLSearchParams(window.location.search);
+  const searchToken = (search.get("token") || "").trim();
+  if (searchToken) return searchToken;
+  const hash = window.location.hash.replace(/^#/, "");
+  const hashParams = new URLSearchParams(hash);
+  return (hashParams.get("token") || "").trim();
+}
+
+function formatExpire(value?: number) {
+  if (!value) return "";
+  return new Date(value * 1000).toLocaleString("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+interface FriendInvitePageProps {
+  overlay?: boolean;
+}
+
+export default function FriendInvitePage({ overlay = false }: FriendInvitePageProps) {
+  const navigate = useNavigate();
+  const { session } = useAuth();
+  const [preview, setPreview] = useState<FriendInvitePreviewDTO | null>(null);
+  const [previewState, setPreviewState] = useState<"loading" | "ready" | "error">("loading");
+  const [redeemState, setRedeemState] = useState<"idle" | "loading" | "success">("idle");
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [dialogError, setDialogError] = useState<string | null>(null);
+  const token = useMemo(() => readInviteToken(), []);
+
+  const closeOverlay = () => {
+    navigate("/app/chats", { replace: true });
+  };
+
+  useEffect(() => {
+    if (!token) {
+      setPreviewState("error");
+      setPreviewError("这个好友邀请链接不完整。");
+      return;
+    }
+
+    const controller = new AbortController();
+    setPreviewState("loading");
+    setPreviewError(null);
+
+    api
+      .getFriendInvitePreview(token, controller.signal)
+      .then((payload) => {
+        setPreview(payload);
+        setPreviewState("ready");
+      })
+      .catch((apiError) => {
+        if (controller.signal.aborted) return;
+        setPreviewState("error");
+        setPreviewError(apiError instanceof ApiError ? apiError.message : "好友邀请无法读取");
+      });
+
+    return () => controller.abort();
+  }, [token]);
+
+  const redeemInvite = async () => {
+    if (!token) return;
+    setRedeemState("loading");
+    setDialogError(null);
+    try {
+      await api.redeemFriendInviteToken(token);
+      setRedeemState("success");
+      window.setTimeout(() => {
+        navigate("/app/friends/requests", { replace: true });
+      }, 900);
+    } catch (apiError) {
+      setRedeemState("idle");
+      setDialogError(apiError instanceof ApiError ? apiError.message : "好友邀请处理失败");
+    }
+  };
+
+  const readyCard =
+    previewState === "ready" && preview ? (
+      <section className={`panel friend-invite-card${overlay ? " is-overlay" : ""}`}>
+        <p className="eyebrow">Friend Invite</p>
+        <div className="friend-invite-header">
+          <UserAvatar className="avatar-large" name={preview.inviter.name} uri={preview.inviter.avatar_uri} />
+          <div className="friend-invite-copy">
+            <h2>{preview.inviter.name}</h2>
+            <p>
+              来自 <span className="friend-invite-space-handle">@{preview.space.slug}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="friend-invite-body">
+          <div className="friend-invite-space-row">
+            <span>所在空间</span>
+            <strong>{preview.space.name}</strong>
+          </div>
+          {preview.expire ? <div className="count-badge">有效期至 {formatExpire(preview.expire)}</div> : null}
+        </div>
+
+        {!session ? (
+          <div className="friend-invite-actions">
+            <Link className="button" to="/">
+              登录或加入
+            </Link>
+            <div className="detail-text">进入空间后再继续。</div>
+          </div>
+        ) : (
+          <div className="friend-invite-actions">
+            <button className="button" disabled={redeemState === "loading" || redeemState === "success"} onClick={() => void redeemInvite()} type="button">
+              {redeemState === "loading" ? "发送中..." : redeemState === "success" ? "好友申请已发出" : "发送好友申请"}
+            </button>
+            <div className="detail-text">二维码邀请可直接发申请。</div>
+          </div>
+        )}
+      </section>
+    ) : null;
+
+  const content = (
+    <>
+      {previewState === "loading" ? <FeedbackState title="正在读取好友邀请" description="正在确认邀请信息。" tone="loading" /> : null}
+      {readyCard}
+      {previewState === "error" ? <FeedbackState title="好友邀请无法使用" description={previewError ?? "这个链接已经失效。"} tone="error" /> : null}
+      <AsyncErrorDialog message={dialogError ?? ""} onClose={() => setDialogError(null)} open={Boolean(dialogError)} />
+    </>
+  );
+
+  if (overlay && session) {
+    return (
+      <div className="dialog-backdrop friend-invite-backdrop" onClick={closeOverlay} role="presentation">
+        <section aria-modal="true" className="friend-invite-modal" onClick={(event) => event.stopPropagation()} role="dialog">
+          {content}
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <AppChrome hideMobileNav title="好友邀请">
+      <section className="auth-shell friend-invite-shell">
+        <div className="auth-card is-space-state">{content}</div>
+      </section>
+    </AppChrome>
+  );
+}

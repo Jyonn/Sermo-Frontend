@@ -8,11 +8,16 @@ import type {
   MessageUploadDTO,
   ChatSyncResponseDTO,
   FriendshipRequestDTO,
+  FriendInvitePreviewDTO,
   FriendshipStatusDTO,
   JoinResponseDTO,
   LoginAuthDTO,
+  OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
+  SpaceAdminDashboardDTO,
+  SpaceAdminSession,
   SpaceDTO,
+  SpaceEmailCodeDTO,
   SpaceAuthDTO,
   UserDTO,
   UserMeDTO,
@@ -25,11 +30,17 @@ type AuthConfig = {
   setSession: (session: AuthSession | null) => void;
 };
 
+type AdminAuthConfig = {
+  getSession: () => SpaceAdminSession | null;
+  setSession: (session: SpaceAdminSession | null) => void;
+};
+
 type RequestOptions = {
   method?: "GET" | "POST" | "DELETE";
   body?: unknown;
   query?: Record<string, string | number | boolean | null | undefined>;
   auth?: boolean;
+  adminAuth?: boolean;
   retryOn401?: boolean;
   signal?: AbortSignal;
 };
@@ -50,10 +61,18 @@ let authConfig: AuthConfig = {
   getSession: () => null,
   setSession: () => undefined,
 };
+let adminAuthConfig: AdminAuthConfig = {
+  getSession: () => null,
+  setSession: () => undefined,
+};
 let refreshInFlight: Promise<AuthSession> | null = null;
 
 export function configureApiAuth(config: AuthConfig) {
   authConfig = config;
+}
+
+export function configureAdminApiAuth(config: AdminAuthConfig) {
+  adminAuthConfig = config;
 }
 
 function withQuery(path: string, query?: RequestOptions["query"]) {
@@ -123,8 +142,9 @@ function refreshSessionSingleFlight(currentSession: AuthSession) {
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, auth = false, retryOn401 = true, signal } = options;
+  const { method = "GET", body, query, auth = false, adminAuth = false, retryOn401 = true, signal } = options;
   const session = auth ? authConfig.getSession() : null;
+  const adminSession = adminAuth ? adminAuthConfig.getSession() : null;
   const headers = new Headers();
   headers.set("Accept", "application/json");
   if (body !== undefined) {
@@ -133,6 +153,9 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   if (auth && session?.accessToken) {
     headers.set("Authorization", `Bearer ${session.accessToken}`);
   }
+  if (adminAuth && adminSession?.accessToken) {
+    headers.set("Authorization", `Bearer ${adminSession.accessToken}`);
+  }
 
   const response = await fetch(`${API_BASE_URL}${withQuery(path, query)}`, {
     method,
@@ -140,6 +163,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     body: body === undefined ? undefined : JSON.stringify(body),
     signal,
   });
+
+  if (response.status === 401 && adminAuth) {
+    adminAuthConfig.setSession(null);
+    throw new ApiError("管理登录已失效，请重新登录。", "UNAUTHORIZED", response.status);
+  }
 
   if (response.status === 401 && auth && retryOn401 && session?.refreshToken) {
     try {
@@ -174,8 +202,8 @@ export const api = {
     });
   },
 
-  postSpaceEmailCode(payload: { slug?: string; email: string }) {
-    return request<{ expires_in: number }>("/spaces/email-code", {
+  postSpaceEmailCode(payload: { slug?: string; email?: string }) {
+    return request<SpaceEmailCodeDTO>("/spaces/email-code", {
       method: "POST",
       body: payload,
     });
@@ -188,7 +216,7 @@ export const api = {
     });
   },
 
-  loginSpace(payload: { slug: string; email: string; code: string }) {
+  loginSpace(payload: { slug: string; email?: string; code: string }) {
     return request<{ space: SpaceDTO; auth: SpaceAuthDTO }>("/spaces/login", {
       method: "POST",
       body: payload,
@@ -204,6 +232,59 @@ export const api = {
 
   getSpaceMe(signal?: AbortSignal) {
     return request<SpaceDTO>("/spaces/me", { auth: true, signal });
+  },
+
+  getAdminDashboard(signal?: AbortSignal) {
+    return request<SpaceAdminDashboardDTO>("/spaces/admin/dashboard", {
+      adminAuth: true,
+      signal,
+    });
+  },
+
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; member_limit: number | null }) {
+    return request<SpaceDTO>("/spaces/admin/settings", {
+      method: "POST",
+      adminAuth: true,
+      body: payload,
+    });
+  },
+
+  createOfficialLoginTicket() {
+    return request<OfficialLoginTicketDTO>("/spaces/admin/official-login-ticket", {
+      method: "POST",
+      adminAuth: true,
+    });
+  },
+
+  getAdminUsers(params: { q?: string; online?: 0 | 1; limit?: number; offset?: number }, signal?: AbortSignal) {
+    return request<UserDTO[]>("/spaces/admin/users", {
+      adminAuth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  removeAdminUser(user_id: number) {
+    return request<Record<string, never>>("/spaces/admin/users/remove", {
+      method: "DELETE",
+      adminAuth: true,
+      query: { user_id },
+    });
+  },
+
+  exchangeOfficialLoginTicket(token: string) {
+    return request<JoinResponseDTO>("/spaces/official-login/exchange", {
+      method: "POST",
+      body: { token },
+    });
+  },
+
+  updateUserName(name: string) {
+    return request<UserMeDTO>("/users/me/name", {
+      method: "POST",
+      auth: true,
+      body: { name },
+    });
   },
 
   getSpaceUsers(params: { q?: string; online?: 0 | 1; limit?: number; offset?: number }, signal?: AbortSignal) {
@@ -378,6 +459,28 @@ export const api = {
       method: "POST",
       auth: true,
       body: { to_user_id },
+    });
+  },
+
+  createFriendInviteToken() {
+    return request<{ token: string; expire: number }>("/friends/invites/token", {
+      method: "POST",
+      auth: true,
+    });
+  },
+
+  getFriendInvitePreview(token: string, signal?: AbortSignal) {
+    return request<FriendInvitePreviewDTO>("/friends/invites/preview", {
+      query: { token },
+      signal,
+    });
+  },
+
+  redeemFriendInviteToken(token: string) {
+    return request<FriendshipRequestDTO>("/friends/invites/redeem", {
+      method: "POST",
+      auth: true,
+      body: { token },
     });
   },
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import QRCode from "qrcode";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -13,6 +14,8 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
+import { copyText } from "../lib/presentation";
+import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
@@ -62,6 +65,15 @@ function channelVerified(me: UserMeDTO | null, channel: NotificationChannel) {
   return Boolean(me.bark_verified_at);
 }
 
+function QrCodeIcon() {
+  return (
+    <svg aria-hidden="true" className="menu-qr-icon" fill="none" viewBox="0 0 24 24">
+      <path d="M4.5 4.5h5v5h-5zM14.5 4.5h5v5h-5zM4.5 14.5h5v5h-5z" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M15 15h1.5v1.5H18V18h1.5M15 18h1.5v1.5M18 13.5V15h1.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 export default function MenuPage() {
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
@@ -77,6 +89,7 @@ export default function MenuPage() {
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
+  const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [prefDrawerChannel, setPrefDrawerChannel] = useState<NotificationChannel | null>(null);
@@ -93,6 +106,10 @@ export default function MenuPage() {
   const [passwordCurrent, setPasswordCurrent] = useState("");
   const [passwordNext, setPasswordNext] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [friendInviteLink, setFriendInviteLink] = useState("");
+  const [friendInviteQrUri, setFriendInviteQrUri] = useState("");
+  const [friendInviteLoading, setFriendInviteLoading] = useState(false);
+  const [friendInviteExpire, setFriendInviteExpire] = useState<number | null>(null);
   const [statusModal, setStatusModal] = useState<{
     open: boolean;
     phase: "loading" | "success" | "error";
@@ -165,6 +182,48 @@ export default function MenuPage() {
       }
     });
   }, [authPending, authSheetChannel]);
+
+  useEffect(() => {
+    if (!inviteDrawerOpen || !space?.slug) return;
+    let cancelled = false;
+    setFriendInviteLoading(true);
+    setFriendInviteLink("");
+    setFriendInviteQrUri("");
+    setFriendInviteExpire(null);
+
+    api
+      .createFriendInviteToken()
+      .then(async (payload) => {
+        if (cancelled) return;
+        const link = buildSpaceHrefForCurrentHost(space.slug, "/friend-invite", "", `token=${encodeURIComponent(payload.token)}`);
+        const qrUri = await QRCode.toDataURL(link, {
+          errorCorrectionLevel: "H",
+          margin: 1,
+          width: 520,
+          color: {
+            dark: "#111827",
+            light: "#ffffff",
+          },
+        });
+        if (cancelled) return;
+        setFriendInviteLink(link);
+        setFriendInviteQrUri(qrUri);
+        setFriendInviteExpire(payload.expire);
+      })
+      .catch((apiError) => {
+        if (cancelled) return;
+        setError(apiError instanceof ApiError ? apiError.message : "生成好友邀请链接失败");
+        setInviteDrawerOpen(false);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setFriendInviteLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteDrawerOpen, space?.slug]);
 
   const openAuthSheet = (channel: NotificationChannel) => {
     if (!hasPassword) {
@@ -449,26 +508,30 @@ export default function MenuPage() {
 
   const confirmBasicEdit = async () => {
     if (!basicEditField) return;
-    if (basicEditField === "name") {
-      setError("当前版本暂未接入昵称修改接口。");
-      return;
-    }
 
     try {
       setStatusModal({
         open: true,
         phase: "loading",
-        loadingLabel: "正在保存欢迎语",
-        successLabel: "欢迎语更新成功",
-        errorLabel: "欢迎语更新失败",
+        loadingLabel: basicEditField === "name" ? "正在保存昵称" : "正在保存欢迎语",
+        successLabel: basicEditField === "name" ? "昵称更新成功" : "欢迎语更新成功",
+        errorLabel: basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
       });
       setBasicEditSaving(true);
-      const payload = await api.updateWelcomeMessage(basicEditValue.trim());
-      const nextMessage = payload.welcome_message ?? "";
-      setMe((current) => (current ? { ...current, welcome_message: nextMessage } : current));
-      patchSessionUser({
-        welcome_message: nextMessage,
-      });
+      if (basicEditField === "name") {
+        const payload = await api.updateUserName(basicEditValue.trim());
+        setMe((current) => (current ? { ...current, name: payload.name, name_pinyin: payload.name_pinyin ?? current.name_pinyin } : current));
+        patchSessionUser({
+          name: payload.name,
+        });
+      } else {
+        const payload = await api.updateWelcomeMessage(basicEditValue.trim());
+        const nextMessage = payload.welcome_message ?? "";
+        setMe((current) => (current ? { ...current, welcome_message: nextMessage } : current));
+        patchSessionUser({
+          welcome_message: nextMessage,
+        });
+      }
       setBasicEditField(null);
       setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
     } catch (apiError) {
@@ -477,7 +540,7 @@ export default function MenuPage() {
           ? {
               ...current,
               phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "欢迎语更新失败",
+              errorLabel: apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
             }
           : null
       );
@@ -499,6 +562,43 @@ export default function MenuPage() {
     setChannelsDrawerOpen(true);
   };
 
+  const copyFriendInviteLink = async () => {
+    if (!friendInviteLink) return;
+    try {
+      const copied = await copyText(friendInviteLink);
+      if (!copied) throw new Error("copy_failed");
+      setStatusModal({
+        open: true,
+        phase: "success",
+        loadingLabel: "正在复制链接",
+        successLabel: "链接已复制",
+        errorLabel: "复制失败",
+      });
+    } catch {
+      setError("复制好友邀请链接失败。");
+    }
+  };
+
+  const friendInviteExpireText = useMemo(() => {
+    if (!friendInviteExpire) return "";
+    return new Date(friendInviteExpire * 1000).toLocaleString("zh-CN", {
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [friendInviteExpire]);
+
+  const canUseFriendInvite = Boolean(me?.verified ?? session?.user?.verified);
+
+  const openFriendInviteDrawer = () => {
+    if (!canUseFriendInvite) {
+      setError("完成邮箱认证后才能使用好友二维码。");
+      return;
+    }
+    setInviteDrawerOpen(true);
+  };
+
   return (
     <AppChrome title="菜单" hideTopbar>
       <section className="page-stack">
@@ -515,13 +615,19 @@ export default function MenuPage() {
             <div className="menu-profile-heading">
               <strong>{session?.user.name ?? "Sermo User"}</strong>
             </div>
-            <div className="row-subtle">
+          <div className="row-subtle">
               {space?.name ?? "当前空间"}
               {space?.slug ? <span className="menu-space-slug">@{space.slug}</span> : null}
             </div>
           </div>
-          <button className="ghost-button inline-avatar-button" onClick={() => setAvatarDialogOpen(true)} type="button">
-            更换头像
+          <button
+            aria-disabled={!canUseFriendInvite}
+            aria-label={canUseFriendInvite ? "分享好友二维码" : "完成认证后可使用好友二维码"}
+            className={`icon-button inline-avatar-icon-button menu-share-qr-button${!canUseFriendInvite ? " is-disabled" : ""}`}
+            onClick={openFriendInviteDrawer}
+            type="button"
+          >
+            <QrCodeIcon />
           </button>
         </div>
         {!hasPassword ? (
@@ -688,6 +794,46 @@ export default function MenuPage() {
               );
             })}
           </div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer
+        description="扫一扫或复制链接，就能把这个空间里的好友邀请发给别人。"
+        eyebrow="Share"
+        open={inviteDrawerOpen}
+        onClose={() => setInviteDrawerOpen(false)}
+        title="好友二维码"
+      >
+        <div className="detail-list menu-share-drawer">
+          {friendInviteLoading ? <FeedbackState title="二维码生成中" description="正在准备专属好友邀请链接。" tone="loading" /> : null}
+
+          {!friendInviteLoading && friendInviteQrUri ? (
+            <div className="menu-share-card">
+              <div className="menu-share-qr-shell">
+                <div className="menu-share-qr-frame">
+                  <img alt="好友邀请二维码" className="menu-share-qr-image" src={friendInviteQrUri} />
+                  <div className="menu-share-qr-avatar">
+                    <UserAvatar className="avatar-large" name={session?.user.name ?? "Sermo"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="menu-share-meta">
+                <strong>{session?.user.name ?? "Sermo User"} 的好友邀请</strong>
+                <div className="row-subtle">仅限当前空间内使用{friendInviteExpireText ? `，有效期至 ${friendInviteExpireText}` : ""}</div>
+              </div>
+
+              <div className="menu-share-link-box">
+                <div className="menu-share-link-text">{friendInviteLink}</div>
+              </div>
+
+              <div className="menu-share-actions">
+                <button className="button" onClick={() => void copyFriendInviteLink()} type="button">
+                  复制链接
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </SideDrawer>
 

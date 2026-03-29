@@ -14,6 +14,7 @@ export interface ApiEnvelope<T> {
 export interface TinyUserDTO {
   user_id: number;
   name: string;
+  official?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
 }
@@ -37,6 +38,7 @@ export interface SpaceDTO {
   email_verified_at: number | null;
   official_user?: TinyUserDTO | null;
   group_square_enabled?: boolean;
+  member_limit?: number | null;
   created_at?: number;
 }
 
@@ -82,6 +84,29 @@ export interface LoginAuthDTO {
 export interface SpaceAuthDTO {
   auth: string;
   data: Record<string, unknown>;
+}
+
+export interface SpaceEmailCodeDTO {
+  expires_in: number;
+  masked_email: string;
+}
+
+export interface OfficialLoginTicketDTO {
+  token: string;
+  expires_in: number;
+}
+
+export interface SpaceAdminSession {
+  accessToken: string;
+  space: SpaceDTO;
+}
+
+export interface SpaceAdminDashboardDTO {
+  space: SpaceDTO;
+  stats: {
+    members_count: number;
+    online_count: number;
+  };
 }
 
 export interface JoinResponseDTO {
@@ -136,6 +161,12 @@ export interface FriendshipRequestDTO {
 export interface FriendshipStatusDTO {
   is_friend: boolean;
   friendship?: FriendshipRequestDTO;
+}
+
+export interface FriendInvitePreviewDTO {
+  inviter: TinyUserDTO;
+  space: SpaceDTO;
+  expire: number;
 }
 
 export interface ChatMessageDTO {

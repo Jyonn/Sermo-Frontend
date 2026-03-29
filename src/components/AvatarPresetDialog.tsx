@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
-import { AVATAR_PRESET_PAGES, buildAvatarPresetPages, buildAvatarPresetUri, parseAvatarPresetId } from "../lib/avatar";
+import { buildAvatarPresetUri, parseAvatarPresetId } from "../lib/avatar";
 import { UserAvatar } from "./UserAvatar";
 
 interface AvatarPresetDialogProps {
@@ -14,7 +14,22 @@ interface AvatarPresetDialogProps {
   onRequestCustomUpload?: () => void;
 }
 
-const avatarPages = buildAvatarPresetPages();
+const presetIds = Array.from({ length: 15 }, (_, index) => index + 1);
+
+function UploadAvatarIcon() {
+  return (
+    <svg aria-hidden="true" className="avatar-upload-icon" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M7 6.5h2.1l1.05-1.6h3.7L14.9 6.5H17a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 17 18.5H7A2.5 2.5 0 0 1 4.5 16v-7A2.5 2.5 0 0 1 7 6.5Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path d="M12 9.25v5.5M9.25 12h5.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
 
 export function AvatarPresetDialog({
   open,
@@ -25,27 +40,15 @@ export function AvatarPresetDialog({
   onSave,
   onRequestCustomUpload,
 }: AvatarPresetDialogProps) {
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
   const currentPresetId = useMemo(() => parseAvatarPresetId(currentAvatarUri) ?? 1, [currentAvatarUri]);
   const [selectedPresetId, setSelectedPresetId] = useState(currentPresetId);
-  const [activePage, setActivePage] = useState(Math.floor((currentPresetId - 1) / 16));
 
   useBodyScrollLock(open);
 
   useEffect(() => {
     if (!open) return;
-    const nextPresetId = parseAvatarPresetId(currentAvatarUri) ?? 1;
-    setSelectedPresetId(nextPresetId);
-    setActivePage(Math.floor((nextPresetId - 1) / 16));
+    setSelectedPresetId(parseAvatarPresetId(currentAvatarUri) ?? 1);
   }, [currentAvatarUri, open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const element = scrollerRef.current;
-    if (!element) return;
-    const nextLeft = activePage * element.clientWidth;
-    element.scrollLeft = nextLeft;
-  }, [activePage, open]);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -56,7 +59,6 @@ export function AvatarPresetDialog({
           <div>
             <p className="eyebrow">Avatar</p>
             <h2>选择头像</h2>
-            <p>左右滑动翻页，每页 16 个预设头像，也可以上传自定义图片。</p>
           </div>
           <button className="icon-button" onClick={onClose} type="button">
             <span className="material-symbols-outlined">close</span>
@@ -67,68 +69,37 @@ export function AvatarPresetDialog({
           <UserAvatar className="avatar-large avatar-preset-current-avatar" name={displayName} uri={buildAvatarPresetUri(selectedPresetId)} />
           <div className="row-main">
             <strong>{displayName}</strong>
-            <div className="row-subtle">预设头像 {String(selectedPresetId).padStart(2, "0")}</div>
           </div>
         </div>
 
-        <div
-          ref={scrollerRef}
-          className="avatar-preset-pages"
-          onScroll={(event) => {
-            const element = event.currentTarget;
-            const width = element.clientWidth || 1;
-            setActivePage(Math.min(AVATAR_PRESET_PAGES - 1, Math.max(0, Math.round(element.scrollLeft / width))));
-          }}
-        >
-          {avatarPages.map((page, pageIndex) => (
-            <div key={pageIndex} className="avatar-preset-page">
-              <div className="avatar-preset-grid">
-                {page.map((presetId) => {
-                  const selected = presetId === selectedPresetId;
-                  return (
-                    <button
-                      key={presetId}
-                      className={`avatar-preset-tile ${selected ? "selected" : ""}`}
-                      onClick={() => setSelectedPresetId(presetId)}
-                      type="button"
-                    >
-                      <img alt={`Preset ${presetId}`} loading="lazy" src={buildAvatarPresetUri(presetId)} />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
+        <div className="avatar-preset-grid">
+          {presetIds.map((presetId) => {
+            const selected = presetId === selectedPresetId;
+            return (
+              <button
+                key={presetId}
+                className={`avatar-preset-tile ${selected ? "selected" : ""}`}
+                onClick={() => setSelectedPresetId(presetId)}
+                type="button"
+              >
+                <img alt={`Preset ${presetId}`} loading="lazy" src={buildAvatarPresetUri(presetId)} />
+              </button>
+            );
+          })}
 
-        <div className="avatar-preset-dots" role="tablist" aria-label="头像分页">
-          {Array.from({ length: AVATAR_PRESET_PAGES }, (_, pageIndex) => (
-            <button
-              key={pageIndex}
-              aria-label={`第 ${pageIndex + 1} 页`}
-              className={`avatar-preset-dot ${pageIndex === activePage ? "active" : ""}`}
-              onClick={() => {
-                const element = scrollerRef.current;
-                if (!element) return;
-                element.scrollTo({ left: pageIndex * element.clientWidth, behavior: "smooth" });
-              }}
-              role="tab"
-              type="button"
-            />
-          ))}
+          {onRequestCustomUpload ? (
+            <button className="avatar-preset-tile avatar-preset-upload-tile" disabled={saving} onClick={onRequestCustomUpload} type="button">
+              <UploadAvatarIcon />
+            </button>
+          ) : null}
         </div>
 
         <div className="avatar-preset-actions">
           <button className="ghost-button" onClick={onClose} type="button">
             取消
           </button>
-          {onRequestCustomUpload ? (
-            <button className="ghost-button" disabled={saving} onClick={onRequestCustomUpload} type="button">
-              上传图片
-            </button>
-          ) : null}
           <button className="button" disabled={saving} onClick={() => void onSave(selectedPresetId)} type="button">
-            {saving ? "保存中..." : "使用这个头像"}
+            {saving ? "保存中..." : "确认"}
           </button>
         </div>
       </section>

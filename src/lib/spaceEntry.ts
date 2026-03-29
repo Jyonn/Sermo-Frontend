@@ -71,9 +71,9 @@ export function buildJoinPath(slug: string) {
   return `/space/${encodeURIComponent(normalizeSlug(slug))}`;
 }
 
-export function buildJoinHrefForCurrentHost(slug: string) {
+export function buildSpaceHrefForCurrentHost(slug: string, pathname = "/", search = "", hash = "") {
   const normalizedSlug = normalizeSlug(slug);
-  if (typeof window === "undefined") return buildJoinPath(normalizedSlug);
+  if (typeof window === "undefined") return pathname || buildJoinPath(normalizedSlug);
 
   const url = new URL(window.location.href);
   const hostname = url.hostname.toLowerCase();
@@ -90,10 +90,14 @@ export function buildJoinHrefForCurrentHost(slug: string) {
     url.hostname = `${normalizedSlug}.${baseHost}`;
   }
 
-  url.pathname = "/";
-  url.search = "";
-  url.hash = "";
+  url.pathname = pathname || "/";
+  url.search = search;
+  url.hash = hash;
   return url.toString();
+}
+
+export function buildJoinHrefForCurrentHost(slug: string) {
+  return buildSpaceHrefForCurrentHost(slug, "/");
 }
 
 export function buildHomeHrefForCurrentHost() {

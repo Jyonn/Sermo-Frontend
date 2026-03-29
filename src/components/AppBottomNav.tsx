@@ -21,6 +21,7 @@ function activeKey(pathname: string) {
 export function AppBottomNav() {
   const location = useLocation();
   const { session } = useAuth();
+  const effectivePathname = location.pathname === "/friend-invite" && session ? "/app/chats" : location.pathname;
   const cacheScope = useMemo(
     () => (session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null),
     [session]
@@ -63,11 +64,10 @@ export function AppBottomNav() {
     };
   }, [cacheScope]);
 
-  if (!location.pathname.startsWith("/app/")) return null;
-  if (matchPath("/app/chats/:chatId", location.pathname)) return null;
+  if (!effectivePathname.startsWith("/app/")) return null;
+  if (matchPath("/app/chats/:chatId", effectivePathname)) return null;
 
-  const current = activeKey(location.pathname);
-  if (!current) return null;
+  const current = activeKey(effectivePathname);
 
   return (
     <nav className="mobile-nav app-mobile-nav">

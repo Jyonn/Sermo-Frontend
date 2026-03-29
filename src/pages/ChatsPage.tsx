@@ -26,7 +26,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
-import { formatRelativeTime } from "../lib/presentation";
+import { copyText, formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -456,12 +456,16 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
 }
 
-function renderMessageContent(message: ChatMessage) {
+function renderMessageContent(message: ChatMessage, onOpenImage?: (uri: string) => void) {
   if (message.kind === "image" && message.payload?.uri) {
     return (
-      <div className={`message-media-frame ${message.from}`}>
+      <button
+        className={`message-media-frame image-button ${message.from}`}
+        onClick={() => onOpenImage?.(message.payload?.uri ?? "")}
+        type="button"
+      >
         <img alt="图片消息" className="message-media-image" loading="lazy" src={message.payload.uri} />
-      </div>
+      </button>
     );
   }
 
@@ -500,6 +504,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   isFirst,
   isLast,
   message,
+  onOpenImage,
   onOpenActions,
   onRetry,
 }: MessageBubbleRowProps) {
@@ -575,14 +580,14 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
-          {renderMessageContent(message)}
+          {renderMessageContent(message, onOpenImage)}
         </div>
       </div>
     </div>
   );
 });
 
-const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
+const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenImage, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
@@ -598,6 +603,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
               isFirst={index === 0}
               isLast={index === group.messages.length - 1}
               message={message}
+              onOpenImage={onOpenImage}
               onOpenActions={onOpenActions}
               onRetry={onRetry}
             />
@@ -623,6 +629,7 @@ interface MessageBubbleRowProps {
   isFirst: boolean;
   isLast: boolean;
   message: ChatMessage;
+  onOpenImage: (uri: string) => void;
   onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
 }
@@ -630,6 +637,7 @@ interface MessageBubbleRowProps {
 interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
+  onOpenImage: (uri: string) => void;
   onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
   showAuthor: boolean;
@@ -812,6 +820,7 @@ export default function ChatsPage() {
     blob: null,
     mimeType: "",
   });
+  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
@@ -1908,7 +1917,8 @@ export default function ChatsPage() {
   const copyMessageText = async () => {
     if (!messageMenu || messageMenu.message.kind !== "text") return;
     try {
-      await navigator.clipboard.writeText(messageMenu.message.text);
+      const copied = await copyText(messageMenu.message.text);
+      if (!copied) throw new Error("复制失败");
       setMessageMenu(null);
     } catch (apiError) {
       const message = apiError instanceof Error ? apiError.message : "复制失败";
@@ -2350,6 +2360,7 @@ export default function ChatsPage() {
                     enteringMessageIds={enteringMessageIds}
                     group={group}
                     key={group.key}
+                    onOpenImage={setImagePreviewUri}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
                     showAuthor={Boolean(selectedChat?.type === "group")}
@@ -2788,6 +2799,13 @@ export default function ChatsPage() {
         onChange={(event) => void handleMediaSelection(event)}
         type="file"
       />
+      {imagePreviewUri ? (
+        <div className="dialog-backdrop message-image-preview-backdrop" onClick={() => setImagePreviewUri(null)} role="presentation">
+          <section aria-modal="true" className="message-image-preview-modal" role="dialog">
+            <img alt="图片预览" className="message-image-preview" src={imagePreviewUri} />
+          </section>
+        </div>
+      ) : null}
       {messageMenu ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
