@@ -5,6 +5,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { clearPendingFriendInviteToken, storePendingFriendInviteToken } from "../lib/friendInvite";
 import { useAuth } from "../lib/auth";
 import type { FriendInvitePreviewDTO } from "../types";
 
@@ -77,12 +78,21 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
     return () => controller.abort();
   }, [token]);
 
+  useEffect(() => {
+    if (!token) return;
+    if (!session) {
+      storePendingFriendInviteToken(token);
+      return;
+    }
+  }, [session, token]);
+
   const redeemInvite = async () => {
     if (!token) return;
     setRedeemState("loading");
     setDialogError(null);
     try {
       await api.redeemFriendInviteToken(token);
+      clearPendingFriendInviteToken();
       setRedeemState("success");
       window.setTimeout(() => {
         navigate("/app/friends/requests", { replace: true });

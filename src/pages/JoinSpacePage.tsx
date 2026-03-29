@@ -4,6 +4,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
 import { getBrowserJoinLanguage } from "../lib/language";
 import { buildAdminEntryHref, buildAdminHrefForCurrentHost, buildAdminPath, buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
 import type { SpaceDTO } from "../types";
@@ -36,7 +37,13 @@ export default function JoinSpacePage() {
   const [submitState, setSubmitState] = useState<"idle" | "submitting">("idle");
 
   useEffect(() => {
-    if (session) navigate("/app/chats", { replace: true });
+    if (!session) return;
+    const pendingInviteToken = readPendingFriendInviteToken();
+    if (pendingInviteToken) {
+      navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
+      return;
+    }
+    navigate("/app/chats", { replace: true });
   }, [navigate, session]);
 
   useEffect(() => {
@@ -93,7 +100,13 @@ export default function JoinSpacePage() {
         language: getBrowserJoinLanguage(),
       });
       loginFromJoin(payload);
-      navigate("/app/chats", { replace: true });
+      const pendingInviteToken = readPendingFriendInviteToken();
+      if (pendingInviteToken) {
+        navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
+      } else {
+        clearPendingFriendInviteToken();
+        navigate("/app/chats", { replace: true });
+      }
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "加入失败";
       setSubmitError(message);
