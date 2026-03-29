@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 
 interface BottomSheetProps {
@@ -9,9 +10,21 @@ interface BottomSheetProps {
   children: ReactNode;
   header?: ReactNode;
   showCloseButton?: boolean;
+  className?: string;
+  bodyClassName?: string;
 }
 
-export function BottomSheet({ open, title, description, onClose, children, header, showCloseButton = true }: BottomSheetProps) {
+export function BottomSheet({
+  open,
+  title,
+  description,
+  onClose,
+  children,
+  header,
+  showCloseButton = true,
+  className,
+  bodyClassName,
+}: BottomSheetProps) {
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [startY, setStartY] = useState<number | null>(null);
@@ -58,12 +71,12 @@ export function BottomSheet({ open, title, description, onClose, children, heade
     setStartY(null);
   };
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="sheet-backdrop" onClick={onClose} role="presentation">
       <section
-        className={`bottom-sheet ${dragging ? "dragging" : ""}`}
+        className={`bottom-sheet ${dragging ? "dragging" : ""} ${className ?? ""}`.trim()}
         onClick={(event) => event.stopPropagation()}
         onMouseMove={(event) => moveDrag(event.clientY)}
         onMouseUp={endDrag}
@@ -100,8 +113,9 @@ export function BottomSheet({ open, title, description, onClose, children, heade
             {description ? <p className="card-subtitle">{description}</p> : null}
           </div>
         )}
-        <div className="sheet-body">{children}</div>
+        <div className={`sheet-body ${bodyClassName ?? ""}`.trim()}>{children}</div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }

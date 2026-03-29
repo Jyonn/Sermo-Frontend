@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 
 interface InputDialogProps {
@@ -60,9 +61,9 @@ export function InputDialog({
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="dialog-backdrop" onClick={onClose} role="presentation">
       <section aria-modal="true" className="input-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <div className="input-dialog-copy">
@@ -84,6 +85,7 @@ export function InputDialog({
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }

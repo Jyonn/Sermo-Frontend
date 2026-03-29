@@ -1,4 +1,14 @@
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -7,20 +17,86 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { InputDialog } from "../components/InputDialog";
+import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
+import { VerificationBanner } from "../components/VerificationBanner";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
+import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { formatRelativeTime } from "../lib/presentation";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, UserDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
+const MESSAGE_TYPE_TEXT = 0;
+const MESSAGE_TYPE_IMAGE = 1;
+const MESSAGE_TYPE_FILE = 2;
+const MESSAGE_TYPE_SYSTEM = 3;
+const MESSAGE_TYPE_VIDEO = 4;
+const MESSAGE_TYPE_AUDIO = 5;
+const AUDIO_MAX_DURATION_SECONDS = 60;
 
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
+}
+
+function ComposerSvgIcon({ kind, className }: { kind: "album" | "mic" | "stop" | "delete"; className?: string }) {
+  if (kind === "album") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <rect x="3.5" y="5" width="17" height="14" rx="3.5" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="9" cy="10" r="1.7" fill="currentColor" />
+        <path d="M7 16.5 11.2 12.3a1.1 1.1 0 0 1 1.56 0l1.58 1.58a1.1 1.1 0 0 0 1.56 0L17 12.6l3.5 3.9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (kind === "stop") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="9" y="9" width="6" height="6" rx="1.4" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (kind === "delete") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <path
+          d="M9 3.75h6a1.5 1.5 0 0 1 1.5 1.5v.75h3a.75.75 0 0 1 0 1.5H18v11.25A2.25 2.25 0 0 1 15.75 21h-7.5A2.25 2.25 0 0 1 6 18.75V7.5H4.5a.75.75 0 0 1 0-1.5h3v-.75A1.5 1.5 0 0 1 9 3.75Zm6 2.25v-.75h-6V6h6Zm-7.5 1.5v11.25a.75.75 0 0 0 .75.75h7.5a.75.75 0 0 0 .75-.75V7.5h-9Zm3 2.25c.414 0 .75.336.75.75v5.25a.75.75 0 0 1-1.5 0V10.5c0-.414.336-.75.75-.75Zm3 0c.414 0 .75.336.75.75v5.25a.75.75 0 0 1-1.5 0V10.5c0-.414.336-.75.75-.75Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M12 15.5a3.1 3.1 0 0 0 3.1-3.1V8.9a3.1 3.1 0 1 0-6.2 0v3.5a3.1 3.1 0 0 0 3.1 3.1Z" fill="currentColor" />
+      <path d="M6.8 11.8a5.2 5.2 0 1 0 10.4 0M12 17v3M9 20h6" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function MessageControlIcon({ kind, className }: { kind: "play" | "pause"; className?: string }) {
+  if (kind === "pause") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <rect x="7.25" y="6.5" width="3.5" height="11" rx="1.2" fill="currentColor" />
+        <rect x="13.25" y="6.5" width="3.5" height="11" rx="1.2" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path d="M8.4 6.9c0-1.02 1.1-1.66 1.98-1.15l7.11 4.11c.89.52.89 1.78 0 2.3l-7.1 4.1c-.89.52-1.99-.12-1.99-1.14V6.9Z" fill="currentColor" />
+    </svg>
+  );
 }
 
 function formatTime(value: number) {
@@ -28,6 +104,138 @@ function formatTime(value: number) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatDuration(seconds: number) {
+  const total = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
+const AUDIO_WAVE_PATTERN = [0.34, 0.58, 0.44, 0.76, 0.41, 0.66, 0.52, 0.84, 0.49, 0.7, 0.39, 0.62, 0.47, 0.8];
+
+const AudioMessagePlayer = memo(function AudioMessagePlayer({
+  durationSeconds,
+  from,
+  uri,
+}: {
+  durationSeconds?: number;
+  from: "self" | "other";
+  uri: string;
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [resolvedDuration, setResolvedDuration] = useState(durationSeconds ?? 0);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setResolvedDuration(durationSeconds ?? 0);
+
+    const sync = () => {
+      const nextDuration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : durationSeconds ?? 0;
+      setResolvedDuration(nextDuration);
+      setCurrentTime(Number.isFinite(audio.currentTime) ? audio.currentTime : 0);
+      setIsPlaying(!audio.paused && !audio.ended);
+    };
+
+    const handleEnded = () => {
+      audio.currentTime = 0;
+      sync();
+    };
+
+    sync();
+    audio.addEventListener("loadedmetadata", sync);
+    audio.addEventListener("durationchange", sync);
+    audio.addEventListener("timeupdate", sync);
+    audio.addEventListener("pause", sync);
+    audio.addEventListener("play", sync);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener("loadedmetadata", sync);
+      audio.removeEventListener("durationchange", sync);
+      audio.removeEventListener("timeupdate", sync);
+      audio.removeEventListener("pause", sync);
+      audio.removeEventListener("play", sync);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [durationSeconds, uri]);
+
+  const totalDuration = resolvedDuration > 0 ? resolvedDuration : durationSeconds ?? 0;
+  const progress = totalDuration > 0 ? Math.min(1, currentTime / totalDuration) : 0;
+  const activeBars = Math.max(1, Math.round(progress * AUDIO_WAVE_PATTERN.length));
+
+  const togglePlayback = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused || audio.ended) {
+      try {
+        await audio.play();
+      } catch {
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    audio.pause();
+  };
+
+  return (
+    <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""}`}>
+      <button
+        aria-label={isPlaying ? "暂停语音" : "播放语音"}
+        className="message-audio-play"
+        onClick={() => void togglePlayback()}
+        type="button"
+      >
+        <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />
+      </button>
+      <div className="message-audio-body">
+        <div className="message-audio-head">
+          <div className="message-audio-meta">
+            <ComposerSvgIcon className="message-audio-icon" kind="mic" />
+            <span>语音消息</span>
+          </div>
+          <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
+        </div>
+        <div className="message-audio-wave" aria-hidden="true">
+          {AUDIO_WAVE_PATTERN.map((bar, index) => (
+            <span
+              key={`audio-wave-${index}`}
+              className={`message-audio-wave-bar ${index < activeBars ? "is-active" : ""}`}
+              style={{ "--wave-scale": `${bar}` } as CSSProperties}
+            />
+          ))}
+        </div>
+      </div>
+      <audio className="message-audio-player" preload="metadata" ref={audioRef} src={uri} />
+    </div>
+  );
+});
+
+function messageKindFromType(type: number): MessageKind {
+  if (type === MESSAGE_TYPE_IMAGE) return "image";
+  if (type === MESSAGE_TYPE_FILE) return "file";
+  if (type === MESSAGE_TYPE_VIDEO) return "video";
+  if (type === MESSAGE_TYPE_AUDIO) return "audio";
+  if (type === MESSAGE_TYPE_SYSTEM) return "system";
+  return "text";
+}
+
+function messageTypeFromKind(kind: MessageMediaKind) {
+  return kind === "image" ? MESSAGE_TYPE_IMAGE : kind === "video" ? MESSAGE_TYPE_VIDEO : MESSAGE_TYPE_AUDIO;
+}
+
+function isMediaMessageKind(kind: MessageKind) {
+  return kind === "image" || kind === "video" || kind === "audio";
 }
 
 function formatThreadDivider(value: number) {
@@ -73,15 +281,19 @@ function formatPresence(user: UserDTO | null) {
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
+  const kind = message.payload?.kind ?? messageKindFromType(message.type);
   return {
     id: message.message_id,
     clientId: `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
+    type: message.type,
+    kind,
     name: message.user.name,
     avatarUri: message.user.avatar_uri,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
     text: message.content,
+    payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     status: "sent",
   };
 }
@@ -100,11 +312,44 @@ function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
   return (
     source.from === "self" &&
     target.from === "self" &&
+    source.kind === "text" &&
+    target.kind === "text" &&
     source.status !== "sent" &&
     target.status === "sent" &&
     source.text === target.text &&
     Math.abs(source.createdAt - target.createdAt) <= 30
   );
+}
+
+function normalizeResourceUri(value?: string) {
+  if (!value) return "";
+
+  try {
+    const parsed = new URL(value);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    const [path] = value.split("?");
+    return path ?? value;
+  }
+}
+
+function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
+  if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
+  if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return incoming;
+  if (existing.kind !== incoming.kind) return incoming;
+
+  const existingResource = normalizeResourceUri(existing.payload.uri);
+  const incomingResource = normalizeResourceUri(incoming.payload.uri);
+  if (!existingResource || existingResource !== incomingResource) return incoming;
+  if (existing.payload.uri === incoming.payload.uri) return incoming;
+
+  return {
+    ...incoming,
+    payload: {
+      ...incoming.payload,
+      uri: existing.payload.uri,
+    },
+  };
 }
 
 function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
@@ -129,7 +374,8 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
       if (deliveredMatch) return;
     }
 
-    bucket.set(message.id, message);
+    const existingMessage = bucket.get(message.id);
+    bucket.set(message.id, preserveStableMediaUri(existingMessage, message));
   });
 
   return sortMessages([...bucket.values()]);
@@ -142,10 +388,13 @@ function createPendingMessage(text: string, name: string): ChatMessage {
     id: clientId,
     clientId,
     from: "self",
+    type: MESSAGE_TYPE_TEXT,
+    kind: "text",
     name,
     time: formatTime(createdAt),
     createdAt,
     text,
+    payload: { kind: "text", text },
     status: "pending",
   };
 }
@@ -162,7 +411,10 @@ function confirmPendingMessage(messages: ChatMessage[], clientId: string, delive
     return {
       ...message,
       id: delivered.id,
+      type: delivered.type,
+      kind: delivered.kind,
       name: delivered.name,
+      payload: delivered.payload,
       text: delivered.text,
       status: "sent" as const,
     };
@@ -202,6 +454,30 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   if (currentDate.toDateString() !== previousDate.toDateString()) return true;
 
   return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
+}
+
+function renderMessageContent(message: ChatMessage) {
+  if (message.kind === "image" && message.payload?.uri) {
+    return (
+      <div className={`message-media-frame ${message.from}`}>
+        <img alt="图片消息" className="message-media-image" loading="lazy" src={message.payload.uri} />
+      </div>
+    );
+  }
+
+  if (message.kind === "video" && message.payload?.uri) {
+    return (
+      <div className={`message-media-frame video ${message.from}`}>
+        <video className="message-media-video" controls playsInline preload="metadata" src={message.payload.uri} />
+      </div>
+    );
+  }
+
+  if (message.kind === "audio" && message.payload?.uri) {
+    return <AudioMessagePlayer durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
+  }
+
+  return <span className="message-text">{message.text}</span>;
 }
 
 function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[]) {
@@ -277,6 +553,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
+            isMediaMessageKind(message.kind) ? "is-media" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
             isLast ? "group-end" : "",
@@ -298,20 +575,21 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
-          {message.text}
+          {renderMessageContent(message)}
         </div>
       </div>
     </div>
   );
 });
 
-const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenActions, onRetry }: MessageGroupBlockProps) {
+const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
       <div className={`message-group ${group.from}`}>
         {group.from === "other" ? <UserAvatar className="avatar message-avatar" name={group.name} uri={group.avatarUri} /> : null}
         <div className="message-bubbles">
+          {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
           {group.messages.map((message, index) => (
             <MessageBubbleRow
               key={message.clientId}
@@ -328,7 +606,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
       </div>
     </div>
   );
-}, (prev, next) => groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds));
+}, (prev, next) => prev.showAuthor === next.showAuthor && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds));
 
 interface MessageGroup {
   key: string;
@@ -354,6 +632,7 @@ interface MessageGroupBlockProps {
   group: MessageGroup;
   onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
+  showAuthor: boolean;
 }
 
 interface MessageMenuState {
@@ -362,6 +641,17 @@ interface MessageMenuState {
   anchorY: number;
   placement: "top" | "bottom";
   confirmDelete: boolean;
+}
+
+type VoiceComposerPhase = "idle" | "recording" | "stopping" | "recorded" | "sending";
+
+interface VoiceComposerState {
+  open: boolean;
+  phase: VoiceComposerPhase;
+  durationSeconds: number;
+  bars: number[];
+  blob: Blob | null;
+  mimeType: string;
 }
 
 function getDirectPeer(chat: ChatDTO, currentUserId: number) {
@@ -480,8 +770,16 @@ export default function ChatsPage() {
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
+  const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [pageError, setPageError] = useState<string | null>(null);
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    phase: "loading" | "success" | "error";
+    loadingLabel: string;
+    successLabel: string;
+    errorLabel: string;
+  } | null>(null);
   const [sendState, setSendState] = useState<"idle" | "sending">("idle");
   const [groupCreateState, setGroupCreateState] = useState<"idle" | "loading-users" | "creating">("idle");
   const [chats, setChats] = useState<Chat[]>([]);
@@ -505,8 +803,18 @@ export default function ChatsPage() {
   const [currentUserVerified, setCurrentUserVerified] = useState<boolean | null>(null);
   const [detailMemberLimit, setDetailMemberLimit] = useState(CHAT_DETAIL_MEMBER_PAGE_SIZE);
   const [groupDangerConfirmOpen, setGroupDangerConfirmOpen] = useState(false);
+  const [friendDangerConfirmOpen, setFriendDangerConfirmOpen] = useState(false);
+  const [voiceComposer, setVoiceComposer] = useState<VoiceComposerState>({
+    open: false,
+    phase: "idle",
+    durationSeconds: 0,
+    bars: Array.from({ length: 24 }, () => 0.28),
+    blob: null,
+    mimeType: "",
+  });
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
+  const mediaInputRef = useRef<HTMLInputElement | null>(null);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
@@ -515,11 +823,54 @@ export default function ChatsPage() {
   const pendingRevealRef = useRef<{ chatId: number; previousHeight: number; previousScrollTop: number } | null>(null);
   const cancelScrollAnimationRef = useRef<(() => void) | null>(null);
   const revealAnimatingRef = useRef(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const waveformFrameRef = useRef<number | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingCancelledRef = useRef(false);
+  const recordingStopRequestedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
   const currentUserName = session?.user.name ?? "我";
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
+  const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping";
+
+  const cleanupRecordingResources = () => {
+    if (waveformFrameRef.current) {
+      cancelAnimationFrame(waveformFrameRef.current);
+      waveformFrameRef.current = null;
+    }
+    if (recordingTimerRef.current) {
+      window.clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    analyserRef.current?.disconnect();
+    analyserRef.current = null;
+    audioContextRef.current?.close().catch(() => undefined);
+    audioContextRef.current = null;
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    mediaStreamRef.current = null;
+    mediaRecorderRef.current = null;
+  };
+
+  const resetVoiceComposer = () => {
+    recordingCancelledRef.current = false;
+    recordingStopRequestedRef.current = false;
+    cleanupRecordingResources();
+    recordingChunksRef.current = [];
+    setVoiceComposer({
+      open: false,
+      phase: "idle",
+      durationSeconds: 0,
+      bars: Array.from({ length: 24 }, () => 0.28),
+      blob: null,
+      mimeType: "",
+    });
+  };
 
   const triggerMessageEntrance = (messageId: number | string) => {
     const key = String(messageId);
@@ -602,9 +953,6 @@ export default function ChatsPage() {
   }, [chatId, chats]);
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
-  const conversationTitle =
-    displayedChat?.type === "group" ? `${displayedChat.title} (${displayedChat.members})` : (displayedChat?.title ?? "");
-
   const selectedMessages = useMemo(
     () => (displayedChat ? sortMessages(messages[displayedChat.id] ?? []) : []),
     [displayedChat, messages]
@@ -621,6 +969,16 @@ export default function ChatsPage() {
       setIsClosingChatView(false);
     }
   }, [selectedChat]);
+
+  useEffect(() => {
+    return () => {
+      resetVoiceComposer();
+    };
+  }, []);
+
+  useEffect(() => {
+    resetVoiceComposer();
+  }, [selectedChat?.id]);
 
   useEffect(() => {
     if (!detailsSheetOpen) return;
@@ -659,7 +1017,6 @@ export default function ChatsPage() {
 
       if (canJoinLastGroup) {
         lastGroup.messages.push(message);
-        lastGroup.key = `${lastGroup.messages[0]?.clientId}-${message.clientId}`;
         return;
       }
 
@@ -1053,8 +1410,38 @@ export default function ChatsPage() {
     setChatMemberLockedIds([]);
   };
 
-  const removeFriend = () => {
-    setPageError("删除好友功能暂未接入。");
+  const removeFriend = async () => {
+    if (!selectedChat || selectedChat.type !== "direct") return;
+    const peer = selectedChat.detail.members.find((member) => !member.isSelf);
+    if (!peer) {
+      setPageError("没有找到当前好友。");
+      return;
+    }
+
+    setStatusModal({
+      open: true,
+      phase: "loading",
+      loadingLabel: "正在删除好友",
+      successLabel: "好友已删除",
+      errorLabel: "删除失败",
+    });
+
+    try {
+      await api.removeFriendRequest(peer.userId);
+      setFriendDangerConfirmOpen(false);
+      setDetailsSheetOpen(false);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+    } catch (apiError) {
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "删除失败",
+            }
+          : null
+      );
+    }
   };
 
   useEffect(() => {
@@ -1220,7 +1607,7 @@ export default function ChatsPage() {
       }
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
-      const created = await api.sendMessage(selectedChat.id, message);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {
         console.log("[chat] send success", {
@@ -1260,7 +1647,7 @@ export default function ChatsPage() {
   };
 
   const retryFailedMessage = async (message: ChatMessage) => {
-    if (!selectedChat || message.status !== "failed") return;
+    if (!selectedChat || message.status !== "failed" || message.kind !== "text") return;
 
     const retryMessage: ChatMessage = {
       ...message,
@@ -1277,7 +1664,7 @@ export default function ChatsPage() {
     triggerMessageEntrance(retryMessage.clientId);
 
     try {
-      const created = await api.sendMessage(selectedChat.id, retryMessage.text);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
         ...current,
@@ -1306,13 +1693,220 @@ export default function ChatsPage() {
     }
   };
 
+  const appendDeliveredMessage = (chatId: number, deliveredMessage: ChatMessage) => {
+    setMessages((current) => ({
+      ...current,
+      [chatId]: sortMessages([...(current[chatId] ?? []), deliveredMessage]),
+    }));
+    setChats((currentChats) =>
+      sortChats(currentChats.map((chat) => (chat.id === chatId ? updateChatSummary(chat, deliveredMessage.text, deliveredMessage.createdAt) : chat)))
+    );
+    stickToBottomRef.current = true;
+    queueThreadReveal(chatId);
+    triggerMessageEntrance(deliveredMessage.clientId);
+  };
+
+  const sendUploadedMediaMessage = async (
+    kind: MessageMediaKind,
+    file: File,
+    extraPayload: Partial<ChatMessagePayloadDTO> = {}
+  ) => {
+    if (!selectedChat) return;
+
+    const label = kind === "image" ? "图片" : kind === "video" ? "视频" : "语音";
+    openStatusModal(`正在发送${label}`, `${label}已发送`, `${label}发送失败`);
+
+    try {
+      const upload = await uploadMessageMedia(file, kind);
+      const created = await api.sendMessage(
+        selectedChat.id,
+        messageTypeFromKind(kind),
+        JSON.stringify({
+          key: upload.key,
+          mime_type: file.type || extraPayload.mime_type,
+          duration_seconds: extraPayload.duration_seconds,
+        })
+      );
+      const deliveredMessage = mapChatMessage(created, currentUserId);
+      appendDeliveredMessage(selectedChat.id, deliveredMessage);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      return true;
+    } catch (error) {
+      const uploadError = toMessageUploadError(error);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: uploadError.message,
+            }
+          : null
+      );
+      return false;
+    }
+  };
+
+  const openMediaPicker = () => {
+    if (composerBusy) return;
+    mediaInputRef.current?.click();
+  };
+
+  const handleMediaSelection = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      const kind = resolveMediaKind(file);
+      await sendUploadedMediaMessage(kind, file);
+    } catch (error) {
+      const uploadError = toMessageUploadError(error);
+      setPageError(uploadError.message);
+    }
+  };
+
+  const startVoiceRecording = async () => {
+    if (composerBusy || voiceComposer.open) return;
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setPageError("当前设备暂不支持语音录制。");
+      return;
+    }
+
+    textareaRef.current?.blur();
+    recordingCancelledRef.current = false;
+    recordingStopRequestedRef.current = false;
+    recordingChunksRef.current = [];
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeTypeCandidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+      const mimeType = mimeTypeCandidates.find((item) => MediaRecorder.isTypeSupported(item)) ?? "";
+      const mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      mediaStreamRef.current = stream;
+      mediaRecorderRef.current = mediaRecorder;
+
+      const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextCtor) {
+        const audioContext = new AudioContextCtor();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        audioContextRef.current = audioContext;
+        analyserRef.current = analyser;
+
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        const updateWaveform = () => {
+          if (!analyserRef.current) return;
+          analyserRef.current.getByteFrequencyData(data);
+          const bars = Array.from({ length: 24 }, (_, index) => {
+            const bucketSize = Math.max(1, Math.floor(data.length / 24));
+            const slice = data.slice(index * bucketSize, (index + 1) * bucketSize);
+            const average = slice.length ? slice.reduce((sum, value) => sum + value, 0) / slice.length : 0;
+            return Math.max(0.18, average / 255);
+          });
+          setVoiceComposer((current) => (current.open ? { ...current, bars } : current));
+          waveformFrameRef.current = requestAnimationFrame(updateWaveform);
+        };
+        waveformFrameRef.current = requestAnimationFrame(updateWaveform);
+      }
+
+      mediaRecorder.ondataavailable = (recordEvent) => {
+        if (recordEvent.data.size > 0) {
+          recordingChunksRef.current.push(recordEvent.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const nextMimeType = mediaRecorder.mimeType || mimeType || "audio/webm";
+        const blob = new Blob(recordingChunksRef.current, { type: nextMimeType });
+        cleanupRecordingResources();
+        if (recordingCancelledRef.current) {
+          resetVoiceComposer();
+          return;
+        }
+        setVoiceComposer((current) => ({
+          ...current,
+          open: true,
+          phase: "recorded",
+          blob,
+          mimeType: nextMimeType,
+          bars: current.bars,
+        }));
+      };
+
+      mediaRecorder.start();
+      setVoiceComposer({
+        open: true,
+        phase: "recording",
+        durationSeconds: 0,
+        bars: Array.from({ length: 24 }, () => 0.28),
+        blob: null,
+        mimeType: mediaRecorder.mimeType || mimeType || "audio/webm",
+      });
+
+      const startedAt = Date.now();
+      recordingTimerRef.current = window.setInterval(() => {
+        const durationSeconds = Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - startedAt) / 1000);
+        setVoiceComposer((current) => ({
+          ...current,
+          durationSeconds,
+        }));
+        if (durationSeconds >= AUDIO_MAX_DURATION_SECONDS && mediaRecorderRef.current?.state === "recording") {
+          recordingStopRequestedRef.current = true;
+          mediaRecorderRef.current.stop();
+          window.clearInterval(recordingTimerRef.current ?? 0);
+          recordingTimerRef.current = null;
+        }
+      }, 120);
+    } catch (error) {
+      resetVoiceComposer();
+      setPageError(error instanceof Error ? error.message : "无法开始录音");
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current?.state !== "recording") return;
+    setVoiceComposer((current) => ({ ...current, phase: "stopping" }));
+    recordingStopRequestedRef.current = true;
+    mediaRecorderRef.current.stop();
+  };
+
+  const cancelVoiceRecording = () => {
+    recordingCancelledRef.current = true;
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+      return;
+    }
+    resetVoiceComposer();
+  };
+
+  const sendRecordedVoiceMessage = async () => {
+    if (!voiceComposer.blob || !selectedChat) return;
+
+    const extension = voiceComposer.mimeType.includes("mp4") ? "m4a" : voiceComposer.mimeType.includes("ogg") ? "ogg" : "webm";
+    const file = new File([voiceComposer.blob], `voice-message.${extension}`, {
+      type: voiceComposer.mimeType || "audio/webm",
+    });
+
+    setVoiceComposer((current) => ({ ...current, phase: "sending" }));
+    const sent = await sendUploadedMediaMessage("audio", file, {
+      duration_seconds: voiceComposer.durationSeconds,
+    });
+    if (sent) {
+      resetVoiceComposer();
+      return;
+    }
+    setVoiceComposer((current) => ({ ...current, phase: "recorded" }));
+  };
+
   const refreshChats = async () => {
     const rows = await api.getChats();
     setChats(sortChats(rows.map((item) => mapChat(item, currentUserId))));
   };
 
   const copyMessageText = async () => {
-    if (!messageMenu) return;
+    if (!messageMenu || messageMenu.message.kind !== "text") return;
     try {
       await navigator.clipboard.writeText(messageMenu.message.text);
       setMessageMenu(null);
@@ -1322,10 +1916,21 @@ export default function ChatsPage() {
     }
   };
 
+  const openStatusModal = (loadingLabel: string, successLabel: string, errorLabel: string) => {
+    setStatusModal({
+      open: true,
+      phase: "loading",
+      loadingLabel,
+      successLabel,
+      errorLabel,
+    });
+  };
+
   const deleteMessage = async () => {
     if (!selectedChat || !messageMenu || typeof messageMenu.message.id !== "number") return;
 
     try {
+      openStatusModal("正在删除消息", "消息已删除", "删除消息失败");
       setMessageDeleteState("deleting");
       await api.deleteMessage(messageMenu.message.id);
       const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== messageMenu.message.clientId);
@@ -1345,9 +1950,17 @@ export default function ChatsPage() {
       }
       setMessageMenu(null);
       await refreshChats();
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "删除消息失败";
-      setPageError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "删除消息失败",
+            }
+          : null
+      );
     } finally {
       setMessageDeleteState("idle");
     }
@@ -1369,6 +1982,7 @@ export default function ChatsPage() {
     }
 
     try {
+      openStatusModal("正在创建群聊", "群聊创建成功", "创建群聊失败");
       setGroupCreateState("creating");
       const created = await api.createGroupChat(groupSelectedIds, groupTitle.trim() || undefined);
       const nextChat = mapChat(created, currentUserId);
@@ -1377,10 +1991,18 @@ export default function ChatsPage() {
       setGroupTitle("");
       setGroupQuery("");
       setGroupSelectedIds([]);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
       navigate(`/app/chats/${created.chat_id}`);
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "创建群聊失败";
-      setPageError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "创建群聊失败",
+            }
+          : null
+      );
       setGroupCreateState("idle");
     }
   };
@@ -1393,13 +2015,22 @@ export default function ChatsPage() {
   const renameGroup = async () => {
     if (!selectedChat) return;
     try {
+      openStatusModal("正在保存群聊名称", "群聊名称已更新", "重命名群聊失败");
       setGroupManageState("saving");
       const updated = await api.renameGroupChat(selectedChat.id, groupRenameValue.trim());
       applyUpdatedGroupChat(updated);
       setGroupRenameOpen(false);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "重命名群聊失败";
-      setPageError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "重命名群聊失败",
+            }
+          : null
+      );
     } finally {
       setGroupManageState("idle");
     }
@@ -1410,6 +2041,11 @@ export default function ChatsPage() {
     if (!chatMemberNewIds.length) return;
 
     try {
+      openStatusModal(
+        selectedChat.type === "group" ? "正在添加群成员" : "正在创建群聊",
+        selectedChat.type === "group" ? "成员添加成功" : "聊天成员已更新",
+        "添加聊天成员失败"
+      );
       setGroupManageState("saving");
       if (selectedChat.type === "group") {
         const updated = await api.addGroupMembers(selectedChat.id, chatMemberNewIds);
@@ -1421,9 +2057,17 @@ export default function ChatsPage() {
         navigate(`/app/chats/${created.chat_id}`);
       }
       closeChatMemberPicker();
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "添加聊天成员失败";
-      setPageError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "添加聊天成员失败",
+            }
+          : null
+      );
     } finally {
       setGroupManageState("idle");
     }
@@ -1432,12 +2076,21 @@ export default function ChatsPage() {
   const removeGroupMember = async (userId: number) => {
     if (!selectedChat) return;
     try {
+      openStatusModal("正在移除成员", "成员已移除", "移除成员失败");
       setGroupManageState("saving");
       const updated = await api.removeGroupMembers(selectedChat.id, [userId]);
       applyUpdatedGroupChat(updated);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "移除成员失败";
-      setPageError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "移除成员失败",
+            }
+          : null
+      );
     } finally {
       setGroupManageState("idle");
     }
@@ -1446,6 +2099,7 @@ export default function ChatsPage() {
   const leaveOrDeleteGroup = async () => {
     if (!selectedChat || selectedChat.type !== "group") return;
     try {
+      openStatusModal(selectedChat.isOwner ? "正在解散群聊" : "正在退出群聊", selectedChat.isOwner ? "群聊已解散" : "已退出群聊", selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败");
       setGroupManageState("saving");
       if (selectedChat.isOwner) {
         await api.deleteGroupChat(selectedChat.id);
@@ -1455,10 +2109,18 @@ export default function ChatsPage() {
       setChats((currentChats) => currentChats.filter((chat) => chat.id !== selectedChat.id));
       setDetailsSheetOpen(false);
       setGroupDangerConfirmOpen(false);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
       navigate("/app/chats");
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败";
-      setPageError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败",
+            }
+          : null
+      );
     } finally {
       setGroupManageState("idle");
     }
@@ -1521,13 +2183,20 @@ export default function ChatsPage() {
       type="button"
     >
       <div className="avatar-wrap">
-        <UserAvatar className={`avatar ${chat.online ? "status-online" : ""}`} name={chat.title} uri={chat.avatarUri} />
+        <UserAvatar
+          className={`avatar ${chat.online ? "status-online" : ""}`}
+          groupMembers={
+            chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri })) : undefined
+          }
+          name={chat.title}
+          uri={chat.avatarUri}
+        />
       </div>
-      <div style={{ textAlign: "left" }}>
+      <div className="chat-copy">
         <p className="chat-name">{chat.title}</p>
         <div className="chat-preview">{chat.preview}</div>
       </div>
-      <div>
+      <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
         {chat.unread ? <span className="small-badge">{chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
@@ -1539,10 +2208,8 @@ export default function ChatsPage() {
       <div className={variant === "desktop" ? "sidebar-header minimal-page-header" : "chat-list-screen-header minimal-page-header"}>
         <div className="page-toolbar">
           <h2 className="panel-title">聊天</h2>
-          <button className="icon-button" onClick={() => setGroupCreateOpen(true)} type="button">
-            <span className="material-symbols-outlined">group_add</span>
-          </button>
         </div>
+        <VerificationBanner verified={Boolean(session?.user?.verified)} />
         <label className="search-box">
           <span className="material-symbols-outlined">search</span>
           <input
@@ -1598,12 +2265,26 @@ export default function ChatsPage() {
             <div className="avatar-wrap">
               <UserAvatar
                 className={`avatar ${displayedChat.online ? "status-online" : ""}`}
+                groupMembers={
+                  displayedChat.type === "group"
+                    ? displayedChat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri }))
+                    : undefined
+                }
                 name={displayedChat.title}
                 uri={displayedChat.avatarUri}
               />
             </div>
             <div className="chat-topbar-meta">
-              <strong className="chat-topbar-name">{conversationTitle}</strong>
+              <strong className="chat-topbar-name">
+                {displayedChat.type === "group" ? (
+                  <>
+                    <span className="chat-topbar-title-text">{displayedChat.title}</span>
+                    <span className="chat-topbar-title-count">({displayedChat.members})</span>
+                  </>
+                ) : (
+                  displayedChat.title
+                )}
+              </strong>
               <div className="chat-topbar-status">{displayedChat.type === "group" ? `${displayedChat.members} 人` : displayedChat.subtitle}</div>
             </div>
           </div>
@@ -1643,6 +2324,9 @@ export default function ChatsPage() {
                 setIsClosingChatView(false);
                 setClosingChatSnapshot(null);
               }}
+              onContextMenu={(event) => {
+                event.preventDefault();
+              }}
             >
               <div
                 ref={messageScrollRef}
@@ -1668,35 +2352,75 @@ export default function ChatsPage() {
                     key={group.key}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
+                    showAuthor={Boolean(selectedChat?.type === "group")}
                   />
                 ))}
               </div>
 
-              <form ref={composerRef} className="composer" onSubmit={submit}>
-                <div className="composer-row">
-                  <button className="composer-plus" type="button">
-                    <span className="material-symbols-outlined">add_circle</span>
-                  </button>
-                  <div className="composer-input-wrap">
-                    <textarea
-                      ref={textareaRef}
-                      className="textarea composer-input"
-                      placeholder="输入消息..."
-                      value={draft}
-                      rows={1}
-                      onChange={(event) => setDraft(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                          event.preventDefault();
-                          event.currentTarget.form?.requestSubmit();
-                        }
-                      }}
-                    />
+              <form ref={composerRef} className={`composer ${voiceComposer.open ? "is-recording-mode" : ""}`} onSubmit={submit}>
+                {!voiceComposer.open ? (
+                  <div className="composer-row composer-row-text">
+                    <div className="composer-leading-actions">
+                      <button className="composer-action-button" disabled={composerBusy} onClick={openMediaPicker} type="button">
+                        <ComposerSvgIcon className="composer-inline-svg" kind="album" />
+                      </button>
+                      <button className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} type="button">
+                        <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
+                      </button>
+                    </div>
+                    <div className="composer-input-wrap">
+                      <textarea
+                        ref={textareaRef}
+                        className="textarea composer-input"
+                        enterKeyHint="send"
+                        placeholder="输入消息..."
+                        value={draft}
+                        rows={1}
+                        onChange={(event) => setDraft(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" && !event.shiftKey) {
+                            event.preventDefault();
+                            event.currentTarget.form?.requestSubmit();
+                          }
+                        }}
+                      />
+                    </div>
+                    <button className="composer-plus" disabled={composerBusy} onClick={() => setComposerMoreOpen(true)} type="button">
+                      <span className="material-symbols-outlined">add</span>
+                    </button>
+                    <button hidden type="submit" />
                   </div>
-                  <button className="composer-send" disabled={!draft.trim() || sendState === "sending"} type="submit">
-                    <span className="material-symbols-outlined">send</span>
-                  </button>
-                </div>
+                ) : (
+                  <div className="composer-row composer-row-recording">
+                    <button className="composer-recording-delete" disabled={voiceComposer.phase === "sending"} onClick={cancelVoiceRecording} type="button">
+                      <ComposerSvgIcon className="composer-inline-svg" kind="delete" />
+                    </button>
+                    <div className="composer-recording-bar">
+                      <button
+                        className="composer-recording-stop"
+                        disabled={voiceComposer.phase !== "recording"}
+                        onClick={stopVoiceRecording}
+                        type="button"
+                      >
+                        <ComposerSvgIcon className="composer-inline-svg composer-stop-svg" kind="stop" />
+                      </button>
+                      <div className="composer-recording-waveform" aria-hidden="true">
+                        {voiceComposer.bars.map((bar, index) => (
+                          <span key={`wave-${index}`} className="composer-recording-bar-item" style={{ "--voice-level": `${bar}` } as CSSProperties} />
+                        ))}
+                      </div>
+                      <span className="composer-recording-time">{formatDuration(voiceComposer.durationSeconds)}</span>
+                    </div>
+                    <button
+                      className="composer-recording-send"
+                      disabled={voiceComposer.phase !== "recorded"}
+                      onClick={() => void sendRecordedVoiceMessage()}
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined">send</span>
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           ) : (
@@ -1927,7 +2651,7 @@ export default function ChatsPage() {
               <div className="simple-list">
                 <button
                   className="simple-row menu-link-row danger-row"
-                  onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : removeFriend())}
+                  onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : setFriendDangerConfirmOpen(true))}
                   type="button"
                 >
                   <div className="row-main">
@@ -1964,6 +2688,15 @@ export default function ChatsPage() {
           setGroupDangerConfirmOpen(false);
         }}
         onConfirm={() => void leaveOrDeleteGroup()}
+      />
+      <ConfirmDialog
+        open={friendDangerConfirmOpen}
+        title="确认删除好友？"
+        description="删除后将解除当前好友关系。你们仍可继续查看已有聊天记录。"
+        confirmLabel="删除好友"
+        danger
+        onClose={() => setFriendDangerConfirmOpen(false)}
+        onConfirm={() => void removeFriend()}
       />
       <BottomSheet
         open={chatMemberPickerOpen}
@@ -2033,6 +2766,28 @@ export default function ChatsPage() {
           </div>
         </div>
       </BottomSheet>
+      <BottomSheet
+        open={composerMoreOpen}
+        title="更多消息类型"
+        description="图片、视频和语音已经可以直接从输入栏使用，更多类型会继续补齐。"
+        onClose={() => setComposerMoreOpen(false)}
+      >
+        <div className="simple-list">
+          <div className="simple-row form-row composer-more-placeholder">
+            <div className="row-main">
+              <strong>更多能力即将支持</strong>
+              <div className="row-subtle">后续这里会接入更多消息类型和快捷能力。</div>
+            </div>
+          </div>
+        </div>
+      </BottomSheet>
+      <input
+        ref={mediaInputRef}
+        accept="image/*,video/*"
+        hidden
+        onChange={(event) => void handleMediaSelection(event)}
+        type="file"
+      />
       {messageMenu ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
@@ -2061,10 +2816,20 @@ export default function ChatsPage() {
                 </div>
               </>
             ) : (
-              <div className={`message-context-actions ${messageMenu.message.from === "self" && typeof messageMenu.message.id === "number" ? "" : "is-single"}`}>
-                <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
-                  复制
-                </button>
+              <div
+                className={`message-context-actions ${
+                  messageMenu.message.kind === "text" && messageMenu.message.from === "self" && typeof messageMenu.message.id === "number"
+                    ? ""
+                    : messageMenu.message.kind === "text"
+                      ? ""
+                      : "is-single"
+                }`}
+              >
+                {messageMenu.message.kind === "text" ? (
+                  <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
+                    复制
+                  </button>
+                ) : null}
                 {messageMenu.message.from === "self" && typeof messageMenu.message.id === "number" ? (
                   <button
                     className="message-context-button danger"
@@ -2079,6 +2844,14 @@ export default function ChatsPage() {
           </div>
         </div>
       ) : null}
+      <RequestStatusModal
+        open={Boolean(statusModal?.open)}
+        phase={statusModal?.phase ?? "loading"}
+        loadingLabel={statusModal?.loadingLabel}
+        successLabel={statusModal?.successLabel}
+        errorLabel={statusModal?.errorLabel}
+        onAutoClose={() => setStatusModal(null)}
+      />
       <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
   );

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 
 interface AsyncErrorDialogProps {
@@ -24,9 +25,9 @@ export function AsyncErrorDialog({
 }: AsyncErrorDialogProps) {
   useBodyScrollLock(open);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="dialog-backdrop" onClick={onClose} role="presentation">
       <section
         aria-modal="true"
@@ -53,6 +54,7 @@ export function AsyncErrorDialog({
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,16 +1,21 @@
 import type {
   ApiEnvelope,
+  AvatarUploadDTO,
   AuthSession,
   ChatDTO,
   ChatMessageDTO,
+  MessageMediaKind,
+  MessageUploadDTO,
   ChatSyncResponseDTO,
   FriendshipRequestDTO,
+  FriendshipStatusDTO,
   JoinResponseDTO,
   LoginAuthDTO,
   NotificationPreferenceDTO,
   SpaceDTO,
   SpaceAuthDTO,
   UserDTO,
+  UserMeDTO,
 } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
@@ -162,6 +167,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 export const api = {
+  getSpaceBySlug(slug: string, signal?: AbortSignal) {
+    return request<SpaceDTO>("/spaces/lookup", {
+      query: { slug },
+      signal,
+    });
+  },
+
   postSpaceEmailCode(payload: { slug?: string; email: string }) {
     return request<{ expires_in: number }>("/spaces/email-code", {
       method: "POST",
@@ -300,12 +312,20 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, content: string) {
+  createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string) {
+    return request<MessageUploadDTO>("/messages/upload", {
+      method: "POST",
+      auth: true,
+      body: { kind, file_name, content_type },
+    });
+  },
+
+  sendMessage(chat_id: number, type: number, content: string) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
       query: { chat_id },
-      body: { content, type: 0 },
+      body: { content, type },
     });
   },
 
@@ -328,20 +348,28 @@ export const api = {
     });
   },
 
-  respondFriendRequest(request_id: number, accept: boolean) {
+  getFriendStatus(user_id: number, signal?: AbortSignal) {
+    return request<FriendshipStatusDTO>("/friends/status", {
+      auth: true,
+      query: { user_id },
+      signal,
+    });
+  },
+
+  respondFriendRequest(user_id: number, accept: boolean) {
     return request<FriendshipRequestDTO>("/friends/requests/respond", {
       method: "POST",
       auth: true,
-      query: { request_id },
+      query: { user_id },
       body: { accept: accept ? 1 : 0 },
     });
   },
 
-  removeFriendRequest(request_id: number) {
+  removeFriendRequest(user_id: number) {
     return request<Record<string, never>>("/friends/requests/remove", {
       method: "DELETE",
       auth: true,
-      query: { request_id },
+      query: { user_id },
     });
   },
 
@@ -360,28 +388,27 @@ export const api = {
     });
   },
 
-  updateNotificationPref(payload: {
-    channel: number;
-    enabled?: 0 | 1;
-    offline_threshold_minutes?: number;
-  }) {
-    return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {
+  getUserMe(signal?: AbortSignal) {
+    return request<UserMeDTO>("/users/me", {
+      auth: true,
+      signal,
+    });
+  },
+
+  updatePassword(payload: { new_password: string; old_password?: string }) {
+    return request<{ has_password: boolean }>("/users/me/password", {
       method: "POST",
       auth: true,
       body: payload,
     });
   },
 
-  sendVerifyEmailCode(email: string) {
-    return request<{ expires_in: number }>("/users/me/email-code", {
-      method: "POST",
-      auth: true,
-      body: { email },
-    });
-  },
-
-  verifyEmail(payload: { email: string; code: string; password: string }) {
-    return request<UserDTO>("/users/me/verify-email", {
+  updateNotificationPref(payload: {
+    channel: number;
+    enabled?: 0 | 1;
+    offline_threshold_minutes?: number;
+  }) {
+    return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {
       method: "POST",
       auth: true,
       body: payload,
@@ -397,7 +424,7 @@ export const api = {
   },
 
   bindContact(payload: { channel: number; target: string; code: string }) {
-    return request<UserDTO>("/users/me/bind-contact", {
+    return request<UserMeDTO>("/users/me/bind-contact", {
       method: "POST",
       auth: true,
       body: payload,
@@ -424,6 +451,22 @@ export const api = {
       method: "POST",
       auth: true,
       body: { avatar_preset_id },
+    });
+  },
+
+  createCustomAvatarUpload(file_name: string, content_type?: string) {
+    return request<AvatarUploadDTO>("/users/me/avatar/custom/upload", {
+      method: "POST",
+      auth: true,
+      body: { file_name, content_type },
+    });
+  },
+
+  setCustomAvatar(key: string) {
+    return request<{ avatar_type: "preset" | "custom"; avatar_uri: string }>("/users/me/avatar/custom", {
+      method: "POST",
+      auth: true,
+      body: { key },
     });
   },
 };

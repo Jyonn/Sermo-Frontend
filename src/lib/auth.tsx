@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { api, configureApiAuth } from "./api";
-import { buildJoinPath, getDetectedSpaceSlug } from "./spaceEntry";
+import { getDetectedSpaceSlug } from "./spaceEntry";
+import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
 import type { AuthSession, JoinResponseDTO } from "../types";
 
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       },
       loginFromJoin(payload) {
+        rememberRecentSpace(payload.space);
         setSessionState(toSession(payload));
       },
       async logout() {
@@ -111,7 +113,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
   if (!session) {
     const detectedSlug = getDetectedSpaceSlug();
-    return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? buildJoinPath(detectedSlug) : "/space"} />;
+    return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? "/" : "/space"} />;
   }
 
   return children;

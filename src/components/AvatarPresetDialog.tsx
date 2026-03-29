@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { AVATAR_PRESET_PAGES, buildAvatarPresetPages, buildAvatarPresetUri, parseAvatarPresetId } from "../lib/avatar";
 import { UserAvatar } from "./UserAvatar";
@@ -10,6 +11,7 @@ interface AvatarPresetDialogProps {
   saving?: boolean;
   onClose: () => void;
   onSave: (presetId: number) => void | Promise<void>;
+  onRequestCustomUpload?: () => void;
 }
 
 const avatarPages = buildAvatarPresetPages();
@@ -21,6 +23,7 @@ export function AvatarPresetDialog({
   saving = false,
   onClose,
   onSave,
+  onRequestCustomUpload,
 }: AvatarPresetDialogProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const currentPresetId = useMemo(() => parseAvatarPresetId(currentAvatarUri) ?? 1, [currentAvatarUri]);
@@ -44,16 +47,16 @@ export function AvatarPresetDialog({
     element.scrollLeft = nextLeft;
   }, [activePage, open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="dialog-backdrop" onClick={onClose} role="presentation">
       <section aria-modal="true" className="avatar-preset-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <div className="avatar-preset-dialog-head">
           <div>
             <p className="eyebrow">Avatar</p>
             <h2>选择头像</h2>
-            <p>左右滑动翻页，每页 16 个预设头像。</p>
+            <p>左右滑动翻页，每页 16 个预设头像，也可以上传自定义图片。</p>
           </div>
           <button className="icon-button" onClick={onClose} type="button">
             <span className="material-symbols-outlined">close</span>
@@ -119,11 +122,17 @@ export function AvatarPresetDialog({
           <button className="ghost-button" onClick={onClose} type="button">
             取消
           </button>
+          {onRequestCustomUpload ? (
+            <button className="ghost-button" disabled={saving} onClick={onRequestCustomUpload} type="button">
+              上传图片
+            </button>
+          ) : null}
           <button className="button" disabled={saving} onClick={() => void onSave(selectedPresetId)} type="button">
             {saving ? "保存中..." : "使用这个头像"}
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }

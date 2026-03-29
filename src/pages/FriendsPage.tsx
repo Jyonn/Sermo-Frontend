@@ -4,6 +4,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { RequestStatusModal } from "../components/RequestStatusModal";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
@@ -39,6 +40,13 @@ export default function FriendsPage() {
   const [outgoing, setOutgoing] = useState<FriendshipRequestDTO[]>([]);
   const [sheetFriend, setSheetFriend] = useState<FriendAccepted | null>(null);
   const [sheetRequest, setSheetRequest] = useState<FriendshipRequestDTO | null>(null);
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    phase: "loading" | "success" | "error";
+    loadingLabel: string;
+    successLabel: string;
+    errorLabel: string;
+  } | null>(null);
 
   useEffect(() => {
     if (location.pathname === "/app/friends") setTab("accepted");
@@ -73,12 +81,20 @@ export default function FriendsPage() {
     return [];
   }, [incoming, outgoing, tab]);
 
-  const actOnRequest = async (requestId: number, accept?: boolean) => {
+  const actOnRequest = async (userId: number, accept?: boolean) => {
     if (accept === undefined && !confirmDangerAction("确认撤回这条好友申请？")) return;
 
+    setStatusModal({
+      open: true,
+      phase: "loading",
+      loadingLabel: accept === undefined ? "正在撤回申请" : accept ? "正在同意申请" : "正在忽略申请",
+      successLabel: accept === undefined ? "申请已撤回" : accept ? "已添加为好友" : "已忽略申请",
+      errorLabel: "操作失败",
+    });
+
     try {
-      if (accept === undefined) await api.removeFriendRequest(requestId);
-      else await api.respondFriendRequest(requestId, accept);
+      if (accept === undefined) await api.removeFriendRequest(userId);
+      else await api.respondFriendRequest(userId, accept);
 
       const requests = await api.getFriendRequests();
       setIncoming(requests.incoming);
@@ -88,9 +104,17 @@ export default function FriendsPage() {
         setFriends(refreshedFriends.map(mapFriend));
       }
       setSheetRequest(null);
+      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "操作失败";
-      setError(message);
+      setStatusModal((current) =>
+        current
+          ? {
+              ...current,
+              phase: "error",
+              errorLabel: apiError instanceof ApiError ? apiError.message : "操作失败",
+            }
+          : null
+      );
     }
   };
 
@@ -160,7 +184,7 @@ export default function FriendsPage() {
                   </div>
                   {tab === "incoming" ? (
                     <div className="row-actions">
-                      <button className="button row-button" onClick={() => void actOnRequest(request.request_id, true)} type="button">
+                      <button className="button row-button" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
                         同意
                       </button>
                       <button className="icon-button" onClick={() => setSheetRequest(request)} type="button">
@@ -168,7 +192,7 @@ export default function FriendsPage() {
                       </button>
                     </div>
                   ) : (
-                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.request_id)} type="button">
+                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.to_user.user_id)} type="button">
                       撤回
                     </button>
                   )}
@@ -227,21 +251,29 @@ export default function FriendsPage() {
           <div className="sheet-action-list">
             {tab === "incoming" ? (
               <>
-                <button className="button" onClick={() => void actOnRequest(sheetRequest.request_id, true)} type="button">
+                <button className="button" onClick={() => void actOnRequest(sheetRequest.from_user.user_id, true)} type="button">
                   同意
                 </button>
-                <button className="ghost-button" onClick={() => void actOnRequest(sheetRequest.request_id, false)} type="button">
+                <button className="ghost-button" onClick={() => void actOnRequest(sheetRequest.from_user.user_id, false)} type="button">
                   忽略
                 </button>
               </>
             ) : (
-              <button className="danger-button" onClick={() => void actOnRequest(sheetRequest.request_id)} type="button">
+              <button className="danger-button" onClick={() => void actOnRequest(sheetRequest.to_user.user_id)} type="button">
                 撤回申请
               </button>
             )}
           </div>
         ) : null}
       </BottomSheet>
+      <RequestStatusModal
+        open={Boolean(statusModal?.open)}
+        phase={statusModal?.phase ?? "loading"}
+        loadingLabel={statusModal?.loadingLabel}
+        successLabel={statusModal?.successLabel}
+        errorLabel={statusModal?.errorLabel}
+        onAutoClose={() => setStatusModal(null)}
+      />
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>
   );

@@ -1,27 +1,31 @@
-import { Navigate, Route, Routes, useLocation, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
+import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { RequireAuth } from "./lib/auth";
 import AdminSpacePage from "./pages/AdminSpacePage";
 import ChatsPage from "./pages/ChatsPage";
+import FriendProfilePage from "./pages/FriendProfilePage";
 import FriendsPage from "./pages/FriendsPage";
 import JoinSpacePage from "./pages/JoinSpacePage";
+import LandingPage from "./pages/LandingPage";
 import MenuPage from "./pages/MenuPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
-import { buildAdminPath, buildJoinPath, getDetectedSpaceSlug } from "./lib/spaceEntry";
+import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
-  return <Navigate replace to={detectedSlug ? buildJoinPath(detectedSlug) : "/space"} />;
+  return detectedSlug ? <JoinSpacePage /> : <LandingPage />;
 }
 
 function LegacyJoinRedirect() {
   const [searchParams] = useSearchParams();
   const slug = searchParams.get("slug");
-  return <Navigate replace to={slug ? buildJoinPath(slug) : "/space"} />;
+  return slug ? <LegacyJoinHostRedirect slug={slug} /> : <Navigate replace to="/space" />;
 }
 
 function LegacyAdminRedirect({ mode }: { mode: "create" | "login" }) {
@@ -29,6 +33,19 @@ function LegacyAdminRedirect({ mode }: { mode: "create" | "login" }) {
   const [searchParams] = useSearchParams();
   const slug = searchParams.get("slug");
   return <Navigate replace to={`${buildAdminPath(slug, mode)}${location.hash}`} />;
+}
+
+function LegacyJoinHostRedirect({ slug }: { slug: string }) {
+  useEffect(() => {
+    window.location.replace(buildJoinHrefForCurrentHost(slug));
+  }, [slug]);
+
+  return <FeedbackState title="正在进入空间..." />;
+}
+
+function LegacySlugRedirect() {
+  const { slug = "" } = useParams();
+  return <LegacyJoinHostRedirect slug={slug} />;
 }
 
 export default function App() {
@@ -41,7 +58,7 @@ export default function App() {
         <Route path="/space/create" element={<LegacyAdminRedirect mode="create" />} />
         <Route path="/space/login" element={<LegacyAdminRedirect mode="login" />} />
         <Route path="/space/join" element={<LegacyJoinRedirect />} />
-        <Route path="/space/:slug" element={<JoinSpacePage />} />
+        <Route path="/space/:slug" element={<LegacySlugRedirect />} />
 
         <Route path="/app" element={<Navigate replace to="/app/chats" />} />
         <Route
@@ -73,6 +90,14 @@ export default function App() {
           element={
             <RequireAuth>
               <NotificationsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/notifications/friends/:friendId"
+          element={
+            <RequireAuth>
+              <FriendProfilePage />
             </RequireAuth>
           }
         />

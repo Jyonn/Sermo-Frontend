@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import logoUrl from "../assets/logo.svg";
 
 interface AppChromeProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface AppChromeProps {
   hideMobileNav?: boolean;
   hidePageTitle?: boolean;
   topbarClassName?: string;
+  shellClassName?: string;
 }
 
 export function AppChrome({
@@ -22,11 +24,13 @@ export function AppChrome({
   hideMobileNav = false,
   hidePageTitle = false,
   topbarClassName,
+  shellClassName,
 }: AppChromeProps) {
   const { session } = useAuth();
   const location = useLocation();
 
   const brandTarget = session ? "/app/chats" : "/entry";
+  const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
 
   return (
     <>
@@ -36,11 +40,18 @@ export function AppChrome({
             {topbarLeading ?? (
               <Link className="brand" to={brandTarget}>
                 <div className="brand-mark">
-                  <span className="material-symbols-outlined">rocket_launch</span>
+                  <span
+                    aria-hidden="true"
+                    className="brand-logo"
+                    style={{
+                      WebkitMaskImage: `url(${logoUrl})`,
+                      maskImage: `url(${logoUrl})`,
+                    }}
+                  />
                 </div>
                 <div className="brand-copy">
                   <h1>Sermo</h1>
-                  <p>Space IM</p>
+                  <p>空间 IM</p>
                 </div>
               </Link>
             )}
@@ -56,7 +67,7 @@ export function AppChrome({
 
           <div className="topbar-actions">
             {topbarAction}
-            {!session && location.pathname !== "/entry" && !location.pathname.startsWith("/space/") ? (
+            {!hideGuestEntryLink && !session && location.pathname !== "/entry" && !location.pathname.startsWith("/space/") ? (
               <Link className="ghost-chip" to="/entry">
                 返回入口
               </Link>
@@ -65,7 +76,7 @@ export function AppChrome({
         </header>
       ) : null}
 
-      <main className={`shell page ${hideTopbar ? "shell-no-topbar" : ""} ${hideMobileNav ? "shell-no-mobile-nav" : ""}`}>
+      <main className={`shell page ${hideTopbar ? "shell-no-topbar" : ""} ${hideMobileNav ? "shell-no-mobile-nav" : ""} ${shellClassName ?? ""}`.trim()}>
         {children}
       </main>
     </>

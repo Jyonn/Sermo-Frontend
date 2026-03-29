@@ -7,6 +7,8 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, UserDTO } from "../types";
 
 const MAX_ORBS = 20;
@@ -176,6 +178,7 @@ function resolveOrbCollisions(orbs: OrbState[]) {
 
 export default function SquarePage() {
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -383,6 +386,7 @@ export default function SquarePage() {
           <div className="page-toolbar">
             <h2 className="panel-title">广场</h2>
           </div>
+          <VerificationBanner verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search square-search">
             <span className="material-symbols-outlined">search</span>
             <input

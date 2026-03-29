@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { getBrowserJoinLanguage } from "../lib/language";
-import { buildJoinPath, normalizeSlug } from "../lib/spaceEntry";
+import { buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
 
 type AdminMode = "create" | "login";
 
@@ -87,7 +87,7 @@ export default function AdminSpacePage() {
     setSuccessMessage(null);
 
     if (!slug.trim()) {
-      setErrors({ slug: "请输入 Space slug。" });
+      setErrors({ slug: "请输入空间标识。" });
       return;
     }
 
@@ -111,7 +111,7 @@ export default function AdminSpacePage() {
         });
       }
 
-      navigate(buildJoinPath(slug), { replace: true });
+      window.location.replace(buildJoinHrefForCurrentHost(slug));
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "请求失败";
       setSubmitError(message);
@@ -121,12 +121,21 @@ export default function AdminSpacePage() {
   };
 
   return (
-    <AppChrome title="管理 Space" topbarAction={slug ? <Link className="ghost-chip" to={buildJoinPath(slug)}>成员加入页</Link> : null}>
+    <AppChrome
+      title="管理空间"
+      topbarAction={
+        slug ? (
+          <a className="ghost-chip" href={buildJoinHrefForCurrentHost(slug)}>
+            成员加入页
+          </a>
+        ) : null
+      }
+    >
       <section className="auth-shell">
         <div className="auth-card">
           <div className="auth-tabs">
             <button className={`mode-pill ${mode === "create" ? "active" : ""}`} onClick={() => updateMode("create")} type="button">
-              创建 Space
+              创建空间
             </button>
             <button className={`mode-pill ${mode === "login" ? "active" : ""}`} onClick={() => updateMode("login")} type="button">
               管理登录
@@ -139,11 +148,11 @@ export default function AdminSpacePage() {
             {mode === "create" ? (
               <div className="field-stack">
                 <div>
-                  <label className="field-label">Space 名称</label>
+                  <label className="field-label">空间名称</label>
                   <input className="input" value={spaceName} onChange={(event) => setSpaceName(event.target.value)} />
                 </div>
                 <div>
-                  <label className="field-label">Space slug</label>
+                  <label className="field-label">空间标识</label>
                   <input
                     className="input"
                     value={slug}
@@ -157,7 +166,7 @@ export default function AdminSpacePage() {
 
             {mode === "login" ? (
               <div>
-                <label className="field-label">Space slug</label>
+                <label className="field-label">空间标识</label>
                 <input
                   className="input"
                   value={slug}
@@ -184,7 +193,7 @@ export default function AdminSpacePage() {
             </div>
 
             <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">
-              {submitState === "submitting" ? "处理中..." : mode === "create" ? "创建 Space" : "进入管理"}
+              {submitState === "submitting" ? "处理中..." : mode === "create" ? "创建空间" : "进入管理"}
             </button>
           </form>
         </div>

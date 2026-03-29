@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 
 interface ConfirmDialogProps {
@@ -9,6 +10,7 @@ interface ConfirmDialogProps {
   cancelLabel?: string;
   busy?: boolean;
   danger?: boolean;
+  showCancelButton?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -21,6 +23,7 @@ export function ConfirmDialog({
   cancelLabel = "取消",
   busy = false,
   danger = false,
+  showCancelButton = true,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
@@ -40,9 +43,9 @@ export function ConfirmDialog({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose, onConfirm, open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="dialog-backdrop" onClick={onClose} role="presentation">
       <section aria-modal="true" className="confirm-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <div className="confirm-dialog-copy">
@@ -50,14 +53,17 @@ export function ConfirmDialog({
           <p>{description}</p>
         </div>
         <div className="confirm-dialog-actions">
-          <button className="ghost-button" disabled={busy} onClick={onClose} type="button">
-            {cancelLabel}
-          </button>
+          {showCancelButton ? (
+            <button className="ghost-button" disabled={busy} onClick={onClose} type="button">
+              {cancelLabel}
+            </button>
+          ) : null}
           <button className={danger ? "danger-button" : "button"} disabled={busy} onClick={onConfirm} type="button">
             {busy ? "处理中..." : confirmLabel}
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }

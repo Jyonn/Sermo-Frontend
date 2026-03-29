@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -6,8 +6,37 @@ import { FeedbackState } from "../components/FeedbackState";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
+import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
+
+type FriendSection = {
+  key: string;
+  items: UserDTO[];
+};
+
+function resolveFriendSectionKey(user: UserDTO) {
+  const first = user.name_pinyin?.trim().charAt(0).toUpperCase();
+  if (first && /^[A-Z]$/.test(first)) return first;
+  return "#";
+}
+
+function groupFriends(rows: UserDTO[]) {
+  const order = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+  const buckets = new Map<string, UserDTO[]>();
+
+  rows.forEach((user) => {
+    const key = resolveFriendSectionKey(user);
+    const current = buckets.get(key) ?? [];
+    current.push(user);
+    buckets.set(key, current);
+  });
+
+  return order
+    .map((key) => ({ key, items: buckets.get(key) ?? [] }))
+    .filter((section) => section.items.length) satisfies FriendSection[];
+}
 
 function formatLastSeen(user: UserDTO) {
   if (user.is_alive) return "在线";
@@ -28,16 +57,28 @@ function formatLastSeen(user: UserDTO) {
 }
 
 function notificationChatAvatar(chat: ChatDTO) {
-  if (chat.group) return { name: chat.title ?? "群聊", uri: chat.owner?.avatar_uri ?? undefined };
+  if (chat.group) {
+    return {
+      name: chat.title ?? "群聊",
+      uri: undefined,
+      groupMembers: chat.members.map((member) => ({
+        name: member.name,
+        uri: member.avatar_uri,
+      })),
+    };
+  }
   const peer = chat.members[0];
   return {
     name: peer?.name ?? chat.title ?? "会话",
     uri: peer?.avatar_uri,
+    groupMembers: undefined,
   };
 }
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const { session } = useAuth();
+  const friendSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +115,17 @@ export default function NotificationsPage() {
 
   const normalizedQuery = query.trim().toLowerCase();
   const filteredFriends = useMemo(
-    () => friends.filter((friend) => !normalizedQuery || friend.name.toLowerCase().includes(normalizedQuery)),
+    () =>
+      friends.filter((friend) => {
+        if (!normalizedQuery) return true;
+        return (
+          friend.name.toLowerCase().includes(normalizedQuery) ||
+          friend.name_pinyin?.toLowerCase().includes(normalizedQuery)
+        );
+      }),
     [friends, normalizedQuery]
   );
+  const friendSections = useMemo(() => groupFriends(filteredFriends), [filteredFriends]);
   const filteredIncoming = useMemo(
     () => requests.incoming.filter((request) => !normalizedQuery || request.from_user.name.toLowerCase().includes(normalizedQuery)),
     [normalizedQuery, requests.incoming]
@@ -92,11 +141,11 @@ export default function NotificationsPage() {
 
   const pendingRequestCount = requests.incoming.length + requests.outgoing.length;
 
-  const actOnRequest = async (requestId: number, accept: boolean) => {
+  const actOnRequest = async (userId: number, accept: boolean) => {
     if (!accept && !confirmDangerAction("确认忽略这条好友申请？")) return;
 
     try {
-      await api.respondFriendRequest(requestId, accept);
+      await api.respondFriendRequest(userId, accept);
       const refreshed = await api.getFriendRequests();
       setRequests(refreshed);
     } catch (apiError) {
@@ -105,11 +154,11 @@ export default function NotificationsPage() {
     }
   };
 
-  const revokeOutgoingRequest = async (requestId: number) => {
+  const revokeOutgoingRequest = async (userId: number) => {
     if (!confirmDangerAction("确认撤回这条好友申请？")) return;
 
     try {
-      await api.removeFriendRequest(requestId);
+      await api.removeFriendRequest(userId);
       const refreshed = await api.getFriendRequests();
       setRequests(refreshed);
     } catch (apiError) {
@@ -118,14 +167,8 @@ export default function NotificationsPage() {
     }
   };
 
-  const startDirectChat = async (userId: number) => {
-    try {
-      const chat = await api.createDirectChat(userId);
-      navigate(`/app/chats/${chat.chat_id}`);
-    } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "发起私聊失败";
-      setError(message);
-    }
+  const scrollToFriendSection = (key: string) => {
+    friendSectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -135,6 +178,7 @@ export default function NotificationsPage() {
           <div className="page-toolbar">
             <h2 className="panel-title">通讯</h2>
           </div>
+          <VerificationBanner verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search">
             <span className="material-symbols-outlined">search</span>
             <input
@@ -176,24 +220,55 @@ export default function NotificationsPage() {
         </section>
 
         <section className="list-section">
-          <div className="section-label">好友列表</div>
-          <div className="simple-list">
-            {filteredFriends.map((friend) => (
-              <div key={friend.user_id} className="simple-row person-row">
-                <UserAvatar
-                  className={`mini-avatar friend-avatar-neutral ${friend.is_alive ? "status-online" : ""}`}
-                  name={friend.name}
-                  uri={friend.avatar_uri}
-                />
-                <div className="row-main">
-                  <strong>{friend.name}</strong>
-                  <div className="row-subtle">{formatLastSeen(friend)}</div>
-                </div>
-                <button className="ghost-button row-button" onClick={() => void startDirectChat(friend.user_id)} type="button">
-                  发消息
-                </button>
+          <div className="friend-directory">
+            <div className="friend-directory-list">
+              {friendSections.map((section) => (
+                <section
+                  key={section.key}
+                  ref={(node) => {
+                    friendSectionRefs.current[section.key] = node;
+                  }}
+                  className="friend-directory-section"
+                >
+                  <div className="friend-directory-heading">{section.key}</div>
+                  <div className="simple-list">
+                    {section.items.map((friend) => (
+                      <button
+                        key={friend.user_id}
+                        className="simple-row person-row person-row-link"
+                        onClick={() => navigate(`/app/notifications/friends/${friend.user_id}`)}
+                        type="button"
+                      >
+                        <UserAvatar
+                          className={`mini-avatar friend-avatar-neutral ${friend.is_alive ? "status-online" : ""}`}
+                          name={friend.name}
+                          uri={friend.avatar_uri}
+                        />
+                        <div className="row-main">
+                          <strong>{friend.name}</strong>
+                          <div className="row-subtle">{formatLastSeen(friend)}</div>
+                        </div>
+                        <span className="material-symbols-outlined chevron-inline">chevron_right</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+            {friendSections.length ? (
+              <div className="friend-directory-index" aria-label="好友索引">
+                {friendSections.map((section) => (
+                  <button
+                    key={`friend-index-${section.key}`}
+                    className="friend-directory-index-button"
+                    onClick={() => scrollToFriendSection(section.key)}
+                    type="button"
+                  >
+                    {section.key}
+                  </button>
+                ))}
               </div>
-            ))}
+            ) : null}
           </div>
         </section>
 
@@ -220,10 +295,10 @@ export default function NotificationsPage() {
                     <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
                   </div>
                   <div className="row-actions">
-                    <button className="button row-button" onClick={() => void actOnRequest(request.request_id, true)} type="button">
+                    <button className="button row-button" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
                       同意
                     </button>
-                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.request_id, false)} type="button">
+                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.from_user.user_id, false)} type="button">
                       忽略
                     </button>
                   </div>
@@ -246,7 +321,7 @@ export default function NotificationsPage() {
                     <strong>{request.to_user.name}</strong>
                     <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
                   </div>
-                  <button className="ghost-button row-button" onClick={() => void revokeOutgoingRequest(request.request_id)} type="button">
+                  <button className="ghost-button row-button" onClick={() => void revokeOutgoingRequest(request.to_user.user_id)} type="button">
                     撤回
                   </button>
                 </div>
@@ -280,7 +355,7 @@ export default function NotificationsPage() {
                     }}
                     type="button"
                   >
-                    <UserAvatar className="mini-avatar" name={avatar.name} uri={avatar.uri} />
+                    <UserAvatar className="mini-avatar" groupMembers={avatar.groupMembers} name={avatar.name} uri={avatar.uri} />
                     <div className="row-main">
                       <strong>{chat.title ?? "未命名群聊"}</strong>
                       <div className="row-subtle">{chat.last_message?.content || "打开群聊继续讨论"}</div>

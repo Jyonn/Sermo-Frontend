@@ -1,6 +1,8 @@
 export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
+export type MessageMediaKind = "image" | "video" | "audio";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "system";
 
 export interface ApiEnvelope<T> {
   identifier: string;
@@ -20,6 +22,8 @@ export interface UserDTO extends TinyUserDTO {
   is_alive: boolean;
   verified: boolean;
   last_heartbeat: number;
+  responded_at?: number | null;
+  name_pinyin?: string | null;
   email_verified_at: number | null;
   phone_verified_at: number | null;
   bark_verified_at: number | null;
@@ -31,6 +35,7 @@ export interface SpaceDTO {
   slug: string;
   email: string;
   email_verified_at: number | null;
+  official_user?: TinyUserDTO | null;
   group_square_enabled?: boolean;
   created_at?: number;
 }
@@ -39,12 +44,33 @@ export interface AccessPayload {
   user_id: number;
   name: string;
   space_id: number;
+  has_password?: boolean;
+  official?: boolean;
+  verified?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
+  welcome_message?: string;
+  email?: string | null;
+  phone?: string | null;
+  bark?: string | null;
+  last_heartbeat?: number;
+  email_verified_at?: number | null;
+  phone_verified_at?: number | null;
+  bark_verified_at?: number | null;
   expire?: number;
   time?: number;
   type?: string;
   language?: string;
+}
+
+export interface UserMeDTO extends UserDTO {
+  has_password: boolean;
+  official?: boolean;
+  language?: string;
+  welcome_message?: string;
+  email?: string | null;
+  phone?: string | null;
+  bark?: string | null;
 }
 
 export interface LoginAuthDTO {
@@ -69,6 +95,33 @@ export interface NotificationPreferenceDTO {
   offline_threshold_minutes: number;
 }
 
+export interface AvatarUploadDTO {
+  upload_token: string;
+  upload_url: string;
+  key: string;
+  avatar_uri: string;
+  expires_in: number;
+  max_file_size: number;
+}
+
+export interface MessageUploadDTO {
+  kind: MessageMediaKind;
+  upload_token: string;
+  upload_url: string;
+  key: string;
+  resource_uri: string;
+  expires_in: number;
+  max_file_size: number;
+}
+
+export interface ChatMessagePayloadDTO {
+  kind: MessageKind;
+  text?: string;
+  uri?: string;
+  mime_type?: string;
+  duration_seconds?: number;
+}
+
 export interface FriendshipRequestDTO {
   request_id: number;
   status: number;
@@ -80,11 +133,17 @@ export interface FriendshipRequestDTO {
   responded_at: number | null;
 }
 
+export interface FriendshipStatusDTO {
+  is_friend: boolean;
+  friendship?: FriendshipRequestDTO;
+}
+
 export interface ChatMessageDTO {
   message_id: number;
   user: TinyUserDTO;
   type: number;
   content: string;
+  payload?: ChatMessagePayloadDTO | null;
   created_at: number;
 }
 
@@ -124,11 +183,14 @@ export interface ChatMessage {
   id: number | string;
   clientId: string;
   from: "self" | "other";
+  type: number;
+  kind: MessageKind;
   name: string;
   avatarUri?: string;
   time: string;
   createdAt: number;
   text: string;
+  payload?: ChatMessagePayloadDTO | null;
   status: "sent" | "pending" | "failed";
 }
 

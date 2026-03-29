@@ -9,6 +9,11 @@ import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserD
 const SYNC_LIMIT = 50;
 const CURSOR_KEY_PREFIX = "sermo-sync-cursor:";
 const DEBUG_SYNC = false;
+const MESSAGE_TYPE_IMAGE = 1;
+const MESSAGE_TYPE_FILE = 2;
+const MESSAGE_TYPE_SYSTEM = 3;
+const MESSAGE_TYPE_VIDEO = 4;
+const MESSAGE_TYPE_AUDIO = 5;
 
 interface PopupState {
   chatId: number | null;
@@ -47,15 +52,31 @@ function formatPresence(user: UserDTO | null) {
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
+  const kind =
+    message.payload?.kind ??
+    (message.type === MESSAGE_TYPE_IMAGE
+      ? "image"
+      : message.type === MESSAGE_TYPE_FILE
+        ? "file"
+      : message.type === MESSAGE_TYPE_VIDEO
+        ? "video"
+        : message.type === MESSAGE_TYPE_AUDIO
+          ? "audio"
+          : message.type === MESSAGE_TYPE_SYSTEM
+            ? "system"
+            : "text");
   return {
     id: message.message_id,
     clientId: `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
+    type: message.type,
+    kind,
     name: message.user.name,
     avatarUri: message.user.avatar_uri,
     time: "",
     createdAt: message.created_at,
     text: message.content,
+    payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     status: "sent",
   };
 }
@@ -64,10 +85,44 @@ function sortMessages(items: ChatMessage[]) {
   return [...items].sort((left, right) => Number(left.id) - Number(right.id));
 }
 
+function normalizeResourceUri(value?: string) {
+  if (!value) return "";
+
+  try {
+    const parsed = new URL(value);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    const [path] = value.split("?");
+    return path ?? value;
+  }
+}
+
+function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
+  if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
+  if (existing.kind !== incoming.kind) return incoming;
+  if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio")) return incoming;
+
+  const existingResource = normalizeResourceUri(existing.payload.uri);
+  const incomingResource = normalizeResourceUri(incoming.payload.uri);
+  if (!existingResource || existingResource !== incomingResource) return incoming;
+  if (existing.payload.uri === incoming.payload.uri) return incoming;
+
+  return {
+    ...incoming,
+    payload: {
+      ...incoming.payload,
+      uri: existing.payload.uri,
+    },
+  };
+}
+
 function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   const bucket = new Map<number | string, ChatMessage>();
   current.forEach((message) => bucket.set(message.id, message));
-  incoming.forEach((message) => bucket.set(message.id, message));
+  incoming.forEach((message) => {
+    const existing = bucket.get(message.id);
+    bucket.set(message.id, preserveStableMediaUri(existing, message));
+  });
   return sortMessages([...bucket.values()]);
 }
 

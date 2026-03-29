@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -7,6 +7,7 @@ import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences } from "../types";
 
@@ -36,31 +37,42 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
 
 export default function SettingsPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { session, patchSessionUser } = useAuth();
   const pathname = location.pathname;
   const tab = pathname.split("/").pop() ?? "account";
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [prefs, setPrefs] = useState<NotificationPreferences>(emptyPrefs);
-  const [email, setEmail] = useState("");
-  const [emailCode, setEmailCode] = useState("");
-  const [password, setPassword] = useState("");
   const [welcomeMessage, setWelcomeMessage] = useState("");
   const [contactTarget, setContactTarget] = useState("");
   const [contactCode, setContactCode] = useState("");
   const [contactChannel, setContactChannel] = useState<NotificationChannel>("email");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [contactStatus, setContactStatus] = useState<Record<NotificationChannel, "idle" | "pending" | "verified">>({
-    email: "idle",
-    sms: "idle",
-    bark: "idle",
+  const [contactActionState, setContactActionState] = useState<"idle" | "sending-code" | "binding">("idle");
+  const [pendingContactState, setPendingContactState] = useState<Record<NotificationChannel, boolean>>({
+    email: false,
+    sms: false,
+    bark: false,
   });
-  const [accountSheet, setAccountSheet] = useState<"code" | "verify" | null>(null);
+  const [contactCooldowns, setContactCooldowns] = useState<Record<NotificationChannel, number>>({
+    email: 0,
+    sms: 0,
+    bark: 0,
+  });
+  const [contactExpiresIn, setContactExpiresIn] = useState<Record<NotificationChannel, number>>({
+    email: 0,
+    sms: 0,
+    bark: 0,
+  });
   const [prefSheetChannel, setPrefSheetChannel] = useState<NotificationChannel | null>(null);
   const [contactSheetChannel, setContactSheetChannel] = useState<NotificationChannel | null>(null);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [welcomeSaving, setWelcomeSaving] = useState(false);
+  const contactVerifyBlockRef = useRef<HTMLDivElement | null>(null);
+  const contactSheetBodyRef = useRef<HTMLDivElement | null>(null);
+  const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -100,7 +112,84 @@ export default function SettingsPage() {
     return () => controller.abort();
   }, []);
 
-  const accountLevelLabel = useMemo(() => (session?.user ? "Basic" : "未登录"), [session]);
+  const accountLevelLabel = useMemo(() => {
+    if (!session?.user) return "未登录";
+    return session.user.verified ? "Verified" : "Basic";
+  }, [session]);
+  const emailVerified = Boolean(session?.user?.email_verified_at);
+  const phoneVerified = Boolean(session?.user?.phone_verified_at);
+  const barkVerified = Boolean(session?.user?.bark_verified_at);
+  const emailTarget = session?.user?.email ?? "";
+  const phoneTarget = session?.user?.phone ?? "";
+  const barkTarget = session?.user?.bark ?? "";
+
+  const contactMeta = useMemo(
+    () => ({
+      email: {
+        verified: emailVerified,
+        target: emailTarget,
+        title: "认证邮箱",
+        description: emailVerified ? "已完成邮箱认证，账号已升级。" : "认证邮箱后，你的账号会升级为 Verified。",
+      },
+      sms: {
+        verified: phoneVerified,
+        target: phoneTarget,
+        title: "短信通知",
+        description: phoneVerified ? "已绑定短信接收。" : "绑定手机号后可接收短信通知。",
+      },
+      bark: {
+        verified: barkVerified,
+        target: barkTarget,
+        title: "Bark 通知",
+        description: barkVerified ? "已绑定 Bark 推送。" : "绑定 Bark 后可接收推送提醒。",
+      },
+    }),
+    [barkTarget, barkVerified, emailTarget, emailVerified, phoneTarget, phoneVerified]
+  );
+
+  useEffect(() => {
+    if (tab !== "contacts") return;
+    const channel = new URLSearchParams(location.search).get("channel");
+    if (channel === "email" || channel === "sms" || channel === "bark") {
+      setContactChannel(channel);
+      setContactSheetChannel(channel);
+      setContactTarget(contactMeta[channel].target);
+      setContactCode("");
+    }
+  }, [contactMeta, location.search, tab]);
+
+  useEffect(() => {
+    const hasCooldown = Object.values(contactCooldowns).some((value) => value > 0);
+    const hasExpires = Object.values(contactExpiresIn).some((value) => value > 0);
+    if (!hasCooldown && !hasExpires) return;
+
+    const timer = window.setInterval(() => {
+      setContactCooldowns((current) => ({
+        email: Math.max(0, current.email - 1),
+        sms: Math.max(0, current.sms - 1),
+        bark: Math.max(0, current.bark - 1),
+      }));
+      setContactExpiresIn((current) => ({
+        email: Math.max(0, current.email - 1),
+        sms: Math.max(0, current.sms - 1),
+        bark: Math.max(0, current.bark - 1),
+      }));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [contactCooldowns, contactExpiresIn]);
+
+  useEffect(() => {
+    if (!contactSheetChannel || !pendingContactState[contactSheetChannel]) return;
+    requestAnimationFrame(() => {
+      const body = contactSheetBodyRef.current;
+      if (body) {
+        body.scrollTo({ top: body.scrollHeight, behavior: "smooth" });
+      } else {
+        contactVerifyBlockRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }
+    });
+  }, [contactSheetChannel, pendingContactState]);
 
   const syncPref = async (channel: NotificationChannel, patch: { enabled?: 0 | 1; offline_threshold_minutes?: number }) => {
     setError(null);
@@ -123,42 +212,21 @@ export default function SettingsPage() {
     }
   };
 
-  const sendEmailCode = async () => {
-    setError(null);
-    setSuccessMessage(null);
-    try {
-      await api.sendVerifyEmailCode(email.trim().toLowerCase());
-      setSuccessMessage("邮箱验证码已发送。");
-    } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "发送验证码失败");
-    }
-  };
-
-  const verifyEmail = async () => {
-    setError(null);
-    setSuccessMessage(null);
-    try {
-      await api.verifyEmail({
-        email: email.trim().toLowerCase(),
-        code: emailCode.trim(),
-        password: password.trim(),
-      });
-      setSuccessMessage("邮箱验证成功，账号已升级。");
-    } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "邮箱验证失败");
-    }
-  };
-
   const sendContactCode = async () => {
     setError(null);
     setSuccessMessage(null);
     try {
+      setContactActionState("sending-code");
       const channel = contactChannel === "email" ? 1 : contactChannel === "sms" ? 2 : 3;
-      await api.sendContactCode({ channel, target: contactTarget.trim() });
-      setSuccessMessage("联系方式验证码已发送。");
-      setContactStatus((current) => ({ ...current, [contactChannel]: "pending" }));
+      const normalizedTarget = contactChannel === "email" ? contactTarget.trim().toLowerCase() : contactTarget.trim();
+      const payload = await api.sendContactCode({ channel, target: normalizedTarget });
+      setPendingContactState((current) => ({ ...current, [contactChannel]: true }));
+      setContactCooldowns((current) => ({ ...current, [contactChannel]: 60 }));
+      setContactExpiresIn((current) => ({ ...current, [contactChannel]: payload.expires_in }));
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : "发送联系方式验证码失败");
+    } finally {
+      setContactActionState("idle");
     }
   };
 
@@ -166,12 +234,34 @@ export default function SettingsPage() {
     setError(null);
     setSuccessMessage(null);
     try {
+      setContactActionState("binding");
       const channel = contactChannel === "email" ? 1 : contactChannel === "sms" ? 2 : 3;
-      await api.bindContact({ channel, target: contactTarget.trim(), code: contactCode.trim() });
-      setSuccessMessage("联系方式绑定成功。");
-      setContactStatus((current) => ({ ...current, [contactChannel]: "verified" }));
+      const normalizedTarget = contactChannel === "email" ? contactTarget.trim().toLowerCase() : contactTarget.trim();
+      const me = await api.bindContact({ channel, target: normalizedTarget, code: contactCode.trim() });
+      patchSessionUser({
+        verified: me.verified,
+        language: me.language,
+        welcome_message: me.welcome_message,
+        email: me.email,
+        phone: me.phone,
+        bark: me.bark,
+        last_heartbeat: me.last_heartbeat,
+        email_verified_at: me.email_verified_at,
+        phone_verified_at: me.phone_verified_at,
+        bark_verified_at: me.bark_verified_at,
+      });
+      if (contactChannel === "email") {
+        const rows = await api.getNotificationPrefs();
+        setPrefs(mapPrefs(rows));
+      }
+      setSuccessMessage(contactChannel === "email" ? "邮箱认证成功，账号已升级。" : "联系方式绑定成功。");
+      setPendingContactState((current) => ({ ...current, [contactChannel]: false }));
+      setContactExpiresIn((current) => ({ ...current, [contactChannel]: 0 }));
+      setContactCode("");
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : "绑定联系方式失败");
+    } finally {
+      setContactActionState("idle");
     }
   };
 
@@ -188,6 +278,36 @@ export default function SettingsPage() {
       setAvatarDialogOpen(false);
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : "头像更新失败");
+    } finally {
+      setAvatarSaving(false);
+    }
+  };
+
+  const requestCustomAvatarUpload = () => {
+    avatarFileInputRef.current?.click();
+  };
+
+  const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setError(null);
+    try {
+      setAvatarSaving(true);
+      const payload = await uploadCustomAvatar(file);
+      patchSessionUser({
+        avatar_type: payload.avatar_type,
+        avatar_uri: payload.avatar_uri,
+      });
+      setSuccessMessage("自定义头像已更新。");
+      setAvatarDialogOpen(false);
+    } catch (uploadError) {
+      if (uploadError instanceof AvatarUploadError || uploadError instanceof ApiError) {
+        setError(uploadError.message);
+      } else {
+        setError("头像上传失败");
+      }
     } finally {
       setAvatarSaving(false);
     }
@@ -237,7 +357,7 @@ export default function SettingsPage() {
               <div className="simple-row form-row">
                 <div className="row-main">
                   <strong>头像</strong>
-                  <div className="row-subtle">从 80 组预设头像中选择</div>
+                  <div className="row-subtle">支持预设头像和自定义图片上传</div>
                 </div>
                 <div className="settings-avatar-inline">
                   <UserAvatar className="mini-avatar" name={session?.user.name ?? "Sermo User"} uri={session?.user.avatar_uri} />
@@ -248,10 +368,10 @@ export default function SettingsPage() {
               </div>
               <div className="simple-row form-row">
                 <div className="row-main">
-                  <strong>当前状态</strong>
-                  <div className="row-subtle">{accountLevelLabel}</div>
+                  <strong>当前身份</strong>
+                  <div className="row-subtle">{session?.user?.verified ? "已完成邮箱认证" : "完成邮箱认证后可添加好友、创建群聊"}</div>
                 </div>
-                <span className="count-badge">{session?.user?.user_id ? "已登录" : "访客"}</span>
+                <span className={`small-badge ${session?.user?.verified ? "" : "route-chip"}`}>{accountLevelLabel}</span>
               </div>
             </div>
             <div className="simple-form">
@@ -268,28 +388,18 @@ export default function SettingsPage() {
                   {welcomeSaving ? "保存中..." : "保存欢迎语"}
                 </button>
               </div>
-              <label className="field-label">验证邮箱</label>
-              <input className="input" placeholder="you@sermo.space" value={email} onChange={(event) => setEmail(event.target.value)} />
-              <label className="field-label">验证码</label>
-              <input className="input" value={emailCode} onChange={(event) => setEmailCode(event.target.value)} />
-              <label className="field-label">设置密码</label>
-              <input className="input" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-              <div className="button-row">
-                <button className="ghost-button" onClick={() => void sendEmailCode()} type="button">
-                  发送验证码
-                </button>
-                <button className="button" onClick={() => void verifyEmail()} type="button">
-                  验证并升级
-                </button>
-              </div>
-              <div className="mobile-inline-actions">
-                <button className="ghost-button" onClick={() => setAccountSheet("code")} type="button">
-                  发送验证码
-                </button>
-                <button className="button" onClick={() => setAccountSheet("verify")} type="button">
-                  输入验证码
-                </button>
-              </div>
+              {!session?.user?.verified ? (
+                <div className="inline-note">
+                  认证邮箱后，你的账号会升级为 Verified。
+                  <button
+                    className="ghost-button inline-link-button"
+                    onClick={() => navigate("/app/settings/contacts?channel=email")}
+                    type="button"
+                  >
+                    去认证邮箱
+                  </button>
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}
@@ -300,16 +410,27 @@ export default function SettingsPage() {
             <div className="simple-list">
               {channels.map(([channel, _value, label]) => {
                 const pref = prefs[channel];
+                const requiresEmailVerification = channel === "email" && !emailVerified;
                 return (
                   <div key={channel} className="simple-row form-row">
                     <div className="row-main">
                       <strong>{label}</strong>
-                      <div className="row-subtle">{pref.enabled ? `${pref.threshold} 分钟后提醒` : "已关闭"}</div>
+                      <div className="row-subtle">
+                        {requiresEmailVerification ? "需先认证邮箱" : pref.enabled ? `${pref.threshold} 分钟后提醒` : "已关闭"}
+                      </div>
                     </div>
-                    <button className="ghost-button row-button desktop-pane" onClick={() => setPrefSheetChannel(channel)} type="button">
+                    <button
+                      className="ghost-button row-button desktop-pane"
+                      onClick={() => (requiresEmailVerification ? navigate("/app/settings/contacts?channel=email") : setPrefSheetChannel(channel))}
+                      type="button"
+                    >
                       调整
                     </button>
-                    <button className="icon-button row-trailing-button mobile-only-action" onClick={() => setPrefSheetChannel(channel)} type="button">
+                    <button
+                      className="icon-button row-trailing-button mobile-only-action"
+                      onClick={() => (requiresEmailVerification ? navigate("/app/settings/contacts?channel=email") : setPrefSheetChannel(channel))}
+                      type="button"
+                    >
                       <span className="material-symbols-outlined">tune</span>
                     </button>
                   </div>
@@ -325,12 +446,26 @@ export default function SettingsPage() {
               {channels.map(([channel, _value, label]) => (
                 <div key={channel} className="simple-row form-row">
                   <div className="row-main">
-                    <strong>{label}</strong>
+                    <strong>{contactMeta[channel].title}</strong>
                     <div className="row-subtle">
-                      {contactStatus[channel] === "verified" ? "已绑定" : contactStatus[channel] === "pending" ? "待验证" : "未绑定"}
+                      {contactMeta[channel].verified
+                        ? contactMeta[channel].target || contactMeta[channel].description
+                        : pendingContactState[channel]
+                          ? "验证码已发送，等待确认"
+                          : contactMeta[channel].description}
                     </div>
                   </div>
-                  <button className="ghost-button row-button desktop-pane" onClick={() => { setContactChannel(channel); setContactSheetChannel(channel); }} type="button">
+                  <button
+                    className="ghost-button row-button desktop-pane"
+                    onClick={() => {
+                      setContactChannel(channel);
+                      setContactTarget(contactMeta[channel].target);
+                      setContactCode("");
+                      setPendingContactState((current) => ({ ...current, [channel]: false }));
+                      setContactSheetChannel(channel);
+                    }}
+                    type="button"
+                  >
                     管理
                   </button>
                   <button
@@ -338,6 +473,9 @@ export default function SettingsPage() {
                     onClick={() => {
                       setContactChannel(channel);
                       setContactSheetChannel(channel);
+                      setContactTarget(contactMeta[channel].target);
+                      setContactCode("");
+                      setPendingContactState((current) => ({ ...current, [channel]: false }));
                     }}
                     type="button"
                   >
@@ -349,28 +487,6 @@ export default function SettingsPage() {
           </section>
         ) : null}
       </section>
-
-      <BottomSheet open={accountSheet === "code"} title="发送验证码" description="先确认邮箱" onClose={() => setAccountSheet(null)}>
-        <div className="simple-form">
-          <label className="field-label">验证邮箱</label>
-          <input className="input" placeholder="you@sermo.space" value={email} onChange={(event) => setEmail(event.target.value)} />
-          <button className="button" onClick={() => void sendEmailCode()} type="button">
-            发送验证码
-          </button>
-        </div>
-      </BottomSheet>
-
-      <BottomSheet open={accountSheet === "verify"} title="验证账号" description="输入验证码并升级" onClose={() => setAccountSheet(null)}>
-        <div className="simple-form">
-          <label className="field-label">验证码</label>
-          <input className="input" value={emailCode} onChange={(event) => setEmailCode(event.target.value)} />
-          <label className="field-label">设置密码</label>
-          <input className="input" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          <button className="button" onClick={() => void verifyEmail()} type="button">
-            验证并升级
-          </button>
-        </div>
-      </BottomSheet>
 
       <BottomSheet
         open={Boolean(prefSheetChannel)}
@@ -426,23 +542,85 @@ export default function SettingsPage() {
 
       <BottomSheet
         open={Boolean(contactSheetChannel)}
-        title={contactSheetChannel ? `绑定 ${contactSheetChannel.toUpperCase()}` : "绑定联系方式"}
-        description="发送验证码后完成绑定"
-        onClose={() => setContactSheetChannel(null)}
+        className="contact-bottom-sheet"
+        bodyClassName="contact-sheet-body"
+        title={
+          contactSheetChannel
+            ? contactSheetChannel === "email"
+              ? "认证邮箱"
+              : `绑定 ${contactSheetChannel.toUpperCase()}`
+            : "绑定联系方式"
+        }
+        description={contactSheetChannel === "email" ? "认证邮箱后，账号会升级为 Verified。" : "发送验证码后完成绑定"}
+        onClose={() => {
+          if (contactSheetChannel) {
+            setPendingContactState((current) => ({ ...current, [contactSheetChannel]: false }));
+            setContactExpiresIn((current) => ({ ...current, [contactSheetChannel]: 0 }));
+          }
+          setContactCode("");
+          setContactSheetChannel(null);
+          if (location.search) navigate(pathname, { replace: true });
+        }}
       >
         {contactSheetChannel ? (
-          <div className="simple-form">
-            <label className="field-label">目标地址</label>
-            <input className="input" value={contactTarget} onChange={(event) => setContactTarget(event.target.value)} />
-            <label className="field-label">验证码</label>
-            <input className="input" value={contactCode} onChange={(event) => setContactCode(event.target.value)} />
-            <div className="button-row">
-              <button className="ghost-button" onClick={() => void sendContactCode()} type="button">
-                发送验证码
+          <div ref={contactSheetBodyRef} className="simple-form contact-sheet-form">
+            <div className="field-label-row">
+              <label className="field-label">{contactSheetChannel === "email" ? "邮箱地址" : "目标地址"}</label>
+              {pendingContactState[contactSheetChannel] && contactExpiresIn[contactSheetChannel] > 0 ? (
+                <span className="field-countdown">验证码还有 {contactExpiresIn[contactSheetChannel]} 秒有效</span>
+              ) : null}
+            </div>
+            <input
+              className="input"
+              placeholder={
+                contactSheetChannel === "email"
+                  ? "you@sermo.space"
+                  : contactSheetChannel === "sms"
+                    ? "输入手机号"
+                    : "输入 Bark 地址"
+              }
+              value={contactTarget}
+              onChange={(event) => {
+                setContactTarget(event.target.value);
+                setContactCode("");
+                setPendingContactState((current) => ({ ...current, [contactSheetChannel]: false }));
+                setContactExpiresIn((current) => ({ ...current, [contactSheetChannel]: 0 }));
+              }}
+            />
+            <div className="contact-flow-actions">
+              <button
+                className="button contact-flow-primary"
+                disabled={contactActionState === "sending-code" || !contactTarget.trim() || contactCooldowns[contactSheetChannel] > 0}
+                onClick={() => void sendContactCode()}
+                type="button"
+              >
+                {contactActionState === "sending-code"
+                  ? "发送中..."
+                  : contactCooldowns[contactSheetChannel] > 0
+                    ? `${contactCooldowns[contactSheetChannel]} 秒后重试`
+                    : "发送验证码"}
               </button>
-              <button className="button" onClick={() => void bindContact()} type="button">
-                确认绑定
-              </button>
+            </div>
+            <div
+              ref={contactVerifyBlockRef}
+              className={`contact-verify-block ${pendingContactState[contactSheetChannel] ? "is-visible" : ""}`}
+            >
+              <label className="field-label">验证码</label>
+              <input className="input" value={contactCode} onChange={(event) => setContactCode(event.target.value)} />
+              <div className="contact-flow-actions">
+                <button
+                  className="button contact-flow-primary"
+                  disabled={contactActionState === "binding" || !contactCode.trim()}
+                  onClick={() => void bindContact()}
+                  type="button"
+                >
+                  {contactActionState === "binding"
+                    ? "处理中..."
+                    : contactSheetChannel === "email"
+                      ? "确认认证"
+                      : "确认绑定"}
+                </button>
+              </div>
             </div>
           </div>
         ) : null}
@@ -451,9 +629,17 @@ export default function SettingsPage() {
         currentAvatarUri={session?.user.avatar_uri}
         displayName={session?.user.name ?? "Sermo User"}
         onClose={() => setAvatarDialogOpen(false)}
+        onRequestCustomUpload={requestCustomAvatarUpload}
         onSave={savePresetAvatar}
         open={avatarDialogOpen}
         saving={avatarSaving}
+      />
+      <input
+        ref={avatarFileInputRef}
+        accept="image/*"
+        hidden
+        onChange={(event) => void handleCustomAvatarChange(event)}
+        type="file"
       />
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>

@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 
 interface SideDrawerProps {
@@ -24,9 +25,9 @@ export function SideDrawer({ open, title, eyebrow, description, onClose, childre
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose, open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="drawer-backdrop" onClick={onClose} role="presentation">
       <aside aria-modal="true" className="side-drawer" onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="drawer-topbar">
@@ -43,6 +44,7 @@ export function SideDrawer({ open, title, eyebrow, description, onClose, childre
         </header>
         <div className="drawer-body">{children}</div>
       </aside>
-    </div>
+    </div>,
+    document.body
   );
 }
