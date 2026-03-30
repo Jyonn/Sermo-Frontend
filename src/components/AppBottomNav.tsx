@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, matchPath, useLocation } from "react-router-dom";
+import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
+import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", label: "聊天" },
@@ -27,6 +29,7 @@ export function AppBottomNav() {
     [session]
   );
   const [totalUnread, setTotalUnread] = useState(0);
+  const [incomingRequestCount, setIncomingRequestCount] = useState(0);
 
   useEffect(() => {
     if (!cacheScope) {
@@ -64,6 +67,40 @@ export function AppBottomNav() {
     };
   }, [cacheScope]);
 
+  useEffect(() => {
+    if (!session) {
+      setIncomingRequestCount(0);
+      return;
+    }
+
+    let cancelled = false;
+
+    const syncRequests = async () => {
+      try {
+        const requests = await api.getFriendRequests();
+        if (cancelled) return;
+        setIncomingRequestCount(requests.incoming.length);
+      } catch {
+        if (cancelled) return;
+        setIncomingRequestCount(0);
+      }
+    };
+
+    void syncRequests();
+
+    const handleUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ incomingCount: number }>).detail;
+      if (!detail || cancelled) return;
+      setIncomingRequestCount(Math.max(0, detail.incomingCount));
+    };
+
+    window.addEventListener(FRIEND_REQUESTS_UPDATED_EVENT, handleUpdated as EventListener);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(FRIEND_REQUESTS_UPDATED_EVENT, handleUpdated as EventListener);
+    };
+  }, [session, effectivePathname]);
+
   if (!effectivePathname.startsWith("/app/")) return null;
   if (matchPath("/app/chats/:chatId", effectivePathname)) return null;
 
@@ -77,6 +114,9 @@ export function AppBottomNav() {
             <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
             {route.key === "chats" && totalUnread > 0 ? (
               <span className="nav-unread-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
+            ) : null}
+            {route.key === "notifications" && incomingRequestCount > 0 ? (
+              <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>
             ) : null}
           </span>
           <span className="nav-button-label">{route.label}</span>

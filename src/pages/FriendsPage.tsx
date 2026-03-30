@@ -7,6 +7,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 
@@ -63,6 +64,7 @@ export default function FriendsPage() {
         setFriends(friendRows.map(mapFriend));
         setIncoming(requestRows.incoming);
         setOutgoing(requestRows.outgoing);
+        emitFriendRequestsUpdated(requestRows.incoming.length);
         setViewState("ready");
       })
       .catch((apiError) => {
@@ -99,6 +101,7 @@ export default function FriendsPage() {
       const requests = await api.getFriendRequests();
       setIncoming(requests.incoming);
       setOutgoing(requests.outgoing);
+      emitFriendRequestsUpdated(requests.incoming.length);
       if (accept) {
         const refreshedFriends = await api.getFriends();
         setFriends(refreshedFriends.map(mapFriend));

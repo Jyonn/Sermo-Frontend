@@ -7,6 +7,7 @@ import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
@@ -100,6 +101,7 @@ export default function NotificationsPage() {
       .then(([friendRows, requestRows, chatRows]) => {
         setFriends(friendRows);
         setRequests(requestRows);
+        emitFriendRequestsUpdated(requestRows.incoming.length);
         setGroupChats(chatRows.filter((chat) => chat.group));
         setViewState("ready");
       })
@@ -139,7 +141,7 @@ export default function NotificationsPage() {
     [groupChats, normalizedQuery]
   );
 
-  const pendingRequestCount = requests.incoming.length + requests.outgoing.length;
+  const pendingRequestCount = requests.incoming.length;
 
   const actOnRequest = async (userId: number, accept: boolean) => {
     if (!accept && !confirmDangerAction("确认忽略这条好友申请？")) return;
@@ -148,6 +150,7 @@ export default function NotificationsPage() {
       await api.respondFriendRequest(userId, accept);
       const refreshed = await api.getFriendRequests();
       setRequests(refreshed);
+      emitFriendRequestsUpdated(refreshed.incoming.length);
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "处理申请失败";
       setError(message);
@@ -161,6 +164,7 @@ export default function NotificationsPage() {
       await api.removeFriendRequest(userId);
       const refreshed = await api.getFriendRequests();
       setRequests(refreshed);
+      emitFriendRequestsUpdated(refreshed.incoming.length);
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "撤回申请失败";
       setError(message);
@@ -214,7 +218,7 @@ export default function NotificationsPage() {
                 <strong>群聊</strong>
                 <div className="row-subtle">{groupChats.length ? `你已加入 ${groupChats.length} 个群聊` : "还没有加入任何群聊"}</div>
               </div>
-              {groupChats.length ? <span className="small-badge">{groupChats.length}</span> : <span className="count-badge">查看</span>}
+              <span className="count-badge">查看</span>
             </button>
           </div>
         </section>
