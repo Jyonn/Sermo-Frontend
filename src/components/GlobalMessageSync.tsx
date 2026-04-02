@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { normalizeStableResourceUri } from "../lib/stableResource";
 import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
+import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
@@ -21,6 +22,7 @@ interface PopupState {
   title: string;
   preview: string;
   count: number;
+  avatarUri?: string;
 }
 
 function formatChatListTime(value: number) {
@@ -205,8 +207,12 @@ function resolveNextCursor(
   return maxMessageId;
 }
 
-function avatarLabel(name: string) {
-  return name.slice(0, 2).toUpperCase();
+function previewFromMessage(message: ChatMessage) {
+  if (message.kind === "image") return "[图片]";
+  if (message.kind === "video") return "[视频]";
+  if (message.kind === "audio") return "[语音]";
+  if (message.kind === "file") return "[文件]";
+  return message.text || "收到一条新消息";
 }
 
 function isChatMessageDTO(value: unknown): value is ChatMessageDTO {
@@ -443,8 +449,9 @@ export function GlobalMessageSync() {
         setPopup({
           chatId: uniqueChatIds.size === 1 ? latest.chatId : null,
           title: uniqueChatIds.size === 1 ? chat?.title ?? latest.message.name : `${uniqueChatIds.size} 个会话有新消息`,
-          preview: uniqueChatIds.size === 1 ? latest.message.text : `${chat?.title ?? latest.message.name}: ${latest.message.text}`,
+          preview: uniqueChatIds.size === 1 ? previewFromMessage(latest.message) : `${chat?.title ?? latest.message.name}: ${previewFromMessage(latest.message)}`,
           count: otherChatItems.length,
+          avatarUri: uniqueChatIds.size === 1 ? chat?.avatarUri ?? latest.message.avatarUri : undefined,
         });
 
         if (activeChatId && allItems.some((item) => item.chatId === activeChatId && item.message.from === "other")) {
@@ -492,7 +499,7 @@ export function GlobalMessageSync() {
       }}
       type="button"
     >
-      <div className="chat-sync-popup-icon">{avatarLabel(popup.title)}</div>
+      <UserAvatar className="chat-sync-popup-avatar" name={popup.title} uri={popup.avatarUri} />
       <div className="chat-sync-popup-copy">
         <strong>{popup.title}</strong>
         <span>{popup.preview}</span>

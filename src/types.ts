@@ -143,6 +143,7 @@ export interface ChatMessagePayloadDTO {
   kind: MessageKind;
   text?: string;
   uri?: string;
+  thumbnail_uri?: string;
   mime_type?: string;
   duration_seconds?: number;
 }

@@ -503,15 +503,18 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
 const MessageMediaImage = memo(function MessageMediaImage({
   groupClassName,
   onOpenImage,
+  thumbnailUri,
   uri,
 }: {
   groupClassName: string;
   onOpenImage?: (uri: string) => void;
+  thumbnailUri?: string;
   uri: string;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
+  const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
 
   useEffect(() => {
     setLoaded(false);
@@ -524,9 +527,10 @@ const MessageMediaImage = memo(function MessageMediaImage({
       onClick={() => onOpenImage?.(resolvedUri)}
       type="button"
     >
+      {resolvedThumbnailUri ? <img alt="" aria-hidden="true" className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
       <img
         alt="图片消息"
-        className="message-media-image"
+        className="message-media-image message-media-image-main"
         loading="lazy"
         src={resolvedUri}
         onLoad={() => setLoaded(true)}
@@ -545,7 +549,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
 
 function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) => void) | undefined, groupClassName: string) {
   if (message.kind === "image" && message.payload?.uri) {
-    return <MessageMediaImage groupClassName={groupClassName} onOpenImage={onOpenImage} uri={message.payload.uri} />;
+    return <MessageMediaImage groupClassName={groupClassName} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {
