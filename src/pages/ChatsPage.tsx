@@ -31,7 +31,6 @@ import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResou
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
-const DEBUG_CHAT_LIST_SCROLL = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
@@ -928,8 +927,6 @@ export default function ChatsPage() {
   const composerRef = useRef<HTMLFormElement | null>(null);
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
-  const desktopChatListScrollRef = useRef<HTMLDivElement | null>(null);
-  const mobileChatListScrollRef = useRef<HTMLDivElement | null>(null);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
@@ -1492,86 +1489,6 @@ export default function ChatsPage() {
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
-
-  useEffect(() => {
-    if (!DEBUG_CHAT_LIST_SCROLL) return;
-    const desktopElement = desktopChatListScrollRef.current;
-    const mobileElement = mobileChatListScrollRef.current;
-
-    const logMetrics = (label: string, target: "desktop" | "mobile", element: HTMLDivElement | null) => {
-      if (!element) {
-        console.log("[chat-list-scroll]", label, {
-          target,
-          viewportWidth: window.innerWidth,
-          missing: true,
-        });
-        return;
-      }
-
-      const styles = window.getComputedStyle(element);
-      console.log("[chat-list-scroll]", label, {
-        target,
-        viewportWidth: window.innerWidth,
-        clientHeight: element.clientHeight,
-        scrollHeight: element.scrollHeight,
-        scrollTop: element.scrollTop,
-        canScroll: element.scrollHeight > element.clientHeight,
-        overflowY: styles.overflowY,
-        pointerEvents: styles.pointerEvents,
-        display: styles.display,
-      });
-    };
-
-    const handleScroll = (target: "desktop" | "mobile", element: HTMLDivElement | null) => () => logMetrics("scroll", target, element);
-    const handleWheel = (target: "desktop" | "mobile", element: HTMLDivElement | null) => (event: WheelEvent) => {
-      console.log("[chat-list-scroll] wheel", {
-        target,
-        viewportWidth: window.innerWidth,
-        deltaY: event.deltaY,
-        targetClass: event.target instanceof HTMLElement ? event.target.className : String(event.target),
-      });
-      window.setTimeout(() => logMetrics("after-wheel", target, element), 0);
-    };
-    const handlePointerDown = (target: "desktop" | "mobile", element: HTMLDivElement | null) => (event: PointerEvent) => {
-      console.log("[chat-list-scroll] pointerdown", {
-        target,
-        viewportWidth: window.innerWidth,
-        clientX: event.clientX,
-        clientY: event.clientY,
-        targetClass: event.target instanceof HTMLElement ? event.target.className : String(event.target),
-      });
-      logMetrics("pointerdown", target, element);
-    };
-
-    const desktopScrollHandler = handleScroll("desktop", desktopElement);
-    const desktopWheelHandler = handleWheel("desktop", desktopElement);
-    const desktopPointerHandler = handlePointerDown("desktop", desktopElement);
-    const mobileScrollHandler = handleScroll("mobile", mobileElement);
-    const mobileWheelHandler = handleWheel("mobile", mobileElement);
-    const mobilePointerHandler = handlePointerDown("mobile", mobileElement);
-
-    logMetrics("mount", "desktop", desktopElement);
-    logMetrics("mount", "mobile", mobileElement);
-    desktopElement?.addEventListener("scroll", desktopScrollHandler);
-    desktopElement?.addEventListener("wheel", desktopWheelHandler, { passive: true });
-    desktopElement?.addEventListener("pointerdown", desktopPointerHandler);
-    mobileElement?.addEventListener("scroll", mobileScrollHandler);
-    mobileElement?.addEventListener("wheel", mobileWheelHandler, { passive: true });
-    mobileElement?.addEventListener("pointerdown", mobilePointerHandler);
-    window.setTimeout(() => {
-      logMetrics("after-mount", "desktop", desktopElement);
-      logMetrics("after-mount", "mobile", mobileElement);
-    }, 0);
-
-    return () => {
-      desktopElement?.removeEventListener("scroll", desktopScrollHandler);
-      desktopElement?.removeEventListener("wheel", desktopWheelHandler);
-      desktopElement?.removeEventListener("pointerdown", desktopPointerHandler);
-      mobileElement?.removeEventListener("scroll", mobileScrollHandler);
-      mobileElement?.removeEventListener("wheel", mobileWheelHandler);
-      mobileElement?.removeEventListener("pointerdown", mobilePointerHandler);
-    };
-  }, [filteredChats.length, viewState]);
 
   const ensureCurrentUserVerified = async () => {
     if (currentUserVerified !== null) return currentUserVerified;
@@ -2453,10 +2370,7 @@ export default function ChatsPage() {
         </label>
       </div>
 
-      <div
-        ref={variant === "desktop" ? desktopChatListScrollRef : mobileChatListScrollRef}
-        className={variant === "desktop" ? "sidebar-scroll" : "chat-list-screen-body"}
-      >
+      <div className={variant === "desktop" ? "sidebar-scroll" : "chat-list-screen-body"}>
         {viewState === "loading" ? <FeedbackState title="会话加载中" description="正在同步你最近的聊天。" tone="loading" /> : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
