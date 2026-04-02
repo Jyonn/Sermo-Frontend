@@ -667,7 +667,7 @@ export default function SettingsPage() {
         onClose={() => setPasswordReminderOpen(false)}
         onConfirm={() => {
           setPasswordReminderOpen(false);
-          navigate("/app/settings/account");
+          navigate("/app/menu?drawer=security");
         }}
       />
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />

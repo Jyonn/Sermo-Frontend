@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
@@ -75,6 +75,7 @@ function QrCodeIcon() {
 }
 
 export default function MenuPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
   const currentUserId = session?.user.user_id;
@@ -161,6 +162,13 @@ export default function MenuPage() {
 
     return () => controller.abort();
   }, [currentUserId]);
+
+  useEffect(() => {
+    const drawer = new URLSearchParams(location.search).get("drawer");
+    if (drawer === "security") {
+      setSecurityDrawerOpen(true);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (!authSheetChannel) return;
@@ -748,7 +756,17 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer description="登录安全与密码管理" open={securityDrawerOpen} onClose={() => setSecurityDrawerOpen(false)} title="账号与安全">
+      <SideDrawer
+        description="登录安全与密码管理"
+        open={securityDrawerOpen}
+        onClose={() => {
+          setSecurityDrawerOpen(false);
+          if (new URLSearchParams(location.search).get("drawer") === "security") {
+            navigate("/app/menu", { replace: true });
+          }
+        }}
+        title="账号与安全"
+      >
         <div className="detail-list">
           <div className="simple-list">
             <button
