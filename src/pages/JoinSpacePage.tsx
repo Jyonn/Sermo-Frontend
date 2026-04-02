@@ -18,9 +18,7 @@ function displaySlug(value: string) {
 }
 
 function isPasswordRequiredJoinError(error: unknown) {
-  if (!(error instanceof ApiError)) return false;
-  if (error.identifier === "USER_ERRORS@PASSWORD_REQUIRED") return true;
-  return /password required|需要密码|访问密码|请输入密码/i.test(error.message);
+  return error instanceof ApiError && error.identifier === "USER_ERRORS@PASSWORD_REQUIRED";
 }
 
 export default function JoinSpacePage() {
