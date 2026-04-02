@@ -17,6 +17,12 @@ function displaySlug(value: string) {
     .join(" ");
 }
 
+function isPasswordRequiredJoinError(error: unknown) {
+  if (!(error instanceof ApiError)) return false;
+  if (error.identifier === "USER_ERRORS@PASSWORD_REQUIRED") return true;
+  return /password required|需要密码|访问密码|请输入密码/i.test(error.message);
+}
+
 export default function JoinSpacePage() {
   const { slug: routeSlug = "" } = useParams();
   const navigate = useNavigate();
@@ -111,7 +117,7 @@ export default function JoinSpacePage() {
         navigate("/app/chats", { replace: true });
       }
     } catch (error) {
-      if (error instanceof ApiError && error.identifier === "USER_ERRORS@PASSWORD_REQUIRED") {
+      if (isPasswordRequiredJoinError(error)) {
         setShowPasswordField(true);
         setPasswordHint("这个昵称已经设置了访问密码，请先输入密码。");
         return;
