@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
+import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
@@ -19,7 +20,7 @@ function displaySlug(value: string) {
 
 function isPasswordRequiredJoinError(error: unknown) {
   if (!(error instanceof ApiError)) return false;
-  return error.identifier === "USER_ERRORS@PASSWORD_REQUIRED" || error.identifier.endsWith("@PASSWORD_REQUIRED");
+  return error.identifier === "USER@PASSWORD_REQUIRED";
 }
 
 export default function JoinSpacePage() {
@@ -116,13 +117,6 @@ export default function JoinSpacePage() {
         navigate("/app/chats", { replace: true });
       }
     } catch (error) {
-      if (import.meta.env.DEV && error instanceof ApiError) {
-        console.log("[join-space] submit error", {
-          identifier: error.identifier,
-          message: error.message,
-          status: error.status,
-        });
-      }
       if (isPasswordRequiredJoinError(error)) {
         setShowPasswordField(true);
         setPasswordHint("这个昵称已经设置了访问密码，请先输入密码。");
@@ -217,6 +211,20 @@ export default function JoinSpacePage() {
                 <p className="join-space-kicker">欢迎来到 {space?.name || displaySlug(slug)}</p>
                 <h2>{space?.official_user?.name ? `先和 ${space.official_user.name} 打个招呼，再加入这里` : "先用一个昵称，进入这个空间"}</h2>
               </div>
+
+              {space?.official_user ? (
+                <div className="join-space-official-card">
+                  <UserAvatar
+                    className="avatar join-space-official-avatar"
+                    name={space.official_user.name}
+                    uri={space.official_user.avatar_uri}
+                  />
+                  <div className="join-space-official-copy">
+                    <strong>{space.official_user.name}</strong>
+                    <span>@{space.slug}</span>
+                  </div>
+                </div>
+              ) : null}
 
               <div>
                 <label className="field-label">昵称</label>
