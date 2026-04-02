@@ -4054,12 +4054,19 @@ img {
 }
 
 .desktop-chat-list {
+  grid-template-rows: auto minmax(0, 1fr);
+  height: calc(100vh - 150px);
   min-height: calc(100vh - 150px);
 }
 
 .desktop-chat-list .sidebar-scroll,
 .list-screen .chat-list-screen-body {
   padding: 0;
+}
+
+.desktop-chat-list .sidebar-scroll {
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .desktop-chat-list .sidebar-header,
