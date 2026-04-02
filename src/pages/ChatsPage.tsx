@@ -27,6 +27,7 @@ import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { copyText, formatRelativeTime } from "../lib/presentation";
+import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -119,15 +120,19 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   durationSeconds,
   from,
   uri,
+  className,
 }: {
   durationSeconds?: number;
   from: "self" | "other";
   uri: string;
+  className?: string;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [resolvedDuration, setResolvedDuration] = useState(durationSeconds ?? 0);
+  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -146,6 +151,9 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
 
     const handleEnded = () => {
       audio.currentTime = 0;
+      if (activeThreadAudio === audio) {
+        activeThreadAudio = null;
+      }
       sync();
     };
 
@@ -159,6 +167,9 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
 
     return () => {
       audio.pause();
+      if (activeThreadAudio === audio) {
+        activeThreadAudio = null;
+      }
       audio.removeEventListener("loadedmetadata", sync);
       audio.removeEventListener("durationchange", sync);
       audio.removeEventListener("timeupdate", sync);
@@ -166,7 +177,11 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
       audio.removeEventListener("play", sync);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [durationSeconds, uri]);
+  }, [durationSeconds, resolvedUri]);
+
+  useEffect(() => {
+    setRetryWithFreshUri(false);
+  }, [uri]);
 
   const totalDuration = resolvedDuration > 0 ? resolvedDuration : durationSeconds ?? 0;
   const progress = totalDuration > 0 ? Math.min(1, currentTime / totalDuration) : 0;
@@ -178,6 +193,11 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
 
     if (audio.paused || audio.ended) {
       try {
+        if (activeThreadAudio && activeThreadAudio !== audio) {
+          activeThreadAudio.pause();
+          activeThreadAudio.currentTime = 0;
+        }
+        activeThreadAudio = audio;
         await audio.play();
       } catch {
         setIsPlaying(false);
@@ -186,10 +206,13 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     }
 
     audio.pause();
+    if (activeThreadAudio === audio) {
+      activeThreadAudio = null;
+    }
   };
 
   return (
-    <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""}`}>
+    <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}>
       <button
         aria-label={isPlaying ? "暂停语音" : "播放语音"}
         className="message-audio-play"
@@ -216,10 +239,25 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           ))}
         </div>
       </div>
-      <audio className="message-audio-player" preload="metadata" ref={audioRef} src={uri} />
+      <audio
+        className="message-audio-player"
+        preload="metadata"
+        ref={audioRef}
+        src={resolvedUri}
+        onError={() => {
+          if (!retryWithFreshUri) {
+            forgetStableResourceUri(uri);
+            setRetryWithFreshUri(true);
+            return;
+          }
+          setIsPlaying(false);
+        }}
+      />
     </div>
   );
 });
+
+let activeThreadAudio: HTMLAudioElement | null = null;
 
 function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_IMAGE) return "image";
@@ -321,25 +359,13 @@ function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
   );
 }
 
-function normalizeResourceUri(value?: string) {
-  if (!value) return "";
-
-  try {
-    const parsed = new URL(value);
-    return `${parsed.origin}${parsed.pathname}`;
-  } catch {
-    const [path] = value.split("?");
-    return path ?? value;
-  }
-}
-
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
   if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
   if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return incoming;
   if (existing.kind !== incoming.kind) return incoming;
 
-  const existingResource = normalizeResourceUri(existing.payload.uri);
-  const incomingResource = normalizeResourceUri(incoming.payload.uri);
+  const existingResource = normalizeStableResourceUri(existing.payload.uri);
+  const incomingResource = normalizeStableResourceUri(incoming.payload.uri);
   if (!existingResource || existingResource !== incomingResource) return incoming;
   if (existing.payload.uri === incoming.payload.uri) return incoming;
 
@@ -433,6 +459,24 @@ function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
   };
 }
 
+function previewFromKind(kind: MessageKind, text: string) {
+  if (kind === "image") return "[图片]";
+  if (kind === "video") return "[视频]";
+  if (kind === "audio") return "[语音]";
+  if (kind === "file") return "[文件]";
+  return text || "暂无消息";
+}
+
+function previewFromMessage(message: Pick<ChatMessage, "kind" | "text">) {
+  return previewFromKind(message.kind, message.text);
+}
+
+function previewFromDto(message: ChatMessageDTO | null) {
+  if (!message) return "暂无消息";
+  const kind = message.payload?.kind ?? messageKindFromType(message.type);
+  return previewFromKind(kind, message.content);
+}
+
 function clearChatUnread(chat: Chat) {
   if (chat.unread === 0) return chat;
   return {
@@ -456,29 +500,65 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
 }
 
-function renderMessageContent(message: ChatMessage, onOpenImage?: (uri: string) => void) {
+const MessageMediaImage = memo(function MessageMediaImage({
+  groupClassName,
+  onOpenImage,
+  uri,
+}: {
+  groupClassName: string;
+  onOpenImage?: (uri: string) => void;
+  uri: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
+
+  useEffect(() => {
+    setLoaded(false);
+    setRetryWithFreshUri(false);
+  }, [uri]);
+
+  return (
+    <button
+      className={`message-media-frame image-button ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
+      onClick={() => onOpenImage?.(resolvedUri)}
+      type="button"
+    >
+      <img
+        alt="图片消息"
+        className="message-media-image"
+        loading="lazy"
+        src={resolvedUri}
+        onLoad={() => setLoaded(true)}
+        onError={() => {
+          if (!retryWithFreshUri) {
+            forgetStableResourceUri(uri);
+            setRetryWithFreshUri(true);
+            return;
+          }
+          setLoaded(true);
+        }}
+      />
+    </button>
+  );
+});
+
+function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) => void) | undefined, groupClassName: string) {
   if (message.kind === "image" && message.payload?.uri) {
-    return (
-      <button
-        className={`message-media-frame image-button ${message.from}`}
-        onClick={() => onOpenImage?.(message.payload?.uri ?? "")}
-        type="button"
-      >
-        <img alt="图片消息" className="message-media-image" loading="lazy" src={message.payload.uri} />
-      </button>
-    );
+    return <MessageMediaImage groupClassName={groupClassName} onOpenImage={onOpenImage} uri={message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {
+    const resolvedUri = resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
     return (
-      <div className={`message-media-frame video ${message.from}`}>
-        <video className="message-media-video" controls playsInline preload="metadata" src={message.payload.uri} />
+      <div className={`message-media-frame video ${groupClassName}`.trim()}>
+        <video className="message-media-video" controls playsInline preload="metadata" src={resolvedUri} />
       </div>
     );
   }
 
   if (message.kind === "audio" && message.payload?.uri) {
-    return <AudioMessagePlayer durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
+    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
   }
 
   return <span className="message-text">{message.text}</span>;
@@ -508,7 +588,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   onOpenActions,
   onRetry,
 }: MessageBubbleRowProps) {
-  const showRetry = from === "self" && message.status === "failed";
+  const showRetry = from === "self" && message.status === "failed" && message.kind === "text";
   const canOpenActions = message.status === "sent";
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
@@ -545,6 +625,15 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     if (deltaX > 8 || deltaY > 8) clearLongPress();
   };
 
+  const groupClassName = [
+    from === "self" ? "self" : "other",
+    isFirst ? "group-start" : "",
+    isLast ? "group-end" : "",
+    message.status !== "sent" ? `is-${message.status}` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}>
       <div className={`message-bubble-shell ${from}`}>
@@ -580,7 +669,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
-          {renderMessageContent(message, onOpenImage)}
+          {renderMessageContent(message, onOpenImage, groupClassName)}
         </div>
       </div>
     </div>
@@ -687,15 +776,16 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const title = chat.title || peer?.name || "未命名会话";
   const presence = formatPresence(peer);
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
+  const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;
 
   return {
     id: chat.chat_id,
     title,
     avatarUri: peer?.avatar_uri,
     subtitle: chat.group ? `${chat.members.length} 人` : presence,
-    preview: chat.last_message?.content || "暂无消息",
-    time: formatChatListTime(chat.last_chat_at),
-    lastActivity: chat.last_chat_at,
+    preview: previewFromDto(chat.last_message),
+    time: formatChatListTime(lastActivity),
+    lastActivity,
     unread: chat.unread_count ?? 0,
     online: chat.group ? false : Boolean(peer?.is_alive),
     verified: Boolean(peer?.verified),
@@ -1069,14 +1159,10 @@ export default function ChatsPage() {
     setOlderState("idle");
     setHasOlderMessages(false);
 
-    const restoreScroll = (scrollTop: number) => {
+    const restoreScroll = () => {
       requestAnimationFrame(() => {
         const element = messageScrollRef.current;
         if (!element) return;
-        if (scrollTop > 0) {
-          element.scrollTop = scrollTop;
-          return;
-        }
         element.scrollTop = element.scrollHeight;
       });
     };
@@ -1088,7 +1174,6 @@ export default function ChatsPage() {
         [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(memoryThread.messages)),
       }));
       setHasOlderMessages(memoryThread.hasOlderMessages);
-      restoreScroll(memoryThread.scrollTop);
     } else {
       void chatCache.hydrateThread(cacheScope, selectedChat.id).then((cached) => {
         if (controller.signal.aborted || didLoadNetwork || !cached?.messages.length) return;
@@ -1097,7 +1182,6 @@ export default function ChatsPage() {
           [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(cached.messages)),
         }));
         setHasOlderMessages(cached.hasOlderMessages);
-        restoreScroll(cached.scrollTop);
       });
     }
 
@@ -1154,7 +1238,7 @@ export default function ChatsPage() {
           scrollTop: memoryThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
-        if (!memoryThread?.messages.length) restoreScroll(0);
+        if (!memoryThread?.messages.length) restoreScroll();
         void api.markChatRead(selectedChat.id).then(() => {
           setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
         });
@@ -1268,6 +1352,12 @@ export default function ChatsPage() {
   }, [composerHeight, keyboardOffset, selectedChat]);
 
   useEffect(() => {
+    if (!selectedChat || !selectedMessages.length) return;
+    if (!stickToBottomRef.current || revealAnimatingRef.current) return;
+    scrollThreadToBottom(messageScrollRef.current);
+  }, [selectedChat?.id, selectedMessages[selectedMessages.length - 1]?.clientId]);
+
+  useEffect(() => {
     if (typeof document === "undefined") return;
 
     const shouldLockViewport = Boolean(selectedChat) && typeof window !== "undefined" && window.innerWidth <= 900;
@@ -1305,7 +1395,7 @@ export default function ChatsPage() {
       const currentChatIncoming = selectedChat ? grouped.get(selectedChat.id) : undefined;
       const shouldRevealCurrentChat = Boolean(currentChatIncoming?.length) && isNearThreadBottom(messageScrollRef.current, 120);
       if (selectedChat && shouldRevealCurrentChat) {
-        queueThreadReveal(selectedChat.id);
+        stickToBottomRef.current = true;
       }
 
       setMessages((current) => {
@@ -1325,7 +1415,7 @@ export default function ChatsPage() {
             const unreadIncrement = chat.id === selectedChat?.id ? 0 : incoming.filter((item) => item.message.from === "other").length;
             return {
               ...chat,
-              preview: newest.text,
+              preview: previewFromMessage(newest),
               time: formatChatListTime(newest.createdAt),
               lastActivity: newest.createdAt,
               unread: chat.id === selectedChat?.id ? 0 : chat.unread + unreadIncrement,
@@ -1582,7 +1672,6 @@ export default function ChatsPage() {
     if (!message) return;
 
     const optimisticMessage = createPendingMessage(message, currentUserName);
-    queueThreadReveal(selectedChat.id);
 
     try {
       setSendState("sending");
@@ -1685,7 +1774,7 @@ export default function ChatsPage() {
             chat.id === selectedChat.id
               ? {
                   ...chat,
-                  preview: deliveredMessage.text,
+                  preview: previewFromMessage(deliveredMessage),
                   time: "刚刚",
                   lastActivity: deliveredMessage.createdAt,
                   unread: 0,
@@ -1708,10 +1797,11 @@ export default function ChatsPage() {
       [chatId]: sortMessages([...(current[chatId] ?? []), deliveredMessage]),
     }));
     setChats((currentChats) =>
-      sortChats(currentChats.map((chat) => (chat.id === chatId ? updateChatSummary(chat, deliveredMessage.text, deliveredMessage.createdAt) : chat)))
+      sortChats(
+        currentChats.map((chat) => (chat.id === chatId ? updateChatSummary(chat, previewFromMessage(deliveredMessage), deliveredMessage.createdAt) : chat))
+      )
     );
     stickToBottomRef.current = true;
-    queueThreadReveal(chatId);
     triggerMessageEntrance(deliveredMessage.clientId);
   };
 
@@ -1721,9 +1811,39 @@ export default function ChatsPage() {
     extraPayload: Partial<ChatMessagePayloadDTO> = {}
   ) => {
     if (!selectedChat) return;
+    const createdAt = Math.floor(Date.now() / 1000);
+    const objectUrl = URL.createObjectURL(file);
+    const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const pendingMessage: ChatMessage = {
+      id: clientId,
+      clientId,
+      from: "self",
+      type: messageTypeFromKind(kind),
+      kind,
+      name: currentUserName,
+      time: formatTime(createdAt),
+      createdAt,
+      text: previewFromKind(kind, ""),
+      payload: {
+        kind,
+        uri: objectUrl,
+        mime_type: file.type || extraPayload.mime_type,
+        duration_seconds: extraPayload.duration_seconds,
+      },
+      status: "pending",
+    };
 
-    const label = kind === "image" ? "图片" : kind === "video" ? "视频" : "语音";
-    openStatusModal(`正在发送${label}`, `${label}已发送`, `${label}发送失败`);
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
+    }));
+    setChats((currentChats) =>
+      sortChats(
+        currentChats.map((chat) => (chat.id === selectedChat.id ? updateChatSummary(chat, previewFromMessage(pendingMessage), pendingMessage.createdAt) : chat))
+      )
+    );
+    stickToBottomRef.current = true;
+    triggerMessageEntrance(pendingMessage.clientId);
 
     try {
       const upload = await uploadMessageMedia(file, kind);
@@ -1737,20 +1857,26 @@ export default function ChatsPage() {
         })
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
-      appendDeliveredMessage(selectedChat.id, deliveredMessage);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], pendingMessage.clientId, deliveredMessage),
+      }));
+      setChats((currentChats) =>
+        sortChats(
+          currentChats.map((chat) =>
+            chat.id === selectedChat.id ? updateChatSummary(chat, previewFromMessage(deliveredMessage), deliveredMessage.createdAt) : chat
+          )
+        )
+      );
+      URL.revokeObjectURL(objectUrl);
       return true;
     } catch (error) {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], pendingMessage.clientId, "failed"),
+      }));
       const uploadError = toMessageUploadError(error);
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: uploadError.message,
-            }
-          : null
-      );
+      setPageError(uploadError.message);
       return false;
     }
   };
@@ -2344,6 +2470,9 @@ export default function ChatsPage() {
                 onScroll={() => {
                   const element = messageScrollRef.current;
                   stickToBottomRef.current = isNearThreadBottom(element);
+                  if (element && element.scrollTop <= 24 && hasOlderMessages && olderState === "idle") {
+                    void loadOlderMessages();
+                  }
                   if (!cacheScope || !selectedChat) return;
                   chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
                 }}

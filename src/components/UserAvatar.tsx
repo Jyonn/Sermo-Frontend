@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 
 interface GroupAvatarMember {
   name: string;
@@ -25,12 +26,15 @@ function normalizeGroupMembers(groupMembers?: GroupAvatarMember[] | null) {
 
 function AvatarTile({ name, uri }: GroupAvatarMember) {
   const [failed, setFailed] = useState(false);
+  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const resolvedUri = retryWithFreshUri ? uri ?? undefined : resolveStableResourceUri(uri);
 
   useEffect(() => {
     setFailed(false);
+    setRetryWithFreshUri(false);
   }, [uri]);
 
-  const canShowImage = Boolean(uri) && !failed;
+  const canShowImage = Boolean(resolvedUri) && !failed;
 
   if (canShowImage) {
     return (
@@ -38,8 +42,15 @@ function AvatarTile({ name, uri }: GroupAvatarMember) {
         alt=""
         className="avatar-group-image"
         loading="lazy"
-        src={uri ?? ""}
-        onError={() => setFailed(true)}
+        src={resolvedUri ?? ""}
+        onError={() => {
+          if (!retryWithFreshUri && uri) {
+            forgetStableResourceUri(uri);
+            setRetryWithFreshUri(true);
+            return;
+          }
+          setFailed(true);
+        }}
       />
     );
   }
@@ -55,15 +66,18 @@ function groupLayoutClass(count: number) {
 
 export function UserAvatar({ name, uri, className, groupMembers }: UserAvatarProps) {
   const [failed, setFailed] = useState(false);
+  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
   const resolvedName = singleSource?.name ?? name;
-  const resolvedUri = singleSource?.uri ?? uri;
+  const sourceUri = singleSource?.uri ?? uri;
+  const resolvedUri = retryWithFreshUri ? sourceUri ?? undefined : resolveStableResourceUri(sourceUri);
 
   useEffect(() => {
     setFailed(false);
-  }, [resolvedUri]);
+    setRetryWithFreshUri(false);
+  }, [sourceUri]);
 
   const canShowImage = Boolean(resolvedUri) && !failed;
 
@@ -83,7 +97,14 @@ export function UserAvatar({ name, uri, className, groupMembers }: UserAvatarPro
           className="avatar-image"
           loading="lazy"
           src={resolvedUri ?? ""}
-          onError={() => setFailed(true)}
+          onError={() => {
+            if (!retryWithFreshUri && sourceUri) {
+              forgetStableResourceUri(sourceUri);
+              setRetryWithFreshUri(true);
+              return;
+            }
+            setFailed(true);
+          }}
         />
       ) : (
         avatarLabel(resolvedName)

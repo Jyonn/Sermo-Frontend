@@ -3,6 +3,7 @@ import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
+import { normalizeStableResourceUri } from "../lib/stableResource";
 import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
@@ -85,25 +86,13 @@ function sortMessages(items: ChatMessage[]) {
   return [...items].sort((left, right) => Number(left.id) - Number(right.id));
 }
 
-function normalizeResourceUri(value?: string) {
-  if (!value) return "";
-
-  try {
-    const parsed = new URL(value);
-    return `${parsed.origin}${parsed.pathname}`;
-  } catch {
-    const [path] = value.split("?");
-    return path ?? value;
-  }
-}
-
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
   if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
   if (existing.kind !== incoming.kind) return incoming;
   if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio")) return incoming;
 
-  const existingResource = normalizeResourceUri(existing.payload.uri);
-  const incomingResource = normalizeResourceUri(incoming.payload.uri);
+  const existingResource = normalizeStableResourceUri(existing.payload.uri);
+  const incomingResource = normalizeStableResourceUri(incoming.payload.uri);
   if (!existingResource || existingResource !== incomingResource) return incoming;
   if (existing.payload.uri === incoming.payload.uri) return incoming;
 
@@ -153,14 +142,16 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
       return left.name.localeCompare(right.name, "zh-CN");
     });
 
+  const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;
+
   return {
     id: chat.chat_id,
     title,
     avatarUri: peer?.avatar_uri,
     subtitle: chat.group ? `${chat.members.length} 人` : presence,
     preview: chat.last_message?.content || "暂无消息",
-    time: formatChatListTime(chat.last_chat_at),
-    lastActivity: chat.last_chat_at,
+    time: formatChatListTime(lastActivity),
+    lastActivity,
     unread: chat.unread_count ?? 0,
     online: chat.group ? false : Boolean(peer?.is_alive),
     verified: Boolean(peer?.verified),
