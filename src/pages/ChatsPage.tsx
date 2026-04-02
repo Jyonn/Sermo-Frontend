@@ -31,6 +31,7 @@ import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResou
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
+const DEBUG_CHAT_LIST_SCROLL = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
@@ -927,6 +928,7 @@ export default function ChatsPage() {
   const composerRef = useRef<HTMLFormElement | null>(null);
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
+  const desktopChatListScrollRef = useRef<HTMLDivElement | null>(null);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
@@ -1489,6 +1491,56 @@ export default function ChatsPage() {
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
+
+  useEffect(() => {
+    if (!DEBUG_CHAT_LIST_SCROLL) return;
+    const element = desktopChatListScrollRef.current;
+    if (!element) {
+      console.log("[chat-list-scroll] no desktop scroller");
+      return;
+    }
+
+    const logMetrics = (label: string) => {
+      const styles = window.getComputedStyle(element);
+      console.log("[chat-list-scroll]", label, {
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+        scrollTop: element.scrollTop,
+        canScroll: element.scrollHeight > element.clientHeight,
+        overflowY: styles.overflowY,
+        pointerEvents: styles.pointerEvents,
+      });
+    };
+
+    const handleScroll = () => logMetrics("scroll");
+    const handleWheel = (event: WheelEvent) => {
+      console.log("[chat-list-scroll] wheel", {
+        deltaY: event.deltaY,
+        target: event.target instanceof HTMLElement ? event.target.className : String(event.target),
+      });
+      window.setTimeout(() => logMetrics("after-wheel"), 0);
+    };
+    const handlePointerDown = (event: PointerEvent) => {
+      console.log("[chat-list-scroll] pointerdown", {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        target: event.target instanceof HTMLElement ? event.target.className : String(event.target),
+      });
+      logMetrics("pointerdown");
+    };
+
+    logMetrics("mount");
+    element.addEventListener("scroll", handleScroll);
+    element.addEventListener("wheel", handleWheel, { passive: true });
+    element.addEventListener("pointerdown", handlePointerDown);
+    window.setTimeout(() => logMetrics("after-mount"), 0);
+
+    return () => {
+      element.removeEventListener("scroll", handleScroll);
+      element.removeEventListener("wheel", handleWheel);
+      element.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [filteredChats.length, viewState]);
 
   const ensureCurrentUserVerified = async () => {
     if (currentUserVerified !== null) return currentUserVerified;
@@ -2370,7 +2422,7 @@ export default function ChatsPage() {
         </label>
       </div>
 
-      <div className={variant === "desktop" ? "sidebar-scroll" : "chat-list-screen-body"}>
+      <div ref={variant === "desktop" ? desktopChatListScrollRef : undefined} className={variant === "desktop" ? "sidebar-scroll" : "chat-list-screen-body"}>
         {viewState === "loading" ? <FeedbackState title="会话加载中" description="正在同步你最近的聊天。" tone="loading" /> : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
