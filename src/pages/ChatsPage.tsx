@@ -943,6 +943,7 @@ export default function ChatsPage() {
   const recordingChunksRef = useRef<Blob[]>([]);
   const recordingCancelledRef = useRef(false);
   const recordingStopRequestedRef = useRef(false);
+  const isComposingRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
@@ -2527,7 +2528,17 @@ export default function ChatsPage() {
                         value={draft}
                         rows={1}
                         onChange={(event) => setDraft(event.target.value)}
+                        onCompositionStart={() => {
+                          isComposingRef.current = true;
+                        }}
+                        onCompositionEnd={() => {
+                          isComposingRef.current = false;
+                        }}
                         onKeyDown={(event) => {
+                          const nativeEvent = event.nativeEvent as KeyboardEvent & { isComposing?: boolean; keyCode?: number };
+                          if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.keyCode === 229) {
+                            return;
+                          }
                           if (event.key === "Enter" && !event.shiftKey) {
                             event.preventDefault();
                             event.currentTarget.form?.requestSubmit();
