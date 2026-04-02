@@ -18,7 +18,8 @@ function displaySlug(value: string) {
 }
 
 function isPasswordRequiredJoinError(error: unknown) {
-  return error instanceof ApiError && error.identifier === "USER_ERRORS@PASSWORD_REQUIRED";
+  if (!(error instanceof ApiError)) return false;
+  return error.identifier === "USER_ERRORS@PASSWORD_REQUIRED" || error.identifier.endsWith("@PASSWORD_REQUIRED");
 }
 
 export default function JoinSpacePage() {
@@ -115,6 +116,13 @@ export default function JoinSpacePage() {
         navigate("/app/chats", { replace: true });
       }
     } catch (error) {
+      if (import.meta.env.DEV && error instanceof ApiError) {
+        console.log("[join-space] submit error", {
+          identifier: error.identifier,
+          message: error.message,
+          status: error.status,
+        });
+      }
       if (isPasswordRequiredJoinError(error)) {
         setShowPasswordField(true);
         setPasswordHint("这个昵称已经设置了访问密码，请先输入密码。");
