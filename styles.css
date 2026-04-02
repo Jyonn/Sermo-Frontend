@@ -4961,9 +4961,17 @@ img {
 }
 
 .join-space-official-copy span {
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(175, 220, 255, 0.8);
+  background: rgba(236, 247, 255, 0.94);
   color: var(--brand-blue-deep);
-  font-size: 0.94rem;
-  font-weight: 700;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
 }
 
 .join-space-state {

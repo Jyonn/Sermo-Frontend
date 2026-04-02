@@ -209,7 +209,7 @@ export default function JoinSpacePage() {
             <form className="auth-form" onSubmit={(event) => void submit(event)}>
               <div className="join-space-head">
                 <p className="join-space-kicker">欢迎来到 {space?.name || displaySlug(slug)}</p>
-                <h2>{space?.official_user?.name ? `先和 ${space.official_user.name} 打个招呼，再加入这里` : "先用一个昵称，进入这个空间"}</h2>
+                <h2>先用一个昵称，进入这个空间</h2>
               </div>
 
               {space?.official_user ? (
