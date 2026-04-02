@@ -4057,6 +4057,7 @@ img {
   grid-template-rows: auto minmax(0, 1fr);
   height: calc(100vh - 150px);
   min-height: calc(100vh - 150px);
+  overflow: hidden;
 }
 
 .desktop-chat-list .sidebar-scroll,
@@ -4065,6 +4066,7 @@ img {
 }
 
 .desktop-chat-list .sidebar-scroll {
+  height: 100%;
   min-height: 0;
   overflow-y: auto;
 }
