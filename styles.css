@@ -1481,6 +1481,7 @@ img {
 }
 
 .message-media-frame {
+  position: relative;
   overflow: hidden;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.94);
@@ -1497,6 +1498,7 @@ img {
   padding: 0;
   display: block;
   cursor: zoom-in;
+  width: fit-content;
 }
 
 .message-media-frame.self {
@@ -1527,6 +1529,11 @@ img {
   position: absolute;
   inset: 0;
   z-index: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
 }
 
 .message-media-image-main {
@@ -1562,6 +1569,8 @@ img {
 
 .message-media-frame.is-loaded .message-media-image-thumb {
   opacity: 0;
+  filter: none;
+  transform: scale(1);
 }
 
 .message-image-preview-backdrop {

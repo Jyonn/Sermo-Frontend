@@ -1,15 +1,25 @@
 const stableResourceMap = new Map<string, string>();
 
+function normalizedSearchKey(search: string) {
+  if (!search) return "";
+  const params = new URLSearchParams(search);
+  params.delete("e");
+  params.delete("token");
+  const normalized = params.toString();
+  return normalized ? `?${normalized}` : "";
+}
+
 export function normalizeStableResourceUri(value?: string | null) {
   const trimmed = value?.trim();
   if (!trimmed) return "";
 
   try {
     const parsed = new URL(trimmed);
-    return `${parsed.origin}${parsed.pathname}`;
+    return `${parsed.origin}${parsed.pathname}${normalizedSearchKey(parsed.search)}`;
   } catch {
-    const [path] = trimmed.split("?");
-    return path ?? trimmed;
+    const [path, rawSearch = ""] = trimmed.split("?");
+    const search = normalizedSearchKey(rawSearch ? `?${rawSearch}` : "");
+    return `${path ?? trimmed}${search}`;
   }
 }
 

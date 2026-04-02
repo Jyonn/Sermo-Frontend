@@ -513,6 +513,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
 }) {
   const [loaded, setLoaded] = useState(false);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
   const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
 
@@ -520,6 +521,12 @@ const MessageMediaImage = memo(function MessageMediaImage({
     setLoaded(false);
     setRetryWithFreshUri(false);
   }, [uri]);
+
+  useEffect(() => {
+    if (imageRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, [resolvedUri]);
 
   return (
     <button
@@ -532,6 +539,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
         alt="图片消息"
         className="message-media-image message-media-image-main"
         loading="lazy"
+        ref={imageRef}
         src={resolvedUri}
         onLoad={() => setLoaded(true)}
         onError={() => {
