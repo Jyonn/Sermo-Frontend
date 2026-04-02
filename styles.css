@@ -4047,37 +4047,36 @@ img {
 }
 
 .list-screen,
-.desktop-chat-list {
+.mobile-chat-list-screen {
   display: grid;
   gap: 14px;
   min-height: 0;
 }
 
-.desktop-chat-list {
+.mobile-chat-list-screen {
   grid-template-rows: auto minmax(0, 1fr);
   height: calc(100vh - 150px);
   min-height: calc(100vh - 150px);
   overflow: hidden;
 }
 
-.desktop-chat-list .sidebar-scroll,
+.mobile-chat-list-screen .chat-list-screen-body,
 .list-screen .chat-list-screen-body {
   padding: 0;
 }
 
-.desktop-chat-list .sidebar-scroll {
+.mobile-chat-list-screen .chat-list-screen-body {
   height: 100%;
   min-height: 0;
   overflow-y: auto;
 }
 
-.desktop-chat-list .sidebar-header,
+.mobile-chat-list-screen .chat-list-screen-header,
 .chat-list-screen-header {
   padding: 0;
   border: 0;
 }
 
-.desktop-chat-list .chat-list,
 .mobile-chat-list-screen .chat-list {
   gap: 0;
 }

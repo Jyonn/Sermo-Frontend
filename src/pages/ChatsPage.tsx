@@ -2351,9 +2351,9 @@ export default function ChatsPage() {
     </button>
   );
 
-  const renderChatList = (variant: "desktop" | "mobile") => (
+  const renderChatList = () => (
     <>
-      <div className={variant === "desktop" ? "sidebar-header minimal-page-header" : "chat-list-screen-header minimal-page-header"}>
+      <div className="chat-list-screen-header minimal-page-header">
         <div className="page-toolbar">
           <h2 className="panel-title">聊天</h2>
         </div>
@@ -2370,7 +2370,7 @@ export default function ChatsPage() {
         </label>
       </div>
 
-      <div className={variant === "desktop" ? "sidebar-scroll" : "chat-list-screen-body"}>
+      <div className="chat-list-screen-body">
         {viewState === "loading" ? <FeedbackState title="会话加载中" description="正在同步你最近的聊天。" tone="loading" /> : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
@@ -2452,9 +2452,7 @@ export default function ChatsPage() {
       }
     >
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
-        <aside className="desktop-pane list-screen desktop-chat-list">{renderChatList("desktop")}</aside>
-
-        <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList("mobile")}</section>
+        <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>
           {displayedChat ? (
