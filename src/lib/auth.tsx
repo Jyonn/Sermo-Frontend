@@ -38,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSessionState] = useState<AuthSession | null>(() => authStorage.get());
   const [ready, setReady] = useState(false);
   const heartbeatInFlightRef = useRef(false);
-  const bootstrapStartedRef = useRef(false);
 
   configureApiAuth({
     getSession: () => authStorage.get(),
@@ -53,9 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   useEffect(() => {
-    if (bootstrapStartedRef.current) return;
-    bootstrapStartedRef.current = true;
-
     let cancelled = false;
     const storedSession = authStorage.get();
 
