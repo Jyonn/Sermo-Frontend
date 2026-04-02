@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { api, configureApiAuth } from "./api";
+import { FeedbackState } from "../components/FeedbackState";
+import { ApiError, api, configureApiAuth, refreshAuthSession } from "./api";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
 import type { AuthSession, JoinResponseDTO } from "../types";
 
 interface AuthContextValue {
+  ready: boolean;
   session: AuthSession | null;
   setSession: (session: AuthSession | null) => void;
   patchSessionUser: (patch: Partial<AuthSession["user"]>) => void;
@@ -34,7 +36,9 @@ function toSession(payload: JoinResponseDTO): AuthSession {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSessionState] = useState<AuthSession | null>(() => authStorage.get());
+  const [ready, setReady] = useState(false);
   const heartbeatInFlightRef = useRef(false);
+  const bootstrapStartedRef = useRef(false);
 
   configureApiAuth({
     getSession: () => authStorage.get(),
@@ -49,7 +53,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   useEffect(() => {
-    if (!session) return;
+    if (bootstrapStartedRef.current) return;
+    bootstrapStartedRef.current = true;
+
+    let cancelled = false;
+    const storedSession = authStorage.get();
+
+    if (!storedSession?.refreshToken) {
+      setReady(true);
+      return;
+    }
+
+    refreshAuthSession(storedSession)
+      .then((nextSession) => {
+        if (cancelled) return;
+        authStorage.set(nextSession);
+        setSessionState(nextSession);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        if (error instanceof ApiError && error.status === 401) {
+          authStorage.set(null);
+          setSessionState(null);
+          return;
+        }
+        setSessionState(storedSession);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ready || !session) return;
     const timer = window.setInterval(() => {
       if (heartbeatInFlightRef.current) return;
       heartbeatInFlightRef.current = true;
@@ -68,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
+      ready,
       session,
       setSession(nextSession) {
         authStorage.set(nextSession);
@@ -92,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const nextSession = toSession(payload);
         authStorage.set(nextSession);
         setSessionState(nextSession);
+        setReady(true);
       },
       async logout() {
         const current = authStorage.get();
@@ -104,9 +147,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         authStorage.set(null);
         setSessionState(null);
+        setReady(true);
       },
     }),
-    [session]
+    [ready, session]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -121,8 +165,12 @@ export function useAuth() {
 }
 
 export function RequireAuth({ children }: { children: JSX.Element }) {
-  const { session } = useAuth();
+  const { ready, session } = useAuth();
   const location = useLocation();
+
+  if (!ready) {
+    return <FeedbackState title="正在恢复登录..." description="正在验证你的登录状态。" />;
+  }
 
   if (!session) {
     const detectedSlug = getDetectedSpaceSlug();

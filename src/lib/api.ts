@@ -141,6 +141,10 @@ function refreshSessionSingleFlight(currentSession: AuthSession) {
   return refreshInFlight;
 }
 
+export function refreshAuthSession(currentSession: AuthSession) {
+  return refreshSessionSingleFlight(currentSession);
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, adminAuth = false, retryOn401 = true, signal } = options;
   const session = auth ? authConfig.getSession() : null;

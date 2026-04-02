@@ -54,7 +54,7 @@ function LegacySlugRedirect() {
 
 export default function App() {
   const location = useLocation();
-  const { session } = useAuth();
+  const { ready, session } = useAuth();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const routeLocation = showFriendInviteOverlay
     ? {
@@ -199,8 +199,8 @@ export default function App() {
           <Route path="/friend-invite" element={<FriendInvitePage overlay />} />
         </Routes>
       ) : null}
-      <GlobalMessageSync />
-      <AppBottomNav />
+      {ready ? <GlobalMessageSync /> : null}
+      {ready ? <AppBottomNav /> : null}
     </>
   );
 }
