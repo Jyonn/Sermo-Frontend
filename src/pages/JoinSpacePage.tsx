@@ -30,6 +30,7 @@ export default function JoinSpacePage() {
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordField, setShowPasswordField] = useState(false);
+  const [passwordHint, setPasswordHint] = useState<string | null>(null);
   const [space, setSpace] = useState<SpaceDTO | null>(null);
   const [lookupState, setLookupState] = useState<"idle" | "loading" | "ready" | "missing" | "error">("idle");
   const [lookupError, setLookupError] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export default function JoinSpacePage() {
     setSpace(null);
     setLookupError(null);
     setShowPasswordField(false);
+    setPasswordHint(null);
 
     api
       .getSpaceBySlug(slug, controller.signal)
@@ -91,6 +93,7 @@ export default function JoinSpacePage() {
     }
 
     setSubmitError(null);
+    setPasswordHint(null);
     setSubmitState("submitting");
     try {
       const payload = await api.joinSpace({
@@ -108,6 +111,12 @@ export default function JoinSpacePage() {
         navigate("/app/chats", { replace: true });
       }
     } catch (error) {
+      if (error instanceof ApiError && error.identifier === "USER_ERRORS@PASSWORD_REQUIRED") {
+        setShowPasswordField(true);
+        setPasswordHint("这个昵称已经设置了访问密码，请先输入密码。");
+        return;
+      }
+
       const message = error instanceof ApiError ? error.message : "加入失败";
       setSubmitError(message);
     } finally {
@@ -203,7 +212,10 @@ export default function JoinSpacePage() {
                   className="input"
                   placeholder="你在聊天里显示的名字"
                   value={nickname}
-                  onChange={(event) => setNickname(event.target.value)}
+                  onChange={(event) => {
+                    setNickname(event.target.value);
+                    setPasswordHint(null);
+                  }}
                 />
               </div>
 
@@ -214,7 +226,17 @@ export default function JoinSpacePage() {
               ) : (
                 <div>
                   <label className="field-label">访问密码</label>
-                  <input className="input" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+                  <input
+                    autoFocus
+                    className="input"
+                    type="password"
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value);
+                      setPasswordHint(null);
+                    }}
+                  />
+                  {passwordHint ? <p className="field-hint field-hint-subtle">{passwordHint}</p> : null}
                 </div>
               )}
 

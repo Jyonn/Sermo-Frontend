@@ -5051,6 +5051,13 @@ img {
   text-transform: uppercase;
 }
 
+.field-hint.field-hint-subtle {
+  margin: 8px 2px 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .landing-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
