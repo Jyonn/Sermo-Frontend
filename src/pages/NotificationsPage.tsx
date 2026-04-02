@@ -182,7 +182,7 @@ export default function NotificationsPage() {
           <div className="page-toolbar">
             <h2 className="panel-title">通讯</h2>
           </div>
-          <VerificationBanner verified={Boolean(session?.user?.verified)} />
+          <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search">
             <span className="material-symbols-outlined">search</span>
             <input

@@ -4,6 +4,7 @@ import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -67,6 +68,7 @@ export default function SettingsPage() {
   });
   const [prefSheetChannel, setPrefSheetChannel] = useState<NotificationChannel | null>(null);
   const [contactSheetChannel, setContactSheetChannel] = useState<NotificationChannel | null>(null);
+  const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [welcomeSaving, setWelcomeSaving] = useState(false);
@@ -117,6 +119,7 @@ export default function SettingsPage() {
     return session.user.verified ? "Verified" : "Basic";
   }, [session]);
   const emailVerified = Boolean(session?.user?.email_verified_at);
+  const hasPassword = Boolean(session?.user?.has_password);
   const phoneVerified = Boolean(session?.user?.phone_verified_at);
   const barkVerified = Boolean(session?.user?.bark_verified_at);
   const emailTarget = session?.user?.email ?? "";
@@ -157,6 +160,21 @@ export default function SettingsPage() {
       setContactCode("");
     }
   }, [contactMeta, location.search, tab]);
+
+  const openEmailVerificationFlow = () => {
+    if (!hasPassword) {
+      setPasswordReminderOpen(true);
+      return;
+    }
+
+    setContactChannel("email");
+    setContactSheetChannel("email");
+    setContactTarget(contactMeta.email.target);
+    setContactCode("");
+    if (tab !== "contacts" || location.search !== "?channel=email") {
+      navigate("/app/settings/contacts?channel=email");
+    }
+  };
 
   useEffect(() => {
     const hasCooldown = Object.values(contactCooldowns).some((value) => value > 0);
@@ -393,7 +411,7 @@ export default function SettingsPage() {
                   认证邮箱后，你的账号会升级为 Verified。
                   <button
                     className="ghost-button inline-link-button"
-                    onClick={() => navigate("/app/settings/contacts?channel=email")}
+                    onClick={openEmailVerificationFlow}
                     type="button"
                   >
                     去认证邮箱
@@ -421,14 +439,14 @@ export default function SettingsPage() {
                     </div>
                     <button
                       className="ghost-button row-button desktop-pane"
-                      onClick={() => (requiresEmailVerification ? navigate("/app/settings/contacts?channel=email") : setPrefSheetChannel(channel))}
+                      onClick={() => (requiresEmailVerification ? openEmailVerificationFlow() : setPrefSheetChannel(channel))}
                       type="button"
                     >
                       调整
                     </button>
                     <button
                       className="icon-button row-trailing-button mobile-only-action"
-                      onClick={() => (requiresEmailVerification ? navigate("/app/settings/contacts?channel=email") : setPrefSheetChannel(channel))}
+                      onClick={() => (requiresEmailVerification ? openEmailVerificationFlow() : setPrefSheetChannel(channel))}
                       type="button"
                     >
                       <span className="material-symbols-outlined">tune</span>
@@ -640,6 +658,17 @@ export default function SettingsPage() {
         hidden
         onChange={(event) => void handleCustomAvatarChange(event)}
         type="file"
+      />
+      <ConfirmDialog
+        open={passwordReminderOpen}
+        title="请先设置密码"
+        description="设置密码后，才能继续认证邮箱并完成后续绑定。"
+        confirmLabel="去设置"
+        onClose={() => setPasswordReminderOpen(false)}
+        onConfirm={() => {
+          setPasswordReminderOpen(false);
+          navigate("/app/settings/account");
+        }}
       />
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>

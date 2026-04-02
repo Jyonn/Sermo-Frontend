@@ -1,12 +1,19 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface VerificationBannerProps {
   verified: boolean;
   mode?: "tab" | "menu";
   onAction?: () => void;
+  hasPassword?: boolean;
 }
 
-export function VerificationBanner({ verified, mode = "tab", onAction }: VerificationBannerProps) {
+export function VerificationBanner({ verified, mode = "tab", onAction, hasPassword = true }: VerificationBannerProps) {
+  const navigate = useNavigate();
+  const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
+
   if (verified) {
     if (mode !== "menu") return null;
     return (
@@ -19,21 +26,46 @@ export function VerificationBanner({ verified, mode = "tab", onAction }: Verific
     );
   }
 
+  const handleAction = () => {
+    if (!hasPassword) {
+      setPasswordReminderOpen(true);
+      return;
+    }
+    if (onAction) {
+      onAction();
+      return;
+    }
+    navigate("/app/settings/contacts?channel=email");
+  };
+
   return (
-    <div className="verification-banner">
-      <div className="verification-banner-copy">
-        <strong>认证邮箱，解锁更多功能</strong>
-        <span>完成邮箱认证后即可发送好友申请、创建群聊并邀请成员。</span>
+    <>
+      <div className="verification-banner">
+        <div className="verification-banner-copy">
+          <strong>认证邮箱，解锁更多功能</strong>
+          <span>完成邮箱认证后即可发送好友申请、创建群聊并邀请成员。</span>
+        </div>
+        {onAction || !hasPassword ? (
+          <button className="ghost-button verification-banner-action" onClick={handleAction} type="button">
+            去认证
+          </button>
+        ) : (
+          <Link className="ghost-button verification-banner-action" to="/app/settings/contacts?channel=email">
+            去认证
+          </Link>
+        )}
       </div>
-      {onAction ? (
-        <button className="ghost-button verification-banner-action" onClick={onAction} type="button">
-          去认证
-        </button>
-      ) : (
-        <Link className="ghost-button verification-banner-action" to="/app/settings/contacts?channel=email">
-          去认证
-        </Link>
-      )}
-    </div>
+      <ConfirmDialog
+        open={passwordReminderOpen}
+        title="请先设置密码"
+        description="设置密码后，才能继续认证邮箱并完成后续绑定。"
+        confirmLabel="去设置"
+        onClose={() => setPasswordReminderOpen(false)}
+        onConfirm={() => {
+          setPasswordReminderOpen(false);
+          navigate("/app/settings/account");
+        }}
+      />
+    </>
   );
 }

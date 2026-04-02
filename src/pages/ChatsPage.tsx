@@ -2349,7 +2349,7 @@ export default function ChatsPage() {
         <div className="page-toolbar">
           <h2 className="panel-title">聊天</h2>
         </div>
-        <VerificationBanner verified={Boolean(session?.user?.verified)} />
+        <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         <label className="search-box">
           <span className="material-symbols-outlined">search</span>
           <input

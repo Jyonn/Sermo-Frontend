@@ -386,7 +386,7 @@ export default function SquarePage() {
           <div className="page-toolbar">
             <h2 className="panel-title">广场</h2>
           </div>
-          <VerificationBanner verified={Boolean(session?.user?.verified)} />
+          <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search square-search">
             <span className="material-symbols-outlined">search</span>
             <input
