@@ -112,7 +112,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
           <div className="friend-invite-copy">
             <h2>{preview.inviter.name}</h2>
             <p>
-              来自 <span className="friend-invite-space-handle">@{preview.space.slug}</span>
+              来自 <span className="friend-invite-space-handle">@{preview.space.name}</span>
             </p>
           </div>
         </div>

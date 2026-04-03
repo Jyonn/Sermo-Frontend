@@ -221,7 +221,7 @@ export default function JoinSpacePage() {
                   />
                   <div className="join-space-official-copy">
                     <strong>{space.official_user.name}</strong>
-                    <span>@{space.slug}</span>
+                    <span>@{space.name}</span>
                   </div>
                 </div>
               ) : null}

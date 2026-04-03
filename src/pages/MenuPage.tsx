@@ -628,7 +628,7 @@ export default function MenuPage() {
             </div>
           <div className="row-subtle">
               {space?.name ?? "当前空间"}
-              {space?.slug ? <span className="menu-space-slug">@{space.slug}</span> : null}
+              {space?.name ? <span className="menu-space-slug">@{space.name}</span> : null}
             </div>
           </div>
           <button
