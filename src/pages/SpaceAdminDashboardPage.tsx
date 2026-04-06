@@ -157,8 +157,8 @@ export default function SpaceAdminDashboardPage() {
               ...current,
               stats: {
                 ...current.stats,
-                members_count: Math.max(0, current.stats.members_count - 1),
-                online_count: current.stats.online_count - (removeUser.is_alive ? 1 : 0),
+                members_count: Math.max(0, current.stats.members_count - (removeUser.is_deleted ? 0 : 1)),
+                online_count: current.stats.online_count - (removeUser.is_deleted ? 0 : removeUser.is_alive ? 1 : 0),
               },
             }
           : current
@@ -336,11 +336,14 @@ export default function SpaceAdminDashboardPage() {
                       <strong>{user.name}</strong>
                       {user.verified ? <span className="verified-badge">Verified</span> : null}
                       {user.official ? <span className="type-badge">官方</span> : null}
+                      {user.is_deleted ? <span className="type-badge">历史残留</span> : null}
                     </div>
-                    <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>
+                    <div className="row-subtle">
+                      {user.is_deleted ? "已删除，但仍残留在旧关系里" : user.is_alive ? "在线" : "离线"}
+                    </div>
                   </div>
                   <button className="ghost-button row-button" onClick={() => setRemoveUser(user)} type="button">
-                    移出
+                    {user.is_deleted ? "彻底移除" : "移出"}
                   </button>
                 </div>
               ))}
@@ -354,12 +357,18 @@ export default function SpaceAdminDashboardPage() {
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
       <ConfirmDialog
         busy={removeBusy}
-        confirmLabel="确认移出"
-        description={removeUser ? `移出 ${removeUser.name} 后，对方将不能再进入这个空间。` : ""}
+        confirmLabel={removeUser?.is_deleted ? "确认清理" : "确认移出"}
+        description={
+          removeUser
+            ? removeUser.is_deleted
+              ? `将再次清理 ${removeUser.name} 的残留好友和群成员关系。`
+              : `移出 ${removeUser.name} 后，对方将不能再进入这个空间。`
+            : ""
+        }
         onClose={() => setRemoveUser(null)}
         onConfirm={() => void confirmRemoveUser()}
         open={Boolean(removeUser)}
-        title="移出成员"
+        title={removeUser?.is_deleted ? "清理历史残留成员" : "移出成员"}
       />
     </AppChrome>
   );

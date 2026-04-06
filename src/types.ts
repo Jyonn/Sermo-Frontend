@@ -23,6 +23,8 @@ export interface UserDTO extends TinyUserDTO {
   is_alive: boolean;
   verified: boolean;
   last_heartbeat: number;
+  is_deleted?: boolean;
+  has_removal_residue?: boolean;
   responded_at?: number | null;
   name_pinyin?: string | null;
   email_verified_at: number | null;
