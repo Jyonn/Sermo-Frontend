@@ -26,9 +26,9 @@ const channelRows: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30 },
-  sms: { enabled: false, threshold: 15 },
-  bark: { enabled: false, threshold: 5 },
+  email: { enabled: false, threshold: 30, hideMessageContent: false },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -38,6 +38,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
     next[channel] = {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes,
+      hideMessageContent: row.hide_message_content,
     };
   });
   return next;
@@ -258,7 +259,10 @@ export default function MenuPage() {
     setAuthActionState("idle");
   };
 
-  const syncPref = async (channel: NotificationChannel, patch: { enabled?: 0 | 1; offline_threshold_minutes?: number }) => {
+  const syncPref = async (
+    channel: NotificationChannel,
+    patch: { enabled?: 0 | 1; offline_threshold_minutes?: number; hide_message_content?: 0 | 1 }
+  ) => {
     setError(null);
     try {
       const updated = await api.updateNotificationPref({
@@ -270,6 +274,7 @@ export default function MenuPage() {
         [channel]: {
           enabled: updated.enabled,
           threshold: updated.offline_threshold_minutes,
+          hideMessageContent: updated.hide_message_content,
         },
       }));
     } catch (apiError) {
@@ -702,7 +707,9 @@ export default function MenuPage() {
                   <div className="row-main">
                     <strong>{label} 设置</strong>
                     <div className="row-subtle">
-                      {prefs[channel].enabled ? `${prefs[channel].threshold} 分钟后提醒` : "当前已关闭"}
+                      {prefs[channel].enabled
+                        ? `${prefs[channel].threshold} 分钟后提醒${prefs[channel].hideMessageContent ? " · 不显示消息内容" : ""}`
+                        : "当前已关闭"}
                     </div>
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
@@ -925,6 +932,24 @@ export default function MenuPage() {
                 <span className="menu-stepper-unit">分钟</span>
               </div>
             </div>
+            {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
+              <div className="menu-pref-row">
+                <div className="row-main">
+                  <strong>隐藏消息内容</strong>
+                  <div className="row-subtle">开启后，只提示收到新消息，不展示具体内容。</div>
+                </div>
+                <button
+                  aria-label={`toggle-hide-content-${prefDrawerChannel}`}
+                  className={`switch ${prefs[prefDrawerChannel].hideMessageContent ? "active" : ""}`}
+                  onClick={() =>
+                    void syncPref(prefDrawerChannel, {
+                      hide_message_content: prefs[prefDrawerChannel].hideMessageContent ? 0 : 1,
+                    })
+                  }
+                  type="button"
+                />
+              </div>
+            ) : null}
           </div>
         ) : null}
       </SideDrawer>

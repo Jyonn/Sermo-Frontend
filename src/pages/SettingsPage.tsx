@@ -19,9 +19,9 @@ const channels: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30 },
-  sms: { enabled: false, threshold: 15 },
-  bark: { enabled: false, threshold: 5 },
+  email: { enabled: false, threshold: 30, hideMessageContent: false },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -31,6 +31,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
     next[channel] = {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes,
+      hideMessageContent: row.hide_message_content,
     };
   });
   return next;
@@ -209,7 +210,10 @@ export default function SettingsPage() {
     });
   }, [contactSheetChannel, pendingContactState]);
 
-  const syncPref = async (channel: NotificationChannel, patch: { enabled?: 0 | 1; offline_threshold_minutes?: number }) => {
+  const syncPref = async (
+    channel: NotificationChannel,
+    patch: { enabled?: 0 | 1; offline_threshold_minutes?: number; hide_message_content?: 0 | 1 }
+  ) => {
     setError(null);
     try {
       const mappedChannel = channel === "email" ? 1 : channel === "sms" ? 2 : 3;
@@ -222,6 +226,7 @@ export default function SettingsPage() {
         [channel]: {
           enabled: updated.enabled,
           threshold: updated.offline_threshold_minutes,
+          hideMessageContent: updated.hide_message_content,
         },
       }));
     } catch (apiError) {
@@ -434,7 +439,11 @@ export default function SettingsPage() {
                     <div className="row-main">
                       <strong>{label}</strong>
                       <div className="row-subtle">
-                        {requiresEmailVerification ? "需先认证邮箱" : pref.enabled ? `${pref.threshold} 分钟后提醒` : "已关闭"}
+                        {requiresEmailVerification
+                          ? "需先认证邮箱"
+                          : pref.enabled
+                            ? `${pref.threshold} 分钟后提醒${pref.hideMessageContent ? " · 不显示消息内容" : ""}`
+                            : "已关闭"}
                       </div>
                     </div>
                     <button
@@ -554,6 +563,26 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
+            {prefSheetChannel === "email" || prefSheetChannel === "bark" ? (
+              <div className="simple-row form-row">
+                <div className="row-main">
+                  <strong>隐藏消息内容</strong>
+                  <div className="row-subtle">
+                    开启后，只提示你收到新消息，不展示具体内容。
+                  </div>
+                </div>
+                <button
+                  aria-label={`toggle-hide-content-${prefSheetChannel}`}
+                  className={`switch ${prefs[prefSheetChannel].hideMessageContent ? "active" : ""}`}
+                  onClick={() =>
+                    void syncPref(prefSheetChannel, {
+                      hide_message_content: prefs[prefSheetChannel].hideMessageContent ? 0 : 1,
+                    })
+                  }
+                  type="button"
+                />
+              </div>
+            ) : null}
           </div>
         ) : null}
       </BottomSheet>

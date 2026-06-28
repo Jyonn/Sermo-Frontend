@@ -120,6 +120,7 @@ export interface NotificationPreferenceDTO {
   channel: number;
   enabled: boolean;
   offline_threshold_minutes: number;
+  hide_message_content: boolean;
 }
 
 export interface AvatarUploadDTO {
@@ -272,6 +273,7 @@ export interface FriendAccepted {
 export interface NotificationPreference {
   enabled: boolean;
   threshold: number;
+  hideMessageContent: boolean;
 }
 
 export type NotificationPreferences = Record<NotificationChannel, NotificationPreference>;

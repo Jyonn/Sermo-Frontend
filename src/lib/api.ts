@@ -515,6 +515,7 @@ export const api = {
     channel: number;
     enabled?: 0 | 1;
     offline_threshold_minutes?: number;
+    hide_message_content?: 0 | 1;
   }) {
     return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {
       method: "POST",
