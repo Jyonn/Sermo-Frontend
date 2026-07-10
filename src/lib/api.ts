@@ -516,6 +516,8 @@ export const api = {
     enabled?: 0 | 1;
     offline_threshold_minutes?: number;
     hide_message_content?: 0 | 1;
+    hidden_direct_message_text?: string;
+    hidden_group_message_text?: string;
   }) {
     return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {
       method: "POST",

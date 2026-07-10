@@ -4237,6 +4237,11 @@ img {
   border-bottom: 0;
 }
 
+.menu-pref-custom {
+  padding: 0 14px 16px;
+  border-top: 1px solid rgba(232, 235, 242, 0.9);
+}
+
 .menu-pref-control {
   display: flex;
   align-items: center;
@@ -4284,6 +4289,10 @@ img {
 .simple-form {
   display: grid;
   gap: 12px;
+}
+
+.notification-custom-message-fields {
+  gap: 14px;
 }
 
 .simple-sheet-user {

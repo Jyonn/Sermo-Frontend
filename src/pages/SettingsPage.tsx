@@ -19,9 +19,9 @@ const channels: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -32,6 +32,8 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes,
       hideMessageContent: row.hide_message_content,
+      hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
+      hiddenGroupMessageText: row.hidden_group_message_text ?? "",
     };
   });
   return next;
@@ -212,7 +214,13 @@ export default function SettingsPage() {
 
   const syncPref = async (
     channel: NotificationChannel,
-    patch: { enabled?: 0 | 1; offline_threshold_minutes?: number; hide_message_content?: 0 | 1 }
+    patch: {
+      enabled?: 0 | 1;
+      offline_threshold_minutes?: number;
+      hide_message_content?: 0 | 1;
+      hidden_direct_message_text?: string;
+      hidden_group_message_text?: string;
+    }
   ) => {
     setError(null);
     try {
@@ -227,12 +235,35 @@ export default function SettingsPage() {
           enabled: updated.enabled,
           threshold: updated.offline_threshold_minutes,
           hideMessageContent: updated.hide_message_content,
+          hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
+          hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
         },
       }));
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "更新通知偏好失败";
       setError(message);
     }
+  };
+
+  const updatePrefDraft = (
+    channel: NotificationChannel,
+    patch: Partial<NotificationPreferences[NotificationChannel]>
+  ) => {
+    setPrefs((current) => ({
+      ...current,
+      [channel]: {
+        ...current[channel],
+        ...patch,
+      },
+    }));
+  };
+
+  const syncHiddenMessageTexts = async (channel: NotificationChannel) => {
+    const pref = prefs[channel];
+    await syncPref(channel, {
+      hidden_direct_message_text: pref.hiddenDirectMessageText.trim(),
+      hidden_group_message_text: pref.hiddenGroupMessageText.trim(),
+    });
   };
 
   const sendContactCode = async () => {
@@ -564,24 +595,60 @@ export default function SettingsPage() {
               </div>
             </div>
             {prefSheetChannel === "email" || prefSheetChannel === "bark" ? (
-              <div className="simple-row form-row">
-                <div className="row-main">
-                  <strong>隐藏消息内容</strong>
-                  <div className="row-subtle">
-                    开启后，只提示你收到新消息，不展示具体内容。
+              <>
+                <div className="simple-row form-row">
+                  <div className="row-main">
+                    <strong>隐藏消息内容</strong>
+                    <div className="row-subtle">
+                      开启后，只提示你收到新消息，不展示具体内容。
+                    </div>
                   </div>
+                  <button
+                    aria-label={`toggle-hide-content-${prefSheetChannel}`}
+                    className={`switch ${prefs[prefSheetChannel].hideMessageContent ? "active" : ""}`}
+                    onClick={() =>
+                      void syncPref(prefSheetChannel, {
+                        hide_message_content: prefs[prefSheetChannel].hideMessageContent ? 0 : 1,
+                      })
+                    }
+                    type="button"
+                  />
                 </div>
-                <button
-                  aria-label={`toggle-hide-content-${prefSheetChannel}`}
-                  className={`switch ${prefs[prefSheetChannel].hideMessageContent ? "active" : ""}`}
-                  onClick={() =>
-                    void syncPref(prefSheetChannel, {
-                      hide_message_content: prefs[prefSheetChannel].hideMessageContent ? 0 : 1,
-                    })
-                  }
-                  type="button"
-                />
-              </div>
+                {prefs[prefSheetChannel].hideMessageContent ? (
+                  <div className="simple-form notification-custom-message-fields">
+                    <div>
+                      <label className="field-label">私聊消息提示</label>
+                      <input
+                        className="input"
+                        maxLength={255}
+                        placeholder="留空则使用默认：你收到了一条新的私聊消息。"
+                        value={prefs[prefSheetChannel].hiddenDirectMessageText}
+                        onBlur={() => void syncHiddenMessageTexts(prefSheetChannel)}
+                        onChange={(event) =>
+                          updatePrefDraft(prefSheetChannel, {
+                            hiddenDirectMessageText: event.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="field-label">群聊消息提示</label>
+                      <input
+                        className="input"
+                        maxLength={255}
+                        placeholder="留空则使用默认：你收到了一条新的群聊消息。"
+                        value={prefs[prefSheetChannel].hiddenGroupMessageText}
+                        onBlur={() => void syncHiddenMessageTexts(prefSheetChannel)}
+                        onChange={(event) =>
+                          updatePrefDraft(prefSheetChannel, {
+                            hiddenGroupMessageText: event.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </>
             ) : null}
           </div>
         ) : null}

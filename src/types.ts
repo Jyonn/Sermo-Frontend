@@ -121,6 +121,8 @@ export interface NotificationPreferenceDTO {
   enabled: boolean;
   offline_threshold_minutes: number;
   hide_message_content: boolean;
+  hidden_direct_message_text: string;
+  hidden_group_message_text: string;
 }
 
 export interface AvatarUploadDTO {
@@ -274,6 +276,8 @@ export interface NotificationPreference {
   enabled: boolean;
   threshold: number;
   hideMessageContent: boolean;
+  hiddenDirectMessageText: string;
+  hiddenGroupMessageText: string;
 }
 
 export type NotificationPreferences = Record<NotificationChannel, NotificationPreference>;
