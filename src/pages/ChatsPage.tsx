@@ -116,6 +116,43 @@ function formatDuration(seconds: number) {
 
 const AUDIO_WAVE_PATTERN = [0.34, 0.58, 0.44, 0.76, 0.41, 0.66, 0.52, 0.84, 0.49, 0.7, 0.39, 0.62, 0.47, 0.8];
 
+function waitForAudioReady(audio: HTMLAudioElement) {
+  if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    let settled = false;
+    let timeoutId = 0;
+
+    const cleanup = () => {
+      audio.removeEventListener("canplay", handleReady);
+      audio.removeEventListener("canplaythrough", handleReady);
+      audio.removeEventListener("loadeddata", handleReady);
+      audio.removeEventListener("error", handleError);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+
+    const finish = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback();
+    };
+
+    const handleReady = () => finish(resolve);
+    const handleError = () => finish(() => reject(new Error("audio_load_failed")));
+
+    timeoutId = window.setTimeout(handleReady, 5000);
+    audio.addEventListener("canplay", handleReady, { once: true });
+    audio.addEventListener("canplaythrough", handleReady, { once: true });
+    audio.addEventListener("loadeddata", handleReady, { once: true });
+    audio.addEventListener("error", handleError, { once: true });
+  });
+}
+
 const AudioMessagePlayer = memo(function AudioMessagePlayer({
   durationSeconds,
   from,
@@ -129,6 +166,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [resolvedDuration, setResolvedDuration] = useState(durationSeconds ?? 0);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
@@ -139,6 +177,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     if (!audio) return;
 
     setIsPlaying(false);
+    setIsLoading(false);
     setCurrentTime(0);
     setResolvedDuration(durationSeconds ?? 0);
 
@@ -151,30 +190,62 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
 
     const handleEnded = () => {
       audio.currentTime = 0;
+      setIsLoading(false);
       if (activeThreadAudio === audio) {
         activeThreadAudio = null;
       }
       sync();
     };
 
+    const handlePlaying = () => {
+      setIsLoading(false);
+      sync();
+    };
+
+    const handleWaiting = () => {
+      if (!audio.paused && !audio.ended) {
+        setIsLoading(true);
+      }
+      sync();
+    };
+
+    const handlePause = () => {
+      setIsLoading(false);
+      sync();
+    };
+
+    const handleError = () => {
+      setIsLoading(false);
+      setIsPlaying(false);
+    };
+
     sync();
     audio.addEventListener("loadedmetadata", sync);
     audio.addEventListener("durationchange", sync);
     audio.addEventListener("timeupdate", sync);
-    audio.addEventListener("pause", sync);
+    audio.addEventListener("pause", handlePause);
     audio.addEventListener("play", sync);
+    audio.addEventListener("playing", handlePlaying);
+    audio.addEventListener("waiting", handleWaiting);
+    audio.addEventListener("stalled", handleWaiting);
+    audio.addEventListener("error", handleError);
     audio.addEventListener("ended", handleEnded);
 
     return () => {
       audio.pause();
+      setIsLoading(false);
       if (activeThreadAudio === audio) {
         activeThreadAudio = null;
       }
       audio.removeEventListener("loadedmetadata", sync);
       audio.removeEventListener("durationchange", sync);
       audio.removeEventListener("timeupdate", sync);
-      audio.removeEventListener("pause", sync);
+      audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("play", sync);
+      audio.removeEventListener("playing", handlePlaying);
+      audio.removeEventListener("waiting", handleWaiting);
+      audio.removeEventListener("stalled", handleWaiting);
+      audio.removeEventListener("error", handleError);
       audio.removeEventListener("ended", handleEnded);
     };
   }, [durationSeconds, resolvedUri]);
@@ -197,15 +268,23 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           activeThreadAudio.pause();
           activeThreadAudio.currentTime = 0;
         }
+        if (audio.ended || audio.currentTime >= (audio.duration || totalDuration || 0)) {
+          audio.currentTime = 0;
+        }
         activeThreadAudio = audio;
+        setIsLoading(true);
+        audio.load();
+        await waitForAudioReady(audio);
         await audio.play();
       } catch {
+        setIsLoading(false);
         setIsPlaying(false);
       }
       return;
     }
 
     audio.pause();
+    setIsLoading(false);
     if (activeThreadAudio === audio) {
       activeThreadAudio = null;
     }
@@ -214,12 +293,13 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   return (
     <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}>
       <button
-        aria-label={isPlaying ? "暂停语音" : "播放语音"}
+        aria-label={isLoading ? "语音加载中" : isPlaying ? "暂停语音" : "播放语音"}
         className="message-audio-play"
+        disabled={isLoading}
         onClick={() => void togglePlayback()}
         type="button"
       >
-        <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />
+        {isLoading ? <span aria-hidden="true" className="message-audio-play-spinner" /> : <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />}
       </button>
       <div className="message-audio-body">
         <div className="message-audio-head">
@@ -245,6 +325,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         ref={audioRef}
         src={resolvedUri}
         onError={() => {
+          setIsLoading(false);
           if (!retryWithFreshUri) {
             forgetStableResourceUri(uri);
             setRetryWithFreshUri(true);

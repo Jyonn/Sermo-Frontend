@@ -1668,6 +1668,16 @@ img {
   display: block;
 }
 
+.message-audio-play-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  display: block;
+  animation: message-audio-spin 0.72s linear infinite;
+}
+
 .message-audio-body {
   display: grid;
   gap: 9px;
@@ -1744,6 +1754,12 @@ img {
 .message-audio-player {
   width: 100%;
   display: none;
+}
+
+@keyframes message-audio-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .message-bubble-actionable {
