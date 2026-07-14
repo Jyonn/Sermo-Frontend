@@ -11,6 +11,15 @@ import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 
+const FRIEND_REQUEST_STATUS_PENDING = 0;
+
+function normalizePendingRequests(rows: { incoming: FriendshipRequestDTO[]; outgoing: FriendshipRequestDTO[] }) {
+  return {
+    incoming: rows.incoming.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING),
+    outgoing: rows.outgoing.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING),
+  };
+}
+
 function tabFromPath(pathname: string): FriendTab {
   return pathname === "/app/friends" ? "accepted" : "incoming";
 }
@@ -61,10 +70,11 @@ export default function FriendsPage() {
 
     Promise.all([api.getFriends(controller.signal), api.getFriendRequests(controller.signal)])
       .then(([friendRows, requestRows]) => {
+        const normalizedRequests = normalizePendingRequests(requestRows);
         setFriends(friendRows.map(mapFriend));
-        setIncoming(requestRows.incoming);
-        setOutgoing(requestRows.outgoing);
-        emitFriendRequestsUpdated(requestRows.incoming.length);
+        setIncoming(normalizedRequests.incoming);
+        setOutgoing(normalizedRequests.outgoing);
+        emitFriendRequestsUpdated(normalizedRequests.incoming.length);
         setViewState("ready");
       })
       .catch((apiError) => {
@@ -98,7 +108,7 @@ export default function FriendsPage() {
       if (accept === undefined) await api.removeFriendRequest(userId);
       else await api.respondFriendRequest(userId, accept);
 
-      const requests = await api.getFriendRequests();
+      const requests = normalizePendingRequests(await api.getFriendRequests());
       setIncoming(requests.incoming);
       setOutgoing(requests.outgoing);
       emitFriendRequestsUpdated(requests.incoming.length);

@@ -12,6 +12,15 @@ import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
 
+const FRIEND_REQUEST_STATUS_PENDING = 0;
+
+function normalizePendingRequests(rows: { incoming: FriendshipRequestDTO[]; outgoing: FriendshipRequestDTO[] }) {
+  return {
+    incoming: rows.incoming.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING),
+    outgoing: rows.outgoing.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING),
+  };
+}
+
 type FriendSection = {
   key: string;
   items: UserDTO[];
@@ -99,9 +108,10 @@ export default function NotificationsPage() {
 
     Promise.all([api.getFriends(controller.signal), api.getFriendRequests(controller.signal), api.getChats(controller.signal)])
       .then(([friendRows, requestRows, chatRows]) => {
+        const normalizedRequests = normalizePendingRequests(requestRows);
         setFriends(friendRows);
-        setRequests(requestRows);
-        emitFriendRequestsUpdated(requestRows.incoming.length);
+        setRequests(normalizedRequests);
+        emitFriendRequestsUpdated(normalizedRequests.incoming.length);
         setGroupChats(chatRows.filter((chat) => chat.group));
         setViewState("ready");
       })
@@ -148,7 +158,7 @@ export default function NotificationsPage() {
 
     try {
       await api.respondFriendRequest(userId, accept);
-      const refreshed = await api.getFriendRequests();
+      const refreshed = normalizePendingRequests(await api.getFriendRequests());
       setRequests(refreshed);
       emitFriendRequestsUpdated(refreshed.incoming.length);
     } catch (apiError) {
@@ -162,7 +172,7 @@ export default function NotificationsPage() {
 
     try {
       await api.removeFriendRequest(userId);
-      const refreshed = await api.getFriendRequests();
+      const refreshed = normalizePendingRequests(await api.getFriendRequests());
       setRequests(refreshed);
       emitFriendRequestsUpdated(refreshed.incoming.length);
     } catch (apiError) {
