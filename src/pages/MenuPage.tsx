@@ -53,6 +53,18 @@ function samePref(
   );
 }
 
+function sameCustomMessages(
+  left: NotificationPreferences[NotificationChannel] | null,
+  right: NotificationPreferences[NotificationChannel] | null
+) {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  return (
+    left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
+    left.hiddenGroupMessageText === right.hiddenGroupMessageText
+  );
+}
+
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
   const next = { ...emptyPrefs };
   rows.forEach((row) => {
@@ -123,6 +135,8 @@ export default function MenuPage() {
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefCustomDrawerOpen, setPrefCustomDrawerOpen] = useState(false);
   const [discardPrefConfirmOpen, setDiscardPrefConfirmOpen] = useState(false);
+  const [prefCustomSnapshot, setPrefCustomSnapshot] = useState<NotificationPreferences[NotificationChannel] | null>(null);
+  const [discardCustomPrefConfirmOpen, setDiscardCustomPrefConfirmOpen] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
   const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
   const [basicEditValue, setBasicEditValue] = useState("");
@@ -292,14 +306,18 @@ export default function MenuPage() {
     setPrefDraft(null);
     setPrefSaving(false);
     setPrefCustomDrawerOpen(false);
+    setPrefCustomSnapshot(null);
     setDiscardPrefConfirmOpen(false);
+    setDiscardCustomPrefConfirmOpen(false);
   };
 
   const openPrefDrawer = (channel: NotificationChannel) => {
     setPrefDrawerChannel(channel);
     setPrefDraft(clonePref(prefs[channel]));
     setPrefCustomDrawerOpen(false);
+    setPrefCustomSnapshot(null);
     setDiscardPrefConfirmOpen(false);
+    setDiscardCustomPrefConfirmOpen(false);
   };
 
   const updatePrefDraft = (patch: Partial<NotificationPreferences[NotificationChannel]>) => {
@@ -314,6 +332,38 @@ export default function MenuPage() {
       return;
     }
     setDiscardPrefConfirmOpen(true);
+  };
+
+  const openPrefCustomDrawer = () => {
+    if (!prefDraft) return;
+    setPrefCustomSnapshot(clonePref(prefDraft));
+    setPrefCustomDrawerOpen(true);
+    setDiscardCustomPrefConfirmOpen(false);
+  };
+
+  const requestClosePrefCustomDrawer = () => {
+    if (!prefCustomDrawerOpen) return;
+    if (sameCustomMessages(prefDraft, prefCustomSnapshot)) {
+      setPrefCustomDrawerOpen(false);
+      setPrefCustomSnapshot(null);
+      return;
+    }
+    setDiscardCustomPrefConfirmOpen(true);
+  };
+
+  const discardPrefCustomChanges = () => {
+    setPrefDraft((current) =>
+      current && prefCustomSnapshot
+        ? {
+            ...current,
+            hiddenDirectMessageText: prefCustomSnapshot.hiddenDirectMessageText,
+            hiddenGroupMessageText: prefCustomSnapshot.hiddenGroupMessageText,
+          }
+        : current
+    );
+    setPrefCustomDrawerOpen(false);
+    setPrefCustomSnapshot(null);
+    setDiscardCustomPrefConfirmOpen(false);
   };
 
   const savePrefDraft = async () => {
@@ -1013,15 +1063,13 @@ export default function MenuPage() {
                   />
                 </div>
                 {activePrefDraft.hideMessageContent ? (
-                  <div className="menu-pref-custom">
-                    <button className="simple-row menu-link-row menu-pref-link-row" onClick={() => setPrefCustomDrawerOpen(true)} type="button">
-                      <div className="row-main">
-                        <strong>自定义消息提示</strong>
-                        <div className="row-subtle">私聊和群聊文案</div>
-                      </div>
-                      <span className="material-symbols-outlined">chevron_right</span>
-                    </button>
-                  </div>
+                  <button className="menu-pref-row menu-pref-row-button" onClick={openPrefCustomDrawer} type="button">
+                    <div className="row-main">
+                      <strong>自定义消息提示</strong>
+                      <div className="row-subtle">私聊和群聊文案</div>
+                    </div>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
                 ) : null}
               </>
             ) : null}
@@ -1035,39 +1083,43 @@ export default function MenuPage() {
         actionDisabled={!prefDraftDirty}
         actionLabel="完成"
         onAction={() => void savePrefDraft()}
-        onClose={() => setPrefCustomDrawerOpen(false)}
+        onClose={requestClosePrefCustomDrawer}
         title="自定义消息提示"
       >
         {prefDrawerChannel && activePrefDraft ? (
           <div className="menu-pref-custom-drawer">
-            <div className="simple-form notification-custom-message-fields">
-              <div>
-                <label className="field-label">私聊消息提示</label>
-                <input
-                  className="input"
-                  maxLength={255}
-                  placeholder={defaultHiddenDirectMessagePlaceholder}
-                  value={activePrefDraft.hiddenDirectMessageText}
-                  onChange={(event) =>
-                    updatePrefDraft({
-                      hiddenDirectMessageText: event.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="field-label">群聊消息提示</label>
-                <input
-                  className="input"
-                  maxLength={255}
-                  placeholder={defaultHiddenGroupMessagePlaceholder}
-                  value={activePrefDraft.hiddenGroupMessageText}
-                  onChange={(event) =>
-                    updatePrefDraft({
-                      hiddenGroupMessageText: event.target.value,
-                    })
-                  }
-                />
+            <div className="menu-pref-list">
+              <div className="menu-pref-form-card">
+                <div className="simple-form notification-custom-message-fields">
+                  <div>
+                    <label className="field-label">私聊消息提示</label>
+                    <input
+                      className="input"
+                      maxLength={255}
+                      placeholder={defaultHiddenDirectMessagePlaceholder}
+                      value={activePrefDraft.hiddenDirectMessageText}
+                      onChange={(event) =>
+                        updatePrefDraft({
+                          hiddenDirectMessageText: event.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label">群聊消息提示</label>
+                    <input
+                      className="input"
+                      maxLength={255}
+                      placeholder={defaultHiddenGroupMessagePlaceholder}
+                      value={activePrefDraft.hiddenGroupMessageText}
+                      onChange={(event) =>
+                        updatePrefDraft({
+                          hiddenGroupMessageText: event.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1204,6 +1256,14 @@ export default function MenuPage() {
           setDiscardPrefConfirmOpen(false);
           closePrefDrawers();
         }}
+      />
+      <ConfirmDialog
+        open={discardCustomPrefConfirmOpen}
+        title="放弃自定义消息提示？"
+        description="你还没有完成保存，直接返回会丢失这次改动。"
+        confirmLabel="直接返回"
+        onClose={() => setDiscardCustomPrefConfirmOpen(false)}
+        onConfirm={discardPrefCustomChanges}
       />
       <ConfirmDialog
         open={passwordReminderOpen}

@@ -4283,18 +4283,22 @@ img {
   border-bottom: 0;
 }
 
-.menu-pref-custom {
-  padding: 0 14px 16px;
-  border-top: 1px solid rgba(232, 235, 242, 0.9);
+.menu-pref-row-button {
+  width: 100%;
+  padding: 16px 14px;
+  border-radius: 0;
+  text-align: left;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
 }
 
-.menu-pref-link-row {
-  min-height: 64px;
-  padding-inline: 0;
+.menu-pref-row-button strong {
+  font-size: 0.97rem;
 }
 
-.menu-pref-link-row strong {
-  font-size: 0.94rem;
+.menu-pref-form-card {
+  padding: 16px 14px;
 }
 
 .menu-pref-control {
