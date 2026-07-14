@@ -2950,8 +2950,17 @@ img {
   padding: 0 16px;
 }
 
+.drawer-topbar-shell {
+  align-items: flex-start;
+}
+
 .drawer-back-button {
   flex: 0 0 auto;
+}
+
+.drawer-topbar-copy {
+  flex: 1;
+  min-width: 0;
 }
 
 .drawer-topbar-meta {
@@ -2976,6 +2985,22 @@ img {
   color: var(--text-muted);
   font-size: 0.78rem;
   line-height: 1.2;
+}
+
+.drawer-topbar-action {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--brand-primary);
+  font-size: 0.92rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.drawer-topbar-action:disabled {
+  color: rgba(145, 154, 171, 0.92);
 }
 
 .drawer-body {
@@ -4263,6 +4288,15 @@ img {
   border-top: 1px solid rgba(232, 235, 242, 0.9);
 }
 
+.menu-pref-link-row {
+  min-height: 64px;
+  padding-inline: 0;
+}
+
+.menu-pref-link-row strong {
+  font-size: 0.94rem;
+}
+
 .menu-pref-control {
   display: flex;
   align-items: center;
@@ -4313,6 +4347,11 @@ img {
 }
 
 .notification-custom-message-fields {
+  gap: 14px;
+}
+
+.menu-pref-custom-drawer {
+  display: grid;
   gap: 14px;
 }
 

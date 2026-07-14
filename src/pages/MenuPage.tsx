@@ -31,6 +31,28 @@ const emptyPrefs: NotificationPreferences = {
   bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
 };
 
+const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
+const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
+
+function clonePref(pref: NotificationPreferences[NotificationChannel]) {
+  return { ...pref };
+}
+
+function samePref(
+  left: NotificationPreferences[NotificationChannel] | null,
+  right: NotificationPreferences[NotificationChannel] | null
+) {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  return (
+    left.enabled === right.enabled &&
+    left.threshold === right.threshold &&
+    left.hideMessageContent === right.hideMessageContent &&
+    left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
+    left.hiddenGroupMessageText === right.hiddenGroupMessageText
+  );
+}
+
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
   const next = { ...emptyPrefs };
   rows.forEach((row) => {
@@ -97,6 +119,10 @@ export default function MenuPage() {
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [prefDrawerChannel, setPrefDrawerChannel] = useState<NotificationChannel | null>(null);
+  const [prefDraft, setPrefDraft] = useState<NotificationPreferences[NotificationChannel] | null>(null);
+  const [prefSaving, setPrefSaving] = useState(false);
+  const [prefCustomDrawerOpen, setPrefCustomDrawerOpen] = useState(false);
+  const [discardPrefConfirmOpen, setDiscardPrefConfirmOpen] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
   const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
   const [basicEditValue, setBasicEditValue] = useState("");
@@ -261,57 +287,66 @@ export default function MenuPage() {
     setAuthActionState("idle");
   };
 
-  const syncPref = async (
-    channel: NotificationChannel,
-    patch: {
-      enabled?: 0 | 1;
-      offline_threshold_minutes?: number;
-      hide_message_content?: 0 | 1;
-      hidden_direct_message_text?: string;
-      hidden_group_message_text?: string;
+  const closePrefDrawers = () => {
+    setPrefDrawerChannel(null);
+    setPrefDraft(null);
+    setPrefSaving(false);
+    setPrefCustomDrawerOpen(false);
+    setDiscardPrefConfirmOpen(false);
+  };
+
+  const openPrefDrawer = (channel: NotificationChannel) => {
+    setPrefDrawerChannel(channel);
+    setPrefDraft(clonePref(prefs[channel]));
+    setPrefCustomDrawerOpen(false);
+    setDiscardPrefConfirmOpen(false);
+  };
+
+  const updatePrefDraft = (patch: Partial<NotificationPreferences[NotificationChannel]>) => {
+    setPrefDraft((current) => (current ? { ...current, ...patch } : current));
+  };
+
+  const requestClosePrefDrawer = () => {
+    if (prefSaving) return;
+    const savedPref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
+    if (samePref(prefDraft, savedPref)) {
+      closePrefDrawers();
+      return;
     }
-  ) => {
+    setDiscardPrefConfirmOpen(true);
+  };
+
+  const savePrefDraft = async () => {
+    if (!prefDrawerChannel || !prefDraft) return;
     setError(null);
+    setPrefSaving(true);
     try {
       const updated = await api.updateNotificationPref({
-        channel: channelCode(channel),
-        ...patch,
+        channel: channelCode(prefDrawerChannel),
+        enabled: prefDraft.enabled ? 1 : 0,
+        offline_threshold_minutes: prefDraft.threshold,
+        hide_message_content: prefDraft.hideMessageContent ? 1 : 0,
+        hidden_direct_message_text: prefDraft.hiddenDirectMessageText.trim(),
+        hidden_group_message_text: prefDraft.hiddenGroupMessageText.trim(),
       });
+      const nextPref = {
+        enabled: updated.enabled,
+        threshold: updated.offline_threshold_minutes,
+        hideMessageContent: updated.hide_message_content,
+        hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
+        hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+      };
       setPrefs((current) => ({
         ...current,
-        [channel]: {
-          enabled: updated.enabled,
-          threshold: updated.offline_threshold_minutes,
-          hideMessageContent: updated.hide_message_content,
-          hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
-          hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
-        },
+        [prefDrawerChannel]: nextPref,
       }));
+      closePrefDrawers();
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "更新通知设置失败";
       setError(message);
+    } finally {
+      setPrefSaving(false);
     }
-  };
-
-  const updatePrefDraft = (
-    channel: NotificationChannel,
-    patch: Partial<NotificationPreferences[NotificationChannel]>
-  ) => {
-    setPrefs((current) => ({
-      ...current,
-      [channel]: {
-        ...current[channel],
-        ...patch,
-      },
-    }));
-  };
-
-  const syncHiddenMessageTexts = async (channel: NotificationChannel) => {
-    const pref = prefs[channel];
-    await syncPref(channel, {
-      hidden_direct_message_text: pref.hiddenDirectMessageText.trim(),
-      hidden_group_message_text: pref.hiddenGroupMessageText.trim(),
-    });
   };
 
   const sendAuthCode = async () => {
@@ -638,6 +673,10 @@ export default function MenuPage() {
 
   const canUseFriendInvite = Boolean(me?.verified ?? session?.user?.verified);
 
+  const savedActivePref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
+  const activePrefDraft = prefDraft ?? savedActivePref;
+  const prefDraftDirty = Boolean(prefDrawerChannel && prefDraft && savedActivePref && !samePref(prefDraft, savedActivePref));
+
   const openFriendInviteDrawer = () => {
     if (!canUseFriendInvite) {
       setError("完成邮箱认证后才能使用好友二维码。");
@@ -734,7 +773,7 @@ export default function MenuPage() {
             </button>
             {channelRows.map(([channel, _value, label]) =>
               channelVerified(me, channel) ? (
-                <button key={`${channel}-settings`} className="simple-row menu-link-row" onClick={() => setPrefDrawerChannel(channel)} type="button">
+                <button key={`${channel}-settings`} className="simple-row menu-link-row" onClick={() => openPrefDrawer(channel)} type="button">
                   <div className="row-main">
                     <strong>{label} 设置</strong>
                     <div className="row-subtle">
@@ -916,10 +955,14 @@ export default function MenuPage() {
       <SideDrawer
         description={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)} 通知偏好` : ""}
         open={Boolean(prefDrawerChannel)}
-        onClose={() => setPrefDrawerChannel(null)}
+        actionBusy={prefSaving}
+        actionDisabled={!prefDraftDirty}
+        actionLabel="完成"
+        onAction={() => void savePrefDraft()}
+        onClose={requestClosePrefDrawer}
         title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)} 设置` : "通知设置"}
       >
-        {prefDrawerChannel ? (
+        {prefDrawerChannel && activePrefDraft ? (
           <div className="menu-pref-list">
             <div className="menu-pref-row">
               <div className="row-main">
@@ -927,8 +970,8 @@ export default function MenuPage() {
               </div>
               <button
                 aria-label={`toggle-${prefDrawerChannel}`}
-                className={`switch ${prefs[prefDrawerChannel].enabled ? "active" : ""}`}
-                onClick={() => void syncPref(prefDrawerChannel, { enabled: prefs[prefDrawerChannel].enabled ? 0 : 1 })}
+                className={`switch ${activePrefDraft.enabled ? "active" : ""}`}
+                onClick={() => updatePrefDraft({ enabled: !activePrefDraft.enabled })}
                 type="button"
               />
             </div>
@@ -939,22 +982,14 @@ export default function MenuPage() {
               <div className="menu-pref-control">
                 <div className="menu-stepper">
                   <button
-                    onClick={() =>
-                      void syncPref(prefDrawerChannel, {
-                        offline_threshold_minutes: Math.max(1, prefs[prefDrawerChannel].threshold - 1),
-                      })
-                    }
+                    onClick={() => updatePrefDraft({ threshold: Math.max(1, activePrefDraft.threshold - 1) })}
                     type="button"
                   >
                     −
                   </button>
-                  <span className="menu-stepper-value mono">{prefs[prefDrawerChannel].threshold}</span>
+                  <span className="menu-stepper-value mono">{activePrefDraft.threshold}</span>
                   <button
-                    onClick={() =>
-                      void syncPref(prefDrawerChannel, {
-                        offline_threshold_minutes: prefs[prefDrawerChannel].threshold + 1,
-                      })
-                    }
+                    onClick={() => updatePrefDraft({ threshold: activePrefDraft.threshold + 1 })}
                     type="button"
                   >
                     +
@@ -968,57 +1003,73 @@ export default function MenuPage() {
                 <div className="menu-pref-row">
                   <div className="row-main">
                     <strong>隐藏消息内容</strong>
-                    <div className="row-subtle">开启后，只提示收到新消息，不展示具体内容。</div>
+                    <div className="row-subtle">仅提示新消息</div>
                   </div>
                   <button
                     aria-label={`toggle-hide-content-${prefDrawerChannel}`}
-                    className={`switch ${prefs[prefDrawerChannel].hideMessageContent ? "active" : ""}`}
-                    onClick={() =>
-                      void syncPref(prefDrawerChannel, {
-                        hide_message_content: prefs[prefDrawerChannel].hideMessageContent ? 0 : 1,
-                      })
-                    }
+                    className={`switch ${activePrefDraft.hideMessageContent ? "active" : ""}`}
+                    onClick={() => updatePrefDraft({ hideMessageContent: !activePrefDraft.hideMessageContent })}
                     type="button"
                   />
                 </div>
-                {prefs[prefDrawerChannel].hideMessageContent ? (
+                {activePrefDraft.hideMessageContent ? (
                   <div className="menu-pref-custom">
-                    <div className="simple-form notification-custom-message-fields">
-                      <div>
-                        <label className="field-label">私聊消息提示</label>
-                        <input
-                          className="input"
-                          maxLength={255}
-                          placeholder="留空则使用默认：你收到了一条新的私聊消息。"
-                          value={prefs[prefDrawerChannel].hiddenDirectMessageText}
-                          onBlur={() => void syncHiddenMessageTexts(prefDrawerChannel)}
-                          onChange={(event) =>
-                            updatePrefDraft(prefDrawerChannel, {
-                              hiddenDirectMessageText: event.target.value,
-                            })
-                          }
-                        />
+                    <button className="simple-row menu-link-row menu-pref-link-row" onClick={() => setPrefCustomDrawerOpen(true)} type="button">
+                      <div className="row-main">
+                        <strong>自定义消息提示</strong>
+                        <div className="row-subtle">私聊和群聊文案</div>
                       </div>
-                      <div>
-                        <label className="field-label">群聊消息提示</label>
-                        <input
-                          className="input"
-                          maxLength={255}
-                          placeholder="留空则使用默认：你收到了一条新的群聊消息。"
-                          value={prefs[prefDrawerChannel].hiddenGroupMessageText}
-                          onBlur={() => void syncHiddenMessageTexts(prefDrawerChannel)}
-                          onChange={(event) =>
-                            updatePrefDraft(prefDrawerChannel, {
-                              hiddenGroupMessageText: event.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
+                      <span className="material-symbols-outlined">chevron_right</span>
+                    </button>
                   </div>
                 ) : null}
               </>
             ) : null}
+          </div>
+        ) : null}
+      </SideDrawer>
+      <SideDrawer
+        description="隐藏内容时使用"
+        open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePrefDraft)}
+        actionBusy={prefSaving}
+        actionDisabled={!prefDraftDirty}
+        actionLabel="完成"
+        onAction={() => void savePrefDraft()}
+        onClose={() => setPrefCustomDrawerOpen(false)}
+        title="自定义消息提示"
+      >
+        {prefDrawerChannel && activePrefDraft ? (
+          <div className="menu-pref-custom-drawer">
+            <div className="simple-form notification-custom-message-fields">
+              <div>
+                <label className="field-label">私聊消息提示</label>
+                <input
+                  className="input"
+                  maxLength={255}
+                  placeholder={defaultHiddenDirectMessagePlaceholder}
+                  value={activePrefDraft.hiddenDirectMessageText}
+                  onChange={(event) =>
+                    updatePrefDraft({
+                      hiddenDirectMessageText: event.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="field-label">群聊消息提示</label>
+                <input
+                  className="input"
+                  maxLength={255}
+                  placeholder={defaultHiddenGroupMessagePlaceholder}
+                  value={activePrefDraft.hiddenGroupMessageText}
+                  onChange={(event) =>
+                    updatePrefDraft({
+                      hiddenGroupMessageText: event.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
           </div>
         ) : null}
       </SideDrawer>
@@ -1142,6 +1193,17 @@ export default function MenuPage() {
         open={Boolean(statusModal?.open)}
         phase={statusModal?.phase ?? "loading"}
         successLabel={statusModal?.successLabel}
+      />
+      <ConfirmDialog
+        open={discardPrefConfirmOpen}
+        title="放弃这次修改？"
+        description="你还没有完成保存，直接返回会丢失这次改动。"
+        confirmLabel="直接返回"
+        onClose={() => setDiscardPrefConfirmOpen(false)}
+        onConfirm={() => {
+          setDiscardPrefConfirmOpen(false);
+          closePrefDrawers();
+        }}
       />
       <ConfirmDialog
         open={passwordReminderOpen}
