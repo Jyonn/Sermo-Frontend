@@ -6,10 +6,6 @@ export function formatRelativeTime(timestampSeconds: number) {
   return `${Math.floor(deltaMinutes / 1440)} 天前`;
 }
 
-export function confirmDangerAction(message: string) {
-  return window.confirm(message);
-}
-
 export async function copyText(value: string) {
   const text = value.trim();
   if (!text) return false;
