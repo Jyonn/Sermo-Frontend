@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
@@ -100,6 +101,7 @@ export default function NotificationsPage() {
   });
   const [requestSheetOpen, setRequestSheetOpen] = useState(false);
   const [groupSheetOpen, setGroupSheetOpen] = useState(false);
+  const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -154,8 +156,6 @@ export default function NotificationsPage() {
   const pendingRequestCount = requests.incoming.length;
 
   const actOnRequest = async (userId: number, accept: boolean) => {
-    if (!accept && !confirmDangerAction("确认忽略这条好友申请？")) return;
-
     try {
       await api.respondFriendRequest(userId, accept);
       const refreshed = normalizePendingRequests(await api.getFriendRequests());
@@ -312,7 +312,7 @@ export default function NotificationsPage() {
                     <button className="button row-button" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
                       同意
                     </button>
-                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.from_user.user_id, false)} type="button">
+                    <button className="ghost-button row-button" onClick={() => setIgnoreRequest(request)} type="button">
                       忽略
                     </button>
                   </div>
@@ -346,6 +346,21 @@ export default function NotificationsPage() {
           )}
         </section>
       </SideDrawer>
+      <ConfirmDialog
+        danger
+        open={Boolean(ignoreRequest)}
+        title="确认忽略好友申请？"
+        description={ignoreRequest ? `忽略后，${ignoreRequest.from_user.name} 的这条申请将不再显示为待处理。` : ""}
+        confirmLabel="确认忽略"
+        onClose={() => setIgnoreRequest(null)}
+        onConfirm={() => {
+          const targetUserId = ignoreRequest?.from_user.user_id;
+          setIgnoreRequest(null);
+          if (targetUserId) {
+            void actOnRequest(targetUserId, false);
+          }
+        }}
+      />
 
       <SideDrawer
         open={groupSheetOpen}

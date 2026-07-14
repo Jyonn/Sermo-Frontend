@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { UserAvatar } from "../components/UserAvatar";
@@ -50,6 +51,7 @@ export default function FriendsPage() {
   const [outgoing, setOutgoing] = useState<FriendshipRequestDTO[]>([]);
   const [sheetFriend, setSheetFriend] = useState<FriendAccepted | null>(null);
   const [sheetRequest, setSheetRequest] = useState<FriendshipRequestDTO | null>(null);
+  const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [statusModal, setStatusModal] = useState<{
     open: boolean;
     phase: "loading" | "success" | "error";
@@ -267,7 +269,7 @@ export default function FriendsPage() {
                 <button className="button" onClick={() => void actOnRequest(sheetRequest.from_user.user_id, true)} type="button">
                   同意
                 </button>
-                <button className="ghost-button" onClick={() => void actOnRequest(sheetRequest.from_user.user_id, false)} type="button">
+                <button className="ghost-button" onClick={() => setIgnoreRequest(sheetRequest)} type="button">
                   忽略
                 </button>
               </>
@@ -279,6 +281,21 @@ export default function FriendsPage() {
           </div>
         ) : null}
       </BottomSheet>
+      <ConfirmDialog
+        danger
+        open={Boolean(ignoreRequest)}
+        title="确认忽略好友申请？"
+        description={ignoreRequest ? `忽略后，${ignoreRequest.from_user.name} 的这条申请将不再显示为待处理。` : ""}
+        confirmLabel="确认忽略"
+        onClose={() => setIgnoreRequest(null)}
+        onConfirm={() => {
+          const targetUserId = ignoreRequest?.from_user.user_id;
+          setIgnoreRequest(null);
+          if (targetUserId) {
+            void actOnRequest(targetUserId, false);
+          }
+        }}
+      />
       <RequestStatusModal
         open={Boolean(statusModal?.open)}
         phase={statusModal?.phase ?? "loading"}
