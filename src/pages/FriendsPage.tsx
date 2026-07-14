@@ -9,7 +9,7 @@ import { RequestStatusModal } from "../components/RequestStatusModal";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
-import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
+import { formatRelativeTime } from "../lib/presentation";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
@@ -52,6 +52,7 @@ export default function FriendsPage() {
   const [sheetFriend, setSheetFriend] = useState<FriendAccepted | null>(null);
   const [sheetRequest, setSheetRequest] = useState<FriendshipRequestDTO | null>(null);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
+  const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
   const [statusModal, setStatusModal] = useState<{
     open: boolean;
     phase: "loading" | "success" | "error";
@@ -96,8 +97,6 @@ export default function FriendsPage() {
   }, [incoming, outgoing, tab]);
 
   const actOnRequest = async (userId: number, accept?: boolean) => {
-    if (accept === undefined && !confirmDangerAction("确认撤回这条好友申请？")) return;
-
     setStatusModal({
       open: true,
       phase: "loading",
@@ -207,7 +206,7 @@ export default function FriendsPage() {
                       </button>
                     </div>
                   ) : (
-                    <button className="ghost-button row-button" onClick={() => void actOnRequest(request.to_user.user_id)} type="button">
+                    <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
                       撤回
                     </button>
                   )}
@@ -274,7 +273,7 @@ export default function FriendsPage() {
                 </button>
               </>
             ) : (
-              <button className="danger-button" onClick={() => void actOnRequest(sheetRequest.to_user.user_id)} type="button">
+              <button className="danger-button" onClick={() => setRevokeRequest(sheetRequest)} type="button">
                 撤回申请
               </button>
             )}
@@ -293,6 +292,21 @@ export default function FriendsPage() {
           setIgnoreRequest(null);
           if (targetUserId) {
             void actOnRequest(targetUserId, false);
+          }
+        }}
+      />
+      <ConfirmDialog
+        danger
+        open={Boolean(revokeRequest)}
+        title="确认撤回好友申请？"
+        description={revokeRequest ? `撤回后，发给 ${revokeRequest.to_user.name} 的这条申请会被取消。` : ""}
+        confirmLabel="确认撤回"
+        onClose={() => setRevokeRequest(null)}
+        onConfirm={() => {
+          const targetUserId = revokeRequest?.to_user.user_id;
+          setRevokeRequest(null);
+          if (targetUserId) {
+            void actOnRequest(targetUserId);
           }
         }}
       />

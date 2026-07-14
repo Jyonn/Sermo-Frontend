@@ -9,7 +9,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
-import { confirmDangerAction, formatRelativeTime } from "../lib/presentation";
+import { formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
 
@@ -102,6 +102,7 @@ export default function NotificationsPage() {
   const [requestSheetOpen, setRequestSheetOpen] = useState(false);
   const [groupSheetOpen, setGroupSheetOpen] = useState(false);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
+  const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -168,8 +169,6 @@ export default function NotificationsPage() {
   };
 
   const revokeOutgoingRequest = async (userId: number) => {
-    if (!confirmDangerAction("确认撤回这条好友申请？")) return;
-
     try {
       await api.removeFriendRequest(userId);
       const refreshed = normalizePendingRequests(await api.getFriendRequests());
@@ -335,7 +334,7 @@ export default function NotificationsPage() {
                     <strong>{request.to_user.name}</strong>
                     <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
                   </div>
-                  <button className="ghost-button row-button" onClick={() => void revokeOutgoingRequest(request.to_user.user_id)} type="button">
+                  <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
                     撤回
                   </button>
                 </div>
@@ -358,6 +357,21 @@ export default function NotificationsPage() {
           setIgnoreRequest(null);
           if (targetUserId) {
             void actOnRequest(targetUserId, false);
+          }
+        }}
+      />
+      <ConfirmDialog
+        danger
+        open={Boolean(revokeRequest)}
+        title="确认撤回好友申请？"
+        description={revokeRequest ? `撤回后，发给 ${revokeRequest.to_user.name} 的这条申请会被取消。` : ""}
+        confirmLabel="确认撤回"
+        onClose={() => setRevokeRequest(null)}
+        onConfirm={() => {
+          const targetUserId = revokeRequest?.to_user.user_id;
+          setRevokeRequest(null);
+          if (targetUserId) {
+            void revokeOutgoingRequest(targetUserId);
           }
         }}
       />
