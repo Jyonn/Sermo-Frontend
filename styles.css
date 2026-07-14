@@ -1031,6 +1031,7 @@ img {
   position: relative;
   display: inline-grid;
   place-items: center;
+  aspect-ratio: 1 / 1;
   color: var(--text-primary);
   font-weight: 700;
   background: var(--avatar-bg);
@@ -1344,6 +1345,7 @@ img {
 .chat-conversation-topbar .avatar {
   width: 40px;
   height: 40px;
+  aspect-ratio: 1 / 1;
   border-radius: 14px;
   font-size: 0.84rem;
 }
@@ -1447,6 +1449,7 @@ img {
 .message-avatar {
   width: 32px;
   height: 32px;
+  aspect-ratio: 1 / 1;
   border-radius: 11px;
   font-size: 0.72rem;
   flex: 0 0 32px;
@@ -3013,6 +3016,7 @@ img {
 .chat-detail-member-avatar {
   width: 54px;
   height: 54px;
+  aspect-ratio: 1 / 1;
   border-radius: 18px;
   font-size: 0.88rem;
 }
@@ -3738,6 +3742,7 @@ img {
 .friend-profile-avatar {
   width: 108px;
   height: 108px;
+  aspect-ratio: 1 / 1;
   border-radius: 30px;
   font-size: 2rem;
 }
