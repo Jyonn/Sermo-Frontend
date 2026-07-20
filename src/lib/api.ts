@@ -12,6 +12,7 @@ import type {
   FriendshipStatusDTO,
   JoinResponseDTO,
   LoginAuthDTO,
+  LinkPreviewDTO,
   OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
   SpaceAdminDashboardDTO,
@@ -417,6 +418,13 @@ export const api = {
   deleteMessage(message_id: number) {
     return request<Record<string, never>>("/messages/", {
       method: "DELETE",
+      auth: true,
+      query: { message_id },
+    });
+  },
+
+  getMessageLinkPreview(message_id: number) {
+    return request<LinkPreviewDTO>("/messages/link-preview", {
       auth: true,
       query: { message_id },
     });

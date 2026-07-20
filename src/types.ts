@@ -3,6 +3,7 @@ export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio";
 export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "system";
+export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
   identifier: string;
@@ -144,6 +145,16 @@ export interface MessageUploadDTO {
   max_file_size: number;
 }
 
+export interface LinkPreviewDTO {
+  url?: string;
+  status: LinkPreviewStatus;
+  title?: string;
+  description?: string;
+  image_url?: string;
+  site_name?: string;
+  favicon_url?: string;
+}
+
 export interface ChatMessagePayloadDTO {
   kind: MessageKind;
   text?: string;
@@ -151,6 +162,7 @@ export interface ChatMessagePayloadDTO {
   thumbnail_uri?: string;
   mime_type?: string;
   duration_seconds?: number;
+  link_preview?: LinkPreviewDTO | null;
 }
 
 export interface FriendshipRequestDTO {

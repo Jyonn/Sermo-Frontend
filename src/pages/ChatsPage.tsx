@@ -28,7 +28,7 @@ import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -39,6 +39,8 @@ const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const AUDIO_MAX_DURATION_SECONDS = 60;
+const TEXT_URL_RE = /https?:\/\/[^\s<>"']+/gi;
+const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -112,6 +114,26 @@ function formatDuration(seconds: number) {
   const minutes = Math.floor(total / 60);
   const rest = total % 60;
   return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
+function normalizeMessageUrl(rawUrl: string) {
+  const escaped = LINK_TRAILING_PUNCTUATION.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return rawUrl.replace(new RegExp(`[${escaped}]+$`), "");
+}
+
+function extractFirstMessageUrl(text: string) {
+  TEXT_URL_RE.lastIndex = 0;
+  const match = TEXT_URL_RE.exec(text);
+  TEXT_URL_RE.lastIndex = 0;
+  return match ? normalizeMessageUrl(match[0]) : null;
+}
+
+function hostnameFromUrl(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
 }
 
 const AUDIO_WAVE_PATTERN = [0.34, 0.58, 0.44, 0.76, 0.41, 0.66, 0.52, 0.84, 0.49, 0.7, 0.39, 0.62, 0.47, 0.8];
@@ -491,6 +513,7 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
 function createPendingMessage(text: string, name: string): ChatMessage {
   const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
   const createdAt = Math.floor(Date.now() / 1000);
+  const linkUrl = extractFirstMessageUrl(text);
   return {
     id: clientId,
     clientId,
@@ -501,7 +524,7 @@ function createPendingMessage(text: string, name: string): ChatMessage {
     time: formatTime(createdAt),
     createdAt,
     text,
-    payload: { kind: "text", text },
+    payload: { kind: "text", text, link_preview: linkUrl ? { url: linkUrl, status: "pending" } : null },
     status: "pending",
   };
 }
@@ -636,6 +659,125 @@ const MessageMediaImage = memo(function MessageMediaImage({
   );
 });
 
+function LinkedMessageText({ text }: { text: string }) {
+  const parts: Array<{ key: string; text: string; href?: string }> = [];
+  let lastIndex = 0;
+
+  TEXT_URL_RE.lastIndex = 0;
+  Array.from(text.matchAll(TEXT_URL_RE)).forEach((match, index) => {
+    const rawUrl = match[0];
+    const start = match.index ?? 0;
+    const url = normalizeMessageUrl(rawUrl);
+    const urlEnd = start + url.length;
+    if (start > lastIndex) {
+      parts.push({ key: `text:${index}:${lastIndex}`, text: text.slice(lastIndex, start) });
+    }
+    parts.push({ key: `url:${index}:${start}`, text: url, href: url });
+    lastIndex = Math.max(urlEnd, start + rawUrl.length);
+  });
+  TEXT_URL_RE.lastIndex = 0;
+
+  if (lastIndex < text.length) {
+    parts.push({ key: `text:end:${lastIndex}`, text: text.slice(lastIndex) });
+  }
+
+  if (parts.length === 0) return <span className="message-text">{text}</span>;
+
+  return (
+    <span className="message-text">
+      {parts.map((part) =>
+        part.href ? (
+          <a
+            key={part.key}
+            className="message-text-link"
+            href={part.href}
+            onClick={(event) => event.stopPropagation()}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {part.text}
+          </a>
+        ) : (
+          <span key={part.key}>{part.text}</span>
+        )
+      )}
+    </span>
+  );
+}
+
+const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId, preview }: { messageId: number | string; preview?: LinkPreviewDTO | null }) {
+  const [currentPreview, setCurrentPreview] = useState<LinkPreviewDTO | null>(preview ?? null);
+  const previewUrl = currentPreview?.url || preview?.url || "";
+  const isPollable = typeof messageId === "number" && (currentPreview?.status ?? preview?.status) === "pending";
+
+  useEffect(() => {
+    setCurrentPreview(preview ?? null);
+  }, [preview?.url, preview?.status, preview?.title, preview?.description, preview?.image_url, preview?.site_name]);
+
+  useEffect(() => {
+    if (!isPollable) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    let timer: number | null = null;
+
+    const poll = async () => {
+      attempts += 1;
+      try {
+        const nextPreview = await api.getMessageLinkPreview(messageId);
+        if (cancelled) return;
+        setCurrentPreview(nextPreview);
+        if (nextPreview.status !== "pending" || attempts >= 12) return;
+      } catch {
+        if (cancelled || attempts >= 12) return;
+      }
+      timer = window.setTimeout(poll, 2000);
+    };
+
+    timer = window.setTimeout(poll, 900);
+    return () => {
+      cancelled = true;
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [isPollable, messageId]);
+
+  if (!currentPreview || currentPreview.status === "none") return null;
+  if (currentPreview.status === "failed") return null;
+
+  if (currentPreview.status === "pending") {
+    return (
+      <div className="message-link-preview-card is-loading" aria-label="正在生成链接预览">
+        <div className="message-link-preview-text">
+          <span className="message-link-preview-site">{hostnameFromUrl(previewUrl) || "链接预览"}</span>
+          <span className="message-link-preview-title shimmer-line" />
+          <span className="message-link-preview-desc shimmer-line short" />
+        </div>
+        <div className="message-link-preview-image shimmer-block" />
+      </div>
+    );
+  }
+
+  const title = currentPreview.title || hostnameFromUrl(currentPreview.url || "") || currentPreview.url || "链接";
+  const siteName = currentPreview.site_name || hostnameFromUrl(currentPreview.url || "");
+
+  return (
+    <a
+      className="message-link-preview-card"
+      href={currentPreview.url}
+      onClick={(event) => event.stopPropagation()}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <div className="message-link-preview-text">
+        {siteName ? <span className="message-link-preview-site">{siteName}</span> : null}
+        <strong className="message-link-preview-title">{title}</strong>
+        {currentPreview.description ? <span className="message-link-preview-desc">{currentPreview.description}</span> : null}
+      </div>
+      {currentPreview.image_url ? <img alt="" className="message-link-preview-image" loading="lazy" src={currentPreview.image_url} /> : null}
+    </a>
+  );
+});
+
 function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) => void) | undefined, groupClassName: string) {
   if (message.kind === "image" && message.payload?.uri) {
     return <MessageMediaImage groupClassName={groupClassName} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
@@ -654,7 +796,12 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) 
     return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
   }
 
-  return <span className="message-text">{message.text}</span>;
+  return (
+    <span className="message-text-stack">
+      <LinkedMessageText text={message.payload?.text ?? message.text} />
+      <MessageLinkPreviewCard messageId={message.id} preview={message.payload?.link_preview} />
+    </span>
+  );
 }
 
 function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[]) {
@@ -666,6 +813,13 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
       clientId: message.clientId,
       status: message.status,
       text: message.text,
+      linkPreview: message.payload?.link_preview
+        ? {
+            status: message.payload.link_preview.status,
+            title: message.payload.link_preview.title,
+            imageUrl: message.payload.link_preview.image_url,
+          }
+        : null,
     })),
     entering,
   });
