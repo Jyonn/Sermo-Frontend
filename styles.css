@@ -929,6 +929,68 @@ img {
   background: rgba(0, 166, 255, 0.1);
 }
 
+.auth-restore-screen {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 76% 18%, rgba(0, 208, 132, 0.14), transparent 28%),
+    radial-gradient(circle at 12% 78%, rgba(0, 166, 255, 0.12), transparent 26%),
+    linear-gradient(180deg, #fbfaf5 0%, var(--bg-canvas) 100%);
+}
+
+.auth-restore-screen .feedback-state {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  padding: 22px;
+  border-style: solid;
+  border-color: rgba(210, 223, 235, 0.82);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 22px 52px rgba(29, 42, 58, 0.1);
+  backdrop-filter: blur(18px);
+}
+
+.auth-restore-screen .feedback-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
+  color: #0f8bcc;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.72), transparent 32%),
+    linear-gradient(135deg, rgba(0, 166, 255, 0.18), rgba(0, 208, 132, 0.18));
+}
+
+.auth-restore-screen .feedback-icon .material-symbols-outlined {
+  animation: restore-spin 1.2s linear infinite;
+}
+
+.auth-restore-screen .feedback-copy strong {
+  font-size: 1.08rem;
+}
+
+.auth-restore-orb {
+  position: absolute;
+  width: min(68vw, 260px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.65), transparent 28%),
+    linear-gradient(135deg, rgba(0, 166, 255, 0.16), rgba(0, 208, 132, 0.18));
+  filter: blur(4px);
+  transform: translate(36%, -42%);
+}
+
+@keyframes restore-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .app-layout {
   display: grid;
   grid-template-columns: 280px minmax(420px, 1fr) 320px;

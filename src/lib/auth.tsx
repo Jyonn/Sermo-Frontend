@@ -165,7 +165,12 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (!ready) {
-    return <FeedbackState title="正在恢复登录..." description="正在验证你的登录状态。" />;
+    return (
+      <main className="auth-restore-screen">
+        <div className="auth-restore-orb" aria-hidden="true" />
+        <FeedbackState title="正在恢复登录..." description="正在验证你的登录状态。" tone="loading" />
+      </main>
+    );
   }
 
   if (!session) {
