@@ -39,7 +39,7 @@ const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const AUDIO_MAX_DURATION_SECONDS = 60;
-const TEXT_URL_RE = /https?:\/\/[^\s<>"']+/gi;
+const TEXT_URL_RE = /https?:\/\/[^\s<>"'，。！？、；：）】》]+/gi;
 const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
 function avatarLabel(name: string) {
@@ -119,6 +119,13 @@ function formatDuration(seconds: number) {
 function normalizeMessageUrl(rawUrl: string) {
   const escaped = LINK_TRAILING_PUNCTUATION.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return rawUrl.replace(new RegExp(`[${escaped}]+$`), "");
+}
+
+function hasMeaningfulTextOutsidePreviewUrl(text: string, previewUrl?: string) {
+  if (!previewUrl) return text.trim().length > 0;
+  const escaped = LINK_TRAILING_PUNCTUATION.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const remaining = text.replace(previewUrl, "").trim();
+  return remaining.replace(new RegExp(`^[${escaped}\\s]+$`), "").length > 0;
 }
 
 function extractFirstMessageUrl(text: string) {
@@ -659,9 +666,10 @@ const MessageMediaImage = memo(function MessageMediaImage({
   );
 });
 
-function LinkedMessageText({ text }: { text: string }) {
+function LinkedMessageText({ hiddenUrl, text }: { hiddenUrl?: string; text: string }) {
   const parts: Array<{ key: string; text: string; href?: string }> = [];
   let lastIndex = 0;
+  const normalizedHiddenUrl = hiddenUrl ? normalizeMessageUrl(hiddenUrl) : null;
 
   TEXT_URL_RE.lastIndex = 0;
   Array.from(text.matchAll(TEXT_URL_RE)).forEach((match, index) => {
@@ -672,7 +680,9 @@ function LinkedMessageText({ text }: { text: string }) {
     if (start > lastIndex) {
       parts.push({ key: `text:${index}:${lastIndex}`, text: text.slice(lastIndex, start) });
     }
-    parts.push({ key: `url:${index}:${start}`, text: url, href: url });
+    if (url !== normalizedHiddenUrl) {
+      parts.push({ key: `url:${index}:${start}`, text: url, href: url });
+    }
     lastIndex = Math.max(urlEnd, start + rawUrl.length);
   });
   TEXT_URL_RE.lastIndex = 0;
@@ -762,7 +772,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   return (
     <a
-      className="message-link-preview-card"
+      className={`message-link-preview-card ${currentPreview.image_url ? "has-image" : "no-image"}`}
       href={currentPreview.url}
       onClick={(event) => event.stopPropagation()}
       rel="noreferrer"
@@ -798,10 +808,17 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) 
 
   const linkPreview = message.payload?.link_preview;
   const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
+  const text = message.payload?.text ?? message.text;
+  const previewUrl = linkPreview?.url ?? extractFirstMessageUrl(text) ?? undefined;
+  const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, hasLinkPreview ? previewUrl : undefined);
 
   return (
     <span className={`message-text-stack ${hasLinkPreview ? "has-link-preview" : ""}`.trim()}>
-      <LinkedMessageText text={message.payload?.text ?? message.text} />
+      {hasTextBesidePreview ? (
+        <span className={`message-text-chip ${message.from}`}>
+          <LinkedMessageText hiddenUrl={hasLinkPreview ? previewUrl : undefined} text={text} />
+        </span>
+      ) : null}
       <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} />
     </span>
   );
@@ -898,6 +915,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             "message-bubble",
             from === "self" ? "self" : "other",
             isMediaMessageKind(message.kind) ? "is-media" : "",
+            message.payload?.link_preview && message.payload.link_preview.status !== "none" && message.payload.link_preview.status !== "failed" ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
             isLast ? "group-end" : "",
