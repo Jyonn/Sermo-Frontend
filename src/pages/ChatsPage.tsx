@@ -42,6 +42,10 @@ const AUDIO_MAX_DURATION_SECONDS = 60;
 const TEXT_URL_RE = /https?:\/\/[^\s<>"'，。！？、；：）】》]+/gi;
 const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
+type ChatRouteState = {
+  chatAccessError?: string;
+};
+
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
@@ -1130,6 +1134,15 @@ function filterUsersByName(rows: UserDTO[], query: string) {
   return rows.filter((user) => user.name.toLowerCase().includes(normalized));
 }
 
+function isChatAccessBoundaryError(error: unknown) {
+  return error instanceof ApiError && (error.status === 403 || error.status === 404);
+}
+
+function chatAccessBoundaryMessage(error: unknown) {
+  if (error instanceof ApiError && error.message) return error.message;
+  return "这个会话不存在，或者你没有访问权限。";
+}
+
 export default function ChatsPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1210,6 +1223,8 @@ export default function ChatsPage() {
   const currentUserName = session?.user.name ?? "我";
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping";
+  const routeState = location.state as ChatRouteState | null;
+  const chatAccessNotice = routeState?.chatAccessError ?? null;
 
   const cleanupRecordingResources = () => {
     if (waveformFrameRef.current) {
@@ -1325,10 +1340,58 @@ export default function ChatsPage() {
   }, [chatId, chats]);
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
+  const routeChatId = useMemo(() => {
+    if (!chatId) return null;
+    const numericChatId = Number(chatId);
+    return Number.isInteger(numericChatId) && numericChatId > 0 ? numericChatId : null;
+  }, [chatId]);
   const selectedMessages = useMemo(
     () => (displayedChat ? sortMessages(messages[displayedChat.id] ?? []) : []),
     [displayedChat, messages]
   );
+
+  const redirectToChatListWithNotice = (message: string, blockedChatId?: number) => {
+    setDetailsSheetOpen(false);
+    setMessageMenu(null);
+    setClosingChatSnapshot(null);
+    setIsClosingChatView(false);
+    setHasOlderMessages(false);
+    setOlderState("idle");
+    setPageError(null);
+
+    if (blockedChatId) {
+      setMessages((current) => {
+        if (!(blockedChatId in current)) return current;
+        const next = { ...current };
+        delete next[blockedChatId];
+        return next;
+      });
+      setChats((current) => {
+        const next = current.filter((chat) => chat.id !== blockedChatId);
+        if (next.length !== current.length && cacheScope) {
+          void chatCache.persistChatList(cacheScope, next);
+        }
+        return next;
+      });
+    }
+
+    navigate("/app/chats", {
+      replace: true,
+      state: {
+        chatAccessError: message,
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!chatId) return;
+    if (!routeChatId) {
+      redirectToChatListWithNotice("这个聊天链接格式不正确。");
+      return;
+    }
+    if (selectedChat || viewState === "idle" || viewState === "loading") return;
+    redirectToChatListWithNotice(pageError ?? "这个会话不存在，或者你没有访问权限。", routeChatId);
+  }, [chatId, routeChatId, selectedChat, viewState, pageError]);
 
   useEffect(() => {
     if (!DEBUG_CHAT_SEND) return;
@@ -1516,6 +1579,10 @@ export default function ChatsPage() {
           setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
         });
       } catch (apiError) {
+        if (isChatAccessBoundaryError(apiError)) {
+          redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
+          return;
+        }
         if (!controller.signal.aborted) {
           const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || memoryThread?.messages.length);
           if (!hasLocalMessages) {
@@ -2577,6 +2644,10 @@ export default function ChatsPage() {
         element.scrollTop = nextHeight - previousHeight + element.scrollTop;
       });
     } catch (apiError) {
+      if (isChatAccessBoundaryError(apiError)) {
+        redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
+        return;
+      }
       const message = apiError instanceof ApiError ? apiError.message : "加载历史消息失败";
       setPageError(message);
     } finally {
@@ -2633,10 +2704,26 @@ export default function ChatsPage() {
 
       <div className="chat-list-screen-body">
         {viewState === "loading" ? <FeedbackState title="会话加载中" description="正在同步你最近的聊天。" tone="loading" /> : null}
+        {chatAccessNotice ? (
+          <FeedbackState
+            title="无法打开这个会话"
+            description={chatAccessNotice}
+            action={
+              <div className="button-row">
+                <Link className="button" replace to="/app/chats">
+                  查看聊天列表
+                </Link>
+                <Link className="ghost-button" to="/app/notifications">
+                  去通讯
+                </Link>
+              </div>
+            }
+          />
+        ) : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
-        {!filteredChats.length && viewState === "ready" ? (
+        {!chatAccessNotice && !filteredChats.length && viewState === "ready" ? (
           <FeedbackState
             title={query.trim() ? "没有匹配的会话" : "还没有会话"}
             description={query.trim() ? "换个关键词试试，或者从广场发起新的聊天。" : "先从广场里找到一个人，再开始第一段对话。"}
