@@ -39,6 +39,17 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
   return next;
 }
 
+function detectAppleEnvironment() {
+  if (typeof navigator === "undefined") return false;
+  const userAgent = navigator.userAgent || "";
+  const platform = navigator.platform || "";
+  const userAgentDataPlatform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || "";
+  const value = `${userAgent} ${platform} ${userAgentDataPlatform}`.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(value);
+  const isMac = /macintosh|mac os x|macintel|mac/.test(value);
+  return isIOS || isMac;
+}
+
 export default function SettingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -78,6 +89,11 @@ export default function SettingsPage() {
   const contactVerifyBlockRef = useRef<HTMLDivElement | null>(null);
   const contactSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+  const isAppleEnvironment = useMemo(() => detectAppleEnvironment(), []);
+  const visibleChannels = useMemo(
+    () => channels.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
+    [isAppleEnvironment]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -156,13 +172,13 @@ export default function SettingsPage() {
   useEffect(() => {
     if (tab !== "contacts") return;
     const channel = new URLSearchParams(location.search).get("channel");
-    if (channel === "email" || channel === "sms" || channel === "bark") {
+    if (channel === "email" || channel === "sms" || (channel === "bark" && isAppleEnvironment)) {
       setContactChannel(channel);
       setContactSheetChannel(channel);
       setContactTarget(contactMeta[channel].target);
       setContactCode("");
     }
-  }, [contactMeta, location.search, tab]);
+  }, [contactMeta, isAppleEnvironment, location.search, tab]);
 
   const openEmailVerificationFlow = () => {
     if (!hasPassword) {
@@ -462,7 +478,7 @@ export default function SettingsPage() {
           <section className="list-section">
             {viewState === "loading" ? <FeedbackState title="通知设置加载中" description="正在同步各渠道设置。" tone="loading" /> : null}
             <div className="simple-list">
-              {channels.map(([channel, _value, label]) => {
+              {visibleChannels.map(([channel, _value, label]) => {
                 const pref = prefs[channel];
                 const requiresEmailVerification = channel === "email" && !emailVerified;
                 return (
@@ -501,7 +517,7 @@ export default function SettingsPage() {
         {tab === "contacts" ? (
           <section className="list-section">
             <div className="simple-list">
-              {channels.map(([channel, _value, label]) => (
+              {visibleChannels.map(([channel, _value, label]) => (
                 <div key={channel} className="simple-row form-row">
                   <div className="row-main">
                     <strong>{contactMeta[channel].title}</strong>

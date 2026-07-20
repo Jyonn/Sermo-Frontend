@@ -33,6 +33,7 @@ const emptyPrefs: NotificationPreferences = {
 
 const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
 const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
+const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
 
 function clonePref(pref: NotificationPreferences[NotificationChannel]) {
   return { ...pref };
@@ -102,12 +103,32 @@ function channelVerified(me: UserMeDTO | null, channel: NotificationChannel) {
   return Boolean(me.bark_verified_at);
 }
 
+function detectAppleEnvironment() {
+  if (typeof navigator === "undefined") return false;
+  const userAgent = navigator.userAgent || "";
+  const platform = navigator.platform || "";
+  const userAgentDataPlatform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || "";
+  const value = `${userAgent} ${platform} ${userAgentDataPlatform}`.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(value);
+  const isMac = /macintosh|mac os x|macintel|mac/.test(value);
+  return isIOS || isMac;
+}
+
 function QrCodeIcon() {
   return (
     <svg aria-hidden="true" className="menu-qr-icon" fill="none" viewBox="0 0 24 24">
       <path d="M4.5 4.5h5v5h-5zM14.5 4.5h5v5h-5zM4.5 14.5h5v5h-5z" stroke="currentColor" strokeWidth="1.8" />
       <path d="M15 15h1.5v1.5H18V18h1.5M15 18h1.5v1.5M18 13.5V15h1.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </svg>
+  );
+}
+
+function BarkGuideIcon() {
+  return (
+    <div className="bark-guide-icon" aria-hidden="true">
+      <span>B</span>
+      <i />
+    </div>
   );
 }
 
@@ -127,6 +148,7 @@ export default function MenuPage() {
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
+  const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
@@ -166,6 +188,13 @@ export default function MenuPage() {
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
+  const isAppleEnvironment = useMemo(() => detectAppleEnvironment(), []);
+  const visibleChannelRows = useMemo(
+    () => channelRows.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
+    [isAppleEnvironment]
+  );
+  const barkBound = channelVerified(me, "bark");
+  const shouldShowBarkGuideBanner = isAppleEnvironment && !barkBound;
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -283,6 +312,17 @@ export default function MenuPage() {
       setPasswordReminderOpen(true);
       return;
     }
+    if (channel === "bark") {
+      setChannelsDrawerOpen(false);
+      setBarkGuideOpen(true);
+      setAuthSheetChannel("bark");
+      setAuthTarget(channelTarget(me, "bark"));
+      setAuthCode("");
+      setAuthPending(false);
+      setAuthCooldown(0);
+      setAuthExpiresIn(0);
+      return;
+    }
     setAuthSheetChannel(channel);
     setAuthTarget(channelTarget(me, channel));
     setAuthCode("");
@@ -292,6 +332,7 @@ export default function MenuPage() {
   };
 
   const closeAuthSheet = () => {
+    setBarkGuideOpen(false);
     setAuthSheetChannel(null);
     setAuthTarget("");
     setAuthCode("");
@@ -299,6 +340,20 @@ export default function MenuPage() {
     setAuthCooldown(0);
     setAuthExpiresIn(0);
     setAuthActionState("idle");
+  };
+
+  const closeBarkGuide = () => {
+    if (authActionState !== "idle") return;
+    setBarkGuideOpen(false);
+    closeAuthSheet();
+  };
+
+  const openBarkGuide = () => {
+    if (!hasPassword) {
+      setPasswordReminderOpen(true);
+      return;
+    }
+    openAuthSheet("bark");
   };
 
   const closePrefDrawers = () => {
@@ -790,6 +845,16 @@ export default function MenuPage() {
           }}
           verified={Boolean(session?.user?.verified)}
         />
+        {shouldShowBarkGuideBanner ? (
+          <button className="verification-banner bark-setup-banner" onClick={openBarkGuide} type="button">
+            <BarkGuideIcon />
+            <div className="verification-banner-copy">
+              <strong>获取即时消息？</strong>
+              <span>下载 Bark 并配置，让聊天提醒更顺畅。</span>
+            </div>
+            <span className="ghost-button verification-banner-action">去绑定</span>
+          </button>
+        ) : null}
 
         {viewState === "loading" ? <FeedbackState title="菜单加载中" description="正在同步你的账户与通知信息。" tone="loading" /> : null}
 
@@ -817,11 +882,11 @@ export default function MenuPage() {
             <button className="simple-row menu-link-row" onClick={openChannelsEntry} type="button">
               <div className="row-main">
                 <strong>通知渠道</strong>
-                <div className="row-subtle">Email、SMS、Bark 认证与绑定</div>
+                <div className="row-subtle">{isAppleEnvironment ? "Email、SMS、Bark 认证与绑定" : "Email、SMS 认证与绑定"}</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            {channelRows.map(([channel, _value, label]) =>
+            {visibleChannelRows.map(([channel, _value, label]) =>
               channelVerified(me, channel) ? (
                 <button key={`${channel}-settings`} className="simple-row menu-link-row" onClick={() => openPrefDrawer(channel)} type="button">
                   <div className="row-main">
@@ -914,7 +979,7 @@ export default function MenuPage() {
       <SideDrawer description="管理各通知渠道的认证状态" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知渠道">
         <div className="detail-list">
           <div className="simple-list">
-            {channelRows.map(([channel, _value, label]) => {
+            {visibleChannelRows.map(([channel, _value, label]) => {
               const verified = channelVerified(me, channel);
               return (
                 <button
@@ -933,6 +998,8 @@ export default function MenuPage() {
                       <span className="menu-channel-value">已绑定</span>
                     ) : !hasPassword ? (
                       <span className="menu-inline-action">先设密码</span>
+                    ) : channel === "bark" ? (
+                      <span className="menu-inline-action">去绑定</span>
                     ) : (
                       <span className="menu-inline-action">去认证</span>
                     )}
@@ -1126,10 +1193,93 @@ export default function MenuPage() {
         ) : null}
       </SideDrawer>
 
+      <SideDrawer
+        description="三步完成 Bark 即时推送，聊天消息会更快抵达。"
+        eyebrow="Instant Push"
+        open={barkGuideOpen}
+        onClose={closeBarkGuide}
+        title="绑定 Bark"
+      >
+        <div className="detail-list bark-guide">
+          <div className="bark-guide-hero">
+            <BarkGuideIcon />
+            <div>
+              <strong>让 Sermo 直接推到你的 iPhone</strong>
+              <span>复制 Bark 的专属链接后，回到这里完成一次验证码确认。</span>
+            </div>
+          </div>
+
+          <div className="bark-guide-steps">
+            <section className="bark-guide-step">
+              <span className="flow-index">1</span>
+              <div>
+                <strong>下载 Bark</strong>
+                <p>从 App Store 安装 Bark，允许通知权限。</p>
+                <a className="bark-store-link" href={barkAppStoreUrl} rel="noreferrer" target="_blank">
+                  打开 App Store
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </a>
+              </div>
+            </section>
+            <section className="bark-guide-step">
+              <span className="flow-index">2</span>
+              <div>
+                <strong>复制专属消息链接</strong>
+                <p>打开 Bark，在首页复制以 https://api.day.app 开头的推送链接。</p>
+              </div>
+            </section>
+            <section className="bark-guide-step active">
+              <span className="flow-index">3</span>
+              <div className="bark-guide-bind">
+                <strong>粘贴并验证</strong>
+                <p>我们会向这个 Bark 链接发送验证码，输入后即可绑定。</p>
+                <div className="simple-form contact-sheet-form">
+                  <input
+                    className="input"
+                    inputMode="url"
+                    placeholder="https://api.day.app/..."
+                    value={authTarget}
+                    onChange={(event) => {
+                      setAuthTarget(event.target.value);
+                      setAuthCode("");
+                      setAuthPending(false);
+                      setAuthExpiresIn(0);
+                    }}
+                  />
+                  <button
+                    className="button contact-flow-primary"
+                    disabled={authActionState === "sending" || !authTarget.trim() || authCooldown > 0}
+                    onClick={() => void sendAuthCode()}
+                    type="button"
+                  >
+                    {authActionState === "sending" ? "发送中..." : authCooldown > 0 ? `${authCooldown} 秒后重试` : "发送验证码"}
+                  </button>
+                  <div className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
+                    <div className="field-label-row">
+                      <label className="field-label">验证码</label>
+                      {authPending && authExpiresIn > 0 ? <span className="field-countdown">还有 {authExpiresIn} 秒有效</span> : null}
+                    </div>
+                    <input className="input" value={authCode} onChange={(event) => setAuthCode(event.target.value)} />
+                    <button
+                      className="button contact-flow-primary"
+                      disabled={authActionState === "binding" || !authCode.trim()}
+                      onClick={() => void bindAuthChannel()}
+                      type="button"
+                    >
+                      {authActionState === "binding" ? "处理中..." : "确认绑定 Bark"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </SideDrawer>
+
       <BottomSheet
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
-        open={Boolean(authSheetChannel)}
+        open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
         title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel ? `绑定 ${channelLabel(authSheetChannel)}` : "通知渠道认证"}
         description={authSheetChannel === "email" ? "认证邮箱后，账号会升级为 Verified。" : "发送验证码后完成绑定"}
         onClose={closeAuthSheet}

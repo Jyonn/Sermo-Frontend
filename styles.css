@@ -719,6 +719,48 @@ img {
   background: rgba(22, 196, 127, 0.1);
 }
 
+.bark-setup-banner {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  border-color: rgba(0, 166, 255, 0.18);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(0, 208, 132, 0.18), transparent 30%),
+    linear-gradient(135deg, rgba(230, 248, 255, 0.92), rgba(244, 255, 248, 0.9));
+}
+
+.bark-guide-icon {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 15px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.42), transparent 28%),
+    linear-gradient(135deg, #15b9ff, #12d084 78%);
+  box-shadow: 0 14px 28px rgba(18, 195, 186, 0.22);
+}
+
+.bark-guide-icon span {
+  position: relative;
+  z-index: 1;
+  font-size: 1.22rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.bark-guide-icon i {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 7px solid rgba(255, 255, 255, 0.28);
+}
+
 .verification-banner-copy {
   min-width: 0;
   display: grid;
@@ -4468,6 +4510,88 @@ img {
 
 .menu-pref-row-button strong {
   font-size: 0.97rem;
+}
+
+.bark-guide {
+  display: grid;
+  gap: 14px;
+}
+
+.bark-guide-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid rgba(208, 224, 236, 0.86);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(0, 208, 132, 0.16), transparent 34%),
+    rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 30px rgba(18, 28, 42, 0.06);
+}
+
+.bark-guide-hero strong,
+.bark-guide-step strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.bark-guide-hero span,
+.bark-guide-step p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.bark-guide-steps {
+  display: grid;
+  gap: 10px;
+}
+
+.bark-guide-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(220, 226, 235, 0.86);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.bark-guide-step.active {
+  border-color: rgba(0, 208, 132, 0.22);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.bark-guide-bind {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.bark-store-link {
+  min-height: 40px;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #061510;
+  background: linear-gradient(135deg, #2fb2ff, #12d084);
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 14px 28px rgba(0, 166, 255, 0.16);
+}
+
+.bark-store-link .material-symbols-outlined {
+  font-size: 1.05rem;
 }
 
 .menu-pref-form-card {
