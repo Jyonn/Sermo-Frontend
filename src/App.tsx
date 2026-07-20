@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
+import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { RequireAdminAuth } from "./lib/adminAuth";
@@ -199,6 +200,7 @@ export default function App() {
           <Route path="/friend-invite" element={<FriendInvitePage overlay />} />
         </Routes>
       ) : null}
+      {ready ? <DocumentTitle /> : null}
       {ready ? <GlobalMessageSync /> : null}
       {ready ? <AppBottomNav /> : null}
     </>
