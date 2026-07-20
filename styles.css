@@ -1479,6 +1479,9 @@ img {
 .message-text-stack {
   display: grid;
   gap: 10px;
+}
+
+.message-text-stack.has-link-preview {
   min-width: min(58vw, 240px);
 }
 

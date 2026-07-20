@@ -796,10 +796,13 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) 
     return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
   }
 
+  const linkPreview = message.payload?.link_preview;
+  const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
+
   return (
-    <span className="message-text-stack">
+    <span className={`message-text-stack ${hasLinkPreview ? "has-link-preview" : ""}`.trim()}>
       <LinkedMessageText text={message.payload?.text ?? message.text} />
-      <MessageLinkPreviewCard messageId={message.id} preview={message.payload?.link_preview} />
+      <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} />
     </span>
   );
 }
