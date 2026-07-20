@@ -26,9 +26,9 @@ const channelRows: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
 };
 
 const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
@@ -50,7 +50,8 @@ function samePref(
     left.threshold === right.threshold &&
     left.hideMessageContent === right.hideMessageContent &&
     left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
-    left.hiddenGroupMessageText === right.hiddenGroupMessageText
+    left.hiddenGroupMessageText === right.hiddenGroupMessageText &&
+    left.openChatOnTap === right.openChatOnTap
   );
 }
 
@@ -76,6 +77,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       hideMessageContent: row.hide_message_content,
       hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
       hiddenGroupMessageText: row.hidden_group_message_text ?? "",
+      openChatOnTap: row.open_chat_on_tap ?? true,
     };
   });
   return next;
@@ -433,6 +435,7 @@ export default function MenuPage() {
         hide_message_content: prefDraft.hideMessageContent ? 1 : 0,
         hidden_direct_message_text: prefDraft.hiddenDirectMessageText.trim(),
         hidden_group_message_text: prefDraft.hiddenGroupMessageText.trim(),
+        open_chat_on_tap: prefDraft.openChatOnTap ? 1 : 0,
       });
       const nextPref = {
         enabled: updated.enabled,
@@ -440,6 +443,7 @@ export default function MenuPage() {
         hideMessageContent: updated.hide_message_content,
         hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
         hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+        openChatOnTap: updated.open_chat_on_tap ?? true,
       };
       setPrefs((current) => ({
         ...current,
@@ -1117,6 +1121,20 @@ export default function MenuPage() {
             </div>
             {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
               <>
+                {prefDrawerChannel === "bark" ? (
+                  <div className="menu-pref-row">
+                    <div className="row-main">
+                      <strong>点击打开聊天</strong>
+                      <div className="row-subtle">点通知进入会话</div>
+                    </div>
+                    <button
+                      aria-label="toggle-bark-open-chat"
+                      className={`switch ${activePrefDraft.openChatOnTap ? "active" : ""}`}
+                      onClick={() => updatePrefDraft({ openChatOnTap: !activePrefDraft.openChatOnTap })}
+                      type="button"
+                    />
+                  </div>
+                ) : null}
                 <div className="menu-pref-row">
                   <div className="row-main">
                     <strong>隐藏消息内容</strong>

@@ -19,9 +19,9 @@ const channels: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "" },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -34,6 +34,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       hideMessageContent: row.hide_message_content,
       hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
       hiddenGroupMessageText: row.hidden_group_message_text ?? "",
+      openChatOnTap: row.open_chat_on_tap ?? true,
     };
   });
   return next;
@@ -236,6 +237,7 @@ export default function SettingsPage() {
       hide_message_content?: 0 | 1;
       hidden_direct_message_text?: string;
       hidden_group_message_text?: string;
+      open_chat_on_tap?: 0 | 1;
     }
   ) => {
     setError(null);
@@ -253,6 +255,7 @@ export default function SettingsPage() {
           hideMessageContent: updated.hide_message_content,
           hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
           hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+          openChatOnTap: updated.open_chat_on_tap ?? true,
         },
       }));
     } catch (apiError) {
@@ -612,6 +615,24 @@ export default function SettingsPage() {
             </div>
             {prefSheetChannel === "email" || prefSheetChannel === "bark" ? (
               <>
+                {prefSheetChannel === "bark" ? (
+                  <div className="simple-row form-row">
+                    <div className="row-main">
+                      <strong>点击打开聊天</strong>
+                      <div className="row-subtle">点通知进入对应会话。</div>
+                    </div>
+                    <button
+                      aria-label="toggle-bark-open-chat"
+                      className={`switch ${prefs[prefSheetChannel].openChatOnTap ? "active" : ""}`}
+                      onClick={() =>
+                        void syncPref(prefSheetChannel, {
+                          open_chat_on_tap: prefs[prefSheetChannel].openChatOnTap ? 0 : 1,
+                        })
+                      }
+                      type="button"
+                    />
+                  </div>
+                ) : null}
                 <div className="simple-row form-row">
                   <div className="row-main">
                     <strong>隐藏消息内容</strong>

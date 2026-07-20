@@ -124,6 +124,7 @@ export interface NotificationPreferenceDTO {
   hide_message_content: boolean;
   hidden_direct_message_text: string;
   hidden_group_message_text: string;
+  open_chat_on_tap: boolean;
 }
 
 export interface AvatarUploadDTO {
@@ -290,6 +291,7 @@ export interface NotificationPreference {
   hideMessageContent: boolean;
   hiddenDirectMessageText: string;
   hiddenGroupMessageText: string;
+  openChatOnTap: boolean;
 }
 
 export type NotificationPreferences = Record<NotificationChannel, NotificationPreference>;
