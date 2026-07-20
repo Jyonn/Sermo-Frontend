@@ -809,14 +809,18 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) 
   const linkPreview = message.payload?.link_preview;
   const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
   const text = message.payload?.text ?? message.text;
+  if (!hasLinkPreview) {
+    return <LinkedMessageText text={text} />;
+  }
+
   const previewUrl = linkPreview?.url ?? extractFirstMessageUrl(text) ?? undefined;
-  const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, hasLinkPreview ? previewUrl : undefined);
+  const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, previewUrl);
 
   return (
-    <span className={`message-text-stack ${hasLinkPreview ? "has-link-preview" : ""}`.trim()}>
+    <span className="message-text-stack has-link-preview">
       {hasTextBesidePreview ? (
         <span className={`message-text-chip ${message.from}`}>
-          <LinkedMessageText hiddenUrl={hasLinkPreview ? previewUrl : undefined} text={text} />
+          <LinkedMessageText hiddenUrl={previewUrl} text={text} />
         </span>
       ) : null}
       <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} />
