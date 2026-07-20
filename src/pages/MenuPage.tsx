@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
+import barkAppIconUrl from "../assets/bark-app-icon.jpg";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -128,8 +129,7 @@ function QrCodeIcon() {
 function BarkGuideIcon() {
   return (
     <div className="bark-guide-icon" aria-hidden="true">
-      <span>B</span>
-      <i />
+      <img alt="" src={barkAppIconUrl} />
     </div>
   );
 }
