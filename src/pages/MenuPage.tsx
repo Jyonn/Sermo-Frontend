@@ -127,9 +127,9 @@ function QrCodeIcon() {
   );
 }
 
-function BarkGuideIcon() {
+function BarkGuideIcon({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="bark-guide-icon" aria-hidden="true">
+    <div className={`bark-guide-icon${compact ? " is-compact" : ""}`} aria-hidden="true">
       <img alt="" src={barkAppIconUrl} />
     </div>
   );
@@ -893,10 +893,12 @@ export default function MenuPage() {
         />
         {shouldShowBarkGuideBanner ? (
           <button className="verification-banner bark-setup-banner" onClick={openBarkGuide} type="button">
-            <BarkGuideIcon />
             <div className="verification-banner-copy">
-              <strong>获取即时消息？</strong>
-              <span>下载 Bark 并配置，让聊天提醒更顺畅。</span>
+              <strong className="bark-banner-title">
+                <BarkGuideIcon compact />
+                <span>绑定Bark，实时联络</span>
+              </strong>
+              <span>下载Bark并绑定后，好友的消息即时推送，点击即刻回复。</span>
             </div>
             <span className="ghost-button verification-banner-action">去绑定</span>
           </button>
