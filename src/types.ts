@@ -237,6 +237,13 @@ export interface ChatDTO {
   last_message: ChatMessageDTO | null;
   unread_count?: number;
   last_read_at?: number | null;
+  pinned?: boolean;
+  online_reminder_enabled?: boolean;
+}
+
+export interface ChatPreferenceDTO {
+  pinned: boolean;
+  online_reminder_enabled: boolean;
 }
 
 export interface AuthSession {
@@ -287,6 +294,8 @@ export interface Chat {
   members: number;
   type: "direct" | "group";
   isOwner: boolean;
+  pinned: boolean;
+  onlineReminderEnabled: boolean;
   detail: ChatDetail;
   messages: ChatMessage[];
 }

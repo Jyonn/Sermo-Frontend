@@ -249,7 +249,6 @@ export default function MenuPage() {
   };
 
   const openWebReminderDrawer = () => {
-    setChannelsDrawerOpen(false);
     setWebReminderDrawerOpen(true);
   };
 
@@ -374,12 +373,10 @@ export default function MenuPage() {
 
   const openAuthSheet = (channel: NotificationChannel) => {
     if (!hasPassword) {
-      setChannelsDrawerOpen(false);
       showPasswordReminder();
       return;
     }
     if (channel === "bark") {
-      setChannelsDrawerOpen(false);
       setBarkGuideOpen(true);
       setAuthSheetChannel("bark");
       setAuthTarget(channelTarget(me, "bark"));
@@ -549,7 +546,6 @@ export default function MenuPage() {
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
-        setChannelsDrawerOpen(false);
         setSecurityDrawerOpen(true);
       }
       setStatusModal((current) =>
@@ -613,7 +609,6 @@ export default function MenuPage() {
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
-        setChannelsDrawerOpen(false);
         setSecurityDrawerOpen(true);
       }
       setStatusModal((current) =>

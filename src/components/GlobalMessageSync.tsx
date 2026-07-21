@@ -120,7 +120,7 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
 }
 
 function sortChats(items: Chat[]) {
-  return [...items].sort((left, right) => right.lastActivity - left.lastActivity);
+  return [...items].sort((left, right) => Number(right.pinned) - Number(left.pinned) || right.lastActivity - left.lastActivity);
 }
 
 function getDirectPeer(chat: ChatDTO, currentUserId: number) {
@@ -162,6 +162,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
     isOwner,
+    pinned: Boolean(chat.pinned),
+    onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     detail: {
       summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
       relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
@@ -260,6 +262,7 @@ export function GlobalMessageSync() {
   const [popup, setPopup] = useState<PopupState | null>(null);
   const cursorRef = useRef<number | null>(null);
   const syncInFlightRef = useRef(false);
+  const presencePollCountRef = useRef(0);
   const scope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const gestureScope = getGestureLockScope(session);
   const activeChatId = useMemo(() => {
@@ -402,6 +405,29 @@ export function GlobalMessageSync() {
 
       syncInFlightRef.current = true;
       try {
+        presencePollCountRef.current += 1;
+        if (presencePollCountRef.current % 5 === 0) {
+          const previousChats = chatCache.getChatList(scope)?.chats ?? [];
+          const previousById = new Map(previousChats.map((chat) => [chat.id, chat]));
+          const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
+          const newlyOnline = freshChats.find((chat) => {
+            const previous = previousById.get(chat.id);
+            return chat.type === "direct" && chat.online && previous?.online === false && chat.onlineReminderEnabled;
+          });
+          chatCache.setChatList(scope, freshChats);
+          void chatCache.persistChatList(scope, freshChats);
+          if (newlyOnline && !isGestureAccessSuppressed(gestureScope)) {
+            setPopup({
+              chatId: newlyOnline.id,
+              title: newlyOnline.title,
+              preview: "刚刚上线",
+              count: 1,
+              avatarUri: newlyOnline.avatarUri,
+            });
+            playWebReminderSound();
+          }
+        }
+
         let cursor = cursorRef.current ?? afterMessageId;
         let hasMore = true;
         let loopCount = 0;

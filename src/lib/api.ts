@@ -3,6 +3,7 @@ import type {
   AvatarUploadDTO,
   AuthSession,
   ChatDTO,
+  ChatPreferenceDTO,
   ChatMessageDTO,
   MessageMediaKind,
   MessageUploadDTO,
@@ -389,6 +390,15 @@ export const api = {
       method: "POST",
       auth: true,
       query: { chat_id },
+    });
+  },
+
+  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1 }) {
+    return request<ChatPreferenceDTO>("/chats/preference", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: payload,
     });
   },
 
