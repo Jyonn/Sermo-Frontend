@@ -822,7 +822,7 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) 
   const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, previewUrl);
 
   return (
-    <span className="message-text-stack has-link-preview">
+    <span className={`message-text-stack has-link-preview ${groupClassName}`.trim()}>
       {hasTextBesidePreview ? (
         <span className={`message-text-chip ${message.from}`}>
           <LinkedMessageText hiddenUrl={previewUrl} text={text} />

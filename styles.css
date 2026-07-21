@@ -2230,6 +2230,38 @@ img {
   border-bottom-right-radius: 4px;
 }
 
+.message-text-stack.other.group-start:not(.group-end) > :last-child {
+  border-bottom-left-radius: 4px;
+}
+
+.message-text-stack.other:not(.group-start).group-end > :first-child {
+  border-top-left-radius: 4px;
+}
+
+.message-text-stack.other:not(.group-start):not(.group-end) > :first-child {
+  border-top-left-radius: 4px;
+}
+
+.message-text-stack.other:not(.group-start):not(.group-end) > :last-child {
+  border-bottom-left-radius: 4px;
+}
+
+.message-text-stack.self.group-start:not(.group-end) > :last-child {
+  border-bottom-right-radius: 4px;
+}
+
+.message-text-stack.self:not(.group-start).group-end > :first-child {
+  border-top-right-radius: 4px;
+}
+
+.message-text-stack.self:not(.group-start):not(.group-end) > :first-child {
+  border-top-right-radius: 4px;
+}
+
+.message-text-stack.self:not(.group-start):not(.group-end) > :last-child {
+  border-bottom-right-radius: 4px;
+}
+
 .message-media-frame.other.group-start:not(.group-end),
 .message-audio-card.other.group-start:not(.group-end) {
   border-bottom-left-radius: 6px;
