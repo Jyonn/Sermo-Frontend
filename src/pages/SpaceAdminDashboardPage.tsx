@@ -7,6 +7,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
 import { copyText } from "../lib/presentation";
+import { setCachedGroupSquareEnabled } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import type { AppViewState, SpaceAdminDashboardDTO, UserDTO } from "../types";
 
@@ -128,6 +129,7 @@ export default function SpaceAdminDashboardPage() {
         group_square_enabled: settingsSquareEnabled ? 1 : 0,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
       });
+      setCachedGroupSquareEnabled(payload.space_id, payload.group_square_enabled !== false);
       patchSpace(payload);
       setDashboard((current) =>
         current

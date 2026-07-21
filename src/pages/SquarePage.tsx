@@ -8,6 +8,7 @@ import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, UserDTO } from "../types";
 
@@ -179,6 +180,7 @@ function resolveOrbCollisions(orbs: OrbState[]) {
 export default function SquarePage() {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const groupSquareEnabled = useGroupSquareEnabled();
   const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -197,6 +199,11 @@ export default function SquarePage() {
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
+    if (!groupSquareEnabled) {
+      navigate("/app/chats", { replace: true });
+      return;
+    }
+
     const controller = new AbortController();
     if (!hasLoadedOnceRef.current) {
       setViewState("loading");
@@ -218,7 +225,7 @@ export default function SquarePage() {
       });
 
     return () => controller.abort();
-  }, [query, refreshTick]);
+  }, [groupSquareEnabled, navigate, query, refreshTick]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setRefreshTick((current) => current + 1), 15_000);

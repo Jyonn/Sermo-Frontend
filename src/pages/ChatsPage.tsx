@@ -28,6 +28,7 @@ import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
+import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -1148,6 +1149,7 @@ export default function ChatsPage() {
   const location = useLocation();
   const { chatId } = useParams();
   const { session } = useAuth();
+  const groupSquareEnabled = useGroupSquareEnabled();
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
@@ -2726,11 +2728,13 @@ export default function ChatsPage() {
         {!chatAccessNotice && !filteredChats.length && viewState === "ready" ? (
           <FeedbackState
             title={query.trim() ? "没有匹配的会话" : "还没有会话"}
-            description={query.trim() ? "换个关键词试试，或者从广场发起新的聊天。" : "先从广场里找到一个人，再开始第一段对话。"}
+            description={query.trim() ? "换个关键词试试。" : groupSquareEnabled ? "先从广场里找到一个人，再开始第一段对话。" : "新的会话出现后会显示在这里。"}
             action={
-              <Link className="button" to="/app/square">
-                去广场
-              </Link>
+              groupSquareEnabled ? (
+                <Link className="button" to="/app/square">
+                  去广场
+                </Link>
+              ) : undefined
             }
           />
         ) : null}
@@ -2936,9 +2940,11 @@ export default function ChatsPage() {
               title="先选一个会话"
               description="左侧按最后聊天时间排列。点进一段对话后，这里才会展开具体消息。"
               action={
-                <Link className="button" to="/app/square">
-                  去广场
-                </Link>
+                groupSquareEnabled ? (
+                  <Link className="button" to="/app/square">
+                    去广场
+                  </Link>
+                ) : undefined
               }
             />
           )}

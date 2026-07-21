@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
+import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", label: "聊天" },
@@ -23,6 +24,7 @@ function activeKey(pathname: string) {
 export function AppBottomNav() {
   const location = useLocation();
   const { session } = useAuth();
+  const groupSquareEnabled = useGroupSquareEnabled();
   const effectivePathname = location.pathname === "/friend-invite" && session ? "/app/chats" : location.pathname;
   const cacheScope = useMemo(
     () => (session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null),
@@ -105,10 +107,11 @@ export function AppBottomNav() {
   if (matchPath("/app/chats/:chatId", effectivePathname)) return null;
 
   const current = activeKey(effectivePathname);
+  const visibleRoutes = groupSquareEnabled ? mobileRoutes : mobileRoutes.filter((route) => route.key !== "square");
 
   return (
     <nav className="mobile-nav app-mobile-nav">
-      {mobileRoutes.map((route) => (
+      {visibleRoutes.map((route) => (
         <Link key={route.key} className={`nav-button ${current === route.key ? "active" : ""}`} to={route.href}>
           <span className="nav-button-icon-wrap">
             <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
