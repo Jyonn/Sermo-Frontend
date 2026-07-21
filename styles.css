@@ -1780,7 +1780,20 @@ img {
   border-color: rgba(10, 14, 22, 0.14);
 }
 
-.message-media-image,
+.message-media-image {
+  display: block;
+  width: min(58vw, 228px);
+  max-width: 100%;
+  max-height: min(42vh, 300px);
+  border-radius: 24px;
+  object-fit: cover;
+  background: rgba(17, 19, 24, 0.04);
+  transition:
+    filter 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
 .message-media-video {
   display: block;
   width: min(72vw, 296px);
@@ -1789,10 +1802,6 @@ img {
   border-radius: 24px;
   object-fit: cover;
   background: rgba(17, 19, 24, 0.04);
-  transition:
-    filter 220ms ease,
-    opacity 220ms ease,
-    transform 220ms ease;
 }
 
 .message-media-image-thumb {
