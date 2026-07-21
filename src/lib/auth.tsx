@@ -4,7 +4,16 @@ import { Navigate, useLocation } from "react-router-dom";
 import { FeedbackState } from "../components/FeedbackState";
 import { GestureUnlockScreen } from "../components/GestureLock";
 import { ApiError, api, configureApiAuth, refreshAuthSession } from "./api";
-import { clearGestureLock, getGestureLockScope, isGestureLockEnabled, isGestureUnlocked } from "./gestureLock";
+import {
+  clearGestureLock,
+  clearGestureUnlock,
+  getGestureLastActivity,
+  getGestureLockAfterMs,
+  getGestureLockScope,
+  isGestureLockEnabled,
+  isGestureUnlocked,
+  markGestureActivity,
+} from "./gestureLock";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
@@ -171,6 +180,63 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   useEffect(() => {
     setGestureUnlocked(isGestureUnlocked(gestureScope));
   }, [gestureScope, session?.accessToken]);
+
+  useEffect(() => {
+    if (!gestureScope || !gestureUnlocked || !isGestureLockEnabled(gestureScope)) return;
+
+    let timer: number | undefined;
+    const listenerOptions: AddEventListenerOptions = { capture: true, passive: true };
+
+    const lock = () => {
+      if (timer) window.clearTimeout(timer);
+      clearGestureUnlock(gestureScope);
+      setGestureUnlocked(false);
+    };
+
+    const schedule = () => {
+      if (timer) window.clearTimeout(timer);
+      const timeoutMs = getGestureLockAfterMs(gestureScope);
+      const lastActivity = getGestureLastActivity(gestureScope) || Date.now();
+      const remaining = timeoutMs - (Date.now() - lastActivity);
+      timer = window.setTimeout(() => {
+        const latestActivity = getGestureLastActivity(gestureScope) || lastActivity;
+        if (Date.now() - latestActivity >= timeoutMs) {
+          lock();
+          return;
+        }
+        schedule();
+      }, Math.max(250, remaining));
+    };
+
+    const recordActivity = () => {
+      markGestureActivity(gestureScope);
+      schedule();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      const timeoutMs = getGestureLockAfterMs(gestureScope);
+      const lastActivity = getGestureLastActivity(gestureScope);
+      if (lastActivity && Date.now() - lastActivity >= timeoutMs) {
+        lock();
+        return;
+      }
+      recordActivity();
+    };
+
+    if (!getGestureLastActivity(gestureScope)) markGestureActivity(gestureScope);
+    schedule();
+
+    const events = ["pointerdown", "keydown", "wheel", "scroll", "touchstart"];
+    events.forEach((eventName) => window.addEventListener(eventName, recordActivity, listenerOptions));
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      events.forEach((eventName) => window.removeEventListener(eventName, recordActivity, listenerOptions));
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [gestureScope, gestureUnlocked, session?.accessToken]);
 
   if (!ready) {
     return (

@@ -19,7 +19,7 @@ import { useAuth } from "../lib/auth";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
-import { getGestureLockScope, isGestureLockEnabled } from "../lib/gestureLock";
+import { getGestureLockAfterMinutes, getGestureLockScope, isGestureLockEnabled } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
@@ -155,6 +155,7 @@ export default function MenuPage() {
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
   const [gestureEnabled, setGestureEnabled] = useState(false);
+  const [gestureLockAfterMinutes, setGestureLockAfterMinutes] = useState(1);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
@@ -203,6 +204,7 @@ export default function MenuPage() {
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
+  const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const isAppleEnvironment = useMemo(() => detectAppleEnvironment(), []);
   const visibleChannelRows = useMemo(
     () => channelRows.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
@@ -222,6 +224,7 @@ export default function MenuPage() {
 
   useEffect(() => {
     setGestureEnabled(isGestureLockEnabled(gestureScope));
+    setGestureLockAfterMinutes(getGestureLockAfterMinutes(gestureScope));
   }, [gestureScope]);
 
   const updateWebReminderPrefs = async (patch: Partial<WebReminderPreferences>) => {
@@ -1086,7 +1089,13 @@ export default function MenuPage() {
             >
               <div className="row-main">
                 <strong>手势解锁</strong>
-                <div className="row-subtle">{gestureEnabled ? "已开启，本机进入网页时需要手势。" : "默认关闭，可为本机增加一道锁。"}</div>
+                <div className="row-subtle">
+                  {gestureEnabled
+                    ? `${gestureLockAfterMinutes} 分钟无动作后上锁。`
+                    : emailVerified
+                      ? "默认关闭，可为本机增加一道锁。"
+                      : "邮箱认证后才能开启。"}
+                </div>
               </div>
               <span className={`switch ${gestureEnabled ? "active" : ""}`} aria-hidden="true" />
             </button>
@@ -1556,10 +1565,19 @@ export default function MenuPage() {
         className="contact-bottom-sheet"
         open={gestureSheetOpen}
         title="手势解锁"
-        description="只保护当前浏览器，默认关闭。开启后刷新或新标签页进入 Sermo 时需要画手势。"
+        description="只保护当前浏览器，默认关闭。开启后刷新、新标签页或一段时间无动作后需要画手势。"
         onClose={() => setGestureSheetOpen(false)}
       >
-        <GestureSetupPanel scope={gestureScope} enabled={gestureEnabled} onChanged={setGestureEnabled} />
+        <GestureSetupPanel
+          scope={gestureScope}
+          canEnable={emailVerified}
+          enabled={gestureEnabled}
+          lockAfterMinutes={gestureLockAfterMinutes}
+          onChanged={(enabled, minutes) => {
+            setGestureEnabled(enabled);
+            if (minutes) setGestureLockAfterMinutes(minutes);
+          }}
+        />
       </BottomSheet>
 
       <AvatarPresetDialog

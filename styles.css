@@ -2773,6 +2773,31 @@ img {
   line-height: 1.5;
 }
 
+.gesture-timeout-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.gesture-timeout-row > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.gesture-timeout-row strong {
+  color: var(--text-primary);
+}
+
+.gesture-timeout-row span {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
 .gesture-grid {
   position: relative;
   width: min(100%, 280px);

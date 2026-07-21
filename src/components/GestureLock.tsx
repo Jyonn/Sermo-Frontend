@@ -1,5 +1,12 @@
 import { useMemo, useRef, useState, type PointerEvent } from "react";
-import { clearGestureLock, markGestureUnlocked, saveGesturePattern, verifyGesturePattern } from "../lib/gestureLock";
+import {
+  MAX_GESTURE_LOCK_AFTER_MINUTES,
+  clearGestureLock,
+  markGestureUnlocked,
+  saveGesturePattern,
+  setGestureLockAfterMinutes,
+  verifyGesturePattern,
+} from "../lib/gestureLock";
 
 interface PatternGridProps {
   disabled?: boolean;
@@ -96,13 +103,22 @@ function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternG
 
 interface GestureSetupPanelProps {
   scope: string | null;
+  canEnable: boolean;
   enabled: boolean;
-  onChanged: (enabled: boolean) => void;
+  lockAfterMinutes: number;
+  onChanged: (enabled: boolean, lockAfterMinutes?: number) => void;
 }
 
-export function GestureSetupPanel({ scope, enabled, onChanged }: GestureSetupPanelProps) {
+export function GestureSetupPanel({ scope, canEnable, enabled, lockAfterMinutes, onChanged }: GestureSetupPanelProps) {
   const [firstPattern, setFirstPattern] = useState("");
-  const [status, setStatus] = useState(enabled ? "已开启。关闭后，下次进入网页不会再要求手势。" : "请连接至少 4 个点。");
+  const [timeoutMinutes, setTimeoutMinutes] = useState(lockAfterMinutes);
+  const [status, setStatus] = useState(
+    enabled
+      ? "已开启。关闭后，下次进入网页不会再要求手势。"
+      : canEnable
+        ? "请连接至少 4 个点。"
+        : "完成邮箱认证后才能开启手势解锁。"
+  );
   const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
   const [saving, setSaving] = useState(false);
 
@@ -113,6 +129,10 @@ export function GestureSetupPanel({ scope, enabled, onChanged }: GestureSetupPan
 
   const complete = async (pattern: string) => {
     if (!scope || saving) return;
+    if (!canEnable) {
+      fail("完成邮箱认证后才能开启手势解锁。");
+      return;
+    }
     if (pattern.split("-").length < 4) {
       fail("至少连接 4 个点。");
       return;
@@ -129,12 +149,12 @@ export function GestureSetupPanel({ scope, enabled, onChanged }: GestureSetupPan
       return;
     }
     setSaving(true);
-    await saveGesturePattern(scope, pattern);
+    await saveGesturePattern(scope, pattern, timeoutMinutes);
     setSaving(false);
     setFirstPattern("");
-    setStatus("手势解锁已开启。");
+    setStatus(`${timeoutMinutes} 分钟没有新动作后会自动上锁。`);
     setTone("success");
-    onChanged(true);
+    onChanged(true, timeoutMinutes);
   };
 
   const disable = () => {
@@ -145,16 +165,43 @@ export function GestureSetupPanel({ scope, enabled, onChanged }: GestureSetupPan
     onChanged(false);
   };
 
+  const updateTimeout = (nextValue: number) => {
+    const next = Math.min(MAX_GESTURE_LOCK_AFTER_MINUTES, Math.max(1, nextValue));
+    setTimeoutMinutes(next);
+    if (enabled) {
+      setGestureLockAfterMinutes(scope, next);
+      setStatus(`${next} 分钟没有新动作后会自动上锁。`);
+      onChanged(true, next);
+    }
+  };
+
   return (
     <div className="gesture-setup-panel">
       <div className="gesture-status-card">
         <strong>{enabled ? "手势解锁已开启" : "手势解锁默认关闭"}</strong>
         <span>{status}</span>
       </div>
+      <div className="gesture-timeout-row">
+        <div>
+          <strong>自动上锁</strong>
+          <span>{timeoutMinutes} 分钟没有新动作</span>
+        </div>
+        <div className="menu-stepper">
+          <button disabled={timeoutMinutes <= 1} onClick={() => updateTimeout(timeoutMinutes - 1)} type="button">
+            -
+          </button>
+          <span className="menu-stepper-value mono">{timeoutMinutes}</span>
+          <button disabled={timeoutMinutes >= MAX_GESTURE_LOCK_AFTER_MINUTES} onClick={() => updateTimeout(timeoutMinutes + 1)} type="button">
+            +
+          </button>
+        </div>
+      </div>
       {enabled ? (
         <button className="danger-button" onClick={disable} type="button">
           关闭手势解锁
         </button>
+      ) : !canEnable ? (
+        <div className="inline-note">请先完成邮箱认证，再回到这里开启手势解锁。</div>
       ) : (
         <>
           <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void complete(pattern)} />
