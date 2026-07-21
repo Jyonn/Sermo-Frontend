@@ -463,16 +463,12 @@ function sortMessages(items: ChatMessage[]) {
 }
 
 function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
-  return (
-    source.from === "self" &&
-    target.from === "self" &&
-    source.kind === "text" &&
-    target.kind === "text" &&
-    source.status !== "sent" &&
-    target.status === "sent" &&
-    source.text === target.text &&
-    Math.abs(source.createdAt - target.createdAt) <= 30
-  );
+  if (source.from !== "self" || target.from !== "self" || source.status === "sent" || target.status !== "sent") return false;
+  if (source.kind !== target.kind) return false;
+  if (source.kind === "text") {
+    return source.text === target.text && Math.abs(source.createdAt - target.createdAt) <= 30;
+  }
+  return isMediaMessageKind(source.kind) && source.status === "pending" && Math.abs(source.createdAt - target.createdAt) <= 600;
 }
 
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
@@ -547,23 +543,8 @@ function updateMessageStatus(messages: ChatMessage[], clientId: string, status: 
 }
 
 function confirmPendingMessage(messages: ChatMessage[], clientId: string, delivered: ChatMessage) {
-  let confirmed = false;
-  const nextMessages = messages.map((message) => {
-    if (message.clientId !== clientId) return message;
-    confirmed = true;
-    return {
-      ...message,
-      id: delivered.id,
-      type: delivered.type,
-      kind: delivered.kind,
-      name: delivered.name,
-      payload: delivered.payload,
-      text: delivered.text,
-      status: "sent" as const,
-    };
-  });
-
-  return confirmed ? sortMessages(nextMessages) : mergeMessages(messages, [{ ...delivered, clientId }]);
+  const remaining = messages.filter((message) => message.clientId !== clientId && message.id !== delivered.id);
+  return sortMessages([...remaining, delivered]);
 }
 
 function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {

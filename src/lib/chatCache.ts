@@ -34,7 +34,16 @@ const memoryThreads = new Map<string, ChatThreadRecord>();
 export const CHAT_LIST_UPDATED_EVENT = "sermo:chat-list-updated";
 
 function normalizeMessages(messages: ChatMessage[]) {
-  return [...messages].sort((left, right) => Number(left.id) - Number(right.id));
+  return [...messages].sort((left, right) => {
+    if (left.createdAt !== right.createdAt) return left.createdAt - right.createdAt;
+    const leftId = typeof left.id === "number" ? left.id : Number.MAX_SAFE_INTEGER;
+    const rightId = typeof right.id === "number" ? right.id : Number.MAX_SAFE_INTEGER;
+    return leftId - rightId;
+  });
+}
+
+function withoutTransientMessages(messages: ChatMessage[]) {
+  return messages.filter((message) => message.status !== "pending");
 }
 
 function trimMessages(messages: ChatMessage[], limit: number) {
@@ -191,20 +200,30 @@ export const chatCache = {
   async hydrateThread(scope: string, chatId: number) {
     const record = await readRecord<ChatThreadRecord>(THREAD_STORE, threadKey(scope, chatId));
     if (!record) return null;
-    memoryThreads.set(record.key, record);
-    return record;
+    const messages = normalizeMessages(withoutTransientMessages(record.messages));
+    const sanitized = { ...record, messages };
+    memoryThreads.set(record.key, sanitized);
+    if (messages.length !== record.messages.length) void writeRecord(THREAD_STORE, sanitized);
+    return sanitized;
   },
 
   async persistThread(scope: string, chatId: number, snapshot: ChatThreadSnapshot) {
-    const trimmed = trimMessages(snapshot.messages, MAX_PERSISTED_MESSAGES);
-    const record: ChatThreadRecord = {
+    const memoryTrimmed = trimMessages(snapshot.messages, MAX_MEMORY_MESSAGES);
+    const memoryRecord: ChatThreadRecord = {
       key: threadKey(scope, chatId),
-      messages: trimmed.messages,
-      hasOlderMessages: snapshot.hasOlderMessages || trimmed.trimmed,
+      messages: memoryTrimmed.messages,
+      hasOlderMessages: snapshot.hasOlderMessages || memoryTrimmed.trimmed,
       scrollTop: snapshot.scrollTop,
       updatedAt: snapshot.updatedAt,
     };
-    memoryThreads.set(record.key, record);
-    await writeRecord(THREAD_STORE, record);
+    memoryThreads.set(memoryRecord.key, memoryRecord);
+
+    const persistedTrimmed = trimMessages(withoutTransientMessages(snapshot.messages), MAX_PERSISTED_MESSAGES);
+    const persistedRecord: ChatThreadRecord = {
+      ...memoryRecord,
+      messages: persistedTrimmed.messages,
+      hasOlderMessages: snapshot.hasOlderMessages || persistedTrimmed.trimmed,
+    };
+    await writeRecord(THREAD_STORE, persistedRecord);
   },
 };

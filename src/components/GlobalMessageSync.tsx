@@ -113,6 +113,14 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   const bucket = new Map<number | string, ChatMessage>();
   current.forEach((message) => bucket.set(message.id, message));
   incoming.forEach((message) => {
+    if (message.from === "self" && message.status === "sent") {
+      const optimisticMatch = [...bucket.values()].find((existing) => {
+        if (existing.from !== "self" || existing.status !== "pending" || existing.kind !== message.kind) return false;
+        if (existing.kind === "text") return existing.text === message.text && Math.abs(existing.createdAt - message.createdAt) <= 30;
+        return ["image", "video", "audio"].includes(existing.kind) && Math.abs(existing.createdAt - message.createdAt) <= 600;
+      });
+      if (optimisticMatch) bucket.delete(optimisticMatch.id);
+    }
     const existing = bucket.get(message.id);
     bucket.set(message.id, preserveStableMediaUri(existing, message));
   });
