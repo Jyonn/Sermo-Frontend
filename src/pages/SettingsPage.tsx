@@ -13,9 +13,9 @@ import { useAuth } from "../lib/auth";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences } from "../types";
 
 const channels: Array<[NotificationChannel, number, string]> = [
-  ["email", 1, "Email"],
-  ["sms", 2, "SMS"],
-  ["bark", 3, "Bark"],
+  ["email", 1, "邮件"],
+  ["sms", 2, "短信"],
+  ["bark", 3, "即时"],
 ];
 
 const emptyPrefs: NotificationPreferences = {
@@ -163,8 +163,8 @@ export default function SettingsPage() {
       bark: {
         verified: barkVerified,
         target: barkTarget,
-        title: "Bark 通知",
-        description: barkVerified ? "已绑定 Bark 推送。" : "绑定 Bark 后可接收推送提醒。",
+        title: "即时提醒",
+        description: barkVerified ? "已绑定即时推送。" : "绑定后可接收即时推送提醒。",
       },
     }),
     [barkTarget, barkVerified, emailTarget, emailVerified, phoneTarget, phoneVerified]
@@ -728,7 +728,7 @@ export default function SettingsPage() {
                   ? "you@sermo.space"
                   : contactSheetChannel === "sms"
                     ? "输入手机号"
-                    : "输入 Bark 地址"
+                    : "输入即时推送地址"
               }
               value={contactTarget}
               onChange={(event) => {

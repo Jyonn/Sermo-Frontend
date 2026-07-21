@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { normalizeStableResourceUri } from "../lib/stableResource";
 import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
+import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
@@ -265,6 +266,10 @@ export function GlobalMessageSync() {
   }, [location.pathname]);
 
   useEffect(() => {
+    installWebReminderAudioUnlock();
+  }, []);
+
+  useEffect(() => {
     if (!scope || !session) {
       setAfterMessageId(null);
       cursorRef.current = null;
@@ -453,6 +458,7 @@ export function GlobalMessageSync() {
           count: otherChatItems.length,
           avatarUri: uniqueChatIds.size === 1 ? chat?.avatarUri ?? latest.message.avatarUri : undefined,
         });
+        playWebReminderSound();
 
         if (activeChatId && allItems.some((item) => item.chatId === activeChatId && item.message.from === "other")) {
           void api.markChatRead(activeChatId);

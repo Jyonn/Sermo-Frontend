@@ -17,13 +17,14 @@ import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
+import { getWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
-  ["email", 1, "Email"],
-  ["sms", 2, "SMS"],
-  ["bark", 3, "Bark"],
+  ["email", 1, "邮件"],
+  ["sms", 2, "短信"],
+  ["bark", 3, "即时"],
 ];
 
 const emptyPrefs: NotificationPreferences = {
@@ -150,6 +151,8 @@ export default function MenuPage() {
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
+  const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
+  const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -197,6 +200,24 @@ export default function MenuPage() {
   );
   const barkBound = channelVerified(me, "bark");
   const shouldShowBarkGuideBanner = isAppleEnvironment && !barkBound;
+  const webReminderSummary = [
+    webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
+    webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
+  ].join(" · ");
+
+  const updateWebReminderPrefs = (patch: Partial<WebReminderPreferences>) => {
+    const next = {
+      ...webReminderPrefs,
+      ...patch,
+    };
+    setWebReminderPrefs(next);
+    setWebReminderPreferences(next);
+  };
+
+  const openWebReminderDrawer = () => {
+    setChannelsDrawerOpen(false);
+    setWebReminderDrawerOpen(true);
+  };
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -886,7 +907,14 @@ export default function MenuPage() {
             <button className="simple-row menu-link-row" onClick={openChannelsEntry} type="button">
               <div className="row-main">
                 <strong>通知渠道</strong>
-                <div className="row-subtle">{isAppleEnvironment ? "Email、SMS、Bark 认证与绑定" : "Email、SMS 认证与绑定"}</div>
+                <div className="row-subtle">{isAppleEnvironment ? "网页、邮件、短信、即时提醒" : "网页、邮件、短信提醒"}</div>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
+              <div className="row-main">
+                <strong>网页提醒</strong>
+                <div className="row-subtle">{webReminderSummary}</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -980,9 +1008,18 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer description="管理各通知渠道的认证状态" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知渠道">
+      <SideDrawer description="管理网页、邮件、短信和即时提醒。" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知渠道">
         <div className="detail-list">
           <div className="simple-list">
+            <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
+              <div className="row-main menu-key-cell">
+                <strong>网页提醒</strong>
+              </div>
+              <div className="menu-detail-value menu-detail-text">
+                <span className="menu-channel-value">{webReminderSummary}</span>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
             {visibleChannelRows.map(([channel, _value, label]) => {
               const verified = channelVerified(me, channel);
               return (
@@ -1012,6 +1049,42 @@ export default function MenuPage() {
                 </button>
               );
             })}
+          </div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer
+        description="只影响当前浏览器的新消息提醒。"
+        open={webReminderDrawerOpen}
+        onClose={() => setWebReminderDrawerOpen(false)}
+        title="网页提醒"
+      >
+        <div className="detail-list">
+          <div className="menu-pref-list">
+            <div className="menu-pref-row">
+              <div className="row-main">
+                <strong>新消息提示音</strong>
+                <div className="row-subtle">收到新消息时轻响</div>
+              </div>
+              <button
+                aria-label="toggle-web-sound-reminder"
+                className={`switch ${webReminderPrefs.soundEnabled ? "active" : ""}`}
+                onClick={() => updateWebReminderPrefs({ soundEnabled: !webReminderPrefs.soundEnabled })}
+                type="button"
+              />
+            </div>
+            <div className="menu-pref-row">
+              <div className="row-main">
+                <strong>标题提醒</strong>
+                <div className="row-subtle">标题显示未读数</div>
+              </div>
+              <button
+                aria-label="toggle-web-title-reminder"
+                className={`switch ${webReminderPrefs.titleEnabled ? "active" : ""}`}
+                onClick={() => updateWebReminderPrefs({ titleEnabled: !webReminderPrefs.titleEnabled })}
+                type="button"
+              />
+            </div>
           </div>
         </div>
       </SideDrawer>
@@ -1216,7 +1289,7 @@ export default function MenuPage() {
         eyebrow="Instant Push"
         open={barkGuideOpen}
         onClose={closeBarkGuide}
-        title="绑定 Bark"
+        title="绑定即时提醒"
       >
         <div className="detail-list bark-guide">
           <div className="bark-guide-hero">
@@ -1284,7 +1357,7 @@ export default function MenuPage() {
                       onClick={() => void bindAuthChannel()}
                       type="button"
                     >
-                      {authActionState === "binding" ? "处理中..." : "确认绑定 Bark"}
+                      {authActionState === "binding" ? "处理中..." : "确认绑定即时提醒"}
                     </button>
                   </div>
                 </div>
@@ -1298,7 +1371,7 @@ export default function MenuPage() {
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
         open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
-        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel ? `绑定 ${channelLabel(authSheetChannel)}` : "通知渠道认证"}
+        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "bark" ? "绑定即时提醒" : authSheetChannel ? `绑定${channelLabel(authSheetChannel)}` : "通知渠道认证"}
         description={authSheetChannel === "email" ? "认证邮箱后，账号会升级为 Verified。" : "发送验证码后完成绑定"}
         onClose={closeAuthSheet}
       >
@@ -1310,7 +1383,7 @@ export default function MenuPage() {
             </div>
             <input
               className="input"
-              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "输入手机号" : "输入 Bark 地址"}
+              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "输入手机号" : "输入即时推送地址"}
               value={authTarget}
               onChange={(event) => {
                 setAuthTarget(event.target.value);

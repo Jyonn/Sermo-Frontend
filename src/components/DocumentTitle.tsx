@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { listRecentSpaces } from "../lib/recentSpaces";
 import { getDetectedSpaceSlug } from "../lib/spaceEntry";
+import { getWebReminderPreferences, WEB_REMINDER_PREFS_UPDATED_EVENT } from "../lib/webReminderPreferences";
 
 const FALLBACK_TITLE = "Sermo";
 
@@ -25,6 +26,7 @@ export function DocumentTitle() {
   );
   const [spaceName, setSpaceName] = useState(FALLBACK_TITLE);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [titleReminderEnabled, setTitleReminderEnabled] = useState(() => getWebReminderPreferences().titleEnabled);
 
   useEffect(() => {
     if (!ready) return;
@@ -86,8 +88,17 @@ export function DocumentTitle() {
 
   useEffect(() => {
     if (!ready || typeof document === "undefined") return;
-    document.title = unreadCount > 0 ? `${spaceName} - ${unreadCount}条新消息` : spaceName;
-  }, [ready, spaceName, unreadCount]);
+    document.title = titleReminderEnabled && unreadCount > 0 ? `${spaceName} - ${unreadCount}条新消息` : spaceName;
+  }, [ready, spaceName, titleReminderEnabled, unreadCount]);
+
+  useEffect(() => {
+    const handleUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ titleEnabled: boolean }>).detail;
+      setTitleReminderEnabled(detail?.titleEnabled ?? getWebReminderPreferences().titleEnabled);
+    };
+    window.addEventListener(WEB_REMINDER_PREFS_UPDATED_EVENT, handleUpdated as EventListener);
+    return () => window.removeEventListener(WEB_REMINDER_PREFS_UPDATED_EVENT, handleUpdated as EventListener);
+  }, []);
 
   return null;
 }
