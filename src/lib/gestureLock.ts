@@ -2,6 +2,8 @@ import type { AuthSession } from "../types";
 import type { GestureLockPreferenceDTO } from "../types";
 
 const UNLOCK_PREFIX = "sermo:gesture-unlocked:v1";
+const LOCKED_PREFIX = "sermo:gesture-locked:v1";
+const DECOY_PREFIX = "sermo:gesture-decoy:v1";
 const ACTIVITY_PREFIX = "sermo:gesture-activity:v1";
 const PREFERENCE_UPDATED_EVENT = "sermo:gesture-lock-preference-updated";
 export const DEFAULT_GESTURE_LOCK_AFTER_MINUTES = 1;
@@ -9,6 +11,14 @@ export const MAX_GESTURE_LOCK_AFTER_MINUTES = 30;
 
 function unlockKey(scope: string) {
   return `${UNLOCK_PREFIX}:${scope}`;
+}
+
+function lockedKey(scope: string) {
+  return `${LOCKED_PREFIX}:${scope}`;
+}
+
+function decoyKey(scope: string) {
+  return `${DECOY_PREFIX}:${scope}`;
 }
 
 function activityKey(scope: string) {
@@ -47,20 +57,54 @@ export function isGestureLockPreferenceEnabled(preference: GestureLockPreference
   return Boolean(preference?.enabled && preference.pattern_hash && preference.salt);
 }
 
+export function isGestureDecoyPreferenceEnabled(preference: GestureLockPreferenceDTO | null | undefined) {
+  return Boolean(preference?.decoy_enabled && preference.decoy_pattern_hash && preference.decoy_salt);
+}
+
 export function isGestureUnlocked(scope: string | null) {
   if (!scope || typeof window === "undefined") return false;
   return window.sessionStorage.getItem(unlockKey(scope)) === "1";
 }
 
+export function isGestureLocked(scope: string | null) {
+  if (!scope || typeof window === "undefined") return false;
+  return window.sessionStorage.getItem(lockedKey(scope)) === "1";
+}
+
+export function isGestureDecoyActive(scope: string | null) {
+  if (!scope || typeof window === "undefined") return false;
+  return window.sessionStorage.getItem(decoyKey(scope)) === "1";
+}
+
+export function isGestureAccessSuppressed(scope: string | null) {
+  return isGestureLocked(scope) || isGestureDecoyActive(scope);
+}
+
+export function markGestureLocked(scope: string | null) {
+  if (!scope || typeof window === "undefined") return;
+  window.sessionStorage.setItem(lockedKey(scope), "1");
+}
+
 export function markGestureUnlocked(scope: string | null) {
   if (!scope || typeof window === "undefined") return;
+  window.sessionStorage.removeItem(lockedKey(scope));
+  window.sessionStorage.removeItem(decoyKey(scope));
   window.sessionStorage.setItem(unlockKey(scope), "1");
   markGestureActivity(scope);
+}
+
+export function markGestureDecoyActive(scope: string | null) {
+  if (!scope || typeof window === "undefined") return;
+  window.sessionStorage.removeItem(lockedKey(scope));
+  window.sessionStorage.removeItem(unlockKey(scope));
+  window.sessionStorage.setItem(decoyKey(scope), "1");
 }
 
 export function clearGestureUnlock(scope: string | null) {
   if (!scope || typeof window === "undefined") return;
   window.sessionStorage.removeItem(unlockKey(scope));
+  window.sessionStorage.removeItem(lockedKey(scope));
+  window.sessionStorage.removeItem(decoyKey(scope));
   window.sessionStorage.removeItem(activityKey(scope));
 }
 
@@ -120,13 +164,21 @@ export async function verifyGesturePattern(preference: GestureLockPreferenceDTO 
   return hash === enabledPreference.pattern_hash;
 }
 
-export function emitGestureLockPreferenceUpdated() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new Event(PREFERENCE_UPDATED_EVENT));
+export async function verifyGestureDecoyPattern(preference: GestureLockPreferenceDTO | null | undefined, pattern: string) {
+  if (!isGestureDecoyPreferenceEnabled(preference)) return false;
+  const enabledPreference = preference as GestureLockPreferenceDTO;
+  const hash = await hashGesturePattern(pattern, enabledPreference.decoy_salt);
+  return hash === enabledPreference.decoy_pattern_hash;
 }
 
-export function listenGestureLockPreferenceUpdated(listener: () => void) {
+export function emitGestureLockPreferenceUpdated(preference?: GestureLockPreferenceDTO) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<GestureLockPreferenceDTO | undefined>(PREFERENCE_UPDATED_EVENT, { detail: preference }));
+}
+
+export function listenGestureLockPreferenceUpdated(listener: (preference?: GestureLockPreferenceDTO) => void) {
   if (typeof window === "undefined") return () => undefined;
-  window.addEventListener(PREFERENCE_UPDATED_EVENT, listener);
-  return () => window.removeEventListener(PREFERENCE_UPDATED_EVENT, listener);
+  const handler = (event: Event) => listener((event as CustomEvent<GestureLockPreferenceDTO | undefined>).detail);
+  window.addEventListener(PREFERENCE_UPDATED_EVENT, handler);
+  return () => window.removeEventListener(PREFERENCE_UPDATED_EVENT, handler);
 }

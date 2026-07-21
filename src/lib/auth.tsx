@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { FeedbackState } from "../components/FeedbackState";
-import { GestureUnlockScreen } from "../components/GestureLock";
+import { GestureDecoyChatScreen, GestureUnlockScreen } from "../components/GestureLock";
 import { ApiError, api, configureApiAuth, refreshAuthSession } from "./api";
 import {
   clearGestureUnlock,
@@ -10,9 +10,11 @@ import {
   getGestureLockAfterMs,
   getGestureLockScope,
   isGestureUnlocked,
+  isGestureDecoyActive,
   isGestureLockPreferenceEnabled,
   listenGestureLockPreferenceUpdated,
   markGestureActivity,
+  markGestureLocked,
 } from "./gestureLock";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
@@ -176,11 +178,13 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
   const gestureScope = getGestureLockScope(session);
   const [gestureUnlocked, setGestureUnlocked] = useState(() => isGestureUnlocked(gestureScope));
+  const [gestureDecoyActive, setGestureDecoyActive] = useState(() => isGestureDecoyActive(gestureScope));
   const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
   const [gesturePreferenceReady, setGesturePreferenceReady] = useState(false);
 
   useEffect(() => {
     setGestureUnlocked(isGestureUnlocked(gestureScope));
+    setGestureDecoyActive(isGestureDecoyActive(gestureScope));
   }, [gestureScope, session?.accessToken]);
 
   useEffect(() => {
@@ -191,7 +195,12 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     }
 
     let cancelled = false;
-    const loadPreference = () => {
+    const loadPreference = (nextPreference?: GestureLockPreferenceDTO) => {
+      if (nextPreference) {
+        setGesturePreference(nextPreference);
+        setGesturePreferenceReady(true);
+        return;
+      }
       setGesturePreferenceReady(false);
       api
         .getGestureLockPrefs()
@@ -226,8 +235,9 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
     const lock = () => {
       if (timer) window.clearTimeout(timer);
-      clearGestureUnlock(gestureScope);
+      markGestureLocked(gestureScope);
       setGestureUnlocked(false);
+      setGestureDecoyActive(false);
     };
 
     const schedule = () => {
@@ -275,6 +285,11 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     };
   }, [gesturePreference, gestureScope, gestureUnlocked, session?.accessToken]);
 
+  useEffect(() => {
+    if (!gestureScope || gestureUnlocked || gestureDecoyActive || !isGestureLockPreferenceEnabled(gesturePreference)) return;
+    markGestureLocked(gestureScope);
+  }, [gestureDecoyActive, gesturePreference, gestureScope, gestureUnlocked]);
+
   if (!ready || (session && !gesturePreferenceReady)) {
     return (
       <main className="auth-restore-screen">
@@ -290,6 +305,10 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   }
 
   const activeGesturePreference = isGestureLockPreferenceEnabled(gesturePreference) ? gesturePreference : null;
+  if (gestureScope && activeGesturePreference && gestureDecoyActive) {
+    return <GestureDecoyChatScreen />;
+  }
+
   if (gestureScope && activeGesturePreference && !gestureUnlocked) {
     return (
       <GestureUnlockScreen
@@ -297,6 +316,10 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
         preference={activeGesturePreference}
         userName={session.user.name}
         onUnlocked={() => setGestureUnlocked(true)}
+        onDecoyUnlocked={() => {
+          setGestureUnlocked(false);
+          setGestureDecoyActive(true);
+        }}
         onResetAndLogout={() => {
           clearGestureUnlock(gestureScope);
           void logout();

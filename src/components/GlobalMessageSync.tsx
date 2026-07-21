@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { normalizeStableResourceUri } from "../lib/stableResource";
 import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
+import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
@@ -260,6 +261,7 @@ export function GlobalMessageSync() {
   const cursorRef = useRef<number | null>(null);
   const syncInFlightRef = useRef(false);
   const scope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
+  const gestureScope = getGestureLockScope(session);
   const activeChatId = useMemo(() => {
     const matched = matchPath("/app/chats/:chatId", location.pathname);
     return matched?.params.chatId ? Number(matched.params.chatId) : null;
@@ -387,6 +389,10 @@ export function GlobalMessageSync() {
     };
 
     const poll = async () => {
+      if (isGestureAccessSuppressed(gestureScope)) {
+        setPopup(null);
+        return;
+      }
       if (syncInFlightRef.current) {
         if (DEBUG_SYNC) {
           console.log("[sync] skip overlapping poll");
@@ -445,6 +451,10 @@ export function GlobalMessageSync() {
 
         const otherChatItems = allItems.filter((item) => item.chatId !== activeChatId && item.message.from === "other");
         if (!otherChatItems.length) return;
+        if (isGestureAccessSuppressed(gestureScope)) {
+          setPopup(null);
+          return;
+        }
 
         const latest = otherChatItems[otherChatItems.length - 1];
         const uniqueChatIds = new Set(otherChatItems.map((item) => item.chatId));
@@ -481,7 +491,7 @@ export function GlobalMessageSync() {
       syncInFlightRef.current = false;
       window.clearInterval(timer);
     };
-  }, [activeChatId, afterMessageId, scope, session]);
+  }, [activeChatId, afterMessageId, gestureScope, scope, session]);
 
   useEffect(() => {
     if (!popup) return;

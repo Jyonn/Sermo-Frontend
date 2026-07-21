@@ -136,6 +136,9 @@ export interface GestureLockPreferenceDTO {
   enabled: boolean;
   pattern_hash: string;
   salt: string;
+  decoy_enabled: boolean;
+  decoy_pattern_hash: string;
+  decoy_salt: string;
   lock_after_minutes: number;
 }
 

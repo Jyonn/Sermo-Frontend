@@ -8,7 +8,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
-import { GestureSetupPanel } from "../components/GestureLock";
+import { GestureDecoySetupPanel, GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
@@ -154,6 +154,7 @@ export default function MenuPage() {
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
+  const [gestureDecoySheetOpen, setGestureDecoySheetOpen] = useState(false);
   const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
@@ -1098,6 +1099,19 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            {gestureEnabled ? (
+              <button
+                className="simple-row menu-link-row"
+                onClick={() => setGestureDecoySheetOpen(true)}
+                type="button"
+              >
+                <div className="row-main">
+                  <strong>伪成功解锁</strong>
+                  <div className="row-subtle">{gesturePreference?.decoy_enabled ? "已设置" : "未设置"}</div>
+                </div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            ) : null}
             <button
               className="simple-row menu-link-row danger-row account-delete-row"
               onClick={() => {
@@ -1570,6 +1584,20 @@ export default function MenuPage() {
         <GestureSetupPanel
           scope={gestureScope}
           canEnable={emailVerified}
+          preference={gesturePreference}
+          onChanged={setGesturePreference}
+        />
+      </BottomSheet>
+      <BottomSheet
+        bodyClassName="menu-security-sheet-body"
+        className="contact-bottom-sheet"
+        open={gestureDecoySheetOpen}
+        title="伪成功解锁"
+        description="请设计伪手势。"
+        onClose={() => setGestureDecoySheetOpen(false)}
+      >
+        <GestureDecoySetupPanel
+          scope={gestureScope}
           preference={gesturePreference}
           onChanged={setGesturePreference}
         />
