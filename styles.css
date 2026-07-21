@@ -2747,6 +2747,169 @@ img {
   transform: translateX(22px);
 }
 
+.gesture-setup-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.gesture-status-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 208, 132, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.82);
+}
+
+.gesture-status-card strong {
+  color: var(--text-primary);
+}
+
+.gesture-status-card span {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.gesture-grid {
+  position: relative;
+  width: min(100%, 280px);
+  aspect-ratio: 1;
+  justify-self: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border-radius: 28px;
+  border: 1px solid rgba(226, 232, 240, 0.82);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.88), rgba(244, 255, 249, 0.74)),
+    rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  touch-action: none;
+  user-select: none;
+}
+
+.gesture-lines {
+  position: absolute;
+  inset: 18px;
+  width: calc(100% - 36px);
+  height: calc(100% - 36px);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.gesture-lines polyline {
+  fill: none;
+  stroke: var(--brand-primary);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.78;
+}
+
+.gesture-grid-error .gesture-lines polyline {
+  stroke: var(--danger);
+}
+
+.gesture-grid-success .gesture-lines polyline {
+  stroke: var(--brand-primary);
+}
+
+.gesture-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.gesture-dot span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(143, 153, 174, 0.42);
+  background: rgba(255, 255, 255, 0.94);
+  transition:
+    transform 150ms ease-out,
+    border-color 150ms ease-out,
+    background 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.gesture-dot.active span {
+  transform: scale(1.35);
+  border-color: rgba(0, 208, 132, 0.86);
+  background: var(--brand-primary);
+  box-shadow: 0 0 0 10px rgba(0, 208, 132, 0.13);
+}
+
+.gesture-grid-error .gesture-dot.active span {
+  border-color: rgba(255, 77, 109, 0.88);
+  background: var(--danger);
+  box-shadow: 0 0 0 10px rgba(255, 77, 109, 0.12);
+}
+
+.gesture-lock-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: max(22px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 18% 12%, rgba(0, 208, 132, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 78%, rgba(44, 169, 255, 0.12), transparent 34%),
+    linear-gradient(145deg, #fffdf8, #f3faf5);
+}
+
+.gesture-lock-card {
+  width: min(100%, 390px);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 24px 20px;
+  border-radius: 30px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  background: rgba(255, 253, 248, 0.88);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+  text-align: center;
+}
+
+.gesture-lock-card h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 9vw, 2.7rem);
+  line-height: 1;
+}
+
+.gesture-lock-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.gesture-lock-message {
+  min-height: 24px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.gesture-lock-message-error {
+  color: var(--danger);
+}
+
+.gesture-lock-message-success {
+  color: var(--brand-primary);
+}
+
+.gesture-lock-reset {
+  width: 100%;
+}
+
 .stepper {
   display: inline-flex;
   align-items: center;

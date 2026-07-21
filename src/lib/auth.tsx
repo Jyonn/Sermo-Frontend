@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { FeedbackState } from "../components/FeedbackState";
+import { GestureUnlockScreen } from "../components/GestureLock";
 import { ApiError, api, configureApiAuth, refreshAuthSession } from "./api";
+import { clearGestureLock, getGestureLockScope, isGestureLockEnabled, isGestureUnlocked } from "./gestureLock";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
@@ -161,8 +163,14 @@ export function useAuth() {
 }
 
 export function RequireAuth({ children }: { children: JSX.Element }) {
-  const { ready, session } = useAuth();
+  const { ready, session, logout } = useAuth();
   const location = useLocation();
+  const gestureScope = getGestureLockScope(session);
+  const [gestureUnlocked, setGestureUnlocked] = useState(() => isGestureUnlocked(gestureScope));
+
+  useEffect(() => {
+    setGestureUnlocked(isGestureUnlocked(gestureScope));
+  }, [gestureScope, session?.accessToken]);
 
   if (!ready) {
     return (
@@ -176,6 +184,20 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   if (!session) {
     const detectedSlug = getDetectedSpaceSlug();
     return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? "/" : "/space"} />;
+  }
+
+  if (gestureScope && isGestureLockEnabled(gestureScope) && !gestureUnlocked) {
+    return (
+      <GestureUnlockScreen
+        scope={gestureScope}
+        userName={session.user.name}
+        onUnlocked={() => setGestureUnlocked(true)}
+        onResetAndLogout={() => {
+          clearGestureLock(gestureScope);
+          void logout();
+        }}
+      />
+    );
   }
 
   return children;

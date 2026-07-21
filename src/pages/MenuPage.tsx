@@ -8,6 +8,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
+import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
@@ -18,6 +19,7 @@ import { useAuth } from "../lib/auth";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
+import { getGestureLockScope, isGestureLockEnabled } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
@@ -151,6 +153,8 @@ export default function MenuPage() {
   const [basicDrawerOpen, setBasicDrawerOpen] = useState(false);
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
+  const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
+  const [gestureEnabled, setGestureEnabled] = useState(false);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
@@ -198,6 +202,7 @@ export default function MenuPage() {
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
+  const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const isAppleEnvironment = useMemo(() => detectAppleEnvironment(), []);
   const visibleChannelRows = useMemo(
     () => channelRows.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
@@ -214,6 +219,10 @@ export default function MenuPage() {
     setPasswordReminderDescription(description);
     setPasswordReminderOpen(true);
   };
+
+  useEffect(() => {
+    setGestureEnabled(isGestureLockEnabled(gestureScope));
+  }, [gestureScope]);
 
   const updateWebReminderPrefs = async (patch: Partial<WebReminderPreferences>) => {
     const previous = webReminderPrefs;
@@ -1071,6 +1080,17 @@ export default function MenuPage() {
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button
+              className="simple-row menu-link-row"
+              onClick={() => setGestureSheetOpen(true)}
+              type="button"
+            >
+              <div className="row-main">
+                <strong>手势解锁</strong>
+                <div className="row-subtle">{gestureEnabled ? "已开启，本机进入网页时需要手势。" : "默认关闭，可为本机增加一道锁。"}</div>
+              </div>
+              <span className={`switch ${gestureEnabled ? "active" : ""}`} aria-hidden="true" />
+            </button>
+            <button
               className="simple-row menu-link-row danger-row account-delete-row"
               onClick={() => {
                 setAccountDeleteInput("");
@@ -1530,6 +1550,16 @@ export default function MenuPage() {
             {passwordSaving ? "处理中..." : hasPassword ? "确认更换" : "确认设置"}
           </button>
         </div>
+      </BottomSheet>
+      <BottomSheet
+        bodyClassName="menu-security-sheet-body"
+        className="contact-bottom-sheet"
+        open={gestureSheetOpen}
+        title="手势解锁"
+        description="只保护当前浏览器，默认关闭。开启后刷新或新标签页进入 Sermo 时需要画手势。"
+        onClose={() => setGestureSheetOpen(false)}
+      >
+        <GestureSetupPanel scope={gestureScope} enabled={gestureEnabled} onChanged={setGestureEnabled} />
       </BottomSheet>
 
       <AvatarPresetDialog
