@@ -117,10 +117,10 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
   const [timeoutMinutes, setTimeoutMinutes] = useState(normalizeGestureLockAfterMinutes(preference?.lock_after_minutes));
   const [status, setStatus] = useState(
     enabled
-      ? "已开启。关闭后，下次进入网页不会再要求手势。"
+      ? "已开启"
       : canEnable
-        ? "请连接至少 4 个点。"
-        : "完成邮箱认证后才能开启手势解锁。"
+        ? "连接至少 4 个点"
+        : "请先认证邮箱"
   );
   const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
   const [saving, setSaving] = useState(false);
@@ -139,22 +139,22 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
   const complete = async (pattern: string) => {
     if (!scope || saving) return;
     if (!canEnable) {
-      fail("完成邮箱认证后才能开启手势解锁。");
+      fail("请先认证邮箱");
       return;
     }
     if (pattern.split("-").length < 4) {
-      fail("至少连接 4 个点。");
+      fail("至少 4 个点");
       return;
     }
     if (!firstPattern) {
       setFirstPattern(pattern);
-      setStatus("再画一次，确认手势。");
+      setStatus("再画一次确认");
       setTone("normal");
       return;
     }
     if (pattern !== firstPattern) {
       setFirstPattern("");
-      fail("两次手势不一致，请重新设置。");
+      fail("不一致，请重画");
       return;
     }
     setSaving(true);
@@ -164,7 +164,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
       markGestureUnlocked(scope);
       emitGestureLockPreferenceUpdated();
       setFirstPattern("");
-      setStatus(`${nextPreference.lock_after_minutes} 分钟没有新动作后会自动上锁。`);
+      setStatus("已开启");
       setTone("success");
       onChanged(nextPreference);
     } catch (error) {
@@ -182,7 +182,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
       clearGestureUnlock(scope);
       emitGestureLockPreferenceUpdated();
       setFirstPattern("");
-      setStatus("手势解锁已关闭。");
+      setStatus("已关闭");
       setTone("normal");
       onChanged(nextPreference);
     } catch (error) {
@@ -202,7 +202,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
         const nextPreference = await api.updateGestureLockPrefs({ lock_after_minutes: next });
         emitGestureLockPreferenceUpdated();
         setTimeoutMinutes(normalizeGestureLockAfterMinutes(nextPreference.lock_after_minutes));
-        setStatus(`${nextPreference.lock_after_minutes} 分钟没有新动作后会自动上锁。`);
+        setStatus("已更新");
         onChanged(nextPreference);
       } catch (error) {
         setTimeoutMinutes(normalizeGestureLockAfterMinutes(preference?.lock_after_minutes));
@@ -216,30 +216,32 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
   return (
     <div className="gesture-setup-panel">
       <div className="gesture-status-card">
-        <strong>{enabled ? "手势解锁已开启" : "手势解锁默认关闭"}</strong>
+        <strong>{enabled ? "手势解锁已开启" : "手势解锁"}</strong>
         <span>{status}</span>
       </div>
-      <div className="gesture-timeout-row">
-        <div>
-          <strong>自动上锁</strong>
-          <span>{timeoutMinutes} 分钟没有新动作</span>
-        </div>
-        <div className="menu-stepper">
-          <button disabled={saving || timeoutMinutes <= 1} onClick={() => void updateTimeout(timeoutMinutes - 1)} type="button">
-            -
-          </button>
-          <span className="menu-stepper-value mono">{timeoutMinutes}</span>
-          <button disabled={saving || timeoutMinutes >= MAX_GESTURE_LOCK_AFTER_MINUTES} onClick={() => void updateTimeout(timeoutMinutes + 1)} type="button">
-            +
-          </button>
-        </div>
-      </div>
       {enabled ? (
-        <button className="danger-button" disabled={saving} onClick={() => void disable()} type="button">
-          {saving ? "处理中..." : "关闭手势解锁"}
-        </button>
+        <>
+          <div className="gesture-timeout-row">
+            <div>
+              <strong>自动上锁</strong>
+              <span>{timeoutMinutes} 分钟</span>
+            </div>
+            <div className="menu-stepper">
+              <button disabled={saving || timeoutMinutes <= 1} onClick={() => void updateTimeout(timeoutMinutes - 1)} type="button">
+                -
+              </button>
+              <span className="menu-stepper-value mono">{timeoutMinutes}</span>
+              <button disabled={saving || timeoutMinutes >= MAX_GESTURE_LOCK_AFTER_MINUTES} onClick={() => void updateTimeout(timeoutMinutes + 1)} type="button">
+                +
+              </button>
+            </div>
+          </div>
+          <button className="danger-button" disabled={saving} onClick={() => void disable()} type="button">
+            {saving ? "处理中..." : "关闭手势解锁"}
+          </button>
+        </>
       ) : !canEnable ? (
-        <div className="inline-note">请先完成邮箱认证，再回到这里开启手势解锁。</div>
+        <div className="inline-note">认证邮箱后可开启</div>
       ) : (
         <>
           <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void complete(pattern)} />
@@ -249,7 +251,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
               onClick={() => {
                 setFirstPattern("");
                 setTone("normal");
-                setStatus("请重新绘制第一遍手势。");
+                setStatus("请重画");
               }}
               type="button"
             >

@@ -1090,13 +1090,13 @@ export default function MenuPage() {
                 <strong>手势解锁</strong>
                 <div className="row-subtle">
                   {gestureEnabled
-                    ? `${gestureLockAfterMinutes} 分钟无动作后上锁。`
+                    ? `${gestureLockAfterMinutes} 分钟后上锁`
                     : emailVerified
-                      ? "默认关闭，可为本机增加一道锁。"
-                      : "邮箱认证后才能开启。"}
+                      ? "未开启"
+                      : "认证邮箱后可开启"}
                 </div>
               </div>
-              <span className={`switch ${gestureEnabled ? "active" : ""}`} aria-hidden="true" />
+              <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button
               className="simple-row menu-link-row danger-row account-delete-row"
@@ -1564,7 +1564,7 @@ export default function MenuPage() {
         className="contact-bottom-sheet"
         open={gestureSheetOpen}
         title="手势解锁"
-        description="只保护当前浏览器，默认关闭。开启后刷新、新标签页或一段时间无动作后需要画手势。"
+        description="请设计您的手势。"
         onClose={() => setGestureSheetOpen(false)}
       >
         <GestureSetupPanel
