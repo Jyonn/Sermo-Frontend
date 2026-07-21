@@ -19,9 +19,9 @@ import { useAuth } from "../lib/auth";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
-import { getGestureLockAfterMinutes, getGestureLockScope, isGestureLockEnabled } from "../lib/gestureLock";
+import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
-import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
+import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
   ["email", 1, "邮件"],
@@ -154,8 +154,7 @@ export default function MenuPage() {
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
-  const [gestureEnabled, setGestureEnabled] = useState(false);
-  const [gestureLockAfterMinutes, setGestureLockAfterMinutes] = useState(1);
+  const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
@@ -222,10 +221,8 @@ export default function MenuPage() {
     setPasswordReminderOpen(true);
   };
 
-  useEffect(() => {
-    setGestureEnabled(isGestureLockEnabled(gestureScope));
-    setGestureLockAfterMinutes(getGestureLockAfterMinutes(gestureScope));
-  }, [gestureScope]);
+  const gestureEnabled = Boolean(gesturePreference?.enabled && gesturePreference.pattern_hash && gesturePreference.salt);
+  const gestureLockAfterMinutes = getGestureLockAfterMinutes(gesturePreference);
 
   const updateWebReminderPrefs = async (patch: Partial<WebReminderPreferences>) => {
     const previous = webReminderPrefs;
@@ -265,13 +262,15 @@ export default function MenuPage() {
       api.getSpaceMe(controller.signal),
       api.getUserMe(controller.signal),
       api.getWebReminderPrefs(controller.signal).catch(() => null),
+      api.getGestureLockPrefs(controller.signal).catch(() => null),
     ])
-      .then(async ([spaceInfo, meInfo, webReminderInfo]) => {
+      .then(async ([spaceInfo, meInfo, webReminderInfo, gestureInfo]) => {
         const prefRows = meInfo.has_password ? await api.getNotificationPrefs(controller.signal) : [];
         const nextWebReminderPrefs = webReminderInfo ? mapWebReminderPreferences(webReminderInfo) : getWebReminderPreferences();
         setSpace(spaceInfo);
         setMe(meInfo);
         setPrefs(mapPrefs(prefRows));
+        setGesturePreference(gestureInfo);
         setWebReminderPrefs(nextWebReminderPrefs);
         setWebReminderPreferences(nextWebReminderPrefs);
         patchSessionUser({
@@ -1571,12 +1570,8 @@ export default function MenuPage() {
         <GestureSetupPanel
           scope={gestureScope}
           canEnable={emailVerified}
-          enabled={gestureEnabled}
-          lockAfterMinutes={gestureLockAfterMinutes}
-          onChanged={(enabled, minutes) => {
-            setGestureEnabled(enabled);
-            if (minutes) setGestureLockAfterMinutes(minutes);
-          }}
+          preference={gesturePreference}
+          onChanged={setGesturePreference}
         />
       </BottomSheet>
 

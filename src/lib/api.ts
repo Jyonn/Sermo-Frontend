@@ -10,6 +10,7 @@ import type {
   FriendshipRequestDTO,
   FriendInvitePreviewDTO,
   FriendshipStatusDTO,
+  GestureLockPreferenceDTO,
   JoinResponseDTO,
   LoginAuthDTO,
   LinkPreviewDTO,
@@ -553,6 +554,26 @@ export const api = {
 
   updateWebReminderPrefs(payload: { sound_enabled?: 0 | 1; title_enabled?: 0 | 1 }) {
     return request<WebReminderPreferenceDTO>("/users/me/web-reminder-prefs", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  getGestureLockPrefs(signal?: AbortSignal) {
+    return request<GestureLockPreferenceDTO>("/users/me/gesture-lock", {
+      auth: true,
+      signal,
+    });
+  },
+
+  updateGestureLockPrefs(payload: {
+    enabled?: 0 | 1;
+    pattern_hash?: string;
+    salt?: string;
+    lock_after_minutes?: number;
+  }) {
+    return request<GestureLockPreferenceDTO>("/users/me/gesture-lock", {
       method: "POST",
       auth: true,
       body: payload,

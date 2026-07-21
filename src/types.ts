@@ -132,6 +132,13 @@ export interface WebReminderPreferenceDTO {
   title_enabled: boolean;
 }
 
+export interface GestureLockPreferenceDTO {
+  enabled: boolean;
+  pattern_hash: string;
+  salt: string;
+  lock_after_minutes: number;
+}
+
 export interface AvatarUploadDTO {
   upload_token: string;
   upload_url: string;

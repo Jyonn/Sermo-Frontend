@@ -1,22 +1,11 @@
 import type { AuthSession } from "../types";
+import type { GestureLockPreferenceDTO } from "../types";
 
-const STORAGE_PREFIX = "sermo:gesture-lock:v1";
 const UNLOCK_PREFIX = "sermo:gesture-unlocked:v1";
 const ACTIVITY_PREFIX = "sermo:gesture-activity:v1";
+const PREFERENCE_UPDATED_EVENT = "sermo:gesture-lock-preference-updated";
 export const DEFAULT_GESTURE_LOCK_AFTER_MINUTES = 1;
 export const MAX_GESTURE_LOCK_AFTER_MINUTES = 30;
-
-export interface GestureLockConfig {
-  enabled: boolean;
-  hash: string;
-  salt: string;
-  lock_after_minutes?: number;
-  updated_at: number;
-}
-
-function storageKey(scope: string) {
-  return `${STORAGE_PREFIX}:${scope}`;
-}
 
 function unlockKey(scope: string) {
   return `${UNLOCK_PREFIX}:${scope}`;
@@ -26,7 +15,7 @@ function activityKey(scope: string) {
   return `${ACTIVITY_PREFIX}:${scope}`;
 }
 
-function normalizeLockAfterMinutes(value: unknown) {
+export function normalizeGestureLockAfterMinutes(value: unknown) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return DEFAULT_GESTURE_LOCK_AFTER_MINUTES;
   return Math.min(MAX_GESTURE_LOCK_AFTER_MINUTES, Math.max(1, Math.round(numeric)));
@@ -54,25 +43,8 @@ export function getGestureLockScope(session: AuthSession | null) {
   return `${spaceId}:${userId}`;
 }
 
-export function getGestureLockConfig(scope: string | null): GestureLockConfig | null {
-  if (!scope || typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(storageKey(scope));
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw) as GestureLockConfig;
-    if (!parsed.enabled || !parsed.hash || !parsed.salt) return null;
-    return {
-      ...parsed,
-      lock_after_minutes: normalizeLockAfterMinutes(parsed.lock_after_minutes),
-    };
-  } catch {
-    window.localStorage.removeItem(storageKey(scope));
-    return null;
-  }
-}
-
-export function isGestureLockEnabled(scope: string | null) {
-  return Boolean(getGestureLockConfig(scope));
+export function isGestureLockPreferenceEnabled(preference: GestureLockPreferenceDTO | null | undefined) {
+  return Boolean(preference?.enabled && preference.pattern_hash && preference.salt);
 }
 
 export function isGestureUnlocked(scope: string | null) {
@@ -90,12 +62,6 @@ export function clearGestureUnlock(scope: string | null) {
   if (!scope || typeof window === "undefined") return;
   window.sessionStorage.removeItem(unlockKey(scope));
   window.sessionStorage.removeItem(activityKey(scope));
-}
-
-export function clearGestureLock(scope: string | null) {
-  if (!scope || typeof window === "undefined") return;
-  window.localStorage.removeItem(storageKey(scope));
-  clearGestureUnlock(scope);
 }
 
 export function createGestureSalt() {
@@ -128,45 +94,39 @@ export function getGestureLastActivity(scope: string | null) {
   return Number(window.sessionStorage.getItem(activityKey(scope)) || 0);
 }
 
-export function getGestureLockAfterMinutes(scope: string | null) {
-  return normalizeLockAfterMinutes(getGestureLockConfig(scope)?.lock_after_minutes);
+export function getGestureLockAfterMinutes(preference: GestureLockPreferenceDTO | null | undefined) {
+  return normalizeGestureLockAfterMinutes(preference?.lock_after_minutes);
 }
 
-export function getGestureLockAfterMs(scope: string | null) {
-  return getGestureLockAfterMinutes(scope) * 60 * 1000;
+export function getGestureLockAfterMs(preference: GestureLockPreferenceDTO | null | undefined) {
+  return getGestureLockAfterMinutes(preference) * 60 * 1000;
 }
 
-export function setGestureLockAfterMinutes(scope: string | null, minutes: number) {
-  if (!scope || typeof window === "undefined") return null;
-  const config = getGestureLockConfig(scope);
-  if (!config) return null;
-  const next = {
-    ...config,
-    lock_after_minutes: normalizeLockAfterMinutes(minutes),
-    updated_at: Date.now(),
-  };
-  window.localStorage.setItem(storageKey(scope), JSON.stringify(next));
-  return next;
-}
-
-export async function saveGesturePattern(scope: string, pattern: string, lockAfterMinutes = DEFAULT_GESTURE_LOCK_AFTER_MINUTES) {
+export async function buildGestureLockPayload(pattern: string, lockAfterMinutes = DEFAULT_GESTURE_LOCK_AFTER_MINUTES) {
   const salt = createGestureSalt();
-  const hash = await hashGesturePattern(pattern, salt);
-  const config: GestureLockConfig = {
-    enabled: true,
-    hash,
+  const pattern_hash = await hashGesturePattern(pattern, salt);
+  return {
+    enabled: 1 as const,
+    pattern_hash,
     salt,
-    lock_after_minutes: normalizeLockAfterMinutes(lockAfterMinutes),
-    updated_at: Date.now(),
+    lock_after_minutes: normalizeGestureLockAfterMinutes(lockAfterMinutes),
   };
-  window.localStorage.setItem(storageKey(scope), JSON.stringify(config));
-  markGestureUnlocked(scope);
-  return config;
 }
 
-export async function verifyGesturePattern(scope: string, pattern: string) {
-  const config = getGestureLockConfig(scope);
-  if (!config) return true;
-  const hash = await hashGesturePattern(pattern, config.salt);
-  return hash === config.hash;
+export async function verifyGesturePattern(preference: GestureLockPreferenceDTO | null | undefined, pattern: string) {
+  if (!isGestureLockPreferenceEnabled(preference)) return true;
+  const enabledPreference = preference as GestureLockPreferenceDTO;
+  const hash = await hashGesturePattern(pattern, enabledPreference.salt);
+  return hash === enabledPreference.pattern_hash;
+}
+
+export function emitGestureLockPreferenceUpdated() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(PREFERENCE_UPDATED_EVENT));
+}
+
+export function listenGestureLockPreferenceUpdated(listener: () => void) {
+  if (typeof window === "undefined") return () => undefined;
+  window.addEventListener(PREFERENCE_UPDATED_EVENT, listener);
+  return () => window.removeEventListener(PREFERENCE_UPDATED_EVENT, listener);
 }

@@ -5,19 +5,19 @@ import { FeedbackState } from "../components/FeedbackState";
 import { GestureUnlockScreen } from "../components/GestureLock";
 import { ApiError, api, configureApiAuth, refreshAuthSession } from "./api";
 import {
-  clearGestureLock,
   clearGestureUnlock,
   getGestureLastActivity,
   getGestureLockAfterMs,
   getGestureLockScope,
-  isGestureLockEnabled,
   isGestureUnlocked,
+  isGestureLockPreferenceEnabled,
+  listenGestureLockPreferenceUpdated,
   markGestureActivity,
 } from "./gestureLock";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
-import type { AuthSession, JoinResponseDTO } from "../types";
+import type { AuthSession, GestureLockPreferenceDTO, JoinResponseDTO } from "../types";
 
 interface AuthContextValue {
   ready: boolean;
@@ -176,13 +176,50 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
   const gestureScope = getGestureLockScope(session);
   const [gestureUnlocked, setGestureUnlocked] = useState(() => isGestureUnlocked(gestureScope));
+  const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
+  const [gesturePreferenceReady, setGesturePreferenceReady] = useState(false);
 
   useEffect(() => {
     setGestureUnlocked(isGestureUnlocked(gestureScope));
   }, [gestureScope, session?.accessToken]);
 
   useEffect(() => {
-    if (!gestureScope || !gestureUnlocked || !isGestureLockEnabled(gestureScope)) return;
+    if (!ready || !session) {
+      setGesturePreference(null);
+      setGesturePreferenceReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    const loadPreference = () => {
+      setGesturePreferenceReady(false);
+      api
+        .getGestureLockPrefs()
+        .then((preference) => {
+          if (cancelled) return;
+          setGesturePreference(preference);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setGesturePreference(null);
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setGesturePreferenceReady(true);
+        });
+    };
+
+    loadPreference();
+    const cleanupPreferenceListener = listenGestureLockPreferenceUpdated(loadPreference);
+
+    return () => {
+      cancelled = true;
+      cleanupPreferenceListener();
+    };
+  }, [ready, session?.accessToken]);
+
+  useEffect(() => {
+    if (!gestureScope || !gestureUnlocked || !isGestureLockPreferenceEnabled(gesturePreference)) return;
 
     let timer: number | undefined;
     const listenerOptions: AddEventListenerOptions = { capture: true, passive: true };
@@ -195,7 +232,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
     const schedule = () => {
       if (timer) window.clearTimeout(timer);
-      const timeoutMs = getGestureLockAfterMs(gestureScope);
+      const timeoutMs = getGestureLockAfterMs(gesturePreference);
       const lastActivity = getGestureLastActivity(gestureScope) || Date.now();
       const remaining = timeoutMs - (Date.now() - lastActivity);
       timer = window.setTimeout(() => {
@@ -215,7 +252,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState !== "visible") return;
-      const timeoutMs = getGestureLockAfterMs(gestureScope);
+      const timeoutMs = getGestureLockAfterMs(gesturePreference);
       const lastActivity = getGestureLastActivity(gestureScope);
       if (lastActivity && Date.now() - lastActivity >= timeoutMs) {
         lock();
@@ -236,9 +273,9 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
       events.forEach((eventName) => window.removeEventListener(eventName, recordActivity, listenerOptions));
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [gestureScope, gestureUnlocked, session?.accessToken]);
+  }, [gesturePreference, gestureScope, gestureUnlocked, session?.accessToken]);
 
-  if (!ready) {
+  if (!ready || (session && !gesturePreferenceReady)) {
     return (
       <main className="auth-restore-screen">
         <div className="auth-restore-orb" aria-hidden="true" />
@@ -252,14 +289,16 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? "/" : "/space"} />;
   }
 
-  if (gestureScope && isGestureLockEnabled(gestureScope) && !gestureUnlocked) {
+  const activeGesturePreference = isGestureLockPreferenceEnabled(gesturePreference) ? gesturePreference : null;
+  if (gestureScope && activeGesturePreference && !gestureUnlocked) {
     return (
       <GestureUnlockScreen
         scope={gestureScope}
+        preference={activeGesturePreference}
         userName={session.user.name}
         onUnlocked={() => setGestureUnlocked(true)}
         onResetAndLogout={() => {
-          clearGestureLock(gestureScope);
+          clearGestureUnlock(gestureScope);
           void logout();
         }}
       />
