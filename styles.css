@@ -761,9 +761,12 @@ img {
   min-width: 0;
   display: grid;
   gap: 4px;
+  justify-items: start;
+  text-align: left;
 }
 
 .verification-banner-copy strong {
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
@@ -771,6 +774,13 @@ img {
   color: var(--text-secondary);
   font-size: 0.82rem;
   line-height: 1.45;
+  text-align: left;
+}
+
+.bark-banner-title span {
+  color: var(--text-primary);
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .verification-banner-action {
@@ -4332,6 +4342,11 @@ img {
 
 .menu-danger-row .row-subtle {
   color: rgba(179, 58, 84, 0.82);
+}
+
+.account-delete-row strong,
+.account-delete-row .material-symbols-outlined {
+  color: var(--danger);
 }
 
 .password-setup-banner {

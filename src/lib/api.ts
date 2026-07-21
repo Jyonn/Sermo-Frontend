@@ -293,6 +293,14 @@ export const api = {
     });
   },
 
+  deleteAccount(payload: { password?: string; name_confirmation?: string }) {
+    return request<Record<string, never>>("/users/me", {
+      method: "DELETE",
+      auth: true,
+      body: payload,
+    });
+  },
+
   getSpaceUsers(params: { q?: string; online?: 0 | 1; limit?: number; offset?: number }, signal?: AbortSignal) {
     return request<UserDTO[]>("/spaces/users", { auth: true, query: params, signal });
   },

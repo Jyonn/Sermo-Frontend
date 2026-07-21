@@ -7,6 +7,7 @@ interface InputDialogProps {
   title: string;
   value: string;
   placeholder?: string;
+  type?: "text" | "password";
   confirmLabel?: string;
   cancelLabel?: string;
   busy?: boolean;
@@ -20,6 +21,7 @@ export function InputDialog({
   title,
   value,
   placeholder,
+  type = "text",
   confirmLabel = "确认",
   cancelLabel = "取消",
   busy = false,
@@ -73,6 +75,7 @@ export function InputDialog({
           ref={inputRef}
           className="input input-dialog-field"
           placeholder={placeholder}
+          type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />

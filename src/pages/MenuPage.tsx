@@ -36,6 +36,7 @@ const emptyPrefs: NotificationPreferences = {
 const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
 const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
+const defaultPasswordReminderDescription = "设置密码后，才能绑定通知渠道或管理通知提醒。";
 
 function clonePref(pref: NotificationPreferences[NotificationChannel]) {
   return { ...pref };
@@ -156,7 +157,11 @@ export default function MenuPage() {
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
+  const [passwordReminderDescription, setPasswordReminderDescription] = useState(defaultPasswordReminderDescription);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [accountDeleteStep, setAccountDeleteStep] = useState<"intro" | "verify" | "final" | null>(null);
+  const [accountDeleteInput, setAccountDeleteInput] = useState("");
+  const [accountDeleteSaving, setAccountDeleteSaving] = useState(false);
   const [prefDrawerChannel, setPrefDrawerChannel] = useState<NotificationChannel | null>(null);
   const [prefDraft, setPrefDraft] = useState<NotificationPreferences[NotificationChannel] | null>(null);
   const [prefSaving, setPrefSaving] = useState(false);
@@ -204,6 +209,11 @@ export default function MenuPage() {
     webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
     webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
   ].join(" · ");
+
+  const showPasswordReminder = (description = defaultPasswordReminderDescription) => {
+    setPasswordReminderDescription(description);
+    setPasswordReminderOpen(true);
+  };
 
   const updateWebReminderPrefs = async (patch: Partial<WebReminderPreferences>) => {
     const previous = webReminderPrefs;
@@ -353,7 +363,7 @@ export default function MenuPage() {
   const openAuthSheet = (channel: NotificationChannel) => {
     if (!hasPassword) {
       setChannelsDrawerOpen(false);
-      setPasswordReminderOpen(true);
+      showPasswordReminder();
       return;
     }
     if (channel === "bark") {
@@ -394,7 +404,7 @@ export default function MenuPage() {
 
   const openBarkGuide = () => {
     if (!hasPassword) {
-      setPasswordReminderOpen(true);
+      showPasswordReminder();
       return;
     }
     openAuthSheet("bark");
@@ -688,6 +698,10 @@ export default function MenuPage() {
   };
 
   const requestCustomAvatarUpload = () => {
+    if (!hasPassword) {
+      showPasswordReminder("设置密码后，才能上传自定义头像。你仍然可以继续使用预设头像。");
+      return;
+    }
     avatarFileInputRef.current?.click();
   };
 
@@ -733,8 +747,37 @@ export default function MenuPage() {
   };
 
   const openBasicEditDialog = (field: "name" | "welcome") => {
+    if (!hasPassword) {
+      showPasswordReminder(field === "name" ? "设置密码后，才能修改昵称。" : "设置密码后，才能修改欢迎语。");
+      return;
+    }
     setBasicEditField(field);
     setBasicEditValue(field === "name" ? session?.user.name ?? "" : me?.welcome_message ?? session?.user?.welcome_message ?? "");
+  };
+
+  const confirmAccountDeleteInput = () => {
+    const value = accountDeleteInput.trim();
+    if (!value) {
+      setError(hasPassword ? "请输入当前密码。" : "请输入当前昵称以确认注销。");
+      return;
+    }
+    setAccountDeleteStep("final");
+  };
+
+  const deleteAccount = async () => {
+    const value = accountDeleteInput.trim();
+    try {
+      setAccountDeleteSaving(true);
+      await api.deleteAccount(hasPassword ? { password: value } : { name_confirmation: value });
+      setAccountDeleteStep(null);
+      setSecurityDrawerOpen(false);
+      await logout();
+      navigate("/", { replace: true });
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : "注销账户失败");
+    } finally {
+      setAccountDeleteSaving(false);
+    }
   };
 
   const confirmBasicEdit = async () => {
@@ -787,7 +830,7 @@ export default function MenuPage() {
 
   const openChannelsEntry = () => {
     if (!hasPassword) {
-      setPasswordReminderOpen(true);
+      showPasswordReminder();
       return;
     }
     setChannelsDrawerOpen(true);
@@ -852,9 +895,9 @@ export default function MenuPage() {
             <div className="menu-profile-heading">
               <strong>{session?.user.name ?? "Sermo User"}</strong>
             </div>
-          <div className="row-subtle">
+            <div className="row-subtle">
               {space?.name ?? "当前空间"}
-              {space?.name ? <span className="menu-space-slug">@{space.name}</span> : null}
+              {space?.slug ? <span className="menu-space-slug">@{space.slug}</span> : null}
             </div>
           </div>
           <button
@@ -884,7 +927,7 @@ export default function MenuPage() {
           mode="menu"
           onAction={() => {
             if (!hasPassword) {
-              setPasswordReminderOpen(true);
+              showPasswordReminder();
               return;
             }
             navigate("/app/settings/contacts?channel=email");
@@ -1024,6 +1067,20 @@ export default function MenuPage() {
               <div className="row-main">
                 <strong>{hasPassword ? "更换密码" : "设置密码"}</strong>
                 <div className="row-subtle">{hasPassword ? "更新当前登录密码。" : "设置后，别人不能只凭昵称登录你的账号。"}</div>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            <button
+              className="simple-row menu-link-row danger-row account-delete-row"
+              onClick={() => {
+                setAccountDeleteInput("");
+                setAccountDeleteStep("intro");
+              }}
+              type="button"
+            >
+              <div className="row-main">
+                <strong>注销账户</strong>
+                <div className="row-subtle">删除账号并退出当前空间</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1502,6 +1559,42 @@ export default function MenuPage() {
         title={basicEditField === "name" ? "修改昵称" : "修改欢迎语"}
         value={basicEditValue}
       />
+      <ConfirmDialog
+        danger
+        open={accountDeleteStep === "intro"}
+        title="确认注销账户？"
+        description="注销后，你会离开当前空间，好友关系和群聊成员关系也会被移除。"
+        confirmLabel="继续注销"
+        onClose={() => setAccountDeleteStep(null)}
+        onConfirm={() => {
+          setAccountDeleteInput("");
+          setAccountDeleteStep("verify");
+        }}
+      />
+      <InputDialog
+        busy={accountDeleteSaving}
+        confirmLabel="下一步"
+        onChange={setAccountDeleteInput}
+        onClose={() => setAccountDeleteStep(null)}
+        onConfirm={confirmAccountDeleteInput}
+        open={accountDeleteStep === "verify"}
+        placeholder={hasPassword ? "输入当前密码" : `输入昵称：${session?.user.name ?? ""}`}
+        title={hasPassword ? "验证当前密码" : "输入昵称确认"}
+        type={hasPassword ? "password" : "text"}
+        value={accountDeleteInput}
+      />
+      <ConfirmDialog
+        danger
+        busy={accountDeleteSaving}
+        open={accountDeleteStep === "final"}
+        title="最后确认一次"
+        description="这个操作会注销你的账户，并清理你在当前空间中的好友和群聊关系。"
+        confirmLabel="确认注销"
+        onClose={() => {
+          if (!accountDeleteSaving) setAccountDeleteStep(null);
+        }}
+        onConfirm={() => void deleteAccount()}
+      />
       <RequestStatusModal
         errorLabel={statusModal?.errorLabel}
         loadingLabel={statusModal?.loadingLabel}
@@ -1532,7 +1625,7 @@ export default function MenuPage() {
       <ConfirmDialog
         open={passwordReminderOpen}
         title="请先设置密码"
-        description="设置密码后，才能绑定通知渠道或管理通知提醒。"
+        description={passwordReminderDescription}
         confirmLabel="去设置"
         onClose={() => setPasswordReminderOpen(false)}
         onConfirm={() => {
