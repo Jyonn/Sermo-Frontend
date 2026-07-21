@@ -17,7 +17,7 @@ import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
-import { getWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
+import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { VerificationBanner } from "../components/VerificationBanner";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
@@ -205,13 +205,27 @@ export default function MenuPage() {
     webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
   ].join(" · ");
 
-  const updateWebReminderPrefs = (patch: Partial<WebReminderPreferences>) => {
+  const updateWebReminderPrefs = async (patch: Partial<WebReminderPreferences>) => {
+    const previous = webReminderPrefs;
     const next = {
       ...webReminderPrefs,
       ...patch,
     };
     setWebReminderPrefs(next);
     setWebReminderPreferences(next);
+    try {
+      const updated = await api.updateWebReminderPrefs({
+        sound_enabled: next.soundEnabled ? 1 : 0,
+        title_enabled: next.titleEnabled ? 1 : 0,
+      });
+      const saved = mapWebReminderPreferences(updated);
+      setWebReminderPrefs(saved);
+      setWebReminderPreferences(saved);
+    } catch (apiError) {
+      setWebReminderPrefs(previous);
+      setWebReminderPreferences(previous);
+      setError(apiError instanceof ApiError ? apiError.message : "网页提醒保存失败");
+    }
   };
 
   const openWebReminderDrawer = () => {
@@ -225,12 +239,19 @@ export default function MenuPage() {
     setViewState("loading");
     setError(null);
 
-    Promise.all([api.getSpaceMe(controller.signal), api.getUserMe(controller.signal)])
-      .then(async ([spaceInfo, meInfo]) => {
+    Promise.all([
+      api.getSpaceMe(controller.signal),
+      api.getUserMe(controller.signal),
+      api.getWebReminderPrefs(controller.signal).catch(() => null),
+    ])
+      .then(async ([spaceInfo, meInfo, webReminderInfo]) => {
         const prefRows = meInfo.has_password ? await api.getNotificationPrefs(controller.signal) : [];
+        const nextWebReminderPrefs = webReminderInfo ? mapWebReminderPreferences(webReminderInfo) : getWebReminderPreferences();
         setSpace(spaceInfo);
         setMe(meInfo);
         setPrefs(mapPrefs(prefRows));
+        setWebReminderPrefs(nextWebReminderPrefs);
+        setWebReminderPreferences(nextWebReminderPrefs);
         patchSessionUser({
           has_password: meInfo.has_password,
           verified: meInfo.verified,
@@ -1069,7 +1090,7 @@ export default function MenuPage() {
               <button
                 aria-label="toggle-web-sound-reminder"
                 className={`switch ${webReminderPrefs.soundEnabled ? "active" : ""}`}
-                onClick={() => updateWebReminderPrefs({ soundEnabled: !webReminderPrefs.soundEnabled })}
+                onClick={() => void updateWebReminderPrefs({ soundEnabled: !webReminderPrefs.soundEnabled })}
                 type="button"
               />
             </div>
@@ -1081,7 +1102,7 @@ export default function MenuPage() {
               <button
                 aria-label="toggle-web-title-reminder"
                 className={`switch ${webReminderPrefs.titleEnabled ? "active" : ""}`}
-                onClick={() => updateWebReminderPrefs({ titleEnabled: !webReminderPrefs.titleEnabled })}
+                onClick={() => void updateWebReminderPrefs({ titleEnabled: !webReminderPrefs.titleEnabled })}
                 type="button"
               />
             </div>

@@ -22,6 +22,7 @@ import type {
   SpaceAuthDTO,
   UserDTO,
   UserMeDTO,
+  WebReminderPreferenceDTO,
 } from "../types";
 
 const API_BASE_URL = import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space";
@@ -529,6 +530,21 @@ export const api = {
     open_chat_on_tap?: 0 | 1;
   }) {
     return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  getWebReminderPrefs(signal?: AbortSignal) {
+    return request<WebReminderPreferenceDTO>("/users/me/web-reminder-prefs", {
+      auth: true,
+      signal,
+    });
+  },
+
+  updateWebReminderPrefs(payload: { sound_enabled?: 0 | 1; title_enabled?: 0 | 1 }) {
+    return request<WebReminderPreferenceDTO>("/users/me/web-reminder-prefs", {
       method: "POST",
       auth: true,
       body: payload,

@@ -3,6 +3,11 @@ export interface WebReminderPreferences {
   titleEnabled: boolean;
 }
 
+export interface WebReminderPreferenceDTO {
+  sound_enabled: boolean;
+  title_enabled: boolean;
+}
+
 const WEB_REMINDER_PREFS_KEY = "sermo-web-reminder-prefs";
 export const WEB_REMINDER_PREFS_UPDATED_EVENT = "sermo:web-reminder-prefs-updated";
 
@@ -59,6 +64,13 @@ export function setWebReminderPreferences(next: WebReminderPreferences) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(WEB_REMINDER_PREFS_KEY, JSON.stringify(next));
   window.dispatchEvent(new CustomEvent<WebReminderPreferences>(WEB_REMINDER_PREFS_UPDATED_EVENT, { detail: next }));
+}
+
+export function mapWebReminderPreferences(row: WebReminderPreferenceDTO): WebReminderPreferences {
+  return {
+    soundEnabled: row.sound_enabled,
+    titleEnabled: row.title_enabled,
+  };
 }
 
 export function playWebReminderSound() {

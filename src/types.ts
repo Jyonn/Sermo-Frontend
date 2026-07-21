@@ -127,6 +127,11 @@ export interface NotificationPreferenceDTO {
   open_chat_on_tap: boolean;
 }
 
+export interface WebReminderPreferenceDTO {
+  sound_enabled: boolean;
+  title_enabled: boolean;
+}
+
 export interface AvatarUploadDTO {
   upload_token: string;
   upload_url: string;
