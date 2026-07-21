@@ -2752,25 +2752,19 @@ img {
   gap: 18px;
 }
 
-.gesture-status-card {
-  display: grid;
-  gap: 6px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  background:
-    radial-gradient(circle at 10% 0%, rgba(0, 208, 132, 0.12), transparent 34%),
-    rgba(255, 255, 255, 0.82);
-}
-
-.gesture-status-card strong {
-  color: var(--text-primary);
-}
-
-.gesture-status-card span {
+.gesture-message {
+  justify-self: center;
   color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.5;
+  font-weight: 900;
+  font-size: 0.92rem;
+}
+
+.gesture-message-error {
+  color: var(--danger);
+}
+
+.gesture-message-success {
+  color: var(--brand-primary);
 }
 
 .gesture-timeout-row {
@@ -2803,11 +2797,8 @@ img {
   width: min(100%, 340px);
   aspect-ratio: 1;
   justify-self: center;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 24px;
-  padding: 22px;
+  display: block;
+  padding: 0;
   border-radius: 30px;
   border: 1px solid rgba(226, 232, 240, 0.82);
   background:
@@ -2820,9 +2811,9 @@ img {
 
 .gesture-lines {
   position: absolute;
-  inset: 22px;
-  width: calc(100% - 44px);
-  height: calc(100% - 44px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   overflow: visible;
 }
@@ -2845,11 +2836,15 @@ img {
 }
 
 .gesture-dot {
-  position: relative;
+  position: absolute;
   z-index: 1;
   display: grid;
   place-items: center;
+  width: 30%;
+  height: 30%;
   border-radius: 999px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .gesture-dot span {
@@ -2875,7 +2870,6 @@ img {
 @media (max-width: 480px) {
   .gesture-grid {
     width: min(100%, 320px);
-    gap: 22px;
   }
 }
 

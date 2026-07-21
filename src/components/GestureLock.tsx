@@ -17,8 +17,30 @@ interface PatternGridProps {
   onComplete: (pattern: string) => void;
 }
 
+const GESTURE_POINTS = Array.from({ length: 9 }, (_, index) => ({
+  x: ((index % 3) + 0.5) * (100 / 3),
+  y: (Math.floor(index / 3) + 0.5) * (100 / 3),
+}));
+const GESTURE_HIT_RADIUS = 14;
+
 function patternFromPoints(points: number[]) {
   return points.join("-");
+}
+
+function distance(left: { x: number; y: number }, right: { x: number; y: number }) {
+  return Math.hypot(left.x - right.x, left.y - right.y);
+}
+
+function distanceToSegment(point: { x: number; y: number }, start: { x: number; y: number }, end: { x: number; y: number }) {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (!lengthSquared) return { distance: distance(point, start), progress: 0 };
+  const progress = Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared));
+  return {
+    distance: distance(point, { x: start.x + progress * dx, y: start.y + progress * dy }),
+    progress,
+  };
 }
 
 function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternGridProps) {
@@ -29,22 +51,55 @@ function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternG
 
   const linePoints = useMemo(
     () =>
-      selected.map((index) => ({
-        x: ((index % 3) + 0.5) * (100 / 3),
-        y: (Math.floor(index / 3) + 0.5) * (100 / 3),
-      })),
+      selected.map((index) => GESTURE_POINTS[index]),
     [selected]
   );
 
-  const hitTest = (clientX: number, clientY: number) => {
+  const pointerPoint = (clientX: number, clientY: number) => {
     const rect = boardRef.current?.getBoundingClientRect();
     if (!rect) return null;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
-    const col = Math.min(2, Math.max(0, Math.floor((x / rect.width) * 3)));
-    const row = Math.min(2, Math.max(0, Math.floor((y / rect.height) * 3)));
-    return row * 3 + col;
+    return {
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+    };
+  };
+
+  const hitTest = (clientX: number, clientY: number) => {
+    const point = pointerPoint(clientX, clientY);
+    if (!point) return null;
+    let nearestIndex: number | null = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    GESTURE_POINTS.forEach((candidate, index) => {
+      const currentDistance = distance(point, candidate);
+      if (currentDistance < nearestDistance) {
+        nearestDistance = currentDistance;
+        nearestIndex = index;
+      }
+    });
+    return nearestDistance <= GESTURE_HIT_RADIUS ? nearestIndex : null;
+  };
+
+  const hitPath = (clientX: number, clientY: number) => {
+    const point = pointerPoint(clientX, clientY);
+    if (!point) return [];
+    const lastIndex = selectedRef.current[selectedRef.current.length - 1];
+    if (lastIndex === undefined) {
+      const nearest = hitTest(clientX, clientY);
+      return nearest === null ? [] : [nearest];
+    }
+    const start = GESTURE_POINTS[lastIndex];
+    return GESTURE_POINTS.map((candidate, index) => {
+      if (selectedRef.current.includes(index)) return null;
+      const hit = distanceToSegment(candidate, start, point);
+      if (hit.distance > GESTURE_HIT_RADIUS) return null;
+      return { index, progress: hit.progress };
+    })
+      .filter((item): item is { index: number; progress: number } => Boolean(item))
+      .sort((left, right) => left.progress - right.progress)
+      .map((item) => item.index);
   };
 
   const addPoint = (index: number | null) => {
@@ -52,6 +107,10 @@ function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternG
     if (selectedRef.current.includes(index)) return;
     selectedRef.current = [...selectedRef.current, index];
     setSelected(selectedRef.current);
+  };
+
+  const addPoints = (indexes: number[]) => {
+    indexes.forEach((index) => addPoint(index));
   };
 
   const start = (event: PointerEvent<HTMLDivElement>) => {
@@ -65,7 +124,7 @@ function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternG
 
   const move = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragging || disabled) return;
-    addPoint(hitTest(event.clientX, event.clientY));
+    addPoints(hitPath(event.clientX, event.clientY));
   };
 
   const end = () => {
@@ -95,8 +154,12 @@ function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternG
           <polyline points={linePoints.map((point) => `${point.x},${point.y}`).join(" ")} />
         ) : null}
       </svg>
-      {Array.from({ length: 9 }, (_, index) => (
-        <span key={index} className={`gesture-dot${selected.includes(index) ? " active" : ""}`}>
+      {GESTURE_POINTS.map((point, index) => (
+        <span
+          key={index}
+          className={`gesture-dot${selected.includes(index) ? " active" : ""}`}
+          style={{ left: `${point.x}%`, top: `${point.y}%` }}
+        >
           <span />
         </span>
       ))}
@@ -215,12 +278,9 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
 
   return (
     <div className="gesture-setup-panel">
-      <div className="gesture-status-card">
-        <strong>{enabled ? "手势解锁已开启" : "手势解锁"}</strong>
-        <span>{status}</span>
-      </div>
       {enabled ? (
         <>
+          {tone === "error" ? <div className="gesture-message gesture-message-error">{status}</div> : null}
           <div className="gesture-timeout-row">
             <div>
               <strong>自动上锁</strong>
@@ -244,6 +304,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
         <div className="inline-note">认证邮箱后可开启</div>
       ) : (
         <>
+          {firstPattern || tone !== "normal" ? <div className={`gesture-message gesture-message-${tone}`}>{status}</div> : null}
           <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void complete(pattern)} />
           {firstPattern ? (
             <button
