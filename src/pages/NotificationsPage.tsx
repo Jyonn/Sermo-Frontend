@@ -6,6 +6,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
+import { UserProfilePanel } from "../components/UserProfilePanel";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
@@ -101,6 +102,7 @@ export default function NotificationsPage() {
   });
   const [requestSheetOpen, setRequestSheetOpen] = useState(false);
   const [groupSheetOpen, setGroupSheetOpen] = useState(false);
+  const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
 
@@ -249,7 +251,7 @@ export default function NotificationsPage() {
                       <button
                         key={friend.user_id}
                         className="simple-row person-row person-row-link"
-                        onClick={() => navigate(`/app/notifications/friends/${friend.user_id}`)}
+                        onClick={() => setProfileDrawerUserId(friend.user_id)}
                         type="button"
                       >
                         <UserAvatar
@@ -412,6 +414,24 @@ export default function NotificationsPage() {
             <FeedbackState title={normalizedQuery ? "没有匹配的群聊" : "还没有群聊"} description={normalizedQuery ? "换个关键词试试。" : "你创建或加入群聊后，这里会出现。"} />
           )}
         </section>
+      </SideDrawer>
+
+      <SideDrawer
+        description="资料与共同关系"
+        open={profileDrawerUserId !== null}
+        title="用户详情"
+        onClose={() => setProfileDrawerUserId(null)}
+      >
+        {profileDrawerUserId !== null ? (
+          <UserProfilePanel
+            userId={profileDrawerUserId}
+            onOpenChat={(chatId) => {
+              window.history.replaceState({ ...window.history.state, sermoDrawerStack: [] }, "");
+              setProfileDrawerUserId(null);
+              navigate(`/app/chats/${chatId}`);
+            }}
+          />
+        ) : null}
       </SideDrawer>
 
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
