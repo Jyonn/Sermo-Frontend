@@ -51,10 +51,6 @@ export function AppChrome({
                     }}
                   />
                 </div>
-                <div className="brand-copy">
-                  <h1>Sermo 言浪</h1>
-                  <p>一方空间，尽兴开聊</p>
-                </div>
               </Link>
             )}
           </div>
