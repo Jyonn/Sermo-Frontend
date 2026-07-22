@@ -1894,7 +1894,7 @@ img {
   width: min(58vw, 228px);
   max-width: 100%;
   max-height: min(42vh, 300px);
-  border-radius: 24px;
+  border-radius: inherit;
   object-fit: cover;
   background: rgba(17, 19, 24, 0.04);
   transition:
