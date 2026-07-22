@@ -194,6 +194,19 @@ export interface ChatMessagePayloadDTO {
   file_name?: string;
   file_size?: number;
   link_preview?: LinkPreviewDTO | null;
+  image_metadata?: ImageMetadataDTO | null;
+}
+
+export interface ImageMetadataDTO {
+  status: number;
+  make?: string;
+  model?: string;
+  lens_model?: string;
+  software?: string;
+  taken_at?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  address?: string;
 }
 
 export interface FriendshipRequestDTO {

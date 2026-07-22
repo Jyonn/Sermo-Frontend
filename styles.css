@@ -2183,10 +2183,94 @@ img {
   width: auto;
   height: auto;
   max-width: min(100%, 1320px);
-  max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 104px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   object-fit: contain;
   border-radius: 10px;
   box-shadow: none;
+}
+
+.message-image-preview-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.message-image-preview-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: min(360px, 100%);
+  pointer-events: auto;
+}
+
+.message-image-preview-actions button {
+  min-height: 44px;
+  color: rgba(255, 255, 255, 0.94);
+  background: rgba(24, 29, 36, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+}
+
+.message-image-preview-actions button.is-primary {
+  color: #062c22;
+  background: var(--brand-primary);
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.message-image-metadata-panel {
+  width: min(460px, 100%);
+  max-height: min(42dvh, 360px);
+  padding: 15px 16px;
+  overflow-y: auto;
+  color: rgba(255, 255, 255, 0.94);
+  background: rgba(15, 18, 23, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 16px;
+  pointer-events: auto;
+  backdrop-filter: blur(20px);
+}
+
+.message-image-metadata-list {
+  display: grid;
+  margin: 0;
+  gap: 10px;
+}
+
+.message-image-metadata-list > div {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.message-image-metadata-list dt {
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.message-image-metadata-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.message-image-metadata-empty {
+  color: rgba(255, 255, 255, 0.64);
+  text-align: center;
+}
+
+.message-image-location-credit {
+  display: inline-block;
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.68rem;
+  text-decoration: none;
 }
 
 .message-image-preview-count {
@@ -2214,7 +2298,7 @@ img {
   }
 
   .message-image-preview {
-    max-height: calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     border-radius: 0;
   }
 }

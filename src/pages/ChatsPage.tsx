@@ -31,7 +31,7 @@ import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../l
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -620,12 +620,16 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
 
 const MessageMediaImage = memo(function MessageMediaImage({
   groupClassName,
+  metadata,
+  messageId,
   onOpenImage,
   thumbnailUri,
   uri,
 }: {
   groupClassName: string;
-  onOpenImage?: (uris: string[], index: number) => void;
+  metadata?: ImageMetadataDTO | null;
+  messageId?: number;
+  onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   thumbnailUri?: string;
   uri: string;
 }) {
@@ -649,7 +653,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
   return (
     <button
       className={`message-media-frame image-button ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
-      onClick={() => onOpenImage?.([resolvedUri], 0)}
+      onClick={() => onOpenImage?.([resolvedUri], 0, [metadata ?? null], [messageId ?? null])}
       type="button"
     >
       {resolvedThumbnailUri ? <img alt="" aria-hidden="true" className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
@@ -687,7 +691,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   isFirst: boolean;
   isLast: boolean;
   messages: ChatMessage[];
-  onOpenImage: (uris: string[], index: number) => void;
+  onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
 }) {
   const longPressTimerRef = useRef<number | null>(null);
@@ -699,6 +703,8 @@ const MessageImageGallery = memo(function MessageImageGallery({
     const uri = message.payload?.uri ?? "";
     return resolveStableResourceUri(uri) ?? uri;
   });
+  const imageMetadata = messages.map((message) => message.payload?.image_metadata ?? null);
+  const imageMessageIds = messages.map((message) => typeof message.id === "number" ? message.id : null);
   const groupClassName = [from, isFirst ? "group-start" : "", isLast ? "group-end" : ""]
     .filter(Boolean)
     .join(" ");
@@ -748,7 +754,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                     event.preventDefault();
                     return;
                   }
-                  onOpenImage(fullUris, index);
+                  onOpenImage(fullUris, index, imageMetadata, imageMessageIds);
                 }}
                 onContextMenu={(event) => {
                   event.preventDefault();
@@ -909,9 +915,9 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   );
 });
 
-function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[], index: number) => void) | undefined, groupClassName: string) {
+function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined, groupClassName: string) {
   if (message.kind === "image" && message.payload?.uri) {
-    return <MessageMediaImage groupClassName={groupClassName} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
+    return <MessageMediaImage groupClassName={groupClassName} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {
@@ -1172,7 +1178,7 @@ interface MessageBubbleRowProps {
   isFirst: boolean;
   isLast: boolean;
   message: ChatMessage;
-  onOpenImage: (uris: string[], index: number) => void;
+  onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
   onRetry: (message: ChatMessage) => void;
 }
@@ -1180,7 +1186,7 @@ interface MessageBubbleRowProps {
 interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
-  onOpenImage: (uris: string[], index: number) => void;
+  onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
   onRetry: (message: ChatMessage) => void;
   showAuthor: boolean;
@@ -1197,6 +1203,39 @@ interface MessageMenuState {
 interface ImagePreviewState {
   index: number;
   uris: string[];
+  metadata: Array<ImageMetadataDTO | null>;
+  messageIds: Array<number | null>;
+}
+
+function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null }) {
+  if (!metadata || metadata.status !== 1) {
+    return <div className="message-image-metadata-empty">没有可展示的拍摄信息</div>;
+  }
+  const device = [metadata.make, metadata.model].filter(Boolean).join(" ");
+  const coordinate = metadata.latitude != null && metadata.longitude != null
+    ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
+    : "";
+  const rows = [
+    ["位置", metadata.address || coordinate],
+    ["坐标", metadata.address ? coordinate : ""],
+    ["设备", device],
+    ["镜头", metadata.lens_model],
+    ["拍摄时间", metadata.taken_at ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN") : ""],
+    ["软件", metadata.software],
+  ].filter((row) => row[1]);
+  if (!rows.length) return <div className="message-image-metadata-empty">没有可展示的拍摄信息</div>;
+  return (
+    <>
+      <dl className="message-image-metadata-list">
+        {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+      </dl>
+      {metadata.address ? (
+        <a className="message-image-location-credit" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
+          © OpenStreetMap contributors
+        </a>
+      ) : null}
+    </>
+  );
 }
 
 type VoiceComposerPhase = "idle" | "recording" | "stopping" | "recorded" | "sending";
@@ -1386,6 +1425,7 @@ export default function ChatsPage() {
     mimeType: "",
   });
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
+  const [imagePreviewInfoOpen, setImagePreviewInfoOpen] = useState(false);
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
@@ -1394,6 +1434,30 @@ export default function ChatsPage() {
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!imagePreview) return;
+    const messageId = imagePreview.messageIds[imagePreview.index];
+    const metadata = imagePreview.metadata[imagePreview.index];
+    if (!messageId || metadata?.status === 1 || metadata?.status === 2) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void api.getImageMetadata(messageId, controller.signal)
+        .then((nextMetadata) => {
+          setImagePreview((current) => {
+            if (!current || current.messageIds[current.index] !== messageId) return current;
+            const next = [...current.metadata];
+            next[current.index] = nextMetadata;
+            return { ...current, metadata: next };
+          });
+        })
+        .catch(() => undefined);
+    }, 1200);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [imagePreview]);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
@@ -2734,6 +2798,26 @@ export default function ChatsPage() {
     }
   };
 
+  const downloadPreviewImage = async () => {
+    if (!imagePreview) return;
+    const uri = imagePreview.uris[imagePreview.index];
+    if (!uri) return;
+    try {
+      const response = await fetch(uri);
+      if (!response.ok) throw new Error("download_failed");
+      const blob = await response.blob();
+      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = `sermo-image-${Date.now()}.${extension}`;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch {
+      window.open(uri, "_blank", "noopener,noreferrer");
+    }
+  };
+
   const openStatusModal = (loadingLabel: string, successLabel: string, errorLabel: string) => {
     setStatusModal({
       open: true,
@@ -3219,7 +3303,15 @@ export default function ChatsPage() {
                     enteringMessageIds={enteringMessageIds}
                     group={group}
                     key={group.key}
-                    onOpenImage={(uris, index) => setImagePreview({ uris, index })}
+                    onOpenImage={(uris, index, metadata = [], messageIds = []) => {
+                      setImagePreviewInfoOpen(false);
+                      setImagePreview({
+                        uris,
+                        index,
+                        metadata: uris.map((_uri, itemIndex) => metadata[itemIndex] ?? null),
+                        messageIds: uris.map((_uri, itemIndex) => messageIds[itemIndex] ?? null),
+                      });
+                    }}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
                     showAuthor={Boolean(selectedChat?.type === "group")}
@@ -3752,18 +3844,41 @@ export default function ChatsPage() {
                 const index = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
                 if (index !== imagePreview.index) {
                   setImagePreview((current) => current ? { ...current, index } : current);
+                  setImagePreviewInfoOpen(false);
                 }
               }}
             >
               {imagePreview.uris.map((uri, index) => (
                 <div className="message-image-preview-slide" key={`${uri}:${index}`}>
-                  <img alt={`图片预览 ${index + 1}`} className="message-image-preview" draggable={false} src={uri} />
+                  <img
+                    alt={`图片预览 ${index + 1}`}
+                    className="message-image-preview"
+                    draggable={false}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setImagePreviewInfoOpen((current) => !current);
+                    }}
+                    src={uri}
+                  />
                 </div>
               ))}
             </div>
             {imagePreview.uris.length > 1 ? (
               <div className="message-image-preview-count">{imagePreview.index + 1} / {imagePreview.uris.length}</div>
             ) : null}
+            <div className="message-image-preview-footer" onClick={(event) => event.stopPropagation()}>
+              {imagePreviewInfoOpen ? (
+                <div className="message-image-metadata-panel">
+                  <ImageMetadataPanel metadata={imagePreview.metadata[imagePreview.index] ?? null} />
+                </div>
+              ) : null}
+              <div className="message-image-preview-actions">
+                <button onClick={() => setImagePreviewInfoOpen((current) => !current)} type="button">
+                  {imagePreviewInfoOpen ? "收起信息" : "图片信息"}
+                </button>
+                <button className="is-primary" onClick={() => void downloadPreviewImage()} type="button">下载</button>
+              </div>
+            </div>
           </section>
         </div>
       ) : null}

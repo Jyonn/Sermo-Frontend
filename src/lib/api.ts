@@ -15,6 +15,7 @@ import type {
   JoinResponseDTO,
   LoginAuthDTO,
   LinkPreviewDTO,
+  ImageMetadataDTO,
   OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
   SpaceAdminDashboardDTO,
@@ -570,6 +571,14 @@ export const api = {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  getImageMetadata(messageId: number, signal?: AbortSignal) {
+    return request<ImageMetadataDTO>("/messages/image-metadata", {
+      auth: true,
+      query: { message_id: messageId },
+      signal,
     });
   },
 
