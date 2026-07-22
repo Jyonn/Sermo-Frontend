@@ -7733,3 +7733,42 @@ img {
     padding: 14px 16px;
   }
 }
+
+@media (min-width: 901px) {
+  .chat-mobile-layout .message-pane.chat-main-pane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid rgba(215, 220, 231, 0.72);
+    border-radius: 20px;
+    background: rgba(255, 253, 248, 0.74);
+  }
+
+  .chat-mobile-layout .desktop-conversation-header + .chat-detail-scene {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .chat-mobile-layout .chat-detail-scene > .message-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: auto;
+  }
+
+  .chat-mobile-layout .chat-detail-scene > .composer {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid rgba(232, 235, 242, 0.92);
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
