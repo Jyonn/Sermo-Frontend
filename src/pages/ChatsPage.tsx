@@ -52,13 +52,22 @@ function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ComposerSvgIcon({ kind, className }: { kind: "album" | "mic" | "stop" | "delete"; className?: string }) {
+function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "mic" | "stop" | "delete"; className?: string }) {
   if (kind === "album") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
         <rect x="3.5" y="5" width="17" height="14" rx="3.5" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="9" cy="10" r="1.7" fill="currentColor" />
         <path d="M7 16.5 11.2 12.3a1.1 1.1 0 0 1 1.56 0l1.58 1.58a1.1 1.1 0 0 0 1.56 0L17 12.6l3.5 3.9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (kind === "file") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <path d="M7 3.75h6.7L18.5 8.6v11.65H7V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
+        <path d="M13.5 4v5h4.75M9.5 13h6M9.5 16.5h4.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
       </svg>
     );
   }
@@ -385,11 +394,21 @@ function messageKindFromType(type: number): MessageKind {
 }
 
 function messageTypeFromKind(kind: MessageMediaKind) {
-  return kind === "image" ? MESSAGE_TYPE_IMAGE : kind === "video" ? MESSAGE_TYPE_VIDEO : MESSAGE_TYPE_AUDIO;
+  if (kind === "image") return MESSAGE_TYPE_IMAGE;
+  if (kind === "video") return MESSAGE_TYPE_VIDEO;
+  if (kind === "file") return MESSAGE_TYPE_FILE;
+  return MESSAGE_TYPE_AUDIO;
 }
 
 function isMediaMessageKind(kind: MessageKind) {
-  return kind === "image" || kind === "video" || kind === "audio";
+  return kind === "image" || kind === "video" || kind === "audio" || kind === "file";
+}
+
+function formatFileSize(value?: number) {
+  const bytes = Math.max(0, Number(value) || 0);
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
+  if (bytes >= 1024) return `${Math.ceil(bytes / 1024)} KB`;
+  return `${bytes} B`;
 }
 
 function formatThreadDivider(value: number) {
@@ -793,6 +812,20 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) 
     return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
   }
 
+  if (message.kind === "file" && message.payload?.uri) {
+    const resolvedUri = resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
+    return (
+      <a className={`message-file-card ${groupClassName}`.trim()} download={message.payload.file_name || true} href={resolvedUri} rel="noreferrer" target="_blank">
+        <span className="message-file-icon"><ComposerSvgIcon kind="file" /></span>
+        <span className="message-file-copy">
+          <strong>{message.payload.file_name || "文件"}</strong>
+          <small>{formatFileSize(message.payload.file_size)}</small>
+        </span>
+        <span className="message-file-open" aria-hidden="true">↗</span>
+      </a>
+    );
+  }
+
   const linkPreview = message.payload?.link_preview;
   const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
   const text = message.payload?.text ?? message.text;
@@ -1186,7 +1219,8 @@ export default function ChatsPage() {
   const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
-  const mediaInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
@@ -2184,6 +2218,8 @@ export default function ChatsPage() {
         uri: objectUrl,
         mime_type: file.type || extraPayload.mime_type,
         duration_seconds: extraPayload.duration_seconds,
+        file_name: extraPayload.file_name,
+        file_size: extraPayload.file_size,
       },
       status: "pending",
     };
@@ -2209,6 +2245,8 @@ export default function ChatsPage() {
           key: upload.key,
           mime_type: file.type || extraPayload.mime_type,
           duration_seconds: extraPayload.duration_seconds,
+          file_name: extraPayload.file_name,
+          file_size: extraPayload.file_size,
         })
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
@@ -2236,23 +2274,33 @@ export default function ChatsPage() {
     }
   };
 
-  const openMediaPicker = () => {
+  const openGalleryPicker = () => {
     if (composerBusy) return;
-    mediaInputRef.current?.click();
+    galleryInputRef.current?.click();
   };
 
-  const handleMediaSelection = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
+  const openFilePicker = () => {
+    if (composerBusy) return;
+    fileInputRef.current?.click();
+  };
 
-    try {
-      const kind = resolveMediaKind(file);
-      await sendUploadedMediaMessage(kind, file);
-    } catch (error) {
-      const uploadError = toMessageUploadError(error);
-      setPageError(uploadError.message);
-    }
+  const handleMediaSelection = async (event: ChangeEvent<HTMLInputElement>, source: "gallery" | "file") => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!files.length) return;
+    setComposerMoreOpen(false);
+
+    await Promise.all(
+      files.map(async (file) => {
+        try {
+          const kind = source === "file" ? "file" : resolveMediaKind(file);
+          await sendUploadedMediaMessage(kind, file, source === "file" ? { file_name: file.name, file_size: file.size } : {});
+        } catch (error) {
+          const uploadError = toMessageUploadError(error);
+          setPageError(uploadError.message);
+        }
+      })
+    );
   };
 
   const startVoiceRecording = async () => {
@@ -2263,6 +2311,7 @@ export default function ChatsPage() {
     }
 
     textareaRef.current?.blur();
+    setComposerMoreOpen(false);
     recordingCancelledRef.current = false;
     recordingStopRequestedRef.current = false;
     recordingChunksRef.current = [];
@@ -2877,9 +2926,6 @@ export default function ChatsPage() {
                 {!voiceComposer.open ? (
                   <div className="composer-row composer-row-text">
                     <div className="composer-leading-actions">
-                      <button className="composer-action-button" disabled={composerBusy} onClick={openMediaPicker} type="button">
-                        <ComposerSvgIcon className="composer-inline-svg" kind="album" />
-                      </button>
                       <button className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} type="button">
                         <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
                       </button>
@@ -2911,7 +2957,14 @@ export default function ChatsPage() {
                         }}
                       />
                     </div>
-                    <button className="composer-plus" disabled={composerBusy} onClick={() => setComposerMoreOpen(true)} type="button">
+                    <button
+                      aria-expanded={composerMoreOpen}
+                      aria-label={composerMoreOpen ? "收起更多操作" : "展开更多操作"}
+                      className={`composer-plus ${composerMoreOpen ? "is-open" : ""}`}
+                      disabled={composerBusy}
+                      onClick={() => setComposerMoreOpen((current) => !current)}
+                      type="button"
+                    >
                       <span className="material-symbols-outlined">add</span>
                     </button>
                     <button hidden type="submit" />
@@ -2947,6 +3000,20 @@ export default function ChatsPage() {
                     </button>
                   </div>
                 )}
+                {!voiceComposer.open ? (
+                  <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
+                    <div className="composer-actions-grid">
+                      <button className="composer-action-tile" disabled={composerBusy} onClick={openGalleryPicker} type="button">
+                        <span className="composer-action-tile-icon"><ComposerSvgIcon kind="album" /></span>
+                        <span>相册</span>
+                      </button>
+                      <button className="composer-action-tile" disabled={composerBusy} onClick={openFilePicker} type="button">
+                        <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
+                        <span>文件</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </form>
             </div>
           ) : (
@@ -3339,26 +3406,20 @@ export default function ChatsPage() {
           </div>
         </div>
       </BottomSheet>
-      <BottomSheet
-        open={composerMoreOpen}
-        title="更多消息类型"
-        description="图片、视频和语音已经可以直接从输入栏使用，更多类型会继续补齐。"
-        onClose={() => setComposerMoreOpen(false)}
-      >
-        <div className="simple-list">
-          <div className="simple-row form-row composer-more-placeholder">
-            <div className="row-main">
-              <strong>更多能力即将支持</strong>
-              <div className="row-subtle">后续这里会接入更多消息类型和快捷能力。</div>
-            </div>
-          </div>
-        </div>
-      </BottomSheet>
       <input
-        ref={mediaInputRef}
+        ref={galleryInputRef}
         accept="image/*,video/*"
         hidden
-        onChange={(event) => void handleMediaSelection(event)}
+        multiple
+        onChange={(event) => void handleMediaSelection(event, "gallery")}
+        type="file"
+      />
+      <input
+        ref={fileInputRef}
+        accept=".pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.zip,.rar,.7z,.tar,.gz,.json"
+        hidden
+        multiple
+        onChange={(event) => void handleMediaSelection(event, "file")}
         type="file"
       />
       {imagePreviewUri ? (

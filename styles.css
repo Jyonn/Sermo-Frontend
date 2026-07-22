@@ -2293,15 +2293,90 @@ img {
   border-bottom-right-radius: 6px;
 }
 
+.message-file-card {
+  width: min(68vw, 264px);
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 1px solid rgba(215, 220, 231, 0.72);
+  border-radius: 18px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 22px rgba(17, 19, 24, 0.08);
+  text-decoration: none;
+}
+
+.message-file-card.self {
+  border-color: rgba(35, 38, 46, 0.86);
+  color: rgba(255, 255, 255, 0.96);
+  background: linear-gradient(155deg, #20232a, #12141a);
+}
+
+.message-file-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--brand-primary);
+  background: rgba(0, 208, 132, 0.11);
+}
+
+.message-file-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.message-file-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.message-file-copy strong {
+  overflow: hidden;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-file-copy small,
+.message-file-open {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.message-file-card.self .message-file-copy small,
+.message-file-card.self .message-file-open {
+  color: rgba(221, 226, 235, 0.68);
+}
+
+.message-file-open {
+  font-size: 1rem;
+}
+
+.message-file-card.other.group-start:not(.group-end) { border-bottom-left-radius: 6px; }
+.message-file-card.other:not(.group-start).group-end { border-top-left-radius: 6px; }
+.message-file-card.other:not(.group-start):not(.group-end) { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+.message-file-card.self.group-start:not(.group-end) { border-bottom-right-radius: 6px; }
+.message-file-card.self:not(.group-start).group-end { border-top-right-radius: 6px; }
+.message-file-card.self:not(.group-start):not(.group-end) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+
 .message-media-frame.is-pending,
-.message-audio-card.is-pending {
+.message-audio-card.is-pending,
+.message-file-card.is-pending {
   background-size: 220% 100%;
   animation: message-pending-sheen 1.2s linear infinite;
   opacity: 0.9;
 }
 
 .message-media-frame.is-failed,
-.message-audio-card.is-failed {
+.message-audio-card.is-failed,
+.message-file-card.is-failed {
   opacity: 0.78;
   filter: saturate(0.84);
 }
@@ -2476,6 +2551,19 @@ img {
   font-size: 1.55rem;
 }
 
+.composer-plus .material-symbols-outlined {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.composer-plus.is-open {
+  color: #0b1712;
+  background: rgba(0, 208, 132, 0.18);
+}
+
+.composer-plus.is-open .material-symbols-outlined {
+  transform: rotate(45deg);
+}
+
 .composer-inline-svg {
   width: 22px;
   height: 22px;
@@ -2509,6 +2597,76 @@ img {
   background: transparent;
   resize: none;
   line-height: 1.35;
+}
+
+.composer-actions-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    grid-template-rows 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 160ms ease-out,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.composer-actions-reveal.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.composer-actions-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  overflow: hidden;
+}
+
+.composer-actions-reveal.is-open .composer-actions-grid {
+  padding-top: 12px;
+}
+
+.composer-action-tile {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 8px 2px 2px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.composer-action-tile-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(215, 220, 231, 0.78);
+  border-radius: 16px;
+  color: var(--text-secondary);
+  background: rgba(247, 249, 252, 0.94);
+  transition: transform 150ms ease-out, color 150ms ease-out, background 150ms ease-out;
+}
+
+.composer-action-tile-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.composer-action-tile:active .composer-action-tile-icon {
+  color: var(--brand-primary);
+  background: rgba(0, 208, 132, 0.1);
+  transform: scale(0.94);
+}
+
+.composer-action-tile:disabled {
+  opacity: 0.48;
 }
 
 .composer-recording-bar {

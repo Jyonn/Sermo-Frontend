@@ -93,7 +93,7 @@ function sortMessages(items: ChatMessage[]) {
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
   if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
   if (existing.kind !== incoming.kind) return incoming;
-  if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio")) return incoming;
+  if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio" || existing.kind === "file")) return incoming;
 
   const existingResource = normalizeStableResourceUri(existing.payload.uri);
   const incomingResource = normalizeStableResourceUri(incoming.payload.uri);
@@ -117,7 +117,7 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
       const optimisticMatch = [...bucket.values()].find((existing) => {
         if (existing.from !== "self" || existing.status !== "pending" || existing.kind !== message.kind) return false;
         if (existing.kind === "text") return existing.text === message.text && Math.abs(existing.createdAt - message.createdAt) <= 30;
-        return ["image", "video", "audio"].includes(existing.kind) && Math.abs(existing.createdAt - message.createdAt) <= 600;
+        return ["image", "video", "audio", "file"].includes(existing.kind) && Math.abs(existing.createdAt - message.createdAt) <= 600;
       });
       if (optimisticMatch) bucket.delete(optimisticMatch.id);
     }

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 
+const activeDrawerIds = new Set<string>();
+
 interface SideDrawerProps {
   open: boolean;
   title: string;
@@ -13,6 +15,7 @@ interface SideDrawerProps {
   onAction?: () => void;
   onClose: () => void;
   children: ReactNode;
+  historyKey?: string;
 }
 
 export function SideDrawer({
@@ -26,6 +29,7 @@ export function SideDrawer({
   onAction,
   onClose,
   children,
+  historyKey,
 }: SideDrawerProps) {
   const drawerId = useId();
   const registeredRef = useRef(false);
@@ -36,6 +40,18 @@ export function SideDrawer({
   const getDrawerStack = () => {
     const value = window.history.state?.sermoDrawerStack;
     return Array.isArray(value) ? (value as string[]) : [];
+  };
+
+  const getDrawerPath = () => {
+    const value = window.history.state?.sermoDrawerPath;
+    return Array.isArray(value) ? (value as string[]) : [];
+  };
+
+  const urlForDrawerPath = (path: string[]) => {
+    const url = new URL(window.location.href);
+    if (path.length) url.searchParams.set("_drawer", path.join("/"));
+    else url.searchParams.delete("_drawer");
+    return `${url.pathname}${url.search}${url.hash}`;
   };
 
   const requestClose = useCallback(() => {
@@ -50,14 +66,32 @@ export function SideDrawer({
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (open && !registeredRef.current) {
-      const stack = getDrawerStack();
-      window.history.pushState({ ...window.history.state, sermoDrawerStack: [...stack, drawerId] }, "");
+      const storedStack = getDrawerStack();
+      const activeStack = storedStack.filter((item) => activeDrawerIds.has(item));
+      const storedPath = getDrawerPath();
+      const activePath = storedPath.slice(0, activeStack.length);
+      if (activeStack.length !== storedStack.length) {
+        window.history.replaceState(
+          { ...window.history.state, sermoDrawerStack: activeStack, sermoDrawerPath: activePath },
+          "",
+          urlForDrawerPath(activePath)
+        );
+      }
+      const nextStack = [...activeStack, drawerId];
+      const nextPath = [...activePath, historyKey?.trim() || title];
+      window.history.pushState(
+        { ...window.history.state, sermoDrawerStack: nextStack, sermoDrawerPath: nextPath },
+        "",
+        urlForDrawerPath(nextPath)
+      );
+      activeDrawerIds.add(drawerId);
       registeredRef.current = true;
       return;
     }
     if (!open && registeredRef.current) {
       const stack = getDrawerStack();
       if (stack[stack.length - 1] === drawerId) {
+        activeDrawerIds.delete(drawerId);
         registeredRef.current = false;
         window.history.back();
         return;
@@ -68,20 +102,23 @@ export function SideDrawer({
           () => {
             const nextStack = getDrawerStack();
             if (nextStack[nextStack.length - 1] === drawerId) window.history.back();
+            activeDrawerIds.delete(drawerId);
             registeredRef.current = false;
           },
           { once: true }
         );
         return;
       }
+      activeDrawerIds.delete(drawerId);
       registeredRef.current = false;
     }
-  }, [drawerId, open]);
+  }, [drawerId, historyKey, open, title]);
 
   useEffect(() => {
     if (!open) return;
     const onPopState = () => {
       if (!getDrawerStack().includes(drawerId)) {
+        activeDrawerIds.delete(drawerId);
         registeredRef.current = false;
         onCloseRef.current();
       }

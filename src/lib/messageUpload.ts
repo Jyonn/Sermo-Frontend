@@ -4,6 +4,7 @@ import type { MessageMediaKind } from "../types";
 const IMAGE_MAX_SIZE = 10 * 1024 * 1024;
 const VIDEO_MAX_SIZE = 500 * 1024 * 1024;
 const AUDIO_MAX_SIZE = 20 * 1024 * 1024;
+const FILE_MAX_SIZE = 100 * 1024 * 1024;
 
 export class MessageUploadError extends Error {
   constructor(message: string) {
@@ -15,7 +16,8 @@ export class MessageUploadError extends Error {
 function maxSizeForKind(kind: MessageMediaKind) {
   if (kind === "image") return IMAGE_MAX_SIZE;
   if (kind === "video") return VIDEO_MAX_SIZE;
-  return AUDIO_MAX_SIZE;
+  if (kind === "audio") return AUDIO_MAX_SIZE;
+  return FILE_MAX_SIZE;
 }
 
 function prettySize(limit: number) {
@@ -34,7 +36,8 @@ export function resolveMediaKind(file: File): MessageMediaKind {
 export function validateMessageMediaFile(file: File, kind: MessageMediaKind) {
   const maxSize = maxSizeForKind(kind);
   if (file.size > maxSize) {
-    throw new MessageUploadError(`${kind === "image" ? "图片" : kind === "video" ? "视频" : "语音"}不能超过 ${prettySize(maxSize)}。`);
+    const label = kind === "image" ? "图片" : kind === "video" ? "视频" : kind === "audio" ? "语音" : "文件";
+    throw new MessageUploadError(`${label}不能超过 ${prettySize(maxSize)}。`);
   }
 }
 

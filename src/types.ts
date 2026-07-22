@@ -1,7 +1,7 @@
 export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
-export type MessageMediaKind = "image" | "video" | "audio";
+export type MessageMediaKind = "image" | "video" | "audio" | "file";
 export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "system";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
@@ -178,6 +178,8 @@ export interface ChatMessagePayloadDTO {
   thumbnail_uri?: string;
   mime_type?: string;
   duration_seconds?: number;
+  file_name?: string;
+  file_size?: number;
   link_preview?: LinkPreviewDTO | null;
 }
 
