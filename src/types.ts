@@ -207,6 +207,7 @@ export interface ImageMetadataDTO {
   latitude?: number | null;
   longitude?: number | null;
   address?: string;
+  geocoding_status?: number;
 }
 
 export interface FriendshipRequestDTO {

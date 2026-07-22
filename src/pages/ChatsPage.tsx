@@ -1216,8 +1216,8 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
     ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
     : "";
   const rows = [
-    ["位置", metadata.address || coordinate],
-    ["坐标", metadata.address ? coordinate : ""],
+    ["位置", metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate)],
+    ["坐标", metadata.address || metadata.geocoding_status === 0 ? coordinate : ""],
     ["设备", device],
     ["镜头", metadata.lens_model],
     ["拍摄时间", metadata.taken_at ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN") : ""],
@@ -1439,7 +1439,8 @@ export default function ChatsPage() {
     if (!imagePreview) return;
     const messageId = imagePreview.messageIds[imagePreview.index];
     const metadata = imagePreview.metadata[imagePreview.index];
-    if (!messageId || metadata?.status === 1 || metadata?.status === 2) return;
+    if (!messageId || metadata?.status === 2) return;
+    if (metadata?.status === 1 && metadata.geocoding_status !== 0) return;
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
       void api.getImageMetadata(messageId, controller.signal)
