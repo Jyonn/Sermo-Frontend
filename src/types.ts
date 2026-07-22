@@ -239,7 +239,16 @@ export interface ChatMessageDTO {
   type: number;
   content: string;
   payload?: ChatMessagePayloadDTO | null;
+  reply_to?: QuotedMessageDTO | null;
   created_at: number;
+}
+
+export interface QuotedMessageDTO {
+  message_id: number;
+  user: TinyUserDTO;
+  type: number;
+  content: string;
+  is_deleted: boolean;
 }
 
 export interface ChatSyncItemDTO {
@@ -293,6 +302,7 @@ export interface ChatMessage {
   createdAt: number;
   text: string;
   payload?: ChatMessagePayloadDTO | null;
+  replyTo?: QuotedMessageDTO | null;
   status: "sent" | "pending" | "failed";
 }
 

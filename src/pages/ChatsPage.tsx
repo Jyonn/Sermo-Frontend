@@ -31,7 +31,7 @@ import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../l
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, UserDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -468,6 +468,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     createdAt: message.created_at,
     text: message.content,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
+    replyTo: message.reply_to ?? null,
     status: "sent",
   };
 }
@@ -539,7 +540,7 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   return sortMessages([...bucket.values()]);
 }
 
-function createPendingMessage(text: string, name: string): ChatMessage {
+function createPendingMessage(text: string, name: string, replyTo?: QuotedMessageDTO | null): ChatMessage {
   const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
   const createdAt = Math.floor(Date.now() / 1000);
   const linkUrl = extractFirstMessageUrl(text);
@@ -554,7 +555,25 @@ function createPendingMessage(text: string, name: string): ChatMessage {
     createdAt,
     text,
     payload: { kind: "text", text, link_preview: linkUrl ? { url: linkUrl, status: "pending" } : null },
+    replyTo,
     status: "pending",
+  };
+}
+
+function quoteFromMessage(message: ChatMessage): QuotedMessageDTO | null {
+  if (typeof message.id !== "number") return null;
+  return {
+    message_id: message.id,
+    user: {
+      user_id: 0,
+      name: message.name,
+      avatar_type: message.avatarUri ? "custom" : "preset",
+      avatar_uri: message.avatarUri ?? "",
+      official: false,
+    },
+    type: message.type,
+    content: previewFromMessage(message),
+    is_deleted: false,
   };
 }
 
@@ -746,6 +765,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
             return (
               <button
                 key={message.clientId}
+                data-message-id={typeof message.id === "number" ? message.id : undefined}
                 aria-label={`查看第 ${index + 1} 张图片`}
                 className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}`}
                 onClick={(event) => {
@@ -988,6 +1008,13 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
             imageUrl: message.payload.link_preview.image_url,
           }
         : null,
+      replyTo: message.replyTo
+        ? {
+            messageId: message.replyTo.message_id,
+            content: message.replyTo.content,
+            deleted: message.replyTo.is_deleted,
+          }
+        : null,
     })),
     entering,
   });
@@ -1061,6 +1088,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
         ) : null}
         <div
           ref={bubbleRef}
+          data-message-id={typeof message.id === "number" ? message.id : undefined}
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
@@ -1070,6 +1098,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             isFirst ? "group-start" : "",
             isLast ? "group-end" : "",
             canOpenActions ? "message-bubble-actionable" : "",
+            message.replyTo ? "has-reply" : "",
           ]
             .filter(Boolean)
             .join(" ")}
@@ -1093,6 +1122,20 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
         >
+          {message.replyTo ? (
+            <button
+              className="message-reply-preview"
+              disabled={message.replyTo.is_deleted}
+              onClick={(event) => {
+                event.stopPropagation();
+                window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId: message.replyTo?.message_id } }));
+              }}
+              type="button"
+            >
+              <strong>{message.replyTo.is_deleted ? "原消息" : message.replyTo.user.name}</strong>
+              <span>{message.replyTo.content}</span>
+            </button>
+          ) : null}
           {renderMessageContent(message, onOpenImage, groupClassName)}
         </div>
       </div>
@@ -1104,7 +1147,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
   const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
-    if (message.kind !== "image" || !message.payload?.uri) {
+    if (message.kind !== "image" || !message.payload?.uri || message.replyTo) {
       rows.push({ kind: "message", message, startIndex: index });
       index += 1;
       continue;
@@ -1114,7 +1157,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
     let cursor = index;
     while (cursor < group.messages.length) {
       const candidate = group.messages[cursor];
-      if (candidate.kind !== "image" || !candidate.payload?.uri) break;
+      if (candidate.kind !== "image" || !candidate.payload?.uri || candidate.replyTo) break;
       imageMessages.push(candidate);
       cursor += 1;
     }
@@ -1375,6 +1418,7 @@ export default function ChatsPage() {
   const groupSquareEnabled = useGroupSquareEnabled();
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
+  const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | null>(null);
@@ -1431,6 +1475,7 @@ export default function ChatsPage() {
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const cancelledSendIdsRef = useRef(new Set<string>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const replyingToRef = useRef<QuotedMessageDTO | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1586,6 +1631,25 @@ export default function ChatsPage() {
     setMessageMenu(null);
   };
 
+  const setReplyTarget = (reply: QuotedMessageDTO | null) => {
+    replyingToRef.current = reply;
+    setReplyingTo(reply);
+  };
+
+  const consumeReplyTarget = () => {
+    const reply = replyingToRef.current;
+    setReplyTarget(null);
+    return reply;
+  };
+
+  const startReply = (message: ChatMessage) => {
+    const reply = quoteFromMessage(message);
+    if (!reply) return;
+    setReplyTarget(reply);
+    setMessageMenu(null);
+    window.setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
   const openMessageMenu = (message: ChatMessage, element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
@@ -1654,6 +1718,40 @@ export default function ChatsPage() {
     () => (displayedChat ? sortMessages(messages[displayedChat.id] ?? []) : []),
     [displayedChat, messages]
   );
+
+  useEffect(() => {
+    setReplyTarget(null);
+  }, [selectedChat?.id]);
+
+  useEffect(() => {
+    const revealElement = (messageId: number) => {
+      const element = messageScrollRef.current?.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`);
+      if (!element) return false;
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.classList.add("is-reply-target");
+      window.setTimeout(() => element.classList.remove("is-reply-target"), 1200);
+      return true;
+    };
+
+    const reveal = (event: Event) => {
+      const messageId = Number((event as CustomEvent<{ messageId?: number }>).detail?.messageId);
+      if (!selectedChat || !Number.isInteger(messageId) || revealElement(messageId)) return;
+
+      void api.getMessages({ chat_id: selectedChat.id, limit: 60, before: messageId + 1 })
+        .then((rows) => {
+          const loaded = rows.map((row) => mapChatMessage(row, currentUserId));
+          setMessages((current) => ({
+            ...current,
+            [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], loaded),
+          }));
+          window.requestAnimationFrame(() => window.requestAnimationFrame(() => revealElement(messageId)));
+        })
+        .catch(() => setPageError("暂时无法定位原消息"));
+    };
+
+    window.addEventListener("sermo:reveal-message", reveal);
+    return () => window.removeEventListener("sermo:reveal-message", reveal);
+  }, [currentUserId, selectedChat]);
 
   const redirectToChatListWithNotice = (message: string, blockedChatId?: number) => {
     setDetailsSheetOpen(false);
@@ -2345,7 +2443,8 @@ export default function ChatsPage() {
     const message = draft.trim();
     if (!message) return;
 
-    const optimisticMessage = createPendingMessage(message, currentUserName);
+    const reply = consumeReplyTarget();
+    const optimisticMessage = createPendingMessage(message, currentUserName, reply);
 
     try {
       setSendState("sending");
@@ -2380,7 +2479,7 @@ export default function ChatsPage() {
       }
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id);
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {
@@ -2440,7 +2539,7 @@ export default function ChatsPage() {
     updateSendTask(retryMessage.clientId, 0.12);
 
     try {
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
         ...current,
@@ -2491,6 +2590,7 @@ export default function ChatsPage() {
     extraPayload: Partial<ChatMessagePayloadDTO> = {}
   ) => {
     if (!selectedChat) return;
+    const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const objectUrl = URL.createObjectURL(file);
     const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -2512,6 +2612,7 @@ export default function ChatsPage() {
         file_name: extraPayload.file_name,
         file_size: extraPayload.file_size,
       },
+      replyTo: reply,
       status: "pending",
     };
 
@@ -2543,7 +2644,8 @@ export default function ChatsPage() {
           duration_seconds: extraPayload.duration_seconds,
           file_name: extraPayload.file_name,
           file_size: extraPayload.file_size,
-        })
+        }),
+        reply?.message_id
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
@@ -3350,6 +3452,17 @@ export default function ChatsPage() {
               </div>
 
               <form ref={composerRef} className={`composer ${voiceComposer.open ? "is-recording-mode" : ""}`} onSubmit={submit}>
+                {replyingTo && !voiceComposer.open ? (
+                  <div className="composer-reply-preview">
+                    <div>
+                      <strong>回复 {replyingTo.user.name}</strong>
+                      <span>{replyingTo.content}</span>
+                    </div>
+                    <button aria-label="取消引用" onClick={() => setReplyTarget(null)} type="button">
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                ) : null}
                 {!voiceComposer.open ? (
                   <div className="composer-row composer-row-text">
                     <div className="composer-leading-actions">
@@ -3944,6 +4057,9 @@ export default function ChatsPage() {
               <div
                 className="message-context-actions"
               >
+                <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
+                  引用
+                </button>
                 {messageMenu.message.kind === "text" ? (
                   <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
                     复制
