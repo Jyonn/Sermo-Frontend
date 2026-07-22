@@ -1,7 +1,7 @@
 import { api } from "./api";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 
-const fallbackIcon = "/icons/sermo-192.png";
+const fallbackIcon = "/icons/sermo-192.png?v=3";
 let manifestObjectUrl: string | null = null;
 
 function updateIconLink(selector: string, attributes: Record<string, string>) {
@@ -40,8 +40,8 @@ export async function setupSpacePwaIdentity() {
       launch_handler: { client_mode: "navigate-existing" },
       icons: [
         officialIcon,
-        { src: "/icons/sermo-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-        { src: "/icons/sermo-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+        { src: "/icons/sermo-192.png?v=3", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+        { src: "/icons/sermo-512.png?v=3", sizes: "512x512", type: "image/png", purpose: "any maskable" },
       ],
       shortcuts: [
         { name: "聊天", short_name: "聊天", url: "/app/chats", icons: [{ src: icon }] },

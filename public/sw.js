@@ -1,5 +1,5 @@
-const CACHE_NAME = "sermo-shell-v2";
-const SHELL = ["/", "/manifest.webmanifest", "/icons/sermo-192.png", "/icons/sermo-512.png"];
+const CACHE_NAME = "sermo-shell-v3";
+const SHELL = ["/", "/manifest.webmanifest", "/icons/sermo-192.png?v=3", "/icons/sermo-512.png?v=3"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -51,8 +51,8 @@ self.addEventListener("push", (event) => {
   const url = payload.chat_id ? `/app/chats/${payload.chat_id}` : "/app/chats";
   event.waitUntil(self.registration.showNotification(payload.title || "Sermo 言浪", {
     body: payload.body || "你收到了一条新消息",
-    icon: payload.icon || "/icons/sermo-192.png",
-    badge: "/icons/sermo-192.png",
+    icon: payload.icon || "/icons/sermo-192.png?v=3",
+    badge: "/icons/sermo-192.png?v=3",
     tag: payload.chat_id ? `chat-${payload.chat_id}` : undefined,
     data: { url },
   }));
