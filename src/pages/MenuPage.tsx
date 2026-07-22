@@ -22,7 +22,9 @@ import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPre
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
+import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
@@ -178,6 +180,7 @@ export default function MenuPage() {
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
   const [webPushState, setWebPushState] = useState<WebPushState>("checking");
   const [webPushSaving, setWebPushSaving] = useState(false);
+  const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -232,6 +235,7 @@ export default function MenuPage() {
   );
   const barkBound = channelVerified(me, "bark");
   const shouldShowBarkGuideBanner = isAppleEnvironment && !barkBound;
+  const standalonePwa = isStandalonePwa();
   const webReminderSummary = [
     webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
     webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
@@ -1076,6 +1080,15 @@ export default function MenuPage() {
 
         <section className="list-section">
           <div className="simple-list">
+            {!standalonePwa ? (
+              <button className="simple-row menu-link-row" onClick={() => setPwaInstallSheetOpen(true)} type="button">
+                <div className="row-main">
+                  <strong>安装 {space?.name ?? "当前空间"} 到桌面</strong>
+                  <div className="row-subtle">快捷打开并接收通知</div>
+                </div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            ) : null}
             <button className="simple-row menu-link-row" onClick={openChannelsEntry} type="button">
               <div className="row-main">
                 <strong>通知渠道</strong>
@@ -1121,6 +1134,12 @@ export default function MenuPage() {
         </section>
 
       </section>
+
+      <PwaInstallSheet
+        onClose={() => setPwaInstallSheetOpen(false)}
+        open={pwaInstallSheetOpen}
+        spaceName={space?.name ?? "当前空间"}
+      />
 
       <SideDrawer description="昵称、头像与欢迎语" open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title="基础信息">
         <div className="detail-list">

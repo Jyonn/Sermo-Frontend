@@ -6,6 +6,180 @@
   src: url("./src/assets/fonts/MaterialSymbolsOutlined-subset.woff2") format("woff2");
 }
 
+.pwa-recommendation {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 78;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: min(520px, calc(100vw - 28px));
+  padding: 13px 14px;
+  color: var(--text-primary);
+  background: rgba(255, 253, 248, 0.97);
+  border: 1px solid rgba(215, 220, 231, 0.92);
+  border-radius: 18px;
+  box-shadow: 0 18px 52px rgba(34, 45, 51, 0.18);
+  transform: translateX(-50%);
+  animation: pwa-recommendation-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(18px);
+}
+
+.pwa-recommendation-dismiss {
+  position: absolute;
+  top: -9px;
+  right: -7px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line-soft);
+  border-radius: 50%;
+  box-shadow: 0 5px 16px rgba(34, 45, 51, 0.12);
+}
+
+.pwa-recommendation-dismiss .material-symbols-outlined {
+  font-size: 17px;
+}
+
+.pwa-recommendation-icon,
+.pwa-install-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #062c22;
+  background: #d9f8eb;
+  border-radius: 13px;
+}
+
+.pwa-symbol {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.pwa-recommendation-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.pwa-recommendation-copy strong {
+  overflow: hidden;
+  font-size: 0.94rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pwa-recommendation-copy > span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.pwa-recommendation-copy .pwa-recommendation-error {
+  color: var(--danger);
+}
+
+.pwa-recommendation-action {
+  min-height: 40px;
+  padding: 0 16px;
+  color: #062c22;
+  font-weight: 700;
+  background: var(--brand-primary);
+  border-radius: 12px;
+}
+
+.pwa-install-guide {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 4px 0 8px;
+}
+
+.pwa-install-mark {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+}
+
+.pwa-install-note,
+.pwa-install-browser-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.pwa-install-browser-hint {
+  max-width: 320px;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.pwa-install-button {
+  width: 100%;
+  min-height: 54px;
+}
+
+.pwa-install-steps {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.pwa-install-steps li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.pwa-install-steps li > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: #062c22;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  background: #d9f8eb;
+  border-radius: 10px;
+}
+
+.pwa-install-steps strong,
+.pwa-install-steps p {
+  display: block;
+  margin: 0;
+}
+
+.pwa-install-steps p {
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+@keyframes pwa-recommendation-in {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 767px) {
+  .pwa-recommendation {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
 :root {
   --font-heading: "Space Grotesk", "Noto Sans SC", sans-serif;
   --font-body: "Noto Sans SC", "PingFang SC", sans-serif;
