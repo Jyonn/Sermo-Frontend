@@ -71,7 +71,8 @@ function sameCustomMessages(
   return (
     left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
     left.hiddenGroupMessageText === right.hiddenGroupMessageText &&
-    left.friendOnlineMessageText === right.friendOnlineMessageText
+    left.friendOnlineMessageText === right.friendOnlineMessageText &&
+    left.openChatOnTap === right.openChatOnTap
   );
 }
 
@@ -481,6 +482,7 @@ export default function MenuPage() {
             hiddenDirectMessageText: prefCustomSnapshot.hiddenDirectMessageText,
             hiddenGroupMessageText: prefCustomSnapshot.hiddenGroupMessageText,
             friendOnlineMessageText: prefCustomSnapshot.friendOnlineMessageText,
+            openChatOnTap: prefCustomSnapshot.openChatOnTap,
           }
         : current
     );
@@ -1316,20 +1318,6 @@ export default function MenuPage() {
             </div>
             {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
               <>
-                {prefDrawerChannel === "bark" ? (
-                  <div className="menu-pref-row">
-                    <div className="row-main">
-                      <strong>点击打开聊天</strong>
-                      <div className="row-subtle">点通知进入会话</div>
-                    </div>
-                    <button
-                      aria-label="toggle-bark-open-chat"
-                      className={`switch ${activePrefDraft.openChatOnTap ? "active" : ""}`}
-                      onClick={() => updatePrefDraft({ openChatOnTap: !activePrefDraft.openChatOnTap })}
-                      type="button"
-                    />
-                  </div>
-                ) : null}
                 <div className="menu-pref-row">
                   <div className="row-main">
                     <strong>隐藏消息内容</strong>
@@ -1342,15 +1330,13 @@ export default function MenuPage() {
                     type="button"
                   />
                 </div>
-                {activePrefDraft.hideMessageContent ? (
-                  <button className="menu-pref-row menu-pref-row-button" onClick={openPrefCustomDrawer} type="button">
-                    <div className="row-main">
-                      <strong>自定义消息提示</strong>
-                      <div className="row-subtle">私聊和群聊文案</div>
-                    </div>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                ) : null}
+                <button className="menu-pref-row menu-pref-row-button" onClick={openPrefCustomDrawer} type="button">
+                  <div className="row-main">
+                    <strong>自定义消息提示</strong>
+                    <div className="row-subtle">文案与点击跳转</div>
+                  </div>
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </button>
               </>
             ) : null}
           </div>
@@ -1371,6 +1357,20 @@ export default function MenuPage() {
             <div className="menu-pref-list">
               <div className="menu-pref-form-card">
                 <div className="simple-form notification-custom-message-fields">
+                  {prefDrawerChannel === "bark" ? (
+                    <div className="menu-pref-row notification-custom-toggle-row">
+                      <div className="row-main">
+                        <strong>点击打开聊天</strong>
+                        <div className="row-subtle">通知携带聊天链接</div>
+                      </div>
+                      <button
+                        aria-label="toggle-bark-open-chat"
+                        className={`switch ${activePrefDraft.openChatOnTap ? "active" : ""}`}
+                        onClick={() => updatePrefDraft({ openChatOnTap: !activePrefDraft.openChatOnTap })}
+                        type="button"
+                      />
+                    </div>
+                  ) : null}
                   <div>
                     <label className="field-label">私聊消息提示</label>
                     <input

@@ -3462,7 +3462,7 @@ export default function ChatsPage() {
                 {visibleDetailMembers.map((member) => (
                   <button
                     key={`sheet-member-${member.userId}`}
-                    className={`chat-detail-member-item ${member.isOwner ? "is-owner" : ""}`}
+                    className={`chat-detail-member-item ${member.isOwner ? "is-owner" : ""} ${member.isSelf ? "is-self" : ""}`}
                     onClick={() => {
                       if (!member.isSelf) setProfileDrawerUserId(member.userId);
                     }}
@@ -3474,18 +3474,15 @@ export default function ChatsPage() {
                     <span className="chat-detail-member-name">
                       <span className="chat-detail-member-label">{member.name}</span>
                       {member.isOwner ? <span className="chat-detail-owner-badge">群主</span> : null}
-                      {member.isSelf && !member.isOwner ? <span className="chat-detail-owner-badge is-neutral">你</span> : null}
                     </span>
                   </button>
                 ))}
-                {selectedChat.type === "group" ? (
-                  <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberAdder} type="button">
-                    <span className="chat-detail-member-avatar chat-detail-member-avatar-add">
-                      <span className="material-symbols-outlined">add</span>
-                    </span>
-                    <span className="chat-detail-member-name">添加</span>
-                  </button>
-                ) : null}
+                <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberAdder} type="button">
+                  <span className="chat-detail-member-avatar chat-detail-member-avatar-add">
+                    <span className="material-symbols-outlined">add</span>
+                  </span>
+                  <span className="chat-detail-member-name">添加</span>
+                </button>
               </div>
               {hasMoreDetailMembers ? (
                 <button className="ghost-button chat-detail-more-button" onClick={() => setDetailMemberLimit((current) => current + CHAT_DETAIL_MEMBER_PAGE_SIZE)} type="button">
@@ -3619,7 +3616,7 @@ export default function ChatsPage() {
               取消
             </button>
             <div className="sheet-toolbar-title">
-              <strong>{selectedChat?.type === "group" ? "添加群成员" : "添加聊天成员"}</strong>
+              <strong>{selectedChat?.type === "group" ? "添加群成员" : "新建群聊"}</strong>
             </div>
             <button
               className="button sheet-toolbar-button"
@@ -3627,7 +3624,7 @@ export default function ChatsPage() {
               onClick={() => void submitChatMemberPicker()}
               type="button"
             >
-              {groupManageState === "saving" ? "处理中..." : selectedChat?.type === "group" ? "添加" : "完成"}
+              {groupManageState === "saving" ? "处理中..." : selectedChat?.type === "group" ? "添加" : "创建"}
             </button>
           </div>
         }

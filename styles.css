@@ -4056,6 +4056,15 @@ img {
   box-shadow: 0 0 0 2px rgba(0, 208, 132, 0.24);
 }
 
+.chat-detail-member-item.is-self .chat-detail-member-avatar {
+  box-shadow: 0 0 0 2px rgba(0, 208, 132, 0.58), 0 8px 18px rgba(0, 166, 124, 0.12);
+}
+
+.chat-detail-member-item.is-self .chat-detail-member-label {
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+
 .chat-detail-member-avatar {
   width: 54px;
   height: 54px;
