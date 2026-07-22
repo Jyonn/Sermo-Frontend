@@ -34,6 +34,15 @@ export function AppBottomNav() {
   );
   const [totalUnread, setTotalUnread] = useState(0);
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(() => localStorage.getItem("sermo:desktop-nav-collapsed") === "1");
+
+  useEffect(() => {
+    document.documentElement.dataset.desktopNav = desktopCollapsed ? "collapsed" : "expanded";
+    localStorage.setItem("sermo:desktop-nav-collapsed", desktopCollapsed ? "1" : "0");
+    return () => {
+      delete document.documentElement.dataset.desktopNav;
+    };
+  }, [desktopCollapsed]);
 
   useEffect(() => {
     if (!cacheScope) {
@@ -112,17 +121,35 @@ export function AppBottomNav() {
   const visibleRoutes = groupSquareEnabled ? mobileRoutes : mobileRoutes.filter((route) => route.key !== "square");
 
   return (
-    <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}`}>
-      <Link aria-label="Sermo 聊天" className="desktop-nav-brand" to="/app/chats">
-        <span
-          aria-hidden="true"
-          className="desktop-nav-logo"
-          style={{ WebkitMaskImage: `url(${logoUrl})`, maskImage: `url(${logoUrl})` }}
-        />
-      </Link>
+    <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
+      <div className="desktop-nav-head">
+        <Link aria-label="Sermo 聊天" className="desktop-nav-brand" to="/app/chats">
+          <span
+            aria-hidden="true"
+            className="desktop-nav-logo"
+            style={{ WebkitMaskImage: `url(${logoUrl})`, maskImage: `url(${logoUrl})` }}
+          />
+          <span aria-hidden="true" className="desktop-nav-monogram">S</span>
+        </Link>
+        <button
+          aria-label={desktopCollapsed ? "展开导航" : "收起导航"}
+          className="desktop-nav-toggle"
+          onClick={() => setDesktopCollapsed((current) => !current)}
+          title={desktopCollapsed ? "展开导航" : "收起导航"}
+          type="button"
+        >
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+      </div>
       <div className="app-nav-routes">
         {visibleRoutes.map((route) => (
-          <Link key={route.key} className={`nav-button ${current === route.key ? "active" : ""}`} to={route.href}>
+          <Link
+            key={route.key}
+            aria-label={route.label}
+            className={`nav-button ${current === route.key ? "active" : ""}`}
+            title={desktopCollapsed ? route.label : undefined}
+            to={route.href}
+          >
             <span className="nav-button-icon-wrap">
               <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
               {route.key === "chats" && totalUnread > 0 ? (

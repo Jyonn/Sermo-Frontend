@@ -3258,9 +3258,41 @@ export default function ChatsPage() {
 
         <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>
           {displayedChat ? (
-            <div
-              className={`chat-detail-scene ${isClosingChatView ? "is-closing" : ""}`}
-              onAnimationEnd={(event) => {
+            <>
+              <header className="desktop-conversation-header">
+                <div className="chat-conversation-topbar">
+                  <div className="avatar-wrap">
+                    <UserAvatar
+                      className={`avatar ${displayedChat.online ? "status-online" : ""}`}
+                      groupMembers={
+                        displayedChat.type === "group"
+                          ? displayedChat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri }))
+                          : undefined
+                      }
+                      name={displayedChat.title}
+                      uri={displayedChat.avatarUri}
+                    />
+                  </div>
+                  <div className="chat-topbar-meta">
+                    <strong className="chat-topbar-name">
+                      <span className="chat-topbar-title-text">{displayedChat.title}</span>
+                      {displayedChat.type === "group" ? <span className="chat-topbar-title-count">({displayedChat.members})</span> : null}
+                    </strong>
+                    <div className="chat-topbar-status">{displayedChat.type === "group" ? `${displayedChat.members} 人` : displayedChat.subtitle}</div>
+                  </div>
+                </div>
+                <button aria-label="聊天详情" className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
+                  <span className="material-symbols-outlined">more_vert</span>
+                </button>
+                {sendProgress !== null ? (
+                  <div className="topbar-progress" aria-label={`发送进度 ${Math.round(sendProgress * 100)}%`} role="progressbar">
+                    <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />
+                  </div>
+                ) : null}
+              </header>
+              <div
+                className={`chat-detail-scene ${isClosingChatView ? "is-closing" : ""}`}
+                onAnimationEnd={(event) => {
                 if (!isClosingChatView) return;
                 if (!(event.target instanceof HTMLElement) || !event.target.classList.contains("chat-detail-scene")) return;
                 if (DEBUG_CHAT_SEND) {
@@ -3271,11 +3303,11 @@ export default function ChatsPage() {
                 navigate("/app/chats");
                 setIsClosingChatView(false);
                 setClosingChatSnapshot(null);
-              }}
-              onContextMenu={(event) => {
-                event.preventDefault();
-              }}
-            >
+                }}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                }}
+              >
               <div
                 ref={messageScrollRef}
                 className="message-scroll"
@@ -3410,7 +3442,8 @@ export default function ChatsPage() {
                   </div>
                 ) : null}
               </form>
-            </div>
+              </div>
+            </>
           ) : (
             <FeedbackState
               title="选择会话"
