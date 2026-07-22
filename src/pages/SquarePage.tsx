@@ -408,7 +408,7 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome title="广场" hideTopbar>
+    <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack square-plaza-page">
         <div className="chat-list-screen-header minimal-page-header square-plaza-toolbar">
           <div className="page-toolbar">

@@ -7735,6 +7735,28 @@ img {
 }
 
 @media (min-width: 901px) {
+  .shell:has(.chat-mobile-layout),
+  .desktop-tab-shell {
+    height: 100dvh;
+    padding-block: 16px;
+    overflow: hidden;
+  }
+
+  .chat-mobile-layout {
+    height: calc(100dvh - 32px);
+  }
+
+  .desktop-tab-shell > .page-stack {
+    width: min(100%, 960px);
+    height: calc(100dvh - 32px);
+    padding: 22px 24px 28px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid rgba(215, 220, 231, 0.72);
+    border-radius: 20px;
+    background: rgba(255, 253, 248, 0.74);
+  }
+
   .chat-mobile-layout .message-pane.chat-main-pane {
     display: flex;
     flex-direction: column;

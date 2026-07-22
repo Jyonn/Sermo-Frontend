@@ -220,7 +220,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <AppChrome title="通讯" hideTopbar>
+    <AppChrome title="通讯" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
         <div className="chat-list-screen-header minimal-page-header">
           <div className="page-toolbar">

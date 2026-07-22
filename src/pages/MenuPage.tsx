@@ -987,7 +987,7 @@ export default function MenuPage() {
   };
 
   return (
-    <AppChrome title="菜单" hideTopbar>
+    <AppChrome title="菜单" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
         <div className="minimal-page-header">
           <div className="page-toolbar">
