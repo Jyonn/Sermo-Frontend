@@ -679,6 +679,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   isLast,
   messages,
   onOpenImage,
+  onOpenActions,
 }: {
   from: "self" | "other";
   isEntering: boolean;
@@ -686,7 +687,11 @@ const MessageImageGallery = memo(function MessageImageGallery({
   isLast: boolean;
   messages: ChatMessage[];
   onOpenImage: (uris: string[], index: number) => void;
+  onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
 }) {
+  const longPressTimerRef = useRef<number | null>(null);
+  const pointerStartRef = useRef<{ index: number; x: number; y: number } | null>(null);
+  const suppressClickRef = useRef<number | null>(null);
   const visibleMessages = messages.slice(0, 18);
   const columns = messages.length === 2 || messages.length === 4 ? 2 : 3;
   const fullUris = messages.map((message) => {
@@ -696,6 +701,28 @@ const MessageImageGallery = memo(function MessageImageGallery({
   const groupClassName = [from, isFirst ? "group-start" : "", isLast ? "group-end" : ""]
     .filter(Boolean)
     .join(" ");
+
+  const clearLongPress = () => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    pointerStartRef.current = null;
+  };
+
+  useEffect(() => clearLongPress, []);
+
+  const startLongPress = (event: ReactPointerEvent<HTMLButtonElement>, message: ChatMessage, index: number) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    clearLongPress();
+    const element = event.currentTarget;
+    pointerStartRef.current = { index, x: event.clientX, y: event.clientY };
+    longPressTimerRef.current = window.setTimeout(() => {
+      suppressClickRef.current = index;
+      clearLongPress();
+      onOpenActions(message, element);
+    }, 380);
+  };
 
   return (
     <div className={`message-bubble-wrap ${from} is-sent ${isEntering ? "is-entering" : ""}`}>
@@ -714,7 +741,28 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 key={message.clientId}
                 aria-label={`查看第 ${index + 1} 张图片`}
                 className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}`}
-                onClick={() => onOpenImage(fullUris, index)}
+                onClick={(event) => {
+                  if (suppressClickRef.current === index) {
+                    suppressClickRef.current = null;
+                    event.preventDefault();
+                    return;
+                  }
+                  onOpenImage(fullUris, index);
+                }}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  clearLongPress();
+                  onOpenActions(message, event.currentTarget);
+                }}
+                onPointerCancel={clearLongPress}
+                onPointerDown={(event) => startLongPress(event, message, index)}
+                onPointerLeave={clearLongPress}
+                onPointerMove={(event) => {
+                  const start = pointerStartRef.current;
+                  if (!start || start.index !== index) return;
+                  if (Math.abs(event.clientX - start.x) > 8 || Math.abs(event.clientY - start.y) > 8) clearLongPress();
+                }}
+                onPointerUp={clearLongPress}
                 type="button"
               >
                 <img alt="" loading="lazy" src={displayUri} />
@@ -949,7 +997,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   onRetry,
 }: MessageBubbleRowProps) {
   const showRetry = from === "self" && message.status === "failed" && message.kind === "text";
-  const canOpenActions = message.status === "sent";
+  const canOpenActions = message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -1079,6 +1127,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
               isLast={row.startIndex + row.messages.length === group.messages.length}
               messages={row.messages}
               onOpenImage={onOpenImage}
+              onOpenActions={onOpenActions}
             />
           ) : (
             <MessageBubbleRow
@@ -1115,7 +1164,7 @@ interface MessageBubbleRowProps {
   isLast: boolean;
   message: ChatMessage;
   onOpenImage: (uris: string[], index: number) => void;
-  onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
+  onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
   onRetry: (message: ChatMessage) => void;
 }
 
@@ -1123,7 +1172,7 @@ interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
   onOpenImage: (uris: string[], index: number) => void;
-  onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
+  onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
   onRetry: (message: ChatMessage) => void;
   showAuthor: boolean;
 }
@@ -1329,6 +1378,7 @@ export default function ChatsPage() {
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
+  const cancelledSendIdsRef = useRef(new Set<string>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -1445,7 +1495,7 @@ export default function ChatsPage() {
     setMessageMenu(null);
   };
 
-  const openMessageMenu = (message: ChatMessage, element: HTMLDivElement) => {
+  const openMessageMenu = (message: ChatMessage, element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
     setMessageMenu({
@@ -2387,6 +2437,7 @@ export default function ChatsPage() {
       const upload = await uploadMessageMedia(file, kind, (progress) => {
         updateSendTask(pendingMessage.clientId, 0.05 + progress * 0.84);
       });
+      if (cancelledSendIdsRef.current.has(pendingMessage.clientId)) return false;
       updateSendTask(pendingMessage.clientId, 0.92);
       const created = await api.sendMessage(
         selectedChat.id,
@@ -2422,7 +2473,15 @@ export default function ChatsPage() {
       setPageError(uploadError.message);
       return false;
     } finally {
-      finishSendTask(pendingMessage.clientId);
+      if (cancelledSendIdsRef.current.delete(pendingMessage.clientId)) {
+        setSendTasks((current) => {
+          const next = { ...current };
+          delete next[pendingMessage.clientId];
+          return next;
+        });
+      } else {
+        finishSendTask(pendingMessage.clientId);
+      }
     }
   };
 
@@ -2608,6 +2667,41 @@ export default function ChatsPage() {
     }
   };
 
+  const downloadMessageImage = async () => {
+    if (!messageMenu || messageMenu.message.kind !== "image") return;
+    const message = messageMenu.message;
+    const rawUri = message.payload?.uri;
+    if (!rawUri) return;
+    const uri = resolveStableResourceUri(rawUri) ?? rawUri;
+    const fallbackName = `sermo-image-${String(message.id).replace(/[^a-zA-Z0-9_-]/g, "") || Date.now()}`;
+
+    try {
+      const response = await fetch(uri);
+      if (!response.ok) throw new Error("download_failed");
+      const blob = await response.blob();
+      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg").replace(/[^a-zA-Z0-9]/g, "") || "jpg";
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = `${fallbackName}.${extension}`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch {
+      const anchor = document.createElement("a");
+      anchor.href = uri;
+      anchor.download = `${fallbackName}.jpg`;
+      anchor.rel = "noreferrer";
+      anchor.target = "_blank";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    } finally {
+      setMessageMenu(null);
+    }
+  };
+
   const openStatusModal = (loadingLabel: string, successLabel: string, errorLabel: string) => {
     setStatusModal({
       open: true,
@@ -2619,7 +2713,24 @@ export default function ChatsPage() {
   };
 
   const deleteMessage = async () => {
-    if (!selectedChat || !messageMenu || typeof messageMenu.message.id !== "number") return;
+    if (!selectedChat || !messageMenu) return;
+
+    if (typeof messageMenu.message.id !== "number") {
+      const removedMessage = messageMenu.message;
+      if (removedMessage.status === "pending") cancelledSendIdsRef.current.add(removedMessage.clientId);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: (current[selectedChat.id] ?? []).filter((message) => message.clientId !== removedMessage.clientId),
+      }));
+      setSendTasks((current) => {
+        const next = { ...current };
+        delete next[removedMessage.clientId];
+        return next;
+      });
+      if (removedMessage.payload?.uri?.startsWith("blob:")) URL.revokeObjectURL(removedMessage.payload.uri);
+      setMessageMenu(null);
+      return;
+    }
 
     try {
       openStatusModal("正在删除消息", "消息已删除", "删除消息失败");
@@ -3647,20 +3758,19 @@ export default function ChatsPage() {
               </>
             ) : (
               <div
-                className={`message-context-actions ${
-                  messageMenu.message.kind === "text" && messageMenu.message.from === "self" && typeof messageMenu.message.id === "number"
-                    ? ""
-                    : messageMenu.message.kind === "text"
-                      ? ""
-                      : "is-single"
-                }`}
+                className="message-context-actions"
               >
                 {messageMenu.message.kind === "text" ? (
                   <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
                     复制
                   </button>
                 ) : null}
-                {messageMenu.message.from === "self" && typeof messageMenu.message.id === "number" ? (
+                {messageMenu.message.kind === "image" ? (
+                  <button className="message-context-button" onClick={() => void downloadMessageImage()} type="button">
+                    下载
+                  </button>
+                ) : null}
+                {messageMenu.message.from === "self" && (typeof messageMenu.message.id === "number" || messageMenu.message.kind === "image") ? (
                   <button
                     className="message-context-button danger"
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: true } : current))}
