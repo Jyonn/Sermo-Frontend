@@ -3246,9 +3246,6 @@ export default function ChatsPage() {
       topbarAction={
         displayedChat ? (
           <div className="button-row message-actions">
-            <button className="icon-button desktop-only-action" type="button">
-              <span className="material-symbols-outlined">{displayedChat.type === "group" ? "group_add" : "videocam"}</span>
-            </button>
             <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
               <span className="material-symbols-outlined">more_vert</span>
             </button>
@@ -3416,8 +3413,8 @@ export default function ChatsPage() {
             </div>
           ) : (
             <FeedbackState
-              title="先选一个会话"
-              description="左侧按最后聊天时间排列。点进一段对话后，这里才会展开具体消息。"
+              title="选择会话"
+              description="从左侧打开聊天。"
               action={
                 groupSquareEnabled ? (
                   <Link className="button" to="/app/square">
@@ -3529,7 +3526,7 @@ export default function ChatsPage() {
               </div>
             </>
           ) : (
-            <FeedbackState title="选择一个会话" description="左侧选中一段聊天后，这里会显示资料和常用动作。" />
+            <FeedbackState title="会话信息" description="选择会话后显示。" />
           )}
         </aside>
       </section>

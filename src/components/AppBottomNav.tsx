@@ -5,6 +5,8 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
+import { UserAvatar } from "./UserAvatar";
+import logoUrl from "../assets/logo.svg";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", label: "聊天" },
@@ -103,28 +105,41 @@ export function AppBottomNav() {
     };
   }, [session, effectivePathname]);
 
-  if (!effectivePathname.startsWith("/app/")) return null;
-  if (matchPath("/app/chats/:chatId", effectivePathname)) return null;
+  if (!session || !effectivePathname.startsWith("/app/")) return null;
+  const isChatDetail = Boolean(matchPath("/app/chats/:chatId", effectivePathname));
 
   const current = activeKey(effectivePathname);
   const visibleRoutes = groupSquareEnabled ? mobileRoutes : mobileRoutes.filter((route) => route.key !== "square");
 
   return (
-    <nav className="mobile-nav app-mobile-nav">
-      {visibleRoutes.map((route) => (
-        <Link key={route.key} className={`nav-button ${current === route.key ? "active" : ""}`} to={route.href}>
-          <span className="nav-button-icon-wrap">
-            <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
-            {route.key === "chats" && totalUnread > 0 ? (
-              <span className="nav-unread-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
-            ) : null}
-            {route.key === "notifications" && incomingRequestCount > 0 ? (
-              <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>
-            ) : null}
-          </span>
-          <span className="nav-button-label">{route.label}</span>
-        </Link>
-      ))}
+    <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}`}>
+      <Link aria-label="Sermo 聊天" className="desktop-nav-brand" to="/app/chats">
+        <span
+          aria-hidden="true"
+          className="desktop-nav-logo"
+          style={{ WebkitMaskImage: `url(${logoUrl})`, maskImage: `url(${logoUrl})` }}
+        />
+      </Link>
+      <div className="app-nav-routes">
+        {visibleRoutes.map((route) => (
+          <Link key={route.key} className={`nav-button ${current === route.key ? "active" : ""}`} to={route.href}>
+            <span className="nav-button-icon-wrap">
+              <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
+              {route.key === "chats" && totalUnread > 0 ? (
+                <span className="nav-unread-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
+              ) : null}
+              {route.key === "notifications" && incomingRequestCount > 0 ? (
+                <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>
+              ) : null}
+            </span>
+            <span className="nav-button-label">{route.label}</span>
+          </Link>
+        ))}
+      </div>
+      <Link aria-label="打开菜单" className="desktop-nav-user" to="/app/menu">
+        <UserAvatar className="mini-avatar" name={session.user.name} uri={session.user.avatar_uri} />
+        <span>{session.user.name}</span>
+      </Link>
     </nav>
   );
 }
