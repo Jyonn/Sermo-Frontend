@@ -1002,6 +1002,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const suppressClickRef = useRef(false);
 
   const clearLongPress = () => {
     if (longPressTimerRef.current !== null) {
@@ -1013,7 +1014,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 
   useEffect(() => clearLongPress, []);
 
-  const openActions = () => {
+  const openActions = (suppressClick = false) => {
+    suppressClickRef.current = suppressClick;
     clearLongPress();
     if (!canOpenActions || !bubbleRef.current) return;
     onOpenActions(message, bubbleRef.current);
@@ -1024,7 +1026,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     if (event.pointerType === "mouse" && event.button !== 0) return;
     clearLongPress();
     pointerStartRef.current = { x: event.clientX, y: event.clientY };
-    longPressTimerRef.current = window.setTimeout(openActions, 380);
+    longPressTimerRef.current = window.setTimeout(() => openActions(true), 380);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -1073,6 +1075,12 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
                 }
               : undefined
           }
+          onClickCapture={(event) => {
+            if (!suppressClickRef.current) return;
+            suppressClickRef.current = false;
+            event.preventDefault();
+            event.stopPropagation();
+          }}
           onPointerCancel={clearLongPress}
           onPointerDown={canOpenActions ? handlePointerDown : undefined}
           onPointerLeave={clearLongPress}
@@ -2689,23 +2697,25 @@ export default function ChatsPage() {
     }
   };
 
-  const downloadMessageImage = async () => {
-    if (!messageMenu || messageMenu.message.kind !== "image") return;
+  const downloadMessageAttachment = async () => {
+    if (!messageMenu || !["image", "audio", "file"].includes(messageMenu.message.kind)) return;
     const message = messageMenu.message;
     const rawUri = message.payload?.uri;
     if (!rawUri) return;
     const uri = resolveStableResourceUri(rawUri) ?? rawUri;
-    const fallbackName = `sermo-image-${String(message.id).replace(/[^a-zA-Z0-9_-]/g, "") || Date.now()}`;
+    const safeId = String(message.id).replace(/[^a-zA-Z0-9_-]/g, "") || String(Date.now());
+    const suppliedName = message.payload?.file_name?.trim();
+    const fallbackName = message.kind === "audio" ? `sermo-audio-${safeId}` : message.kind === "file" ? `sermo-file-${safeId}` : `sermo-image-${safeId}`;
 
     try {
       const response = await fetch(uri);
       if (!response.ok) throw new Error("download_failed");
       const blob = await response.blob();
-      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg").replace(/[^a-zA-Z0-9]/g, "") || "jpg";
+      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg").replace("mpeg", "mp3").replace(/[^a-zA-Z0-9]/g, "") || (message.kind === "audio" ? "webm" : "bin");
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = objectUrl;
-      anchor.download = `${fallbackName}.${extension}`;
+      anchor.download = suppliedName || `${fallbackName}.${extension}`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
@@ -2713,7 +2723,7 @@ export default function ChatsPage() {
     } catch {
       const anchor = document.createElement("a");
       anchor.href = uri;
-      anchor.download = `${fallbackName}.jpg`;
+      anchor.download = suppliedName || fallbackName;
       anchor.rel = "noreferrer";
       anchor.target = "_blank";
       document.body.appendChild(anchor);
@@ -3791,8 +3801,8 @@ export default function ChatsPage() {
                     复制
                   </button>
                 ) : null}
-                {messageMenu.message.kind === "image" ? (
-                  <button className="message-context-button" onClick={() => void downloadMessageImage()} type="button">
+                {["image", "audio", "file"].includes(messageMenu.message.kind) ? (
+                  <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
                     下载
                   </button>
                 ) : null}

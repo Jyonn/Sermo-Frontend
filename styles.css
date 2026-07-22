@@ -2462,6 +2462,7 @@ img {
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 8px 22px rgba(17, 19, 24, 0.08);
   text-decoration: none;
+  margin-inline: -2px;
 }
 
 .message-file-card.self {
