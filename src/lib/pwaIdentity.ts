@@ -13,6 +13,16 @@ function updateIconLink(selector: string, attributes: Record<string, string>) {
   Object.entries(attributes).forEach(([key, value]) => link?.setAttribute(key, value));
 }
 
+function updateMetaContent(name: string, content: string) {
+  let meta = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.name = name;
+    document.head.appendChild(meta);
+  }
+  meta.content = content;
+}
+
 export async function setupSpacePwaIdentity() {
   const slug = getDetectedSpaceSlug();
   if (!slug) return;
@@ -23,9 +33,10 @@ export async function setupSpacePwaIdentity() {
     const officialIcon = icon.toLowerCase().includes(".svg")
       ? { src: icon, sizes: "any", type: "image/svg+xml", purpose: "any" }
       : { src: icon, sizes: "400x400", purpose: "any" };
+    const appName = `${space.name} - 言浪`;
     const manifest = {
-      name: `${space.name} · Sermo 言浪`,
-      short_name: space.name,
+      name: appName,
+      short_name: appName,
       description: `${space.name}：一方空间，尽兴开聊。`,
       id: "/",
       start_url: "/app/chats",
@@ -54,6 +65,7 @@ export async function setupSpacePwaIdentity() {
     manifestObjectUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
     updateIconLink('link[rel="manifest"]', { rel: "manifest", href: manifestObjectUrl });
     updateIconLink('link[rel="apple-touch-icon"]', { rel: "apple-touch-icon", href: icon });
+    updateMetaContent("apple-mobile-web-app-title", appName);
   } catch {
     // Keep the static Sermo Yanlang identity when the space cannot be resolved.
   }

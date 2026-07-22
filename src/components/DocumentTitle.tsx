@@ -88,7 +88,8 @@ export function DocumentTitle() {
 
   useEffect(() => {
     if (!ready || typeof document === "undefined") return;
-    document.title = titleReminderEnabled && unreadCount > 0 ? `${spaceName} - ${unreadCount}条新消息` : spaceName;
+    const brandedTitle = spaceName === FALLBACK_TITLE ? FALLBACK_TITLE : `${spaceName} - 言浪`;
+    document.title = titleReminderEnabled && unreadCount > 0 ? `${brandedTitle} - ${unreadCount}条新消息` : brandedTitle;
   }, [ready, spaceName, titleReminderEnabled, unreadCount]);
 
   useEffect(() => {

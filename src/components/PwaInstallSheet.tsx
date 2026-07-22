@@ -17,6 +17,7 @@ interface PwaInstallSheetProps {
 export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetProps) {
   const ios = isIosDevice();
   const desktopChrome = isDesktopChrome();
+  const appName = `${spaceName} - 言浪`;
   const [promptAvailable, setPromptAvailable] = useState(canPromptPwaInstall());
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetPro
       description="像 App 一样打开，消息触手可及。"
       onClose={onClose}
       open={open}
-      title={`安装 ${spaceName}`}
+      title={`安装 ${appName}`}
     >
       <div className="pwa-install-guide">
         {ios ? (

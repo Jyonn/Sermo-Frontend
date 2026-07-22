@@ -22,6 +22,7 @@ export function PwaRecommendation() {
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const appName = `${spaceName} - 言浪`;
 
   useEffect(() => {
     if (!session || !location.pathname.startsWith("/app")) return;
@@ -94,7 +95,7 @@ export function PwaRecommendation() {
           <span className="pwa-symbol">{kind === "install" ? "+" : "!"}</span>
         </div>
         <div className="pwa-recommendation-copy">
-          <strong>{kind === "install" ? `安装 ${spaceName} 到桌面` : "打开系统通知"}</strong>
+          <strong>{kind === "install" ? `安装 ${appName} 到桌面` : "打开系统通知"}</strong>
           <span>{kind === "install" ? "像 App 一样快捷打开" : "离开网页也能收到新消息"}</span>
           {error ? <span className="pwa-recommendation-error">{error}</span> : null}
         </div>
