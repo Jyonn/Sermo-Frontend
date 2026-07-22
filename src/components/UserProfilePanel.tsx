@@ -4,6 +4,7 @@ import { AsyncErrorDialog } from "./AsyncErrorDialog";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { RequestStatusModal } from "./RequestStatusModal";
+import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { formatRelativeTime } from "../lib/presentation";
@@ -26,6 +27,9 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<UserDTO | null>(null);
   const [groupChats, setGroupChats] = useState<ChatDTO[]>([]);
+  const [directChat, setDirectChat] = useState<ChatDTO | null>(null);
+  const [allGroupsOpen, setAllGroupsOpen] = useState(false);
+  const [onlineReminderSaving, setOnlineReminderSaving] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const [respondedAt, setRespondedAt] = useState<number | null>(null);
   const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
@@ -55,6 +59,7 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
         setIsFriend(status.is_friend);
         setRespondedAt(status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null);
         setGroupChats(chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId)));
+        setDirectChat(chats.find((chat) => !chat.group && chat.members.some((member) => member.user_id === userId)) ?? null);
         setRequestState("idle");
         setViewState("ready");
       })
@@ -81,6 +86,39 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
       setError(apiError instanceof ApiError ? apiError.message : "发起私聊失败");
     }
   };
+
+  const createGroupChat = async () => {
+    if (!user) return;
+    try {
+      const chat = await api.createGroupChat([user.user_id]);
+      if (onOpenChat) onOpenChat(chat.chat_id);
+      else navigate(`/app/chats/${chat.chat_id}`);
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : "新建群聊失败");
+    }
+  };
+
+  const toggleOnlineReminder = async () => {
+    if (!directChat || onlineReminderSaving) return;
+    const nextEnabled = !Boolean(directChat.online_reminder_enabled);
+    setOnlineReminderSaving(true);
+    try {
+      const preference = await api.updateChatPreference(directChat.chat_id, { online_reminder_enabled: nextEnabled ? 1 : 0 });
+      setDirectChat((current) => current ? { ...current, online_reminder_enabled: preference.online_reminder_enabled } : current);
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : "上线提醒设置失败");
+    } finally {
+      setOnlineReminderSaving(false);
+    }
+  };
+
+  const renderGroupRow = (chat: ChatDTO) => (
+    <button key={chat.chat_id} className="user-profile-group-row" onClick={() => (onOpenChat ? onOpenChat(chat.chat_id) : navigate(`/app/chats/${chat.chat_id}`))} type="button">
+      <UserAvatar className="mini-avatar" groupMembers={chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri }))} name={chat.title ?? "群聊"} />
+      <span><strong>{chat.title ?? "未命名群聊"}</strong><small>{chat.members.length} 人</small></span>
+      <span className="material-symbols-outlined">chevron_right</span>
+    </button>
+  );
 
   const sendRequest = async () => {
     if (!user || requestState !== "idle") return;
@@ -141,25 +179,33 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
       </div>
 
       <section className="user-profile-section">
-        <div className="section-label">共同群聊 · {groupChats.length}</div>
-        {groupChats.length ? (
-          <div className="user-profile-groups">
-            {groupChats.map((chat) => (
-              <button key={chat.chat_id} className="user-profile-group-row" onClick={() => (onOpenChat ? onOpenChat(chat.chat_id) : navigate(`/app/chats/${chat.chat_id}`))} type="button">
-                <UserAvatar className="mini-avatar" groupMembers={chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri }))} name={chat.title ?? "群聊"} />
-                <span><strong>{chat.title ?? "未命名群聊"}</strong><small>{chat.members.length} 人</small></span>
-                <span className="material-symbols-outlined">chevron_right</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="user-profile-empty">暂时没有共同群聊</div>
-        )}
+        <div className="user-profile-section-head">
+          <div className="section-label">共同群聊 · {groupChats.length}</div>
+          {groupChats.length > 3 ? <button className="user-profile-section-more" onClick={() => setAllGroupsOpen(true)} type="button">查看全部</button> : null}
+        </div>
+        <div className="user-profile-groups">
+          <button className="user-profile-group-row user-profile-create-group" onClick={() => void createGroupChat()} type="button">
+            <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">add</span>
+            <span><strong>新建群聊</strong><small>邀请共同好友加入</small></span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+          {groupChats.slice(0, 3).map(renderGroupRow)}
+        </div>
       </section>
 
       {isFriend ? (
-        <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">删除好友</button>
+        <section className="user-profile-relationship-actions">
+          <div className="user-profile-online-reminder">
+            <span><strong>好友上线提醒</strong><small>{directChat ? "对方上线时通知你" : "发起聊天后可设置"}</small></span>
+            <button aria-label="切换好友上线提醒" className={`switch ${directChat?.online_reminder_enabled ? "active" : ""}`} disabled={!directChat || onlineReminderSaving} onClick={() => void toggleOnlineReminder()} type="button" />
+          </div>
+          <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">删除好友</button>
+        </section>
       ) : null}
+
+      <SideDrawer description={`${groupChats.length} 个共同群聊`} open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title="共同群聊">
+        <div className="user-profile-groups user-profile-all-groups">{groupChats.map(renderGroupRow)}</div>
+      </SideDrawer>
 
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
       <ConfirmDialog danger open={removeConfirmOpen} title="删除好友？" description="已有聊天记录仍会保留。" confirmLabel="删除" onClose={() => setRemoveConfirmOpen(false)} onConfirm={() => void removeFriend()} />

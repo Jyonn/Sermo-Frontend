@@ -30,13 +30,14 @@ const channelRows: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
 };
 
 const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
 const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
+const defaultFriendOnlineMessagePlaceholder = "你的好友上线了。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
 const defaultPasswordReminderDescription = "设置密码后，才能绑定通知渠道或管理通知提醒。";
 
@@ -56,6 +57,7 @@ function samePref(
     left.hideMessageContent === right.hideMessageContent &&
     left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
     left.hiddenGroupMessageText === right.hiddenGroupMessageText &&
+    left.friendOnlineMessageText === right.friendOnlineMessageText &&
     left.openChatOnTap === right.openChatOnTap
   );
 }
@@ -68,7 +70,8 @@ function sameCustomMessages(
   if (!left || !right) return false;
   return (
     left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
-    left.hiddenGroupMessageText === right.hiddenGroupMessageText
+    left.hiddenGroupMessageText === right.hiddenGroupMessageText &&
+    left.friendOnlineMessageText === right.friendOnlineMessageText
   );
 }
 
@@ -82,6 +85,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       hideMessageContent: row.hide_message_content,
       hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
       hiddenGroupMessageText: row.hidden_group_message_text ?? "",
+      friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
     };
   });
@@ -476,6 +480,7 @@ export default function MenuPage() {
             ...current,
             hiddenDirectMessageText: prefCustomSnapshot.hiddenDirectMessageText,
             hiddenGroupMessageText: prefCustomSnapshot.hiddenGroupMessageText,
+            friendOnlineMessageText: prefCustomSnapshot.friendOnlineMessageText,
           }
         : current
     );
@@ -496,6 +501,7 @@ export default function MenuPage() {
         hide_message_content: prefDraft.hideMessageContent ? 1 : 0,
         hidden_direct_message_text: prefDraft.hiddenDirectMessageText.trim(),
         hidden_group_message_text: prefDraft.hiddenGroupMessageText.trim(),
+        friend_online_message_text: prefDraft.friendOnlineMessageText.trim(),
         open_chat_on_tap: prefDraft.openChatOnTap ? 1 : 0,
       });
       const nextPref = {
@@ -504,6 +510,7 @@ export default function MenuPage() {
         hideMessageContent: updated.hide_message_content,
         hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
         hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+        friendOnlineMessageText: updated.friend_online_message_text ?? "",
         openChatOnTap: updated.open_chat_on_tap ?? true,
       };
       setPrefs((current) => ({
@@ -995,7 +1002,7 @@ export default function MenuPage() {
               channelVerified(me, channel) ? (
                 <button key={`${channel}-settings`} className="simple-row menu-link-row" onClick={() => openPrefDrawer(channel)} type="button">
                   <div className="row-main">
-                    <strong>{label} 设置</strong>
+                    <strong>{label}设置</strong>
                     <div className="row-subtle">
                       {prefs[channel].enabled
                         ? `${prefs[channel].threshold} 分钟后提醒${prefs[channel].hideMessageContent ? " · 不显示消息内容" : ""}`
@@ -1130,7 +1137,7 @@ export default function MenuPage() {
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
               <div className="row-main menu-key-cell">
-                <strong>网页提醒</strong>
+                <strong>网页</strong>
               </div>
               <div className="menu-detail-value menu-detail-text">
                 <span className="menu-channel-value">{webReminderSummary}</span>
@@ -1143,9 +1150,7 @@ export default function MenuPage() {
                 <button
                   key={channel}
                   className="simple-row menu-link-row"
-                  onClick={() => {
-                    if (!verified) openAuthSheet(channel);
-                  }}
+                  onClick={() => verified ? openPrefDrawer(channel) : openAuthSheet(channel)}
                   type="button"
                 >
                   <div className="row-main menu-key-cell">
@@ -1162,7 +1167,7 @@ export default function MenuPage() {
                       <span className="menu-inline-action">去认证</span>
                     )}
                   </div>
-                  {!verified ? <span className="material-symbols-outlined">chevron_right</span> : null}
+                  <span className="material-symbols-outlined">chevron_right</span>
                 </button>
               );
             })}
@@ -1264,14 +1269,14 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)} 通知偏好` : ""}
+        description={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}通知偏好` : ""}
         open={Boolean(prefDrawerChannel)}
         actionBusy={prefSaving}
         actionDisabled={!prefDraftDirty}
         actionLabel="完成"
         onAction={() => void savePrefDraft()}
         onClose={requestClosePrefDrawer}
-        title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)} 设置` : "通知设置"}
+        title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}设置` : "通知设置"}
       >
         {prefDrawerChannel && activePrefDraft ? (
           <div className="menu-pref-list">
@@ -1392,6 +1397,16 @@ export default function MenuPage() {
                           hiddenGroupMessageText: event.target.value,
                         })
                       }
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label">好友上线提示</label>
+                    <input
+                      className="input"
+                      maxLength={255}
+                      placeholder={defaultFriendOnlineMessagePlaceholder}
+                      value={activePrefDraft.friendOnlineMessageText}
+                      onChange={(event) => updatePrefDraft({ friendOnlineMessageText: event.target.value })}
                     />
                   </div>
                 </div>

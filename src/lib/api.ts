@@ -546,6 +546,7 @@ export const api = {
     hide_message_content?: 0 | 1;
     hidden_direct_message_text?: string;
     hidden_group_message_text?: string;
+    friend_online_message_text?: string;
     open_chat_on_tap?: 0 | 1;
   }) {
     return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {

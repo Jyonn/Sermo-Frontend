@@ -124,6 +124,7 @@ export interface NotificationPreferenceDTO {
   hide_message_content: boolean;
   hidden_direct_message_text: string;
   hidden_group_message_text: string;
+  friend_online_message_text: string;
   open_chat_on_tap: boolean;
 }
 
@@ -317,6 +318,7 @@ export interface NotificationPreference {
   hideMessageContent: boolean;
   hiddenDirectMessageText: string;
   hiddenGroupMessageText: string;
+  friendOnlineMessageText: string;
   openChatOnTap: boolean;
 }
 

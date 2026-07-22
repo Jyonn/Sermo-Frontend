@@ -4940,6 +4940,23 @@ img {
   gap: 10px;
 }
 
+.user-profile-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.user-profile-section-more {
+  padding: 0;
+  border: 0;
+  color: var(--brand-primary);
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .user-profile-groups {
   border-block: 1px solid rgba(215, 220, 231, 0.76);
 }
@@ -4961,6 +4978,18 @@ img {
 
 .user-profile-group-row:last-child {
   border-bottom: 0;
+}
+
+.user-profile-create-group-icon {
+  display: grid;
+  place-items: center;
+  color: var(--brand-primary);
+  background: rgba(0, 208, 132, 0.1);
+  font-size: 21px;
+}
+
+.user-profile-all-groups {
+  margin-top: 4px;
 }
 
 .user-profile-group-row > span:nth-child(2) {
@@ -4987,14 +5016,44 @@ img {
 }
 
 .user-profile-danger-action {
-  justify-self: start;
-  padding: 0;
-  border: 0;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 78, 96, 0.22);
+  border-radius: 16px;
   background: transparent;
   color: var(--danger);
   box-shadow: none;
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+.user-profile-relationship-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.user-profile-online-reminder {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(215, 220, 231, 0.76);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.user-profile-online-reminder > span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.user-profile-online-reminder small {
+  color: var(--text-muted);
+  font-size: 0.76rem;
 }
 
 .friend-profile-hero {

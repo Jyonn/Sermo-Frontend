@@ -19,9 +19,9 @@ const channels: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", openChatOnTap: true },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -34,6 +34,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       hideMessageContent: row.hide_message_content,
       hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
       hiddenGroupMessageText: row.hidden_group_message_text ?? "",
+      friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
     };
   });
@@ -255,6 +256,7 @@ export default function SettingsPage() {
           hideMessageContent: updated.hide_message_content,
           hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
           hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+          friendOnlineMessageText: updated.friend_online_message_text ?? "",
           openChatOnTap: updated.open_chat_on_tap ?? true,
         },
       }));
