@@ -624,7 +624,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
   uri,
 }: {
   groupClassName: string;
-  onOpenImage?: (uri: string) => void;
+  onOpenImage?: (uris: string[], index: number) => void;
   thumbnailUri?: string;
   uri: string;
 }) {
@@ -648,7 +648,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
   return (
     <button
       className={`message-media-frame image-button ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
-      onClick={() => onOpenImage?.(resolvedUri)}
+      onClick={() => onOpenImage?.([resolvedUri], 0)}
       type="button"
     >
       {resolvedThumbnailUri ? <img alt="" aria-hidden="true" className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
@@ -669,6 +669,67 @@ const MessageMediaImage = memo(function MessageMediaImage({
         }}
       />
     </button>
+  );
+});
+
+const MessageImageGallery = memo(function MessageImageGallery({
+  from,
+  isEntering,
+  isFirst,
+  isLast,
+  messages,
+  onOpenImage,
+}: {
+  from: "self" | "other";
+  isEntering: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  messages: ChatMessage[];
+  onOpenImage: (uris: string[], index: number) => void;
+}) {
+  const visibleMessages = messages.slice(0, 18);
+  const columns = messages.length === 2 || messages.length === 4 ? 2 : 3;
+  const fullUris = messages.map((message) => {
+    const uri = message.payload?.uri ?? "";
+    return resolveStableResourceUri(uri) ?? uri;
+  });
+  const groupClassName = [from, isFirst ? "group-start" : "", isLast ? "group-end" : ""]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div className={`message-bubble-wrap ${from} is-sent ${isEntering ? "is-entering" : ""}`}>
+      <div className={`message-bubble-shell ${from}`}>
+        <div
+          className={`message-image-gallery message-media-frame ${groupClassName}`}
+          style={{ "--message-gallery-columns": columns } as CSSProperties}
+        >
+          {visibleMessages.map((message, index) => {
+            const uri = fullUris[index];
+            const thumbnailUri = message.payload?.thumbnail_uri;
+            const displayUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri ?? uri;
+            const hasMore = index === 17 && messages.length > 18;
+            return (
+              <button
+                key={message.clientId}
+                aria-label={`查看第 ${index + 1} 张图片`}
+                className={`message-image-gallery-item ${hasMore ? "has-more" : ""}`}
+                onClick={() => onOpenImage(fullUris, index)}
+                type="button"
+              >
+                <img alt="" loading="lazy" src={displayUri} />
+                {hasMore ? (
+                  <span className="message-image-gallery-more">
+                    <span className="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                    <strong>+{messages.length - 18}</strong>
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 });
 
@@ -794,7 +855,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   );
 });
 
-function renderMessageContent(message: ChatMessage, onOpenImage: ((uri: string) => void) | undefined, groupClassName: string) {
+function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[], index: number) => void) | undefined, groupClassName: string) {
   if (message.kind === "image" && message.payload?.uri) {
     return <MessageMediaImage groupClassName={groupClassName} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
   }
@@ -855,8 +916,11 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
     dividerLabel: group.dividerLabel,
     messages: group.messages.map((message) => ({
       clientId: message.clientId,
+      kind: message.kind,
       status: message.status,
       text: message.text,
+      uri: message.payload?.uri,
+      thumbnailUri: message.payload?.thumbnail_uri,
       linkPreview: message.payload?.link_preview
         ? {
             status: message.payload.link_preview.status,
@@ -969,6 +1033,31 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 });
 
 const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenImage, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
+  const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
+  for (let index = 0; index < group.messages.length;) {
+    const message = group.messages[index];
+    if (message.kind !== "image" || !message.payload?.uri || message.status !== "sent") {
+      rows.push({ kind: "message", message, startIndex: index });
+      index += 1;
+      continue;
+    }
+
+    const imageMessages: ChatMessage[] = [];
+    let cursor = index;
+    while (cursor < group.messages.length) {
+      const candidate = group.messages[cursor];
+      if (candidate.kind !== "image" || !candidate.payload?.uri || candidate.status !== "sent") break;
+      imageMessages.push(candidate);
+      cursor += 1;
+    }
+    if (imageMessages.length === 1) {
+      rows.push({ kind: "message", message, startIndex: index });
+    } else {
+      rows.push({ kind: "gallery", messages: imageMessages, startIndex: index });
+    }
+    index = cursor;
+  }
+
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
@@ -976,14 +1065,24 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
         {group.from === "other" ? <UserAvatar className="avatar message-avatar" name={group.name} uri={group.avatarUri} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
-          {group.messages.map((message, index) => (
-            <MessageBubbleRow
-              key={message.clientId}
+          {rows.map((row) => row.kind === "gallery" ? (
+            <MessageImageGallery
+              key={`gallery:${row.messages[0].clientId}`}
               from={group.from}
-              isEntering={enteringMessageIds.includes(message.clientId)}
-              isFirst={index === 0}
-              isLast={index === group.messages.length - 1}
-              message={message}
+              isEntering={row.messages.some((message) => enteringMessageIds.includes(message.clientId))}
+              isFirst={row.startIndex === 0}
+              isLast={row.startIndex + row.messages.length === group.messages.length}
+              messages={row.messages}
+              onOpenImage={onOpenImage}
+            />
+          ) : (
+            <MessageBubbleRow
+              key={row.message.clientId}
+              from={group.from}
+              isEntering={enteringMessageIds.includes(row.message.clientId)}
+              isFirst={row.startIndex === 0}
+              isLast={row.startIndex === group.messages.length - 1}
+              message={row.message}
               onOpenImage={onOpenImage}
               onOpenActions={onOpenActions}
               onRetry={onRetry}
@@ -1010,7 +1109,7 @@ interface MessageBubbleRowProps {
   isFirst: boolean;
   isLast: boolean;
   message: ChatMessage;
-  onOpenImage: (uri: string) => void;
+  onOpenImage: (uris: string[], index: number) => void;
   onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
 }
@@ -1018,7 +1117,7 @@ interface MessageBubbleRowProps {
 interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
-  onOpenImage: (uri: string) => void;
+  onOpenImage: (uris: string[], index: number) => void;
   onOpenActions: (message: ChatMessage, element: HTMLDivElement) => void;
   onRetry: (message: ChatMessage) => void;
   showAuthor: boolean;
@@ -1030,6 +1129,11 @@ interface MessageMenuState {
   anchorY: number;
   placement: "top" | "bottom";
   confirmDelete: boolean;
+}
+
+interface ImagePreviewState {
+  index: number;
+  uris: string[];
 }
 
 type VoiceComposerPhase = "idle" | "recording" | "stopping" | "recorded" | "sending";
@@ -1216,7 +1320,9 @@ export default function ChatsPage() {
     blob: null,
     mimeType: "",
   });
-  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
+  const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
+  const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -1230,6 +1336,12 @@ export default function ChatsPage() {
   const cancelScrollAnimationRef = useRef<(() => void) | null>(null);
   const revealAnimatingRef = useRef(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+  useLayoutEffect(() => {
+    const track = imagePreviewTrackRef.current;
+    if (!imagePreview || !track) return;
+    track.scrollLeft = track.clientWidth * imagePreview.index;
+  }, [imagePreview?.uris, imagePreview?.index]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -2914,7 +3026,7 @@ export default function ChatsPage() {
                     enteringMessageIds={enteringMessageIds}
                     group={group}
                     key={group.key}
-                    onOpenImage={setImagePreviewUri}
+                    onOpenImage={(uris, index) => setImagePreview({ uris, index })}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
                     showAuthor={Boolean(selectedChat?.type === "group")}
@@ -3422,10 +3534,46 @@ export default function ChatsPage() {
         onChange={(event) => void handleMediaSelection(event, "file")}
         type="file"
       />
-      {imagePreviewUri ? (
-        <div className="dialog-backdrop message-image-preview-backdrop" onClick={() => setImagePreviewUri(null)} role="presentation">
+      {imagePreview ? (
+        <div
+          className="dialog-backdrop message-image-preview-backdrop"
+          onClick={() => {
+            if (imagePreviewGestureRef.current?.moved) {
+              imagePreviewGestureRef.current = null;
+              return;
+            }
+            setImagePreview(null);
+          }}
+          onPointerDown={(event) => {
+            imagePreviewGestureRef.current = { moved: false, x: event.clientX };
+          }}
+          onPointerMove={(event) => {
+            const gesture = imagePreviewGestureRef.current;
+            if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
+          }}
+          role="presentation"
+        >
           <section aria-modal="true" className="message-image-preview-modal" role="dialog">
-            <img alt="图片预览" className="message-image-preview" src={imagePreviewUri} />
+            <div
+              ref={imagePreviewTrackRef}
+              className="message-image-preview-track"
+              onScroll={(event) => {
+                const element = event.currentTarget;
+                const index = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
+                if (index !== imagePreview.index) {
+                  setImagePreview((current) => current ? { ...current, index } : current);
+                }
+              }}
+            >
+              {imagePreview.uris.map((uri, index) => (
+                <div className="message-image-preview-slide" key={`${uri}:${index}`}>
+                  <img alt={`图片预览 ${index + 1}`} className="message-image-preview" draggable={false} src={uri} />
+                </div>
+              ))}
+            </div>
+            {imagePreview.uris.length > 1 ? (
+              <div className="message-image-preview-count">{imagePreview.index + 1} / {imagePreview.uris.length}</div>
+            ) : null}
           </section>
         </div>
       ) : null}
