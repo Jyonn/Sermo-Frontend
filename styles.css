@@ -4737,6 +4737,18 @@ img {
   gap: 12px;
 }
 
+.page-toolbar-title-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.page-toolbar-title-status .header-sync-indicator {
+  width: 20px;
+  height: 20px;
+}
+
 .header-sync-indicator {
   display: grid;
   place-items: center;

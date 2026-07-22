@@ -224,8 +224,10 @@ export default function NotificationsPage() {
       <section className="page-stack">
         <div className="chat-list-screen-header minimal-page-header">
           <div className="page-toolbar">
-            <h2 className="panel-title">通讯</h2>
-            <HeaderSyncIndicator syncing={syncing} />
+            <div className="page-toolbar-title-status">
+              <h2 className="panel-title">通讯</h2>
+              <HeaderSyncIndicator syncing={syncing} />
+            </div>
           </div>
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search">

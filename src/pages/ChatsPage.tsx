@@ -3047,14 +3047,16 @@ export default function ChatsPage() {
     <>
       <div className="chat-list-screen-header minimal-page-header">
         <div className="page-toolbar">
-          <h2 className="panel-title">聊天</h2>
-          <span
-            aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
-            className={`chat-health-indicator is-${chatHealth}`}
-            title={chatHealth === "healthy" ? "连接正常" : chatHealth === "warning" ? "连接不稳定" : "连接中断"}
-          >
-            <span className="chat-health-dot" />
-          </span>
+          <div className="page-toolbar-title-status">
+            <h2 className="panel-title">聊天</h2>
+            <span
+              aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
+              className={`chat-health-indicator is-${chatHealth}`}
+              title={chatHealth === "healthy" ? "连接正常" : chatHealth === "warning" ? "连接不稳定" : "连接中断"}
+            >
+              <span className="chat-health-dot" />
+            </span>
+          </div>
         </div>
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         <label className="search-box">

@@ -941,8 +941,10 @@ export default function MenuPage() {
       <section className="page-stack">
         <div className="minimal-page-header">
           <div className="page-toolbar">
-            <h2 className="panel-title">菜单</h2>
-            <HeaderSyncIndicator syncing={syncing} />
+            <div className="page-toolbar-title-status">
+              <h2 className="panel-title">菜单</h2>
+              <HeaderSyncIndicator syncing={syncing} />
+            </div>
           </div>
         </div>
         <div className="menu-profile-card">
