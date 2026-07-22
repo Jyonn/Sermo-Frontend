@@ -2,7 +2,11 @@ const CACHE_NAME = "sermo-shell-v3";
 const SHELL = ["/", "/manifest.webmanifest", "/icons/sermo-192.png?v=3", "/icons/sermo-512.png?v=3"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)));
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {

@@ -96,6 +96,14 @@
   border-radius: 12px;
 }
 
+.pwa-update-prompt {
+  z-index: 80;
+}
+
+.pwa-update-prompt .pwa-recommendation-icon .material-symbols-outlined {
+  font-size: 24px;
+}
+
 .pwa-install-guide {
   display: grid;
   justify-items: center;

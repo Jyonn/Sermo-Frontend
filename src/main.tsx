@@ -6,6 +6,7 @@ import "../styles.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { setupSpacePwaIdentity } from "./lib/pwaIdentity";
+import { watchPwaUpdates } from "./lib/pwaUpdate";
 
 void setupSpacePwaIdentity();
 
@@ -24,7 +25,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then((registration) => {
+      watchPwaUpdates(registration);
       void registration.update();
     });
+  });
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
   });
 }

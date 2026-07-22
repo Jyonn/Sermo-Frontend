@@ -5,6 +5,7 @@ import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { PwaRecommendation } from "./components/PwaRecommendation";
+import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { RequireAdminAuth } from "./lib/adminAuth";
 import { RequireAuth, useAuth } from "./lib/auth";
 import AdminSpacePage from "./pages/AdminSpacePage";
@@ -205,6 +206,7 @@ export default function App() {
       {ready ? <GlobalMessageSync /> : null}
       {ready ? <AppBottomNav /> : null}
       {ready ? <PwaRecommendation /> : null}
+      <PwaUpdatePrompt />
     </>
   );
 }
