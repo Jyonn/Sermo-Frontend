@@ -20,6 +20,9 @@ export async function setupSpacePwaIdentity() {
   try {
     const space = await api.getSpaceBySlug(slug);
     const icon = space.official_user?.avatar_uri || fallbackIcon;
+    const officialIcon = icon.toLowerCase().includes(".svg")
+      ? { src: icon, sizes: "any", type: "image/svg+xml", purpose: "any" }
+      : { src: icon, sizes: "400x400", purpose: "any" };
     const manifest = {
       name: `${space.name} · Sermo`,
       short_name: space.name,
@@ -28,11 +31,22 @@ export async function setupSpacePwaIdentity() {
       start_url: "/app/chats",
       scope: "/",
       display: "standalone",
+      display_override: ["standalone", "minimal-ui"],
+      orientation: "any",
       background_color: "#f7f4ec",
       theme_color: "#f7f4ec",
+      categories: ["social", "communication"],
+      prefer_related_applications: false,
+      launch_handler: { client_mode: "navigate-existing" },
       icons: [
-        { src: icon, sizes: "192x192", purpose: "any" },
-        { src: icon, sizes: "512x512", purpose: "any" },
+        officialIcon,
+        { src: "/icons/sermo-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+        { src: "/icons/sermo-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+      ],
+      shortcuts: [
+        { name: "聊天", short_name: "聊天", url: "/app/chats", icons: [{ src: icon }] },
+        { name: "通讯", short_name: "通讯", url: "/app/notifications", icons: [{ src: icon }] },
+        { name: "菜单", short_name: "菜单", url: "/app/menu", icons: [{ src: icon }] },
       ],
     };
 

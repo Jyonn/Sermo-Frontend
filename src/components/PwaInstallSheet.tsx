@@ -1,5 +1,12 @@
+import { useEffect, useState } from "react";
 import { BottomSheet } from "./BottomSheet";
-import { isIosDevice, requestPwaInstall } from "../lib/pwaInstall";
+import {
+  canPromptPwaInstall,
+  isDesktopChrome,
+  isIosDevice,
+  PWA_INSTALL_STATE_EVENT,
+  requestPwaInstall,
+} from "../lib/pwaInstall";
 
 interface PwaInstallSheetProps {
   open: boolean;
@@ -9,6 +16,14 @@ interface PwaInstallSheetProps {
 
 export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetProps) {
   const ios = isIosDevice();
+  const desktopChrome = isDesktopChrome();
+  const [promptAvailable, setPromptAvailable] = useState(canPromptPwaInstall());
+
+  useEffect(() => {
+    const sync = () => setPromptAvailable(canPromptPwaInstall());
+    window.addEventListener(PWA_INSTALL_STATE_EVENT, sync);
+    return () => window.removeEventListener(PWA_INSTALL_STATE_EVENT, sync);
+  }, []);
 
   const install = async () => {
     const outcome = await requestPwaInstall();
@@ -38,7 +53,11 @@ export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetPro
             <button className="primary-button pwa-install-button" onClick={() => void install()} type="button">
               安装到桌面
             </button>
-            <p className="pwa-install-browser-hint">若未弹出确认，请使用浏览器菜单中的“安装应用”。</p>
+            <p className="pwa-install-browser-hint">
+              {desktopChrome && !promptAvailable
+                ? "若没有弹出确认，请点击地址栏右侧的安装图标。"
+                : "若未弹出确认，请使用浏览器菜单中的“安装应用”。"}
+            </p>
           </>
         )}
       </div>

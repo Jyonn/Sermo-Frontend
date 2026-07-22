@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import {
   isStandalonePwa,
   markPwaRecommendationShown,
+  PWA_INSTALL_STATE_EVENT,
   requestPwaInstall,
   wasPwaRecommendationShown,
 } from "../lib/pwaInstall";
@@ -47,6 +48,16 @@ export function PwaRecommendation() {
       window.clearTimeout(timer);
     };
   }, [location.pathname, session]);
+
+  useEffect(() => {
+    const handleInstalled = () => {
+      if (!isStandalonePwa()) return;
+      setKind(null);
+      setInstallGuideOpen(false);
+    };
+    window.addEventListener(PWA_INSTALL_STATE_EVENT, handleInstalled);
+    return () => window.removeEventListener(PWA_INSTALL_STATE_EVENT, handleInstalled);
+  }, []);
 
   const act = async () => {
     if (!kind || busy) return;
