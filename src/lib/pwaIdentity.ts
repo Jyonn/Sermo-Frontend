@@ -24,9 +24,9 @@ export async function setupSpacePwaIdentity() {
       ? { src: icon, sizes: "any", type: "image/svg+xml", purpose: "any" }
       : { src: icon, sizes: "400x400", purpose: "any" };
     const manifest = {
-      name: `${space.name} · Sermo`,
+      name: `${space.name} · Sermo 言浪`,
       short_name: space.name,
-      description: `来自 ${space.name} 的聊天空间`,
+      description: `${space.name}：一方空间，尽兴开聊。`,
       id: "/",
       start_url: "/app/chats",
       scope: "/",
@@ -55,6 +55,6 @@ export async function setupSpacePwaIdentity() {
     updateIconLink('link[rel="manifest"]', { rel: "manifest", href: manifestObjectUrl });
     updateIconLink('link[rel="apple-touch-icon"]', { rel: "apple-touch-icon", href: icon });
   } catch {
-    // Keep the static Sermo identity when the space cannot be resolved.
+    // Keep the static Sermo Yanlang identity when the space cannot be resolved.
   }
 }

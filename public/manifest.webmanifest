@@ -1,7 +1,7 @@
 {
-  "name": "Sermo",
-  "short_name": "Sermo",
-  "description": "面向空间的轻量聊天应用",
+  "name": "Sermo 言浪",
+  "short_name": "言浪",
+  "description": "一方空间，尽兴开聊。",
   "id": "/",
   "start_url": "/app/chats",
   "scope": "/",

@@ -164,11 +164,11 @@ export default function JoinSpacePage() {
               <div className="join-space-state-badge">还没有创建</div>
               <div className="join-space-state-copy">
                 <h2>这个空间还没有创建</h2>
-                <p>我们没有找到与这个子域名对应的空间。你可以先了解 Sermo，或者直接把它创建成一个新的专属入口。</p>
+                <p>我们没有找到与这个子域名对应的空间。你可以先了解 Sermo 言浪，或者直接把它创建成一个新的专属入口。</p>
               </div>
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
-                  了解 Sermo
+                  了解 Sermo 言浪
                 </a>
                 <a className="ghost-button" href={buildAdminEntryHref("create", slug)}>
                   创建这个空间
@@ -186,11 +186,11 @@ export default function JoinSpacePage() {
               <div className="join-space-state-badge">暂时不可用</div>
               <div className="join-space-state-copy">
                 <h2>暂时无法确认这个空间</h2>
-                <p>可能是网络波动，或者服务暂时不可用。你可以重新检查，或者先了解 Sermo，稍后再试。</p>
+                <p>可能是网络波动，或者服务暂时不可用。你可以重新检查，或者先了解 Sermo 言浪，稍后再试。</p>
               </div>
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
-                  了解 Sermo
+                  了解 Sermo 言浪
                 </a>
                 <button
                   className="ghost-button"

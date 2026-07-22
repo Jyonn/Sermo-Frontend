@@ -28,7 +28,7 @@ export default function LandingPage() {
 
   return (
     <AppChrome
-      title="Sermo"
+      title="Sermo 言浪"
       topbarAction={
         <>
           <a className="ghost-chip" href={buildAdminEntryHref("create")}>
@@ -43,8 +43,8 @@ export default function LandingPage() {
       <div className="landing-page">
         <section className="landing-hero">
           <div className="landing-copy">
-            <p className="landing-eyebrow">为社区而生的空间即时沟通</p>
-            <h1>让每个社区，都有自己的入口。</h1>
+            <p className="landing-eyebrow">Sermo 言浪</p>
+            <h1>一方空间，尽兴开聊。</h1>
             <p className="landing-description">成员通过专属子域名进入，关系、聊天和通知自然围绕同一个空间发生。</p>
             <div className="landing-actions">
               <a className="button" href={buildAdminEntryHref("create")}>

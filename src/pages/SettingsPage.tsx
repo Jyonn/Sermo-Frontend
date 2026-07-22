@@ -435,7 +435,7 @@ export default function SettingsPage() {
                   <div className="row-subtle">支持预设头像和自定义图片上传</div>
                 </div>
                 <div className="settings-avatar-inline">
-                  <UserAvatar className="mini-avatar" name={session?.user.name ?? "Sermo User"} uri={session?.user.avatar_uri} />
+                  <UserAvatar className="mini-avatar" name={session?.user.name ?? "言浪用户"} uri={session?.user.avatar_uri} />
                   <button className="ghost-button row-button" onClick={() => setAvatarDialogOpen(true)} type="button">
                     更换
                   </button>
@@ -780,7 +780,7 @@ export default function SettingsPage() {
       </BottomSheet>
       <AvatarPresetDialog
         currentAvatarUri={session?.user.avatar_uri}
-        displayName={session?.user.name ?? "Sermo User"}
+        displayName={session?.user.name ?? "言浪用户"}
         onClose={() => setAvatarDialogOpen(false)}
         onRequestCustomUpload={requestCustomAvatarUpload}
         onSave={savePresetAvatar}

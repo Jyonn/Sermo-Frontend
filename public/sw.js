@@ -49,7 +49,7 @@ self.addEventListener("push", (event) => {
     payload = { body: event.data ? event.data.text() : "你收到了一条新消息" };
   }
   const url = payload.chat_id ? `/app/chats/${payload.chat_id}` : "/app/chats";
-  event.waitUntil(self.registration.showNotification(payload.title || "Sermo", {
+  event.waitUntil(self.registration.showNotification(payload.title || "Sermo 言浪", {
     body: payload.body || "你收到了一条新消息",
     icon: payload.icon || "/icons/sermo-192.png",
     badge: "/icons/sermo-192.png",

@@ -123,7 +123,7 @@ export function AppBottomNav() {
   return (
     <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
-        <Link aria-label="Sermo 聊天" className="desktop-nav-brand" to="/app/chats">
+        <Link aria-label="Sermo 言浪" className="desktop-nav-brand" to="/app/chats">
           <span
             aria-hidden="true"
             className="desktop-nav-logo"

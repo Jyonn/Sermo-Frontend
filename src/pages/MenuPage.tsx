@@ -999,11 +999,11 @@ export default function MenuPage() {
         </div>
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
-            <UserAvatar className="avatar-large" name={session?.user.name ?? "Sermo"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+            <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
           </button>
           <div className="row-main menu-profile-copy">
             <div className="menu-profile-heading">
-              <strong>{session?.user.name ?? "Sermo User"}</strong>
+              <strong>{session?.user.name ?? "言浪用户"}</strong>
             </div>
             <div className="row-subtle">
               {space?.name ?? "当前空间"}
@@ -1149,7 +1149,7 @@ export default function MenuPage() {
                 <strong>头像</strong>
               </div>
               <div className="menu-detail-value">
-                <UserAvatar className="mini-avatar" name={session?.user.name ?? "Sermo"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                <UserAvatar className="mini-avatar" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1157,7 +1157,7 @@ export default function MenuPage() {
               <div className="row-main menu-key-cell">
                 <strong>昵称</strong>
               </div>
-              <div className="menu-detail-value menu-detail-text">{session?.user.name ?? "Sermo User"}</div>
+              <div className="menu-detail-value menu-detail-text">{session?.user.name ?? "言浪用户"}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="simple-row menu-link-row" onClick={() => openBasicEditDialog("welcome")} type="button">
@@ -1351,13 +1351,13 @@ export default function MenuPage() {
                 <div className="menu-share-qr-frame">
                   <img alt="好友邀请二维码" className="menu-share-qr-image" src={friendInviteQrUri} />
                   <div className="menu-share-qr-avatar">
-                    <UserAvatar className="avatar-large" name={session?.user.name ?? "Sermo"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                    <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
                   </div>
                 </div>
               </div>
 
               <div className="menu-share-meta">
-                <strong>{session?.user.name ?? "Sermo User"} 的好友邀请</strong>
+                <strong>{session?.user.name ?? "言浪用户"} 的好友邀请</strong>
                 <div className="row-subtle">仅限当前空间内使用，{friendInviteValidityText}</div>
               </div>
 
@@ -1549,7 +1549,7 @@ export default function MenuPage() {
           <div className="bark-guide-hero">
             <BarkGuideIcon />
             <div>
-              <strong>让 Sermo 直接推到你的 iPhone</strong>
+              <strong>让言浪直接推到你的 iPhone</strong>
               <span>复制 Bark 的专属链接后，回到这里完成一次验证码确认。</span>
             </div>
           </div>
@@ -1737,7 +1737,7 @@ export default function MenuPage() {
 
       <AvatarPresetDialog
         currentAvatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
-        displayName={session?.user.name ?? "Sermo User"}
+        displayName={session?.user.name ?? "言浪用户"}
         onClose={() => setAvatarDialogOpen(false)}
         onRequestCustomUpload={requestCustomAvatarUpload}
         onSave={savePresetAvatar}

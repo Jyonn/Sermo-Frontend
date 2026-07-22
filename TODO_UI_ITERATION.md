@@ -1,4 +1,4 @@
-# Sermo UI Iteration Todo
+# Sermo 言浪 UI Iteration Todo
 
 说明：
 - 本文档用于跟踪当前 UI / 文案 / 交互优化。
