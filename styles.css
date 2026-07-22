@@ -7759,6 +7759,14 @@ img {
 
   .chat-mobile-layout {
     height: calc(100dvh - 32px);
+    min-height: 0;
+    max-height: none;
+  }
+
+  .chat-mobile-layout > .mobile-chat-list-screen {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
   }
 
   .desktop-tab-shell > .page-stack {
