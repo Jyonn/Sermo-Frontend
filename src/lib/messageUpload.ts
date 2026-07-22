@@ -41,35 +41,47 @@ export function validateMessageMediaFile(file: File, kind: MessageMediaKind) {
   }
 }
 
-export async function uploadMessageMedia(file: File, kind: MessageMediaKind) {
+function uploadFormData(url: string, formData: FormData, onProgress?: (progress: number) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", url);
+    request.upload.addEventListener("progress", (event) => {
+      if (!event.lengthComputable) return;
+      onProgress?.(Math.min(1, event.loaded / event.total));
+    });
+    request.addEventListener("load", () => {
+      if (request.status >= 200 && request.status < 300) {
+        onProgress?.(1);
+        resolve();
+        return;
+      }
+
+      let message = "资源上传失败";
+      try {
+        const payload = JSON.parse(request.responseText) as { error?: string };
+        if (payload.error) message = payload.error;
+      } catch {
+        if (request.responseText.trim()) message = request.responseText.trim();
+      }
+      reject(new MessageUploadError(message));
+    });
+    request.addEventListener("error", () => reject(new MessageUploadError("资源上传失败")));
+    request.addEventListener("abort", () => reject(new MessageUploadError("资源上传已取消")));
+    request.send(formData);
+  });
+}
+
+export async function uploadMessageMedia(file: File, kind: MessageMediaKind, onProgress?: (progress: number) => void) {
   validateMessageMediaFile(file, kind);
 
+  onProgress?.(0.02);
   const upload = await api.createMessageUpload(kind, file.name, file.type);
   const formData = new FormData();
   formData.set("token", upload.upload_token);
   formData.set("key", upload.key);
   formData.set("file", file);
 
-  const response = await fetch(upload.upload_url, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const raw = await response.text();
-    let message = "资源上传失败";
-    try {
-      const payload = JSON.parse(raw) as { error?: string };
-      if (payload.error) {
-        message = payload.error;
-      }
-    } catch {
-      if (raw.trim()) {
-        message = raw.trim();
-      }
-    }
-    throw new MessageUploadError(message);
-  }
+  await uploadFormData(upload.upload_url, formData, onProgress);
 
   return upload;
 }

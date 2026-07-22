@@ -713,7 +713,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
               <button
                 key={message.clientId}
                 aria-label={`查看第 ${index + 1} 张图片`}
-                className={`message-image-gallery-item ${hasMore ? "has-more" : ""}`}
+                className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}`}
                 onClick={() => onOpenImage(fullUris, index)}
                 type="button"
               >
@@ -722,6 +722,11 @@ const MessageImageGallery = memo(function MessageImageGallery({
                   <span className="message-image-gallery-more">
                     <span className="material-symbols-outlined" aria-hidden="true">photo_library</span>
                     <strong>+{messages.length - 18}</strong>
+                  </span>
+                ) : null}
+                {message.status === "failed" ? (
+                  <span className="message-image-gallery-failed" aria-label="发送失败">
+                    <span className="material-symbols-outlined" aria-hidden="true">error</span>
                   </span>
                 ) : null}
               </button>
@@ -1036,7 +1041,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
   const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
-    if (message.kind !== "image" || !message.payload?.uri || message.status !== "sent") {
+    if (message.kind !== "image" || !message.payload?.uri) {
       rows.push({ kind: "message", message, startIndex: index });
       index += 1;
       continue;
@@ -1046,7 +1051,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
     let cursor = index;
     while (cursor < group.messages.length) {
       const candidate = group.messages[cursor];
-      if (candidate.kind !== "image" || !candidate.payload?.uri || candidate.status !== "sent") break;
+      if (candidate.kind !== "image" || !candidate.payload?.uri) break;
       imageMessages.push(candidate);
       cursor += 1;
     }
@@ -1321,6 +1326,7 @@ export default function ChatsPage() {
     mimeType: "",
   });
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
+  const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -1336,6 +1342,28 @@ export default function ChatsPage() {
   const cancelScrollAnimationRef = useRef<(() => void) | null>(null);
   const revealAnimatingRef = useRef(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+  const sendProgress = useMemo(() => {
+    const values = Object.values(sendTasks);
+    if (!values.length) return null;
+    return values.reduce((total, progress) => total + progress, 0) / values.length;
+  }, [sendTasks]);
+
+  const updateSendTask = (clientId: string, progress: number) => {
+    setSendTasks((current) => ({ ...current, [clientId]: Math.max(current[clientId] ?? 0, Math.min(1, progress)) }));
+  };
+
+  const finishSendTask = (clientId: string) => {
+    updateSendTask(clientId, 1);
+    window.setTimeout(() => {
+      setSendTasks((current) => {
+        if (!(clientId in current)) return current;
+        const next = { ...current };
+        delete next[clientId];
+        return next;
+      });
+    }, 420);
+  };
 
   useLayoutEffect(() => {
     const track = imagePreviewTrackRef.current;
@@ -2176,6 +2204,7 @@ export default function ChatsPage() {
 
     try {
       setSendState("sending");
+      updateSendTask(optimisticMessage.clientId, 0.12);
       if (DEBUG_CHAT_SEND) {
         console.log("[chat] submit start", {
           chatId: selectedChat.id,
@@ -2207,6 +2236,7 @@ export default function ChatsPage() {
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
       const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message);
+      updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {
         console.log("[chat] send success", {
@@ -2241,6 +2271,7 @@ export default function ChatsPage() {
         [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
       }));
     } finally {
+      finishSendTask(optimisticMessage.clientId);
       setSendState("idle");
     }
   };
@@ -2261,6 +2292,7 @@ export default function ChatsPage() {
     }));
     stickToBottomRef.current = true;
     triggerMessageEntrance(retryMessage.clientId);
+    updateSendTask(retryMessage.clientId, 0.12);
 
     try {
       const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text);
@@ -2289,6 +2321,8 @@ export default function ChatsPage() {
         ...current,
         [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], retryMessage.clientId, "failed"),
       }));
+    } finally {
+      finishSendTask(retryMessage.clientId);
     }
   };
 
@@ -2347,9 +2381,13 @@ export default function ChatsPage() {
     );
     stickToBottomRef.current = true;
     triggerMessageEntrance(pendingMessage.clientId);
+    updateSendTask(pendingMessage.clientId, 0.03);
 
     try {
-      const upload = await uploadMessageMedia(file, kind);
+      const upload = await uploadMessageMedia(file, kind, (progress) => {
+        updateSendTask(pendingMessage.clientId, 0.05 + progress * 0.84);
+      });
+      updateSendTask(pendingMessage.clientId, 0.92);
       const created = await api.sendMessage(
         selectedChat.id,
         messageTypeFromKind(kind),
@@ -2383,6 +2421,8 @@ export default function ChatsPage() {
       const uploadError = toMessageUploadError(error);
       setPageError(uploadError.message);
       return false;
+    } finally {
+      finishSendTask(pendingMessage.clientId);
     }
   };
 
@@ -2931,6 +2971,7 @@ export default function ChatsPage() {
       hideMobileNav={Boolean(displayedChat)}
       hidePageTitle={Boolean(displayedChat)}
       topbarClassName={displayedChat ? `conversation-topbar${isClosingChatView ? " is-closing" : ""}` : undefined}
+      topbarProgress={displayedChat ? sendProgress : null}
       topbarLeading={
         displayedChat ? (
           <div className="chat-conversation-topbar">

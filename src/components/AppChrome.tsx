@@ -12,6 +12,7 @@ interface AppChromeProps {
   hideMobileNav?: boolean;
   hidePageTitle?: boolean;
   topbarClassName?: string;
+  topbarProgress?: number | null;
   shellClassName?: string;
 }
 
@@ -24,6 +25,7 @@ export function AppChrome({
   hideMobileNav = false,
   hidePageTitle = false,
   topbarClassName,
+  topbarProgress,
   shellClassName,
 }: AppChromeProps) {
   const { session } = useAuth();
@@ -73,6 +75,11 @@ export function AppChrome({
               </Link>
             ) : null}
           </div>
+          {topbarProgress !== null && topbarProgress !== undefined ? (
+            <div className="topbar-progress" aria-label={`发送进度 ${Math.round(topbarProgress * 100)}%`} role="progressbar">
+              <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, topbarProgress))})` }} />
+            </div>
+          ) : null}
         </header>
       ) : null}
 

@@ -259,6 +259,27 @@ img {
   border-bottom: 1px solid rgba(232, 235, 242, 0.84);
 }
 
+.topbar-progress {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(15, 194, 132, 0.1);
+}
+
+.topbar-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #28a9f2, #00cf8b);
+  box-shadow: 0 0 8px rgba(0, 207, 139, 0.3);
+  transition: transform 180ms ease-out;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -1803,6 +1824,39 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.message-image-gallery-item.is-pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform: translateX(-115%);
+  background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.68) 48%, transparent 76%);
+  animation: preview-shimmer 1.15s linear infinite;
+}
+
+.message-image-gallery-item.is-pending img {
+  filter: saturate(0.84) brightness(0.9);
+}
+
+.message-image-gallery-failed {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 78, 96, 0.94);
+  box-shadow: 0 4px 12px rgba(24, 18, 20, 0.24);
+}
+
+.message-image-gallery-failed .material-symbols-outlined {
+  font-size: 17px;
 }
 
 .message-image-gallery-item.has-more img {
