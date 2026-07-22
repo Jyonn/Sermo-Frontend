@@ -4741,7 +4741,7 @@ img {
 }
 
 @media (min-width: 901px) {
-  #root {
+  html[data-desktop-nav] #root {
     padding-left: 220px;
   }
 
@@ -4896,11 +4896,11 @@ img {
     white-space: nowrap;
   }
 
-  .shell {
+  html[data-desktop-nav] .shell {
     width: min(1440px, calc(100vw - 252px));
   }
 
-  .topbar {
+  html[data-desktop-nav] .topbar {
     width: min(1440px, calc(100vw - 252px));
   }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Link, matchPath, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -35,14 +35,19 @@ export function AppBottomNav() {
   const [totalUnread, setTotalUnread] = useState(0);
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
   const [desktopCollapsed, setDesktopCollapsed] = useState(() => localStorage.getItem("sermo:desktop-nav-collapsed") === "1");
+  const desktopNavigationActive = Boolean(session && effectivePathname.startsWith("/app/"));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!desktopNavigationActive) {
+      delete document.documentElement.dataset.desktopNav;
+      return;
+    }
     document.documentElement.dataset.desktopNav = desktopCollapsed ? "collapsed" : "expanded";
     localStorage.setItem("sermo:desktop-nav-collapsed", desktopCollapsed ? "1" : "0");
     return () => {
       delete document.documentElement.dataset.desktopNav;
     };
-  }, [desktopCollapsed]);
+  }, [desktopCollapsed, desktopNavigationActive]);
 
   useEffect(() => {
     if (!cacheScope) {
