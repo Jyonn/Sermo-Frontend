@@ -112,10 +112,9 @@ m229 -224 c11 -6 28 -25 37 -42 21 -42 11 -93 -32 -165 -104 -173 -266 -290
 </g>
 </g>
 <g id="wave-divider" fill="none" stroke="#00b87a" stroke-linecap="round" stroke-width="18">
-  <path d="M900 124c36-38 72-38 108 0s72 38 108 0"/>
-  <path d="M900 166c36-38 72-38 108 0s72 38 108 0" opacity=".42"/>
+  <path d="M918 128c34-34 68-34 102 0s68 34 102 0"/>
 </g>
 <g id="wordmark-yanlang" fill="#101619">
-  <text x="895" y="330" font-family="STKaiti, KaiTi, 'Noto Serif SC', serif" font-size="184" font-weight="700" letter-spacing="10">言浪</text>
+  <text x="912" y="330" font-family="'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="172" font-weight="700" letter-spacing="4">言浪</text>
 </g>
 </svg>
