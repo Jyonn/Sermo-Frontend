@@ -514,7 +514,8 @@ img {
 }
 
 .desktop-nav-brand,
-.desktop-nav-user {
+.desktop-nav-user,
+.desktop-nav-toggle {
   display: none;
 }
 
@@ -4799,8 +4800,14 @@ img {
     background: rgba(17, 19, 24, 0.05);
   }
 
-  .desktop-nav-toggle .material-symbols-outlined {
-    font-size: 20px;
+  .desktop-nav-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
   }
 
   .desktop-nav-logo {
