@@ -133,6 +133,18 @@ export interface WebReminderPreferenceDTO {
   title_enabled: boolean;
 }
 
+export interface WebPushSubscriptionDTO {
+  endpoint: string;
+  origin: string;
+  enabled: boolean;
+  last_seen_at: string;
+}
+
+export interface WebPushInfoDTO {
+  public_key: string;
+  subscriptions: WebPushSubscriptionDTO[];
+}
+
 export interface GestureLockPreferenceDTO {
   enabled: boolean;
   pattern_hash: string;

@@ -25,6 +25,8 @@ import type {
   UserDTO,
   UserMeDTO,
   WebReminderPreferenceDTO,
+  WebPushInfoDTO,
+  WebPushSubscriptionDTO,
 } from "../types";
 
 const API_BASE_URL = import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space";
@@ -568,6 +570,29 @@ export const api = {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  getWebPushInfo(signal?: AbortSignal) {
+    return request<WebPushInfoDTO>("/users/me/web-push", {
+      auth: true,
+      signal,
+    });
+  },
+
+  registerWebPush(payload: { endpoint: string; p256dh: string; auth: string; origin: string }) {
+    return request<WebPushSubscriptionDTO>("/users/me/web-push", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  deleteWebPush(endpoint: string) {
+    return request<null>("/users/me/web-push", {
+      method: "DELETE",
+      auth: true,
+      body: { endpoint },
     });
   },
 

@@ -1,0 +1,15 @@
+{
+  "name": "Sermo",
+  "short_name": "Sermo",
+  "description": "面向空间的轻量聊天应用",
+  "id": "/",
+  "start_url": "/app/chats",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#f7f4ec",
+  "icons": [
+    { "src": "/icons/sermo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sermo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

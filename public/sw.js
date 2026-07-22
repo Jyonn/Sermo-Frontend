@@ -1,0 +1,53 @@
+const CACHE_NAME = "sermo-shell-v1";
+const SHELL = ["/", "/manifest.webmanifest", "/icons/sermo-192.png", "/icons/sermo-512.png"];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
+  if (event.request.mode === "navigate") {
+    event.respondWith(fetch(event.request).catch(() => caches.match("/")));
+  }
+});
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data ? event.data.text() : "你收到了一条新消息" };
+  }
+  const url = payload.chat_id ? `/app/chats/${payload.chat_id}` : "/app/chats";
+  event.waitUntil(self.registration.showNotification(payload.title || "Sermo", {
+    body: payload.body || "你收到了一条新消息",
+    icon: "/icons/sermo-192.png",
+    badge: "/icons/sermo-192.png",
+    tag: payload.chat_id ? `chat-${payload.chat_id}` : undefined,
+    data: { url },
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || "/app/chats", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
+      const current = clients.find((client) => new URL(client.url).origin === self.location.origin);
+      if (current) {
+        await current.navigate(target);
+        return current.focus();
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});

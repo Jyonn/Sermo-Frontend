@@ -23,6 +23,7 @@ import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureL
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
+import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
@@ -175,6 +176,8 @@ export default function MenuPage() {
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
+  const [webPushState, setWebPushState] = useState<WebPushState>("checking");
+  const [webPushSaving, setWebPushSaving] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -268,6 +271,49 @@ export default function MenuPage() {
   const openWebReminderDrawer = () => {
     setWebReminderDrawerOpen(true);
   };
+
+  useEffect(() => {
+    if (!webReminderDrawerOpen) return;
+    let active = true;
+    setWebPushState("checking");
+    void getWebPushState()
+      .then((state) => {
+        if (active) setWebPushState(state);
+      })
+      .catch(() => {
+        if (active) setWebPushState("off");
+      });
+    return () => {
+      active = false;
+    };
+  }, [webReminderDrawerOpen]);
+
+  const toggleWebPush = async () => {
+    if (webPushSaving || webPushState === "checking") return;
+    setWebPushSaving(true);
+    try {
+      if (webPushState === "on") {
+        await disableWebPush();
+      } else {
+        await enableWebPush();
+      }
+      setWebPushState(await getWebPushState());
+    } catch (pushError) {
+      setWebPushState(await getWebPushState().catch((): WebPushState => "off"));
+      setError(pushError instanceof Error ? pushError.message : "系统通知设置失败");
+    } finally {
+      setWebPushSaving(false);
+    }
+  };
+
+  const webPushDescription = {
+    checking: "正在检查",
+    unsupported: "当前浏览器不支持",
+    "needs-install": "添加到主屏幕后开启",
+    denied: "请在系统设置中允许",
+    off: "未开启",
+    on: "已开启",
+  }[webPushState];
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -1229,6 +1275,19 @@ export default function MenuPage() {
       >
         <div className="detail-list">
           <div className="menu-pref-list">
+            <div className="menu-pref-row">
+              <div className="row-main">
+                <strong>系统通知</strong>
+                <div className="row-subtle">{webPushDescription}</div>
+              </div>
+              <button
+                aria-label="toggle-web-push"
+                className={`switch ${webPushState === "on" ? "active" : ""}`}
+                disabled={webPushSaving || webPushState === "checking" || webPushState === "unsupported" || webPushState === "denied"}
+                onClick={() => void toggleWebPush()}
+                type="button"
+              />
+            </div>
             <div className="menu-pref-row">
               <div className="row-main">
                 <strong>新消息提示音</strong>
