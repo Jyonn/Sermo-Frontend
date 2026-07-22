@@ -5,6 +5,9 @@ import App from "./App";
 import "../styles.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
+import { setupSpacePwaIdentity } from "./lib/pwaIdentity";
+
+void setupSpacePwaIdentity();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

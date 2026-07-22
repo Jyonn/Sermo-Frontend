@@ -30,7 +30,7 @@ self.addEventListener("push", (event) => {
   const url = payload.chat_id ? `/app/chats/${payload.chat_id}` : "/app/chats";
   event.waitUntil(self.registration.showNotification(payload.title || "Sermo", {
     body: payload.body || "你收到了一条新消息",
-    icon: "/icons/sermo-192.png",
+    icon: payload.icon || "/icons/sermo-192.png",
     badge: "/icons/sermo-192.png",
     tag: payload.chat_id ? `chat-${payload.chat_id}` : undefined,
     data: { url },
