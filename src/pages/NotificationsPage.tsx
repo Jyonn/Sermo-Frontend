@@ -12,6 +12,8 @@ import { useAuth } from "../lib/auth";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
@@ -93,6 +95,7 @@ export default function NotificationsPage() {
   const friendSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [friends, setFriends] = useState<UserDTO[]>([]);
   const [groupChats, setGroupChats] = useState<ChatDTO[]>([]);
@@ -105,10 +108,25 @@ export default function NotificationsPage() {
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
+  const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
     const controller = new AbortController();
-    setViewState("loading");
+    const cached = readTabCache<{
+      friends: UserDTO[];
+      groupChats: ChatDTO[];
+      requests: { incoming: FriendshipRequestDTO[]; outgoing: FriendshipRequestDTO[] };
+    }>(cacheScope, "notifications");
+    if (cached) {
+      setFriends(cached.data.friends);
+      setGroupChats(cached.data.groupChats);
+      setRequests(cached.data.requests);
+      emitFriendRequestsUpdated(cached.data.requests.incoming.length);
+      setViewState("ready");
+    } else {
+      setViewState("loading");
+    }
+    setSyncing(true);
     setError(null);
 
     Promise.all([api.getFriends(controller.signal), api.getFriendRequests(controller.signal), api.getChats(controller.signal)])
@@ -118,17 +136,32 @@ export default function NotificationsPage() {
         setRequests(normalizedRequests);
         emitFriendRequestsUpdated(normalizedRequests.incoming.length);
         setGroupChats(chatRows.filter((chat) => chat.group));
+        writeTabCache(cacheScope, "notifications", {
+          friends: friendRows,
+          requests: normalizedRequests,
+          groupChats: chatRows.filter((chat) => chat.group),
+        });
         setViewState("ready");
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "通讯加载失败";
-        setError(message);
-        setViewState("error");
+        if (!cached) {
+          const message = apiError instanceof ApiError ? apiError.message : "通讯加载失败";
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSyncing(false);
       });
 
     return () => controller.abort();
-  }, []);
+  }, [cacheScope]);
+
+  useEffect(() => {
+    if (viewState !== "ready") return;
+    writeTabCache(cacheScope, "notifications", { friends, groupChats, requests });
+  }, [cacheScope, friends, groupChats, requests, viewState]);
 
   const normalizedQuery = query.trim().toLowerCase();
   const filteredFriends = useMemo(
@@ -192,6 +225,7 @@ export default function NotificationsPage() {
         <div className="chat-list-screen-header minimal-page-header">
           <div className="page-toolbar">
             <h2 className="panel-title">通讯</h2>
+            <HeaderSyncIndicator syncing={syncing} />
           </div>
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search">

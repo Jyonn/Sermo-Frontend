@@ -21,6 +21,8 @@ import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
@@ -40,6 +42,14 @@ const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消�
 const defaultFriendOnlineMessagePlaceholder = "你的好友上线了。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
 const defaultPasswordReminderDescription = "设置密码后，才能绑定通知渠道或管理通知提醒。";
+
+interface MenuCacheSnapshot {
+  space: SpaceDTO;
+  me: UserMeDTO;
+  prefs: NotificationPreferences;
+  gesturePreference: GestureLockPreferenceDTO | null;
+  webReminderPrefs: WebReminderPreferences;
+}
 
 function clonePref(pref: NotificationPreferences[NotificationChannel]) {
   return { ...pref };
@@ -149,6 +159,7 @@ export default function MenuPage() {
   const { session, logout, patchSessionUser } = useAuth();
   const currentUserId = session?.user.user_id;
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [space, setSpace] = useState<SpaceDTO | null>(null);
   const [me, setMe] = useState<UserMeDTO | null>(null);
@@ -207,6 +218,7 @@ export default function MenuPage() {
   const authVerifyRef = useRef<HTMLDivElement | null>(null);
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+  const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
@@ -260,7 +272,19 @@ export default function MenuPage() {
   useEffect(() => {
     if (!currentUserId) return;
     const controller = new AbortController();
-    setViewState("loading");
+    const cached = readTabCache<MenuCacheSnapshot>(cacheScope, "menu");
+    if (cached) {
+      setSpace(cached.data.space);
+      setMe(cached.data.me);
+      setPrefs(cached.data.prefs);
+      setGesturePreference(cached.data.gesturePreference);
+      setWebReminderPrefs(cached.data.webReminderPrefs);
+      setWebReminderPreferences(cached.data.webReminderPrefs);
+      setViewState("ready");
+    } else {
+      setViewState("loading");
+    }
+    setSyncing(true);
     setError(null);
 
     Promise.all([
@@ -278,6 +302,13 @@ export default function MenuPage() {
         setGesturePreference(gestureInfo);
         setWebReminderPrefs(nextWebReminderPrefs);
         setWebReminderPreferences(nextWebReminderPrefs);
+        writeTabCache(cacheScope, "menu", {
+          space: spaceInfo,
+          me: meInfo,
+          prefs: mapPrefs(prefRows),
+          gesturePreference: gestureInfo,
+          webReminderPrefs: nextWebReminderPrefs,
+        });
         patchSessionUser({
           has_password: meInfo.has_password,
           verified: meInfo.verified,
@@ -297,13 +328,23 @@ export default function MenuPage() {
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "菜单加载失败";
-        setError(message);
-        setViewState("error");
+        if (!cached) {
+          const message = apiError instanceof ApiError ? apiError.message : "菜单加载失败";
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSyncing(false);
       });
 
     return () => controller.abort();
-  }, [currentUserId]);
+  }, [cacheScope, currentUserId]);
+
+  useEffect(() => {
+    if (viewState !== "ready" || !space || !me) return;
+    writeTabCache(cacheScope, "menu", { space, me, prefs, gesturePreference, webReminderPrefs });
+  }, [cacheScope, gesturePreference, me, prefs, space, viewState, webReminderPrefs]);
 
   useEffect(() => {
     const drawer = new URLSearchParams(location.search).get("drawer");
@@ -901,6 +942,7 @@ export default function MenuPage() {
         <div className="minimal-page-header">
           <div className="page-toolbar">
             <h2 className="panel-title">菜单</h2>
+            <HeaderSyncIndicator syncing={syncing} />
           </div>
         </div>
         <div className="menu-profile-card">

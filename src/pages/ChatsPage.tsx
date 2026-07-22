@@ -26,6 +26,7 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
+import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
@@ -1334,6 +1335,8 @@ export default function ChatsPage() {
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
+  const [healthClock, setHealthClock] = useState(() => Date.now());
   const [pageError, setPageError] = useState<string | null>(null);
   const [statusModal, setStatusModal] = useState<{
     open: boolean;
@@ -1437,6 +1440,21 @@ export default function ChatsPage() {
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping";
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
+  const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
+
+  useEffect(() => {
+    setChatHealthSnapshot(getChatHealth(cacheScope));
+    const handleHealth = (event: Event) => {
+      const detail = (event as CustomEvent<{ scope: string; snapshot: ChatHealthSnapshot }>).detail;
+      if (detail.scope === cacheScope) setChatHealthSnapshot(detail.snapshot);
+    };
+    const timer = window.setInterval(() => setHealthClock(Date.now()), 10_000);
+    window.addEventListener(CHAT_HEALTH_EVENT, handleHealth);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener(CHAT_HEALTH_EVENT, handleHealth);
+    };
+  }, [cacheScope]);
 
   const cleanupRecordingResources = () => {
     if (waveformFrameRef.current) {
@@ -1529,6 +1547,7 @@ export default function ChatsPage() {
     api
       .getChats(controller.signal)
       .then((rows) => {
+        recordChatHealth(cacheScope, true);
         didLoadNetwork = true;
         const nextChats = sortChats(rows.map((item) => mapChat(item, currentUserId)));
         setChats(nextChats);
@@ -1537,6 +1556,7 @@ export default function ChatsPage() {
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
+        recordChatHealth(cacheScope, false);
         const message = apiError instanceof ApiError ? apiError.message : "加载会话失败";
         setPageError(message);
         setViewState("error");
@@ -1742,6 +1762,7 @@ export default function ChatsPage() {
           },
           controller.signal
         );
+        recordChatHealth(cacheScope, true);
         const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
         const existingThread = chatCache.getThread(cacheScope, selectedChat.id);
         let mergedMessages = mergeMessages(existingThread?.messages ?? [], normalized);
@@ -1791,6 +1812,7 @@ export default function ChatsPage() {
           setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
         });
       } catch (apiError) {
+        if (!controller.signal.aborted) recordChatHealth(cacheScope, false);
         if (isChatAccessBoundaryError(apiError)) {
           redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
           return;
@@ -3016,6 +3038,13 @@ export default function ChatsPage() {
       <div className="chat-list-screen-header minimal-page-header">
         <div className="page-toolbar">
           <h2 className="panel-title">聊天</h2>
+          <span
+            aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
+            className={`chat-health-indicator is-${chatHealth}`}
+            title={chatHealth === "healthy" ? "连接正常" : chatHealth === "warning" ? "连接不稳定" : "连接中断"}
+          >
+            <span className="chat-health-dot" />
+          </span>
         </div>
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         <label className="search-box">

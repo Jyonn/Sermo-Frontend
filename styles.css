@@ -4736,6 +4736,51 @@ img {
   gap: 12px;
 }
 
+.header-sync-indicator {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text-muted);
+  opacity: 0.72;
+}
+
+.header-sync-indicator .material-symbols-outlined {
+  font-size: 18px;
+  animation: header-sync-spin 900ms linear infinite;
+}
+
+@keyframes header-sync-spin {
+  to { transform: rotate(360deg); }
+}
+
+.chat-health-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.chat-health-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #98a0ae;
+  box-shadow: 0 0 0 4px rgba(152, 160, 174, 0.1);
+}
+
+.chat-health-indicator.is-healthy .chat-health-dot {
+  background: #10c982;
+  box-shadow: 0 0 0 4px rgba(16, 201, 130, 0.11);
+}
+
+.chat-health-indicator.is-warning .chat-health-dot {
+  background: #e2ad2f;
+  box-shadow: 0 0 0 4px rgba(226, 173, 47, 0.12);
+}
+
 .page-tabs {
   display: flex;
   gap: 8px;

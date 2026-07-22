@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { normalizeStableResourceUri } from "../lib/stableResource";
 import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
+import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { UserAvatar } from "./UserAvatar";
@@ -470,6 +471,8 @@ export function GlobalMessageSync() {
           if (!response.items.length && !response.has_more) break;
         }
 
+        recordChatHealth(scope, true);
+
         if (cancelled) return;
 
         if (cursor !== (cursorRef.current ?? afterMessageId)) {
@@ -509,6 +512,7 @@ export function GlobalMessageSync() {
         }
       } catch (error) {
         if (cancelled) return;
+        recordChatHealth(scope, false);
         if (DEBUG_SYNC) {
           console.error("[sync] poll failed", error);
         }

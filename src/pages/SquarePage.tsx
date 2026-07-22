@@ -10,6 +10,8 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { VerificationBanner } from "../components/VerificationBanner";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
 
 const MAX_ORBS = 20;
@@ -183,6 +185,7 @@ export default function SquarePage() {
   const groupSquareEnabled = useGroupSquareEnabled();
   const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<UserDTO[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
@@ -195,8 +198,10 @@ export default function SquarePage() {
   const lastTickRef = useRef<number | null>(null);
   const orbsRef = useRef<OrbState[]>([]);
   const hasLoadedOnceRef = useRef(false);
+  const cacheHydratedRef = useRef(false);
   const exitTimersRef = useRef<Record<number, number>>({});
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+  const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
     if (!groupSquareEnabled) {
@@ -205,9 +210,19 @@ export default function SquarePage() {
     }
 
     const controller = new AbortController();
+    if (!cacheHydratedRef.current) {
+      cacheHydratedRef.current = true;
+      const cached = readTabCache<UserDTO[]>(cacheScope, "square");
+      if (cached) {
+        setOnlineUsers(cached.data);
+        setViewState("ready");
+        hasLoadedOnceRef.current = true;
+      }
+    }
     if (!hasLoadedOnceRef.current) {
       setViewState("loading");
     }
+    setSyncing(true);
     setError(null);
 
     api
@@ -216,16 +231,22 @@ export default function SquarePage() {
         setOnlineUsers(liveUsers);
         setViewState("ready");
         hasLoadedOnceRef.current = true;
+        if (!query.trim()) writeTabCache(cacheScope, "square", liveUsers);
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "广场加载失败";
-        setError(message);
-        setViewState("error");
+        if (!hasLoadedOnceRef.current) {
+          const message = apiError instanceof ApiError ? apiError.message : "广场加载失败";
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSyncing(false);
       });
 
     return () => controller.abort();
-  }, [groupSquareEnabled, navigate, query, refreshTick]);
+  }, [cacheScope, groupSquareEnabled, navigate, query, refreshTick]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setRefreshTick((current) => current + 1), 15_000);
@@ -392,6 +413,7 @@ export default function SquarePage() {
         <div className="chat-list-screen-header minimal-page-header square-plaza-toolbar">
           <div className="page-toolbar">
             <h2 className="panel-title">广场</h2>
+            <HeaderSyncIndicator syncing={syncing} />
           </div>
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search square-search">
