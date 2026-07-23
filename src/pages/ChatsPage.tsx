@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type ClipboardEvent as ReactClipboardEvent,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
@@ -47,6 +48,11 @@ const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
 type ChatRouteState = {
   chatAccessError?: string;
+};
+
+type ClipboardUploadCandidate = {
+  files: File[];
+  previewUris: Array<string | null>;
 };
 
 function avatarLabel(name: string) {
@@ -1434,6 +1440,7 @@ export default function ChatsPage() {
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
   const [healthClock, setHealthClock] = useState(() => Date.now());
@@ -1490,6 +1497,7 @@ export default function ChatsPage() {
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const clipboardPreviewUrlsRef = useRef(new Set<string>());
 
   useEffect(() => {
     if (!imagePreview) return;
@@ -1574,6 +1582,8 @@ export default function ChatsPage() {
   useEffect(() => () => {
     localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
     localObjectUrlsRef.current.clear();
+    clipboardPreviewUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
+    clipboardPreviewUrlsRef.current.clear();
   }, []);
 
   useEffect(() => {
@@ -2743,6 +2753,49 @@ export default function ChatsPage() {
     );
   };
 
+  const closeClipboardUpload = () => {
+    clipboardPreviewUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
+    clipboardPreviewUrlsRef.current.clear();
+    setClipboardUpload(null);
+  };
+
+  const handleComposerPaste = (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
+    const itemFiles = Array.from(event.clipboardData.items)
+      .filter((item) => item.kind === "file")
+      .map((item) => item.getAsFile())
+      .filter((file): file is File => file !== null);
+    const files = itemFiles.length ? itemFiles : Array.from(event.clipboardData.files);
+    if (!files.length) return;
+
+    event.preventDefault();
+    closeClipboardUpload();
+    const previewUris = files.map((file) => {
+      if (!file.type.startsWith("image/")) return null;
+      const uri = URL.createObjectURL(file);
+      clipboardPreviewUrlsRef.current.add(uri);
+      return uri;
+    });
+    setComposerMoreOpen(false);
+    setClipboardUpload({ files, previewUris });
+  };
+
+  const confirmClipboardUpload = async () => {
+    if (!clipboardUpload) return;
+    const files = clipboardUpload.files;
+    closeClipboardUpload();
+    await Promise.all(
+      files.map(async (file) => {
+        try {
+          const kind: MessageMediaKind = file.type.startsWith("image/") ? "image" : "file";
+          await sendUploadedMediaMessage(kind, file, kind === "file" ? { file_name: file.name, file_size: file.size } : {});
+        } catch (error) {
+          const uploadError = toMessageUploadError(error);
+          setPageError(uploadError.message);
+        }
+      })
+    );
+  };
+
   const startVoiceRecording = async () => {
     if (composerBusy || voiceComposer.open) return;
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
@@ -3524,6 +3577,7 @@ export default function ChatsPage() {
                         onCompositionEnd={() => {
                           isComposingRef.current = false;
                         }}
+                        onPaste={handleComposerPaste}
                         onKeyDown={(event) => {
                           const nativeEvent = event.nativeEvent as KeyboardEvent & { isComposing?: boolean; keyCode?: number };
                           if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.keyCode === 229) {
@@ -3609,6 +3663,40 @@ export default function ChatsPage() {
               }
             />
           )}
+          {clipboardUpload ? (
+            <div className="chat-clipboard-backdrop" role="presentation">
+              <section aria-modal="true" className="chat-clipboard-dialog" role="dialog">
+                <div className="chat-clipboard-copy">
+                  <span className="chat-clipboard-icon" aria-hidden="true">
+                    <ComposerSvgIcon kind="file" />
+                  </span>
+                  <div>
+                    <h3>发送这些内容？</h3>
+                    <p>{clipboardUpload.files.length === 1 ? "已从剪贴板读取 1 个项目" : `已从剪贴板读取 ${clipboardUpload.files.length} 个项目`}</p>
+                  </div>
+                </div>
+                <div className="chat-clipboard-items">
+                  {clipboardUpload.files.map((file, index) => (
+                    <div className="chat-clipboard-item" key={`${file.name}:${file.size}:${index}`}>
+                      {clipboardUpload.previewUris[index] ? (
+                        <img alt="" src={clipboardUpload.previewUris[index] ?? undefined} />
+                      ) : (
+                        <span className="chat-clipboard-file-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span>
+                      )}
+                      <div>
+                        <strong>{file.name || (file.type.startsWith("image/") ? "剪贴板图片" : "剪贴板文件")}</strong>
+                        <span>{formatFileSize(file.size)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="chat-clipboard-actions">
+                  <button className="ghost-button" onClick={closeClipboardUpload} type="button">取消</button>
+                  <button className="button" onClick={() => void confirmClipboardUpload()} type="button">上传</button>
+                </div>
+              </section>
+            </div>
+          ) : null}
         </section>
 
         <aside className="panel desktop-pane">

@@ -3233,6 +3233,137 @@ img {
   opacity: 0.48;
 }
 
+.chat-main-pane {
+  position: relative;
+}
+
+.chat-clipboard-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(17, 19, 24, 0.34);
+  backdrop-filter: blur(12px);
+}
+
+.chat-clipboard-dialog {
+  width: min(100%, 380px);
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.96);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
+}
+
+.chat-clipboard-copy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-clipboard-copy h3,
+.chat-clipboard-copy p {
+  margin: 0;
+}
+
+.chat-clipboard-copy h3 {
+  font-size: 1rem;
+}
+
+.chat-clipboard-copy p {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.chat-clipboard-icon,
+.chat-clipboard-file-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--brand-primary);
+  background: rgba(0, 208, 132, 0.1);
+}
+
+.chat-clipboard-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+}
+
+.chat-clipboard-icon svg,
+.chat-clipboard-file-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.chat-clipboard-items {
+  display: grid;
+  gap: 8px;
+  max-height: min(42dvh, 320px);
+  overflow-y: auto;
+}
+
+.chat-clipboard-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.82);
+}
+
+.chat-clipboard-item img,
+.chat-clipboard-file-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+
+.chat-clipboard-item img {
+  display: block;
+  object-fit: cover;
+}
+
+.chat-clipboard-item > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.chat-clipboard-item strong,
+.chat-clipboard-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-clipboard-item strong {
+  font-size: 0.86rem;
+}
+
+.chat-clipboard-item > div span {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.chat-clipboard-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+}
+
+.chat-clipboard-actions > button {
+  width: 100%;
+}
+
 .composer-recording-bar {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -4422,6 +4553,17 @@ img {
   overflow: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+.drawer-body .simple-list {
+  overflow: hidden;
+  border: 1px solid rgba(215, 220, 231, 0.72);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.drawer-body .simple-row {
+  padding-inline: 14px;
 }
 
 .member-line-button {
