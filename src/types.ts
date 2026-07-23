@@ -231,9 +231,13 @@ export interface ImageMetadataDTO {
   lens_model?: string;
   software?: string;
   taken_at?: number | null;
+  file_size?: number | null;
+  pixel_width?: number | null;
+  pixel_height?: number | null;
   latitude?: number | null;
   longitude?: number | null;
   address?: string;
+  geocoding_provider?: "amap" | "nominatim" | string;
   geocoding_status?: number;
 }
 

@@ -1275,7 +1275,17 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   const coordinate = metadata.latitude != null && metadata.longitude != null
     ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
     : "";
+  const fileSize = metadata.file_size != null
+    ? metadata.file_size >= 1024 * 1024
+      ? `${(metadata.file_size / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.max(1, Math.round(metadata.file_size / 1024))} KB`
+    : "";
+  const dimensions = metadata.pixel_width && metadata.pixel_height
+    ? `${metadata.pixel_width} × ${metadata.pixel_height}`
+    : "";
   const rows = [
+    ["尺寸", dimensions],
+    ["大小", fileSize],
     ["位置", metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate)],
     ["坐标", metadata.address || metadata.geocoding_status === 0 ? coordinate : ""],
     ["设备", device],
@@ -1289,9 +1299,13 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
       <dl className="message-image-metadata-list">
         {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
       </dl>
-      {metadata.address ? (
+      {metadata.address && metadata.geocoding_provider === "nominatim" ? (
         <a className="message-image-location-credit" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
           © OpenStreetMap contributors
+        </a>
+      ) : metadata.address && metadata.geocoding_provider === "amap" ? (
+        <a className="message-image-location-credit" href="https://www.amap.com/" rel="noreferrer" target="_blank">
+          地址由高德地图提供
         </a>
       ) : null}
     </>
