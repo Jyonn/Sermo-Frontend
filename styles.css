@@ -8881,6 +8881,7 @@ img {
     height: 100%;
     min-height: 0;
     max-height: none;
+    padding-top: 0;
   }
 
   .chat-mobile-layout > .mobile-chat-list-screen .chat-list-screen-body {
@@ -8899,7 +8900,7 @@ img {
   .desktop-tab-shell > .page-stack {
     width: min(100%, 960px);
     height: calc(100dvh - 32px);
-    padding: 22px 24px 28px;
+    padding: 0 24px 28px;
     overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid rgba(215, 220, 231, 0.72);
@@ -8908,13 +8909,13 @@ img {
   }
 
   .desktop-tab-shell > .page-stack > .tab-sticky-header {
-    margin: -22px -24px 0;
+    margin: 0 -24px;
     padding: 22px 24px 13px;
     border-radius: 20px 20px 0 0;
   }
 
   .chat-mobile-layout > .mobile-chat-list-screen .tab-sticky-header {
-    margin: -18px -18px 0;
+    margin: 0 -18px;
     padding: 18px 18px 12px;
     border-radius: 20px 20px 0 0;
   }
@@ -9059,8 +9060,20 @@ img {
 }
 
 @media (max-width: 900px) {
+  .shell-no-topbar {
+    padding-top: 0;
+  }
+
   .shell-no-topbar .tab-sticky-header {
-    padding-top: calc(10px + env(safe-area-inset-top));
+    position: relative;
+    top: auto;
+    z-index: auto;
+    padding: calc(14px + env(safe-area-inset-top)) 0 8px;
+    border-bottom: 0;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
   }
 }
 
