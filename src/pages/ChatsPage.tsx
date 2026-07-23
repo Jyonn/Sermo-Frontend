@@ -458,7 +458,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
   return {
     id: message.message_id,
-    clientId: `server:${message.message_id}`,
+    clientId: message.client_message_id || `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
     type: message.type,
     kind,
@@ -493,17 +493,23 @@ function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
 }
 
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
-  if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
-  if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return incoming;
-  if (existing.kind !== incoming.kind) return incoming;
+  if (!existing) return incoming;
+  const reconciled = {
+    ...incoming,
+    clientId: existing.clientId,
+    localPreviewUri: existing.localPreviewUri,
+  };
+  if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
+  if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return reconciled;
+  if (existing.kind !== incoming.kind) return reconciled;
 
   const existingResource = normalizeStableResourceUri(existing.payload.uri);
   const incomingResource = normalizeStableResourceUri(incoming.payload.uri);
-  if (!existingResource || existingResource !== incomingResource) return incoming;
-  if (existing.payload.uri === incoming.payload.uri) return incoming;
+  if (!existingResource || existingResource !== incomingResource) return reconciled;
+  if (existing.payload.uri === incoming.payload.uri) return reconciled;
 
   return {
-    ...incoming,
+    ...reconciled,
     payload: {
       ...incoming.payload,
       uri: existing.payload.uri,
@@ -521,8 +527,9 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
       bucket.delete(existingByClientId.id);
     }
 
-    if (message.status === "sent") {
-      const optimisticMatch = [...bucket.values()].find((existing) => isOptimisticSelfMatch(existing, message));
+    let optimisticMatch: ChatMessage | undefined;
+    if (message.status === "sent" && !existingByClientId) {
+      optimisticMatch = [...bucket.values()].find((existing) => isOptimisticSelfMatch(existing, message));
       if (optimisticMatch) {
         bucket.delete(optimisticMatch.id);
       }
@@ -533,7 +540,7 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
       if (deliveredMatch) return;
     }
 
-    const existingMessage = bucket.get(message.id);
+    const existingMessage = existingByClientId ?? optimisticMatch ?? bucket.get(message.id);
     bucket.set(message.id, preserveStableMediaUri(existingMessage, message));
   });
 
@@ -582,8 +589,9 @@ function updateMessageStatus(messages: ChatMessage[], clientId: string, status: 
 }
 
 function confirmPendingMessage(messages: ChatMessage[], clientId: string, delivered: ChatMessage) {
+  const pending = messages.find((message) => message.clientId === clientId);
   const remaining = messages.filter((message) => message.clientId !== clientId && message.id !== delivered.id);
-  return sortMessages([...remaining, delivered]);
+  return sortMessages([...remaining, preserveStableMediaUri(pending, delivered)]);
 }
 
 function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
@@ -719,7 +727,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   const visibleMessages = messages.slice(0, 18);
   const columns = messages.length === 2 || messages.length === 4 ? 2 : 3;
   const fullUris = messages.map((message) => {
-    const uri = message.payload?.uri ?? "";
+    const uri = message.localPreviewUri ?? message.payload?.uri ?? "";
     return resolveStableResourceUri(uri) ?? uri;
   });
   const imageMetadata = messages.map((message) => message.payload?.image_metadata ?? null);
@@ -759,7 +767,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
         >
           {visibleMessages.map((message, index) => {
             const uri = fullUris[index];
-            const thumbnailUri = message.payload?.thumbnail_uri;
+            const thumbnailUri = message.localPreviewUri ? undefined : message.payload?.thumbnail_uri;
             const displayUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri ?? uri;
             const hasMore = index === 17 && messages.length > 18;
             return (
@@ -937,11 +945,11 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
 function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined, groupClassName: string) {
   if (message.kind === "image" && message.payload?.uri) {
-    return <MessageMediaImage groupClassName={groupClassName} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
+    return <MessageMediaImage groupClassName={groupClassName} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {
-    const resolvedUri = resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
+    const resolvedUri = message.localPreviewUri ?? resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
     return (
       <div className={`message-media-frame video ${groupClassName}`.trim()}>
         <video className="message-media-video" controls playsInline preload="metadata" src={resolvedUri} />
@@ -950,11 +958,11 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[
   }
 
   if (message.kind === "audio" && message.payload?.uri) {
-    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.payload.uri} />;
+    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
 
   if (message.kind === "file" && message.payload?.uri) {
-    const resolvedUri = resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
+    const resolvedUri = message.localPreviewUri ?? resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
     return (
       <a className={`message-file-card ${groupClassName}`.trim()} download={message.payload.file_name || true} href={resolvedUri} rel="noreferrer" target="_blank">
         <span className="message-file-icon"><ComposerSvgIcon kind="file" /></span>
@@ -1475,6 +1483,7 @@ export default function ChatsPage() {
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const cancelledSendIdsRef = useRef(new Set<string>());
+  const localObjectUrlsRef = useRef(new Set<string>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const messageMenuRef = useRef<HTMLDivElement | null>(null);
   const replyingToRef = useRef<QuotedMessageDTO | null>(null);
@@ -1561,6 +1570,11 @@ export default function ChatsPage() {
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
   const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
+
+  useEffect(() => () => {
+    localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
+    localObjectUrlsRef.current.clear();
+  }, []);
 
   useEffect(() => {
     setChatHealthSnapshot(getChatHealth(cacheScope));
@@ -2495,7 +2509,7 @@ export default function ChatsPage() {
       }
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId);
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {
@@ -2555,7 +2569,7 @@ export default function ChatsPage() {
     updateSendTask(retryMessage.clientId, 0.12);
 
     try {
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id, retryMessage.clientId);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
         ...current,
@@ -2609,6 +2623,7 @@ export default function ChatsPage() {
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const objectUrl = URL.createObjectURL(file);
+    localObjectUrlsRef.current.add(objectUrl);
     const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     const pendingMessage: ChatMessage = {
       id: clientId,
@@ -2628,6 +2643,7 @@ export default function ChatsPage() {
         file_name: extraPayload.file_name,
         file_size: extraPayload.file_size,
       },
+      localPreviewUri: objectUrl,
       replyTo: reply,
       status: "pending",
     };
@@ -2661,7 +2677,8 @@ export default function ChatsPage() {
           file_name: extraPayload.file_name,
           file_size: extraPayload.file_size,
         }),
-        reply?.message_id
+        reply?.message_id,
+        pendingMessage.clientId
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
@@ -2675,7 +2692,6 @@ export default function ChatsPage() {
           )
         )
       );
-      URL.revokeObjectURL(objectUrl);
       return true;
     } catch (error) {
       setMessages((current) => ({
@@ -2962,7 +2978,10 @@ export default function ChatsPage() {
         delete next[removedMessage.clientId];
         return next;
       });
-      if (removedMessage.payload?.uri?.startsWith("blob:")) URL.revokeObjectURL(removedMessage.payload.uri);
+      if (removedMessage.localPreviewUri) {
+        URL.revokeObjectURL(removedMessage.localPreviewUri);
+        localObjectUrlsRef.current.delete(removedMessage.localPreviewUri);
+      }
       setMessageMenu(null);
       return;
     }
@@ -2971,6 +2990,10 @@ export default function ChatsPage() {
       openStatusModal("正在删除消息", "消息已删除", "删除消息失败");
       setMessageDeleteState("deleting");
       await api.deleteMessage(messageMenu.message.id);
+      if (messageMenu.message.localPreviewUri) {
+        URL.revokeObjectURL(messageMenu.message.localPreviewUri);
+        localObjectUrlsRef.current.delete(messageMenu.message.localPreviewUri);
+      }
       const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== messageMenu.message.clientId);
       setMessages((current) => ({
         ...current,

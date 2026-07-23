@@ -46,6 +46,10 @@ function withoutTransientMessages(messages: ChatMessage[]) {
   return messages.filter((message) => message.status !== "pending");
 }
 
+function withoutLocalPreviews(messages: ChatMessage[]) {
+  return messages.map(({ localPreviewUri: _localPreviewUri, ...message }) => message);
+}
+
 function trimMessages(messages: ChatMessage[], limit: number) {
   const normalized = normalizeMessages(messages);
   if (normalized.length <= limit) return { messages: normalized, trimmed: false };
@@ -218,7 +222,7 @@ export const chatCache = {
     };
     memoryThreads.set(memoryRecord.key, memoryRecord);
 
-    const persistedTrimmed = trimMessages(withoutTransientMessages(snapshot.messages), MAX_PERSISTED_MESSAGES);
+    const persistedTrimmed = trimMessages(withoutLocalPreviews(withoutTransientMessages(snapshot.messages)), MAX_PERSISTED_MESSAGES);
     const persistedRecord: ChatThreadRecord = {
       ...memoryRecord,
       messages: persistedTrimmed.messages,

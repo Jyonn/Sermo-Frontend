@@ -429,12 +429,12 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number) {
+  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
       query: { chat_id },
-      body: { content, type, reply_to_message_id: reply_to_message_id ?? null },
+      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null },
     });
   },
 

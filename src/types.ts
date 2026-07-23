@@ -235,6 +235,7 @@ export interface FriendInvitePreviewDTO {
 
 export interface ChatMessageDTO {
   message_id: number;
+  client_message_id?: string | null;
   user: TinyUserDTO;
   type: number;
   content: string;
@@ -302,6 +303,7 @@ export interface ChatMessage {
   createdAt: number;
   text: string;
   payload?: ChatMessagePayloadDTO | null;
+  localPreviewUri?: string;
   replyTo?: QuotedMessageDTO | null;
   status: "sent" | "pending" | "failed";
 }

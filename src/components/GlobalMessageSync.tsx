@@ -73,7 +73,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
             : "text");
   return {
     id: message.message_id,
-    clientId: `server:${message.message_id}`,
+    clientId: message.client_message_id || `server:${message.message_id}`,
     from: message.user.user_id === currentUserId ? "self" : "other",
     type: message.type,
     kind,
@@ -83,6 +83,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     createdAt: message.created_at,
     text: message.content,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
+    replyTo: message.reply_to ?? null,
     status: "sent",
   };
 }
@@ -92,17 +93,19 @@ function sortMessages(items: ChatMessage[]) {
 }
 
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
-  if (!existing || !existing.payload?.uri || !incoming.payload?.uri) return incoming;
-  if (existing.kind !== incoming.kind) return incoming;
-  if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio" || existing.kind === "file")) return incoming;
+  if (!existing) return incoming;
+  const reconciled = { ...incoming, clientId: existing.clientId, localPreviewUri: existing.localPreviewUri };
+  if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
+  if (existing.kind !== incoming.kind) return reconciled;
+  if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio" || existing.kind === "file")) return reconciled;
 
   const existingResource = normalizeStableResourceUri(existing.payload.uri);
   const incomingResource = normalizeStableResourceUri(incoming.payload.uri);
-  if (!existingResource || existingResource !== incomingResource) return incoming;
-  if (existing.payload.uri === incoming.payload.uri) return incoming;
+  if (!existingResource || existingResource !== incomingResource) return reconciled;
+  if (existing.payload.uri === incoming.payload.uri) return reconciled;
 
   return {
-    ...incoming,
+    ...reconciled,
     payload: {
       ...incoming.payload,
       uri: existing.payload.uri,
@@ -114,15 +117,18 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   const bucket = new Map<number | string, ChatMessage>();
   current.forEach((message) => bucket.set(message.id, message));
   incoming.forEach((message) => {
-    if (message.from === "self" && message.status === "sent") {
-      const optimisticMatch = [...bucket.values()].find((existing) => {
+    const existingByClientId = [...bucket.values()].find((existing) => existing.clientId === message.clientId);
+    if (existingByClientId && existingByClientId.id !== message.id) bucket.delete(existingByClientId.id);
+    let optimisticMatch: ChatMessage | undefined;
+    if (message.from === "self" && message.status === "sent" && !existingByClientId) {
+      optimisticMatch = [...bucket.values()].find((existing) => {
         if (existing.from !== "self" || existing.status !== "pending" || existing.kind !== message.kind) return false;
         if (existing.kind === "text") return existing.text === message.text && Math.abs(existing.createdAt - message.createdAt) <= 30;
         return ["image", "video", "audio", "file"].includes(existing.kind) && Math.abs(existing.createdAt - message.createdAt) <= 600;
       });
       if (optimisticMatch) bucket.delete(optimisticMatch.id);
     }
-    const existing = bucket.get(message.id);
+    const existing = existingByClientId ?? optimisticMatch ?? bucket.get(message.id);
     bucket.set(message.id, preserveStableMediaUri(existing, message));
   });
   return sortMessages([...bucket.values()]);
