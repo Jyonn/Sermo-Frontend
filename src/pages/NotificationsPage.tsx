@@ -104,6 +104,7 @@ export default function NotificationsPage() {
     outgoing: [],
   });
   const [requestSheetOpen, setRequestSheetOpen] = useState(false);
+  const [requestDrawerTab, setRequestDrawerTab] = useState<"incoming" | "outgoing">("incoming");
   const [groupSheetOpen, setGroupSheetOpen] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
@@ -306,7 +307,7 @@ export default function NotificationsPage() {
                 </section>
               ))}
             </div>
-            {friendSections.length ? (
+            {friendSections.length && !requestSheetOpen && !groupSheetOpen && profileDrawerUserId === null ? (
               <div className="friend-directory-index" aria-label="好友索引">
                 {friendSections.map((section) => (
                   <button
@@ -331,22 +332,29 @@ export default function NotificationsPage() {
       <SideDrawer
         open={requestSheetOpen}
         title="好友申请"
-        description="处理收到的申请，或查看你发出的申请。"
+        description="查看和处理好友申请"
         onClose={() => setRequestSheetOpen(false)}
       >
-        <section className="list-section">
-          <div className="section-label">收到的</div>
-          {filteredIncoming.length ? (
-            <div className="simple-list">
+        <div className="friend-request-drawer">
+          <div className="friend-request-tabs" role="tablist">
+            <button className={requestDrawerTab === "incoming" ? "active" : ""} onClick={() => setRequestDrawerTab("incoming")} role="tab" type="button">
+              收到的{filteredIncoming.length ? ` ${filteredIncoming.length}` : ""}
+            </button>
+            <button className={requestDrawerTab === "outgoing" ? "active" : ""} onClick={() => setRequestDrawerTab("outgoing")} role="tab" type="button">
+              发出的{filteredOutgoing.length ? ` ${filteredOutgoing.length}` : ""}
+            </button>
+          </div>
+          {requestDrawerTab === "incoming" ? filteredIncoming.length ? (
+            <div className="simple-list friend-request-list">
               {filteredIncoming.map((request) => (
-                <div key={request.request_id} className="simple-row request-row">
+                <div key={request.request_id} className="simple-row request-row friend-request-card">
                   <UserAvatar className="mini-avatar" name={request.from_user.name} uri={request.from_user.avatar_uri} />
                   <div className="row-main">
                     <strong>{request.from_user.name}</strong>
                     <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
                   </div>
                   <div className="row-actions">
-                    <button className="button row-button" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
+                    <button className="button row-button friend-request-accept" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
                       同意
                     </button>
                     <button className="ghost-button row-button" onClick={() => setIgnoreRequest(request)} type="button">
@@ -356,17 +364,10 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-          ) : (
-            <FeedbackState title="没有收到新的申请" description="有人想和你建立联系时，这里会出现。" />
-          )}
-        </section>
-
-        <section className="list-section">
-          <div className="section-label">发出的</div>
-          {filteredOutgoing.length ? (
-            <div className="simple-list">
+          ) : <FeedbackState title="没有待处理申请" description="" /> : filteredOutgoing.length ? (
+            <div className="simple-list friend-request-list">
               {filteredOutgoing.map((request) => (
-                <div key={request.request_id} className="simple-row request-row">
+                <div key={request.request_id} className="simple-row request-row friend-request-card">
                   <UserAvatar className="mini-avatar" name={request.to_user.name} uri={request.to_user.avatar_uri} />
                   <div className="row-main">
                     <strong>{request.to_user.name}</strong>
@@ -378,10 +379,8 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-          ) : (
-            <FeedbackState title="没有发出的申请" description="想建立关系时，可以先从广场里发起。" />
-          )}
-        </section>
+          ) : <FeedbackState title="没有发出的申请" description="" />}
+        </div>
       </SideDrawer>
       <ConfirmDialog
         danger

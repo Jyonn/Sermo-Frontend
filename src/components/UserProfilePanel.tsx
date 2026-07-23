@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AsyncErrorDialog } from "./AsyncErrorDialog";
+import { BottomSheet } from "./BottomSheet";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { RequestStatusModal } from "./RequestStatusModal";
@@ -27,9 +28,12 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<UserDTO | null>(null);
   const [groupChats, setGroupChats] = useState<ChatDTO[]>([]);
-  const [directChat, setDirectChat] = useState<ChatDTO | null>(null);
   const [allGroupsOpen, setAllGroupsOpen] = useState(false);
-  const [onlineReminderSaving, setOnlineReminderSaving] = useState(false);
+  const [groupPickerOpen, setGroupPickerOpen] = useState(false);
+  const [groupCandidates, setGroupCandidates] = useState<UserDTO[]>([]);
+  const [groupCandidatesLoading, setGroupCandidatesLoading] = useState(false);
+  const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
+  const [groupCreating, setGroupCreating] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const [respondedAt, setRespondedAt] = useState<number | null>(null);
   const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
@@ -59,7 +63,6 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
         setIsFriend(status.is_friend);
         setRespondedAt(status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null);
         setGroupChats(chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId)));
-        setDirectChat(chats.find((chat) => !chat.group && chat.members.some((member) => member.user_id === userId)) ?? null);
         setRequestState("idle");
         setViewState("ready");
       })
@@ -87,28 +90,34 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
     }
   };
 
-  const createGroupChat = async () => {
+  const openGroupPicker = async () => {
     if (!user) return;
+    setGroupSelectedIds([]);
+    setGroupCandidates([]);
+    setGroupCandidatesLoading(true);
+    setGroupPickerOpen(true);
     try {
-      const chat = await api.createGroupChat([user.user_id]);
+      const friends = await api.getFriends();
+      setGroupCandidates(friends.filter((friend) => friend.user_id !== user.user_id));
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : "好友列表加载失败");
+    } finally {
+      setGroupCandidatesLoading(false);
+    }
+  };
+
+  const createGroupChat = async () => {
+    if (!user || !groupSelectedIds.length || groupCreating) return;
+    setGroupCreating(true);
+    try {
+      const chat = await api.createGroupChat([user.user_id, ...groupSelectedIds]);
+      setGroupPickerOpen(false);
       if (onOpenChat) onOpenChat(chat.chat_id);
       else navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : "新建群聊失败");
-    }
-  };
-
-  const toggleOnlineReminder = async () => {
-    if (!directChat || onlineReminderSaving) return;
-    const nextEnabled = !Boolean(directChat.online_reminder_enabled);
-    setOnlineReminderSaving(true);
-    try {
-      const preference = await api.updateChatPreference(directChat.chat_id, { online_reminder_enabled: nextEnabled ? 1 : 0 });
-      setDirectChat((current) => current ? { ...current, online_reminder_enabled: preference.online_reminder_enabled } : current);
-    } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "上线提醒设置失败");
     } finally {
-      setOnlineReminderSaving(false);
+      setGroupCreating(false);
     }
   };
 
@@ -184,7 +193,7 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
           {groupChats.length > 3 ? <button className="user-profile-section-more" onClick={() => setAllGroupsOpen(true)} type="button">查看全部</button> : null}
         </div>
         <div className="user-profile-groups">
-          <button className="user-profile-group-row user-profile-create-group" onClick={() => void createGroupChat()} type="button">
+          <button className="user-profile-group-row user-profile-create-group" onClick={() => void openGroupPicker()} type="button">
             <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">add</span>
             <span><strong>新建群聊</strong><small>邀请共同好友加入</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
@@ -195,13 +204,41 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
 
       {isFriend ? (
         <section className="user-profile-relationship-actions">
-          <div className="user-profile-online-reminder">
-            <span><strong>好友上线提醒</strong><small>{directChat ? "对方上线时通知你" : "发起聊天后可设置"}</small></span>
-            <button aria-label="切换好友上线提醒" className={`switch ${directChat?.online_reminder_enabled ? "active" : ""}`} disabled={!directChat || onlineReminderSaving} onClick={() => void toggleOnlineReminder()} type="button" />
-          </div>
           <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">删除好友</button>
         </section>
       ) : null}
+
+      <BottomSheet
+        open={groupPickerOpen}
+        title="新建群聊"
+        description={`和 ${user.name} 一起选择群成员`}
+        onClose={() => setGroupPickerOpen(false)}
+      >
+        <div className="user-profile-group-picker">
+          {groupCandidatesLoading ? <FeedbackState title="正在加载好友" description="" tone="loading" /> : groupCandidates.length ? (
+            <div className="simple-list">
+              {groupCandidates.map((candidate) => {
+                const selected = groupSelectedIds.includes(candidate.user_id);
+                return (
+                  <button
+                    key={candidate.user_id}
+                    className={`simple-row person-row user-profile-picker-row${selected ? " is-selected" : ""}`}
+                    onClick={() => setGroupSelectedIds((current) => selected ? current.filter((id) => id !== candidate.user_id) : [...current, candidate.user_id])}
+                    type="button"
+                  >
+                    <UserAvatar className="mini-avatar" name={candidate.name} uri={candidate.avatar_uri} />
+                    <span className="row-main"><strong>{candidate.name}</strong></span>
+                    <span aria-hidden="true" className="user-profile-picker-check">{selected ? "✓" : ""}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : <FeedbackState title="没有可邀请的好友" description="" />}
+          <button className="button user-profile-create-confirm" disabled={!groupSelectedIds.length || groupCreating} onClick={() => void createGroupChat()} type="button">
+            {groupCreating ? "创建中" : `创建群聊${groupSelectedIds.length ? ` · ${groupSelectedIds.length + 2} 人` : ""}`}
+          </button>
+        </div>
+      </BottomSheet>
 
       <SideDrawer description={`${groupChats.length} 个共同群聊`} open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title="共同群聊">
         <div className="user-profile-groups user-profile-all-groups">{groupChats.map(renderGroupRow)}</div>

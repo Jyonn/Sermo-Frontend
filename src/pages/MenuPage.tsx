@@ -44,7 +44,7 @@ const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消
 const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
 const defaultFriendOnlineMessagePlaceholder = "你的好友上线了。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
-const defaultPasswordReminderDescription = "设置密码后，才能绑定通知渠道或管理通知提醒。";
+const defaultPasswordReminderDescription = "设置密码后，才能管理通知和提醒。";
 
 interface MenuCacheSnapshot {
   space: SpaceDTO;
@@ -1083,7 +1083,10 @@ export default function MenuPage() {
             {!standalonePwa ? (
               <button className="simple-row menu-link-row" onClick={() => setPwaInstallSheetOpen(true)} type="button">
                 <div className="row-main">
-                  <strong>安装 {space?.name ?? "当前空间"} 到桌面</strong>
+                  <strong className="menu-install-title">
+                    <span>安装 {space?.name ?? "当前空间"} 到桌面</span>
+                    <UserAvatar className="menu-install-avatar" name={space?.official_user?.name ?? space?.name ?? "空间"} uri={space?.official_user?.avatar_uri} />
+                  </strong>
                   <div className="row-subtle">快捷打开并接收通知</div>
                 </div>
                 <span className="material-symbols-outlined">chevron_right</span>
@@ -1091,33 +1094,11 @@ export default function MenuPage() {
             ) : null}
             <button className="simple-row menu-link-row" onClick={openChannelsEntry} type="button">
               <div className="row-main">
-                <strong>通知渠道</strong>
+                <strong>通知和提醒</strong>
                 <div className="row-subtle">{isAppleEnvironment ? "网页、邮件、短信、即时提醒" : "网页、邮件、短信提醒"}</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
-              <div className="row-main">
-                <strong>网页提醒</strong>
-                <div className="row-subtle">{webReminderSummary}</div>
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            {visibleChannelRows.map(([channel, _value, label]) =>
-              channelVerified(me, channel) ? (
-                <button key={`${channel}-settings`} className="simple-row menu-link-row" onClick={() => openPrefDrawer(channel)} type="button">
-                  <div className="row-main">
-                    <strong>{label}设置</strong>
-                    <div className="row-subtle">
-                      {prefs[channel].enabled
-                        ? `${prefs[channel].threshold} 分钟后提醒${prefs[channel].hideMessageContent ? " · 不显示消息内容" : ""}`
-                        : "当前已关闭"}
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
-              ) : null
-            )}
           </div>
         </section>
 
@@ -1243,7 +1224,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer description="管理网页、邮件、短信和即时提醒。" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知渠道">
+      <SideDrawer description="管理网页、邮件、短信和即时提醒" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知和提醒">
         <div className="detail-list">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
@@ -1625,7 +1606,7 @@ export default function MenuPage() {
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
         open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
-        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "bark" ? "绑定即时提醒" : authSheetChannel ? `绑定${channelLabel(authSheetChannel)}` : "通知渠道认证"}
+        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "bark" ? "绑定即时提醒" : authSheetChannel ? `绑定${channelLabel(authSheetChannel)}` : "通知认证"}
         description={authSheetChannel === "email" ? "认证邮箱后，账号会升级为 Verified。" : "发送验证码后完成绑定"}
         onClose={closeAuthSheet}
       >

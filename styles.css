@@ -5829,6 +5829,86 @@ img {
   gap: 10px;
 }
 
+.user-profile-group-picker {
+  display: grid;
+  gap: 16px;
+}
+
+.user-profile-picker-check {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  color: white;
+  background: transparent;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.user-profile-picker-row.is-selected .user-profile-picker-check {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.user-profile-create-confirm {
+  width: 100%;
+  min-height: 50px;
+}
+
+.friend-request-drawer {
+  display: grid;
+  gap: 16px;
+}
+
+.friend-request-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(226, 231, 237, 0.66);
+  border-radius: 13px;
+}
+
+.friend-request-tabs button {
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border-radius: 10px;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.friend-request-tabs button.active {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 3px 10px rgba(30, 42, 50, 0.07);
+}
+
+.friend-request-list,
+.friend-request-card {
+  border-radius: 14px;
+}
+
+.friend-request-accept {
+  min-width: 64px;
+}
+
+.menu-install-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.menu-install-avatar {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 7px;
+}
+
 .user-profile-online-reminder {
   min-height: 64px;
   display: flex;
