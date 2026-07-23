@@ -20,9 +20,9 @@ const channels: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -33,8 +33,11 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes,
       hideMessageContent: row.hide_message_content,
+      hiddenDirectMessageTitle: row.hidden_direct_message_title ?? "",
       hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
+      hiddenGroupMessageTitle: row.hidden_group_message_title ?? "",
       hiddenGroupMessageText: row.hidden_group_message_text ?? "",
+      friendOnlineMessageTitle: row.friend_online_message_title ?? "",
       friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
     };
@@ -275,8 +278,11 @@ export default function SettingsPage() {
           enabled: updated.enabled,
           threshold: updated.offline_threshold_minutes,
           hideMessageContent: updated.hide_message_content,
+          hiddenDirectMessageTitle: updated.hidden_direct_message_title ?? "",
           hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
+          hiddenGroupMessageTitle: updated.hidden_group_message_title ?? "",
           hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+          friendOnlineMessageTitle: updated.friend_online_message_title ?? "",
           friendOnlineMessageText: updated.friend_online_message_text ?? "",
           openChatOnTap: updated.open_chat_on_tap ?? true,
         },

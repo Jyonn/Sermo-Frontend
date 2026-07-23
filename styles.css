@@ -6691,6 +6691,170 @@ img {
   font-size: 0.97rem;
 }
 
+.menu-pref-row-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.menu-pref-row-value .material-symbols-outlined {
+  font-size: 19px;
+}
+
+.notification-template-block {
+  display: grid;
+  gap: 8px;
+}
+
+.notification-template-block .section-label {
+  margin: 0;
+  padding-inline: 2px;
+}
+
+.notification-editor-backdrop {
+  z-index: 60;
+}
+
+.notification-editor-dialog {
+  width: min(100%, 430px);
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.96);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.99);
+  box-shadow: 0 28px 72px rgba(15, 23, 42, 0.2);
+}
+
+.notification-editor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.notification-editor-heading h2,
+.notification-editor-heading p {
+  margin: 0;
+}
+
+.notification-editor-heading h2 {
+  font-size: 1.08rem;
+}
+
+.notification-editor-heading p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.notification-editor-heading .icon-button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+
+.notification-threshold-editor {
+  display: grid;
+  gap: 14px;
+  padding: 18px 16px 12px;
+  border: 1px solid rgba(215, 220, 231, 0.72);
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.78);
+}
+
+.notification-threshold-editor strong {
+  color: var(--brand-primary);
+  font-size: 1.45rem;
+  text-align: center;
+}
+
+.notification-threshold-editor input[type="range"] {
+  width: 100%;
+  accent-color: var(--brand-primary);
+}
+
+.notification-threshold-editor > div {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.notification-editor-textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.notification-push-preview {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid rgba(215, 220, 231, 0.78);
+  border-radius: 16px;
+  background: rgba(245, 247, 250, 0.94);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.notification-push-preview img,
+.notification-mail-preview-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+}
+
+.notification-push-preview img {
+  display: block;
+  object-fit: cover;
+}
+
+.notification-mail-preview-icon {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #23a5f6, #0d79cf);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.notification-push-preview > div {
+  min-width: 0;
+}
+
+.notification-push-preview strong,
+.notification-push-preview p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-push-preview strong {
+  display: block;
+  font-size: 0.84rem;
+}
+
+.notification-push-preview p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.notification-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+}
+
+.notification-editor-actions button {
+  width: 100%;
+}
+
 .bark-guide {
   display: grid;
   gap: 14px;
@@ -6771,50 +6935,6 @@ img {
 
 .bark-store-link .material-symbols-outlined {
   font-size: 1.05rem;
-}
-
-.menu-pref-form-card {
-  padding: 16px 14px;
-}
-
-.menu-pref-control {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.menu-stepper {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line-soft);
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.84);
-}
-
-.menu-stepper button {
-  width: 38px;
-  height: 40px;
-  color: var(--text-secondary);
-  background: transparent;
-}
-
-.menu-stepper-value {
-  min-width: 52px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  padding: 0 12px;
-  border-left: 1px solid var(--line-soft);
-  border-right: 1px solid var(--line-soft);
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.menu-stepper-unit {
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  white-space: nowrap;
 }
 
 .danger-row {

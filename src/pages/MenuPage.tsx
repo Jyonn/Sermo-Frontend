@@ -35,16 +35,24 @@ const channelRows: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageText: "", hiddenGroupMessageText: "", friendOnlineMessageText: "", openChatOnTap: true },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
 };
 
+const defaultHiddenDirectMessageTitle = "新私聊消息";
 const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
+const defaultHiddenGroupMessageTitle = "新群聊消息";
 const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
+const defaultFriendOnlineMessageTitle = "好友上线";
 const defaultFriendOnlineMessagePlaceholder = "你的好友上线了。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
 const defaultPasswordReminderDescription = "设置密码后，才能管理通知和提醒。";
+
+type NotificationMessageKind = "direct" | "group" | "online";
+type PreferenceEditor =
+  | { type: "threshold"; channel: NotificationChannel }
+  | { type: "message"; channel: NotificationChannel; kind: NotificationMessageKind; field: "title" | "content" };
 
 interface MenuCacheSnapshot {
   space: SpaceDTO;
@@ -52,41 +60,6 @@ interface MenuCacheSnapshot {
   prefs: NotificationPreferences;
   gesturePreference: GestureLockPreferenceDTO | null;
   webReminderPrefs: WebReminderPreferences;
-}
-
-function clonePref(pref: NotificationPreferences[NotificationChannel]) {
-  return { ...pref };
-}
-
-function samePref(
-  left: NotificationPreferences[NotificationChannel] | null,
-  right: NotificationPreferences[NotificationChannel] | null
-) {
-  if (!left && !right) return true;
-  if (!left || !right) return false;
-  return (
-    left.enabled === right.enabled &&
-    left.threshold === right.threshold &&
-    left.hideMessageContent === right.hideMessageContent &&
-    left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
-    left.hiddenGroupMessageText === right.hiddenGroupMessageText &&
-    left.friendOnlineMessageText === right.friendOnlineMessageText &&
-    left.openChatOnTap === right.openChatOnTap
-  );
-}
-
-function sameCustomMessages(
-  left: NotificationPreferences[NotificationChannel] | null,
-  right: NotificationPreferences[NotificationChannel] | null
-) {
-  if (!left && !right) return true;
-  if (!left || !right) return false;
-  return (
-    left.hiddenDirectMessageText === right.hiddenDirectMessageText &&
-    left.hiddenGroupMessageText === right.hiddenGroupMessageText &&
-    left.friendOnlineMessageText === right.friendOnlineMessageText &&
-    left.openChatOnTap === right.openChatOnTap
-  );
 }
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -97,8 +70,11 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes,
       hideMessageContent: row.hide_message_content,
+      hiddenDirectMessageTitle: row.hidden_direct_message_title ?? "",
       hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
+      hiddenGroupMessageTitle: row.hidden_group_message_title ?? "",
       hiddenGroupMessageText: row.hidden_group_message_text ?? "",
+      friendOnlineMessageTitle: row.friend_online_message_title ?? "",
       friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
     };
@@ -190,12 +166,11 @@ export default function MenuPage() {
   const [accountDeleteInput, setAccountDeleteInput] = useState("");
   const [accountDeleteSaving, setAccountDeleteSaving] = useState(false);
   const [prefDrawerChannel, setPrefDrawerChannel] = useState<NotificationChannel | null>(null);
-  const [prefDraft, setPrefDraft] = useState<NotificationPreferences[NotificationChannel] | null>(null);
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefCustomDrawerOpen, setPrefCustomDrawerOpen] = useState(false);
-  const [discardPrefConfirmOpen, setDiscardPrefConfirmOpen] = useState(false);
-  const [prefCustomSnapshot, setPrefCustomSnapshot] = useState<NotificationPreferences[NotificationChannel] | null>(null);
-  const [discardCustomPrefConfirmOpen, setDiscardCustomPrefConfirmOpen] = useState(false);
+  const [prefEditor, setPrefEditor] = useState<PreferenceEditor | null>(null);
+  const [prefEditorValue, setPrefEditorValue] = useState("");
+  const [prefEditorSaving, setPrefEditorSaving] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
   const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
   const [basicEditValue, setBasicEditValue] = useState("");
@@ -517,106 +492,88 @@ export default function MenuPage() {
 
   const closePrefDrawers = () => {
     setPrefDrawerChannel(null);
-    setPrefDraft(null);
     setPrefSaving(false);
     setPrefCustomDrawerOpen(false);
-    setPrefCustomSnapshot(null);
-    setDiscardPrefConfirmOpen(false);
-    setDiscardCustomPrefConfirmOpen(false);
+    setPrefEditor(null);
   };
 
   const openPrefDrawer = (channel: NotificationChannel) => {
     setPrefDrawerChannel(channel);
-    setPrefDraft(clonePref(prefs[channel]));
     setPrefCustomDrawerOpen(false);
-    setPrefCustomSnapshot(null);
-    setDiscardPrefConfirmOpen(false);
-    setDiscardCustomPrefConfirmOpen(false);
   };
 
-  const updatePrefDraft = (patch: Partial<NotificationPreferences[NotificationChannel]>) => {
-    setPrefDraft((current) => (current ? { ...current, ...patch } : current));
-  };
+  const preferenceFromResponse = (updated: NotificationPreferenceDTO): NotificationPreferences[NotificationChannel] => ({
+    enabled: updated.enabled,
+    threshold: updated.offline_threshold_minutes,
+    hideMessageContent: updated.hide_message_content,
+    hiddenDirectMessageTitle: updated.hidden_direct_message_title ?? "",
+    hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
+    hiddenGroupMessageTitle: updated.hidden_group_message_title ?? "",
+    hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
+    friendOnlineMessageTitle: updated.friend_online_message_title ?? "",
+    friendOnlineMessageText: updated.friend_online_message_text ?? "",
+    openChatOnTap: updated.open_chat_on_tap ?? true,
+  });
 
-  const requestClosePrefDrawer = () => {
-    if (prefSaving) return;
-    const savedPref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
-    if (samePref(prefDraft, savedPref)) {
-      closePrefDrawers();
-      return;
-    }
-    setDiscardPrefConfirmOpen(true);
-  };
-
-  const openPrefCustomDrawer = () => {
-    if (!prefDraft) return;
-    setPrefCustomSnapshot(clonePref(prefDraft));
-    setPrefCustomDrawerOpen(true);
-    setDiscardCustomPrefConfirmOpen(false);
-  };
-
-  const requestClosePrefCustomDrawer = () => {
-    if (!prefCustomDrawerOpen) return;
-    if (sameCustomMessages(prefDraft, prefCustomSnapshot)) {
-      setPrefCustomDrawerOpen(false);
-      setPrefCustomSnapshot(null);
-      return;
-    }
-    setDiscardCustomPrefConfirmOpen(true);
-  };
-
-  const discardPrefCustomChanges = () => {
-    setPrefDraft((current) =>
-      current && prefCustomSnapshot
-        ? {
-            ...current,
-            hiddenDirectMessageText: prefCustomSnapshot.hiddenDirectMessageText,
-            hiddenGroupMessageText: prefCustomSnapshot.hiddenGroupMessageText,
-            friendOnlineMessageText: prefCustomSnapshot.friendOnlineMessageText,
-            openChatOnTap: prefCustomSnapshot.openChatOnTap,
-          }
-        : current
-    );
-    setPrefCustomDrawerOpen(false);
-    setPrefCustomSnapshot(null);
-    setDiscardCustomPrefConfirmOpen(false);
-  };
-
-  const savePrefDraft = async () => {
-    if (!prefDrawerChannel || !prefDraft) return;
-    setError(null);
+  const savePreferencePatch = async (
+    channel: NotificationChannel,
+    patch: Omit<Parameters<typeof api.updateNotificationPref>[0], "channel">
+  ) => {
     setPrefSaving(true);
+    setError(null);
     try {
-      const updated = await api.updateNotificationPref({
-        channel: channelCode(prefDrawerChannel),
-        enabled: prefDraft.enabled ? 1 : 0,
-        offline_threshold_minutes: prefDraft.threshold,
-        hide_message_content: prefDraft.hideMessageContent ? 1 : 0,
-        hidden_direct_message_text: prefDraft.hiddenDirectMessageText.trim(),
-        hidden_group_message_text: prefDraft.hiddenGroupMessageText.trim(),
-        friend_online_message_text: prefDraft.friendOnlineMessageText.trim(),
-        open_chat_on_tap: prefDraft.openChatOnTap ? 1 : 0,
-      });
-      const nextPref = {
-        enabled: updated.enabled,
-        threshold: updated.offline_threshold_minutes,
-        hideMessageContent: updated.hide_message_content,
-        hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
-        hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
-        friendOnlineMessageText: updated.friend_online_message_text ?? "",
-        openChatOnTap: updated.open_chat_on_tap ?? true,
-      };
-      setPrefs((current) => ({
-        ...current,
-        [prefDrawerChannel]: nextPref,
-      }));
-      closePrefDrawers();
+      const updated = await api.updateNotificationPref({ ...patch, channel: channelCode(channel) });
+      setPrefs((current) => ({ ...current, [channel]: preferenceFromResponse(updated) }));
+      return true;
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "更新通知设置失败";
-      setError(message);
+      setError(apiError instanceof ApiError ? apiError.message : "更新通知设置失败");
+      return false;
     } finally {
       setPrefSaving(false);
     }
+  };
+
+  const messagePreferenceValue = (
+    pref: NotificationPreferences[NotificationChannel],
+    kind: NotificationMessageKind,
+    field: "title" | "content"
+  ) => {
+    if (kind === "direct") return field === "title" ? pref.hiddenDirectMessageTitle : pref.hiddenDirectMessageText;
+    if (kind === "group") return field === "title" ? pref.hiddenGroupMessageTitle : pref.hiddenGroupMessageText;
+    return field === "title" ? pref.friendOnlineMessageTitle : pref.friendOnlineMessageText;
+  };
+
+  const openThresholdEditor = (channel: NotificationChannel) => {
+    setPrefEditor({ type: "threshold", channel });
+    setPrefEditorValue(String(prefs[channel].threshold));
+  };
+
+  const openMessageEditor = (channel: NotificationChannel, kind: NotificationMessageKind, field: "title" | "content") => {
+    setPrefEditor({ type: "message", channel, kind, field });
+    setPrefEditorValue(messagePreferenceValue(prefs[channel], kind, field));
+  };
+
+  const savePreferenceEditor = async () => {
+    if (!prefEditor || prefEditorSaving) return;
+    setPrefEditorSaving(true);
+    let patch: Omit<Parameters<typeof api.updateNotificationPref>[0], "channel">;
+    if (prefEditor.type === "threshold") {
+      patch = { offline_threshold_minutes: Math.min(60, Math.max(1, Number(prefEditorValue))) };
+    } else {
+      const value = prefEditorValue.trim();
+      const key = `${prefEditor.kind}:${prefEditor.field}`;
+      patch = {
+        ...(key === "direct:title" ? { hidden_direct_message_title: value } : {}),
+        ...(key === "direct:content" ? { hidden_direct_message_text: value } : {}),
+        ...(key === "group:title" ? { hidden_group_message_title: value } : {}),
+        ...(key === "group:content" ? { hidden_group_message_text: value } : {}),
+        ...(key === "online:title" ? { friend_online_message_title: value } : {}),
+        ...(key === "online:content" ? { friend_online_message_text: value } : {}),
+      };
+    }
+    const saved = await savePreferencePatch(prefEditor.channel, patch);
+    if (saved) setPrefEditor(null);
+    setPrefEditorSaving(false);
   };
 
   const sendAuthCode = async () => {
@@ -974,9 +931,23 @@ export default function MenuPage() {
 
   const canUseFriendInvite = Boolean(me?.verified ?? session?.user?.verified);
 
-  const savedActivePref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
-  const activePrefDraft = prefDraft ?? savedActivePref;
-  const prefDraftDirty = Boolean(prefDrawerChannel && prefDraft && savedActivePref && !samePref(prefDraft, savedActivePref));
+  const activePref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
+  const editorMessageDefaults = (kind: NotificationMessageKind) => {
+    if (kind === "direct") return { title: defaultHiddenDirectMessageTitle, content: defaultHiddenDirectMessagePlaceholder };
+    if (kind === "group") return { title: defaultHiddenGroupMessageTitle, content: defaultHiddenGroupMessagePlaceholder };
+    return { title: defaultFriendOnlineMessageTitle, content: defaultFriendOnlineMessagePlaceholder };
+  };
+  const editorPreview = (() => {
+    if (!prefEditor || prefEditor.type !== "message") return null;
+    const pref = prefs[prefEditor.channel];
+    const defaults = editorMessageDefaults(prefEditor.kind);
+    const titleValue = prefEditor.field === "title" ? prefEditorValue : messagePreferenceValue(pref, prefEditor.kind, "title");
+    const contentValue = prefEditor.field === "content" ? prefEditorValue : messagePreferenceValue(pref, prefEditor.kind, "content");
+    return {
+      title: titleValue.trim() || defaults.title,
+      content: contentValue.trim() || defaults.content,
+    };
+  })();
 
   const openFriendInviteDrawer = () => {
     if (!canUseFriendInvite) {
@@ -1372,14 +1343,10 @@ export default function MenuPage() {
       <SideDrawer
         description={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}通知偏好` : ""}
         open={Boolean(prefDrawerChannel)}
-        actionBusy={prefSaving}
-        actionDisabled={!prefDraftDirty}
-        actionLabel="完成"
-        onAction={() => void savePrefDraft()}
-        onClose={requestClosePrefDrawer}
+        onClose={closePrefDrawers}
         title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}设置` : "通知设置"}
       >
-        {prefDrawerChannel && activePrefDraft ? (
+        {prefDrawerChannel && activePref ? (
           <div className="menu-pref-list">
             <div className="menu-pref-row">
               <div className="row-main">
@@ -1387,34 +1354,21 @@ export default function MenuPage() {
               </div>
               <button
                 aria-label={`toggle-${prefDrawerChannel}`}
-                className={`switch ${activePrefDraft.enabled ? "active" : ""}`}
-                onClick={() => updatePrefDraft({ enabled: !activePrefDraft.enabled })}
+                className={`switch ${activePref.enabled ? "active" : ""}`}
+                disabled={prefSaving}
+                onClick={() => void savePreferencePatch(prefDrawerChannel, { enabled: activePref.enabled ? 0 : 1 })}
                 type="button"
               />
             </div>
-            <div className="menu-pref-row">
+            <button className="menu-pref-row menu-pref-row-button" onClick={() => openThresholdEditor(prefDrawerChannel)} type="button">
               <div className="row-main">
                 <strong>离线阈值</strong>
               </div>
-              <div className="menu-pref-control">
-                <div className="menu-stepper">
-                  <button
-                    onClick={() => updatePrefDraft({ threshold: Math.max(1, activePrefDraft.threshold - 1) })}
-                    type="button"
-                  >
-                    −
-                  </button>
-                  <span className="menu-stepper-value mono">{activePrefDraft.threshold}</span>
-                  <button
-                    onClick={() => updatePrefDraft({ threshold: activePrefDraft.threshold + 1 })}
-                    type="button"
-                  >
-                    +
-                  </button>
-                </div>
-                <span className="menu-stepper-unit">分钟</span>
+              <div className="menu-pref-row-value">
+                <span>{activePref.threshold} 分钟</span>
+                <span className="material-symbols-outlined">chevron_right</span>
               </div>
-            </div>
+            </button>
             {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
               <>
                 <div className="menu-pref-row">
@@ -1424,15 +1378,16 @@ export default function MenuPage() {
                   </div>
                   <button
                     aria-label={`toggle-hide-content-${prefDrawerChannel}`}
-                    className={`switch ${activePrefDraft.hideMessageContent ? "active" : ""}`}
-                    onClick={() => updatePrefDraft({ hideMessageContent: !activePrefDraft.hideMessageContent })}
+                    className={`switch ${activePref.hideMessageContent ? "active" : ""}`}
+                    disabled={prefSaving}
+                    onClick={() => void savePreferencePatch(prefDrawerChannel, { hide_message_content: activePref.hideMessageContent ? 0 : 1 })}
                     type="button"
                   />
                 </div>
-                <button className="menu-pref-row menu-pref-row-button" onClick={openPrefCustomDrawer} type="button">
+                <button className="menu-pref-row menu-pref-row-button" onClick={() => setPrefCustomDrawerOpen(true)} type="button">
                   <div className="row-main">
                     <strong>自定义消息提示</strong>
-                    <div className="row-subtle">文案与点击跳转</div>
+                    <div className="row-subtle">按消息类型设置</div>
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
                 </button>
@@ -1442,75 +1397,49 @@ export default function MenuPage() {
         ) : null}
       </SideDrawer>
       <SideDrawer
-        description="隐藏内容时使用"
-        open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePrefDraft)}
-        actionBusy={prefSaving}
-        actionDisabled={!prefDraftDirty}
-        actionLabel="完成"
-        onAction={() => void savePrefDraft()}
-        onClose={requestClosePrefCustomDrawer}
+        description={prefDrawerChannel === "email" ? "邮件正文" : "标题与内容"}
+        open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePref)}
+        onClose={() => setPrefCustomDrawerOpen(false)}
         title="自定义消息提示"
       >
-        {prefDrawerChannel && activePrefDraft ? (
+        {prefDrawerChannel && activePref ? (
           <div className="menu-pref-custom-drawer">
-            <div className="menu-pref-list">
-              <div className="menu-pref-form-card">
-                <div className="simple-form notification-custom-message-fields">
-                  {prefDrawerChannel === "bark" ? (
-                    <div className="menu-pref-row notification-custom-toggle-row">
-                      <div className="row-main">
-                        <strong>点击打开聊天</strong>
-                        <div className="row-subtle">通知携带聊天链接</div>
-                      </div>
-                      <button
-                        aria-label="toggle-bark-open-chat"
-                        className={`switch ${activePrefDraft.openChatOnTap ? "active" : ""}`}
-                        onClick={() => updatePrefDraft({ openChatOnTap: !activePrefDraft.openChatOnTap })}
-                        type="button"
-                      />
-                    </div>
-                  ) : null}
-                  <div>
-                    <label className="field-label">私聊消息提示</label>
-                    <input
-                      className="input"
-                      maxLength={255}
-                      placeholder={defaultHiddenDirectMessagePlaceholder}
-                      value={activePrefDraft.hiddenDirectMessageText}
-                      onChange={(event) =>
-                        updatePrefDraft({
-                          hiddenDirectMessageText: event.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="field-label">群聊消息提示</label>
-                    <input
-                      className="input"
-                      maxLength={255}
-                      placeholder={defaultHiddenGroupMessagePlaceholder}
-                      value={activePrefDraft.hiddenGroupMessageText}
-                      onChange={(event) =>
-                        updatePrefDraft({
-                          hiddenGroupMessageText: event.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="field-label">好友上线提示</label>
-                    <input
-                      className="input"
-                      maxLength={255}
-                      placeholder={defaultFriendOnlineMessagePlaceholder}
-                      value={activePrefDraft.friendOnlineMessageText}
-                      onChange={(event) => updatePrefDraft({ friendOnlineMessageText: event.target.value })}
-                    />
-                  </div>
+            {prefDrawerChannel === "bark" ? (
+              <div className="menu-pref-list">
+                <div className="menu-pref-row">
+                  <div className="row-main"><strong>点击打开聊天</strong><div className="row-subtle">通知携带聊天链接</div></div>
+                  <button
+                    aria-label="toggle-bark-open-chat"
+                    className={`switch ${activePref.openChatOnTap ? "active" : ""}`}
+                    disabled={prefSaving}
+                    onClick={() => void savePreferencePatch("bark", { open_chat_on_tap: activePref.openChatOnTap ? 0 : 1 })}
+                    type="button"
+                  />
                 </div>
               </div>
-            </div>
+            ) : null}
+            {(["direct", "group", "online"] as NotificationMessageKind[]).map((kind) => {
+              const label = kind === "direct" ? "私聊提示" : kind === "group" ? "群聊提示" : "上线提示";
+              const content = messagePreferenceValue(activePref, kind, "content");
+              const title = messagePreferenceValue(activePref, kind, "title");
+              return (
+                <section className="notification-template-block" key={kind}>
+                  <div className="section-label">{label}</div>
+                  <div className="simple-list">
+                    {prefDrawerChannel === "bark" ? (
+                      <button className="simple-row menu-link-row" onClick={() => openMessageEditor(prefDrawerChannel, kind, "title")} type="button">
+                        <div className="row-main"><strong>标题自定义</strong><div className="row-subtle">{title || "使用默认标题"}</div></div>
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </button>
+                    ) : null}
+                    <button className="simple-row menu-link-row" onClick={() => openMessageEditor(prefDrawerChannel, kind, "content")} type="button">
+                      <div className="row-main"><strong>内容自定义</strong><div className="row-subtle">{content || "使用默认内容"}</div></div>
+                      <span className="material-symbols-outlined">chevron_right</span>
+                    </button>
+                  </div>
+                </section>
+              );
+            })}
           </div>
         ) : null}
       </SideDrawer>
@@ -1775,6 +1704,84 @@ export default function MenuPage() {
         }}
         onConfirm={() => void deleteAccount()}
       />
+      {prefEditor ? (
+        <div
+          className="dialog-backdrop notification-editor-backdrop"
+          onClick={() => {
+            if (!prefEditorSaving) setPrefEditor(null);
+          }}
+          role="presentation"
+        >
+          <section
+            aria-modal="true"
+            className="notification-editor-dialog"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className="notification-editor-heading">
+              <div>
+                <h2>{prefEditor.type === "threshold" ? "离线阈值" : prefEditor.field === "title" ? "自定义标题" : "自定义内容"}</h2>
+                <p>{prefEditor.type === "threshold" ? "离线多久后发送提醒" : "留空将使用默认文案"}</p>
+              </div>
+              <button className="icon-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button" aria-label="关闭">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            {prefEditor.type === "threshold" ? (
+              <div className="notification-threshold-editor">
+                <strong>{prefEditorValue} 分钟</strong>
+                <input
+                  aria-label="离线阈值"
+                  max={60}
+                  min={1}
+                  onChange={(event) => setPrefEditorValue(event.target.value)}
+                  type="range"
+                  value={prefEditorValue}
+                />
+                <div><span>1 分钟</span><span>60 分钟</span></div>
+              </div>
+            ) : (
+              <>
+                {prefEditor.field === "title" ? (
+                  <input
+                    autoFocus
+                    className="input"
+                    maxLength={80}
+                    onChange={(event) => setPrefEditorValue(event.target.value)}
+                    placeholder={editorMessageDefaults(prefEditor.kind).title}
+                    value={prefEditorValue}
+                  />
+                ) : (
+                  <textarea
+                    autoFocus
+                    className="textarea notification-editor-textarea"
+                    maxLength={255}
+                    onChange={(event) => setPrefEditorValue(event.target.value)}
+                    placeholder={editorMessageDefaults(prefEditor.kind).content}
+                    rows={3}
+                    value={prefEditorValue}
+                  />
+                )}
+                {editorPreview ? (
+                  <div className={`notification-push-preview is-${prefEditor.channel}`}>
+                    {prefEditor.channel === "bark" ? <img alt="" src={barkAppIconUrl} /> : <span className="notification-mail-preview-icon">邮</span>}
+                    <div>
+                      <strong>{prefEditor.channel === "bark" ? `【言浪】${editorPreview.title}` : "邮件正文预览"}</strong>
+                      <p>{editorPreview.content}</p>
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
+            <div className="notification-editor-actions">
+              <button className="ghost-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button">取消</button>
+              <button className="button" disabled={prefEditorSaving} onClick={() => void savePreferenceEditor()} type="button">
+                {prefEditorSaving ? "保存中" : "保存"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
       <RequestStatusModal
         errorLabel={statusModal?.errorLabel}
         loadingLabel={statusModal?.loadingLabel}
@@ -1782,25 +1789,6 @@ export default function MenuPage() {
         open={Boolean(statusModal?.open)}
         phase={statusModal?.phase ?? "loading"}
         successLabel={statusModal?.successLabel}
-      />
-      <ConfirmDialog
-        open={discardPrefConfirmOpen}
-        title="放弃这次修改？"
-        description="你还没有完成保存，直接返回会丢失这次改动。"
-        confirmLabel="直接返回"
-        onClose={() => setDiscardPrefConfirmOpen(false)}
-        onConfirm={() => {
-          setDiscardPrefConfirmOpen(false);
-          closePrefDrawers();
-        }}
-      />
-      <ConfirmDialog
-        open={discardCustomPrefConfirmOpen}
-        title="放弃自定义消息提示？"
-        description="你还没有完成保存，直接返回会丢失这次改动。"
-        confirmLabel="直接返回"
-        onClose={() => setDiscardCustomPrefConfirmOpen(false)}
-        onConfirm={discardPrefCustomChanges}
       />
       <ConfirmDialog
         open={passwordReminderOpen}

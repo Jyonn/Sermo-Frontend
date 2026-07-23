@@ -122,8 +122,11 @@ export interface NotificationPreferenceDTO {
   enabled: boolean;
   offline_threshold_minutes: number;
   hide_message_content: boolean;
+  hidden_direct_message_title: string;
   hidden_direct_message_text: string;
+  hidden_group_message_title: string;
   hidden_group_message_text: string;
+  friend_online_message_title: string;
   friend_online_message_text: string;
   open_chat_on_tap: boolean;
 }
@@ -354,8 +357,11 @@ export interface NotificationPreference {
   enabled: boolean;
   threshold: number;
   hideMessageContent: boolean;
+  hiddenDirectMessageTitle: string;
   hiddenDirectMessageText: string;
+  hiddenGroupMessageTitle: string;
   hiddenGroupMessageText: string;
+  friendOnlineMessageTitle: string;
   friendOnlineMessageText: string;
   openChatOnTap: boolean;
 }
