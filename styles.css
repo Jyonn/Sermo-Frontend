@@ -4458,12 +4458,21 @@ img {
   top: 14px;
   right: 14px;
   z-index: 1;
+  display: grid;
+  place-items: center;
   width: 40px;
   height: 40px;
+  padding: 0;
   border-radius: 999px;
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--line-soft);
+}
+
+.sheet-close .material-symbols-outlined {
+  display: block;
+  font-size: 22px;
+  line-height: 1;
 }
 
 .sheet-drag-zone {
