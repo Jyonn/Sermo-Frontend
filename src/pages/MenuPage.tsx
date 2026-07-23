@@ -1317,8 +1317,6 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description="扫一扫或复制链接，就能把这个空间里的好友邀请发给别人。"
-        eyebrow="Share"
         open={inviteDrawerOpen}
         onClose={() => setInviteDrawerOpen(false)}
         title="好友二维码"

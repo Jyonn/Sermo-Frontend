@@ -4555,14 +4555,21 @@ img {
   -webkit-overflow-scrolling: touch;
 }
 
-.drawer-body .simple-list {
+.drawer-body .simple-list,
+.sheet-body .simple-list,
+.drawer-body .chat-detail-settings-list,
+.drawer-body .user-profile-groups,
+.drawer-body .user-profile-empty {
   overflow: hidden;
   border: 1px solid rgba(215, 220, 231, 0.72);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.56);
 }
 
-.drawer-body .simple-row {
+.drawer-body .simple-row,
+.sheet-body .simple-row,
+.drawer-body .chat-detail-setting-row,
+.drawer-body .user-profile-group-row {
   padding-inline: 14px;
 }
 

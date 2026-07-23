@@ -3855,7 +3855,7 @@ export default function ChatsPage() {
       <SideDrawer
         description={selectedChat ? (selectedChat.type === "group" ? `${selectedChat.members} 位成员` : selectedChat.subtitle) : ""}
         open={detailsSheetOpen}
-        title={selectedChat?.title ?? "聊天详情"}
+        title="聊天详情"
         onClose={() => setDetailsSheetOpen(false)}
       >
         {selectedChat ? (
