@@ -292,9 +292,9 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
   if (!ready || (session && !gesturePreferenceReady)) {
     return (
-      <main className="auth-restore-screen">
+    <main className="auth-restore-screen">
         <div className="auth-restore-orb" aria-hidden="true" />
-        <FeedbackState title="正在恢复登录..." description="正在验证你的登录状态。" tone="loading" />
+        <FeedbackState title="正在恢复登录" description="会话核验中" tone="loading" />
       </main>
     );
   }
