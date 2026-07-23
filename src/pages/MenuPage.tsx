@@ -1084,8 +1084,9 @@ export default function MenuPage() {
               <button className="simple-row menu-link-row" onClick={() => setPwaInstallSheetOpen(true)} type="button">
                 <div className="row-main">
                   <strong className="menu-install-title">
-                    <span>安装 {space?.name ?? "当前空间"} 到桌面</span>
+                    <span>安装 {space?.name ?? "当前空间"}</span>
                     <UserAvatar className="menu-install-avatar" name={space?.official_user?.name ?? space?.name ?? "空间"} uri={space?.official_user?.avatar_uri} />
+                    <span>到桌面</span>
                   </strong>
                   <div className="row-subtle">快捷打开并接收通知</div>
                 </div>

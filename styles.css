@@ -4496,6 +4496,15 @@ img {
   align-items: flex-start;
 }
 
+.drawer-topbar-shell.is-title-only {
+  align-items: center;
+  min-height: 36px;
+}
+
+.drawer-topbar-shell.is-title-only .drawer-topbar-meta {
+  align-content: center;
+}
+
 .drawer-back-button {
   flex: 0 0 auto;
 }

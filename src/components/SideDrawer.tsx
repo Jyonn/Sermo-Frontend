@@ -144,7 +144,7 @@ export function SideDrawer({
     <div className="drawer-backdrop" onClick={requestClose} role="presentation">
       <aside aria-modal="true" className="side-drawer" onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="drawer-topbar">
-          <div className="chat-conversation-topbar drawer-topbar-shell">
+          <div className={`chat-conversation-topbar drawer-topbar-shell${!eyebrow && !description ? " is-title-only" : ""}`}>
             <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label="返回">
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
