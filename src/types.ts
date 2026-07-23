@@ -112,6 +112,30 @@ export interface SpaceAdminDashboardDTO {
   };
 }
 
+export interface AdminMemberContactDTO {
+  bound: boolean;
+  verified: boolean;
+}
+
+export interface AdminMemberDTO extends UserDTO {
+  contacts: {
+    email: AdminMemberContactDTO;
+    sms: AdminMemberContactDTO;
+    bark: AdminMemberContactDTO;
+  };
+  notification_preferences: Array<{
+    channel: number;
+    enabled: boolean;
+    offline_threshold_minutes: number;
+  }>;
+}
+
+export interface SpaceAdminBroadcastResultDTO {
+  recipients_count: number;
+  sent_count: number;
+  duplicate_count: number;
+}
+
 export interface JoinResponseDTO {
   space: SpaceDTO;
   auth: LoginAuthDTO;

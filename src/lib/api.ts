@@ -1,5 +1,6 @@
 import type {
   ApiEnvelope,
+  AdminMemberDTO,
   AvatarUploadDTO,
   AuthSession,
   ChatDTO,
@@ -19,6 +20,7 @@ import type {
   OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
   SpaceAdminDashboardDTO,
+  SpaceAdminBroadcastResultDTO,
   SpaceAdminSession,
   SpaceDTO,
   SpaceEmailCodeDTO,
@@ -268,10 +270,18 @@ export const api = {
   },
 
   getAdminUsers(params: { q?: string; online?: 0 | 1; limit?: number; offset?: number }, signal?: AbortSignal) {
-    return request<UserDTO[]>("/spaces/admin/users", {
+    return request<AdminMemberDTO[]>("/spaces/admin/users", {
       adminAuth: true,
       query: params,
       signal,
+    });
+  },
+
+  broadcastAdminMessage(payload: { content: string; broadcast_id: string }) {
+    return request<SpaceAdminBroadcastResultDTO>("/spaces/admin/broadcast", {
+      method: "POST",
+      adminAuth: true,
+      body: payload,
     });
   },
 
