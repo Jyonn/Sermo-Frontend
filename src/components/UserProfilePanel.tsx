@@ -1,19 +1,40 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AsyncErrorDialog } from "./AsyncErrorDialog";
 import { BottomSheet } from "./BottomSheet";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
+import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
 import { RequestStatusModal } from "./RequestStatusModal";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, UserDTO } from "../types";
+
+export interface UserProfileSeed {
+  user_id: number;
+  name: string;
+  avatar_uri?: string;
+  is_alive?: boolean;
+  last_heartbeat?: number;
+}
 
 interface UserProfilePanelProps {
   userId: number;
+  initialUser?: UserProfileSeed | null;
+  initialIsFriend?: boolean;
+  onSyncingChange?: (syncing: boolean) => void;
   onOpenChat?: (chatId: number) => void;
+}
+
+interface UserProfileCacheSnapshot {
+  user: UserDTO;
+  groupChats: ChatDTO[];
+  isFriend: boolean;
+  respondedAt: number | null;
 }
 
 function friendshipAge(respondedAt?: number | null) {
@@ -22,20 +43,28 @@ function friendshipAge(respondedAt?: number | null) {
   return days < 30 ? `认识 ${days} 天` : `认识 ${Math.floor(days / 30)} 个月`;
 }
 
-export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) {
+export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat }: UserProfilePanelProps) {
   const navigate = useNavigate();
-  const [viewState, setViewState] = useState<AppViewState>("idle");
+  const { session } = useAuth();
+  const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
+  const initialCached = useMemo(
+    () => readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data ?? null,
+    [cacheScope, userId]
+  );
+  const syncingCallbackRef = useRef(onSyncingChange);
+  syncingCallbackRef.current = onSyncingChange;
+  const [viewState, setViewState] = useState<AppViewState>(initialCached || initialUser ? "ready" : "loading");
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<UserDTO | null>(null);
-  const [groupChats, setGroupChats] = useState<ChatDTO[]>([]);
+  const [user, setUser] = useState<UserDTO | UserProfileSeed | null>(initialCached?.user ?? initialUser ?? null);
+  const [groupChats, setGroupChats] = useState<ChatDTO[]>(initialCached?.groupChats ?? []);
   const [allGroupsOpen, setAllGroupsOpen] = useState(false);
   const [groupPickerOpen, setGroupPickerOpen] = useState(false);
   const [groupCandidates, setGroupCandidates] = useState<UserDTO[]>([]);
   const [groupCandidatesLoading, setGroupCandidatesLoading] = useState(false);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
   const [groupCreating, setGroupCreating] = useState(false);
-  const [isFriend, setIsFriend] = useState(false);
-  const [respondedAt, setRespondedAt] = useState<number | null>(null);
+  const [isFriend, setIsFriend] = useState<boolean | null>(initialCached?.isFriend ?? initialIsFriend ?? null);
+  const [respondedAt, setRespondedAt] = useState<number | null>(initialCached?.respondedAt ?? null);
   const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [statusModal, setStatusModal] = useState<{
@@ -47,8 +76,14 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
 
   useEffect(() => {
     const controller = new AbortController();
-    setViewState("loading");
+    const cached = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data ?? null;
+    setUser(cached?.user ?? initialUser ?? null);
+    setGroupChats(cached?.groupChats ?? []);
+    setIsFriend(cached?.isFriend ?? initialIsFriend ?? null);
+    setRespondedAt(cached?.respondedAt ?? null);
+    setViewState(cached || initialUser ? "ready" : "loading");
     setError(null);
+    syncingCallbackRef.current?.(true);
     Promise.all([
       api.getFriends(controller.signal),
       api.getChats(controller.signal),
@@ -61,22 +96,39 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
         if (!matchedUser) throw new Error("没有找到这个用户");
         setUser(matchedUser);
         setIsFriend(status.is_friend);
-        setRespondedAt(status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null);
-        setGroupChats(chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId)));
+        const nextRespondedAt = status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null;
+        const nextGroupChats = chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId));
+        setRespondedAt(nextRespondedAt);
+        setGroupChats(nextGroupChats);
+        writeTabCache(cacheScope, `user-profile:${userId}`, {
+          user: matchedUser,
+          groupChats: nextGroupChats,
+          isFriend: status.is_friend,
+          respondedAt: nextRespondedAt,
+        });
         setRequestState("idle");
         setViewState("ready");
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        setError(apiError instanceof ApiError || apiError instanceof Error ? apiError.message : "用户详情加载失败");
-        setViewState("error");
+        const message = apiError instanceof ApiError || apiError instanceof Error ? apiError.message : "用户详情加载失败";
+        if (!cached && !initialUser) {
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) syncingCallbackRef.current?.(false);
       });
-    return () => controller.abort();
-  }, [userId]);
+    return () => {
+      controller.abort();
+      syncingCallbackRef.current?.(false);
+    };
+  }, [cacheScope, userId]);
 
   const presence = useMemo(() => {
     if (!user) return "";
-    return user.is_alive ? "现在在线" : `上次活跃 ${formatRelativeTime(user.last_heartbeat)}`;
+    return user.is_alive ? "现在在线" : user.last_heartbeat ? `上次活跃 ${formatRelativeTime(user.last_heartbeat)}` : "暂时离线";
   }, [user]);
 
   const openChat = async () => {
@@ -154,6 +206,8 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
       setRespondedAt(null);
       setRemoveConfirmOpen(false);
       setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      const cached = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data;
+      if (cached) writeTabCache(cacheScope, `user-profile:${userId}`, { ...cached, isFriend: false, respondedAt: null });
     } catch (apiError) {
       setStatusModal((current) =>
         current ? { ...current, phase: "error", errorLabel: apiError instanceof ApiError ? apiError.message : "删除失败" } : null
@@ -161,7 +215,17 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
     }
   };
 
-  if (viewState === "loading") return <FeedbackState title="正在打开用户资料" description="" tone="loading" />;
+  if (!user && viewState === "loading") {
+    return (
+      <div className="user-profile-loading-shell" aria-hidden="true">
+        <span className="user-profile-loading-avatar" />
+        <span className="user-profile-loading-copy">
+          <span className="user-profile-loading-line" />
+          <span className="user-profile-loading-line is-short" />
+        </span>
+      </div>
+    );
+  }
   if (!user || viewState === "error") return <FeedbackState title="无法打开用户资料" description={error ?? "请稍后重试"} />;
 
   return (
@@ -178,13 +242,13 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
       </section>
 
       <div className="user-profile-primary-actions">
-        {isFriend ? (
+        {isFriend === true ? (
           <button className="button" onClick={() => void openChat()} type="button">发消息</button>
-        ) : (
+        ) : isFriend === false ? (
           <button className="button" disabled={requestState !== "idle"} onClick={() => void sendRequest()} type="button">
             {requestState === "sending" ? "发送中" : requestState === "sent" ? "已发送" : "加好友"}
           </button>
-        )}
+        ) : null}
       </div>
 
       <section className="user-profile-section">
@@ -202,7 +266,7 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
         </div>
       </section>
 
-      {isFriend ? (
+      {isFriend === true ? (
         <section className="user-profile-relationship-actions">
           <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">删除好友</button>
         </section>
@@ -211,11 +275,12 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
       <BottomSheet
         open={groupPickerOpen}
         title="新建群聊"
+        titleAccessory={<HeaderSyncIndicator syncing={groupCandidatesLoading} />}
         description={`和 ${user.name} 一起选择群成员`}
         onClose={() => setGroupPickerOpen(false)}
       >
         <div className="user-profile-group-picker">
-          {groupCandidatesLoading ? <FeedbackState title="正在加载好友" description="" tone="loading" /> : groupCandidates.length ? (
+          {!groupCandidatesLoading && groupCandidates.length ? (
             <div className="simple-list">
               {groupCandidates.map((candidate) => {
                 const selected = groupSelectedIds.includes(candidate.user_id);
@@ -233,7 +298,7 @@ export function UserProfilePanel({ userId, onOpenChat }: UserProfilePanelProps) 
                 );
               })}
             </div>
-          ) : <FeedbackState title="没有可邀请的好友" description="" />}
+          ) : !groupCandidatesLoading ? <FeedbackState title="没有可邀请的好友" description="" /> : null}
           <button className="button user-profile-create-confirm" disabled={!groupSelectedIds.length || groupCreating} onClick={() => void createGroupChat()} type="button">
             {groupCreating ? "创建中" : `创建群聊${groupSelectedIds.length ? ` · ${groupSelectedIds.length + 2} 人` : ""}`}
           </button>

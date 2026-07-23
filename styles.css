@@ -4443,6 +4443,12 @@ img {
   touch-action: none;
 }
 
+.sheet-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .sheet-body {
   padding-top: 16px;
   display: grid;
@@ -4529,6 +4535,13 @@ img {
   font-size: 0.98rem;
   font-weight: 700;
   line-height: 1.1;
+}
+
+.drawer-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .drawer-description {
@@ -5811,6 +5824,12 @@ img {
   font-size: 1rem;
 }
 
+.friend-profile-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .friend-profile-page-title span {
   color: var(--text-muted);
   font-size: 0.76rem;
@@ -5869,11 +5888,46 @@ img {
 
 .user-profile-copy h2 {
   margin: 0;
+  padding-bottom: 0.12em;
   overflow: hidden;
   font-size: clamp(1.55rem, 7vw, 2rem);
-  line-height: 1.05;
+  line-height: 1.18;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.user-profile-loading-shell {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 10px 2px;
+}
+
+.user-profile-loading-avatar,
+.user-profile-loading-line {
+  background: rgba(145, 154, 171, 0.12);
+}
+
+.user-profile-loading-avatar {
+  width: 104px;
+  height: 104px;
+  border-radius: 30px;
+}
+
+.user-profile-loading-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.user-profile-loading-line {
+  width: 72%;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.user-profile-loading-line.is-short {
+  width: 44%;
 }
 
 .user-profile-copy p {

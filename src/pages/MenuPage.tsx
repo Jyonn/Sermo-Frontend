@@ -1057,8 +1057,6 @@ export default function MenuPage() {
           </button>
         ) : null}
 
-        {viewState === "loading" ? <FeedbackState title="菜单加载中" description="正在同步你的账户与通知信息。" tone="loading" /> : null}
-
         <section className="list-section">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setBasicDrawerOpen(true)} type="button">
@@ -1321,10 +1319,9 @@ export default function MenuPage() {
         open={inviteDrawerOpen}
         onClose={() => setInviteDrawerOpen(false)}
         title="好友二维码"
+        titleAccessory={<HeaderSyncIndicator syncing={friendInviteLoading} />}
       >
         <div className="detail-list menu-share-drawer">
-          {friendInviteLoading ? <FeedbackState title="二维码生成中" description="正在准备专属好友邀请链接。" tone="loading" /> : null}
-
           {!friendInviteLoading && friendInviteQrUri ? (
             <div className="menu-share-card">
               <div className="menu-share-qr-shell">

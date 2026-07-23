@@ -5,11 +5,14 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { formatRelativeTime } from "../lib/presentation";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
@@ -43,8 +46,10 @@ function requestName(request: FriendshipRequestDTO, tab: FriendTab) {
 export default function FriendsPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [tab, setTab] = useState<FriendTab>(tabFromPath(location.pathname));
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [friends, setFriends] = useState<FriendAccepted[]>([]);
   const [incoming, setIncoming] = useState<FriendshipRequestDTO[]>([]);
@@ -60,6 +65,7 @@ export default function FriendsPage() {
     successLabel: string;
     errorLabel: string;
   } | null>(null);
+  const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
     if (location.pathname === "/app/friends") setTab("accepted");
@@ -68,27 +74,56 @@ export default function FriendsPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setViewState("loading");
+    const cached = readTabCache<{
+      friends: FriendAccepted[];
+      incoming: FriendshipRequestDTO[];
+      outgoing: FriendshipRequestDTO[];
+    }>(cacheScope, "friends");
+    if (cached) {
+      setFriends(cached.data.friends);
+      setIncoming(cached.data.incoming);
+      setOutgoing(cached.data.outgoing);
+      setViewState("ready");
+    } else {
+      setViewState("loading");
+    }
+    setSyncing(true);
     setError(null);
 
     Promise.all([api.getFriends(controller.signal), api.getFriendRequests(controller.signal)])
       .then(([friendRows, requestRows]) => {
         const normalizedRequests = normalizePendingRequests(requestRows);
-        setFriends(friendRows.map(mapFriend));
+        const nextFriends = friendRows.map(mapFriend);
+        setFriends(nextFriends);
         setIncoming(normalizedRequests.incoming);
         setOutgoing(normalizedRequests.outgoing);
+        writeTabCache(cacheScope, "friends", {
+          friends: nextFriends,
+          incoming: normalizedRequests.incoming,
+          outgoing: normalizedRequests.outgoing,
+        });
         emitFriendRequestsUpdated(normalizedRequests.incoming.length);
         setViewState("ready");
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "好友数据加载失败";
-        setError(message);
-        setViewState("error");
+        if (!cached) {
+          const message = apiError instanceof ApiError ? apiError.message : "好友数据加载失败";
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSyncing(false);
       });
 
     return () => controller.abort();
-  }, []);
+  }, [cacheScope]);
+
+  useEffect(() => {
+    if (viewState !== "ready") return;
+    writeTabCache(cacheScope, "friends", { friends, incoming, outgoing });
+  }, [cacheScope, friends, incoming, outgoing, viewState]);
 
   const activeRequests = useMemo(() => {
     if (tab === "incoming") return incoming;
@@ -155,9 +190,9 @@ export default function FriendsPage() {
           <Link className={`tab-chip ${tab === "accepted" ? "active" : ""}`} to="/app/friends">
             好友 {friends.length ? `(${friends.length})` : ""}
           </Link>
+          <HeaderSyncIndicator syncing={syncing} />
         </div>
 
-        {viewState === "loading" ? <FeedbackState title="好友加载中" description="正在同步好友和申请。" tone="loading" /> : null}
         {tab === "accepted" ? (
           <section className="list-section">
             <div className="simple-list">

@@ -478,12 +478,6 @@ export default function SquarePage() {
             </div>
           ))}
 
-          {viewState === "loading" ? (
-            <div className="square-plaza-status">
-              <FeedbackState title="广场加载中" description="正在同步在线成员。" tone="loading" />
-            </div>
-          ) : null}
-
           {!onlineUsers.length && viewState === "ready" ? (
             <div className="square-plaza-status">
               <FeedbackState

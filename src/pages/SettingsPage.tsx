@@ -5,11 +5,12 @@ import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { FeedbackState } from "../components/FeedbackState";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences } from "../types";
 
 const channels: Array<[NotificationChannel, number, string]> = [
@@ -59,6 +60,7 @@ export default function SettingsPage() {
   const pathname = location.pathname;
   const tab = pathname.split("/").pop() ?? "account";
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prefs, setPrefs] = useState<NotificationPreferences>(emptyPrefs);
   const [welcomeMessage, setWelcomeMessage] = useState("");
@@ -96,27 +98,46 @@ export default function SettingsPage() {
     () => channels.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
     [isAppleEnvironment]
   );
+  const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
     const controller = new AbortController();
-    setViewState("loading");
+    const cached = readTabCache<NotificationPreferences>(cacheScope, "settings:notifications");
+    if (cached) {
+      setPrefs(cached.data);
+      setViewState("ready");
+    } else {
+      setViewState("loading");
+    }
+    setSyncing(true);
     setError(null);
 
     api
       .getNotificationPrefs(controller.signal)
       .then((rows) => {
-        setPrefs(mapPrefs(rows));
+        const nextPrefs = mapPrefs(rows);
+        setPrefs(nextPrefs);
+        writeTabCache(cacheScope, "settings:notifications", nextPrefs);
         setViewState("ready");
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "加载设置失败";
-        setError(message);
-        setViewState("error");
+        if (!cached) {
+          const message = apiError instanceof ApiError ? apiError.message : "加载设置失败";
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSyncing(false);
       });
 
     return () => controller.abort();
-  }, []);
+  }, [cacheScope]);
+
+  useEffect(() => {
+    if (viewState === "ready") writeTabCache(cacheScope, "settings:notifications", prefs);
+  }, [cacheScope, prefs, viewState]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -422,6 +443,7 @@ export default function SettingsPage() {
           <Link className={`tab-chip ${tab === "contacts" ? "active" : ""}`} to="/app/settings/contacts">
             联系方式
           </Link>
+          <HeaderSyncIndicator syncing={syncing} />
         </div>
 
         {successMessage ? <div className="inline-note success-note">{successMessage}</div> : null}
@@ -481,7 +503,6 @@ export default function SettingsPage() {
 
         {tab === "notifications" ? (
           <section className="list-section">
-            {viewState === "loading" ? <FeedbackState title="通知设置加载中" description="正在同步各渠道设置。" tone="loading" /> : null}
             <div className="simple-list">
               {visibleChannels.map(([channel, _value, label]) => {
                 const pref = prefs[channel];

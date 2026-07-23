@@ -107,6 +107,7 @@ export default function NotificationsPage() {
   const [requestDrawerTab, setRequestDrawerTab] = useState<"incoming" | "outgoing">("incoming");
   const [groupSheetOpen, setGroupSheetOpen] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
+  const [profileSyncing, setProfileSyncing] = useState(false);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
@@ -242,8 +243,6 @@ export default function NotificationsPage() {
             />
           </label>
         </div>
-
-        {viewState === "loading" ? <FeedbackState title="通讯加载中" description="正在同步好友、申请和群聊。" tone="loading" /> : null}
 
         <section className="list-section">
           <div className="simple-list">
@@ -455,11 +454,16 @@ export default function NotificationsPage() {
         description="资料与共同关系"
         open={profileDrawerUserId !== null}
         title="用户详情"
+        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >
         {profileDrawerUserId !== null ? (
           <UserProfilePanel
+            key={profileDrawerUserId}
             userId={profileDrawerUserId}
+            initialUser={friends.find((friend) => friend.user_id === profileDrawerUserId)}
+            initialIsFriend
+            onSyncingChange={setProfileSyncing}
             onOpenChat={(chatId) => {
               window.history.replaceState({ ...window.history.state, sermoDrawerStack: [] }, "");
               setProfileDrawerUserId(null);

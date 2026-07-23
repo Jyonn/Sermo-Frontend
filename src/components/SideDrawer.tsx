@@ -7,6 +7,7 @@ const activeDrawerIds = new Set<string>();
 interface SideDrawerProps {
   open: boolean;
   title: string;
+  titleAccessory?: ReactNode;
   eyebrow?: string;
   description?: string;
   actionLabel?: string;
@@ -21,6 +22,7 @@ interface SideDrawerProps {
 export function SideDrawer({
   open,
   title,
+  titleAccessory,
   eyebrow,
   description,
   actionLabel,
@@ -151,7 +153,10 @@ export function SideDrawer({
             <div className="drawer-topbar-copy">
               <div className="drawer-topbar-meta">
                 {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-                <h3 className="drawer-title">{title}</h3>
+                <div className="drawer-title-row">
+                  <h3 className="drawer-title">{title}</h3>
+                  {titleAccessory}
+                </div>
                 {description ? <p className="drawer-description">{description}</p> : null}
               </div>
             </div>

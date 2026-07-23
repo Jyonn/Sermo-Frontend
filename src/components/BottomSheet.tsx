@@ -5,6 +5,7 @@ import { useBodyScrollLock } from "../lib/bodyLock";
 interface BottomSheetProps {
   open: boolean;
   title: string;
+  titleAccessory?: ReactNode;
   description?: string;
   onClose: () => void;
   children: ReactNode;
@@ -17,6 +18,7 @@ interface BottomSheetProps {
 export function BottomSheet({
   open,
   title,
+  titleAccessory,
   description,
   onClose,
   children,
@@ -109,7 +111,10 @@ export function BottomSheet({
             onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
           >
             <p className="eyebrow">Sheet</p>
-            <h3 className="panel-title">{title}</h3>
+            <div className="sheet-title-row">
+              <h3 className="panel-title">{title}</h3>
+              {titleAccessory}
+            </div>
             {description ? <p className="card-subtitle">{description}</p> : null}
           </div>
         )}

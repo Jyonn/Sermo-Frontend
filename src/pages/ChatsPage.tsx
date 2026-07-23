@@ -17,6 +17,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { InputDialog } from "../components/InputDialog";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
@@ -1436,6 +1437,7 @@ export default function ChatsPage() {
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
+  const [profileSyncing, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
@@ -1747,6 +1749,21 @@ export default function ChatsPage() {
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
+  const profileDrawerSeed = useMemo(() => {
+    if (profileDrawerUserId === null) return null;
+    for (const chat of chats) {
+      const member = chat.detail.members.find((item) => item.userId === profileDrawerUserId);
+      if (member) {
+        return {
+          user_id: member.userId,
+          name: member.name,
+          avatar_uri: member.avatarUri,
+          is_alive: chat.type === "direct" ? chat.online : undefined,
+        };
+      }
+    }
+    return null;
+  }, [chats, profileDrawerUserId]);
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
   const routeChatId = useMemo(() => {
@@ -3328,6 +3345,7 @@ export default function ChatsPage() {
         <div className="page-toolbar">
           <div className="page-toolbar-title-status">
             <h2 className="panel-title">聊天</h2>
+            <HeaderSyncIndicator syncing={viewState === "loading"} />
             <span
               aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
               className={`chat-health-indicator is-${chatHealth}`}
@@ -3351,7 +3369,6 @@ export default function ChatsPage() {
       </div>
 
       <div className="chat-list-screen-body">
-        {viewState === "loading" ? <FeedbackState title="会话加载中" description="正在同步你最近的聊天。" tone="loading" /> : null}
         {chatAccessNotice ? (
           <FeedbackState
             title="无法打开这个会话"
@@ -3956,11 +3973,15 @@ export default function ChatsPage() {
         description="资料与共同关系"
         open={profileDrawerUserId !== null}
         title="用户详情"
+        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >
         {profileDrawerUserId !== null ? (
           <UserProfilePanel
+            key={profileDrawerUserId}
             userId={profileDrawerUserId}
+            initialUser={profileDrawerSeed}
+            onSyncingChange={setProfileSyncing}
             onOpenChat={(nextChatId) => {
               window.history.replaceState({ ...window.history.state, sermoDrawerStack: [] }, "");
               setProfileDrawerUserId(null);

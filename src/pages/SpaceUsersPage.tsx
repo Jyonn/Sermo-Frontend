@@ -4,8 +4,11 @@ import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
 
 function productizeFriendRequestError(message: string) {
@@ -18,17 +21,28 @@ function productizeFriendRequestError(message: string) {
 export default function SpaceUsersPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [refreshTick, setRefreshTick] = useState(0);
   const [sheetUser, setSheetUser] = useState<UserDTO | null>(null);
   const onlineOnly = location.pathname === "/app/space-users/online";
+  const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
     const controller = new AbortController();
-    setViewState("loading");
+    const cacheKey = onlineOnly ? "space-users:online" : "space-users:all";
+    const cached = !query ? readTabCache<UserDTO[]>(cacheScope, cacheKey) : null;
+    if (cached) {
+      setUsers(cached.data);
+      setViewState("ready");
+    } else if (!users.length) {
+      setViewState("loading");
+    }
+    setSyncing(true);
     setError(null);
 
     const fetcher = onlineOnly
@@ -39,16 +53,22 @@ export default function SpaceUsersPage() {
       .then((rows) => {
         setUsers(rows);
         setViewState("ready");
+        if (!query) writeTabCache(cacheScope, cacheKey, rows);
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "加载用户列表失败";
-        setError(message);
-        setViewState("error");
+        if (!cached && !users.length) {
+          const message = apiError instanceof ApiError ? apiError.message : "加载用户列表失败";
+          setError(message);
+          setViewState("error");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSyncing(false);
       });
 
     return () => controller.abort();
-  }, [onlineOnly, query, refreshTick]);
+  }, [cacheScope, onlineOnly, query, refreshTick]);
 
   useEffect(() => {
     if (!onlineOnly) return;
@@ -86,6 +106,7 @@ export default function SpaceUsersPage() {
           <Link className={`tab-chip ${onlineOnly ? "active" : ""}`} to="/app/space-users/online">
             在线
           </Link>
+          <HeaderSyncIndicator syncing={syncing} />
         </div>
 
         <label className="search-box page-search">
@@ -99,7 +120,6 @@ export default function SpaceUsersPage() {
           />
         </label>
 
-        {viewState === "loading" ? <FeedbackState title="成员加载中" description="正在同步成员列表。" tone="loading" /> : null}
         <section className="list-section">
           <div className="simple-list">
             {users.map((user) => (
