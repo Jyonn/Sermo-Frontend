@@ -8365,6 +8365,96 @@ img {
     background: rgba(255, 253, 248, 0.74);
   }
 
+  .desktop-chat-empty {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    flex: 1 1 auto;
+    place-content: center;
+    justify-items: center;
+    gap: 18px;
+    min-height: 0;
+    color: var(--text-secondary);
+    overflow: hidden;
+  }
+
+  .desktop-chat-empty::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: min(52%, 420px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(22, 196, 127, 0.09), rgba(0, 166, 255, 0.035) 48%, transparent 72%);
+    filter: blur(4px);
+  }
+
+  .desktop-chat-empty > strong {
+    font-size: 0.9rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+  }
+
+  .desktop-chat-empty-mark {
+    position: relative;
+    width: 82px;
+    height: 70px;
+  }
+
+  .desktop-chat-empty-bubble {
+    position: absolute;
+    display: block;
+    border-radius: 18px;
+  }
+
+  .desktop-chat-empty-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -7px;
+    width: 16px;
+    height: 16px;
+    background: inherit;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+
+  .desktop-chat-empty-bubble-back {
+    top: 2px;
+    right: 2px;
+    width: 52px;
+    height: 40px;
+    background: rgba(0, 166, 255, 0.16);
+    transform: rotate(4deg);
+  }
+
+  .desktop-chat-empty-bubble-back::after {
+    right: 8px;
+    transform: scaleX(-1);
+  }
+
+  .desktop-chat-empty-bubble-front {
+    left: 2px;
+    bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 58px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--info), var(--brand-primary));
+    box-shadow: 0 12px 28px rgba(22, 196, 127, 0.14);
+  }
+
+  .desktop-chat-empty-bubble-front::after {
+    left: 9px;
+  }
+
+  .desktop-chat-empty-bubble-front > span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
   .chat-mobile-layout .desktop-conversation-header + .chat-detail-scene {
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;

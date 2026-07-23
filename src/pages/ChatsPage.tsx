@@ -3668,17 +3668,17 @@ export default function ChatsPage() {
               </div>
             </>
           ) : (
-            <FeedbackState
-              title="选择会话"
-              description="从左侧打开聊天。"
-              action={
-                groupSquareEnabled ? (
-                  <Link className="button" to="/app/square">
-                    去广场
-                  </Link>
-                ) : undefined
-              }
-            />
+            <div className="desktop-chat-empty" aria-label="尚未选择会话">
+              <div className="desktop-chat-empty-mark" aria-hidden="true">
+                <span className="desktop-chat-empty-bubble desktop-chat-empty-bubble-back" />
+                <span className="desktop-chat-empty-bubble desktop-chat-empty-bubble-front">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </div>
+              <strong>选择一段对话</strong>
+            </div>
           )}
           {clipboardUpload ? (
             <div className="chat-clipboard-backdrop" role="presentation">
