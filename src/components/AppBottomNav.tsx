@@ -6,7 +6,6 @@ import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { UserAvatar } from "./UserAvatar";
-import logoUrl from "../assets/logo.svg";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", label: "聊天" },
@@ -129,12 +128,7 @@ export function AppBottomNav() {
     <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
         <Link aria-label="Sermo 言浪" className="desktop-nav-brand" to="/app/chats">
-          <span
-            aria-hidden="true"
-            className="desktop-nav-logo"
-            style={{ WebkitMaskImage: `url(${logoUrl})`, maskImage: `url(${logoUrl})` }}
-          />
-          <span aria-hidden="true" className="desktop-nav-monogram">S</span>
+          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-192.png?v=3" />
         </Link>
         <button
           aria-label={desktopCollapsed ? "展开导航" : "收起导航"}

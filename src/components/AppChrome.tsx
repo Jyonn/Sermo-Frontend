@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { UserAvatar } from "./UserAvatar";
-import logoUrl from "../assets/logo.svg";
 
 interface AppChromeProps {
   children: ReactNode;
@@ -51,14 +50,7 @@ export function AppChrome({
             {topbarLeading ?? (
               <Link className={`brand${guestSpaceBrand ? " guest-space-brand" : ""}`} to={brandTarget}>
                 <div className="brand-mark sermo-brand-mark">
-                  <span
-                    aria-hidden="true"
-                    className="brand-logo"
-                    style={{
-                      WebkitMaskImage: `url(${logoUrl})`,
-                      maskImage: `url(${logoUrl})`,
-                    }}
-                  />
+                  <img alt="" aria-hidden="true" className="brand-logo" src="/icons/sermo-192.png?v=3" />
                 </div>
                 {guestSpaceBrand ? (
                   <>

@@ -472,23 +472,17 @@ img {
 .brand-mark {
   display: flex;
   align-items: center;
-  width: 190px;
-  height: 57px;
-  flex: 0 0 190px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
 }
 
 .brand-logo {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #00d084 8%, #2ca9ff 92%);
   filter: drop-shadow(0 6px 14px rgba(44, 169, 255, 0.18));
-  -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
+  object-fit: contain;
 }
 
 .guest-topbar {
@@ -498,9 +492,9 @@ img {
 }
 
 .guest-topbar .sermo-brand-mark {
-  width: 124px;
+  width: 38px;
   height: 38px;
-  flex-basis: 124px;
+  flex-basis: 38px;
 }
 
 .guest-space-brand {
@@ -5197,14 +5191,6 @@ img {
     padding: 2px 8px;
   }
 
-  .desktop-nav-monogram {
-    display: none;
-    color: #087f5b;
-    font-family: var(--font-heading);
-    font-size: 1.35rem;
-    font-weight: 800;
-  }
-
   .desktop-nav-toggle {
     display: grid;
     width: 34px;
@@ -5232,15 +5218,9 @@ img {
 
   .desktop-nav-logo {
     display: block;
-    width: 128px;
+    width: 38px;
     height: 38px;
-    background: linear-gradient(135deg, #00b978, #239fe8);
-    -webkit-mask-position: left center;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-size: contain;
-    mask-position: left center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    object-fit: contain;
   }
 
   .app-nav-routes {
@@ -5464,9 +5444,9 @@ img {
 
 @media (max-width: 767px) {
   .guest-topbar .sermo-brand-mark {
-    width: 106px;
+    width: 32px;
     height: 32px;
-    flex-basis: 106px;
+    flex-basis: 32px;
   }
 
   .guest-space-brand {
@@ -5486,9 +5466,9 @@ img {
   }
 
   .brand-mark {
-    width: 148px;
-    height: 44px;
-    flex-basis: 148px;
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
   }
 }
 
@@ -5530,7 +5510,7 @@ img {
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 900px) {
   .brand-copy p,
   .page-head {
     display: none;
