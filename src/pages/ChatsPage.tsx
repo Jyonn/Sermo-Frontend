@@ -1269,7 +1269,12 @@ interface ImagePreviewState {
 
 function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null }) {
   if (!metadata || metadata.status !== 1) {
-    return <div className="message-image-metadata-empty">没有可展示的拍摄信息</div>;
+    return (
+      <div className="message-image-archive is-empty">
+        <span>IMAGE RECORD</span>
+        <p>影像资料尚未写入</p>
+      </div>
+    );
   }
   const device = [metadata.make, metadata.model].filter(Boolean).join(" ");
   const coordinate = metadata.latitude != null && metadata.longitude != null
@@ -1283,36 +1288,52 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   const dimensions = metadata.pixel_width && metadata.pixel_height
     ? `${metadata.pixel_width} × ${metadata.pixel_height}`
     : "";
+  const takenAt = metadata.taken_at
+    ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate);
   const rows = [
-    ["尺寸", dimensions],
-    ["大小", fileSize],
-    ["位置", metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate)],
-    ["坐标", metadata.address || metadata.geocoding_status === 0 ? coordinate : ""],
     ["设备", device],
     ["镜头", metadata.lens_model],
-    ["拍摄时间", metadata.taken_at ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN") : ""],
+    ["尺寸", dimensions],
+    ["大小", fileSize],
     ["软件", metadata.software],
   ].filter((row) => row[1]);
-  if (!rows.length) return <div className="message-image-metadata-empty">没有可展示的拍摄信息</div>;
+  const provider = metadata.geocoding_provider === "nominatim"
+    ? { href: "https://www.openstreetmap.org/copyright", label: "OpenStreetMap" }
+    : metadata.geocoding_provider === "amap"
+      ? { href: "https://www.amap.com/", label: "高德地图" }
+      : metadata.geocoding_provider === "opencage"
+        ? { href: "https://opencagedata.com/", label: "OpenCage" }
+        : null;
   return (
-    <>
-      <dl className="message-image-metadata-list">
-        {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-      </dl>
-      {metadata.address && metadata.geocoding_provider === "nominatim" ? (
-        <a className="message-image-location-credit" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
-          © OpenStreetMap contributors
-        </a>
-      ) : metadata.address && metadata.geocoding_provider === "amap" ? (
-        <a className="message-image-location-credit" href="https://www.amap.com/" rel="noreferrer" target="_blank">
-          地址由高德地图提供
-        </a>
-      ) : metadata.address && metadata.geocoding_provider === "opencage" ? (
-        <a className="message-image-location-credit" href="https://opencagedata.com/" rel="noreferrer" target="_blank">
-          地址由 OpenCage 提供
-        </a>
-      ) : null}
-    </>
+    <div className="message-image-archive">
+      <div className={`message-image-location ${location ? "" : "is-empty"}`}>
+        <span className="message-image-archive-label">LOCATION</span>
+        <strong>{location || "未记录地点"}</strong>
+        {coordinate ? <small>{coordinate}</small> : null}
+        {provider && metadata.address ? (
+          <a href={provider.href} rel="noreferrer" target="_blank">GEOCODED BY {provider.label}</a>
+        ) : null}
+      </div>
+      <div className="message-image-record">
+        <div className="message-image-record-heading">
+          <span className="message-image-archive-label">IMAGE RECORD</span>
+          <strong>{takenAt || "拍摄时间未记录"}</strong>
+        </div>
+        {rows.length ? (
+          <dl className="message-image-metadata-list">
+            {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+          </dl>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -1505,7 +1526,6 @@ export default function ChatsPage() {
     mimeType: "",
   });
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
-  const [imagePreviewInfoOpen, setImagePreviewInfoOpen] = useState(false);
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
@@ -3553,7 +3573,6 @@ export default function ChatsPage() {
                     group={group}
                     key={group.key}
                     onOpenImage={(uris, index, metadata = [], messageIds = []) => {
-                      setImagePreviewInfoOpen(false);
                       setImagePreview({
                         uris,
                         index,
@@ -4144,40 +4163,36 @@ export default function ChatsPage() {
                 const index = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
                 if (index !== imagePreview.index) {
                   setImagePreview((current) => current ? { ...current, index } : current);
-                  setImagePreviewInfoOpen(false);
                 }
               }}
             >
               {imagePreview.uris.map((uri, index) => (
                 <div className="message-image-preview-slide" key={`${uri}:${index}`}>
-                  <img
-                    alt={`图片预览 ${index + 1}`}
-                    className="message-image-preview"
-                    draggable={false}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setImagePreviewInfoOpen((current) => !current);
-                    }}
-                    src={uri}
-                  />
+                  <article className="message-image-preview-plate">
+                    <div className="message-image-preview-frame">
+                      <img
+                        alt={`图片预览 ${index + 1}`}
+                        className="message-image-preview"
+                        draggable={false}
+                        src={uri}
+                      />
+                    </div>
+                    <ImageMetadataPanel metadata={imagePreview.metadata[index] ?? null} />
+                  </article>
                 </div>
               ))}
             </div>
-            {imagePreview.uris.length > 1 ? (
-              <div className="message-image-preview-count">{imagePreview.index + 1} / {imagePreview.uris.length}</div>
-            ) : null}
-            <div className="message-image-preview-footer" onClick={(event) => event.stopPropagation()}>
-              {imagePreviewInfoOpen ? (
-                <div className="message-image-metadata-panel">
-                  <ImageMetadataPanel metadata={imagePreview.metadata[imagePreview.index] ?? null} />
-                </div>
-              ) : null}
-              <div className="message-image-preview-actions">
-                <button onClick={() => setImagePreviewInfoOpen((current) => !current)} type="button">
-                  {imagePreviewInfoOpen ? "收起信息" : "图片信息"}
-                </button>
-                <button className="is-primary" onClick={() => void downloadPreviewImage()} type="button">下载</button>
-              </div>
+            <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
+              <span className="message-image-preview-count">
+                {String(imagePreview.index + 1).padStart(2, "0")}
+                <i />
+                {String(imagePreview.uris.length).padStart(2, "0")}
+              </span>
+              <button aria-label="下载图片" onClick={() => void downloadPreviewImage()} type="button">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" />
+                </svg>
+              </button>
             </div>
           </section>
         </div>
