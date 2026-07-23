@@ -5574,8 +5574,7 @@ img {
   font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.06em;
-  background: linear-gradient(180deg, rgba(245, 244, 239, 0.96), rgba(245, 244, 239, 0.82));
-  backdrop-filter: blur(10px);
+  background: transparent;
 }
 
 .friend-directory-index {
