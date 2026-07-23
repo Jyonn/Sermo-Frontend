@@ -45,7 +45,7 @@ export async function setupSpacePwaIdentity() {
       display_override: ["standalone", "minimal-ui"],
       orientation: "any",
       background_color: "#f7f4ec",
-      theme_color: "#f7f4ec",
+      theme_color: "#eef7f1",
       categories: ["social", "communication"],
       prefer_related_applications: false,
       launch_handler: { client_mode: "navigate-existing" },
