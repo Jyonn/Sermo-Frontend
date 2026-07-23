@@ -8136,6 +8136,13 @@ img {
     max-height: none;
   }
 
+  .chat-mobile-layout > .mobile-chat-list-screen .chat-list-screen-body {
+    width: calc(100% + 36px);
+    margin-inline: -18px;
+    padding-inline: 18px;
+    overflow-x: hidden;
+  }
+
   .desktop-tab-shell > .page-stack {
     width: min(100%, 960px);
     height: calc(100dvh - 32px);
