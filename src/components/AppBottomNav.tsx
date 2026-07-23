@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, matchPath, useLocation } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -25,9 +25,10 @@ function activeKey(pathname: string) {
 
 export function AppBottomNav() {
   const location = useLocation();
-  const { session } = useAuth();
+  const { session, patchSessionUser } = useAuth();
   const space = useSpaceBrand();
   const groupSquareEnabled = useGroupSquareEnabled();
+  const loadedIdentityRef = useRef<string | null>(null);
   const effectivePathname = location.pathname === "/friend-invite" && session ? "/app/chats" : location.pathname;
   const cacheScope = useMemo(
     () => (session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null),
@@ -37,6 +38,31 @@ export function AppBottomNav() {
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
   const [desktopCollapsed, setDesktopCollapsed] = useState(() => localStorage.getItem("sermo:desktop-nav-collapsed") === "1");
   const desktopNavigationActive = Boolean(session && effectivePathname.startsWith("/app/"));
+
+  useEffect(() => {
+    if (!session) {
+      loadedIdentityRef.current = null;
+      return;
+    }
+
+    const identityKey = `${session.user.space_id}:${session.user.user_id}`;
+    if (loadedIdentityRef.current === identityKey) return;
+    loadedIdentityRef.current = identityKey;
+
+    void api
+      .getUserMe()
+      .then((user) => {
+        patchSessionUser({
+          name: user.name,
+          avatar_type: user.avatar_type,
+          avatar_uri: user.avatar_uri,
+          verified: user.verified,
+        });
+      })
+      .catch(() => {
+        if (loadedIdentityRef.current === identityKey) loadedIdentityRef.current = null;
+      });
+  }, [patchSessionUser, session]);
 
   useLayoutEffect(() => {
     if (!desktopNavigationActive) {
