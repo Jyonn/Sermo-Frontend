@@ -8143,6 +8143,12 @@ img {
     overflow-x: hidden;
   }
 
+  .chat-mobile-layout > .mobile-chat-list-screen .chat-item {
+    width: calc(100% + 36px);
+    margin-inline: -18px;
+    padding-inline: 22px;
+  }
+
   .desktop-tab-shell > .page-stack {
     width: min(100%, 960px);
     height: calc(100dvh - 32px);
