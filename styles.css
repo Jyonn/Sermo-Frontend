@@ -5157,6 +5157,7 @@ img {
 @media (min-width: 901px) {
   html[data-desktop-nav] #root {
     padding-left: 220px;
+    transition: padding-left 260ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .app-mobile-nav {
@@ -5175,12 +5176,16 @@ img {
     background: rgba(255, 253, 248, 0.9);
     box-shadow: 0 18px 48px rgba(31, 43, 50, 0.08);
     backdrop-filter: blur(22px);
+    transition:
+      width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      padding 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 180ms ease;
   }
 
   .desktop-nav-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 6px;
   }
 
@@ -5189,7 +5194,17 @@ img {
     align-items: center;
     gap: 5px;
     height: 42px;
+    max-width: 110px;
     padding: 2px 4px;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+      max-width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      padding 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      gap 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 140ms ease,
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .desktop-brand-collaboration-mark {
@@ -5216,8 +5231,14 @@ img {
     height: 34px;
     flex: 0 0 34px;
     place-items: center;
+    margin-left: auto;
     color: var(--text-muted);
     border-radius: 10px;
+    transition:
+      width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      margin 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 150ms ease,
+      background 150ms ease;
   }
 
   .desktop-nav-toggle:hover {
@@ -5233,6 +5254,8 @@ img {
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 1.8;
+    transform: rotate(0deg);
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .desktop-nav-logo {
@@ -5258,7 +5281,19 @@ img {
     border-radius: 12px;
     font-size: 0.9rem;
     font-weight: 700;
-    transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    transition:
+      grid-template-columns 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      gap 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      padding 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 150ms ease,
+      background 150ms ease,
+      transform 150ms ease;
+  }
+
+  .app-mobile-nav .nav-button-label {
+    min-width: 0;
+    opacity: 1;
+    transition: opacity 140ms ease;
   }
 
   .app-mobile-nav .nav-button:hover {
@@ -5300,6 +5335,10 @@ img {
     padding: 10px 8px;
     color: var(--text-secondary);
     border-top: 1px solid var(--line-soft);
+    transition:
+      grid-template-columns 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      gap 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      padding 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .desktop-nav-user .mini-avatar {
@@ -5309,18 +5348,23 @@ img {
 
   .desktop-nav-user > span {
     overflow: hidden;
+    max-width: 110px;
+    opacity: 1;
     font-size: 0.82rem;
     font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: max-width 220ms ease, opacity 140ms ease;
   }
 
   html[data-desktop-nav] .shell {
     width: min(1440px, calc(100vw - 252px));
+    transition: width 260ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   html[data-desktop-nav] .topbar {
     width: min(1440px, calc(100vw - 252px));
+    transition: width 260ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .page-stack {
@@ -5421,34 +5465,45 @@ img {
     align-items: stretch;
   }
 
-  html[data-desktop-nav="collapsed"] .desktop-nav-head {
-    justify-content: center;
-  }
-
   html[data-desktop-nav="collapsed"] .desktop-nav-brand {
-    display: none;
+    max-width: 0;
+    padding-inline: 0;
+    gap: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-10px);
   }
 
   html[data-desktop-nav="collapsed"] .desktop-nav-toggle {
     width: 44px;
+    margin-right: auto;
+  }
+
+  html[data-desktop-nav="collapsed"] .desktop-nav-toggle svg {
+    transform: rotate(180deg);
   }
 
   html[data-desktop-nav="collapsed"] .app-mobile-nav .nav-button {
-    display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 28px 0fr;
     justify-items: center;
+    gap: 0;
     padding-inline: 0;
   }
 
-  html[data-desktop-nav="collapsed"] .app-mobile-nav .nav-button-label,
-  html[data-desktop-nav="collapsed"] .desktop-nav-user > span {
-    display: none;
+  html[data-desktop-nav="collapsed"] .app-mobile-nav .nav-button-label {
+    overflow: hidden;
+    opacity: 0;
   }
 
   html[data-desktop-nav="collapsed"] .desktop-nav-user {
-    display: flex;
-    justify-content: center;
+    grid-template-columns: 36px 0fr;
+    gap: 0;
     padding-inline: 0;
+  }
+
+  html[data-desktop-nav="collapsed"] .desktop-nav-user > span {
+    max-width: 0;
+    opacity: 0;
   }
 
   html[data-desktop-nav="collapsed"] .shell,
@@ -5458,6 +5513,20 @@ img {
 
   .chat-list-active .chat-main-pane {
     display: flex;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html[data-desktop-nav] #root,
+    .app-mobile-nav,
+    .desktop-nav-brand,
+    .desktop-nav-toggle,
+    .desktop-nav-toggle svg,
+    .app-mobile-nav .nav-button,
+    .desktop-nav-user > span,
+    html[data-desktop-nav] .shell,
+    html[data-desktop-nav] .topbar {
+      transition: none;
+    }
   }
 }
 

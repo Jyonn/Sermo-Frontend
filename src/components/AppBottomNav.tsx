@@ -151,7 +151,7 @@ export function AppBottomNav() {
         >
           <svg aria-hidden="true" viewBox="0 0 24 24">
             <path d="M4.5 4.5h15v15h-15zM9 4.5v15" />
-            <path d={desktopCollapsed ? "m13 9 3 3-3 3" : "m16 9-3 3 3 3"} />
+            <path d="m16 9-3 3 3 3" />
           </svg>
         </button>
       </div>
