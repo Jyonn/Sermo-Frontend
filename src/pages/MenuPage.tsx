@@ -1351,11 +1351,12 @@ export default function MenuPage() {
             <div className="menu-pref-row">
               <div className="row-main">
                 <strong>启用提醒</strong>
+                {prefDrawerChannel === "sms" ? <div className="row-subtle">暂不支持</div> : null}
               </div>
               <button
                 aria-label={`toggle-${prefDrawerChannel}`}
-                className={`switch ${activePref.enabled ? "active" : ""}`}
-                disabled={prefSaving}
+                className={`switch ${prefDrawerChannel !== "sms" && activePref.enabled ? "active" : ""}`}
+                disabled={prefSaving || prefDrawerChannel === "sms"}
                 onClick={() => void savePreferencePatch(prefDrawerChannel, { enabled: activePref.enabled ? 0 : 1 })}
                 type="button"
               />
@@ -1384,13 +1385,15 @@ export default function MenuPage() {
                     type="button"
                   />
                 </div>
-                <button className="menu-pref-row menu-pref-row-button" onClick={() => setPrefCustomDrawerOpen(true)} type="button">
-                  <div className="row-main">
-                    <strong>自定义消息提示</strong>
-                    <div className="row-subtle">按消息类型设置</div>
-                  </div>
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
+                {activePref.hideMessageContent ? (
+                  <button className="menu-pref-row menu-pref-row-button" onClick={() => setPrefCustomDrawerOpen(true)} type="button">
+                    <div className="row-main">
+                      <strong>自定义消息提示</strong>
+                      <div className="row-subtle">按消息类型设置</div>
+                    </div>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                ) : null}
               </>
             ) : null}
           </div>
@@ -1398,7 +1401,7 @@ export default function MenuPage() {
       </SideDrawer>
       <SideDrawer
         description={prefDrawerChannel === "email" ? "邮件正文" : "标题与内容"}
-        open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePref)}
+        open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePref?.hideMessageContent)}
         onClose={() => setPrefCustomDrawerOpen(false)}
         title="自定义消息提示"
       >

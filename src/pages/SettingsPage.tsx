@@ -605,10 +605,12 @@ export default function SettingsPage() {
             <div className="simple-row form-row">
               <div className="row-main">
                 <strong>启用提醒</strong>
+                {prefSheetChannel === "sms" ? <div className="row-subtle">暂不支持</div> : null}
               </div>
               <button
                 aria-label={`toggle-${prefSheetChannel}`}
-                className={`switch ${prefs[prefSheetChannel].enabled ? "active" : ""}`}
+                className={`switch ${prefSheetChannel !== "sms" && prefs[prefSheetChannel].enabled ? "active" : ""}`}
+                disabled={prefSheetChannel === "sms"}
                 onClick={() => void syncPref(prefSheetChannel, { enabled: prefs[prefSheetChannel].enabled ? 0 : 1 })}
                 type="button"
               />
