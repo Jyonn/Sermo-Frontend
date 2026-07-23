@@ -673,6 +673,12 @@ const MessageMediaImage = memo(function MessageMediaImage({
   const imageRef = useRef<HTMLImageElement | null>(null);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
   const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
+  const imageAspect = metadata?.pixel_width && metadata.pixel_height
+    ? metadata.pixel_width / metadata.pixel_height
+    : null;
+  const frameStyle = imageAspect
+    ? { "--message-image-aspect": imageAspect } as CSSProperties
+    : undefined;
 
   useEffect(() => {
     setLoaded(false);
@@ -687,8 +693,9 @@ const MessageMediaImage = memo(function MessageMediaImage({
 
   return (
     <button
-      className={`message-media-frame image-button ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
+      className={`message-media-frame image-button ${imageAspect ? "has-intrinsic-size" : ""} ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
       onClick={() => onOpenImage?.([resolvedUri], 0, [metadata ?? null], [messageId ?? null])}
+      style={frameStyle}
       type="button"
     >
       {resolvedThumbnailUri ? <img alt="" aria-hidden="true" className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
@@ -1267,6 +1274,12 @@ interface ImagePreviewState {
   messageIds: Array<number | null>;
 }
 
+function formatImageFileSize(fileSize?: number | null) {
+  if (fileSize == null) return "";
+  if (fileSize >= 1024 * 1024) return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(fileSize / 1024))} KB`;
+}
+
 function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null }) {
   if (!metadata || metadata.status !== 1) {
     return (
@@ -1279,14 +1292,6 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   const device = [metadata.make, metadata.model].filter(Boolean).join(" ");
   const coordinate = metadata.latitude != null && metadata.longitude != null
     ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
-    : "";
-  const fileSize = metadata.file_size != null
-    ? metadata.file_size >= 1024 * 1024
-      ? `${(metadata.file_size / (1024 * 1024)).toFixed(1)} MB`
-      : `${Math.max(1, Math.round(metadata.file_size / 1024))} KB`
-    : "";
-  const dimensions = metadata.pixel_width && metadata.pixel_height
-    ? `${metadata.pixel_width} × ${metadata.pixel_height}`
     : "";
   const takenAt = metadata.taken_at
     ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN", {
@@ -1301,9 +1306,6 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   const rows = [
     ["设备", device],
     ["镜头", metadata.lens_model],
-    ["尺寸", dimensions],
-    ["大小", fileSize],
-    ["软件", metadata.software],
   ].filter((row) => row[1]);
   const provider = metadata.geocoding_provider === "nominatim"
     ? { href: "https://www.openstreetmap.org/copyright", label: "OpenStreetMap" }
@@ -4188,10 +4190,17 @@ export default function ChatsPage() {
                 <i />
                 {String(imagePreview.uris.length).padStart(2, "0")}
               </span>
-              <button aria-label="下载图片" onClick={() => void downloadPreviewImage()} type="button">
+              <button
+                aria-label={`下载图片${formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size) ? `，${formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size)}` : ""}`}
+                onClick={() => void downloadPreviewImage()}
+                type="button"
+              >
                 <svg aria-hidden="true" viewBox="0 0 24 24">
                   <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" />
                 </svg>
+                {formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size) ? (
+                  <span>{formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size)}</span>
+                ) : null}
               </button>
             </div>
           </section>
