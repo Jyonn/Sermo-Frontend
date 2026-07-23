@@ -27,11 +27,22 @@ export function BottomSheet({
   className,
   bodyClassName,
 }: BottomSheetProps) {
+  const [desktopModal, setDesktopModal] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches
+  );
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [startY, setStartY] = useState<number | null>(null);
 
   useBodyScrollLock(open);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 901px)");
+    const sync = () => setDesktopModal(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -53,17 +64,18 @@ export function BottomSheet({
   }, [onClose, open]);
 
   const startDrag = (clientY: number) => {
+    if (desktopModal) return;
     setDragging(true);
     setStartY(clientY);
   };
 
   const moveDrag = (clientY: number) => {
-    if (!dragging || startY === null) return;
+    if (desktopModal || !dragging || startY === null) return;
     setDragY(Math.max(0, clientY - startY));
   };
 
   const endDrag = () => {
-    if (!dragging) return;
+    if (desktopModal || !dragging) return;
     if (dragY > 120) {
       onClose();
     } else {
@@ -80,11 +92,11 @@ export function BottomSheet({
       <section
         className={`bottom-sheet ${dragging ? "dragging" : ""} ${className ?? ""}`.trim()}
         onClick={(event) => event.stopPropagation()}
-        onMouseMove={(event) => moveDrag(event.clientY)}
-        onMouseUp={endDrag}
-        onTouchEnd={endDrag}
-        onTouchMove={(event) => moveDrag(event.touches[0]?.clientY ?? 0)}
-        style={{ transform: `translateY(${dragY}px)` }}
+        onMouseMove={desktopModal ? undefined : (event) => moveDrag(event.clientY)}
+        onMouseUp={desktopModal ? undefined : endDrag}
+        onTouchEnd={desktopModal ? undefined : endDrag}
+        onTouchMove={desktopModal ? undefined : (event) => moveDrag(event.touches[0]?.clientY ?? 0)}
+        style={desktopModal ? undefined : { transform: `translateY(${dragY}px)` }}
         aria-modal="true"
         role="dialog"
       >
@@ -93,22 +105,24 @@ export function BottomSheet({
             <span className="material-symbols-outlined">close</span>
           </button>
         ) : null}
-        <button
-          className="sheet-drag-zone"
-          onMouseDown={(event) => startDrag(event.clientY)}
-          onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
-          type="button"
-          aria-label="拖动关闭"
-        >
-          <div className="sheet-handle" />
-        </button>
+        {!desktopModal ? (
+          <button
+            className="sheet-drag-zone"
+            onMouseDown={(event) => startDrag(event.clientY)}
+            onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
+            type="button"
+            aria-label="拖动关闭"
+          >
+            <div className="sheet-handle" />
+          </button>
+        ) : null}
         {header ? (
           <div className="sheet-header custom-sheet-header">{header}</div>
         ) : (
           <div
             className="sheet-header"
-            onMouseDown={(event) => startDrag(event.clientY)}
-            onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
+            onMouseDown={desktopModal ? undefined : (event) => startDrag(event.clientY)}
+            onTouchStart={desktopModal ? undefined : (event) => startDrag(event.touches[0]?.clientY ?? 0)}
           >
             <p className="eyebrow">Sheet</p>
             <div className="sheet-title-row">
