@@ -50,7 +50,7 @@ export function AppChrome({
             {topbarLeading ?? (
               <Link className={`brand${guestSpaceBrand ? " guest-space-brand" : ""}`} to={brandTarget}>
                 <div className="brand-mark sermo-brand-mark">
-                  <img alt="" aria-hidden="true" className="brand-logo" src="/icons/sermo-192.png?v=3" />
+                  <img alt="" aria-hidden="true" className="brand-logo" src="/icons/sermo-512.png?v=3" />
                 </div>
                 {guestSpaceBrand ? (
                   <>

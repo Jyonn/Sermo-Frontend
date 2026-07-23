@@ -128,7 +128,7 @@ export function AppBottomNav() {
     <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
         <Link aria-label="Sermo 言浪" className="desktop-nav-brand" to="/app/chats">
-          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-192.png?v=3" />
+          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-512.png?v=3" />
         </Link>
         <button
           aria-label={desktopCollapsed ? "展开导航" : "收起导航"}
