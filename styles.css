@@ -7996,6 +7996,17 @@ img {
     background: rgba(255, 253, 248, 0.74);
   }
 
+  .desktop-tab-shell .simple-list {
+    overflow: hidden;
+    border: 1px solid rgba(215, 220, 231, 0.72);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.56);
+  }
+
+  .desktop-tab-shell .simple-row {
+    padding-inline: 14px;
+  }
+
   .chat-mobile-layout .message-pane.chat-main-pane {
     display: flex;
     flex-direction: column;
