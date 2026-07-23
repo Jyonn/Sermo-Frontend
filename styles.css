@@ -182,7 +182,7 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 900px) {
   .pwa-recommendation {
     bottom: calc(76px + env(safe-area-inset-bottom));
   }
@@ -2409,7 +2409,7 @@ img {
   backdrop-filter: blur(10px);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 900px) {
   .message-image-preview-modal {
     padding: 0;
   }
@@ -8616,7 +8616,7 @@ img {
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 900px) {
   .topbar {
     position: sticky;
     top: 0;
