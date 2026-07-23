@@ -3342,20 +3342,20 @@ export default function ChatsPage() {
 
   const renderChatList = () => (
     <>
+      <TabPageHeader
+        title="聊天"
+        syncing={viewState === "loading"}
+        status={
+          <span
+            aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
+            className={`chat-health-indicator is-${chatHealth}`}
+            title={chatHealth === "healthy" ? "连接正常" : chatHealth === "warning" ? "连接不稳定" : "连接中断"}
+          >
+            <span className="chat-health-dot" />
+          </span>
+        }
+      />
       <div className="chat-list-screen-header">
-        <TabPageHeader
-          title="聊天"
-          syncing={viewState === "loading"}
-          status={
-            <span
-              aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
-              className={`chat-health-indicator is-${chatHealth}`}
-              title={chatHealth === "healthy" ? "连接正常" : chatHealth === "warning" ? "连接不稳定" : "连接中断"}
-            >
-              <span className="chat-health-dot" />
-            </span>
-          }
-        />
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         <label className="search-box">
           <span className="material-symbols-outlined">search</span>
