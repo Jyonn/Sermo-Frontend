@@ -5187,8 +5187,27 @@ img {
   .desktop-nav-brand {
     display: flex;
     align-items: center;
+    gap: 5px;
     height: 42px;
-    padding: 2px 8px;
+    padding: 2px 4px;
+  }
+
+  .desktop-brand-collaboration-mark {
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1;
+    transform: rotate(-8deg);
+  }
+
+  .desktop-nav-space-logo {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border: 2px solid rgba(255, 255, 255, 0.92);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(17, 19, 24, 0.1);
   }
 
   .desktop-nav-toggle {

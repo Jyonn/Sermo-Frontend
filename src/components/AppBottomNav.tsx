@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
+import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 
 const mobileRoutes = [
@@ -25,6 +26,7 @@ function activeKey(pathname: string) {
 export function AppBottomNav() {
   const location = useLocation();
   const { session } = useAuth();
+  const space = useSpaceBrand();
   const groupSquareEnabled = useGroupSquareEnabled();
   const effectivePathname = location.pathname === "/friend-invite" && session ? "/app/chats" : location.pathname;
   const cacheScope = useMemo(
@@ -129,6 +131,16 @@ export function AppBottomNav() {
       <div className="desktop-nav-head">
         <Link aria-label="Sermo 言浪" className="desktop-nav-brand" to="/app/chats">
           <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-512.png?v=3" />
+          {space ? (
+            <>
+              <span aria-hidden="true" className="desktop-brand-collaboration-mark">×</span>
+              <UserAvatar
+                className="desktop-nav-space-logo"
+                name={space.name}
+                uri={space.official_user?.avatar_uri}
+              />
+            </>
+          ) : null}
         </Link>
         <button
           aria-label={desktopCollapsed ? "展开导航" : "收起导航"}

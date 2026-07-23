@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 
 interface AppChromeProps {
@@ -36,11 +37,15 @@ export function AppChrome({
   guestSpaceBrand,
 }: AppChromeProps) {
   const { session } = useAuth();
+  const sessionSpace = useSpaceBrand();
   const location = useLocation();
 
   const brandTarget = session ? "/app/chats" : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
   const usePublicHeader = publicHeader || !session;
+  const visibleSpaceBrand = guestSpaceBrand ?? (sessionSpace
+    ? { name: sessionSpace.name, avatarUri: sessionSpace.official_user?.avatar_uri }
+    : undefined);
 
   return (
     <>
@@ -48,14 +53,14 @@ export function AppChrome({
         <header className={`topbar${usePublicHeader ? " guest-topbar" : ""}${topbarClassName ? ` ${topbarClassName}` : ""}`}>
           <div className="topbar-leading">
             {topbarLeading ?? (
-              <Link className={`brand${guestSpaceBrand ? " guest-space-brand" : ""}`} to={brandTarget}>
+              <Link className={`brand${visibleSpaceBrand ? " guest-space-brand" : ""}`} to={brandTarget}>
                 <div className="brand-mark sermo-brand-mark">
                   <img alt="" aria-hidden="true" className="brand-logo" src="/icons/sermo-512.png?v=3" />
                 </div>
-                {guestSpaceBrand ? (
+                {visibleSpaceBrand ? (
                   <>
                     <span className="brand-collaboration-mark" aria-hidden="true">×</span>
-                    <UserAvatar className="brand-space-avatar" name={guestSpaceBrand.name} uri={guestSpaceBrand.avatarUri} />
+                    <UserAvatar className="brand-space-avatar" name={visibleSpaceBrand.name} uri={visibleSpaceBrand.avatarUri} />
                   </>
                 ) : null}
               </Link>
