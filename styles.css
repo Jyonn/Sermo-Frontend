@@ -1329,7 +1329,6 @@ img {
 
 .chat-list-screen-body {
   gap: 14px;
-  margin-top: 18px;
   overflow: auto;
   overscroll-behavior: auto;
   -webkit-overflow-scrolling: touch;

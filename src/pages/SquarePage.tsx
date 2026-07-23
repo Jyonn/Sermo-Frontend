@@ -183,7 +183,6 @@ export default function SquarePage() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const groupSquareEnabled = useGroupSquareEnabled();
-  const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -226,12 +225,12 @@ export default function SquarePage() {
     setError(null);
 
     api
-      .getOnlineUsers({ q: query || undefined, limit: 80, offset: 0 }, controller.signal)
+      .getOnlineUsers({ limit: 80, offset: 0 }, controller.signal)
       .then((liveUsers) => {
         setOnlineUsers(liveUsers);
         setViewState("ready");
         hasLoadedOnceRef.current = true;
-        if (!query.trim()) writeTabCache(cacheScope, "square", liveUsers);
+        writeTabCache(cacheScope, "square", liveUsers);
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
@@ -246,7 +245,7 @@ export default function SquarePage() {
       });
 
     return () => controller.abort();
-  }, [cacheScope, groupSquareEnabled, navigate, query, refreshTick]);
+  }, [cacheScope, groupSquareEnabled, navigate, refreshTick]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setRefreshTick((current) => current + 1), 15_000);
@@ -413,19 +412,8 @@ export default function SquarePage() {
         <TabPageHeader title="广场" syncing={syncing} />
         <div className="chat-list-screen-header square-plaza-toolbar">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
-          <label className="search-box page-search square-search">
-            <span className="material-symbols-outlined">search</span>
-            <input
-              className="input"
-              style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-              placeholder="搜索在线成员"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
           <div className="square-online-meta">
-            <strong>{query.trim() ? `找到 ${onlineUsers.length} 位在线成员` : `${onlineUsers.length} 人在线`}</strong>
-            {query.trim() ? <span>点击头像直接开始一段对话</span> : null}
+            <strong>{onlineUsers.length} 人在线</strong>
           </div>
         </div>
 
@@ -476,8 +464,8 @@ export default function SquarePage() {
           {!onlineUsers.length && viewState === "ready" ? (
             <div className="square-plaza-status">
               <FeedbackState
-                title={query.trim() ? "没有匹配的在线成员" : "现在还没有人在线"}
-                description={query.trim() ? "换个关键词试试。" : "等有人上线后，这里会立刻热闹起来。"}
+                title="现在还没有人在线"
+                description="等有人上线后，这里会立刻热闹起来。"
               />
             </div>
           ) : null}

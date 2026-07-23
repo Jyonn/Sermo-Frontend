@@ -94,7 +94,6 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const friendSectionRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [query, setQuery] = useState("");
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -166,31 +165,11 @@ export default function NotificationsPage() {
     writeTabCache(cacheScope, "notifications", { friends, groupChats, requests });
   }, [cacheScope, friends, groupChats, requests, viewState]);
 
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredFriends = useMemo(
-    () =>
-      friends.filter((friend) => {
-        if (!normalizedQuery) return true;
-        return (
-          friend.name.toLowerCase().includes(normalizedQuery) ||
-          friend.name_pinyin?.toLowerCase().includes(normalizedQuery)
-        );
-      }),
-    [friends, normalizedQuery]
-  );
+  const filteredFriends = friends;
   const friendSections = useMemo(() => groupFriends(filteredFriends), [filteredFriends]);
-  const filteredIncoming = useMemo(
-    () => requests.incoming.filter((request) => !normalizedQuery || request.from_user.name.toLowerCase().includes(normalizedQuery)),
-    [normalizedQuery, requests.incoming]
-  );
-  const filteredOutgoing = useMemo(
-    () => requests.outgoing.filter((request) => !normalizedQuery || request.to_user.name.toLowerCase().includes(normalizedQuery)),
-    [normalizedQuery, requests.outgoing]
-  );
-  const filteredGroups = useMemo(
-    () => groupChats.filter((chat) => !normalizedQuery || (chat.title ?? "群聊").toLowerCase().includes(normalizedQuery)),
-    [groupChats, normalizedQuery]
-  );
+  const filteredIncoming = requests.incoming;
+  const filteredOutgoing = requests.outgoing;
+  const filteredGroups = groupChats;
 
   const pendingRequestCount = requests.incoming.length;
 
@@ -228,16 +207,6 @@ export default function NotificationsPage() {
         <TabPageHeader title="通讯" syncing={syncing} />
         <div className="chat-list-screen-header">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
-          <label className="search-box page-search">
-            <span className="material-symbols-outlined">search</span>
-            <input
-              className="input"
-              style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-              placeholder="搜索好友、申请或群聊"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
         </div>
 
         <section className="list-section">
@@ -320,7 +289,7 @@ export default function NotificationsPage() {
         </section>
 
         {!filteredFriends.length && viewState === "ready" ? (
-          <FeedbackState title={normalizedQuery ? "没有匹配的好友" : "还没有好友"} description={normalizedQuery ? "换个关键词试试。" : "先从广场或聊天里开始建立联系。"} />
+          <FeedbackState title="还没有好友" description="先从广场或聊天里开始建立联系。" />
         ) : null}
       </section>
 
@@ -441,7 +410,7 @@ export default function NotificationsPage() {
               })}
             </div>
           ) : (
-            <FeedbackState title={normalizedQuery ? "没有匹配的群聊" : "还没有群聊"} description={normalizedQuery ? "换个关键词试试。" : "你创建或加入群聊后，这里会出现。"} />
+            <FeedbackState title="还没有群聊" description="你创建或加入群聊后，这里会出现。" />
           )}
         </section>
       </SideDrawer>

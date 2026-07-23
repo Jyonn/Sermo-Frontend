@@ -1433,7 +1433,6 @@ export default function ChatsPage() {
   const { chatId } = useParams();
   const { session } = useAuth();
   const groupSquareEnabled = useGroupSquareEnabled();
-  const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
@@ -2275,7 +2274,7 @@ export default function ChatsPage() {
     return () => window.clearTimeout(timer);
   }, [cacheScope, hasOlderMessages, selectedChat, selectedMessages]);
 
-  const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(query.trim().toLowerCase()));
+  const filteredChats = chats;
   const detailMembers = selectedChat?.detail.members ?? [];
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
@@ -3357,16 +3356,6 @@ export default function ChatsPage() {
       />
       <div className="chat-list-screen-header">
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
-        <label className="search-box">
-          <span className="material-symbols-outlined">search</span>
-          <input
-            className="input"
-            style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-            placeholder="搜索会话名 / 用户名"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
       </div>
 
       <div className="chat-list-screen-body">
@@ -3391,8 +3380,8 @@ export default function ChatsPage() {
         </div>
         {!chatAccessNotice && !filteredChats.length && viewState === "ready" ? (
           <FeedbackState
-            title={query.trim() ? "没有匹配的会话" : "还没有会话"}
-            description={query.trim() ? "换个关键词试试。" : groupSquareEnabled ? "先从广场里找到一个人，再开始第一段对话。" : "新的会话出现后会显示在这里。"}
+            title="还没有会话"
+            description={groupSquareEnabled ? "先从广场里找到一个人，再开始第一段对话。" : "新的会话出现后会显示在这里。"}
             action={
               groupSquareEnabled ? (
                 <Link className="button" to="/app/square">
