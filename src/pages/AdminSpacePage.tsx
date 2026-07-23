@@ -130,6 +130,7 @@ export default function AdminSpacePage() {
 
   return (
     <AppChrome
+      publicHeader
       title="管理空间"
       topbarAction={
         slug ? (
@@ -144,7 +145,13 @@ export default function AdminSpacePage() {
       }
     >
       <section className="auth-shell">
-        <div className="auth-card">
+        <div className="auth-card admin-auth-card">
+          <div className="admin-auth-head">
+            <p className="admin-auth-kicker">空间管理</p>
+            <h1>{mode === "create" ? "创建你的空间" : "进入管理后台"}</h1>
+            <p>{mode === "create" ? "一个名称，一个专属入口。" : "验证码会发送至管理员邮箱。"}</p>
+          </div>
+
           <div className="auth-tabs">
             <button className={`mode-pill ${mode === "create" ? "active" : ""}`} onClick={() => updateMode("create")} type="button">
               创建空间
@@ -208,13 +215,9 @@ export default function AdminSpacePage() {
               </div>
             ) : (
               <div className="auth-assist-block">
-                <label className="field-label">
-                  <span>管理员邮箱</span>
-                  <button className="ghost-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
-                    {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s` : "发送验证码"}
-                  </button>
-                </label>
-                <div className="inline-note">输入空间标识后，我们会自动向该空间管理员邮箱发送验证码。</div>
+                <button className="ghost-button admin-code-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
+                  {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s 后可重发` : "发送管理员验证码"}
+                </button>
               </div>
             )}
 

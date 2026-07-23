@@ -38,8 +38,7 @@ export default function JoinSpacePage() {
   const [showPasswordField, setShowPasswordField] = useState(false);
   const [passwordHint, setPasswordHint] = useState<string | null>(null);
   const [space, setSpace] = useState<SpaceDTO | null>(null);
-  const [lookupState, setLookupState] = useState<"idle" | "loading" | "ready" | "missing" | "error">("idle");
-  const [lookupError, setLookupError] = useState<string | null>(null);
+  const [lookupState, setLookupState] = useState<"idle" | "loading" | "ready" | "missing" | "error">("loading");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting">("idle");
 
@@ -63,7 +62,6 @@ export default function JoinSpacePage() {
     const controller = new AbortController();
     setLookupState("loading");
     setSpace(null);
-    setLookupError(null);
     setShowPasswordField(false);
     setPasswordHint(null);
 
@@ -82,7 +80,6 @@ export default function JoinSpacePage() {
         }
 
         setLookupState("error");
-        setLookupError(error instanceof ApiError ? error.message : "暂时无法确认这个空间是否存在");
       });
 
     return () => controller.abort();
@@ -132,6 +129,12 @@ export default function JoinSpacePage() {
 
   return (
     <AppChrome
+      guestSpaceBrand={{
+        name: space?.name || displaySlug(slug) || slug,
+        avatarUri: space?.official_user?.avatar_uri,
+      }}
+      hidePageTitle
+      publicHeader
       title={space?.name || displaySlug(slug) || slug}
       topbarAction={
         <a className="ghost-chip" href={adminHref}>
@@ -143,28 +146,21 @@ export default function JoinSpacePage() {
         <div className={`auth-card ${lookupState !== "ready" ? "is-space-state" : ""}`}>
           {lookupState === "loading" ? (
             <div className="join-space-state loading">
-              <div className="join-space-state-hero">
-                <p className="join-space-state-kicker">空间校验</p>
-                <div className="join-space-domain">{spaceDomainLabel}</div>
-              </div>
-              <div className="join-space-state-badge">正在确认</div>
+              <div className="join-space-state-icon is-loading" aria-hidden="true"><span /></div>
               <div className="join-space-state-copy">
-                <h2>我们正在确认这个入口属于哪个空间</h2>
-                <p>请稍等片刻，我们会先核对子域名和对应空间的关系，再决定是否展示加入页面。</p>
+                <h2>正在确认空间</h2>
+                <div className="join-space-domain">{spaceDomainLabel}</div>
               </div>
             </div>
           ) : null}
 
           {lookupState === "missing" ? (
             <div className="join-space-state missing">
-              <div className="join-space-state-hero">
-                <p className="join-space-state-kicker">空间不存在</p>
-                <div className="join-space-domain">{spaceDomainLabel}</div>
-              </div>
-              <div className="join-space-state-badge">还没有创建</div>
+              <div className="join-space-state-icon" aria-hidden="true"><span>404</span></div>
               <div className="join-space-state-copy">
                 <h2>这个空间还没有创建</h2>
-                <p>我们没有找到与这个子域名对应的空间。你可以先了解 Sermo 言浪，或者直接把它创建成一个新的专属入口。</p>
+                <div className="join-space-domain">{spaceDomainLabel}</div>
+                <p>创建它，或返回言浪主页。</p>
               </div>
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
@@ -179,14 +175,11 @@ export default function JoinSpacePage() {
 
           {lookupState === "error" ? (
             <div className="join-space-state error">
-              <div className="join-space-state-hero">
-                <p className="join-space-state-kicker">空间校验失败</p>
-                <div className="join-space-domain">{spaceDomainLabel}</div>
-              </div>
-              <div className="join-space-state-badge">暂时不可用</div>
+              <div className="join-space-state-icon" aria-hidden="true"><span>!</span></div>
               <div className="join-space-state-copy">
                 <h2>暂时无法确认这个空间</h2>
-                <p>可能是网络波动，或者服务暂时不可用。你可以重新检查，或者先了解 Sermo 言浪，稍后再试。</p>
+                <div className="join-space-domain">{spaceDomainLabel}</div>
+                <p>检查网络后再试一次。</p>
               </div>
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
@@ -221,7 +214,7 @@ export default function JoinSpacePage() {
                   />
                   <div className="join-space-official-copy">
                     <strong>{space.official_user.name}</strong>
-                    <span>@{space.name}</span>
+                    <span>@{space.slug}</span>
                   </div>
                 </div>
               ) : null}
@@ -267,12 +260,6 @@ export default function JoinSpacePage() {
           ) : null}
         </div>
       </section>
-      <AsyncErrorDialog
-        title="暂时无法确认这个空间"
-        message={lookupError ?? ""}
-        onClose={() => setLookupError(null)}
-        open={Boolean(lookupError) && lookupState === "error"}
-      />
       <AsyncErrorDialog message={submitError ?? ""} onClose={() => setSubmitError(null)} open={Boolean(submitError)} />
     </AppChrome>
   );

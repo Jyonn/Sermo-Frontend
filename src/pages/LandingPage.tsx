@@ -29,6 +29,7 @@ export default function LandingPage() {
   return (
     <AppChrome
       hidePageTitle
+      publicHeader
       title="Sermo 言浪"
       topbarAction={
         <>

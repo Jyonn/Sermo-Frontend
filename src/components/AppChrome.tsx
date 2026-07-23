@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { UserAvatar } from "./UserAvatar";
 import logoUrl from "../assets/logo.svg";
 
 interface AppChromeProps {
@@ -14,6 +15,11 @@ interface AppChromeProps {
   topbarClassName?: string;
   topbarProgress?: number | null;
   shellClassName?: string;
+  publicHeader?: boolean;
+  guestSpaceBrand?: {
+    name: string;
+    avatarUri?: string;
+  };
 }
 
 export function AppChrome({
@@ -27,21 +33,24 @@ export function AppChrome({
   topbarClassName,
   topbarProgress,
   shellClassName,
+  publicHeader = false,
+  guestSpaceBrand,
 }: AppChromeProps) {
   const { session } = useAuth();
   const location = useLocation();
 
   const brandTarget = session ? "/app/chats" : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
+  const usePublicHeader = publicHeader || !session;
 
   return (
     <>
       {!hideTopbar ? (
-        <header className={`topbar${topbarClassName ? ` ${topbarClassName}` : ""}`}>
+        <header className={`topbar${usePublicHeader ? " guest-topbar" : ""}${topbarClassName ? ` ${topbarClassName}` : ""}`}>
           <div className="topbar-leading">
             {topbarLeading ?? (
-              <Link className="brand" to={brandTarget}>
-                <div className="brand-mark">
+              <Link className={`brand${guestSpaceBrand ? " guest-space-brand" : ""}`} to={brandTarget}>
+                <div className="brand-mark sermo-brand-mark">
                   <span
                     aria-hidden="true"
                     className="brand-logo"
@@ -51,6 +60,12 @@ export function AppChrome({
                     }}
                   />
                 </div>
+                {guestSpaceBrand ? (
+                  <>
+                    <span className="brand-collaboration-mark" aria-hidden="true">×</span>
+                    <UserAvatar className="brand-space-avatar" name={guestSpaceBrand.name} uri={guestSpaceBrand.avatarUri} />
+                  </>
+                ) : null}
               </Link>
             )}
           </div>
