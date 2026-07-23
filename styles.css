@@ -2551,6 +2551,7 @@ img {
 }
 
 .message-context-menu {
+  --message-menu-shift-x: 0px;
   position: fixed;
   width: max-content;
   max-width: min(260px, calc(100vw - 24px));
@@ -2565,7 +2566,7 @@ img {
 .message-context-menu::after {
   content: "";
   position: absolute;
-  left: 50%;
+  left: clamp(16px, calc(50% - var(--message-menu-shift-x)), calc(100% - 16px));
   width: 12px;
   height: 12px;
   background: rgba(255, 255, 255, 0.96);
@@ -2575,7 +2576,7 @@ img {
 }
 
 .message-context-menu.above {
-  transform: translate(-50%, -100%);
+  transform: translate(calc(-50% + var(--message-menu-shift-x)), -100%);
 }
 
 .message-context-menu.above::after {
@@ -2584,7 +2585,7 @@ img {
 }
 
 .message-context-menu.below {
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--message-menu-shift-x)), 0);
 }
 
 .message-context-menu.below::after {

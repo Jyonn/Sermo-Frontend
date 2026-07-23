@@ -711,7 +711,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   isLast: boolean;
   messages: ChatMessage[];
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
-  onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
+  onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
 }) {
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ index: number; x: number; y: number } | null>(null);
@@ -779,7 +779,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 onContextMenu={(event) => {
                   event.preventDefault();
                   clearLongPress();
-                  onOpenActions(message, event.currentTarget);
+                  onOpenActions(message, event.currentTarget, event.clientX);
                 }}
                 onPointerCancel={clearLongPress}
                 onPointerDown={(event) => startLongPress(event, message, index)}
@@ -1106,7 +1106,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             canOpenActions
               ? (event) => {
                   event.preventDefault();
-                  openActions();
+                  clearLongPress();
+                  onOpenActions(message, event.currentTarget, event.clientX);
                 }
               : undefined
           }
@@ -1222,7 +1223,7 @@ interface MessageBubbleRowProps {
   isLast: boolean;
   message: ChatMessage;
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
-  onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
+  onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
 }
 
@@ -1230,7 +1231,7 @@ interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
-  onOpenActions: (message: ChatMessage, element: HTMLElement) => void;
+  onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
   showAuthor: boolean;
 }
@@ -1475,6 +1476,7 @@ export default function ChatsPage() {
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const cancelledSendIdsRef = useRef(new Set<string>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const messageMenuRef = useRef<HTMLDivElement | null>(null);
   const replyingToRef = useRef<QuotedMessageDTO | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -1650,17 +1652,31 @@ export default function ChatsPage() {
     window.setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
-  const openMessageMenu = (message: ChatMessage, element: HTMLElement) => {
+  const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
     setMessageMenu({
       message,
-      anchorX: rect.left + rect.width / 2,
+      anchorX: pointerX ?? rect.left + rect.width / 2,
       anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
       placement,
       confirmDelete: false,
     });
   };
+
+  useLayoutEffect(() => {
+    const menu = messageMenuRef.current;
+    if (!menu || !messageMenu) return;
+    menu.style.setProperty("--message-menu-shift-x", "0px");
+    const rect = menu.getBoundingClientRect();
+    const safeInset = 12;
+    let shift = 0;
+    if (rect.left < safeInset) shift = safeInset - rect.left;
+    if (rect.right + shift > window.innerWidth - safeInset) {
+      shift -= rect.right + shift - (window.innerWidth - safeInset);
+    }
+    menu.style.setProperty("--message-menu-shift-x", `${Math.round(shift)}px`);
+  }, [messageMenu]);
 
   useEffect(() => {
     if (!cacheScope) return;
@@ -4029,6 +4045,7 @@ export default function ChatsPage() {
       {messageMenu ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
+            ref={messageMenuRef}
             className={`message-context-menu ${messageMenu.placement === "bottom" ? "below" : "above"} ${messageMenu.confirmDelete ? "confirming" : ""}`}
             onClick={(event) => event.stopPropagation()}
             style={{
