@@ -18,6 +18,7 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { TabPageHeader } from "../components/TabPageHeader";
 import { InputDialog } from "../components/InputDialog";
 import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
@@ -3341,11 +3342,11 @@ export default function ChatsPage() {
 
   const renderChatList = () => (
     <>
-      <div className="chat-list-screen-header minimal-page-header">
-        <div className="page-toolbar">
-          <div className="page-toolbar-title-status">
-            <h2 className="panel-title">聊天</h2>
-            <HeaderSyncIndicator syncing={viewState === "loading"} />
+      <div className="chat-list-screen-header">
+        <TabPageHeader
+          title="聊天"
+          syncing={viewState === "loading"}
+          status={
             <span
               aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
               className={`chat-health-indicator is-${chatHealth}`}
@@ -3353,8 +3354,8 @@ export default function ChatsPage() {
             >
               <span className="chat-health-dot" />
             </span>
-          </div>
-        </div>
+          }
+        />
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         <label className="search-box">
           <span className="material-symbols-outlined">search</span>

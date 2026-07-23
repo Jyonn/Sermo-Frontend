@@ -10,7 +10,7 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { VerificationBanner } from "../components/VerificationBanner";
-import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { TabPageHeader } from "../components/TabPageHeader";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
 
@@ -410,13 +410,8 @@ export default function SquarePage() {
   return (
     <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack square-plaza-page">
-        <div className="chat-list-screen-header minimal-page-header square-plaza-toolbar">
-          <div className="page-toolbar">
-            <div className="page-toolbar-title-status">
-              <h2 className="panel-title">广场</h2>
-              <HeaderSyncIndicator syncing={syncing} />
-            </div>
-          </div>
+        <TabPageHeader title="广场" syncing={syncing} />
+        <div className="chat-list-screen-header square-plaza-toolbar">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search square-search">
             <span className="material-symbols-outlined">search</span>

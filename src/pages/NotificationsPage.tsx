@@ -13,6 +13,7 @@ import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { TabPageHeader } from "../components/TabPageHeader";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
 
@@ -224,13 +225,8 @@ export default function NotificationsPage() {
   return (
     <AppChrome title="通讯" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <div className="chat-list-screen-header minimal-page-header">
-          <div className="page-toolbar">
-            <div className="page-toolbar-title-status">
-              <h2 className="panel-title">通讯</h2>
-              <HeaderSyncIndicator syncing={syncing} />
-            </div>
-          </div>
+        <TabPageHeader title="通讯" syncing={syncing} />
+        <div className="chat-list-screen-header">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <label className="search-box page-search">
             <span className="material-symbols-outlined">search</span>

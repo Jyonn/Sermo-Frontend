@@ -22,6 +22,7 @@ import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPre
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { TabPageHeader } from "../components/TabPageHeader";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
@@ -960,14 +961,7 @@ export default function MenuPage() {
   return (
     <AppChrome title="菜单" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <div className="minimal-page-header">
-          <div className="page-toolbar">
-            <div className="page-toolbar-title-status">
-              <h2 className="panel-title">菜单</h2>
-              <HeaderSyncIndicator syncing={syncing} />
-            </div>
-          </div>
-        </div>
+        <TabPageHeader title="菜单" syncing={syncing} />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
             <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
