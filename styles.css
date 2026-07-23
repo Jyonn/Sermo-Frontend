@@ -253,10 +253,6 @@ body {
   overscroll-behavior: none;
 }
 
-html {
-  background: #eef7f1;
-}
-
 body {
   font-family: var(--font-body);
   color: var(--text-primary);
