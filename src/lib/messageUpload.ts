@@ -72,10 +72,19 @@ function uploadFormData(url: string, formData: FormData, onProgress?: (progress:
 }
 
 export async function uploadMessageMedia(file: File, kind: MessageMediaKind, onProgress?: (progress: number) => void) {
+  return uploadMessageMediaWith(file, kind, (mediaKind, fileName, contentType) => api.createMessageUpload(mediaKind, fileName, contentType), onProgress);
+}
+
+export async function uploadMessageMediaWith(
+  file: File,
+  kind: MessageMediaKind,
+  createUpload: (kind: MessageMediaKind, fileName: string, contentType?: string) => ReturnType<typeof api.createMessageUpload>,
+  onProgress?: (progress: number) => void
+) {
   validateMessageMediaFile(file, kind);
 
   onProgress?.(0.02);
-  const upload = await api.createMessageUpload(kind, file.name, file.type);
+  const upload = await createUpload(kind, file.name, file.type);
   const formData = new FormData();
   formData.set("token", upload.upload_token);
   formData.set("key", upload.key);

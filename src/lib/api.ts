@@ -277,11 +277,19 @@ export const api = {
     });
   },
 
-  broadcastAdminMessage(payload: { content: string; broadcast_id: string }) {
+  broadcastAdminMessage(payload: { content: string; type: number; broadcast_id: string }) {
     return request<SpaceAdminBroadcastResultDTO>("/spaces/admin/broadcast", {
       method: "POST",
       adminAuth: true,
       body: payload,
+    });
+  },
+
+  createAdminBroadcastUpload(kind: MessageMediaKind, file_name: string, content_type?: string) {
+    return request<MessageUploadDTO>("/spaces/admin/broadcast/upload", {
+      method: "POST",
+      adminAuth: true,
+      body: { kind, file_name, content_type },
     });
   },
 

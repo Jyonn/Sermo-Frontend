@@ -8136,10 +8136,69 @@ img {
   gap: 14px;
 }
 
-.admin-broadcast-form .textarea {
-  min-height: 148px;
-  padding: 14px;
-  white-space: pre-wrap;
+.admin-broadcast-composer {
+  margin: 0;
+}
+
+.admin-broadcast-composer .composer-input {
+  padding: 12px 0;
+}
+
+.admin-composer-svg,
+.admin-composer-svg svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.admin-broadcast-progress {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(215, 220, 231, 0.66);
+}
+
+.admin-broadcast-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #28a9f2, #00cf8b);
+  transition: transform 160ms ease-out;
+}
+
+.admin-broadcast-waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  height: 26px;
+}
+
+.admin-broadcast-waveform span {
+  width: 4px;
+  height: 34%;
+  flex: 1 1 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(0, 208, 132, 0.92), rgba(44, 169, 255, 0.68));
+}
+
+.admin-broadcast-waveform.is-recording span {
+  animation: admin-broadcast-wave 760ms ease-in-out infinite alternate;
+  animation-delay: calc(var(--wave-index, 0) * -45ms);
+}
+
+.admin-broadcast-waveform.is-recording span:nth-child(3n + 1) {
+  animation-delay: -180ms;
+}
+
+.admin-broadcast-waveform.is-recording span:nth-child(3n + 2) {
+  animation-delay: -360ms;
+}
+
+@keyframes admin-broadcast-wave {
+  from { transform: scaleY(0.45); }
+  to { transform: scaleY(1.45); }
 }
 
 .admin-broadcast-meta {
