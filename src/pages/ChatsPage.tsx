@@ -1307,6 +1307,10 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
         <a className="message-image-location-credit" href="https://www.amap.com/" rel="noreferrer" target="_blank">
           地址由高德地图提供
         </a>
+      ) : metadata.address && metadata.geocoding_provider === "opencage" ? (
+        <a className="message-image-location-credit" href="https://opencagedata.com/" rel="noreferrer" target="_blank">
+          地址由 OpenCage 提供
+        </a>
       ) : null}
     </>
   );

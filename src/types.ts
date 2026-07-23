@@ -237,7 +237,7 @@ export interface ImageMetadataDTO {
   latitude?: number | null;
   longitude?: number | null;
   address?: string;
-  geocoding_provider?: "amap" | "nominatim" | string;
+  geocoding_provider?: "amap" | "opencage" | "nominatim" | string;
   geocoding_status?: number;
 }
 
