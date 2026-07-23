@@ -9039,15 +9039,26 @@ img {
   }
 
   .desktop-tab-shell > .page-stack > .tab-sticky-header {
+    align-self: start;
+    height: 65px;
+    min-height: 65px;
     margin: 0 -24px;
-    padding: 22px 24px 13px;
+    padding: 0 24px;
     border-radius: 20px 20px 0 0;
   }
 
   .chat-mobile-layout > .mobile-chat-list-screen .tab-sticky-header {
+    align-self: start;
+    height: 65px;
+    min-height: 65px;
     margin: 0 -18px;
-    padding: 18px 18px 12px;
+    padding: 0 18px;
     border-radius: 20px 20px 0 0;
+  }
+
+  .desktop-tab-shell > .page-stack > .tab-sticky-header .page-toolbar,
+  .chat-mobile-layout > .mobile-chat-list-screen .tab-sticky-header .page-toolbar {
+    height: 100%;
   }
 
   .desktop-tab-shell .simple-list {
