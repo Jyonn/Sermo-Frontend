@@ -16,6 +16,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
+import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
@@ -588,7 +589,8 @@ export default function MenuPage() {
     });
     try {
       setAuthActionState("sending");
-      const normalizedTarget = authSheetChannel === "email" ? authTarget.trim().toLowerCase() : authTarget.trim();
+      const normalizedTarget = normalizeContactTarget(authSheetChannel, authTarget);
+      setAuthTarget(normalizedTarget);
       const payload = await api.sendContactCode({ channel: channelCode(authSheetChannel), target: normalizedTarget });
       setAuthPending(true);
       setAuthCooldown(60);
@@ -631,7 +633,7 @@ export default function MenuPage() {
     });
     try {
       setAuthActionState("binding");
-      const normalizedTarget = authSheetChannel === "email" ? authTarget.trim().toLowerCase() : authTarget.trim();
+      const normalizedTarget = normalizeContactTarget(authSheetChannel, authTarget);
       const nextMe = await api.bindContact({
         channel: channelCode(authSheetChannel),
         target: normalizedTarget,

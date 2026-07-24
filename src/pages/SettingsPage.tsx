@@ -10,6 +10,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
+import { normalizeContactTarget } from "../lib/contactTarget";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences } from "../types";
 
@@ -320,7 +321,8 @@ export default function SettingsPage() {
     try {
       setContactActionState("sending-code");
       const channel = contactChannel === "email" ? 1 : contactChannel === "sms" ? 2 : 3;
-      const normalizedTarget = contactChannel === "email" ? contactTarget.trim().toLowerCase() : contactTarget.trim();
+      const normalizedTarget = normalizeContactTarget(contactChannel, contactTarget);
+      setContactTarget(normalizedTarget);
       const payload = await api.sendContactCode({ channel, target: normalizedTarget });
       setPendingContactState((current) => ({ ...current, [contactChannel]: true }));
       setContactCooldowns((current) => ({ ...current, [contactChannel]: 60 }));
@@ -338,7 +340,7 @@ export default function SettingsPage() {
     try {
       setContactActionState("binding");
       const channel = contactChannel === "email" ? 1 : contactChannel === "sms" ? 2 : 3;
-      const normalizedTarget = contactChannel === "email" ? contactTarget.trim().toLowerCase() : contactTarget.trim();
+      const normalizedTarget = normalizeContactTarget(contactChannel, contactTarget);
       const me = await api.bindContact({ channel, target: normalizedTarget, code: contactCode.trim() });
       patchSessionUser({
         verified: me.verified,
