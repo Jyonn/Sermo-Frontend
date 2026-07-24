@@ -12,6 +12,7 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
+import { showToast } from "../lib/toast";
 import type { AppViewState, ChatDTO, UserDTO } from "../types";
 
 export interface UserProfileSeed {
@@ -164,10 +165,11 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     try {
       const chat = await api.createGroupChat(groupSelectedIds);
       setGroupPickerOpen(false);
+      showToast("群聊已创建");
       if (onOpenChat) onOpenChat(chat.chat_id);
       else navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "新建群聊失败");
+      showToast(apiError instanceof ApiError ? apiError.message : "新建群聊失败", "error");
     } finally {
       setGroupCreating(false);
     }
@@ -184,16 +186,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const sendRequest = async () => {
     if (!user || requestState !== "idle") return;
     setRequestState("sending");
-    setStatusModal({ phase: "loading", loadingLabel: "正在发送", successLabel: "好友申请已发送", errorLabel: "发送失败" });
     try {
       await api.createFriendRequest(user.user_id);
       setRequestState("sent");
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("好友申请已发送");
     } catch (apiError) {
       setRequestState("idle");
-      setStatusModal((current) =>
-        current ? { ...current, phase: "error", errorLabel: apiError instanceof ApiError ? apiError.message : "发送失败" } : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "发送失败", "error");
     }
   };
 

@@ -6,13 +6,13 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
-import { RequestStatusModal } from "../components/RequestStatusModal";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
+import { showToast } from "../lib/toast";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
@@ -58,13 +58,7 @@ export default function FriendsPage() {
   const [sheetRequest, setSheetRequest] = useState<FriendshipRequestDTO | null>(null);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
-  const [statusModal, setStatusModal] = useState<{
-    open: boolean;
-    phase: "loading" | "success" | "error";
-    loadingLabel: string;
-    successLabel: string;
-    errorLabel: string;
-  } | null>(null);
+  const [requestActionUserId, setRequestActionUserId] = useState<number | null>(null);
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
@@ -132,15 +126,8 @@ export default function FriendsPage() {
   }, [incoming, outgoing, tab]);
 
   const actOnRequest = async (userId: number, accept?: boolean) => {
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: accept === undefined ? "正在撤回申请" : accept ? "正在同意申请" : "正在忽略申请",
-      successLabel: accept === undefined ? "申请已撤回" : accept ? "已添加为好友" : "已忽略申请",
-      errorLabel: "操作失败",
-    });
-
     try {
+      setRequestActionUserId(userId);
       if (accept === undefined) await api.removeFriendRequest(userId);
       else await api.respondFriendRequest(userId, accept);
 
@@ -153,17 +140,11 @@ export default function FriendsPage() {
         setFriends(refreshedFriends.map(mapFriend));
       }
       setSheetRequest(null);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast(accept === undefined ? "申请已撤回" : accept ? "已添加为好友" : "申请已忽略");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "操作失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "操作失败", "error");
+    } finally {
+      setRequestActionUserId(null);
     }
   };
 
@@ -233,8 +214,8 @@ export default function FriendsPage() {
                   </div>
                   {tab === "incoming" ? (
                     <div className="row-actions">
-                      <button className="button row-button" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
-                        同意
+                      <button className="button row-button" disabled={requestActionUserId === request.from_user.user_id} onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
+                        {requestActionUserId === request.from_user.user_id ? "处理中" : "同意"}
                       </button>
                       <button className="icon-button" onClick={() => setSheetRequest(request)} type="button">
                         <span className="material-symbols-outlined">more_horiz</span>
@@ -300,8 +281,8 @@ export default function FriendsPage() {
           <div className="sheet-action-list">
             {tab === "incoming" ? (
               <>
-                <button className="button" onClick={() => void actOnRequest(sheetRequest.from_user.user_id, true)} type="button">
-                  同意
+                <button className="button" disabled={requestActionUserId === sheetRequest.from_user.user_id} onClick={() => void actOnRequest(sheetRequest.from_user.user_id, true)} type="button">
+                  {requestActionUserId === sheetRequest.from_user.user_id ? "处理中" : "同意"}
                 </button>
                 <button className="ghost-button" onClick={() => setIgnoreRequest(sheetRequest)} type="button">
                   忽略
@@ -344,14 +325,6 @@ export default function FriendsPage() {
             void actOnRequest(targetUserId);
           }
         }}
-      />
-      <RequestStatusModal
-        open={Boolean(statusModal?.open)}
-        phase={statusModal?.phase ?? "loading"}
-        loadingLabel={statusModal?.loadingLabel}
-        successLabel={statusModal?.successLabel}
-        errorLabel={statusModal?.errorLabel}
-        onAutoClose={() => setStatusModal(null)}
       />
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>

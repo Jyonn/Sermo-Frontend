@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
+import { AppToast } from "./components/AppToast";
 import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
@@ -207,6 +208,7 @@ export default function App() {
       {ready ? <AppBottomNav /> : null}
       {ready ? <PwaRecommendation /> : null}
       <PwaUpdatePrompt />
+      <AppToast />
     </>
   );
 }

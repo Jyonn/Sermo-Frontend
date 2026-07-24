@@ -34,6 +34,7 @@ import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../l
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
+import { showToast } from "../lib/toast";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -3153,7 +3154,6 @@ export default function ChatsPage() {
     }
 
     try {
-      openStatusModal("正在创建群聊", "群聊创建成功", "创建群聊失败");
       setGroupCreateState("creating");
       const created = await api.createGroupChat(groupSelectedIds, groupTitle.trim() || undefined);
       const nextChat = mapChat(created, currentUserId);
@@ -3162,18 +3162,11 @@ export default function ChatsPage() {
       setGroupTitle("");
       setGroupQuery("");
       setGroupSelectedIds([]);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("群聊已创建");
       navigate(`/app/chats/${created.chat_id}`);
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "创建群聊失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "创建群聊失败", "error");
+    } finally {
       setGroupCreateState("idle");
     }
   };
@@ -3186,22 +3179,13 @@ export default function ChatsPage() {
   const renameGroup = async () => {
     if (!selectedChat) return;
     try {
-      openStatusModal("正在保存群聊名称", "群聊名称已更新", "重命名群聊失败");
       setGroupManageState("saving");
       const updated = await api.renameGroupChat(selectedChat.id, groupRenameValue.trim());
       applyUpdatedGroupChat(updated);
       setGroupRenameOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("群聊名称已更新");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "重命名群聊失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "重命名群聊失败", "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -3212,33 +3196,24 @@ export default function ChatsPage() {
     if (!chatMemberNewIds.length) return;
 
     try {
-      openStatusModal(
-        selectedChat.type === "group" ? "正在添加群成员" : "正在创建群聊",
-        selectedChat.type === "group" ? "成员添加成功" : "聊天成员已更新",
-        "添加聊天成员失败"
-      );
       setGroupManageState("saving");
       if (selectedChat.type === "group") {
         const updated = await api.addGroupMembers(selectedChat.id, chatMemberNewIds);
         applyUpdatedGroupChat(updated);
+        showToast("成员已添加");
       } else {
         const created = await api.createGroupChat(groupSelectedIds);
         const nextChat = mapChat(created, currentUserId);
         setChats((currentChats) => sortChats([nextChat, ...currentChats.filter((chat) => chat.id !== nextChat.id)]));
+        showToast("群聊已创建");
         navigate(`/app/chats/${created.chat_id}`);
       }
-      closeChatMemberPicker();
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      setChatMemberPickerOpen(false);
+      setGroupQuery("");
+      setGroupSelectedIds([]);
+      setChatMemberLockedIds([]);
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "添加聊天成员失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "添加聊天成员失败", "error");
     } finally {
       setGroupManageState("idle");
     }

@@ -19,6 +19,7 @@ import { useAuth } from "../lib/auth";
 import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
+import { showToast } from "../lib/toast";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { VerificationBanner } from "../components/VerificationBanner";
@@ -851,14 +852,8 @@ export default function MenuPage() {
     if (!basicEditField) return;
 
     try {
-      setStatusModal({
-        open: true,
-        phase: "loading",
-        loadingLabel: basicEditField === "name" ? "正在保存昵称" : "正在保存欢迎语",
-        successLabel: basicEditField === "name" ? "昵称更新成功" : "欢迎语更新成功",
-        errorLabel: basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
-      });
       setBasicEditSaving(true);
+      const editingField = basicEditField;
       if (basicEditField === "name") {
         const payload = await api.updateUserName(basicEditValue.trim());
         setMe((current) => (current ? { ...current, name: payload.name, name_pinyin: payload.name_pinyin ?? current.name_pinyin } : current));
@@ -874,16 +869,11 @@ export default function MenuPage() {
         });
       }
       setBasicEditField(null);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast(editingField === "name" ? "昵称已更新" : "欢迎语已更新");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
-            }
-          : null
+      showToast(
+        apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
+        "error"
       );
     } finally {
       setBasicEditSaving(false);
@@ -908,15 +898,9 @@ export default function MenuPage() {
     try {
       const copied = await copyText(friendInviteLink);
       if (!copied) throw new Error("copy_failed");
-      setStatusModal({
-        open: true,
-        phase: "success",
-        loadingLabel: "正在复制链接",
-        successLabel: "链接已复制",
-        errorLabel: "复制失败",
-      });
+      showToast("链接已复制");
     } catch {
-      setError("复制好友邀请链接失败。");
+      showToast("复制失败", "error");
     }
   };
 
