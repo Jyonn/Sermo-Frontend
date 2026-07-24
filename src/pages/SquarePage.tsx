@@ -10,15 +10,18 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { VerificationBanner } from "../components/VerificationBanner";
-import { TabPageHeader } from "../components/TabPageHeader";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
 
 const MAX_ORBS = 20;
-const ORB_AREA_RATIO = 0.16;
-const ORB_MIN_SIZE = 44;
-const ORB_PADDING = 22;
-const ORB_GAP = 16;
+const CHARACTER_AREA_RATIO = 0.2;
+const CHARACTER_MIN_HEAD_SIZE = 38;
+const CHARACTER_MAX_HEAD_SIZE = 64;
+const CHARACTER_WIDTH_RATIO = 1.45;
+const CHARACTER_HEIGHT_RATIO = 2.18;
+const CHARACTER_PADDING = 18;
+const CHARACTER_GAP = 10;
 const MAX_FRAME_DELTA = 0.028;
 const ORB_ENTER_DURATION_MS = 320;
 const ORB_EXIT_DURATION_MS = 260;
@@ -37,8 +40,29 @@ function clamp(min: number, value: number, max: number) {
 }
 
 function calculateOrbSize(count: number, width: number, height: number) {
-  if (!count || !width || !height) return ORB_MIN_SIZE;
-  return Math.max(ORB_MIN_SIZE, Math.sqrt((ORB_AREA_RATIO * width * height) / count));
+  if (!count || !width || !height) return CHARACTER_MIN_HEAD_SIZE;
+  const sizingCount = Math.max(5, count);
+  const estimated = Math.sqrt(
+    (CHARACTER_AREA_RATIO * width * height)
+    / (sizingCount * CHARACTER_WIDTH_RATIO * CHARACTER_HEIGHT_RATIO)
+  );
+  return clamp(CHARACTER_MIN_HEAD_SIZE, estimated, CHARACTER_MAX_HEAD_SIZE);
+}
+
+function characterDimensions(size: number) {
+  return {
+    width: size * CHARACTER_WIDTH_RATIO,
+    height: size * CHARACTER_HEIGHT_RATIO,
+  };
+}
+
+function charactersOverlap(first: Pick<OrbState, "x" | "y" | "size">, second: Pick<OrbState, "x" | "y" | "size">, gap = CHARACTER_GAP) {
+  const firstBox = characterDimensions(first.size);
+  const secondBox = characterDimensions(second.size);
+  return (
+    Math.abs(first.x - second.x) < (firstBox.width + secondBox.width) / 2 + gap
+    && Math.abs(first.y - second.y) < (firstBox.height + secondBox.height) / 2 + gap
+  );
 }
 
 function randomBetween(min: number, max: number) {
@@ -51,12 +75,11 @@ function createInitialOrbs(users: UserDTO[], width: number, height: number) {
 }
 
 function createOrbsWithSize(users: UserDTO[], width: number, height: number, size: number) {
-  const radius = size / 2;
-  const minX = ORB_PADDING + radius;
-  const maxX = width - ORB_PADDING - radius;
-  const minY = ORB_PADDING + radius;
-  const maxY = height - ORB_PADDING - radius;
-  const minDistance = size + ORB_GAP;
+  const character = characterDimensions(size);
+  const minX = CHARACTER_PADDING + character.width / 2;
+  const maxX = width - CHARACTER_PADDING - character.width / 2;
+  const minY = CHARACTER_PADDING + character.height / 2;
+  const maxY = height - CHARACTER_PADDING - character.height / 2;
   const next: OrbState[] = [];
 
   users.forEach((user, index) => {
@@ -66,11 +89,7 @@ function createOrbsWithSize(users: UserDTO[], width: number, height: number, siz
     for (let attempt = 0; attempt < 2000; attempt += 1) {
       x = randomBetween(minX, maxX);
       y = randomBetween(minY, maxY);
-      const overlaps = next.some((orb) => {
-        const dx = orb.x - x;
-        const dy = orb.y - y;
-        return Math.hypot(dx, dy) < minDistance;
-      });
+      const overlaps = next.some((orb) => charactersOverlap(orb, { x, y, size }));
       if (!overlaps) break;
     }
 
@@ -94,11 +113,11 @@ function syncOrbsWithUsers(previous: OrbState[], users: UserDTO[], width: number
   if (!previous.length) return createInitialOrbs(users, width, height);
 
   const nextSize = calculateOrbSize(users.length, width, height);
-  const radius = nextSize / 2;
-  const minX = ORB_PADDING + radius;
-  const maxX = width - ORB_PADDING - radius;
-  const minY = ORB_PADDING + radius;
-  const maxY = height - ORB_PADDING - radius;
+  const character = characterDimensions(nextSize);
+  const minX = CHARACTER_PADDING + character.width / 2;
+  const maxX = width - CHARACTER_PADDING - character.width / 2;
+  const minY = CHARACTER_PADDING + character.height / 2;
+  const maxY = height - CHARACTER_PADDING - character.height / 2;
   const nextById = new Map(previous.map((orb) => [orb.user.user_id, orb]));
   const next: OrbState[] = [];
 
@@ -121,7 +140,7 @@ function syncOrbsWithUsers(previous: OrbState[], users: UserDTO[], width: number
   const additions = createOrbsWithSize(newcomers, width, height, nextSize);
   additions.forEach((addition) => {
     for (let attempt = 0; attempt < 1200; attempt += 1) {
-      const overlaps = next.some((orb) => Math.hypot(orb.x - addition.x, orb.y - addition.y) < nextSize + ORB_GAP);
+      const overlaps = next.some((orb) => charactersOverlap(orb, addition));
       if (!overlaps) break;
       addition.x = randomBetween(minX, maxX);
       addition.y = randomBetween(minY, maxY);
@@ -141,40 +160,29 @@ function buildOrbSyncSignature(users: UserDTO[]) {
 
 function resolveOrbCollisions(orbs: OrbState[]) {
   if (!orbs.length) return;
-  const minDistance = orbs[0].size + ORB_GAP;
   for (let i = 0; i < orbs.length; i += 1) {
     for (let j = i + 1; j < orbs.length; j += 1) {
       const first = orbs[i];
       const second = orbs[j];
-      let dx = second.x - first.x;
-      let dy = second.y - first.y;
-      let distance = Math.hypot(dx, dy);
+      if (!charactersOverlap(first, second)) continue;
+      const firstBox = characterDimensions(first.size);
+      const secondBox = characterDimensions(second.size);
+      const dx = second.x - first.x || 1;
+      const dy = second.y - first.y || 1;
+      const overlapX = (firstBox.width + secondBox.width) / 2 + CHARACTER_GAP - Math.abs(dx);
+      const overlapY = (firstBox.height + secondBox.height) / 2 + CHARACTER_GAP - Math.abs(dy);
 
-      if (distance === 0) {
-        dx = 1;
-        dy = 0;
-        distance = 1;
+      if (overlapX < overlapY) {
+        const direction = Math.sign(dx);
+        first.x -= direction * overlapX / 2;
+        second.x += direction * overlapX / 2;
+        [first.vx, second.vx] = [second.vx, first.vx];
+      } else {
+        const direction = Math.sign(dy);
+        first.y -= direction * overlapY / 2;
+        second.y += direction * overlapY / 2;
+        [first.vy, second.vy] = [second.vy, first.vy];
       }
-
-      if (distance >= minDistance) continue;
-
-      const nx = dx / distance;
-      const ny = dy / distance;
-      const overlap = minDistance - distance;
-      first.x -= nx * (overlap / 2);
-      first.y -= ny * (overlap / 2);
-      second.x += nx * (overlap / 2);
-      second.y += ny * (overlap / 2);
-
-      const firstNormal = first.vx * nx + first.vy * ny;
-      const secondNormal = second.vx * nx + second.vy * ny;
-      const normalDelta = firstNormal - secondNormal;
-      if (normalDelta <= 0) continue;
-
-      first.vx -= normalDelta * nx;
-      first.vy -= normalDelta * ny;
-      second.vx += normalDelta * nx;
-      second.vy += normalDelta * ny;
     }
   }
 }
@@ -324,13 +332,12 @@ export default function SquarePage() {
       lastTickRef.current = timestamp;
 
       const next = orbsRef.current.map((orb) => ({ ...orb }));
-      const radius = next[0]?.size ? next[0].size / 2 : 0;
-      const minX = ORB_PADDING + radius;
-      const maxX = stageSize.width - ORB_PADDING - radius;
-      const minY = ORB_PADDING + radius;
-      const maxY = stageSize.height - ORB_PADDING - radius;
-
       next.forEach((orb) => {
+        const character = characterDimensions(orb.size);
+        const minX = CHARACTER_PADDING + character.width / 2;
+        const maxX = stageSize.width - CHARACTER_PADDING - character.width / 2;
+        const minY = CHARACTER_PADDING + character.height / 2;
+        const maxY = stageSize.height - CHARACTER_PADDING - character.height / 2;
         orb.x += orb.vx * delta;
         orb.y += orb.vy * delta;
 
@@ -409,12 +416,16 @@ export default function SquarePage() {
   return (
     <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack square-plaza-page">
-        <TabPageHeader title="广场" syncing={syncing} />
+        <div className="square-scene-header">
+          <div className="square-scene-title">
+            <strong>广场</strong>
+            <i aria-hidden="true" />
+            <span>{onlineUsers.length} 人</span>
+            <HeaderSyncIndicator syncing={syncing} />
+          </div>
+        </div>
         <div className="square-plaza-toolbar">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
-          <div className="square-online-meta">
-            <strong>{onlineUsers.length} 人在线</strong>
-          </div>
         </div>
 
         <section ref={stageRef} className="square-plaza-stage" style={{ minHeight: `${squareStageHeight}px` }}>
@@ -424,40 +435,60 @@ export default function SquarePage() {
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
-              className={`avatar-orb square-orb ${enteringOrbIds.includes(orb.user.user_id) ? "is-entering" : ""}`}
+              className={`square-character ${enteringOrbIds.includes(orb.user.user_id) ? "is-entering" : ""}`}
               onClick={() => setSelectedUser(orb.user)}
               style={
                 {
                   left: `${orb.x}px`,
                   top: `${orb.y}px`,
                   "--orb-size": `${orb.size}px`,
+                  "--walk-direction": orb.vx < 0 ? -1 : 1,
                 } as CSSProperties
               }
               type="button"
             >
-              <UserAvatar
-                className={`avatar-orb-core ${orb.user.is_alive ? "status-online" : ""}`}
-                name={orb.user.name}
-                uri={orb.user.avatar_uri}
-              />
-              <span>{orb.user.name}</span>
+              <span className="square-character-figure" aria-hidden="true">
+                <UserAvatar
+                  className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`}
+                  name={orb.user.name}
+                  uri={orb.user.avatar_uri}
+                />
+                <span className="square-character-body">
+                  <i className="square-character-arm is-left" />
+                  <i className="square-character-arm is-right" />
+                  <i className="square-character-torso" />
+                  <i className="square-character-leg is-left" />
+                  <i className="square-character-leg is-right" />
+                </span>
+              </span>
+              <span className="square-character-name">{orb.user.name}</span>
             </button>
           ))}
 
           {exitingOrbs.map((orb) => (
             <div
               key={`exiting-${orb.user.user_id}`}
-              className="avatar-orb square-orb is-exiting"
+              className="square-character is-exiting"
               style={
                 {
                   left: `${orb.x}px`,
                   top: `${orb.y}px`,
                   "--orb-size": `${orb.size}px`,
+                  "--walk-direction": orb.vx < 0 ? -1 : 1,
                 } as CSSProperties
               }
             >
-              <UserAvatar className={`avatar-orb-core ${orb.user.is_alive ? "status-online" : ""}`} name={orb.user.name} uri={orb.user.avatar_uri} />
-              <span>{orb.user.name}</span>
+              <span className="square-character-figure" aria-hidden="true">
+                <UserAvatar className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`} name={orb.user.name} uri={orb.user.avatar_uri} />
+                <span className="square-character-body">
+                  <i className="square-character-arm is-left" />
+                  <i className="square-character-arm is-right" />
+                  <i className="square-character-torso" />
+                  <i className="square-character-leg is-left" />
+                  <i className="square-character-leg is-right" />
+                </span>
+              </span>
+              <span className="square-character-name">{orb.user.name}</span>
             </div>
           ))}
 
