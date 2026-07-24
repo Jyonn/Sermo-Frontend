@@ -9377,6 +9377,14 @@ img {
     padding-bottom: 0;
   }
 
+  .shell-no-topbar:has(.chat-mobile-layout.chat-list-active) {
+    padding-bottom: 0;
+  }
+
+  .chat-list-active .chat-list-screen-body {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
   .desktop-tab-shell > .page-stack {
     width: 100%;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
