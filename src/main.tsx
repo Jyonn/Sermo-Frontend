@@ -26,7 +26,11 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then((registration) => {
       watchPwaUpdates(registration);
-      void registration.update();
+      const checkForUpdate = () => {
+        void registration.update().catch(() => undefined);
+      };
+      checkForUpdate();
+      window.setInterval(checkForUpdate, 3 * 60 * 1000);
     });
   });
 

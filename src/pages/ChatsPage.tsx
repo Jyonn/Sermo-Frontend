@@ -3393,9 +3393,7 @@ export default function ChatsPage() {
           </span>
         }
       />
-      <div className="chat-list-screen-header">
-        <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
-      </div>
+      <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
       <div className="chat-list-screen-body">
         {chatAccessNotice ? (

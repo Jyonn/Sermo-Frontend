@@ -12,7 +12,7 @@ export default function FriendProfilePage() {
 
   return (
     <AppChrome title="用户详情" hideTopbar shellClassName="shell-friend-profile">
-      <header className="chat-list-screen-header minimal-page-header friend-profile-header">
+      <header className="minimal-page-header friend-profile-header">
         <button className="chat-back-button" onClick={() => navigate(-1)} type="button" aria-label="返回上一页">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>

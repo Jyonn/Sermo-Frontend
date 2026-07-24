@@ -410,7 +410,7 @@ export default function SquarePage() {
     <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack square-plaza-page">
         <TabPageHeader title="广场" syncing={syncing} />
-        <div className="chat-list-screen-header square-plaza-toolbar">
+        <div className="square-plaza-toolbar">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
           <div className="square-online-meta">
             <strong>{onlineUsers.length} 人在线</strong>

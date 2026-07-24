@@ -205,9 +205,7 @@ export default function NotificationsPage() {
     <AppChrome title="通讯" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
         <TabPageHeader title="通讯" syncing={syncing} />
-        <div className="chat-list-screen-header">
-          <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
-        </div>
+        <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
         <section className="list-section">
           <div className="simple-list">
