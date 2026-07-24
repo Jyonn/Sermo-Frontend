@@ -16,6 +16,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
+import { useAdminAuth } from "../lib/adminAuth";
 import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
@@ -146,6 +147,7 @@ export default function MenuPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
+  const { setSession: setAdminSession } = useAdminAuth();
   const currentUserId = session?.user.user_id;
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [syncing, setSyncing] = useState(false);
@@ -162,6 +164,7 @@ export default function MenuPage() {
   const [accountSwitcherLoading, setAccountSwitcherLoading] = useState(false);
   const [switchingUserId, setSwitchingUserId] = useState<number | null>(null);
   const [privateAccountSaving, setPrivateAccountSaving] = useState(false);
+  const [adminDashboardOpening, setAdminDashboardOpening] = useState(false);
   const [unbindChannel, setUnbindChannel] = useState<NotificationChannel | null>(null);
   const [unbindConfirmOpen, setUnbindConfirmOpen] = useState(false);
   const [unbindVerifyOpen, setUnbindVerifyOpen] = useState(false);
@@ -263,6 +266,22 @@ export default function MenuPage() {
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : "账号切换失败", "error");
       setSwitchingUserId(null);
+    }
+  };
+
+  const openAdminDashboard = async () => {
+    if (adminDashboardOpening) return;
+    setAdminDashboardOpening(true);
+    try {
+      const payload = await api.createAdminSessionFromOfficialAccount();
+      setAdminSession({
+        accessToken: payload.auth.auth,
+        space: payload.space,
+      });
+      navigate("/space/dashboard");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "无法打开控制面板", "error");
+      setAdminDashboardOpening(false);
     }
   };
 
@@ -1148,12 +1167,19 @@ export default function MenuPage() {
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             {Boolean(me?.official ?? session?.user.official) ? (
-              <button className="simple-row menu-link-row" onClick={() => navigate("/space/dashboard")} type="button">
+              <button
+                className="simple-row menu-link-row"
+                disabled={adminDashboardOpening}
+                onClick={() => void openAdminDashboard()}
+                type="button"
+              >
                 <div className="row-main">
                   <strong>控制面板</strong>
                   <div className="row-subtle">管理空间与成员</div>
                 </div>
-                <span className="material-symbols-outlined">chevron_right</span>
+                <span className={`material-symbols-outlined${adminDashboardOpening ? " is-spinning" : ""}`}>
+                  {adminDashboardOpening ? "progress_activity" : "chevron_right"}
+                </span>
               </button>
             ) : null}
           </div>

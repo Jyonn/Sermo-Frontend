@@ -297,6 +297,13 @@ export const api = {
     });
   },
 
+  createAdminSessionFromOfficialAccount() {
+    return request<{ space: SpaceDTO; auth: SpaceAuthDTO }>("/spaces/admin/session", {
+      method: "POST",
+      auth: true,
+    });
+  },
+
   updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; member_limit: number | null }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
