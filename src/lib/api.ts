@@ -77,6 +77,7 @@ let adminAuthConfig: AdminAuthConfig = {
   setSession: () => undefined,
 };
 let refreshInFlight: Promise<AuthSession> | null = null;
+const getRequestsInFlight = new Map<string, Promise<unknown>>();
 
 export function configureApiAuth(config: AuthConfig) {
   authConfig = config;
@@ -156,7 +157,7 @@ export function refreshAuthSession(currentSession: AuthSession) {
   return refreshSessionSingleFlight(currentSession);
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, adminAuth = false, retryOn401 = true, signal } = options;
   const session = auth ? authConfig.getSession() : null;
   const adminSession = adminAuth ? adminAuthConfig.getSession() : null;
@@ -207,6 +208,45 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   }
 
   return parseEnvelope<T>(response);
+}
+
+function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) return shared;
+  if (signal.aborted) return Promise.reject(new DOMException("The operation was aborted.", "AbortError"));
+
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(new DOMException("The operation was aborted.", "AbortError"));
+    signal.addEventListener("abort", abort, { once: true });
+    shared.then(
+      (value) => {
+        signal.removeEventListener("abort", abort);
+        resolve(value);
+      },
+      (error) => {
+        signal.removeEventListener("abort", abort);
+        reject(error);
+      }
+    );
+  });
+}
+
+function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { method = "GET", auth = false, adminAuth = false, query, signal } = options;
+  if (method !== "GET") return requestCore<T>(path, options);
+
+  const sessionKey = auth ? authConfig.getSession()?.accessToken ?? "anonymous" : "";
+  const adminSessionKey = adminAuth ? adminAuthConfig.getSession()?.accessToken ?? "anonymous" : "";
+  const requestKey = `${withQuery(path, query)}|auth:${sessionKey}|admin:${adminSessionKey}`;
+  let shared = getRequestsInFlight.get(requestKey) as Promise<T> | undefined;
+
+  if (!shared) {
+    shared = requestCore<T>(path, { ...options, signal: undefined }).finally(() => {
+      getRequestsInFlight.delete(requestKey);
+    });
+    getRequestsInFlight.set(requestKey, shared);
+  }
+
+  return waitForSharedRequest(shared, signal);
 }
 
 export const api = {
