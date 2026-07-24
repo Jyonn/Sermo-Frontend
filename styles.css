@@ -6822,6 +6822,28 @@ img {
   min-width: 64px;
 }
 
+.friend-request-status {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  background: rgba(226, 231, 237, 0.72);
+  border-radius: 999px;
+}
+
+.friend-request-status.is-accepted {
+  color: #176247;
+  background: rgba(63, 184, 132, 0.13);
+}
+
+.friend-request-status.is-rejected,
+.friend-request-status.is-closed {
+  color: var(--text-secondary);
+  background: rgba(226, 231, 237, 0.56);
+}
+
 .menu-install-title {
   display: flex;
   align-items: center;

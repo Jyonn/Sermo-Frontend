@@ -18,12 +18,28 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
+const FRIEND_REQUEST_STATUS_ACCEPTED = 1;
+const FRIEND_REQUEST_STATUS_REJECTED = 2;
+const FRIEND_REQUEST_STATUS_DELETED = 3;
 
-function normalizePendingRequests(rows: { incoming: FriendshipRequestDTO[]; outgoing: FriendshipRequestDTO[] }) {
-  return {
-    incoming: rows.incoming.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING),
-    outgoing: rows.outgoing.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING),
-  };
+function pendingIncomingCount(rows: FriendshipRequestDTO[]) {
+  return rows.filter((request) => request.status === FRIEND_REQUEST_STATUS_PENDING).length;
+}
+
+function requestStatus(request: FriendshipRequestDTO, direction: "incoming" | "outgoing") {
+  if (request.status === FRIEND_REQUEST_STATUS_PENDING) {
+    return { label: direction === "incoming" ? "待处理" : "等待回应", tone: "pending" };
+  }
+  if (request.status === FRIEND_REQUEST_STATUS_ACCEPTED) {
+    return { label: direction === "incoming" ? "已同意" : "已通过", tone: "accepted" };
+  }
+  if (request.status === FRIEND_REQUEST_STATUS_REJECTED) {
+    return { label: direction === "incoming" ? "已忽略" : "未通过", tone: "rejected" };
+  }
+  if (request.status === FRIEND_REQUEST_STATUS_DELETED) {
+    return { label: "已结束", tone: "closed" };
+  }
+  return { label: "已处理", tone: "closed" };
 }
 
 type FriendSection = {
@@ -123,7 +139,7 @@ export default function NotificationsPage() {
       setFriends(cached.data.friends);
       setGroupChats(cached.data.groupChats);
       setRequests(cached.data.requests);
-      emitFriendRequestsUpdated(cached.data.requests.incoming.length);
+      emitFriendRequestsUpdated(pendingIncomingCount(cached.data.requests.incoming));
       setViewState("ready");
     } else {
       setViewState("loading");
@@ -133,14 +149,13 @@ export default function NotificationsPage() {
 
     Promise.all([api.getFriends(controller.signal), api.getFriendRequests(controller.signal), api.getChats(controller.signal)])
       .then(([friendRows, requestRows, chatRows]) => {
-        const normalizedRequests = normalizePendingRequests(requestRows);
         setFriends(friendRows);
-        setRequests(normalizedRequests);
-        emitFriendRequestsUpdated(normalizedRequests.incoming.length);
+        setRequests(requestRows);
+        emitFriendRequestsUpdated(pendingIncomingCount(requestRows.incoming));
         setGroupChats(chatRows.filter((chat) => chat.group));
         writeTabCache(cacheScope, "notifications", {
           friends: friendRows,
-          requests: normalizedRequests,
+          requests: requestRows,
           groupChats: chatRows.filter((chat) => chat.group),
         });
         setViewState("ready");
@@ -171,14 +186,14 @@ export default function NotificationsPage() {
   const filteredOutgoing = requests.outgoing;
   const filteredGroups = groupChats;
 
-  const pendingRequestCount = requests.incoming.length;
+  const pendingRequestCount = pendingIncomingCount(requests.incoming);
 
   const actOnRequest = async (userId: number, accept: boolean) => {
     try {
       await api.respondFriendRequest(userId, accept);
-      const refreshed = normalizePendingRequests(await api.getFriendRequests());
+      const refreshed = await api.getFriendRequests();
       setRequests(refreshed);
-      emitFriendRequestsUpdated(refreshed.incoming.length);
+      emitFriendRequestsUpdated(pendingIncomingCount(refreshed.incoming));
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "处理申请失败";
       setError(message);
@@ -188,9 +203,9 @@ export default function NotificationsPage() {
   const revokeOutgoingRequest = async (userId: number) => {
     try {
       await api.removeFriendRequest(userId);
-      const refreshed = normalizePendingRequests(await api.getFriendRequests());
+      const refreshed = await api.getFriendRequests();
       setRequests(refreshed);
-      emitFriendRequestsUpdated(refreshed.incoming.length);
+      emitFriendRequestsUpdated(pendingIncomingCount(refreshed.incoming));
     } catch (apiError) {
       const message = apiError instanceof ApiError ? apiError.message : "撤回申请失败";
       setError(message);
@@ -294,7 +309,6 @@ export default function NotificationsPage() {
       <SideDrawer
         open={requestSheetOpen}
         title="好友申请"
-        description="查看和处理好友申请"
         onClose={() => setRequestSheetOpen(false)}
       >
         <div className="friend-request-drawer">
@@ -313,31 +327,43 @@ export default function NotificationsPage() {
                   <UserAvatar className="mini-avatar" name={request.from_user.name} uri={request.from_user.avatar_uri} />
                   <div className="row-main">
                     <strong>{request.from_user.name}</strong>
-                    <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
+                    <div className="row-subtle">{formatRelativeTime(request.responded_at ?? request.updated_at)}</div>
                   </div>
-                  <div className="row-actions">
-                    <button className="button row-button friend-request-accept" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
-                      同意
-                    </button>
-                    <button className="ghost-button row-button" onClick={() => setIgnoreRequest(request)} type="button">
-                      忽略
-                    </button>
-                  </div>
+                  {request.status === FRIEND_REQUEST_STATUS_PENDING ? (
+                    <div className="row-actions">
+                      <button className="button row-button friend-request-accept" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
+                        同意
+                      </button>
+                      <button className="ghost-button row-button" onClick={() => setIgnoreRequest(request)} type="button">
+                        忽略
+                      </button>
+                    </div>
+                  ) : (
+                    <span className={`friend-request-status is-${requestStatus(request, "incoming").tone}`}>
+                      {requestStatus(request, "incoming").label}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
-          ) : <FeedbackState title="没有待处理申请" description="" /> : filteredOutgoing.length ? (
+          ) : <FeedbackState title="还没有收到申请" description="" /> : filteredOutgoing.length ? (
             <div className="simple-list friend-request-list">
               {filteredOutgoing.map((request) => (
                 <div key={request.request_id} className="simple-row request-row friend-request-card">
                   <UserAvatar className="mini-avatar" name={request.to_user.name} uri={request.to_user.avatar_uri} />
                   <div className="row-main">
                     <strong>{request.to_user.name}</strong>
-                    <div className="row-subtle">{formatRelativeTime(request.updated_at)}</div>
+                    <div className="row-subtle">{formatRelativeTime(request.responded_at ?? request.updated_at)}</div>
                   </div>
-                  <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
-                    撤回
-                  </button>
+                  {request.status === FRIEND_REQUEST_STATUS_PENDING ? (
+                    <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
+                      撤回
+                    </button>
+                  ) : (
+                    <span className={`friend-request-status is-${requestStatus(request, "outgoing").tone}`}>
+                      {requestStatus(request, "outgoing").label}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

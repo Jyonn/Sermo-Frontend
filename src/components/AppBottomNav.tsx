@@ -124,7 +124,7 @@ export function AppBottomNav() {
       try {
         const requests = await api.getFriendRequests();
         if (cancelled) return;
-        setIncomingRequestCount(requests.incoming.length);
+        setIncomingRequestCount(requests.incoming.filter((request) => request.status === 0).length);
       } catch {
         if (cancelled) return;
         setIncomingRequestCount(0);
