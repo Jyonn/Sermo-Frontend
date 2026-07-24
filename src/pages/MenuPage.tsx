@@ -90,6 +90,12 @@ function channelLabel(channel: NotificationChannel) {
   return channelRows.find(([key]) => key === channel)?.[2] ?? channel.toUpperCase();
 }
 
+function contactLabel(channel: NotificationChannel) {
+  if (channel === "email") return "邮箱";
+  if (channel === "sms") return "手机";
+  return "即时提醒";
+}
+
 function channelCode(channel: NotificationChannel) {
   return channel === "email" ? 1 : channel === "sms" ? 2 : 3;
 }
@@ -328,7 +334,7 @@ export default function MenuPage() {
     setUnbindConfirmOpen(false);
     setUnbindVerifyOpen(false);
     setUnbindChannel(null);
-    showToast(`${channelLabel(channel)}已解除绑定`);
+    showToast(`${contactLabel(channel)}已解除绑定`);
   };
 
   const confirmUnbind = async () => {
@@ -354,7 +360,7 @@ export default function MenuPage() {
     try {
       await api.sendContactCode({ channel: channelCode(unbindChannel), target: contactValue(unbindChannel) });
       setUnbindCooldown(60);
-      showToast("验证码已发送");
+      showToast(authSheetChannel === "email" ? "验证码已发送至邮箱" : authSheetChannel === "sms" ? "验证码已发送至手机" : "验证码已发送");
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : "验证码发送失败", "error");
     } finally {
@@ -815,14 +821,20 @@ export default function MenuPage() {
       const prefRows = await api.getNotificationPrefs();
       setPrefs(mapPrefs(prefRows));
       closeAuthSheet();
-      showToast(authSheetChannel === "email" ? "邮箱认证成功" : "绑定成功");
+      showToast(authSheetChannel === "email" ? "邮箱认证成功" : authSheetChannel === "sms" ? "手机绑定成功" : "绑定成功");
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
         setSecurityDrawerOpen(true);
       }
       showToast(
-        apiError instanceof ApiError ? apiError.message : authSheetChannel === "email" ? "邮箱认证失败" : "绑定失败",
+        apiError instanceof ApiError
+          ? apiError.message
+          : authSheetChannel === "email"
+            ? "邮箱认证失败"
+            : authSheetChannel === "sms"
+              ? "手机绑定失败"
+              : "绑定失败",
         "error"
       );
     } finally {
@@ -1373,7 +1385,7 @@ export default function MenuPage() {
                       <span className="menu-channel-value">已绑定</span>
                     ) : !hasPassword ? (
                       <span className="menu-inline-action">先设密码</span>
-                    ) : channel === "bark" ? (
+                    ) : channel === "bark" || channel === "sms" ? (
                       <span className="menu-inline-action">去绑定</span>
                     ) : (
                       <span className="menu-inline-action">去认证</span>
@@ -1757,19 +1769,22 @@ export default function MenuPage() {
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
         open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
-        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "bark" ? "绑定即时提醒" : authSheetChannel ? `绑定${channelLabel(authSheetChannel)}` : "通知认证"}
-        description={authSheetChannel === "email" ? undefined : "发送验证码后完成绑定"}
+        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "sms" ? "绑定手机" : authSheetChannel === "bark" ? "绑定即时提醒" : "绑定联系方式"}
+        description={authSheetChannel === "bark" ? "发送验证码后完成绑定" : undefined}
         onClose={closeAuthSheet}
       >
         {authSheetChannel ? (
           <div ref={authSheetBodyRef} className="simple-form contact-sheet-form">
             <div className="field-label-row">
-              <label className="field-label">{authSheetChannel === "email" ? "邮箱地址" : "目标地址"}</label>
+              <label className="field-label">{authSheetChannel === "email" ? "邮箱地址" : authSheetChannel === "sms" ? "手机号" : "目标地址"}</label>
               {authPending && authExpiresIn > 0 ? <span className="field-countdown">验证码还有 {authExpiresIn} 秒有效</span> : null}
             </div>
             <input
               className="input"
-              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "输入手机号" : "输入即时推送地址"}
+              autoComplete={authSheetChannel === "email" ? "email" : authSheetChannel === "sms" ? "tel" : "off"}
+              inputMode={authSheetChannel === "email" ? "email" : authSheetChannel === "sms" ? "tel" : "url"}
+              maxLength={authSheetChannel === "sms" ? 24 : undefined}
+              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "+86 138 0000 0000" : "输入即时推送地址"}
               value={authTarget}
               onChange={(event) => {
                 setAuthTarget(event.target.value);
@@ -1790,7 +1805,14 @@ export default function MenuPage() {
             </div>
             <div ref={authVerifyRef} className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
               <label className="field-label">验证码</label>
-              <input className="input" value={authCode} onChange={(event) => setAuthCode(event.target.value)} />
+              <input
+                autoComplete="one-time-code"
+                className="input"
+                inputMode="numeric"
+                placeholder="输入验证码"
+                value={authCode}
+                onChange={(event) => setAuthCode(event.target.value)}
+              />
               <div className="contact-flow-actions">
                 <button
                   className="button contact-flow-primary"
@@ -1798,7 +1820,7 @@ export default function MenuPage() {
                   onClick={() => void bindAuthChannel()}
                   type="button"
                 >
-                  {authActionState === "binding" ? "处理中..." : authSheetChannel === "email" ? "确认认证" : "确认绑定"}
+                  {authActionState === "binding" ? "处理中..." : authSheetChannel === "email" ? "确认认证" : authSheetChannel === "sms" ? "确认绑定" : "确认绑定"}
                 </button>
               </div>
             </div>
@@ -1809,7 +1831,7 @@ export default function MenuPage() {
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
         open={unbindVerifyOpen}
-        title={`验证当前${unbindChannel ? channelLabel(unbindChannel) : "联系方式"}`}
+        title={`验证当前${unbindChannel ? contactLabel(unbindChannel) : "联系方式"}`}
         description="验证通过后才会解除绑定"
         onClose={() => {
           if (unbindState !== "idle") return;
@@ -2061,7 +2083,7 @@ export default function MenuPage() {
         busy={unbindState === "removing"}
         danger
         open={unbindConfirmOpen}
-        title={`解除${unbindChannel ? channelLabel(unbindChannel) : "联系方式"}绑定？`}
+        title={`解除${unbindChannel ? contactLabel(unbindChannel) : "联系方式"}绑定？`}
         description={
           unbindChannel === "sms"
             ? "手机每 365 天只能解绑一次。解绑后，该手机号将停止接收提醒。"

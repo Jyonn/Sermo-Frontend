@@ -5,6 +5,7 @@ const barkEndpointPattern = /^https:\/\/api\.day\.app\/([^/?#\s]+)/i;
 export function normalizeContactTarget(channel: NotificationChannel, target: string): string {
   const trimmed = target.trim();
   if (channel === "email") return trimmed.toLowerCase();
+  if (channel === "sms") return trimmed.replace(/[\s()-]/g, "");
   if (channel !== "bark") return trimmed;
 
   const match = trimmed.match(barkEndpointPattern);
