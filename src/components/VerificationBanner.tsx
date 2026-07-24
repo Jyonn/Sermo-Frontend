@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 interface VerificationBannerProps {
@@ -12,6 +11,7 @@ interface VerificationBannerProps {
 
 export function VerificationBanner({ verified, mode = "tab", onAction, hasPassword = true }: VerificationBannerProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
 
   if (verified) {
@@ -35,7 +35,11 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
       onAction();
       return;
     }
-    navigate("/app/settings/contacts?channel=email");
+    navigate("/app/menu?sheet=email-verification", {
+      state: {
+        emailVerificationReturnTo: `${location.pathname}${location.search}`,
+      },
+    });
   };
 
   return (
@@ -45,15 +49,9 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
           <strong>认证邮箱，解锁更多功能</strong>
           <span>完成邮箱认证后即可发送好友申请、创建群聊并邀请成员。</span>
         </div>
-        {onAction || !hasPassword ? (
-          <button className="ghost-button verification-banner-action" onClick={handleAction} type="button">
-            去认证
-          </button>
-        ) : (
-          <Link className="ghost-button verification-banner-action" to="/app/settings/contacts?channel=email">
-            去认证
-          </Link>
-        )}
+        <button className="ghost-button verification-banner-action" onClick={handleAction} type="button">
+          去认证
+        </button>
       </div>
       <ConfirmDialog
         open={passwordReminderOpen}

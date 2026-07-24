@@ -21,7 +21,6 @@ import NotificationsPage from "./pages/NotificationsPage";
 import OfficialLoginPage from "./pages/OfficialLoginPage";
 import AccountSwitchPage from "./pages/AccountSwitchPage";
 import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
-import SettingsPage from "./pages/SettingsPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
 import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
@@ -55,6 +54,12 @@ function LegacyJoinHostRedirect({ slug }: { slug: string }) {
 function LegacySlugRedirect() {
   const { slug = "" } = useParams();
   return <LegacyJoinHostRedirect slug={slug} />;
+}
+
+function LegacySettingsRedirect() {
+  const location = useLocation();
+  const channel = new URLSearchParams(location.search).get("channel");
+  return <Navigate replace to={channel === "email" ? "/app/menu?sheet=email-verification" : "/app/menu"} />;
 }
 
 export default function App() {
@@ -178,7 +183,7 @@ export default function App() {
           path="/app/settings/account"
           element={
             <RequireAuth>
-              <SettingsPage />
+              <LegacySettingsRedirect />
             </RequireAuth>
           }
         />
@@ -186,7 +191,7 @@ export default function App() {
           path="/app/settings/notifications"
           element={
             <RequireAuth>
-              <SettingsPage />
+              <LegacySettingsRedirect />
             </RequireAuth>
           }
         />
@@ -194,7 +199,7 @@ export default function App() {
           path="/app/settings/contacts"
           element={
             <RequireAuth>
-              <SettingsPage />
+              <LegacySettingsRedirect />
             </RequireAuth>
           }
         />

@@ -539,6 +539,21 @@ export default function MenuPage() {
   }, [location.search]);
 
   useEffect(() => {
+    const sheet = new URLSearchParams(location.search).get("sheet");
+    if (sheet !== "email-verification" || authSheetChannel === "email") return;
+    if (!hasPassword) {
+      showPasswordReminder();
+      return;
+    }
+    setAuthSheetChannel("email");
+    setAuthTarget(channelTarget(me, "email"));
+    setAuthCode("");
+    setAuthPending(false);
+    setAuthCooldown(0);
+    setAuthExpiresIn(0);
+  }, [authSheetChannel, hasPassword, location.search, me]);
+
+  useEffect(() => {
     if (!authSheetChannel) return;
     if (authCooldown <= 0 && authExpiresIn <= 0) return;
     const timer = window.setInterval(() => {
@@ -642,6 +657,10 @@ export default function MenuPage() {
     setAuthCooldown(0);
     setAuthExpiresIn(0);
     setAuthActionState("idle");
+    if (new URLSearchParams(location.search).get("sheet") === "email-verification") {
+      const routeState = location.state as { emailVerificationReturnTo?: string } | null;
+      navigate(routeState?.emailVerificationReturnTo || "/app/menu", { replace: true });
+    }
   };
 
   const closeBarkGuide = () => {
@@ -1083,13 +1102,8 @@ export default function MenuPage() {
         ) : null}
         <VerificationBanner
           mode="menu"
-          onAction={() => {
-            if (!hasPassword) {
-              showPasswordReminder();
-              return;
-            }
-            navigate("/app/settings/contacts?channel=email");
-          }}
+          onAction={() => openAuthSheet("email")}
+          hasPassword={hasPassword}
           verified={Boolean(session?.user?.verified)}
         />
         {shouldShowBarkGuideBanner ? (
@@ -1744,7 +1758,7 @@ export default function MenuPage() {
         className="contact-bottom-sheet"
         open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
         title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "bark" ? "绑定即时提醒" : authSheetChannel ? `绑定${channelLabel(authSheetChannel)}` : "通知认证"}
-        description={authSheetChannel === "email" ? "认证邮箱后，账号会升级为 Verified。" : "发送验证码后完成绑定"}
+        description={authSheetChannel === "email" ? undefined : "发送验证码后完成绑定"}
         onClose={closeAuthSheet}
       >
         {authSheetChannel ? (
