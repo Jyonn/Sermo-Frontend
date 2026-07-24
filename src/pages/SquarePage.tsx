@@ -260,7 +260,27 @@ export default function SquarePage() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const visibleOnlineUsers = useMemo(() => onlineUsers.slice(0, MAX_ORBS), [onlineUsers]);
+  const displayedOnlineUsers = useMemo(() => {
+    const currentUser = session?.user;
+    if (!currentUser || onlineUsers.some((user) => user.user_id === currentUser.user_id)) {
+      return onlineUsers;
+    }
+    const self: UserDTO = {
+      user_id: currentUser.user_id,
+      name: currentUser.name,
+      official: currentUser.official,
+      avatar_type: currentUser.avatar_type,
+      avatar_uri: currentUser.avatar_uri,
+      is_alive: true,
+      verified: Boolean(currentUser.verified),
+      last_heartbeat: currentUser.last_heartbeat ?? Date.now() / 1000,
+      email_verified_at: currentUser.email_verified_at ?? null,
+      phone_verified_at: currentUser.phone_verified_at ?? null,
+      bark_verified_at: currentUser.bark_verified_at ?? null,
+    };
+    return [self, ...onlineUsers];
+  }, [onlineUsers, session?.user]);
+  const visibleOnlineUsers = useMemo(() => displayedOnlineUsers.slice(0, MAX_ORBS), [displayedOnlineUsers]);
   const orbSyncSignature = useMemo(() => buildOrbSyncSignature(visibleOnlineUsers), [visibleOnlineUsers]);
 
   const squareStageHeight = useMemo(() => {
@@ -379,13 +399,13 @@ export default function SquarePage() {
 
   useEffect(() => {
     if (!selectedUser) return;
-    const refreshed = onlineUsers.find((user) => user.user_id === selectedUser.user_id);
+    const refreshed = displayedOnlineUsers.find((user) => user.user_id === selectedUser.user_id);
     if (!refreshed) {
       setSelectedUser(null);
       return;
     }
     setSelectedUser(refreshed);
-  }, [onlineUsers, selectedUser]);
+  }, [displayedOnlineUsers, selectedUser]);
 
   useEffect(() => {
     return () => {
@@ -416,22 +436,17 @@ export default function SquarePage() {
   return (
     <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack square-plaza-page">
-        <div className="square-scene-header">
-          <div className="square-scene-title">
-            <strong>广场</strong>
-            <i aria-hidden="true" />
-            <span>{onlineUsers.length} 人</span>
-            <HeaderSyncIndicator syncing={syncing} />
-          </div>
+        <div className="square-scene-title">
+          <strong>广场</strong>
+          <i aria-hidden="true" />
+          <span>{displayedOnlineUsers.length} 人</span>
+          <HeaderSyncIndicator syncing={syncing} />
         </div>
         <div className="square-plaza-toolbar">
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         </div>
 
         <section ref={stageRef} className="square-plaza-stage" style={{ minHeight: `${squareStageHeight}px` }}>
-          <div className="square-plaza-glow square-plaza-glow-a" />
-          <div className="square-plaza-glow square-plaza-glow-b" />
-          <div className="square-plaza-glow square-plaza-glow-c" />
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
@@ -492,7 +507,7 @@ export default function SquarePage() {
             </div>
           ))}
 
-          {!onlineUsers.length && viewState === "ready" ? (
+          {!displayedOnlineUsers.length && viewState === "ready" ? (
             <div className="square-plaza-status">
               <FeedbackState
                 title="现在还没有人在线"

@@ -4676,20 +4676,15 @@ img {
   padding: 0 22px;
 }
 
-.square-scene-header {
+.square-scene-title {
   position: relative;
   z-index: 5;
-  display: flex;
-  align-items: center;
-  min-height: 72px;
-  padding: 14px 22px 8px;
-}
-
-.square-scene-title {
   display: inline-flex;
+  justify-self: start;
   align-items: center;
   gap: 9px;
   min-height: 42px;
+  margin: 14px 22px 8px;
   padding: 0 14px;
   color: #16231e;
   border: 1px solid rgba(255, 255, 255, 0.58);
@@ -4743,34 +4738,6 @@ img {
   background-size: 28px 28px;
   opacity: 0.18;
   pointer-events: none;
-}
-
-.square-plaza-glow {
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  border-radius: 999px;
-  filter: blur(16px);
-  opacity: 0.46;
-  pointer-events: none;
-}
-
-.square-plaza-glow-a {
-  top: -48px;
-  left: -28px;
-  background: rgba(255, 176, 32, 0.24);
-}
-
-.square-plaza-glow-b {
-  top: 28%;
-  right: -36px;
-  background: rgba(0, 166, 255, 0.18);
-}
-
-.square-plaza-glow-c {
-  bottom: -68px;
-  left: 32%;
-  background: rgba(0, 208, 132, 0.2);
 }
 
 .square-character {
@@ -10214,9 +10181,8 @@ img {
     border-radius: 0;
   }
 
-  .square-scene-header {
-    min-height: calc(66px + env(safe-area-inset-top));
-    padding: calc(12px + env(safe-area-inset-top)) 18px 8px;
+  .square-scene-title {
+    margin: calc(12px + env(safe-area-inset-top)) 18px 8px;
   }
 
   .square-plaza-toolbar {
