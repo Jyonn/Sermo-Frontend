@@ -1444,47 +1444,50 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description="三步完成 Bark 即时推送，聊天消息会更快抵达。"
-        eyebrow="Instant Push"
+        description="消息直接送达 iPhone"
         open={barkGuideOpen}
         onClose={closeBarkGuide}
-        title="绑定即时提醒"
+        title="绑定 Bark"
       >
-        <div className="detail-list bark-guide">
-          <div className="bark-guide-hero">
+        <div className="bark-guide">
+          <div className="bark-guide-app">
             <BarkGuideIcon />
             <div>
-              <strong>让言浪直接推到你的 iPhone</strong>
-              <span>复制 Bark 的专属链接后，回到这里完成一次验证码确认。</span>
+              <strong>Bark</strong>
+              <span>接收言浪即时提醒</span>
             </div>
+            <span className="bark-guide-duration">约 1 分钟</span>
           </div>
 
-          <div className="bark-guide-steps">
-            <section className="bark-guide-step">
-              <span className="flow-index">1</span>
-              <div>
+          <ol className="bark-guide-steps">
+            <li className="bark-guide-step">
+              <span className="bark-guide-index">1</span>
+              <div className="bark-guide-step-content">
                 <strong>下载 Bark</strong>
-                <p>从 App Store 安装 Bark，允许通知权限。</p>
+                <p>安装后允许通知。</p>
                 <a className="bark-store-link" href={barkAppStoreUrl} rel="noreferrer" target="_blank">
-                  打开 App Store
+                  前往 App Store
                   <span className="material-symbols-outlined">chevron_right</span>
                 </a>
               </div>
-            </section>
-            <section className="bark-guide-step">
-              <span className="flow-index">2</span>
-              <div>
-                <strong>复制专属消息链接</strong>
-                <p>打开 Bark，在首页复制以 https://api.day.app 开头的推送链接。</p>
+            </li>
+            <li className="bark-guide-step">
+              <span className="bark-guide-index">2</span>
+              <div className="bark-guide-step-content">
+                <strong>复制推送链接</strong>
+                <p>在 Bark 首页轻点「复制」。</p>
+                <code className="bark-guide-link-example">https://api.day.app/••••••</code>
               </div>
-            </section>
-            <section className="bark-guide-step active">
-              <span className="flow-index">3</span>
-              <div className="bark-guide-bind">
-                <strong>粘贴并验证</strong>
-                <p>我们会向这个 Bark 链接发送验证码，输入后即可绑定。</p>
+            </li>
+            <li className="bark-guide-step is-action">
+              <span className="bark-guide-index">3</span>
+              <div className="bark-guide-step-content bark-guide-bind">
+                <strong>{authPending ? "输入验证码" : "粘贴链接"}</strong>
+                <p>{authPending ? "验证码已发送到 Bark。" : "整段粘贴即可，我们会自动识别。"}</p>
                 <div className="simple-form contact-sheet-form">
+                  <label className="field-label" htmlFor="bark-endpoint">推送链接</label>
                   <input
+                    id="bark-endpoint"
                     className="input"
                     inputMode="url"
                     placeholder="https://api.day.app/..."
@@ -1521,8 +1524,8 @@ export default function MenuPage() {
                   </div>
                 </div>
               </div>
-            </section>
-          </div>
+            </li>
+          </ol>
         </div>
       </SideDrawer>
 

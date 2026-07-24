@@ -7254,80 +7254,149 @@ img {
 
 .bark-guide {
   display: grid;
-  gap: 14px;
+  gap: 22px;
 }
 
-.bark-guide-hero {
+.bark-guide-app {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
-  padding: 16px;
-  border: 1px solid rgba(208, 224, 236, 0.86);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(0, 208, 132, 0.16), transparent 34%),
-    rgba(255, 255, 255, 0.7);
-  box-shadow: 0 12px 30px rgba(18, 28, 42, 0.06);
+  padding: 2px 2px 0;
 }
 
-.bark-guide-hero strong,
+.bark-guide-app strong,
 .bark-guide-step strong {
   display: block;
   color: var(--text-primary);
-  font-size: 1rem;
-  line-height: 1.25;
+  font-size: 0.96rem;
+  line-height: 1.3;
 }
 
-.bark-guide-hero span,
+.bark-guide-app > div > span,
 .bark-guide-step p {
   margin: 4px 0 0;
   color: var(--text-secondary);
-  font-size: 0.86rem;
-  line-height: 1.5;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.bark-guide-duration {
+  padding: 5px 9px;
+  color: var(--text-muted);
+  border-radius: 999px;
+  background: rgba(17, 19, 24, 0.045);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .bark-guide-steps {
+  position: relative;
   display: grid;
-  gap: 10px;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .bark-guide-step {
+  position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(220, 226, 235, 0.86);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.64);
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  padding: 0 0 24px;
 }
 
-.bark-guide-step.active {
-  border-color: rgba(0, 208, 132, 0.22);
-  background: rgba(255, 255, 255, 0.84);
+.bark-guide-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 31px;
+  bottom: 3px;
+  left: 13px;
+  width: 1px;
+  background: rgba(151, 161, 177, 0.28);
+}
+
+.bark-guide-step.is-action {
+  padding: 16px;
+  border: 1px solid rgba(0, 208, 132, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.bark-guide-index {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--text-secondary);
+  border: 1px solid rgba(151, 161, 177, 0.3);
+  border-radius: 50%;
+  background: var(--bg-canvas);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.bark-guide-step.is-action .bark-guide-index {
+  color: #06392c;
+  border-color: rgba(0, 208, 132, 0.26);
+  background: rgba(0, 208, 132, 0.14);
+}
+
+.bark-guide-step-content {
+  min-width: 0;
+  padding-top: 3px;
 }
 
 .bark-guide-bind {
-  min-width: 0;
   display: grid;
-  gap: 10px;
+  gap: 4px;
+}
+
+.bark-guide-bind .contact-sheet-form {
+  margin-top: 10px;
+}
+
+.bark-guide-link-example {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 6px 9px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  background: rgba(17, 19, 24, 0.045);
+  font-size: 0.74rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bark-store-link {
-  min-height: 40px;
+  min-height: 34px;
   width: fit-content;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-top: 10px;
-  padding: 0 14px;
+  margin-top: 8px;
+  padding: 0 10px 0 12px;
   border-radius: 999px;
-  color: #061510;
-  background: linear-gradient(135deg, #2fb2ff, #12d084);
-  font-size: 0.86rem;
-  font-weight: 900;
+  color: var(--text-primary);
+  border: 1px solid rgba(151, 161, 177, 0.24);
+  background: rgba(255, 255, 255, 0.58);
+  font-size: 0.8rem;
+  font-weight: 750;
   text-decoration: none;
-  box-shadow: 0 14px 28px rgba(0, 166, 255, 0.16);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.bark-store-link:hover {
+  border-color: rgba(0, 208, 132, 0.24);
+  background: rgba(0, 208, 132, 0.08);
 }
 
 .bark-store-link .material-symbols-outlined {
