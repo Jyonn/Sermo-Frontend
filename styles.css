@@ -1573,19 +1573,7 @@ img {
   font-weight: 700;
 }
 
-.chat-name-row {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  min-width: 0;
-}
-
-.chat-name-row .chat-name {
-  min-width: 0;
-}
-
 .chat-pin-label {
-  flex: 0 0 auto;
   color: var(--brand-primary);
   font-size: 0.68rem;
   font-weight: 800;

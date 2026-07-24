@@ -3310,14 +3310,12 @@ export default function ChatsPage() {
         />
       </div>
       <div className="chat-copy">
-        <div className="chat-name-row">
-          <p className="chat-name">{chat.title}</p>
-          {chat.pinned ? <span className="chat-pin-label">置顶</span> : null}
-        </div>
+        <p className="chat-name">{chat.title}</p>
         <div className="chat-preview">{chat.preview}</div>
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
+        {chat.pinned ? <span className="chat-pin-label">置顶</span> : null}
         {chat.unread ? <span className="small-badge">{chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
     </button>
