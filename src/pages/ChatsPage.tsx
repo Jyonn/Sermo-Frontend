@@ -35,7 +35,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO, VideoMetadataDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -752,68 +752,43 @@ const MessageMediaImage = memo(function MessageMediaImage({
 
 const MessageMediaVideo = memo(function MessageMediaVideo({
   groupClassName,
+  messageId,
+  metadata,
+  onOpenVideo,
   thumbnailUri,
   uri,
 }: {
   groupClassName: string;
+  messageId?: number;
+  metadata?: VideoMetadataDTO | null;
+  onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   thumbnailUri?: string;
   uri: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
   const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
-  const progress = duration > 0 ? Math.min(1, currentTime / duration) : 0;
 
   useEffect(() => {
     setLoaded(false);
-    setPlaying(false);
     setDuration(0);
-    setCurrentTime(0);
     setAspectRatio(null);
     setRetryWithFreshUri(false);
   }, [uri]);
 
-  const togglePlayback = async () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      try {
-        await video.play();
-      } catch {
-        // The browser keeps the poster state when playback is unavailable.
-      }
-      return;
-    }
-    video.pause();
-  };
-
-  const openFullscreen = async (event: ReactPointerEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.requestFullscreen) {
-      await video.requestFullscreen().catch(() => undefined);
-      return;
-    }
-    const iosVideo = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
-    iosVideo.webkitEnterFullscreen?.();
-  };
-
   return (
     <div
-      className={`message-media-frame message-video-card ${groupClassName} ${loaded ? "is-loaded" : "is-loading"} ${playing ? "is-playing" : ""}`.trim()}
+      className={`message-media-frame message-video-card ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
       style={aspectRatio ? { "--message-video-aspect": aspectRatio } as CSSProperties : undefined}
     >
       <button
-        aria-label={playing ? "暂停视频" : "播放视频"}
+        aria-label="查看视频"
         className="message-video-surface"
-        onClick={() => void togglePlayback()}
+        onClick={() => onOpenVideo?.(resolvedUri, metadata ?? null, messageId ?? null)}
         type="button"
       >
         <video
@@ -822,10 +797,6 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
           onDurationChange={(event) => {
             const value = event.currentTarget.duration;
             if (Number.isFinite(value)) setDuration(value);
-          }}
-          onEnded={() => {
-            setPlaying(false);
-            setCurrentTime(0);
           }}
           onError={() => {
             if (!retryWithFreshUri) {
@@ -841,9 +812,6 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
             }
             if (Number.isFinite(video.duration)) setDuration(video.duration);
           }}
-          onPause={() => setPlaying(false)}
-          onPlay={() => setPlaying(true)}
-          onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
           playsInline
           poster={resolvedThumbnailUri}
           preload="metadata"
@@ -852,22 +820,12 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
         />
         <span className="message-video-shade" aria-hidden="true" />
         <span className="message-video-play" aria-hidden="true">
-          {playing ? (
-            <svg viewBox="0 0 24 24"><path d="M8 6.5v11M16 6.5v11" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z" /></svg>
-          )}
+          <svg viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z" /></svg>
         </span>
       </button>
       <div className="message-video-meta">
-        <span>{formatDuration(currentTime || duration)}</span>
-        <button aria-label="全屏播放" onClick={openFullscreen} type="button">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="M8.5 4.5h-4v4M15.5 4.5h4v4M8.5 19.5h-4v-4M15.5 19.5h4v-4" />
-          </svg>
-        </button>
+        <span>{formatDuration(metadata?.duration_seconds ?? duration)}</span>
       </div>
-      <span className="message-video-progress" style={{ "--message-video-progress": progress } as CSSProperties} aria-hidden="true" />
     </div>
   );
 });
@@ -1111,7 +1069,12 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   );
 });
 
-function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined, groupClassName: string) {
+function renderMessageContent(
+  message: ChatMessage,
+  onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined,
+  onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined,
+  groupClassName: string
+) {
   if (message.kind === "image" && message.payload?.uri) {
     return <MessageMediaImage groupClassName={groupClassName} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
@@ -1120,6 +1083,9 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[
     return (
       <MessageMediaVideo
         groupClassName={groupClassName}
+        messageId={typeof message.id === "number" ? message.id : undefined}
+        metadata={message.payload.video_metadata}
+        onOpenVideo={onOpenVideo}
         thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri}
         uri={message.localPreviewUri ?? message.payload.uri}
       />
@@ -1229,6 +1195,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   isLast,
   message,
   onOpenImage,
+  onOpenVideo,
   onOpenActions,
   onRetry,
 }: MessageBubbleRowProps) {
@@ -1339,14 +1306,14 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
-          {renderMessageContent(message, onOpenImage, groupClassName)}
+          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName)}
         </div>
       </div>
     </div>
   );
 });
 
-const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenImage, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
+const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenImage, onOpenVideo, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
   const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
@@ -1399,6 +1366,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
               isLast={row.startIndex === group.messages.length - 1}
               message={row.message}
               onOpenImage={onOpenImage}
+              onOpenVideo={onOpenVideo}
               onOpenActions={onOpenActions}
               onRetry={onRetry}
             />
@@ -1425,6 +1393,7 @@ interface MessageBubbleRowProps {
   isLast: boolean;
   message: ChatMessage;
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
+  onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
 }
@@ -1433,6 +1402,7 @@ interface MessageGroupBlockProps {
   enteringMessageIds: string[];
   group: MessageGroup;
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
+  onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
   showAuthor: boolean;
@@ -1451,6 +1421,12 @@ interface ImagePreviewState {
   uris: string[];
   metadata: Array<ImageMetadataDTO | null>;
   messageIds: Array<number | null>;
+}
+
+interface VideoPreviewState {
+  uri: string;
+  metadata: VideoMetadataDTO | null;
+  messageId: number | null;
 }
 
 function formatImageFileSize(fileSize?: number | null) {
@@ -1506,6 +1482,55 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
       <div className="message-image-record">
         <div className="message-image-record-heading">
           <span className="message-image-archive-label">IMAGE RECORD</span>
+          <strong>{takenAt || "拍摄时间未记录"}</strong>
+        </div>
+        {rows.length ? (
+          <dl className="message-image-metadata-list">
+            {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+          </dl>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null }) {
+  if (!metadata || metadata.status !== 1) {
+    return (
+      <div className="message-image-archive is-empty">
+        <span>VIDEO RECORD</span>
+        <p>影像资料正在整理</p>
+      </div>
+    );
+  }
+  const device = [metadata.make, metadata.model].filter(Boolean).join(" ");
+  const coordinate = metadata.latitude != null && metadata.longitude != null
+    ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
+    : "";
+  const takenAt = metadata.taken_at
+    ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate);
+  const rows = [
+    ["设备", device],
+    ["镜头", metadata.lens_model],
+  ].filter((row) => row[1]);
+  return (
+    <div className="message-image-archive message-video-archive">
+      <div className={`message-image-location ${location ? "" : "is-empty"}`}>
+        <span className="message-image-archive-label">LOCATION</span>
+        <strong>{location || "未记录地点"}</strong>
+        {coordinate ? <small>{coordinate}</small> : null}
+      </div>
+      <div className="message-image-record">
+        <div className="message-image-record-heading">
+          <span className="message-image-archive-label">VIDEO RECORD</span>
           <strong>{takenAt || "拍摄时间未记录"}</strong>
         </div>
         {rows.length ? (
@@ -1705,6 +1730,7 @@ export default function ChatsPage() {
   const [voicePreviewUri, setVoicePreviewUri] = useState("");
   const [voicePreviewPlaying, setVoicePreviewPlaying] = useState(false);
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
+  const [videoPreview, setVideoPreview] = useState<VideoPreviewState | null>(null);
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
@@ -1742,6 +1768,22 @@ export default function ChatsPage() {
       window.clearTimeout(timer);
     };
   }, [imagePreview]);
+
+  useEffect(() => {
+    if (!videoPreview?.messageId) return;
+    if (videoPreview.metadata?.status === 2) return;
+    if (videoPreview.metadata?.status === 1 && videoPreview.metadata.geocoding_status !== 0) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void api.getVideoMetadata(videoPreview.messageId as number, controller.signal)
+        .then((metadata) => setVideoPreview((current) => current ? { ...current, metadata } : current))
+        .catch(() => undefined);
+    }, 1200);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [videoPreview]);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
@@ -3468,6 +3510,24 @@ export default function ChatsPage() {
     }
   };
 
+  const downloadPreviewVideo = async () => {
+    if (!videoPreview?.uri) return;
+    try {
+      const response = await fetch(videoPreview.uri);
+      if (!response.ok) throw new Error("download_failed");
+      const blob = await response.blob();
+      const extension = blob.type.split("/")[1]?.replace("quicktime", "mov").replace(/[^a-zA-Z0-9]/g, "") || "mp4";
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = `sermo-video-${Date.now()}.${extension}`;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch {
+      window.open(videoPreview.uri, "_blank", "noopener,noreferrer");
+    }
+  };
+
   const deleteMessage = async () => {
     if (!selectedChat || !messageMenu) return;
 
@@ -3932,6 +3992,7 @@ export default function ChatsPage() {
                         messageIds: uris.map((_uri, itemIndex) => messageIds[itemIndex] ?? null),
                       });
                     }}
+                    onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
                     showAuthor={Boolean(selectedChat?.type === "group")}
@@ -4619,6 +4680,36 @@ export default function ChatsPage() {
                 {formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size) ? (
                   <span>{formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size)}</span>
                 ) : null}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+      {videoPreview ? (
+        <div
+          className="dialog-backdrop message-image-preview-backdrop message-video-preview-backdrop"
+          onClick={() => setVideoPreview(null)}
+          role="presentation"
+        >
+          <section aria-modal="true" className="message-video-preview-modal" role="dialog">
+            <article className="message-image-preview-plate message-video-preview-plate">
+              <div className="message-image-preview-frame message-video-preview-frame" onClick={(event) => event.stopPropagation()}>
+                <video autoPlay className="message-video-preview" controls playsInline src={videoPreview.uri} />
+              </div>
+              <div onClick={(event) => event.stopPropagation()}>
+                <VideoMetadataPanel metadata={videoPreview.metadata} />
+              </div>
+            </article>
+            <div className="message-image-preview-toolbar message-video-preview-toolbar" onClick={(event) => event.stopPropagation()}>
+              <button
+                aria-label={`下载视频${formatImageFileSize(videoPreview.metadata?.file_size) ? `，${formatImageFileSize(videoPreview.metadata?.file_size)}` : ""}`}
+                onClick={() => void downloadPreviewVideo()}
+                type="button"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" />
+                </svg>
+                {formatImageFileSize(videoPreview.metadata?.file_size) ? <span>{formatImageFileSize(videoPreview.metadata?.file_size)}</span> : null}
               </button>
             </div>
           </section>

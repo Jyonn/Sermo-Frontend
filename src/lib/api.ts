@@ -18,6 +18,7 @@ import type {
   LoginAuthDTO,
   LinkPreviewDTO,
   ImageMetadataDTO,
+  VideoMetadataDTO,
   OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
   SpaceAdminDashboardDTO,
@@ -640,6 +641,14 @@ export const api = {
 
   getImageMetadata(messageId: number, signal?: AbortSignal) {
     return request<ImageMetadataDTO>("/messages/image-metadata", {
+      auth: true,
+      query: { message_id: messageId },
+      signal,
+    });
+  },
+
+  getVideoMetadata(messageId: number, signal?: AbortSignal) {
+    return request<VideoMetadataDTO>("/messages/video-metadata", {
       auth: true,
       query: { message_id: messageId },
       signal,

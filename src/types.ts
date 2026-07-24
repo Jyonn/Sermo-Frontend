@@ -242,6 +242,7 @@ export interface ChatMessagePayloadDTO {
   file_size?: number;
   link_preview?: LinkPreviewDTO | null;
   image_metadata?: ImageMetadataDTO | null;
+  video_metadata?: VideoMetadataDTO | null;
   latitude?: number;
   longitude?: number;
   address?: string;
@@ -258,6 +259,28 @@ export interface ImageMetadataDTO {
   file_size?: number | null;
   pixel_width?: number | null;
   pixel_height?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  address?: string;
+  geocoding_provider?: "amap" | "opencage" | "nominatim" | string;
+  geocoding_status?: number;
+}
+
+export interface VideoMetadataDTO {
+  status: number;
+  duration_seconds?: number | null;
+  file_size?: number | null;
+  pixel_width?: number | null;
+  pixel_height?: number | null;
+  frame_rate?: number | null;
+  bit_rate?: number | null;
+  video_codec?: string;
+  audio_codec?: string;
+  make?: string;
+  model?: string;
+  lens_model?: string;
+  software?: string;
+  taken_at?: number | null;
   latitude?: number | null;
   longitude?: number | null;
   address?: string;
