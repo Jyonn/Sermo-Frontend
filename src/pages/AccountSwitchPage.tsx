@@ -4,10 +4,21 @@ import { AppChrome } from "../components/AppChrome";
 import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import type { JoinResponseDTO } from "../types";
+
+const exchangeRequests = new Map<string, Promise<JoinResponseDTO>>();
 
 function readTicketFromHash() {
   const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
   return (params.get("ticket") || "").trim();
+}
+
+function exchangeTicketOnce(ticket: string) {
+  const existing = exchangeRequests.get(ticket);
+  if (existing) return existing;
+  const request = api.exchangeAccountSwitchTicket(ticket);
+  exchangeRequests.set(ticket, request);
+  return request;
 }
 
 export default function AccountSwitchPage() {
@@ -22,7 +33,7 @@ export default function AccountSwitchPage() {
       return;
     }
     let cancelled = false;
-    api.exchangeAccountSwitchTicket(ticket)
+    exchangeTicketOnce(ticket)
       .then((payload) => {
         if (cancelled) return;
         loginFromJoin(payload);
