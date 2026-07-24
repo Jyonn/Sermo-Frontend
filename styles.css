@@ -5032,13 +5032,6 @@ img {
   color: var(--danger);
 }
 
-.chat-pinned-mark {
-  color: var(--brand-primary);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .chat-detail-more-button {
   margin-top: 12px;
 }
@@ -6925,8 +6918,25 @@ img {
   border-color: rgba(232, 235, 242, 0.9);
 }
 
+.chat-item.is-pinned:not(.active) {
+  background: linear-gradient(90deg, rgba(17, 19, 24, 0.045), rgba(17, 19, 24, 0.018) 72%, transparent);
+}
+
+.chat-item.is-pinned:not(.active) .avatar {
+  box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.09);
+}
+
+.chat-item.is-pinned .chat-time {
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
 .chat-item:hover {
   background: rgba(255, 255, 255, 0.38);
+}
+
+.chat-item.is-pinned:not(.active):hover {
+  background: linear-gradient(90deg, rgba(17, 19, 24, 0.055), rgba(17, 19, 24, 0.025) 72%, rgba(255, 255, 255, 0.28));
 }
 
 .message-pane.chat-main-pane {

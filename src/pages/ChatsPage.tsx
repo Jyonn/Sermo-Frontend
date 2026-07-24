@@ -3353,7 +3353,7 @@ export default function ChatsPage() {
   const renderChatItem = (chat: Chat, active: boolean) => (
     <button
       key={chat.id}
-      className={`chat-item ${active ? "active" : ""}`}
+      className={`chat-item${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
       onClick={() => navigate(`/app/chats/${chat.id}`)}
       type="button"
     >
@@ -3373,7 +3373,6 @@ export default function ChatsPage() {
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
-        {chat.pinned && !chat.unread ? <span className="chat-pinned-mark">置顶</span> : null}
         {chat.unread ? <span className="small-badge">{chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
     </button>
