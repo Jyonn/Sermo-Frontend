@@ -750,6 +750,128 @@ const MessageMediaImage = memo(function MessageMediaImage({
   );
 });
 
+const MessageMediaVideo = memo(function MessageMediaVideo({
+  groupClassName,
+  thumbnailUri,
+  uri,
+}: {
+  groupClassName: string;
+  thumbnailUri?: string;
+  uri: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
+  const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
+  const progress = duration > 0 ? Math.min(1, currentTime / duration) : 0;
+
+  useEffect(() => {
+    setLoaded(false);
+    setPlaying(false);
+    setDuration(0);
+    setCurrentTime(0);
+    setAspectRatio(null);
+    setRetryWithFreshUri(false);
+  }, [uri]);
+
+  const togglePlayback = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      try {
+        await video.play();
+      } catch {
+        // The browser keeps the poster state when playback is unavailable.
+      }
+      return;
+    }
+    video.pause();
+  };
+
+  const openFullscreen = async (event: ReactPointerEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.requestFullscreen) {
+      await video.requestFullscreen().catch(() => undefined);
+      return;
+    }
+    const iosVideo = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+    iosVideo.webkitEnterFullscreen?.();
+  };
+
+  return (
+    <div
+      className={`message-media-frame message-video-card ${groupClassName} ${loaded ? "is-loaded" : "is-loading"} ${playing ? "is-playing" : ""}`.trim()}
+      style={aspectRatio ? { "--message-video-aspect": aspectRatio } as CSSProperties : undefined}
+    >
+      <button
+        aria-label={playing ? "暂停视频" : "播放视频"}
+        className="message-video-surface"
+        onClick={() => void togglePlayback()}
+        type="button"
+      >
+        <video
+          className="message-media-video"
+          onCanPlay={() => setLoaded(true)}
+          onDurationChange={(event) => {
+            const value = event.currentTarget.duration;
+            if (Number.isFinite(value)) setDuration(value);
+          }}
+          onEnded={() => {
+            setPlaying(false);
+            setCurrentTime(0);
+          }}
+          onError={() => {
+            if (!retryWithFreshUri) {
+              forgetStableResourceUri(uri);
+              setRetryWithFreshUri(true);
+            }
+          }}
+          onLoadedMetadata={(event) => {
+            const video = event.currentTarget;
+            setLoaded(true);
+            if (video.videoWidth > 0 && video.videoHeight > 0) {
+              setAspectRatio(video.videoWidth / video.videoHeight);
+            }
+            if (Number.isFinite(video.duration)) setDuration(video.duration);
+          }}
+          onPause={() => setPlaying(false)}
+          onPlay={() => setPlaying(true)}
+          onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+          playsInline
+          poster={resolvedThumbnailUri}
+          preload="metadata"
+          ref={videoRef}
+          src={resolvedUri}
+        />
+        <span className="message-video-shade" aria-hidden="true" />
+        <span className="message-video-play" aria-hidden="true">
+          {playing ? (
+            <svg viewBox="0 0 24 24"><path d="M8 6.5v11M16 6.5v11" /></svg>
+          ) : (
+            <svg viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z" /></svg>
+          )}
+        </span>
+      </button>
+      <div className="message-video-meta">
+        <span>{formatDuration(currentTime || duration)}</span>
+        <button aria-label="全屏播放" onClick={openFullscreen} type="button">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M8.5 4.5h-4v4M15.5 4.5h4v4M8.5 19.5h-4v-4M15.5 19.5h4v-4" />
+          </svg>
+        </button>
+      </div>
+      <span className="message-video-progress" style={{ "--message-video-progress": progress } as CSSProperties} aria-hidden="true" />
+    </div>
+  );
+});
+
 const MessageImageGallery = memo(function MessageImageGallery({
   from,
   isEntering,
@@ -995,11 +1117,12 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[
   }
 
   if (message.kind === "video" && message.payload?.uri) {
-    const resolvedUri = message.localPreviewUri ?? resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
     return (
-      <div className={`message-media-frame video ${groupClassName}`.trim()}>
-        <video className="message-media-video" controls playsInline preload="metadata" src={resolvedUri} />
-      </div>
+      <MessageMediaVideo
+        groupClassName={groupClassName}
+        thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri}
+        uri={message.localPreviewUri ?? message.payload.uri}
+      />
     );
   }
 
