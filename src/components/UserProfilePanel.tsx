@@ -59,7 +59,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [groupChats, setGroupChats] = useState<ChatDTO[]>(initialCached?.groupChats ?? []);
   const [allGroupsOpen, setAllGroupsOpen] = useState(false);
   const [groupPickerOpen, setGroupPickerOpen] = useState(false);
-  const [groupCandidates, setGroupCandidates] = useState<UserDTO[]>([]);
+  const [groupCandidates, setGroupCandidates] = useState<UserProfileSeed[]>([]);
   const [groupCandidatesLoading, setGroupCandidatesLoading] = useState(false);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
   const [groupCreating, setGroupCreating] = useState(false);
@@ -144,13 +144,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   const openGroupPicker = async () => {
     if (!user) return;
-    setGroupSelectedIds([]);
-    setGroupCandidates([]);
+    setGroupSelectedIds([user.user_id]);
+    setGroupCandidates([user]);
     setGroupCandidatesLoading(true);
     setGroupPickerOpen(true);
     try {
       const friends = await api.getFriends();
-      setGroupCandidates(friends.filter((friend) => friend.user_id !== user.user_id));
+      setGroupCandidates([user, ...friends.filter((friend) => friend.user_id !== user.user_id)]);
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : "好友列表加载失败");
     } finally {
@@ -159,10 +159,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   };
 
   const createGroupChat = async () => {
-    if (!user || !groupSelectedIds.length || groupCreating) return;
+    if (!user || groupSelectedIds.length < 2 || groupCreating) return;
     setGroupCreating(true);
     try {
-      const chat = await api.createGroupChat([user.user_id, ...groupSelectedIds]);
+      const chat = await api.createGroupChat(groupSelectedIds);
       setGroupPickerOpen(false);
       if (onOpenChat) onOpenChat(chat.chat_id);
       else navigate(`/app/chats/${chat.chat_id}`);
@@ -276,31 +276,37 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         open={groupPickerOpen}
         title="新建群聊"
         titleAccessory={<HeaderSyncIndicator syncing={groupCandidatesLoading} />}
-        description={`和 ${user.name} 一起选择群成员`}
         onClose={() => setGroupPickerOpen(false)}
       >
         <div className="user-profile-group-picker">
-          {!groupCandidatesLoading && groupCandidates.length ? (
+          {groupCandidates.length ? (
             <div className="simple-list">
               {groupCandidates.map((candidate) => {
                 const selected = groupSelectedIds.includes(candidate.user_id);
+                const locked = candidate.user_id === user.user_id;
                 return (
                   <button
                     key={candidate.user_id}
-                    className={`simple-row person-row user-profile-picker-row${selected ? " is-selected" : ""}`}
-                    onClick={() => setGroupSelectedIds((current) => selected ? current.filter((id) => id !== candidate.user_id) : [...current, candidate.user_id])}
+                    className={`simple-row person-row user-profile-picker-row${selected ? " is-selected" : ""}${locked ? " is-locked" : ""}`}
+                    onClick={() => {
+                      if (locked) return;
+                      setGroupSelectedIds((current) => selected ? current.filter((id) => id !== candidate.user_id) : [...current, candidate.user_id]);
+                    }}
                     type="button"
                   >
                     <UserAvatar className="mini-avatar" name={candidate.name} uri={candidate.avatar_uri} />
-                    <span className="row-main"><strong>{candidate.name}</strong></span>
+                    <span className="row-main">
+                      <strong>{candidate.name}</strong>
+                      {locked ? <small className="row-subtle">当前好友</small> : null}
+                    </span>
                     <span aria-hidden="true" className="user-profile-picker-check">{selected ? "✓" : ""}</span>
                   </button>
                 );
               })}
             </div>
           ) : !groupCandidatesLoading ? <FeedbackState title="没有可邀请的好友" description="" /> : null}
-          <button className="button user-profile-create-confirm" disabled={!groupSelectedIds.length || groupCreating} onClick={() => void createGroupChat()} type="button">
-            {groupCreating ? "创建中" : `创建群聊${groupSelectedIds.length ? ` · ${groupSelectedIds.length + 2} 人` : ""}`}
+          <button className="button user-profile-create-confirm" disabled={groupSelectedIds.length < 2 || groupCreating} onClick={() => void createGroupChat()} type="button">
+            {groupCreating ? "创建中" : `创建群聊 · ${groupSelectedIds.length + 1} 人`}
           </button>
         </div>
       </BottomSheet>

@@ -124,7 +124,6 @@ export function BottomSheet({
             onMouseDown={desktopModal ? undefined : (event) => startDrag(event.clientY)}
             onTouchStart={desktopModal ? undefined : (event) => startDrag(event.touches[0]?.clientY ?? 0)}
           >
-            <p className="eyebrow">Sheet</p>
             <div className="sheet-title-row">
               <h3 className="panel-title">{title}</h3>
               {titleAccessory}

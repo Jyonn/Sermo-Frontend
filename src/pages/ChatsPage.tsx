@@ -3852,7 +3852,6 @@ export default function ChatsPage() {
       <BottomSheet
         open={groupCreateOpen}
         title="新建群聊"
-        description="先选成员，再决定要不要写群名。"
         onClose={() => {
           if (groupCreateState === "creating") return;
           setGroupCreateOpen(false);

@@ -4608,7 +4608,7 @@ img {
   right: 0;
   bottom: 0;
   max-height: min(78dvh, 720px);
-  padding: 10px 18px 22px;
+  padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
   border-radius: 28px 28px 0 0;
   background: rgba(255, 253, 248, 0.98);
   border-top: 1px solid rgba(232, 235, 242, 0.96);
@@ -6426,6 +6426,7 @@ img {
 .user-profile-group-picker {
   display: grid;
   gap: 16px;
+  padding-bottom: 4px;
 }
 
 .user-profile-picker-check {
@@ -6444,6 +6445,10 @@ img {
 .user-profile-picker-row.is-selected .user-profile-picker-check {
   background: var(--brand-primary);
   border-color: var(--brand-primary);
+}
+
+.user-profile-picker-row.is-locked {
+  cursor: default;
 }
 
 .user-profile-create-confirm {
