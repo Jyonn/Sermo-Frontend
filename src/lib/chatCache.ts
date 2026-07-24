@@ -1,7 +1,7 @@
 import type { Chat, ChatMessage } from "../types";
 
 const DB_NAME = "sermo-chat-cache";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const LIST_STORE = "chat-lists";
 const THREAD_STORE = "chat-threads";
 const MAX_PERSISTED_MESSAGES = 200;
@@ -95,10 +95,13 @@ function openDatabase() {
   dbPromise = new Promise((resolve) => {
     const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const database = request.result;
       if (!database.objectStoreNames.contains(LIST_STORE)) {
         database.createObjectStore(LIST_STORE, { keyPath: "key" });
+      }
+      if (event.oldVersion < 2 && database.objectStoreNames.contains(THREAD_STORE)) {
+        database.deleteObjectStore(THREAD_STORE);
       }
       if (!database.objectStoreNames.contains(THREAD_STORE)) {
         database.createObjectStore(THREAD_STORE, { keyPath: "key" });

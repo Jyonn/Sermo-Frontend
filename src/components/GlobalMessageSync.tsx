@@ -8,6 +8,7 @@ import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
 import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
+import { loadMessagesAfterThrough } from "../lib/messageHistory";
 import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
@@ -361,7 +362,17 @@ export function GlobalMessageSync() {
 
       for (const [chatId, incoming] of grouped) {
         const existingThread = chatCache.getThread(scope, chatId) ?? (await chatCache.hydrateThread(scope, chatId));
-        const mergedMessages = mergeMessages(existingThread?.messages ?? [], incoming);
+        const existingMessages = existingThread?.messages ?? [];
+        const existingIds = existingMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
+        const incomingIds = incoming.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
+        const existingMaxId = existingIds.length ? Math.max(...existingIds) : null;
+        const incomingMaxId = incomingIds.length ? Math.max(...incomingIds) : null;
+        const bridgeRows =
+          existingMaxId !== null && incomingMaxId !== null && existingMaxId < incomingMaxId
+            ? await loadMessagesAfterThrough(chatId, existingMaxId, incomingMaxId)
+            : [];
+        const bridgeMessages = bridgeRows.map((message) => mapChatMessage(message, session.user.user_id));
+        const mergedMessages = mergeMessages(mergeMessages(existingMessages, bridgeMessages), incoming);
         const snapshot = {
           messages: mergedMessages,
           hasOlderMessages: existingThread?.hasOlderMessages ?? false,

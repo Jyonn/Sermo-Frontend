@@ -30,6 +30,7 @@ import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
+import { loadMessagesAfterThrough, loadMessagesBeforeThrough } from "../lib/messageHistory";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
@@ -1896,7 +1897,21 @@ export default function ChatsPage() {
       const messageId = Number((event as CustomEvent<{ messageId?: number }>).detail?.messageId);
       if (!selectedChat || !Number.isInteger(messageId) || revealElement(messageId)) return;
 
-      void api.getMessages({ chat_id: selectedChat.id, limit: 60, before: messageId + 1 })
+      const numericMessages = selectedMessages.filter((message): message is ChatMessage & { id: number } => typeof message.id === "number");
+      const oldestId = numericMessages[0]?.id;
+      const newestId = numericMessages[numericMessages.length - 1]?.id;
+      const request =
+        oldestId === undefined || newestId === undefined
+          ? api.getMessages({ chat_id: selectedChat.id, limit: 60, before: messageId + 1 })
+          : messageId < oldestId
+            ? loadMessagesBeforeThrough(selectedChat.id, oldestId, messageId)
+            : loadMessagesAfterThrough(
+                selectedChat.id,
+                Math.max(0, ...numericMessages.filter((message) => message.id < messageId).map((message) => message.id)),
+                messageId
+              );
+
+      void request
         .then((rows) => {
           const loaded = rows.map((row) => mapChatMessage(row, currentUserId));
           setMessages((current) => ({
@@ -1910,7 +1925,7 @@ export default function ChatsPage() {
 
     window.addEventListener("sermo:reveal-message", reveal);
     return () => window.removeEventListener("sermo:reveal-message", reveal);
-  }, [currentUserId, selectedChat]);
+  }, [currentUserId, selectedChat, selectedMessages]);
 
   const redirectToChatListWithNotice = (message: string, blockedChatId?: number) => {
     setDetailsSheetOpen(false);
@@ -2061,7 +2076,6 @@ export default function ChatsPage() {
   useEffect(() => {
     if (!selectedChat || !cacheScope) return;
     const controller = new AbortController();
-    let didLoadNetwork = false;
     setOlderState("idle");
     setHasOlderMessages(false);
 
@@ -2073,26 +2087,29 @@ export default function ChatsPage() {
       });
     };
 
-    const memoryThread = chatCache.getThread(cacheScope, selectedChat.id);
-    if (memoryThread?.messages.length) {
+    let restoredThread = chatCache.getThread(cacheScope, selectedChat.id);
+    if (restoredThread?.messages.length) {
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(memoryThread.messages)),
+        [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(restoredThread?.messages ?? [])),
       }));
-      setHasOlderMessages(memoryThread.hasOlderMessages);
-    } else {
-      void chatCache.hydrateThread(cacheScope, selectedChat.id).then((cached) => {
-        if (controller.signal.aborted || didLoadNetwork || !cached?.messages.length) return;
-        setMessages((current) => ({
-          ...current,
-          [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(cached.messages)),
-        }));
-        setHasOlderMessages(cached.hasOlderMessages);
-      });
+      setHasOlderMessages(restoredThread.hasOlderMessages);
     }
 
     const loadLatestMessages = async () => {
       try {
+        if (!restoredThread) {
+          restoredThread = await chatCache.hydrateThread(cacheScope, selectedChat.id);
+          if (controller.signal.aborted) return;
+          if (restoredThread?.messages.length) {
+            setMessages((current) => ({
+              ...current,
+              [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(restoredThread?.messages ?? [])),
+            }));
+            setHasOlderMessages(restoredThread.hasOlderMessages);
+          }
+        }
+
         const rows = await api.getMessages(
           {
             chat_id: selectedChat.id,
@@ -2102,9 +2119,18 @@ export default function ChatsPage() {
         );
         recordChatHealth(cacheScope, true);
         const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
-        const existingThread = chatCache.getThread(cacheScope, selectedChat.id);
-        let mergedMessages = mergeMessages(existingThread?.messages ?? [], normalized);
-        didLoadNetwork = true;
+        const cachedMessages = restoredThread?.messages ?? [];
+        const cachedIds = cachedMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
+        const latestIds = normalized.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
+        const cachedMaxId = cachedIds.length ? Math.max(...cachedIds) : null;
+        const latestMaxId = latestIds.length ? Math.max(...latestIds) : null;
+        const bridgeRows =
+          cachedMaxId !== null && latestMaxId !== null && cachedMaxId < latestMaxId
+            ? await loadMessagesAfterThrough(selectedChat.id, cachedMaxId, latestMaxId, controller.signal)
+            : [];
+        if (controller.signal.aborted) return;
+        const bridged = bridgeRows.map((row) => mapChatMessage(row, currentUserId));
+        let mergedMessages = mergeMessages(mergeMessages(cachedMessages, bridged), normalized);
         if (DEBUG_CHAT_SEND) {
           console.log("[chat] loadLatestMessages response", {
             chatId: selectedChat.id,
@@ -2114,12 +2140,13 @@ export default function ChatsPage() {
               status: message.status,
               text: message.text,
             })),
-            cachedCount: existingThread?.messages.length ?? 0,
+            cachedCount: cachedMessages.length,
+            bridgeCount: bridged.length,
           });
         }
         setMessages((current) => {
           const currentThreadMessages = current[selectedChat.id] ?? [];
-          mergedMessages = mergeMessages(currentThreadMessages, normalized);
+          mergedMessages = mergeMessages(mergeMessages(currentThreadMessages, bridged), normalized);
           if (DEBUG_CHAT_SEND) {
             console.log("[chat] loadLatestMessages merge", {
               chatId: selectedChat.id,
@@ -2132,20 +2159,21 @@ export default function ChatsPage() {
             [selectedChat.id]: mergedMessages,
           };
         });
-        setHasOlderMessages(rows.length >= 30 || memoryThread?.hasOlderMessages || false);
+        const hasOlder = rows.length >= 30 || restoredThread?.hasOlderMessages || false;
+        setHasOlderMessages(hasOlder);
         chatCache.setThread(cacheScope, selectedChat.id, {
           messages: mergedMessages,
-          hasOlderMessages: rows.length >= 30 || memoryThread?.hasOlderMessages || false,
-          scrollTop: memoryThread?.scrollTop ?? 0,
+          hasOlderMessages: hasOlder,
+          scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
         void chatCache.persistThread(cacheScope, selectedChat.id, {
           messages: mergedMessages,
-          hasOlderMessages: rows.length >= 30 || memoryThread?.hasOlderMessages || false,
-          scrollTop: memoryThread?.scrollTop ?? 0,
+          hasOlderMessages: hasOlder,
+          scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
-        if (!memoryThread?.messages.length) restoreScroll();
+        if (!restoredThread?.messages.length) restoreScroll();
         void api.markChatRead(selectedChat.id).then(() => {
           setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
         });
@@ -2156,7 +2184,7 @@ export default function ChatsPage() {
           return;
         }
         if (!controller.signal.aborted) {
-          const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || memoryThread?.messages.length);
+          const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || restoredThread?.messages.length);
           if (!hasLocalMessages) {
             const message = apiError instanceof ApiError ? apiError.message : "加载消息失败";
             setPageError(message);
