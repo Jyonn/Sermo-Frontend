@@ -1147,6 +1147,15 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            {Boolean(me?.official ?? session?.user.official) ? (
+              <button className="simple-row menu-link-row" onClick={() => navigate("/space/dashboard")} type="button">
+                <div className="row-main">
+                  <strong>控制面板</strong>
+                  <div className="row-subtle">管理空间与成员</div>
+                </div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            ) : null}
           </div>
         </section>
 
