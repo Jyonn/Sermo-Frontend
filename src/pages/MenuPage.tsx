@@ -1136,7 +1136,7 @@ export default function MenuPage() {
               </button>
             ) : null}
             {!me?.official ? (
-              <div className="simple-row menu-link-row">
+              <div className="simple-row menu-link-row menu-toggle-row">
                 <div className="row-main">
                   <strong>私密账号</strong>
                   <div className="row-subtle">

@@ -7044,6 +7044,30 @@ img {
   color: var(--text-secondary);
 }
 
+.drawer-body .menu-link-row,
+.drawer-body .menu-pref-row,
+.drawer-body .menu-pref-row-button {
+  color: var(--text-primary);
+}
+
+.drawer-body .menu-link-row > .material-symbols-outlined,
+.drawer-body .menu-pref-row-value,
+.drawer-body .menu-detail-value {
+  color: var(--text-muted);
+}
+
+.drawer-body .menu-inline-action {
+  color: var(--text-secondary);
+}
+
+.menu-toggle-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.menu-toggle-row > .switch {
+  justify-self: end;
+}
+
 .menu-detail-text {
   font-size: 0.9rem;
   line-height: 1.2;
