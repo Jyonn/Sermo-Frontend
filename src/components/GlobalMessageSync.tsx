@@ -19,6 +19,7 @@ const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
+const MESSAGE_TYPE_LOCATION = 6;
 
 interface PopupState {
   chatId: number | null;
@@ -68,6 +69,8 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
         ? "video"
         : message.type === MESSAGE_TYPE_AUDIO
           ? "audio"
+          : message.type === MESSAGE_TYPE_LOCATION
+            ? "location"
           : message.type === MESSAGE_TYPE_SYSTEM
             ? "system"
             : "text");
@@ -231,6 +234,7 @@ function previewFromMessage(message: ChatMessage) {
   if (message.kind === "video") return "[视频]";
   if (message.kind === "audio") return "[语音]";
   if (message.kind === "file") return "[文件]";
+  if (message.kind === "location") return "[位置]";
   return message.text || "收到一条新消息";
 }
 

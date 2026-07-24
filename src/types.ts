@@ -2,7 +2,7 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "system";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "system";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -242,6 +242,10 @@ export interface ChatMessagePayloadDTO {
   file_size?: number;
   link_preview?: LinkPreviewDTO | null;
   image_metadata?: ImageMetadataDTO | null;
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  geocoding_provider?: string;
 }
 
 export interface ImageMetadataDTO {

@@ -44,6 +44,7 @@ const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
+const MESSAGE_TYPE_LOCATION = 6;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const TEXT_URL_RE = /https?:\/\/[^\s<>"'，。！？、；：）】》]+/gi;
 const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
@@ -57,11 +58,18 @@ type ClipboardUploadCandidate = {
   previewUris: Array<string | null>;
 };
 
+type LocationDraft = {
+  phase: "locating" | "ready" | "sending" | "error";
+  latitude?: number;
+  longitude?: number;
+  error?: string;
+};
+
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "mic" | "stop" | "delete"; className?: string }) {
+function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "mic" | "stop" | "delete"; className?: string }) {
   if (kind === "album") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -77,6 +85,15 @@ function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "mic" |
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
         <path d="M7 3.75h6.7L18.5 8.6v11.65H7V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
         <path d="M13.5 4v5h4.75M9.5 13h6M9.5 16.5h4.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (kind === "location") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <path d="M19 10.2c0 5.1-7 10-7 10s-7-4.9-7-10a7 7 0 1 1 14 0Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
+        <circle cx="12" cy="10.2" r="2.35" fill="currentColor" />
       </svg>
     );
   }
@@ -398,6 +415,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_FILE) return "file";
   if (type === MESSAGE_TYPE_VIDEO) return "video";
   if (type === MESSAGE_TYPE_AUDIO) return "audio";
+  if (type === MESSAGE_TYPE_LOCATION) return "location";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   return "text";
 }
@@ -411,6 +429,17 @@ function messageTypeFromKind(kind: MessageMediaKind) {
 
 function isMediaMessageKind(kind: MessageKind) {
   return kind === "image" || kind === "video" || kind === "audio" || kind === "file";
+}
+
+function buildAmapLocationUrl(latitude: number, longitude: number, address?: string) {
+  const params = new URLSearchParams({
+    position: `${longitude},${latitude}`,
+    name: address || "共享位置",
+    src: "Sermo",
+    coordinate: "wgs84",
+    callnative: "1",
+  });
+  return `https://uri.amap.com/marker?${params.toString()}`;
 }
 
 function formatFileSize(value?: number) {
@@ -617,6 +646,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "video") return "[视频]";
   if (kind === "audio") return "[语音]";
   if (kind === "file") return "[文件]";
+  if (kind === "location") return "[位置]";
   return text || "暂无消息";
 }
 
@@ -990,6 +1020,31 @@ function renderMessageContent(message: ChatMessage, onOpenImage: ((uris: string[
     );
   }
 
+  if (message.kind === "location" && Number.isFinite(message.payload?.latitude) && Number.isFinite(message.payload?.longitude)) {
+    const latitude = Number(message.payload?.latitude);
+    const longitude = Number(message.payload?.longitude);
+    const address = message.payload?.address?.trim();
+    return (
+      <a
+        className={`message-location-card ${groupClassName}`.trim()}
+        href={buildAmapLocationUrl(latitude, longitude, address)}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <span className="message-location-map" aria-hidden="true">
+          <span className="message-location-road road-one" />
+          <span className="message-location-road road-two" />
+          <span className="message-location-pin"><ComposerSvgIcon kind="location" /></span>
+        </span>
+        <span className="message-location-copy">
+          <strong>{address || (message.status === "pending" ? "正在解析位置" : "共享位置")}</strong>
+          <small>{latitude.toFixed(5)}, {longitude.toFixed(5)}</small>
+        </span>
+        <span className="message-location-open" aria-hidden="true">↗</span>
+      </a>
+    );
+  }
+
   const linkPreview = message.payload?.link_preview;
   const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
   const text = message.payload?.text ?? message.text;
@@ -1115,7 +1170,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           className={[
             "message-bubble",
             from === "self" ? "self" : "other",
-            isMediaMessageKind(message.kind) ? "is-media" : "",
+            isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
             message.payload?.link_preview && message.payload.link_preview.status !== "none" && message.payload.link_preview.status !== "failed" ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
@@ -1483,6 +1538,7 @@ export default function ChatsPage() {
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
@@ -1611,7 +1667,7 @@ export default function ChatsPage() {
   const currentUserId = session?.user.user_id ?? 0;
   const currentUserName = session?.user.name ?? "我";
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
-  const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping";
+  const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
   const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
@@ -2788,6 +2844,96 @@ export default function ChatsPage() {
     fileInputRef.current?.click();
   };
 
+  const openLocationPicker = () => {
+    if (composerBusy) return;
+    setComposerMoreOpen(false);
+    if (!navigator.geolocation) {
+      setLocationDraft({ phase: "error", error: "当前浏览器不支持定位" });
+      return;
+    }
+    setLocationDraft({ phase: "locating" });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationDraft({
+          phase: "ready",
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        const message = error.code === error.PERMISSION_DENIED
+          ? "请允许言浪访问你的位置"
+          : "暂时无法获取当前位置";
+        setLocationDraft({ phase: "error", error: message });
+      },
+      { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
+    );
+  };
+
+  const sendLocationMessage = async () => {
+    if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
+    const latitude = locationDraft.latitude;
+    const longitude = locationDraft.longitude;
+    const reply = consumeReplyTarget();
+    const createdAt = Math.floor(Date.now() / 1000);
+    const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const pendingMessage: ChatMessage = {
+      id: clientId,
+      clientId,
+      from: "self",
+      type: MESSAGE_TYPE_LOCATION,
+      kind: "location",
+      name: currentUserName,
+      time: formatTime(createdAt),
+      createdAt,
+      text: "[位置]",
+      payload: { kind: "location", latitude, longitude },
+      replyTo: reply,
+      status: "pending",
+    };
+
+    setLocationDraft((current) => current ? { ...current, phase: "sending" } : current);
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
+    }));
+    setChats((current) => sortChats(current.map((chat) => (
+      chat.id === selectedChat.id ? updateChatSummary(chat, "[位置]", createdAt) : chat
+    ))));
+    stickToBottomRef.current = true;
+    triggerMessageEntrance(clientId);
+    updateSendTask(clientId, 0.15);
+
+    try {
+      const created = await api.sendMessage(
+        selectedChat.id,
+        MESSAGE_TYPE_LOCATION,
+        JSON.stringify({ latitude, longitude }),
+        reply?.message_id,
+        clientId,
+      );
+      const deliveredMessage = mapChatMessage(created, currentUserId);
+      updateSendTask(clientId, 0.9);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, deliveredMessage),
+      }));
+      setChats((current) => sortChats(current.map((chat) => (
+        chat.id === selectedChat.id ? updateChatSummary(chat, "[位置]", deliveredMessage.createdAt) : chat
+      ))));
+      setLocationDraft(null);
+    } catch (error) {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
+      }));
+      setLocationDraft(null);
+      setPageError(error instanceof ApiError ? error.message : "位置发送失败");
+    } finally {
+      finishSendTask(clientId);
+    }
+  };
+
   const handleMediaSelection = async (event: ChangeEvent<HTMLInputElement>, source: "gallery" | "file") => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
@@ -3632,6 +3778,10 @@ export default function ChatsPage() {
                         <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
                         <span>文件</span>
                       </button>
+                      <button className="composer-action-tile" disabled={composerBusy} onClick={openLocationPicker} type="button">
+                        <span className="composer-action-tile-icon"><ComposerSvgIcon kind="location" /></span>
+                        <span>位置</span>
+                      </button>
                     </div>
                   </div>
                 ) : null}
@@ -4181,6 +4331,54 @@ export default function ChatsPage() {
                   <span>{formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size)}</span>
                 ) : null}
               </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+      {locationDraft ? (
+        <div
+          className="dialog-backdrop location-share-backdrop"
+          onClick={() => {
+            if (locationDraft.phase !== "sending") setLocationDraft(null);
+          }}
+          role="presentation"
+        >
+          <section
+            aria-labelledby="location-share-title"
+            aria-modal="true"
+            className="location-share-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className="location-share-preview" aria-hidden="true">
+              <span className="message-location-road road-one" />
+              <span className="message-location-road road-two" />
+              <span className="location-share-pin"><ComposerSvgIcon kind="location" /></span>
+            </div>
+            <div className="location-share-copy">
+              <span className="location-share-eyebrow">当前位置</span>
+              <h2 id="location-share-title">
+                {locationDraft.phase === "locating"
+                  ? "正在定位"
+                  : locationDraft.phase === "error"
+                    ? "无法获取位置"
+                    : "发送这个位置？"}
+              </h2>
+              {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
+                <p>{locationDraft.latitude?.toFixed(5)}, {locationDraft.longitude?.toFixed(5)}</p>
+              ) : (
+                <p>{locationDraft.error || "请稍候"}</p>
+              )}
+            </div>
+            <div className="location-share-actions">
+              <button className="ghost-button" disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">取消</button>
+              {locationDraft.phase === "error" ? (
+                <button className="button" onClick={openLocationPicker} type="button">重试</button>
+              ) : (
+                <button className="button" disabled={locationDraft.phase !== "ready"} onClick={() => void sendLocationMessage()} type="button">
+                  {locationDraft.phase === "sending" ? "发送中" : "发送位置"}
+                </button>
+              )}
             </div>
           </section>
         </div>

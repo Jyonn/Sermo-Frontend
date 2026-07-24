@@ -3108,6 +3108,110 @@ img {
 .message-file-card.self:not(.group-start).group-end { border-top-right-radius: 6px; }
 .message-file-card.self:not(.group-start):not(.group-end) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
 
+.message-location-card {
+  width: min(72vw, 286px);
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(215, 220, 231, 0.78);
+  border-radius: 18px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 9px 24px rgba(17, 19, 24, 0.09);
+  text-decoration: none;
+  margin-inline: -2px;
+}
+
+.message-location-map,
+.location-share-preview {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(132deg, transparent 45%, rgba(255, 255, 255, 0.9) 46% 53%, transparent 54%),
+    linear-gradient(28deg, #dfeee5 0 28%, #eef4e9 28% 52%, #d9e7ef 52% 68%, #e9eee2 68%);
+}
+
+.message-location-map {
+  align-self: stretch;
+  min-height: 86px;
+}
+
+.message-location-road {
+  position: absolute;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 1px rgba(181, 192, 188, 0.22);
+}
+
+.message-location-road.road-one {
+  width: 130%;
+  left: -18%;
+  top: 30%;
+  transform: rotate(-24deg);
+}
+
+.message-location-road.road-two {
+  width: 96%;
+  left: 18%;
+  bottom: 22%;
+  transform: rotate(34deg);
+}
+
+.message-location-pin,
+.location-share-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  filter: drop-shadow(0 5px 7px rgba(20, 71, 52, 0.24));
+  transform: translate(-50%, -52%);
+}
+
+.message-location-pin svg { width: 31px; height: 31px; fill: var(--brand-primary); }
+
+.message-location-copy {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.message-location-copy strong {
+  overflow: hidden;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-location-copy small {
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.message-location-open {
+  padding-right: 11px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.message-location-card.other.group-start:not(.group-end) { border-bottom-left-radius: 6px; }
+.message-location-card.other:not(.group-start).group-end { border-top-left-radius: 6px; }
+.message-location-card.other:not(.group-start):not(.group-end) { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+.message-location-card.self.group-start:not(.group-end) { border-bottom-right-radius: 6px; }
+.message-location-card.self:not(.group-start).group-end { border-top-right-radius: 6px; }
+.message-location-card.self:not(.group-start):not(.group-end) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+
+.message-location-card.is-pending {
+  background-size: 220% 100%;
+  animation: message-pending-sheen 1.2s linear infinite;
+}
+
 .message-media-frame.is-pending,
 .message-audio-card.is-pending,
 .message-file-card.is-pending {
@@ -7541,6 +7645,57 @@ img {
   background: rgba(17, 19, 24, 0.28);
   backdrop-filter: blur(10px);
   touch-action: none;
+}
+
+.location-share-modal {
+  width: min(100%, 390px);
+  overflow: hidden;
+  border: 1px solid rgba(229, 233, 240, 0.92);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 28px 72px rgba(17, 19, 24, 0.2);
+}
+
+.location-share-preview {
+  height: 156px;
+}
+
+.location-share-pin svg {
+  width: 48px;
+  height: 48px;
+  fill: var(--brand-primary);
+}
+
+.location-share-copy {
+  display: grid;
+  gap: 6px;
+  padding: 20px 22px 12px;
+}
+
+.location-share-eyebrow {
+  color: var(--brand-deep);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.location-share-copy h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.location-share-copy p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.location-share-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 10px;
+  padding: 12px 22px 22px;
 }
 
 .chat-sync-popup {
