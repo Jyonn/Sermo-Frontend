@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import barkAppIconUrl from "../assets/bark-app-icon.jpg";
+import appleMailIconUrl from "../assets/apple-mail-icon.jpg";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -1992,7 +1993,11 @@ export default function MenuPage() {
                 )}
                 {editorPreview ? (
                   <div className={`notification-push-preview is-${prefEditor.channel}`}>
-                    {prefEditor.channel === "bark" ? <img alt="" src={barkAppIconUrl} /> : <span className="notification-mail-preview-icon">邮</span>}
+                    <img
+                      alt=""
+                      className={prefEditor.channel === "email" ? "notification-mail-preview-icon" : undefined}
+                      src={prefEditor.channel === "bark" ? barkAppIconUrl : appleMailIconUrl}
+                    />
                     <div>
                       <strong>{prefEditor.channel === "bark" ? `【言浪】${editorPreview.title}` : "邮件正文预览"}</strong>
                       <p>{editorPreview.content}</p>

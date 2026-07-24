@@ -7308,25 +7308,16 @@ img {
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
 }
 
-.notification-push-preview img,
-.notification-mail-preview-icon {
+.notification-push-preview img {
   width: 42px;
   height: 42px;
   border-radius: 11px;
-}
-
-.notification-push-preview img {
   display: block;
   object-fit: cover;
 }
 
 .notification-mail-preview-icon {
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(135deg, #23a5f6, #0d79cf);
-  font-size: 0.9rem;
-  font-weight: 800;
+  box-shadow: 0 3px 9px rgba(21, 119, 226, 0.18);
 }
 
 .notification-push-preview > div {
