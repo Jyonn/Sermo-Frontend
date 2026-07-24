@@ -8948,6 +8948,7 @@ img {
 
   .chat-list-active .mobile-chat-list-screen {
     grid-template-rows: auto auto;
+    overflow: visible;
   }
 
   .chat-list-screen-body {
