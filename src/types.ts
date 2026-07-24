@@ -62,6 +62,9 @@ export interface AccessPayload {
   email_verified_at?: number | null;
   phone_verified_at?: number | null;
   bark_verified_at?: number | null;
+  email_unbound_at?: number | null;
+  phone_unbound_at?: number | null;
+  bark_unbound_at?: number | null;
   is_private_account?: boolean;
   expire?: number;
   time?: number;
@@ -77,6 +80,9 @@ export interface UserMeDTO extends UserDTO {
   email?: string | null;
   phone?: string | null;
   bark?: string | null;
+  email_unbound_at?: number | null;
+  phone_unbound_at?: number | null;
+  bark_unbound_at?: number | null;
   is_private_account: boolean;
 }
 

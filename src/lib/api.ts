@@ -707,6 +707,14 @@ export const api = {
     });
   },
 
+  unbindContact(payload: { channel: number; code?: string }) {
+    return request<UserMeDTO>("/users/me/unbind-contact", {
+      method: "DELETE",
+      auth: true,
+      body: payload,
+    });
+  },
+
   getSwitchAccounts(signal?: AbortSignal) {
     return request<SwitchAccountDTO[]>("/users/me/switch-accounts", { auth: true, signal });
   },

@@ -154,6 +154,12 @@ export default function MenuPage() {
   const [accountSwitcherLoading, setAccountSwitcherLoading] = useState(false);
   const [switchingUserId, setSwitchingUserId] = useState<number | null>(null);
   const [privateAccountSaving, setPrivateAccountSaving] = useState(false);
+  const [unbindChannel, setUnbindChannel] = useState<NotificationChannel | null>(null);
+  const [unbindConfirmOpen, setUnbindConfirmOpen] = useState(false);
+  const [unbindVerifyOpen, setUnbindVerifyOpen] = useState(false);
+  const [unbindCode, setUnbindCode] = useState("");
+  const [unbindState, setUnbindState] = useState<"idle" | "sending" | "removing">("idle");
+  const [unbindCooldown, setUnbindCooldown] = useState(0);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
   const [gestureDecoySheetOpen, setGestureDecoySheetOpen] = useState(false);
@@ -254,7 +260,7 @@ export default function MenuPage() {
 
   const togglePrivateAccount = async () => {
     if (!me || privateAccountSaving) return;
-    if (!emailVerified || !phoneVerified) {
+    if (!me.official && (!emailVerified || !phoneVerified)) {
       showToast("绑定并认证邮箱和手机后可设置", "error");
       return;
     }
@@ -268,6 +274,104 @@ export default function MenuPage() {
       showToast(apiError instanceof ApiError ? apiError.message : "设置失败", "error");
     } finally {
       setPrivateAccountSaving(false);
+    }
+  };
+
+  const contactValue = (channel: NotificationChannel) => {
+    if (channel === "email") return me?.email ?? "";
+    if (channel === "sms") return me?.phone ?? "";
+    return me?.bark ?? "";
+  };
+
+  const contactUnboundAt = (channel: NotificationChannel) => {
+    if (channel === "email") return me?.email_unbound_at ?? null;
+    if (channel === "sms") return me?.phone_unbound_at ?? null;
+    return me?.bark_unbound_at ?? null;
+  };
+
+  const contactUnbindAvailableAt = (channel: NotificationChannel) => {
+    const last = contactUnboundAt(channel);
+    if (!last || channel === "bark") return null;
+    return last * 1000 + (channel === "email" ? 30 : 365) * 24 * 60 * 60 * 1000;
+  };
+
+  const formatContactDate = (timestamp: number | null) => {
+    if (!timestamp) return "从未解绑";
+    return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "short", day: "numeric" }).format(timestamp * 1000);
+  };
+
+  const openUnbindConfirm = (channel: NotificationChannel) => {
+    setUnbindChannel(channel);
+    setUnbindCode("");
+    setUnbindConfirmOpen(true);
+  };
+
+  const applyUnboundUser = (updated: UserMeDTO, channel: NotificationChannel) => {
+    setMe(updated);
+    patchSessionUser({
+      verified: updated.verified,
+      email: updated.email,
+      phone: updated.phone,
+      bark: updated.bark,
+      email_verified_at: updated.email_verified_at,
+      phone_verified_at: updated.phone_verified_at,
+      bark_verified_at: updated.bark_verified_at,
+      email_unbound_at: updated.email_unbound_at,
+      phone_unbound_at: updated.phone_unbound_at,
+      bark_unbound_at: updated.bark_unbound_at,
+      is_private_account: updated.is_private_account,
+    });
+    setPrefs((current) => ({ ...current, [channel]: { ...current[channel], enabled: false } }));
+    setPrefDrawerChannel(null);
+    setUnbindConfirmOpen(false);
+    setUnbindVerifyOpen(false);
+    setUnbindChannel(null);
+    showToast(`${channelLabel(channel)}已解除绑定`);
+  };
+
+  const confirmUnbind = async () => {
+    if (!unbindChannel) return;
+    if (unbindChannel !== "bark") {
+      setUnbindConfirmOpen(false);
+      setUnbindVerifyOpen(true);
+      return;
+    }
+    setUnbindState("removing");
+    try {
+      applyUnboundUser(await api.unbindContact({ channel: channelCode(unbindChannel) }), unbindChannel);
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "解除绑定失败", "error");
+    } finally {
+      setUnbindState("idle");
+    }
+  };
+
+  const sendUnbindCode = async () => {
+    if (!unbindChannel || unbindChannel === "bark") return;
+    setUnbindState("sending");
+    try {
+      await api.sendContactCode({ channel: channelCode(unbindChannel), target: contactValue(unbindChannel) });
+      setUnbindCooldown(60);
+      showToast("验证码已发送");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "验证码发送失败", "error");
+    } finally {
+      setUnbindState("idle");
+    }
+  };
+
+  const submitUnbind = async () => {
+    if (!unbindChannel || !unbindCode.trim()) return;
+    setUnbindState("removing");
+    try {
+      applyUnboundUser(
+        await api.unbindContact({ channel: channelCode(unbindChannel), code: unbindCode.trim() }),
+        unbindChannel
+      );
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "解除绑定失败", "error");
+    } finally {
+      setUnbindState("idle");
     }
   };
 
@@ -396,6 +500,9 @@ export default function MenuPage() {
           email_verified_at: meInfo.email_verified_at,
           phone_verified_at: meInfo.phone_verified_at,
           bark_verified_at: meInfo.bark_verified_at,
+          email_unbound_at: meInfo.email_unbound_at,
+          phone_unbound_at: meInfo.phone_unbound_at,
+          bark_unbound_at: meInfo.bark_unbound_at,
           is_private_account: meInfo.is_private_account,
           language: meInfo.language,
           last_heartbeat: meInfo.last_heartbeat,
@@ -438,6 +545,14 @@ export default function MenuPage() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [authCooldown, authExpiresIn, authSheetChannel]);
+
+  useEffect(() => {
+    if (unbindCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setUnbindCooldown((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [unbindCooldown]);
 
   useEffect(() => {
     if (!authSheetChannel || !authPending) return;
@@ -1135,12 +1250,11 @@ export default function MenuPage() {
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             ) : null}
-            {!me?.official ? (
-              <div className="simple-row menu-link-row menu-toggle-row">
+            <div className="simple-row menu-link-row menu-toggle-row">
                 <div className="row-main">
                   <strong>私密账号</strong>
                   <div className="row-subtle">
-                    {emailVerified && phoneVerified
+                    {me?.official || (emailVerified && phoneVerified)
                       ? me?.is_private_account
                         ? "不会出现在其他账号的切换列表"
                         : "可被相同联系方式的账号发现"
@@ -1150,12 +1264,11 @@ export default function MenuPage() {
                 <button
                   aria-label="切换私密账号"
                   className={`switch ${me?.is_private_account ? "active" : ""}`}
-                  disabled={privateAccountSaving || !emailVerified || !phoneVerified}
+                  disabled={privateAccountSaving || (!me?.official && (!emailVerified || !phoneVerified))}
                   onClick={() => void togglePrivateAccount()}
                   type="button"
                 />
               </div>
-            ) : null}
             <button
               className="simple-row menu-link-row danger-row account-delete-row"
               onClick={() => {
@@ -1416,6 +1529,42 @@ export default function MenuPage() {
                 ) : null}
               </>
             ) : null}
+            <div className="menu-pref-row">
+              <div className="row-main">
+                <strong>上次解绑</strong>
+                {contactUnbindAvailableAt(prefDrawerChannel) &&
+                contactUnbindAvailableAt(prefDrawerChannel)! > Date.now() ? (
+                  <div className="row-subtle">
+                    {formatContactDate(contactUnbindAvailableAt(prefDrawerChannel)! / 1000)} 后可再次解绑
+                  </div>
+                ) : null}
+              </div>
+              <div className="menu-pref-row-value">{formatContactDate(contactUnboundAt(prefDrawerChannel))}</div>
+            </div>
+            <button
+              className="menu-pref-row menu-pref-row-button menu-contact-unbind"
+              disabled={
+                prefSaving ||
+                Boolean(
+                  contactUnbindAvailableAt(prefDrawerChannel) &&
+                  contactUnbindAvailableAt(prefDrawerChannel)! > Date.now()
+                )
+              }
+              onClick={() => openUnbindConfirm(prefDrawerChannel)}
+              type="button"
+            >
+              <div className="row-main">
+                <strong>解除绑定</strong>
+                <div className="row-subtle">
+                  {prefDrawerChannel === "bark"
+                    ? "随时可以重新绑定"
+                    : prefDrawerChannel === "email"
+                      ? "每 30 天仅可解绑一次"
+                      : "每 365 天仅可解绑一次"}
+                </div>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
         ) : null}
       </SideDrawer>
@@ -1602,6 +1751,45 @@ export default function MenuPage() {
                 </button>
               </div>
             </div>
+          </div>
+        ) : null}
+      </BottomSheet>
+      <BottomSheet
+        bodyClassName="contact-sheet-body"
+        className="contact-bottom-sheet"
+        open={unbindVerifyOpen}
+        title={`验证当前${unbindChannel ? channelLabel(unbindChannel) : "联系方式"}`}
+        description="验证通过后才会解除绑定"
+        onClose={() => {
+          if (unbindState !== "idle") return;
+          setUnbindVerifyOpen(false);
+          setUnbindChannel(null);
+        }}
+      >
+        {unbindChannel && unbindChannel !== "bark" ? (
+          <div className="simple-form contact-sheet-form">
+            <div className="menu-unbind-current">
+              <span>当前绑定</span>
+              <strong>{contactValue(unbindChannel)}</strong>
+            </div>
+            <button
+              className="secondary-button contact-flow-primary"
+              disabled={unbindState !== "idle" || unbindCooldown > 0}
+              onClick={() => void sendUnbindCode()}
+              type="button"
+            >
+              {unbindState === "sending" ? "发送中..." : unbindCooldown > 0 ? `${unbindCooldown} 秒后重试` : "发送验证码"}
+            </button>
+            <label className="field-label">验证码</label>
+            <input className="input" inputMode="numeric" value={unbindCode} onChange={(event) => setUnbindCode(event.target.value)} />
+            <button
+              className="danger-button contact-flow-primary"
+              disabled={unbindState !== "idle" || !unbindCode.trim()}
+              onClick={() => void submitUnbind()}
+              type="button"
+            >
+              {unbindState === "removing" ? "解绑中..." : "确认解除绑定"}
+            </button>
           </div>
         ) : null}
       </BottomSheet>
@@ -1808,6 +1996,26 @@ export default function MenuPage() {
           </section>
         </div>
       ) : null}
+      <ConfirmDialog
+        busy={unbindState === "removing"}
+        danger
+        open={unbindConfirmOpen}
+        title={`解除${unbindChannel ? channelLabel(unbindChannel) : "联系方式"}绑定？`}
+        description={
+          unbindChannel === "sms"
+            ? "手机每 365 天只能解绑一次。解绑后，该手机号将停止接收提醒。"
+            : unbindChannel === "email"
+              ? "邮箱每 30 天只能解绑一次。解绑前需要验证当前邮箱。"
+              : "解绑后将立即停止接收 Bark 即时提醒。"
+        }
+        confirmLabel={unbindChannel === "bark" ? "确认解绑" : "继续验证"}
+        onClose={() => {
+          if (unbindState === "removing") return;
+          setUnbindConfirmOpen(false);
+          setUnbindChannel(null);
+        }}
+        onConfirm={() => void confirmUnbind()}
+      />
       <ConfirmDialog
         open={passwordReminderOpen}
         title="请先设置密码"

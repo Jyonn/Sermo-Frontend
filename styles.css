@@ -7172,6 +7172,34 @@ img {
   font-size: 19px;
 }
 
+.menu-contact-unbind strong,
+.menu-contact-unbind > .material-symbols-outlined {
+  color: var(--danger);
+}
+
+.menu-contact-unbind:disabled strong,
+.menu-contact-unbind:disabled > .material-symbols-outlined {
+  color: var(--text-muted);
+}
+
+.menu-unbind-current {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(215, 220, 231, 0.72);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.78);
+}
+
+.menu-unbind-current span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.menu-unbind-current strong {
+  overflow-wrap: anywhere;
+}
+
 .notification-template-block {
   display: grid;
   gap: 8px;
