@@ -1,5 +1,5 @@
-const CACHE_NAME = "sermo-shell-v3";
-const SHELL = ["/", "/manifest.webmanifest", "/icons/sermo-192.png?v=3", "/icons/sermo-512.png?v=3"];
+const CACHE_NAME = "sermo-shell-v4";
+const SHELL = ["/", "/manifest.json", "/icons/sermo-192.png?v=3", "/icons/sermo-512.png?v=3"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)));
