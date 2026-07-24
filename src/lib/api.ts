@@ -3,6 +3,7 @@ import type {
   AdminMemberDTO,
   AvatarUploadDTO,
   AuthSession,
+  AccountSwitchTicketDTO,
   ChatDTO,
   ChatPreferenceDTO,
   ChatMessageDTO,
@@ -23,6 +24,7 @@ import type {
   SpaceAdminBroadcastResultDTO,
   SpaceAdminSession,
   SpaceDTO,
+  SwitchAccountDTO,
   SpaceEmailCodeDTO,
   SpaceAuthDTO,
   UserDTO,
@@ -662,6 +664,33 @@ export const api = {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  getSwitchAccounts(signal?: AbortSignal) {
+    return request<SwitchAccountDTO[]>("/users/me/switch-accounts", { auth: true, signal });
+  },
+
+  createAccountSwitchTicket(user_id: number) {
+    return request<AccountSwitchTicketDTO>("/users/me/switch-account", {
+      method: "POST",
+      auth: true,
+      body: { user_id },
+    });
+  },
+
+  exchangeAccountSwitchTicket(ticket: string) {
+    return request<JoinResponseDTO>("/users/switch-account/exchange", {
+      method: "POST",
+      body: { ticket },
+    });
+  },
+
+  updatePrivateAccount(enabled: boolean) {
+    return request<UserMeDTO>("/users/me/private-account", {
+      method: "POST",
+      auth: true,
+      body: { enabled: enabled ? 1 : 0 },
     });
   },
 

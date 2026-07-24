@@ -28,7 +28,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, UserMeDTO } from "../types";
+import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
   ["email", 1, "邮件"],
@@ -149,6 +149,11 @@ export default function MenuPage() {
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [basicDrawerOpen, setBasicDrawerOpen] = useState(false);
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
+  const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
+  const [switchAccounts, setSwitchAccounts] = useState<SwitchAccountDTO[]>([]);
+  const [accountSwitcherLoading, setAccountSwitcherLoading] = useState(false);
+  const [switchingUserId, setSwitchingUserId] = useState<number | null>(null);
+  const [privateAccountSaving, setPrivateAccountSaving] = useState(false);
   const [passwordSheetOpen, setPasswordSheetOpen] = useState(false);
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
   const [gestureDecoySheetOpen, setGestureDecoySheetOpen] = useState(false);
@@ -198,6 +203,7 @@ export default function MenuPage() {
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
+  const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
   const isAppleEnvironment = useMemo(() => detectAppleEnvironment(), []);
   const visibleChannelRows = useMemo(
     () => channelRows.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
@@ -214,6 +220,55 @@ export default function MenuPage() {
   const showPasswordReminder = (description = defaultPasswordReminderDescription) => {
     setPasswordReminderDescription(description);
     setPasswordReminderOpen(true);
+  };
+
+  const openAccountSwitcher = async () => {
+    setAccountSwitcherOpen(true);
+    setAccountSwitcherLoading(true);
+    try {
+      setSwitchAccounts(await api.getSwitchAccounts());
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "账号列表加载失败", "error");
+    } finally {
+      setAccountSwitcherLoading(false);
+    }
+  };
+
+  const switchAccount = async (account: SwitchAccountDTO) => {
+    setSwitchingUserId(account.user.user_id);
+    try {
+      const payload = await api.createAccountSwitchTicket(account.user.user_id);
+      window.location.assign(
+        buildSpaceHrefForCurrentHost(
+          payload.space.slug,
+          "/account-switch",
+          "",
+          `ticket=${encodeURIComponent(payload.token)}`
+        )
+      );
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "账号切换失败", "error");
+      setSwitchingUserId(null);
+    }
+  };
+
+  const togglePrivateAccount = async () => {
+    if (!me || privateAccountSaving) return;
+    if (!emailVerified || !phoneVerified) {
+      showToast("绑定并认证邮箱和手机后可设置", "error");
+      return;
+    }
+    setPrivateAccountSaving(true);
+    try {
+      const updated = await api.updatePrivateAccount(!me.is_private_account);
+      setMe(updated);
+      patchSessionUser({ is_private_account: updated.is_private_account });
+      showToast(updated.is_private_account ? "已设为私密账号" : "已允许账号发现");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "设置失败", "error");
+    } finally {
+      setPrivateAccountSaving(false);
+    }
   };
 
   const gestureEnabled = Boolean(gesturePreference?.enabled && gesturePreference.pattern_hash && gesturePreference.salt);
@@ -341,6 +396,7 @@ export default function MenuPage() {
           email_verified_at: meInfo.email_verified_at,
           phone_verified_at: meInfo.phone_verified_at,
           bark_verified_at: meInfo.bark_verified_at,
+          is_private_account: meInfo.is_private_account,
           language: meInfo.language,
           last_heartbeat: meInfo.last_heartbeat,
         });
@@ -853,7 +909,24 @@ export default function MenuPage() {
   return (
     <AppChrome title="菜单" hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <TabPageHeader title="菜单" syncing={syncing} />
+        <TabPageHeader
+          title={
+            <span className="menu-switch-title">
+              <span>菜单</span>
+              <span className="menu-switch-separator">·</span>
+              <button
+                aria-label="切换账号"
+                className="menu-account-switch-trigger"
+                onClick={() => void openAccountSwitcher()}
+                type="button"
+              >
+                <span className="menu-account-switch-icon" aria-hidden="true">⇄</span>
+                <span>{space?.name ?? "当前空间"}</span>
+              </button>
+            </span>
+          }
+          syncing={syncing}
+        />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
             <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
@@ -1062,6 +1135,27 @@ export default function MenuPage() {
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             ) : null}
+            {!me?.official ? (
+              <div className="simple-row menu-link-row">
+                <div className="row-main">
+                  <strong>私密账号</strong>
+                  <div className="row-subtle">
+                    {emailVerified && phoneVerified
+                      ? me?.is_private_account
+                        ? "不会出现在其他账号的切换列表"
+                        : "可被相同联系方式的账号发现"
+                      : "绑定邮箱和手机后可设置"}
+                  </div>
+                </div>
+                <button
+                  aria-label="切换私密账号"
+                  className={`switch ${me?.is_private_account ? "active" : ""}`}
+                  disabled={privateAccountSaving || !emailVerified || !phoneVerified}
+                  onClick={() => void togglePrivateAccount()}
+                  type="button"
+                />
+              </div>
+            ) : null}
             <button
               className="simple-row menu-link-row danger-row account-delete-row"
               onClick={() => {
@@ -1079,6 +1173,46 @@ export default function MenuPage() {
           </div>
         </div>
       </SideDrawer>
+
+      <BottomSheet
+        open={accountSwitcherOpen}
+        title="切换账号"
+        onClose={() => {
+          if (switchingUserId !== null) return;
+          setAccountSwitcherOpen(false);
+        }}
+      >
+        <div className="simple-list account-switch-list">
+          {accountSwitcherLoading ? (
+            <FeedbackState title="正在查找账号" description="" tone="loading" />
+          ) : switchAccounts.length ? (
+            switchAccounts.map((account) => (
+              <button
+                key={`${account.space.space_id}-${account.user.user_id}`}
+                className="simple-row person-row"
+                disabled={switchingUserId !== null}
+                onClick={() => void switchAccount(account)}
+                type="button"
+              >
+                <UserAvatar className="mini-avatar" name={account.user.name} uri={account.user.avatar_uri} />
+                <div className="row-main">
+                  <strong>{account.user.name}</strong>
+                  <div className="row-subtle">
+                    {account.space.name}{account.user.official ? " · 管理账号" : ""}
+                  </div>
+                </div>
+                {switchingUserId === account.user.user_id ? (
+                  <HeaderSyncIndicator syncing />
+                ) : (
+                  <span className="material-symbols-outlined">chevron_right</span>
+                )}
+              </button>
+            ))
+          ) : (
+            <FeedbackState title="没有可切换的账号" description="已设为私密的账号不会显示。" />
+          )}
+        </div>
+      </BottomSheet>
 
       <SideDrawer description="管理网页、邮件、短信和即时提醒" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知和提醒">
         <div className="detail-list">

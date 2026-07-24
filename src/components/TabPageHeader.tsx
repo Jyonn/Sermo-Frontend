@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
 
 interface TabPageHeaderProps {
-  title: string;
+  title: ReactNode;
   syncing?: boolean;
   status?: ReactNode;
 }

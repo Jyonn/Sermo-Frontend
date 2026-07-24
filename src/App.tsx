@@ -19,6 +19,7 @@ import LandingPage from "./pages/LandingPage";
 import MenuPage from "./pages/MenuPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import OfficialLoginPage from "./pages/OfficialLoginPage";
+import AccountSwitchPage from "./pages/AccountSwitchPage";
 import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
 import SettingsPage from "./pages/SettingsPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
@@ -77,6 +78,7 @@ export default function App() {
         <Route path="/entry" element={<RootEntryRedirect />} />
         <Route path="/friend-invite" element={<FriendInvitePage />} />
         <Route path="/official-login" element={<OfficialLoginPage />} />
+        <Route path="/account-switch" element={<AccountSwitchPage />} />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"

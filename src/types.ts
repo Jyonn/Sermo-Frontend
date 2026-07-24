@@ -62,6 +62,7 @@ export interface AccessPayload {
   email_verified_at?: number | null;
   phone_verified_at?: number | null;
   bark_verified_at?: number | null;
+  is_private_account?: boolean;
   expire?: number;
   time?: number;
   type?: string;
@@ -76,6 +77,18 @@ export interface UserMeDTO extends UserDTO {
   email?: string | null;
   phone?: string | null;
   bark?: string | null;
+  is_private_account: boolean;
+}
+
+export interface SwitchAccountDTO {
+  user: TinyUserDTO;
+  space: SpaceDTO;
+}
+
+export interface AccountSwitchTicketDTO {
+  token: string;
+  expires_in: number;
+  space: SpaceDTO;
 }
 
 export interface LoginAuthDTO {
