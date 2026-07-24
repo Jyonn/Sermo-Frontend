@@ -172,6 +172,7 @@ export interface NotificationPreferenceDTO {
   friend_online_message_title: string;
   friend_online_message_text: string;
   open_chat_on_tap: boolean;
+  bark_icon_mode: 0 | 1 | 2;
 }
 
 export interface WebReminderPreferenceDTO {
@@ -411,6 +412,7 @@ export interface NotificationPreference {
   friendOnlineMessageTitle: string;
   friendOnlineMessageText: string;
   openChatOnTap: boolean;
+  barkIconMode: 0 | 1 | 2;
 }
 
 export type NotificationPreferences = Record<NotificationChannel, NotificationPreference>;

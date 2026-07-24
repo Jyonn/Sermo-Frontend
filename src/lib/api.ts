@@ -614,6 +614,7 @@ export const api = {
     friend_online_message_title?: string;
     friend_online_message_text?: string;
     open_chat_on_tap?: 0 | 1;
+    bark_icon_mode?: 0 | 1 | 2;
   }) {
     return request<NotificationPreferenceDTO>("/users/me/notification-prefs", {
       method: "POST",

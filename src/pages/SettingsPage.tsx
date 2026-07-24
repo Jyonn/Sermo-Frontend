@@ -22,9 +22,9 @@ const channels: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
 };
 
 function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
@@ -42,6 +42,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       friendOnlineMessageTitle: row.friend_online_message_title ?? "",
       friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
+      barkIconMode: row.bark_icon_mode ?? 1,
     };
   });
   return next;
@@ -286,6 +287,7 @@ export default function SettingsPage() {
           friendOnlineMessageTitle: updated.friend_online_message_title ?? "",
           friendOnlineMessageText: updated.friend_online_message_text ?? "",
           openChatOnTap: updated.open_chat_on_tap ?? true,
+          barkIconMode: updated.bark_icon_mode ?? 1,
         },
       }));
     } catch (apiError) {

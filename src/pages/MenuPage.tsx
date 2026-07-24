@@ -38,9 +38,9 @@ const channelRows: Array<[NotificationChannel, number, string]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
 };
 
 const defaultHiddenDirectMessageTitle = "新私聊消息";
@@ -80,6 +80,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       friendOnlineMessageTitle: row.friend_online_message_title ?? "",
       friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
+      barkIconMode: row.bark_icon_mode ?? 1,
     };
   });
   return next;
@@ -680,6 +681,7 @@ export default function MenuPage() {
     friendOnlineMessageTitle: updated.friend_online_message_title ?? "",
     friendOnlineMessageText: updated.friend_online_message_text ?? "",
     openChatOnTap: updated.open_chat_on_tap ?? true,
+    barkIconMode: updated.bark_icon_mode ?? 1,
   });
 
   const savePreferencePatch = async (
@@ -1603,6 +1605,26 @@ export default function MenuPage() {
                     type="button"
                   />
                 </div>
+                <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
+                  <div className="row-main"><strong>使用空间 Logo</strong><div className="row-subtle">推送显示空间头像</div></div>
+                  <button
+                    aria-label="toggle-bark-space-icon"
+                    className={`switch ${activePref.barkIconMode === 1 ? "active" : ""}`}
+                    disabled={prefSaving || !activePref.enabled}
+                    onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 1 ? 0 : 1 })}
+                    type="button"
+                  />
+                </div>
+                <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
+                  <div className="row-main"><strong>使用用户头像</strong><div className="row-subtle">推送显示消息发送者</div></div>
+                  <button
+                    aria-label="toggle-bark-user-icon"
+                    className={`switch ${activePref.barkIconMode === 2 ? "active" : ""}`}
+                    disabled={prefSaving || !activePref.enabled}
+                    onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 2 ? 0 : 2 })}
+                    type="button"
+                  />
+                </div>
               </div>
             ) : null}
             {(["direct", "group", "online"] as NotificationMessageKind[]).map((kind) => {
@@ -1996,7 +2018,13 @@ export default function MenuPage() {
                     <img
                       alt=""
                       className={prefEditor.channel === "email" ? "notification-mail-preview-icon" : undefined}
-                      src={prefEditor.channel === "bark" ? barkAppIconUrl : appleMailIconUrl}
+                      src={prefEditor.channel === "bark"
+                        ? prefs.bark.barkIconMode === 1
+                          ? space?.official_user?.avatar_uri || barkAppIconUrl
+                          : prefs.bark.barkIconMode === 2
+                            ? me?.avatar_uri ?? session?.user.avatar_uri ?? barkAppIconUrl
+                            : barkAppIconUrl
+                        : appleMailIconUrl}
                     />
                     <div>
                       <strong>{prefEditor.channel === "bark" ? `【言浪】${editorPreview.title}` : "邮件正文预览"}</strong>
