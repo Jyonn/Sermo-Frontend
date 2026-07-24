@@ -1505,6 +1505,7 @@ export default function ChatsPage() {
   const [groupFriendPool, setGroupFriendPool] = useState<UserDTO[]>([]);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
   const [chatMemberLockedIds, setChatMemberLockedIds] = useState<number[]>([]);
+  const [chatMemberPickerMode, setChatMemberPickerMode] = useState<"add" | "remove">("add");
   const [groupRenameOpen, setGroupRenameOpen] = useState(false);
   const [groupRenameValue, setGroupRenameValue] = useState("");
   const [groupManageState, setGroupManageState] = useState<"idle" | "saving" | "loading-candidates">("idle");
@@ -2313,6 +2314,7 @@ export default function ChatsPage() {
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
+  const chatMemberActionIds = chatMemberPickerMode === "remove" ? groupSelectedIds : chatMemberNewIds;
 
   const updateSelectedChatPreference = async (kind: "pin" | "online", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
@@ -2358,9 +2360,22 @@ export default function ChatsPage() {
     }
     setDetailsSheetOpen(false);
     setGroupQuery("");
+    setChatMemberPickerMode("add");
     const lockedIds = selectedChat.detail.members.filter((member) => !member.isSelf).map((member) => member.userId);
     setChatMemberLockedIds(lockedIds);
     setGroupSelectedIds(lockedIds);
+    setChatMemberPickerOpen(true);
+  };
+
+  const openChatMemberRemover = () => {
+    if (!selectedChat || selectedChat.type !== "group" || !selectedChat.isOwner) return;
+    setDetailsSheetOpen(false);
+    setGroupQuery("");
+    setChatMemberPickerMode("remove");
+    setChatMemberLockedIds(
+      selectedChat.detail.members.filter((member) => member.isSelf || member.isOwner).map((member) => member.userId)
+    );
+    setGroupSelectedIds([]);
     setChatMemberPickerOpen(true);
   };
 
@@ -2370,6 +2385,7 @@ export default function ChatsPage() {
     setGroupQuery("");
     setGroupSelectedIds([]);
     setChatMemberLockedIds([]);
+    setChatMemberPickerMode("add");
   };
 
   const removeFriend = async () => {
@@ -2435,7 +2451,7 @@ export default function ChatsPage() {
     const chatMemberRows =
       chatMemberPickerOpen && selectedChat
         ? selectedChat.detail.members
-            .filter((member) => !member.isSelf)
+            .filter((member) => chatMemberPickerMode === "remove" || !member.isSelf)
             .map(
               (member) =>
                 ({
@@ -2452,12 +2468,12 @@ export default function ChatsPage() {
                 }) as UserDTO
             )
         : [];
-    const baseCandidates = [...chatMemberRows, ...groupFriendPool].filter(
+    const baseCandidates = (chatMemberPickerMode === "remove" ? chatMemberRows : [...chatMemberRows, ...groupFriendPool]).filter(
       (user, index, rows) => rows.findIndex((item) => item.user_id === user.user_id) === index
     );
 
     setGroupCandidates(filterUsersByName(baseCandidates, groupQuery));
-  }, [chatMemberPickerOpen, groupCreateOpen, groupFriendPool, groupQuery, selectedChat]);
+  }, [chatMemberPickerMode, chatMemberPickerOpen, groupCreateOpen, groupFriendPool, groupQuery, selectedChat]);
 
   useEffect(() => {
     const element = textareaRef.current;
@@ -3154,11 +3170,15 @@ export default function ChatsPage() {
 
   const submitChatMemberPicker = async () => {
     if (!selectedChat) return;
-    if (!chatMemberNewIds.length) return;
+    if (!chatMemberActionIds.length) return;
 
     try {
       setGroupManageState("saving");
-      if (selectedChat.type === "group") {
+      if (selectedChat.type === "group" && chatMemberPickerMode === "remove") {
+        const updated = await api.removeGroupMembers(selectedChat.id, chatMemberActionIds);
+        applyUpdatedGroupChat(updated);
+        showToast(chatMemberActionIds.length > 1 ? "成员已批量移除" : "成员已移除");
+      } else if (selectedChat.type === "group") {
         const updated = await api.addGroupMembers(selectedChat.id, chatMemberNewIds);
         applyUpdatedGroupChat(updated);
         showToast("成员已添加");
@@ -3173,8 +3193,12 @@ export default function ChatsPage() {
       setGroupQuery("");
       setGroupSelectedIds([]);
       setChatMemberLockedIds([]);
+      setChatMemberPickerMode("add");
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "添加聊天成员失败", "error");
+      showToast(
+        apiError instanceof ApiError ? apiError.message : chatMemberPickerMode === "remove" ? "移除群成员失败" : "添加聊天成员失败",
+        "error"
+      );
     } finally {
       setGroupManageState("idle");
     }
@@ -3837,7 +3861,6 @@ export default function ChatsPage() {
                     <UserAvatar className="chat-detail-member-avatar" name={member.name} uri={member.avatarUri} />
                     <span className="chat-detail-member-name">
                       <span className="chat-detail-member-label">{member.name}</span>
-                      {member.isOwner ? <span className="chat-detail-owner-badge">群主</span> : null}
                     </span>
                   </button>
                 ))}
@@ -3847,6 +3870,14 @@ export default function ChatsPage() {
                   </span>
                   <span className="chat-detail-member-name">添加</span>
                 </button>
+                {selectedChat.type === "group" && selectedChat.isOwner ? (
+                  <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberRemover} type="button">
+                    <span className="chat-detail-member-avatar chat-detail-member-avatar-add chat-detail-member-avatar-remove">
+                      <span className="material-symbols-outlined">remove</span>
+                    </span>
+                    <span className="chat-detail-member-name">移除</span>
+                  </button>
+                ) : null}
               </div>
               {hasMoreDetailMembers ? (
                 <button className="ghost-button chat-detail-more-button" onClick={() => setDetailMemberLimit((current) => current + CHAT_DETAIL_MEMBER_PAGE_SIZE)} type="button">
@@ -3988,15 +4019,27 @@ export default function ChatsPage() {
               取消
             </button>
             <div className="sheet-toolbar-title">
-              <strong>{selectedChat?.type === "group" ? "添加群成员" : "新建群聊"}</strong>
+              <strong>
+                {selectedChat?.type === "group"
+                  ? chatMemberPickerMode === "remove"
+                    ? "移除群成员"
+                    : "添加群成员"
+                  : "新建群聊"}
+              </strong>
             </div>
             <button
-              className="button sheet-toolbar-button"
-              disabled={groupManageState === "saving" || !chatMemberNewIds.length}
+              className={`button sheet-toolbar-button ${chatMemberPickerMode === "remove" ? "danger-button" : ""}`}
+              disabled={groupManageState === "saving" || !chatMemberActionIds.length}
               onClick={() => void submitChatMemberPicker()}
               type="button"
             >
-              {groupManageState === "saving" ? "处理中..." : selectedChat?.type === "group" ? "添加" : "创建"}
+              {groupManageState === "saving"
+                ? "处理中..."
+                : selectedChat?.type === "group"
+                  ? chatMemberPickerMode === "remove"
+                    ? "移除"
+                    : "添加"
+                  : "创建"}
             </button>
           </div>
         }
@@ -4016,6 +4059,7 @@ export default function ChatsPage() {
             {groupCandidates.map((user) => {
               const selected = groupSelectedIds.includes(user.user_id);
               const locked = chatMemberLockedIds.includes(user.user_id);
+              const protectedMember = selectedChat?.detail.members.find((member) => member.userId === user.user_id);
               return (
                 <button
                   key={`picker-user-${user.user_id}`}
@@ -4026,10 +4070,24 @@ export default function ChatsPage() {
                   <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
                   <div className="row-main">
                     <strong>{user.name}</strong>
-                    <div className="row-subtle">{locked ? "已在当前聊天中" : user.is_alive ? "在线" : "离线"}</div>
+                    <div className="row-subtle">
+                      {chatMemberPickerMode === "remove"
+                        ? protectedMember?.isOwner
+                          ? "群主"
+                          : protectedMember?.isSelf
+                            ? "当前账号"
+                            : "群成员"
+                        : locked
+                          ? "已在当前聊天中"
+                          : user.is_alive
+                            ? "在线"
+                            : "离线"}
+                    </div>
                   </div>
                   {locked ? (
-                    <span className="member-picker-status member-picker-status-locked">已在群聊</span>
+                    <span className="member-picker-status member-picker-status-locked">
+                      {chatMemberPickerMode === "remove" ? "不可移除" : "已在群聊"}
+                    </span>
                   ) : (
                     <span className={`member-picker-check ${selected ? "is-selected" : ""}`} aria-hidden="true" />
                   )}
