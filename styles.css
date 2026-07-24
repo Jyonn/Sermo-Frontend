@@ -1580,6 +1580,19 @@ img {
   letter-spacing: 0.04em;
 }
 
+.chat-list-unread {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  z-index: 2;
+  min-width: 19px;
+  height: 19px;
+  padding-inline: 5px;
+  border: 2px solid var(--bg-surface);
+  line-height: 15px;
+  box-shadow: 0 3px 8px rgba(255, 77, 109, 0.2);
+}
+
 .title-row,
 .meta-row {
   display: flex;

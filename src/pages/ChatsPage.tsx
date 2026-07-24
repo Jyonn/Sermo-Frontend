@@ -3308,6 +3308,9 @@ export default function ChatsPage() {
           name={chat.title}
           uri={chat.avatarUri}
         />
+        {chat.unread ? (
+          <span className="small-badge chat-list-unread">{chat.unread > 99 ? "99+" : chat.unread}</span>
+        ) : null}
       </div>
       <div className="chat-copy">
         <p className="chat-name">{chat.title}</p>
@@ -3316,7 +3319,6 @@ export default function ChatsPage() {
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
         {chat.pinned ? <span className="chat-pin-label">置顶</span> : null}
-        {chat.unread ? <span className="small-badge">{chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
     </button>
   );
