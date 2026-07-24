@@ -3707,6 +3707,19 @@ img {
   border: 1px solid rgba(224, 230, 240, 0.95);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 253, 0.9));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.composer-recording-bar.is-recording {
+  border-color: rgba(255, 77, 109, 0.2);
+  background:
+    radial-gradient(circle at 8% 50%, rgba(255, 77, 109, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 250, 253, 0.92));
+}
+
+.composer-recording-bar.is-recorded {
+  border-color: rgba(0, 208, 132, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 8px 22px rgba(0, 151, 98, 0.07);
 }
 
 .composer-recording-stop {
@@ -3718,6 +3731,21 @@ img {
   border-radius: 999px;
   color: var(--danger);
   background: rgba(255, 77, 109, 0.1);
+}
+
+.composer-recording-bar.is-recorded .composer-recording-stop {
+  color: #0a5b40;
+  background: rgba(0, 208, 132, 0.13);
+}
+
+.composer-recording-spinner {
+  width: 17px;
+  height: 17px;
+  display: block;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: message-audio-spin 700ms linear infinite;
 }
 
 .composer-recording-stop .material-symbols-outlined {
@@ -3732,6 +3760,15 @@ img {
   height: 26px;
 }
 
+.composer-recording-state {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .composer-recording-bar-item {
   width: 5px;
   flex: 1 1 0;
@@ -3740,12 +3777,36 @@ img {
   background: linear-gradient(180deg, rgba(0, 208, 132, 0.92), rgba(44, 169, 255, 0.68));
   transform-origin: center;
   transform: scaleY(var(--voice-level));
+  transition: transform 80ms linear, opacity 160ms ease;
+}
+
+.composer-recording-waveform.is-previewing .composer-recording-bar-item {
+  animation: composer-preview-wave 720ms ease-in-out infinite alternate;
+  animation-delay: calc(var(--wave-index, 0) * -32ms);
+}
+
+.composer-recording-waveform.is-previewing .composer-recording-bar-item:nth-child(3n + 1) {
+  animation-delay: -180ms;
+}
+
+.composer-recording-waveform.is-previewing .composer-recording-bar-item:nth-child(3n + 2) {
+  animation-delay: -360ms;
+}
+
+@keyframes composer-preview-wave {
+  from { opacity: 0.5; transform: scaleY(0.28); }
+  to { opacity: 1; transform: scaleY(0.92); }
 }
 
 .composer-recording-time {
   color: var(--text-secondary);
   font-size: 0.84rem;
   font-variant-numeric: tabular-nums;
+}
+
+.composer-recording-time.is-limit {
+  color: var(--danger);
+  font-weight: 750;
 }
 
 .composer-recording-delete {

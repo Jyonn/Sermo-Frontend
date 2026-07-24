@@ -1108,7 +1108,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   onOpenActions,
   onRetry,
 }: MessageBubbleRowProps) {
-  const showRetry = from === "self" && message.status === "failed" && message.kind === "text";
+  const showRetry = from === "self" && message.status === "failed" && ["text", "audio"].includes(message.kind);
   const canOpenActions = message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
@@ -1394,7 +1394,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   );
 }
 
-type VoiceComposerPhase = "idle" | "recording" | "stopping" | "recorded" | "sending";
+type VoiceComposerPhase = "idle" | "requesting" | "recording" | "stopping" | "recorded" | "sending";
 
 interface VoiceComposerState {
   open: boolean;
@@ -1578,6 +1578,8 @@ export default function ChatsPage() {
     blob: null,
     mimeType: "",
   });
+  const [voicePreviewUri, setVoicePreviewUri] = useState("");
+  const [voicePreviewPlaying, setVoicePreviewPlaying] = useState(false);
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
@@ -1625,6 +1627,7 @@ export default function ChatsPage() {
   const cancelScrollAnimationRef = useRef<(() => void) | null>(null);
   const revealAnimatingRef = useRef(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const voicePreviewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const sendProgress = useMemo(() => {
     const values = Object.values(sendTasks);
@@ -1661,6 +1664,8 @@ export default function ChatsPage() {
   const recordingChunksRef = useRef<Blob[]>([]);
   const recordingCancelledRef = useRef(false);
   const recordingStopRequestedRef = useRef(false);
+  const recordingAttemptRef = useRef(0);
+  const recordingStartedAtRef = useRef(0);
   const isComposingRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
@@ -1716,6 +1721,12 @@ export default function ChatsPage() {
     recordingStopRequestedRef.current = false;
     cleanupRecordingResources();
     recordingChunksRef.current = [];
+    voicePreviewAudioRef.current?.pause();
+    setVoicePreviewPlaying(false);
+    setVoicePreviewUri((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return "";
+    });
     setVoiceComposer({
       open: false,
       phase: "idle",
@@ -1958,11 +1969,19 @@ export default function ChatsPage() {
 
   useEffect(() => {
     return () => {
+      recordingAttemptRef.current += 1;
+      recordingCancelledRef.current = true;
       resetVoiceComposer();
     };
   }, []);
 
   useEffect(() => {
+    recordingAttemptRef.current += 1;
+    recordingCancelledRef.current = true;
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+      return;
+    }
     resetVoiceComposer();
   }, [selectedChat?.id]);
 
@@ -2671,7 +2690,7 @@ export default function ChatsPage() {
   };
 
   const retryFailedMessage = async (message: ChatMessage) => {
-    if (!selectedChat || message.status !== "failed" || message.kind !== "text") return;
+    if (!selectedChat || message.status !== "failed" || !["text", "audio"].includes(message.kind)) return;
 
     const retryMessage: ChatMessage = {
       ...message,
@@ -2689,7 +2708,33 @@ export default function ChatsPage() {
     updateSendTask(retryMessage.clientId, 0.12);
 
     try {
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id, retryMessage.clientId);
+      let created: ChatMessageDTO;
+      if (retryMessage.kind === "audio") {
+        const sourceUri = retryMessage.localPreviewUri ?? retryMessage.payload?.uri;
+        if (!sourceUri) throw new Error("audio_source_missing");
+        const response = await fetch(sourceUri);
+        if (!response.ok) throw new Error("audio_source_unavailable");
+        const blob = await response.blob();
+        const mimeType = retryMessage.payload?.mime_type || blob.type || "audio/webm";
+        const extension = mimeType.includes("mp4") ? "m4a" : mimeType.includes("ogg") ? "ogg" : "webm";
+        const file = new File([blob], `voice-message.${extension}`, { type: mimeType });
+        const upload = await uploadMessageMedia(file, "audio", (progress) => {
+          updateSendTask(retryMessage.clientId, 0.12 + progress * 0.76);
+        });
+        created = await api.sendMessage(
+          selectedChat.id,
+          MESSAGE_TYPE_AUDIO,
+          JSON.stringify({
+            key: upload.key,
+            mime_type: mimeType,
+            duration_seconds: retryMessage.payload?.duration_seconds,
+          }),
+          retryMessage.replyTo?.message_id,
+          retryMessage.clientId,
+        );
+      } else {
+        created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id, retryMessage.clientId);
+      }
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
         ...current,
@@ -3005,12 +3050,33 @@ export default function ChatsPage() {
 
     textareaRef.current?.blur();
     setComposerMoreOpen(false);
+    const attempt = recordingAttemptRef.current + 1;
+    recordingAttemptRef.current = attempt;
     recordingCancelledRef.current = false;
     recordingStopRequestedRef.current = false;
     recordingChunksRef.current = [];
+    setVoiceComposer({
+      open: true,
+      phase: "requesting",
+      durationSeconds: 0,
+      bars: Array.from({ length: 24 }, () => 0.2),
+      blob: null,
+      mimeType: "",
+    });
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1,
+        },
+      });
+      if (attempt !== recordingAttemptRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const mimeTypeCandidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
       const mimeType = mimeTypeCandidates.find((item) => MediaRecorder.isTypeSupported(item)) ?? "";
       const mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
@@ -3020,6 +3086,7 @@ export default function ChatsPage() {
       const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (AudioContextCtor) {
         const audioContext = new AudioContextCtor();
+        await audioContext.resume().catch(() => undefined);
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 64;
         const source = audioContext.createMediaStreamSource(stream);
@@ -3052,15 +3119,30 @@ export default function ChatsPage() {
       mediaRecorder.onstop = () => {
         const nextMimeType = mediaRecorder.mimeType || mimeType || "audio/webm";
         const blob = new Blob(recordingChunksRef.current, { type: nextMimeType });
+        const durationSeconds = Math.min(
+          AUDIO_MAX_DURATION_SECONDS,
+          Math.max(0, (Date.now() - recordingStartedAtRef.current) / 1000),
+        );
         cleanupRecordingResources();
         if (recordingCancelledRef.current) {
           resetVoiceComposer();
           return;
         }
+        if (blob.size === 0 || durationSeconds < 0.4) {
+          resetVoiceComposer();
+          showToast("录音时间太短", "error");
+          return;
+        }
+        const previewUri = URL.createObjectURL(blob);
+        setVoicePreviewUri((current) => {
+          if (current) URL.revokeObjectURL(current);
+          return previewUri;
+        });
         setVoiceComposer((current) => ({
           ...current,
           open: true,
           phase: "recorded",
+          durationSeconds,
           blob,
           mimeType: nextMimeType,
           bars: current.bars,
@@ -3068,6 +3150,7 @@ export default function ChatsPage() {
       };
 
       mediaRecorder.start();
+      recordingStartedAtRef.current = Date.now();
       setVoiceComposer({
         open: true,
         phase: "recording",
@@ -3077,9 +3160,8 @@ export default function ChatsPage() {
         mimeType: mediaRecorder.mimeType || mimeType || "audio/webm",
       });
 
-      const startedAt = Date.now();
       recordingTimerRef.current = window.setInterval(() => {
-        const durationSeconds = Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - startedAt) / 1000);
+        const durationSeconds = Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - recordingStartedAtRef.current) / 1000);
         setVoiceComposer((current) => ({
           ...current,
           durationSeconds,
@@ -3092,8 +3174,17 @@ export default function ChatsPage() {
         }
       }, 120);
     } catch (error) {
+      if (attempt !== recordingAttemptRef.current) return;
       resetVoiceComposer();
-      setPageError(error instanceof Error ? error.message : "无法开始录音");
+      const errorName = error instanceof DOMException ? error.name : "";
+      const message = errorName === "NotAllowedError"
+        ? "请在浏览器设置中允许言浪使用麦克风"
+        : errorName === "NotFoundError"
+          ? "没有找到可用的麦克风"
+          : errorName === "NotReadableError"
+            ? "麦克风正在被其他应用使用"
+            : "暂时无法开始录音";
+      setPageError(message);
     }
   };
 
@@ -3105,6 +3196,7 @@ export default function ChatsPage() {
   };
 
   const cancelVoiceRecording = () => {
+    recordingAttemptRef.current += 1;
     recordingCancelledRef.current = true;
     if (mediaRecorderRef.current?.state === "recording") {
       mediaRecorderRef.current.stop();
@@ -3113,9 +3205,31 @@ export default function ChatsPage() {
     resetVoiceComposer();
   };
 
+  const toggleVoicePreview = async () => {
+    const audio = voicePreviewAudioRef.current;
+    if (!audio || voiceComposer.phase !== "recorded") return;
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+    if (activeThreadAudio && activeThreadAudio !== audio) {
+      activeThreadAudio.pause();
+      activeThreadAudio.currentTime = 0;
+    }
+    activeThreadAudio = audio;
+    try {
+      await audio.play();
+    } catch {
+      setVoicePreviewPlaying(false);
+      setPageError("录音试听失败");
+    }
+  };
+
   const sendRecordedVoiceMessage = async () => {
     if (!voiceComposer.blob || !selectedChat) return;
 
+    voicePreviewAudioRef.current?.pause();
+    setVoicePreviewPlaying(false);
     const extension = voiceComposer.mimeType.includes("mp4") ? "m4a" : voiceComposer.mimeType.includes("ogg") ? "ogg" : "webm";
     const file = new File([voiceComposer.blob], `voice-message.${extension}`, {
       type: voiceComposer.mimeType || "audio/webm",
@@ -3125,11 +3239,8 @@ export default function ChatsPage() {
     const sent = await sendUploadedMediaMessage("audio", file, {
       duration_seconds: voiceComposer.durationSeconds,
     });
-    if (sent) {
-      resetVoiceComposer();
-      return;
-    }
-    setVoiceComposer((current) => ({ ...current, phase: "recorded" }));
+    resetVoiceComposer();
+    if (!sent) showToast("语音发送失败，可在消息旁重试", "error");
   };
 
   const refreshChats = async () => {
@@ -3692,7 +3803,7 @@ export default function ChatsPage() {
                 {!voiceComposer.open ? (
                   <div className="composer-row composer-row-text">
                     <div className="composer-leading-actions">
-                      <button className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} type="button">
+                      <button aria-label="录制语音" className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} type="button">
                         <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
                       </button>
                     </div>
@@ -3741,21 +3852,36 @@ export default function ChatsPage() {
                     <button className="composer-recording-delete" disabled={voiceComposer.phase === "sending"} onClick={cancelVoiceRecording} type="button">
                       <ComposerSvgIcon className="composer-inline-svg" kind="delete" />
                     </button>
-                    <div className="composer-recording-bar">
+                    <div className={`composer-recording-bar is-${voiceComposer.phase}`}>
                       <button
                         className="composer-recording-stop"
-                        disabled={voiceComposer.phase !== "recording"}
-                        onClick={stopVoiceRecording}
+                        disabled={!["recording", "recorded"].includes(voiceComposer.phase)}
+                        onClick={voiceComposer.phase === "recorded" ? () => void toggleVoicePreview() : stopVoiceRecording}
                         type="button"
+                        aria-label={voiceComposer.phase === "recorded" ? (voicePreviewPlaying ? "暂停试听" : "试听录音") : "停止录音"}
                       >
-                        <ComposerSvgIcon className="composer-inline-svg composer-stop-svg" kind="stop" />
+                        {voiceComposer.phase === "recorded" ? (
+                          <MessageControlIcon className="composer-inline-svg" kind={voicePreviewPlaying ? "pause" : "play"} />
+                        ) : voiceComposer.phase === "requesting" || voiceComposer.phase === "stopping" ? (
+                          <span className="composer-recording-spinner" />
+                        ) : (
+                          <ComposerSvgIcon className="composer-inline-svg composer-stop-svg" kind="stop" />
+                        )}
                       </button>
-                      <div className="composer-recording-waveform" aria-hidden="true">
-                        {voiceComposer.bars.map((bar, index) => (
-                          <span key={`wave-${index}`} className="composer-recording-bar-item" style={{ "--voice-level": `${bar}` } as CSSProperties} />
-                        ))}
+                      <div className={`composer-recording-waveform ${voicePreviewPlaying ? "is-previewing" : ""}`} aria-hidden="true">
+                        {voiceComposer.phase === "requesting" ? (
+                          <span className="composer-recording-state">准备麦克风</span>
+                        ) : voiceComposer.phase === "stopping" ? (
+                          <span className="composer-recording-state">正在生成录音</span>
+                        ) : (
+                          voiceComposer.bars.map((bar, index) => (
+                            <span key={`wave-${index}`} className="composer-recording-bar-item" style={{ "--voice-level": `${bar}` } as CSSProperties} />
+                          ))
+                        )}
                       </div>
-                      <span className="composer-recording-time">{formatDuration(voiceComposer.durationSeconds)}</span>
+                      <span className={`composer-recording-time ${voiceComposer.durationSeconds >= AUDIO_MAX_DURATION_SECONDS ? "is-limit" : ""}`}>
+                        {formatDuration(voiceComposer.durationSeconds)}
+                      </span>
                     </div>
                     <button
                       className="composer-recording-send"
@@ -3763,8 +3889,20 @@ export default function ChatsPage() {
                       onClick={() => void sendRecordedVoiceMessage()}
                       type="button"
                     >
-                      <span className="material-symbols-outlined">send</span>
+                      {voiceComposer.phase === "sending" ? <span className="composer-recording-spinner" /> : <span className="material-symbols-outlined">send</span>}
                     </button>
+                    <audio
+                      ref={voicePreviewAudioRef}
+                      hidden
+                      preload="metadata"
+                      src={voicePreviewUri}
+                      onEnded={() => {
+                        setVoicePreviewPlaying(false);
+                        if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null;
+                      }}
+                      onPause={() => setVoicePreviewPlaying(false)}
+                      onPlay={() => setVoicePreviewPlaying(true)}
+                    />
                   </div>
                 )}
                 {!voiceComposer.open ? (
