@@ -20,7 +20,6 @@ import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { InputDialog } from "../components/InputDialog";
-import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -1489,13 +1488,6 @@ export default function ChatsPage() {
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
   const [healthClock, setHealthClock] = useState(() => Date.now());
   const [pageError, setPageError] = useState<string | null>(null);
-  const [statusModal, setStatusModal] = useState<{
-    open: boolean;
-    phase: "loading" | "success" | "error";
-    loadingLabel: string;
-    successLabel: string;
-    errorLabel: string;
-  } | null>(null);
   const [sendState, setSendState] = useState<"idle" | "sending">("idle");
   const [groupCreateState, setGroupCreateState] = useState<"idle" | "loading-users" | "creating">("idle");
   const [chats, setChats] = useState<Chat[]>([]);
@@ -1520,6 +1512,7 @@ export default function ChatsPage() {
   const [detailMemberLimit, setDetailMemberLimit] = useState(CHAT_DETAIL_MEMBER_PAGE_SIZE);
   const [groupDangerConfirmOpen, setGroupDangerConfirmOpen] = useState(false);
   const [friendDangerConfirmOpen, setFriendDangerConfirmOpen] = useState(false);
+  const [friendDeleteSaving, setFriendDeleteSaving] = useState(false);
   const [voiceComposer, setVoiceComposer] = useState<VoiceComposerState>({
     open: false,
     phase: "idle",
@@ -2387,29 +2380,16 @@ export default function ChatsPage() {
       return;
     }
 
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: "正在删除好友",
-      successLabel: "好友已删除",
-      errorLabel: "删除失败",
-    });
-
     try {
+      setFriendDeleteSaving(true);
       await api.removeFriendRequest(peer.userId);
       setFriendDangerConfirmOpen(false);
       setDetailsSheetOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("好友已删除");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "删除失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "删除失败", "error");
+    } finally {
+      setFriendDeleteSaving(false);
     }
   };
 
@@ -3064,16 +3044,6 @@ export default function ChatsPage() {
     }
   };
 
-  const openStatusModal = (loadingLabel: string, successLabel: string, errorLabel: string) => {
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel,
-      successLabel,
-      errorLabel,
-    });
-  };
-
   const deleteMessage = async () => {
     if (!selectedChat || !messageMenu) return;
 
@@ -3098,7 +3068,6 @@ export default function ChatsPage() {
     }
 
     try {
-      openStatusModal("正在删除消息", "消息已删除", "删除消息失败");
       setMessageDeleteState("deleting");
       await api.deleteMessage(messageMenu.message.id);
       if (messageMenu.message.localPreviewUri) {
@@ -3122,17 +3091,9 @@ export default function ChatsPage() {
       }
       setMessageMenu(null);
       await refreshChats();
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("消息已删除");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "删除消息失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "删除消息失败", "error");
     } finally {
       setMessageDeleteState("idle");
     }
@@ -3222,21 +3183,12 @@ export default function ChatsPage() {
   const removeGroupMember = async (userId: number) => {
     if (!selectedChat) return;
     try {
-      openStatusModal("正在移除成员", "成员已移除", "移除成员失败");
       setGroupManageState("saving");
       const updated = await api.removeGroupMembers(selectedChat.id, [userId]);
       applyUpdatedGroupChat(updated);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("成员已移除");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "移除成员失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "移除成员失败", "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -3245,7 +3197,6 @@ export default function ChatsPage() {
   const leaveOrDeleteGroup = async () => {
     if (!selectedChat || selectedChat.type !== "group") return;
     try {
-      openStatusModal(selectedChat.isOwner ? "正在解散群聊" : "正在退出群聊", selectedChat.isOwner ? "群聊已解散" : "已退出群聊", selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败");
       setGroupManageState("saving");
       if (selectedChat.isOwner) {
         await api.deleteGroupChat(selectedChat.id);
@@ -3255,18 +3206,10 @@ export default function ChatsPage() {
       setChats((currentChats) => currentChats.filter((chat) => chat.id !== selectedChat.id));
       setDetailsSheetOpen(false);
       setGroupDangerConfirmOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast(selectedChat.isOwner ? "群聊已解散" : "已退出群聊");
       navigate("/app/chats");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败", "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -4020,8 +3963,12 @@ export default function ChatsPage() {
         title="确认删除好友？"
         description="删除后将解除当前好友关系。你们仍可继续查看已有聊天记录。"
         confirmLabel="删除好友"
+        busy={friendDeleteSaving}
         danger
-        onClose={() => setFriendDangerConfirmOpen(false)}
+        onClose={() => {
+          if (friendDeleteSaving) return;
+          setFriendDangerConfirmOpen(false);
+        }}
         onConfirm={() => void removeFriend()}
       />
       <BottomSheet
@@ -4236,14 +4183,6 @@ export default function ChatsPage() {
           </div>
         </div>
       ) : null}
-      <RequestStatusModal
-        open={Boolean(statusModal?.open)}
-        phase={statusModal?.phase ?? "loading"}
-        loadingLabel={statusModal?.loadingLabel}
-        successLabel={statusModal?.successLabel}
-        errorLabel={statusModal?.errorLabel}
-        onAutoClose={() => setStatusModal(null)}
-      />
       <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
   );

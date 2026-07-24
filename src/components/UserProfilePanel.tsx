@@ -5,7 +5,6 @@ import { BottomSheet } from "./BottomSheet";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
-import { RequestStatusModal } from "./RequestStatusModal";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -68,12 +67,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [respondedAt, setRespondedAt] = useState<number | null>(initialCached?.respondedAt ?? null);
   const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
-  const [statusModal, setStatusModal] = useState<{
-    phase: "loading" | "success" | "error";
-    loadingLabel: string;
-    successLabel: string;
-    errorLabel: string;
-  } | null>(null);
+  const [removingFriend, setRemovingFriend] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -197,20 +191,20 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   };
 
   const removeFriend = async () => {
-    if (!user) return;
-    setStatusModal({ phase: "loading", loadingLabel: "正在删除", successLabel: "好友已删除", errorLabel: "删除失败" });
+    if (!user || removingFriend) return;
     try {
+      setRemovingFriend(true);
       await api.removeFriendRequest(user.user_id);
       setIsFriend(false);
       setRespondedAt(null);
       setRemoveConfirmOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
       const cached = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data;
       if (cached) writeTabCache(cacheScope, `user-profile:${userId}`, { ...cached, isFriend: false, respondedAt: null });
+      showToast("好友已删除");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current ? { ...current, phase: "error", errorLabel: apiError instanceof ApiError ? apiError.message : "删除失败" } : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "删除失败", "error");
+    } finally {
+      setRemovingFriend(false);
     }
   };
 
@@ -315,8 +309,19 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       </SideDrawer>
 
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
-      <ConfirmDialog danger open={removeConfirmOpen} title="删除好友？" description="已有聊天记录仍会保留。" confirmLabel="删除" onClose={() => setRemoveConfirmOpen(false)} onConfirm={() => void removeFriend()} />
-      <RequestStatusModal errorLabel={statusModal?.errorLabel} loadingLabel={statusModal?.loadingLabel} onAutoClose={() => setStatusModal(null)} open={Boolean(statusModal)} phase={statusModal?.phase ?? "loading"} successLabel={statusModal?.successLabel} />
+      <ConfirmDialog
+        busy={removingFriend}
+        danger
+        open={removeConfirmOpen}
+        title="删除好友？"
+        description="已有聊天记录仍会保留。"
+        confirmLabel="删除"
+        onClose={() => {
+          if (removingFriend) return;
+          setRemoveConfirmOpen(false);
+        }}
+        onConfirm={() => void removeFriend()}
+      />
     </div>
   );
 }

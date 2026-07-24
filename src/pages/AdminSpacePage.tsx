@@ -7,6 +7,7 @@ import { useAdminAuth } from "../lib/adminAuth";
 import { useAuth } from "../lib/auth";
 import { getBrowserJoinLanguage } from "../lib/language";
 import { buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
+import { showToast } from "../lib/toast";
 
 type AdminMode = "create" | "login";
 
@@ -80,9 +81,11 @@ export default function AdminSpacePage() {
       });
       setCountdown(60);
       setSuccessMessage(`验证码已发送到 ${payload.masked_email}。`);
+      showToast("验证码已发送");
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "验证码发送失败";
       setSubmitError(message);
+      showToast(message, "error");
     } finally {
       setSubmitState("idle");
     }

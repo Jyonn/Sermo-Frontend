@@ -12,6 +12,7 @@ import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { useAuth } from "../lib/auth";
 import { normalizeContactTarget } from "../lib/contactTarget";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
+import { showToast } from "../lib/toast";
 import type { AppViewState, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences } from "../types";
 
 const channels: Array<[NotificationChannel, number, string]> = [
@@ -71,7 +72,6 @@ export default function SettingsPage() {
   const [contactTarget, setContactTarget] = useState("");
   const [contactCode, setContactCode] = useState("");
   const [contactChannel, setContactChannel] = useState<NotificationChannel>("email");
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [contactActionState, setContactActionState] = useState<"idle" | "sending-code" | "binding">("idle");
   const [pendingContactState, setPendingContactState] = useState<Record<NotificationChannel, boolean>>({
     email: false,
@@ -317,7 +317,6 @@ export default function SettingsPage() {
 
   const sendContactCode = async () => {
     setError(null);
-    setSuccessMessage(null);
     try {
       setContactActionState("sending-code");
       const channel = contactChannel === "email" ? 1 : contactChannel === "sms" ? 2 : 3;
@@ -327,8 +326,9 @@ export default function SettingsPage() {
       setPendingContactState((current) => ({ ...current, [contactChannel]: true }));
       setContactCooldowns((current) => ({ ...current, [contactChannel]: 60 }));
       setContactExpiresIn((current) => ({ ...current, [contactChannel]: payload.expires_in }));
+      showToast("验证码已发送");
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "发送联系方式验证码失败");
+      showToast(apiError instanceof ApiError ? apiError.message : "发送联系方式验证码失败", "error");
     } finally {
       setContactActionState("idle");
     }
@@ -336,7 +336,6 @@ export default function SettingsPage() {
 
   const bindContact = async () => {
     setError(null);
-    setSuccessMessage(null);
     try {
       setContactActionState("binding");
       const channel = contactChannel === "email" ? 1 : contactChannel === "sms" ? 2 : 3;
@@ -358,12 +357,12 @@ export default function SettingsPage() {
         const rows = await api.getNotificationPrefs();
         setPrefs(mapPrefs(rows));
       }
-      setSuccessMessage(contactChannel === "email" ? "邮箱认证成功，账号已升级。" : "联系方式绑定成功。");
+      showToast(contactChannel === "email" ? "邮箱认证成功" : "绑定成功");
       setPendingContactState((current) => ({ ...current, [contactChannel]: false }));
       setContactExpiresIn((current) => ({ ...current, [contactChannel]: 0 }));
       setContactCode("");
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "绑定联系方式失败");
+      showToast(apiError instanceof ApiError ? apiError.message : "绑定联系方式失败", "error");
     } finally {
       setContactActionState("idle");
     }
@@ -378,10 +377,10 @@ export default function SettingsPage() {
         avatar_type: payload.avatar_type,
         avatar_uri: payload.avatar_uri,
       });
-      setSuccessMessage("头像已更新。");
+      showToast("头像已更新");
       setAvatarDialogOpen(false);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "头像更新失败");
+      showToast(apiError instanceof ApiError ? apiError.message : "头像更新失败", "error");
     } finally {
       setAvatarSaving(false);
     }
@@ -404,13 +403,13 @@ export default function SettingsPage() {
         avatar_type: payload.avatar_type,
         avatar_uri: payload.avatar_uri,
       });
-      setSuccessMessage("自定义头像已更新。");
+      showToast("头像上传成功");
       setAvatarDialogOpen(false);
     } catch (uploadError) {
       if (uploadError instanceof AvatarUploadError || uploadError instanceof ApiError) {
-        setError(uploadError.message);
+        showToast(uploadError.message, "error");
       } else {
-        setError("头像上传失败");
+        showToast("头像上传失败", "error");
       }
     } finally {
       setAvatarSaving(false);
@@ -419,12 +418,11 @@ export default function SettingsPage() {
 
   const saveWelcomeMessage = async () => {
     setError(null);
-    setSuccessMessage(null);
     try {
       setWelcomeSaving(true);
       const payload = await api.updateWelcomeMessage(welcomeMessage.trim());
       setWelcomeMessage(payload.welcome_message ?? "");
-      setSuccessMessage("欢迎语已更新。");
+      showToast("欢迎语已更新");
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : "欢迎语保存失败");
     } finally {
@@ -453,8 +451,6 @@ export default function SettingsPage() {
           </Link>
           <HeaderSyncIndicator syncing={syncing} />
         </div>
-
-        {successMessage ? <div className="inline-note success-note">{successMessage}</div> : null}
 
         {tab === "account" ? (
           <section className="list-section">

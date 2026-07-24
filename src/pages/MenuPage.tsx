@@ -10,7 +10,6 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { GestureDecoySetupPanel, GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
-import { RequestStatusModal } from "../components/RequestStatusModal";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -192,13 +191,6 @@ export default function MenuPage() {
   const [friendInviteLoading, setFriendInviteLoading] = useState(false);
   const [friendInviteExpire, setFriendInviteExpire] = useState<number | null>(null);
   const [friendInviteMode, setFriendInviteMode] = useState<"limited" | "permanent">("limited");
-  const [statusModal, setStatusModal] = useState<{
-    open: boolean;
-    phase: "loading" | "success" | "error";
-    loadingLabel: string;
-    successLabel: string;
-    errorLabel: string;
-  } | null>(null);
   const authVerifyRef = useRef<HTMLDivElement | null>(null);
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -581,13 +573,6 @@ export default function MenuPage() {
 
   const sendAuthCode = async () => {
     if (!authSheetChannel) return;
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: "正在发送验证码",
-      successLabel: "验证码发送成功",
-      errorLabel: "发送失败",
-    });
     try {
       setAuthActionState("sending");
       const normalizedTarget = normalizeContactTarget(authSheetChannel, authTarget);
@@ -596,28 +581,13 @@ export default function MenuPage() {
       setAuthPending(true);
       setAuthCooldown(60);
       setAuthExpiresIn(payload.expires_in);
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "success",
-            }
-          : null
-      );
+      showToast("验证码已发送");
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
         setSecurityDrawerOpen(true);
       }
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "发送验证码失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "发送验证码失败", "error");
     } finally {
       setAuthActionState("idle");
     }
@@ -625,13 +595,6 @@ export default function MenuPage() {
 
   const bindAuthChannel = async () => {
     if (!authSheetChannel) return;
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: authSheetChannel === "email" ? "正在确认邮箱认证" : "正在确认绑定",
-      successLabel: authSheetChannel === "email" ? "邮箱认证成功" : "绑定成功",
-      errorLabel: authSheetChannel === "email" ? "邮箱认证失败" : "绑定失败",
-    });
     try {
       setAuthActionState("binding");
       const normalizedTarget = normalizeContactTarget(authSheetChannel, authTarget);
@@ -658,28 +621,16 @@ export default function MenuPage() {
       });
       const prefRows = await api.getNotificationPrefs();
       setPrefs(mapPrefs(prefRows));
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "success",
-            }
-          : null
-      );
       closeAuthSheet();
+      showToast(authSheetChannel === "email" ? "邮箱认证成功" : "绑定成功");
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
         setSecurityDrawerOpen(true);
       }
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : authSheetChannel === "email" ? "邮箱认证失败" : "绑定失败",
-            }
-          : null
+      showToast(
+        apiError instanceof ApiError ? apiError.message : authSheetChannel === "email" ? "邮箱认证失败" : "绑定失败",
+        "error"
       );
     } finally {
       setAuthActionState("idle");
@@ -688,14 +639,6 @@ export default function MenuPage() {
 
   const savePassword = async () => {
     if (!passwordNext.trim()) return;
-
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: hasPassword ? "正在更新密码" : "正在设置密码",
-      successLabel: hasPassword ? "密码更新成功" : "密码设置成功",
-      errorLabel: hasPassword ? "密码更新失败" : "密码设置失败",
-    });
 
     try {
       setPasswordSaving(true);
@@ -710,18 +653,10 @@ export default function MenuPage() {
       setPasswordCurrent("");
       setPasswordNext("");
       setPasswordSheetOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
       setSecurityDrawerOpen(false);
+      showToast(hasPassword ? "密码已更新" : "密码已设置");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : hasPassword ? "密码更新失败" : "密码设置失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : hasPassword ? "密码更新失败" : "密码设置失败", "error");
     } finally {
       setPasswordSaving(false);
     }
@@ -733,13 +668,6 @@ export default function MenuPage() {
   };
 
   const savePresetAvatar = async (presetId: number) => {
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: "正在更新头像",
-      successLabel: "头像更新成功",
-      errorLabel: "头像更新失败",
-    });
     try {
       setAvatarSaving(true);
       const payload = await api.setPresetAvatar(presetId);
@@ -749,17 +677,9 @@ export default function MenuPage() {
       });
       setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri } : current));
       setAvatarDialogOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("头像已更新");
     } catch (apiError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel: apiError instanceof ApiError ? apiError.message : "头像更新失败",
-            }
-          : null
-      );
+      showToast(apiError instanceof ApiError ? apiError.message : "头像更新失败", "error");
     } finally {
       setAvatarSaving(false);
     }
@@ -778,14 +698,6 @@ export default function MenuPage() {
     event.target.value = "";
     if (!file) return;
 
-    setStatusModal({
-      open: true,
-      phase: "loading",
-      loadingLabel: "正在上传头像",
-      successLabel: "头像上传成功",
-      errorLabel: "头像上传失败",
-    });
-
     try {
       setAvatarSaving(true);
       const payload = await uploadCustomAvatar(file);
@@ -795,19 +707,13 @@ export default function MenuPage() {
       });
       setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri } : current));
       setAvatarDialogOpen(false);
-      setStatusModal((current) => (current ? { ...current, phase: "success" } : null));
+      showToast("头像上传成功");
     } catch (uploadError) {
-      setStatusModal((current) =>
-        current
-          ? {
-              ...current,
-              phase: "error",
-              errorLabel:
-                uploadError instanceof AvatarUploadError || uploadError instanceof ApiError
-                  ? uploadError.message
-                  : "头像上传失败",
-            }
-          : null
+      showToast(
+        uploadError instanceof AvatarUploadError || uploadError instanceof ApiError
+          ? uploadError.message
+          : "头像上传失败",
+        "error"
       );
     } finally {
       setAvatarSaving(false);
@@ -1768,14 +1674,6 @@ export default function MenuPage() {
           </section>
         </div>
       ) : null}
-      <RequestStatusModal
-        errorLabel={statusModal?.errorLabel}
-        loadingLabel={statusModal?.loadingLabel}
-        onAutoClose={() => setStatusModal(null)}
-        open={Boolean(statusModal?.open)}
-        phase={statusModal?.phase ?? "loading"}
-        successLabel={statusModal?.successLabel}
-      />
       <ConfirmDialog
         open={passwordReminderOpen}
         title="请先设置密码"
