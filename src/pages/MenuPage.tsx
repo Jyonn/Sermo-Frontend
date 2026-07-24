@@ -1480,91 +1480,105 @@ export default function MenuPage() {
         title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}设置` : "通知设置"}
       >
         {prefDrawerChannel && activePref ? (
-          <div className="menu-pref-list">
-            <div className="menu-pref-row">
-              <div className="row-main">
-                <strong>启用提醒</strong>
-                {prefDrawerChannel === "sms" ? <div className="row-subtle">暂不支持</div> : null}
+          <div className="menu-pref-settings-stack">
+            <div className="menu-pref-list">
+              <div className="menu-pref-row">
+                <div className="row-main">
+                  <strong>启用提醒</strong>
+                  {prefDrawerChannel === "sms" ? <div className="row-subtle">暂不支持</div> : null}
+                </div>
+                <button
+                  aria-label={`toggle-${prefDrawerChannel}`}
+                  className={`switch ${prefDrawerChannel !== "sms" && activePref.enabled ? "active" : ""}`}
+                  disabled={prefSaving || prefDrawerChannel === "sms"}
+                  onClick={() => void savePreferencePatch(prefDrawerChannel, { enabled: activePref.enabled ? 0 : 1 })}
+                  type="button"
+                />
               </div>
               <button
-                aria-label={`toggle-${prefDrawerChannel}`}
-                className={`switch ${prefDrawerChannel !== "sms" && activePref.enabled ? "active" : ""}`}
-                disabled={prefSaving || prefDrawerChannel === "sms"}
-                onClick={() => void savePreferencePatch(prefDrawerChannel, { enabled: activePref.enabled ? 0 : 1 })}
+                className="menu-pref-row menu-pref-row-button"
+                disabled={!activePref.enabled}
+                onClick={() => openThresholdEditor(prefDrawerChannel)}
                 type="button"
-              />
-            </div>
-            <button className="menu-pref-row menu-pref-row-button" onClick={() => openThresholdEditor(prefDrawerChannel)} type="button">
-              <div className="row-main">
-                <strong>离线阈值</strong>
-              </div>
-              <div className="menu-pref-row-value">
-                <span>{activePref.threshold} 分钟</span>
-                <span className="material-symbols-outlined">chevron_right</span>
-              </div>
-            </button>
-            {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
-              <>
-                <div className="menu-pref-row">
-                  <div className="row-main">
-                    <strong>隐藏消息内容</strong>
-                    <div className="row-subtle">仅提示新消息</div>
-                  </div>
-                  <button
-                    aria-label={`toggle-hide-content-${prefDrawerChannel}`}
-                    className={`switch ${activePref.hideMessageContent ? "active" : ""}`}
-                    disabled={prefSaving}
-                    onClick={() => void savePreferencePatch(prefDrawerChannel, { hide_message_content: activePref.hideMessageContent ? 0 : 1 })}
-                    type="button"
-                  />
+              >
+                <div className="row-main">
+                  <strong>离线阈值</strong>
                 </div>
-                {activePref.hideMessageContent ? (
-                  <button className="menu-pref-row menu-pref-row-button" onClick={() => setPrefCustomDrawerOpen(true)} type="button">
+                <div className="menu-pref-row-value">
+                  <span>{activePref.threshold} 分钟</span>
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </div>
+              </button>
+              {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
+                <>
+                  <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                     <div className="row-main">
-                      <strong>自定义消息提示</strong>
-                      <div className="row-subtle">按消息类型设置</div>
+                      <strong>隐藏消息内容</strong>
+                      <div className="row-subtle">仅提示新消息</div>
                     </div>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                ) : null}
-              </>
-            ) : null}
-            <div className="menu-pref-row">
-              <div className="row-main">
-                <strong>上次解绑</strong>
-                {contactUnbindAvailableAt(prefDrawerChannel) &&
-                contactUnbindAvailableAt(prefDrawerChannel)! > Date.now() ? (
-                  <div className="row-subtle">
-                    {formatContactDate(contactUnbindAvailableAt(prefDrawerChannel)! / 1000)} 后可再次解绑
+                    <button
+                      aria-label={`toggle-hide-content-${prefDrawerChannel}`}
+                      className={`switch ${activePref.hideMessageContent ? "active" : ""}`}
+                      disabled={prefSaving || !activePref.enabled}
+                      onClick={() => void savePreferencePatch(prefDrawerChannel, { hide_message_content: activePref.hideMessageContent ? 0 : 1 })}
+                      type="button"
+                    />
                   </div>
-                ) : null}
-              </div>
-              <div className="menu-pref-row-value">{formatContactDate(contactUnboundAt(prefDrawerChannel))}</div>
+                  {activePref.hideMessageContent ? (
+                    <button
+                      className="menu-pref-row menu-pref-row-button"
+                      disabled={!activePref.enabled}
+                      onClick={() => setPrefCustomDrawerOpen(true)}
+                      type="button"
+                    >
+                      <div className="row-main">
+                        <strong>自定义消息提示</strong>
+                        <div className="row-subtle">按消息类型设置</div>
+                      </div>
+                      <span className="material-symbols-outlined">chevron_right</span>
+                    </button>
+                  ) : null}
+                </>
+              ) : null}
             </div>
-            <button
-              className="menu-pref-row menu-pref-row-button menu-contact-unbind"
-              disabled={
-                prefSaving ||
-                Boolean(
-                  contactUnbindAvailableAt(prefDrawerChannel) &&
-                  contactUnbindAvailableAt(prefDrawerChannel)! > Date.now()
-                )
-              }
-              onClick={() => openUnbindConfirm(prefDrawerChannel)}
-              type="button"
-            >
-              <div className="row-main">
-                <strong>解除绑定</strong>
-                <div className="row-subtle">
-                  {prefDrawerChannel === "bark"
-                    ? "随时可以重新绑定"
-                    : prefDrawerChannel === "email"
-                      ? "每 30 天仅可解绑一次"
-                      : "每 365 天仅可解绑一次"}
+            <div className="menu-pref-list">
+              <div className="menu-pref-row">
+                <div className="row-main">
+                  <strong>上次解绑</strong>
+                  {contactUnbindAvailableAt(prefDrawerChannel) &&
+                  contactUnbindAvailableAt(prefDrawerChannel)! > Date.now() ? (
+                    <div className="row-subtle">
+                      {formatContactDate(contactUnbindAvailableAt(prefDrawerChannel)! / 1000)} 后可再次解绑
+                    </div>
+                  ) : null}
                 </div>
+                <div className="menu-pref-row-value">{formatContactDate(contactUnboundAt(prefDrawerChannel))}</div>
               </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
+              <button
+                className="menu-pref-row menu-pref-row-button menu-contact-unbind"
+                disabled={
+                  prefSaving ||
+                  Boolean(
+                    contactUnbindAvailableAt(prefDrawerChannel) &&
+                    contactUnbindAvailableAt(prefDrawerChannel)! > Date.now()
+                  )
+                }
+                onClick={() => openUnbindConfirm(prefDrawerChannel)}
+                type="button"
+              >
+                <div className="row-main">
+                  <strong>解除绑定</strong>
+                  <div className="row-subtle">
+                    {prefDrawerChannel === "bark"
+                      ? "随时可以重新绑定"
+                      : prefDrawerChannel === "email"
+                        ? "每 30 天仅可解绑一次"
+                        : "每 365 天仅可解绑一次"}
+                  </div>
+                </div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
           </div>
         ) : null}
       </SideDrawer>
@@ -1578,12 +1592,12 @@ export default function MenuPage() {
           <div className="menu-pref-custom-drawer">
             {prefDrawerChannel === "bark" ? (
               <div className="menu-pref-list">
-                <div className="menu-pref-row">
+                <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                   <div className="row-main"><strong>点击打开聊天</strong><div className="row-subtle">通知携带聊天链接</div></div>
                   <button
                     aria-label="toggle-bark-open-chat"
                     className={`switch ${activePref.openChatOnTap ? "active" : ""}`}
-                    disabled={prefSaving}
+                    disabled={prefSaving || !activePref.enabled}
                     onClick={() => void savePreferencePatch("bark", { open_chat_on_tap: activePref.openChatOnTap ? 0 : 1 })}
                     type="button"
                   />
