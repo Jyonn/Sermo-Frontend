@@ -62,7 +62,7 @@ export default function OfficialLoginPage() {
     <AppChrome hideMobileNav hidePageTitle title="官方账号登录">
       <section className="auth-shell">
         <div className="auth-card is-space-state">
-          {state === "loading" ? <FeedbackState title="正在登录官方账号" description="请稍等片刻，我们正在为这个空间建立官方账号会话。" tone="loading" /> : null}
+          {state === "loading" ? <FeedbackState title="正在登录官方账号" description="" tone="loading" /> : null}
           {state === "error" ? <FeedbackState title="官方账号登录失败" description="这个桥接链接可能已经过期。请回到空间后台重新发起登录。" tone="error" /> : null}
         </div>
       </section>

@@ -152,7 +152,6 @@ export default function SpaceUsersPage() {
       <BottomSheet
         open={Boolean(sheetUser)}
         title={sheetUser?.name ?? "成员"}
-        description="选择一个动作"
         onClose={() => setSheetUser(null)}
       >
         {sheetUser ? (

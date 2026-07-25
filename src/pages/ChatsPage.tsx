@@ -4191,7 +4191,6 @@ export default function ChatsPage() {
           {selectedChat ? (
             <>
               <div className="panel-header" style={{ padding: 0, borderBottom: "1px solid rgba(232,235,242,.9)" }}>
-                <p className="eyebrow">Details</p>
                 <h3 className="panel-title">{selectedChat.type === "direct" ? "会话资料" : "群聊资料"}</h3>
                 <p className="card-subtitle">{selectedChat.detail.summary}</p>
               </div>
@@ -4340,7 +4339,6 @@ export default function ChatsPage() {
       </BottomSheet>
 
       <SideDrawer
-        description={selectedChat ? (selectedChat.type === "group" ? `${selectedChat.members} 位成员` : selectedChat.subtitle) : ""}
         open={detailsSheetOpen}
         title="聊天详情"
         onClose={() => setDetailsSheetOpen(false)}
@@ -4395,7 +4393,6 @@ export default function ChatsPage() {
                 <div className="chat-detail-setting-row">
                   <div className="row-main">
                     <strong>置顶该聊天</strong>
-                    <div className="row-subtle">固定在聊天列表最前面</div>
                   </div>
                   <button aria-label="切换置顶" className={`switch ${selectedChat.pinned ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("pin", !selectedChat.pinned)} type="button" />
                 </div>
@@ -4403,7 +4400,6 @@ export default function ChatsPage() {
                   <div className="chat-detail-setting-row">
                     <div className="row-main">
                       <strong>上线提醒</strong>
-                      <div className="row-subtle">对方重新上线时提醒我</div>
                     </div>
                     <button aria-label="切换上线提醒" className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} type="button" />
                   </div>
@@ -4437,7 +4433,6 @@ export default function ChatsPage() {
                 >
                   <div className="row-main">
                     <strong>{selectedChat.type === "group" ? (selectedChat.isOwner ? "解散群聊" : "退出群聊") : "删除好友"}</strong>
-                    <div className="row-subtle">{selectedChat.type === "group" ? "离开当前聊天" : "解除当前好友关系"}</div>
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
                 </button>
@@ -4447,7 +4442,6 @@ export default function ChatsPage() {
         ) : null}
       </SideDrawer>
       <SideDrawer
-        description="资料与共同关系"
         open={profileDrawerUserId !== null}
         title="用户详情"
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}

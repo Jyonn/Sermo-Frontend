@@ -260,7 +260,6 @@ export default function FriendsPage() {
       <BottomSheet
         open={Boolean(sheetFriend || sheetRequest)}
         title={sheetFriend?.name ?? (sheetRequest ? requestName(sheetRequest, tab === "accepted" ? "incoming" : tab) : "更多")}
-        description="选择一个动作"
         onClose={() => {
           setSheetFriend(null);
           setSheetRequest(null);

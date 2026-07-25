@@ -5231,10 +5231,6 @@ img {
   gap: 4px;
 }
 
-.drawer-topbar .eyebrow {
-  margin: 0;
-}
-
 .drawer-title {
   margin: 0;
   font-size: 0.98rem;
@@ -5247,13 +5243,6 @@ img {
   align-items: center;
   gap: 8px;
   min-width: 0;
-}
-
-.drawer-description {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  line-height: 1.2;
 }
 
 .drawer-topbar-action {
@@ -7066,6 +7055,10 @@ img {
   border-bottom: 1px solid rgba(232, 235, 242, 0.9);
 }
 
+.simple-row:not(:has(.row-subtle)) {
+  min-height: 58px;
+}
+
 .simple-row:last-child {
   border-bottom: 0;
 }
@@ -7591,6 +7584,11 @@ img {
   min-height: 68px;
   padding: 12px 14px;
   border-bottom: 1px solid rgba(232, 235, 242, 0.9);
+}
+
+.menu-pref-row:not(:has(.row-subtle)),
+.chat-detail-setting-row:not(:has(.row-subtle)) {
+  min-height: 58px;
 }
 
 .menu-pref-row:last-child {

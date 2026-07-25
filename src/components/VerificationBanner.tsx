@@ -47,7 +47,7 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
       <div className="verification-banner">
         <div className="verification-banner-copy">
           <strong>认证邮箱，解锁更多功能</strong>
-          <span>完成邮箱认证后即可发送好友申请、创建群聊并邀请成员。</span>
+          <span>用于好友申请与群聊</span>
         </div>
         <button className="ghost-button verification-banner-action" onClick={handleAction} type="button">
           去认证

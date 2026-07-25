@@ -521,7 +521,6 @@ export default function SquarePage() {
       <BottomSheet
         open={Boolean(selectedUser)}
         title={selectedUser?.name ?? "成员"}
-        description="在线成员"
         onClose={() => setSelectedUser(null)}
       >
         {selectedUser ? (

@@ -54,7 +54,7 @@ export default function AccountSwitchPage() {
         <div className="auth-card is-space-state">
           <FeedbackState
             title={error ? "无法切换账号" : "正在切换账号"}
-            description={error || "正在建立新的安全会话。"}
+            description={error || ""}
             tone={error ? "error" : "loading"}
           />
         </div>

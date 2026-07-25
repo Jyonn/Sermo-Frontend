@@ -1126,7 +1126,7 @@ export default function MenuPage() {
           >
             <div className="verification-banner-copy">
               <strong>设置密码，保障你的隐私</strong>
-              <span>目前您的账户存在风险，他人可以根据您的名称登录查看信息。</span>
+              <span>避免他人仅凭昵称登录</span>
             </div>
             <span className="ghost-button verification-banner-action">去设置</span>
           </button>
@@ -1144,7 +1144,7 @@ export default function MenuPage() {
                 <BarkGuideIcon compact />
                 <span>绑定Bark，实时联络</span>
               </strong>
-              <span>下载Bark并绑定后，好友的消息即时推送，点击即刻回复。</span>
+              <span>即时接收好友消息</span>
             </div>
             <span className="ghost-button verification-banner-action">去绑定</span>
           </button>
@@ -1155,14 +1155,12 @@ export default function MenuPage() {
             <button className="simple-row menu-link-row" onClick={() => setBasicDrawerOpen(true)} type="button">
               <div className="row-main">
                 <strong>基础信息</strong>
-                <div className="row-subtle">昵称、头像、欢迎语</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="simple-row menu-link-row" onClick={() => setSecurityDrawerOpen(true)} type="button">
               <div className="row-main">
                 <strong>账号与安全</strong>
-                <div className="row-subtle">密码与登录安全</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1175,7 +1173,6 @@ export default function MenuPage() {
               >
                 <div className="row-main">
                   <strong>控制面板</strong>
-                  <div className="row-subtle">管理空间与成员</div>
                 </div>
                 <span className={`material-symbols-outlined${adminDashboardOpening ? " is-spinning" : ""}`}>
                   {adminDashboardOpening ? "progress_activity" : "chevron_right"}
@@ -1195,7 +1192,6 @@ export default function MenuPage() {
                     <UserAvatar className="menu-install-avatar" name={space?.official_user?.name ?? space?.name ?? "空间"} uri={space?.official_user?.avatar_uri} />
                     <span>到桌面</span>
                   </strong>
-                  <div className="row-subtle">快捷打开并接收通知</div>
                 </div>
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
@@ -1203,7 +1199,6 @@ export default function MenuPage() {
             <button className="simple-row menu-link-row" onClick={openChannelsEntry} type="button">
               <div className="row-main">
                 <strong>通知和提醒</strong>
-                <div className="row-subtle">{isAppleEnvironment ? "网页、邮件、短信、即时提醒" : "网页、邮件、短信提醒"}</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1215,7 +1210,6 @@ export default function MenuPage() {
             <button className="simple-row menu-link-row danger-row menu-danger-row" onClick={() => setLeaveConfirmOpen(true)} type="button">
               <div className="row-main">
                 <strong>退出</strong>
-                <div className="row-subtle">离开当前空间</div>
               </div>
               <span className="material-symbols-outlined">logout</span>
             </button>
@@ -1230,7 +1224,7 @@ export default function MenuPage() {
         spaceName={space?.name ?? "当前空间"}
       />
 
-      <SideDrawer description="昵称、头像与欢迎语" open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title="基础信息">
+      <SideDrawer open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title="基础信息">
         <div className="detail-list">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setAvatarDialogOpen(true)} type="button">
@@ -1261,7 +1255,6 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description="登录安全与密码管理"
         open={securityDrawerOpen}
         onClose={() => {
           setSecurityDrawerOpen(false);
@@ -1280,7 +1273,7 @@ export default function MenuPage() {
             >
               <div className="row-main">
                 <strong>{hasPassword ? "更换密码" : "设置密码"}</strong>
-                <div className="row-subtle">{hasPassword ? "更新当前登录密码。" : "设置后，别人不能只凭昵称登录你的账号。"}</div>
+                {!hasPassword ? <div className="row-subtle">防止他人仅凭昵称登录</div> : null}
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1391,7 +1384,7 @@ export default function MenuPage() {
         </div>
       </BottomSheet>
 
-      <SideDrawer description="管理网页、邮件、短信和即时提醒" open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知和提醒">
+      <SideDrawer open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知和提醒">
         <div className="detail-list">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
@@ -1435,7 +1428,6 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description="只影响当前浏览器的新消息提醒。"
         open={webReminderDrawerOpen}
         onClose={() => setWebReminderDrawerOpen(false)}
         title="网页提醒"
@@ -1458,7 +1450,6 @@ export default function MenuPage() {
             <div className="menu-pref-row">
               <div className="row-main">
                 <strong>新消息提示音</strong>
-                <div className="row-subtle">收到新消息时轻响</div>
               </div>
               <button
                 aria-label="toggle-web-sound-reminder"
@@ -1470,7 +1461,6 @@ export default function MenuPage() {
             <div className="menu-pref-row">
               <div className="row-main">
                 <strong>标题提醒</strong>
-                <div className="row-subtle">标题显示未读数</div>
               </div>
               <button
                 aria-label="toggle-web-title-reminder"
@@ -1538,7 +1528,6 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}通知偏好` : ""}
         open={Boolean(prefDrawerChannel)}
         onClose={closePrefDrawers}
         title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}设置` : "通知设置"}
@@ -1578,7 +1567,6 @@ export default function MenuPage() {
                   <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                     <div className="row-main">
                       <strong>隐藏消息内容</strong>
-                      <div className="row-subtle">仅提示新消息</div>
                     </div>
                     <button
                       aria-label={`toggle-hide-content-${prefDrawerChannel}`}
@@ -1597,7 +1585,6 @@ export default function MenuPage() {
                     >
                       <div className="row-main">
                         <strong>自定义消息提示</strong>
-                        <div className="row-subtle">按消息类型设置</div>
                       </div>
                       <span className="material-symbols-outlined">chevron_right</span>
                     </button>
@@ -1647,7 +1634,6 @@ export default function MenuPage() {
         ) : null}
       </SideDrawer>
       <SideDrawer
-        description={prefDrawerChannel === "email" ? "邮件正文" : "标题与内容"}
         open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePref?.hideMessageContent)}
         onClose={() => setPrefCustomDrawerOpen(false)}
         title="自定义消息提示"
@@ -1657,7 +1643,7 @@ export default function MenuPage() {
             {prefDrawerChannel === "bark" ? (
               <div className="menu-pref-list">
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>点击打开聊天</strong><div className="row-subtle">通知携带聊天链接</div></div>
+                  <div className="row-main"><strong>点击打开聊天</strong></div>
                   <button
                     aria-label="toggle-bark-open-chat"
                     className={`switch ${activePref.openChatOnTap ? "active" : ""}`}
@@ -1667,7 +1653,7 @@ export default function MenuPage() {
                   />
                 </div>
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>使用空间 Logo</strong><div className="row-subtle">推送显示空间头像</div></div>
+                  <div className="row-main"><strong>使用空间 Logo</strong></div>
                   <button
                     aria-label="toggle-bark-space-icon"
                     className={`switch ${activePref.barkIconMode === 1 ? "active" : ""}`}
@@ -1677,7 +1663,7 @@ export default function MenuPage() {
                   />
                 </div>
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>使用用户头像</strong><div className="row-subtle">推送显示消息发送者</div></div>
+                  <div className="row-main"><strong>使用用户头像</strong></div>
                   <button
                     aria-label="toggle-bark-user-icon"
                     className={`switch ${activePref.barkIconMode === 2 ? "active" : ""}`}
@@ -1715,7 +1701,6 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
-        description="消息直接送达 iPhone"
         open={barkGuideOpen}
         onClose={closeBarkGuide}
         title="绑定 Bark"
@@ -1805,7 +1790,6 @@ export default function MenuPage() {
         className="contact-bottom-sheet"
         open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
         title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "sms" ? "绑定手机" : authSheetChannel === "bark" ? "绑定即时提醒" : "绑定联系方式"}
-        description={authSheetChannel === "bark" ? "发送验证码后完成绑定" : undefined}
         onClose={closeAuthSheet}
       >
         {authSheetChannel ? (
@@ -1867,7 +1851,6 @@ export default function MenuPage() {
         className="contact-bottom-sheet"
         open={unbindVerifyOpen}
         title={`验证当前${unbindChannel ? contactLabel(unbindChannel) : "联系方式"}`}
-        description="验证通过后才会解除绑定"
         onClose={() => {
           if (unbindState !== "idle") return;
           setUnbindVerifyOpen(false);
@@ -1906,7 +1889,6 @@ export default function MenuPage() {
         className="contact-bottom-sheet"
         open={passwordSheetOpen}
         title={hasPassword ? "更换密码" : "设置密码"}
-        description={hasPassword ? "输入当前密码后设置新密码。" : "设置后，别人不能只凭昵称登录你的账号。"}
         onClose={() => {
           if (passwordSaving) return;
           setPasswordSheetOpen(false);

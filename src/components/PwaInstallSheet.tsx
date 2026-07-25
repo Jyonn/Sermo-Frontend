@@ -34,7 +34,6 @@ export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetPro
   return (
     <BottomSheet
       className="pwa-install-sheet"
-      description="像 App 一样打开，消息触手可及。"
       onClose={onClose}
       open={open}
       title={`安装 ${appName}`}

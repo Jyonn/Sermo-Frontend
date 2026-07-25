@@ -145,7 +145,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
 
   const content = (
     <>
-      {previewState === "loading" ? <FeedbackState title="正在读取好友邀请" description="正在确认邀请信息。" tone="loading" /> : null}
+      {previewState === "loading" ? <FeedbackState title="正在读取好友邀请" description="" tone="loading" /> : null}
       {readyCard}
       {previewState === "error" ? <FeedbackState title="好友邀请无法使用" description={previewError ?? "这个链接已经失效。"} tone="error" /> : null}
       <AsyncErrorDialog message={dialogError ?? ""} onClose={() => setDialogError(null)} open={Boolean(dialogError)} />

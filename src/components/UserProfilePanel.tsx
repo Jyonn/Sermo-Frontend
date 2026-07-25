@@ -304,7 +304,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         </div>
       </BottomSheet>
 
-      <SideDrawer description={`${groupChats.length} 个共同群聊`} open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title="共同群聊">
+      <SideDrawer open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title="共同群聊">
         <div className="user-profile-groups user-profile-all-groups">{groupChats.map(renderGroupRow)}</div>
       </SideDrawer>
 

@@ -404,7 +404,6 @@ export default function NotificationsPage() {
       <SideDrawer
         open={groupSheetOpen}
         title="群聊"
-        description="查看你已加入的群聊。"
         onClose={() => setGroupSheetOpen(false)}
       >
         <section className="list-section">
@@ -440,7 +439,6 @@ export default function NotificationsPage() {
       </SideDrawer>
 
       <SideDrawer
-        description="资料与共同关系"
         open={profileDrawerUserId !== null}
         title="用户详情"
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
