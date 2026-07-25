@@ -4374,7 +4374,9 @@ export default function ChatsPage() {
                 {selectedChat.type === "group" && selectedChat.isOwner ? (
                   <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberRemover} type="button">
                     <span className="chat-detail-member-avatar chat-detail-member-avatar-add chat-detail-member-avatar-remove">
-                      <span className="material-symbols-outlined">remove</span>
+                      <svg aria-hidden="true" className="chat-detail-member-remove-icon" fill="none" viewBox="0 0 24 24">
+                        <path d="M6.5 12h11" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2" />
+                      </svg>
                     </span>
                     <span className="chat-detail-member-name">移除</span>
                   </button>

@@ -5379,6 +5379,11 @@ img {
   border-color: rgba(220, 159, 149, 0.82);
 }
 
+.chat-detail-member-remove-icon {
+  width: 22px;
+  height: 22px;
+}
+
 .chat-detail-member-add {
   padding: 0;
 }
