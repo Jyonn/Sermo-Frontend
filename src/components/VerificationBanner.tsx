@@ -14,17 +14,7 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
   const location = useLocation();
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
 
-  if (verified) {
-    if (mode !== "menu") return null;
-    return (
-      <div className="verification-banner is-verified">
-        <div className="verification-banner-copy">
-          <strong>邮箱已认证</strong>
-          <span>你已解锁发送好友申请、创建群聊等功能。</span>
-        </div>
-      </div>
-    );
-  }
+  if (verified) return null;
 
   const handleAction = () => {
     if (!hasPassword) {
@@ -44,15 +34,13 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
 
   return (
     <>
-      <div className="verification-banner">
+      <button className={`verification-banner${mode === "menu" ? " is-menu" : ""}`} onClick={handleAction} type="button">
         <div className="verification-banner-copy">
-          <strong>认证邮箱，解锁更多功能</strong>
-          <span>用于好友申请与群聊</span>
+          <strong>认证邮箱</strong>
+          <span>解锁好友与群聊</span>
         </div>
-        <button className="ghost-button verification-banner-action" onClick={handleAction} type="button">
-          去认证
-        </button>
-      </div>
+        <span className="material-symbols-outlined verification-banner-action">arrow_forward</span>
+      </button>
       <ConfirmDialog
         open={passwordReminderOpen}
         title="请先设置密码"

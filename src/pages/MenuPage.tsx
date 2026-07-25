@@ -23,7 +23,6 @@ import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
-import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
@@ -227,7 +226,6 @@ export default function MenuPage() {
     [isAppleEnvironment]
   );
   const barkBound = channelVerified(me, "bark");
-  const shouldShowBarkGuideBanner = isAppleEnvironment && !barkBound;
   const standalonePwa = isStandalonePwa();
   const webReminderSummary = [
     webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
@@ -1023,6 +1021,22 @@ export default function MenuPage() {
     setChannelsDrawerOpen(true);
   };
 
+  const openShowcaseBadge = (kind: "password" | NotificationChannel) => {
+    if (kind === "password") {
+      setSecurityDrawerOpen(true);
+      return;
+    }
+    if (channelVerified(me, kind)) {
+      openPrefDrawer(kind);
+      return;
+    }
+    if (kind === "bark") {
+      openBarkGuide();
+      return;
+    }
+    openAuthSheet(kind);
+  };
+
   const copyFriendInviteLink = async () => {
     if (!friendInviteLink) return;
     try {
@@ -1118,37 +1132,48 @@ export default function MenuPage() {
             <QrCodeIcon />
           </button>
         </div>
-        {!hasPassword ? (
-          <button
-            className="verification-banner password-setup-banner"
-            onClick={() => setSecurityDrawerOpen(true)}
-            type="button"
-          >
-            <div className="verification-banner-copy">
-              <strong>设置密码，保障你的隐私</strong>
-              <span>避免他人仅凭昵称登录</span>
+        <section className={`growth-showcase is-level-${me?.growth?.level ?? 1}`}>
+          <div className="growth-showcase-head">
+            <div className="growth-level-seal">
+              <span>Lv.{me?.growth?.level ?? 1}</span>
+              <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? "初来"}</strong>
             </div>
-            <span className="ghost-button verification-banner-action">去设置</span>
-          </button>
-        ) : null}
-        <VerificationBanner
-          mode="menu"
-          onAction={() => openAuthSheet("email")}
-          hasPassword={hasPassword}
-          verified={Boolean(session?.user?.verified)}
-        />
-        {shouldShowBarkGuideBanner ? (
-          <button className="verification-banner bark-setup-banner" onClick={openBarkGuide} type="button">
-            <div className="verification-banner-copy">
-              <strong className="bark-banner-title">
-                <BarkGuideIcon compact />
-                <span>绑定Bark，实时联络</span>
-              </strong>
-              <span>即时接收好友消息</span>
+            <div className="growth-progress-copy">
+              <div>
+                <strong>成长橱窗</strong>
+                <span>{me?.growth ? (me.growth.next_score ? `${me.growth.score} / ${me.growth.next_score}` : "已达最高等级") : "正在同步"}</span>
+              </div>
+              <div className="growth-progress-track" aria-hidden="true">
+                <i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} />
+              </div>
             </div>
-            <span className="ghost-button verification-banner-action">去绑定</span>
-          </button>
-        ) : null}
+          </div>
+          <div className={`growth-badge-shelf${isAppleEnvironment ? "" : " is-three"}`}>
+            <button className={`growth-badge ${hasPassword ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("password")} type="button">
+              <span className="growth-badge-mark">{hasPassword ? "✓" : "+"}</span>
+              <strong>密码</strong>
+            </button>
+            <button className={`growth-badge ${emailVerified ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("email")} type="button">
+              <span className="growth-badge-mark">{emailVerified ? "✓" : "+"}</span>
+              <strong>邮箱</strong>
+            </button>
+            <button className={`growth-badge ${phoneVerified ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("sms")} type="button">
+              <span className="growth-badge-mark">{phoneVerified ? "✓" : "+"}</span>
+              <strong>手机</strong>
+            </button>
+            {isAppleEnvironment ? (
+              <button className={`growth-badge ${barkBound ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("bark")} type="button">
+                <span className="growth-badge-mark">{barkBound ? "✓" : "+"}</span>
+                <strong>即时</strong>
+              </button>
+            ) : null}
+          </div>
+          {me?.growth?.privileges?.length ? (
+            <div className="growth-privileges">
+              {me.growth.privileges.map((privilege) => <span key={privilege}>{privilege}</span>)}
+            </div>
+          ) : null}
+        </section>
 
         <section className="list-section">
           <div className="simple-list">

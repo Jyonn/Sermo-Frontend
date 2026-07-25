@@ -103,6 +103,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
   const [settingsMemberLimit, setSettingsMemberLimit] = useState("");
+  const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(["初来", "同频", "热聊", "浪潮", "尽兴"]);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [officialLoginBusy, setOfficialLoginBusy] = useState(false);
   const [removeUser, setRemoveUser] = useState<AdminMemberDTO | null>(null);
@@ -169,6 +170,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsName(dashboard.space.name);
     setSettingsSquareEnabled(Boolean(dashboard.space.group_square_enabled));
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
+    setSettingsLevelNames(dashboard.space.level_names?.length === 5 ? dashboard.space.level_names : ["初来", "同频", "热聊", "浪潮", "尽兴"]);
   }, [dashboard?.space]);
 
   useEffect(() => {
@@ -220,6 +222,7 @@ export default function SpaceAdminDashboardPage() {
         name: settingsName.trim(),
         group_square_enabled: settingsSquareEnabled ? 1 : 0,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
+        level_names: settingsLevelNames.map((name) => name.trim()),
       });
       setCachedGroupSquareEnabled(payload.space_id, payload.group_square_enabled !== false);
       patchSpace(payload);
@@ -562,6 +565,7 @@ export default function SpaceAdminDashboardPage() {
                   <thead>
                     <tr>
                       <th>成员</th>
+                      <th>等级</th>
                       <th>已认证</th>
                       <th>邮件</th>
                       <th>短信</th>
@@ -581,6 +585,7 @@ export default function SpaceAdminDashboardPage() {
                             </div>
                           </div>
                         </td>
+                        <td><span className="admin-growth-level">Lv.{user.growth_level ?? 1} {user.growth_level_name ?? settingsLevelNames[(user.growth_level ?? 1) - 1]}</span></td>
                         <td><span className={`admin-verified-state ${user.verified ? "is-verified" : ""}`}>{user.verified ? "是" : "否"}</span></td>
                         <td>{notificationCell(user, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</td>
                         <td>{notificationCell(user, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</td>
@@ -641,6 +646,22 @@ export default function SpaceAdminDashboardPage() {
                       value={settingsMemberLimit}
                       onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))}
                     />
+                  </div>
+                  <div>
+                    <label className="field-label">空间等级</label>
+                    <div className="admin-level-name-grid">
+                      {settingsLevelNames.map((levelName, index) => (
+                        <label key={index}>
+                          <span>Lv.{index + 1}</span>
+                          <input
+                            className="input"
+                            maxLength={8}
+                            value={levelName}
+                            onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))}
+                          />
+                        </label>
+                      ))}
+                    </div>
                   </div>
                   <div className="admin-toggle-row">
                     <div className="row-main"><strong>空间广场</strong></div>

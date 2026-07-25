@@ -304,7 +304,7 @@ export const api = {
     });
   },
 
-  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; member_limit: number | null }) {
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; member_limit: number | null; level_names: string[] }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
       adminAuth: true,

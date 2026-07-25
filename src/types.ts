@@ -25,6 +25,8 @@ export interface UserDTO extends TinyUserDTO {
   verified: boolean;
   last_heartbeat: number;
   welcome_message?: string;
+  growth_level?: number;
+  growth_level_name?: string;
   is_deleted?: boolean;
   has_removal_residue?: boolean;
   responded_at?: number | null;
@@ -43,7 +45,17 @@ export interface SpaceDTO {
   official_user?: TinyUserDTO | null;
   group_square_enabled?: boolean;
   member_limit?: number | null;
+  level_names?: string[];
   created_at?: number;
+}
+
+export interface UserGrowthDTO {
+  score: number;
+  level: number;
+  name: string;
+  next_score: number | null;
+  progress: number;
+  privileges: string[];
 }
 
 export interface AccessPayload {
@@ -85,6 +97,7 @@ export interface UserMeDTO extends UserDTO {
   phone_unbound_at?: number | null;
   bark_unbound_at?: number | null;
   is_private_account: boolean;
+  growth?: UserGrowthDTO;
 }
 
 export interface SwitchAccountDTO {

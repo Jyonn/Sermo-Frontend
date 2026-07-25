@@ -155,7 +155,7 @@ function syncOrbsWithUsers(previous: OrbState[], users: UserDTO[], width: number
 
 function buildOrbSyncSignature(users: UserDTO[]) {
   return users
-    .map((user) => `${user.user_id}:${user.name}:${user.avatar_uri ?? ""}:${user.is_alive ? 1 : 0}`)
+    .map((user) => `${user.user_id}:${user.name}:${user.avatar_uri ?? ""}:${user.is_alive ? 1 : 0}:${user.growth_level ?? 1}:${user.growth_level_name ?? ""}`)
     .sort()
     .join("|");
 }
@@ -502,7 +502,7 @@ export default function SquarePage() {
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
-              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}`}
+              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 4 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 5 ? " is-max-level" : ""}`}
               onClick={(event) => {
                 event.stopPropagation();
                 setSelectedUser((current) => current?.user_id === orb.user.user_id ? null : orb.user);
@@ -578,6 +578,9 @@ export default function SquarePage() {
                   <div className="square-person-card-name">
                     <strong>{selectedUser.name}</strong>
                     {selectedUser.official ? <span>官方</span> : null}
+                    {!selectedUser.official && selectedUser.growth_level ? (
+                      <span className="square-growth-badge">Lv.{selectedUser.growth_level} {selectedUser.growth_level_name}</span>
+                    ) : null}
                   </div>
                   <p>{selectedIsSelf ? "你正在广场" : selectedUser.is_alive ? "正在广场" : "刚刚离开"}</p>
                 </div>
