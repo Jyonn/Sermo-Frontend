@@ -6,11 +6,21 @@ import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
+const officialLoginExchanges = new Map<string, ReturnType<typeof api.exchangeOfficialLoginTicket>>();
+
 function readTicketFromHash() {
   if (typeof window === "undefined") return "";
   const hash = window.location.hash.replace(/^#/, "");
   const params = new URLSearchParams(hash);
   return (params.get("ticket") || "").trim();
+}
+
+function exchangeOfficialLoginTicketOnce(ticket: string) {
+  const existing = officialLoginExchanges.get(ticket);
+  if (existing) return existing;
+  const exchange = api.exchangeOfficialLoginTicket(ticket);
+  officialLoginExchanges.set(ticket, exchange);
+  return exchange;
 }
 
 export default function OfficialLoginPage() {
@@ -31,8 +41,7 @@ export default function OfficialLoginPage() {
     setState("loading");
     setError(null);
 
-    api
-      .exchangeOfficialLoginTicket(ticket)
+    exchangeOfficialLoginTicketOnce(ticket)
       .then((payload) => {
         if (cancelled) return;
         loginFromJoin(payload);
