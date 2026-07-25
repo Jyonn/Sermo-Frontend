@@ -973,6 +973,7 @@ img {
   align-self: start;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  height: fit-content;
   gap: 12px;
   align-items: center;
   padding: 14px 16px;
@@ -6424,6 +6425,8 @@ img {
 
 .page-stack {
   display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 18px;
   max-width: 860px;
   margin: 0 auto;
@@ -6531,6 +6534,8 @@ img {
 
 .list-section {
   display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 10px;
 }
 
@@ -7043,6 +7048,8 @@ img {
 
 .simple-list {
   display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 2px;
   border-top: 1px solid rgba(215, 220, 231, 0.72);
   border-bottom: 1px solid rgba(215, 220, 231, 0.72);
