@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { UserAvatar } from "../components/UserAvatar";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
-import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { SideDrawer } from "../components/SideDrawer";
+import { UserProfilePanel } from "../components/UserProfilePanel";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
+import { showToast } from "../lib/toast";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
@@ -158,7 +160,7 @@ function buildOrbSyncSignature(users: UserDTO[]) {
     .join("|");
 }
 
-function resolveOrbCollisions(orbs: OrbState[]) {
+function resolveOrbCollisions(orbs: OrbState[], lockedUserId: number | null) {
   if (!orbs.length) return;
   for (let i = 0; i < orbs.length; i += 1) {
     for (let j = i + 1; j < orbs.length; j += 1) {
@@ -171,17 +173,23 @@ function resolveOrbCollisions(orbs: OrbState[]) {
       const dy = second.y - first.y || 1;
       const overlapX = (firstBox.width + secondBox.width) / 2 + CHARACTER_GAP - Math.abs(dx);
       const overlapY = (firstBox.height + secondBox.height) / 2 + CHARACTER_GAP - Math.abs(dy);
+      const firstLocked = first.user.user_id === lockedUserId;
+      const secondLocked = second.user.user_id === lockedUserId;
 
       if (overlapX < overlapY) {
         const direction = Math.sign(dx);
-        first.x -= direction * overlapX / 2;
-        second.x += direction * overlapX / 2;
-        [first.vx, second.vx] = [second.vx, first.vx];
+        first.x -= firstLocked ? 0 : direction * overlapX / (secondLocked ? 1 : 2);
+        second.x += secondLocked ? 0 : direction * overlapX / (firstLocked ? 1 : 2);
+        if (firstLocked) second.vx = direction * Math.abs(second.vx);
+        else if (secondLocked) first.vx = -direction * Math.abs(first.vx);
+        else [first.vx, second.vx] = [second.vx, first.vx];
       } else {
         const direction = Math.sign(dy);
-        first.y -= direction * overlapY / 2;
-        second.y += direction * overlapY / 2;
-        [first.vy, second.vy] = [second.vy, first.vy];
+        first.y -= firstLocked ? 0 : direction * overlapY / (secondLocked ? 1 : 2);
+        second.y += secondLocked ? 0 : direction * overlapY / (firstLocked ? 1 : 2);
+        if (firstLocked) second.vy = direction * Math.abs(second.vy);
+        else if (secondLocked) first.vy = -direction * Math.abs(first.vy);
+        else [first.vy, second.vy] = [second.vy, first.vy];
       }
     }
   }
@@ -196,6 +204,9 @@ export default function SquarePage() {
   const [error, setError] = useState<string | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<UserDTO[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
+  const [selectedRelation, setSelectedRelation] = useState<"idle" | "loading" | "friend" | "stranger" | "sent">("idle");
+  const [profileUserId, setProfileUserId] = useState<number | null>(null);
+  const [profileSyncing, setProfileSyncing] = useState(false);
   const [refreshTick, setRefreshTick] = useState(0);
   const [orbRenderState, setOrbRenderState] = useState<OrbState[]>([]);
   const [exitingOrbs, setExitingOrbs] = useState<OrbState[]>([]);
@@ -204,11 +215,14 @@ export default function SquarePage() {
   const animationFrameRef = useRef<number | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const orbsRef = useRef<OrbState[]>([]);
+  const selectedUserIdRef = useRef<number | null>(null);
   const hasLoadedOnceRef = useRef(false);
   const cacheHydratedRef = useRef(false);
   const exitTimersRef = useRef<Record<number, number>>({});
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
+
+  selectedUserIdRef.current = selectedUser?.user_id ?? null;
 
   useEffect(() => {
     if (!groupSquareEnabled) {
@@ -274,6 +288,7 @@ export default function SquarePage() {
       is_alive: true,
       verified: Boolean(currentUser.verified),
       last_heartbeat: currentUser.last_heartbeat ?? Date.now() / 1000,
+      welcome_message: currentUser.welcome_message,
       email_verified_at: currentUser.email_verified_at ?? null,
       phone_verified_at: currentUser.phone_verified_at ?? null,
       bark_verified_at: currentUser.bark_verified_at ?? null,
@@ -358,8 +373,10 @@ export default function SquarePage() {
         const maxX = stageSize.width - CHARACTER_PADDING - character.width / 2;
         const minY = CHARACTER_PADDING + character.height / 2;
         const maxY = stageSize.height - CHARACTER_PADDING - character.height / 2;
-        orb.x += orb.vx * delta;
-        orb.y += orb.vy * delta;
+        if (orb.user.user_id !== selectedUserIdRef.current) {
+          orb.x += orb.vx * delta;
+          orb.y += orb.vy * delta;
+        }
 
         if (orb.x <= minX) {
           orb.x = minX;
@@ -379,7 +396,7 @@ export default function SquarePage() {
       });
 
       if (next.length) {
-        resolveOrbCollisions(next);
+        resolveOrbCollisions(next, selectedUserIdRef.current);
       }
       orbsRef.current = next;
       setOrbRenderState(next.map((orb) => ({ ...orb })));
@@ -408,6 +425,21 @@ export default function SquarePage() {
   }, [displayedOnlineUsers, selectedUser]);
 
   useEffect(() => {
+    if (!selectedUser || selectedUser.user_id === session?.user.user_id) {
+      setSelectedRelation("idle");
+      return;
+    }
+    const controller = new AbortController();
+    setSelectedRelation("loading");
+    api.getFriendStatus(selectedUser.user_id, controller.signal)
+      .then((status) => setSelectedRelation(status.is_friend ? "friend" : "stranger"))
+      .catch(() => {
+        if (!controller.signal.aborted) setSelectedRelation("stranger");
+      });
+    return () => controller.abort();
+  }, [selectedUser?.user_id, session?.user.user_id]);
+
+  useEffect(() => {
     return () => {
       Object.values(exitTimersRef.current).forEach((timer) => window.clearTimeout(timer));
     };
@@ -425,13 +457,28 @@ export default function SquarePage() {
 
   const sendFriendRequest = async (userId: number) => {
     try {
+      setSelectedRelation("loading");
       await api.createFriendRequest(userId);
-      navigate("/app/notifications");
+      setSelectedRelation("sent");
+      showToast("好友申请已发送");
     } catch (apiError) {
+      setSelectedRelation("stranger");
       const message = apiError instanceof ApiError ? apiError.message : "发起好友申请失败";
       setError(message);
     }
   };
+
+  const selectedOrb = selectedUser
+    ? orbRenderState.find((orb) => orb.user.user_id === selectedUser.user_id) ?? null
+    : null;
+  const selectedIsSelf = selectedUser?.user_id === session?.user.user_id;
+  const selectedCardBelow = Boolean(selectedOrb && selectedOrb.y < 250);
+  const selectedCardStyle = selectedOrb
+    ? {
+        left: `${clamp(150, selectedOrb.x, Math.max(150, stageSize.width - 150))}px`,
+        top: `${selectedOrb.y + (selectedCardBelow ? characterDimensions(selectedOrb.size).height / 2 + 12 : -characterDimensions(selectedOrb.size).height / 2 - 12)}px`,
+      }
+    : undefined;
 
   return (
     <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
@@ -446,12 +493,20 @@ export default function SquarePage() {
           <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
         </div>
 
-        <section ref={stageRef} className="square-plaza-stage" style={{ minHeight: `${squareStageHeight}px` }}>
+        <section
+          ref={stageRef}
+          className={`square-plaza-stage${selectedUser ? " has-selection" : ""}`}
+          onClick={() => setSelectedUser(null)}
+          style={{ minHeight: `${squareStageHeight}px` }}
+        >
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
-              className={`square-character ${enteringOrbIds.includes(orb.user.user_id) ? "is-entering" : ""}`}
-              onClick={() => setSelectedUser(orb.user)}
+              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                setSelectedUser((current) => current?.user_id === orb.user.user_id ? null : orb.user);
+              }}
               style={
                 {
                   left: `${orb.x}px`,
@@ -507,6 +562,61 @@ export default function SquarePage() {
             </div>
           ))}
 
+          {selectedUser && selectedOrb && selectedCardStyle ? (
+            <div
+              className={`square-person-card${selectedCardBelow ? " is-below" : ""}`}
+              onClick={(event) => event.stopPropagation()}
+              style={selectedCardStyle}
+            >
+              <div className="square-person-card-identity">
+                <UserAvatar
+                  className={`square-person-card-avatar ${selectedUser.is_alive ? "status-online" : ""}`}
+                  name={selectedUser.name}
+                  uri={selectedUser.avatar_uri}
+                />
+                <div className="square-person-card-copy">
+                  <div className="square-person-card-name">
+                    <strong>{selectedUser.name}</strong>
+                    {selectedUser.official ? <span>官方</span> : null}
+                  </div>
+                  <p>{selectedIsSelf ? "你正在广场" : selectedUser.is_alive ? "正在广场" : "刚刚离开"}</p>
+                </div>
+              </div>
+              {selectedUser.welcome_message?.trim() ? (
+                <blockquote>{selectedUser.welcome_message.trim()}</blockquote>
+              ) : null}
+              <div className="square-person-card-actions">
+                {selectedIsSelf ? (
+                  <button className="button" onClick={() => navigate("/app/menu")} type="button">个人设置</button>
+                ) : (
+                  <>
+                    <button className="button" onClick={() => void startChat(selectedUser.user_id)} type="button">发消息</button>
+                    {selectedRelation !== "friend" ? (
+                      <button
+                        className="ghost-button"
+                        disabled={selectedRelation === "loading" || selectedRelation === "sent"}
+                        onClick={() => void sendFriendRequest(selectedUser.user_id)}
+                        type="button"
+                      >
+                        {selectedRelation === "loading" ? "确认中" : selectedRelation === "sent" ? "已申请" : "加好友"}
+                      </button>
+                    ) : null}
+                    <button
+                      className="square-person-profile-link"
+                      onClick={() => {
+                        setProfileUserId(selectedUser.user_id);
+                        setSelectedUser(null);
+                      }}
+                      type="button"
+                    >
+                      查看资料
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : null}
+
           {!displayedOnlineUsers.length && viewState === "ready" ? (
             <div className="square-plaza-status">
               <FeedbackState
@@ -518,35 +628,25 @@ export default function SquarePage() {
         </section>
       </section>
 
-      <BottomSheet
-        open={Boolean(selectedUser)}
-        title={selectedUser?.name ?? "成员"}
-        onClose={() => setSelectedUser(null)}
+      <SideDrawer
+        open={profileUserId !== null}
+        title="用户详情"
+        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
+        onClose={() => setProfileUserId(null)}
       >
-        {selectedUser ? (
-          <div className="detail-list">
-            <div className="simple-sheet-user">
-              <UserAvatar
-                className={`mini-avatar ${selectedUser.is_alive ? "status-online" : ""}`}
-                name={selectedUser.name}
-                uri={selectedUser.avatar_uri}
-              />
-              <div>
-                <strong>{selectedUser.name}</strong>
-                <div className="row-subtle">{selectedUser.is_alive ? "在线" : "离线"}</div>
-              </div>
-            </div>
-            <div className="sheet-action-list">
-              <button className="button" onClick={() => void startChat(selectedUser.user_id)} type="button">
-                发消息
-              </button>
-              <button className="ghost-button" onClick={() => void sendFriendRequest(selectedUser.user_id)} type="button">
-                加好友
-              </button>
-            </div>
-          </div>
+        {profileUserId !== null ? (
+          <UserProfilePanel
+            userId={profileUserId}
+            initialUser={displayedOnlineUsers.find((user) => user.user_id === profileUserId)}
+            initialIsFriend={selectedRelation === "friend"}
+            onSyncingChange={setProfileSyncing}
+            onOpenChat={(chatId) => {
+              setProfileUserId(null);
+              navigate(`/app/chats/${chatId}`);
+            }}
+          />
         ) : null}
-      </BottomSheet>
+      </SideDrawer>
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
     </AppChrome>
   );
