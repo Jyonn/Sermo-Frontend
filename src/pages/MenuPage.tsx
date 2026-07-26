@@ -307,7 +307,7 @@ export default function MenuPage() {
 
   const togglePrivateAccount = async () => {
     if (!me || privateAccountSaving) return;
-    if (!me.official && !phoneVerified) {
+    if (!phoneVerified) {
       showToast("绑定手机后可设置", "error");
       return;
     }
@@ -1420,7 +1420,7 @@ export default function MenuPage() {
                 <div className="row-main">
                   <strong>私密账号</strong>
                   <div className="row-subtle">
-                    {me?.official || phoneVerified
+                    {phoneVerified
                       ? me?.is_private_account
                         ? "不会出现在其他账号的切换列表"
                         : "可被相同联系方式的账号发现"
@@ -1430,7 +1430,7 @@ export default function MenuPage() {
                 <button
                   aria-label="切换私密账号"
                   className={`switch ${me?.is_private_account ? "active" : ""}`}
-                  disabled={privateAccountSaving || (!me?.official && !phoneVerified)}
+                  disabled={privateAccountSaving || !phoneVerified}
                   onClick={() => void togglePrivateAccount()}
                   type="button"
                 />
