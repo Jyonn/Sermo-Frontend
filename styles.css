@@ -1280,6 +1280,11 @@ img {
   font-size: 1.05rem;
 }
 
+.growth-level-guide-summary small {
+  font-size: 0.68rem;
+  opacity: 0.78;
+}
+
 .growth-level-list {
   display: grid;
   gap: 8px;
@@ -1373,6 +1378,14 @@ img {
   color: #9a651f;
   border-color: rgba(179, 107, 35, 0.24);
   background: rgba(255, 248, 235, 0.72);
+}
+
+.growth-level-card.is-capped {
+  color: var(--text-muted);
+  border-style: dashed;
+  background: rgba(246, 247, 246, 0.58);
+  box-shadow: none;
+  opacity: 0.66;
 }
 
 .growth-showcase-head {

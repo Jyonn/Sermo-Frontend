@@ -307,8 +307,8 @@ export default function MenuPage() {
 
   const togglePrivateAccount = async () => {
     if (!me || privateAccountSaving) return;
-    if (!me.official && (!emailVerified || !phoneVerified)) {
-      showToast("绑定并认证邮箱和手机后可设置", "error");
+    if (!me.official && !phoneVerified) {
+      showToast("绑定手机后可设置", "error");
       return;
     }
     setPrivateAccountSaving(true);
@@ -1258,8 +1258,8 @@ export default function MenuPage() {
             </div>
             <div className="growth-progress-copy">
               <div>
-                <strong>{me?.growth?.next_score ? `距离 Lv.${(me.growth.level ?? 1) + 1}` : "已抵达最高等级"}</strong>
-                <span>{me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : `${me?.growth?.score ?? 0} 成长值`}</span>
+                <strong>{me?.growth?.level_cap_reason || (me?.growth?.next_score ? `距离 Lv.${(me.growth.level ?? 1) + 1}` : "已抵达最高等级")}</strong>
+                <span>{me?.growth?.level_cap_reason ? `${me.growth.score} 成长值 · 上限 Lv.${me.growth.level_cap}` : me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : `${me?.growth?.score ?? 0} 成长值`}</span>
               </div>
               <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
             </div>
@@ -1310,13 +1310,14 @@ export default function MenuPage() {
           <div className="growth-level-guide-summary">
             <span>当前等级</span>
             <strong>Lv.{me?.growth?.level ?? 1} · {me?.growth?.name ?? "初见"}</strong>
+            {me?.growth?.level_cap_reason ? <small>{me.growth.level_cap_reason}</small> : null}
           </div>
           <div className="growth-level-list">
             {growthLevels.map((item) => {
               const current = item.level === (me?.growth?.level ?? 1);
               const next = item.level === (me?.growth?.level ?? 1) + 1;
               return (
-                <article className={`growth-level-card${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}`} key={item.level}>
+                <article className={`growth-level-card${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`} key={item.level}>
                   <div className="growth-level-card-index">Lv.{item.level}</div>
                   <div className="growth-level-card-copy">
                     <strong>{item.name}</strong>
@@ -1419,17 +1420,17 @@ export default function MenuPage() {
                 <div className="row-main">
                   <strong>私密账号</strong>
                   <div className="row-subtle">
-                    {me?.official || (emailVerified && phoneVerified)
+                    {me?.official || phoneVerified
                       ? me?.is_private_account
                         ? "不会出现在其他账号的切换列表"
                         : "可被相同联系方式的账号发现"
-                      : "绑定邮箱和手机后可设置"}
+                      : "绑定手机后可设置"}
                   </div>
                 </div>
                 <button
                   aria-label="切换私密账号"
                   className={`switch ${me?.is_private_account ? "active" : ""}`}
-                  disabled={privateAccountSaving || (!me?.official && (!emailVerified || !phoneVerified))}
+                  disabled={privateAccountSaving || (!me?.official && !phoneVerified)}
                   onClick={() => void togglePrivateAccount()}
                   type="button"
                 />

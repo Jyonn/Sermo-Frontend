@@ -56,6 +56,8 @@ export interface UserGrowthDTO {
   next_score: number | null;
   progress: number;
   privileges: string[];
+  level_cap?: number;
+  level_cap_reason?: string;
   recent_events?: Array<{
     key: string;
     category: "daily" | "explore" | "social" | "security";
