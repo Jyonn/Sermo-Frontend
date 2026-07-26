@@ -39,6 +39,11 @@ const BROADCAST_MESSAGE_TYPE = {
   audio: 5,
 } as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
+const DEFAULT_LEVEL_NAMES = [
+  "初见", "起言", "同频", "渐熟", "热聊", "成群",
+  "入浪", "逐潮", "回响", "共鸣", "风生", "云起",
+  "浪涌", "潮生", "星聚", "盛放", "无界", "尽兴",
+];
 
 function broadcastTypeForKind(kind: MessageMediaKind) {
   return BROADCAST_MESSAGE_TYPE[kind];
@@ -103,7 +108,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
   const [settingsMemberLimit, setSettingsMemberLimit] = useState("");
-  const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(["初来", "同频", "热聊", "浪潮", "尽兴"]);
+  const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(DEFAULT_LEVEL_NAMES);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [officialLoginBusy, setOfficialLoginBusy] = useState(false);
   const [removeUser, setRemoveUser] = useState<AdminMemberDTO | null>(null);
@@ -170,7 +175,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsName(dashboard.space.name);
     setSettingsSquareEnabled(Boolean(dashboard.space.group_square_enabled));
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
-    setSettingsLevelNames(dashboard.space.level_names?.length === 5 ? dashboard.space.level_names : ["初来", "同频", "热聊", "浪潮", "尽兴"]);
+    setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : DEFAULT_LEVEL_NAMES);
   }, [dashboard?.space]);
 
   useEffect(() => {

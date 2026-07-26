@@ -180,6 +180,7 @@ export default function MenuPage() {
   const [webPushState, setWebPushState] = useState<WebPushState>("checking");
   const [webPushSaving, setWebPushSaving] = useState(false);
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
+  const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -215,6 +216,7 @@ export default function MenuPage() {
   const authVerifyRef = useRef<HTMLDivElement | null>(null);
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+  const pwaGrowthClaimedRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
@@ -231,6 +233,16 @@ export default function MenuPage() {
     webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
     webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
   ].join(" · ");
+
+  useEffect(() => {
+    if (!standalonePwa || !me || pwaGrowthClaimedRef.current) return;
+    pwaGrowthClaimedRef.current = true;
+    void api.claimGrowthEvent("install_webapp").then(({ growth }) => {
+      setMe((current) => current ? { ...current, growth } : current);
+    }).catch(() => {
+      pwaGrowthClaimedRef.current = false;
+    });
+  }, [me?.user_id, standalonePwa]);
 
   const showPasswordReminder = (description = defaultPasswordReminderDescription) => {
     setPasswordReminderDescription(description);
@@ -1037,6 +1049,14 @@ export default function MenuPage() {
     openAuthSheet(kind);
   };
 
+  const openGrowthMilestone = (key: string) => {
+    if (key === "security:password") return openShowcaseBadge("password");
+    if (key === "security:email") return openShowcaseBadge("email");
+    if (key === "security:phone") return openShowcaseBadge("sms");
+    if (key === "security:bark") return openShowcaseBadge("bark");
+    if (key === "explore:install_webapp") setPwaInstallSheetOpen(true);
+  };
+
   const copyFriendInviteLink = async () => {
     if (!friendInviteLink) return;
     try {
@@ -1117,10 +1137,11 @@ export default function MenuPage() {
             <div className="menu-profile-heading">
               <strong>{session?.user.name ?? "言浪用户"}</strong>
             </div>
-            <div className="row-subtle">
-              {space?.name ?? "当前空间"}
+            <button className="menu-growth-entry" onClick={() => setGrowthDrawerOpen(true)} type="button">
+              <span>Lv.{me?.growth?.level ?? 1} {me?.growth?.name ?? space?.level_names?.[0] ?? "初见"}</span>
               {space?.slug ? <span className="menu-space-slug">@{space.slug}</span> : null}
-            </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
           <button
             aria-disabled={!canUseFriendInvite}
@@ -1132,49 +1153,6 @@ export default function MenuPage() {
             <QrCodeIcon />
           </button>
         </div>
-        <section className={`growth-showcase is-level-${me?.growth?.level ?? 1}`}>
-          <div className="growth-showcase-head">
-            <div className="growth-level-seal">
-              <span>Lv.{me?.growth?.level ?? 1}</span>
-              <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? "初来"}</strong>
-            </div>
-            <div className="growth-progress-copy">
-              <div>
-                <strong>成长橱窗</strong>
-                <span>{me?.growth ? (me.growth.next_score ? `${me.growth.score} / ${me.growth.next_score}` : "已达最高等级") : "正在同步"}</span>
-              </div>
-              <div className="growth-progress-track" aria-hidden="true">
-                <i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} />
-              </div>
-            </div>
-          </div>
-          <div className={`growth-badge-shelf${isAppleEnvironment ? "" : " is-three"}`}>
-            <button className={`growth-badge ${hasPassword ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("password")} type="button">
-              <span className="growth-badge-mark">{hasPassword ? "✓" : "+"}</span>
-              <strong>密码</strong>
-            </button>
-            <button className={`growth-badge ${emailVerified ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("email")} type="button">
-              <span className="growth-badge-mark">{emailVerified ? "✓" : "+"}</span>
-              <strong>邮箱</strong>
-            </button>
-            <button className={`growth-badge ${phoneVerified ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("sms")} type="button">
-              <span className="growth-badge-mark">{phoneVerified ? "✓" : "+"}</span>
-              <strong>手机</strong>
-            </button>
-            {isAppleEnvironment ? (
-              <button className={`growth-badge ${barkBound ? "is-earned" : ""}`} onClick={() => openShowcaseBadge("bark")} type="button">
-                <span className="growth-badge-mark">{barkBound ? "✓" : "+"}</span>
-                <strong>即时</strong>
-              </button>
-            ) : null}
-          </div>
-          {me?.growth?.privileges?.length ? (
-            <div className="growth-privileges">
-              {me.growth.privileges.map((privilege) => <span key={privilege}>{privilege}</span>)}
-            </div>
-          ) : null}
-        </section>
-
         <section className="list-section">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setBasicDrawerOpen(true)} type="button">
@@ -1245,9 +1223,69 @@ export default function MenuPage() {
 
       <PwaInstallSheet
         onClose={() => setPwaInstallSheetOpen(false)}
+        onInstalled={() => {
+          void api.claimGrowthEvent("install_webapp").then(({ growth }) => {
+            setMe((current) => current ? { ...current, growth } : current);
+          });
+        }}
         open={pwaInstallSheetOpen}
         spaceName={space?.name ?? "当前空间"}
       />
+
+      <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title="我的成长">
+        <div className={`growth-drawer is-level-${me?.growth?.level ?? 1}`}>
+          <section className="growth-hero">
+            <div className="growth-level-seal">
+              <span>Lv.{me?.growth?.level ?? 1}</span>
+              <strong>{me?.growth?.name ?? "初见"}</strong>
+            </div>
+            <div className="growth-progress-copy">
+              <div>
+                <strong>{me?.growth?.next_score ? `距离 Lv.${(me.growth.level ?? 1) + 1}` : "已抵达最高等级"}</strong>
+                <span>{me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : `${me?.growth?.score ?? 0} 成长值`}</span>
+              </div>
+              <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
+            </div>
+          </section>
+          <section className="growth-daily-card">
+            <div><strong>今日聊天</strong><span>每天最多 20</span></div>
+            <b>{me?.growth?.daily_chat.earned ?? 0}<small> / {me?.growth?.daily_chat.limit ?? 20}</small></b>
+          </section>
+          <section className="growth-drawer-section">
+            <h3>探索言浪</h3>
+            <div className="growth-milestone-grid">
+              {me?.growth?.milestones.filter((item) => item.category !== "security").map((item) => (
+                <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} disabled={!item.key.includes("install_webapp")} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
+                  <span>{item.earned ? "✓" : "+"}</span>
+                  <strong>{item.title}</strong>
+                  <small>+{item.points}</small>
+                </button>
+              ))}
+            </div>
+          </section>
+          <section className="growth-drawer-section">
+            <h3>推荐完善</h3>
+            <div className="growth-milestone-grid">
+              {me?.growth?.milestones.filter((item) => item.category === "security" && (item.key !== "security:bark" || isAppleEnvironment)).map((item) => (
+                <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
+                  <span>{item.earned ? "✓" : "+"}</span>
+                  <strong>{item.title}</strong>
+                  <small>+{item.points}</small>
+                </button>
+              ))}
+            </div>
+          </section>
+          {me?.growth?.recent_events.length ? (
+            <section className="growth-drawer-section">
+              <h3>最近获得</h3>
+              <div className="growth-event-list">
+                {me.growth.recent_events.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}
+              </div>
+            </section>
+          ) : null}
+          <div className="growth-privileges">{me?.growth?.privileges.map((item) => <span key={item}>{item}</span>)}</div>
+        </div>
+      </SideDrawer>
 
       <SideDrawer open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title="基础信息">
         <div className="detail-list">

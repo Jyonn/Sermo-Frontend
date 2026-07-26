@@ -29,6 +29,7 @@ import type {
   SpaceEmailCodeDTO,
   SpaceAuthDTO,
   UserDTO,
+  UserGrowthDTO,
   UserMeDTO,
   WebReminderPreferenceDTO,
   WebPushInfoDTO,
@@ -309,6 +310,14 @@ export const api = {
       method: "POST",
       adminAuth: true,
       body: payload,
+    });
+  },
+
+  claimGrowthEvent(event: "install_webapp" | "plaza_friend") {
+    return request<{ awarded: number; growth: UserGrowthDTO }>("/users/me/growth-events", {
+      method: "POST",
+      auth: true,
+      body: { event },
     });
   },
 

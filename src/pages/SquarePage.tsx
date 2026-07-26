@@ -459,6 +459,7 @@ export default function SquarePage() {
     try {
       setSelectedRelation("loading");
       await api.createFriendRequest(userId);
+      void api.claimGrowthEvent("plaza_friend");
       setSelectedRelation("sent");
       showToast("好友申请已发送");
     } catch (apiError) {
@@ -502,7 +503,7 @@ export default function SquarePage() {
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
-              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 4 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 5 ? " is-max-level" : ""}`}
+              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 10 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 18 ? " is-max-level" : ""}`}
               onClick={(event) => {
                 event.stopPropagation();
                 setSelectedUser((current) => current?.user_id === orb.user.user_id ? null : orb.user);

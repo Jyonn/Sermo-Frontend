@@ -12,9 +12,10 @@ interface PwaInstallSheetProps {
   open: boolean;
   spaceName: string;
   onClose: () => void;
+  onInstalled?: () => void;
 }
 
-export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetProps) {
+export function PwaInstallSheet({ open, spaceName, onClose, onInstalled }: PwaInstallSheetProps) {
   const ios = isIosDevice();
   const desktopChrome = isDesktopChrome();
   const appName = `${spaceName} - 言浪`;
@@ -28,7 +29,10 @@ export function PwaInstallSheet({ open, spaceName, onClose }: PwaInstallSheetPro
 
   const install = async () => {
     const outcome = await requestPwaInstall();
-    if (outcome === "accepted") onClose();
+    if (outcome === "accepted") {
+      onInstalled?.();
+      onClose();
+    }
   };
 
   return (
