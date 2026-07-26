@@ -1249,12 +1249,12 @@ export default function MenuPage() {
           </section>
           <section className="growth-daily-card">
             <div><strong>今日聊天</strong><span>每天最多 20</span></div>
-            <b>{me?.growth?.daily_chat.earned ?? 0}<small> / {me?.growth?.daily_chat.limit ?? 20}</small></b>
+            <b>{me?.growth?.daily_chat?.earned ?? 0}<small> / {me?.growth?.daily_chat?.limit ?? 20}</small></b>
           </section>
           <section className="growth-drawer-section">
             <h3>探索言浪</h3>
             <div className="growth-milestone-grid">
-              {me?.growth?.milestones.filter((item) => item.category !== "security").map((item) => (
+              {(me?.growth?.milestones ?? []).filter((item) => item.category !== "security").map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} disabled={!item.key.includes("install_webapp")} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
                   <span>{item.earned ? "✓" : "+"}</span>
                   <strong>{item.title}</strong>
@@ -1266,7 +1266,7 @@ export default function MenuPage() {
           <section className="growth-drawer-section">
             <h3>推荐完善</h3>
             <div className="growth-milestone-grid">
-              {me?.growth?.milestones.filter((item) => item.category === "security" && (item.key !== "security:bark" || isAppleEnvironment)).map((item) => (
+              {(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && (item.key !== "security:bark" || isAppleEnvironment)).map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
                   <span>{item.earned ? "✓" : "+"}</span>
                   <strong>{item.title}</strong>
@@ -1275,11 +1275,11 @@ export default function MenuPage() {
               ))}
             </div>
           </section>
-          {me?.growth?.recent_events.length ? (
+          {me?.growth?.recent_events?.length ? (
             <section className="growth-drawer-section">
               <h3>最近获得</h3>
               <div className="growth-event-list">
-                {me.growth.recent_events.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}
+                {me.growth.recent_events?.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}
               </div>
             </section>
           ) : null}

@@ -56,18 +56,18 @@ export interface UserGrowthDTO {
   next_score: number | null;
   progress: number;
   privileges: string[];
-  recent_events: Array<{
+  recent_events?: Array<{
     key: string;
     category: "daily" | "explore" | "social" | "security";
     title: string;
     points: number;
     created_at: number;
   }>;
-  daily_chat: {
+  daily_chat?: {
     earned: number;
     limit: number;
   };
-  milestones: Array<{
+  milestones?: Array<{
     key: string;
     category: "explore" | "social" | "security";
     title: string;
