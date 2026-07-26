@@ -15,6 +15,7 @@ import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
+import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
 import { useAuth } from "../lib/auth";
 import { useAdminAuth } from "../lib/adminAuth";
 import { normalizeContactTarget } from "../lib/contactTarget";
@@ -60,7 +61,7 @@ const growthLevelUnlocks: Record<number, string[]> = {
   5: ["发送视频", "修改群名称", "昵称每年可改"],
   6: ["自定义欢迎语", "广场招呼", "昵称每月可改", "橱窗主题"],
   7: ["好友上线提醒", "昵称每周可改"],
-  8: ["下载语音"],
+  8: ["下载语音", "自定义聊天背景"],
   9: ["基础头像框"],
   10: ["广场光环"],
   11: ["聊天气泡主题"],
@@ -202,6 +203,8 @@ export default function MenuPage() {
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
+  const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
+  const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -237,6 +240,7 @@ export default function MenuPage() {
   const authVerifyRef = useRef<HTMLDivElement | null>(null);
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+  const chatBackgroundFileInputRef = useRef<HTMLInputElement | null>(null);
   const pwaGrowthClaimedRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
@@ -246,6 +250,7 @@ export default function MenuPage() {
   const canRenameNickname = hasGrowthCapability("rename_nickname", 5);
   const canEditWelcome = hasGrowthCapability("welcome_message", 6);
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
+  const canCustomizeChatBackground = hasGrowthCapability("chat_background", 8);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -958,6 +963,44 @@ export default function MenuPage() {
     avatarFileInputRef.current?.click();
   };
 
+  const saveChatBackgroundTheme = async (theme: "default" | "paper" | "mint" | "dusk") => {
+    if (!canCustomizeChatBackground) {
+      showToast("达到 Lv.8 后可自定义聊天背景", "error");
+      return;
+    }
+    try {
+      setChatBackgroundSaving(true);
+      const payload = await api.setChatBackground(theme);
+      setMe(payload);
+      showToast("聊天背景已更新");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "背景更新失败", "error");
+    } finally {
+      setChatBackgroundSaving(false);
+    }
+  };
+
+  const handleChatBackgroundChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      setChatBackgroundSaving(true);
+      const payload = await uploadChatBackground(file);
+      setMe(payload);
+      showToast("聊天背景已更新");
+    } catch (uploadError) {
+      showToast(
+        uploadError instanceof ChatBackgroundUploadError || uploadError instanceof ApiError
+          ? uploadError.message
+          : "背景上传失败",
+        "error"
+      );
+    } finally {
+      setChatBackgroundSaving(false);
+    }
+  };
+
   const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -1256,6 +1299,35 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button
+              className={`simple-row menu-link-row${canCustomizeChatBackground ? "" : " is-locked"}`}
+              onClick={() => {
+                if (!canCustomizeChatBackground) {
+                  showToast("达到 Lv.8 后可自定义聊天背景", "error");
+                  return;
+                }
+                setChatBackgroundDrawerOpen(true);
+              }}
+              type="button"
+            >
+              <div className="row-main">
+                <strong>聊天背景</strong>
+              </div>
+              <div className="menu-detail-value menu-detail-text">
+                {canCustomizeChatBackground
+                  ? me?.chat_background_theme === "custom"
+                    ? "自定义"
+                    : me?.chat_background_theme === "paper"
+                      ? "纸感"
+                      : me?.chat_background_theme === "mint"
+                        ? "薄荷"
+                        : me?.chat_background_theme === "dusk"
+                          ? "暮色"
+                          : "默认"
+                  : "Lv.8 解锁"}
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
         </section>
 
@@ -1402,6 +1474,55 @@ export default function MenuPage() {
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer open={chatBackgroundDrawerOpen} onClose={() => setChatBackgroundDrawerOpen(false)} title="聊天背景">
+        <div className="chat-background-settings">
+          <div className="chat-background-preview" data-theme={me?.chat_background_theme ?? "default"}>
+            {me?.chat_background_theme === "custom" && me.chat_background_uri ? (
+              <img alt="" src={me.chat_background_uri} />
+            ) : null}
+            <span className="chat-background-preview-bubble other">今天聊点什么？</span>
+            <span className="chat-background-preview-bubble self">尽兴开聊。</span>
+          </div>
+          <div className="chat-background-grid">
+            {([
+              ["default", "默认"],
+              ["paper", "纸感"],
+              ["mint", "薄荷"],
+              ["dusk", "暮色"],
+            ] as const).map(([theme, label]) => (
+              <button
+                className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
+                disabled={chatBackgroundSaving}
+                key={theme}
+                onClick={() => void saveChatBackgroundTheme(theme)}
+                type="button"
+              >
+                <span />
+                <strong>{label}</strong>
+              </button>
+            ))}
+            <button
+              className={`chat-background-choice theme-custom${me?.chat_background_theme === "custom" ? " is-selected" : ""}`}
+              disabled={chatBackgroundSaving}
+              onClick={() => chatBackgroundFileInputRef.current?.click()}
+              type="button"
+            >
+              <span>
+                {me?.chat_background_uri ? <img alt="" src={me.chat_background_uri} /> : <span className="material-symbols-outlined">add_photo_alternate</span>}
+              </span>
+              <strong>{chatBackgroundSaving ? "处理中" : "自定义"}</strong>
+            </button>
+          </div>
+          <input
+            ref={chatBackgroundFileInputRef}
+            accept="image/*"
+            hidden
+            onChange={(event) => void handleChatBackgroundChange(event)}
+            type="file"
+          />
         </div>
       </SideDrawer>
 

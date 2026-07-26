@@ -136,6 +136,8 @@ export interface UserMeDTO extends UserDTO {
     interval_days: number | null;
     available_at: number | null;
   };
+  chat_background_theme?: "default" | "paper" | "mint" | "dusk" | "custom";
+  chat_background_uri?: string;
 }
 
 export interface SwitchAccountDTO {

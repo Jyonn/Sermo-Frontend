@@ -842,4 +842,27 @@ export const api = {
       body: { key },
     });
   },
+
+  createChatBackgroundUpload(file_name: string, content_type?: string) {
+    return request<{
+      upload_token: string;
+      upload_url: string;
+      key: string;
+      resource_uri: string;
+      expires_in: number;
+      max_file_size: number;
+    }>("/users/me/chat-background/upload", {
+      method: "POST",
+      auth: true,
+      body: { file_name, content_type },
+    });
+  },
+
+  setChatBackground(theme: "default" | "paper" | "mint" | "dusk" | "custom", key = "") {
+    return request<UserMeDTO>("/users/me/chat-background", {
+      method: "POST",
+      auth: true,
+      body: { theme, key },
+    });
+  },
 };

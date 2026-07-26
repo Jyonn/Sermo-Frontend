@@ -2255,6 +2255,179 @@ img {
   justify-content: center;
 }
 
+.chat-detail-scene {
+  position: relative;
+  isolation: isolate;
+}
+
+.chat-detail-scene::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background-color: rgba(248, 249, 246, 0.72);
+  transition: background 220ms ease, opacity 220ms ease;
+}
+
+.chat-detail-scene.chat-background-paper::before {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(74, 65, 48, 0.085) 0.7px, transparent 0.8px) 0 0 / 18px 18px,
+    linear-gradient(145deg, #f7f2e8, #fbf8f0 58%, #f1eadc);
+}
+
+.chat-detail-scene.chat-background-mint::before {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(66, 178, 139, 0.15), transparent 32%),
+    radial-gradient(circle at 88% 72%, rgba(93, 153, 188, 0.12), transparent 34%),
+    linear-gradient(155deg, #eef8f2, #f7faf5 54%, #e8f3ee);
+}
+
+.chat-detail-scene.chat-background-dusk::before {
+  background:
+    linear-gradient(128deg, rgba(228, 169, 131, 0.2), transparent 44%),
+    linear-gradient(320deg, rgba(97, 112, 151, 0.18), transparent 48%),
+    #f4f0ee;
+}
+
+.chat-detail-scene.chat-background-custom::before {
+  background:
+    linear-gradient(rgba(250, 250, 247, 0.12), rgba(250, 250, 247, 0.12)),
+    var(--chat-background-image) center / cover no-repeat;
+}
+
+.chat-background-settings {
+  display: grid;
+  gap: 20px;
+  padding: 4px 0 24px;
+}
+
+.chat-background-preview {
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+  border: 1px solid rgba(205, 211, 205, 0.72);
+  border-radius: 18px;
+  background: rgba(248, 249, 246, 0.9);
+}
+
+.chat-background-preview[data-theme="paper"] {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(74, 65, 48, 0.085) 0.7px, transparent 0.8px) 0 0 / 18px 18px,
+    linear-gradient(145deg, #f7f2e8, #fbf8f0 58%, #f1eadc);
+}
+
+.chat-background-preview[data-theme="mint"] {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(66, 178, 139, 0.15), transparent 32%),
+    radial-gradient(circle at 88% 72%, rgba(93, 153, 188, 0.12), transparent 34%),
+    linear-gradient(155deg, #eef8f2, #f7faf5 54%, #e8f3ee);
+}
+
+.chat-background-preview[data-theme="dusk"] {
+  background:
+    linear-gradient(128deg, rgba(228, 169, 131, 0.2), transparent 44%),
+    linear-gradient(320deg, rgba(97, 112, 151, 0.18), transparent 48%),
+    #f4f0ee;
+}
+
+.chat-background-preview > img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+
+.chat-background-preview-bubble {
+  position: absolute;
+  z-index: 1;
+  max-width: 70%;
+  padding: 9px 13px;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  box-shadow: 0 4px 14px rgba(22, 28, 25, 0.08);
+}
+
+.chat-background-preview-bubble.other {
+  left: 18px;
+  bottom: 78px;
+  color: #202620;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.chat-background-preview-bubble.self {
+  right: 18px;
+  bottom: 28px;
+  color: #fff;
+  background: #17211e;
+}
+
+.chat-background-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 10px;
+}
+
+.chat-background-choice {
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  text-align: left;
+}
+
+.chat-background-choice > span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.22;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #f3f4f0;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.chat-background-choice.is-selected > span {
+  border-color: var(--brand-primary);
+}
+
+.chat-background-choice:active > span {
+  transform: scale(0.97);
+}
+
+.chat-background-choice strong {
+  padding-left: 2px;
+  font-size: 0.78rem;
+}
+
+.chat-background-choice.theme-paper > span {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(74, 65, 48, 0.14) 0.7px, transparent 0.8px) 0 0 / 12px 12px,
+    #f7f2e8;
+}
+
+.chat-background-choice.theme-mint > span {
+  background: linear-gradient(145deg, #dcefe5, #f4f8ef 58%, #d9e9e4);
+}
+
+.chat-background-choice.theme-dusk > span {
+  background: linear-gradient(135deg, #e8c7b1, #eee8e4 48%, #b9bfd1);
+}
+
+.chat-background-choice.theme-custom > span {
+  color: var(--brand-primary);
+  background: rgba(0, 208, 132, 0.08);
+}
+
+.chat-background-choice.theme-custom img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .message-group {
   display: flex;
   gap: 6px;

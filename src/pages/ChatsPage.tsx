@@ -3893,8 +3893,12 @@ export default function ChatsPage() {
     ? ({
         "--chat-keyboard-offset": `${keyboardOffset}px`,
         "--chat-composer-height": `${composerHeight}px`,
+        "--chat-background-image": currentUserMe?.chat_background_uri
+          ? `url("${currentUserMe.chat_background_uri.replace(/"/g, "%22")}")`
+          : "none",
       } as CSSProperties)
     : undefined;
+  const chatBackgroundTheme = currentUserMe?.chat_background_theme ?? "default";
 
   return (
     <AppChrome
@@ -3986,7 +3990,7 @@ export default function ChatsPage() {
                 ) : null}
               </header>
               <div
-                className={`chat-detail-scene ${isClosingChatView ? "is-closing" : ""}`}
+                className={`chat-detail-scene chat-background-${chatBackgroundTheme} ${isClosingChatView ? "is-closing" : ""}`}
                 onAnimationEnd={(event) => {
                 if (!isClosingChatView) return;
                 if (!(event.target instanceof HTMLElement) || !event.target.classList.contains("chat-detail-scene")) return;
