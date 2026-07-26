@@ -4173,6 +4173,15 @@ img {
   opacity: 0.48;
 }
 
+.composer-action-button.is-locked,
+.composer-action-tile.is-locked,
+.simple-row.is-locked,
+.user-profile-group-row.is-locked,
+.chat-detail-member-item.is-locked {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
 .chat-main-pane {
   position: relative;
 }
@@ -9152,6 +9161,11 @@ img {
   place-items: center;
   color: rgba(37, 99, 235, 0.92);
   background: linear-gradient(180deg, rgba(240, 249, 255, 0.96), rgba(236, 253, 245, 0.96));
+}
+
+.avatar-preset-upload-tile.is-locked {
+  color: var(--text-muted);
+  background: rgba(241, 243, 247, 0.92);
 }
 
 .avatar-upload-icon {

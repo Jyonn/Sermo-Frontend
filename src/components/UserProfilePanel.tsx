@@ -12,7 +12,7 @@ import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { showToast } from "../lib/toast";
-import type { AppViewState, ChatDTO, UserDTO } from "../types";
+import type { AppViewState, ChatDTO, UserDTO, UserMeDTO } from "../types";
 
 export interface UserProfileSeed {
   user_id: number;
@@ -68,6 +68,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [removingFriend, setRemovingFriend] = useState(false);
+  const [currentUserMe, setCurrentUserMe] = useState<UserMeDTO | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -115,6 +116,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       .finally(() => {
         if (!controller.signal.aborted) syncingCallbackRef.current?.(false);
       });
+    api.getUserMe(controller.signal).then(setCurrentUserMe).catch(() => undefined);
     return () => {
       controller.abort();
       syncingCallbackRef.current?.(false);
@@ -125,6 +127,8 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     if (!user) return "";
     return user.is_alive ? "现在在线" : user.last_heartbeat ? `上次活跃 ${formatRelativeTime(user.last_heartbeat)}` : "暂时离线";
   }, [user]);
+  const createGroupCapability = currentUserMe?.growth?.capabilities?.create_group;
+  const canCreateGroup = createGroupCapability?.available ?? false;
 
   const openChat = async () => {
     if (!user) return;
@@ -139,6 +143,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   const openGroupPicker = async () => {
     if (!user) return;
+    if (!canCreateGroup) {
+      showToast(`达到 Lv.${createGroupCapability?.required_level ?? 4} 后可创建群聊`, "error");
+      return;
+    }
     setGroupSelectedIds([user.user_id]);
     setGroupCandidates([user]);
     setGroupCandidatesLoading(true);
@@ -256,9 +264,9 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           {groupChats.length > 3 ? <button className="user-profile-section-more" onClick={() => setAllGroupsOpen(true)} type="button">查看全部</button> : null}
         </div>
         <div className="user-profile-groups">
-          <button className="user-profile-group-row user-profile-create-group" onClick={() => void openGroupPicker()} type="button">
-            <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">add</span>
-            <span><strong>新建群聊</strong><small>邀请共同好友加入</small></span>
+          <button className={`user-profile-group-row user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
+            <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
+            <span><strong>新建群聊</strong><small>{canCreateGroup ? "邀请共同好友加入" : `Lv.${createGroupCapability?.required_level ?? 4} 解锁`}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           {groupChats.slice(0, 3).map(renderGroupRow)}

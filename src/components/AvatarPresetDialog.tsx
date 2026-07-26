@@ -12,6 +12,8 @@ interface AvatarPresetDialogProps {
   onClose: () => void;
   onSave: (presetId: number) => void | Promise<void>;
   onRequestCustomUpload?: () => void;
+  customUploadEnabled?: boolean;
+  customUploadHint?: string;
 }
 
 const presetIds = Array.from({ length: 15 }, (_, index) => index + 1);
@@ -39,6 +41,8 @@ export function AvatarPresetDialog({
   onClose,
   onSave,
   onRequestCustomUpload,
+  customUploadEnabled = true,
+  customUploadHint = "上传自定义头像",
 }: AvatarPresetDialogProps) {
   const currentPresetId = useMemo(() => parseAvatarPresetId(currentAvatarUri) ?? 1, [currentAvatarUri]);
   const [selectedPresetId, setSelectedPresetId] = useState(currentPresetId);
@@ -88,8 +92,15 @@ export function AvatarPresetDialog({
           })}
 
           {onRequestCustomUpload ? (
-            <button className="avatar-preset-tile avatar-preset-upload-tile" disabled={saving} onClick={onRequestCustomUpload} type="button">
-              <UploadAvatarIcon />
+            <button
+              aria-label={customUploadEnabled ? "上传自定义头像" : customUploadHint}
+              className={`avatar-preset-tile avatar-preset-upload-tile${customUploadEnabled ? "" : " is-locked"}`}
+              disabled={saving || !customUploadEnabled}
+              onClick={onRequestCustomUpload}
+              title={customUploadHint}
+              type="button"
+            >
+              {customUploadEnabled ? <UploadAvatarIcon /> : <span className="material-symbols-outlined">lock</span>}
             </button>
           ) : null}
         </div>

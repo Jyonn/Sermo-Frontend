@@ -240,6 +240,12 @@ export default function MenuPage() {
   const pwaGrowthClaimedRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
+  const hasGrowthCapability = (key: string, fallbackLevel: number) =>
+    me?.growth?.capabilities?.[key]?.available ?? (me?.growth?.level ?? 1) >= fallbackLevel;
+  const canUploadCustomAvatar = hasGrowthCapability("custom_avatar", 4);
+  const canRenameNickname = hasGrowthCapability("rename_nickname", 5);
+  const canEditWelcome = hasGrowthCapability("welcome_message", 6);
+  const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -1373,26 +1379,26 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <button className="simple-row menu-link-row" onClick={() => openBasicEditDialog("name")} type="button">
+            <button className={`simple-row menu-link-row${canRenameNickname ? "" : " is-locked"}`} disabled={!canRenameNickname} onClick={() => openBasicEditDialog("name")} type="button">
               <div className="row-main menu-key-cell">
                 <strong>昵称</strong>
               </div>
               <div className="menu-detail-value menu-detail-text">
-                {session?.user.name ?? "言浪用户"}
+                {canRenameNickname ? session?.user.name ?? "言浪用户" : "Lv.5 解锁"}
                 {me?.nickname_change?.interval_days ? <small>{me.nickname_change.interval_days} 天一次</small> : null}
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <button className="simple-row menu-link-row" onClick={() => openBasicEditDialog("welcome")} type="button">
+            <button className={`simple-row menu-link-row${canEditWelcome ? "" : " is-locked"}`} disabled={!canEditWelcome} onClick={() => openBasicEditDialog("welcome")} type="button">
               <div className="row-main menu-key-cell">
                 <strong>欢迎语</strong>
               </div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditWelcome ? welcomeSummary : "Lv.6 解锁"}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <button className="simple-row menu-link-row" onClick={() => openBasicEditDialog("plaza")} type="button">
+            <button className={`simple-row menu-link-row${canEditPlazaGreeting ? "" : " is-locked"}`} disabled={!canEditPlazaGreeting} onClick={() => openBasicEditDialog("plaza")} type="button">
               <div className="row-main menu-key-cell"><strong>广场招呼</strong></div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{me?.plaza_greeting || "还没有设置"}</div>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditPlazaGreeting ? me?.plaza_greeting || "还没有设置" : "Lv.6 解锁"}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
@@ -2094,6 +2100,8 @@ export default function MenuPage() {
         currentAvatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
         displayName={session?.user.name ?? "言浪用户"}
         onClose={() => setAvatarDialogOpen(false)}
+        customUploadEnabled={canUploadCustomAvatar && hasPassword}
+        customUploadHint={!canUploadCustomAvatar ? "Lv.4 解锁自定义头像" : "设置密码后可上传"}
         onRequestCustomUpload={requestCustomAvatarUpload}
         onSave={savePresetAvatar}
         open={avatarDialogOpen}

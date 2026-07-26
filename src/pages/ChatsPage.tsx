@@ -1844,7 +1844,7 @@ export default function ChatsPage() {
   const chatAccessNotice = routeState?.chatAccessError ?? null;
   const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
   const growthCapability = (key: string, fallbackLevel: number) => currentUserMe?.growth?.capabilities?.[key] ?? {
-    available: true,
+    available: (currentUserMe?.growth?.level ?? 1) >= fallbackLevel,
     required_level: fallbackLevel,
   };
   const requireComposerCapability = (key: string, fallbackLevel: number, label: string) => {
@@ -1853,6 +1853,15 @@ export default function ChatsPage() {
     showToast(`达到 Lv.${capability.required_level} 后可${label}`, "error");
     return false;
   };
+  const canSendImage = growthCapability("send_image", 2).available;
+  const canSendAudio = growthCapability("send_audio", 3).available;
+  const canSendLocation = growthCapability("send_location", 3).available;
+  const canCreateGroup = growthCapability("create_group", 4).available;
+  const canInviteGroupMember = growthCapability("invite_group_member", 4).available;
+  const canRenameGroup = growthCapability("rename_group", 5).available;
+  const canSendVideo = growthCapability("send_video", 5).available;
+  const canUseOnlineReminder = growthCapability("online_reminder", 7).available;
+  const canDownloadAudio = growthCapability("download_audio", 8).available;
 
   useEffect(() => () => {
     localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
@@ -2644,6 +2653,9 @@ export default function ChatsPage() {
 
   const openChatMemberAdder = async () => {
     if (!selectedChat) return;
+    const capabilityKey = selectedChat.type === "group" ? "invite_group_member" : "create_group";
+    const label = selectedChat.type === "group" ? "邀请群成员" : "创建群聊";
+    if (!requireComposerCapability(capabilityKey, 4, label)) return;
     const verified = await ensureCurrentUserVerified();
     if (!verified) {
       setPageError("完成认证后才能添加聊天成员。");
@@ -4047,8 +4059,8 @@ export default function ChatsPage() {
                 {!voiceComposer.open ? (
                   <div className="composer-row composer-row-text">
                     <div className="composer-leading-actions">
-                      <button aria-label="录制语音" className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} type="button">
-                        <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
+                      <button aria-label={canSendAudio ? "录制语音" : "Lv.3 解锁语音"} className={`composer-action-button${canSendAudio ? "" : " is-locked"}`} disabled={composerBusy || !canSendAudio} onClick={() => void startVoiceRecording()} title={canSendAudio ? "录制语音" : "Lv.3 解锁语音"} type="button">
+                        {canSendAudio ? <ComposerSvgIcon className="composer-inline-svg" kind="mic" /> : <span className="material-symbols-outlined">lock</span>}
                       </button>
                     </div>
                     <div className="composer-input-wrap">
@@ -4152,17 +4164,17 @@ export default function ChatsPage() {
                 {!voiceComposer.open ? (
                   <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
                     <div className="composer-actions-grid">
-                      <button className="composer-action-tile" disabled={composerBusy} onClick={openGalleryPicker} type="button">
-                        <span className="composer-action-tile-icon"><ComposerSvgIcon kind="album" /></span>
-                        <span>相册</span>
+                      <button className={`composer-action-tile${canSendImage ? "" : " is-locked"}`} disabled={composerBusy || !canSendImage} onClick={openGalleryPicker} title={canSendImage ? "相册" : "Lv.2 解锁图片"} type="button">
+                        <span className="composer-action-tile-icon">{canSendImage ? <ComposerSvgIcon kind="album" /> : <span className="material-symbols-outlined">lock</span>}</span>
+                        <span>{canSendImage ? "相册" : "Lv.2 图片"}</span>
                       </button>
                       <button className="composer-action-tile" disabled={composerBusy} onClick={openFilePicker} type="button">
                         <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
                         <span>文件</span>
                       </button>
-                      <button className="composer-action-tile" disabled={composerBusy} onClick={openLocationPicker} type="button">
-                        <span className="composer-action-tile-icon"><ComposerSvgIcon kind="location" /></span>
-                        <span>位置</span>
+                      <button className={`composer-action-tile${canSendLocation ? "" : " is-locked"}`} disabled={composerBusy || !canSendLocation} onClick={openLocationPicker} title={canSendLocation ? "位置" : "Lv.3 解锁位置"} type="button">
+                        <span className="composer-action-tile-icon">{canSendLocation ? <ComposerSvgIcon kind="location" /> : <span className="material-symbols-outlined">lock</span>}</span>
+                        <span>{canSendLocation ? "位置" : "Lv.3 位置"}</span>
                       </button>
                     </div>
                   </div>
@@ -4288,16 +4300,17 @@ export default function ChatsPage() {
                             <>
                               <button
                                 className="ghost-button"
+                                disabled={!canRenameGroup}
                                 onClick={() => {
                                   setGroupRenameValue(selectedChat.title);
                                   setGroupRenameOpen(true);
                                 }}
                                 type="button"
                               >
-                                重命名群聊
+                                {canRenameGroup ? "重命名群聊" : "Lv.5 解锁改名"}
                               </button>
-                              <button className="ghost-button" onClick={() => void openChatMemberAdder()} type="button">
-                                邀请成员
+                              <button className="ghost-button" disabled={!canInviteGroupMember} onClick={() => void openChatMemberAdder()} type="button">
+                                {canInviteGroupMember ? "邀请成员" : "Lv.4 解锁邀请"}
                               </button>
                             </>
                           ) : null}
@@ -4397,9 +4410,9 @@ export default function ChatsPage() {
                     </span>
                   </button>
                 ))}
-                <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberAdder} type="button">
+                <button className={`chat-detail-member-item chat-detail-member-add${selectedChat.type === "group" && !canInviteGroupMember ? " is-locked" : ""}`} disabled={selectedChat.type === "group" ? !canInviteGroupMember : !canCreateGroup} onClick={openChatMemberAdder} type="button">
                   <span className="chat-detail-member-avatar chat-detail-member-avatar-add">
-                    <span className="material-symbols-outlined">add</span>
+                    <span className="material-symbols-outlined">{(selectedChat.type === "group" ? canInviteGroupMember : canCreateGroup) ? "add" : "lock"}</span>
                   </span>
                   <span className="chat-detail-member-name">添加</span>
                 </button>
@@ -4434,8 +4447,9 @@ export default function ChatsPage() {
                   <div className="chat-detail-setting-row">
                     <div className="row-main">
                       <strong>上线提醒</strong>
+                      {!canUseOnlineReminder ? <div className="row-subtle">Lv.7 解锁</div> : null}
                     </div>
-                    <button aria-label="切换上线提醒" className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} type="button" />
+                    <button aria-label={canUseOnlineReminder ? "切换上线提醒" : "Lv.7 解锁上线提醒"} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null || !canUseOnlineReminder} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={canUseOnlineReminder ? "切换上线提醒" : "Lv.7 解锁"} type="button" />
                   </div>
                 ) : null}
                 {selectedChat.type === "group" ? (
@@ -4443,6 +4457,7 @@ export default function ChatsPage() {
                     <div className="row-main chat-detail-title-main"><strong>群聊名称</strong><div className="row-subtle">{selectedChat.title}</div></div>
                     <button
                       className="chat-detail-row-icon"
+                      disabled={!canRenameGroup}
                       onClick={() => {
                         setGroupRenameValue(selectedChat.title);
                         setGroupRenameOpen(true);
@@ -4630,7 +4645,7 @@ export default function ChatsPage() {
       </BottomSheet>
       <input
         ref={galleryInputRef}
-        accept="image/*,video/*"
+        accept={canSendVideo ? "image/*,video/*" : "image/*"}
         hidden
         multiple
         onChange={(event) => void handleMediaSelection(event, "gallery")}
@@ -4831,7 +4846,7 @@ export default function ChatsPage() {
                     复制
                   </button>
                 ) : null}
-                {["image", "audio", "file"].includes(messageMenu.message.kind) ? (
+                {(["image", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
                   <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
                     下载
                   </button>
