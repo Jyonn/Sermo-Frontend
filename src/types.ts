@@ -74,6 +74,13 @@ export interface UserGrowthDTO {
     points: number;
     earned: boolean;
   }>;
+  levels?: Array<{
+    level: number;
+    name: string;
+    score: number;
+    unlocks: string[];
+    unlocked: boolean;
+  }>;
 }
 
 export interface AccessPayload {

@@ -51,6 +51,15 @@ const defaultFriendOnlineMessageTitle = "好友上线";
 const defaultFriendOnlineMessagePlaceholder = "你的好友上线了。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
 const defaultPasswordReminderDescription = "设置密码后，才能管理通知和提醒。";
+const growthLevelScores = [0, 20, 45, 80, 130, 200, 300, 440, 620, 850, 1150, 1530, 2000, 2580, 3300, 4180, 5250, 6550];
+const growthLevelUnlocks: Record<number, string[]> = {
+  1: ["基础沟通"],
+  3: ["等级签"],
+  6: ["橱窗主题"],
+  10: ["广场光环"],
+  14: ["动态轨迹"],
+  18: ["尽兴徽记"],
+};
 
 type NotificationMessageKind = "direct" | "group" | "online";
 type PreferenceEditor =
@@ -181,6 +190,7 @@ export default function MenuPage() {
   const [webPushSaving, setWebPushSaving] = useState(false);
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
+  const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -1024,6 +1034,13 @@ export default function MenuPage() {
     const value = (me?.welcome_message ?? session?.user?.welcome_message ?? "").trim();
     return value || "还没有设置欢迎语";
   }, [me?.welcome_message, session?.user?.welcome_message]);
+  const growthLevels = me?.growth?.levels ?? growthLevelScores.map((score, index) => ({
+    level: index + 1,
+    name: space?.level_names?.[index] ?? `Lv.${index + 1}`,
+    score,
+    unlocks: growthLevelUnlocks[index + 1] ?? [],
+    unlocked: (me?.growth?.level ?? 1) >= index + 1,
+  }));
 
   const openChannelsEntry = () => {
     if (!hasPassword) {
@@ -1234,7 +1251,7 @@ export default function MenuPage() {
 
       <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title="我的成长">
         <div className={`growth-drawer is-level-${me?.growth?.level ?? 1}`}>
-          <section className="growth-hero">
+          <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
             <div className="growth-level-seal">
               <span>Lv.{me?.growth?.level ?? 1}</span>
               <strong>{me?.growth?.name ?? "初见"}</strong>
@@ -1246,7 +1263,8 @@ export default function MenuPage() {
               </div>
               <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
             </div>
-          </section>
+            <span className="material-symbols-outlined growth-hero-arrow">chevron_right</span>
+          </button>
           <section className="growth-daily-card">
             <div><strong>今日聊天</strong><span>每天最多 20</span></div>
             <b>{me?.growth?.daily_chat?.earned ?? 0}<small> / {me?.growth?.daily_chat?.limit ?? 20}</small></b>
@@ -1284,6 +1302,33 @@ export default function MenuPage() {
             </section>
           ) : null}
           <div className="growth-privileges">{me?.growth?.privileges.map((item) => <span key={item}>{item}</span>)}</div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title="等级图鉴">
+        <div className="growth-level-guide">
+          <div className="growth-level-guide-summary">
+            <span>当前等级</span>
+            <strong>Lv.{me?.growth?.level ?? 1} · {me?.growth?.name ?? "初见"}</strong>
+          </div>
+          <div className="growth-level-list">
+            {growthLevels.map((item) => {
+              const current = item.level === (me?.growth?.level ?? 1);
+              const next = item.level === (me?.growth?.level ?? 1) + 1;
+              return (
+                <article className={`growth-level-card${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}`} key={item.level}>
+                  <div className="growth-level-card-index">Lv.{item.level}</div>
+                  <div className="growth-level-card-copy">
+                    <strong>{item.name}</strong>
+                    {item.unlocks.length ? (
+                      <div>{item.unlocks.map((unlock) => <span key={unlock}>{unlock}</span>)}</div>
+                    ) : <small>成长阶段</small>}
+                  </div>
+                  <div className="growth-level-card-score">{item.score.toLocaleString()}<small>成长值</small></div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </SideDrawer>
 
