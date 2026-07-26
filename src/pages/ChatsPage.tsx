@@ -35,7 +35,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -1715,6 +1715,7 @@ export default function ChatsPage() {
   const [groupRenameValue, setGroupRenameValue] = useState("");
   const [groupManageState, setGroupManageState] = useState<"idle" | "saving" | "loading-candidates">("idle");
   const [currentUserVerified, setCurrentUserVerified] = useState<boolean | null>(null);
+  const [currentUserMe, setCurrentUserMe] = useState<UserMeDTO | null>(null);
   const [detailMemberLimit, setDetailMemberLimit] = useState(CHAT_DETAIL_MEMBER_PAGE_SIZE);
   const [groupDangerConfirmOpen, setGroupDangerConfirmOpen] = useState(false);
   const [friendDangerConfirmOpen, setFriendDangerConfirmOpen] = useState(false);
@@ -1842,6 +1843,16 @@ export default function ChatsPage() {
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
   const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
+  const growthCapability = (key: string, fallbackLevel: number) => currentUserMe?.growth?.capabilities?.[key] ?? {
+    available: true,
+    required_level: fallbackLevel,
+  };
+  const requireComposerCapability = (key: string, fallbackLevel: number, label: string) => {
+    const capability = growthCapability(key, fallbackLevel);
+    if (capability.available) return true;
+    showToast(`达到 Lv.${capability.required_level} 后可${label}`, "error");
+    return false;
+  };
 
   useEffect(() => () => {
     localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
@@ -2011,6 +2022,17 @@ export default function ChatsPage() {
 
     return () => controller.abort();
   }, [cacheScope, currentUserId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const sync = () => api.getUserMe(controller.signal).then(setCurrentUserMe).catch(() => undefined);
+    void sync();
+    const timer = window.setInterval(sync, 30_000);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, [currentUserId]);
 
   const selectedChat = useMemo(() => {
     const numericChatId = Number(chatId);
@@ -2586,6 +2608,7 @@ export default function ChatsPage() {
 
   const updateSelectedChatPreference = async (kind: "pin" | "online", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
+    if (kind === "online" && enabled && !requireComposerCapability("online_reminder", 7, "开启好友上线提醒")) return;
     const chatIdToUpdate = selectedChat.id;
     const field = kind === "pin" ? "pinned" : "onlineReminderEnabled";
     setPreferenceSaving(kind);
@@ -3074,6 +3097,7 @@ export default function ChatsPage() {
 
   const openGalleryPicker = () => {
     if (composerBusy) return;
+    if (!requireComposerCapability("send_image", 2, "发送图片")) return;
     galleryInputRef.current?.click();
   };
 
@@ -3084,6 +3108,7 @@ export default function ChatsPage() {
 
   const openLocationPicker = () => {
     if (composerBusy) return;
+    if (!requireComposerCapability("send_location", 3, "发送位置")) return;
     setComposerMoreOpen(false);
     if (!navigator.geolocation) {
       setLocationDraft({ phase: "error", error: "当前浏览器不支持定位" });
@@ -3182,6 +3207,8 @@ export default function ChatsPage() {
       files.map(async (file) => {
         try {
           const kind = source === "file" ? "file" : resolveMediaKind(file);
+          if (kind === "image" && !requireComposerCapability("send_image", 2, "发送图片")) return;
+          if (kind === "video" && !requireComposerCapability("send_video", 5, "发送视频")) return;
           await sendUploadedMediaMessage(kind, file, source === "file" ? { file_name: file.name, file_size: file.size } : {});
         } catch (error) {
           const uploadError = toMessageUploadError(error);
@@ -3236,6 +3263,7 @@ export default function ChatsPage() {
 
   const startVoiceRecording = async () => {
     if (composerBusy || voiceComposer.open) return;
+    if (!requireComposerCapability("send_audio", 3, "发送语音")) return;
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setPageError("当前设备暂不支持语音录制。");
       return;
@@ -3456,6 +3484,7 @@ export default function ChatsPage() {
   const downloadMessageAttachment = async () => {
     if (!messageMenu || !["image", "audio", "file"].includes(messageMenu.message.kind)) return;
     const message = messageMenu.message;
+    if (message.kind === "audio" && !requireComposerCapability("download_audio", 8, "下载语音")) return;
     const rawUri = message.payload?.uri;
     if (!rawUri) return;
     const uri = resolveStableResourceUri(rawUri) ?? rawUri;
@@ -3589,6 +3618,7 @@ export default function ChatsPage() {
   };
 
   const createGroup = async () => {
+    if (!requireComposerCapability("create_group", 4, "创建群聊")) return;
     if (!currentUserVerified) {
       setPageError("完成认证后才可以创建群聊。");
       return;
@@ -3622,6 +3652,7 @@ export default function ChatsPage() {
   };
 
   const renameGroup = async () => {
+    if (!requireComposerCapability("rename_group", 5, "修改群名称")) return;
     if (!selectedChat) return;
     try {
       setGroupManageState("saving");
@@ -3639,6 +3670,7 @@ export default function ChatsPage() {
   const submitChatMemberPicker = async () => {
     if (!selectedChat) return;
     if (!chatMemberActionIds.length) return;
+    if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "invite_group_member" : "create_group", 4, selectedChat.type === "group" ? "邀请群成员" : "创建群聊")) return;
 
     try {
       setGroupManageState("saving");

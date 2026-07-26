@@ -25,6 +25,7 @@ export interface UserDTO extends TinyUserDTO {
   verified: boolean;
   last_heartbeat: number;
   welcome_message?: string;
+  plaza_greeting?: string;
   growth_level?: number;
   growth_level_name?: string;
   is_deleted?: boolean;
@@ -83,6 +84,10 @@ export interface UserGrowthDTO {
     unlocks: string[];
     unlocked: boolean;
   }>;
+  capabilities?: Record<string, {
+    required_level: number;
+    available: boolean;
+  }>;
 }
 
 export interface AccessPayload {
@@ -125,6 +130,12 @@ export interface UserMeDTO extends UserDTO {
   bark_unbound_at?: number | null;
   is_private_account: boolean;
   growth?: UserGrowthDTO;
+  plaza_greeting?: string;
+  name_changed_at?: number | null;
+  nickname_change?: {
+    interval_days: number | null;
+    available_at: number | null;
+  };
 }
 
 export interface SwitchAccountDTO {

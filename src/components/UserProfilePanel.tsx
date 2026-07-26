@@ -157,6 +157,12 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     if (!user || groupSelectedIds.length < 2 || groupCreating) return;
     setGroupCreating(true);
     try {
+      const me = await api.getUserMe();
+      const capability = me.growth?.capabilities?.create_group;
+      if (capability && !capability.available) {
+        showToast(`达到 Lv.${capability.required_level} 后可创建群聊`, "error");
+        return;
+      }
       const chat = await api.createGroupChat(groupSelectedIds);
       setGroupPickerOpen(false);
       showToast("群聊已创建");

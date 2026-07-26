@@ -54,10 +54,21 @@ const defaultPasswordReminderDescription = "设置密码后，才能管理通知
 const growthLevelScores = [0, 20, 45, 80, 130, 200, 300, 440, 620, 850, 1150, 1530, 2000, 2580, 3300, 4180, 5250, 6550];
 const growthLevelUnlocks: Record<number, string[]> = {
   1: ["基础沟通"],
-  3: ["等级签"],
-  6: ["橱窗主题"],
+  2: ["发送图片"],
+  3: ["发送语音与位置", "等级签"],
+  4: ["自定义头像", "创建群聊"],
+  5: ["发送视频", "修改群名称", "昵称每年可改"],
+  6: ["自定义欢迎语", "广场招呼", "昵称每月可改", "橱窗主题"],
+  7: ["好友上线提醒", "昵称每周可改"],
+  8: ["下载语音"],
+  9: ["基础头像框"],
   10: ["广场光环"],
+  11: ["聊天气泡主题"],
+  12: ["个人名片主题"],
   14: ["动态轨迹"],
+  15: ["入场效果"],
+  16: ["成长报告"],
+  17: ["稀有头像框"],
   18: ["尽兴徽记"],
 };
 
@@ -206,7 +217,7 @@ export default function MenuPage() {
   const [prefEditorValue, setPrefEditorValue] = useState("");
   const [prefEditorSaving, setPrefEditorSaving] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
-  const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
+  const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | "plaza" | null>(null);
   const [basicEditValue, setBasicEditValue] = useState("");
   const [authTarget, setAuthTarget] = useState("");
   const [authCode, setAuthCode] = useState("");
@@ -934,6 +945,10 @@ export default function MenuPage() {
       showPasswordReminder("设置密码后，才能上传自定义头像。你仍然可以继续使用预设头像。");
       return;
     }
+    if (!me?.growth?.capabilities?.custom_avatar?.available) {
+      showToast("达到 Lv.4 后可上传自定义头像", "error");
+      return;
+    }
     avatarFileInputRef.current?.click();
   };
 
@@ -964,13 +979,23 @@ export default function MenuPage() {
     }
   };
 
-  const openBasicEditDialog = (field: "name" | "welcome") => {
+  const openBasicEditDialog = (field: "name" | "welcome" | "plaza") => {
     if (!hasPassword) {
-      showPasswordReminder(field === "name" ? "设置密码后，才能修改昵称。" : "设置密码后，才能修改欢迎语。");
+      showPasswordReminder(field === "name" ? "设置密码后，才能修改昵称。" : field === "welcome" ? "设置密码后，才能修改欢迎语。" : "设置密码后，才能修改广场招呼。");
+      return;
+    }
+    const capability = field === "name" ? "rename_nickname" : field === "welcome" ? "welcome_message" : "plaza_greeting";
+    const requiredLevel = me?.growth?.capabilities?.[capability]?.required_level ?? (field === "name" ? 5 : 6);
+    if (!me?.growth?.capabilities?.[capability]?.available) {
+      showToast(`达到 Lv.${requiredLevel} 后可使用`, "error");
+      return;
+    }
+    if (field === "name" && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now()) {
+      showToast(`下次可修改：${new Date(me.nickname_change.available_at * 1000).toLocaleDateString("zh-CN")}`, "error");
       return;
     }
     setBasicEditField(field);
-    setBasicEditValue(field === "name" ? session?.user.name ?? "" : me?.welcome_message ?? session?.user?.welcome_message ?? "");
+    setBasicEditValue(field === "name" ? session?.user.name ?? "" : field === "welcome" ? me?.welcome_message ?? session?.user?.welcome_message ?? "" : me?.plaza_greeting ?? "");
   };
 
   const confirmAccountDeleteInput = () => {
@@ -1010,16 +1035,19 @@ export default function MenuPage() {
         patchSessionUser({
           name: payload.name,
         });
-      } else {
+      } else if (basicEditField === "welcome") {
         const payload = await api.updateWelcomeMessage(basicEditValue.trim());
         const nextMessage = payload.welcome_message ?? "";
         setMe((current) => (current ? { ...current, welcome_message: nextMessage } : current));
         patchSessionUser({
           welcome_message: nextMessage,
         });
+      } else {
+        const payload = await api.updatePlazaGreeting(basicEditValue.trim());
+        setMe((current) => current ? { ...current, plaza_greeting: payload.plaza_greeting } : current);
       }
       setBasicEditField(null);
-      showToast(editingField === "name" ? "昵称已更新" : "欢迎语已更新");
+      showToast(editingField === "name" ? "昵称已更新" : editingField === "welcome" ? "欢迎语已更新" : "广场招呼已更新");
     } catch (apiError) {
       showToast(
         apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
@@ -1349,7 +1377,10 @@ export default function MenuPage() {
               <div className="row-main menu-key-cell">
                 <strong>昵称</strong>
               </div>
-              <div className="menu-detail-value menu-detail-text">{session?.user.name ?? "言浪用户"}</div>
+              <div className="menu-detail-value menu-detail-text">
+                {session?.user.name ?? "言浪用户"}
+                {me?.nickname_change?.interval_days ? <small>{me.nickname_change.interval_days} 天一次</small> : null}
+              </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="simple-row menu-link-row" onClick={() => openBasicEditDialog("welcome")} type="button">
@@ -1357,6 +1388,11 @@ export default function MenuPage() {
                 <strong>欢迎语</strong>
               </div>
               <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            <button className="simple-row menu-link-row" onClick={() => openBasicEditDialog("plaza")} type="button">
+              <div className="row-main menu-key-cell"><strong>广场招呼</strong></div>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{me?.plaza_greeting || "还没有设置"}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
@@ -2072,13 +2108,13 @@ export default function MenuPage() {
       />
       <InputDialog
         busy={basicEditSaving}
-        confirmLabel={basicEditField === "name" ? "保存昵称" : "保存欢迎语"}
+        confirmLabel={basicEditField === "name" ? "保存昵称" : basicEditField === "welcome" ? "保存欢迎语" : "保存招呼"}
         onChange={setBasicEditValue}
         onClose={() => setBasicEditField(null)}
         onConfirm={() => void confirmBasicEdit()}
         open={Boolean(basicEditField)}
-        placeholder={basicEditField === "name" ? "输入新的昵称" : "输入新的欢迎语"}
-        title={basicEditField === "name" ? "修改昵称" : "修改欢迎语"}
+        placeholder={basicEditField === "name" ? "输入新的昵称" : basicEditField === "welcome" ? "输入新的欢迎语" : "输入广场招呼"}
+        title={basicEditField === "name" ? "修改昵称" : basicEditField === "welcome" ? "修改欢迎语" : "广场招呼"}
         value={basicEditValue}
       />
       <ConfirmDialog

@@ -783,6 +783,14 @@ export const api = {
     });
   },
 
+  updatePlazaGreeting(plaza_greeting: string) {
+    return request<{ plaza_greeting: string }>("/users/me/plaza-greeting", {
+      method: "POST",
+      auth: true,
+      body: { plaza_greeting },
+    });
+  },
+
   setPresetAvatar(avatar_preset_id: number) {
     return request<{ avatar_type: "preset" | "custom"; avatar_uri: string }>("/users/me/avatar/preset", {
       method: "POST",

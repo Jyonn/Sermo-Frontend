@@ -586,8 +586,8 @@ export default function SquarePage() {
                   <p>{selectedIsSelf ? "你正在广场" : selectedUser.is_alive ? "正在广场" : "刚刚离开"}</p>
                 </div>
               </div>
-              {selectedUser.welcome_message?.trim() ? (
-                <blockquote>{selectedUser.welcome_message.trim()}</blockquote>
+              {(selectedUser.plaza_greeting || selectedUser.welcome_message)?.trim() ? (
+                <blockquote>{(selectedUser.plaza_greeting || selectedUser.welcome_message)?.trim()}</blockquote>
               ) : null}
               <div className="square-person-card-actions">
                 {selectedIsSelf ? (
