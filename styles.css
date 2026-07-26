@@ -10935,3 +10935,67 @@ img {
     flex-direction: row;
   }
 }
+.auth-password-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-forgot-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.password-recovery {
+  display: grid;
+  gap: 16px;
+}
+
+.password-recovery-loading,
+.password-recovery-target {
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.password-recovery-loading .material-symbols-outlined {
+  margin-right: 7px;
+  animation: spin 900ms linear infinite;
+  vertical-align: -0.25em;
+}
+
+.password-recovery-account {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 4px;
+  font-weight: 700;
+}
+
+.password-recovery-account small {
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.password-recovery-channel {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.password-recovery-channel > .material-symbols-outlined:first-child {
+  color: var(--brand-primary);
+}
+
+.password-recovery-code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1.15rem;
+  letter-spacing: 0.28em;
+}
+
+.password-recovery-error {
+  margin: 0;
+  color: var(--danger);
+  text-align: center;
+}

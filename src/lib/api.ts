@@ -287,6 +287,34 @@ export const api = {
     });
   },
 
+  lookupPasswordRecovery(payload: { slug: string; name: string }) {
+    return request<{ channels: Array<{ channel: number; masked: string }> }>("/users/password-recovery/lookup", {
+      method: "POST",
+      body: payload,
+    });
+  },
+
+  sendPasswordRecoveryCode(payload: { slug: string; name: string; channel: number }) {
+    return request<{ challenge_id: number; expires_in: number }>("/users/password-recovery/code", {
+      method: "POST",
+      body: payload,
+    });
+  },
+
+  verifyPasswordRecoveryCode(payload: { challenge_id: number; code: string }) {
+    return request<{ reset_token: string; expires_in: number }>("/users/password-recovery/verify", {
+      method: "POST",
+      body: payload,
+    });
+  },
+
+  resetRecoveredPassword(payload: { reset_token: string; new_password: string }) {
+    return request<Record<string, never>>("/users/password-recovery/reset", {
+      method: "POST",
+      body: payload,
+    });
+  },
+
   getSpaceMe(signal?: AbortSignal) {
     return request<SpaceDTO>("/spaces/me", { auth: true, signal });
   },

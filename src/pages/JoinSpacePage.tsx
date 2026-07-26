@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
+import { BottomSheet } from "../components/BottomSheet";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -9,6 +10,7 @@ import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../
 import { getBrowserJoinLanguage } from "../lib/language";
 import { buildAdminEntryHref, buildAdminHrefForCurrentHost, buildAdminPath, buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
 import type { SpaceDTO } from "../types";
+import { showToast } from "../lib/toast";
 
 function displaySlug(value: string) {
   return value
@@ -41,6 +43,17 @@ export default function JoinSpacePage() {
   const [lookupState, setLookupState] = useState<"idle" | "loading" | "ready" | "missing" | "error">("loading");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting">("idle");
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
+  const [recoveryStep, setRecoveryStep] = useState<"channels" | "code" | "password">("channels");
+  const [recoveryChannels, setRecoveryChannels] = useState<Array<{ channel: number; masked: string }>>([]);
+  const [recoveryTarget, setRecoveryTarget] = useState("");
+  const [recoveryChallengeId, setRecoveryChallengeId] = useState<number | null>(null);
+  const [recoveryResetToken, setRecoveryResetToken] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [recoveryPassword, setRecoveryPassword] = useState("");
+  const [recoveryPasswordConfirm, setRecoveryPasswordConfirm] = useState("");
+  const [recoveryBusy, setRecoveryBusy] = useState(false);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -87,6 +100,102 @@ export default function JoinSpacePage() {
 
   const adminHref =
     typeof window !== "undefined" && window.location.hostname !== "localhost" ? buildAdminHrefForCurrentHost(slug) : buildAdminPath(slug, "login");
+
+  const closeRecovery = () => {
+    if (recoveryBusy) return;
+    setRecoveryOpen(false);
+    setRecoveryStep("channels");
+    setRecoveryChannels([]);
+    setRecoveryTarget("");
+    setRecoveryChallengeId(null);
+    setRecoveryResetToken("");
+    setRecoveryCode("");
+    setRecoveryPassword("");
+    setRecoveryPasswordConfirm("");
+    setRecoveryError(null);
+  };
+
+  const openRecovery = async () => {
+    const name = nickname.trim();
+    if (!name) {
+      setPasswordHint("先输入需要找回的昵称。");
+      return;
+    }
+    setRecoveryOpen(true);
+    setRecoveryBusy(true);
+    setRecoveryError(null);
+    try {
+      const payload = await api.lookupPasswordRecovery({ slug, name });
+      setRecoveryChannels(payload.channels);
+      setRecoveryStep("channels");
+    } catch (error) {
+      setRecoveryError(error instanceof ApiError ? error.message : "暂时无法找回密码");
+    } finally {
+      setRecoveryBusy(false);
+    }
+  };
+
+  const sendRecoveryCode = async (channel: number, masked: string) => {
+    setRecoveryBusy(true);
+    setRecoveryError(null);
+    try {
+      const payload = await api.sendPasswordRecoveryCode({ slug, name: nickname.trim(), channel });
+      setRecoveryChallengeId(payload.challenge_id);
+      setRecoveryTarget(masked);
+      setRecoveryStep("code");
+    } catch (error) {
+      setRecoveryError(error instanceof ApiError ? error.message : "验证码发送失败");
+    } finally {
+      setRecoveryBusy(false);
+    }
+  };
+
+  const verifyRecoveryCode = async () => {
+    if (!recoveryChallengeId || recoveryCode.trim().length !== 6) return;
+    setRecoveryBusy(true);
+    setRecoveryError(null);
+    try {
+      const payload = await api.verifyPasswordRecoveryCode({
+        challenge_id: recoveryChallengeId,
+        code: recoveryCode.trim(),
+      });
+      setRecoveryResetToken(payload.reset_token);
+      setRecoveryStep("password");
+    } catch (error) {
+      setRecoveryError(error instanceof ApiError ? error.message : "验证码无效");
+    } finally {
+      setRecoveryBusy(false);
+    }
+  };
+
+  const resetRecoveredPassword = async () => {
+    if (recoveryPassword.length < 6) {
+      setRecoveryError("密码至少需要 6 位。");
+      return;
+    }
+    if (recoveryPassword !== recoveryPasswordConfirm) {
+      setRecoveryError("两次输入的密码不一致。");
+      return;
+    }
+    setRecoveryBusy(true);
+    setRecoveryError(null);
+    try {
+      await api.resetRecoveredPassword({
+        reset_token: recoveryResetToken,
+        new_password: recoveryPassword,
+      });
+      const nextPassword = recoveryPassword;
+      setRecoveryBusy(false);
+      closeRecovery();
+      setPassword(nextPassword);
+      setShowPasswordField(true);
+      setPasswordHint("密码已重置，可以直接进入空间。");
+      showToast("密码已重置");
+    } catch (error) {
+      setRecoveryError(error instanceof ApiError ? error.message : "密码重置失败");
+      setRecoveryBusy(false);
+    }
+  };
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -238,7 +347,10 @@ export default function JoinSpacePage() {
                 </button>
               ) : (
                 <div>
-                  <label className="field-label">访问密码</label>
+                  <div className="auth-password-label">
+                    <label className="field-label">访问密码</label>
+                    <button className="auth-forgot-button" onClick={() => void openRecovery()} type="button">忘记密码</button>
+                  </div>
                   <input
                     autoFocus
                     className="input"
@@ -261,6 +373,59 @@ export default function JoinSpacePage() {
         </div>
       </section>
       <AsyncErrorDialog message={submitError ?? ""} onClose={() => setSubmitError(null)} open={Boolean(submitError)} />
+      <BottomSheet open={recoveryOpen} onClose={closeRecovery} title="找回密码">
+        <div className="password-recovery">
+          {recoveryBusy && recoveryStep === "channels" && !recoveryChannels.length ? (
+            <div className="password-recovery-loading"><span className="material-symbols-outlined">progress_activity</span>正在查找账号</div>
+          ) : null}
+
+          {recoveryStep === "channels" && recoveryChannels.length ? (
+            <>
+              <div className="password-recovery-account">
+                <span>{nickname.trim()}</span>
+                <small>@{space?.slug}</small>
+              </div>
+              <div className="simple-list">
+                {recoveryChannels.map((item) => (
+                  <button className="simple-row password-recovery-channel" disabled={recoveryBusy} key={item.channel} onClick={() => void sendRecoveryCode(item.channel, item.masked)} type="button">
+                    <span className="material-symbols-outlined">{item.channel === 0 ? "mail" : "smartphone"}</span>
+                    <span className="row-main">
+                      <strong>{item.channel === 0 ? "通过邮箱验证" : "通过手机验证"}</strong>
+                      <span className="row-subtle">{item.masked}</span>
+                    </span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
+
+          {recoveryStep === "code" ? (
+            <div className="simple-form">
+              <div className="password-recovery-target">验证码已发送至 <strong>{recoveryTarget}</strong></div>
+              <label className="field-label">验证码</label>
+              <input autoFocus className="input password-recovery-code" inputMode="numeric" maxLength={6} value={recoveryCode} onChange={(event) => setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))} />
+              <button className="button" disabled={recoveryBusy || recoveryCode.length !== 6} onClick={() => void verifyRecoveryCode()} type="button">
+                {recoveryBusy ? "验证中..." : "继续"}
+              </button>
+            </div>
+          ) : null}
+
+          {recoveryStep === "password" ? (
+            <div className="simple-form">
+              <label className="field-label">新密码</label>
+              <input autoFocus className="input" type="password" value={recoveryPassword} onChange={(event) => setRecoveryPassword(event.target.value)} />
+              <label className="field-label">确认新密码</label>
+              <input className="input" type="password" value={recoveryPasswordConfirm} onChange={(event) => setRecoveryPasswordConfirm(event.target.value)} />
+              <button className="button" disabled={recoveryBusy || !recoveryPassword || !recoveryPasswordConfirm} onClick={() => void resetRecoveredPassword()} type="button">
+                {recoveryBusy ? "重置中..." : "重置密码"}
+              </button>
+            </div>
+          ) : null}
+
+          {recoveryError ? <div className="field-hint password-recovery-error">{recoveryError}</div> : null}
+        </div>
+      </BottomSheet>
     </AppChrome>
   );
 }
