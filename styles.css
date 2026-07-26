@@ -2754,6 +2754,14 @@ img {
   box-shadow: none;
 }
 
+.message-bubble.is-location {
+  margin-inline: 4px;
+}
+
+.message-bubble.is-location:not(.has-reply) {
+  padding: 4px;
+}
+
 .message-media-frame {
   position: relative;
   overflow: hidden;
@@ -3906,7 +3914,6 @@ img {
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--message-card-shadow);
   text-decoration: none;
-  margin-inline: 3px;
 }
 
 .message-location-map,
