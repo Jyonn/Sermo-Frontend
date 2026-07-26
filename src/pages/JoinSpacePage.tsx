@@ -45,7 +45,7 @@ export default function JoinSpacePage() {
   const [submitState, setSubmitState] = useState<"idle" | "submitting">("idle");
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryStep, setRecoveryStep] = useState<"channels" | "code" | "password">("channels");
-  const [recoveryChannels, setRecoveryChannels] = useState<Array<{ channel: number; masked: string }>>([]);
+  const [recoveryChannels, setRecoveryChannels] = useState<Array<{ channel: number; type: "email" | "sms"; masked: string }>>([]);
   const [recoveryTarget, setRecoveryTarget] = useState("");
   const [recoveryChallengeId, setRecoveryChallengeId] = useState<number | null>(null);
   const [recoveryResetToken, setRecoveryResetToken] = useState("");
@@ -388,9 +388,20 @@ export default function JoinSpacePage() {
               <div className="simple-list">
                 {recoveryChannels.map((item) => (
                   <button className="simple-row password-recovery-channel" disabled={recoveryBusy} key={item.channel} onClick={() => void sendRecoveryCode(item.channel, item.masked)} type="button">
-                    <span className="material-symbols-outlined">{item.channel === 0 ? "mail" : "smartphone"}</span>
+                    <span className="password-recovery-channel-icon" aria-hidden="true">
+                      {item.type === "email" ? (
+                        <svg fill="none" viewBox="0 0 24 24">
+                          <path d="M4.5 7.5 12 13l7.5-5.5M6 5.5h12A2.5 2.5 0 0 1 20.5 8v8A2.5 2.5 0 0 1 18 18.5H6A2.5 2.5 0 0 1 3.5 16V8A2.5 2.5 0 0 1 6 5.5Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                        </svg>
+                      ) : (
+                        <svg fill="none" viewBox="0 0 24 24">
+                          <rect height="19" rx="2.5" stroke="currentColor" strokeWidth="1.8" width="12" x="6" y="2.5" />
+                          <path d="M10 5h4M10.5 18.5h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                        </svg>
+                      )}
+                    </span>
                     <span className="row-main">
-                      <strong>{item.channel === 0 ? "通过邮箱验证" : "通过手机验证"}</strong>
+                      <strong>{item.type === "email" ? "通过邮箱验证" : "通过手机验证"}</strong>
                       <span className="row-subtle">{item.masked}</span>
                     </span>
                     <span className="material-symbols-outlined">chevron_right</span>

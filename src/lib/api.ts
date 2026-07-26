@@ -288,7 +288,7 @@ export const api = {
   },
 
   lookupPasswordRecovery(payload: { slug: string; name: string }) {
-    return request<{ channels: Array<{ channel: number; masked: string }> }>("/users/password-recovery/lookup", {
+    return request<{ channels: Array<{ channel: number; type: "email" | "sms"; masked: string }> }>("/users/password-recovery/lookup", {
       method: "POST",
       body: payload,
     });

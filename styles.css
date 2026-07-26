@@ -10984,8 +10984,17 @@ img {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
-.password-recovery-channel > .material-symbols-outlined:first-child {
+.password-recovery-channel-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   color: var(--brand-primary);
+}
+
+.password-recovery-channel-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .password-recovery-code {
