@@ -63,7 +63,7 @@ const growthLevelUnlocks: Record<number, string[]> = {
   7: ["好友上线提醒", "昵称每周可改"],
   8: ["下载语音", "自定义聊天背景"],
   9: ["基础头像框"],
-  10: ["广场光环"],
+  10: ["广场光环", "自定义消息提示"],
   11: ["聊天气泡主题"],
   12: ["个人名片主题"],
   14: ["动态轨迹"],
@@ -251,6 +251,7 @@ export default function MenuPage() {
   const canEditWelcome = hasGrowthCapability("welcome_message", 6);
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const canCustomizeChatBackground = hasGrowthCapability("chat_background", 8);
+  const canCustomizeNotificationMessage = hasGrowthCapability("custom_notification_message", 10);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -804,6 +805,10 @@ export default function MenuPage() {
   };
 
   const openMessageEditor = (channel: NotificationChannel, kind: NotificationMessageKind, field: "title" | "content") => {
+    if (!canCustomizeNotificationMessage) {
+      showToast("达到 Lv.10 后可自定义消息提示", "error");
+      return;
+    }
     setPrefEditor({ type: "message", channel, kind, field });
     setPrefEditorValue(messagePreferenceValue(prefs[channel], kind, field));
   };
@@ -1850,15 +1855,26 @@ export default function MenuPage() {
                   </div>
                   {activePref.hideMessageContent ? (
                     <button
-                      className="menu-pref-row menu-pref-row-button"
+                      className={`menu-pref-row menu-pref-row-button ${!canCustomizeNotificationMessage ? "is-disabled" : ""}`}
                       disabled={!activePref.enabled}
-                      onClick={() => setPrefCustomDrawerOpen(true)}
+                      onClick={() => {
+                        if (!canCustomizeNotificationMessage) {
+                          showToast("达到 Lv.10 后可自定义消息提示", "error");
+                          return;
+                        }
+                        setPrefCustomDrawerOpen(true);
+                      }}
                       type="button"
                     >
                       <div className="row-main">
                         <strong>自定义消息提示</strong>
                       </div>
-                      <span className="material-symbols-outlined">chevron_right</span>
+                      <div className="menu-pref-row-value">
+                        {!canCustomizeNotificationMessage ? <span>Lv.10 解锁</span> : null}
+                        <span className="material-symbols-outlined">
+                          {canCustomizeNotificationMessage ? "chevron_right" : "lock"}
+                        </span>
+                      </div>
                     </button>
                   ) : null}
                 </>
