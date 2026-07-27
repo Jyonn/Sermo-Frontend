@@ -252,6 +252,7 @@ export default function MenuPage() {
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const canCustomizeChatBackground = hasGrowthCapability("chat_background", 8);
   const canCustomizeNotificationMessage = hasGrowthCapability("custom_notification_message", 10);
+  const canSwitchAccount = switchAccounts.length > 0;
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -283,6 +284,7 @@ export default function MenuPage() {
   };
 
   const openAccountSwitcher = async () => {
+    if (!canSwitchAccount) return;
     setAccountSwitcherOpen(true);
     setAccountSwitcherLoading(true);
     try {
@@ -293,6 +295,15 @@ export default function MenuPage() {
       setAccountSwitcherLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    const controller = new AbortController();
+    void api.getSwitchAccounts(controller.signal)
+      .then(setSwitchAccounts)
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [currentUserId]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
     setSwitchingUserId(account.user.user_id);
@@ -509,13 +520,13 @@ export default function MenuPage() {
     }
   };
 
-  const webPushDescription = {
+  const webPushDescription: string | null = {
     checking: "正在检查",
     unsupported: "当前浏览器不支持",
     "needs-install": "添加到主屏幕后开启",
     denied: "请在系统设置中允许",
-    off: "未开启",
-    on: "已开启",
+    off: null,
+    on: null,
   }[webPushState];
 
   useEffect(() => {
@@ -1215,15 +1226,21 @@ export default function MenuPage() {
             <span className="menu-switch-title">
               <span>菜单</span>
               <span className="menu-switch-separator">·</span>
-              <button
-                aria-label="切换账号"
-                className="menu-account-switch-trigger"
-                onClick={() => void openAccountSwitcher()}
-                type="button"
-              >
-                <span className="menu-account-switch-icon" aria-hidden="true">⇄</span>
-                <span>{space?.name ?? "当前空间"}</span>
-              </button>
+              {canSwitchAccount ? (
+                <button
+                  aria-label="切换账号"
+                  className="menu-account-switch-trigger"
+                  onClick={() => void openAccountSwitcher()}
+                  type="button"
+                >
+                  <span className="menu-account-switch-icon" aria-hidden="true">⇄</span>
+                  <span>{space?.name ?? "当前空间"}</span>
+                </button>
+              ) : (
+                <span className="menu-account-switch-trigger is-static">
+                  {space?.name ?? "当前空间"}
+                </span>
+              )}
             </span>
           }
           syncing={syncing}
@@ -1722,7 +1739,7 @@ export default function MenuPage() {
             <div className="menu-pref-row">
               <div className="row-main">
                 <strong>系统通知</strong>
-                <div className="row-subtle">{webPushDescription}</div>
+                {webPushDescription ? <div className="row-subtle">{webPushDescription}</div> : null}
               </div>
               <button
                 aria-label="toggle-web-push"

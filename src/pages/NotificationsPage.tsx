@@ -109,6 +109,7 @@ function notificationChatAvatar(chat: ChatDTO) {
 export default function NotificationsPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const friendDirectoryRef = useRef<HTMLDivElement | null>(null);
   const friendSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [syncing, setSyncing] = useState(false);
@@ -126,6 +127,7 @@ export default function NotificationsPage() {
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
+  const [friendIndexNeeded, setFriendIndexNeeded] = useState(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
   useEffect(() => {
@@ -188,6 +190,30 @@ export default function NotificationsPage() {
 
   const pendingRequestCount = pendingIncomingCount(requests.incoming);
 
+  useEffect(() => {
+    const directory = friendDirectoryRef.current;
+    if (!directory || !friendSections.length) {
+      setFriendIndexNeeded(false);
+      return;
+    }
+
+    const update = () => {
+      const rect = directory.getBoundingClientRect();
+      const bottomNavigationAllowance = window.matchMedia("(max-width: 767px)").matches ? 88 : 24;
+      const availableHeight = Math.max(0, window.innerHeight - Math.max(0, rect.top) - bottomNavigationAllowance);
+      setFriendIndexNeeded(rect.height > availableHeight + 24);
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(directory);
+    window.addEventListener("resize", update);
+    const frame = window.requestAnimationFrame(update);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", update);
+      observer?.disconnect();
+    };
+  }, [friendSections]);
+
   const actOnRequest = async (userId: number, accept: boolean) => {
     try {
       await api.respondFriendRequest(userId, accept);
@@ -232,7 +258,7 @@ export default function NotificationsPage() {
                 <strong>好友申请</strong>
                 <div className="row-subtle">{pendingRequestCount ? `${pendingRequestCount} 条待处理` : "现在没有新的好友申请"}</div>
               </div>
-              {pendingRequestCount ? <span className="small-badge">{pendingRequestCount}</span> : <span className="count-badge">查看</span>}
+              {pendingRequestCount ? <span className="small-badge">{pendingRequestCount}</span> : <span className="material-symbols-outlined chevron-inline">chevron_right</span>}
             </button>
 
             <button className="simple-row communication-entry-row" onClick={() => setGroupSheetOpen(true)} type="button">
@@ -243,13 +269,13 @@ export default function NotificationsPage() {
                 <strong>群聊</strong>
                 <div className="row-subtle">{groupChats.length ? `你已加入 ${groupChats.length} 个群聊` : "还没有加入任何群聊"}</div>
               </div>
-              <span className="count-badge">查看</span>
+              <span className="material-symbols-outlined chevron-inline">chevron_right</span>
             </button>
           </div>
         </section>
 
         <section className="list-section">
-          <div className="friend-directory">
+          <div className="friend-directory" ref={friendDirectoryRef}>
             <div className="friend-directory-list">
               {friendSections.map((section) => (
                 <section
@@ -284,7 +310,7 @@ export default function NotificationsPage() {
                 </section>
               ))}
             </div>
-            {friendSections.length && !requestSheetOpen && !groupSheetOpen && profileDrawerUserId === null ? (
+            {friendIndexNeeded && !requestSheetOpen && !groupSheetOpen && profileDrawerUserId === null ? (
               <div className="friend-directory-index" aria-label="好友索引">
                 {friendSections.map((section) => (
                   <button

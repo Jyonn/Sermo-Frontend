@@ -8217,6 +8217,14 @@ img {
   white-space: nowrap;
 }
 
+.menu-account-switch-trigger.is-static {
+  padding-left: 10px;
+  color: var(--text-secondary);
+  border-color: rgba(121, 139, 132, 0.18);
+  background: rgba(255, 255, 255, 0.46);
+  cursor: default;
+}
+
 .menu-account-switch-icon {
   display: grid;
   place-items: center;
