@@ -18,6 +18,7 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { ImageLightbox } from "../components/ImageLightbox";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
@@ -1737,8 +1738,6 @@ export default function ChatsPage() {
   const [imagePreview, setImagePreview] = useState<ImagePreviewState | null>(null);
   const [videoPreview, setVideoPreview] = useState<VideoPreviewState | null>(null);
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
-  const imagePreviewTrackRef = useRef<HTMLDivElement | null>(null);
-  const imagePreviewGestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const cancelledSendIdsRef = useRef(new Set<string>());
   const localObjectUrlsRef = useRef(new Set<string>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -1822,11 +1821,6 @@ export default function ChatsPage() {
     }, 420);
   };
 
-  useLayoutEffect(() => {
-    const track = imagePreviewTrackRef.current;
-    if (!imagePreview || !track) return;
-    track.scrollLeft = track.clientWidth * imagePreview.index;
-  }, [imagePreview?.uris, imagePreview?.index]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -3543,26 +3537,6 @@ export default function ChatsPage() {
     }
   };
 
-  const downloadPreviewImage = async () => {
-    if (!imagePreview) return;
-    const uri = imagePreview.uris[imagePreview.index];
-    if (!uri) return;
-    try {
-      const response = await fetch(uri);
-      if (!response.ok) throw new Error("download_failed");
-      const blob = await response.blob();
-      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = `sermo-image-${Date.now()}.${extension}`;
-      anchor.click();
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    } catch {
-      window.open(uri, "_blank", "noopener,noreferrer");
-    }
-  };
-
   const downloadPreviewVideo = async () => {
     if (!videoPreview?.uri) return;
     try {
@@ -4676,73 +4650,14 @@ export default function ChatsPage() {
         type="file"
       />
       {imagePreview ? (
-        <div
-          className="dialog-backdrop message-image-preview-backdrop"
-          onClick={() => {
-            if (imagePreviewGestureRef.current?.moved) {
-              imagePreviewGestureRef.current = null;
-              return;
-            }
-            setImagePreview(null);
-          }}
-          onPointerDown={(event) => {
-            imagePreviewGestureRef.current = { moved: false, x: event.clientX };
-          }}
-          onPointerMove={(event) => {
-            const gesture = imagePreviewGestureRef.current;
-            if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
-          }}
-          role="presentation"
-        >
-          <section aria-modal="true" className="message-image-preview-modal" role="dialog">
-            <div
-              ref={imagePreviewTrackRef}
-              className="message-image-preview-track"
-              onScroll={(event) => {
-                const element = event.currentTarget;
-                const index = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
-                if (index !== imagePreview.index) {
-                  setImagePreview((current) => current ? { ...current, index } : current);
-                }
-              }}
-            >
-              {imagePreview.uris.map((uri, index) => (
-                <div className="message-image-preview-slide" key={`${uri}:${index}`}>
-                  <article className="message-image-preview-plate">
-                    <div className="message-image-preview-frame">
-                      <img
-                        alt={`图片预览 ${index + 1}`}
-                        className="message-image-preview"
-                        draggable={false}
-                        src={uri}
-                      />
-                    </div>
-                    <ImageMetadataPanel metadata={imagePreview.metadata[index] ?? null} />
-                  </article>
-                </div>
-              ))}
-            </div>
-            <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
-              <span className="message-image-preview-count">
-                {String(imagePreview.index + 1).padStart(2, "0")}
-                <i />
-                {String(imagePreview.uris.length).padStart(2, "0")}
-              </span>
-              <button
-                aria-label={`下载图片${formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size) ? `，${formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size)}` : ""}`}
-                onClick={() => void downloadPreviewImage()}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" />
-                </svg>
-                {formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size) ? (
-                  <span>{formatImageFileSize(imagePreview.metadata[imagePreview.index]?.file_size)}</span>
-                ) : null}
-              </button>
-            </div>
-          </section>
-        </div>
+        <ImageLightbox
+          details={imagePreview.metadata.map((metadata, index) => <ImageMetadataPanel key={`metadata:${imagePreview.uris[index]}`} metadata={metadata} />)}
+          downloadLabels={imagePreview.metadata.map((metadata) => formatImageFileSize(metadata?.file_size))}
+          index={imagePreview.index}
+          onClose={() => setImagePreview(null)}
+          onIndexChange={(index) => setImagePreview((current) => current ? { ...current, index } : current)}
+          uris={imagePreview.uris}
+        />
       ) : null}
       {videoPreview ? (
         <div

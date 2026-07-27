@@ -5,6 +5,7 @@ import { BottomSheet } from "./BottomSheet";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
+import { ImageLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -69,6 +70,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [removingFriend, setRemovingFriend] = useState(false);
   const [currentUserMe, setCurrentUserMe] = useState<UserMeDTO | null>(null);
+  const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -238,9 +240,15 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   return (
     <div className="user-profile-panel">
       <section className="user-profile-identity">
-        <div className="user-profile-avatar-wrap">
+        <button
+          aria-label={`查看${user.name}的头像`}
+          className="user-profile-avatar-wrap"
+          disabled={!user.avatar_uri}
+          onClick={() => setAvatarPreviewOpen(true)}
+          type="button"
+        >
           <UserAvatar className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
-        </div>
+        </button>
         <div className="user-profile-copy">
           <div className="user-profile-kicker">{isFriend ? friendshipAge(respondedAt) : "同一空间成员"}</div>
           <h2>{user.name}</h2>
@@ -336,6 +344,16 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         }}
         onConfirm={() => void removeFriend()}
       />
+      {avatarPreviewOpen && user.avatar_uri ? (
+        <ImageLightbox
+          altPrefix={`${user.name}的头像`}
+          fileNamePrefix="sermo-avatar"
+          index={0}
+          onClose={() => setAvatarPreviewOpen(false)}
+          onIndexChange={() => undefined}
+          uris={[user.avatar_uri]}
+        />
+      ) : null}
     </div>
   );
 }

@@ -7509,6 +7509,21 @@ img {
 
 .user-profile-avatar-wrap {
   position: relative;
+  width: 104px;
+  height: 104px;
+  padding: 0;
+  border-radius: 30px;
+  background: transparent;
+  cursor: zoom-in;
+  transition: transform 160ms ease;
+}
+
+.user-profile-avatar-wrap:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.user-profile-avatar-wrap:disabled {
+  cursor: default;
 }
 
 .user-profile-avatar {
