@@ -1459,10 +1459,18 @@ export default function MenuPage() {
             <button className={`simple-row menu-link-row${canRenameNickname ? "" : " is-locked"}`} disabled={!canRenameNickname} onClick={() => openBasicEditDialog("name")} type="button">
               <div className="row-main menu-key-cell">
                 <strong>昵称</strong>
+                {canRenameNickname && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now() ? (
+                  <div className="row-subtle">
+                    下次可修改 {new Date(me.nickname_change.available_at * 1000).toLocaleDateString("zh-CN", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </div>
+                ) : null}
               </div>
               <div className="menu-detail-value menu-detail-text">
                 {canRenameNickname ? session?.user.name ?? "言浪用户" : "Lv.5 解锁"}
-                {me?.nickname_change?.interval_days ? <small>{me.nickname_change.interval_days} 天一次</small> : null}
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1475,7 +1483,7 @@ export default function MenuPage() {
             </button>
             <button className={`simple-row menu-link-row${canEditPlazaGreeting ? "" : " is-locked"}`} disabled={!canEditPlazaGreeting} onClick={() => openBasicEditDialog("plaza")} type="button">
               <div className="row-main menu-key-cell"><strong>广场招呼</strong></div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditPlazaGreeting ? me?.plaza_greeting || "还没有设置" : "Lv.6 解锁"}</div>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditPlazaGreeting ? me?.plaza_greeting || "嗨，认识一下？" : "Lv.6 解锁"}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>

@@ -289,6 +289,7 @@ export default function SquarePage() {
       verified: Boolean(currentUser.verified),
       last_heartbeat: currentUser.last_heartbeat ?? Date.now() / 1000,
       welcome_message: currentUser.welcome_message,
+      plaza_greeting: currentUser.language === "en" ? "Hi, nice to meet you." : "嗨，认识一下？",
       email_verified_at: currentUser.email_verified_at ?? null,
       phone_verified_at: currentUser.phone_verified_at ?? null,
       bark_verified_at: currentUser.bark_verified_at ?? null,
@@ -586,8 +587,8 @@ export default function SquarePage() {
                   <p>{selectedIsSelf ? "你正在广场" : selectedUser.is_alive ? "正在广场" : "刚刚离开"}</p>
                 </div>
               </div>
-              {(selectedUser.plaza_greeting || selectedUser.welcome_message)?.trim() ? (
-                <blockquote>{(selectedUser.plaza_greeting || selectedUser.welcome_message)?.trim()}</blockquote>
+              {selectedUser.plaza_greeting?.trim() ? (
+                <blockquote>{selectedUser.plaza_greeting.trim()}</blockquote>
               ) : null}
               <div className="square-person-card-actions">
                 {selectedIsSelf ? (
