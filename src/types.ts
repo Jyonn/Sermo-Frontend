@@ -301,6 +301,8 @@ export interface ChatMessagePayloadDTO {
   longitude?: number;
   address?: string;
   geocoding_provider?: string;
+  obscured?: boolean;
+  obscure_radius_km?: number;
 }
 
 export interface ImageMetadataDTO {

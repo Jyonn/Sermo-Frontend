@@ -63,6 +63,7 @@ type LocationDraft = {
   phase: "locating" | "ready" | "sending" | "error";
   latitude?: number;
   longitude?: number;
+  obscure?: boolean;
   error?: string;
 };
 
@@ -1114,10 +1115,12 @@ function renderMessageContent(
     const latitude = Number(message.payload?.latitude);
     const longitude = Number(message.payload?.longitude);
     const address = message.payload?.address?.trim();
+    const obscured = Boolean(message.payload?.obscured);
+    const obscureRadius = message.payload?.obscure_radius_km ?? 50;
     return (
       <a
         className={`message-location-card ${groupClassName}`.trim()}
-        href={buildAmapLocationUrl(latitude, longitude, address)}
+        href={obscured && message.status === "pending" ? undefined : buildAmapLocationUrl(latitude, longitude, address)}
         rel="noreferrer"
         target="_blank"
       >
@@ -1127,8 +1130,8 @@ function renderMessageContent(
           <span className="message-location-pin"><ComposerSvgIcon kind="location" /></span>
         </span>
         <span className="message-location-copy">
-          <strong>{address || (message.status === "pending" ? "正在解析位置" : "共享位置")}</strong>
-          <small>{latitude.toFixed(5)}, {longitude.toFixed(5)}</small>
+          <strong>{address || (message.status === "pending" ? obscured ? "正在生成模糊位置" : "正在解析位置" : obscured ? "模糊位置" : "共享位置")}</strong>
+          <small>{obscured ? `模糊至 ${obscureRadius} 公里内` : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}</small>
         </span>
         <span className="message-location-open" aria-hidden="true">↗</span>
       </a>
@@ -3134,6 +3137,7 @@ export default function ChatsPage() {
           phase: "ready",
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          obscure: false,
         });
       },
       (error) => {
@@ -3150,6 +3154,7 @@ export default function ChatsPage() {
     if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
     const latitude = locationDraft.latitude;
     const longitude = locationDraft.longitude;
+    const obscure = Boolean(locationDraft.obscure);
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -3163,7 +3168,13 @@ export default function ChatsPage() {
       time: formatTime(createdAt),
       createdAt,
       text: "[位置]",
-      payload: { kind: "location", latitude, longitude },
+      payload: {
+        kind: "location",
+        latitude,
+        longitude,
+        obscured: obscure,
+        obscure_radius_km: obscure ? 50 : undefined,
+      },
       replyTo: reply,
       status: "pending",
     };
@@ -3184,7 +3195,7 @@ export default function ChatsPage() {
       const created = await api.sendMessage(
         selectedChat.id,
         MESSAGE_TYPE_LOCATION,
-        JSON.stringify({ latitude, longitude }),
+        JSON.stringify({ latitude, longitude, obscure }),
         reply?.message_id,
         clientId,
       );
@@ -4793,11 +4804,26 @@ export default function ChatsPage() {
                     : "发送这个位置？"}
               </h2>
               {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
-                <p>{locationDraft.latitude?.toFixed(5)}, {locationDraft.longitude?.toFixed(5)}</p>
+                <p>{locationDraft.obscure ? "精确坐标不会写入消息" : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`}</p>
               ) : (
                 <p>{locationDraft.error || "请稍候"}</p>
               )}
             </div>
+            {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
+              <div className="location-share-privacy">
+                <div>
+                  <strong>模糊坐标</strong>
+                  <span>随机偏移至 50 公里内</span>
+                </div>
+                <button
+                  aria-label="切换模糊坐标"
+                  className={`switch ${locationDraft.obscure ? "active" : ""}`}
+                  disabled={locationDraft.phase === "sending"}
+                  onClick={() => setLocationDraft((current) => current ? { ...current, obscure: !current.obscure } : current)}
+                  type="button"
+                />
+              </div>
+            ) : null}
             <div className="location-share-actions">
               <button className="ghost-button" disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">取消</button>
               {locationDraft.phase === "error" ? (
