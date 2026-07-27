@@ -3892,7 +3892,8 @@ export default function ChatsPage() {
       hideTopbar={!displayedChat}
       hideMobileNav={Boolean(displayedChat)}
       hidePageTitle={Boolean(displayedChat)}
-      topbarClassName={displayedChat ? `conversation-topbar${isClosingChatView ? " is-closing" : ""}` : undefined}
+      topbarClassName={displayedChat ? `conversation-topbar chat-background-${chatBackgroundTheme}${isClosingChatView ? " is-closing" : ""}` : undefined}
+      topbarStyle={displayedChat ? chatLayoutStyle : undefined}
       topbarProgress={displayedChat ? sendProgress : null}
       topbarLeading={
         displayedChat ? (
@@ -3938,13 +3939,13 @@ export default function ChatsPage() {
         ) : undefined
       }
     >
-      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
+      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>
           {displayedChat ? (
             <>
-              <header className="desktop-conversation-header">
+              <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}`}>
                 <div className="chat-conversation-topbar">
                   <div className="avatar-wrap">
                     <UserAvatar

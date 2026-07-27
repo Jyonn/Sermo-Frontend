@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
@@ -13,6 +13,7 @@ interface AppChromeProps {
   hideMobileNav?: boolean;
   hidePageTitle?: boolean;
   topbarClassName?: string;
+  topbarStyle?: CSSProperties;
   topbarProgress?: number | null;
   shellClassName?: string;
   publicHeader?: boolean;
@@ -31,6 +32,7 @@ export function AppChrome({
   hideMobileNav = false,
   hidePageTitle = false,
   topbarClassName,
+  topbarStyle,
   topbarProgress,
   shellClassName,
   publicHeader = false,
@@ -50,7 +52,10 @@ export function AppChrome({
   return (
     <>
       {!hideTopbar ? (
-        <header className={`topbar${usePublicHeader ? " guest-topbar" : ""}${topbarClassName ? ` ${topbarClassName}` : ""}`}>
+        <header
+          className={`topbar${usePublicHeader ? " guest-topbar" : ""}${topbarClassName ? ` ${topbarClassName}` : ""}`}
+          style={topbarStyle}
+        >
           <div className="topbar-leading">
             {topbarLeading ?? (
               <Link className={`brand${visibleSpaceBrand ? " guest-space-brand" : ""}`} to={brandTarget}>

@@ -2264,6 +2264,44 @@ img {
   isolation: isolate;
 }
 
+.chat-background-default {
+  --chat-chrome-surface: rgba(247, 248, 244, 0.7);
+  --chat-chrome-border: rgba(222, 226, 220, 0.72);
+  --chat-input-surface: rgba(255, 255, 255, 0.66);
+}
+
+.chat-background-paper {
+  --chat-chrome-surface: rgba(246, 240, 227, 0.68);
+  --chat-chrome-border: rgba(199, 184, 155, 0.38);
+  --chat-input-surface: rgba(255, 252, 244, 0.64);
+}
+
+.chat-background-mint {
+  --chat-chrome-surface: rgba(229, 244, 235, 0.66);
+  --chat-chrome-border: rgba(111, 175, 151, 0.3);
+  --chat-input-surface: rgba(247, 253, 249, 0.62);
+}
+
+.chat-background-dusk {
+  --chat-chrome-surface: rgba(238, 230, 228, 0.68);
+  --chat-chrome-border: rgba(146, 126, 137, 0.3);
+  --chat-input-surface: rgba(252, 247, 245, 0.62);
+}
+
+.chat-background-custom {
+  --chat-chrome-surface: rgba(244, 244, 240, 0.58);
+  --chat-chrome-border: rgba(255, 255, 255, 0.42);
+  --chat-input-surface: rgba(255, 255, 255, 0.58);
+}
+
+.topbar.conversation-topbar,
+.desktop-conversation-header {
+  background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.68));
+  border-bottom-color: var(--chat-chrome-border, rgba(232, 235, 242, 0.72));
+  -webkit-backdrop-filter: blur(22px) saturate(1.12);
+  backdrop-filter: blur(22px) saturate(1.12);
+}
+
 .chat-detail-scene::before {
   position: absolute;
   inset: 0;
@@ -4169,10 +4207,11 @@ img {
   margin: 0;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   border: 0;
-  border-top: 1px solid rgba(232, 235, 242, 0.92);
+  border-top: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.92));
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.76);
-  backdrop-filter: blur(14px);
+  background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.76));
+  -webkit-backdrop-filter: blur(22px) saturate(1.12);
+  backdrop-filter: blur(22px) saturate(1.12);
   box-shadow: none;
 }
 
@@ -4270,8 +4309,10 @@ img {
   min-height: 46px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(224, 230, 240, 0.95);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--chat-chrome-border, rgba(224, 230, 240, 0.88));
+  background: var(--chat-input-surface, rgba(255, 255, 255, 0.82));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
@@ -4338,7 +4379,9 @@ img {
   border: 1px solid rgba(215, 220, 231, 0.78);
   border-radius: 16px;
   color: var(--text-secondary);
-  background: rgba(247, 249, 252, 0.94);
+  background: var(--chat-input-surface, rgba(247, 249, 252, 0.82));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   transition: transform 150ms ease-out, color 150ms ease-out, background 150ms ease-out;
 }
 
@@ -4505,8 +4548,10 @@ img {
   min-height: 50px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(224, 230, 240, 0.95);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 253, 0.9));
+  border: 1px solid var(--chat-chrome-border, rgba(224, 230, 240, 0.88));
+  background: var(--chat-input-surface, rgba(255, 255, 255, 0.82));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
@@ -6870,8 +6915,8 @@ img {
     justify-content: space-between;
     min-height: 70px;
     padding: 10px 14px;
-    border-bottom: 1px solid rgba(215, 220, 231, 0.72);
-    background: rgba(255, 253, 248, 0.82);
+    border-bottom: 1px solid var(--chat-chrome-border, rgba(215, 220, 231, 0.72));
+    background: var(--chat-chrome-surface, rgba(255, 253, 248, 0.82));
   }
 
   .desktop-conversation-header .chat-conversation-topbar {
@@ -7219,8 +7264,8 @@ img {
 }
 
 .topbar.conversation-topbar {
-  background: rgba(255, 255, 255, 0.52);
-  border-bottom-color: rgba(232, 235, 242, 0.66);
+  background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.52));
+  border-bottom-color: var(--chat-chrome-border, rgba(232, 235, 242, 0.66));
 }
 
 .topbar-leading {
@@ -10723,9 +10768,10 @@ img {
     z-index: 12;
     margin: 0;
     padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.94);
-    border-top: 1px solid rgba(232, 235, 242, 0.98);
-    backdrop-filter: blur(18px);
+    background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.76));
+    border-top: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.92));
+    -webkit-backdrop-filter: blur(22px) saturate(1.12);
+    backdrop-filter: blur(22px) saturate(1.12);
   }
 
   .composer-input-wrap {
