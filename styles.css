@@ -2305,11 +2305,17 @@ img {
 .chat-detail-scene::before {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   content: "";
   pointer-events: none;
   background-color: rgba(248, 249, 246, 0.72);
   transition: background 220ms ease, opacity 220ms ease;
+}
+
+.chat-detail-scene > .message-scroll,
+.chat-detail-scene > .composer {
+  position: relative;
+  z-index: 1;
 }
 
 .chat-detail-scene.chat-background-paper::before {
