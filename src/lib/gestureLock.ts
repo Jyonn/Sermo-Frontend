@@ -57,10 +57,6 @@ export function isGestureLockPreferenceEnabled(preference: GestureLockPreference
   return Boolean(preference?.enabled && preference.pattern_hash && preference.salt);
 }
 
-export function isGestureDecoyPreferenceEnabled(preference: GestureLockPreferenceDTO | null | undefined) {
-  return Boolean(preference?.decoy_enabled && preference.decoy_pattern_hash && preference.decoy_salt);
-}
-
 export function isGestureUnlocked(scope: string | null) {
   if (!scope || typeof window === "undefined") return false;
   return window.sessionStorage.getItem(unlockKey(scope)) === "1";
@@ -71,13 +67,8 @@ export function isGestureLocked(scope: string | null) {
   return window.sessionStorage.getItem(lockedKey(scope)) === "1";
 }
 
-export function isGestureDecoyActive(scope: string | null) {
-  if (!scope || typeof window === "undefined") return false;
-  return window.sessionStorage.getItem(decoyKey(scope)) === "1";
-}
-
 export function isGestureAccessSuppressed(scope: string | null) {
-  return isGestureLocked(scope) || isGestureDecoyActive(scope);
+  return isGestureLocked(scope);
 }
 
 export function markGestureLocked(scope: string | null) {
@@ -91,13 +82,6 @@ export function markGestureUnlocked(scope: string | null) {
   window.sessionStorage.removeItem(decoyKey(scope));
   window.sessionStorage.setItem(unlockKey(scope), "1");
   markGestureActivity(scope);
-}
-
-export function markGestureDecoyActive(scope: string | null) {
-  if (!scope || typeof window === "undefined") return;
-  window.sessionStorage.removeItem(lockedKey(scope));
-  window.sessionStorage.removeItem(unlockKey(scope));
-  window.sessionStorage.setItem(decoyKey(scope), "1");
 }
 
 export function clearGestureUnlock(scope: string | null) {
@@ -162,13 +146,6 @@ export async function verifyGesturePattern(preference: GestureLockPreferenceDTO 
   const enabledPreference = preference as GestureLockPreferenceDTO;
   const hash = await hashGesturePattern(pattern, enabledPreference.salt);
   return hash === enabledPreference.pattern_hash;
-}
-
-export async function verifyGestureDecoyPattern(preference: GestureLockPreferenceDTO | null | undefined, pattern: string) {
-  if (!isGestureDecoyPreferenceEnabled(preference)) return false;
-  const enabledPreference = preference as GestureLockPreferenceDTO;
-  const hash = await hashGesturePattern(pattern, enabledPreference.decoy_salt);
-  return hash === enabledPreference.decoy_pattern_hash;
 }
 
 export function emitGestureLockPreferenceUpdated(preference?: GestureLockPreferenceDTO) {

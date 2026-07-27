@@ -4,12 +4,9 @@ import {
   buildGestureLockPayload,
   clearGestureUnlock,
   emitGestureLockPreferenceUpdated,
-  isGestureDecoyPreferenceEnabled,
-  markGestureDecoyActive,
   markGestureUnlocked,
   normalizeGestureLockAfterMinutes,
   verifyGesturePattern,
-  verifyGestureDecoyPattern,
 } from "../lib/gestureLock";
 import { ApiError, api } from "../lib/api";
 import type { GestureLockPreferenceDTO } from "../types";
@@ -378,133 +375,15 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
   );
 }
 
-interface GestureDecoySetupPanelProps {
-  scope: string | null;
-  preference: GestureLockPreferenceDTO | null;
-  onChanged: (preference: GestureLockPreferenceDTO) => void;
-}
-
-export function GestureDecoySetupPanel({ scope, preference, onChanged }: GestureDecoySetupPanelProps) {
-  const decoyEnabled = Boolean(preference?.decoy_enabled && preference.decoy_pattern_hash && preference.decoy_salt);
-  const [editing, setEditing] = useState(!decoyEnabled);
-  const [firstPattern, setFirstPattern] = useState("");
-  const [status, setStatus] = useState(decoyEnabled ? "已设置" : "");
-  const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
-  const [saving, setSaving] = useState(false);
-  const apiErrorMessage = (error: unknown, fallback: string) => (error instanceof ApiError ? error.message : fallback);
-
-  const fail = (message: string) => {
-    setStatus(message);
-    setTone("error");
-  };
-
-  const complete = async (pattern: string) => {
-    if (!scope || !preference || saving) return;
-    if (pattern.split("-").length < 4) {
-      fail("至少 4 个点");
-      return;
-    }
-    if (!firstPattern) {
-      setFirstPattern(pattern);
-      setStatus("再画一次确认");
-      setTone("normal");
-      return;
-    }
-    if (pattern !== firstPattern) {
-      setFirstPattern("");
-      fail("不一致，请重画");
-      return;
-    }
-    if (await verifyGesturePattern(preference, pattern)) {
-      fail("不能与真实手势相同");
-      return;
-    }
-    const payload = await buildGestureLockPayload(pattern, preference.lock_after_minutes);
-    setSaving(true);
-    try {
-      const nextPreference = await api.updateGestureLockPrefs({
-        decoy_enabled: 1,
-        decoy_pattern_hash: payload.pattern_hash,
-        decoy_salt: payload.salt,
-      });
-      emitGestureLockPreferenceUpdated(nextPreference);
-      setFirstPattern("");
-      setEditing(false);
-      setStatus("已设置");
-      setTone("success");
-      onChanged(nextPreference);
-    } catch (error) {
-      fail(apiErrorMessage(error, "保存失败"));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const disable = async () => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      const nextPreference = await api.updateGestureLockPrefs({ decoy_enabled: 0 });
-      emitGestureLockPreferenceUpdated(nextPreference);
-      setEditing(true);
-      setStatus("");
-      setTone("normal");
-      onChanged(nextPreference);
-    } catch (error) {
-      fail(apiErrorMessage(error, "关闭失败"));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (!preference?.enabled) {
-    return <div className="inline-note">先开启手势解锁</div>;
-  }
-
-  return (
-    <div className="gesture-setup-panel">
-      {status ? <div className={`gesture-message gesture-message-${tone}`}>{status}</div> : null}
-      {editing ? (
-        <>
-          <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void complete(pattern)} />
-          {firstPattern ? (
-            <button
-              className="ghost-button"
-              onClick={() => {
-                setFirstPattern("");
-                setTone("normal");
-                setStatus("请重画");
-              }}
-              type="button"
-            >
-              重新开始
-            </button>
-          ) : null}
-        </>
-      ) : (
-        <>
-          <button className="button" disabled={saving} onClick={() => setEditing(true)} type="button">
-            重新设置
-          </button>
-          <button className="danger-button" disabled={saving} onClick={() => void disable()} type="button">
-            关闭伪手势
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
-
 interface GestureUnlockScreenProps {
   scope: string;
   preference: GestureLockPreferenceDTO;
   userName?: string;
   onUnlocked: () => void;
-  onDecoyUnlocked?: () => void;
   onResetAndLogout: () => void;
 }
 
-export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, onDecoyUnlocked, onResetAndLogout }: GestureUnlockScreenProps) {
+export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, onResetAndLogout }: GestureUnlockScreenProps) {
   const [message, setMessage] = useState("画出手势");
   const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
   const [checking, setChecking] = useState(false);
@@ -513,16 +392,8 @@ export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, o
     if (checking) return;
     setChecking(true);
     const ok = await verifyGesturePattern(preference, pattern);
-    const decoyOk = ok ? false : await verifyGestureDecoyPattern(preference, pattern);
     setChecking(false);
     if (!ok) {
-      if (decoyOk) {
-        markGestureDecoyActive(scope);
-        setTone("success");
-        setMessage("已解锁");
-        window.setTimeout(() => onDecoyUnlocked?.(), 120);
-        return;
-      }
       setTone("error");
       setMessage("手势不对");
       return;
@@ -541,33 +412,9 @@ export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, o
         <p>欢迎回来{userName ? `，${userName}` : ""}</p>
         <PatternGrid disabled={checking} tone={tone} onComplete={(pattern) => void complete(pattern)} />
         <div className={`gesture-lock-message gesture-lock-message-${tone}`}>{message}</div>
-        {isGestureDecoyPreferenceEnabled(preference) ? <span className="gesture-lock-decoy-dot" aria-hidden="true" /> : null}
         <button className="ghost-button gesture-lock-reset" onClick={onResetAndLogout} type="button">
           退出登录
         </button>
-      </section>
-    </main>
-  );
-}
-
-export function GestureDecoyChatScreen() {
-  return (
-    <main className="gesture-decoy-screen" aria-label="聊天">
-      <section className="gesture-decoy-phone">
-        <header className="gesture-decoy-header">
-          <div className="gesture-decoy-avatar">S</div>
-          <div>
-            <strong>软糖小啾咪</strong>
-            <span>在线</span>
-          </div>
-        </header>
-        <div className="gesture-decoy-messages">
-          <p className="gesture-decoy-time">刚刚</p>
-          <div className="gesture-decoy-bubble other">在路上了。</div>
-          <div className="gesture-decoy-bubble self">好。</div>
-          <div className="gesture-decoy-bubble other">晚点聊。</div>
-        </div>
-        <footer className="gesture-decoy-input">输入消息...</footer>
       </section>
     </main>
   );

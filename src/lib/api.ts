@@ -733,9 +733,6 @@ export const api = {
     enabled?: 0 | 1;
     pattern_hash?: string;
     salt?: string;
-    decoy_enabled?: 0 | 1;
-    decoy_pattern_hash?: string;
-    decoy_salt?: string;
     lock_after_minutes?: number;
   }) {
     return request<GestureLockPreferenceDTO>("/users/me/gesture-lock", {
