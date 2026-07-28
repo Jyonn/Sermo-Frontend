@@ -4248,6 +4248,7 @@ img {
 }
 
 .composer-action-button,
+.composer-emoji-button,
 .composer-plus,
 .composer-recording-delete,
 .composer-recording-send {
@@ -4268,6 +4269,10 @@ img {
 .composer-plus {
   color: var(--text-muted);
   background: rgba(242, 245, 250, 0.92);
+}
+
+.composer-emoji-button {
+  display: none;
 }
 
 .composer-action-button:active,
@@ -4295,6 +4300,15 @@ img {
 
 .composer-plus.is-open .material-symbols-outlined {
   transform: rotate(45deg);
+}
+
+.composer-emoji-button.is-open {
+  color: #0b1712;
+  background: rgba(0, 208, 132, 0.16);
+}
+
+.composer-emoji-panel {
+  display: none;
 }
 
 .composer-inline-svg {
@@ -4673,6 +4687,7 @@ img {
 }
 
 .composer-action-button:disabled,
+.composer-emoji-button:disabled,
 .composer-plus:disabled,
 .composer-recording-delete:disabled,
 .composer-recording-send:disabled,
@@ -10791,6 +10806,64 @@ img {
 }
 
 @media (min-width: 901px) {
+  .composer-row-text {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .composer-emoji-button {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 999px;
+    color: var(--text-muted);
+    background: rgba(242, 245, 250, 0.72);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform 160ms ease, background 160ms ease;
+  }
+
+  .composer-emoji-button:active {
+    transform: scale(0.96);
+  }
+
+  .composer-emoji-panel {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 10px;
+    padding: 10px;
+    overflow: hidden;
+    border: 1px solid var(--chat-chrome-border, rgba(224, 230, 240, 0.76));
+    border-radius: 16px;
+    background: var(--chat-input-surface, rgba(255, 255, 255, 0.66));
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    backdrop-filter: blur(16px) saturate(1.08);
+  }
+
+  .composer-emoji-panel > button {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: 9px;
+    background: transparent;
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+    line-height: 1;
+    transition: background 130ms ease, transform 130ms ease;
+  }
+
+  .composer-emoji-panel > button:hover {
+    background: rgba(255, 255, 255, 0.64);
+    transform: translateY(-1px);
+  }
+
+  .composer-emoji-panel > button:active {
+    transform: scale(0.92);
+  }
+
   .shell:has(.chat-mobile-layout),
   .desktop-tab-shell {
     height: 100dvh;

@@ -48,6 +48,14 @@ const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
 const AUDIO_MAX_DURATION_SECONDS = 60;
+const COMMON_EMOJIS = [
+  "😀", "😄", "😁", "😂", "🥹", "😊", "🙂", "🙃",
+  "😉", "😍", "🥰", "😘", "😋", "😎", "🤓", "🫡",
+  "🤔", "🤭", "🫢", "😶", "😅", "🥲", "😴", "😭",
+  "😤", "😡", "🤯", "🥳", "🤩", "😇", "🤗", "🫠",
+  "👍", "👎", "👌", "✌️", "🤝", "👏", "🙌", "🙏",
+  "💪", "👀", "❤️", "💔", "🔥", "✨", "🎉", "💯",
+] as const;
 const TEXT_URL_RE = /https?:\/\/[^\s<>"'，。！？、；：）】》]+/gi;
 const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
@@ -1692,6 +1700,7 @@ export default function ChatsPage() {
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [viewState, setViewState] = useState<AppViewState>("idle");
@@ -2421,7 +2430,23 @@ export default function ChatsPage() {
 
   useEffect(() => {
     setMessageMenu(null);
+    setComposerMoreOpen(false);
+    setEmojiPickerOpen(false);
   }, [selectedChat?.id]);
+
+  const insertEmoji = (emoji: string) => {
+    const input = textareaRef.current;
+    const start = input?.selectionStart ?? draft.length;
+    const end = input?.selectionEnd ?? start;
+    const nextDraft = `${draft.slice(0, start)}${emoji}${draft.slice(end)}`;
+    const nextCursor = start + emoji.length;
+    setDraft(nextDraft);
+    window.requestAnimationFrame(() => {
+      const nextInput = textareaRef.current;
+      nextInput?.focus();
+      nextInput?.setSelectionRange(nextCursor, nextCursor);
+    });
+  };
 
   useEffect(() => {
     if (!messageMenu) return;
@@ -4083,11 +4108,27 @@ export default function ChatsPage() {
                       />
                     </div>
                     <button
+                      aria-expanded={emojiPickerOpen}
+                      aria-label={emojiPickerOpen ? "收起表情" : "选择表情"}
+                      className={`composer-emoji-button ${emojiPickerOpen ? "is-open" : ""}`}
+                      disabled={composerBusy}
+                      onClick={() => {
+                        setComposerMoreOpen(false);
+                        setEmojiPickerOpen((current) => !current);
+                      }}
+                      type="button"
+                    >
+                      <span aria-hidden="true">🙂</span>
+                    </button>
+                    <button
                       aria-expanded={composerMoreOpen}
                       aria-label={composerMoreOpen ? "收起更多操作" : "展开更多操作"}
                       className={`composer-plus ${composerMoreOpen ? "is-open" : ""}`}
                       disabled={composerBusy}
-                      onClick={() => setComposerMoreOpen((current) => !current)}
+                      onClick={() => {
+                        setEmojiPickerOpen(false);
+                        setComposerMoreOpen((current) => !current);
+                      }}
                       type="button"
                     >
                       <span className="material-symbols-outlined">add</span>
@@ -4152,6 +4193,20 @@ export default function ChatsPage() {
                     />
                   </div>
                 )}
+                {!voiceComposer.open && emojiPickerOpen ? (
+                  <div className="composer-emoji-panel" aria-label="常用表情">
+                    {COMMON_EMOJIS.map((emoji) => (
+                      <button
+                        aria-label={`插入 ${emoji}`}
+                        key={emoji}
+                        onClick={() => insertEmoji(emoji)}
+                        type="button"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 {!voiceComposer.open ? (
                   <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
                     <div className="composer-actions-grid">
