@@ -31,7 +31,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
   ["email", 1, "邮件"],
@@ -73,6 +73,14 @@ const growthLevelUnlocks: Record<number, string[]> = {
   17: ["稀有头像框"],
   18: ["尽兴徽记"],
 };
+const personalizationOptions = {
+  chat_bubble_style: [["default", "经典"], ["tide", "潮汐"], ["comic", "漫画"], ["neon", "霓虹"]],
+  avatar_frame_style: [["none", "无边界"], ["orbit", "星轨"], ["blaze", "烈焰"], ["pixel", "像素"]],
+  square_outfit_style: [["sunset", "落日夹克"], ["varsity", "学院棒球"], ["noir", "黑曜风衣"], ["cloud", "云朵卫衣"]],
+  square_prop_style: [["none", "空手"], ["star", "星光棒"], ["coffee", "咖啡杯"], ["flag", "言浪旗"]],
+  square_motion_style: [["walk", "漫步"], ["bounce", "弹跳"], ["float", "漂浮"], ["dash", "冲浪"]],
+  square_limb_style: [["line", "线条"], ["chunky", "软糖"], ["robot", "机械"], ["ribbon", "飘带"]],
+} as const;
 
 type NotificationMessageKind = "direct" | "group" | "online";
 type PreferenceEditor =
@@ -206,6 +214,8 @@ export default function MenuPage() {
   const [vipClaiming, setVipClaiming] = useState(false);
   const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
   const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
+  const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
+  const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
@@ -1040,6 +1050,30 @@ export default function MenuPage() {
     }
   };
 
+  const savePersonalization = async <K extends keyof PersonalizationDTO>(field: K, value: PersonalizationDTO[K]) => {
+    if (!me || personalizationSaving) return;
+    const payload: PersonalizationDTO = {
+      chat_bubble_style: me.chat_bubble_style ?? "default",
+      avatar_frame_style: me.avatar_frame_style ?? "none",
+      square_outfit_style: me.square_outfit_style ?? "sunset",
+      square_prop_style: me.square_prop_style ?? "none",
+      square_motion_style: me.square_motion_style ?? "walk",
+      square_limb_style: me.square_limb_style ?? "line",
+      [field]: value,
+    };
+    setPersonalizationSaving(true);
+    try {
+      const nextMe = await api.setPersonalization(payload);
+      setMe(nextMe);
+      patchSessionUser(nextMe);
+      showToast("个性化已更新");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "个性化更新失败", "error");
+    } finally {
+      setPersonalizationSaving(false);
+    }
+  };
+
   const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -1281,7 +1315,7 @@ export default function MenuPage() {
         />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
-            <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
+            <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
           </button>
           <div className="row-main menu-profile-copy">
             <div className="menu-profile-heading">
@@ -1412,32 +1446,9 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <button
-              className={`simple-row menu-link-row${canCustomizeChatBackground ? "" : " is-locked"}`}
-              onClick={() => {
-                if (!canCustomizeChatBackground) {
-                  showToast("达到 Lv.8 后可自定义聊天背景", "error");
-                  return;
-                }
-                setChatBackgroundDrawerOpen(true);
-              }}
-              type="button"
-            >
+            <button className="simple-row menu-link-row" onClick={() => setPersonalizationDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong>聊天背景</strong>
-              </div>
-              <div className="menu-detail-value menu-detail-text">
-                {canCustomizeChatBackground
-                  ? me?.chat_background_theme === "custom"
-                    ? "自定义"
-                    : me?.chat_background_theme === "paper"
-                      ? "纸感"
-                      : me?.chat_background_theme === "mint"
-                        ? "薄荷"
-                        : me?.chat_background_theme === "dusk"
-                          ? "暮色"
-                          : "默认"
-                  : "Lv.8 解锁"}
+                <strong>个性化</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1668,6 +1679,52 @@ export default function MenuPage() {
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title="个性化">
+        <div className="personalization-drawer">
+          <button
+            className={`personalization-background-entry${canCustomizeChatBackground ? "" : " is-locked"}`}
+            onClick={() => {
+              if (!canCustomizeChatBackground) {
+                showToast("达到 Lv.8 后可自定义聊天背景", "error");
+                return;
+              }
+              setChatBackgroundDrawerOpen(true);
+            }}
+            type="button"
+          >
+            <span className={`personalization-background-swatch theme-${me?.chat_background_theme ?? "default"}`} />
+            <span><strong>聊天背景</strong><small>{canCustomizeChatBackground ? "让整个对话进入你的世界" : "LV8 解锁"}</small></span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+          {([
+            ["chat_bubble_style", "聊天气泡", "让每一句话拥有自己的轮廓"],
+            ["avatar_frame_style", "头像框", "在任何出现头像的地方留下标记"],
+            ["square_outfit_style", "广场 · 衣服", "决定你的角色主色与剪影"],
+            ["square_prop_style", "广场 · 手持物", "带点东西再去认识新朋友"],
+            ["square_motion_style", "广场 · 动作", "漫步、弹跳、漂浮或冲浪"],
+            ["square_limb_style", "广场 · 四肢", "改变人物的肢体语言"],
+          ] as const).map(([field, title, description]) => (
+            <section className="personalization-section" key={field}>
+              <header><strong>{title}</strong><span>{description}</span></header>
+              <div className={`personalization-option-grid field-${field}`}>
+                {personalizationOptions[field].map(([value, label]) => (
+                  <button
+                    className={`personalization-option preview-${value}${(me?.[field] ?? personalizationOptions[field][0][0]) === value ? " is-selected" : ""}`}
+                    disabled={personalizationSaving}
+                    key={value}
+                    onClick={() => void savePersonalization(field, value)}
+                    type="button"
+                  >
+                    <i aria-hidden="true"><span /></i>
+                    <strong>{label}</strong>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
       </SideDrawer>
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
+import type { AvatarFrameStyle } from "../types";
 
 interface GroupAvatarMember {
   name: string;
@@ -12,6 +13,7 @@ interface UserAvatarProps {
   className: string;
   groupMembers?: GroupAvatarMember[] | null;
   vip?: boolean;
+  frame?: AvatarFrameStyle;
 }
 
 function avatarLabel(name: string) {
@@ -65,7 +67,7 @@ function groupLayoutClass(count: number) {
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ name, uri, className, groupMembers, vip = false }: UserAvatarProps) {
+export function UserAvatar({ name, uri, className, groupMembers, vip = false, frame = "none" }: UserAvatarProps) {
   const [failed, setFailed] = useState(false);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
@@ -83,7 +85,7 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false }: 
   const canShowImage = Boolean(resolvedUri) && !failed;
 
   return (
-    <div className={`${className} ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}`}>
+    <div className={`${className} ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}${frame !== "none" ? ` avatar-frame-${frame}` : ""}`}>
       {canShowGroup ? (
         <div aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
           {normalizedGroupMembers.map((member, index) => (

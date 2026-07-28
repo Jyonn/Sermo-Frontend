@@ -613,6 +613,8 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     name: message.user.name,
     avatarUri: message.user.avatar_uri,
     isPermanentVip: message.user.is_permanent_vip,
+    chatBubbleStyle: message.user.chat_bubble_style,
+    avatarFrameStyle: message.user.avatar_frame_style,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
     text: message.content,
@@ -1279,6 +1281,8 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
   return JSON.stringify({
     key: group.key,
     isPermanentVip: group.isPermanentVip,
+    chatBubbleStyle: group.chatBubbleStyle,
+    avatarFrameStyle: group.avatarFrameStyle,
     dividerLabel: group.dividerLabel,
     messages: group.messages.map((message) => ({
       clientId: message.clientId,
@@ -1461,8 +1465,8 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-      <div className={`message-group ${group.from}${group.isPermanentVip ? " is-permanent-vip" : ""}`}>
-        {group.from === "other" ? <UserAvatar className="avatar message-avatar" name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
+      <div className={`message-group ${group.from}${group.isPermanentVip ? " is-permanent-vip" : ""} bubble-style-${group.chatBubbleStyle ?? "default"}`}>
+        {group.from === "other" ? <UserAvatar className="avatar message-avatar" frame={group.avatarFrameStyle} name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
           {rows.map((row) => row.kind === "gallery" ? (
@@ -1502,6 +1506,8 @@ interface MessageGroup {
   name: string;
   avatarUri?: string;
   isPermanentVip?: boolean;
+  chatBubbleStyle?: ChatMessage["chatBubbleStyle"];
+  avatarFrameStyle?: ChatMessage["avatarFrameStyle"];
   dividerLabel?: string;
   messages: ChatMessage[];
 }
@@ -1705,6 +1711,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     id: chat.chat_id,
     title,
     avatarUri: peer?.avatar_uri,
+    avatarFrameStyle: peer?.avatar_frame_style,
     subtitle: chat.group ? `${chat.members.length} 人` : presence,
     preview: previewFromDto(chat.last_message),
     time: formatChatListTime(lastActivity),
@@ -1726,6 +1733,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
           userId: member.user_id,
           name: member.name,
           avatarUri: member.avatar_uri,
+          avatarFrameStyle: member.avatar_frame_style,
           isSelf: member.user_id === currentUserId,
           isOwner: Boolean(chat.owner?.user_id === member.user_id),
         }))
@@ -2510,6 +2518,8 @@ export default function ChatsPage() {
         name: message.name,
         avatarUri: message.avatarUri,
         isPermanentVip: message.isPermanentVip,
+        chatBubbleStyle: message.chatBubbleStyle,
+        avatarFrameStyle: message.avatarFrameStyle,
         dividerLabel,
         messages: [message],
       });
@@ -4107,6 +4117,7 @@ export default function ChatsPage() {
           }
           name={chat.title}
           uri={chat.avatarUri}
+          frame={chat.avatarFrameStyle}
         />
         {chat.unread ? (
           <span className="small-badge chat-list-unread">{chat.unread > 99 ? "99+" : chat.unread}</span>
@@ -4213,6 +4224,7 @@ export default function ChatsPage() {
                 }
                 name={displayedChat.title}
                 uri={displayedChat.avatarUri}
+                frame={displayedChat.avatarFrameStyle}
               />
             </div>
             <div className="chat-topbar-meta">
@@ -4259,6 +4271,7 @@ export default function ChatsPage() {
                       }
                       name={displayedChat.title}
                       uri={displayedChat.avatarUri}
+                      frame={displayedChat.avatarFrameStyle}
                     />
                   </div>
                   <div className="chat-topbar-meta">

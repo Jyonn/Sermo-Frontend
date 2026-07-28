@@ -155,7 +155,7 @@ function syncOrbsWithUsers(previous: OrbState[], users: UserDTO[], width: number
 
 function buildOrbSyncSignature(users: UserDTO[]) {
   return users
-    .map((user) => `${user.user_id}:${user.name}:${user.avatar_uri ?? ""}:${user.is_alive ? 1 : 0}:${user.growth_level ?? 1}:${user.growth_level_name ?? ""}:${user.is_permanent_vip ? 1 : 0}`)
+    .map((user) => `${user.user_id}:${user.name}:${user.avatar_uri ?? ""}:${user.is_alive ? 1 : 0}:${user.growth_level ?? 1}:${user.growth_level_name ?? ""}:${user.is_permanent_vip ? 1 : 0}:${user.avatar_frame_style ?? "none"}:${user.square_outfit_style ?? "sunset"}:${user.square_prop_style ?? "none"}:${user.square_motion_style ?? "walk"}:${user.square_limb_style ?? "line"}`)
     .sort()
     .join("|");
 }
@@ -294,6 +294,11 @@ export default function SquarePage() {
       phone_verified_at: currentUser.phone_verified_at ?? null,
       bark_verified_at: currentUser.bark_verified_at ?? null,
       is_permanent_vip: currentUser.is_permanent_vip,
+      avatar_frame_style: currentUser.avatar_frame_style,
+      square_outfit_style: currentUser.square_outfit_style,
+      square_prop_style: currentUser.square_prop_style,
+      square_motion_style: currentUser.square_motion_style,
+      square_limb_style: currentUser.square_limb_style,
     };
     return [self, ...onlineUsers];
   }, [onlineUsers, session?.user]);
@@ -505,7 +510,7 @@ export default function SquarePage() {
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
-              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 10 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 18 ? " is-max-level" : ""}${orb.user.is_permanent_vip ? " is-permanent-vip" : ""}`}
+              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 10 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 18 ? " is-max-level" : ""}${orb.user.is_permanent_vip ? " is-permanent-vip" : ""} outfit-${orb.user.square_outfit_style ?? "sunset"} prop-${orb.user.square_prop_style ?? "none"} motion-${orb.user.square_motion_style ?? "walk"} limbs-${orb.user.square_limb_style ?? "line"}`}
               onClick={(event) => {
                 event.stopPropagation();
                 setSelectedUser((current) => current?.user_id === orb.user.user_id ? null : orb.user);
@@ -523,11 +528,13 @@ export default function SquarePage() {
               <span className="square-character-figure" aria-hidden="true">
                 <UserAvatar
                   className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`}
+                  frame={orb.user.avatar_frame_style}
                   name={orb.user.name}
                   uri={orb.user.avatar_uri}
                   vip={orb.user.is_permanent_vip}
                 />
                 <span className="square-character-body">
+                  <i className="square-character-prop" />
                   <i className="square-character-arm is-left" />
                   <i className="square-character-arm is-right" />
                   <i className="square-character-torso" />
@@ -553,8 +560,9 @@ export default function SquarePage() {
               }
             >
               <span className="square-character-figure" aria-hidden="true">
-                <UserAvatar className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`} name={orb.user.name} uri={orb.user.avatar_uri} vip={orb.user.is_permanent_vip} />
+                <UserAvatar className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`} frame={orb.user.avatar_frame_style} name={orb.user.name} uri={orb.user.avatar_uri} vip={orb.user.is_permanent_vip} />
                 <span className="square-character-body">
+                  <i className="square-character-prop" />
                   <i className="square-character-arm is-left" />
                   <i className="square-character-arm is-right" />
                   <i className="square-character-torso" />
@@ -575,6 +583,7 @@ export default function SquarePage() {
               <div className="square-person-card-identity">
                 <UserAvatar
                   className={`square-person-card-avatar ${selectedUser.is_alive ? "status-online" : ""}`}
+                  frame={selectedUser.avatar_frame_style}
                   name={selectedUser.name}
                   uri={selectedUser.avatar_uri}
                   vip={selectedUser.is_permanent_vip}

@@ -32,6 +32,7 @@ import type {
   UserDTO,
   UserGrowthDTO,
   PermanentVipCampaignDTO,
+  PersonalizationDTO,
   UserMeDTO,
   WebReminderPreferenceDTO,
   EmojiUsageDTO,
@@ -923,6 +924,14 @@ export const api = {
       method: "POST",
       auth: true,
       body: { theme, key },
+    });
+  },
+
+  setPersonalization(payload: PersonalizationDTO) {
+    return request<UserMeDTO>("/users/me/personalization", {
+      method: "POST",
+      auth: true,
+      body: payload,
     });
   },
 };

@@ -19,6 +19,12 @@ export interface TinyUserDTO {
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
   is_permanent_vip?: boolean;
+  chat_bubble_style?: ChatBubbleStyle;
+  avatar_frame_style?: AvatarFrameStyle;
+  square_outfit_style?: SquareOutfitStyle;
+  square_prop_style?: SquarePropStyle;
+  square_motion_style?: SquareMotionStyle;
+  square_limb_style?: SquareLimbStyle;
 }
 
 export interface UserDTO extends TinyUserDTO {
@@ -115,6 +121,12 @@ export interface AccessPayload {
   bark_unbound_at?: number | null;
   is_private_account?: boolean;
   is_permanent_vip?: boolean;
+  chat_bubble_style?: ChatBubbleStyle;
+  avatar_frame_style?: AvatarFrameStyle;
+  square_outfit_style?: SquareOutfitStyle;
+  square_prop_style?: SquarePropStyle;
+  square_motion_style?: SquareMotionStyle;
+  square_limb_style?: SquareLimbStyle;
   expire?: number;
   time?: number;
   type?: string;
@@ -144,6 +156,22 @@ export interface UserMeDTO extends UserDTO {
   };
   chat_background_theme?: "default" | "paper" | "mint" | "dusk" | "custom";
   chat_background_uri?: string;
+}
+
+export type ChatBubbleStyle = "default" | "tide" | "comic" | "neon";
+export type AvatarFrameStyle = "none" | "orbit" | "blaze" | "pixel";
+export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud";
+export type SquarePropStyle = "none" | "star" | "coffee" | "flag";
+export type SquareMotionStyle = "walk" | "bounce" | "float" | "dash";
+export type SquareLimbStyle = "line" | "chunky" | "robot" | "ribbon";
+
+export interface PersonalizationDTO {
+  chat_bubble_style: ChatBubbleStyle;
+  avatar_frame_style: AvatarFrameStyle;
+  square_outfit_style: SquareOutfitStyle;
+  square_prop_style: SquarePropStyle;
+  square_motion_style: SquareMotionStyle;
+  square_limb_style: SquareLimbStyle;
 }
 
 export interface PermanentVipCampaignDTO {
@@ -466,6 +494,8 @@ export interface ChatMessage {
   name: string;
   avatarUri?: string;
   isPermanentVip?: boolean;
+  chatBubbleStyle?: ChatBubbleStyle;
+  avatarFrameStyle?: AvatarFrameStyle;
   time: string;
   createdAt: number;
   text: string;
@@ -483,6 +513,7 @@ export interface ChatDetail {
     userId: number;
     name: string;
     avatarUri?: string;
+    avatarFrameStyle?: AvatarFrameStyle;
     isSelf: boolean;
     isOwner: boolean;
   }>;
@@ -492,6 +523,7 @@ export interface Chat {
   id: number;
   title: string;
   avatarUri?: string;
+  avatarFrameStyle?: AvatarFrameStyle;
   subtitle: string;
   preview: string;
   time: string;
