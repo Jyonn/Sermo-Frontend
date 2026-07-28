@@ -173,8 +173,9 @@ function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "locati
   if (kind === "pin" || kind === "pin-off") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
-        <path d="m9.15 4.4 6.65 6.65-2.1 1.1-.95 3.3-1.45 1.45-4.2-4.2 1.45-1.45 3.3-.95 1.1-2.1" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" />
-        <path d="m8.9 15.1-4.25 4.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
+        <path d="M8 3.75h8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.85" />
+        <path d="m9.35 4 .6 5.05-2.45 2.5v1.35h9v-1.35l-2.45-2.5.6-5.05" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.85" />
+        <path d="M12 12.9v7.35" stroke="currentColor" strokeLinecap="round" strokeWidth="1.85" />
         {kind === "pin-off" ? <path d="M4.2 4.2 19.8 19.8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" /> : null}
       </svg>
     );
@@ -1838,6 +1839,7 @@ export default function ChatsPage() {
   const [groupManageState, setGroupManageState] = useState<"idle" | "saving" | "loading-candidates">("idle");
   const [currentUserVerified, setCurrentUserVerified] = useState<boolean | null>(null);
   const [currentUserMe, setCurrentUserMe] = useState<UserMeDTO | null>(null);
+  const [paintedChatBackgroundUri, setPaintedChatBackgroundUri] = useState<string | null>(null);
   const [detailMemberLimit, setDetailMemberLimit] = useState(CHAT_DETAIL_MEMBER_PAGE_SIZE);
   const [groupDangerConfirmOpen, setGroupDangerConfirmOpen] = useState(false);
   const [friendDangerConfirmOpen, setFriendDangerConfirmOpen] = useState(false);
@@ -1921,6 +1923,31 @@ export default function ChatsPage() {
     if (!values.length) return null;
     return values.reduce((total, progress) => total + progress, 0) / values.length;
   }, [sendTasks]);
+
+  useEffect(() => {
+    const rawUri = currentUserMe?.chat_background_uri;
+    if (currentUserMe?.chat_background_theme !== "custom" || !rawUri) {
+      setPaintedChatBackgroundUri(null);
+      return;
+    }
+
+    const resolvedUri = resolveStableResourceUri(rawUri) ?? rawUri;
+    if (
+      paintedChatBackgroundUri
+      && normalizeStableResourceUri(paintedChatBackgroundUri) === normalizeStableResourceUri(resolvedUri)
+    ) return;
+
+    let cancelled = false;
+    const image = new Image();
+    image.onload = () => {
+      if (!cancelled) setPaintedChatBackgroundUri(resolvedUri);
+    };
+    image.src = resolvedUri;
+    return () => {
+      cancelled = true;
+      image.onload = null;
+    };
+  }, [currentUserMe?.chat_background_theme, currentUserMe?.chat_background_uri, paintedChatBackgroundUri]);
 
   const updateSendTask = (clientId: string, progress: number) => {
     setSendTasks((current) => ({ ...current, [clientId]: Math.max(current[clientId] ?? 0, Math.min(1, progress)) }));
@@ -4150,8 +4177,8 @@ export default function ChatsPage() {
     ? ({
         "--chat-keyboard-offset": `${keyboardOffset}px`,
         "--chat-composer-height": `${composerHeight}px`,
-        "--chat-background-image": currentUserMe?.chat_background_uri
-          ? `url("${currentUserMe.chat_background_uri.replace(/"/g, "%22")}")`
+        "--chat-background-image": paintedChatBackgroundUri
+          ? `url("${paintedChatBackgroundUri.replace(/"/g, "%22")}")`
           : "none",
       } as CSSProperties)
     : undefined;
