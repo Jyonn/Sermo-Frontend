@@ -1133,14 +1133,18 @@ function renderMessageContent(
         rel="noreferrer"
         target="_blank"
       >
-        <span className="message-location-map" aria-hidden="true">
-          <span className="message-location-road road-one" />
-          <span className="message-location-road road-two" />
-          <span className="message-location-pin"><ComposerSvgIcon kind="location" /></span>
+        <span className="message-location-mark" aria-hidden="true">
+          <ComposerSvgIcon kind="location" />
         </span>
         <span className="message-location-copy">
           <strong>{address || (message.status === "pending" ? obscured ? "正在生成模糊位置" : "正在解析位置" : obscured ? "模糊位置" : "共享位置")}</strong>
-          <small>{obscured ? `模糊至 ${obscureRadius} 公里内` : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}</small>
+          <small>
+            {obscured
+              ? `模糊至 ${obscureRadius} 公里内`
+              : address
+                ? "在地图中查看"
+                : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
+          </small>
         </span>
         <span className="message-location-open" aria-hidden="true">↗</span>
       </a>

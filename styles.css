@@ -3947,10 +3947,10 @@ img {
 .message-file-card.self:not(.group-start):not(.group-end) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
 
 .message-location-card {
-  width: min(72vw, 286px);
+  width: min(78vw, 340px);
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: stretch;
   overflow: hidden;
   border: 1px solid var(--message-card-border);
   border-radius: var(--radius-bubble);
@@ -3960,7 +3960,6 @@ img {
   text-decoration: none;
 }
 
-.message-location-map,
 .location-share-preview {
   position: relative;
   overflow: hidden;
@@ -3969,12 +3968,7 @@ img {
     linear-gradient(28deg, #dfeee5 0 28%, #eef4e9 28% 52%, #d9e7ef 52% 68%, #e9eee2 68%);
 }
 
-.message-location-map {
-  align-self: stretch;
-  min-height: 86px;
-}
-
-.message-location-road {
+.location-share-preview .message-location-road {
   position: absolute;
   height: 5px;
   border-radius: 999px;
@@ -3982,21 +3976,37 @@ img {
   box-shadow: 0 0 0 1px rgba(181, 192, 188, 0.22);
 }
 
-.message-location-road.road-one {
+.location-share-preview .message-location-road.road-one {
   width: 130%;
   left: -18%;
   top: 30%;
   transform: rotate(-24deg);
 }
 
-.message-location-road.road-two {
+.location-share-preview .message-location-road.road-two {
   width: 96%;
   left: 18%;
   bottom: 22%;
   transform: rotate(34deg);
 }
 
-.message-location-pin,
+.message-location-mark {
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  border-radius: 10px;
+  color: var(--brand-primary);
+  background: rgba(0, 208, 132, 0.09);
+}
+
+.message-location-mark svg {
+  width: 17px;
+  height: 17px;
+}
+
 .location-share-pin {
   position: absolute;
   left: 50%;
@@ -4008,21 +4018,25 @@ img {
   transform: translate(-50%, -52%);
 }
 
-.message-location-pin svg { width: 31px; height: 31px; fill: var(--brand-primary); }
+.location-share-pin svg {
+  width: 31px;
+  height: 31px;
+  fill: var(--brand-primary);
+}
 
 .message-location-copy {
   min-width: 0;
   display: grid;
-  gap: 6px;
-  padding: 13px;
+  align-content: center;
+  gap: 7px;
+  padding: 13px 10px 13px 12px;
 }
 
 .message-location-copy strong {
-  overflow: hidden;
   font-size: 0.88rem;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .message-location-copy small {
@@ -4032,7 +4046,8 @@ img {
 }
 
 .message-location-open {
-  padding-right: 14px;
+  align-self: center;
+  padding-right: 12px;
   color: var(--text-muted);
   font-size: 1rem;
 }
