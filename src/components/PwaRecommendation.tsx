@@ -67,7 +67,7 @@ export function PwaRecommendation() {
     try {
       if (kind === "install") {
         const outcome = await requestPwaInstall();
-        if (outcome === "unavailable" || outcome === "dismissed") {
+        if (outcome === "unavailable") {
           setInstallGuideOpen(true);
         } else if (outcome === "accepted") {
           setKind(null);

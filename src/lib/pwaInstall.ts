@@ -42,16 +42,6 @@ export function isDesktopChrome() {
   return chrome && !/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent);
 }
 
-export function isAndroidDevice() {
-  if (typeof navigator === "undefined") return false;
-  return /Android/i.test(navigator.userAgent);
-}
-
-export function isChromiumBrowser() {
-  if (typeof navigator === "undefined") return false;
-  return /Chrome|Chromium/i.test(navigator.userAgent) && !/Edg|OPR|SamsungBrowser/i.test(navigator.userAgent);
-}
-
 export function canPromptPwaInstall() {
   return Boolean(installPrompt);
 }
@@ -74,19 +64,12 @@ function waitForInstallPrompt(timeout = 1800) {
 }
 
 export async function requestPwaInstall() {
-  if (!installPrompt && isChromiumBrowser()) await waitForInstallPrompt(3000);
+  if (!installPrompt && isDesktopChrome()) await waitForInstallPrompt();
   if (!installPrompt) return "unavailable" as const;
-  const prompt = installPrompt;
-  installPrompt = null;
-  try {
-    await prompt.prompt();
-    const choice = await prompt.userChoice;
-    emitInstallState();
-    return choice.outcome;
-  } catch {
-    emitInstallState();
-    return "unavailable" as const;
-  }
+  await installPrompt.prompt();
+  const choice = await installPrompt.userChoice;
+  if (choice.outcome === "accepted") installPrompt = null;
+  return choice.outcome;
 }
 
 export function markPwaRecommendationShown(slug: string, kind: "install" | "push") {
