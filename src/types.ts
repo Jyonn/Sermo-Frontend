@@ -234,6 +234,12 @@ export interface WebReminderPreferenceDTO {
   title_enabled: boolean;
 }
 
+export interface EmojiUsageDTO {
+  emoji: string;
+  use_count: number;
+  last_used_at: number;
+}
+
 export interface WebPushSubscriptionDTO {
   endpoint: string;
   origin: string;

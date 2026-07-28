@@ -32,6 +32,7 @@ import type {
   UserGrowthDTO,
   UserMeDTO,
   WebReminderPreferenceDTO,
+  EmojiUsageDTO,
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
 } from "../types";
@@ -634,6 +635,13 @@ export const api = {
 
   getUserMe(signal?: AbortSignal) {
     return request<UserMeDTO>("/users/me", {
+      auth: true,
+      signal,
+    });
+  },
+
+  getEmojiUsage(signal?: AbortSignal) {
+    return request<EmojiUsageDTO[]>("/users/me/emoji-usage", {
       auth: true,
       signal,
     });

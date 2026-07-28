@@ -36,7 +36,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -48,14 +48,59 @@ const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
 const AUDIO_MAX_DURATION_SECONDS = 60;
-const COMMON_EMOJIS = [
-  "😀", "😄", "😁", "😂", "🥹", "😊", "🙂", "🙃",
-  "😉", "😍", "🥰", "😘", "😋", "😎", "🤓", "🫡",
-  "🤔", "🤭", "🫢", "😶", "😅", "🥲", "😴", "😭",
-  "😤", "😡", "🤯", "🥳", "🤩", "😇", "🤗", "🫠",
-  "👍", "👎", "👌", "✌️", "🤝", "👏", "🙌", "🙏",
-  "💪", "👀", "❤️", "💔", "🔥", "✨", "🎉", "💯",
+const EMOJI_PAGES = [
+  {
+    label: "常用",
+    icon: "🕘",
+    emojis: [
+      "😀", "😄", "😁", "😂", "🥹", "😊", "🙂", "🙃", "😉", "😍", "🥰", "😘",
+      "😋", "😎", "🤓", "🫡", "🤔", "🤭", "🫢", "😶", "😅", "🥲", "😴", "😭",
+      "😤", "😡", "🤯", "🥳", "🤩", "😇", "🤗", "🫠", "👍", "👎", "👌", "✌️",
+      "🤝", "👏", "🙌", "🙏", "💪", "👀", "❤️", "💔", "🔥", "✨", "🎉", "💯",
+    ],
+  },
+  {
+    label: "表情",
+    icon: "😊",
+    emojis: [
+      "😃", "😆", "🤣", "😌", "😏", "😒", "🙄", "😬", "😮‍💨", "🤥", "🫣", "🤫",
+      "🤐", "🫥", "😐", "😑", "😯", "😦", "😧", "😮", "😲", "🥱", "😵", "😵‍💫",
+      "🤤", "🤢", "🤮", "🤧", "🥴", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👻",
+      "💀", "☠️", "👽", "🤖", "💩", "😺", "😸", "😹", "😻", "😼", "🙀", "😿",
+    ],
+  },
+  {
+    label: "手势",
+    icon: "👋",
+    emojis: [
+      "👋", "🤚", "🖐️", "✋", "🖖", "🫱", "🫲", "🫳", "🫴", "🫷", "🫸", "🤌",
+      "🤏", "🫰", "🤞", "🫶", "🤟", "🤘", "🤙", "👈", "👉", "👆", "👇", "☝️",
+      "🫵", "✊", "👊", "🤛", "🤜", "🫂", "🙌", "👏", "🤝", "🙏", "✍️", "💅",
+      "🤳", "💪", "🦾", "🦵", "🦶", "👂", "👃", "🧠", "🫀", "🫁", "👀", "👁️",
+    ],
+  },
+  {
+    label: "生活",
+    icon: "🎈",
+    emojis: [
+      "🌞", "🌙", "⭐", "🌈", "☁️", "❄️", "🌊", "🌱", "🌸", "🌻", "🍀", "🍎",
+      "🍓", "🍉", "🍜", "🍰", "☕", "🍻", "🎂", "🎁", "🎈", "🎊", "🎵", "🎧",
+      "🎬", "📷", "🎮", "⚽", "🏀", "🏸", "🚗", "✈️", "🏠", "🏕️", "🌆", "🗺️",
+      "🐶", "🐱", "🐼", "🐰", "🦊", "🐻", "🐧", "🦋", "💐", "🍃", "🚀", "💡",
+    ],
+  },
+  {
+    label: "符号",
+    icon: "❤️",
+    emojis: [
+      "❤️", "🧡", "💛", "💚", "🩵", "💙", "💜", "🖤", "🩶", "🤍", "🤎", "💔",
+      "❤️‍🔥", "❤️‍🩹", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "❣️", "💯",
+      "💢", "💥", "💫", "💦", "💨", "💬", "💭", "✅", "❌", "⭕", "❗", "❓",
+      "‼️", "⁉️", "⚠️", "🔔", "🔕", "🔒", "🔑", "📌", "📍", "♻️", "➕", "➖",
+    ],
+  },
 ] as const;
+const EMOJI_SEQUENCE_RE = /(?:[\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?)*)/gu;
 const TEXT_URL_RE = /https?:\/\/[^\s<>"'，。！？、；：）】》]+/gi;
 const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
@@ -75,6 +120,19 @@ type LocationDraft = {
   obscure?: boolean;
   error?: string;
 };
+
+function extractMessageEmojis(text: string) {
+  return text.match(EMOJI_SEQUENCE_RE) ?? [];
+}
+
+function sortEmojiUsage(rows: EmojiUsageDTO[]) {
+  const nowSeconds = Date.now() / 1000;
+  return [...rows].sort((left, right) => {
+    const leftScore = Math.log1p(left.use_count) * Math.exp(-Math.max(0, nowSeconds - left.last_used_at) / (30 * 86400));
+    const rightScore = Math.log1p(right.use_count) * Math.exp(-Math.max(0, nowSeconds - right.last_used_at) / (30 * 86400));
+    return rightScore - leftScore;
+  });
+}
 
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -1705,6 +1763,8 @@ export default function ChatsPage() {
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [emojiPage, setEmojiPage] = useState(0);
+  const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [viewState, setViewState] = useState<AppViewState>("idle");
@@ -1848,6 +1908,66 @@ export default function ChatsPage() {
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
+  const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
+  const frequentEmojis = emojiUsage.slice(0, 5).map((item) => item.emoji);
+  const visibleEmojis =
+    emojiPage === 0
+      ? [...frequentEmojis, ...EMOJI_PAGES[0].emojis.filter((emoji) => !frequentEmojis.includes(emoji))].slice(0, 48)
+      : [...EMOJI_PAGES[emojiPage].emojis];
+
+  const storeEmojiUsage = (rows: EmojiUsageDTO[]) => {
+    const sorted = sortEmojiUsage(rows).slice(0, 50);
+    setEmojiUsage(sorted);
+    if (emojiUsageCacheKey) {
+      window.localStorage.setItem(emojiUsageCacheKey, JSON.stringify(sorted));
+    }
+  };
+
+  const syncEmojiUsage = async () => {
+    if (!currentUserId) return;
+    try {
+      storeEmojiUsage(await api.getEmojiUsage());
+    } catch {
+      // Emoji ranking is an enhancement and must not interrupt message sending.
+    }
+  };
+
+  const recordOptimisticEmojiUsage = (text: string) => {
+    const emojis = extractMessageEmojis(text);
+    if (!emojis.length) return;
+    const counts = new Map<string, number>();
+    emojis.forEach((emoji) => counts.set(emoji, (counts.get(emoji) ?? 0) + 1));
+    const nowSeconds = Date.now() / 1000;
+    const nextRows = emojiUsage.map((item) => ({ ...item }));
+    counts.forEach((count, emoji) => {
+      const existing = nextRows.find((item) => item.emoji === emoji);
+      if (existing) {
+        existing.use_count += count;
+        existing.last_used_at = nowSeconds;
+      } else {
+        nextRows.push({ emoji, use_count: count, last_used_at: nowSeconds });
+      }
+    });
+    storeEmojiUsage(nextRows);
+  };
+
+  useEffect(() => {
+    if (!emojiUsageCacheKey) {
+      setEmojiUsage([]);
+      return;
+    }
+    try {
+      const cached = JSON.parse(window.localStorage.getItem(emojiUsageCacheKey) ?? "[]") as EmojiUsageDTO[];
+      setEmojiUsage(sortEmojiUsage(cached).slice(0, 50));
+    } catch {
+      setEmojiUsage([]);
+    }
+    const controller = new AbortController();
+    api.getEmojiUsage(controller.signal)
+      .then(storeEmojiUsage)
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [emojiUsageCacheKey]);
   const currentUserName = session?.user.name ?? "我";
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
@@ -2436,6 +2556,7 @@ export default function ChatsPage() {
     setMessageMenu(null);
     setComposerMoreOpen(false);
     setEmojiPickerOpen(false);
+    setEmojiPage(0);
   }, [selectedChat?.id]);
 
   const insertEmoji = (emoji: string) => {
@@ -2903,6 +3024,7 @@ export default function ChatsPage() {
       }
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
+      recordOptimisticEmojiUsage(message);
       const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId);
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
@@ -2926,6 +3048,7 @@ export default function ChatsPage() {
           )
         )
       );
+      void syncEmojiUsage();
     } catch (apiError) {
       if (DEBUG_CHAT_SEND) {
         console.log("[chat] send failed", {
@@ -2938,6 +3061,7 @@ export default function ChatsPage() {
         ...current,
         [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
       }));
+      void syncEmojiUsage();
     } finally {
       finishSendTask(optimisticMessage.clientId);
       setSendState("idle");
@@ -2988,6 +3112,7 @@ export default function ChatsPage() {
           retryMessage.clientId,
         );
       } else {
+        recordOptimisticEmojiUsage(retryMessage.text);
         created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id, retryMessage.clientId);
       }
       const deliveredMessage = mapChatMessage(created, currentUserId);
@@ -3010,11 +3135,13 @@ export default function ChatsPage() {
           )
         )
       );
+      if (retryMessage.kind === "text") void syncEmojiUsage();
     } catch {
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], retryMessage.clientId, "failed"),
       }));
+      if (retryMessage.kind === "text") void syncEmojiUsage();
     } finally {
       finishSendTask(retryMessage.clientId);
     }
@@ -4198,17 +4325,37 @@ export default function ChatsPage() {
                   </div>
                 )}
                 {!voiceComposer.open && emojiPickerOpen ? (
-                  <div className="composer-emoji-panel" aria-label="常用表情">
-                    {COMMON_EMOJIS.map((emoji) => (
-                      <button
-                        aria-label={`插入 ${emoji}`}
-                        key={emoji}
-                        onClick={() => insertEmoji(emoji)}
-                        type="button"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
+                  <div className="composer-emoji-panel" aria-label="表情选择器">
+                    <div className="composer-emoji-tabs" role="tablist" aria-label="表情分类">
+                      {EMOJI_PAGES.map((page, index) => (
+                        <button
+                          aria-label={page.label}
+                          aria-selected={emojiPage === index}
+                          className={emojiPage === index ? "is-active" : ""}
+                          key={page.label}
+                          onClick={() => setEmojiPage(index)}
+                          role="tab"
+                          title={page.label}
+                          type="button"
+                        >
+                          <span>{page.icon}</span>
+                          <small>{page.label}</small>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="composer-emoji-grid" role="tabpanel" aria-label={EMOJI_PAGES[emojiPage].label}>
+                      {visibleEmojis.map((emoji, index) => (
+                        <button
+                          aria-label={`插入 ${emoji}`}
+                          className={emojiPage === 0 && index < frequentEmojis.length ? "is-frequent" : ""}
+                          key={`${emoji}-${index}`}
+                          onClick={() => insertEmoji(emoji)}
+                          type="button"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
                 {!voiceComposer.open ? (

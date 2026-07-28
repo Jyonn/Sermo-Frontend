@@ -10844,9 +10844,7 @@ img {
   }
 
   .composer-emoji-panel {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 4px;
+    display: block;
     margin-top: 10px;
     padding: 10px;
     overflow: hidden;
@@ -10857,7 +10855,53 @@ img {
     backdrop-filter: blur(16px) saturate(1.08);
   }
 
-  .composer-emoji-panel > button {
+  .composer-emoji-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(19, 52, 40, 0.08);
+  }
+
+  .composer-emoji-tabs > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 9px;
+    color: var(--text-muted);
+    background: transparent;
+    transition: color 150ms ease, background 150ms ease;
+  }
+
+  .composer-emoji-tabs > button.is-active {
+    color: #0b1712;
+    background: rgba(0, 208, 132, 0.13);
+  }
+
+  .composer-emoji-tabs span {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .composer-emoji-tabs small {
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .composer-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 4px;
+    min-height: 132px;
+  }
+
+  .composer-emoji-grid > button {
+    position: relative;
     display: grid;
     place-items: center;
     min-width: 0;
@@ -10870,12 +10914,23 @@ img {
     transition: background 130ms ease, transform 130ms ease;
   }
 
-  .composer-emoji-panel > button:hover {
+  .composer-emoji-grid > button.is-frequent::after {
+    position: absolute;
+    right: 3px;
+    bottom: 2px;
+    width: 3px;
+    height: 3px;
+    border-radius: 999px;
+    background: #00a86b;
+    content: "";
+  }
+
+  .composer-emoji-grid > button:hover {
     background: rgba(255, 255, 255, 0.64);
     transform: translateY(-1px);
   }
 
-  .composer-emoji-panel > button:active {
+  .composer-emoji-grid > button:active {
     transform: scale(0.92);
   }
 
