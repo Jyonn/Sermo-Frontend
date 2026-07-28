@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { ForwardArrowIcon } from "./ForwardArrowIcon";
 
 interface VerificationBannerProps {
   verified: boolean;
@@ -39,7 +40,7 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
           <strong>认证邮箱</strong>
           <span>解锁好友与群聊</span>
         </div>
-        <span className="material-symbols-outlined verification-banner-action">arrow_forward</span>
+        <ForwardArrowIcon className="verification-banner-action" />
       </button>
       <ConfirmDialog
         open={passwordReminderOpen}

@@ -25,6 +25,7 @@ import { showToast } from "../lib/toast";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { ForwardArrowIcon } from "../components/ForwardArrowIcon";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
@@ -1317,12 +1318,45 @@ export default function MenuPage() {
               <p>专属光环、聊天气泡与头像框</p>
             </div>
             <div className="menu-vip-requirements">
-              <span className={vipCampaign.requirements.email ? "is-complete" : ""}>邮箱</span>
-              <span className={vipCampaign.requirements.phone ? "is-complete" : ""}>手机</span>
-              <span className={vipCampaign.requirements.level ? "is-complete" : ""}>LV6</span>
+              {[
+                {
+                  key: "email",
+                  label: "认证邮箱",
+                  complete: vipCampaign.requirements.email,
+                  detail: vipCampaign.requirements.email ? "已完成" : "去认证",
+                  action: () => openAuthSheet("email"),
+                },
+                {
+                  key: "phone",
+                  label: "绑定手机",
+                  complete: vipCampaign.requirements.phone,
+                  detail: vipCampaign.requirements.phone ? "已完成" : "去绑定",
+                  action: () => openAuthSheet("sms"),
+                },
+                {
+                  key: "level",
+                  label: "达到 LV6",
+                  complete: vipCampaign.requirements.level,
+                  detail: vipCampaign.requirements.level ? "已完成" : `当前 LV${me?.growth?.level ?? 1}`,
+                  action: () => setGrowthDrawerOpen(true),
+                },
+              ].map((requirement) => (
+                <button
+                  className={requirement.complete ? "is-complete" : ""}
+                  disabled={requirement.complete}
+                  key={requirement.key}
+                  onClick={requirement.action}
+                  type="button"
+                >
+                  <i aria-hidden="true">{requirement.complete ? "✓" : ""}</i>
+                  <strong>{requirement.label}</strong>
+                  <span>{requirement.detail}</span>
+                  {!requirement.complete ? <ForwardArrowIcon /> : null}
+                </button>
+              ))}
             </div>
             <button disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">
-              {vipClaiming ? "正在锁定席位" : vipCampaign.eligible ? "认领永久 VIP" : "完成条件后认领"}
+              {vipClaiming ? "正在锁定席位" : vipCampaign.eligible ? "认领永久 VIP" : "完成以上条件即可认领"}
             </button>
           </section>
         ) : null}

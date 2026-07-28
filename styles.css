@@ -1058,8 +1058,9 @@ img {
 }
 
 .verification-banner-action {
+  width: 19px;
+  height: 19px;
   color: rgba(150, 107, 16, 0.72);
-  font-size: 19px;
 }
 
 .growth-showcase {
@@ -1236,24 +1237,79 @@ img {
 .menu-vip-requirements {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(49, 66, 57, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.4);
 }
 
-.menu-vip-requirements span {
-  padding: 4px 7px;
-  color: rgba(49, 66, 57, 0.5);
-  border: 1px solid rgba(49, 66, 57, 0.12);
-  border-radius: 6px;
-  font-size: 0.62rem;
+.menu-vip-requirements button {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto 16px;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  color: #314239;
+  border: 0;
+  border-bottom: 1px solid rgba(49, 66, 57, 0.08);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.48);
+  text-align: left;
+}
+
+.menu-vip-requirements button:last-child {
+  border-bottom: 0;
+}
+
+.menu-vip-requirements button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.menu-vip-requirements button i {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  color: rgba(49, 66, 57, 0.3);
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.64rem;
+  font-style: normal;
+}
+
+.menu-vip-requirements button strong {
+  font-size: 0.74rem;
+}
+
+.menu-vip-requirements button span {
+  color: #8e6325;
+  font-size: 0.68rem;
   font-weight: 720;
 }
 
-.menu-vip-requirements span.is-complete {
+.menu-vip-requirements button svg {
+  width: 15px;
+  height: 15px;
+  color: rgba(49, 66, 57, 0.42);
+}
+
+.menu-vip-requirements button.is-complete {
+  cursor: default;
+  color: rgba(49, 66, 57, 0.66);
+}
+
+.menu-vip-requirements button.is-complete i {
   color: #087751;
-  border-color: rgba(8, 119, 81, 0.18);
-  background: rgba(8, 119, 81, 0.07);
+  border-color: rgba(8, 119, 81, 0.32);
+  background: rgba(8, 119, 81, 0.08);
+}
+
+.menu-vip-requirements button.is-complete span {
+  color: rgba(49, 66, 57, 0.48);
 }
 
 .menu-vip-campaign > button {
