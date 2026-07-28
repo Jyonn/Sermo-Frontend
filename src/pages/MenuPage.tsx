@@ -202,6 +202,7 @@ export default function MenuPage() {
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
+  const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
   const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
@@ -241,6 +242,7 @@ export default function MenuPage() {
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const chatBackgroundFileInputRef = useRef<HTMLInputElement | null>(null);
   const pwaGrowthClaimedRef = useRef(false);
+  const growthLevelTrackRef = useRef<HTMLDivElement | null>(null);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const hasGrowthCapability = (key: string, fallbackLevel: number) =>
@@ -1134,6 +1136,17 @@ export default function MenuPage() {
     unlocked: (me?.growth?.level ?? 1) >= index + 1,
   }));
 
+  useEffect(() => {
+    if (!growthLevelsOpen) return;
+    const currentLevel = me?.growth?.level ?? 1;
+    setActiveGrowthGuideLevel(currentLevel);
+    window.requestAnimationFrame(() => {
+      growthLevelTrackRef.current
+        ?.querySelector<HTMLElement>(`[data-growth-level="${currentLevel}"]`)
+        ?.scrollIntoView({ behavior: "auto", block: "nearest", inline: "center" });
+    });
+  }, [growthLevelsOpen, me?.growth?.level]);
+
   const openChannelsEntry = () => {
     if (!hasPassword) {
       showPasswordReminder();
@@ -1253,8 +1266,11 @@ export default function MenuPage() {
               <strong>{session?.user.name ?? "言浪用户"}</strong>
             </div>
             <button className="menu-growth-entry" onClick={() => setGrowthDrawerOpen(true)} type="button">
-              <span>Lv.{me?.growth?.level ?? 1} {me?.growth?.name ?? space?.level_names?.[0] ?? "初见"}</span>
-              {space?.slug ? <span className="menu-space-slug">@{space.slug}</span> : null}
+              <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}</span>
+              <span className="menu-growth-identity">
+                <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? "初见"}</strong>
+                {space?.slug ? <small>@{space.slug}</small> : null}
+              </span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
@@ -1379,9 +1395,19 @@ export default function MenuPage() {
       <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title="我的成长">
         <div className={`growth-drawer is-level-${me?.growth?.level ?? 1}`}>
           <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
-            <div className="growth-level-seal">
-              <span>Lv.{me?.growth?.level ?? 1}</span>
-              <strong>{me?.growth?.name ?? "初见"}</strong>
+            <div className="growth-hero-heading">
+              <div className="growth-level-seal">
+                <span>LEVEL</span>
+                <strong>{String(me?.growth?.level ?? 1).padStart(2, "0")}</strong>
+              </div>
+              <div className="growth-hero-title">
+                <small>当前称号</small>
+                <strong>{me?.growth?.name ?? "初见"}</strong>
+              </div>
+              <span className="growth-hero-guide">
+                图鉴
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </span>
             </div>
             <div className="growth-progress-copy">
               <div>
@@ -1390,11 +1416,16 @@ export default function MenuPage() {
               </div>
               <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
             </div>
-            <span className="material-symbols-outlined growth-hero-arrow">chevron_right</span>
           </button>
           <section className="growth-daily-card">
-            <div><strong>今日聊天</strong><span>每天最多 20</span></div>
-            <b>{me?.growth?.daily_chat?.earned ?? 0}<small> / {me?.growth?.daily_chat?.limit ?? 20}</small></b>
+            <div className="growth-daily-copy">
+              <strong>今日聊天</strong>
+              <span>每日成长</span>
+            </div>
+            <div className="growth-daily-meter">
+              <i style={{ transform: `scaleX(${Math.min(1, (me?.growth?.daily_chat?.earned ?? 0) / Math.max(1, me?.growth?.daily_chat?.limit ?? 20))})` }} />
+            </div>
+            <b>{me?.growth?.daily_chat?.earned ?? 0}<small>/{me?.growth?.daily_chat?.limit ?? 20}</small></b>
           </section>
           <section className="growth-drawer-section">
             <h3>探索言浪</h3>
@@ -1428,35 +1459,80 @@ export default function MenuPage() {
               </div>
             </section>
           ) : null}
-          <div className="growth-privileges">{me?.growth?.privileges.map((item) => <span key={item}>{item}</span>)}</div>
+          {me?.growth?.privileges.length ? (
+            <section className="growth-drawer-section">
+              <h3>已经解锁</h3>
+              <div className="growth-privileges">{me.growth.privileges.map((item) => <span key={item}>{item}</span>)}</div>
+            </section>
+          ) : null}
         </div>
       </SideDrawer>
 
       <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title="等级图鉴">
         <div className="growth-level-guide">
           <div className="growth-level-guide-summary">
-            <span>当前等级</span>
-            <strong>Lv.{me?.growth?.level ?? 1} · {me?.growth?.name ?? "初见"}</strong>
-            {me?.growth?.level_cap_reason ? <small>{me.growth.level_cap_reason}</small> : null}
+            <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
+            <strong>{growthLevels[activeGrowthGuideLevel - 1]?.name ?? `Lv.${activeGrowthGuideLevel}`}</strong>
+            <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? "当前所在等级" : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? "已抵达" : "继续成长解锁"}</small>
           </div>
-          <div className="growth-level-list">
+          <div
+            className="growth-level-list"
+            ref={growthLevelTrackRef}
+            onScroll={(event) => {
+              const track = event.currentTarget;
+              const center = track.scrollLeft + track.clientWidth / 2;
+              const cards = Array.from(track.querySelectorAll<HTMLElement>("[data-growth-level]"));
+              const closest = cards.reduce<{ level: number; distance: number } | null>((best, card) => {
+                const level = Number(card.dataset.growthLevel);
+                const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+                return !best || distance < best.distance ? { level, distance } : best;
+              }, null);
+              if (closest && closest.level !== activeGrowthGuideLevel) setActiveGrowthGuideLevel(closest.level);
+            }}
+          >
             {growthLevels.map((item) => {
               const current = item.level === (me?.growth?.level ?? 1);
               const next = item.level === (me?.growth?.level ?? 1) + 1;
               return (
-                <article className={`growth-level-card${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`} key={item.level}>
-                  <div className="growth-level-card-index">Lv.{item.level}</div>
+                <article
+                  className={`growth-level-card${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
+                  data-growth-level={item.level}
+                  key={item.level}
+                >
+                  <div className="growth-level-card-stage">
+                    <span>LEVEL</span>
+                    <strong>{String(item.level).padStart(2, "0")}</strong>
+                  </div>
                   <div className="growth-level-card-copy">
                     <strong>{item.name}</strong>
+                    <small>{item.score.toLocaleString()} 成长值</small>
                     {item.unlocks.length ? (
-                      <div>{item.unlocks.map((unlock) => <span key={unlock}>{unlock}</span>)}</div>
-                    ) : <small>成长阶段</small>}
+                      <div>{item.unlocks.map((unlock) => <span key={unlock}><i />{unlock}</span>)}</div>
+                    ) : <div className="growth-level-rest"><span><i />成长阶段</span></div>}
                   </div>
-                  <div className="growth-level-card-score">{item.score.toLocaleString()}<small>成长值</small></div>
+                  <div className="growth-level-card-state">
+                    {current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}
+                  </div>
                 </article>
               );
             })}
           </div>
+          <div className="growth-level-rail" aria-label="选择等级">
+            {growthLevels.map((item) => (
+              <button
+                aria-label={`查看 Lv.${item.level}`}
+                className={activeGrowthGuideLevel === item.level ? "is-active" : ""}
+                key={`rail-${item.level}`}
+                onClick={() => {
+                  growthLevelTrackRef.current
+                    ?.querySelector<HTMLElement>(`[data-growth-level="${item.level}"]`)
+                    ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                }}
+                type="button"
+              />
+            ))}
+          </div>
+          {me?.growth?.level_cap_reason ? <p className="growth-level-cap-note">{me.growth.level_cap_reason}</p> : null}
         </div>
       </SideDrawer>
 
