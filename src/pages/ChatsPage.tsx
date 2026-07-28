@@ -31,6 +31,7 @@ import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
+import { purgeCachedMedia } from "../lib/mediaCache";
 import { loadMessagesAfterThrough, loadMessagesBeforeThrough } from "../lib/messageHistory";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
@@ -3812,14 +3813,19 @@ export default function ChatsPage() {
 
     try {
       setMessageDeleteState("deleting");
-      await api.deleteMessage(messageMenu.message.id);
-      if (messageMenu.message.localPreviewUri) {
-        URL.revokeObjectURL(messageMenu.message.localPreviewUri);
-        localObjectUrlsRef.current.delete(messageMenu.message.localPreviewUri);
+      const deletedMessage = messageMenu.message;
+      await api.deleteMessage(deletedMessage.id as number);
+      purgeCachedMedia([
+        deletedMessage.payload?.uri,
+        deletedMessage.payload?.thumbnail_uri,
+      ]);
+      if (deletedMessage.localPreviewUri) {
+        URL.revokeObjectURL(deletedMessage.localPreviewUri);
+        localObjectUrlsRef.current.delete(deletedMessage.localPreviewUri);
       }
-      const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== messageMenu.message.clientId);
-      if (typeof messageMenu.message.id === "number") {
-        setPinnedMessages((current) => current.filter((pin) => pin.message.message_id !== messageMenu.message.id));
+      const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== deletedMessage.clientId);
+      if (typeof deletedMessage.id === "number") {
+        setPinnedMessages((current) => current.filter((pin) => pin.message.message_id !== deletedMessage.id));
       }
       setMessages((current) => ({
         ...current,
