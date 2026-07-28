@@ -381,6 +381,13 @@ export interface ChatMessageDTO {
   created_at: number;
 }
 
+export interface PinnedMessageDTO {
+  pin_id: number;
+  message: ChatMessageDTO;
+  pinned_by: TinyUserDTO;
+  pinned_at: number;
+}
+
 export interface QuotedMessageDTO {
   message_id: number;
   user: TinyUserDTO;

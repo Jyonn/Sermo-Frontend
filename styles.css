@@ -4326,6 +4326,150 @@ img {
   display: none;
 }
 
+.chat-pinned-bar {
+  position: relative;
+  z-index: 7;
+  display: flex;
+  align-items: stretch;
+  min-height: 46px;
+  margin: 0 12px 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 168, 107, 0.15);
+  border-radius: 12px;
+  background: rgba(250, 255, 252, 0.86);
+  box-shadow: 0 7px 20px rgba(20, 53, 40, 0.06);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.chat-pinned-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  gap: 9px;
+  padding: 7px 11px;
+  text-align: left;
+}
+
+.chat-pinned-main > .material-symbols-outlined {
+  color: #00a86b;
+  font-size: 1.1rem;
+  transform: rotate(-18deg);
+}
+
+.chat-pinned-copy {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.chat-pinned-copy strong {
+  color: #174532;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.chat-pinned-copy > span {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-pinned-list-button {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 0 8px;
+  color: #16805a;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.chat-pinned-list-button .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+.pinned-message-list {
+  display: grid;
+  gap: 9px;
+}
+
+.pinned-message-card {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(218, 226, 222, 0.9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.pinned-message-content {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  padding: 11px 12px;
+  text-align: left;
+}
+
+.pinned-message-avatar {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 11px;
+}
+
+.pinned-message-body {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.pinned-message-meta {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  gap: 8px;
+}
+
+.pinned-message-meta strong {
+  overflow: hidden;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pinned-message-meta time,
+.pinned-message-body small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.pinned-message-preview {
+  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pinned-message-remove {
+  align-self: stretch;
+  width: 44px;
+  flex: 0 0 44px;
+  color: var(--text-muted);
+  border-left: 1px solid rgba(218, 226, 222, 0.74);
+}
+
+.pinned-message-remove .material-symbols-outlined {
+  font-size: 1.15rem;
+}
+
 .composer-inline-svg {
   width: 22px;
   height: 22px;
@@ -6840,7 +6984,7 @@ img {
     min-width: 0;
   }
 
-  .desktop-conversation-header + .chat-detail-scene {
+  .message-pane.chat-main-pane > .chat-detail-scene {
     flex: 1 1 auto;
     min-height: 0;
   }
@@ -11125,7 +11269,7 @@ img {
     background: rgba(255, 255, 255, 0.9);
   }
 
-  .chat-mobile-layout .desktop-conversation-header + .chat-detail-scene {
+  .chat-mobile-layout .message-pane.chat-main-pane > .chat-detail-scene {
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
     flex: 1 1 auto;

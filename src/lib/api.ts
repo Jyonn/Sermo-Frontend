@@ -21,6 +21,7 @@ import type {
   VideoMetadataDTO,
   OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
+  PinnedMessageDTO,
   SpaceAdminDashboardDTO,
   SpaceAdminBroadcastResultDTO,
   SpaceAdminSession,
@@ -516,6 +517,30 @@ export const api = {
       auth: true,
       query: params,
       signal,
+    });
+  },
+
+  getPinnedMessages(chat_id: number, signal?: AbortSignal) {
+    return request<PinnedMessageDTO[]>("/messages/pins", {
+      auth: true,
+      query: { chat_id },
+      signal,
+    });
+  },
+
+  pinMessage(message_id: number) {
+    return request<PinnedMessageDTO>("/messages/pins", {
+      method: "POST",
+      auth: true,
+      query: { message_id },
+    });
+  },
+
+  unpinMessage(message_id: number) {
+    return request<Record<string, never>>("/messages/pins", {
+      method: "DELETE",
+      auth: true,
+      query: { message_id },
     });
   },
 

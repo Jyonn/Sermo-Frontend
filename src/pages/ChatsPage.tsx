@@ -36,7 +36,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -132,6 +132,18 @@ function sortEmojiUsage(rows: EmojiUsageDTO[]) {
     const rightScore = Math.log1p(right.use_count) * Math.exp(-Math.max(0, nowSeconds - right.last_used_at) / (30 * 86400));
     return rightScore - leftScore;
   });
+}
+
+function pinnedMessagePreview(pin: PinnedMessageDTO) {
+  const message = pin.message;
+  if (message.type === MESSAGE_TYPE_TEXT) return message.content;
+  return {
+    [MESSAGE_TYPE_IMAGE]: "图片",
+    [MESSAGE_TYPE_FILE]: message.payload?.file_name || "文件",
+    [MESSAGE_TYPE_VIDEO]: "视频",
+    [MESSAGE_TYPE_AUDIO]: `语音${message.payload?.duration_seconds ? ` ${Math.round(message.payload.duration_seconds)} 秒` : ""}`,
+    [MESSAGE_TYPE_LOCATION]: "位置",
+  }[message.type] ?? "消息";
 }
 
 function avatarLabel(name: string) {
@@ -1756,6 +1768,9 @@ export default function ChatsPage() {
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
+  const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
+  const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
+  const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | null>(null);
@@ -2097,6 +2112,33 @@ export default function ChatsPage() {
     window.setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
+  const revealPinnedMessage = (messageId: number) => {
+    setPinnedDrawerOpen(false);
+    window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId } }));
+  };
+
+  const togglePinnedMessage = async (message: ChatMessage) => {
+    if (typeof message.id !== "number" || !canManagePinnedMessages) return;
+    const existing = pinnedMessages.find((pin) => pin.message.message_id === message.id);
+    setPinSavingMessageId(message.id);
+    setMessageMenu(null);
+    try {
+      if (existing) {
+        await api.unpinMessage(message.id);
+        setPinnedMessages((current) => current.filter((pin) => pin.message.message_id !== message.id));
+        showToast("已取消置顶");
+      } else {
+        const created = await api.pinMessage(message.id);
+        setPinnedMessages((current) => [created, ...current.filter((pin) => pin.message.message_id !== message.id)]);
+        showToast("消息已置顶");
+      }
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : "置顶操作失败", "error");
+    } finally {
+      setPinSavingMessageId(null);
+    }
+  };
+
   const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
@@ -2205,6 +2247,19 @@ export default function ChatsPage() {
     () => (displayedChat ? sortMessages(messages[displayedChat.id] ?? []) : []),
     [displayedChat, messages]
   );
+  const canManagePinnedMessages = Boolean(selectedChat && (selectedChat.type === "direct" || selectedChat.isOwner));
+
+  useEffect(() => {
+    if (!selectedChat) {
+      setPinnedMessages([]);
+      return;
+    }
+    const controller = new AbortController();
+    api.getPinnedMessages(selectedChat.id, controller.signal)
+      .then(setPinnedMessages)
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [selectedChat?.id]);
 
   useEffect(() => {
     setReplyTarget(null);
@@ -3742,6 +3797,9 @@ export default function ChatsPage() {
         localObjectUrlsRef.current.delete(messageMenu.message.localPreviewUri);
       }
       const nextThreadMessages = (selectedMessages ?? []).filter((message) => message.clientId !== messageMenu.message.clientId);
+      if (typeof messageMenu.message.id === "number") {
+        setPinnedMessages((current) => current.filter((pin) => pin.message.message_id !== messageMenu.message.id));
+      }
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: nextThreadMessages,
@@ -4132,6 +4190,25 @@ export default function ChatsPage() {
                   </div>
                 ) : null}
               </header>
+              {pinnedMessages.length ? (
+                <div className="chat-pinned-bar">
+                  <button
+                    className="chat-pinned-main"
+                    onClick={() => revealPinnedMessage(pinnedMessages[0].message.message_id)}
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined">keep</span>
+                    <span className="chat-pinned-copy">
+                      <strong>置顶消息</strong>
+                      <span>{pinnedMessagePreview(pinnedMessages[0])}</span>
+                    </span>
+                  </button>
+                  <button aria-label={`查看全部 ${pinnedMessages.length} 条置顶消息`} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
+                    <span>{pinnedMessages.length}</span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </div>
+              ) : null}
               <div
                 className={`chat-detail-scene chat-background-${chatBackgroundTheme} ${isClosingChatView ? "is-closing" : ""}`}
                 onAnimationEnd={(event) => {
@@ -4581,6 +4658,41 @@ export default function ChatsPage() {
       </BottomSheet>
 
       <SideDrawer
+        open={pinnedDrawerOpen}
+        title="置顶消息"
+        onClose={() => setPinnedDrawerOpen(false)}
+      >
+        <div className="pinned-message-list">
+          {pinnedMessages.map((pin) => (
+            <article className="pinned-message-card" key={pin.pin_id}>
+              <button className="pinned-message-content" onClick={() => revealPinnedMessage(pin.message.message_id)} type="button">
+                <UserAvatar className="pinned-message-avatar" name={pin.message.user.name} uri={pin.message.user.avatar_uri} />
+                <span className="pinned-message-body">
+                  <span className="pinned-message-meta">
+                    <strong>{pin.message.user.name}</strong>
+                    <time>{formatRelativeTime(pin.message.created_at)}</time>
+                  </span>
+                  <span className="pinned-message-preview">{pinnedMessagePreview(pin)}</span>
+                  <small>{pin.pinned_by.name} 置顶</small>
+                </span>
+              </button>
+              {canManagePinnedMessages ? (
+                <button
+                  aria-label="取消置顶"
+                  className="pinned-message-remove"
+                  disabled={pinSavingMessageId === pin.message.message_id}
+                  onClick={() => void togglePinnedMessage(mapChatMessage(pin.message, currentUserId))}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined">keep_off</span>
+                </button>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </SideDrawer>
+
+      <SideDrawer
         open={detailsSheetOpen}
         title="聊天详情"
         onClose={() => setDetailsSheetOpen(false)}
@@ -4994,6 +5106,16 @@ export default function ChatsPage() {
                 <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
                   引用
                 </button>
+                {typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
+                  <button
+                    className="message-context-button"
+                    disabled={pinSavingMessageId === messageMenu.message.id}
+                    onClick={() => void togglePinnedMessage(messageMenu.message)}
+                    type="button"
+                  >
+                    {pinnedMessages.some((pin) => pin.message.message_id === messageMenu.message.id) ? "取消置顶" : "置顶"}
+                  </button>
+                ) : null}
                 {messageMenu.message.kind === "text" ? (
                   <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
                     复制
