@@ -150,7 +150,28 @@ function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "mic" | "stop" | "delete"; className?: string }) {
+function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
+  if (kind === "emoji") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="9" cy="10" r="1" fill="currentColor" />
+        <circle cx="15" cy="10" r="1" fill="currentColor" />
+        <path d="M8.5 14c.85 1.35 2 2.05 3.5 2.05s2.65-.7 3.5-2.05" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (kind === "pin" || kind === "pin-off") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <path d="m9.15 4.4 6.65 6.65-2.1 1.1-.95 3.3-1.45 1.45-4.2-4.2 1.45-1.45 3.3-.95 1.1-2.1" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" />
+        <path d="m8.9 15.1-4.25 4.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
+        {kind === "pin-off" ? <path d="M4.2 4.2 19.8 19.8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" /> : null}
+      </svg>
+    );
+  }
+
   if (kind === "album") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -4197,7 +4218,7 @@ export default function ChatsPage() {
                     onClick={() => revealPinnedMessage(pinnedMessages[0].message.message_id)}
                     type="button"
                   >
-                    <span className="material-symbols-outlined">keep</span>
+                    <ComposerSvgIcon className="chat-pinned-icon" kind="pin" />
                     <span className="chat-pinned-copy">
                       <strong>置顶消息</strong>
                       <span>{pinnedMessagePreview(pinnedMessages[0])}</span>
@@ -4326,7 +4347,7 @@ export default function ChatsPage() {
                       }}
                       type="button"
                     >
-                      <span aria-hidden="true">🙂</span>
+                      <ComposerSvgIcon className="composer-inline-svg" kind="emoji" />
                     </button>
                     <button
                       aria-expanded={composerMoreOpen}
@@ -4684,7 +4705,7 @@ export default function ChatsPage() {
                   onClick={() => void togglePinnedMessage(mapChatMessage(pin.message, currentUserId))}
                   type="button"
                 >
-                  <span className="material-symbols-outlined">keep_off</span>
+                  <ComposerSvgIcon className="pinned-message-remove-icon" kind="pin-off" />
                 </button>
               ) : null}
             </article>

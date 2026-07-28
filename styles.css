@@ -4352,9 +4352,11 @@ img {
   text-align: left;
 }
 
-.chat-pinned-main > .material-symbols-outlined {
+.chat-pinned-icon {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
   color: #00a86b;
-  font-size: 1.1rem;
   transform: rotate(-18deg);
 }
 
@@ -4466,8 +4468,9 @@ img {
   border-left: 1px solid rgba(218, 226, 222, 0.74);
 }
 
-.pinned-message-remove .material-symbols-outlined {
-  font-size: 1.15rem;
+.pinned-message-remove-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .composer-inline-svg {
