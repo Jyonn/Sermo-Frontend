@@ -31,6 +31,7 @@ import type {
   SpaceAuthDTO,
   UserDTO,
   UserGrowthDTO,
+  PermanentVipCampaignDTO,
   UserMeDTO,
   WebReminderPreferenceDTO,
   EmojiUsageDTO,
@@ -684,6 +685,13 @@ export const api = {
       method: "POST",
       auth: true,
       body: { level },
+    });
+  },
+
+  claimPermanentVip() {
+    return request<PermanentVipCampaignDTO>("/users/me/permanent-vip", {
+      method: "POST",
+      auth: true,
     });
   },
 

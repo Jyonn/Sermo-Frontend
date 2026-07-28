@@ -18,6 +18,7 @@ export interface TinyUserDTO {
   official?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
+  is_permanent_vip?: boolean;
 }
 
 export interface UserDTO extends TinyUserDTO {
@@ -113,6 +114,7 @@ export interface AccessPayload {
   phone_unbound_at?: number | null;
   bark_unbound_at?: number | null;
   is_private_account?: boolean;
+  is_permanent_vip?: boolean;
   expire?: number;
   time?: number;
   type?: string;
@@ -131,6 +133,8 @@ export interface UserMeDTO extends UserDTO {
   phone_unbound_at?: number | null;
   bark_unbound_at?: number | null;
   is_private_account: boolean;
+  is_permanent_vip?: boolean;
+  permanent_vip_campaign?: PermanentVipCampaignDTO;
   growth?: UserGrowthDTO;
   plaza_greeting?: string;
   name_changed_at?: number | null;
@@ -140,6 +144,22 @@ export interface UserMeDTO extends UserDTO {
   };
   chat_background_theme?: "default" | "paper" | "mint" | "dusk" | "custom";
   chat_background_uri?: string;
+}
+
+export interface PermanentVipCampaignDTO {
+  limit: number;
+  claimed: number;
+  remaining: number;
+  eligible: boolean;
+  required_level: number;
+  claimed_by_user: boolean;
+  slot: number | null;
+  active: boolean;
+  requirements: {
+    email: boolean;
+    phone: boolean;
+    level: boolean;
+  };
 }
 
 export interface SwitchAccountDTO {
@@ -445,6 +465,7 @@ export interface ChatMessage {
   kind: MessageKind;
   name: string;
   avatarUri?: string;
+  isPermanentVip?: boolean;
   time: string;
   createdAt: number;
   text: string;

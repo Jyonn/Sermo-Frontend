@@ -202,6 +202,7 @@ export default function MenuPage() {
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
+  const [vipClaiming, setVipClaiming] = useState(false);
   const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
   const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
@@ -268,6 +269,26 @@ export default function MenuPage() {
     webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
     webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
   ].join(" · ");
+  const vipCampaign = me?.permanent_vip_campaign;
+
+  const claimPermanentVip = async () => {
+    if (!vipCampaign?.eligible || vipClaiming) return;
+    setVipClaiming(true);
+    try {
+      const campaign = await api.claimPermanentVip();
+      setMe((current) => current ? {
+        ...current,
+        is_permanent_vip: true,
+        permanent_vip_campaign: campaign,
+      } : current);
+      patchSessionUser({ is_permanent_vip: true });
+      showToast(`永久 VIP 认领成功 · 第 ${campaign.slot} 位`, "success");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : "认领失败，请稍后重试", "error");
+    } finally {
+      setVipClaiming(false);
+    }
+  };
 
   useEffect(() => {
     if (!standalonePwa || !me || pwaGrowthClaimedRef.current) return;
@@ -1259,7 +1280,7 @@ export default function MenuPage() {
         />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
-            <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+            <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
           </button>
           <div className="row-main menu-profile-copy">
             <div className="menu-profile-heading">
@@ -1284,6 +1305,27 @@ export default function MenuPage() {
             <QrCodeIcon />
           </button>
         </div>
+        {vipCampaign?.active && !vipCampaign.claimed_by_user ? (
+          <section className={`menu-vip-campaign${vipCampaign.eligible ? " is-eligible" : ""}`}>
+            <div className="menu-vip-campaign-orbit" aria-hidden="true"><i /><i /></div>
+            <div className="menu-vip-campaign-heading">
+              <span>FOUNDING 100</span>
+              <small>余 {vipCampaign.remaining} 席</small>
+            </div>
+            <div className="menu-vip-campaign-copy">
+              <strong>永久 VIP，留给最早抵达的人</strong>
+              <p>专属光环、聊天气泡与头像框</p>
+            </div>
+            <div className="menu-vip-requirements">
+              <span className={vipCampaign.requirements.email ? "is-complete" : ""}>邮箱</span>
+              <span className={vipCampaign.requirements.phone ? "is-complete" : ""}>手机</span>
+              <span className={vipCampaign.requirements.level ? "is-complete" : ""}>LV6</span>
+            </div>
+            <button disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">
+              {vipClaiming ? "正在锁定席位" : vipCampaign.eligible ? "认领永久 VIP" : "完成条件后认领"}
+            </button>
+          </section>
+        ) : null}
         <section className="list-section">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setBasicDrawerOpen(true)} type="button">

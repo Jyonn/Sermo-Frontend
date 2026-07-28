@@ -612,6 +612,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     kind,
     name: message.user.name,
     avatarUri: message.user.avatar_uri,
+    isPermanentVip: message.user.is_permanent_vip,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
     text: message.content,
@@ -1277,6 +1278,7 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
   const entering = group.messages.filter((message) => enteringMessageIds.includes(message.clientId)).map((message) => message.clientId);
   return JSON.stringify({
     key: group.key,
+    isPermanentVip: group.isPermanentVip,
     dividerLabel: group.dividerLabel,
     messages: group.messages.map((message) => ({
       clientId: message.clientId,
@@ -1459,8 +1461,8 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-      <div className={`message-group ${group.from}`}>
-        {group.from === "other" ? <UserAvatar className="avatar message-avatar" name={group.name} uri={group.avatarUri} /> : null}
+      <div className={`message-group ${group.from}${group.isPermanentVip ? " is-permanent-vip" : ""}`}>
+        {group.from === "other" ? <UserAvatar className="avatar message-avatar" name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
           {rows.map((row) => row.kind === "gallery" ? (
@@ -1499,6 +1501,7 @@ interface MessageGroup {
   from: "self" | "other";
   name: string;
   avatarUri?: string;
+  isPermanentVip?: boolean;
   dividerLabel?: string;
   messages: ChatMessage[];
 }
@@ -2506,6 +2509,7 @@ export default function ChatsPage() {
         from: message.from,
         name: message.name,
         avatarUri: message.avatarUri,
+        isPermanentVip: message.isPermanentVip,
         dividerLabel,
         messages: [message],
       });
@@ -4237,7 +4241,7 @@ export default function ChatsPage() {
         ) : undefined
       }
     >
-      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
+      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}${currentUserMe?.is_permanent_vip ? " chat-user-vip" : ""}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>

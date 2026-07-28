@@ -11,6 +11,7 @@ interface UserAvatarProps {
   uri?: string | null;
   className: string;
   groupMembers?: GroupAvatarMember[] | null;
+  vip?: boolean;
 }
 
 function avatarLabel(name: string) {
@@ -64,7 +65,7 @@ function groupLayoutClass(count: number) {
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ name, uri, className, groupMembers }: UserAvatarProps) {
+export function UserAvatar({ name, uri, className, groupMembers, vip = false }: UserAvatarProps) {
   const [failed, setFailed] = useState(false);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
@@ -82,7 +83,7 @@ export function UserAvatar({ name, uri, className, groupMembers }: UserAvatarPro
   const canShowImage = Boolean(resolvedUri) && !failed;
 
   return (
-    <div className={`${className} ${canShowImage ? "avatar-has-image" : ""}`}>
+    <div className={`${className} ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}`}>
       {canShowGroup ? (
         <div aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
           {normalizedGroupMembers.map((member, index) => (
