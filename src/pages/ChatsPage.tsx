@@ -147,6 +147,13 @@ function pinnedMessagePreview(pin: PinnedMessageDTO) {
   }[message.type] ?? "消息";
 }
 
+function pinnedByLabel(pin: PinnedMessageDTO) {
+  const names = pin.pinned_by_users.map((user) => user.name);
+  if (!names.length) return "聊天成员";
+  if (names.length <= 2) return names.join("、");
+  return `${names[0]}等${names.length}人`;
+}
+
 function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
@@ -2142,13 +2149,19 @@ export default function ChatsPage() {
   const togglePinnedMessage = async (message: ChatMessage) => {
     if (typeof message.id !== "number" || !canManagePinnedMessages) return;
     const existing = pinnedMessages.find((pin) => pin.message.message_id === message.id);
+    const pinnedByCurrentUser = existing?.pinned_by_users.some((user) => user.user_id === currentUserId) ?? false;
     setPinSavingMessageId(message.id);
     setMessageMenu(null);
     try {
-      if (existing) {
+      if (existing && pinnedByCurrentUser) {
         await api.unpinMessage(message.id);
-        setPinnedMessages((current) => current.filter((pin) => pin.message.message_id !== message.id));
-        if (pinnedMessages.length === 1) setPinnedDrawerOpen(false);
+        const remainingUsers = existing.pinned_by_users.filter((user) => user.user_id !== currentUserId);
+        setPinnedMessages((current) =>
+          remainingUsers.length
+            ? current.map((pin) => pin.message.message_id === message.id ? { ...pin, pinned_by_users: remainingUsers } : pin)
+            : current.filter((pin) => pin.message.message_id !== message.id)
+        );
+        if (pinnedMessages.length === 1 && !remainingUsers.length) setPinnedDrawerOpen(false);
         showToast("已取消置顶");
       } else {
         const created = await api.pinMessage(message.id);
@@ -2278,10 +2291,26 @@ export default function ChatsPage() {
       return;
     }
     const controller = new AbortController();
-    api.getPinnedMessages(selectedChat.id, controller.signal)
-      .then(setPinnedMessages)
-      .catch(() => undefined);
-    return () => controller.abort();
+    let syncing = false;
+    const sync = () => {
+      if (syncing || controller.signal.aborted) return;
+      syncing = true;
+      api.getPinnedMessages(selectedChat.id, controller.signal)
+        .then(setPinnedMessages)
+        .catch(() => undefined)
+        .finally(() => {
+          syncing = false;
+        });
+    };
+    const syncOnFocus = () => sync();
+    sync();
+    const interval = window.setInterval(sync, 5000);
+    window.addEventListener("focus", syncOnFocus);
+    return () => {
+      controller.abort();
+      window.clearInterval(interval);
+      window.removeEventListener("focus", syncOnFocus);
+    };
   }, [selectedChat?.id]);
 
   useEffect(() => {
@@ -4232,7 +4261,7 @@ export default function ChatsPage() {
                       <span className="chat-pinned-kicker">
                         <strong>置顶</strong>
                         <i />
-                        <span>{pinnedMessages[0].message.user.name}</span>
+                        <span>{pinnedByLabel(pinnedMessages[0])}</span>
                       </span>
                       <span className="chat-pinned-preview">{pinnedMessagePreview(pinnedMessages[0])}</span>
                     </span>
@@ -4710,7 +4739,7 @@ export default function ChatsPage() {
                   </span>
                   <span className="pinned-message-preview">{pinnedMessagePreview(pin)}</span>
                   <small>
-                    {pin.pinned_by.name} 置顶
+                    {pinnedByLabel(pin)}置顶
                     <i />
                     {formatRelativeTime(pin.pinned_at)}
                   </small>
@@ -4724,7 +4753,7 @@ export default function ChatsPage() {
                   />
                 ) : null}
               </button>
-              {canManagePinnedMessages ? (
+              {canManagePinnedMessages && pin.pinned_by_users.some((user) => user.user_id === currentUserId) ? (
                 <button
                   aria-label="取消置顶"
                   className="pinned-message-remove"
@@ -5161,7 +5190,10 @@ export default function ChatsPage() {
                     onClick={() => void togglePinnedMessage(messageMenu.message)}
                     type="button"
                   >
-                    {pinnedMessages.some((pin) => pin.message.message_id === messageMenu.message.id) ? "取消置顶" : "置顶"}
+                    {pinnedMessages.some((pin) =>
+                      pin.message.message_id === messageMenu.message.id
+                      && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
+                    ) ? "取消置顶" : "置顶"}
                   </button>
                 ) : null}
                 {messageMenu.message.kind === "text" ? (

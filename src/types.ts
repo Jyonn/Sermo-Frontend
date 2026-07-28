@@ -384,7 +384,7 @@ export interface ChatMessageDTO {
 export interface PinnedMessageDTO {
   pin_id: number;
   message: ChatMessageDTO;
-  pinned_by: TinyUserDTO;
+  pinned_by_users: TinyUserDTO[];
   pinned_at: number;
 }
 
