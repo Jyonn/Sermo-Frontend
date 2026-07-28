@@ -236,7 +236,14 @@ function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Prom
 
 function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", auth = false, adminAuth = false, query, signal } = options;
-  if (method !== "GET") return requestCore<T>(path, options);
+  if (method !== "GET") {
+    return requestCore<T>(path, options).then((result) => {
+      if (auth && path !== "/users/me/growth") {
+        window.dispatchEvent(new CustomEvent("sermo:growth-refresh"));
+      }
+      return result;
+    });
+  }
 
   const sessionKey = auth ? authConfig.getSession()?.accessToken ?? "anonymous" : "";
   const adminSessionKey = adminAuth ? adminAuthConfig.getSession()?.accessToken ?? "anonymous" : "";
@@ -662,6 +669,21 @@ export const api = {
     return request<UserMeDTO>("/users/me", {
       auth: true,
       signal,
+    });
+  },
+
+  getGrowth(signal?: AbortSignal) {
+    return request<UserGrowthDTO>("/users/me/growth", {
+      auth: true,
+      signal,
+    });
+  },
+
+  acknowledgeGrowthLevel(level: number) {
+    return request<UserGrowthDTO>("/users/me/growth", {
+      method: "POST",
+      auth: true,
+      body: { level },
     });
   },
 

@@ -5,6 +5,7 @@ import { AppToast } from "./components/AppToast";
 import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
+import { GrowthLevelCelebration } from "./components/GrowthLevelCelebration";
 import { PwaRecommendation } from "./components/PwaRecommendation";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { RequireAdminAuth } from "./lib/adminAuth";
@@ -212,6 +213,7 @@ export default function App() {
       ) : null}
       {ready ? <DocumentTitle /> : null}
       {ready ? <GlobalMessageSync /> : null}
+      {ready ? <GrowthLevelCelebration /> : null}
       {ready ? <AppBottomNav /> : null}
       {ready ? <PwaRecommendation /> : null}
       <PwaUpdatePrompt />

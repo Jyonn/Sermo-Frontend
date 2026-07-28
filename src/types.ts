@@ -53,6 +53,8 @@ export interface SpaceDTO {
 export interface UserGrowthDTO {
   score: number;
   level: number;
+  acknowledged_level?: number;
+  pending_level?: number | null;
   name: string;
   next_score: number | null;
   progress: number;
