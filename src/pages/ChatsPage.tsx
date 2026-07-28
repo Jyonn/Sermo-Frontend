@@ -2148,6 +2148,7 @@ export default function ChatsPage() {
       if (existing) {
         await api.unpinMessage(message.id);
         setPinnedMessages((current) => current.filter((pin) => pin.message.message_id !== message.id));
+        if (pinnedMessages.length === 1) setPinnedDrawerOpen(false);
         showToast("已取消置顶");
       } else {
         const created = await api.pinMessage(message.id);
@@ -4224,14 +4225,20 @@ export default function ChatsPage() {
                     onClick={() => revealPinnedMessage(pinnedMessages[0].message.message_id)}
                     type="button"
                   >
-                    <ComposerSvgIcon className="chat-pinned-icon" kind="pin" />
+                    <span className="chat-pinned-marker">
+                      <ComposerSvgIcon className="chat-pinned-icon" kind="pin" />
+                    </span>
                     <span className="chat-pinned-copy">
-                      <strong>置顶消息</strong>
-                      <span>{pinnedMessagePreview(pinnedMessages[0])}</span>
+                      <span className="chat-pinned-kicker">
+                        <strong>置顶</strong>
+                        <i />
+                        <span>{pinnedMessages[0].message.user.name}</span>
+                      </span>
+                      <span className="chat-pinned-preview">{pinnedMessagePreview(pinnedMessages[0])}</span>
                     </span>
                   </button>
                   <button aria-label={`查看全部 ${pinnedMessages.length} 条置顶消息`} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
-                    <span>{pinnedMessages.length}</span>
+                    <span className="chat-pinned-count">{pinnedMessages.length}</span>
                     <span className="material-symbols-outlined">chevron_right</span>
                   </button>
                 </div>
@@ -4687,11 +4694,13 @@ export default function ChatsPage() {
       <SideDrawer
         open={pinnedDrawerOpen}
         title="置顶消息"
+        titleAccessory={<span className="pinned-message-title-count">{pinnedMessages.length}</span>}
         onClose={() => setPinnedDrawerOpen(false)}
       >
         <div className="pinned-message-list">
-          {pinnedMessages.map((pin) => (
+          {pinnedMessages.map((pin, index) => (
             <article className="pinned-message-card" key={pin.pin_id}>
+              <span className="pinned-message-sequence">{String(index + 1).padStart(2, "0")}</span>
               <button className="pinned-message-content" onClick={() => revealPinnedMessage(pin.message.message_id)} type="button">
                 <UserAvatar className="pinned-message-avatar" name={pin.message.user.name} uri={pin.message.user.avatar_uri} />
                 <span className="pinned-message-body">
@@ -4700,8 +4709,20 @@ export default function ChatsPage() {
                     <time>{formatRelativeTime(pin.message.created_at)}</time>
                   </span>
                   <span className="pinned-message-preview">{pinnedMessagePreview(pin)}</span>
-                  <small>{pin.pinned_by.name} 置顶</small>
+                  <small>
+                    {pin.pinned_by.name} 置顶
+                    <i />
+                    {formatRelativeTime(pin.pinned_at)}
+                  </small>
                 </span>
+                {[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(pin.message.type) && (pin.message.payload?.thumbnail_uri || pin.message.payload?.uri) ? (
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    className="pinned-message-media"
+                    src={pin.message.payload.thumbnail_uri || pin.message.payload.uri}
+                  />
+                ) : null}
               </button>
               {canManagePinnedMessages ? (
                 <button
