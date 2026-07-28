@@ -1264,12 +1264,12 @@ export default function MenuPage() {
           <div className="row-main menu-profile-copy">
             <div className="menu-profile-heading">
               <strong>{session?.user.name ?? "言浪用户"}</strong>
+              {space?.slug ? <span>@{space.slug}</span> : null}
             </div>
             <button className="menu-growth-entry" onClick={() => setGrowthDrawerOpen(true)} type="button">
               <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}</span>
               <span className="menu-growth-identity">
                 <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? "初见"}</strong>
-                {space?.slug ? <small>@{space.slug}</small> : null}
               </span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1406,7 +1406,9 @@ export default function MenuPage() {
               </div>
               <span className="growth-hero-guide">
                 图鉴
-                <span className="material-symbols-outlined">arrow_forward</span>
+                <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
+                  <path d="M4 10h11M11.5 6.5 15 10l-3.5 3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+                </svg>
               </span>
             </div>
             <div className="growth-progress-copy">
@@ -1505,10 +1507,6 @@ export default function MenuPage() {
                   </div>
                   <div className="growth-level-card-copy">
                     <strong>{item.name}</strong>
-                    <small>{item.score.toLocaleString()} 成长值</small>
-                    {item.unlocks.length ? (
-                      <div>{item.unlocks.map((unlock) => <span key={unlock}><i />{unlock}</span>)}</div>
-                    ) : <div className="growth-level-rest"><span><i />成长阶段</span></div>}
                   </div>
                   <div className="growth-level-card-state">
                     {current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}
@@ -1517,6 +1515,21 @@ export default function MenuPage() {
               );
             })}
           </div>
+          <section className="growth-level-detail">
+            <div className="growth-level-detail-score">
+              <span>解锁条件</span>
+              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>成长值</small></strong>
+            </div>
+            <div className="growth-level-detail-unlocks">
+              {(growthLevels[activeGrowthGuideLevel - 1]?.unlocks ?? []).length ? (
+                growthLevels[activeGrowthGuideLevel - 1].unlocks.map((unlock) => (
+                  <span key={unlock}><i />{unlock}</span>
+                ))
+              ) : (
+                <span><i />成长阶段</span>
+              )}
+            </div>
+          </section>
           <div className="growth-level-rail" aria-label="选择等级">
             {growthLevels.map((item) => (
               <button

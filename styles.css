@@ -1231,8 +1231,9 @@ img {
   font-weight: 800;
 }
 
-.growth-hero-guide .material-symbols-outlined {
-  font-size: 16px;
+.growth-hero-guide svg {
+  width: 16px;
+  height: 16px;
 }
 
 .growth-daily-card {
@@ -1548,6 +1549,64 @@ img {
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.16em;
+}
+
+.growth-level-detail {
+  display: grid;
+  gap: 12px;
+  padding: 2px 4px 0;
+}
+
+.growth-level-detail-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 76%, transparent);
+}
+
+.growth-level-detail-score > span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.growth-level-detail-score strong {
+  color: #087751;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.growth-level-detail-score small {
+  margin-left: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+}
+
+.growth-level-detail-unlocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  min-height: 22px;
+}
+
+.growth-level-detail-unlocks span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: color-mix(in srgb, var(--text-primary) 82%, #456052);
+  font-size: 0.72rem;
+  font-weight: 680;
+}
+
+.growth-level-detail-unlocks i {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 4px;
+  border-radius: 50%;
+  background: #087751;
 }
 
 .growth-level-card.is-unlocked {
@@ -3841,8 +3900,8 @@ img {
 .message-context-menu {
   --message-menu-shift-x: 0px;
   position: fixed;
-  width: max-content;
-  max-width: min(260px, calc(100vw - 24px));
+  width: auto;
+  max-width: min(360px, calc(100vw - 24px));
   padding: 8px;
   border: 1px solid rgba(222, 226, 235, 0.92);
   border-radius: 18px;
@@ -3890,10 +3949,12 @@ img {
 }
 
 .message-context-actions {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   width: max-content;
+  max-width: calc(100vw - 42px);
 }
 
 .message-context-actions.is-confirm {
@@ -3917,6 +3978,7 @@ img {
   color: var(--text-default);
   font-size: 0.88rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .message-context-button .material-symbols-outlined {
@@ -8472,6 +8534,15 @@ img {
 .menu-profile-heading strong {
   min-width: 0;
   font-size: 1.05rem;
+}
+
+.menu-profile-heading > span {
+  overflow: hidden;
+  color: var(--brand-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menu-space-slug {
