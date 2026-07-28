@@ -144,6 +144,41 @@
   list-style: none;
 }
 
+.pwa-brand-install-guide {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+}
+
+.pwa-brand-install-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 0 4px 4px;
+}
+
+.pwa-brand-install-heading span {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.pwa-brand-install-heading strong {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+}
+
+.pwa-other-brand-button {
+  justify-self: center;
+  padding: 7px 10px;
+  color: var(--text-muted);
+  border: 0;
+  background: transparent;
+  font-size: 0.7rem;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 36%, transparent);
+  text-underline-offset: 3px;
+}
+
 .pwa-install-steps li {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);

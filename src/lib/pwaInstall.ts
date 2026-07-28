@@ -3,6 +3,8 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+export type AndroidInstallBrand = "huawei" | "xiaomi" | "oppo" | "other";
+
 let installPrompt: BeforeInstallPromptEvent | null = null;
 export const PWA_INSTALL_STATE_EVENT = "sermo:pwa-install-state";
 
@@ -40,6 +42,20 @@ export function isDesktopChrome() {
   if (typeof navigator === "undefined") return false;
   const chrome = /Chrome|Chromium/.test(navigator.userAgent) && !/Edg|OPR/.test(navigator.userAgent);
   return chrome && !/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent);
+}
+
+export function isAndroidDevice() {
+  if (typeof navigator === "undefined") return false;
+  return /Android/i.test(navigator.userAgent);
+}
+
+export function detectAndroidInstallBrand(): AndroidInstallBrand {
+  if (!isAndroidDevice()) return "other";
+  const userAgent = navigator.userAgent;
+  if (/HUAWEI|HONOR|HarmonyOS/i.test(userAgent)) return "huawei";
+  if (/Xiaomi|Redmi|POCO|MIUI/i.test(userAgent)) return "xiaomi";
+  if (/OPPO|OnePlus|Realme|RMX\d|CPH\d|ColorOS/i.test(userAgent)) return "oppo";
+  return "other";
 }
 
 export function canPromptPwaInstall() {
