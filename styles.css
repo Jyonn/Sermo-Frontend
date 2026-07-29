@@ -334,6 +334,38 @@
   --message-card-shadow: 0 5px 16px rgba(28, 43, 37, 0.065);
 }
 
+html[data-theme="dark"] {
+  --bg-canvas: #0e1411;
+  --bg-surface: #151d19;
+  --bg-elevated: #1b2520;
+  --bg-panel: rgba(22, 31, 27, 0.82);
+  --bg-panel-strong: rgba(18, 26, 22, 0.96);
+
+  --text-primary: #eef5f1;
+  --text-secondary: #b8c5be;
+  --text-muted: #7f9188;
+
+  --brand-primary: #35d59a;
+  --brand-primary-press: #22bc83;
+  --line-soft: #29352f;
+  --line-strong: #3a4941;
+
+  --chat-self: #2d795e;
+  --chat-self-text: #f5fffa;
+  --chat-other: #202c27;
+  --chat-other-text: #edf5f1;
+  --avatar-bg: rgba(48, 64, 56, 0.92);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.38);
+
+  --message-self-surface: linear-gradient(155deg, #347b61, #225743);
+  --message-other-surface: rgba(30, 42, 36, 0.96);
+  --message-card-border: rgba(75, 94, 84, 0.7);
+  --message-card-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
 * {
   box-sizing: border-box;
   scrollbar-width: none;
@@ -383,6 +415,20 @@ body::before {
   background-position: 0 0, 14px 14px;
   background-size: 28px 28px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 85%);
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at top right, rgba(32, 190, 132, 0.13), transparent 28%),
+    radial-gradient(circle at 10% 20%, rgba(45, 119, 91, 0.1), transparent 24%),
+    linear-gradient(180deg, #111915 0%, var(--bg-canvas) 100%);
+}
+
+html[data-theme="dark"] body::before {
+  opacity: 0.28;
+  background-image:
+    radial-gradient(rgba(216, 237, 226, 0.06) 0.7px, transparent 0.7px),
+    radial-gradient(rgba(216, 237, 226, 0.035) 0.7px, transparent 0.7px);
 }
 
 a,
@@ -7468,6 +7514,134 @@ img {
   }
 }
 
+/* Dark surfaces stay neutral and let the brand and media carry the color. */
+html[data-theme="dark"] :is(input, textarea, select, .input, .textarea, .search-box) {
+  color: var(--text-primary);
+  border-color: var(--line-soft);
+  background: var(--bg-elevated);
+}
+
+html[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: var(--text-muted);
+}
+
+html[data-theme="dark"] :is(
+  .pwa-recommendation,
+  .bottom-sheet,
+  .drawer-topbar,
+  .drawer-body,
+  .simple-list,
+  .menu-pref-list,
+  .detail-card,
+  .feedback-state,
+  .empty-state,
+  .chat-detail-settings-list,
+  .message-context-menu,
+  .notification-editor-dialog,
+  .async-dialog,
+  .input-dialog,
+  .confirm-dialog,
+  .request-status-modal,
+  .avatar-preset-dialog,
+  .admin-auth-card,
+  .admin-stat-card,
+  .landing-entry-panel,
+  .mobile-nav,
+  .app-mobile-nav
+) {
+  color: var(--text-primary);
+  border-color: var(--line-soft);
+  background: var(--bg-panel-strong);
+}
+
+html[data-theme="dark"] :is(
+  .route-chip,
+  .ghost-chip,
+  .tab-chip,
+  .icon-button,
+  .growth-milestone,
+  .growth-badge,
+  .personalization-background-entry,
+  .personalization-language-option,
+  .personalization-option,
+  .gesture-range-row,
+  .stepper button,
+  .friend-directory-index,
+  .menu-account-switch-trigger.is-static,
+  .bark-guide-step.is-action,
+  .bark-store-link
+) {
+  color: var(--text-secondary);
+  border-color: var(--line-soft);
+  background: rgba(29, 41, 35, 0.78);
+}
+
+html[data-theme="dark"] :is(
+  .personalization-language-option.is-selected,
+  .personalization-option.is-selected
+) {
+  color: #75e0b7;
+  border-color: rgba(70, 210, 158, 0.46);
+  background: rgba(53, 213, 154, 0.12);
+}
+
+html[data-theme="dark"] :is(
+  .mobile-chat-list-screen,
+  .chat-mobile-layout > .panel.desktop-pane,
+  .desktop-tab-shell > .page-stack,
+  .chat-mobile-layout .message-pane.chat-main-pane
+) {
+  background: rgba(17, 25, 21, 0.76);
+}
+
+html[data-theme="dark"] :is(.chat-item, .simple-row, .menu-pref-row, .user-profile-group-row) {
+  border-color: var(--line-soft);
+}
+
+html[data-theme="dark"] :is(.chat-item:hover, .simple-row:hover, .menu-pref-row-button:hover) {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+html[data-theme="dark"] .panel::after,
+html[data-theme="dark"] .detail-card::after {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent 42%);
+}
+
+html[data-theme="dark"] .message-context-menu::after {
+  background: var(--bg-panel-strong);
+}
+
+html[data-theme="dark"] .message-location-card {
+  color: var(--text-primary);
+  border-color: var(--message-card-border);
+  background: var(--message-other-surface);
+}
+
+html[data-theme="dark"] .personalization-tabs {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .personalization-tabs button.is-active {
+  color: #73dfb6;
+  background: #26352e;
+}
+
+html[data-theme="dark"] .user-profile-identity::after {
+  background: linear-gradient(90deg, transparent, rgba(53, 213, 154, 0.1));
+}
+
+html[data-theme="dark"] .drawer-backdrop,
+html[data-theme="dark"] .dialog-backdrop,
+html[data-theme="dark"] .sheet-backdrop {
+  background: rgba(2, 7, 5, 0.66);
+}
+
+html[data-theme="dark"] .tab-sticky-header.is-scrolled,
+html[data-theme="dark"] .chat-conversation-topbar {
+  background: rgba(17, 25, 21, 0.82);
+  border-color: var(--line-soft);
+}
+
 .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -13193,4 +13367,75 @@ img {
   .growth-celebration-unlocks span {
     animation: none;
   }
+}
+
+/* Final theme layer: keep late responsive declarations from restoring light surfaces. */
+html[data-theme="dark"] body .side-drawer {
+  border-color: var(--line-soft);
+  background:
+    radial-gradient(circle at top right, rgba(53, 213, 154, 0.1), transparent 28%),
+    linear-gradient(180deg, #141d18 0%, var(--bg-canvas) 100%);
+}
+
+html[data-theme="dark"] body :is(
+  .drawer-topbar,
+  .drawer-body,
+  .bottom-sheet,
+  .mobile-nav,
+  .app-mobile-nav,
+  .mobile-chat-list-screen,
+  .chat-mobile-layout > .panel.desktop-pane,
+  .desktop-tab-shell > .page-stack,
+  .chat-mobile-layout .message-pane.chat-main-pane
+) {
+  color: var(--text-primary);
+  border-color: var(--line-soft);
+  background: rgba(18, 26, 22, 0.94);
+}
+
+html[data-theme="dark"] body :is(
+  .drawer-body,
+  .sheet-body,
+  .page-stack
+) :is(
+  .simple-list,
+  .chat-detail-settings-list,
+  .user-profile-groups,
+  .user-profile-empty,
+  .menu-pref-list
+) {
+  border-color: var(--line-soft);
+  background: rgba(29, 41, 35, 0.72);
+}
+
+html[data-theme="dark"] body :is(
+  .pwa-recommendation,
+  .notification-editor-dialog,
+  .async-dialog,
+  .input-dialog,
+  .confirm-dialog,
+  .request-status-modal,
+  .avatar-preset-dialog,
+  .chat-sync-popup
+) {
+  color: var(--text-primary);
+  border-color: var(--line-soft);
+  background: var(--bg-panel-strong);
+}
+
+html[data-theme="dark"] body .growth-celebration {
+  color: var(--text-primary);
+  background: #111814;
+}
+
+html[data-theme="dark"] body .growth-celebration-unlocks,
+html[data-theme="dark"] body .growth-celebration-eyebrow,
+html[data-theme="dark"] body .growth-celebration-unlocks span {
+  border-color: var(--line-soft);
+}
+
+html[data-theme="dark"] body .growth-celebration-heading p,
+html[data-theme="dark"] body .growth-celebration-unlocks > p,
+html[data-theme="dark"] body .growth-celebration-footer > small {
+  color: var(--text-muted);
 }

@@ -8,17 +8,21 @@ import { AdminAuthProvider } from "./lib/adminAuth";
 import { setupSpacePwaIdentity } from "./lib/pwaIdentity";
 import { watchPwaUpdates } from "./lib/pwaUpdate";
 import { LanguageProvider } from "./lib/language";
+import { initializeTheme, ThemeProvider } from "./lib/theme";
 
 void setupSpacePwaIdentity();
+initializeTheme();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AdminAuthProvider>
         <AuthProvider>
-          <LanguageProvider>
-            <App />
-          </LanguageProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <App />
+            </LanguageProvider>
+          </ThemeProvider>
         </AuthProvider>
       </AdminAuthProvider>
     </BrowserRouter>

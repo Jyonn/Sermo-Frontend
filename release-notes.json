@@ -1,17 +1,21 @@
 {
-  "id": "2026.07.29.6",
+  "id": "2026.07.29.7",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "通知渠道文案修复",
+      "title": "深色模式上线",
       "items": [
-        "邮件、短信和即时渠道现已正确显示中英文名称"
+        "新增跟随系统、浅色和深色三种外观",
+        "系统主题不可用时，将按本地时间自动切换",
+        "个性化设置中可随时调整外观"
       ]
     },
     "en": {
-      "title": "Notification channel labels fixed",
+      "title": "Dark mode is here",
       "items": [
-        "Email, SMS, and Instant channels now display the correct localized names"
+        "Choose System, Light, or Dark appearance",
+        "Falls back to local time when the system theme is unavailable",
+        "Change appearance anytime from Personalization"
       ]
     }
   }

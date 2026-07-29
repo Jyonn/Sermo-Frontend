@@ -33,6 +33,7 @@ import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
+import { useTheme, type ThemePreference } from "../lib/theme";
 
 const channelRows: Array<[NotificationChannel, number, TranslationKey]> = [
   ["email", 1, "channel.email"],
@@ -169,6 +170,7 @@ function BarkGuideIcon({ compact = false }: { compact?: boolean }) {
 
 export default function MenuPage() {
   const { t, preference: languagePreference, setPreference: setLanguagePreference, saving: languageSaving } = useI18n();
+  const { preference: themePreference, setPreference: setThemePreference } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
@@ -1697,6 +1699,33 @@ export default function MenuPage() {
 
       <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
+          <section className="personalization-section personalization-language-section">
+            <header><strong>{t("menu.appearance")}</strong><span>{t("menu.appearanceHint")}</span></header>
+            <div className="personalization-language-options" role="radiogroup" aria-label={t("menu.appearance")}>
+              {([
+                ["system", "common.system"],
+                ["light", "menu.themeLight"],
+                ["dark", "menu.themeDark"],
+              ] as Array<[ThemePreference, TranslationKey]>).map(([value, labelKey]) => (
+                <button
+                  aria-checked={themePreference === value}
+                  className={`personalization-language-option${themePreference === value ? " is-selected" : ""}`}
+                  key={value}
+                  onClick={() => setThemePreference(value)}
+                  role="radio"
+                  type="button"
+                >
+                  <span>{t(labelKey)}</span>
+                  <span className="language-choice-indicator" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                      <circle cx="10" cy="10" r="7.5" />
+                      {themePreference === value ? <path d="m6.5 10.2 2.15 2.2 4.85-5" /> : null}
+                    </svg>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
           <section className="personalization-section personalization-language-section">
             <header><strong>{t("menu.language")}</strong><span>{t("menu.languageHint")}</span></header>
             <div className="personalization-language-options" role="radiogroup" aria-label={t("menu.language")}>
