@@ -11,13 +11,15 @@ import {
 } from "../lib/pwaInstall";
 import { enableWebPush, getWebPushState } from "../lib/webPush";
 import { PwaInstallSheet } from "./PwaInstallSheet";
+import { useI18n } from "../lib/language";
 
 type RecommendationKind = "install" | "push";
 
 export function PwaRecommendation() {
+  const { t } = useI18n();
   const { session } = useAuth();
   const location = useLocation();
-  const [spaceName, setSpaceName] = useState("当前空间");
+  const [spaceName, setSpaceName] = useState(() => t("pwa.currentSpace"));
   const [kind, setKind] = useState<RecommendationKind | null>(null);
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -77,7 +79,7 @@ export function PwaRecommendation() {
         setKind(null);
       }
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "操作没有完成");
+      setError(actionError instanceof Error ? actionError.message : t("common.operationFailed"));
     } finally {
       setBusy(false);
     }
@@ -88,19 +90,19 @@ export function PwaRecommendation() {
   return (
     <>
       <aside className="pwa-recommendation" role="status">
-        <button className="pwa-recommendation-dismiss" onClick={() => setKind(null)} type="button" aria-label="不再提示">
+        <button className="pwa-recommendation-dismiss" onClick={() => setKind(null)} type="button" aria-label={t("pwa.dismiss")}>
           <span className="material-symbols-outlined">close</span>
         </button>
         <div className="pwa-recommendation-icon" aria-hidden="true">
           <span className="pwa-symbol">{kind === "install" ? "+" : "!"}</span>
         </div>
         <div className="pwa-recommendation-copy">
-          <strong>{kind === "install" ? `安装 ${appName} 到桌面` : "打开系统通知"}</strong>
-          <span>{kind === "install" ? "像 App 一样快捷打开" : "离开网页也能收到新消息"}</span>
+          <strong>{kind === "install" ? t("pwa.installTitle", { name: appName }) : t("pwa.enableNotifications")}</strong>
+          <span>{kind === "install" ? t("pwa.installHint") : t("pwa.notificationHint")}</span>
           {error ? <span className="pwa-recommendation-error">{error}</span> : null}
         </div>
         <button className="pwa-recommendation-action" disabled={busy} onClick={() => void act()} type="button">
-          {busy ? "请稍候" : kind === "install" ? "安装" : "开启"}
+          {busy ? t("pwa.wait") : kind === "install" ? t("pwa.install") : t("pwa.enable")}
         </button>
       </aside>
       <PwaInstallSheet onClose={() => setInstallGuideOpen(false)} open={installGuideOpen} spaceName={spaceName} />

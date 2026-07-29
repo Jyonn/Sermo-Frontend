@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { ForwardArrowIcon } from "./ForwardArrowIcon";
+import { useI18n } from "../lib/language";
 
 interface VerificationBannerProps {
   verified: boolean;
@@ -11,6 +12,7 @@ interface VerificationBannerProps {
 }
 
 export function VerificationBanner({ verified, mode = "tab", onAction, hasPassword = true }: VerificationBannerProps) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -37,16 +39,16 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
     <>
       <button className={`verification-banner${mode === "menu" ? " is-menu" : ""}`} onClick={handleAction} type="button">
         <div className="verification-banner-copy">
-          <strong>认证邮箱</strong>
-          <span>解锁好友与群聊</span>
+          <strong>{t("verification.email")}</strong>
+          <span>{t("verification.unlock")}</span>
         </div>
         <ForwardArrowIcon className="verification-banner-action" />
       </button>
       <ConfirmDialog
         open={passwordReminderOpen}
-        title="请先设置密码"
-        description="设置密码后，才能继续认证邮箱并完成后续绑定。"
-        confirmLabel="去设置"
+        title={t("verification.passwordFirst")}
+        description={t("verification.passwordHint")}
+        confirmLabel={t("verification.goSet")}
         onClose={() => setPasswordReminderOpen(false)}
         onConfirm={() => {
           setPasswordReminderOpen(false);

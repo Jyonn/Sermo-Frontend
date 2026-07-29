@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { buildAvatarPresetUri, parseAvatarPresetId } from "../lib/avatar";
 import { UserAvatar } from "./UserAvatar";
+import { useI18n } from "../lib/language";
 
 interface AvatarPresetDialogProps {
   open: boolean;
@@ -42,8 +43,10 @@ export function AvatarPresetDialog({
   onSave,
   onRequestCustomUpload,
   customUploadEnabled = true,
-  customUploadHint = "上传自定义头像",
+  customUploadHint,
 }: AvatarPresetDialogProps) {
+  const { t } = useI18n();
+  const effectiveCustomUploadHint = customUploadHint ?? t("avatar.uploadCustom");
   const currentPresetId = useMemo(() => parseAvatarPresetId(currentAvatarUri) ?? 1, [currentAvatarUri]);
   const [selectedPresetId, setSelectedPresetId] = useState(currentPresetId);
 
@@ -62,7 +65,7 @@ export function AvatarPresetDialog({
         <div className="avatar-preset-dialog-head">
           <div>
             <p className="eyebrow">Avatar</p>
-            <h2>选择头像</h2>
+            <h2>{t("avatar.choose")}</h2>
           </div>
           <button className="icon-button" onClick={onClose} type="button">
             <span className="material-symbols-outlined">close</span>
@@ -93,11 +96,11 @@ export function AvatarPresetDialog({
 
           {onRequestCustomUpload ? (
             <button
-              aria-label={customUploadEnabled ? "上传自定义头像" : customUploadHint}
+              aria-label={customUploadEnabled ? t("avatar.uploadCustom") : effectiveCustomUploadHint}
               className={`avatar-preset-tile avatar-preset-upload-tile${customUploadEnabled ? "" : " is-locked"}`}
               disabled={saving || !customUploadEnabled}
               onClick={onRequestCustomUpload}
-              title={customUploadHint}
+              title={effectiveCustomUploadHint}
               type="button"
             >
               {customUploadEnabled ? <UploadAvatarIcon /> : <span className="material-symbols-outlined">lock</span>}
@@ -107,10 +110,10 @@ export function AvatarPresetDialog({
 
         <div className="avatar-preset-actions">
           <button className="ghost-button" onClick={onClose} type="button">
-            取消
+            {t("common.cancel")}
           </button>
           <button className="button" disabled={saving} onClick={() => void onSave(selectedPresetId)} type="button">
-            {saving ? "保存中..." : "确认"}
+            {saving ? t("avatar.saving") : t("common.confirm")}
           </button>
         </div>
       </section>

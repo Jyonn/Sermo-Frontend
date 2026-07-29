@@ -2,11 +2,13 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { UserGrowthDTO } from "../types";
+import { useI18n } from "../lib/language";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
 
 export function GrowthLevelCelebration() {
+  const { t } = useI18n();
   const { session } = useAuth();
   const [growth, setGrowth] = useState<UserGrowthDTO | null>(null);
   const [acknowledging, setAcknowledging] = useState(false);
@@ -72,7 +74,7 @@ export function GrowthLevelCelebration() {
   if (!growth || !pendingLevel || !level) return null;
 
   const isLastPendingLevel = pendingLevel === growth.level;
-  const unlocks = level.unlocks.length ? level.unlocks : ["新的成长阶段"];
+  const unlocks = level.unlocks.length ? level.unlocks : [t("growth.defaultUnlock")];
 
   const acknowledge = async () => {
     if (acknowledging) return;
@@ -81,7 +83,7 @@ export function GrowthLevelCelebration() {
     try {
       setGrowth(await api.acknowledgeGrowthLevel(pendingLevel));
     } catch {
-      setError("确认失败，请检查网络后重试");
+      setError(t("growth.confirmFailed"));
     } finally {
       setAcknowledging(false);
     }
@@ -103,7 +105,7 @@ export function GrowthLevelCelebration() {
       </div>
       <div className="growth-celebration-stage">
         <header className="growth-celebration-eyebrow">
-          <span>言浪成长授章</span>
+          <span>{t("growth.badge")}</span>
           <small>{String(pendingLevel).padStart(2, "0")} / {String(growth.level).padStart(2, "0")}</small>
         </header>
 
@@ -113,13 +115,13 @@ export function GrowthLevelCelebration() {
             <strong>{pendingLevel}</strong>
           </div>
           <div className="growth-celebration-heading">
-            <p>新的浪潮已经抵达</p>
+            <p>{t("growth.newWave")}</p>
             <h2 id="growth-celebration-title">{level.name}</h2>
           </div>
         </div>
 
         <section className="growth-celebration-unlocks" id="growth-celebration-unlocks">
-          <p>本级解锁</p>
+          <p>{t("growth.unlocked")}</p>
           <div>
             {unlocks.map((unlock, index) => (
               <span key={unlock} style={{ "--unlock-index": index } as CSSProperties}>
@@ -133,12 +135,12 @@ export function GrowthLevelCelebration() {
         <footer className="growth-celebration-footer">
           {error ? <p role="alert">{error}</p> : null}
           <button disabled={acknowledging} onClick={() => void acknowledge()} ref={actionRef} type="button">
-            <span>{acknowledging ? "正在确认" : isLastPendingLevel ? "知道了" : "收下并继续"}</span>
+            <span>{acknowledging ? t("growth.confirming") : isLastPendingLevel ? t("growth.gotIt") : t("growth.continue")}</span>
             <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
               <path d="M5 12h13M13.5 6.5 19 12l-5.5 5.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
             </svg>
           </button>
-          <small>确认后记入成长历程</small>
+          <small>{t("growth.recordHint")}</small>
         </footer>
       </div>
     </div>

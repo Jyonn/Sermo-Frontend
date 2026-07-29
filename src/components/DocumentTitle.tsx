@@ -6,6 +6,7 @@ import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/
 import { listRecentSpaces } from "../lib/recentSpaces";
 import { getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, WEB_REMINDER_PREFS_UPDATED_EVENT } from "../lib/webReminderPreferences";
+import { useI18n } from "../lib/language";
 
 const FALLBACK_TITLE = "Sermo 言浪";
 
@@ -19,6 +20,7 @@ function countUnread(chats: Array<Pick<Chat, "unread">>) {
 }
 
 export function DocumentTitle() {
+  const { t } = useI18n();
   const { ready, session } = useAuth();
   const cacheScope = useMemo(
     () => (session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null),
@@ -89,8 +91,8 @@ export function DocumentTitle() {
   useEffect(() => {
     if (!ready || typeof document === "undefined") return;
     const brandedTitle = spaceName === FALLBACK_TITLE ? FALLBACK_TITLE : `${spaceName} - 言浪`;
-    document.title = titleReminderEnabled && unreadCount > 0 ? `[${unreadCount}条新消息] ${brandedTitle}` : brandedTitle;
-  }, [ready, spaceName, titleReminderEnabled, unreadCount]);
+    document.title = titleReminderEnabled && unreadCount > 0 ? t("document.unreadTitle", { count: unreadCount, title: brandedTitle }) : brandedTitle;
+  }, [ready, spaceName, t, titleReminderEnabled, unreadCount]);
 
   useEffect(() => {
     if (!ready || !session) return;
