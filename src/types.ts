@@ -2,7 +2,7 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "system";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "system";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -358,6 +358,35 @@ export interface ChatMessagePayloadDTO {
   geocoding_provider?: string;
   obscured?: boolean;
   obscure_radius_km?: number;
+  owner?: TinyUserDTO;
+  target_user_id?: number;
+  access?: TravelMapAccessDTO;
+}
+
+export interface TravelMapRegionDTO {
+  region_code: string;
+  region_name: string;
+  country_code: string;
+  country_name: string;
+  checked_at: number;
+}
+
+export interface TravelMapAccessDTO {
+  can_view_theirs: boolean;
+  they_can_view_mine: boolean;
+}
+
+export interface MyTravelMapDTO {
+  owner: TinyUserDTO;
+  regions: TravelMapRegionDTO[];
+}
+
+export interface TravelMapComparisonDTO {
+  me: TinyUserDTO;
+  other: TinyUserDTO;
+  my_regions: TravelMapRegionDTO[];
+  other_regions: TravelMapRegionDTO[];
+  access: TravelMapAccessDTO;
 }
 
 export interface ImageMetadataDTO {

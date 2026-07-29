@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.29.7",
+  "id": "2026.07.29.8",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "深色模式上线",
+      "title": "把共同足迹铺在地图上",
       "items": [
-        "新增跟随系统、浅色和深色三种外观",
-        "系统主题不可用时，将按本地时间自动切换",
-        "个性化设置中可随时调整外观"
+        "点亮去过的国家、省州和地区",
+        "在私聊中交换地图查看权",
+        "世界与中国地图支持缩放和共同足迹高亮"
       ]
     },
     "en": {
-      "title": "Dark mode is here",
+      "title": "Put shared journeys on the map",
       "items": [
-        "Choose System, Light, or Dark appearance",
-        "Falls back to local time when the system theme is unavailable",
-        "Change appearance anytime from Personalization"
+        "Light up countries, states, provinces, and regions",
+        "Exchange map access in direct messages",
+        "Zoom across World and China maps with shared footprints highlighted"
       ]
     }
   }

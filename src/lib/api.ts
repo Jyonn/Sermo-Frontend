@@ -38,7 +38,11 @@ import type {
   EmojiUsageDTO,
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
+  MyTravelMapDTO,
+  TravelMapAccessDTO,
+  TravelMapComparisonDTO,
 } from "../types";
+import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
 
 const API_BASE_URL = import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space";
@@ -581,6 +585,68 @@ export const api = {
       auth: true,
       query: { chat_id },
       body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null },
+    });
+  },
+
+  getMyTravelMap(signal?: AbortSignal) {
+    return request<MyTravelMapDTO>("/maps/me", { auth: true, signal });
+  },
+
+  setTravelMapRegion(payload: {
+    region_code: string;
+    region_name: string;
+    country_code: string;
+    country_name: string;
+    checked: 0 | 1;
+  }) {
+    return request<MyTravelMapDTO>("/maps/me", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  getTravelMap(user_id: number, signal?: AbortSignal) {
+    return request<TravelMapComparisonDTO>("/maps/users", {
+      auth: true,
+      query: { user_id },
+      signal,
+    });
+  },
+
+  getTravelMapAccess(user_id: number) {
+    return request<TravelMapAccessDTO>("/maps/access", { auth: true, query: { user_id } });
+  },
+
+  grantTravelMapAccess(user_id: number) {
+    return request<TravelMapAccessDTO>("/maps/access", {
+      method: "POST",
+      auth: true,
+      query: { user_id },
+    });
+  },
+
+  reciprocateTravelMapAccess(user_id: number) {
+    return request<TravelMapAccessDTO>("/maps/access/reciprocate", {
+      method: "POST",
+      auth: true,
+      query: { user_id },
+    });
+  },
+
+  revokeTravelMapAccess(user_id: number) {
+    return request<Record<string, never>>("/maps/access", {
+      method: "DELETE",
+      auth: true,
+      query: { user_id },
+    });
+  },
+
+  getTravelMapGeometry(country_code: string, signal?: AbortSignal) {
+    return request<FeatureCollection>("/maps/geometry", {
+      auth: true,
+      query: { country_code },
+      signal,
     });
   },
 

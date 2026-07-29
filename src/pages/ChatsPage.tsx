@@ -20,6 +20,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox } from "../components/ImageLightbox";
 import { TabPageHeader } from "../components/TabPageHeader";
+import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
@@ -37,7 +38,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -49,6 +50,7 @@ const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
+const MESSAGE_TYPE_MAP_ACCESS = 7;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const EMOJI_PAGES = [
   {
@@ -147,6 +149,7 @@ function pinnedMessagePreview(pin: PinnedMessageDTO) {
       ? i18n.t("message.audioDuration", { seconds: Math.round(message.payload.duration_seconds) })
       : i18n.t("media.audio"),
     [MESSAGE_TYPE_LOCATION]: i18n.t("media.location"),
+    [MESSAGE_TYPE_MAP_ACCESS]: i18n.t("travelMap.action"),
   }[message.type] ?? i18n.t("message.generic");
 }
 
@@ -161,7 +164,7 @@ function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
+function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
   if (kind === "emoji") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -208,6 +211,16 @@ function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "locati
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
         <path d="M19 10.2c0 5.1-7 10-7 10s-7-4.9-7-10a7 7 0 1 1 14 0Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
         <circle cx="12" cy="10.2" r="2.35" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (kind === "map") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <path d="m3.5 5.75 5-2.25 7 2.25 5-2.25v14.75l-5 2.25-7-2.25-5 2.25V5.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.7" />
+        <path d="M8.5 3.5v14.75m7-12.5V20.5" stroke="currentColor" strokeWidth="1.7" />
+        <path d="M13.4 10.2c0 1.75-2.4 3.45-2.4 3.45s-2.4-1.7-2.4-3.45a2.4 2.4 0 1 1 4.8 0Z" fill="currentColor" />
       </svg>
     );
   }
@@ -530,6 +543,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_VIDEO) return "video";
   if (type === MESSAGE_TYPE_AUDIO) return "audio";
   if (type === MESSAGE_TYPE_LOCATION) return "location";
+  if (type === MESSAGE_TYPE_MAP_ACCESS) return "map_access";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   return "text";
 }
@@ -764,6 +778,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "audio") return i18n.t("message.audioPlaceholder");
   if (kind === "file") return i18n.t("message.filePlaceholder");
   if (kind === "location") return i18n.t("message.locationPlaceholder");
+  if (kind === "map_access") return i18n.t("travelMap.action");
   return text || i18n.t("chat.noMessages");
 }
 
@@ -1254,6 +1269,36 @@ function renderMessageContent(
         </span>
         <span className="message-location-open" aria-hidden="true">↗</span>
       </a>
+    );
+  }
+
+  if (message.kind === "map_access") {
+    const owner = message.payload?.owner;
+    const access = message.payload?.access;
+    const connected = Boolean(access?.can_view_theirs && access?.they_can_view_mine);
+    return (
+      <button
+        className={`message-travel-map-card ${groupClassName}`.trim()}
+        onClick={(event) => {
+          event.stopPropagation();
+          window.dispatchEvent(new CustomEvent("sermo:travel-map-message", {
+            detail: { messageId: message.id, owner, access, from: message.from },
+          }));
+        }}
+        type="button"
+      >
+        <span className="message-travel-map-art" aria-hidden="true">
+          <span className="message-travel-map-fold fold-one" />
+          <span className="message-travel-map-fold fold-two" />
+          <ComposerSvgIcon kind="map" />
+        </span>
+        <span className="message-travel-map-copy">
+          <small>{message.from === "self" ? i18n.t("travelMap.messageOwn") : owner?.name}</small>
+          <strong>{i18n.t("travelMap.messageTitle")}</strong>
+          <span>{connected ? i18n.t("travelMap.messageReady") : i18n.t("travelMap.messageFirstTap")}</span>
+        </span>
+        <span className="message-travel-map-arrow" aria-hidden="true">→</span>
+      </button>
     );
   }
 
@@ -1826,6 +1871,11 @@ export default function ChatsPage() {
   const [emojiPage, setEmojiPage] = useState(0);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
+  const [travelMapOpen, setTravelMapOpen] = useState(false);
+  const [travelMapOtherUser, setTravelMapOtherUser] = useState<TinyUserDTO | null>(null);
+  const [travelMapMenu, setTravelMapMenu] = useState<{ user: TinyUserDTO; access: TravelMapAccessDTO } | null>(null);
+  const [travelMapSaving, setTravelMapSaving] = useState(false);
+  const [travelMapRevokeConfirmOpen, setTravelMapRevokeConfirmOpen] = useState(false);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
@@ -2299,6 +2349,11 @@ export default function ChatsPage() {
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
+  const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
+    if (!selectedChat || selectedChat.type !== "direct") return null;
+    const member = selectedChat.detail.members.find((item) => !item.isSelf);
+    return member ? { user_id: member.userId, name: member.name, avatar_uri: member.avatarUri } : null;
+  }, [selectedChat]);
   const profileDrawerSeed = useMemo(() => {
     if (profileDrawerUserId === null) return null;
     for (const chat of chats) {
@@ -3523,6 +3578,151 @@ export default function ChatsPage() {
     }
   };
 
+  const openOwnTravelMap = () => {
+    if (!selectedDirectPeer || composerBusy) return;
+    setComposerMoreOpen(false);
+    setTravelMapOtherUser(null);
+    setTravelMapOpen(true);
+  };
+
+  const sendTravelMapMessage = async () => {
+    if (!selectedChat || !selectedDirectPeer || selectedChat.type !== "direct") return;
+    const createdAt = Math.floor(Date.now() / 1000);
+    const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const pendingMessage: ChatMessage = {
+      id: clientId,
+      clientId,
+      from: "self",
+      type: MESSAGE_TYPE_MAP_ACCESS,
+      kind: "map_access",
+      name: currentUserName,
+      time: formatTime(createdAt),
+      createdAt,
+      text: t("travelMap.action"),
+      payload: {
+        kind: "map_access",
+        owner: session?.user,
+        target_user_id: selectedDirectPeer.user_id,
+        access: { can_view_theirs: false, they_can_view_mine: true },
+      },
+      replyTo: consumeReplyTarget(),
+      status: "pending",
+    };
+    setTravelMapOpen(false);
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
+    }));
+    setChats((current) => sortChats(current.map((chat) => (
+      chat.id === selectedChat.id ? updateChatSummary(chat, t("travelMap.action"), createdAt) : chat
+    ))));
+    stickToBottomRef.current = true;
+    triggerMessageEntrance(clientId);
+    updateSendTask(clientId, 0.15);
+    try {
+      const created = await api.sendMessage(
+        selectedChat.id,
+        MESSAGE_TYPE_MAP_ACCESS,
+        JSON.stringify({ kind: "map_access", target_user_id: selectedDirectPeer.user_id }),
+        pendingMessage.replyTo?.message_id,
+        clientId,
+      );
+      const deliveredMessage = mapChatMessage(created, currentUserId);
+      updateSendTask(clientId, 0.9);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, deliveredMessage),
+      }));
+      setChats((current) => sortChats(current.map((chat) => (
+        chat.id === selectedChat.id ? updateChatSummary(chat, t("travelMap.action"), deliveredMessage.createdAt) : chat
+      ))));
+      showToast(t("travelMap.shareSent"));
+    } catch (error) {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
+      }));
+      showToast(error instanceof ApiError ? error.message : t("travelMap.shareFailed"), "error");
+    } finally {
+      finishSendTask(clientId);
+    }
+  };
+
+  const patchTravelMapAccess = (messageId: number | string, access: TravelMapAccessDTO) => {
+    if (!selectedChat) return;
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: (current[selectedChat.id] ?? []).map((message) => (
+        message.id === messageId && message.payload
+          ? { ...message, payload: { ...message.payload, access } }
+          : message
+      )),
+    }));
+  };
+
+  useEffect(() => {
+    const handleMapMessage = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        messageId: number | string;
+        owner?: TinyUserDTO;
+        access?: TravelMapAccessDTO;
+        from: "self" | "other";
+      }>).detail;
+      const peer = detail.from === "self" ? selectedDirectPeer : (detail.owner ?? selectedDirectPeer);
+      if (!peer || travelMapSaving) return;
+      const access = detail.access ?? { can_view_theirs: false, they_can_view_mine: false };
+      if (detail.from === "other" && !access.they_can_view_mine) {
+        setTravelMapSaving(true);
+        void api.reciprocateTravelMapAccess(peer.user_id)
+          .then((updated) => {
+            patchTravelMapAccess(detail.messageId, updated);
+            showToast(t("travelMap.accessAccepted"));
+          })
+          .catch((error) => showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error"))
+          .finally(() => setTravelMapSaving(false));
+        return;
+      }
+      setTravelMapMenu({ user: peer, access });
+    };
+    window.addEventListener("sermo:travel-map-message", handleMapMessage);
+    return () => window.removeEventListener("sermo:travel-map-message", handleMapMessage);
+  }, [selectedChat?.id, selectedDirectPeer?.user_id, travelMapSaving]);
+
+  const openSharedTravelMap = () => {
+    if (!travelMapMenu?.access.can_view_theirs) return;
+    setTravelMapOtherUser(travelMapMenu.user);
+    setTravelMapMenu(null);
+    setTravelMapOpen(true);
+  };
+
+  const revokeTravelMapAccess = async () => {
+    if (!travelMapMenu) return;
+    setTravelMapSaving(true);
+    try {
+      await api.revokeTravelMapAccess(travelMapMenu.user.user_id);
+      if (selectedChat) {
+        setMessages((current) => ({
+          ...current,
+          [selectedChat.id]: (current[selectedChat.id] ?? []).map((message) => (
+            message.kind === "map_access" && message.payload?.access
+              ? { ...message, payload: { ...message.payload, access: { ...message.payload.access, they_can_view_mine: false } } }
+              : message
+          )),
+        }));
+      }
+      setTravelMapMenu((current) => current ? {
+        ...current,
+        access: { ...current.access, they_can_view_mine: false },
+      } : current);
+      setTravelMapRevokeConfirmOpen(false);
+      showToast(t("travelMap.accessRemoved"));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
+    } finally {
+      setTravelMapSaving(false);
+    }
+  };
+
   const handleMediaSelection = async (event: ChangeEvent<HTMLInputElement>, source: "gallery" | "file") => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
@@ -4561,6 +4761,12 @@ export default function ChatsPage() {
                         <span className="composer-action-tile-icon">{canSendLocation ? <ComposerSvgIcon kind="location" /> : <span className="material-symbols-outlined">lock</span>}</span>
                         <span>{canSendLocation ? t("media.location") : t("location.levelLabel", { level: 3 })}</span>
                       </button>
+                      {selectedChat?.type === "direct" ? (
+                        <button className="composer-action-tile" disabled={composerBusy} onClick={openOwnTravelMap} type="button">
+                          <span className="composer-action-tile-icon"><ComposerSvgIcon kind="map" /></span>
+                          <span>{t("travelMap.action")}</span>
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 ) : null}
@@ -5198,6 +5404,47 @@ export default function ChatsPage() {
           </section>
         </div>
       ) : null}
+      <TravelMapDrawer
+        open={travelMapOpen}
+        otherUser={travelMapOtherUser}
+        onClose={() => setTravelMapOpen(false)}
+        onShare={!travelMapOtherUser && selectedDirectPeer ? () => void sendTravelMapMessage() : undefined}
+      />
+      <BottomSheet
+        open={Boolean(travelMapMenu)}
+        title={t("travelMap.accessMenuTitle")}
+        description={t("travelMap.accessMenuHint")}
+        onClose={() => setTravelMapMenu(null)}
+      >
+        <div className="travel-map-access-actions">
+          <div className="travel-map-access-person">
+            <UserAvatar className="mini-avatar" name={travelMapMenu?.user.name ?? ""} uri={travelMapMenu?.user.avatar_uri} />
+            <span>
+              <strong>{travelMapMenu?.user.name}</strong>
+              <small>{travelMapMenu?.access.can_view_theirs ? t("travelMap.messageReady") : t("travelMap.waitingForReply")}</small>
+            </span>
+          </div>
+          <button className="button" disabled={!travelMapMenu?.access.can_view_theirs} onClick={openSharedTravelMap} type="button">
+            <ComposerSvgIcon kind="map" />
+            {t("travelMap.openMap")}
+          </button>
+          {travelMapMenu?.access.they_can_view_mine ? (
+            <button className="ghost-button danger-text-button" onClick={() => setTravelMapRevokeConfirmOpen(true)} type="button">
+              {t("travelMap.stopSharing")}
+            </button>
+          ) : null}
+        </div>
+      </BottomSheet>
+      <ConfirmDialog
+        open={travelMapRevokeConfirmOpen}
+        title={t("travelMap.stopSharingTitle")}
+        description={t("travelMap.stopSharingHint")}
+        confirmLabel={t("travelMap.stopSharing")}
+        busy={travelMapSaving}
+        danger
+        onClose={() => setTravelMapRevokeConfirmOpen(false)}
+        onConfirm={() => void revokeTravelMapAccess()}
+      />
       {messageMenu ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
