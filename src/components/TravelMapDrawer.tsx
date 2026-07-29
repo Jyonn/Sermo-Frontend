@@ -198,6 +198,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const [checkInPosition, setCheckInPosition] = useState<CheckInPosition | null>(null);
   const [checkInCandidates, setCheckInCandidates] = useState<CheckInCandidate[]>([]);
   const [accessOverview, setAccessOverview] = useState<TravelMapAccessOverviewDTO | null>(null);
+  const [accessOverviewOpen, setAccessOverviewOpen] = useState(false);
+  const [accessTab, setAccessTab] = useState<"shared_by_me" | "shared_with_me">("shared_by_me");
   const [accessDetail, setAccessDetail] = useState<TravelMapAccessOverviewEntryDTO | null>(null);
   const [transform, setTransform] = useState<MapTransform>({ x: 0, y: 0, scale: 1 });
   const dragRef = useRef<{ pointerId: number; x: number; y: number; originX: number; originY: number } | null>(null);
@@ -488,40 +490,11 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           </button>
         ) : null}
 
-        {!chatId && !otherUser && accessOverview ? (
-          <div className="travel-map-access-overview">
-            <section>
-              <h4>{t("travelMap.sharedByMe")}</h4>
-              {accessOverview.shared_by_me.length ? accessOverview.shared_by_me.map((entry) => (
-                <div className="travel-map-access-overview-row" key={`mine:${entry.chat_id}`}>
-                  <span><strong>{entry.title}</strong><small>{entry.chat_type === "group" ? t("travelMap.groupMemberCount", { count: entry.users.length }) : t("travelMap.directChat")}</small></span>
-                  <div className="travel-map-access-overview-avatars">
-                    {entry.users.slice(0, 3).map((user) => <UserAvatar className="mini-avatar" key={user.user_id} name={user.name} uri={user.avatar_uri} />)}
-                  </div>
-                </div>
-              )) : <p>{t("travelMap.noSharedByMe")}</p>}
-            </section>
-            <section>
-              <h4>{t("travelMap.sharedWithMe")}</h4>
-              {accessOverview.shared_with_me.length ? accessOverview.shared_with_me.map((entry) => {
-                const content = (
-                  <>
-                    <span><strong>{entry.title}</strong><small>{entry.chat_type === "group" ? t("travelMap.authorizedMemberCount", { count: entry.users.length }) : entry.users[0]?.name}</small></span>
-                    {entry.chat_type === "group" ? <span className="material-symbols-outlined">chevron_right</span> : (
-                      <UserAvatar className="mini-avatar" name={entry.users[0]?.name ?? entry.title} uri={entry.users[0]?.avatar_uri} />
-                    )}
-                  </>
-                );
-                return entry.chat_type === "group" ? (
-                  <button className="travel-map-access-overview-row" key={`theirs:${entry.chat_id}`} onClick={() => setAccessDetail(entry)} type="button">
-                    {content}
-                  </button>
-                ) : (
-                  <div className="travel-map-access-overview-row" key={`theirs:${entry.chat_id}`}>{content}</div>
-                );
-              }) : <p>{t("travelMap.noSharedWithMe")}</p>}
-            </section>
-          </div>
+        {!chatId && !otherUser ? (
+          <button className="travel-map-access-entry" onClick={() => setAccessOverviewOpen(true)} type="button">
+            <span><strong>{t("travelMap.accessManagement")}</strong><small>{t("travelMap.accessManagementHint")}</small></span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
         ) : null}
       </div>
       <BottomSheet
@@ -549,6 +522,54 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           ))}
         </div>
       </BottomSheet>
+      <SideDrawer
+        open={accessOverviewOpen}
+        title={t("travelMap.accessManagement")}
+        onClose={() => setAccessOverviewOpen(false)}
+      >
+        <div className="travel-map-access-overview">
+          <div className="travel-map-access-tabs" role="tablist" aria-label={t("travelMap.accessManagement")}>
+            <button aria-selected={accessTab === "shared_by_me"} className={accessTab === "shared_by_me" ? "is-active" : ""} onClick={() => setAccessTab("shared_by_me")} role="tab" type="button">
+              {t("travelMap.sharedByMe")}
+              <small>{accessOverview?.shared_by_me.length ?? 0}</small>
+            </button>
+            <button aria-selected={accessTab === "shared_with_me"} className={accessTab === "shared_with_me" ? "is-active" : ""} onClick={() => setAccessTab("shared_with_me")} role="tab" type="button">
+              {t("travelMap.sharedWithMe")}
+              <small>{accessOverview?.shared_with_me.length ?? 0}</small>
+            </button>
+          </div>
+          {accessTab === "shared_by_me" ? (
+            <section>
+              {accessOverview?.shared_by_me.length ? accessOverview.shared_by_me.map((entry) => (
+                <div className="travel-map-access-overview-row" key={`mine:${entry.chat_id}`}>
+                  <span><strong>{entry.title}</strong><small>{entry.chat_type === "group" ? t("travelMap.groupMemberCount", { count: entry.users.length }) : t("travelMap.directChat")}</small></span>
+                  <div className="travel-map-access-overview-avatars">
+                    {entry.users.slice(0, 3).map((user) => <UserAvatar className="mini-avatar" key={user.user_id} name={user.name} uri={user.avatar_uri} />)}
+                  </div>
+                </div>
+              )) : <p>{t("travelMap.noSharedByMe")}</p>}
+            </section>
+          ) : (
+            <section>
+              {accessOverview?.shared_with_me.length ? accessOverview.shared_with_me.map((entry) => {
+                const content = (
+                  <>
+                    <span><strong>{entry.title}</strong><small>{entry.chat_type === "group" ? t("travelMap.authorizedMemberCount", { count: entry.users.length }) : entry.users[0]?.name}</small></span>
+                    {entry.chat_type === "group" ? <span className="material-symbols-outlined">chevron_right</span> : (
+                      <UserAvatar className="mini-avatar" name={entry.users[0]?.name ?? entry.title} uri={entry.users[0]?.avatar_uri} />
+                    )}
+                  </>
+                );
+                return entry.chat_type === "group" ? (
+                  <button className="travel-map-access-overview-row" key={`theirs:${entry.chat_id}`} onClick={() => setAccessDetail(entry)} type="button">{content}</button>
+                ) : (
+                  <div className="travel-map-access-overview-row" key={`theirs:${entry.chat_id}`}>{content}</div>
+                );
+              }) : <p>{t("travelMap.noSharedWithMe")}</p>}
+            </section>
+          )}
+        </div>
+      </SideDrawer>
       <SideDrawer
         open={Boolean(accessDetail)}
         title={accessDetail?.title ?? t("travelMap.authorizedMembers")}

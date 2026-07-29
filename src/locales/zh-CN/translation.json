@@ -1138,5 +1138,7 @@
   "travelMap.authorizedMemberCount": "{{count}} 人已授权",
   "travelMap.authorizedMembers": "已授权成员",
   "travelMap.matchingRegion": "正在匹配地区…",
-  "travelMap.savingCheckIn": "正在保存打卡…"
+  "travelMap.savingCheckIn": "正在保存打卡…",
+  "travelMap.accessManagement": "足迹授权",
+  "travelMap.accessManagementHint": "查看地图授权情况"
 }

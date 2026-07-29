@@ -1,19 +1,21 @@
 {
-  "id": "2026.07.30.8",
+  "id": "2026.07.30.9",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "现场打卡恢复响应",
+      "title": "足迹授权独立管理",
       "items": [
-        "修复共同足迹地图中点击现场打卡无响应的问题",
-        "定位、地区匹配和保存期间按钮会禁用并显示进度"
+        "足迹地图改用独立入口查看授权情况",
+        "通过 Tab 切换我授权的和授权给我的",
+        "群聊授权成员继续支持下一级查看"
       ]
     },
     "en": {
-      "title": "Responsive on-site check-ins",
+      "title": "Dedicated footprint access",
       "items": [
-        "Fixed on-site check-ins not responding in shared travel maps",
-        "The button now disables and shows progress while locating, matching, and saving"
+        "Moved access details behind a dedicated travel map entry",
+        "Switch between shared by me and shared with me using tabs",
+        "Group access still opens a detailed member drawer"
       ]
     }
   }

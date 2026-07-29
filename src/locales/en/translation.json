@@ -1138,5 +1138,7 @@
   "travelMap.authorizedMemberCount": "{{count}} members sharing",
   "travelMap.authorizedMembers": "Members sharing footprints",
   "travelMap.matchingRegion": "Matching region…",
-  "travelMap.savingCheckIn": "Saving check-in…"
+  "travelMap.savingCheckIn": "Saving check-in…",
+  "travelMap.accessManagement": "Footprint access",
+  "travelMap.accessManagementHint": "Review who can see each map"
 }
