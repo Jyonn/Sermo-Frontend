@@ -1140,5 +1140,8 @@
   "travelMap.matchingRegion": "正在匹配地区…",
   "travelMap.savingCheckIn": "正在保存打卡…",
   "travelMap.accessManagement": "足迹授权",
-  "travelMap.accessManagementHint": "查看地图授权情况"
+  "travelMap.accessManagementHint": "查看地图授权情况",
+  "travelMap.locationPermissionDenied": "请允许定位后再打卡",
+  "travelMap.locationTimeout": "定位超时，请重试",
+  "travelMap.regionNotFound": "坐标未能匹配内置地图"
 }

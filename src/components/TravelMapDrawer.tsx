@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent } from "react";
-import { geoContains, geoMercator, geoNaturalEarth1, geoPath } from "d3-geo";
+import { geoBounds, geoContains, geoMercator, geoNaturalEarth1, geoPath } from "d3-geo";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
@@ -150,10 +150,23 @@ function accuracySamples(position: CheckInPosition) {
 
 export async function resolveTravelMapCandidates(position: CheckInPosition, language: string) {
   const samples = accuracySamples(position);
-  const candidateCountries = worldFeatures()
+  const world = worldFeatures();
+  let candidateCountries = world
     .filter((item) => samples.some((point) => geoContains(item, point)))
     .map((item) => countryCodeOf(item))
     .filter(Boolean);
+  if (!candidateCountries.length) {
+    candidateCountries = world
+      .filter((item) => {
+        const [[west, south], [east, north]] = geoBounds(item);
+        return position.latitude >= south - 0.25
+          && position.latitude <= north + 0.25
+          && position.longitude >= west - 0.25
+          && position.longitude <= east + 0.25;
+      })
+      .map((item) => countryCodeOf(item))
+      .filter(Boolean);
+  }
   const candidates: CheckInCandidate[] = [];
   for (const code of [...new Set(candidateCountries)]) {
     const countryLabel = countryName(code, language);
@@ -179,6 +192,26 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
         isExact: geoContains(item, samples[0]),
       });
     });
+    if (!candidates.some((item) => item.countryCode === code)) {
+      const margin = Math.max(position.accuracy / 111_320, 0.15);
+      collection.features.forEach((item) => {
+        const [[west, south], [east, north]] = geoBounds(item);
+        if (
+          position.latitude < south - margin
+          || position.latitude > north + margin
+          || position.longitude < west - margin
+          || position.longitude > east + margin
+        ) return;
+        const name = item.properties?.name || countryLabel;
+        candidates.push({
+          regionCode: regionCode(code, item),
+          regionName: name,
+          countryCode: code,
+          countryName: countryLabel,
+          isExact: false,
+        });
+      });
+    }
   }
   return [...new Map(
     candidates.sort((left, right) => Number(right.isExact) - Number(left.isExact)).map((item) => [item.regionCode, item]),
@@ -196,6 +229,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInPhase, setCheckInPhase] = useState<CheckInPhase>("idle");
   const [checkInPosition, setCheckInPosition] = useState<CheckInPosition | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<CheckInPosition | null>(null);
   const [checkInCandidates, setCheckInCandidates] = useState<CheckInCandidate[]>([]);
   const [accessOverview, setAccessOverview] = useState<TravelMapAccessOverviewDTO | null>(null);
   const [accessOverviewOpen, setAccessOverviewOpen] = useState(false);
@@ -244,6 +278,29 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   }, [open, chatId, otherUser?.user_id]);
 
   useEffect(() => {
+    if (!open || !navigator.geolocation || !navigator.permissions) return;
+    let cancelled = false;
+    void navigator.permissions.query({ name: "geolocation" }).then((permission) => {
+      if (cancelled || permission.state !== "granted") return;
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (cancelled) return;
+          setCurrentLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+          });
+        },
+        () => undefined,
+        { enableHighAccuracy: true, maximumAge: 60_000, timeout: 10_000 },
+      );
+    }).catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  useEffect(() => {
     if (!open || !activeCountry) {
       setGeometry(null);
       return;
@@ -267,13 +324,38 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     return () => controller.abort();
   }, [activeCountry, open]);
 
-  const detailPath = useMemo(() => geometry
-    ? geoPath(geoMercator().fitExtent([[26, 26], [WIDTH - 26, HEIGHT - 26]], geometry))
+  const detailProjection = useMemo(() => geometry
+    ? geoMercator().fitExtent([[26, 26], [WIDTH - 26, HEIGHT - 26]], geometry)
     : null, [geometry]);
-  const worldPath = useMemo(() => geoPath(geoNaturalEarth1().fitExtent(
+  const detailPath = useMemo(() => detailProjection
+    ? geoPath(detailProjection)
+    : null, [detailProjection]);
+  const worldProjection = useMemo(() => geoNaturalEarth1().fitExtent(
     [[18, 18], [WIDTH - 18, HEIGHT - 18]],
     { type: "FeatureCollection", features: world } as FeatureCollection,
-  )), [world]);
+  ), [world]);
+  const worldPath = useMemo(() => geoPath(worldProjection), [worldProjection]);
+  const currentLocationCountry = useMemo(() => {
+    if (!currentLocation) return "";
+    const point: [number, number] = [currentLocation.longitude, currentLocation.latitude];
+    const country = world.find((item) => geoContains(item, point));
+    if (country) return countryCodeOf(country);
+    const nearby = world.find((item) => {
+      const [[west, south], [east, north]] = geoBounds(item);
+      return currentLocation.latitude >= south - 0.25
+        && currentLocation.latitude <= north + 0.25
+        && currentLocation.longitude >= west - 0.25
+        && currentLocation.longitude <= east + 0.25;
+    });
+    return nearby ? countryCodeOf(nearby) : "";
+  }, [currentLocation, world]);
+  const currentLocationPoint = useMemo(() => {
+    if (!currentLocation) return null;
+    const coordinate: [number, number] = [currentLocation.longitude, currentLocation.latitude];
+    if (!activeCountry) return worldProjection(coordinate);
+    if (activeCountry !== currentLocationCountry || !detailProjection) return null;
+    return detailProjection(coordinate);
+  }, [activeCountry, currentLocation, currentLocationCountry, detailProjection, worldProjection]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -338,20 +420,30 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       try {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            void resolveCheckIn({
+            const located = {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
               accuracy: position.coords.accuracy,
-            }).catch(() => {
+            };
+            setCurrentLocation(located);
+            void resolveCheckIn(located).catch((error) => {
+              console.warn("[travel-map] region resolution failed", located, error);
               setCheckingIn(false);
               setCheckInPhase("idle");
-              showToast(t("travelMap.locationFailed"), "error");
+              showToast(t("travelMap.regionNotFound"), "error");
             });
           },
-          () => {
+          (error) => {
             setCheckingIn(false);
             setCheckInPhase("idle");
-            showToast(t("travelMap.locationFailed"), "error");
+            showToast(
+              error.code === error.PERMISSION_DENIED
+                ? t("travelMap.locationPermissionDenied")
+                : error.code === error.TIMEOUT
+                  ? t("travelMap.locationTimeout")
+                  : t("travelMap.locationFailed"),
+              "error",
+            );
           },
           { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
         );
@@ -454,6 +546,23 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                   </path>
                 ) : null;
               })}
+              {currentLocationPoint ? (
+                <foreignObject
+                  className="travel-map-current-location"
+                  height="44"
+                  width="44"
+                  x={currentLocationPoint[0] - 22}
+                  y={currentLocationPoint[1] - 22}
+                >
+                  <div>
+                    <UserAvatar
+                      className="travel-map-current-avatar"
+                      name={session?.user.name ?? t("travelMap.me")}
+                      uri={session?.user.avatar_uri}
+                    />
+                  </div>
+                </foreignObject>
+              ) : null}
             </g>
           </svg>
           {loading ? <div className="travel-map-loading"><span /></div> : null}

@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.30.9",
+  "id": "2026.07.30.10",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "足迹授权独立管理",
+      "title": "定位足迹更直观",
       "items": [
-        "足迹地图改用独立入口查看授权情况",
-        "通过 Tab 切换我授权的和授权给我的",
-        "群聊授权成员继续支持下一级查看"
+        "已授权定位时，在世界和国家地图展示当前位置头像",
+        "优化沿海与边界附近的地区识别",
+        "定位失败会展示更准确的原因"
       ]
     },
     "en": {
-      "title": "Dedicated footprint access",
+      "title": "A clearer location on your map",
       "items": [
-        "Moved access details behind a dedicated travel map entry",
-        "Switch between shared by me and shared with me using tabs",
-        "Group access still opens a detailed member drawer"
+        "Show your avatar on world and country maps when location is allowed",
+        "Improved region matching near coasts and boundaries",
+        "Location failures now explain what went wrong"
       ]
     }
   }

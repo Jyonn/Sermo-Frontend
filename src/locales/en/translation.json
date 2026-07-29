@@ -1140,5 +1140,8 @@
   "travelMap.matchingRegion": "Matching region…",
   "travelMap.savingCheckIn": "Saving check-in…",
   "travelMap.accessManagement": "Footprint access",
-  "travelMap.accessManagementHint": "Review who can see each map"
+  "travelMap.accessManagementHint": "Review who can see each map",
+  "travelMap.locationPermissionDenied": "Allow location access to check in",
+  "travelMap.locationTimeout": "Location timed out. Please try again",
+  "travelMap.regionNotFound": "Your coordinates did not match the bundled map"
 }
