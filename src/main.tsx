@@ -5,17 +5,20 @@ import App from "./App";
 import "../styles.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
-import { setupSpacePwaIdentity } from "./lib/pwaIdentity";
+import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdentity";
 import { watchPwaUpdates } from "./lib/pwaUpdate";
 import { LanguageProvider } from "./lib/language";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
+import { getSpaceRouterBasename } from "./lib/spaceEntry";
 
+restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
 initializeTheme();
+const routerBasename = getSpaceRouterBasename();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <AdminAuthProvider>
         <AuthProvider>
           <ThemeProvider>

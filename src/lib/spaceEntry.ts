@@ -3,6 +3,18 @@ function looksLikeIp(hostname: string) {
 }
 
 const SPACE_HOST_SUFFIX = "sermo.jyonn.space";
+const ROOT_PATH_SEGMENTS = new Set([
+  "",
+  "entry",
+  "space",
+  "app",
+  "friend-invite",
+  "official-login",
+  "account-switch",
+  "api",
+  "assets",
+  "icons",
+]);
 
 export function normalizeSlug(value: string) {
   return value.trim().toLowerCase();
@@ -24,76 +36,45 @@ export function detectSpaceSlugFromHostname(hostname: string) {
     return prefix.split(".")[0] || null;
   }
 
-  const parts = normalizedHostname.split(".");
-  if (parts.length < 4) return null;
-  if (parts[0] === "www") return null;
-  return parts[0];
+  return null;
+}
+
+export function detectSpaceSlugFromPathname(pathname: string) {
+  const firstSegment = pathname.split("/").filter(Boolean)[0]?.toLowerCase() ?? "";
+  if (!firstSegment || ROOT_PATH_SEGMENTS.has(firstSegment) || firstSegment.includes(".")) return null;
+  return normalizeSlug(decodeURIComponent(firstSegment));
 }
 
 export function getDetectedSpaceSlug() {
   if (typeof window === "undefined") return null;
-  return detectSpaceSlugFromHostname(window.location.hostname);
+  return detectSpaceSlugFromPathname(window.location.pathname)
+    ?? detectSpaceSlugFromHostname(window.location.hostname);
 }
 
-function resolveSpaceBaseHost(hostname: string) {
-  const normalizedHostname = hostname.trim().toLowerCase();
-  if (!normalizedHostname || normalizedHostname === "localhost" || looksLikeIp(normalizedHostname)) return normalizedHostname;
-
-  if (normalizedHostname.endsWith(".localhost")) return "localhost";
-  if (normalizedHostname === SPACE_HOST_SUFFIX || normalizedHostname === `www.${SPACE_HOST_SUFFIX}`) return SPACE_HOST_SUFFIX;
-
-  const detectedSlug = detectSpaceSlugFromHostname(normalizedHostname);
-  if (detectedSlug && normalizedHostname.endsWith(`.${SPACE_HOST_SUFFIX}`)) return SPACE_HOST_SUFFIX;
-  if (detectedSlug) return normalizedHostname.slice(detectedSlug.length + 1);
-  if (normalizedHostname.startsWith("www.")) return normalizedHostname.slice(4);
-  return normalizedHostname;
+export function getSpaceRouterBasename() {
+  const slug = getDetectedSpaceSlug();
+  return slug ? `/${encodeURIComponent(slug)}` : "/";
 }
 
-function buildUrlForRootHost(pathname: string, search = "") {
-  if (typeof window === "undefined") return `${pathname}${search}`;
-
+function buildRootUrl(pathname: string, search = "", hash = "") {
+  if (typeof window === "undefined") return `${pathname}${search}${hash}`;
   const url = new URL(window.location.href);
-  const hostname = url.hostname.toLowerCase();
-
-  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
-    url.hostname = "localhost";
-  } else if (!looksLikeIp(hostname)) {
-    url.hostname = resolveSpaceBaseHost(hostname);
-  }
-
+  if (url.hostname.endsWith(".localhost")) url.hostname = "localhost";
+  else if (url.hostname.endsWith(`.${SPACE_HOST_SUFFIX}`)) url.hostname = SPACE_HOST_SUFFIX;
   url.pathname = pathname;
   url.search = search;
-  url.hash = "";
+  url.hash = hash;
   return url.toString();
 }
 
 export function buildJoinPath(slug: string) {
-  return `/space/${encodeURIComponent(normalizeSlug(slug))}`;
+  return `/${encodeURIComponent(normalizeSlug(slug))}/`;
 }
 
 export function buildSpaceHrefForCurrentHost(slug: string, pathname = "/", search = "", hash = "") {
   const normalizedSlug = normalizeSlug(slug);
-  if (typeof window === "undefined") return pathname || buildJoinPath(normalizedSlug);
-
-  const url = new URL(window.location.href);
-  const hostname = url.hostname.toLowerCase();
-
-  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
-    url.hostname = `${normalizedSlug}.localhost`;
-  } else if (looksLikeIp(hostname)) {
-    url.pathname = buildJoinPath(normalizedSlug);
-    url.search = "";
-    url.hash = "";
-    return url.toString();
-  } else {
-    const baseHost = resolveSpaceBaseHost(hostname);
-    url.hostname = `${normalizedSlug}.${baseHost}`;
-  }
-
-  url.pathname = pathname || "/";
-  url.search = search;
-  url.hash = hash;
-  return url.toString();
+  const childPath = pathname === "/" ? "" : `/${pathname.replace(/^\/+/, "")}`;
+  return buildRootUrl(`/${encodeURIComponent(normalizedSlug)}${childPath || "/"}`, search, hash);
 }
 
 export function buildJoinHrefForCurrentHost(slug: string) {
@@ -101,7 +82,7 @@ export function buildJoinHrefForCurrentHost(slug: string) {
 }
 
 export function buildHomeHrefForCurrentHost() {
-  return buildUrlForRootHost("/");
+  return buildRootUrl("/");
 }
 
 export function buildAdminPath(slug?: string | null, mode: "create" | "login" = "login") {
@@ -112,16 +93,8 @@ export function buildAdminPath(slug?: string | null, mode: "create" | "login" = 
 }
 
 export function buildAdminEntryHref(mode: "create" | "login" = "login", slug?: string | null) {
-  return buildUrlForRootHost("/space", `?${new URLSearchParams(
-    slug
-      ? {
-          mode,
-          slug: normalizeSlug(slug),
-        }
-      : {
-          mode,
-        }
-  ).toString()}`);
+  const [pathname, search = ""] = buildAdminPath(slug, mode).split("?");
+  return buildRootUrl(pathname, search ? `?${search}` : "");
 }
 
 export function buildAdminHrefForCurrentHost(slug: string) {

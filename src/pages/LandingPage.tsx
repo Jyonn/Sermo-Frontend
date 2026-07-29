@@ -70,7 +70,7 @@ export default function LandingPage() {
             </div>
             <div className="landing-entry-list">
               {recentSpaces.map((space) => (
-                <a className="landing-entry-item" href={`https://${space.domain}`} key={space.slug}>
+                <a className="landing-entry-item" href={buildJoinHrefForCurrentHost(space.slug)} key={space.slug}>
                   <div className="landing-entry-main">
                     <strong>{space.name}</strong>
                     <span>{space.domain}</span>

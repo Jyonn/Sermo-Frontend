@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.29.13",
+  "id": "2026.07.29.14",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "漫画气泡衔接更自然",
+      "title": "空间入口迁移至统一域名",
       "items": [
-        "连续消息之间的连接圆角正确生效",
-        "首条、中间条和末条保持清晰层次",
-        "我方与对方气泡严格使用各自连接侧"
+        "空间入口统一为 sermo.jyonn.space/空间标识",
+        "旧空间链接可平滑跳转至新入口",
+        "桌面安装与消息通知会打开正确空间"
       ]
     },
     "en": {
-      "title": "Smoother comic bubble groups",
+      "title": "Spaces move to one shared domain",
       "items": [
-        "Connected corners now apply correctly between consecutive messages",
-        "First, middle, and last bubbles keep a clear rhythm",
-        "Sent and received bubbles use only their respective connecting side"
+        "Space links now use sermo.jyonn.space/space-slug",
+        "Legacy space links can redirect smoothly to the new entry",
+        "Installed apps and notifications open the correct space"
       ]
     }
   }

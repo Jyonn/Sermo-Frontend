@@ -55,11 +55,9 @@ function writeCookie(name: string, value: string, domain: string | null) {
 
 function buildDomainForSlug(slug: string) {
   const hostname = currentHostname();
-  if (!hostname) return `${slug}.sermo.jyonn.space`;
-  if (hostname === "localhost" || hostname.endsWith(".localhost")) return `${slug}.localhost`;
-  if (looksLikeIp(hostname)) return hostname;
-  if (hostname === "sermo.jyonn.space" || hostname.endsWith(".sermo.jyonn.space")) return `${slug}.sermo.jyonn.space`;
-  return `${slug}.${hostname.replace(/^[^.]+\./, "")}`;
+  if (!hostname) return `sermo.jyonn.space/${slug}`;
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) return `localhost/${slug}`;
+  return `${hostname}/${slug}`;
 }
 
 export function listRecentSpaces() {

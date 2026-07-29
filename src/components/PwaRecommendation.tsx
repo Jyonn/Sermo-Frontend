@@ -12,6 +12,7 @@ import {
 import { enableWebPush, getWebPushState } from "../lib/webPush";
 import { PwaInstallSheet } from "./PwaInstallSheet";
 import { useI18n } from "../lib/language";
+import { getDetectedSpaceSlug } from "../lib/spaceEntry";
 
 type RecommendationKind = "install" | "push";
 
@@ -29,7 +30,7 @@ export function PwaRecommendation() {
   useEffect(() => {
     if (!session || !location.pathname.startsWith("/app")) return;
     let active = true;
-    const slug = window.location.hostname.split(".")[0] || String(session.user.space_id);
+    const slug = getDetectedSpaceSlug() || String(session.user.space_id);
 
     void api.getSpaceMe().then((space) => {
       if (active) setSpaceName(space.name);

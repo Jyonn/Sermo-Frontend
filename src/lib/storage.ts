@@ -1,18 +1,25 @@
 import type { AuthSession, SpaceAdminSession } from "../types";
+import { getDetectedSpaceSlug } from "./spaceEntry";
 
 const AUTH_STORAGE_KEY = "sermo.auth.session";
 const ADMIN_AUTH_STORAGE_KEY = "sermo.admin.session";
 
+function scopedKey(baseKey: string) {
+  const slug = getDetectedSpaceSlug();
+  return slug ? `${baseKey}:${slug}` : baseKey;
+}
+
 export const authStorage = {
   get(): AuthSession | null {
     if (typeof window === "undefined") return null;
-    const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+    const key = scopedKey(AUTH_STORAGE_KEY);
+    const raw = window.localStorage.getItem(key);
     if (!raw) return null;
 
     try {
       return JSON.parse(raw) as AuthSession;
     } catch {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      window.localStorage.removeItem(key);
       return null;
     }
   },
@@ -20,10 +27,10 @@ export const authStorage = {
   set(session: AuthSession | null) {
     if (typeof window === "undefined") return;
     if (!session) {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      window.localStorage.removeItem(scopedKey(AUTH_STORAGE_KEY));
       return;
     }
-    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+    window.localStorage.setItem(scopedKey(AUTH_STORAGE_KEY), JSON.stringify(session));
   },
 };
 

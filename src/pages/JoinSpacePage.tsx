@@ -33,8 +33,10 @@ export default function JoinSpacePage() {
   const detectedSlug = getDetectedSpaceSlug();
   const slug = useMemo(() => normalizeSlug(routeSlug || detectedSlug || ""), [detectedSlug, routeSlug]);
   const spaceDomainLabel = useMemo(() => {
-    if (typeof window !== "undefined" && window.location.hostname) return window.location.hostname;
-    return slug ? `${slug}.sermo.jyonn.space` : "sermo.jyonn.space";
+    if (typeof window !== "undefined" && window.location.host) {
+      return slug ? `${window.location.host}/${slug}` : window.location.host;
+    }
+    return slug ? `sermo.jyonn.space/${slug}` : "sermo.jyonn.space";
   }, [slug]);
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");

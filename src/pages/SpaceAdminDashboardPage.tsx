@@ -512,7 +512,7 @@ export default function SpaceAdminDashboardPage() {
                 <h1>{currentSpace.name}</h1>
                 <HeaderSyncIndicator syncing={dashboardState === "loading"} />
               </div>
-              <div className="admin-dashboard-domain">{currentSpace.slug}.sermo.jyonn.space</div>
+              <div className="admin-dashboard-domain">sermo.jyonn.space/{currentSpace.slug}</div>
             </div>
 
             <div className="admin-stat-grid">
