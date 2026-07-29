@@ -13623,6 +13623,32 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   min-height: 48px;
 }
 
+.travel-map-region-choices {
+  display: grid;
+  gap: 8px;
+}
+
+.travel-map-region-choices button {
+  display: grid;
+  min-height: 56px;
+  gap: 2px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--bg-panel);
+  text-align: left;
+}
+
+.travel-map-region-choices button:active {
+  border-color: var(--brand-primary);
+  background: var(--brand-soft);
+}
+
+.travel-map-region-choices small {
+  color: var(--text-muted);
+}
+
 .travel-map-owner > span {
   display: grid;
   min-width: 0;

@@ -599,6 +599,10 @@ export const api = {
     latitude: number;
     longitude: number;
     accuracy_meters: number;
+    region_code: string;
+    region_name: string;
+    country_code: string;
+    country_name: string;
   }) {
     return request<TravelMapCheckInDTO>("/maps/me/check-in", {
       method: "POST",

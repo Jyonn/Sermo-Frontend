@@ -1,19 +1,19 @@
 {
-  "id": "2026.07.30.4",
+  "id": "2026.07.30.5",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "省级足迹准确点亮",
+      "title": "现场打卡更稳定",
       "items": [
-        "修复已打卡省份在中国地图中没有点亮的问题",
-        "兼容早期版本保存的省份足迹"
+        "使用内置地图边界直接判断所在国家和地区",
+        "定位靠近边界时可自行确认所在地区"
       ]
     },
     "en": {
-      "title": "Accurate regional footprints",
+      "title": "More reliable on-site check-ins",
       "items": [
-        "Fixed visited provinces not lighting up on the China map",
-        "Added compatibility for footprints saved by earlier versions"
+        "Check-ins now resolve countries and regions from bundled boundaries",
+        "Choose the correct region when location accuracy crosses a boundary"
       ]
     }
   }

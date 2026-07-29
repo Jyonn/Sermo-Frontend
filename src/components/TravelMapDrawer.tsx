@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent } from "react";
-import { geoMercator, geoNaturalEarth1, geoPath } from "d3-geo";
+import { geoContains, geoMercator, geoNaturalEarth1, geoPath } from "d3-geo";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
@@ -8,6 +8,7 @@ import worldTopology from "world-atlas/countries-110m.json";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 import { SideDrawer } from "./SideDrawer";
+import { BottomSheet } from "./BottomSheet";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -42,8 +43,22 @@ interface MapTransform {
   scale: number;
 }
 
+interface CheckInCandidate {
+  regionCode: string;
+  regionName: string;
+  countryCode: string;
+  countryName: string;
+}
+
+interface CheckInPosition {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+}
+
 const WIDTH = 920;
 const HEIGHT = 500;
+const boundaryCache = new Map<string, FeatureCollection<Geometry, RegionProperties>>();
 
 function worldFeatures() {
   const topology = worldTopology as unknown as { objects: { countries: Parameters<typeof feature>[1] } };
@@ -103,6 +118,32 @@ function rewindForD3(collection: FeatureCollection<Geometry, RegionProperties>) 
   };
 }
 
+async function loadCountryBoundary(code: string) {
+  const cached = boundaryCache.get(code);
+  if (cached) return cached;
+  const response = await fetch(`/maps/adm1/${code}.json`);
+  if (!response.ok) return null;
+  const collection = rewindForD3(await response.json() as FeatureCollection<Geometry, RegionProperties>);
+  boundaryCache.set(code, collection);
+  return collection;
+}
+
+function accuracySamples(position: CheckInPosition) {
+  const radius = Math.min(Math.max(position.accuracy, 20), 5000);
+  const latitudeStep = radius / 111_320;
+  const longitudeStep = latitudeStep / Math.max(Math.cos(position.latitude * Math.PI / 180), 0.15);
+  return [
+    [position.longitude, position.latitude],
+    ...Array.from({ length: 8 }, (_, index) => {
+      const angle = index * Math.PI / 4;
+      return [
+        position.longitude + Math.cos(angle) * longitudeStep,
+        position.latitude + Math.sin(angle) * latitudeStep,
+      ];
+    }),
+  ] as [number, number][];
+}
+
 export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
@@ -112,6 +153,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
   const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [checkInPosition, setCheckInPosition] = useState<CheckInPosition | null>(null);
+  const [checkInCandidates, setCheckInCandidates] = useState<CheckInCandidate[]>([]);
   const [transform, setTransform] = useState<MapTransform>({ x: 0, y: 0, scale: 1 });
   const dragRef = useRef<{ pointerId: number; x: number; y: number; originX: number; originY: number } | null>(null);
 
@@ -153,12 +196,11 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
     const controller = new AbortController();
     setLoading(true);
     setTransform({ x: 0, y: 0, scale: 1 });
-    void fetch(`/maps/adm1/${activeCountry}.json`, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("geometry unavailable");
-        return response.json() as Promise<FeatureCollection<Geometry, RegionProperties>>;
+    void loadCountryBoundary(activeCountry)
+      .then((payload) => {
+        if (!payload) throw new Error("geometry unavailable");
+        setGeometry(payload);
       })
-      .then((payload) => setGeometry(rewindForD3(payload)))
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setGeometry(null);
@@ -185,6 +227,70 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
     return "empty";
   };
 
+  const saveCheckIn = async (position: CheckInPosition, candidate: CheckInCandidate) => {
+    try {
+      const payload = await api.checkInTravelMap({
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracy_meters: position.accuracy,
+        region_code: candidate.regionCode,
+        region_name: candidate.regionName,
+        country_code: candidate.countryCode,
+        country_name: candidate.countryName,
+      });
+      setMaps([{ owner: payload.owner, regions: payload.regions }]);
+      setMode(payload.checked_region.country_code === "CHN" ? "china" : "world");
+      setSelectedCountry(payload.checked_region.country_code);
+      setCheckInCandidates([]);
+      setCheckInPosition(null);
+      showToast(t("travelMap.checkedIn", { region: payload.checked_region.region_name }));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("travelMap.saveFailed"), "error");
+    } finally {
+      setCheckingIn(false);
+    }
+  };
+
+  const resolveCheckIn = async (position: CheckInPosition) => {
+    const samples = accuracySamples(position);
+    const candidateCountries = world
+      .filter((item) => samples.some((point) => geoContains(item, point)))
+      .map((item) => countryCodeOf(item))
+      .filter(Boolean);
+    const candidates: CheckInCandidate[] = [];
+    for (const code of [...new Set(candidateCountries)]) {
+      const countryLabel = countryName(code, language);
+      const collection = await loadCountryBoundary(code);
+      if (!collection) {
+        candidates.push({
+          regionCode: `COUNTRY:${code}`,
+          regionName: countryLabel,
+          countryCode: code,
+          countryName: countryLabel,
+        });
+        continue;
+      }
+      collection.features.forEach((item) => {
+        if (!samples.some((point) => geoContains(item, point))) return;
+        const name = item.properties?.name || countryLabel;
+        candidates.push({
+          regionCode: regionCode(code, item),
+          regionName: name,
+          countryCode: code,
+          countryName: countryLabel,
+        });
+      });
+    }
+    const unique = [...new Map(candidates.map((item) => [item.regionCode, item])).values()];
+    if (!unique.length) throw new Error("region unavailable");
+    if (unique.length === 1) {
+      await saveCheckIn(position, unique[0]);
+      return;
+    }
+    setCheckInPosition(position);
+    setCheckInCandidates(unique);
+  };
+
   const checkIn = () => {
     if (chatId || otherUser || checkingIn) return;
     if (!navigator.geolocation) {
@@ -194,18 +300,14 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
     setCheckingIn(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        void api.checkInTravelMap({
+        void resolveCheckIn({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-          accuracy_meters: position.coords.accuracy,
-        }).then((payload) => {
-          setMaps([{ owner: payload.owner, regions: payload.regions }]);
-          setMode(payload.checked_region.country_code === "CHN" ? "china" : "world");
-          setSelectedCountry(payload.checked_region.country_code);
-          showToast(t("travelMap.checkedIn", { region: payload.checked_region.region_name }));
-        }).catch((error) => {
-          showToast(error instanceof ApiError ? error.message : t("travelMap.saveFailed"), "error");
-        }).finally(() => setCheckingIn(false));
+          accuracy: position.coords.accuracy,
+        }).catch(() => {
+          setCheckingIn(false);
+          showToast(t("travelMap.locationFailed"), "error");
+        });
       },
       () => {
         setCheckingIn(false);
@@ -331,6 +433,30 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
           </button>
         ) : null}
       </div>
+      <BottomSheet
+        open={checkInCandidates.length > 1}
+        title={t("travelMap.chooseCurrentRegion")}
+        onClose={() => {
+          setCheckInCandidates([]);
+          setCheckInPosition(null);
+          setCheckingIn(false);
+        }}
+      >
+        <div className="travel-map-region-choices">
+          {checkInCandidates.map((candidate) => (
+            <button
+              key={candidate.regionCode}
+              onClick={() => {
+                if (checkInPosition) void saveCheckIn(checkInPosition, candidate);
+              }}
+              type="button"
+            >
+              <strong>{candidate.regionName}</strong>
+              <small>{candidate.countryName}</small>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
     </SideDrawer>
   );
 }

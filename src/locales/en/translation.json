@@ -1126,5 +1126,6 @@
   "travelMap.chatGrantGroupHint": "Members of this group who also opt in can compare footprints together.",
   "travelMap.authorize": "Share and continue",
   "travelMap.chatAccessGranted": "Your footprints are now shared in this chat",
-  "travelMap.sharedMemberCount": "{{count}} members are sharing"
+  "travelMap.sharedMemberCount": "{{count}} members are sharing",
+  "travelMap.chooseCurrentRegion": "Where are you now?"
 }
