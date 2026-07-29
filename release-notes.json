@@ -1,19 +1,17 @@
 {
-  "id": "2026.07.29.5",
+  "id": "2026.07.29.6",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "用户详情交互更准确",
+      "title": "通知渠道文案修复",
       "items": [
-        "陌生人的用户详情不再展示新建群聊入口",
-        "共同群聊信息仍会正常保留"
+        "邮件、短信和即时渠道现已正确显示中英文名称"
       ]
     },
     "en": {
-      "title": "More accurate profile actions",
+      "title": "Notification channel labels fixed",
       "items": [
-        "Create group is now hidden on profiles of people who are not friends",
-        "Shared group information remains available"
+        "Email, SMS, and Instant channels now display the correct localized names"
       ]
     }
   }

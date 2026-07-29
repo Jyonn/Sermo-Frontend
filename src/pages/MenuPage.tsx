@@ -2096,7 +2096,7 @@ export default function MenuPage() {
                   type="button"
                 >
                   <div className="row-main menu-key-cell">
-                    <strong>{label}</strong>
+                    <strong>{t(label)}</strong>
                   </div>
                   <div className="menu-detail-value menu-detail-text">
                     {verified ? (
