@@ -395,5 +395,13 @@
   "gesture.title": "Gesture unlock",
   "gesture.welcome": "Welcome back",
   "gesture.welcomeUser": "Welcome back, {{name}}",
-  "auth.logout": "Log out"
+  "auth.logout": "Log out",
+  "brand.fullName": "Sermo Yanlang",
+  "nav.main": "Main navigation",
+  "nav.expand": "Expand navigation",
+  "nav.collapse": "Collapse navigation",
+  "nav.openMenu": "Open menu",
+  "media.imagePreview": "Image preview",
+  "media.downloadImage": "Download image",
+  "media.downloadImageWithSize": "Download image, {{size}}"
 }

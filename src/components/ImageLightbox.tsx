@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useI18n } from "../lib/language";
 
 interface ImageLightboxProps {
   index: number;
@@ -32,13 +33,15 @@ async function downloadImage(uri: string, fileNamePrefix: string) {
 export function ImageLightbox({
   index,
   uris,
-  altPrefix = "图片预览",
+  altPrefix,
   details = [],
   downloadLabels = [],
   fileNamePrefix = "sermo-image",
   onClose,
   onIndexChange,
 }: ImageLightboxProps) {
+  const { t } = useI18n();
+  const resolvedAltPrefix = altPrefix || t("media.imagePreview");
   const trackRef = useRef<HTMLDivElement | null>(null);
   const gestureRef = useRef<{ moved: boolean; x: number } | null>(null);
 
@@ -86,7 +89,7 @@ export function ImageLightbox({
               <article className="message-image-preview-plate">
                 <div className="message-image-preview-frame">
                   <img
-                    alt={`${altPrefix} ${itemIndex + 1}`}
+                    alt={`${resolvedAltPrefix} ${itemIndex + 1}`}
                     className="message-image-preview"
                     draggable={false}
                     src={uri}
@@ -106,7 +109,9 @@ export function ImageLightbox({
             </span>
           ) : null}
           <button
-            aria-label={`下载图片${downloadLabel ? `，${downloadLabel}` : ""}`}
+            aria-label={downloadLabel
+              ? t("media.downloadImageWithSize", { size: downloadLabel })
+              : t("media.downloadImage")}
             onClick={() => void downloadImage(activeUri, fileNamePrefix)}
             type="button"
           >

@@ -155,9 +155,9 @@ export function AppBottomNav() {
   const visibleRoutes = groupSquareEnabled ? mobileRoutes : mobileRoutes.filter((route) => route.key !== "square");
 
   return (
-    <nav aria-label="主导航" className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
+    <nav aria-label={t("nav.main")} className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
-        <Link aria-label="Sermo 言浪" className="desktop-nav-brand" to="/app/chats">
+        <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to="/app/chats">
           <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-512.png?v=3" />
           {space ? (
             <>
@@ -171,10 +171,10 @@ export function AppBottomNav() {
           ) : null}
         </Link>
         <button
-          aria-label={desktopCollapsed ? "展开导航" : "收起导航"}
+          aria-label={desktopCollapsed ? t("nav.expand") : t("nav.collapse")}
           className="desktop-nav-toggle"
           onClick={() => setDesktopCollapsed((current) => !current)}
-          title={desktopCollapsed ? "展开导航" : "收起导航"}
+          title={desktopCollapsed ? t("nav.expand") : t("nav.collapse")}
           type="button"
         >
           <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -205,7 +205,7 @@ export function AppBottomNav() {
           </Link>
         ))}
       </div>
-      <Link aria-label="打开菜单" className="desktop-nav-user" to="/app/menu">
+      <Link aria-label={t("nav.openMenu")} className="desktop-nav-user" to="/app/menu">
         <UserAvatar className="mini-avatar" name={session.user.name} uri={session.user.avatar_uri} />
         <span>{session.user.name}</span>
       </Link>

@@ -395,5 +395,13 @@
   "gesture.title": "手势解锁",
   "gesture.welcome": "欢迎回来",
   "gesture.welcomeUser": "欢迎回来，{{name}}",
-  "auth.logout": "退出登录"
+  "auth.logout": "退出登录",
+  "brand.fullName": "Sermo 言浪",
+  "nav.main": "主导航",
+  "nav.expand": "展开导航",
+  "nav.collapse": "收起导航",
+  "nav.openMenu": "打开菜单",
+  "media.imagePreview": "图片预览",
+  "media.downloadImage": "下载图片",
+  "media.downloadImageWithSize": "下载图片，{{size}}"
 }

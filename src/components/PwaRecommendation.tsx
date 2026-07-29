@@ -24,7 +24,7 @@ export function PwaRecommendation() {
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const appName = `${spaceName} - 言浪`;
+  const appName = `${spaceName} - ${t("brand.yanlang")}`;
 
   useEffect(() => {
     if (!session || !location.pathname.startsWith("/app")) return;
