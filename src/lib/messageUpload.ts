@@ -1,4 +1,5 @@
 import { ApiError, api } from "./api";
+import { i18n } from "./language";
 import type { MessageMediaKind } from "../types";
 
 const IMAGE_MAX_SIZE = 10 * 1024 * 1024;
@@ -30,14 +31,14 @@ function prettySize(limit: number) {
 export function resolveMediaKind(file: File): MessageMediaKind {
   if (file.type.startsWith("video/")) return "video";
   if (file.type.startsWith("image/")) return "image";
-  throw new MessageUploadError("目前只支持图片和视频。");
+  throw new MessageUploadError(i18n.t("upload.imagesVideosOnly"));
 }
 
 export function validateMessageMediaFile(file: File, kind: MessageMediaKind) {
   const maxSize = maxSizeForKind(kind);
   if (file.size > maxSize) {
-    const label = kind === "image" ? "图片" : kind === "video" ? "视频" : kind === "audio" ? "语音" : "文件";
-    throw new MessageUploadError(`${label}不能超过 ${prettySize(maxSize)}。`);
+    const label = i18n.t(`media.${kind}` as "media.image");
+    throw new MessageUploadError(i18n.t("upload.sizeLimit", { type: label, size: prettySize(maxSize) }));
   }
 }
 
@@ -56,7 +57,7 @@ function uploadFormData(url: string, formData: FormData, onProgress?: (progress:
         return;
       }
 
-      let message = "资源上传失败";
+      let message = i18n.t("upload.failed");
       try {
         const payload = JSON.parse(request.responseText) as { error?: string };
         if (payload.error) message = payload.error;
@@ -65,8 +66,8 @@ function uploadFormData(url: string, formData: FormData, onProgress?: (progress:
       }
       reject(new MessageUploadError(message));
     });
-    request.addEventListener("error", () => reject(new MessageUploadError("资源上传失败")));
-    request.addEventListener("abort", () => reject(new MessageUploadError("资源上传已取消")));
+    request.addEventListener("error", () => reject(new MessageUploadError(i18n.t("upload.failed"))));
+    request.addEventListener("abort", () => reject(new MessageUploadError(i18n.t("upload.cancelled"))));
     request.send(formData);
   });
 }
@@ -98,5 +99,5 @@ export async function uploadMessageMediaWith(
 export function toMessageUploadError(error: unknown) {
   if (error instanceof MessageUploadError) return error;
   if (error instanceof ApiError) return new MessageUploadError(error.message);
-  return new MessageUploadError("资源上传失败");
+  return new MessageUploadError(i18n.t("upload.failed"));
 }

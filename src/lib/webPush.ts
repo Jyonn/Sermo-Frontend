@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { i18n } from "./language";
 
 export type WebPushState = "checking" | "unsupported" | "needs-install" | "denied" | "off" | "on";
 
@@ -31,13 +32,13 @@ export async function getWebPushState(): Promise<WebPushState> {
 }
 
 export async function enableWebPush() {
-  if (!canUseWebPush()) throw new Error("当前浏览器不支持系统通知");
-  if (isIos() && !isStandalone()) throw new Error("请先通过 Safari 添加到主屏幕");
+  if (!canUseWebPush()) throw new Error(i18n.t("webPush.unsupported"));
+  if (isIos() && !isStandalone()) throw new Error(i18n.t("webPush.installFirst"));
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") throw new Error("系统通知权限未开启");
+  if (permission !== "granted") throw new Error(i18n.t("webPush.permissionDenied"));
 
   const info = await api.getWebPushInfo();
-  if (!info.public_key) throw new Error("系统通知尚未配置");
+  if (!info.public_key) throw new Error(i18n.t("webPush.notConfigured"));
   await navigator.serviceWorker.register("/sw.js");
   const registration = await navigator.serviceWorker.ready;
   const existing = await registration.pushManager.getSubscription();
@@ -47,7 +48,7 @@ export async function enableWebPush() {
   });
   const serialized = subscription.toJSON();
   if (!serialized.endpoint || !serialized.keys?.p256dh || !serialized.keys.auth) {
-    throw new Error("无法读取浏览器通知订阅");
+    throw new Error(i18n.t("webPush.subscriptionFailed"));
   }
   await api.registerWebPush({
     endpoint: serialized.endpoint,

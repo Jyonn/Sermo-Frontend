@@ -1,4 +1,5 @@
 import { ApiError, api } from "./api";
+import { i18n } from "./language";
 
 export const MAX_CHAT_BACKGROUND_SIZE = 10 * 1024 * 1024;
 
@@ -11,10 +12,10 @@ export class ChatBackgroundUploadError extends Error {
 
 export async function uploadChatBackground(file: File) {
   if (!file.type.startsWith("image/")) {
-    throw new ChatBackgroundUploadError("请选择图片文件。");
+    throw new ChatBackgroundUploadError(i18n.t("upload.selectImage"));
   }
   if (file.size > MAX_CHAT_BACKGROUND_SIZE) {
-    throw new ChatBackgroundUploadError("图片不能超过 10 MB。");
+    throw new ChatBackgroundUploadError(i18n.t("upload.imageLimit", { size: "10 MB" }));
   }
 
   const upload = await api.createChatBackgroundUpload(file.name, file.type);
@@ -25,7 +26,7 @@ export async function uploadChatBackground(file: File) {
 
   const response = await fetch(upload.upload_url, { method: "POST", body: formData });
   if (!response.ok) {
-    throw new ChatBackgroundUploadError("背景上传失败");
+    throw new ChatBackgroundUploadError(i18n.t("upload.backgroundFailed"));
   }
 
   try {
