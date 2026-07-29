@@ -148,7 +148,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const openGroupPicker = async () => {
     if (!user) return;
     if (!canCreateGroup) {
-      showToast(`达到 Lv.${createGroupCapability?.required_level ?? 4} 后可创建群聊`, "error");
+      showToast(t("profile.groupLevelRequired", { level: createGroupCapability?.required_level ?? 4 }), "error");
       return;
     }
     setGroupSelectedIds([user.user_id]);
@@ -159,7 +159,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       const friends = await api.getFriends();
       setGroupCandidates([user, ...friends.filter((friend) => friend.user_id !== user.user_id)]);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "好友列表加载失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("friends.loadFailed"));
     } finally {
       setGroupCandidatesLoading(false);
     }
@@ -172,7 +172,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       const me = await api.getUserMe();
       const capability = me.growth?.capabilities?.create_group;
       if (capability && !capability.available) {
-        showToast(`达到 Lv.${capability.required_level} 后可创建群聊`, "error");
+        showToast(t("profile.groupLevelRequired", { level: capability.required_level }), "error");
         return;
       }
       const chat = await api.createGroupChat(groupSelectedIds);
@@ -189,8 +189,8 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   const renderGroupRow = (chat: ChatDTO) => (
     <button key={chat.chat_id} className="user-profile-group-row" onClick={() => (onOpenChat ? onOpenChat(chat.chat_id) : navigate(`/app/chats/${chat.chat_id}`))} type="button">
-      <UserAvatar className="mini-avatar" groupMembers={chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri }))} name={chat.title ?? "群聊"} />
-      <span><strong>{chat.title ?? "未命名群聊"}</strong><small>{chat.members.length} 人</small></span>
+      <UserAvatar className="mini-avatar" groupMembers={chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri }))} name={chat.title ?? t("chat.group")} />
+      <span><strong>{chat.title ?? t("chat.unnamedGroup")}</strong><small>{t("chat.memberCount", { count: chat.members.length })}</small></span>
       <span className="material-symbols-outlined">chevron_right</span>
     </button>
   );
@@ -348,7 +348,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       />
       {avatarPreviewOpen && user.avatar_uri ? (
         <ImageLightbox
-          altPrefix={`${user.name}的头像`}
+          altPrefix={t("profile.avatarAlt", { name: user.name })}
           fileNamePrefix="sermo-avatar"
           index={0}
           onClose={() => setAvatarPreviewOpen(false)}

@@ -191,7 +191,7 @@ export default function FriendsPage() {
                     <div className="row-subtle">{friend.status}</div>
                   </div>
                   <button className="ghost-button row-button" onClick={() => void startDirectChat(friend.id)} type="button">
-                    发消息
+                    {t("profile.message")}
                   </button>
                   <button className="icon-button row-trailing-button" onClick={() => setSheetFriend(friend)} type="button">
                     <span className="material-symbols-outlined">more_horiz</span>
@@ -217,7 +217,7 @@ export default function FriendsPage() {
                   {tab === "incoming" ? (
                     <div className="row-actions">
                       <button className="button row-button" disabled={requestActionUserId === request.from_user.user_id} onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
-                        {requestActionUserId === request.from_user.user_id ? "处理中" : "同意"}
+                        {requestActionUserId === request.from_user.user_id ? t("request.processing") : t("request.accept")}
                       </button>
                       <button className="icon-button" onClick={() => setSheetRequest(request)} type="button">
                         <span className="material-symbols-outlined">more_horiz</span>
@@ -225,7 +225,7 @@ export default function FriendsPage() {
                     </div>
                   ) : (
                     <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
-                      撤回
+                      {t("request.withdraw")}
                     </button>
                   )}
                 </div>
@@ -236,11 +236,11 @@ export default function FriendsPage() {
 
         {!friends.length && tab === "accepted" && viewState === "ready" ? (
           <FeedbackState
-            title="还没有好友"
-            description="从成员里开始第一段对话后，再把想保留的人加进来。"
+            title={t("friends.empty")}
+            description={t("friends.emptyHint")}
             action={
               <Link className="button" to="/app/space-users/online">
-                去成员页
+                {t("friends.openMembers")}
               </Link>
             }
           />
@@ -248,11 +248,11 @@ export default function FriendsPage() {
 
         {!activeRequests.length && tab !== "accepted" && viewState === "ready" ? (
           <FeedbackState
-            title={tab === "incoming" ? "没有待处理申请" : "你还没发出申请"}
-            description={tab === "incoming" ? "有新的好友申请时，这里会直接出现。" : "想主动建立关系时，先去成员页。"}
+            title={tab === "incoming" ? t("request.noIncoming") : t("request.noOutgoing")}
+            description={tab === "incoming" ? t("request.noIncomingHint") : t("request.noOutgoingHint")}
             action={
               <Link className="button" to="/app/space-users">
-                去成员页
+                {t("friends.openMembers")}
               </Link>
             }
           />
@@ -261,7 +261,7 @@ export default function FriendsPage() {
 
       <BottomSheet
         open={Boolean(sheetFriend || sheetRequest)}
-        title={sheetFriend?.name ?? (sheetRequest ? requestName(sheetRequest, tab === "accepted" ? "incoming" : tab) : "更多")}
+        title={sheetFriend?.name ?? (sheetRequest ? requestName(sheetRequest, tab === "accepted" ? "incoming" : tab) : t("common.more"))}
         onClose={() => {
           setSheetFriend(null);
           setSheetRequest(null);
@@ -270,10 +270,10 @@ export default function FriendsPage() {
         {sheetFriend ? (
           <div className="sheet-action-list">
             <button className="button" onClick={() => void startDirectChat(sheetFriend.id)} type="button">
-              发消息
+              {t("profile.message")}
             </button>
             <Link className="ghost-button" to="/app/space-users/online">
-              去成员页
+              {t("friends.openMembers")}
             </Link>
           </div>
         ) : null}
@@ -283,15 +283,15 @@ export default function FriendsPage() {
             {tab === "incoming" ? (
               <>
                 <button className="button" disabled={requestActionUserId === sheetRequest.from_user.user_id} onClick={() => void actOnRequest(sheetRequest.from_user.user_id, true)} type="button">
-                  {requestActionUserId === sheetRequest.from_user.user_id ? "处理中" : "同意"}
+                  {requestActionUserId === sheetRequest.from_user.user_id ? t("request.processing") : t("request.accept")}
                 </button>
                 <button className="ghost-button" onClick={() => setIgnoreRequest(sheetRequest)} type="button">
-                  忽略
+                  {t("request.ignore")}
                 </button>
               </>
             ) : (
               <button className="danger-button" onClick={() => setRevokeRequest(sheetRequest)} type="button">
-                撤回申请
+                {t("request.withdrawRequest")}
               </button>
             )}
           </div>
@@ -300,9 +300,9 @@ export default function FriendsPage() {
       <ConfirmDialog
         danger
         open={Boolean(ignoreRequest)}
-        title="确认忽略好友申请？"
-        description={ignoreRequest ? `忽略后，${ignoreRequest.from_user.name} 的这条申请将不再显示为待处理。` : ""}
-        confirmLabel="确认忽略"
+        title={t("request.ignoreConfirmTitle")}
+        description={ignoreRequest ? t("request.ignoreConfirmHint", { name: ignoreRequest.from_user.name }) : ""}
+        confirmLabel={t("request.confirmIgnore")}
         onClose={() => setIgnoreRequest(null)}
         onConfirm={() => {
           const targetUserId = ignoreRequest?.from_user.user_id;
@@ -315,9 +315,9 @@ export default function FriendsPage() {
       <ConfirmDialog
         danger
         open={Boolean(revokeRequest)}
-        title="确认撤回好友申请？"
-        description={revokeRequest ? `撤回后，发给 ${revokeRequest.to_user.name} 的这条申请会被取消。` : ""}
-        confirmLabel="确认撤回"
+        title={t("request.withdrawConfirmTitle")}
+        description={revokeRequest ? t("request.withdrawConfirmHint", { name: revokeRequest.to_user.name }) : ""}
+        confirmLabel={t("request.confirmWithdraw")}
         onClose={() => setRevokeRequest(null)}
         onConfirm={() => {
           const targetUserId = revokeRequest?.to_user.user_id;

@@ -91,7 +91,7 @@ function formatLastSeen(user: UserDTO) {
 function notificationChatAvatar(chat: ChatDTO) {
   if (chat.group) {
     return {
-      name: chat.title ?? "群聊",
+      name: chat.title ?? i18n.t("chat.group"),
       uri: undefined,
       groupMembers: chat.members.map((member) => ({
         name: member.name,
@@ -101,7 +101,7 @@ function notificationChatAvatar(chat: ChatDTO) {
   }
   const peer = chat.members[0];
   return {
-    name: peer?.name ?? chat.title ?? "会话",
+    name: peer?.name ?? chat.title ?? i18n.t("chat.conversation"),
     uri: peer?.avatar_uri,
     groupMembers: undefined,
   };
@@ -167,7 +167,7 @@ export default function NotificationsPage() {
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         if (!cached) {
-          const message = apiError instanceof ApiError ? apiError.message : "通讯加载失败";
+          const message = apiError instanceof ApiError ? apiError.message : t("contacts.loadFailed");
           setError(message);
           setViewState("error");
         }
@@ -223,7 +223,7 @@ export default function NotificationsPage() {
       setRequests(refreshed);
       emitFriendRequestsUpdated(pendingIncomingCount(refreshed.incoming));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "处理申请失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("request.handleFailed");
       setError(message);
     }
   };
@@ -235,7 +235,7 @@ export default function NotificationsPage() {
       setRequests(refreshed);
       emitFriendRequestsUpdated(pendingIncomingCount(refreshed.incoming));
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "撤回申请失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("request.revokeFailed");
       setError(message);
     }
   };
