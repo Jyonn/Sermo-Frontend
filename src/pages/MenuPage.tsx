@@ -27,6 +27,7 @@ import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureL
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ForwardArrowIcon } from "../components/ForwardArrowIcon";
 import { TabPageHeader } from "../components/TabPageHeader";
+import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
@@ -211,6 +212,7 @@ export default function MenuPage() {
   const [webPushState, setWebPushState] = useState<WebPushState>("checking");
   const [webPushSaving, setWebPushSaving] = useState(false);
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
+  const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
   const [vipClaiming, setVipClaiming] = useState(false);
@@ -1471,6 +1473,12 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button className="simple-row menu-link-row" onClick={() => setTravelMapOpen(true)} type="button">
+              <div className="row-main">
+                <strong>{t("travelMap.myTitle")}</strong>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
         </section>
 
@@ -1497,6 +1505,7 @@ export default function MenuPage() {
         open={pwaInstallSheetOpen}
         spaceName={space?.name ?? t("space.current")}
       />
+      <TravelMapDrawer open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
 
       <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
         <div className={`growth-drawer is-level-${me?.growth?.level ?? 1}`}>

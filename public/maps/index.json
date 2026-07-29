@@ -1,0 +1,1507 @@
+{
+  "source": "geoBoundaries gbOpen ADM1",
+  "license": "CC BY 4.0",
+  "generated_at": "2026-07-29T16:54:48.605Z",
+  "countries": [
+    {
+      "code": "ABW",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "AFG",
+      "available": true,
+      "regions": 34,
+      "bytes": 151531
+    },
+    {
+      "code": "AGO",
+      "available": true,
+      "regions": 18,
+      "bytes": 514300
+    },
+    {
+      "code": "AIA",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ALA",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ALB",
+      "available": true,
+      "regions": 12,
+      "bytes": 50776
+    },
+    {
+      "code": "AND",
+      "available": true,
+      "regions": 7,
+      "bytes": 11514
+    },
+    {
+      "code": "ARE",
+      "available": true,
+      "regions": 7,
+      "bytes": 174422
+    },
+    {
+      "code": "ARG",
+      "available": true,
+      "regions": 23,
+      "bytes": 160389
+    },
+    {
+      "code": "ARM",
+      "available": true,
+      "regions": 11,
+      "bytes": 71088
+    },
+    {
+      "code": "ASM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ATA",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ATF",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ATG",
+      "available": true,
+      "regions": 8,
+      "bytes": 22489
+    },
+    {
+      "code": "AUS",
+      "available": true,
+      "regions": 9,
+      "bytes": 4212703
+    },
+    {
+      "code": "AUT",
+      "available": true,
+      "regions": 9,
+      "bytes": 347974
+    },
+    {
+      "code": "AZE",
+      "available": true,
+      "regions": 2,
+      "bytes": 105856
+    },
+    {
+      "code": "BDI",
+      "available": true,
+      "regions": 18,
+      "bytes": 123549
+    },
+    {
+      "code": "BEL",
+      "available": true,
+      "regions": 3,
+      "bytes": 5299
+    },
+    {
+      "code": "BEN",
+      "available": true,
+      "regions": 12,
+      "bytes": 50399
+    },
+    {
+      "code": "BES",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "BFA",
+      "available": true,
+      "regions": 13,
+      "bytes": 312283
+    },
+    {
+      "code": "BGD",
+      "available": true,
+      "regions": 8,
+      "bytes": 80178
+    },
+    {
+      "code": "BGR",
+      "available": true,
+      "regions": 28,
+      "bytes": 224841
+    },
+    {
+      "code": "BHR",
+      "available": true,
+      "regions": 4,
+      "bytes": 34151
+    },
+    {
+      "code": "BHS",
+      "available": true,
+      "regions": 32,
+      "bytes": 754598
+    },
+    {
+      "code": "BIH",
+      "available": true,
+      "regions": 3,
+      "bytes": 109976
+    },
+    {
+      "code": "BLM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "BLR",
+      "available": true,
+      "regions": 7,
+      "bytes": 225710
+    },
+    {
+      "code": "BLZ",
+      "available": true,
+      "regions": 6,
+      "bytes": 45259
+    },
+    {
+      "code": "BMU",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "BOL",
+      "available": true,
+      "regions": 9,
+      "bytes": 888599
+    },
+    {
+      "code": "BRA",
+      "available": true,
+      "regions": 27,
+      "bytes": 1325201
+    },
+    {
+      "code": "BRB",
+      "available": true,
+      "regions": 11,
+      "bytes": 9851
+    },
+    {
+      "code": "BRN",
+      "available": true,
+      "regions": 4,
+      "bytes": 30343
+    },
+    {
+      "code": "BTN",
+      "available": true,
+      "regions": 20,
+      "bytes": 86939
+    },
+    {
+      "code": "BVT",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "BWA",
+      "available": true,
+      "regions": 10,
+      "bytes": 111466
+    },
+    {
+      "code": "CAF",
+      "available": true,
+      "regions": 17,
+      "bytes": 102018
+    },
+    {
+      "code": "CAN",
+      "available": true,
+      "regions": 13,
+      "bytes": 26021215
+    },
+    {
+      "code": "CCK",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "CHE",
+      "available": true,
+      "regions": 26,
+      "bytes": 389026
+    },
+    {
+      "code": "CHL",
+      "available": true,
+      "regions": 16,
+      "bytes": 7047296
+    },
+    {
+      "code": "CHN",
+      "available": true,
+      "regions": 34,
+      "bytes": 228695
+    },
+    {
+      "code": "CIV",
+      "available": true,
+      "regions": 14,
+      "bytes": 442187
+    },
+    {
+      "code": "CMR",
+      "available": true,
+      "regions": 10,
+      "bytes": 130644
+    },
+    {
+      "code": "COD",
+      "available": true,
+      "regions": 26,
+      "bytes": 981907
+    },
+    {
+      "code": "COG",
+      "available": true,
+      "regions": 12,
+      "bytes": 144403
+    },
+    {
+      "code": "COK",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "COL",
+      "available": true,
+      "regions": 33,
+      "bytes": 1047643
+    },
+    {
+      "code": "COM",
+      "available": true,
+      "regions": 3,
+      "bytes": 17550
+    },
+    {
+      "code": "CPV",
+      "available": true,
+      "regions": 22,
+      "bytes": 56551
+    },
+    {
+      "code": "CRI",
+      "available": true,
+      "regions": 7,
+      "bytes": 135333
+    },
+    {
+      "code": "CUB",
+      "available": true,
+      "regions": 16,
+      "bytes": 478625
+    },
+    {
+      "code": "CUW",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "CXR",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "CYM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "CYP",
+      "available": true,
+      "regions": 6,
+      "bytes": 55635
+    },
+    {
+      "code": "CZE",
+      "available": true,
+      "regions": 14,
+      "bytes": 566361
+    },
+    {
+      "code": "DEU",
+      "available": true,
+      "regions": 16,
+      "bytes": 1077362
+    },
+    {
+      "code": "DJI",
+      "available": true,
+      "regions": 6,
+      "bytes": 11908
+    },
+    {
+      "code": "DMA",
+      "available": true,
+      "regions": 10,
+      "bytes": 20523
+    },
+    {
+      "code": "DNK",
+      "available": true,
+      "regions": 5,
+      "bytes": 243001
+    },
+    {
+      "code": "DOM",
+      "available": true,
+      "regions": 32,
+      "bytes": 72820
+    },
+    {
+      "code": "DZA",
+      "available": true,
+      "regions": 48,
+      "bytes": 572157
+    },
+    {
+      "code": "ECU",
+      "available": true,
+      "regions": 24,
+      "bytes": 362577
+    },
+    {
+      "code": "EGY",
+      "available": true,
+      "regions": 27,
+      "bytes": 164790
+    },
+    {
+      "code": "ERI",
+      "available": true,
+      "regions": 6,
+      "bytes": 140572
+    },
+    {
+      "code": "ESH",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ESP",
+      "available": true,
+      "regions": 19,
+      "bytes": 840643
+    },
+    {
+      "code": "EST",
+      "available": true,
+      "regions": 15,
+      "bytes": 360523
+    },
+    {
+      "code": "ETH",
+      "available": true,
+      "regions": 11,
+      "bytes": 347031
+    },
+    {
+      "code": "FIN",
+      "available": true,
+      "regions": 19,
+      "bytes": 910441
+    },
+    {
+      "code": "FJI",
+      "available": true,
+      "regions": 4,
+      "bytes": 32324
+    },
+    {
+      "code": "FLK",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "FRA",
+      "available": true,
+      "regions": 13,
+      "bytes": 1490265
+    },
+    {
+      "code": "FRO",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "FSM",
+      "available": true,
+      "regions": 4,
+      "bytes": 77994
+    },
+    {
+      "code": "GAB",
+      "available": true,
+      "regions": 9,
+      "bytes": 80217
+    },
+    {
+      "code": "GBR",
+      "available": true,
+      "regions": 4,
+      "bytes": 170540
+    },
+    {
+      "code": "GEO",
+      "available": true,
+      "regions": 12,
+      "bytes": 144494
+    },
+    {
+      "code": "GGY",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "GHA",
+      "available": true,
+      "regions": 16,
+      "bytes": 227442
+    },
+    {
+      "code": "GIB",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "GIN",
+      "available": true,
+      "regions": 8,
+      "bytes": 161966
+    },
+    {
+      "code": "GLP",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "GMB",
+      "available": true,
+      "regions": 8,
+      "bytes": 72589
+    },
+    {
+      "code": "GNB",
+      "available": true,
+      "regions": 9,
+      "bytes": 155750
+    },
+    {
+      "code": "GNQ",
+      "available": true,
+      "regions": 7,
+      "bytes": 37115
+    },
+    {
+      "code": "GRC",
+      "available": true,
+      "regions": 8,
+      "bytes": 490685
+    },
+    {
+      "code": "GRD",
+      "available": true,
+      "regions": 7,
+      "bytes": 18327
+    },
+    {
+      "code": "GRL",
+      "available": true,
+      "regions": 6,
+      "bytes": 1400396
+    },
+    {
+      "code": "GTM",
+      "available": true,
+      "regions": 22,
+      "bytes": 279024
+    },
+    {
+      "code": "GUF",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "GUM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "GUY",
+      "available": true,
+      "regions": 10,
+      "bytes": 120900
+    },
+    {
+      "code": "HKG",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "HMD",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "HND",
+      "available": true,
+      "regions": 18,
+      "bytes": 262611
+    },
+    {
+      "code": "HRV",
+      "available": true,
+      "regions": 21,
+      "bytes": 422218
+    },
+    {
+      "code": "HTI",
+      "available": true,
+      "regions": 10,
+      "bytes": 150593
+    },
+    {
+      "code": "HUN",
+      "available": true,
+      "regions": 19,
+      "bytes": 182377
+    },
+    {
+      "code": "IDN",
+      "available": true,
+      "regions": 34,
+      "bytes": 2861876
+    },
+    {
+      "code": "IMN",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "IND",
+      "available": true,
+      "regions": 36,
+      "bytes": 4480438
+    },
+    {
+      "code": "IOT",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "IRL",
+      "available": true,
+      "regions": 4,
+      "bytes": 705891
+    },
+    {
+      "code": "IRN",
+      "available": true,
+      "regions": 32,
+      "bytes": 1043389
+    },
+    {
+      "code": "IRQ",
+      "available": true,
+      "regions": 18,
+      "bytes": 129923
+    },
+    {
+      "code": "ISL",
+      "available": true,
+      "regions": 8,
+      "bytes": 299777
+    },
+    {
+      "code": "ISR",
+      "available": true,
+      "regions": 6,
+      "bytes": 38579
+    },
+    {
+      "code": "ITA",
+      "available": true,
+      "regions": 5,
+      "bytes": 761980
+    },
+    {
+      "code": "JAM",
+      "available": true,
+      "regions": 14,
+      "bytes": 44325
+    },
+    {
+      "code": "JEY",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "JOR",
+      "available": true,
+      "regions": 12,
+      "bytes": 47415
+    },
+    {
+      "code": "JPN",
+      "available": true,
+      "regions": 47,
+      "bytes": 1882575
+    },
+    {
+      "code": "KAZ",
+      "available": true,
+      "regions": 16,
+      "bytes": 405016
+    },
+    {
+      "code": "KEN",
+      "available": true,
+      "regions": 47,
+      "bytes": 764246
+    },
+    {
+      "code": "KGZ",
+      "available": true,
+      "regions": 7,
+      "bytes": 151405
+    },
+    {
+      "code": "KHM",
+      "available": true,
+      "regions": 25,
+      "bytes": 351023
+    },
+    {
+      "code": "KIR",
+      "available": true,
+      "regions": 3,
+      "bytes": 63257
+    },
+    {
+      "code": "KNA",
+      "available": true,
+      "regions": 14,
+      "bytes": 11505
+    },
+    {
+      "code": "KOR",
+      "available": true,
+      "regions": 17,
+      "bytes": 162976
+    },
+    {
+      "code": "KWT",
+      "available": true,
+      "regions": 6,
+      "bytes": 39813
+    },
+    {
+      "code": "LAO",
+      "available": true,
+      "regions": 18,
+      "bytes": 389310
+    },
+    {
+      "code": "LBN",
+      "available": true,
+      "regions": 9,
+      "bytes": 83765
+    },
+    {
+      "code": "LBR",
+      "available": true,
+      "regions": 15,
+      "bytes": 267619
+    },
+    {
+      "code": "LBY",
+      "available": true,
+      "regions": 22,
+      "bytes": 67267
+    },
+    {
+      "code": "LCA",
+      "available": true,
+      "regions": 10,
+      "bytes": 43608
+    },
+    {
+      "code": "LIE",
+      "available": true,
+      "regions": 11,
+      "bytes": 14470
+    },
+    {
+      "code": "LKA",
+      "available": true,
+      "regions": 9,
+      "bytes": 146911
+    },
+    {
+      "code": "LSO",
+      "available": true,
+      "regions": 10,
+      "bytes": 140182
+    },
+    {
+      "code": "LTU",
+      "available": true,
+      "regions": 10,
+      "bytes": 184422
+    },
+    {
+      "code": "LUX",
+      "available": true,
+      "regions": 12,
+      "bytes": 48122
+    },
+    {
+      "code": "LVA",
+      "available": true,
+      "regions": 43,
+      "bytes": 557208
+    },
+    {
+      "code": "MAC",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "MAF",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "MAR",
+      "available": true,
+      "regions": 12,
+      "bytes": 213687
+    },
+    {
+      "code": "MCO",
+      "available": true,
+      "regions": 1,
+      "bytes": 783
+    },
+    {
+      "code": "MDA",
+      "available": true,
+      "regions": 37,
+      "bytes": 278589
+    },
+    {
+      "code": "MDG",
+      "available": true,
+      "regions": 22,
+      "bytes": 652014
+    },
+    {
+      "code": "MDV",
+      "available": true,
+      "regions": 21,
+      "bytes": 15755
+    },
+    {
+      "code": "MEX",
+      "available": true,
+      "regions": 32,
+      "bytes": 3544235
+    },
+    {
+      "code": "MHL",
+      "available": true,
+      "regions": 24,
+      "bytes": 32835
+    },
+    {
+      "code": "MKD",
+      "available": true,
+      "regions": 8,
+      "bytes": 91045
+    },
+    {
+      "code": "MLI",
+      "available": true,
+      "regions": 9,
+      "bytes": 265730
+    },
+    {
+      "code": "MLT",
+      "available": true,
+      "regions": 68,
+      "bytes": 62227
+    },
+    {
+      "code": "MMR",
+      "available": true,
+      "regions": 14,
+      "bytes": 1375630
+    },
+    {
+      "code": "MNE",
+      "available": true,
+      "regions": 23,
+      "bytes": 60131
+    },
+    {
+      "code": "MNG",
+      "available": true,
+      "regions": 22,
+      "bytes": 219445
+    },
+    {
+      "code": "MNP",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "MOZ",
+      "available": true,
+      "regions": 10,
+      "bytes": 226708
+    },
+    {
+      "code": "MRT",
+      "available": true,
+      "regions": 13,
+      "bytes": 173982
+    },
+    {
+      "code": "MSR",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "MTQ",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "MUS",
+      "available": true,
+      "regions": 12,
+      "bytes": 50083
+    },
+    {
+      "code": "MWI",
+      "available": true,
+      "regions": 3,
+      "bytes": 103636
+    },
+    {
+      "code": "MYS",
+      "available": true,
+      "regions": 16,
+      "bytes": 503785
+    },
+    {
+      "code": "MYT",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "NAM",
+      "available": true,
+      "regions": 14,
+      "bytes": 130452
+    },
+    {
+      "code": "NCL",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "NER",
+      "available": true,
+      "regions": 6,
+      "bytes": 61680
+    },
+    {
+      "code": "NFK",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "NGA",
+      "available": true,
+      "regions": 37,
+      "bytes": 744692
+    },
+    {
+      "code": "NIC",
+      "available": true,
+      "regions": 17,
+      "bytes": 292928
+    },
+    {
+      "code": "NIU",
+      "available": true,
+      "regions": 14,
+      "bytes": 11795
+    },
+    {
+      "code": "NLD",
+      "available": true,
+      "regions": 12,
+      "bytes": 136181
+    },
+    {
+      "code": "NOR",
+      "available": true,
+      "regions": 11,
+      "bytes": 2810579
+    },
+    {
+      "code": "NPL",
+      "available": true,
+      "regions": 7,
+      "bytes": 371089
+    },
+    {
+      "code": "NRU",
+      "available": true,
+      "regions": 14,
+      "bytes": 15171
+    },
+    {
+      "code": "NZL",
+      "available": true,
+      "regions": 17,
+      "bytes": 1742600
+    },
+    {
+      "code": "OMN",
+      "available": true,
+      "regions": 7,
+      "bytes": 183269
+    },
+    {
+      "code": "PAK",
+      "available": true,
+      "regions": 7,
+      "bytes": 138570
+    },
+    {
+      "code": "PAN",
+      "available": true,
+      "regions": 13,
+      "bytes": 340600
+    },
+    {
+      "code": "PCN",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "PER",
+      "available": true,
+      "regions": 26,
+      "bytes": 287659
+    },
+    {
+      "code": "PHL",
+      "available": true,
+      "regions": 17,
+      "bytes": 2810791
+    },
+    {
+      "code": "PLW",
+      "available": true,
+      "regions": 16,
+      "bytes": 31868
+    },
+    {
+      "code": "PNG",
+      "available": true,
+      "regions": 22,
+      "bytes": 1258153
+    },
+    {
+      "code": "POL",
+      "available": true,
+      "regions": 16,
+      "bytes": 511616
+    },
+    {
+      "code": "PRI",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "PRK",
+      "available": true,
+      "regions": 11,
+      "bytes": 289614
+    },
+    {
+      "code": "PRT",
+      "available": true,
+      "regions": 20,
+      "bytes": 528749
+    },
+    {
+      "code": "PRY",
+      "available": true,
+      "regions": 18,
+      "bytes": 760627
+    },
+    {
+      "code": "PSE",
+      "available": true,
+      "regions": 2,
+      "bytes": 30170
+    },
+    {
+      "code": "PYF",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "QAT",
+      "available": true,
+      "regions": 8,
+      "bytes": 75152
+    },
+    {
+      "code": "REU",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "ROU",
+      "available": true,
+      "regions": 42,
+      "bytes": 1104580
+    },
+    {
+      "code": "RUS",
+      "available": true,
+      "regions": 83,
+      "bytes": 8169603
+    },
+    {
+      "code": "RWA",
+      "available": true,
+      "regions": 5,
+      "bytes": 114527
+    },
+    {
+      "code": "SAU",
+      "available": true,
+      "regions": 13,
+      "bytes": 378310
+    },
+    {
+      "code": "SDN",
+      "available": true,
+      "regions": 19,
+      "bytes": 257947
+    },
+    {
+      "code": "SEN",
+      "available": true,
+      "regions": 14,
+      "bytes": 215353
+    },
+    {
+      "code": "SGP",
+      "available": true,
+      "regions": 5,
+      "bytes": 35562
+    },
+    {
+      "code": "SGS",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "SHN",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "SJM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "SLB",
+      "available": true,
+      "regions": 10,
+      "bytes": 81594
+    },
+    {
+      "code": "SLE",
+      "available": true,
+      "regions": 4,
+      "bytes": 158364
+    },
+    {
+      "code": "SLV",
+      "available": true,
+      "regions": 14,
+      "bytes": 99842
+    },
+    {
+      "code": "SMR",
+      "available": true,
+      "regions": 9,
+      "bytes": 6028
+    },
+    {
+      "code": "SOM",
+      "available": true,
+      "regions": 18,
+      "bytes": 72989
+    },
+    {
+      "code": "SPM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "SRB",
+      "available": true,
+      "regions": 25,
+      "bytes": 311457
+    },
+    {
+      "code": "SSD",
+      "available": true,
+      "regions": 10,
+      "bytes": 194049
+    },
+    {
+      "code": "STP",
+      "available": true,
+      "regions": 2,
+      "bytes": 11435
+    },
+    {
+      "code": "SUR",
+      "available": true,
+      "regions": 10,
+      "bytes": 69923
+    },
+    {
+      "code": "SVK",
+      "available": true,
+      "regions": 8,
+      "bytes": 138215
+    },
+    {
+      "code": "SVN",
+      "available": true,
+      "regions": 2,
+      "bytes": 3424
+    },
+    {
+      "code": "SWE",
+      "available": true,
+      "regions": 21,
+      "bytes": 1228457
+    },
+    {
+      "code": "SWZ",
+      "available": true,
+      "regions": 4,
+      "bytes": 17235
+    },
+    {
+      "code": "SXM",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "SYC",
+      "available": true,
+      "regions": 26,
+      "bytes": 70893
+    },
+    {
+      "code": "SYR",
+      "available": true,
+      "regions": 14,
+      "bytes": 165548
+    },
+    {
+      "code": "TCA",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "TCD",
+      "available": true,
+      "regions": 23,
+      "bytes": 94217
+    },
+    {
+      "code": "TGO",
+      "available": true,
+      "regions": 5,
+      "bytes": 62934
+    },
+    {
+      "code": "THA",
+      "available": true,
+      "regions": 77,
+      "bytes": 858849
+    },
+    {
+      "code": "TJK",
+      "available": true,
+      "regions": 5,
+      "bytes": 110780
+    },
+    {
+      "code": "TKL",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "TKM",
+      "available": true,
+      "regions": 5,
+      "bytes": 44845
+    },
+    {
+      "code": "TLS",
+      "available": true,
+      "regions": 13,
+      "bytes": 41447
+    },
+    {
+      "code": "TON",
+      "available": true,
+      "regions": 5,
+      "bytes": 27892
+    },
+    {
+      "code": "TTO",
+      "available": true,
+      "regions": 14,
+      "bytes": 37542
+    },
+    {
+      "code": "TUN",
+      "available": true,
+      "regions": 24,
+      "bytes": 249547
+    },
+    {
+      "code": "TUR",
+      "available": true,
+      "regions": 81,
+      "bytes": 1326093
+    },
+    {
+      "code": "TUV",
+      "available": true,
+      "regions": 8,
+      "bytes": 4788
+    },
+    {
+      "code": "TWN",
+      "available": true,
+      "regions": 22,
+      "bytes": 218518
+    },
+    {
+      "code": "TZA",
+      "available": true,
+      "regions": 30,
+      "bytes": 361784
+    },
+    {
+      "code": "UGA",
+      "available": true,
+      "regions": 4,
+      "bytes": 219427
+    },
+    {
+      "code": "UKR",
+      "available": true,
+      "regions": 27,
+      "bytes": 650327
+    },
+    {
+      "code": "UMI",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "URY",
+      "available": true,
+      "regions": 19,
+      "bytes": 366755
+    },
+    {
+      "code": "USA",
+      "available": true,
+      "regions": 56,
+      "bytes": 4793254
+    },
+    {
+      "code": "UZB",
+      "available": true,
+      "regions": 14,
+      "bytes": 147925
+    },
+    {
+      "code": "VAT",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "VCT",
+      "available": true,
+      "regions": 6,
+      "bytes": 16290
+    },
+    {
+      "code": "VEN",
+      "available": true,
+      "regions": 25,
+      "bytes": 1113402
+    },
+    {
+      "code": "VGB",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "VIR",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "VNM",
+      "available": true,
+      "regions": 64,
+      "bytes": 468465
+    },
+    {
+      "code": "VUT",
+      "available": true,
+      "regions": 6,
+      "bytes": 107511
+    },
+    {
+      "code": "WLF",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "WSM",
+      "available": true,
+      "regions": 11,
+      "bytes": 41053
+    },
+    {
+      "code": "XKK",
+      "available": false,
+      "regions": 0,
+      "bytes": 0
+    },
+    {
+      "code": "YEM",
+      "available": true,
+      "regions": 22,
+      "bytes": 187924
+    },
+    {
+      "code": "ZAF",
+      "available": true,
+      "regions": 9,
+      "bytes": 646039
+    },
+    {
+      "code": "ZMB",
+      "available": true,
+      "regions": 10,
+      "bytes": 645377
+    },
+    {
+      "code": "ZWE",
+      "available": true,
+      "regions": 10,
+      "bytes": 381859
+    }
+  ]
+}

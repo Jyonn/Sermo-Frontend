@@ -39,6 +39,9 @@ import type {
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
   MyTravelMapDTO,
+  TravelMapCheckInDTO,
+  ChatTravelMapAccessDTO,
+  ChatTravelMapDTO,
   TravelMapAccessDTO,
   TravelMapComparisonDTO,
 } from "../types";
@@ -592,14 +595,12 @@ export const api = {
     return request<MyTravelMapDTO>("/maps/me", { auth: true, signal });
   },
 
-  setTravelMapRegion(payload: {
-    region_code: string;
-    region_name: string;
-    country_code: string;
-    country_name: string;
-    checked: 0 | 1;
+  checkInTravelMap(payload: {
+    latitude: number;
+    longitude: number;
+    accuracy_meters: number;
   }) {
-    return request<MyTravelMapDTO>("/maps/me", {
+    return request<TravelMapCheckInDTO>("/maps/me/check-in", {
       method: "POST",
       auth: true,
       body: payload,
@@ -639,6 +640,38 @@ export const api = {
       method: "DELETE",
       auth: true,
       query: { user_id },
+    });
+  },
+
+  getChatTravelMapAccess(chat_id: number, signal?: AbortSignal) {
+    return request<ChatTravelMapAccessDTO>("/maps/chats/access", {
+      auth: true,
+      query: { chat_id },
+      signal,
+    });
+  },
+
+  grantChatTravelMapAccess(chat_id: number) {
+    return request<ChatTravelMapAccessDTO>("/maps/chats/access", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+    });
+  },
+
+  revokeChatTravelMapAccess(chat_id: number) {
+    return request<ChatTravelMapAccessDTO>("/maps/chats/access", {
+      method: "DELETE",
+      auth: true,
+      query: { chat_id },
+    });
+  },
+
+  getChatTravelMaps(chat_id: number, signal?: AbortSignal) {
+    return request<ChatTravelMapDTO>("/maps/chats/maps", {
+      auth: true,
+      query: { chat_id },
+      signal,
     });
   },
 

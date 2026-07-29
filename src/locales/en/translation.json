@@ -1113,5 +1113,18 @@
   "travelMap.accessMenuHint": "Explore shared footprints or change your sharing.",
   "travelMap.waitingForReply": "Waiting for them to connect",
   "travelMap.checkInCountry": "Light up this country",
-  "travelMap.removeCountry": "Remove this country"
+  "travelMap.removeCountry": "Remove this country",
+  "travelMap.others": "Other members",
+  "travelMap.sharedFootprints": "Shared footprints",
+  "travelMap.readOnlyRegions": "Footprints can only be added on location",
+  "travelMap.checkInHere": "Check in here",
+  "travelMap.locating": "Locating…",
+  "travelMap.locationUnsupported": "Location is unavailable on this device",
+  "travelMap.locationFailed": "Your current location could not be confirmed",
+  "travelMap.chatGrantTitle": "Share your footprints here?",
+  "travelMap.chatGrantDirectHint": "You and this friend will be able to compare the places you have visited.",
+  "travelMap.chatGrantGroupHint": "Members of this group who also opt in can compare footprints together.",
+  "travelMap.authorize": "Share and continue",
+  "travelMap.chatAccessGranted": "Your footprints are now shared in this chat",
+  "travelMap.sharedMemberCount": "{{count}} members are sharing"
 }

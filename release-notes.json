@@ -1,19 +1,21 @@
 {
-  "id": "2026.07.30.1",
+  "id": "2026.07.30.2",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "图标字体加载更稳定",
+      "title": "足迹地图全面升级",
       "items": [
-        "修复部分图标在新空间地址下无法显示的问题",
-        "图标字体随应用一同加载，不再受页面路径影响"
+        "新增菜单中的个人足迹入口，仅支持现场定位打卡",
+        "世界地图支持进入各国查看省、州等下一级区域",
+        "私聊和群聊均可授权查看共同足迹"
       ]
     },
     "en": {
-      "title": "More reliable icon loading",
+      "title": "A richer travel map",
       "items": [
-        "Fixed missing icons on the new path-based space URLs",
-        "Icon fonts now ship with the app and no longer depend on the current route"
+        "Added a personal travel map with on-location check-ins only",
+        "Open any country to explore its first-level regions",
+        "Share and compare footprints in direct and group chats"
       ]
     }
   }

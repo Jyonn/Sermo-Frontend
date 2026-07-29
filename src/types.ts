@@ -381,6 +381,24 @@ export interface MyTravelMapDTO {
   regions: TravelMapRegionDTO[];
 }
 
+export interface TravelMapCheckInDTO extends MyTravelMapDTO {
+  checked_region: TravelMapRegionDTO;
+}
+
+export interface ChatTravelMapAccessDTO {
+  authorized_by_me: boolean;
+  shared_members: TinyUserDTO[];
+}
+
+export interface ChatTravelMapDTO {
+  chat_id: number;
+  authorized_by_me: boolean;
+  maps: Array<{
+    owner: TinyUserDTO;
+    regions: TravelMapRegionDTO[];
+  }>;
+}
+
 export interface TravelMapComparisonDTO {
   me: TinyUserDTO;
   other: TinyUserDTO;

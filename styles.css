@@ -13608,6 +13608,21 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   gap: 9px;
 }
 
+.travel-map-owner-avatars {
+  display: flex;
+  padding-left: 6px;
+}
+
+.travel-map-owner-avatars .mini-avatar {
+  margin-left: -6px;
+  border: 2px solid var(--surface, #fff);
+}
+
+.travel-map-check-in-button {
+  width: 100%;
+  min-height: 48px;
+}
+
 .travel-map-owner > span {
   display: grid;
   min-width: 0;

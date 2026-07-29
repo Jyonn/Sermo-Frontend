@@ -38,7 +38,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -1880,6 +1880,10 @@ export default function ChatsPage() {
   const [travelMapMenu, setTravelMapMenu] = useState<{ user: TinyUserDTO; access: TravelMapAccessDTO } | null>(null);
   const [travelMapSaving, setTravelMapSaving] = useState(false);
   const [travelMapRevokeConfirmOpen, setTravelMapRevokeConfirmOpen] = useState(false);
+  const [chatTravelMapOpen, setChatTravelMapOpen] = useState(false);
+  const [chatTravelMapAccess, setChatTravelMapAccess] = useState<ChatTravelMapAccessDTO | null>(null);
+  const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
+  const [chatTravelMapMenuOpen, setChatTravelMapMenuOpen] = useState(false);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
@@ -3592,73 +3596,50 @@ export default function ChatsPage() {
     }
   };
 
-  const openOwnTravelMap = () => {
-    if (!selectedDirectPeer || composerBusy) return;
+  const openChatTravelMap = async () => {
+    if (!selectedChat || composerBusy || travelMapSaving) return;
     setComposerMoreOpen(false);
-    setTravelMapOtherUser(null);
-    setTravelMapOpen(true);
+    setTravelMapSaving(true);
+    try {
+      const access = await api.getChatTravelMapAccess(selectedChat.id);
+      setChatTravelMapAccess(access);
+      if (access.authorized_by_me) setChatTravelMapMenuOpen(true);
+      else setChatTravelMapGrantConfirmOpen(true);
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
+    } finally {
+      setTravelMapSaving(false);
+    }
   };
 
-  const sendTravelMapMessage = async () => {
-    if (!selectedChat || !selectedDirectPeer || selectedChat.type !== "direct") return;
-    const createdAt = Math.floor(Date.now() / 1000);
-    const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
-    const pendingMessage: ChatMessage = {
-      id: clientId,
-      clientId,
-      from: "self",
-      type: MESSAGE_TYPE_MAP_ACCESS,
-      kind: "map_access",
-      name: currentUserName,
-      time: formatTime(createdAt),
-      createdAt,
-      text: t("travelMap.action"),
-      payload: {
-        kind: "map_access",
-        owner: session?.user,
-        target_user_id: selectedDirectPeer.user_id,
-        access: { can_view_theirs: false, they_can_view_mine: true },
-      },
-      replyTo: consumeReplyTarget(),
-      status: "pending",
-    };
-    setTravelMapOpen(false);
-    setMessages((current) => ({
-      ...current,
-      [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
-    }));
-    setChats((current) => sortChats(current.map((chat) => (
-      chat.id === selectedChat.id ? updateChatSummary(chat, t("travelMap.action"), createdAt) : chat
-    ))));
-    stickToBottomRef.current = true;
-    triggerMessageEntrance(clientId);
-    updateSendTask(clientId, 0.15);
+  const grantChatTravelMap = async () => {
+    if (!selectedChat || travelMapSaving) return;
+    setTravelMapSaving(true);
     try {
-      const created = await api.sendMessage(
-        selectedChat.id,
-        MESSAGE_TYPE_MAP_ACCESS,
-        JSON.stringify({ kind: "map_access", target_user_id: selectedDirectPeer.user_id }),
-        pendingMessage.replyTo?.message_id,
-        clientId,
-      );
-      const deliveredMessage = mapChatMessage(created, currentUserId);
-      updateSendTask(clientId, 0.9);
-      setMessages((current) => ({
-        ...current,
-        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, deliveredMessage),
-      }));
-      setChats((current) => sortChats(current.map((chat) => (
-        chat.id === selectedChat.id ? updateChatSummary(chat, t("travelMap.action"), deliveredMessage.createdAt) : chat
-      ))));
-      showToast(t("travelMap.shareSent"));
+      const access = await api.grantChatTravelMapAccess(selectedChat.id);
+      setChatTravelMapAccess(access);
+      setChatTravelMapGrantConfirmOpen(false);
+      setChatTravelMapOpen(true);
+      showToast(t("travelMap.chatAccessGranted"));
     } catch (error) {
-      setMessages((current) => ({
-        ...current,
-        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
-      }));
-      showToast(error instanceof ApiError ? error.message : t("travelMap.shareFailed"), "error");
+      showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
     } finally {
-      finishSendTask(clientId);
+      setTravelMapSaving(false);
+    }
+  };
+
+  const revokeChatTravelMap = async () => {
+    if (!selectedChat || travelMapSaving) return;
+    setTravelMapSaving(true);
+    try {
+      const access = await api.revokeChatTravelMapAccess(selectedChat.id);
+      setChatTravelMapAccess(access);
+      setChatTravelMapMenuOpen(false);
+      showToast(t("travelMap.accessRemoved"));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
+    } finally {
+      setTravelMapSaving(false);
     }
   };
 
@@ -4775,8 +4756,8 @@ export default function ChatsPage() {
                         <span className="composer-action-tile-icon">{canSendLocation ? <ComposerSvgIcon kind="location" /> : <span className="material-symbols-outlined">lock</span>}</span>
                         <span>{canSendLocation ? t("media.location") : t("location.levelLabel", { level: 3 })}</span>
                       </button>
-                      {selectedChat?.type === "direct" ? (
-                        <button className="composer-action-tile" disabled={composerBusy} onClick={openOwnTravelMap} type="button">
+                      {selectedChat ? (
+                        <button className="composer-action-tile" disabled={composerBusy || travelMapSaving} onClick={() => void openChatTravelMap()} type="button">
                           <span className="composer-action-tile-icon"><ComposerSvgIcon kind="map" /></span>
                           <span>{t("travelMap.action")}</span>
                         </button>
@@ -5422,8 +5403,43 @@ export default function ChatsPage() {
         open={travelMapOpen}
         otherUser={travelMapOtherUser}
         onClose={() => setTravelMapOpen(false)}
-        onShare={!travelMapOtherUser && selectedDirectPeer ? () => void sendTravelMapMessage() : undefined}
       />
+      <TravelMapDrawer
+        chatId={selectedChat?.id}
+        chatTitle={selectedChat?.title}
+        open={chatTravelMapOpen}
+        onClose={() => setChatTravelMapOpen(false)}
+      />
+      <ConfirmDialog
+        open={chatTravelMapGrantConfirmOpen}
+        title={t("travelMap.chatGrantTitle")}
+        description={selectedChat?.type === "group" ? t("travelMap.chatGrantGroupHint") : t("travelMap.chatGrantDirectHint")}
+        confirmLabel={t("travelMap.authorize")}
+        busy={travelMapSaving}
+        onClose={() => setChatTravelMapGrantConfirmOpen(false)}
+        onConfirm={() => void grantChatTravelMap()}
+      />
+      <BottomSheet
+        open={chatTravelMapMenuOpen}
+        title={t("travelMap.sharedFootprints")}
+        onClose={() => setChatTravelMapMenuOpen(false)}
+      >
+        <div className="travel-map-access-actions">
+          <div className="travel-map-access-person">
+            <span>
+              <strong>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess?.shared_members.length ?? 0 })}</strong>
+              <small>{selectedChat?.title}</small>
+            </span>
+          </div>
+          <button className="button" onClick={() => { setChatTravelMapMenuOpen(false); setChatTravelMapOpen(true); }} type="button">
+            <ComposerSvgIcon kind="map" />
+            {t("travelMap.openMap")}
+          </button>
+          <button className="ghost-button danger-text-button" disabled={travelMapSaving} onClick={() => void revokeChatTravelMap()} type="button">
+            {t("travelMap.stopSharing")}
+          </button>
+        </div>
+      </BottomSheet>
       <BottomSheet
         open={Boolean(travelMapMenu)}
         title={t("travelMap.accessMenuTitle")}

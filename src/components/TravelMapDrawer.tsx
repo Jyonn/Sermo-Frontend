@@ -5,37 +5,36 @@ import enCountries from "i18n-iso-countries/langs/en.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
 import { feature } from "topojson-client";
 import worldTopology from "world-atlas/countries-110m.json";
-import type { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import { useI18n } from "../lib/language";
 import { showToast } from "../lib/toast";
 import type { TinyUserDTO, TravelMapRegionDTO } from "../types";
-import { useI18n } from "../lib/language";
 
 countries.registerLocale(enCountries);
 countries.registerLocale(zhCountries);
 
-type MapMode = "world" | "china";
-
 interface TravelMapDrawerProps {
   open: boolean;
-  otherUser?: TinyUserDTO | null;
   onClose: () => void;
-  onShare?: () => void;
+  chatId?: number | null;
+  chatTitle?: string;
+  otherUser?: TinyUserDTO | null;
 }
 
-type RegionFeatureProperties = GeoJsonProperties & {
-  shapeName?: string;
-  shapeISO?: string;
-  shapeID?: string;
+interface RegionProperties {
   name?: string;
-  NAME_1?: string;
-  name_1?: string;
-  iso_3166_2?: string;
-  adm1_code?: string;
-};
+  code?: string;
+}
+
+interface MapOwner {
+  owner: TinyUserDTO;
+  regions: TravelMapRegionDTO[];
+}
 
 interface MapTransform {
   x: number;
@@ -43,82 +42,67 @@ interface MapTransform {
   scale: number;
 }
 
-const WORLD_WIDTH = 920;
-const WORLD_HEIGHT = 500;
+const WIDTH = 920;
+const HEIGHT = 500;
 
 function worldFeatures() {
-  const topology = worldTopology as unknown as {
-    objects: { countries: Parameters<typeof feature>[1] };
-  };
+  const topology = worldTopology as unknown as { objects: { countries: Parameters<typeof feature>[1] } };
   return (feature(topology as never, topology.objects.countries) as unknown as FeatureCollection).features;
 }
 
-function countryCodeOf(featureItem: Feature) {
-  const numeric = String(featureItem.id ?? "").padStart(3, "0");
-  return countries.numericToAlpha3(numeric) || "";
-}
-
-function regionIdentity(featureItem: Feature<Geometry, RegionFeatureProperties>, countryCode: string) {
-  const properties = featureItem.properties ?? {};
-  const name = String(properties.shapeName || properties.name || properties.NAME_1 || properties.name_1 || "").trim();
-  const sourceCode = String(properties.shapeISO || properties.shapeID || properties.iso_3166_2 || properties.adm1_code || name).trim();
-  return {
-    code: `${countryCode}:${sourceCode || name}`,
-    name: name || sourceCode || countryCode,
-  };
+function countryCodeOf(item: Feature) {
+  return countries.numericToAlpha3(String(item.id ?? "").padStart(3, "0")) || "";
 }
 
 function countryName(code: string, language: string) {
   return countries.getName(code, language === "zh-CN" ? "zh" : "en") || code;
 }
 
-function checkedCountries(regions: TravelMapRegionDTO[]) {
-  return new Set(regions.map((region) => region.country_code));
+function regionCode(country: string, item: Feature<Geometry, RegionProperties>) {
+  return `${country}:${item.properties?.code || item.properties?.name || ""}`;
 }
 
-export function TravelMapDrawer({ open, otherUser, onClose, onShare }: TravelMapDrawerProps) {
+export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }: TravelMapDrawerProps) {
+  const { session } = useAuth();
   const { language, t } = useI18n();
-  const [mode, setMode] = useState<MapMode>("world");
+  const [mode, setMode] = useState<"world" | "china">("world");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [myRegions, setMyRegions] = useState<TravelMapRegionDTO[]>([]);
-  const [otherRegions, setOtherRegions] = useState<TravelMapRegionDTO[]>([]);
-  const [geometry, setGeometry] = useState<FeatureCollection | null>(null);
-  const [geometryUnavailable, setGeometryUnavailable] = useState(false);
+  const [maps, setMaps] = useState<MapOwner[]>([]);
+  const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [loading, setLoading] = useState(false);
-  const [savingCode, setSavingCode] = useState<string | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
   const [transform, setTransform] = useState<MapTransform>({ x: 0, y: 0, scale: 1 });
   const dragRef = useRef<{ pointerId: number; x: number; y: number; originX: number; originY: number } | null>(null);
 
-  const editable = !otherUser;
   const world = useMemo(worldFeatures, []);
   const activeCountry = mode === "china" ? "CHN" : selectedCountry;
-  const activeCountryName = activeCountry ? countryName(activeCountry, language) : "";
-  const myCodes = useMemo(() => new Set(myRegions.map((region) => region.region_code)), [myRegions]);
-  const otherCodes = useMemo(() => new Set(otherRegions.map((region) => region.region_code)), [otherRegions]);
-  const myCountryCodes = useMemo(() => checkedCountries(myRegions), [myRegions]);
-  const otherCountryCodes = useMemo(() => checkedCountries(otherRegions), [otherRegions]);
+  const currentUserId = session?.user.user_id;
+  const mine = maps.find((item) => item.owner.user_id === currentUserId);
+  const others = maps.filter((item) => item.owner.user_id !== currentUserId);
+  const myCodes = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.region_code)), [mine]);
+  const otherCodes = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.region_code))), [others]);
+  const myCountries = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.country_code)), [mine]);
+  const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
 
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();
     setLoading(true);
-    setGeometryUnavailable(false);
-    const load = otherUser
-      ? api.getTravelMap(otherUser.user_id, controller.signal).then((payload) => {
-        setMyRegions(payload.my_regions);
-        setOtherRegions(payload.other_regions);
-      })
-      : api.getMyTravelMap(controller.signal).then((payload) => {
-        setMyRegions(payload.regions);
-        setOtherRegions([]);
-      });
-    void load.catch((error) => {
+    const request = chatId
+      ? api.getChatTravelMaps(chatId, controller.signal).then((payload) => setMaps(payload.maps))
+      : otherUser
+        ? api.getTravelMap(otherUser.user_id, controller.signal).then((payload) => setMaps([
+          { owner: payload.me, regions: payload.my_regions },
+          { owner: payload.other, regions: payload.other_regions },
+        ]))
+        : api.getMyTravelMap(controller.signal).then((payload) => setMaps([{ owner: payload.owner, regions: payload.regions }]));
+    void request.catch((error) => {
       if (!controller.signal.aborted) showToast(error instanceof ApiError ? error.message : t("travelMap.loadFailed"), "error");
     }).finally(() => {
       if (!controller.signal.aborted) setLoading(false);
     });
     return () => controller.abort();
-  }, [open, otherUser?.user_id]);
+  }, [open, chatId, otherUser?.user_id]);
 
   useEffect(() => {
     if (!open || !activeCountry) {
@@ -127,142 +111,113 @@ export function TravelMapDrawer({ open, otherUser, onClose, onShare }: TravelMap
     }
     const controller = new AbortController();
     setLoading(true);
-    setGeometryUnavailable(false);
-    void api.getTravelMapGeometry(activeCountry, controller.signal)
-      .then((payload) => {
-        setGeometry(payload);
-        setGeometryUnavailable(false);
+    setTransform({ x: 0, y: 0, scale: 1 });
+    void fetch(`/maps/adm1/${activeCountry}.json`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("geometry unavailable");
+        return response.json() as Promise<FeatureCollection<Geometry, RegionProperties>>;
       })
+      .then(setGeometry)
       .catch((error) => {
-        if (!controller.signal.aborted) {
-          setGeometry(null);
-          setGeometryUnavailable(true);
-          showToast(error instanceof ApiError ? error.message : t("travelMap.geometryFailed"), "error");
-        }
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setGeometry(null);
+        showToast(t("travelMap.geometryFailed"), "error");
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
-    setTransform({ x: 0, y: 0, scale: 1 });
     return () => controller.abort();
   }, [activeCountry, open]);
 
-  const detailFeatures = (geometry?.features ?? []) as Array<Feature<Geometry, RegionFeatureProperties>>;
-  const detailPath = useMemo(() => {
-    if (!geometry) return null;
-    return geoPath(geoMercator().fitExtent([[26, 26], [WORLD_WIDTH - 26, WORLD_HEIGHT - 26]], geometry));
-  }, [geometry]);
-  const worldPath = useMemo(
-    () => geoPath(geoNaturalEarth1().fitExtent([[18, 18], [WORLD_WIDTH - 18, WORLD_HEIGHT - 18]], { type: "FeatureCollection", features: world } as FeatureCollection)),
-    [world],
-  );
+  const detailPath = useMemo(() => geometry
+    ? geoPath(geoMercator().fitExtent([[26, 26], [WIDTH - 26, HEIGHT - 26]], geometry))
+    : null, [geometry]);
+  const worldPath = useMemo(() => geoPath(geoNaturalEarth1().fitExtent(
+    [[18, 18], [WIDTH - 18, HEIGHT - 18]],
+    { type: "FeatureCollection", features: world } as FeatureCollection,
+  )), [world]);
 
-  const regionTone = (code: string) => {
-    const mine = myCodes.has(code);
-    const theirs = otherCodes.has(code);
-    if (mine && theirs) return "overlap";
-    if (mine) return "mine";
-    if (theirs) return "theirs";
+  const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
+    if (mineSet.has(code) && otherSet.has(code)) return "overlap";
+    if (mineSet.has(code)) return "mine";
+    if (otherSet.has(code)) return "theirs";
     return "empty";
   };
 
-  const countryTone = (code: string) => {
-    const mine = myCountryCodes.has(code);
-    const theirs = otherCountryCodes.has(code);
-    if (mine && theirs) return "overlap";
-    if (mine) return "mine";
-    if (theirs) return "theirs";
-    return "empty";
-  };
-
-  const toggleRegion = async (featureItem: Feature<Geometry, RegionFeatureProperties>) => {
-    if (!editable || !activeCountry || savingCode) return;
-    const identity = regionIdentity(featureItem, activeCountry);
-    const checked = !myCodes.has(identity.code);
-    setSavingCode(identity.code);
-    try {
-      const payload = await api.setTravelMapRegion({
-        region_code: identity.code,
-        region_name: identity.name,
-        country_code: activeCountry,
-        country_name: activeCountryName,
-        checked: checked ? 1 : 0,
-      });
-      setMyRegions(payload.regions);
-      showToast(checked ? t("travelMap.checkedIn", { region: identity.name }) : t("travelMap.checkInRemoved", { region: identity.name }));
-    } catch (error) {
-      showToast(error instanceof ApiError ? error.message : t("travelMap.saveFailed"), "error");
-    } finally {
-      setSavingCode(null);
+  const checkIn = () => {
+    if (chatId || otherUser || checkingIn) return;
+    if (!navigator.geolocation) {
+      showToast(t("travelMap.locationUnsupported"), "error");
+      return;
     }
+    setCheckingIn(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        void api.checkInTravelMap({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy_meters: position.coords.accuracy,
+        }).then((payload) => {
+          setMaps([{ owner: payload.owner, regions: payload.regions }]);
+          setMode(payload.checked_region.country_code === "CHN" ? "china" : "world");
+          setSelectedCountry(payload.checked_region.country_code);
+          showToast(t("travelMap.checkedIn", { region: payload.checked_region.region_name }));
+        }).catch((error) => {
+          showToast(error instanceof ApiError ? error.message : t("travelMap.saveFailed"), "error");
+        }).finally(() => setCheckingIn(false));
+      },
+      () => {
+        setCheckingIn(false);
+        showToast(t("travelMap.locationFailed"), "error");
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
+    );
   };
 
-  const toggleWholeCountry = async () => {
-    if (!editable || !activeCountry || savingCode) return;
-    const regionCode = `COUNTRY:${activeCountry}`;
-    const checked = !myCodes.has(regionCode);
-    setSavingCode(regionCode);
-    try {
-      const payload = await api.setTravelMapRegion({
-        region_code: regionCode,
-        region_name: activeCountryName,
-        country_code: activeCountry,
-        country_name: activeCountryName,
-        checked: checked ? 1 : 0,
-      });
-      setMyRegions(payload.regions);
-      showToast(checked ? t("travelMap.checkedIn", { region: activeCountryName }) : t("travelMap.checkInRemoved", { region: activeCountryName }));
-    } catch (error) {
-      showToast(error instanceof ApiError ? error.message : t("travelMap.saveFailed"), "error");
-    } finally {
-      setSavingCode(null);
-    }
+  const zoom = (delta: number) => setTransform((current) => ({
+    ...current,
+    scale: Math.min(4, Math.max(1, current.scale + delta)),
+  }));
+  const resetView = () => {
+    setMode("world");
+    setSelectedCountry(null);
+    setGeometry(null);
+    setTransform({ x: 0, y: 0, scale: 1 });
   };
-
-  const zoom = (delta: number) => {
-    setTransform((current) => ({ ...current, scale: Math.min(4, Math.max(1, current.scale + delta)) }));
-  };
-
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
     zoom(event.deltaY < 0 ? 0.25 : -0.25);
   };
-
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, originX: transform.x, originY: transform.y };
   };
-
   const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId || transform.scale <= 1) return;
     setTransform((current) => ({
       ...current,
-      x: drag.originX + (event.clientX - drag.x),
-      y: drag.originY + (event.clientY - drag.y),
+      x: drag.originX + event.clientX - drag.x,
+      y: drag.originY + event.clientY - drag.y,
     }));
   };
 
-  const resetView = () => {
-    if (mode === "china") setMode("world");
-    setSelectedCountry(null);
-    setGeometry(null);
-    setTransform({ x: 0, y: 0, scale: 1 });
-  };
+  const title = chatId ? (chatTitle || t("travelMap.sharedFootprints")) : otherUser
+    ? t("travelMap.sharedTitle", { name: otherUser.name })
+    : t("travelMap.myTitle");
+  const totalRegions = maps.reduce((sum, item) => sum + item.regions.length, 0);
 
   return (
-    <SideDrawer
-      open={open}
-      onClose={onClose}
-      title={otherUser ? t("travelMap.sharedTitle", { name: otherUser.name }) : t("travelMap.myTitle")}
-      actionLabel={editable && onShare ? t("travelMap.share") : undefined}
-      onAction={editable && onShare ? onShare : undefined}
-    >
+    <SideDrawer open={open} onClose={onClose} title={title}>
       <div className="travel-map-drawer">
         <div className="travel-map-owner-row">
           <div className="travel-map-owner">
-            <UserAvatar className="mini-avatar" name={otherUser?.name ?? t("travelMap.me")} uri={otherUser?.avatar_uri} />
-            <span><strong>{otherUser?.name ?? t("travelMap.myFootprints")}</strong><small>{t("travelMap.regionCount", { count: otherUser ? otherRegions.length : myRegions.length })}</small></span>
+            <div className="travel-map-owner-avatars">
+              {maps.slice(0, 4).map((item) => (
+                <UserAvatar className="mini-avatar" key={item.owner.user_id} name={item.owner.name} uri={item.owner.avatar_uri} />
+              ))}
+            </div>
+            <span><strong>{chatId ? t("travelMap.sharedFootprints") : t("travelMap.myFootprints")}</strong><small>{t("travelMap.regionCount", { count: totalRegions })}</small></span>
           </div>
           <div className="travel-map-view-switch">
             <button className={mode === "world" ? "is-active" : ""} onClick={resetView} type="button">{t("travelMap.world")}</button>
@@ -276,14 +231,14 @@ export function TravelMapDrawer({ open, otherUser, onClose, onShare }: TravelMap
             <strong>{activeCountry || t("travelMap.worldCode")}</strong>
           </div>
           <svg
-            aria-label={activeCountry ? activeCountryName : t("travelMap.world")}
+            aria-label={activeCountry ? countryName(activeCountry, language) : t("travelMap.world")}
             onPointerCancel={() => { dragRef.current = null; }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={() => { dragRef.current = null; }}
             onWheel={handleWheel}
             role="img"
-            viewBox={`0 0 ${WORLD_WIDTH} ${WORLD_HEIGHT}`}
+            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           >
             <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
               {!activeCountry ? world.map((country) => {
@@ -291,29 +246,18 @@ export function TravelMapDrawer({ open, otherUser, onClose, onShare }: TravelMap
                 const path = worldPath(country);
                 if (!code || !path) return null;
                 return (
-                  <path
-                    className={`travel-map-region is-${countryTone(code)}`}
-                    d={path}
-                    key={String(country.id)}
-                    onClick={() => setSelectedCountry(code)}
-                  >
+                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)}`} d={path} key={String(country.id)} onClick={() => setSelectedCountry(code)}>
                     <title>{countryName(code, language)}</title>
                   </path>
                 );
-              }) : detailFeatures.map((region) => {
-                const identity = regionIdentity(region, activeCountry);
+              }) : geometry?.features.map((region, index) => {
+                const code = regionCode(activeCountry, region);
                 const path = detailPath?.(region);
-                if (!path) return null;
-                return (
-                  <path
-                    className={`travel-map-region is-${regionTone(identity.code)}${editable ? " is-editable" : ""}`}
-                    d={path}
-                    key={identity.code}
-                    onClick={() => void toggleRegion(region)}
-                  >
-                    <title>{identity.name}</title>
+                return path ? (
+                  <path className={`travel-map-region is-${tone(myCodes, otherCodes, code)}`} d={path} key={`${code}:${index}`}>
+                    <title>{region.properties?.name || code}</title>
                   </path>
-                );
+                ) : null;
               })}
             </g>
           </svg>
@@ -327,25 +271,22 @@ export function TravelMapDrawer({ open, otherUser, onClose, onShare }: TravelMap
 
         <div className="travel-map-legend">
           <span><i className="is-mine" />{t("travelMap.mine")}</span>
-          {otherUser ? <span><i className="is-theirs" />{t("travelMap.theirs", { name: otherUser.name })}</span> : null}
-          {otherUser ? <span><i className="is-overlap" />{t("travelMap.overlap")}</span> : null}
+          {others.length ? <span><i className="is-theirs" />{t("travelMap.others")}</span> : null}
+          {others.length ? <span><i className="is-overlap" />{t("travelMap.overlap")}</span> : null}
         </div>
 
         {activeCountry ? (
-          <div className="travel-map-country-actions">
-            <button className="travel-map-country-back" onClick={resetView} type="button">
-              <span>←</span>
-              <span><strong>{activeCountryName}</strong><small>{editable ? t("travelMap.tapToCheckIn") : t("travelMap.comparingRegions")}</small></span>
-            </button>
-            {geometryUnavailable && editable ? (
-              <button className="travel-map-country-checkin" disabled={Boolean(savingCode)} onClick={() => void toggleWholeCountry()} type="button">
-                {myCodes.has(`COUNTRY:${activeCountry}`) ? t("travelMap.removeCountry") : t("travelMap.checkInCountry")}
-              </button>
-            ) : null}
-          </div>
-        ) : (
-          <p className="travel-map-hint">{t("travelMap.chooseCountry")}</p>
-        )}
+          <button className="travel-map-country-back" onClick={resetView} type="button">
+            <span>←</span>
+            <span><strong>{countryName(activeCountry, language)}</strong><small>{t("travelMap.readOnlyRegions")}</small></span>
+          </button>
+        ) : null}
+
+        {!chatId && !otherUser ? (
+          <button className="button travel-map-check-in-button" disabled={checkingIn} onClick={checkIn} type="button">
+            {checkingIn ? t("travelMap.locating") : t("travelMap.checkInHere")}
+          </button>
+        ) : null}
       </div>
     </SideDrawer>
   );

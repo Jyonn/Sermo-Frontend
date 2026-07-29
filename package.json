@@ -8,6 +8,7 @@
     "dev": "npm run release:prepare && vite",
     "build": "npm run release:prepare && tsc -b && vite build && node scripts/prepare-github-pages.mjs",
     "i18n:check": "node scripts/check-i18n.mjs",
+    "maps:cache": "node scripts/cache-map-boundaries.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
