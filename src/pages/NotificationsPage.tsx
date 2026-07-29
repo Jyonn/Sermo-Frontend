@@ -16,7 +16,7 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
-import { useI18n } from "../lib/language";
+import { i18n, useI18n } from "../lib/language";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
 const FRIEND_REQUEST_STATUS_ACCEPTED = 1;
@@ -29,18 +29,18 @@ function pendingIncomingCount(rows: FriendshipRequestDTO[]) {
 
 function requestStatus(request: FriendshipRequestDTO, direction: "incoming" | "outgoing") {
   if (request.status === FRIEND_REQUEST_STATUS_PENDING) {
-    return { label: direction === "incoming" ? "待处理" : "等待回应", tone: "pending" };
+    return { label: i18n.t(direction === "incoming" ? "request.pending" : "request.awaiting"), tone: "pending" };
   }
   if (request.status === FRIEND_REQUEST_STATUS_ACCEPTED) {
-    return { label: direction === "incoming" ? "已同意" : "已通过", tone: "accepted" };
+    return { label: i18n.t(direction === "incoming" ? "request.accepted" : "request.approved"), tone: "accepted" };
   }
   if (request.status === FRIEND_REQUEST_STATUS_REJECTED) {
-    return { label: direction === "incoming" ? "已忽略" : "未通过", tone: "rejected" };
+    return { label: i18n.t(direction === "incoming" ? "request.ignored" : "request.rejected"), tone: "rejected" };
   }
   if (request.status === FRIEND_REQUEST_STATUS_DELETED) {
-    return { label: "已结束", tone: "closed" };
+    return { label: i18n.t("request.closed"), tone: "closed" };
   }
-  return { label: "已处理", tone: "closed" };
+  return { label: i18n.t("request.handled"), tone: "closed" };
 }
 
 type FriendSection = {
@@ -71,21 +71,21 @@ function groupFriends(rows: UserDTO[]) {
 }
 
 function formatLastSeen(user: UserDTO) {
-  if (user.is_alive) return "在线";
+  if (user.is_alive) return i18n.t("presence.online");
 
   const diffSeconds = Math.max(0, Math.floor(Date.now() / 1000) - user.last_heartbeat);
   const minutes = Math.floor(diffSeconds / 60);
 
-  if (minutes < 1) return "刚刚";
-  if (minutes < 60) return `${minutes} 分钟前`;
+  if (minutes < 1) return i18n.t("presence.justNow");
+  if (minutes < 60) return i18n.t("presence.minutesAgo", { count: minutes });
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} 小时前`;
+  if (hours < 24) return i18n.t("presence.hoursAgo", { count: hours });
 
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} 天前`;
+  if (days < 30) return i18n.t("presence.daysAgo", { count: days });
 
-  return "一个月前";
+  return i18n.t("presence.monthAgo");
 }
 
 function notificationChatAvatar(chat: ChatDTO) {
@@ -313,7 +313,7 @@ export default function NotificationsPage() {
               ))}
             </div>
             {friendIndexNeeded && !requestSheetOpen && !groupSheetOpen && profileDrawerUserId === null ? (
-              <div className="friend-directory-index" aria-label="好友索引">
+              <div className="friend-directory-index" aria-label={t("contacts.friendIndex")}>
                 {friendSections.map((section) => (
                   <button
                     key={`friend-index-${section.key}`}
@@ -330,22 +330,22 @@ export default function NotificationsPage() {
         </section>
 
         {!filteredFriends.length && viewState === "ready" ? (
-          <FeedbackState title="还没有好友" description="先从广场或聊天里开始建立联系。" />
+          <FeedbackState title={t("contacts.noFriends")} description={t("contacts.noFriendsHint")} />
         ) : null}
       </section>
 
       <SideDrawer
         open={requestSheetOpen}
-        title="好友申请"
+        title={t("contacts.requests")}
         onClose={() => setRequestSheetOpen(false)}
       >
         <div className="friend-request-drawer">
           <div className="friend-request-tabs" role="tablist">
             <button className={requestDrawerTab === "incoming" ? "active" : ""} onClick={() => setRequestDrawerTab("incoming")} role="tab" type="button">
-              收到的{filteredIncoming.length ? ` ${filteredIncoming.length}` : ""}
+              {t("request.incoming")}{filteredIncoming.length ? ` ${filteredIncoming.length}` : ""}
             </button>
             <button className={requestDrawerTab === "outgoing" ? "active" : ""} onClick={() => setRequestDrawerTab("outgoing")} role="tab" type="button">
-              发出的{filteredOutgoing.length ? ` ${filteredOutgoing.length}` : ""}
+              {t("request.outgoing")}{filteredOutgoing.length ? ` ${filteredOutgoing.length}` : ""}
             </button>
           </div>
           {requestDrawerTab === "incoming" ? filteredIncoming.length ? (
@@ -360,10 +360,10 @@ export default function NotificationsPage() {
                   {request.status === FRIEND_REQUEST_STATUS_PENDING ? (
                     <div className="row-actions">
                       <button className="button row-button friend-request-accept" onClick={() => void actOnRequest(request.from_user.user_id, true)} type="button">
-                        同意
+                        {t("request.accept")}
                       </button>
                       <button className="ghost-button row-button" onClick={() => setIgnoreRequest(request)} type="button">
-                        忽略
+                        {t("request.ignore")}
                       </button>
                     </div>
                   ) : (
@@ -374,7 +374,7 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-          ) : <FeedbackState title="还没有收到申请" description="" /> : filteredOutgoing.length ? (
+          ) : <FeedbackState title={t("request.noIncoming")} description="" /> : filteredOutgoing.length ? (
             <div className="simple-list friend-request-list">
               {filteredOutgoing.map((request) => (
                 <div key={request.request_id} className="simple-row request-row friend-request-card">
@@ -385,7 +385,7 @@ export default function NotificationsPage() {
                   </div>
                   {request.status === FRIEND_REQUEST_STATUS_PENDING ? (
                     <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
-                      撤回
+                      {t("request.withdraw")}
                     </button>
                   ) : (
                     <span className={`friend-request-status is-${requestStatus(request, "outgoing").tone}`}>
@@ -395,15 +395,15 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-          ) : <FeedbackState title="没有发出的申请" description="" />}
+          ) : <FeedbackState title={t("request.noOutgoing")} description="" />}
         </div>
       </SideDrawer>
       <ConfirmDialog
         danger
         open={Boolean(ignoreRequest)}
-        title="确认忽略好友申请？"
-        description={ignoreRequest ? `忽略后，${ignoreRequest.from_user.name} 的这条申请将不再显示为待处理。` : ""}
-        confirmLabel="确认忽略"
+        title={t("request.ignoreTitle")}
+        description={ignoreRequest ? t("request.ignoreDescription", { name: ignoreRequest.from_user.name }) : ""}
+        confirmLabel={t("request.ignoreConfirm")}
         onClose={() => setIgnoreRequest(null)}
         onConfirm={() => {
           const targetUserId = ignoreRequest?.from_user.user_id;
@@ -416,9 +416,9 @@ export default function NotificationsPage() {
       <ConfirmDialog
         danger
         open={Boolean(revokeRequest)}
-        title="确认撤回好友申请？"
-        description={revokeRequest ? `撤回后，发给 ${revokeRequest.to_user.name} 的这条申请会被取消。` : ""}
-        confirmLabel="确认撤回"
+        title={t("request.withdrawTitle")}
+        description={revokeRequest ? t("request.withdrawDescription", { name: revokeRequest.to_user.name }) : ""}
+        confirmLabel={t("request.withdrawConfirm")}
         onClose={() => setRevokeRequest(null)}
         onConfirm={() => {
           const targetUserId = revokeRequest?.to_user.user_id;
@@ -431,11 +431,11 @@ export default function NotificationsPage() {
 
       <SideDrawer
         open={groupSheetOpen}
-        title="群聊"
+        title={t("contacts.groups")}
         onClose={() => setGroupSheetOpen(false)}
       >
         <section className="list-section">
-          <div className="section-label">已加入的群聊</div>
+          <div className="section-label">{t("contacts.groupJoined")}</div>
           {filteredGroups.length ? (
             <div className="simple-list">
               {filteredGroups.map((chat) => {
@@ -452,23 +452,23 @@ export default function NotificationsPage() {
                   >
                     <UserAvatar className="mini-avatar" groupMembers={avatar.groupMembers} name={avatar.name} uri={avatar.uri} />
                     <div className="row-main">
-                      <strong>{chat.title ?? "未命名群聊"}</strong>
-                      <div className="row-subtle">{chat.last_message?.content || "打开群聊继续讨论"}</div>
+                      <strong>{chat.title ?? t("contacts.unnamedGroup")}</strong>
+                      <div className="row-subtle">{chat.last_message?.content || t("contacts.groupContinue")}</div>
                     </div>
-                    <span className="count-badge">{chat.members.length} 人</span>
+                    <span className="count-badge">{t("contacts.memberCount", { count: chat.members.length })}</span>
                   </button>
                 );
               })}
             </div>
           ) : (
-            <FeedbackState title="还没有群聊" description="你创建或加入群聊后，这里会出现。" />
+            <FeedbackState title={t("contacts.noGroups")} description={t("contacts.noGroupHint")} />
           )}
         </section>
       </SideDrawer>
 
       <SideDrawer
         open={profileDrawerUserId !== null}
-        title="用户详情"
+        title={t("contacts.userDetails")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >
