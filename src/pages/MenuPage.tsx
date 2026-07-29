@@ -1713,8 +1713,11 @@ export default function MenuPage() {
                   type="button"
                 >
                   <span>{t(labelKey)}</span>
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    {languagePreference === value ? "check_circle" : "radio_button_unchecked"}
+                  <span className="language-choice-indicator" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                      <circle cx="10" cy="10" r="7.5" />
+                      {languagePreference === value ? <path d="m6.5 10.2 2.15 2.2 4.85-5" /> : null}
+                    </svg>
                   </span>
                 </button>
               ))}
