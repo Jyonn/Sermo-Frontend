@@ -1,21 +1,19 @@
 {
-  "id": "2026.07.29.1",
+  "id": "2026.07.29.2",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "更新内容，一眼看懂",
+      "title": "个性化体验更完整",
       "items": [
-        "发现新版本时，直接展示本次更新内容",
-        "更新说明现已支持中英文",
-        "优化新版本检测的可靠性"
+        "修复自定义聊天背景的相册图标显示异常",
+        "新版本提示现在会展示清晰的更新内容"
       ]
     },
     "en": {
-      "title": "See what is new at a glance",
+      "title": "A more polished personalization experience",
       "items": [
-        "See a clear summary whenever an update is ready",
-        "Release notes are now available in Chinese and English",
-        "Improved update detection reliability"
+        "Fixed the gallery icon in custom chat backgrounds",
+        "Update prompts now include a clear summary of changes"
       ]
     }
   }

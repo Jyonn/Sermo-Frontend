@@ -1799,7 +1799,7 @@ export default function MenuPage() {
               type="button"
             >
               <span>
-                {me?.chat_background_uri ? <img alt="" src={me.chat_background_uri} /> : <span className="material-symbols-outlined">add_photo_alternate</span>}
+                {me?.chat_background_uri ? <img alt="" src={me.chat_background_uri} /> : <span className="material-symbols-outlined">photo_library</span>}
               </span>
               <strong>{chatBackgroundSaving ? t("common.processing") : t("common.custom")}</strong>
             </button>
