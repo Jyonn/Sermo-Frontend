@@ -62,6 +62,22 @@ function regionCode(country: string, item: Feature<Geometry, RegionProperties>) 
   return `${country}:${item.properties?.code || item.properties?.name || ""}`;
 }
 
+function normalizedRegionName(value: string) {
+  return value
+    .toLocaleLowerCase()
+    .replace(/special administrative region|autonomous region|municipality|province/g, "")
+    .replace(/\u58ee\u65cf\u81ea\u6cbb\u533a|\u56de\u65cf\u81ea\u6cbb\u533a|\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a|\u7279\u522b\u884c\u653f\u533a|\u81ea\u6cbb\u533a|\u7701|\u5e02/g, "")
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+function hasRegion(regions: TravelMapRegionDTO[], code: string, name: string) {
+  const normalizedName = normalizedRegionName(name);
+  return regions.some((item) => (
+    item.region_code === code
+    || (item.country_code === code.slice(0, 3) && normalizedRegionName(item.region_name) === normalizedName)
+  ));
+}
+
 function rewindForD3(collection: FeatureCollection<Geometry, RegionProperties>) {
   const rewindGeometry = (geometry: Geometry): Geometry => {
     if (geometry.type === "Polygon") {
@@ -104,8 +120,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
   const currentUserId = session?.user.user_id;
   const mine = maps.find((item) => item.owner.user_id === currentUserId);
   const others = maps.filter((item) => item.owner.user_id !== currentUserId);
-  const myCodes = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.region_code)), [mine]);
-  const otherCodes = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.region_code))), [others]);
+  const myRegions = mine?.regions ?? [];
+  const otherRegions = useMemo(() => others.flatMap((item) => item.regions), [others]);
   const myCountries = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.country_code)), [mine]);
   const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
 
@@ -276,10 +292,13 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
                 );
               }) : geometry?.features.map((region, index) => {
                 const code = regionCode(activeCountry, region);
+                const name = region.properties?.name || code;
+                const mineVisited = hasRegion(myRegions, code, name);
+                const othersVisited = hasRegion(otherRegions, code, name);
                 const path = detailPath?.(region);
                 return path ? (
-                  <path className={`travel-map-region is-${tone(myCodes, otherCodes, code)}`} d={path} key={`${code}:${index}`}>
-                    <title>{region.properties?.name || code}</title>
+                  <path className={`travel-map-region is-${mineVisited && othersVisited ? "overlap" : mineVisited ? "mine" : othersVisited ? "theirs" : "empty"}`} d={path} key={`${code}:${index}`}>
+                    <title>{name}</title>
                   </path>
                 ) : null;
               })}

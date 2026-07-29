@@ -1,19 +1,19 @@
 {
-  "id": "2026.07.30.3",
+  "id": "2026.07.30.4",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "足迹地图显示修复",
+      "title": "省级足迹准确点亮",
       "items": [
-        "修复中国省级地图无法正常绘制的问题",
-        "修复世界地图无法点击国家进入详情的问题"
+        "修复已打卡省份在中国地图中没有点亮的问题",
+        "兼容早期版本保存的省份足迹"
       ]
     },
     "en": {
-      "title": "Travel map display fixes",
+      "title": "Accurate regional footprints",
       "items": [
-        "Fixed first-level regions not rendering correctly in China",
-        "Fixed countries on the world map not opening their detail view"
+        "Fixed visited provinces not lighting up on the China map",
+        "Added compatibility for footprints saved by earlier versions"
       ]
     }
   }
