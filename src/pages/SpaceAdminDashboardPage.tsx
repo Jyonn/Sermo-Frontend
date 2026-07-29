@@ -12,13 +12,14 @@ import { resolveMediaKind, toMessageUploadError, uploadMessageMediaWith } from "
 import { copyText } from "../lib/presentation";
 import { setCachedGroupSquareEnabled } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
+import { getActiveLocale, i18n, useI18n } from "../lib/language";
 import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO } from "../types";
 
 type MemberFilter = "all" | "online";
 
 function formatCreatedAt(value?: number) {
-  if (!value) return "刚刚创建";
-  return new Date(value * 1000).toLocaleDateString("zh-CN", {
+  if (!value) return i18n.t("admin.justCreated");
+  return new Date(value * 1000).toLocaleDateString(getActiveLocale(), {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -39,12 +40,6 @@ const BROADCAST_MESSAGE_TYPE = {
   audio: 5,
 } as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
-const DEFAULT_LEVEL_NAMES = [
-  "初见", "起言", "同频", "渐熟", "热聊", "成群",
-  "入浪", "逐潮", "回响", "共鸣", "风生", "云起",
-  "浪涌", "潮生", "星聚", "盛放", "无界", "尽兴",
-];
-
 function broadcastTypeForKind(kind: MessageMediaKind) {
   return BROADCAST_MESSAGE_TYPE[kind];
 }
@@ -96,6 +91,8 @@ function AdminComposerIcon({ kind }: { kind: "mic" | "gallery" | "file" | "delet
 }
 
 export default function SpaceAdminDashboardPage() {
+  const { t } = useI18n();
+  const defaultLevelNames = useMemo(() => t("admin.defaultLevelNames").split("|"), [t]);
   const { session, logout, patchSpace } = useAdminAuth();
   const [dashboardState, setDashboardState] = useState<AppViewState>("idle");
   const [memberState, setMemberState] = useState<AppViewState>("idle");
@@ -108,7 +105,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
   const [settingsMemberLimit, setSettingsMemberLimit] = useState("");
-  const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(DEFAULT_LEVEL_NAMES);
+  const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(defaultLevelNames);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [officialLoginBusy, setOfficialLoginBusy] = useState(false);
   const [removeUser, setRemoveUser] = useState<AdminMemberDTO | null>(null);
@@ -162,7 +159,7 @@ export default function SpaceAdminDashboardPage() {
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "加载空间后台失败";
+        const message = apiError instanceof ApiError ? apiError.message : t("admin.dashboardLoadFailed");
         setError(message);
         setDashboardState("error");
       });
@@ -175,8 +172,8 @@ export default function SpaceAdminDashboardPage() {
     setSettingsName(dashboard.space.name);
     setSettingsSquareEnabled(Boolean(dashboard.space.group_square_enabled));
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
-    setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : DEFAULT_LEVEL_NAMES);
-  }, [dashboard?.space]);
+    setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : defaultLevelNames);
+  }, [dashboard?.space, defaultLevelNames]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -199,7 +196,7 @@ export default function SpaceAdminDashboardPage() {
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "加载成员列表失败";
+        const message = apiError instanceof ApiError ? apiError.message : t("admin.membersLoadFailed");
         setError(message);
         setMemberState("error");
       });
@@ -214,7 +211,7 @@ export default function SpaceAdminDashboardPage() {
       if (!copied) throw new Error("copy_failed");
       setCopied(true);
     } catch {
-      setError("复制入口链接失败，请稍后再试。");
+      setError(t("admin.copyEntryFailed"));
     }
   };
 
@@ -240,7 +237,7 @@ export default function SpaceAdminDashboardPage() {
           : current
       );
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "保存基础设置失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.settingsSaveFailed"));
     } finally {
       setSettingsSaving(false);
     }
@@ -268,7 +265,7 @@ export default function SpaceAdminDashboardPage() {
       setRemoveUser(null);
       setRefreshTick((value) => value + 1);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "移出成员失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.removeMemberFailed"));
     } finally {
       setRemoveBusy(false);
     }
@@ -283,7 +280,7 @@ export default function SpaceAdminDashboardPage() {
       const loginUrl = buildSpaceHrefForCurrentHost(currentSpace.slug, "/official-login", "", `ticket=${encodeURIComponent(payload.token)}`);
       window.location.assign(loginUrl);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "生成官方账号登录链接失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.officialLoginLinkFailed"));
       setOfficialLoginBusy(false);
     }
   };
@@ -321,7 +318,7 @@ export default function SpaceAdminDashboardPage() {
       setBroadcastContent("");
       finishBroadcast([payload]);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "群发消息失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.broadcastFailed"));
       setBroadcastState("idle");
       setBroadcastProgress(0);
     }
@@ -356,7 +353,7 @@ export default function SpaceAdminDashboardPage() {
   const startBroadcastRecording = async () => {
     if (broadcastState === "sending" || broadcastRecording.phase !== "idle") return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      setError("当前设备暂不支持录音。");
+      setError(t("audio.unsupported"));
       return;
     }
 
@@ -393,7 +390,7 @@ export default function SpaceAdminDashboardPage() {
     } catch {
       stopBroadcastRecordingResources();
       setBroadcastRecording({ phase: "idle", duration: 0, file: null });
-      setError("无法开始录音，请检查麦克风权限。");
+      setError(t("audio.startFailed"));
     }
   };
 
@@ -477,13 +474,13 @@ export default function SpaceAdminDashboardPage() {
   ) => {
     const contact = user.contacts[key];
     const preference = user.notification_preferences.find((item) => item.channel === channel);
-    if (!contact.bound) return <span className="admin-channel-state is-muted">未绑定</span>;
-    if (!contact.verified) return <span className="admin-channel-state is-pending">待认证</span>;
-    if (key === "sms") return <span className="admin-channel-state is-muted">暂不支持</span>;
+    if (!contact.bound) return <span className="admin-channel-state is-muted">{t("channel.unbound")}</span>;
+    if (!contact.verified) return <span className="admin-channel-state is-pending">{t("channel.pendingVerification")}</span>;
+    if (key === "sms") return <span className="admin-channel-state is-muted">{t("common.unsupported")}</span>;
     return (
       <span className="admin-channel-state">
         <span className={`admin-table-dot ${preference?.enabled ? "is-on" : ""}`} />
-        {preference?.enabled ? "已开启" : "未开启"} · {preference?.offline_threshold_minutes ?? 30} 分钟
+        {preference?.enabled ? t("common.enabled") : t("common.disabled")} · {t("common.minutes", { count: preference?.offline_threshold_minutes ?? 30 })}
       </span>
     );
   };
@@ -500,10 +497,10 @@ export default function SpaceAdminDashboardPage() {
       }
       hidePageTitle
       publicHeader
-      title="空间后台"
+      title={t("admin.dashboardTitle")}
       topbarAction={
         <button className="ghost-chip" onClick={() => logout()} type="button">
-          退出登录
+          {t("auth.logout")}
         </button>
       }
     >
@@ -521,20 +518,20 @@ export default function SpaceAdminDashboardPage() {
             <div className="admin-stat-grid">
               <div className="admin-stat-card">
                 <strong>{dashboard?.stats.members_count ?? 0}</strong>
-                <span>成员</span>
+                <span>{t("admin.members")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{dashboard?.stats.online_count ?? 0}</strong>
-                <span>在线</span>
+                <span>{t("presence.online")}</span>
               </div>
             </div>
 
             <div className="admin-dashboard-actions">
               <button className="ghost-button" onClick={() => void copyEntryLink()} type="button">
-                {copied ? "已复制入口" : "复制成员入口"}
+                {copied ? t("admin.entryCopied") : t("admin.copyMemberEntry")}
               </button>
               <a className="ghost-button" href={entryHref}>
-                打开成员入口
+                {t("admin.openMemberEntry")}
               </a>
             </div>
           </section>
@@ -544,12 +541,12 @@ export default function SpaceAdminDashboardPage() {
           <section className="panel admin-dashboard-section admin-members-panel">
             <div className="admin-section-head">
               <div className="admin-section-title-row">
-                <h2 className="panel-title">成员</h2>
+                <h2 className="panel-title">{t("admin.members")}</h2>
                 <HeaderSyncIndicator syncing={memberState === "loading"} />
               </div>
               <div className="list-segment segmented-switch">
-                <button className={`tab-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")} type="button">全部</button>
-                <button className={`tab-chip ${filter === "online" ? "active" : ""}`} onClick={() => setFilter("online")} type="button">在线</button>
+                <button className={`tab-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")} type="button">{t("common.all")}</button>
+                <button className={`tab-chip ${filter === "online" ? "active" : ""}`} onClick={() => setFilter("online")} type="button">{t("presence.online")}</button>
               </div>
             </div>
 
@@ -558,7 +555,7 @@ export default function SpaceAdminDashboardPage() {
               <input
                 className="input"
                 style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-                placeholder="搜索成员"
+                placeholder={t("admin.searchMembers")}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -569,13 +566,13 @@ export default function SpaceAdminDashboardPage() {
                 <table className="admin-member-table">
                   <thead>
                     <tr>
-                      <th>成员</th>
-                      <th>等级</th>
-                      <th>已认证</th>
-                      <th>邮件</th>
-                      <th>短信</th>
-                      <th>即时</th>
-                      <th aria-label="操作" />
+                      <th>{t("admin.members")}</th>
+                      <th>{t("growth.level")}</th>
+                      <th>{t("admin.verified")}</th>
+                      <th>{t("channel.email")}</th>
+                      <th>{t("channel.sms")}</th>
+                      <th>{t("channel.instant")}</th>
+                      <th aria-label={t("common.actions")} />
                     </tr>
                   </thead>
                   <tbody>
@@ -586,18 +583,18 @@ export default function SpaceAdminDashboardPage() {
                             <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
                             <div>
                               <strong>{user.name}</strong>
-                              <span>{user.is_deleted ? "历史残留" : user.is_alive ? "在线" : "离线"}</span>
+                              <span>{user.is_deleted ? t("admin.historicalResidual") : user.is_alive ? t("presence.online") : t("presence.offline")}</span>
                             </div>
                           </div>
                         </td>
                         <td><span className="admin-growth-level">Lv.{user.growth_level ?? 1} {user.growth_level_name ?? settingsLevelNames[(user.growth_level ?? 1) - 1]}</span></td>
-                        <td><span className={`admin-verified-state ${user.verified ? "is-verified" : ""}`}>{user.verified ? "是" : "否"}</span></td>
+                        <td><span className={`admin-verified-state ${user.verified ? "is-verified" : ""}`}>{user.verified ? t("common.yes") : t("common.no")}</span></td>
                         <td>{notificationCell(user, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</td>
                         <td>{notificationCell(user, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</td>
                         <td>{notificationCell(user, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</td>
                         <td>
                           <button className="admin-member-remove" onClick={() => setRemoveUser(user)} type="button">
-                            {user.is_deleted ? "清理" : "移出"}
+                            {user.is_deleted ? t("common.clean") : t("admin.remove")}
                           </button>
                         </td>
                       </tr>
@@ -606,14 +603,14 @@ export default function SpaceAdminDashboardPage() {
                 </table>
               </div>
             ) : memberState === "ready" ? (
-              <FeedbackState title="还没有成员" description={query.trim() ? "换个关键词试试。" : filter === "online" ? "当前没有在线成员。" : ""} />
+              <FeedbackState title={t("admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : filter === "online" ? t("admin.noOnlineMembers") : ""} />
             ) : null}
           </section>
 
           <aside className="admin-dashboard-aside">
             {currentSpace?.official_user ? (
               <section className="panel admin-dashboard-section admin-official-panel">
-                <h2 className="panel-title">官方账号</h2>
+                <h2 className="panel-title">{t("admin.officialAccount")}</h2>
                 <div className="admin-official-profile">
                   <UserAvatar className="avatar" name={currentSpace.official_user.name} uri={currentSpace.official_user.avatar_uri} />
                   <div>
@@ -622,9 +619,9 @@ export default function SpaceAdminDashboardPage() {
                   </div>
                 </div>
                 <div className="admin-official-actions">
-                  <button className="button" disabled={!dashboard?.stats.members_count} onClick={openBroadcast} type="button">群发消息</button>
+                  <button className="button" disabled={!dashboard?.stats.members_count} onClick={openBroadcast} type="button">{t("admin.broadcast")}</button>
                   <button className="ghost-button" disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button">
-                    {officialLoginBusy ? "进入中..." : "进入账号"}
+                    {officialLoginBusy ? t("admin.enteringAccount") : t("admin.enterAccount")}
                   </button>
                 </div>
               </section>
@@ -633,27 +630,27 @@ export default function SpaceAdminDashboardPage() {
             {currentSpace ? (
               <section className="panel admin-dashboard-section admin-settings-panel">
                 <div className="admin-section-title-row">
-                  <h2 className="panel-title">基础设置</h2>
+                  <h2 className="panel-title">{t("admin.basicSettings")}</h2>
                   <span>{formatCreatedAt(currentSpace.created_at)}</span>
                 </div>
                 <div className="admin-settings-email">{currentSpace.email}</div>
                 <div className="field-stack">
                   <div>
-                    <label className="field-label">空间名称</label>
+                    <label className="field-label">{t("admin.spaceName")}</label>
                     <input className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} />
                   </div>
                   <div>
-                    <label className="field-label">成员上限</label>
+                    <label className="field-label">{t("admin.memberLimit")}</label>
                     <input
                       className="input mono"
                       inputMode="numeric"
-                      placeholder="不限制"
+                      placeholder={t("admin.unlimited")}
                       value={settingsMemberLimit}
                       onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))}
                     />
                   </div>
                   <div>
-                    <label className="field-label">空间等级</label>
+                    <label className="field-label">{t("admin.spaceLevels")}</label>
                     <div className="admin-level-name-grid">
                       {settingsLevelNames.map((levelName, index) => (
                         <label key={index}>
@@ -669,9 +666,9 @@ export default function SpaceAdminDashboardPage() {
                     </div>
                   </div>
                   <div className="admin-toggle-row">
-                    <div className="row-main"><strong>空间广场</strong></div>
+                    <div className="row-main"><strong>{t("admin.spaceSquare")}</strong></div>
                     <button
-                      aria-label="切换空间广场"
+                      aria-label={t("admin.toggleSpaceSquare")}
                       className={`switch ${settingsSquareEnabled ? "active" : ""}`}
                       onClick={() => setSettingsSquareEnabled((current) => !current)}
                       type="button"
@@ -679,7 +676,7 @@ export default function SpaceAdminDashboardPage() {
                   </div>
                 </div>
                 <button className="ghost-button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">
-                  {settingsSaving ? "保存中..." : "保存设置"}
+                  {settingsSaving ? t("common.saving") : t("admin.saveSettings")}
                 </button>
               </section>
             ) : null}
@@ -689,20 +686,20 @@ export default function SpaceAdminDashboardPage() {
 
       <BottomSheet
         open={broadcastOpen}
-        title="群发消息"
-        description={`以官方账号发送给 ${dashboard?.stats.members_count ?? 0} 位成员`}
+        title={t("admin.broadcast")}
+        description={t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}
         onClose={closeBroadcast}
       >
         {broadcastState === "sent" && broadcastResult ? (
           <div className="admin-broadcast-result">
             <span>{broadcastResult.sent_count}</span>
-            <strong>条消息已发送</strong>
-            <button className="button" onClick={closeBroadcast} type="button">完成</button>
+            <strong>{t("admin.messagesSent")}</strong>
+            <button className="button" onClick={closeBroadcast} type="button">{t("common.done")}</button>
           </div>
         ) : (
           <div className="admin-broadcast-form">
             {broadcastState === "sending" ? (
-              <div aria-label={`发送进度 ${Math.round(broadcastProgress * 100)}%`} className="admin-broadcast-progress" role="progressbar">
+              <div aria-label={t("admin.sendProgress", { progress: Math.round(broadcastProgress * 100) })} className="admin-broadcast-progress" role="progressbar">
                 <span style={{ transform: `scaleX(${Math.max(0.02, broadcastProgress)})` }} />
               </div>
             ) : null}
@@ -710,7 +707,7 @@ export default function SpaceAdminDashboardPage() {
               {broadcastRecording.phase === "idle" ? (
                 <div className="composer-row composer-row-text">
                   <button
-                    aria-label="录制语音"
+                    aria-label={t("audio.record")}
                     className="composer-action-button"
                     disabled={broadcastState === "sending"}
                     onClick={() => void startBroadcastRecording()}
@@ -723,7 +720,7 @@ export default function SpaceAdminDashboardPage() {
                       className="textarea composer-input"
                       enterKeyHint="send"
                       maxLength={512}
-                      placeholder="输入消息..."
+                      placeholder={t("chat.inputPlaceholder")}
                       rows={1}
                       value={broadcastContent}
                       onChange={(event) => setBroadcastContent(event.target.value)}
@@ -739,7 +736,7 @@ export default function SpaceAdminDashboardPage() {
                   </div>
                   <button
                     aria-expanded={broadcastMoreOpen}
-                    aria-label={broadcastMoreOpen ? "收起更多操作" : "展开更多操作"}
+                    aria-label={broadcastMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
                     className={`composer-plus ${broadcastMoreOpen ? "is-open" : ""}`}
                     disabled={broadcastState === "sending"}
                     onClick={() => setBroadcastMoreOpen((current) => !current)}
@@ -752,7 +749,7 @@ export default function SpaceAdminDashboardPage() {
               ) : (
                 <div className="composer-row composer-row-recording">
                   <button
-                    aria-label="删除录音"
+                    aria-label={t("audio.deleteRecording")}
                     className="composer-recording-delete"
                     disabled={broadcastState === "sending"}
                     onClick={cancelBroadcastRecording}
@@ -762,7 +759,7 @@ export default function SpaceAdminDashboardPage() {
                   </button>
                   <div className="composer-recording-bar">
                     <button
-                      aria-label="停止录音"
+                      aria-label={t("audio.stopRecording")}
                       className="composer-recording-stop"
                       disabled={broadcastRecording.phase !== "recording"}
                       onClick={stopBroadcastRecording}
@@ -776,7 +773,7 @@ export default function SpaceAdminDashboardPage() {
                     <span className="composer-recording-time">{formatBroadcastDuration(broadcastRecording.duration)}</span>
                   </div>
                   <button
-                    aria-label="发送录音"
+                    aria-label={t("audio.sendRecording")}
                     className="composer-recording-send"
                     disabled={broadcastRecording.phase !== "recorded" || !broadcastRecording.file || broadcastState === "sending"}
                     onClick={() => {
@@ -798,11 +795,11 @@ export default function SpaceAdminDashboardPage() {
                   <div className="composer-actions-grid">
                     <button className="composer-action-tile" disabled={broadcastState === "sending"} onClick={() => broadcastGalleryInputRef.current?.click()} type="button">
                       <span className="composer-action-tile-icon"><AdminComposerIcon kind="gallery" /></span>
-                      <span>相册</span>
+                      <span>{t("media.gallery")}</span>
                     </button>
                     <button className="composer-action-tile" disabled={broadcastState === "sending"} onClick={() => broadcastFileInputRef.current?.click()} type="button">
                       <span className="composer-action-tile-icon"><AdminComposerIcon kind="file" /></span>
-                      <span>文件</span>
+                      <span>{t("media.file")}</span>
                     </button>
                   </div>
                 </div>
@@ -812,7 +809,7 @@ export default function SpaceAdminDashboardPage() {
             </form>
             <div className="admin-broadcast-meta">
               <span>{broadcastContent.length}/512</span>
-              <span>{broadcastState === "sending" ? `${Math.round(broadcastProgress * 100)}%` : "发送给全部成员"}</span>
+              <span>{broadcastState === "sending" ? `${Math.round(broadcastProgress * 100)}%` : t("admin.sendToAllMembers")}</span>
             </div>
           </div>
         )}
@@ -821,18 +818,18 @@ export default function SpaceAdminDashboardPage() {
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
       <ConfirmDialog
         busy={removeBusy}
-        confirmLabel={removeUser?.is_deleted ? "确认清理" : "确认移出"}
+        confirmLabel={removeUser?.is_deleted ? t("admin.confirmClean") : t("admin.confirmRemove")}
         description={
           removeUser
             ? removeUser.is_deleted
-              ? `将再次清理 ${removeUser.name} 的残留好友和群成员关系。`
-              : `移出 ${removeUser.name} 后，对方将不能再进入这个空间。`
+              ? t("admin.cleanResidualHint", { name: removeUser.name })
+              : t("admin.removeMemberHint", { name: removeUser.name })
             : ""
         }
         onClose={() => setRemoveUser(null)}
         onConfirm={() => void confirmRemoveUser()}
         open={Boolean(removeUser)}
-        title={removeUser?.is_deleted ? "清理历史残留成员" : "移出成员"}
+        title={removeUser?.is_deleted ? t("admin.cleanResidualTitle") : t("admin.removeMemberTitle")}
       />
     </AppChrome>
   );
