@@ -5,7 +5,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
 import { useAuth } from "../lib/auth";
-import { getBrowserJoinLanguage } from "../lib/language";
+import { getBrowserJoinLanguage, useI18n } from "../lib/language";
 import { buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 
@@ -16,6 +16,7 @@ function routeMode(value: string | null): AdminMode {
 }
 
 export default function AdminSpacePage() {
+  const { t } = useI18n();
   const { session } = useAuth();
   const { session: adminSession, login: loginAdmin } = useAdminAuth();
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function AdminSpacePage() {
 
   const sendCode = async () => {
     if (!canSendCode) {
-      setSubmitError(mode === "create" ? "请先输入可用邮箱。" : "请先输入空间标识。");
+      setSubmitError(mode === "create" ? t("admin.emailRequired") : t("admin.slugRequired"));
       return;
     }
 
@@ -80,10 +81,10 @@ export default function AdminSpacePage() {
         email: mode === "create" ? email.trim().toLowerCase() : undefined,
       });
       setCountdown(60);
-      setSuccessMessage(`验证码已发送到 ${payload.masked_email}。`);
-      showToast("验证码已发送");
+      setSuccessMessage(t("admin.codeSentTo", { email: payload.masked_email }));
+      showToast(t("admin.codeSent"));
     } catch (error) {
-      const message = error instanceof ApiError ? error.message : "验证码发送失败";
+      const message = error instanceof ApiError ? error.message : t("admin.codeFailed");
       setSubmitError(message);
       showToast(message, "error");
     } finally {
@@ -97,7 +98,7 @@ export default function AdminSpacePage() {
     setSuccessMessage(null);
 
     if (!slug.trim()) {
-      setErrors({ slug: "请输入空间标识。" });
+      setErrors({ slug: t("admin.slugRequired") });
       return;
     }
 
@@ -124,7 +125,7 @@ export default function AdminSpacePage() {
 
       navigate("/space/dashboard", { replace: true });
     } catch (error) {
-      const message = error instanceof ApiError ? error.message : "请求失败";
+      const message = error instanceof ApiError ? error.message : t("admin.requestFailed");
       setSubmitError(message);
     } finally {
       setSubmitState("idle");
@@ -134,15 +135,15 @@ export default function AdminSpacePage() {
   return (
     <AppChrome
       publicHeader
-      title="管理空间"
+      title={t("admin.title")}
       topbarAction={
         slug ? (
           <a className="ghost-chip" href={buildJoinHrefForCurrentHost(slug)}>
-            成员加入页
+            {t("admin.memberEntry")}
           </a>
         ) : session ? (
           <button className="ghost-chip" onClick={() => navigate("/app/chats")} type="button">
-            返回聊天
+            {t("admin.backChat")}
           </button>
         ) : null
       }
@@ -150,17 +151,17 @@ export default function AdminSpacePage() {
       <section className="auth-shell">
         <div className="auth-card admin-auth-card">
           <div className="admin-auth-head">
-            <p className="admin-auth-kicker">空间管理</p>
-            <h1>{mode === "create" ? "创建你的空间" : "进入管理后台"}</h1>
-            <p>{mode === "create" ? "一个名称，一个专属入口。" : "验证码会发送至管理员邮箱。"}</p>
+            <p className="admin-auth-kicker">{t("admin.kicker")}</p>
+            <h1>{mode === "create" ? t("admin.createHeading") : t("admin.loginHeading")}</h1>
+            <p>{mode === "create" ? t("admin.createHint") : t("admin.loginHint")}</p>
           </div>
 
           <div className="auth-tabs">
             <button className={`mode-pill ${mode === "create" ? "active" : ""}`} onClick={() => updateMode("create")} type="button">
-              创建空间
+              {t("admin.createTab")}
             </button>
             <button className={`mode-pill ${mode === "login" ? "active" : ""}`} onClick={() => updateMode("login")} type="button">
-              管理登录
+              {t("admin.loginTab")}
             </button>
           </div>
 
@@ -170,16 +171,16 @@ export default function AdminSpacePage() {
             {mode === "create" ? (
               <div className="field-stack">
                 <div>
-                  <label className="field-label">空间名称</label>
-                  <input className="input" placeholder="输入空间名称" value={spaceName} onChange={(event) => setSpaceName(event.target.value)} />
+                  <label className="field-label">{t("admin.spaceName")}</label>
+                  <input className="input" placeholder={t("admin.spaceNamePlaceholder")} value={spaceName} onChange={(event) => setSpaceName(event.target.value)} />
                 </div>
                 <div>
-                  <label className="field-label">空间标识</label>
+                  <label className="field-label">{t("admin.spaceSlug")}</label>
                   <input
                     className="input"
                     value={slug}
                     onChange={(event) => setSlug(normalizeSlug(event.target.value))}
-                    placeholder="输入空间标识"
+                    placeholder={t("admin.spaceSlugPlaceholder")}
                   />
                   {errors.slug ? <div className="validation-error">{errors.slug}</div> : null}
                 </div>
@@ -188,12 +189,12 @@ export default function AdminSpacePage() {
 
             {mode === "login" ? (
               <div>
-                <label className="field-label">空间标识</label>
+                <label className="field-label">{t("admin.spaceSlug")}</label>
                 <input
                   className="input"
                   value={slug}
                   onChange={(event) => setSlug(normalizeSlug(event.target.value))}
-                  placeholder="输入空间标识"
+                  placeholder={t("admin.spaceSlugPlaceholder")}
                 />
                 {errors.slug ? <div className="validation-error">{errors.slug}</div> : null}
               </div>
@@ -202,15 +203,15 @@ export default function AdminSpacePage() {
             {mode === "create" ? (
               <div>
                 <label className="field-label">
-                  <span>管理员邮箱</span>
+                  <span>{t("admin.email")}</span>
                   <button className="ghost-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
-                    {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s` : "发送验证码"}
+                    {submitState === "code" ? t("admin.sending") : countdown > 0 ? `${countdown}s` : t("admin.sendCode")}
                   </button>
                 </label>
                 <input
                   className="input"
                   inputMode="email"
-                  placeholder="输入管理员邮箱"
+                  placeholder={t("admin.emailPlaceholder")}
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -219,18 +220,18 @@ export default function AdminSpacePage() {
             ) : (
               <div className="auth-assist-block">
                 <button className="ghost-button admin-code-button" disabled={!canSendCode || submitState === "code"} onClick={() => void sendCode()} type="button">
-                  {submitState === "code" ? "发送中..." : countdown > 0 ? `${countdown}s 后可重发` : "发送管理员验证码"}
+                  {submitState === "code" ? t("admin.sending") : countdown > 0 ? t("admin.resendIn", { seconds: countdown }) : t("admin.sendAdminCode")}
                 </button>
               </div>
             )}
 
             <div>
-              <label className="field-label">验证码</label>
-              <input className="input mono" inputMode="numeric" placeholder="输入验证码" value={code} onChange={(event) => setCode(event.target.value)} />
+              <label className="field-label">{t("admin.code")}</label>
+              <input className="input mono" inputMode="numeric" placeholder={t("admin.codePlaceholder")} value={code} onChange={(event) => setCode(event.target.value)} />
             </div>
 
             <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">
-              {submitState === "submitting" ? "处理中..." : mode === "create" ? "创建空间" : "进入管理"}
+              {submitState === "submitting" ? t("common.processing") : mode === "create" ? t("admin.createTab") : t("admin.enter")}
             </button>
           </form>
         </div>
