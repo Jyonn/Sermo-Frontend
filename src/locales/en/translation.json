@@ -265,6 +265,7 @@
   "profile.tryLater": "Try again later",
   "profile.avatarLabel": "View {{name}}’s avatar",
   "profile.sameSpace": "Member of the same space",
+  "profile.permanentVip": "Lifetime VIP",
   "profile.sendMessage": "Message",
   "profile.sending": "Sending",
   "profile.sent": "Sent",

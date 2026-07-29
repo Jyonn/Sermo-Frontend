@@ -1,21 +1,19 @@
 {
-  "id": "2026.07.29.3",
+  "id": "2026.07.29.4",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "个性化空间重新整理",
+      "title": "用户身份展示更完整",
       "items": [
-        "聊天气泡、头像框和广场人物拥有独立设置页",
-        "新增实时预览，选择样式时即可看到效果",
-        "广场人物的衣服、手持物和动作调整更清晰"
+        "用户详情页新增等级与永久 VIP 标识",
+        "头像框和 VIP 头像效果现已同步展示"
       ]
     },
     "en": {
-      "title": "A redesigned personalization space",
+      "title": "Richer identity details",
       "items": [
-        "Chat bubbles, avatar frames, and Square characters now have dedicated editors",
-        "New live previews show each style before you leave",
-        "Square outfits, props, and motions are now easier to customize"
+        "User profiles now show level and Lifetime VIP badges",
+        "Avatar frames and VIP avatar effects now appear consistently"
       ]
     }
   }

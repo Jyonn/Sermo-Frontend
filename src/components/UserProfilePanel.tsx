@@ -19,9 +19,14 @@ import { i18n, useI18n } from "../lib/language";
 export interface UserProfileSeed {
   user_id: number;
   name: string;
+  official?: boolean;
   avatar_uri?: string;
   is_alive?: boolean;
   last_heartbeat?: number;
+  is_permanent_vip?: boolean;
+  growth_level?: number;
+  growth_level_name?: string;
+  avatar_frame_style?: UserDTO["avatar_frame_style"];
 }
 
 interface UserProfilePanelProps {
@@ -249,11 +254,28 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           onClick={() => setAvatarPreviewOpen(true)}
           type="button"
         >
-          <UserAvatar className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
+          <UserAvatar
+            className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`}
+            frame={user.avatar_frame_style}
+            name={user.name}
+            uri={user.avatar_uri}
+            vip={Boolean(user.is_permanent_vip)}
+          />
         </button>
         <div className="user-profile-copy">
           <div className="user-profile-kicker">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</div>
-          <h2>{user.name}</h2>
+          <div className="user-profile-name-row">
+            <h2>{user.name}</h2>
+            <div className="user-profile-status-badges">
+              {user.is_permanent_vip ? <span className="user-profile-vip-badge">{t("profile.permanentVip")}</span> : null}
+              {!user.official && user.growth_level ? (
+                <span className="user-profile-level-badge">
+                  <b>Lv.{user.growth_level}</b>
+                  {user.growth_level_name ? <span>{user.growth_level_name}</span> : null}
+                </span>
+              ) : null}
+            </div>
+          </div>
           <p className={user.is_alive ? "is-online" : ""}>{presence}</p>
         </div>
       </section>
