@@ -14,6 +14,7 @@ import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { showToast } from "../lib/toast";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
+import { i18n, useI18n } from "../lib/language";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
 
@@ -33,8 +34,8 @@ function mapFriend(user: UserDTO): FriendAccepted {
     id: user.user_id,
     name: user.name,
     avatarUri: user.avatar_uri,
-    status: user.is_alive ? "在线" : "离线",
-    mood: user.verified ? "已验证成员" : "成员",
+    status: user.is_alive ? i18n.t("presence.online") : i18n.t("presence.offline"),
+    mood: user.verified ? i18n.t("friends.verifiedMember") : i18n.t("friends.member"),
     verified: user.verified,
   };
 }
@@ -44,6 +45,7 @@ function requestName(request: FriendshipRequestDTO, tab: FriendTab) {
 }
 
 export default function FriendsPage() {
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -102,7 +104,7 @@ export default function FriendsPage() {
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         if (!cached) {
-          const message = apiError instanceof ApiError ? apiError.message : "好友数据加载失败";
+          const message = apiError instanceof ApiError ? apiError.message : t("friends.loadFailed");
           setError(message);
           setViewState("error");
         }
@@ -140,9 +142,9 @@ export default function FriendsPage() {
         setFriends(refreshedFriends.map(mapFriend));
       }
       setSheetRequest(null);
-      showToast(accept === undefined ? "申请已撤回" : accept ? "已添加为好友" : "申请已忽略");
+      showToast(accept === undefined ? t("friends.withdrawn") : accept ? t("friends.added") : t("friends.ignored"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "操作失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("friends.actionFailed"), "error");
     } finally {
       setRequestActionUserId(null);
     }
@@ -153,23 +155,23 @@ export default function FriendsPage() {
       const chat = await api.createDirectChat(userId);
       navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "发起私聊失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("profile.chatFailed");
       setError(message);
     }
   };
 
   return (
-    <AppChrome title="好友" hideTopbar>
+    <AppChrome title={t("friends.title")} hideTopbar>
       <section className="page-stack">
         <div className="page-tabs">
           <Link className={`tab-chip ${tab === "incoming" ? "active" : ""}`} to="/app/friends/requests">
-            收到的 {incoming.length ? `(${incoming.length})` : ""}
+            {t("request.incoming")} {incoming.length ? `(${incoming.length})` : ""}
           </Link>
           <button className={`tab-chip ${tab === "outgoing" ? "active" : ""}`} onClick={() => setTab("outgoing")} type="button">
-            发出的 {outgoing.length ? `(${outgoing.length})` : ""}
+            {t("request.outgoing")} {outgoing.length ? `(${outgoing.length})` : ""}
           </button>
           <Link className={`tab-chip ${tab === "accepted" ? "active" : ""}`} to="/app/friends">
-            好友 {friends.length ? `(${friends.length})` : ""}
+            {t("friends.title")} {friends.length ? `(${friends.length})` : ""}
           </Link>
           <HeaderSyncIndicator syncing={syncing} />
         </div>
@@ -180,7 +182,7 @@ export default function FriendsPage() {
               {friends.map((friend) => (
                 <div key={friend.id} className="simple-row person-row">
                   <UserAvatar
-                    className={`mini-avatar friend-avatar-neutral ${friend.status === "在线" ? "status-online" : ""}`}
+                    className={`mini-avatar friend-avatar-neutral ${friend.status === t("presence.online") ? "status-online" : ""}`}
                     name={friend.name}
                     uri={friend.avatarUri}
                   />

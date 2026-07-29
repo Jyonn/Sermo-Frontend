@@ -259,7 +259,7 @@ export default function SquarePage() {
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         if (!hasLoadedOnceRef.current) {
-          const message = apiError instanceof ApiError ? apiError.message : "广场加载失败";
+          const message = apiError instanceof ApiError ? apiError.message : t("square.loadFailed");
           setError(message);
           setViewState("error");
         }
@@ -459,7 +459,7 @@ export default function SquarePage() {
       const chat = await api.createDirectChat(userId);
       navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "发起私聊失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("profile.chatFailed");
       setError(message);
     }
   };
@@ -470,10 +470,10 @@ export default function SquarePage() {
       await api.createFriendRequest(userId);
       void api.claimGrowthEvent("plaza_friend");
       setSelectedRelation("sent");
-      showToast("好友申请已发送");
+      showToast(t("profile.requestSent"));
     } catch (apiError) {
       setSelectedRelation("stranger");
-      const message = apiError instanceof ApiError ? apiError.message : "发起好友申请失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("members.requestFailed");
       setError(message);
     }
   };
@@ -593,12 +593,12 @@ export default function SquarePage() {
                 <div className="square-person-card-copy">
                   <div className="square-person-card-name">
                     <strong>{selectedUser.name}</strong>
-                    {selectedUser.official ? <span>官方</span> : null}
+                    {selectedUser.official ? <span>{t("square.official")}</span> : null}
                     {!selectedUser.official && selectedUser.growth_level ? (
                       <span className="square-growth-badge">Lv.{selectedUser.growth_level} {selectedUser.growth_level_name}</span>
                     ) : null}
                   </div>
-                  <p>{selectedIsSelf ? "你正在广场" : selectedUser.is_alive ? "正在广场" : "刚刚离开"}</p>
+                  <p>{selectedIsSelf ? t("square.youHere") : selectedUser.is_alive ? t("square.here") : t("square.left")}</p>
                 </div>
               </div>
               {selectedUser.plaza_greeting?.trim() ? (
@@ -606,10 +606,10 @@ export default function SquarePage() {
               ) : null}
               <div className="square-person-card-actions">
                 {selectedIsSelf ? (
-                  <button className="button" onClick={() => navigate("/app/menu")} type="button">个人设置</button>
+                  <button className="button" onClick={() => navigate("/app/menu")} type="button">{t("square.settings")}</button>
                 ) : (
                   <>
-                    <button className="button" onClick={() => void startChat(selectedUser.user_id)} type="button">发消息</button>
+                    <button className="button" onClick={() => void startChat(selectedUser.user_id)} type="button">{t("profile.sendMessage")}</button>
                     {selectedRelation !== "friend" ? (
                       <button
                         className="ghost-button"
@@ -617,7 +617,7 @@ export default function SquarePage() {
                         onClick={() => void sendFriendRequest(selectedUser.user_id)}
                         type="button"
                       >
-                        {selectedRelation === "loading" ? "确认中" : selectedRelation === "sent" ? "已申请" : "加好友"}
+                        {selectedRelation === "loading" ? t("square.confirming") : selectedRelation === "sent" ? t("square.requested") : t("profile.addFriend")}
                       </button>
                     ) : null}
                     <button
@@ -628,7 +628,7 @@ export default function SquarePage() {
                       }}
                       type="button"
                     >
-                      查看资料
+                      {t("square.viewProfile")}
                     </button>
                   </>
                 )}
@@ -639,8 +639,8 @@ export default function SquarePage() {
           {!displayedOnlineUsers.length && viewState === "ready" ? (
             <div className="square-plaza-status">
               <FeedbackState
-                title="现在还没有人在线"
-                description="等有人上线后，这里会立刻热闹起来。"
+                title={t("square.empty")}
+                description={t("square.emptyHint")}
               />
             </div>
           ) : null}
@@ -649,7 +649,7 @@ export default function SquarePage() {
 
       <SideDrawer
         open={profileUserId !== null}
-        title="用户详情"
+        title={t("profile.details")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileUserId(null)}
       >
