@@ -1,21 +1,19 @@
 {
-  "id": "2026.07.30.2",
+  "id": "2026.07.30.3",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "足迹地图全面升级",
+      "title": "足迹地图显示修复",
       "items": [
-        "新增菜单中的个人足迹入口，仅支持现场定位打卡",
-        "世界地图支持进入各国查看省、州等下一级区域",
-        "私聊和群聊均可授权查看共同足迹"
+        "修复中国省级地图无法正常绘制的问题",
+        "修复世界地图无法点击国家进入详情的问题"
       ]
     },
     "en": {
-      "title": "A richer travel map",
+      "title": "Travel map display fixes",
       "items": [
-        "Added a personal travel map with on-location check-ins only",
-        "Open any country to explore its first-level regions",
-        "Share and compare footprints in direct and group chats"
+        "Fixed first-level regions not rendering correctly in China",
+        "Fixed countries on the world map not opening their detail view"
       ]
     }
   }

@@ -62,6 +62,31 @@ function regionCode(country: string, item: Feature<Geometry, RegionProperties>) 
   return `${country}:${item.properties?.code || item.properties?.name || ""}`;
 }
 
+function rewindForD3(collection: FeatureCollection<Geometry, RegionProperties>) {
+  const rewindGeometry = (geometry: Geometry): Geometry => {
+    if (geometry.type === "Polygon") {
+      return { ...geometry, coordinates: geometry.coordinates.map((ring) => [...ring].reverse()) };
+    }
+    if (geometry.type === "MultiPolygon") {
+      return {
+        ...geometry,
+        coordinates: geometry.coordinates.map((polygon) => polygon.map((ring) => [...ring].reverse())),
+      };
+    }
+    if (geometry.type === "GeometryCollection") {
+      return { ...geometry, geometries: geometry.geometries.map(rewindGeometry) };
+    }
+    return geometry;
+  };
+  return {
+    ...collection,
+    features: collection.features.map((item) => ({
+      ...item,
+      geometry: rewindGeometry(item.geometry),
+    })),
+  };
+}
+
 export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
@@ -117,7 +142,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
         if (!response.ok) throw new Error("geometry unavailable");
         return response.json() as Promise<FeatureCollection<Geometry, RegionProperties>>;
       })
-      .then(setGeometry)
+      .then((payload) => setGeometry(rewindForD3(payload)))
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setGeometry(null);
@@ -189,7 +214,6 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
     zoom(event.deltaY < 0 ? 0.25 : -0.25);
   };
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, originX: transform.x, originY: transform.y };
   };
   const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
@@ -246,7 +270,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
                 const path = worldPath(country);
                 if (!code || !path) return null;
                 return (
-                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)}`} d={path} key={String(country.id)} onClick={() => setSelectedCountry(code)}>
+                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)} is-country`} d={path} key={String(country.id)} onClick={() => setSelectedCountry(code)}>
                     <title>{countryName(code, language)}</title>
                   </path>
                 );

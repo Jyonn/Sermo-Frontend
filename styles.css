@@ -13760,6 +13760,10 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   cursor: pointer;
 }
 
+.travel-map-region.is-country {
+  cursor: pointer;
+}
+
 .travel-map-loading {
   position: absolute;
   inset: 0;
