@@ -32,12 +32,12 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
-import { getActiveLocale, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
+import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 
-const channelRows: Array<[NotificationChannel, number, string]> = [
-  ["email", 1, "邮件"],
-  ["sms", 2, "短信"],
-  ["bark", 3, "即时"],
+const channelRows: Array<[NotificationChannel, number, TranslationKey]> = [
+  ["email", 1, "channel.email"],
+  ["sms", 2, "channel.sms"],
+  ["bark", 3, "channel.instant"],
 ];
 
 const emptyPrefs: NotificationPreferences = {
@@ -46,33 +46,26 @@ const emptyPrefs: NotificationPreferences = {
   bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
 };
 
-const defaultHiddenDirectMessageTitle = "新私聊消息";
-const defaultHiddenDirectMessagePlaceholder = "你收到了一条新的私聊消息。";
-const defaultHiddenGroupMessageTitle = "新群聊消息";
-const defaultHiddenGroupMessagePlaceholder = "你收到了一条新的群聊消息。";
-const defaultFriendOnlineMessageTitle = "好友上线";
-const defaultFriendOnlineMessagePlaceholder = "你的好友上线了。";
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
-const defaultPasswordReminderDescription = "设置密码后，才能管理通知和提醒。";
 const growthLevelScores = [0, 20, 45, 80, 130, 200, 300, 440, 620, 850, 1150, 1530, 2000, 2580, 3300, 4180, 5250, 6550];
-const growthLevelUnlocks: Record<number, string[]> = {
-  1: ["基础沟通"],
-  2: ["发送图片"],
-  3: ["发送语音与位置", "等级签"],
-  4: ["自定义头像", "创建群聊"],
-  5: ["发送视频", "修改群名称", "昵称每年可改"],
-  6: ["自定义欢迎语", "广场招呼", "昵称每月可改", "橱窗主题"],
-  7: ["好友上线提醒", "昵称每周可改"],
-  8: ["下载语音", "自定义聊天背景"],
-  9: ["基础头像框"],
-  10: ["广场光环", "自定义消息提示"],
-  11: ["聊天气泡主题"],
-  12: ["个人名片主题"],
-  14: ["动态轨迹"],
-  15: ["入场效果"],
-  16: ["成长报告"],
-  17: ["稀有头像框"],
-  18: ["尽兴徽记"],
+const growthLevelUnlockKeys: Record<number, TranslationKey[]> = {
+  1: ["growth.unlockBasic"],
+  2: ["growth.unlockImages"],
+  3: ["growth.unlockAudioLocation", "growth.unlockLevelTag"],
+  4: ["growth.unlockCustomAvatar", "growth.unlockCreateGroup"],
+  5: ["growth.unlockVideo", "growth.unlockGroupName", "growth.unlockAnnualNickname"],
+  6: ["growth.unlockWelcome", "growth.unlockPlazaGreeting", "growth.unlockMonthlyNickname", "growth.unlockShowcase"],
+  7: ["growth.unlockOnlineReminder", "growth.unlockWeeklyNickname"],
+  8: ["growth.unlockAudioDownload", "growth.unlockChatBackground"],
+  9: ["growth.unlockAvatarFrame"],
+  10: ["growth.unlockPlazaHalo", "growth.unlockNotificationText"],
+  11: ["growth.unlockBubbleTheme"],
+  12: ["growth.unlockProfileTheme"],
+  14: ["growth.unlockMotionTrail"],
+  15: ["growth.unlockEntrance"],
+  16: ["growth.unlockReport"],
+  17: ["growth.unlockRareFrame"],
+  18: ["growth.unlockFinalBadge"],
 };
 const personalizationOptions = {
   chat_bubble_style: [["default", "menu.styleDefault"], ["tide", "menu.styleTide"], ["comic", "menu.styleComic"], ["neon", "menu.styleNeon"]],
@@ -118,13 +111,14 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
 }
 
 function channelLabel(channel: NotificationChannel) {
-  return channelRows.find(([key]) => key === channel)?.[2] ?? channel.toUpperCase();
+  const key = channelRows.find(([rowChannel]) => rowChannel === channel)?.[2];
+  return key ? i18n.t(key) : channel.toUpperCase();
 }
 
 function contactLabel(channel: NotificationChannel) {
-  if (channel === "email") return "邮箱";
-  if (channel === "sms") return "手机";
-  return "即时提醒";
+  if (channel === "email") return i18n.t("contact.email");
+  if (channel === "sms") return i18n.t("contact.phone");
+  return i18n.t("contact.instant");
 }
 
 function channelCode(channel: NotificationChannel) {
@@ -222,7 +216,7 @@ export default function MenuPage() {
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
-  const [passwordReminderDescription, setPasswordReminderDescription] = useState(defaultPasswordReminderDescription);
+  const [passwordReminderDescription, setPasswordReminderDescription] = useState(() => t("menu.passwordReminder"));
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [accountDeleteStep, setAccountDeleteStep] = useState<"intro" | "verify" | "final" | null>(null);
   const [accountDeleteInput, setAccountDeleteInput] = useState("");
@@ -279,8 +273,8 @@ export default function MenuPage() {
   const barkBound = channelVerified(me, "bark");
   const standalonePwa = isStandalonePwa();
   const webReminderSummary = [
-    webReminderPrefs.soundEnabled ? "提示音已开" : "提示音已关",
-    webReminderPrefs.titleEnabled ? "标题已开" : "标题已关",
+    webReminderPrefs.soundEnabled ? t("webReminder.soundOn") : t("webReminder.soundOff"),
+    webReminderPrefs.titleEnabled ? t("webReminder.titleOn") : t("webReminder.titleOff"),
   ].join(" · ");
   const vipCampaign = me?.permanent_vip_campaign;
 
@@ -295,9 +289,9 @@ export default function MenuPage() {
         permanent_vip_campaign: campaign,
       } : current);
       patchSessionUser({ is_permanent_vip: true });
-      showToast(`永久 VIP 认领成功 · 第 ${campaign.slot} 位`, "success");
+      showToast(t("vip.claimed", { slot: campaign.slot }), "success");
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "认领失败，请稍后重试", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("vip.claimFailed"), "error");
     } finally {
       setVipClaiming(false);
     }
@@ -313,7 +307,7 @@ export default function MenuPage() {
     });
   }, [me?.user_id, standalonePwa]);
 
-  const showPasswordReminder = (description = defaultPasswordReminderDescription) => {
+  const showPasswordReminder = (description = t("menu.passwordReminder")) => {
     setPasswordReminderDescription(description);
     setPasswordReminderOpen(true);
   };
@@ -325,7 +319,7 @@ export default function MenuPage() {
     try {
       setSwitchAccounts(await api.getSwitchAccounts());
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "账号列表加载失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("account.listLoadFailed"), "error");
     } finally {
       setAccountSwitcherLoading(false);
     }
@@ -353,7 +347,7 @@ export default function MenuPage() {
         )
       );
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "账号切换失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("account.switchFailed"), "error");
       setSwitchingUserId(null);
     }
   };
@@ -369,7 +363,7 @@ export default function MenuPage() {
       });
       navigate("/space/dashboard");
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "无法打开控制面板", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("admin.openDashboardFailed"), "error");
       setAdminDashboardOpening(false);
     }
   };
@@ -377,7 +371,7 @@ export default function MenuPage() {
   const togglePrivateAccount = async () => {
     if (!me || privateAccountSaving) return;
     if (!phoneVerified) {
-      showToast("绑定手机后可设置", "error");
+      showToast(t("account.bindPhoneFirst"), "error");
       return;
     }
     setPrivateAccountSaving(true);
@@ -385,9 +379,9 @@ export default function MenuPage() {
       const updated = await api.updatePrivateAccount(!me.is_private_account);
       setMe(updated);
       patchSessionUser({ is_private_account: updated.is_private_account });
-      showToast(updated.is_private_account ? "已设为私密账号" : "已允许账号发现");
+      showToast(updated.is_private_account ? t("account.privateEnabled") : t("account.discoverableEnabled"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "设置失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("common.settingFailed"), "error");
     } finally {
       setPrivateAccountSaving(false);
     }
@@ -412,7 +406,7 @@ export default function MenuPage() {
   };
 
   const formatContactDate = (timestamp: number | null) => {
-    if (!timestamp) return "从未解绑";
+    if (!timestamp) return t("contact.neverUnbound");
     return new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "short", day: "numeric" }).format(timestamp * 1000);
   };
 
@@ -442,7 +436,7 @@ export default function MenuPage() {
     setUnbindConfirmOpen(false);
     setUnbindVerifyOpen(false);
     setUnbindChannel(null);
-    showToast(`${contactLabel(channel)}已解除绑定`);
+    showToast(t("contact.unbound", { channel: contactLabel(channel) }));
   };
 
   const confirmUnbind = async () => {
@@ -456,7 +450,7 @@ export default function MenuPage() {
     try {
       applyUnboundUser(await api.unbindContact({ channel: channelCode(unbindChannel) }), unbindChannel);
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "解除绑定失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("contact.unbindFailed"), "error");
     } finally {
       setUnbindState("idle");
     }
@@ -468,9 +462,9 @@ export default function MenuPage() {
     try {
       await api.sendContactCode({ channel: channelCode(unbindChannel), target: contactValue(unbindChannel) });
       setUnbindCooldown(60);
-      showToast(authSheetChannel === "email" ? "验证码已发送至邮箱" : authSheetChannel === "sms" ? "验证码已发送至手机" : "验证码已发送");
+      showToast(unbindChannel === "email" ? t("auth.codeSentEmail") : unbindChannel === "sms" ? t("auth.codeSentPhone") : t("auth.codeSent"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "验证码发送失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("auth.codeSendFailed"), "error");
     } finally {
       setUnbindState("idle");
     }
@@ -485,7 +479,7 @@ export default function MenuPage() {
         unbindChannel
       );
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "解除绑定失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("contact.unbindFailed"), "error");
     } finally {
       setUnbindState("idle");
     }
@@ -513,7 +507,7 @@ export default function MenuPage() {
     } catch (apiError) {
       setWebReminderPrefs(previous);
       setWebReminderPreferences(previous);
-      setError(apiError instanceof ApiError ? apiError.message : "网页提醒保存失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("webReminder.saveFailed"));
     }
   };
 
@@ -549,17 +543,17 @@ export default function MenuPage() {
       setWebPushState(await getWebPushState());
     } catch (pushError) {
       setWebPushState(await getWebPushState().catch((): WebPushState => "off"));
-      setError(pushError instanceof Error ? pushError.message : "系统通知设置失败");
+      setError(pushError instanceof Error ? pushError.message : t("webPush.settingFailed"));
     } finally {
       setWebPushSaving(false);
     }
   };
 
   const webPushDescription: string | null = {
-    checking: "正在检查",
-    unsupported: "当前浏览器不支持",
-    "needs-install": "添加到主屏幕后开启",
-    denied: "请在系统设置中允许",
+    checking: t("common.checking"),
+    unsupported: t("webPush.browserUnsupported"),
+    "needs-install": t("webPush.addToHomeFirst"),
+    denied: t("webPush.allowInSettings"),
     off: null,
     on: null,
   }[webPushState];
@@ -628,7 +622,7 @@ export default function MenuPage() {
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         if (!cached) {
-          const message = apiError instanceof ApiError ? apiError.message : "菜单加载失败";
+          const message = apiError instanceof ApiError ? apiError.message : t("menu.loadFailed");
           setError(message);
           setViewState("error");
         }
@@ -726,7 +720,7 @@ export default function MenuPage() {
       })
       .catch((apiError) => {
         if (cancelled) return;
-        setError(apiError instanceof ApiError ? apiError.message : "生成好友邀请链接失败");
+        setError(apiError instanceof ApiError ? apiError.message : t("invite.generateFailed"));
         setInviteDrawerOpen(false);
       })
       .finally(() => {
@@ -828,7 +822,7 @@ export default function MenuPage() {
       setPrefs((current) => ({ ...current, [channel]: preferenceFromResponse(updated) }));
       return true;
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "更新通知设置失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("notification.updateFailed"));
       return false;
     } finally {
       setPrefSaving(false);
@@ -852,7 +846,7 @@ export default function MenuPage() {
 
   const openMessageEditor = (channel: NotificationChannel, kind: NotificationMessageKind, field: "title" | "content") => {
     if (!canCustomizeNotificationMessage) {
-      showToast("达到 Lv.10 后可自定义消息提示", "error");
+      showToast(t("notification.levelRequired", { level: 10 }), "error");
       return;
     }
     setPrefEditor({ type: "message", channel, kind, field });
@@ -892,13 +886,13 @@ export default function MenuPage() {
       setAuthPending(true);
       setAuthCooldown(60);
       setAuthExpiresIn(payload.expires_in);
-      showToast("验证码已发送");
+      showToast(t("auth.codeSent"));
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
         setSecurityDrawerOpen(true);
       }
-      showToast(apiError instanceof ApiError ? apiError.message : "发送验证码失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("auth.codeSendFailed"), "error");
     } finally {
       setAuthActionState("idle");
     }
@@ -933,7 +927,7 @@ export default function MenuPage() {
       const prefRows = await api.getNotificationPrefs();
       setPrefs(mapPrefs(prefRows));
       closeAuthSheet();
-      showToast(authSheetChannel === "email" ? "邮箱认证成功" : authSheetChannel === "sms" ? "手机绑定成功" : "绑定成功");
+      showToast(authSheetChannel === "email" ? t("contact.emailVerified") : authSheetChannel === "sms" ? t("contact.phoneBound") : t("contact.bound"));
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
         closeAuthSheet();
@@ -943,10 +937,10 @@ export default function MenuPage() {
         apiError instanceof ApiError
           ? apiError.message
           : authSheetChannel === "email"
-            ? "邮箱认证失败"
+            ? t("contact.emailVerifyFailed")
             : authSheetChannel === "sms"
-              ? "手机绑定失败"
-              : "绑定失败",
+              ? t("contact.phoneBindFailed")
+              : t("contact.bindFailed"),
         "error"
       );
     } finally {
@@ -971,9 +965,9 @@ export default function MenuPage() {
       setPasswordNext("");
       setPasswordSheetOpen(false);
       setSecurityDrawerOpen(false);
-      showToast(hasPassword ? "密码已更新" : "密码已设置");
+      showToast(hasPassword ? t("password.updated") : t("password.set"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : hasPassword ? "密码更新失败" : "密码设置失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : hasPassword ? t("password.updateFailed") : t("password.setFailed"), "error");
     } finally {
       setPasswordSaving(false);
     }
@@ -994,9 +988,9 @@ export default function MenuPage() {
       });
       setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri } : current));
       setAvatarDialogOpen(false);
-      showToast("头像已更新");
+      showToast(t("avatar.updated"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "头像更新失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("avatar.updateFailed"), "error");
     } finally {
       setAvatarSaving(false);
     }
@@ -1004,11 +998,11 @@ export default function MenuPage() {
 
   const requestCustomAvatarUpload = () => {
     if (!hasPassword) {
-      showPasswordReminder("设置密码后，才能上传自定义头像。你仍然可以继续使用预设头像。");
+      showPasswordReminder(t("avatar.passwordRequired"));
       return;
     }
     if (!me?.growth?.capabilities?.custom_avatar?.available) {
-      showToast("达到 Lv.4 后可上传自定义头像", "error");
+      showToast(t("avatar.levelRequired", { level: 4 }), "error");
       return;
     }
     avatarFileInputRef.current?.click();
@@ -1016,16 +1010,16 @@ export default function MenuPage() {
 
   const saveChatBackgroundTheme = async (theme: "default" | "paper" | "mint" | "dusk") => {
     if (!canCustomizeChatBackground) {
-      showToast("达到 Lv.8 后可自定义聊天背景", "error");
+      showToast(t("background.levelRequired", { level: 8 }), "error");
       return;
     }
     try {
       setChatBackgroundSaving(true);
       const payload = await api.setChatBackground(theme);
       setMe(payload);
-      showToast("聊天背景已更新");
+      showToast(t("background.updated"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "背景更新失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("background.updateFailed"), "error");
     } finally {
       setChatBackgroundSaving(false);
     }
@@ -1039,12 +1033,12 @@ export default function MenuPage() {
       setChatBackgroundSaving(true);
       const payload = await uploadChatBackground(file);
       setMe(payload);
-      showToast("聊天背景已更新");
+      showToast(t("background.updated"));
     } catch (uploadError) {
       showToast(
         uploadError instanceof ChatBackgroundUploadError || uploadError instanceof ApiError
           ? uploadError.message
-          : "背景上传失败",
+          : t("upload.backgroundFailed"),
         "error"
       );
     } finally {
@@ -1068,9 +1062,9 @@ export default function MenuPage() {
       const nextMe = await api.setPersonalization(payload);
       setMe(nextMe);
       patchSessionUser(nextMe);
-      showToast("个性化已更新");
+      showToast(t("personalization.updated"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "个性化更新失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("personalization.updateFailed"), "error");
     } finally {
       setPersonalizationSaving(false);
     }
@@ -1099,12 +1093,12 @@ export default function MenuPage() {
       });
       setMe((current) => (current ? { ...current, avatar_type: payload.avatar_type, avatar_uri: payload.avatar_uri } : current));
       setAvatarDialogOpen(false);
-      showToast("头像上传成功");
+      showToast(t("avatar.uploaded"));
     } catch (uploadError) {
       showToast(
         uploadError instanceof AvatarUploadError || uploadError instanceof ApiError
           ? uploadError.message
-          : "头像上传失败",
+          : t("upload.avatarFailed"),
         "error"
       );
     } finally {
@@ -1114,17 +1108,17 @@ export default function MenuPage() {
 
   const openBasicEditDialog = (field: "name" | "welcome" | "plaza") => {
     if (!hasPassword) {
-      showPasswordReminder(field === "name" ? "设置密码后，才能修改昵称。" : field === "welcome" ? "设置密码后，才能修改欢迎语。" : "设置密码后，才能修改广场招呼。");
+      showPasswordReminder(field === "name" ? t("profile.nicknamePasswordRequired") : field === "welcome" ? t("profile.welcomePasswordRequired") : t("profile.greetingPasswordRequired"));
       return;
     }
     const capability = field === "name" ? "rename_nickname" : field === "welcome" ? "welcome_message" : "plaza_greeting";
     const requiredLevel = me?.growth?.capabilities?.[capability]?.required_level ?? (field === "name" ? 5 : 6);
     if (!me?.growth?.capabilities?.[capability]?.available) {
-      showToast(`达到 Lv.${requiredLevel} 后可使用`, "error");
+      showToast(t("growth.levelRequired", { level: requiredLevel }), "error");
       return;
     }
     if (field === "name" && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now()) {
-      showToast(`下次可修改：${new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale())}`, "error");
+      showToast(t("profile.nextChange", { date: new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale()) }), "error");
       return;
     }
     setBasicEditField(field);
@@ -1134,7 +1128,7 @@ export default function MenuPage() {
   const confirmAccountDeleteInput = () => {
     const value = accountDeleteInput.trim();
     if (!value) {
-      setError(hasPassword ? "请输入当前密码。" : "请输入当前昵称以确认注销。");
+      setError(hasPassword ? t("account.enterCurrentPassword") : t("account.enterNicknameToDelete"));
       return;
     }
     setAccountDeleteStep("final");
@@ -1150,7 +1144,7 @@ export default function MenuPage() {
       await logout();
       navigate("/", { replace: true });
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "注销账户失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("account.deleteFailed"));
     } finally {
       setAccountDeleteSaving(false);
     }
@@ -1180,10 +1174,10 @@ export default function MenuPage() {
         setMe((current) => current ? { ...current, plaza_greeting: payload.plaza_greeting } : current);
       }
       setBasicEditField(null);
-      showToast(editingField === "name" ? "昵称已更新" : editingField === "welcome" ? "欢迎语已更新" : "广场招呼已更新");
+      showToast(editingField === "name" ? t("profile.nicknameUpdated") : editingField === "welcome" ? t("profile.welcomeUpdated") : t("profile.greetingUpdated"));
     } catch (apiError) {
       showToast(
-        apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? "昵称更新失败" : "欢迎语更新失败",
+        apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? t("profile.nicknameUpdateFailed") : t("profile.welcomeUpdateFailed"),
         "error"
       );
     } finally {
@@ -1193,13 +1187,13 @@ export default function MenuPage() {
 
   const welcomeSummary = useMemo(() => {
     const value = (me?.welcome_message ?? session?.user?.welcome_message ?? "").trim();
-    return value || "还没有设置欢迎语";
+    return value || t("profile.noWelcome");
   }, [me?.welcome_message, session?.user?.welcome_message]);
   const growthLevels = me?.growth?.levels ?? growthLevelScores.map((score, index) => ({
     level: index + 1,
     name: space?.level_names?.[index] ?? `Lv.${index + 1}`,
     score,
-    unlocks: growthLevelUnlocks[index + 1] ?? [],
+    unlocks: (growthLevelUnlockKeys[index + 1] ?? []).map((key) => t(key)),
     unlocked: (me?.growth?.level ?? 1) >= index + 1,
   }));
 
@@ -1251,9 +1245,9 @@ export default function MenuPage() {
     try {
       const copied = await copyText(friendInviteLink);
       if (!copied) throw new Error("copy_failed");
-      showToast("链接已复制");
+      showToast(t("common.linkCopied"));
     } catch {
-      showToast("复制失败", "error");
+      showToast(t("common.copyFailed"), "error");
     }
   };
 
@@ -1267,15 +1261,19 @@ export default function MenuPage() {
     });
   }, [friendInviteExpire]);
 
-  const friendInviteValidityText = friendInviteMode === "permanent" ? "长期有效" : friendInviteExpireText ? `有效期至 ${friendInviteExpireText}` : "7 天有效";
+  const friendInviteValidityText = friendInviteMode === "permanent"
+    ? t("invite.permanent")
+    : friendInviteExpireText
+      ? t("invite.validUntil", { date: friendInviteExpireText })
+      : t("invite.sevenDays");
 
   const canUseFriendInvite = Boolean(me?.verified ?? session?.user?.verified);
 
   const activePref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
   const editorMessageDefaults = (kind: NotificationMessageKind) => {
-    if (kind === "direct") return { title: defaultHiddenDirectMessageTitle, content: defaultHiddenDirectMessagePlaceholder };
-    if (kind === "group") return { title: defaultHiddenGroupMessageTitle, content: defaultHiddenGroupMessagePlaceholder };
-    return { title: defaultFriendOnlineMessageTitle, content: defaultFriendOnlineMessagePlaceholder };
+    if (kind === "direct") return { title: t("notification.directTitle"), content: t("notification.directContent") };
+    if (kind === "group") return { title: t("notification.groupTitle"), content: t("notification.groupContent") };
+    return { title: t("notification.onlineTitle"), content: t("notification.onlineContent") };
   };
   const editorPreview = (() => {
     if (!prefEditor || prefEditor.type !== "message") return null;
@@ -1291,7 +1289,7 @@ export default function MenuPage() {
 
   const openFriendInviteDrawer = () => {
     if (!canUseFriendInvite) {
-      setError("完成邮箱认证后才能使用好友二维码。");
+      setError(t("invite.verificationRequired"));
       return;
     }
     setInviteDrawerOpen(true);
@@ -1326,24 +1324,24 @@ export default function MenuPage() {
         />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
-            <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
+            <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
           </button>
           <div className="row-main menu-profile-copy">
             <div className="menu-profile-heading">
-              <strong>{session?.user.name ?? "言浪用户"}</strong>
+              <strong>{session?.user.name ?? t("brand.user")}</strong>
               {space?.slug ? <span>@{space.slug}</span> : null}
             </div>
             <button className="menu-growth-entry" onClick={() => setGrowthDrawerOpen(true)} type="button">
               <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}</span>
               <span className="menu-growth-identity">
-                <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? "初见"}</strong>
+                <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? t("growth.firstLevel")}</strong>
               </span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
           <button
             aria-disabled={!canUseFriendInvite}
-            aria-label={canUseFriendInvite ? "分享好友二维码" : "完成认证后可使用好友二维码"}
+            aria-label={canUseFriendInvite ? t("invite.shareQr") : t("invite.verifyToUseQr")}
             className={`icon-button inline-avatar-icon-button menu-share-qr-button${!canUseFriendInvite ? " is-disabled" : ""}`}
             onClick={openFriendInviteDrawer}
             type="button"
@@ -1356,33 +1354,33 @@ export default function MenuPage() {
             <div className="menu-vip-campaign-orbit" aria-hidden="true"><i /><i /></div>
             <div className="menu-vip-campaign-heading">
               <span>FOUNDING 100</span>
-              <small>余 {vipCampaign.remaining} 席</small>
+              <small>{t("vip.remaining", { count: vipCampaign.remaining })}</small>
             </div>
             <div className="menu-vip-campaign-copy">
-              <strong>永久 VIP，留给最早抵达的人</strong>
-              <p>专属光环、聊天气泡与头像框</p>
+              <strong>{t("vip.title")}</strong>
+              <p>{t("vip.rewards")}</p>
             </div>
             <div className="menu-vip-requirements">
               {[
                 {
                   key: "email",
-                  label: "认证邮箱",
+                  label: t("contact.verifyEmail"),
                   complete: vipCampaign.requirements.email,
-                  detail: vipCampaign.requirements.email ? "已完成" : "去认证",
+                  detail: vipCampaign.requirements.email ? t("common.completed") : t("contact.verifyNow"),
                   action: () => openAuthSheet("email"),
                 },
                 {
                   key: "phone",
-                  label: "绑定手机",
+                  label: t("contact.bindPhone"),
                   complete: vipCampaign.requirements.phone,
-                  detail: vipCampaign.requirements.phone ? "已完成" : "去绑定",
+                  detail: vipCampaign.requirements.phone ? t("common.completed") : t("contact.bindNow"),
                   action: () => openAuthSheet("sms"),
                 },
                 {
                   key: "level",
-                  label: "达到 LV6",
+                  label: t("vip.reachLevel", { level: 6 }),
                   complete: vipCampaign.requirements.level,
-                  detail: vipCampaign.requirements.level ? "已完成" : `当前 LV${me?.growth?.level ?? 1}`,
+                  detail: vipCampaign.requirements.level ? t("common.completed") : t("growth.currentLevel", { level: me?.growth?.level ?? 1 }),
                   action: () => setGrowthDrawerOpen(true),
                 },
               ].map((requirement) => (
@@ -1401,7 +1399,7 @@ export default function MenuPage() {
               ))}
             </div>
             <button disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">
-              {vipClaiming ? "正在锁定席位" : vipCampaign.eligible ? "认领永久 VIP" : "完成以上条件即可认领"}
+              {vipClaiming ? t("vip.reserving") : vipCampaign.eligible ? t("vip.claim") : t("vip.completeRequirements")}
             </button>
           </section>
         ) : null}
@@ -1409,13 +1407,13 @@ export default function MenuPage() {
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setBasicDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong>基础信息</strong>
+                <strong>{t("menu.basicInfo")}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="simple-row menu-link-row" onClick={() => setSecurityDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong>账号与安全</strong>
+                <strong>{t("menu.accountSecurity")}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1427,7 +1425,7 @@ export default function MenuPage() {
                 type="button"
               >
                 <div className="row-main">
-                  <strong>控制面板</strong>
+                  <strong>{t("menu.dashboard")}</strong>
                 </div>
                 <span className={`material-symbols-outlined${adminDashboardOpening ? " is-spinning" : ""}`}>
                   {adminDashboardOpening ? "progress_activity" : "chevron_right"}
@@ -1443,9 +1441,9 @@ export default function MenuPage() {
               <button className="simple-row menu-link-row" onClick={() => setPwaInstallSheetOpen(true)} type="button">
                 <div className="row-main">
                   <strong className="menu-install-title">
-                    <span>安装 {space?.name ?? "当前空间"}</span>
-                    <UserAvatar className="menu-install-avatar" name={space?.official_user?.name ?? space?.name ?? "空间"} uri={space?.official_user?.avatar_uri} />
-                    <span>到桌面</span>
+                    <span>{t("pwa.installSpace", { name: space?.name ?? t("space.current") })}</span>
+                    <UserAvatar className="menu-install-avatar" name={space?.official_user?.name ?? space?.name ?? t("space.title")} uri={space?.official_user?.avatar_uri} />
+                    <span>{t("pwa.toDesktop")}</span>
                   </strong>
                 </div>
                 <span className="material-symbols-outlined">chevron_right</span>
@@ -1453,13 +1451,13 @@ export default function MenuPage() {
             ) : null}
             <button className="simple-row menu-link-row" onClick={openChannelsEntry} type="button">
               <div className="row-main">
-                <strong>通知和提醒</strong>
+                <strong>{t("menu.notifications")}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className="simple-row menu-link-row" onClick={() => setPersonalizationDrawerOpen(true)} type="button">
               <div className="row-main">
-                <strong>个性化</strong>
+                <strong>{t("menu.personalization")}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1470,7 +1468,7 @@ export default function MenuPage() {
           <div className="simple-list">
             <button className="simple-row menu-link-row danger-row menu-danger-row" onClick={() => setLeaveConfirmOpen(true)} type="button">
               <div className="row-main">
-                <strong>退出</strong>
+                <strong>{t("auth.logout")}</strong>
               </div>
               <span className="material-symbols-outlined">logout</span>
             </button>
@@ -1487,10 +1485,10 @@ export default function MenuPage() {
           });
         }}
         open={pwaInstallSheetOpen}
-        spaceName={space?.name ?? "当前空间"}
+        spaceName={space?.name ?? t("space.current")}
       />
 
-      <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title="我的成长">
+      <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
         <div className={`growth-drawer is-level-${me?.growth?.level ?? 1}`}>
           <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
             <div className="growth-hero-heading">
@@ -1499,11 +1497,11 @@ export default function MenuPage() {
                 <strong>{String(me?.growth?.level ?? 1).padStart(2, "0")}</strong>
               </div>
               <div className="growth-hero-title">
-                <small>当前称号</small>
-                <strong>{me?.growth?.name ?? "初见"}</strong>
+                <small>{t("growth.currentTitle")}</small>
+                <strong>{me?.growth?.name ?? t("growth.firstLevel")}</strong>
               </div>
               <span className="growth-hero-guide">
-                图鉴
+                {t("growth.guide")}
                 <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
                   <path d="M4 10h11M11.5 6.5 15 10l-3.5 3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
                 </svg>
@@ -1511,16 +1509,16 @@ export default function MenuPage() {
             </div>
             <div className="growth-progress-copy">
               <div>
-                <strong>{me?.growth?.level_cap_reason || (me?.growth?.next_score ? `距离 Lv.${(me.growth.level ?? 1) + 1}` : "已抵达最高等级")}</strong>
-                <span>{me?.growth?.level_cap_reason ? `${me.growth.score} 成长值 · 上限 Lv.${me.growth.level_cap}` : me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : `${me?.growth?.score ?? 0} 成长值`}</span>
+                <strong>{me?.growth?.level_cap_reason || (me?.growth?.next_score ? t("growth.toNextLevel", { level: (me.growth.level ?? 1) + 1 }) : t("growth.maxLevel"))}</strong>
+                <span>{me?.growth?.level_cap_reason ? t("growth.scoreAndCap", { score: me.growth.score, level: me.growth.level_cap }) : me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : t("growth.score", { score: me?.growth?.score ?? 0 })}</span>
               </div>
               <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
             </div>
           </button>
           <section className="growth-daily-card">
             <div className="growth-daily-copy">
-              <strong>今日聊天</strong>
-              <span>每日成长</span>
+              <strong>{t("growth.todayChat")}</strong>
+              <span>{t("growth.daily")}</span>
             </div>
             <div className="growth-daily-meter">
               <i style={{ transform: `scaleX(${Math.min(1, (me?.growth?.daily_chat?.earned ?? 0) / Math.max(1, me?.growth?.daily_chat?.limit ?? 20))})` }} />
@@ -1528,7 +1526,7 @@ export default function MenuPage() {
             <b>{me?.growth?.daily_chat?.earned ?? 0}<small>/{me?.growth?.daily_chat?.limit ?? 20}</small></b>
           </section>
           <section className="growth-drawer-section">
-            <h3>探索言浪</h3>
+            <h3>{t("growth.explore")}</h3>
             <div className="growth-milestone-grid">
               {(me?.growth?.milestones ?? []).filter((item) => item.category !== "security").map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} disabled={!item.key.includes("install_webapp")} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
@@ -1540,7 +1538,7 @@ export default function MenuPage() {
             </div>
           </section>
           <section className="growth-drawer-section">
-            <h3>推荐完善</h3>
+            <h3>{t("growth.recommended")}</h3>
             <div className="growth-milestone-grid">
               {(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && (item.key !== "security:bark" || isAppleEnvironment)).map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
@@ -1553,7 +1551,7 @@ export default function MenuPage() {
           </section>
           {me?.growth?.recent_events?.length ? (
             <section className="growth-drawer-section">
-              <h3>最近获得</h3>
+              <h3>{t("growth.recent")}</h3>
               <div className="growth-event-list">
                 {me.growth.recent_events?.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}
               </div>
@@ -1561,19 +1559,19 @@ export default function MenuPage() {
           ) : null}
           {me?.growth?.privileges.length ? (
             <section className="growth-drawer-section">
-              <h3>已经解锁</h3>
+              <h3>{t("growth.unlocked")}</h3>
               <div className="growth-privileges">{me.growth.privileges.map((item) => <span key={item}>{item}</span>)}</div>
             </section>
           ) : null}
         </div>
       </SideDrawer>
 
-      <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title="等级图鉴">
+      <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
         <div className="growth-level-guide">
           <div className="growth-level-guide-summary">
             <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
             <strong>{growthLevels[activeGrowthGuideLevel - 1]?.name ?? `Lv.${activeGrowthGuideLevel}`}</strong>
-            <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? "当前所在等级" : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? "已抵达" : "继续成长解锁"}</small>
+            <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? t("growth.currentLevelLabel") : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? t("growth.reached") : t("growth.keepGrowing")}</small>
           </div>
           <div
             className="growth-level-list"
@@ -1615,8 +1613,8 @@ export default function MenuPage() {
           </div>
           <section className="growth-level-detail">
             <div className="growth-level-detail-score">
-              <span>解锁条件</span>
-              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>成长值</small></strong>
+              <span>{t("growth.unlockCondition")}</span>
+              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>{t("growth.points")}</small></strong>
             </div>
             <div className="growth-level-detail-unlocks">
               {(growthLevels[activeGrowthGuideLevel - 1]?.unlocks ?? []).length ? (
@@ -1624,14 +1622,14 @@ export default function MenuPage() {
                   <span key={unlock}><i />{unlock}</span>
                 ))
               ) : (
-                <span><i />成长阶段</span>
+                <span><i />{t("growth.stage")}</span>
               )}
             </div>
           </section>
-          <div className="growth-level-rail" aria-label="选择等级">
+          <div className="growth-level-rail" aria-label={t("growth.selectLevel")}>
             {growthLevels.map((item) => (
               <button
-                aria-label={`查看 Lv.${item.level}`}
+                aria-label={t("growth.viewLevel", { level: item.level })}
                 className={activeGrowthGuideLevel === item.level ? "is-active" : ""}
                 key={`rail-${item.level}`}
                 onClick={() => {
@@ -1647,46 +1645,46 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title="基础信息">
+      <SideDrawer open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
         <div className="detail-list">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setAvatarDialogOpen(true)} type="button">
               <div className="row-main menu-key-cell">
-                <strong>头像</strong>
+                <strong>{t("profile.avatar")}</strong>
               </div>
               <div className="menu-detail-value">
-                <UserAvatar className="mini-avatar" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                <UserAvatar className="mini-avatar" name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className={`simple-row menu-link-row${canRenameNickname ? "" : " is-locked"}`} disabled={!canRenameNickname} onClick={() => openBasicEditDialog("name")} type="button">
               <div className="row-main menu-key-cell">
-                <strong>昵称</strong>
+                <strong>{t("profile.nickname")}</strong>
                 {canRenameNickname && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now() ? (
                   <div className="row-subtle">
-                    下次可修改 {new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale(), {
+                    {t("profile.nextChange", { date: new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale(), {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
-                    })}
+                    }) })}
                   </div>
                 ) : null}
               </div>
               <div className="menu-detail-value menu-detail-text">
-                {canRenameNickname ? session?.user.name ?? "言浪用户" : "Lv.5 解锁"}
+                {canRenameNickname ? session?.user.name ?? t("brand.user") : t("growth.unlockAtLevel", { level: 5 })}
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className={`simple-row menu-link-row${canEditWelcome ? "" : " is-locked"}`} disabled={!canEditWelcome} onClick={() => openBasicEditDialog("welcome")} type="button">
               <div className="row-main menu-key-cell">
-                <strong>欢迎语</strong>
+                <strong>{t("profile.welcome")}</strong>
               </div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditWelcome ? welcomeSummary : "Lv.6 解锁"}</div>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditWelcome ? welcomeSummary : t("growth.unlockAtLevel", { level: 6 })}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <button className={`simple-row menu-link-row${canEditPlazaGreeting ? "" : " is-locked"}`} disabled={!canEditPlazaGreeting} onClick={() => openBasicEditDialog("plaza")} type="button">
-              <div className="row-main menu-key-cell"><strong>广场招呼</strong></div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditPlazaGreeting ? me?.plaza_greeting || "嗨，认识一下？" : "Lv.6 解锁"}</div>
+              <div className="row-main menu-key-cell"><strong>{t("profile.plazaGreeting")}</strong></div>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditPlazaGreeting ? me?.plaza_greeting || t("profile.defaultPlazaGreeting") : t("growth.unlockAtLevel", { level: 6 })}</div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
@@ -1803,7 +1801,7 @@ export default function MenuPage() {
               <span>
                 {me?.chat_background_uri ? <img alt="" src={me.chat_background_uri} /> : <span className="material-symbols-outlined">add_photo_alternate</span>}
               </span>
-              <strong>{chatBackgroundSaving ? "处理中" : "自定义"}</strong>
+              <strong>{chatBackgroundSaving ? t("common.processing") : t("common.custom")}</strong>
             </button>
           </div>
           <input
@@ -1824,7 +1822,7 @@ export default function MenuPage() {
             navigate("/app/menu", { replace: true });
           }
         }}
-        title="账号与安全"
+        title={t("menu.accountSecurity")}
       >
         <div className="detail-list">
           <div className="simple-list">
@@ -1834,8 +1832,8 @@ export default function MenuPage() {
               type="button"
             >
               <div className="row-main">
-                <strong>{hasPassword ? "更换密码" : "设置密码"}</strong>
-                {!hasPassword ? <div className="row-subtle">防止他人仅凭昵称登录</div> : null}
+                <strong>{hasPassword ? t("password.change") : t("password.setup")}</strong>
+                {!hasPassword ? <div className="row-subtle">{t("password.securityHint")}</div> : null}
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1845,30 +1843,30 @@ export default function MenuPage() {
               type="button"
             >
               <div className="row-main">
-                <strong>手势解锁</strong>
+                <strong>{t("gesture.title")}</strong>
                 <div className="row-subtle">
                   {gestureEnabled
-                    ? `${gestureLockAfterMinutes} 分钟后上锁`
+                    ? t("gesture.lockAfter", { count: gestureLockAfterMinutes })
                     : emailVerified
-                      ? "未开启"
-                      : "认证邮箱后可开启"}
+                      ? t("common.notEnabled")
+                      : t("gesture.verifyEmailToEnable")}
                 </div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
             <div className="simple-row menu-link-row menu-toggle-row">
                 <div className="row-main">
-                  <strong>私密账号</strong>
+                  <strong>{t("account.private")}</strong>
                   <div className="row-subtle">
                     {phoneVerified
                       ? me?.is_private_account
-                        ? "不会出现在其他账号的切换列表"
-                        : "可被相同联系方式的账号发现"
-                      : "绑定手机后可设置"}
+                        ? t("account.privateHint")
+                        : t("account.discoverableHint")
+                      : t("account.bindPhoneFirst")}
                   </div>
                 </div>
                 <button
-                  aria-label="切换私密账号"
+                  aria-label={t("account.togglePrivate")}
                   className={`switch ${me?.is_private_account ? "active" : ""}`}
                   disabled={privateAccountSaving || !phoneVerified}
                   onClick={() => void togglePrivateAccount()}
@@ -1884,8 +1882,8 @@ export default function MenuPage() {
               type="button"
             >
               <div className="row-main">
-                <strong>注销账户</strong>
-                <div className="row-subtle">删除账号并退出当前空间</div>
+                <strong>{t("account.delete")}</strong>
+                <div className="row-subtle">{t("account.deleteHint")}</div>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1895,7 +1893,7 @@ export default function MenuPage() {
 
       <BottomSheet
         open={accountSwitcherOpen}
-        title="切换账号"
+        title={t("menu.switchAccount")}
         onClose={() => {
           if (switchingUserId !== null) return;
           setAccountSwitcherOpen(false);
@@ -1903,7 +1901,7 @@ export default function MenuPage() {
       >
         <div className="simple-list account-switch-list">
           {accountSwitcherLoading ? (
-            <FeedbackState title="正在查找账号" description="" tone="loading" />
+            <FeedbackState title={t("account.finding")} description="" tone="loading" />
           ) : switchAccounts.length ? (
             switchAccounts.map((account) => (
               <button
@@ -1917,7 +1915,7 @@ export default function MenuPage() {
                 <div className="row-main">
                   <strong>{account.user.name}</strong>
                   <div className="row-subtle">
-                    {account.space.name}{account.user.official ? " · 管理账号" : ""}
+                    {account.space.name}{account.user.official ? t("account.adminSuffix") : ""}
                   </div>
                 </div>
                 {switchingUserId === account.user.user_id ? (
@@ -1928,17 +1926,17 @@ export default function MenuPage() {
               </button>
             ))
           ) : (
-            <FeedbackState title="没有可切换的账号" description="已设为私密的账号不会显示。" />
+            <FeedbackState title={t("account.noSwitchable")} description={t("account.privateHidden")} />
           )}
         </div>
       </BottomSheet>
 
-      <SideDrawer open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title="通知和提醒">
+      <SideDrawer open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
         <div className="detail-list">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
               <div className="row-main menu-key-cell">
-                <strong>网页</strong>
+                <strong>{t("channel.web")}</strong>
               </div>
               <div className="menu-detail-value menu-detail-text">
                 <span className="menu-channel-value">{webReminderSummary}</span>
@@ -1959,13 +1957,13 @@ export default function MenuPage() {
                   </div>
                   <div className="menu-detail-value menu-detail-text">
                     {verified ? (
-                      <span className="menu-channel-value">已绑定</span>
+                      <span className="menu-channel-value">{t("contact.boundState")}</span>
                     ) : !hasPassword ? (
-                      <span className="menu-inline-action">先设密码</span>
+                      <span className="menu-inline-action">{t("password.setupFirst")}</span>
                     ) : channel === "bark" || channel === "sms" ? (
-                      <span className="menu-inline-action">去绑定</span>
+                      <span className="menu-inline-action">{t("contact.bindNow")}</span>
                     ) : (
-                      <span className="menu-inline-action">去认证</span>
+                      <span className="menu-inline-action">{t("contact.verifyNow")}</span>
                     )}
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
@@ -1979,13 +1977,13 @@ export default function MenuPage() {
       <SideDrawer
         open={webReminderDrawerOpen}
         onClose={() => setWebReminderDrawerOpen(false)}
-        title="网页提醒"
+        title={t("webReminder.title")}
       >
         <div className="detail-list">
           <div className="menu-pref-list">
             <div className="menu-pref-row">
               <div className="row-main">
-                <strong>系统通知</strong>
+                <strong>{t("webReminder.systemNotifications")}</strong>
                 {webPushDescription ? <div className="row-subtle">{webPushDescription}</div> : null}
               </div>
               <button
@@ -1998,7 +1996,7 @@ export default function MenuPage() {
             </div>
             <div className="menu-pref-row">
               <div className="row-main">
-                <strong>新消息提示音</strong>
+                <strong>{t("webReminder.messageSound")}</strong>
               </div>
               <button
                 aria-label="toggle-web-sound-reminder"
@@ -2009,7 +2007,7 @@ export default function MenuPage() {
             </div>
             <div className="menu-pref-row">
               <div className="row-main">
-                <strong>标题提醒</strong>
+                <strong>{t("webReminder.titleAlert")}</strong>
               </div>
               <button
                 aria-label="toggle-web-title-reminder"
@@ -2025,7 +2023,7 @@ export default function MenuPage() {
       <SideDrawer
         open={inviteDrawerOpen}
         onClose={() => setInviteDrawerOpen(false)}
-        title="好友二维码"
+        title={t("invite.friendQr")}
         titleAccessory={<HeaderSyncIndicator syncing={friendInviteLoading} />}
       >
         <div className="detail-list menu-share-drawer">
@@ -2033,16 +2031,16 @@ export default function MenuPage() {
             <div className="menu-share-card">
               <div className="menu-share-qr-shell">
                 <div className="menu-share-qr-frame">
-                  <img alt="好友邀请二维码" className="menu-share-qr-image" src={friendInviteQrUri} />
+                  <img alt={t("invite.qrAlt")} className="menu-share-qr-image" src={friendInviteQrUri} />
                   <div className="menu-share-qr-avatar">
-                    <UserAvatar className="avatar-large" name={session?.user.name ?? "言浪用户"} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                    <UserAvatar className="avatar-large" name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
                   </div>
                 </div>
               </div>
 
               <div className="menu-share-meta">
-                <strong>{session?.user.name ?? "言浪用户"} 的好友邀请</strong>
-                <div className="row-subtle">仅限当前空间内使用，{friendInviteValidityText}</div>
+                <strong>{t("invite.fromUser", { name: session?.user.name ?? t("brand.user") })}</strong>
+                <div className="row-subtle">{t("invite.spaceOnly", { validity: friendInviteValidityText })}</div>
               </div>
 
               <div className="menu-share-link-box">
@@ -2051,7 +2049,7 @@ export default function MenuPage() {
 
               <div className="menu-share-actions">
                 <button className="button" onClick={() => void copyFriendInviteLink()} type="button">
-                  复制链接
+                  {t("common.copyLink")}
                 </button>
               </div>
 
@@ -2061,14 +2059,14 @@ export default function MenuPage() {
                   onClick={() => setFriendInviteMode("limited")}
                   type="button"
                 >
-                  7天有效
+                  {t("invite.sevenDaysCompact")}
                 </button>
                 <button
                   className={`mode-pill ${friendInviteMode === "permanent" ? "active" : ""}`}
                   onClick={() => setFriendInviteMode("permanent")}
                   type="button"
                 >
-                  无限期
+                  {t("invite.permanentCompact")}
                 </button>
               </div>
             </div>
@@ -2079,15 +2077,15 @@ export default function MenuPage() {
       <SideDrawer
         open={Boolean(prefDrawerChannel)}
         onClose={closePrefDrawers}
-        title={prefDrawerChannel ? `${channelLabel(prefDrawerChannel)}设置` : "通知设置"}
+        title={prefDrawerChannel ? t("notification.channelSettings", { channel: channelLabel(prefDrawerChannel) }) : t("notification.settings")}
       >
         {prefDrawerChannel && activePref ? (
           <div className="menu-pref-settings-stack">
             <div className="menu-pref-list">
               <div className="menu-pref-row">
                 <div className="row-main">
-                  <strong>启用提醒</strong>
-                  {prefDrawerChannel === "sms" ? <div className="row-subtle">暂不支持</div> : null}
+                  <strong>{t("notification.enable")}</strong>
+                  {prefDrawerChannel === "sms" ? <div className="row-subtle">{t("common.unsupported")}</div> : null}
                 </div>
                 <button
                   aria-label={`toggle-${prefDrawerChannel}`}
@@ -2104,10 +2102,10 @@ export default function MenuPage() {
                 type="button"
               >
                 <div className="row-main">
-                  <strong>离线阈值</strong>
+                  <strong>{t("notification.offlineThreshold")}</strong>
                 </div>
                 <div className="menu-pref-row-value">
-                  <span>{activePref.threshold} 分钟</span>
+                  <span>{t("common.minutes", { count: activePref.threshold })}</span>
                   <span className="material-symbols-outlined">chevron_right</span>
                 </div>
               </button>
@@ -2115,7 +2113,7 @@ export default function MenuPage() {
                 <>
                   <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                     <div className="row-main">
-                      <strong>隐藏消息内容</strong>
+                      <strong>{t("notification.hideContent")}</strong>
                     </div>
                     <button
                       aria-label={`toggle-hide-content-${prefDrawerChannel}`}
@@ -2131,7 +2129,7 @@ export default function MenuPage() {
                       disabled={!activePref.enabled}
                       onClick={() => {
                         if (!canCustomizeNotificationMessage) {
-                          showToast("达到 Lv.10 后可自定义消息提示", "error");
+                          showToast(t("notification.levelRequired", { level: 10 }), "error");
                           return;
                         }
                         setPrefCustomDrawerOpen(true);
@@ -2139,10 +2137,10 @@ export default function MenuPage() {
                       type="button"
                     >
                       <div className="row-main">
-                        <strong>自定义消息提示</strong>
+                        <strong>{t("notification.customMessages")}</strong>
                       </div>
                       <div className="menu-pref-row-value">
-                        {!canCustomizeNotificationMessage ? <span>Lv.10 解锁</span> : null}
+                        {!canCustomizeNotificationMessage ? <span>{t("growth.unlockAtLevel", { level: 10 })}</span> : null}
                         <span className="material-symbols-outlined">
                           {canCustomizeNotificationMessage ? "chevron_right" : "lock"}
                         </span>
@@ -2155,11 +2153,11 @@ export default function MenuPage() {
             <div className="menu-pref-list">
               <div className="menu-pref-row">
                 <div className="row-main">
-                  <strong>上次解绑</strong>
+                  <strong>{t("contact.lastUnbound")}</strong>
                   {contactUnbindAvailableAt(prefDrawerChannel) &&
                   contactUnbindAvailableAt(prefDrawerChannel)! > Date.now() ? (
                     <div className="row-subtle">
-                      {formatContactDate(contactUnbindAvailableAt(prefDrawerChannel)! / 1000)} 后可再次解绑
+                      {t("contact.canUnbindAfter", { date: formatContactDate(contactUnbindAvailableAt(prefDrawerChannel)! / 1000) })}
                     </div>
                   ) : null}
                 </div>
@@ -2178,13 +2176,13 @@ export default function MenuPage() {
                 type="button"
               >
                 <div className="row-main">
-                  <strong>解除绑定</strong>
+                  <strong>{t("contact.unbind")}</strong>
                   <div className="row-subtle">
                     {prefDrawerChannel === "bark"
-                      ? "随时可以重新绑定"
+                      ? t("contact.rebindAnytime")
                       : prefDrawerChannel === "email"
-                        ? "每 30 天仅可解绑一次"
-                        : "每 365 天仅可解绑一次"}
+                        ? t("contact.emailUnbindLimit")
+                        : t("contact.phoneUnbindLimit")}
                   </div>
                 </div>
                 <span className="material-symbols-outlined">chevron_right</span>
@@ -2196,14 +2194,14 @@ export default function MenuPage() {
       <SideDrawer
         open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePref?.hideMessageContent)}
         onClose={() => setPrefCustomDrawerOpen(false)}
-        title="自定义消息提示"
+        title={t("notification.customMessages")}
       >
         {prefDrawerChannel && activePref ? (
           <div className="menu-pref-custom-drawer">
             {prefDrawerChannel === "bark" ? (
               <div className="menu-pref-list">
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>点击打开聊天</strong></div>
+                  <div className="row-main"><strong>{t("notification.openChatOnTap")}</strong></div>
                   <button
                     aria-label="toggle-bark-open-chat"
                     className={`switch ${activePref.openChatOnTap ? "active" : ""}`}
@@ -2213,7 +2211,7 @@ export default function MenuPage() {
                   />
                 </div>
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>使用空间 Logo</strong></div>
+                  <div className="row-main"><strong>{t("notification.useSpaceLogo")}</strong></div>
                   <button
                     aria-label="toggle-bark-space-icon"
                     className={`switch ${activePref.barkIconMode === 1 ? "active" : ""}`}
@@ -2223,7 +2221,7 @@ export default function MenuPage() {
                   />
                 </div>
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>使用用户头像</strong></div>
+                  <div className="row-main"><strong>{t("notification.useUserAvatar")}</strong></div>
                   <button
                     aria-label="toggle-bark-user-icon"
                     className={`switch ${activePref.barkIconMode === 2 ? "active" : ""}`}
@@ -2235,7 +2233,7 @@ export default function MenuPage() {
               </div>
             ) : null}
             {(["direct", "group", "online"] as NotificationMessageKind[]).map((kind) => {
-              const label = kind === "direct" ? "私聊提示" : kind === "group" ? "群聊提示" : "上线提示";
+              const label = kind === "direct" ? t("notification.directPrompt") : kind === "group" ? t("notification.groupPrompt") : t("notification.onlinePrompt");
               const content = messagePreferenceValue(activePref, kind, "content");
               const title = messagePreferenceValue(activePref, kind, "title");
               return (
@@ -2244,12 +2242,12 @@ export default function MenuPage() {
                   <div className="simple-list">
                     {prefDrawerChannel === "bark" ? (
                       <button className="simple-row menu-link-row" onClick={() => openMessageEditor(prefDrawerChannel, kind, "title")} type="button">
-                        <div className="row-main"><strong>标题自定义</strong><div className="row-subtle">{title || "使用默认标题"}</div></div>
+                        <div className="row-main"><strong>{t("notification.customTitle")}</strong><div className="row-subtle">{title || t("notification.defaultTitle")}</div></div>
                         <span className="material-symbols-outlined">chevron_right</span>
                       </button>
                     ) : null}
                     <button className="simple-row menu-link-row" onClick={() => openMessageEditor(prefDrawerChannel, kind, "content")} type="button">
-                      <div className="row-main"><strong>内容自定义</strong><div className="row-subtle">{content || "使用默认内容"}</div></div>
+                      <div className="row-main"><strong>{t("notification.customContent")}</strong><div className="row-subtle">{content || t("notification.defaultContent")}</div></div>
                       <span className="material-symbols-outlined">chevron_right</span>
                     </button>
                   </div>
@@ -2263,26 +2261,26 @@ export default function MenuPage() {
       <SideDrawer
         open={barkGuideOpen}
         onClose={closeBarkGuide}
-        title="绑定 Bark"
+        title={t("bark.bind")}
       >
         <div className="bark-guide">
           <div className="bark-guide-app">
             <BarkGuideIcon />
             <div>
               <strong>Bark</strong>
-              <span>接收言浪即时提醒</span>
+              <span>{t("bark.receiveInstant")}</span>
             </div>
-            <span className="bark-guide-duration">约 1 分钟</span>
+            <span className="bark-guide-duration">{t("bark.aboutOneMinute")}</span>
           </div>
 
           <ol className="bark-guide-steps">
             <li className="bark-guide-step">
               <span className="bark-guide-index">1</span>
               <div className="bark-guide-step-content">
-                <strong>下载 Bark</strong>
-                <p>安装后允许通知。</p>
+                <strong>{t("bark.download")}</strong>
+                <p>{t("bark.allowNotifications")}</p>
                 <a className="bark-store-link" href={barkAppStoreUrl} rel="noreferrer" target="_blank">
-                  前往 App Store
+                  {t("bark.openAppStore")}
                   <span className="material-symbols-outlined">chevron_right</span>
                 </a>
               </div>
@@ -2290,18 +2288,18 @@ export default function MenuPage() {
             <li className="bark-guide-step">
               <span className="bark-guide-index">2</span>
               <div className="bark-guide-step-content">
-                <strong>复制推送链接</strong>
-                <p>在 Bark 首页轻点「复制」。</p>
+                <strong>{t("bark.copyLink")}</strong>
+                <p>{t("bark.copyLinkHint")}</p>
                 <code className="bark-guide-link-example">https://api.day.app/••••••</code>
               </div>
             </li>
             <li className="bark-guide-step is-action">
               <span className="bark-guide-index">3</span>
               <div className="bark-guide-step-content bark-guide-bind">
-                <strong>{authPending ? "输入验证码" : "粘贴链接"}</strong>
-                <p>{authPending ? "验证码已发送到 Bark。" : "整段粘贴即可，我们会自动识别。"}</p>
+                <strong>{authPending ? t("auth.enterCode") : t("bark.pasteLink")}</strong>
+                <p>{authPending ? t("bark.codeSent") : t("bark.pasteHint")}</p>
                 <div className="simple-form contact-sheet-form">
-                  <label className="field-label" htmlFor="bark-endpoint">推送链接</label>
+                  <label className="field-label" htmlFor="bark-endpoint">{t("bark.pushLink")}</label>
                   <input
                     id="bark-endpoint"
                     className="input"
@@ -2321,12 +2319,12 @@ export default function MenuPage() {
                     onClick={() => void sendAuthCode()}
                     type="button"
                   >
-                    {authActionState === "sending" ? "发送中..." : authCooldown > 0 ? `${authCooldown} 秒后重试` : "发送验证码"}
+                    {authActionState === "sending" ? t("common.sending") : authCooldown > 0 ? t("auth.retryIn", { seconds: authCooldown }) : t("auth.sendCode")}
                   </button>
                   <div className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
                     <div className="field-label-row">
-                      <label className="field-label">验证码</label>
-                      {authPending && authExpiresIn > 0 ? <span className="field-countdown">还有 {authExpiresIn} 秒有效</span> : null}
+                      <label className="field-label">{t("recovery.code")}</label>
+                      {authPending && authExpiresIn > 0 ? <span className="field-countdown">{t("auth.validFor", { seconds: authExpiresIn })}</span> : null}
                     </div>
                     <input className="input" value={authCode} onChange={(event) => setAuthCode(event.target.value)} />
                     <button
@@ -2335,7 +2333,7 @@ export default function MenuPage() {
                       onClick={() => void bindAuthChannel()}
                       type="button"
                     >
-                      {authActionState === "binding" ? "处理中..." : "确认绑定即时提醒"}
+                      {authActionState === "binding" ? t("common.processing") : t("bark.confirmBind")}
                     </button>
                   </div>
                 </div>
@@ -2349,21 +2347,21 @@ export default function MenuPage() {
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
         open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
-        title={authSheetChannel === "email" ? "认证邮箱" : authSheetChannel === "sms" ? "绑定手机" : authSheetChannel === "bark" ? "绑定即时提醒" : "绑定联系方式"}
+        title={authSheetChannel === "email" ? t("contact.verifyEmail") : authSheetChannel === "sms" ? t("contact.bindPhone") : authSheetChannel === "bark" ? t("contact.bindInstant") : t("contact.bindContact")}
         onClose={closeAuthSheet}
       >
         {authSheetChannel ? (
           <div ref={authSheetBodyRef} className="simple-form contact-sheet-form">
             <div className="field-label-row">
-              <label className="field-label">{authSheetChannel === "email" ? "邮箱地址" : authSheetChannel === "sms" ? "手机号" : "目标地址"}</label>
-              {authPending && authExpiresIn > 0 ? <span className="field-countdown">验证码还有 {authExpiresIn} 秒有效</span> : null}
+              <label className="field-label">{authSheetChannel === "email" ? t("contact.emailAddress") : authSheetChannel === "sms" ? t("contact.phoneNumber") : t("contact.targetAddress")}</label>
+              {authPending && authExpiresIn > 0 ? <span className="field-countdown">{t("auth.codeValidFor", { seconds: authExpiresIn })}</span> : null}
             </div>
             <input
               className="input"
               autoComplete={authSheetChannel === "email" ? "email" : authSheetChannel === "sms" ? "tel" : "off"}
               inputMode={authSheetChannel === "email" ? "email" : authSheetChannel === "sms" ? "tel" : "url"}
               maxLength={authSheetChannel === "sms" ? 24 : undefined}
-              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "+86 138 0000 0000" : "输入即时推送地址"}
+              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "+86 138 0000 0000" : t("contact.instantAddressPlaceholder")}
               value={authTarget}
               onChange={(event) => {
                 setAuthTarget(event.target.value);
@@ -2379,16 +2377,16 @@ export default function MenuPage() {
                 onClick={() => void sendAuthCode()}
                 type="button"
               >
-                {authActionState === "sending" ? "发送中..." : authCooldown > 0 ? `${authCooldown} 秒后重试` : "发送验证码"}
+                {authActionState === "sending" ? t("common.sending") : authCooldown > 0 ? t("auth.retryIn", { seconds: authCooldown }) : t("auth.sendCode")}
               </button>
             </div>
             <div ref={authVerifyRef} className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
-              <label className="field-label">验证码</label>
+              <label className="field-label">{t("recovery.code")}</label>
               <input
                 autoComplete="one-time-code"
                 className="input"
                 inputMode="numeric"
-                placeholder="输入验证码"
+                placeholder={t("admin.codePlaceholder")}
                 value={authCode}
                 onChange={(event) => setAuthCode(event.target.value)}
               />
@@ -2399,7 +2397,7 @@ export default function MenuPage() {
                   onClick={() => void bindAuthChannel()}
                   type="button"
                 >
-                  {authActionState === "binding" ? "处理中..." : authSheetChannel === "email" ? "确认认证" : authSheetChannel === "sms" ? "确认绑定" : "确认绑定"}
+                  {authActionState === "binding" ? t("common.processing") : authSheetChannel === "email" ? t("contact.confirmVerify") : t("contact.confirmBind")}
                 </button>
               </div>
             </div>
@@ -2410,7 +2408,7 @@ export default function MenuPage() {
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"
         open={unbindVerifyOpen}
-        title={`验证当前${unbindChannel ? contactLabel(unbindChannel) : "联系方式"}`}
+        title={t("contact.verifyCurrent", { channel: unbindChannel ? contactLabel(unbindChannel) : t("contact.method") })}
         onClose={() => {
           if (unbindState !== "idle") return;
           setUnbindVerifyOpen(false);
@@ -2420,7 +2418,7 @@ export default function MenuPage() {
         {unbindChannel && unbindChannel !== "bark" ? (
           <div className="simple-form contact-sheet-form">
             <div className="menu-unbind-current">
-              <span>当前绑定</span>
+              <span>{t("contact.currentBinding")}</span>
               <strong>{contactValue(unbindChannel)}</strong>
             </div>
             <button
@@ -2429,9 +2427,9 @@ export default function MenuPage() {
               onClick={() => void sendUnbindCode()}
               type="button"
             >
-              {unbindState === "sending" ? "发送中..." : unbindCooldown > 0 ? `${unbindCooldown} 秒后重试` : "发送验证码"}
+              {unbindState === "sending" ? t("common.sending") : unbindCooldown > 0 ? t("auth.retryIn", { seconds: unbindCooldown }) : t("auth.sendCode")}
             </button>
-            <label className="field-label">验证码</label>
+            <label className="field-label">{t("recovery.code")}</label>
             <input className="input" inputMode="numeric" value={unbindCode} onChange={(event) => setUnbindCode(event.target.value)} />
             <button
               className="danger-button contact-flow-primary"
@@ -2439,7 +2437,7 @@ export default function MenuPage() {
               onClick={() => void submitUnbind()}
               type="button"
             >
-              {unbindState === "removing" ? "解绑中..." : "确认解除绑定"}
+              {unbindState === "removing" ? t("contact.unbinding") : t("contact.confirmUnbind")}
             </button>
           </div>
         ) : null}
@@ -2448,7 +2446,7 @@ export default function MenuPage() {
         bodyClassName="menu-security-sheet-body"
         className="contact-bottom-sheet"
         open={passwordSheetOpen}
-        title={hasPassword ? "更换密码" : "设置密码"}
+        title={hasPassword ? t("password.change") : t("password.setup")}
         onClose={() => {
           if (passwordSaving) return;
           setPasswordSheetOpen(false);
@@ -2457,12 +2455,12 @@ export default function MenuPage() {
         <div className="simple-form menu-security-form">
           {hasPassword ? (
             <div className="menu-security-field">
-              <label className="field-label">当前密码</label>
+              <label className="field-label">{t("password.current")}</label>
               <input className="input" type="password" value={passwordCurrent} onChange={(event) => setPasswordCurrent(event.target.value)} />
             </div>
           ) : null}
           <div className="menu-security-field">
-            <label className="field-label">{hasPassword ? "新密码" : "设置密码"}</label>
+            <label className="field-label">{hasPassword ? t("recovery.newPassword") : t("password.setup")}</label>
             <input className="input" type="password" value={passwordNext} onChange={(event) => setPasswordNext(event.target.value)} />
           </div>
           <button
@@ -2471,7 +2469,7 @@ export default function MenuPage() {
             onClick={() => void savePassword()}
             type="button"
           >
-            {passwordSaving ? "处理中..." : hasPassword ? "确认更换" : "确认设置"}
+            {passwordSaving ? t("common.processing") : hasPassword ? t("password.confirmChange") : t("password.confirmSetup")}
           </button>
         </div>
       </BottomSheet>
@@ -2479,8 +2477,8 @@ export default function MenuPage() {
         bodyClassName="menu-security-sheet-body"
         className="contact-bottom-sheet"
         open={gestureSheetOpen}
-        title="手势解锁"
-        description="请设计您的手势。"
+        title={t("gesture.title")}
+        description={t("gesture.design")}
         onClose={() => setGestureSheetOpen(false)}
       >
         <GestureSetupPanel
@@ -2492,10 +2490,10 @@ export default function MenuPage() {
       </BottomSheet>
       <AvatarPresetDialog
         currentAvatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
-        displayName={session?.user.name ?? "言浪用户"}
+        displayName={session?.user.name ?? t("brand.user")}
         onClose={() => setAvatarDialogOpen(false)}
         customUploadEnabled={canUploadCustomAvatar && hasPassword}
-        customUploadHint={!canUploadCustomAvatar ? "Lv.4 解锁自定义头像" : "设置密码后可上传"}
+        customUploadHint={!canUploadCustomAvatar ? t("avatar.unlockAtLevel", { level: 4 }) : t("avatar.setPasswordToUpload")}
         onRequestCustomUpload={requestCustomAvatarUpload}
         onSave={savePresetAvatar}
         open={avatarDialogOpen}
@@ -2510,21 +2508,21 @@ export default function MenuPage() {
       />
       <InputDialog
         busy={basicEditSaving}
-        confirmLabel={basicEditField === "name" ? "保存昵称" : basicEditField === "welcome" ? "保存欢迎语" : "保存招呼"}
+        confirmLabel={basicEditField === "name" ? t("profile.saveNickname") : basicEditField === "welcome" ? t("profile.saveWelcome") : t("profile.saveGreeting")}
         onChange={setBasicEditValue}
         onClose={() => setBasicEditField(null)}
         onConfirm={() => void confirmBasicEdit()}
         open={Boolean(basicEditField)}
-        placeholder={basicEditField === "name" ? "输入新的昵称" : basicEditField === "welcome" ? "输入新的欢迎语" : "输入广场招呼"}
-        title={basicEditField === "name" ? "修改昵称" : basicEditField === "welcome" ? "修改欢迎语" : "广场招呼"}
+        placeholder={basicEditField === "name" ? t("profile.nicknamePlaceholder") : basicEditField === "welcome" ? t("profile.welcomePlaceholder") : t("profile.greetingPlaceholder")}
+        title={basicEditField === "name" ? t("profile.editNickname") : basicEditField === "welcome" ? t("profile.editWelcome") : t("profile.plazaGreeting")}
         value={basicEditValue}
       />
       <ConfirmDialog
         danger
         open={accountDeleteStep === "intro"}
-        title="确认注销账户？"
-        description="注销后，你会离开当前空间，好友关系和群聊成员关系也会被移除。"
-        confirmLabel="继续注销"
+        title={t("account.deleteConfirmTitle")}
+        description={t("account.deleteConfirmHint")}
+        confirmLabel={t("account.continueDelete")}
         onClose={() => setAccountDeleteStep(null)}
         onConfirm={() => {
           setAccountDeleteInput("");
@@ -2533,13 +2531,13 @@ export default function MenuPage() {
       />
       <InputDialog
         busy={accountDeleteSaving}
-        confirmLabel="下一步"
+        confirmLabel={t("common.next")}
         onChange={setAccountDeleteInput}
         onClose={() => setAccountDeleteStep(null)}
         onConfirm={confirmAccountDeleteInput}
         open={accountDeleteStep === "verify"}
-        placeholder={hasPassword ? "输入当前密码" : `输入昵称：${session?.user.name ?? ""}`}
-        title={hasPassword ? "验证当前密码" : "输入昵称确认"}
+        placeholder={hasPassword ? t("password.currentPlaceholder") : t("account.nicknameConfirmPlaceholder", { name: session?.user.name ?? "" })}
+        title={hasPassword ? t("password.verifyCurrent") : t("account.nicknameConfirm")}
         type={hasPassword ? "password" : "text"}
         value={accountDeleteInput}
       />
@@ -2547,9 +2545,9 @@ export default function MenuPage() {
         danger
         busy={accountDeleteSaving}
         open={accountDeleteStep === "final"}
-        title="最后确认一次"
-        description="这个操作会注销你的账户，并清理你在当前空间中的好友和群聊关系。"
-        confirmLabel="确认注销"
+        title={t("account.finalConfirm")}
+        description={t("account.finalDeleteHint")}
+        confirmLabel={t("account.confirmDelete")}
         onClose={() => {
           if (!accountDeleteSaving) setAccountDeleteStep(null);
         }}
@@ -2571,25 +2569,25 @@ export default function MenuPage() {
           >
             <div className="notification-editor-heading">
               <div>
-                <h2>{prefEditor.type === "threshold" ? "离线阈值" : prefEditor.field === "title" ? "自定义标题" : "自定义内容"}</h2>
-                <p>{prefEditor.type === "threshold" ? "离线多久后发送提醒" : "留空将使用默认文案"}</p>
+                <h2>{prefEditor.type === "threshold" ? t("notification.offlineThreshold") : prefEditor.field === "title" ? t("notification.customTitle") : t("notification.customContent")}</h2>
+                <p>{prefEditor.type === "threshold" ? t("notification.thresholdHint") : t("notification.emptyUsesDefault")}</p>
               </div>
-              <button className="icon-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button" aria-label="关闭">
+              <button className="icon-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button" aria-label={t("common.close")}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             {prefEditor.type === "threshold" ? (
               <div className="notification-threshold-editor">
-                <strong>{prefEditorValue} 分钟</strong>
+                <strong>{t("common.minutes", { count: Number(prefEditorValue) })}</strong>
                 <input
-                  aria-label="离线阈值"
+                  aria-label={t("notification.offlineThreshold")}
                   max={60}
                   min={1}
                   onChange={(event) => setPrefEditorValue(event.target.value)}
                   type="range"
                   value={prefEditorValue}
                 />
-                <div><span>1 分钟</span><span>60 分钟</span></div>
+                <div><span>{t("common.minutes", { count: 1 })}</span><span>{t("common.minutes", { count: 60 })}</span></div>
               </div>
             ) : (
               <>
@@ -2627,7 +2625,7 @@ export default function MenuPage() {
                         : appleMailIconUrl}
                     />
                     <div>
-                      <strong>{prefEditor.channel === "bark" ? `【言浪】${editorPreview.title}` : "邮件正文预览"}</strong>
+                      <strong>{prefEditor.channel === "bark" ? t("bark.previewTitle", { title: editorPreview.title }) : t("email.preview")}</strong>
                       <p>{editorPreview.content}</p>
                     </div>
                   </div>
@@ -2635,9 +2633,9 @@ export default function MenuPage() {
               </>
             )}
             <div className="notification-editor-actions">
-              <button className="ghost-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button">取消</button>
+              <button className="ghost-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button">{t("common.cancel")}</button>
               <button className="button" disabled={prefEditorSaving} onClick={() => void savePreferenceEditor()} type="button">
-                {prefEditorSaving ? "保存中" : "保存"}
+                {prefEditorSaving ? t("common.savingPlain") : t("common.save")}
               </button>
             </div>
           </section>
@@ -2647,15 +2645,15 @@ export default function MenuPage() {
         busy={unbindState === "removing"}
         danger
         open={unbindConfirmOpen}
-        title={`解除${unbindChannel ? contactLabel(unbindChannel) : "联系方式"}绑定？`}
+        title={t("contact.unbindConfirmTitle", { channel: unbindChannel ? contactLabel(unbindChannel) : t("contact.method") })}
         description={
           unbindChannel === "sms"
-            ? "手机每 365 天只能解绑一次。解绑后，该手机号将停止接收提醒。"
+            ? t("contact.phoneUnbindConfirm")
             : unbindChannel === "email"
-              ? "邮箱每 30 天只能解绑一次。解绑前需要验证当前邮箱。"
-              : "解绑后将立即停止接收 Bark 即时提醒。"
+              ? t("contact.emailUnbindConfirm")
+              : t("contact.barkUnbindConfirm")
         }
-        confirmLabel={unbindChannel === "bark" ? "确认解绑" : "继续验证"}
+        confirmLabel={unbindChannel === "bark" ? t("contact.confirmUnbind") : t("contact.continueVerify")}
         onClose={() => {
           if (unbindState === "removing") return;
           setUnbindConfirmOpen(false);
@@ -2665,9 +2663,9 @@ export default function MenuPage() {
       />
       <ConfirmDialog
         open={passwordReminderOpen}
-        title="请先设置密码"
+        title={t("password.setupFirstTitle")}
         description={passwordReminderDescription}
-        confirmLabel="去设置"
+        confirmLabel={t("password.setupNow")}
         onClose={() => setPasswordReminderOpen(false)}
         onConfirm={() => {
           setPasswordReminderOpen(false);
@@ -2677,9 +2675,9 @@ export default function MenuPage() {
       <ConfirmDialog
         danger
         open={leaveConfirmOpen}
-        title="确认退出当前空间？"
-        description="退出后会返回加入页。之后仍可以再次通过当前空间重新进入。"
-        confirmLabel="确认退出"
+        title={t("space.leaveConfirmTitle")}
+        description={t("space.leaveConfirmHint")}
+        confirmLabel={t("space.confirmLeave")}
         onClose={() => setLeaveConfirmOpen(false)}
         onConfirm={() => {
           setLeaveConfirmOpen(false);
