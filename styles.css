@@ -4402,16 +4402,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background: var(--message-other-surface);
   border: 1px solid var(--message-card-border);
   box-shadow: var(--message-card-shadow);
-  border-top-left-radius: 16px;
-  border-bottom-left-radius: 16px;
+  border-radius: var(--radius-bubble);
 }
 
 .message-bubble.self {
   color: var(--chat-self-text);
   background: var(--message-self-surface);
   box-shadow: 0 5px 16px rgba(20, 48, 39, 0.13);
-  border-top-right-radius: 16px;
-  border-bottom-right-radius: 16px;
+  border-radius: var(--radius-bubble);
 }
 
 .message-bubble.self.is-media,
@@ -5357,25 +5355,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   box-shadow: 0 6px 12px rgba(24, 35, 29, 0.12);
 }
 
-.personalization-entry-preview.bubble-preview.preview-tide i {
-  border-radius: 17px 17px 5px 17px;
-  background: linear-gradient(135deg, #d8f4ea, #8dd5c0);
-}
-
 .personalization-entry-preview.bubble-preview.preview-comic i {
   border: 2px solid #26352e;
+  background: #fff9df;
   box-shadow: 3px 3px 0 #f0a54e;
-}
-
-.personalization-entry-preview.bubble-preview.preview-neon {
-  background: linear-gradient(145deg, #f4f5f0, #e5ebe5);
-}
-
-.personalization-entry-preview.bubble-preview.preview-neon i {
-  border: 1px solid #5b9c83;
-  border-radius: 7px 14px 14px;
-  background: linear-gradient(145deg, #f7fbf4, #e4f2e8);
-  box-shadow: -3px 3px 0 #b9e5d2;
 }
 
 .avatar-frame-preview {
@@ -5486,6 +5469,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   gap: 8px;
 }
 
+.field-chat_bubble_style {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .personalization-option {
   display: grid;
   gap: 7px;
@@ -5550,20 +5537,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
     linear-gradient(145deg, #f7f4ed, #edf2ed);
 }
 
-.personalization-bubble-stage.bubble-style-tide,
-.message-group.bubble-style-tide {
-  --bubble-skin-other-bg: linear-gradient(145deg, #f4fbf8, #dcefe9);
-  --bubble-skin-other-color: #20463b;
-  --bubble-skin-other-border: rgba(57, 116, 96, 0.24);
-  --bubble-skin-other-shadow: 0 5px 0 #b9ddd1, 0 9px 18px rgba(39, 91, 73, 0.11);
-  --bubble-skin-self-bg: linear-gradient(145deg, #24765f, #15513f);
-  --bubble-skin-self-color: #f4fff9;
-  --bubble-skin-self-border: rgba(10, 65, 47, 0.2);
-  --bubble-skin-self-shadow: 0 5px 0 #68bea1, 0 9px 18px rgba(20, 77, 59, 0.2);
-  --bubble-skin-other-radius: 20px 20px 8px 20px;
-  --bubble-skin-self-radius: 20px 20px 20px 8px;
-}
-
 .personalization-bubble-stage.bubble-style-comic,
 .message-group.bubble-style-comic {
   --bubble-skin-other-bg: #fff9df;
@@ -5574,23 +5547,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   --bubble-skin-self-color: #27322d;
   --bubble-skin-self-border: #26342e;
   --bubble-skin-self-shadow: 4px 4px 0 #e49328;
-  --bubble-skin-other-radius: 16px 16px 5px 16px;
-  --bubble-skin-self-radius: 16px 16px 16px 5px;
+  --bubble-skin-other-radius: 16px;
+  --bubble-skin-self-radius: 16px;
   --bubble-skin-border-width: 2px;
-}
-
-.personalization-bubble-stage.bubble-style-neon,
-.message-group.bubble-style-neon {
-  --bubble-skin-other-bg: linear-gradient(145deg, #f7fbf4, #e4f2e8);
-  --bubble-skin-other-color: #1c4034;
-  --bubble-skin-other-border: #5b9c83;
-  --bubble-skin-other-shadow: -3px 3px 0 #b9e5d2, 0 9px 20px rgba(29, 82, 63, 0.1);
-  --bubble-skin-self-bg: linear-gradient(145deg, #233d35, #142b24);
-  --bubble-skin-self-color: #eafff5;
-  --bubble-skin-self-border: #63d8ad;
-  --bubble-skin-self-shadow: 3px 3px 0 #1aaa78, 0 9px 20px rgba(12, 49, 38, 0.24);
-  --bubble-skin-other-radius: 8px 18px 18px 18px;
-  --bubble-skin-self-radius: 18px 8px 18px 18px;
 }
 
 .personalization-preview-message {
@@ -5769,9 +5728,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-weight: 700;
 }
 
-.field-chat_bubble_style .preview-tide i span { border: 1px solid rgba(57, 116, 96, 0.24); border-radius: 16px 16px 5px 16px; background: linear-gradient(145deg, #f4fbf8, #dcefe9); box-shadow: 0 4px 0 #b9ddd1; }
-.field-chat_bubble_style .preview-comic i span { border: 2px solid #26352e; border-radius: 13px 13px 3px 13px; background: #fff9df; box-shadow: 3px 3px 0 #f0a54e; }
-.field-chat_bubble_style .preview-neon i span { border: 1px solid #5b9c83; border-radius: 5px 13px 13px; background: linear-gradient(145deg, #f7fbf4, #e4f2e8); box-shadow: -3px 3px 0 #b9e5d2; }
+.field-chat_bubble_style .preview-comic i span { border: 2px solid #26352e; border-radius: 13px; background: #fff9df; box-shadow: 3px 3px 0 #f0a54e; }
 
 .field-avatar_frame_style .personalization-option > i > span,
 .field-square_outfit_style .personalization-option > i > span,
@@ -5878,33 +5835,15 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   padding: 0 5px 5px 0;
 }
 
+.message-group.bubble-style-comic .message-bubbles {
+  gap: 0;
+}
+
 html[data-theme="dark"] .personalization-bubble-stage {
   border-color: rgba(180, 202, 190, 0.12);
   background:
     radial-gradient(circle at 85% 12%, rgba(65, 132, 103, 0.16), transparent 34%),
     linear-gradient(145deg, #1b2420, #15201b);
-}
-
-html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-tide, .message-group.bubble-style-tide) {
-  --bubble-skin-other-bg: linear-gradient(145deg, #29473d, #203830);
-  --bubble-skin-other-color: #e7fff5;
-  --bubble-skin-other-border: rgba(133, 205, 180, 0.32);
-  --bubble-skin-other-shadow: 0 5px 0 #315f50, 0 9px 18px rgba(0, 0, 0, 0.2);
-  --bubble-skin-self-bg: linear-gradient(145deg, #38876d, #24604d);
-  --bubble-skin-self-color: #f5fff9;
-  --bubble-skin-self-border: rgba(130, 226, 190, 0.28);
-  --bubble-skin-self-shadow: 0 5px 0 #6bc1a3, 0 9px 18px rgba(0, 0, 0, 0.25);
-}
-
-html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-neon, .message-group.bubble-style-neon) {
-  --bubble-skin-other-bg: linear-gradient(145deg, #263832, #1e2e29);
-  --bubble-skin-other-color: #e8fff5;
-  --bubble-skin-other-border: #508d77;
-  --bubble-skin-other-shadow: -3px 3px 0 #315e4f, 0 9px 20px rgba(0, 0, 0, 0.22);
-  --bubble-skin-self-bg: linear-gradient(145deg, #1d4135, #102c24);
-  --bubble-skin-self-color: #edfff8;
-  --bubble-skin-self-border: #6be0b4;
-  --bubble-skin-self-shadow: 3px 3px 0 #20a879, 0 9px 20px rgba(0, 0, 0, 0.3);
 }
 
 .square-character.outfit-varsity .square-character-torso { background: linear-gradient(90deg, #edf0e8 22%, #34735c 22% 78%, #edf0e8 78%); }

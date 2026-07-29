@@ -69,13 +69,17 @@ const growthLevelUnlockKeys: Record<number, TranslationKey[]> = {
   18: ["growth.unlockFinalBadge"],
 };
 const personalizationOptions = {
-  chat_bubble_style: [["default", "menu.styleDefault"], ["tide", "menu.styleTide"], ["comic", "menu.styleComic"], ["neon", "menu.styleNeon"]],
+  chat_bubble_style: [["default", "menu.styleDefault"], ["comic", "menu.styleComic"]],
   avatar_frame_style: [["none", "menu.frameNone"], ["orbit", "menu.frameOrbit"], ["blaze", "menu.frameBlaze"], ["pixel", "menu.framePixel"]],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
   square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"]],
   square_limb_style: [["line", "menu.limbLine"], ["chunky", "menu.limbChunky"], ["robot", "menu.limbRobot"], ["ribbon", "menu.limbRibbon"]],
 } as const;
+
+function visibleBubbleStyle(style?: string) {
+  return style === "comic" ? "comic" : "default";
+}
 
 type NotificationMessageKind = "direct" | "group" | "online";
 type PreferenceEditor =
@@ -1770,7 +1774,7 @@ export default function MenuPage() {
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           <button className="personalization-background-entry personalization-feature-entry" onClick={() => setChatBubbleDrawerOpen(true)} type="button">
-            <span className={`personalization-entry-preview bubble-preview preview-${me?.chat_bubble_style ?? "default"}`}><i /></span>
+            <span className={`personalization-entry-preview bubble-preview preview-${visibleBubbleStyle(me?.chat_bubble_style)}`}><i /></span>
             <span><strong>{t("menu.chatBubble")}</strong><small>{t("menu.chatBubbleHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
@@ -1845,7 +1849,7 @@ export default function MenuPage() {
 
       <SideDrawer open={chatBubbleDrawerOpen} onClose={() => setChatBubbleDrawerOpen(false)} title={t("menu.chatBubble")}>
         <div className="personalization-editor">
-          <div className={`personalization-bubble-stage bubble-style-${me?.chat_bubble_style ?? "default"}`}>
+          <div className={`personalization-bubble-stage bubble-style-${visibleBubbleStyle(me?.chat_bubble_style)}`}>
             <div className="personalization-preview-message other">
               <UserAvatar className="personalization-preview-avatar" name={space?.official_user?.name ?? t("brand.user")} uri={space?.official_user?.avatar_uri} />
               <span>{t("menu.bubblePreviewOther")}</span>
@@ -1855,7 +1859,7 @@ export default function MenuPage() {
           <div className="personalization-option-grid field-chat_bubble_style">
             {personalizationOptions.chat_bubble_style.map(([value, label]) => (
               <button
-                className={`personalization-option preview-${value}${(me?.chat_bubble_style ?? "default") === value ? " is-selected" : ""}`}
+                className={`personalization-option preview-${value}${visibleBubbleStyle(me?.chat_bubble_style) === value ? " is-selected" : ""}`}
                 disabled={personalizationSaving}
                 key={value}
                 onClick={() => void savePersonalization("chat_bubble_style", value)}

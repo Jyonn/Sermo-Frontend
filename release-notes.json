@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.29.11",
+  "id": "2026.07.29.12",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "同步恢复稳定",
+      "title": "漫画气泡重新登场",
       "items": [
-        "修复用户资料更新触发重复请求的问题",
-        "消息、好友申请和提醒同步不再反复重启",
-        "轮询任务增加防重入保护"
+        "气泡风格精简为经典与漫画",
+        "漫画气泡恢复完整的描边与叠色",
+        "连续消息的圆角连接更加统一"
       ]
     },
     "en": {
-      "title": "Stable background sync",
+      "title": "Comic bubbles, redrawn",
       "items": [
-        "Fixed repeated requests triggered by profile updates",
-        "Message, friend request, and reminder sync no longer restart repeatedly",
-        "Polling tasks now guard against overlapping requests"
+        "Bubble styles are streamlined to Classic and Comic",
+        "Comic bubbles restore their full outline and layered color",
+        "Grouped message corners now connect consistently"
       ]
     }
   }

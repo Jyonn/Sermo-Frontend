@@ -164,6 +164,10 @@ function avatarLabel(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
+function visibleBubbleStyle(style?: string) {
+  return style === "comic" ? "comic" : "default";
+}
+
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
   if (kind === "emoji") {
     return (
@@ -1513,7 +1517,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-      <div className={`message-group ${group.from}${group.isPermanentVip ? " is-permanent-vip" : ""} bubble-style-${group.chatBubbleStyle ?? "default"}`}>
+      <div className={`message-group ${group.from}${group.isPermanentVip ? " is-permanent-vip" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
         {group.from === "other" ? <UserAvatar className="avatar message-avatar" frame={group.avatarFrameStyle} name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
