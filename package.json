@@ -4,8 +4,9 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "release:prepare": "node scripts/prepare-release.mjs",
+    "dev": "npm run release:prepare && vite",
+    "build": "npm run release:prepare && tsc -b && vite build",
     "i18n:check": "node scripts/check-i18n.mjs",
     "preview": "vite preview"
   },

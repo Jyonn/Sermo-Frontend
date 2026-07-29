@@ -1,3 +1,5 @@
+importScripts("/sw-release.js");
+
 const CACHE_NAME = "sermo-shell-v5";
 const MEDIA_CACHE_NAME = "sermo-media-v1";
 const MEDIA_DB_NAME = "sermo-media-metadata";

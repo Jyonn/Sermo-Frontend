@@ -98,10 +98,57 @@
 
 .pwa-update-prompt {
   z-index: 80;
+  align-items: start;
+  width: min(580px, calc(100vw - 28px));
+  padding: 16px;
 }
 
 .pwa-update-prompt .pwa-recommendation-icon .material-symbols-outlined {
   font-size: 24px;
+}
+
+.pwa-update-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pwa-update-heading > span {
+  flex: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+}
+
+.pwa-update-list {
+  display: grid;
+  gap: 5px;
+  margin: 7px 0 0;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  list-style: none;
+}
+
+.pwa-update-list li {
+  position: relative;
+  padding-left: 13px;
+}
+
+.pwa-update-list li::before {
+  position: absolute;
+  top: 0.58em;
+  left: 1px;
+  width: 4px;
+  height: 4px;
+  background: var(--brand-strong);
+  border-radius: 50%;
+  content: "";
+}
+
+.pwa-update-prompt .pwa-recommendation-action {
+  align-self: center;
 }
 
 .pwa-install-guide {
@@ -227,6 +274,15 @@
 
   .pwa-recommendation {
     bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .pwa-update-prompt {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .pwa-update-prompt .pwa-recommendation-action {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
 

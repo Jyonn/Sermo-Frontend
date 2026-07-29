@@ -1,0 +1,11 @@
+.gitignore
+.idea
+.DS_Store
+node_modules
+dist
+public/release.json
+public/sw-release.js
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+src/assets

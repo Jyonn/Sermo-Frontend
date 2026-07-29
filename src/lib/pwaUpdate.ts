@@ -1,15 +1,35 @@
 export const PWA_UPDATE_AVAILABLE_EVENT = "sermo:pwa-update-available";
 
+export interface ReleaseNotes {
+  id: string;
+  publishedAt: string;
+  locales: Record<string, {
+    title: string;
+    items: string[];
+  }>;
+}
+
 let waitingWorker: ServiceWorker | null = null;
 
-function announceUpdate(worker: ServiceWorker) {
+async function getReleaseNotes() {
+  try {
+    const response = await fetch(`/release.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) return null;
+    return await response.json() as ReleaseNotes;
+  } catch {
+    return null;
+  }
+}
+
+async function announceUpdate(worker: ServiceWorker) {
   waitingWorker = worker;
-  window.dispatchEvent(new CustomEvent(PWA_UPDATE_AVAILABLE_EVENT));
+  const release = await getReleaseNotes();
+  window.dispatchEvent(new CustomEvent(PWA_UPDATE_AVAILABLE_EVENT, { detail: release }));
 }
 
 export function watchPwaUpdates(registration: ServiceWorkerRegistration) {
   if (registration.waiting && navigator.serviceWorker.controller) {
-    announceUpdate(registration.waiting);
+    void announceUpdate(registration.waiting);
   }
 
   registration.addEventListener("updatefound", () => {
@@ -18,7 +38,7 @@ export function watchPwaUpdates(registration: ServiceWorkerRegistration) {
 
     worker.addEventListener("statechange", () => {
       if (worker.state === "installed" && navigator.serviceWorker.controller) {
-        announceUpdate(worker);
+        void announceUpdate(worker);
       }
     });
   });

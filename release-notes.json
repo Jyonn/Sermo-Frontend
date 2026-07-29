@@ -1,0 +1,22 @@
+{
+  "id": "2026.07.29.1",
+  "publishedAt": "2026-07-29",
+  "locales": {
+    "zh-CN": {
+      "title": "更新内容，一眼看懂",
+      "items": [
+        "发现新版本时，直接展示本次更新内容",
+        "更新说明现已支持中英文",
+        "优化新版本检测的可靠性"
+      ]
+    },
+    "en": {
+      "title": "See what is new at a glance",
+      "items": [
+        "See a clear summary whenever an update is ready",
+        "Release notes are now available in Chinese and English",
+        "Improved update detection reliability"
+      ]
+    }
+  }
+}
