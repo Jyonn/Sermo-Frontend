@@ -38,7 +38,7 @@ import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResou
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
-import { getActiveLanguage, getActiveLocale, useI18n } from "../lib/language";
+import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -52,7 +52,7 @@ const MESSAGE_TYPE_LOCATION = 6;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const EMOJI_PAGES = [
   {
-    label: "常用",
+    labelKey: "emoji.frequent",
     icon: "🕘",
     emojis: [
       "😀", "😄", "😁", "😂", "🥹", "😊", "🙂", "🙃", "😉", "😍", "🥰", "😘",
@@ -62,7 +62,7 @@ const EMOJI_PAGES = [
     ],
   },
   {
-    label: "表情",
+    labelKey: "emoji.faces",
     icon: "😊",
     emojis: [
       "😃", "😆", "🤣", "😌", "😏", "😒", "🙄", "😬", "😮‍💨", "🤥", "🫣", "🤫",
@@ -72,7 +72,7 @@ const EMOJI_PAGES = [
     ],
   },
   {
-    label: "手势",
+    labelKey: "emoji.gestures",
     icon: "👋",
     emojis: [
       "👋", "🤚", "🖐️", "✋", "🖖", "🫱", "🫲", "🫳", "🫴", "🫷", "🫸", "🤌",
@@ -82,7 +82,7 @@ const EMOJI_PAGES = [
     ],
   },
   {
-    label: "生活",
+    labelKey: "emoji.life",
     icon: "🎈",
     emojis: [
       "🌞", "🌙", "⭐", "🌈", "☁️", "❄️", "🌊", "🌱", "🌸", "🌻", "🍀", "🍎",
@@ -92,7 +92,7 @@ const EMOJI_PAGES = [
     ],
   },
   {
-    label: "符号",
+    labelKey: "emoji.symbols",
     icon: "❤️",
     emojis: [
       "❤️", "🧡", "💛", "💚", "🩵", "💙", "💜", "🖤", "🩶", "🤍", "🤎", "💔",
@@ -140,19 +140,21 @@ function pinnedMessagePreview(pin: PinnedMessageDTO) {
   const message = pin.message;
   if (message.type === MESSAGE_TYPE_TEXT) return message.content;
   return {
-    [MESSAGE_TYPE_IMAGE]: "图片",
-    [MESSAGE_TYPE_FILE]: message.payload?.file_name || "文件",
-    [MESSAGE_TYPE_VIDEO]: "视频",
-    [MESSAGE_TYPE_AUDIO]: `语音${message.payload?.duration_seconds ? ` ${Math.round(message.payload.duration_seconds)} 秒` : ""}`,
-    [MESSAGE_TYPE_LOCATION]: "位置",
-  }[message.type] ?? "消息";
+    [MESSAGE_TYPE_IMAGE]: i18n.t("media.image"),
+    [MESSAGE_TYPE_FILE]: message.payload?.file_name || i18n.t("media.file"),
+    [MESSAGE_TYPE_VIDEO]: i18n.t("media.video"),
+    [MESSAGE_TYPE_AUDIO]: message.payload?.duration_seconds
+      ? i18n.t("message.audioDuration", { seconds: Math.round(message.payload.duration_seconds) })
+      : i18n.t("media.audio"),
+    [MESSAGE_TYPE_LOCATION]: i18n.t("media.location"),
+  }[message.type] ?? i18n.t("message.generic");
 }
 
 function pinnedByLabel(pin: PinnedMessageDTO) {
   const names = pin.pinned_by_users.map((user) => user.name);
-  if (!names.length) return "聊天成员";
+  if (!names.length) return i18n.t("chat.members");
   if (names.length <= 2) return names.join("、");
-  return `${names[0]}等${names.length}人`;
+  return i18n.t("chat.peopleIncluding", { name: names[0], count: names.length });
 }
 
 function avatarLabel(name: string) {
@@ -475,7 +477,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   return (
     <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}>
       <button
-        aria-label={isLoading ? "语音加载中" : isPlaying ? "暂停语音" : "播放语音"}
+        aria-label={isLoading ? i18n.t("audio.loading") : isPlaying ? i18n.t("audio.pause") : i18n.t("audio.play")}
         className="message-audio-play"
         disabled={isLoading}
         onClick={() => void togglePlayback()}
@@ -487,7 +489,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         <div className="message-audio-head">
           <div className="message-audio-meta">
             <ComposerSvgIcon className="message-audio-icon" kind="mic" />
-            <span>语音消息</span>
+            <span>{i18n.t("message.audio")}</span>
           </div>
           <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
         </div>
@@ -546,7 +548,7 @@ function isMediaMessageKind(kind: MessageKind) {
 function buildAmapLocationUrl(latitude: number, longitude: number, address?: string) {
   const params = new URLSearchParams({
     position: `${longitude},${latitude}`,
-    name: address || "共享位置",
+    name: address || i18n.t("location.shared"),
     src: "Sermo",
     coordinate: "wgs84",
     callnative: "1",
@@ -586,21 +588,21 @@ function formatChatListTime(value: number) {
 
   const sameDay = date.toDateString() === now.toDateString();
   if (sameDay) {
-    return getActiveLanguage() === "en" ? `${Math.floor(minutes / 60)} hr ago` : `${Math.floor(minutes / 60)} 小时前`;
+    return i18n.t("time.hoursAgo", { count: Math.floor(minutes / 60) });
   }
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return getActiveLanguage() === "en" ? "Yesterday" : "昨天";
+  if (date.toDateString() === yesterday.toDateString()) return i18n.t("time.yesterday");
   return new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(date);
 }
 
 function formatPresence(user: UserDTO | null) {
-  if (!user) return getActiveLanguage() === "en" ? "Status unavailable" : "暂无状态";
-  if (user.is_alive) return getActiveLanguage() === "en" ? "Online" : "在线";
+  if (!user) return i18n.t("presence.unavailable");
+  if (user.is_alive) return i18n.t("presence.online");
 
   const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
-  if (minutes < 30) return getActiveLanguage() === "en" ? "Recently active" : "刚刚活跃";
-  return getActiveLanguage() === "en" ? "Offline" : "离线";
+  if (minutes < 30) return i18n.t("presence.recentlyActive");
+  return i18n.t("presence.offline");
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
@@ -750,19 +752,19 @@ function updateChatSummary(chat: Chat, preview: string, lastActivity: number) {
   return {
     ...chat,
     preview,
-    time: "刚刚",
+    time: i18n.t("time.justNow"),
     lastActivity,
     unread: 0,
   };
 }
 
 function previewFromKind(kind: MessageKind, text: string) {
-  if (kind === "image") return "[图片]";
-  if (kind === "video") return "[视频]";
-  if (kind === "audio") return "[语音]";
-  if (kind === "file") return "[文件]";
-  if (kind === "location") return "[位置]";
-  return text || "暂无消息";
+  if (kind === "image") return i18n.t("message.imagePlaceholder");
+  if (kind === "video") return i18n.t("message.videoPlaceholder");
+  if (kind === "audio") return i18n.t("message.audioPlaceholder");
+  if (kind === "file") return i18n.t("message.filePlaceholder");
+  if (kind === "location") return i18n.t("message.locationPlaceholder");
+  return text || i18n.t("chat.noMessages");
 }
 
 function previewFromMessage(message: Pick<ChatMessage, "kind" | "text">) {
@@ -770,7 +772,7 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text">) {
 }
 
 function previewFromDto(message: ChatMessageDTO | null) {
-  if (!message) return "暂无消息";
+  if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
   return previewFromKind(kind, message.content);
 }
@@ -845,7 +847,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
     >
       {resolvedThumbnailUri ? <img alt="" aria-hidden="true" className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
       <img
-        alt="图片消息"
+        alt={i18n.t("message.image")}
         className="message-media-image message-media-image-main"
         loading="lazy"
         ref={imageRef}
@@ -900,7 +902,7 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
       style={aspectRatio ? { "--message-video-aspect": aspectRatio } as CSSProperties : undefined}
     >
       <button
-        aria-label="查看视频"
+        aria-label={i18n.t("video.view")}
         className="message-video-surface"
         onClick={() => onOpenVideo?.(resolvedUri, metadata ?? null, messageId ?? null)}
         type="button"
@@ -1014,7 +1016,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
               <button
                 key={message.clientId}
                 data-message-id={typeof message.id === "number" ? message.id : undefined}
-                aria-label={`查看第 ${index + 1} 张图片`}
+                aria-label={i18n.t("image.viewNumber", { index: index + 1 })}
                 className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}`}
                 onClick={(event) => {
                   if (suppressClickRef.current === index) {
@@ -1048,7 +1050,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                   </span>
                 ) : null}
                 {message.status === "failed" ? (
-                  <span className="message-image-gallery-failed" aria-label="发送失败">
+                  <span className="message-image-gallery-failed" aria-label={i18n.t("message.sendFailed")}>
                     <span className="material-symbols-outlined" aria-hidden="true">error</span>
                   </span>
                 ) : null}
@@ -1151,9 +1153,9 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   if (currentPreview.status === "pending") {
     return (
-      <div className="message-link-preview-card is-loading" aria-label="正在生成链接预览">
+      <div className="message-link-preview-card is-loading" aria-label={i18n.t("link.generatingPreview")}>
         <div className="message-link-preview-text">
-          <span className="message-link-preview-site">{hostnameFromUrl(previewUrl) || "链接预览"}</span>
+          <span className="message-link-preview-site">{hostnameFromUrl(previewUrl) || i18n.t("link.preview")}</span>
           <span className="message-link-preview-title shimmer-line" />
           <span className="message-link-preview-desc shimmer-line short" />
         </div>
@@ -1162,7 +1164,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
     );
   }
 
-  const title = currentPreview.title || hostnameFromUrl(currentPreview.url || "") || currentPreview.url || "链接";
+  const title = currentPreview.title || hostnameFromUrl(currentPreview.url || "") || currentPreview.url || i18n.t("link.title");
   const siteName = currentPreview.site_name || hostnameFromUrl(currentPreview.url || "");
 
   return (
@@ -1216,7 +1218,7 @@ function renderMessageContent(
       <a className={`message-file-card ${groupClassName}`.trim()} download={message.payload.file_name || true} href={resolvedUri} rel="noreferrer" target="_blank">
         <span className="message-file-icon"><ComposerSvgIcon kind="file" /></span>
         <span className="message-file-copy">
-          <strong>{message.payload.file_name || "文件"}</strong>
+          <strong>{message.payload.file_name || i18n.t("media.file")}</strong>
           <small>{formatFileSize(message.payload.file_size)}</small>
         </span>
         <span className="message-file-open" aria-hidden="true">↗</span>
@@ -1241,12 +1243,12 @@ function renderMessageContent(
           <ComposerSvgIcon kind="location" />
         </span>
         <span className="message-location-copy">
-          <strong>{address || (message.status === "pending" ? obscured ? "正在生成模糊位置" : "正在解析位置" : obscured ? "模糊位置" : "共享位置")}</strong>
+          <strong>{address || (message.status === "pending" ? obscured ? i18n.t("location.generatingApproximate") : i18n.t("location.resolving") : obscured ? i18n.t("location.approximate") : i18n.t("location.shared"))}</strong>
           <small>
             {obscured
-              ? `模糊至 ${obscureRadius} 公里内`
+              ? i18n.t("location.withinKm", { distance: obscureRadius })
               : address
-                ? "在地图中查看"
+                ? i18n.t("location.viewOnMap")
                 : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
           </small>
         </span>
@@ -1374,7 +1376,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}>
       <div className={`message-bubble-shell ${from}`}>
         {showRetry ? (
-          <button aria-label="重试发送" className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
+          <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">refresh</span>
           </button>
         ) : null}
@@ -1426,7 +1428,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               }}
               type="button"
             >
-              <strong>{message.replyTo.is_deleted ? "原消息" : message.replyTo.user.name}</strong>
+              <strong>{message.replyTo.is_deleted ? i18n.t("message.original") : message.replyTo.user.name}</strong>
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
@@ -1567,7 +1569,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
     return (
       <div className="message-image-archive is-empty">
         <span>IMAGE RECORD</span>
-        <p>影像资料尚未写入</p>
+        <p>{i18n.t("media.metadataMissing")}</p>
       </div>
     );
   }
@@ -1584,15 +1586,15 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
         minute: "2-digit",
       })
     : "";
-  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate);
+  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? i18n.t("location.resolving") : coordinate);
   const rows = [
-    ["设备", device],
-    ["镜头", metadata.lens_model],
+    [i18n.t("media.device"), device],
+    [i18n.t("media.lens"), metadata.lens_model],
   ].filter((row) => row[1]);
   const provider = metadata.geocoding_provider === "nominatim"
     ? { href: "https://www.openstreetmap.org/copyright", label: "OpenStreetMap" }
     : metadata.geocoding_provider === "amap"
-      ? { href: "https://www.amap.com/", label: "高德地图" }
+      ? { href: "https://www.amap.com/", label: i18n.t("map.amap") }
       : metadata.geocoding_provider === "opencage"
         ? { href: "https://opencagedata.com/", label: "OpenCage" }
         : null;
@@ -1600,7 +1602,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
     <div className="message-image-archive">
       <div className={`message-image-location ${location ? "" : "is-empty"}`}>
         <span className="message-image-archive-label">LOCATION</span>
-        <strong>{location || "未记录地点"}</strong>
+        <strong>{location || i18n.t("location.notRecorded")}</strong>
         {coordinate ? <small>{coordinate}</small> : null}
         {provider && metadata.address ? (
           <a href={provider.href} rel="noreferrer" target="_blank">GEOCODED BY {provider.label}</a>
@@ -1609,7 +1611,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
       <div className="message-image-record">
         <div className="message-image-record-heading">
           <span className="message-image-archive-label">IMAGE RECORD</span>
-          <strong>{takenAt || "拍摄时间未记录"}</strong>
+          <strong>{takenAt || i18n.t("media.timeNotRecorded")}</strong>
         </div>
         {rows.length ? (
           <dl className="message-image-metadata-list">
@@ -1626,7 +1628,7 @@ function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null })
     return (
       <div className="message-image-archive is-empty">
         <span>VIDEO RECORD</span>
-        <p>影像资料正在整理</p>
+        <p>{i18n.t("media.metadataLoading")}</p>
       </div>
     );
   }
@@ -1643,22 +1645,22 @@ function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null })
         minute: "2-digit",
       })
     : "";
-  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? "正在解析位置" : coordinate);
+  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? i18n.t("location.resolving") : coordinate);
   const rows = [
-    ["设备", device],
-    ["镜头", metadata.lens_model],
+    [i18n.t("media.device"), device],
+    [i18n.t("media.lens"), metadata.lens_model],
   ].filter((row) => row[1]);
   return (
     <div className="message-image-archive message-video-archive">
       <div className={`message-image-location ${location ? "" : "is-empty"}`}>
         <span className="message-image-archive-label">LOCATION</span>
-        <strong>{location || "未记录地点"}</strong>
+        <strong>{location || i18n.t("location.notRecorded")}</strong>
         {coordinate ? <small>{coordinate}</small> : null}
       </div>
       <div className="message-image-record">
         <div className="message-image-record-heading">
           <span className="message-image-archive-label">VIDEO RECORD</span>
-          <strong>{takenAt || "拍摄时间未记录"}</strong>
+          <strong>{takenAt || i18n.t("media.timeNotRecorded")}</strong>
         </div>
         {rows.length ? (
           <dl className="message-image-metadata-list">
@@ -1703,7 +1705,7 @@ function sortChatDetailMembers(
 
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
-  const title = chat.title || peer?.name || "未命名会话";
+  const title = chat.title || peer?.name || i18n.t("chat.unnamed");
   const presence = formatPresence(peer);
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
   const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;
@@ -1713,7 +1715,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     title,
     avatarUri: peer?.avatar_uri,
     avatarFrameStyle: peer?.avatar_frame_style,
-    subtitle: chat.group ? `${chat.members.length} 人` : presence,
+    subtitle: chat.group ? i18n.t("chat.memberCount", { count: chat.members.length }) : presence,
     preview: previewFromDto(chat.last_message),
     time: formatChatListTime(lastActivity),
     lastActivity,
@@ -1726,9 +1728,9 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     detail: {
-      summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
-      relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
-      actions: chat.group ? (isOwner ? ["邀请成员", "解散群聊"] : ["退出群聊"]) : ["发起好友申请", "静音通知"],
+      summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
+      relation: chat.group ? (isOwner ? i18n.t("chat.ownerRelation") : i18n.t("chat.memberRelation")) : i18n.t("chat.directRelation"),
+      actions: chat.group ? (isOwner ? [i18n.t("chat.inviteMembers"), i18n.t("chat.disband")] : [i18n.t("chat.leave")]) : [i18n.t("chat.friendRequest"), i18n.t("chat.mute")],
       members: sortChatDetailMembers(
         chat.members.map((member) => ({
           userId: member.user_id,
@@ -1798,7 +1800,7 @@ function isChatAccessBoundaryError(error: unknown) {
 
 function chatAccessBoundaryMessage(error: unknown) {
   if (error instanceof ApiError && error.message) return error.message;
-  return "这个会话不存在，或者你没有访问权限。";
+  return i18n.t("chat.accessDenied");
 }
 
 export default function ChatsPage() {
@@ -2052,7 +2054,7 @@ export default function ChatsPage() {
       .catch(() => undefined);
     return () => controller.abort();
   }, [emojiUsageCacheKey]);
-  const currentUserName = session?.user.name ?? "我";
+  const currentUserName = session?.user.name ?? t("common.me");
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
   const routeState = location.state as ChatRouteState | null;
@@ -2065,7 +2067,7 @@ export default function ChatsPage() {
   const requireComposerCapability = (key: string, fallbackLevel: number, label: string) => {
     const capability = growthCapability(key, fallbackLevel);
     if (capability.available) return true;
-    showToast(`达到 Lv.${capability.required_level} 后可${label}`, "error");
+    showToast(t("growth.capabilityRequired", { level: capability.required_level, capability: label }), "error");
     return false;
   };
   const canSendImage = growthCapability("send_image", 2).available;
@@ -2202,14 +2204,14 @@ export default function ChatsPage() {
             : current.filter((pin) => pin.message.message_id !== message.id)
         );
         if (pinnedMessages.length === 1 && !remainingUsers.length) setPinnedDrawerOpen(false);
-        showToast("已取消置顶");
+        showToast(t("pin.removed"));
       } else {
         const created = await api.pinMessage(message.id);
         setPinnedMessages((current) => [created, ...current.filter((pin) => pin.message.message_id !== message.id)]);
-        showToast("消息已置顶");
+        showToast(t("pin.added"));
       }
     } catch (error) {
-      showToast(error instanceof ApiError ? error.message : "置顶操作失败", "error");
+      showToast(error instanceof ApiError ? error.message : t("pin.failed"), "error");
     } finally {
       setPinSavingMessageId(null);
     }
@@ -2273,7 +2275,7 @@ export default function ChatsPage() {
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         recordChatHealth(cacheScope, false);
-        const message = apiError instanceof ApiError ? apiError.message : "加载会话失败";
+        const message = apiError instanceof ApiError ? apiError.message : t("chat.loadFailed");
         setPageError(message);
         setViewState("error");
       });
@@ -2394,7 +2396,7 @@ export default function ChatsPage() {
           }));
           window.requestAnimationFrame(() => window.requestAnimationFrame(() => revealElement(messageId)));
         })
-        .catch(() => setPageError("暂时无法定位原消息"));
+        .catch(() => setPageError(t("message.locateOriginalFailed")));
     };
 
     window.addEventListener("sermo:reveal-message", reveal);
@@ -2437,11 +2439,11 @@ export default function ChatsPage() {
   useEffect(() => {
     if (!chatId) return;
     if (!routeChatId) {
-      redirectToChatListWithNotice("这个聊天链接格式不正确。");
+      redirectToChatListWithNotice(t("chat.invalidLink"));
       return;
     }
     if (selectedChat || viewState === "idle" || viewState === "loading") return;
-    redirectToChatListWithNotice(pageError ?? "这个会话不存在，或者你没有访问权限。", routeChatId);
+    redirectToChatListWithNotice(pageError ?? t("chat.accessDenied"), routeChatId);
   }, [chatId, routeChatId, selectedChat, viewState, pageError]);
 
   useEffect(() => {
@@ -2663,7 +2665,7 @@ export default function ChatsPage() {
         if (!controller.signal.aborted) {
           const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || restoredThread?.messages.length);
           if (!hasLocalMessages) {
-            const message = apiError instanceof ApiError ? apiError.message : "加载消息失败";
+            const message = apiError instanceof ApiError ? apiError.message : t("message.loadFailed");
             setPageError(message);
           }
         }
@@ -2915,7 +2917,7 @@ export default function ChatsPage() {
 
   const updateSelectedChatPreference = async (kind: "pin" | "online", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
-    if (kind === "online" && enabled && !requireComposerCapability("online_reminder", 7, "开启好友上线提醒")) return;
+    if (kind === "online" && enabled && !requireComposerCapability("online_reminder", 7, t("chat.enableOnlineReminder"))) return;
     const chatIdToUpdate = selectedChat.id;
     const field = kind === "pin" ? "pinned" : "onlineReminderEnabled";
     setPreferenceSaving(kind);
@@ -2935,7 +2937,7 @@ export default function ChatsPage() {
       );
     } catch (apiError) {
       setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: !enabled } : chat))));
-      setPageError(apiError instanceof ApiError ? apiError.message : "会话设置保存失败");
+      setPageError(apiError instanceof ApiError ? apiError.message : t("chat.settingsSaveFailed"));
     } finally {
       setPreferenceSaving(null);
     }
@@ -2952,11 +2954,11 @@ export default function ChatsPage() {
   const openChatMemberAdder = async () => {
     if (!selectedChat) return;
     const capabilityKey = selectedChat.type === "group" ? "invite_group_member" : "create_group";
-    const label = selectedChat.type === "group" ? "邀请群成员" : "创建群聊";
+    const label = selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup");
     if (!requireComposerCapability(capabilityKey, 4, label)) return;
     const verified = await ensureCurrentUserVerified();
     if (!verified) {
-      setPageError("完成认证后才能添加聊天成员。");
+      setPageError(t("chat.verifyToAddMembers"));
       return;
     }
     setDetailsSheetOpen(false);
@@ -2993,7 +2995,7 @@ export default function ChatsPage() {
     if (!selectedChat || selectedChat.type !== "direct") return;
     const peer = selectedChat.detail.members.find((member) => !member.isSelf);
     if (!peer) {
-      setPageError("没有找到当前好友。");
+      setPageError(t("friends.currentMissing"));
       return;
     }
 
@@ -3002,9 +3004,9 @@ export default function ChatsPage() {
       await api.removeFriendRequest(peer.userId);
       setFriendDangerConfirmOpen(false);
       setDetailsSheetOpen(false);
-      showToast("好友已删除");
+      showToast(t("friends.deleted"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "删除失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("common.deleteFailed"), "error");
     } finally {
       setFriendDeleteSaving(false);
     }
@@ -3034,7 +3036,7 @@ export default function ChatsPage() {
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError ? apiError.message : "加载群聊候选成员失败";
+        const message = apiError instanceof ApiError ? apiError.message : t("chat.candidatesLoadFailed");
         setPageError(message);
         setGroupCreateState((current) => (current === "creating" ? current : "idle"));
         setGroupManageState((current) => (current === "saving" ? current : "idle"));
@@ -3277,7 +3279,7 @@ export default function ChatsPage() {
               ? {
                   ...chat,
                   preview: previewFromMessage(deliveredMessage),
-                  time: "刚刚",
+                  time: t("time.justNow"),
                   lastActivity: deliveredMessage.createdAt,
                   unread: 0,
                 }
@@ -3413,7 +3415,7 @@ export default function ChatsPage() {
 
   const openGalleryPicker = () => {
     if (composerBusy) return;
-    if (!requireComposerCapability("send_image", 2, "发送图片")) return;
+    if (!requireComposerCapability("send_image", 2, t("message.sendImage"))) return;
     galleryInputRef.current?.click();
   };
 
@@ -3424,10 +3426,10 @@ export default function ChatsPage() {
 
   const openLocationPicker = () => {
     if (composerBusy) return;
-    if (!requireComposerCapability("send_location", 3, "发送位置")) return;
+    if (!requireComposerCapability("send_location", 3, t("message.sendLocation"))) return;
     setComposerMoreOpen(false);
     if (!navigator.geolocation) {
-      setLocationDraft({ phase: "error", error: "当前浏览器不支持定位" });
+      setLocationDraft({ phase: "error", error: t("location.browserUnsupported") });
       return;
     }
     setLocationDraft({ phase: "locating" });
@@ -3442,8 +3444,8 @@ export default function ChatsPage() {
       },
       (error) => {
         const message = error.code === error.PERMISSION_DENIED
-          ? "请允许言浪访问你的位置"
-          : "暂时无法获取当前位置";
+          ? t("location.permissionRequired")
+          : t("location.unavailable");
         setLocationDraft({ phase: "error", error: message });
       },
       { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
@@ -3467,7 +3469,7 @@ export default function ChatsPage() {
       name: currentUserName,
       time: formatTime(createdAt),
       createdAt,
-      text: "[位置]",
+      text: t("message.locationPlaceholder"),
       payload: {
         kind: "location",
         latitude,
@@ -3485,7 +3487,7 @@ export default function ChatsPage() {
       [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
     }));
     setChats((current) => sortChats(current.map((chat) => (
-      chat.id === selectedChat.id ? updateChatSummary(chat, "[位置]", createdAt) : chat
+      chat.id === selectedChat.id ? updateChatSummary(chat, t("message.locationPlaceholder"), createdAt) : chat
     ))));
     stickToBottomRef.current = true;
     triggerMessageEntrance(clientId);
@@ -3506,7 +3508,7 @@ export default function ChatsPage() {
         [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, deliveredMessage),
       }));
       setChats((current) => sortChats(current.map((chat) => (
-        chat.id === selectedChat.id ? updateChatSummary(chat, "[位置]", deliveredMessage.createdAt) : chat
+        chat.id === selectedChat.id ? updateChatSummary(chat, t("message.locationPlaceholder"), deliveredMessage.createdAt) : chat
       ))));
       setLocationDraft(null);
     } catch (error) {
@@ -3515,7 +3517,7 @@ export default function ChatsPage() {
         [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
       }));
       setLocationDraft(null);
-      setPageError(error instanceof ApiError ? error.message : "位置发送失败");
+      setPageError(error instanceof ApiError ? error.message : t("location.sendFailed"));
     } finally {
       finishSendTask(clientId);
     }
@@ -3531,8 +3533,8 @@ export default function ChatsPage() {
       files.map(async (file) => {
         try {
           const kind = source === "file" ? "file" : resolveMediaKind(file);
-          if (kind === "image" && !requireComposerCapability("send_image", 2, "发送图片")) return;
-          if (kind === "video" && !requireComposerCapability("send_video", 5, "发送视频")) return;
+          if (kind === "image" && !requireComposerCapability("send_image", 2, t("message.sendImage"))) return;
+          if (kind === "video" && !requireComposerCapability("send_video", 5, t("message.sendVideo"))) return;
           await sendUploadedMediaMessage(kind, file, source === "file" ? { file_name: file.name, file_size: file.size } : {});
         } catch (error) {
           const uploadError = toMessageUploadError(error);
@@ -3587,9 +3589,9 @@ export default function ChatsPage() {
 
   const startVoiceRecording = async () => {
     if (composerBusy || voiceComposer.open) return;
-    if (!requireComposerCapability("send_audio", 3, "发送语音")) return;
+    if (!requireComposerCapability("send_audio", 3, t("message.sendAudio"))) return;
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      setPageError("当前设备暂不支持语音录制。");
+      setPageError(t("audio.unsupported"));
       return;
     }
 
@@ -3675,7 +3677,7 @@ export default function ChatsPage() {
         }
         if (blob.size === 0 || durationSeconds < 0.4) {
           resetVoiceComposer();
-          showToast("录音时间太短", "error");
+          showToast(t("audio.tooShort"), "error");
           return;
         }
         const previewUri = URL.createObjectURL(blob);
@@ -3723,12 +3725,12 @@ export default function ChatsPage() {
       resetVoiceComposer();
       const errorName = error instanceof DOMException ? error.name : "";
       const message = errorName === "NotAllowedError"
-        ? "请在浏览器设置中允许言浪使用麦克风"
+        ? t("audio.permissionRequired")
         : errorName === "NotFoundError"
-          ? "没有找到可用的麦克风"
+          ? t("audio.noMicrophone")
           : errorName === "NotReadableError"
-            ? "麦克风正在被其他应用使用"
-            : "暂时无法开始录音";
+            ? t("audio.inUse")
+            : t("audio.startUnavailable");
       setPageError(message);
     }
   };
@@ -3766,7 +3768,7 @@ export default function ChatsPage() {
       await audio.play();
     } catch {
       setVoicePreviewPlaying(false);
-      setPageError("录音试听失败");
+      setPageError(t("audio.previewFailed"));
     }
   };
 
@@ -3785,7 +3787,7 @@ export default function ChatsPage() {
       duration_seconds: voiceComposer.durationSeconds,
     });
     resetVoiceComposer();
-    if (!sent) showToast("语音发送失败，可在消息旁重试", "error");
+    if (!sent) showToast(t("audio.sendRetry"), "error");
   };
 
   const refreshChats = async () => {
@@ -3797,10 +3799,10 @@ export default function ChatsPage() {
     if (!messageMenu || messageMenu.message.kind !== "text") return;
     try {
       const copied = await copyText(messageMenu.message.text);
-      if (!copied) throw new Error("复制失败");
+      if (!copied) throw new Error(t("common.copyFailed"));
       setMessageMenu(null);
     } catch (apiError) {
-      const message = apiError instanceof Error ? apiError.message : "复制失败";
+      const message = apiError instanceof Error ? apiError.message : t("common.copyFailed");
       setPageError(message);
     }
   };
@@ -3808,7 +3810,7 @@ export default function ChatsPage() {
   const downloadMessageAttachment = async () => {
     if (!messageMenu || !["image", "audio", "file"].includes(messageMenu.message.kind)) return;
     const message = messageMenu.message;
-    if (message.kind === "audio" && !requireComposerCapability("download_audio", 8, "下载语音")) return;
+    if (message.kind === "audio" && !requireComposerCapability("download_audio", 8, t("audio.download"))) return;
     const rawUri = message.payload?.uri;
     if (!rawUri) return;
     const uri = resolveStableResourceUri(rawUri) ?? rawUri;
@@ -3916,9 +3918,9 @@ export default function ChatsPage() {
       }
       setMessageMenu(null);
       await refreshChats();
-      showToast("消息已删除");
+      showToast(t("message.deleted"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "删除消息失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("message.deleteFailed"), "error");
     } finally {
       setMessageDeleteState("idle");
     }
@@ -3930,13 +3932,13 @@ export default function ChatsPage() {
   };
 
   const createGroup = async () => {
-    if (!requireComposerCapability("create_group", 4, "创建群聊")) return;
+    if (!requireComposerCapability("create_group", 4, t("chat.createGroup"))) return;
     if (!currentUserVerified) {
-      setPageError("完成认证后才可以创建群聊。");
+      setPageError(t("chat.verifyToCreateGroup"));
       return;
     }
     if (!groupSelectedIds.length) {
-      setPageError("请至少选择一位成员。");
+      setPageError(t("chat.selectOneMember"));
       return;
     }
 
@@ -3949,10 +3951,10 @@ export default function ChatsPage() {
       setGroupTitle("");
       setGroupQuery("");
       setGroupSelectedIds([]);
-      showToast("群聊已创建");
+      showToast(t("chat.groupCreated"));
       navigate(`/app/chats/${created.chat_id}`);
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "创建群聊失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("chat.groupCreateFailed"), "error");
     } finally {
       setGroupCreateState("idle");
     }
@@ -3964,16 +3966,16 @@ export default function ChatsPage() {
   };
 
   const renameGroup = async () => {
-    if (!requireComposerCapability("rename_group", 5, "修改群名称")) return;
+    if (!requireComposerCapability("rename_group", 5, t("chat.renameGroup"))) return;
     if (!selectedChat) return;
     try {
       setGroupManageState("saving");
       const updated = await api.renameGroupChat(selectedChat.id, groupRenameValue.trim());
       applyUpdatedGroupChat(updated);
       setGroupRenameOpen(false);
-      showToast("群聊名称已更新");
+      showToast(t("chat.groupNameUpdated"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "重命名群聊失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("chat.groupRenameFailed"), "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -3982,23 +3984,23 @@ export default function ChatsPage() {
   const submitChatMemberPicker = async () => {
     if (!selectedChat) return;
     if (!chatMemberActionIds.length) return;
-    if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "invite_group_member" : "create_group", 4, selectedChat.type === "group" ? "邀请群成员" : "创建群聊")) return;
+    if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "invite_group_member" : "create_group", 4, selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup"))) return;
 
     try {
       setGroupManageState("saving");
       if (selectedChat.type === "group" && chatMemberPickerMode === "remove") {
         const updated = await api.removeGroupMembers(selectedChat.id, chatMemberActionIds);
         applyUpdatedGroupChat(updated);
-        showToast(chatMemberActionIds.length > 1 ? "成员已批量移除" : "成员已移除");
+        showToast(chatMemberActionIds.length > 1 ? t("chat.membersRemoved") : t("chat.memberRemoved"));
       } else if (selectedChat.type === "group") {
         const updated = await api.addGroupMembers(selectedChat.id, chatMemberNewIds);
         applyUpdatedGroupChat(updated);
-        showToast("成员已添加");
+        showToast(t("chat.memberAdded"));
       } else {
         const created = await api.createGroupChat(groupSelectedIds);
         const nextChat = mapChat(created, currentUserId);
         setChats((currentChats) => sortChats([nextChat, ...currentChats.filter((chat) => chat.id !== nextChat.id)]));
-        showToast("群聊已创建");
+        showToast(t("chat.groupCreated"));
         navigate(`/app/chats/${created.chat_id}`);
       }
       setChatMemberPickerOpen(false);
@@ -4008,7 +4010,7 @@ export default function ChatsPage() {
       setChatMemberPickerMode("add");
     } catch (apiError) {
       showToast(
-        apiError instanceof ApiError ? apiError.message : chatMemberPickerMode === "remove" ? "移除群成员失败" : "添加聊天成员失败",
+        apiError instanceof ApiError ? apiError.message : chatMemberPickerMode === "remove" ? t("chat.removeMemberFailed") : t("chat.addMemberFailed"),
         "error"
       );
     } finally {
@@ -4022,9 +4024,9 @@ export default function ChatsPage() {
       setGroupManageState("saving");
       const updated = await api.removeGroupMembers(selectedChat.id, [userId]);
       applyUpdatedGroupChat(updated);
-      showToast("成员已移除");
+      showToast(t("chat.memberRemoved"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "移除成员失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("chat.removeMemberFailed"), "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -4042,10 +4044,10 @@ export default function ChatsPage() {
       setChats((currentChats) => currentChats.filter((chat) => chat.id !== selectedChat.id));
       setDetailsSheetOpen(false);
       setGroupDangerConfirmOpen(false);
-      showToast(selectedChat.isOwner ? "群聊已解散" : "已退出群聊");
+      showToast(selectedChat.isOwner ? t("chat.groupDisbanded") : t("chat.groupLeft"));
       navigate("/app/chats");
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? "解散群聊失败" : "退出群聊失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? t("chat.disbandFailed") : t("chat.leaveFailed"), "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -4097,7 +4099,7 @@ export default function ChatsPage() {
         redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
         return;
       }
-      const message = apiError instanceof ApiError ? apiError.message : "加载历史消息失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("message.historyLoadFailed");
       setPageError(message);
     } finally {
       setOlderState("idle");
@@ -4240,7 +4242,7 @@ export default function ChatsPage() {
                   displayedChat.title
                 )}
               </strong>
-              <div className="chat-topbar-status">{displayedChat.type === "group" ? `${displayedChat.members} 人` : displayedChat.subtitle}</div>
+              <div className="chat-topbar-status">{displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
             </div>
           </div>
         ) : undefined
@@ -4281,14 +4283,14 @@ export default function ChatsPage() {
                       <span className="chat-topbar-title-text">{displayedChat.title}</span>
                       {displayedChat.type === "group" ? <span className="chat-topbar-title-count">({displayedChat.members})</span> : null}
                     </strong>
-                    <div className="chat-topbar-status">{displayedChat.type === "group" ? `${displayedChat.members} 人` : displayedChat.subtitle}</div>
+                    <div className="chat-topbar-status">{displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
                   </div>
                 </div>
-                <button aria-label="聊天详情" className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
+                <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
                   <span className="material-symbols-outlined">more_vert</span>
                 </button>
                 {sendProgress !== null ? (
-                  <div className="topbar-progress" aria-label={`发送进度 ${Math.round(sendProgress * 100)}%`} role="progressbar">
+                  <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />
                   </div>
                 ) : null}
@@ -4305,14 +4307,14 @@ export default function ChatsPage() {
                     </span>
                     <span className="chat-pinned-copy">
                       <span className="chat-pinned-kicker">
-                        <strong>置顶</strong>
+                        <strong>{t("pin.label")}</strong>
                         <i />
                         <span>{pinnedByLabel(pinnedMessages[0])}</span>
                       </span>
                       <span className="chat-pinned-preview">{pinnedMessagePreview(pinnedMessages[0])}</span>
                     </span>
                   </button>
-                  <button aria-label={`查看全部 ${pinnedMessages.length} 条置顶消息`} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
+                  <button aria-label={t("pin.viewAll", { count: pinnedMessages.length })} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
                     <span className="chat-pinned-count">{pinnedMessages.length}</span>
                     <span className="material-symbols-outlined">chevron_right</span>
                   </button>
@@ -4352,7 +4354,7 @@ export default function ChatsPage() {
                 {hasOlderMessages ? (
                   <div className="message-history-actions">
                     <button className="ghost-button" disabled={olderState === "loading"} onClick={() => void loadOlderMessages()} type="button">
-                      {olderState === "loading" ? "加载中..." : "查看更多消息"}
+                      {olderState === "loading" ? t("common.loading") : t("message.viewMore")}
                     </button>
                   </div>
                 ) : null}
@@ -4381,10 +4383,10 @@ export default function ChatsPage() {
                 {replyingTo && !voiceComposer.open ? (
                   <div className="composer-reply-preview">
                     <div>
-                      <strong>回复 {replyingTo.user.name}</strong>
+                      <strong>{t("message.replyTo", { name: replyingTo.user.name })}</strong>
                       <span>{replyingTo.content}</span>
                     </div>
-                    <button aria-label="取消引用" onClick={() => setReplyTarget(null)} type="button">
+                    <button aria-label={t("message.cancelReply")} onClick={() => setReplyTarget(null)} type="button">
                       <span className="material-symbols-outlined">close</span>
                     </button>
                   </div>
@@ -4392,7 +4394,7 @@ export default function ChatsPage() {
                 {!voiceComposer.open ? (
                   <div className="composer-row composer-row-text">
                     <div className="composer-leading-actions">
-                      <button aria-label={canSendAudio ? "录制语音" : "Lv.3 解锁语音"} className={`composer-action-button${canSendAudio ? "" : " is-locked"}`} disabled={composerBusy || !canSendAudio} onClick={() => void startVoiceRecording()} title={canSendAudio ? "录制语音" : "Lv.3 解锁语音"} type="button">
+                      <button aria-label={canSendAudio ? t("audio.record") : t("audio.unlockAtLevel", { level: 3 })} className={`composer-action-button${canSendAudio ? "" : " is-locked"}`} disabled={composerBusy || !canSendAudio} onClick={() => void startVoiceRecording()} title={canSendAudio ? t("audio.record") : t("audio.unlockAtLevel", { level: 3 })} type="button">
                         {canSendAudio ? <ComposerSvgIcon className="composer-inline-svg" kind="mic" /> : <span className="material-symbols-outlined">lock</span>}
                       </button>
                     </div>
@@ -4401,7 +4403,7 @@ export default function ChatsPage() {
                         ref={textareaRef}
                         className="textarea composer-input"
                         enterKeyHint="send"
-                        placeholder="输入消息..."
+                        placeholder={t("chat.inputPlaceholder")}
                         value={draft}
                         rows={1}
                         onChange={(event) => setDraft(event.target.value)}
@@ -4426,7 +4428,7 @@ export default function ChatsPage() {
                     </div>
                     <button
                       aria-expanded={emojiPickerOpen}
-                      aria-label={emojiPickerOpen ? "收起表情" : "选择表情"}
+                      aria-label={emojiPickerOpen ? t("emoji.collapse") : t("emoji.choose")}
                       className={`composer-emoji-button ${emojiPickerOpen ? "is-open" : ""}`}
                       disabled={composerBusy}
                       onClick={() => {
@@ -4439,7 +4441,7 @@ export default function ChatsPage() {
                     </button>
                     <button
                       aria-expanded={composerMoreOpen}
-                      aria-label={composerMoreOpen ? "收起更多操作" : "展开更多操作"}
+                      aria-label={composerMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
                       className={`composer-plus ${composerMoreOpen ? "is-open" : ""}`}
                       disabled={composerBusy}
                       onClick={() => {
@@ -4463,7 +4465,7 @@ export default function ChatsPage() {
                         disabled={!["recording", "recorded"].includes(voiceComposer.phase)}
                         onClick={voiceComposer.phase === "recorded" ? () => void toggleVoicePreview() : stopVoiceRecording}
                         type="button"
-                        aria-label={voiceComposer.phase === "recorded" ? (voicePreviewPlaying ? "暂停试听" : "试听录音") : "停止录音"}
+                        aria-label={voiceComposer.phase === "recorded" ? (voicePreviewPlaying ? t("audio.pausePreview") : t("audio.preview")) : t("audio.stopRecording")}
                       >
                         {voiceComposer.phase === "recorded" ? (
                           <MessageControlIcon className="composer-inline-svg" kind={voicePreviewPlaying ? "pause" : "play"} />
@@ -4475,9 +4477,9 @@ export default function ChatsPage() {
                       </button>
                       <div className={`composer-recording-waveform ${voicePreviewPlaying ? "is-previewing" : ""}`} aria-hidden="true">
                         {voiceComposer.phase === "requesting" ? (
-                          <span className="composer-recording-state">准备麦克风</span>
+                          <span className="composer-recording-state">{t("audio.preparingMicrophone")}</span>
                         ) : voiceComposer.phase === "stopping" ? (
-                          <span className="composer-recording-state">正在生成录音</span>
+                          <span className="composer-recording-state">{t("audio.generating")}</span>
                         ) : (
                           voiceComposer.bars.map((bar, index) => (
                             <span key={`wave-${index}`} className="composer-recording-bar-item" style={{ "--voice-level": `${bar}` } as CSSProperties} />
@@ -4511,28 +4513,28 @@ export default function ChatsPage() {
                   </div>
                 )}
                 {!voiceComposer.open && emojiPickerOpen ? (
-                  <div className="composer-emoji-panel" aria-label="表情选择器">
-                    <div className="composer-emoji-tabs" role="tablist" aria-label="表情分类">
+                  <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
+                    <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
                       {EMOJI_PAGES.map((page, index) => (
                         <button
-                          aria-label={page.label}
+                          aria-label={t(page.labelKey as TranslationKey)}
                           aria-selected={emojiPage === index}
                           className={emojiPage === index ? "is-active" : ""}
-                          key={page.label}
+                          key={page.labelKey}
                           onClick={() => setEmojiPage(index)}
                           role="tab"
-                          title={page.label}
+                          title={t(page.labelKey as TranslationKey)}
                           type="button"
                         >
                           <span>{page.icon}</span>
-                          <small>{page.label}</small>
+                          <small>{t(page.labelKey as TranslationKey)}</small>
                         </button>
                       ))}
                     </div>
-                    <div className="composer-emoji-grid" role="tabpanel" aria-label={EMOJI_PAGES[emojiPage].label}>
+                    <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
                       {visibleEmojis.map((emoji, index) => (
                         <button
-                          aria-label={`插入 ${emoji}`}
+                          aria-label={t("emoji.insert", { emoji })}
                           className={emojiPage === 0 && index < frequentEmojis.length ? "is-frequent" : ""}
                           key={`${emoji}-${index}`}
                           onClick={() => insertEmoji(emoji)}
@@ -4547,17 +4549,17 @@ export default function ChatsPage() {
                 {!voiceComposer.open ? (
                   <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
                     <div className="composer-actions-grid">
-                      <button className={`composer-action-tile${canSendImage ? "" : " is-locked"}`} disabled={composerBusy || !canSendImage} onClick={openGalleryPicker} title={canSendImage ? "相册" : "Lv.2 解锁图片"} type="button">
+                      <button className={`composer-action-tile${canSendImage ? "" : " is-locked"}`} disabled={composerBusy || !canSendImage} onClick={openGalleryPicker} title={canSendImage ? t("media.gallery") : t("image.unlockAtLevel", { level: 2 })} type="button">
                         <span className="composer-action-tile-icon">{canSendImage ? <ComposerSvgIcon kind="album" /> : <span className="material-symbols-outlined">lock</span>}</span>
-                        <span>{canSendImage ? "相册" : "Lv.2 图片"}</span>
+                        <span>{canSendImage ? t("media.gallery") : t("image.levelLabel", { level: 2 })}</span>
                       </button>
                       <button className="composer-action-tile" disabled={composerBusy} onClick={openFilePicker} type="button">
                         <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
-                        <span>文件</span>
+                        <span>{t("media.file")}</span>
                       </button>
-                      <button className={`composer-action-tile${canSendLocation ? "" : " is-locked"}`} disabled={composerBusy || !canSendLocation} onClick={openLocationPicker} title={canSendLocation ? "位置" : "Lv.3 解锁位置"} type="button">
+                      <button className={`composer-action-tile${canSendLocation ? "" : " is-locked"}`} disabled={composerBusy || !canSendLocation} onClick={openLocationPicker} title={canSendLocation ? t("media.location") : t("location.unlockAtLevel", { level: 3 })} type="button">
                         <span className="composer-action-tile-icon">{canSendLocation ? <ComposerSvgIcon kind="location" /> : <span className="material-symbols-outlined">lock</span>}</span>
-                        <span>{canSendLocation ? "位置" : "Lv.3 位置"}</span>
+                        <span>{canSendLocation ? t("media.location") : t("location.levelLabel", { level: 3 })}</span>
                       </button>
                     </div>
                   </div>
@@ -4566,7 +4568,7 @@ export default function ChatsPage() {
               </div>
             </>
           ) : (
-            <div className="desktop-chat-empty" aria-label="尚未选择会话">
+            <div className="desktop-chat-empty" aria-label={t("chat.noneSelected")}>
               <div className="desktop-chat-empty-mark" aria-hidden="true">
                 <span className="desktop-chat-empty-bubble desktop-chat-empty-bubble-back" />
                 <span className="desktop-chat-empty-bubble desktop-chat-empty-bubble-front">
@@ -4575,7 +4577,7 @@ export default function ChatsPage() {
                   <span />
                 </span>
               </div>
-              <strong>选择一段对话</strong>
+              <strong>{t("chat.selectConversation")}</strong>
             </div>
           )}
           {clipboardUpload ? (
@@ -4586,8 +4588,8 @@ export default function ChatsPage() {
                     <ComposerSvgIcon kind="file" />
                   </span>
                   <div>
-                    <h3>发送这些内容？</h3>
-                    <p>{clipboardUpload.files.length === 1 ? "已从剪贴板读取 1 个项目" : `已从剪贴板读取 ${clipboardUpload.files.length} 个项目`}</p>
+                    <h3>{t("clipboard.sendThese")}</h3>
+                    <p>{t("clipboard.itemsRead", { count: clipboardUpload.files.length })}</p>
                   </div>
                 </div>
                 <div className="chat-clipboard-items">
@@ -4599,15 +4601,15 @@ export default function ChatsPage() {
                         <span className="chat-clipboard-file-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span>
                       )}
                       <div>
-                        <strong>{file.name || (file.type.startsWith("image/") ? "剪贴板图片" : "剪贴板文件")}</strong>
+                        <strong>{file.name || (file.type.startsWith("image/") ? t("clipboard.image") : t("clipboard.file"))}</strong>
                         <span>{formatFileSize(file.size)}</span>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="chat-clipboard-actions">
-                  <button className="ghost-button" onClick={closeClipboardUpload} type="button">取消</button>
-                  <button className="button" onClick={() => void confirmClipboardUpload()} type="button">上传</button>
+                  <button className="ghost-button" onClick={closeClipboardUpload} type="button">{t("common.cancel")}</button>
+                  <button className="button" onClick={() => void confirmClipboardUpload()} type="button">{t("common.upload")}</button>
                 </div>
               </section>
             </div>
@@ -4618,7 +4620,7 @@ export default function ChatsPage() {
           {selectedChat ? (
             <>
               <div className="panel-header" style={{ padding: 0, borderBottom: "1px solid rgba(232,235,242,.9)" }}>
-                <h3 className="panel-title">{selectedChat.type === "direct" ? "会话资料" : "群聊资料"}</h3>
+                <h3 className="panel-title">{selectedChat.type === "direct" ? t("chat.conversationInfo") : t("chat.groupInfo")}</h3>
                 <p className="card-subtitle">{selectedChat.detail.summary}</p>
               </div>
 
@@ -4643,19 +4645,19 @@ export default function ChatsPage() {
                     ) : null}
                     <div className="detail-row">
                       <div>
-                        <strong>{selectedChat.type === "direct" ? "当前状态" : "你的身份"}</strong>
+                        <strong>{selectedChat.type === "direct" ? t("chat.currentStatus") : t("chat.yourRole")}</strong>
                         <div className="detail-text">{selectedChat.detail.relation}</div>
                       </div>
                       {selectedChat.type === "direct" ? (
                         <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{selectedChat.subtitle}</span>
                       ) : (
-                        <span className="count-badge">{selectedChat.members} 人</span>
+                        <span className="count-badge">{t("chat.memberCount", { count: selectedChat.members })}</span>
                       )}
                     </div>
                   </div>
 
                   <div className="detail-card">
-                    <strong>{selectedChat.type === "direct" ? "会话成员" : "群成员"}</strong>
+                    <strong>{selectedChat.type === "direct" ? t("chat.conversationMembers") : t("chat.groupMembers")}</strong>
                     <div className="member-list">
                       {selectedChat.detail.members.map((member) => (
                         <div key={member.userId} className="member-line">
@@ -4663,10 +4665,10 @@ export default function ChatsPage() {
                             <UserAvatar className="mini-avatar" name={member.name} uri={member.avatarUri} />
                             <span>{member.name}</span>
                           </div>
-                          {member.isSelf ? <span className="count-badge">你</span> : null}
+                          {member.isSelf ? <span className="count-badge">{t("common.you")}</span> : null}
                           {selectedChat.type === "group" && selectedChat.isOwner && !member.isSelf ? (
                             <button className="ghost-button member-line-action" onClick={() => void removeGroupMember(member.userId)} type="button">
-                              移除
+                              {t("admin.remove")}
                             </button>
                           ) : null}
                         </div>
@@ -4675,7 +4677,7 @@ export default function ChatsPage() {
                   </div>
 
                   <div className="detail-card">
-                    <strong>快捷操作</strong>
+                    <strong>{t("common.quickActions")}</strong>
                     <div className="settings-actions" style={{ marginTop: 12 }}>
                       {selectedChat.type === "group" ? (
                         <>
@@ -4690,15 +4692,15 @@ export default function ChatsPage() {
                                 }}
                                 type="button"
                               >
-                                {canRenameGroup ? "重命名群聊" : "Lv.5 解锁改名"}
+                                {canRenameGroup ? t("chat.renameGroup") : t("chat.renameUnlockAtLevel", { level: 5 })}
                               </button>
                               <button className="ghost-button" disabled={!canInviteGroupMember} onClick={() => void openChatMemberAdder()} type="button">
-                                {canInviteGroupMember ? "邀请成员" : "Lv.4 解锁邀请"}
+                                {canInviteGroupMember ? t("chat.inviteMembers") : t("chat.inviteUnlockAtLevel", { level: 4 })}
                               </button>
                             </>
                           ) : null}
                           <button className="danger-button" onClick={() => setGroupDangerConfirmOpen(true)} type="button">
-                            {selectedChat.isOwner ? "解散群聊" : "退出群聊"}
+                            {selectedChat.isOwner ? t("chat.disband") : t("chat.leave")}
                           </button>
                         </>
                       ) : (
@@ -4714,30 +4716,30 @@ export default function ChatsPage() {
               </div>
             </>
           ) : (
-            <FeedbackState title="会话信息" description="选择会话后显示。" />
+            <FeedbackState title={t("chat.conversationInfo")} description={t("chat.selectToView")} />
           )}
         </aside>
       </section>
 
       <BottomSheet
         open={groupCreateOpen}
-        title="新建群聊"
+        title={t("chat.createGroup")}
         onClose={() => {
           if (groupCreateState === "creating") return;
           setGroupCreateOpen(false);
         }}
       >
         <div className="simple-form">
-          <label className="field-label">群聊名称</label>
-          <input className="input" placeholder="例如：产品讨论组" value={groupTitle} onChange={(event) => setGroupTitle(event.target.value)} />
-          <label className="field-label">选择成员</label>
-          <div className="row-subtle">仅认证用户可创建群聊，且只能邀请自己的好友。</div>
+          <label className="field-label">{t("chat.groupName")}</label>
+          <input className="input" placeholder={t("chat.groupNameExample")} value={groupTitle} onChange={(event) => setGroupTitle(event.target.value)} />
+          <label className="field-label">{t("chat.selectMembers")}</label>
+          <div className="row-subtle">{t("chat.groupVerificationHint")}</div>
           {currentUserVerified === false ? (
-            <FeedbackState title="完成认证后再创建群聊" description="群聊发起人需要先完成认证。" />
+            <FeedbackState title={t("chat.verifyBeforeCreate")} description={t("chat.creatorVerificationRequired")} />
           ) : (
             <>
-              <input className="input" placeholder="搜索好友" value={groupQuery} onChange={(event) => setGroupQuery(event.target.value)} />
-              <div className="row-subtle">已选择 {groupSelectedIds.length} 人</div>
+              <input className="input" placeholder={t("friends.search")} value={groupQuery} onChange={(event) => setGroupQuery(event.target.value)} />
+              <div className="row-subtle">{t("chat.selectedCount", { count: groupSelectedIds.length })}</div>
               <div className="simple-list">
                 {groupCandidates.map((user) => {
                   const selected = groupSelectedIds.includes(user.user_id);
@@ -4746,9 +4748,9 @@ export default function ChatsPage() {
                       <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
                       <div className="row-main">
                         <strong>{user.name}</strong>
-                        <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>
+                        <div className="row-subtle">{user.is_alive ? t("presence.online") : t("presence.offline")}</div>
                       </div>
-                      {selected ? <span className="small-badge">已选</span> : <span className="count-badge">选择</span>}
+                      {selected ? <span className="small-badge">{t("common.selected")}</span> : <span className="count-badge">{t("common.select")}</span>}
                     </button>
                   );
                 })}
@@ -4757,10 +4759,10 @@ export default function ChatsPage() {
           )}
           <div className="button-row">
             <button className="ghost-button" onClick={() => setGroupCreateOpen(false)} type="button">
-              取消
+              {t("common.cancel")}
             </button>
             <button className="button" disabled={groupCreateState === "creating" || currentUserVerified === false} onClick={() => void createGroup()} type="button">
-              {groupCreateState === "creating" ? "创建中..." : "创建群聊"}
+              {groupCreateState === "creating" ? t("common.creating") : t("chat.createGroup")}
             </button>
           </div>
         </div>
@@ -4768,7 +4770,7 @@ export default function ChatsPage() {
 
       <SideDrawer
         open={pinnedDrawerOpen}
-        title="置顶消息"
+        title={t("pin.messages")}
         titleAccessory={<span className="pinned-message-title-count">{pinnedMessages.length}</span>}
         onClose={() => setPinnedDrawerOpen(false)}
       >
@@ -4785,7 +4787,7 @@ export default function ChatsPage() {
                   </span>
                   <span className="pinned-message-preview">{pinnedMessagePreview(pin)}</span>
                   <small>
-                    {pinnedByLabel(pin)}置顶
+                    {t("pin.by", { names: pinnedByLabel(pin) })}
                     <i />
                     {formatRelativeTime(pin.pinned_at)}
                   </small>
@@ -4801,7 +4803,7 @@ export default function ChatsPage() {
               </button>
               {canManagePinnedMessages && pin.pinned_by_users.some((user) => user.user_id === currentUserId) ? (
                 <button
-                  aria-label="取消置顶"
+                  aria-label={t("pin.remove")}
                   className="pinned-message-remove"
                   disabled={pinSavingMessageId === pin.message.message_id}
                   onClick={() => void togglePinnedMessage(mapChatMessage(pin.message, currentUserId))}
@@ -4817,13 +4819,13 @@ export default function ChatsPage() {
 
       <SideDrawer
         open={detailsSheetOpen}
-        title="聊天详情"
+        title={t("chat.details")}
         onClose={() => setDetailsSheetOpen(false)}
       >
         {selectedChat ? (
           <div className="chat-detail-panel">
             <section className="chat-detail-people-section">
-              <div className="section-label">{selectedChat.type === "group" ? "群成员" : "聊天成员"}</div>
+              <div className="section-label">{selectedChat.type === "group" ? t("chat.groupMembers") : t("chat.members")}</div>
               <div className="chat-detail-member-grid">
                 {visibleDetailMembers.map((member) => (
                   <button
@@ -4846,7 +4848,7 @@ export default function ChatsPage() {
                   <span className="chat-detail-member-avatar chat-detail-member-avatar-add">
                     <span className="material-symbols-outlined">{(selectedChat.type === "group" ? canInviteGroupMember : canCreateGroup) ? "add" : "lock"}</span>
                   </span>
-                  <span className="chat-detail-member-name">添加</span>
+                  <span className="chat-detail-member-name">{t("common.add")}</span>
                 </button>
                 {selectedChat.type === "group" && selectedChat.isOwner ? (
                   <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberRemover} type="button">
@@ -4855,38 +4857,38 @@ export default function ChatsPage() {
                         <path d="M6.5 12h11" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2" />
                       </svg>
                     </span>
-                    <span className="chat-detail-member-name">移除</span>
+                    <span className="chat-detail-member-name">{t("admin.remove")}</span>
                   </button>
                 ) : null}
               </div>
               {hasMoreDetailMembers ? (
                 <button className="ghost-button chat-detail-more-button" onClick={() => setDetailMemberLimit((current) => current + CHAT_DETAIL_MEMBER_PAGE_SIZE)} type="button">
-                  更多群成员
+                  {t("chat.moreMembers")}
                 </button>
               ) : null}
             </section>
 
             <section className="chat-detail-settings-section">
-              <div className="section-label">会话设置</div>
+              <div className="section-label">{t("chat.settings")}</div>
               <div className="chat-detail-settings-list">
                 <div className="chat-detail-setting-row">
                   <div className="row-main">
-                    <strong>置顶该聊天</strong>
+                    <strong>{t("chat.pinConversation")}</strong>
                   </div>
-                  <button aria-label="切换置顶" className={`switch ${selectedChat.pinned ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("pin", !selectedChat.pinned)} type="button" />
+                  <button aria-label={t("chat.togglePin")} className={`switch ${selectedChat.pinned ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("pin", !selectedChat.pinned)} type="button" />
                 </div>
                 {selectedChat.type === "direct" ? (
                   <div className="chat-detail-setting-row">
                     <div className="row-main">
-                      <strong>上线提醒</strong>
-                      {!canUseOnlineReminder ? <div className="row-subtle">Lv.7 解锁</div> : null}
+                      <strong>{t("chat.onlineReminder")}</strong>
+                      {!canUseOnlineReminder ? <div className="row-subtle">{t("growth.unlockAtLevel", { level: 7 })}</div> : null}
                     </div>
-                    <button aria-label={canUseOnlineReminder ? "切换上线提醒" : "Lv.7 解锁上线提醒"} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null || !canUseOnlineReminder} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={canUseOnlineReminder ? "切换上线提醒" : "Lv.7 解锁"} type="button" />
+                    <button aria-label={canUseOnlineReminder ? t("chat.toggleOnlineReminder") : t("chat.onlineReminderUnlockAtLevel", { level: 7 })} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null || !canUseOnlineReminder} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={canUseOnlineReminder ? t("chat.toggleOnlineReminder") : t("growth.unlockAtLevel", { level: 7 })} type="button" />
                   </div>
                 ) : null}
                 {selectedChat.type === "group" ? (
                   <div className="chat-detail-setting-row">
-                    <div className="row-main chat-detail-title-main"><strong>群聊名称</strong><div className="row-subtle">{selectedChat.title}</div></div>
+                    <div className="row-main chat-detail-title-main"><strong>{t("chat.groupName")}</strong><div className="row-subtle">{selectedChat.title}</div></div>
                     <button
                       className="chat-detail-row-icon"
                       disabled={!canRenameGroup}
@@ -4894,7 +4896,7 @@ export default function ChatsPage() {
                         setGroupRenameValue(selectedChat.title);
                         setGroupRenameOpen(true);
                       }}
-                      aria-label="编辑群聊名称"
+                      aria-label={t("chat.editGroupName")}
                       type="button"
                     >
                       <span className="material-symbols-outlined">edit</span>
@@ -4905,7 +4907,7 @@ export default function ChatsPage() {
             </section>
 
             <section className="chat-detail-danger-section">
-              <div className="section-label">更多</div>
+              <div className="section-label">{t("common.more")}</div>
               <div className="chat-detail-settings-list">
                 <button
                   className="chat-detail-setting-row danger-row"
@@ -4913,7 +4915,7 @@ export default function ChatsPage() {
                   type="button"
                 >
                   <div className="row-main">
-                    <strong>{selectedChat.type === "group" ? (selectedChat.isOwner ? "解散群聊" : "退出群聊") : "删除好友"}</strong>
+                    <strong>{selectedChat.type === "group" ? (selectedChat.isOwner ? t("chat.disband") : t("chat.leave")) : t("friends.delete")}</strong>
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
                 </button>
@@ -4924,7 +4926,7 @@ export default function ChatsPage() {
       </SideDrawer>
       <SideDrawer
         open={profileDrawerUserId !== null}
-        title="用户详情"
+        title={t("profile.details")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >
@@ -4945,10 +4947,10 @@ export default function ChatsPage() {
       </SideDrawer>
       <InputDialog
         open={groupRenameOpen}
-        title="编辑群聊名称"
+        title={t("chat.editGroupName")}
         value={groupRenameValue}
-        placeholder="输入群聊名称"
-        confirmLabel="保存"
+        placeholder={t("chat.groupNamePlaceholder")}
+        confirmLabel={t("common.save")}
         busy={groupManageState === "saving"}
         onChange={setGroupRenameValue}
         onClose={() => setGroupRenameOpen(false)}
@@ -4956,9 +4958,9 @@ export default function ChatsPage() {
       />
       <ConfirmDialog
         open={groupDangerConfirmOpen}
-        title={selectedChat?.isOwner ? "确认解散群聊？" : "确认退出群聊？"}
-        description={selectedChat?.isOwner ? "解散后群聊会被永久移除，成员将无法继续访问。" : "退出后你将离开当前群聊，之后需要重新被邀请才能加入。"}
-        confirmLabel={selectedChat?.isOwner ? "解散群聊" : "退出群聊"}
+        title={selectedChat?.isOwner ? t("chat.disbandConfirmTitle") : t("chat.leaveConfirmTitle")}
+        description={selectedChat?.isOwner ? t("chat.disbandConfirmHint") : t("chat.leaveConfirmHint")}
+        confirmLabel={selectedChat?.isOwner ? t("chat.disband") : t("chat.leave")}
         busy={groupManageState === "saving"}
         danger
         onClose={() => {
@@ -4969,9 +4971,9 @@ export default function ChatsPage() {
       />
       <ConfirmDialog
         open={friendDangerConfirmOpen}
-        title="确认删除好友？"
-        description="删除后将解除当前好友关系。你们仍可继续查看已有聊天记录。"
-        confirmLabel="删除好友"
+        title={t("friends.deleteConfirmTitle")}
+        description={t("friends.deleteConfirmHint")}
+        confirmLabel={t("friends.delete")}
         busy={friendDeleteSaving}
         danger
         onClose={() => {
@@ -4994,15 +4996,15 @@ export default function ChatsPage() {
               onClick={closeChatMemberPicker}
               type="button"
             >
-              取消
+              {t("common.cancel")}
             </button>
             <div className="sheet-toolbar-title">
               <strong>
                 {selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
-                    ? "移除群成员"
-                    : "添加群成员"
-                  : "新建群聊"}
+                    ? t("chat.removeGroupMembers")
+                    : t("chat.addGroupMembers")
+                  : t("chat.createGroup")}
               </strong>
             </div>
             <button
@@ -5012,12 +5014,12 @@ export default function ChatsPage() {
               type="button"
             >
               {groupManageState === "saving"
-                ? "处理中..."
+                ? t("common.processing")
                 : selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
-                    ? "移除"
-                    : "添加"
-                  : "创建"}
+                    ? t("admin.remove")
+                    : t("common.add")
+                  : t("common.create")}
             </button>
           </div>
         }
@@ -5028,7 +5030,7 @@ export default function ChatsPage() {
             <input
               className="input"
               style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-              placeholder="搜索好友"
+              placeholder={t("friends.search")}
               value={groupQuery}
               onChange={(event) => setGroupQuery(event.target.value)}
             />
@@ -5051,20 +5053,20 @@ export default function ChatsPage() {
                     <div className="row-subtle">
                       {chatMemberPickerMode === "remove"
                         ? protectedMember?.isOwner
-                          ? "群主"
+                          ? t("chat.owner")
                           : protectedMember?.isSelf
-                            ? "当前账号"
-                            : "群成员"
+                            ? t("account.current")
+                            : t("chat.groupMember")
                         : locked
-                          ? "已在当前聊天中"
+                          ? t("chat.alreadyInConversation")
                           : user.is_alive
-                            ? "在线"
-                            : "离线"}
+                            ? t("presence.online")
+                            : t("presence.offline")}
                     </div>
                   </div>
                   {locked ? (
                     <span className="member-picker-status member-picker-status-locked">
-                      {chatMemberPickerMode === "remove" ? "不可移除" : "已在群聊"}
+                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : t("chat.alreadyInGroup")}
                     </span>
                   ) : (
                     <span className={`member-picker-check ${selected ? "is-selected" : ""}`} aria-hidden="true" />
@@ -5118,7 +5120,9 @@ export default function ChatsPage() {
             </article>
             <div className="message-image-preview-toolbar message-video-preview-toolbar" onClick={(event) => event.stopPropagation()}>
               <button
-                aria-label={`下载视频${formatImageFileSize(videoPreview.metadata?.file_size) ? `，${formatImageFileSize(videoPreview.metadata?.file_size)}` : ""}`}
+                aria-label={formatImageFileSize(videoPreview.metadata?.file_size)
+                  ? t("video.downloadWithSize", { size: formatImageFileSize(videoPreview.metadata?.file_size) })
+                  : t("video.download")}
                 onClick={() => void downloadPreviewVideo()}
                 type="button"
               >
@@ -5152,28 +5156,28 @@ export default function ChatsPage() {
               <span className="location-share-pin"><ComposerSvgIcon kind="location" /></span>
             </div>
             <div className="location-share-copy">
-              <span className="location-share-eyebrow">当前位置</span>
+              <span className="location-share-eyebrow">{t("location.current")}</span>
               <h2 id="location-share-title">
                 {locationDraft.phase === "locating"
-                  ? "正在定位"
+                  ? t("location.locating")
                   : locationDraft.phase === "error"
-                    ? "无法获取位置"
-                    : "发送这个位置？"}
+                    ? t("location.unavailable")
+                    : t("location.sendThis")}
               </h2>
               {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
-                <p>{locationDraft.obscure ? "精确坐标不会写入消息" : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`}</p>
+                <p>{locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`}</p>
               ) : (
-                <p>{locationDraft.error || "请稍候"}</p>
+                <p>{locationDraft.error || t("common.pleaseWait")}</p>
               )}
             </div>
             {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
               <div className="location-share-privacy">
                 <div>
-                  <strong>模糊坐标</strong>
-                  <span>随机偏移至 50 公里内</span>
+                  <strong>{t("location.approximate")}</strong>
+                  <span>{t("location.randomOffset", { distance: 50 })}</span>
                 </div>
                 <button
-                  aria-label="切换模糊坐标"
+                  aria-label={t("location.toggleApproximate")}
                   className={`switch ${locationDraft.obscure ? "active" : ""}`}
                   disabled={locationDraft.phase === "sending"}
                   onClick={() => setLocationDraft((current) => current ? { ...current, obscure: !current.obscure } : current)}
@@ -5182,12 +5186,12 @@ export default function ChatsPage() {
               </div>
             ) : null}
             <div className="location-share-actions">
-              <button className="ghost-button" disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">取消</button>
+              <button className="ghost-button" disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button>
               {locationDraft.phase === "error" ? (
-                <button className="button" onClick={openLocationPicker} type="button">重试</button>
+                <button className="button" onClick={openLocationPicker} type="button">{t("common.retry")}</button>
               ) : (
                 <button className="button" disabled={locationDraft.phase !== "ready"} onClick={() => void sendLocationMessage()} type="button">
-                  {locationDraft.phase === "sending" ? "发送中" : "发送位置"}
+                  {locationDraft.phase === "sending" ? t("common.sendingPlain") : t("message.sendLocation")}
                 </button>
               )}
             </div>
@@ -5207,7 +5211,7 @@ export default function ChatsPage() {
           >
             {messageMenu.confirmDelete ? (
               <>
-                <div className="message-context-title">删除这条消息？</div>
+                <div className="message-context-title">{t("message.deleteConfirmTitle")}</div>
                 <div className="message-context-actions is-confirm">
                   <button
                     className="message-context-button"
@@ -5215,10 +5219,10 @@ export default function ChatsPage() {
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: false } : current))}
                     type="button"
                   >
-                    取消
+                    {t("common.cancel")}
                   </button>
                   <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage()} type="button">
-                    {messageDeleteState === "deleting" ? "删除中..." : "确认删除"}
+                    {messageDeleteState === "deleting" ? t("common.deleting") : t("common.confirmDelete")}
                   </button>
                 </div>
               </>
@@ -5227,7 +5231,7 @@ export default function ChatsPage() {
                 className="message-context-actions"
               >
                 <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
-                  引用
+                  {t("message.reply")}
                 </button>
                 {typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
                   <button
@@ -5239,17 +5243,17 @@ export default function ChatsPage() {
                     {pinnedMessages.some((pin) =>
                       pin.message.message_id === messageMenu.message.id
                       && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
-                    ) ? "取消置顶" : "置顶"}
+                    ) ? t("pin.remove") : t("pin.label")}
                   </button>
                 ) : null}
                 {messageMenu.message.kind === "text" ? (
                   <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
-                    复制
+                    {t("common.copy")}
                   </button>
                 ) : null}
                 {(["image", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
                   <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
-                    下载
+                    {t("common.download")}
                   </button>
                 ) : null}
                 {messageMenu.message.from === "self" && (typeof messageMenu.message.id === "number" || messageMenu.message.kind === "image") ? (
@@ -5258,7 +5262,7 @@ export default function ChatsPage() {
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: true } : current))}
                     type="button"
                   >
-                    删除
+                    {t("common.delete")}
                   </button>
                 ) : null}
               </div>
