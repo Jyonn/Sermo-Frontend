@@ -1987,7 +1987,7 @@ export default function MenuPage() {
                 {webPushDescription ? <div className="row-subtle">{webPushDescription}</div> : null}
               </div>
               <button
-                aria-label="toggle-web-push"
+                aria-label={t("webReminder.toggleSystem")}
                 className={`switch ${webPushState === "on" ? "active" : ""}`}
                 disabled={webPushSaving || webPushState === "checking" || webPushState === "unsupported" || webPushState === "denied"}
                 onClick={() => void toggleWebPush()}
@@ -1999,7 +1999,7 @@ export default function MenuPage() {
                 <strong>{t("webReminder.messageSound")}</strong>
               </div>
               <button
-                aria-label="toggle-web-sound-reminder"
+                aria-label={t("webReminder.toggleSound")}
                 className={`switch ${webReminderPrefs.soundEnabled ? "active" : ""}`}
                 onClick={() => void updateWebReminderPrefs({ soundEnabled: !webReminderPrefs.soundEnabled })}
                 type="button"
@@ -2010,7 +2010,7 @@ export default function MenuPage() {
                 <strong>{t("webReminder.titleAlert")}</strong>
               </div>
               <button
-                aria-label="toggle-web-title-reminder"
+                aria-label={t("webReminder.toggleTitle")}
                 className={`switch ${webReminderPrefs.titleEnabled ? "active" : ""}`}
                 onClick={() => void updateWebReminderPrefs({ titleEnabled: !webReminderPrefs.titleEnabled })}
                 type="button"
@@ -2203,7 +2203,7 @@ export default function MenuPage() {
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                   <div className="row-main"><strong>{t("notification.openChatOnTap")}</strong></div>
                   <button
-                    aria-label="toggle-bark-open-chat"
+                    aria-label={t("notification.toggleOpenChat")}
                     className={`switch ${activePref.openChatOnTap ? "active" : ""}`}
                     disabled={prefSaving || !activePref.enabled}
                     onClick={() => void savePreferencePatch("bark", { open_chat_on_tap: activePref.openChatOnTap ? 0 : 1 })}
@@ -2213,7 +2213,7 @@ export default function MenuPage() {
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                   <div className="row-main"><strong>{t("notification.useSpaceLogo")}</strong></div>
                   <button
-                    aria-label="toggle-bark-space-icon"
+                    aria-label={t("notification.toggleSpaceLogo")}
                     className={`switch ${activePref.barkIconMode === 1 ? "active" : ""}`}
                     disabled={prefSaving || !activePref.enabled}
                     onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 1 ? 0 : 1 })}
@@ -2223,7 +2223,7 @@ export default function MenuPage() {
                 <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
                   <div className="row-main"><strong>{t("notification.useUserAvatar")}</strong></div>
                   <button
-                    aria-label="toggle-bark-user-icon"
+                    aria-label={t("notification.toggleUserAvatar")}
                     className={`switch ${activePref.barkIconMode === 2 ? "active" : ""}`}
                     disabled={prefSaving || !activePref.enabled}
                     onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 2 ? 0 : 2 })}

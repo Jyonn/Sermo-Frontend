@@ -19,6 +19,7 @@ import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
 import type { AuthSession, GestureLockPreferenceDTO, JoinResponseDTO } from "../types";
+import { i18n } from "./i18n";
 
 interface AuthContextValue {
   ready: boolean;
@@ -290,7 +291,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     return (
     <main className="auth-restore-screen">
         <div className="auth-restore-orb" aria-hidden="true" />
-        <FeedbackState title="正在恢复登录" description="会话核验中" tone="loading" />
+        <FeedbackState title={i18n.t("auth.restoring")} description={i18n.t("auth.verifyingSession")} tone="loading" />
       </main>
     );
   }

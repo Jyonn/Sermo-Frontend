@@ -39,6 +39,7 @@ import type {
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
 } from "../types";
+import { i18n } from "./i18n";
 
 const API_BASE_URL = import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space";
 
@@ -193,7 +194,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
 
   if (response.status === 401 && adminAuth) {
     adminAuthConfig.setSession(null);
-    throw new ApiError("管理登录已失效，请重新登录。", "UNAUTHORIZED", response.status);
+    throw new ApiError(i18n.t("admin.sessionExpired"), "UNAUTHORIZED", response.status);
   }
 
   if (response.status === 401 && auth && retryOn401 && session?.refreshToken) {

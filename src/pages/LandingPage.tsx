@@ -64,7 +64,7 @@ export default function LandingPage() {
         {recentSpaces.length ? (
           <section className="landing-entry-panel">
             <div className="landing-entry-copy">
-              <p className="landing-eyebrow">My Entrances</p>
+              <p className="landing-eyebrow">{t("landing.myEntrancesEyebrow")}</p>
               <h2>{t("landing.myEntrances")}</h2>
               <p>{t("landing.entrancesHint")}</p>
             </div>

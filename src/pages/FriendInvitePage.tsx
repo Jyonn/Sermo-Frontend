@@ -108,7 +108,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
   const readyCard =
     previewState === "ready" && preview ? (
       <section className={`panel friend-invite-card${overlay ? " is-overlay" : ""}`}>
-        <p className="eyebrow">Friend Invite</p>
+        <p className="eyebrow">{t("invite.eyebrow")}</p>
         <div className="friend-invite-header">
           <UserAvatar className="avatar-large" name={preview.inviter.name} uri={preview.inviter.avatar_uri} />
           <div className="friend-invite-copy">

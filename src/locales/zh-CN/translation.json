@@ -1042,5 +1042,20 @@
   "message.reply": "引用",
   "common.copy": "复制",
   "common.download": "下载",
-  "common.delete": "删除"
+  "common.delete": "删除",
+  "admin.sessionExpired": "管理登录已失效，请重新登录。",
+  "auth.restoring": "正在恢复登录",
+  "auth.verifyingSession": "会话核验中",
+  "landing.myEntrancesEyebrow": "我的入口",
+  "invite.eyebrow": "好友邀请",
+  "gesture.eyebrow": "手势",
+  "media.imageRecord": "影像记录",
+  "media.videoRecord": "视频记录",
+  "media.locationLabel": "位置",
+  "webReminder.toggleSystem": "切换系统通知",
+  "webReminder.toggleSound": "切换新消息提示音",
+  "webReminder.toggleTitle": "切换标题提醒",
+  "notification.toggleOpenChat": "切换点击打开聊天",
+  "notification.toggleSpaceLogo": "切换空间 Logo",
+  "notification.toggleUserAvatar": "切换用户头像"
 }

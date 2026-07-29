@@ -1568,7 +1568,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   if (!metadata || metadata.status !== 1) {
     return (
       <div className="message-image-archive is-empty">
-        <span>IMAGE RECORD</span>
+        <span>{i18n.t("media.imageRecord")}</span>
         <p>{i18n.t("media.metadataMissing")}</p>
       </div>
     );
@@ -1601,7 +1601,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
   return (
     <div className="message-image-archive">
       <div className={`message-image-location ${location ? "" : "is-empty"}`}>
-        <span className="message-image-archive-label">LOCATION</span>
+        <span className="message-image-archive-label">{i18n.t("media.locationLabel")}</span>
         <strong>{location || i18n.t("location.notRecorded")}</strong>
         {coordinate ? <small>{coordinate}</small> : null}
         {provider && metadata.address ? (
@@ -1610,7 +1610,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
       </div>
       <div className="message-image-record">
         <div className="message-image-record-heading">
-          <span className="message-image-archive-label">IMAGE RECORD</span>
+          <span className="message-image-archive-label">{i18n.t("media.imageRecord")}</span>
           <strong>{takenAt || i18n.t("media.timeNotRecorded")}</strong>
         </div>
         {rows.length ? (
@@ -1627,7 +1627,7 @@ function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null })
   if (!metadata || metadata.status !== 1) {
     return (
       <div className="message-image-archive is-empty">
-        <span>VIDEO RECORD</span>
+        <span>{i18n.t("media.videoRecord")}</span>
         <p>{i18n.t("media.metadataLoading")}</p>
       </div>
     );
@@ -1653,13 +1653,13 @@ function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null })
   return (
     <div className="message-image-archive message-video-archive">
       <div className={`message-image-location ${location ? "" : "is-empty"}`}>
-        <span className="message-image-archive-label">LOCATION</span>
+        <span className="message-image-archive-label">{i18n.t("media.locationLabel")}</span>
         <strong>{location || i18n.t("location.notRecorded")}</strong>
         {coordinate ? <small>{coordinate}</small> : null}
       </div>
       <div className="message-image-record">
         <div className="message-image-record-heading">
-          <span className="message-image-archive-label">VIDEO RECORD</span>
+          <span className="message-image-archive-label">{i18n.t("media.videoRecord")}</span>
           <strong>{takenAt || i18n.t("media.timeNotRecorded")}</strong>
         </div>
         {rows.length ? (
@@ -4637,7 +4637,7 @@ export default function ChatsPage() {
                         <div>
                           <strong>{selectedChat.title}</strong>
                           <div className="meta-row">
-                            {selectedChat.verified ? <span className="verified-badge">Verified</span> : null}
+                            {selectedChat.verified ? <span className="verified-badge">{t("admin.verified")}</span> : null}
                             <span className={selectedChat.online ? "presence-badge" : "count-badge"}>{selectedChat.subtitle}</span>
                           </div>
                         </div>

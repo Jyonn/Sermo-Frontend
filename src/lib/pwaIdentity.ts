@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { i18n } from "./i18n";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 
 const fallbackIcon = "/icons/sermo-192.png?v=3";
@@ -29,7 +30,7 @@ export async function setupSpacePwaIdentity() {
   try {
     const space = await api.getSpaceBySlug(slug);
     const icon = space.official_user?.avatar_uri || fallbackIcon;
-    const appName = `${space.name} - 言浪`;
+    const appName = `${space.name} - ${i18n.t("brand.yanlang")}`;
     updateIconLink('link[rel="apple-touch-icon"]', { rel: "apple-touch-icon", href: icon });
     updateMetaContent("apple-mobile-web-app-title", appName);
   } catch {

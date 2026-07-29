@@ -12,11 +12,16 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import type { AppViewState, UserDTO } from "../types";
 import { i18n, useI18n } from "../lib/language";
 
-function productizeFriendRequestError(message: string) {
-  if (/verified|认证|验证|权限|forbidden/i.test(message)) {
+function productizeFriendRequestError(error: unknown, fallback: string) {
+  if (error instanceof ApiError && (
+    error.status === 403
+    || error.identifier.includes("VERIFIED")
+    || error.identifier.includes("FORBIDDEN")
+    || error.identifier.includes("PERMISSION")
+  )) {
     return i18n.t("members.verifyHint");
   }
-  return message;
+  return error instanceof ApiError ? error.message : fallback;
 }
 
 export default function SpaceUsersPage() {
@@ -93,8 +98,7 @@ export default function SpaceUsersPage() {
       await api.createFriendRequest(userId);
       navigate("/app/friends/requests");
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : t("members.requestFailed");
-      setError(productizeFriendRequestError(message));
+      setError(productizeFriendRequestError(apiError, t("members.requestFailed")));
     }
   };
 

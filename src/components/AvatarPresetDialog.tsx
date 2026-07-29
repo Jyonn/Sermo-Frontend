@@ -64,7 +64,7 @@ export function AvatarPresetDialog({
       <section aria-modal="true" className="avatar-preset-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <div className="avatar-preset-dialog-head">
           <div>
-            <p className="eyebrow">Avatar</p>
+            <p className="eyebrow">{t("profile.avatar")}</p>
             <h2>{t("avatar.choose")}</h2>
           </div>
           <button className="icon-button" onClick={onClose} type="button">

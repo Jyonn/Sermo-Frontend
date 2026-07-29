@@ -1,47 +1,17 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import i18n from "i18next";
-import { initReactI18next, useTranslation } from "react-i18next";
-import en from "../locales/en/translation.json";
-import zhCN from "../locales/zh-CN/translation.json";
+import { useTranslation } from "react-i18next";
 import { api } from "./api";
 import { useAuth } from "./auth";
+import {
+  getBrowserJoinLanguage,
+  i18n,
+  resolveJoinLanguage,
+  type SupportedLanguage,
+  type TranslationKey,
+} from "./i18n";
 
-export type SupportedLanguage = "en" | "zh-CN";
 export type LanguagePreference = "system" | SupportedLanguage;
-export type TranslationKey = keyof typeof en;
-
-const SUPPORTED_LANGUAGES = new Set<SupportedLanguage>(["en", "zh-CN"]);
-
-export function resolveJoinLanguage(input?: string | null): SupportedLanguage {
-  const raw = (input ?? "").trim();
-  if (!raw) return "en";
-
-  const lower = raw.toLowerCase().replace(/_/g, "-");
-  if (lower === "en" || lower.startsWith("en-")) return "en";
-  if (lower === "zh" || lower === "zh-cn" || lower.startsWith("zh-cn")) return "zh-CN";
-  return SUPPORTED_LANGUAGES.has(raw as SupportedLanguage) ? (raw as SupportedLanguage) : "en";
-}
-
-export function getBrowserJoinLanguage(): SupportedLanguage {
-  if (typeof navigator === "undefined") return "en";
-  return resolveJoinLanguage(navigator.language);
-}
-
-void i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: en },
-      "zh-CN": { translation: zhCN },
-    },
-    lng: getBrowserJoinLanguage(),
-    fallbackLng: "en",
-    supportedLngs: ["en", "zh-CN"],
-    load: "currentOnly",
-    interpolation: { escapeValue: false },
-    returnNull: false,
-  });
 
 interface LanguageContextValue {
   language: SupportedLanguage;
@@ -145,4 +115,10 @@ export function useI18n() {
   return { ...context, t };
 }
 
-export { i18n };
+export {
+  getBrowserJoinLanguage,
+  i18n,
+  resolveJoinLanguage,
+  type SupportedLanguage,
+  type TranslationKey,
+};

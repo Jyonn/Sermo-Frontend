@@ -1042,5 +1042,20 @@
   "message.reply": "Reply",
   "common.copy": "Copy",
   "common.download": "Download",
-  "common.delete": "Delete"
+  "common.delete": "Delete",
+  "admin.sessionExpired": "Admin session expired. Log in again.",
+  "auth.restoring": "Restoring your session",
+  "auth.verifyingSession": "Verifying session",
+  "landing.myEntrancesEyebrow": "My entrances",
+  "invite.eyebrow": "Friend invite",
+  "gesture.eyebrow": "Gesture",
+  "media.imageRecord": "IMAGE RECORD",
+  "media.videoRecord": "VIDEO RECORD",
+  "media.locationLabel": "LOCATION",
+  "webReminder.toggleSystem": "Toggle system notifications",
+  "webReminder.toggleSound": "Toggle new message sound",
+  "webReminder.toggleTitle": "Toggle title alerts",
+  "notification.toggleOpenChat": "Toggle opening chat on tap",
+  "notification.toggleSpaceLogo": "Toggle space logo",
+  "notification.toggleUserAvatar": "Toggle user avatar"
 }

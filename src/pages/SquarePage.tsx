@@ -291,7 +291,7 @@ export default function SquarePage() {
       verified: Boolean(currentUser.verified),
       last_heartbeat: currentUser.last_heartbeat ?? Date.now() / 1000,
       welcome_message: currentUser.welcome_message,
-      plaza_greeting: currentUser.language === "en" ? "Hi, nice to meet you." : "嗨，认识一下？",
+      plaza_greeting: t("profile.defaultPlazaGreeting"),
       email_verified_at: currentUser.email_verified_at ?? null,
       phone_verified_at: currentUser.phone_verified_at ?? null,
       bark_verified_at: currentUser.bark_verified_at ?? null,

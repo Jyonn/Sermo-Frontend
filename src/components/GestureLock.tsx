@@ -412,7 +412,7 @@ export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, o
   return (
     <main className="gesture-lock-screen">
       <section className="gesture-lock-card" aria-label={t("gesture.title")}>
-        <p className="eyebrow">Gesture</p>
+        <p className="eyebrow">{t("gesture.eyebrow")}</p>
         <h1>{t("gesture.title")}</h1>
         <p>{userName ? t("gesture.welcomeUser", { name: userName }) : t("gesture.welcome")}</p>
         <PatternGrid disabled={checking} tone={tone} onComplete={(pattern) => void complete(pattern)} />
