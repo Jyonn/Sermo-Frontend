@@ -1136,5 +1136,7 @@
   "travelMap.directChat": "Direct chat",
   "travelMap.groupMemberCount": "{{count}} members",
   "travelMap.authorizedMemberCount": "{{count}} members sharing",
-  "travelMap.authorizedMembers": "Members sharing footprints"
+  "travelMap.authorizedMembers": "Members sharing footprints",
+  "travelMap.matchingRegion": "Matching region…",
+  "travelMap.savingCheckIn": "Saving check-in…"
 }

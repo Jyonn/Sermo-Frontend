@@ -58,6 +58,8 @@ export interface CheckInPosition {
   accuracy: number;
 }
 
+type CheckInPhase = "idle" | "locating" | "matching" | "saving";
+
 const WIDTH = 920;
 const HEIGHT = 500;
 const boundaryCache = new Map<string, FeatureCollection<Geometry, RegionProperties>>();
@@ -192,6 +194,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [checkInPhase, setCheckInPhase] = useState<CheckInPhase>("idle");
   const [checkInPosition, setCheckInPosition] = useState<CheckInPosition | null>(null);
   const [checkInCandidates, setCheckInCandidates] = useState<CheckInCandidate[]>([]);
   const [accessOverview, setAccessOverview] = useState<TravelMapAccessOverviewDTO | null>(null);
@@ -278,6 +281,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   };
 
   const saveCheckIn = async (position: CheckInPosition, candidate: CheckInCandidate) => {
+    setCheckInPhase("saving");
     try {
       const payload = await api.checkInTravelMap({
         latitude: position.latitude,
@@ -304,10 +308,12 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       showToast(error instanceof ApiError ? error.message : t("travelMap.saveFailed"), "error");
     } finally {
       setCheckingIn(false);
+      setCheckInPhase("idle");
     }
   };
 
   const resolveCheckIn = async (position: CheckInPosition) => {
+    setCheckInPhase("matching");
     const unique = await resolveTravelMapCandidates(position, language);
     if (!unique.length) throw new Error("region unavailable");
     if (unique.length === 1) {
@@ -319,29 +325,40 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   };
 
   const checkIn = () => {
-    if (chatId || otherUser || checkingIn) return;
+    if (otherUser || checkingIn) return;
     if (!navigator.geolocation) {
       showToast(t("travelMap.locationUnsupported"), "error");
       return;
     }
     setCheckingIn(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        void resolveCheckIn({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        }).catch(() => {
-          setCheckingIn(false);
-          showToast(t("travelMap.locationFailed"), "error");
-        });
-      },
-      () => {
+    setCheckInPhase("locating");
+    window.setTimeout(() => {
+      try {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            void resolveCheckIn({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+            }).catch(() => {
+              setCheckingIn(false);
+              setCheckInPhase("idle");
+              showToast(t("travelMap.locationFailed"), "error");
+            });
+          },
+          () => {
+            setCheckingIn(false);
+            setCheckInPhase("idle");
+            showToast(t("travelMap.locationFailed"), "error");
+          },
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
+        );
+      } catch {
         setCheckingIn(false);
+        setCheckInPhase("idle");
         showToast(t("travelMap.locationFailed"), "error");
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
-    );
+      }
+    }, 0);
   };
 
   const zoom = (delta: number) => setTransform((current) => ({
@@ -460,7 +477,14 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
 
         {!otherUser ? (
           <button className="button travel-map-check-in-button" disabled={checkingIn} onClick={checkIn} type="button">
-            {checkingIn ? t("travelMap.locating") : t("travelMap.checkInHere")}
+            {checkingIn ? <span className="travel-map-check-in-spinner" aria-hidden="true" /> : null}
+            {checkInPhase === "locating"
+              ? t("travelMap.locating")
+              : checkInPhase === "matching"
+                ? t("travelMap.matchingRegion")
+                : checkInPhase === "saving"
+                  ? t("travelMap.savingCheckIn")
+                  : t("travelMap.checkInHere")}
           </button>
         ) : null}
 
@@ -507,6 +531,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           setCheckInCandidates([]);
           setCheckInPosition(null);
           setCheckingIn(false);
+          setCheckInPhase("idle");
         }}
       >
         <div className="travel-map-region-choices">

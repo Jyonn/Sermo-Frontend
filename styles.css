@@ -13619,8 +13619,26 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
 }
 
 .travel-map-check-in-button {
+  display: inline-flex;
   width: 100%;
   min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.travel-map-check-in-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.travel-map-check-in-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
 }
 
 .travel-map-region-choices {

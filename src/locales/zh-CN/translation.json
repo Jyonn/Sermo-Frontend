@@ -1136,5 +1136,7 @@
   "travelMap.directChat": "私聊",
   "travelMap.groupMemberCount": "{{count}} 位成员",
   "travelMap.authorizedMemberCount": "{{count}} 人已授权",
-  "travelMap.authorizedMembers": "已授权成员"
+  "travelMap.authorizedMembers": "已授权成员",
+  "travelMap.matchingRegion": "正在匹配地区…",
+  "travelMap.savingCheckIn": "正在保存打卡…"
 }

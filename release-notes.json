@@ -1,21 +1,19 @@
 {
-  "id": "2026.07.30.7",
+  "id": "2026.07.30.8",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "足迹授权一目了然",
+      "title": "现场打卡恢复响应",
       "items": [
-        "个人足迹地图新增授权总览",
-        "分别查看我授权的会话和授权给我的成员",
-        "群聊授权支持进入成员详情"
+        "修复共同足迹地图中点击现场打卡无响应的问题",
+        "定位、地区匹配和保存期间按钮会禁用并显示进度"
       ]
     },
     "en": {
-      "title": "Clearer travel map access",
+      "title": "Responsive on-site check-ins",
       "items": [
-        "Added an access overview to the personal travel map",
-        "See chats you share with and people sharing with you",
-        "Open group access for a detailed member list"
+        "Fixed on-site check-ins not responding in shared travel maps",
+        "The button now disables and shows progress while locating, matching, and saving"
       ]
     }
   }
