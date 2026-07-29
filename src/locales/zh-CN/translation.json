@@ -273,5 +273,8 @@
   "profile.createGroup": "创建群聊 · {{count}} 人",
   "profile.removeTitle": "删除好友？",
   "profile.removeHint": "已有聊天记录仍会保留。",
-  "profile.remove": "删除"
+  "profile.remove": "删除",
+  "profile.details": "用户详情",
+  "profile.detailsHint": "资料与共同关系",
+  "profile.back": "返回上一页"
 }

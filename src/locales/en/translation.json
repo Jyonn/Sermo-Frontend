@@ -273,5 +273,8 @@
   "profile.createGroup": "Create group · {{count}} members",
   "profile.removeTitle": "Remove friend?",
   "profile.removeHint": "Existing chat history will remain.",
-  "profile.remove": "Remove"
+  "profile.remove": "Remove",
+  "profile.details": "User details",
+  "profile.detailsHint": "Profile and shared connections",
+  "profile.back": "Back to previous page"
 }
