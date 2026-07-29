@@ -296,11 +296,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           {groupChats.length > 3 ? <button className="user-profile-section-more" onClick={() => setAllGroupsOpen(true)} type="button">{t("profile.viewAll")}</button> : null}
         </div>
         <div className="user-profile-groups">
-          <button className={`user-profile-group-row user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
-            <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
-            <span><strong>{t("profile.newGroup")}</strong><small>{canCreateGroup ? t("profile.inviteFriends") : t("profile.levelUnlock", { level: createGroupCapability?.required_level ?? 4 })}</small></span>
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
+          {isFriend === true ? (
+            <button className={`user-profile-group-row user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
+              <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
+              <span><strong>{t("profile.newGroup")}</strong><small>{canCreateGroup ? t("profile.inviteFriends") : t("profile.levelUnlock", { level: createGroupCapability?.required_level ?? 4 })}</small></span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          ) : null}
           {groupChats.slice(0, 3).map(renderGroupRow)}
         </div>
       </section>

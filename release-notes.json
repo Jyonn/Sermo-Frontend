@@ -1,19 +1,19 @@
 {
-  "id": "2026.07.29.4",
+  "id": "2026.07.29.5",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "用户身份展示更完整",
+      "title": "用户详情交互更准确",
       "items": [
-        "用户详情页新增等级与永久 VIP 标识",
-        "头像框和 VIP 头像效果现已同步展示"
+        "陌生人的用户详情不再展示新建群聊入口",
+        "共同群聊信息仍会正常保留"
       ]
     },
     "en": {
-      "title": "Richer identity details",
+      "title": "More accurate profile actions",
       "items": [
-        "User profiles now show level and Lifetime VIP badges",
-        "Avatar frames and VIP avatar effects now appear consistently"
+        "Create group is now hidden on profiles of people who are not friends",
+        "Shared group information remains available"
       ]
     }
   }
