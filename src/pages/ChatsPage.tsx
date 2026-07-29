@@ -2335,7 +2335,17 @@ export default function ChatsPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const sync = () => api.getUserMe(controller.signal).then(setCurrentUserMe).catch(() => undefined);
+    let syncing = false;
+    const sync = () => {
+      if (syncing || controller.signal.aborted) return;
+      syncing = true;
+      api.getUserMe(controller.signal)
+        .then(setCurrentUserMe)
+        .catch(() => undefined)
+        .finally(() => {
+          syncing = false;
+        });
+    };
     void sync();
     const timer = window.setInterval(sync, 30_000);
     return () => {

@@ -31,10 +31,13 @@ export function AppBottomNav() {
   const groupSquareEnabled = useGroupSquareEnabled();
   const { t } = useI18n();
   const loadedIdentityRef = useRef<string | null>(null);
+  const sessionUserId = session?.user.user_id ?? null;
+  const sessionSpaceId = session?.user.space_id ?? null;
+  const sessionAccessToken = session?.accessToken ?? null;
   const effectivePathname = location.pathname === "/friend-invite" && session ? "/app/chats" : location.pathname;
   const cacheScope = useMemo(
-    () => (session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null),
-    [session]
+    () => (sessionSpaceId && sessionUserId ? buildChatCacheScope(sessionSpaceId, sessionUserId) : null),
+    [sessionSpaceId, sessionUserId]
   );
   const [totalUnread, setTotalUnread] = useState(0);
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
@@ -64,7 +67,7 @@ export function AppBottomNav() {
       .catch(() => {
         if (loadedIdentityRef.current === identityKey) loadedIdentityRef.current = null;
       });
-  }, [patchSessionUser, session]);
+  }, [patchSessionUser, sessionAccessToken, sessionSpaceId, sessionUserId]);
 
   useLayoutEffect(() => {
     if (!desktopNavigationActive) {
@@ -146,7 +149,7 @@ export function AppBottomNav() {
       cancelled = true;
       window.removeEventListener(FRIEND_REQUESTS_UPDATED_EVENT, handleUpdated as EventListener);
     };
-  }, [session, effectivePathname]);
+  }, [effectivePathname, sessionAccessToken, sessionUserId]);
 
   if (!session || !effectivePathname.startsWith("/app/")) return null;
   const isChatDetail = Boolean(matchPath("/app/chats/:chatId", effectivePathname));

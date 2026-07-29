@@ -50,7 +50,7 @@ export function PwaRecommendation() {
       active = false;
       window.clearTimeout(timer);
     };
-  }, [location.pathname, session]);
+  }, [location.pathname, session?.accessToken, session?.user.space_id, session?.user.user_id]);
 
   useEffect(() => {
     const handleInstalled = () => {

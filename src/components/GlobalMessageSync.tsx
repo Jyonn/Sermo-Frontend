@@ -286,6 +286,8 @@ export function GlobalMessageSync() {
   const cursorRef = useRef<number | null>(null);
   const syncInFlightRef = useRef(false);
   const presencePollCountRef = useRef(0);
+  const sessionUserId = session?.user.user_id ?? null;
+  const sessionAccessToken = session?.accessToken ?? null;
   const scope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const gestureScope = getGestureLockScope(session);
   const activeChatId = useMemo(() => {
@@ -347,7 +349,7 @@ export function GlobalMessageSync() {
       });
 
     return () => controller.abort();
-  }, [scope, session]);
+  }, [scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!scope || !session || afterMessageId === null) return;
@@ -553,7 +555,7 @@ export function GlobalMessageSync() {
       syncInFlightRef.current = false;
       window.clearInterval(timer);
     };
-  }, [activeChatId, afterMessageId, gestureScope, scope, session]);
+  }, [activeChatId, afterMessageId, gestureScope, scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!popup) return;

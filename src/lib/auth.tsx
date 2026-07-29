@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { FeedbackState } from "../components/FeedbackState";
 import { GestureUnlockScreen } from "../components/GestureLock";
@@ -64,6 +64,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authStorage.set(session);
   }, [session]);
 
+  const setSession = useCallback((nextSession: AuthSession | null) => {
+    authStorage.set(nextSession);
+    setSessionState(nextSession);
+  }, []);
+
+  const patchSessionUser = useCallback((patch: Partial<AuthSession["user"]>) => {
+    setSessionState((current) => {
+      if (!current) return current;
+      const entries = Object.entries(patch) as Array<[keyof AuthSession["user"], AuthSession["user"][keyof AuthSession["user"]]]>;
+      if (entries.every(([key, value]) => current.user[key] === value)) return current;
+      const nextSession = {
+        ...current,
+        user: {
+          ...current.user,
+          ...patch,
+        },
+      };
+      authStorage.set(nextSession);
+      return nextSession;
+    });
+  }, []);
+
+  const loginFromJoin = useCallback((payload: JoinResponseDTO) => {
+    rememberRecentSpace(payload.space);
+    const nextSession = toSession(payload);
+    authStorage.set(nextSession);
+    setSessionState(nextSession);
+    setReady(true);
+  }, []);
+
+  const logout = useCallback(async () => {
+    const current = authStorage.get();
+    if (current?.refreshToken) {
+      try {
+        await api.logout(current.refreshToken);
+      } catch {
+        // Best-effort logout; local cleanup still proceeds.
+      }
+    }
+    authStorage.set(null);
+    setSessionState(null);
+    setReady(true);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     const storedSession = authStorage.get();
@@ -114,52 +158,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       heartbeatInFlightRef.current = false;
       window.clearInterval(timer);
     };
-  }, [session]);
+  }, [ready, session?.accessToken]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       ready,
       session,
-      setSession(nextSession) {
-        authStorage.set(nextSession);
-        setSessionState(nextSession);
-      },
-      patchSessionUser(patch) {
-        setSessionState((current) => {
-          if (!current) return current;
-          const nextSession = {
-            ...current,
-            user: {
-              ...current.user,
-              ...patch,
-            },
-          };
-          authStorage.set(nextSession);
-          return nextSession;
-        });
-      },
-      loginFromJoin(payload) {
-        rememberRecentSpace(payload.space);
-        const nextSession = toSession(payload);
-        authStorage.set(nextSession);
-        setSessionState(nextSession);
-        setReady(true);
-      },
-      async logout() {
-        const current = authStorage.get();
-        if (current?.refreshToken) {
-          try {
-            await api.logout(current.refreshToken);
-          } catch {
-            // Best-effort logout; local cleanup still proceeds.
-          }
-        }
-        authStorage.set(null);
-        setSessionState(null);
-        setReady(true);
-      },
+      setSession,
+      patchSessionUser,
+      loginFromJoin,
+      logout,
     }),
-    [ready, session]
+    [loginFromJoin, logout, patchSessionUser, ready, session, setSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

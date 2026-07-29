@@ -22,9 +22,12 @@ function countUnread(chats: Array<Pick<Chat, "unread">>) {
 export function DocumentTitle() {
   const { t } = useI18n();
   const { ready, session } = useAuth();
+  const sessionUserId = session?.user.user_id ?? null;
+  const sessionSpaceId = session?.user.space_id ?? null;
+  const sessionAccessToken = session?.accessToken ?? null;
   const cacheScope = useMemo(
-    () => (session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null),
-    [session]
+    () => (sessionSpaceId && sessionUserId ? buildChatCacheScope(sessionSpaceId, sessionUserId) : null),
+    [sessionSpaceId, sessionUserId]
   );
   const [spaceName, setSpaceName] = useState(FALLBACK_TITLE);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -52,7 +55,7 @@ export function DocumentTitle() {
       });
 
     return () => controller.abort();
-  }, [ready, session]);
+  }, [ready, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!ready || !cacheScope) {
@@ -104,7 +107,7 @@ export function DocumentTitle() {
       .then((prefs) => setWebReminderPreferences(mapWebReminderPreferences(prefs)))
       .catch(() => undefined);
     return () => controller.abort();
-  }, [ready, session]);
+  }, [ready, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     const handleUpdated = (event: Event) => {

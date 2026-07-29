@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.29.10",
+  "id": "2026.07.29.11",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "聊天深色模式更完整",
+      "title": "同步恢复稳定",
       "items": [
-        "聊天标题栏与输入区统一为深色玻璃质感",
-        "不同聊天背景拥有对应的深色版本",
-        "链接、录音与更多操作在夜间更清晰"
+        "修复用户资料更新触发重复请求的问题",
+        "消息、好友申请和提醒同步不再反复重启",
+        "轮询任务增加防重入保护"
       ]
     },
     "en": {
-      "title": "A more complete dark chat",
+      "title": "Stable background sync",
       "items": [
-        "Chat headers and composers now share a dark glass surface",
-        "Every chat background has a matching dark variant",
-        "Links, recording, and more actions are clearer at night"
+        "Fixed repeated requests triggered by profile updates",
+        "Message, friend request, and reminder sync no longer restart repeatedly",
+        "Polling tasks now guard against overlapping requests"
       ]
     }
   }
