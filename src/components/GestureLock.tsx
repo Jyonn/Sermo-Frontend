@@ -9,6 +9,7 @@ import {
   verifyGesturePattern,
 } from "../lib/gestureLock";
 import { ApiError, api } from "../lib/api";
+import { useI18n } from "../lib/language";
 import type { GestureLockPreferenceDTO } from "../types";
 
 interface PatternGridProps {
@@ -45,6 +46,7 @@ function distanceToSegment(point: { x: number; y: number }, start: { x: number; 
 }
 
 function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternGridProps) {
+  const { t } = useI18n();
   const boardRef = useRef<HTMLDivElement | null>(null);
   const selectedRef = useRef<number[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
@@ -148,7 +150,7 @@ function PatternGrid({ disabled = false, tone = "normal", onComplete }: PatternG
       onPointerMove={move}
       onPointerUp={end}
       role="application"
-      aria-label="手势九宫格"
+      aria-label={t("gesture.grid")}
     >
       <svg className="gesture-lines" viewBox="0 0 100 100" aria-hidden="true">
         {linePoints.length > 1 ? (
@@ -188,14 +190,15 @@ function GestureRange({
   onChange: (value: number) => void;
   onCommit: (value: number) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="gesture-range-row">
       <div>
-        <strong>自动上锁</strong>
-        <span>{value} 分钟</span>
+        <strong>{t("gesture.autoLock")}</strong>
+        <span>{t("gesture.minutes", { count: value })}</span>
       </div>
       <input
-        aria-label="自动上锁间隔"
+        aria-label={t("gesture.autoLockInterval")}
         disabled={disabled || saving}
         max={MAX_GESTURE_LOCK_AFTER_MINUTES}
         min={1}
@@ -212,15 +215,16 @@ function GestureRange({
 }
 
 export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: GestureSetupPanelProps) {
+  const { t } = useI18n();
   const enabled = Boolean(preference?.enabled && preference.pattern_hash && preference.salt);
   const [firstPattern, setFirstPattern] = useState("");
   const [timeoutMinutes, setTimeoutMinutes] = useState(normalizeGestureLockAfterMinutes(preference?.lock_after_minutes));
   const [status, setStatus] = useState(
     enabled
-      ? "已开启"
+      ? t("gesture.enabled")
       : canEnable
-        ? "连接至少 4 个点"
-        : "请先认证邮箱"
+        ? t("gesture.connectPoints")
+        : t("gesture.verifyEmailFirst")
   );
   const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
   const [saving, setSaving] = useState(false);
@@ -240,22 +244,22 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
   const complete = async (pattern: string) => {
     if (!scope || saving) return;
     if (!canEnable) {
-      fail("请先认证邮箱");
+      fail(t("gesture.verifyEmailFirst"));
       return;
     }
     if (pattern.split("-").length < 4) {
-      fail("至少 4 个点");
+      fail(t("gesture.minimumPoints"));
       return;
     }
     if (!firstPattern) {
       setFirstPattern(pattern);
-      setStatus("再画一次确认");
+      setStatus(t("gesture.drawAgain"));
       setTone("normal");
       return;
     }
     if (pattern !== firstPattern) {
       setFirstPattern("");
-      fail("不一致，请重画");
+      fail(t("gesture.mismatch"));
       return;
     }
     setSaving(true);
@@ -265,11 +269,11 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
       markGestureUnlocked(scope);
       emitGestureLockPreferenceUpdated(nextPreference);
       setFirstPattern("");
-      setStatus("已开启");
+      setStatus(t("gesture.enabled"));
       setTone("success");
       onChanged(nextPreference);
     } catch (error) {
-      fail(apiErrorMessage(error, "手势解锁保存失败，请稍后再试。"));
+      fail(apiErrorMessage(error, t("gesture.saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -283,12 +287,12 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
       clearGestureUnlock(scope);
       emitGestureLockPreferenceUpdated(nextPreference);
       setFirstPattern("");
-      setStatus("已关闭");
+      setStatus(t("gesture.disabled"));
       setTone("normal");
       setVerifyingDisable(false);
       onChanged(nextPreference);
     } catch (error) {
-      fail(apiErrorMessage(error, "手势解锁关闭失败，请稍后再试。"));
+      fail(apiErrorMessage(error, t("gesture.disableFailed")));
     } finally {
       setSaving(false);
     }
@@ -303,11 +307,11 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
       const nextPreference = await api.updateGestureLockPrefs({ lock_after_minutes: next });
       emitGestureLockPreferenceUpdated(nextPreference);
       setTimeoutMinutes(normalizeGestureLockAfterMinutes(nextPreference.lock_after_minutes));
-      setStatus("已更新");
+      setStatus(t("gesture.updated"));
       onChanged(nextPreference);
     } catch (error) {
       setTimeoutMinutes(normalizeGestureLockAfterMinutes(preference?.lock_after_minutes));
-      fail(apiErrorMessage(error, "保存失败"));
+      fail(apiErrorMessage(error, t("common.saveFailed")));
     } finally {
       setSaving(false);
     }
@@ -317,7 +321,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
     if (!preference || saving) return;
     const ok = await verifyGesturePattern(preference, pattern);
     if (!ok) {
-      fail("手势不对");
+      fail(t("gesture.incorrect"));
       return;
     }
     await disable();
@@ -330,10 +334,10 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
           {tone === "error" ? <div className="gesture-message gesture-message-error">{status}</div> : null}
           {verifyingDisable ? (
             <>
-              <div className="gesture-message">确认手势</div>
+              <div className="gesture-message">{t("gesture.confirm")}</div>
               <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void verifyDisable(pattern)} />
               <button className="ghost-button" disabled={saving} onClick={() => setVerifyingDisable(false)} type="button">
-                取消
+                {t("common.cancel")}
               </button>
             </>
           ) : (
@@ -345,13 +349,13 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
                 onCommit={(value) => void commitTimeout(value)}
               />
               <button className="danger-button" disabled={saving} onClick={() => setVerifyingDisable(true)} type="button">
-                关闭手势解锁
+                {t("gesture.disable")}
               </button>
             </>
           )}
         </>
       ) : !canEnable ? (
-        <div className="inline-note">认证邮箱后可开启</div>
+        <div className="inline-note">{t("gesture.verifyEmailToEnable")}</div>
       ) : (
         <>
           {firstPattern || tone !== "normal" ? <div className={`gesture-message gesture-message-${tone}`}>{status}</div> : null}
@@ -362,11 +366,11 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
               onClick={() => {
                 setFirstPattern("");
                 setTone("normal");
-                setStatus("请重画");
+                setStatus(t("gesture.redraw"));
               }}
               type="button"
             >
-              重新开始
+              {t("gesture.restart")}
             </button>
           ) : null}
         </>
@@ -384,7 +388,8 @@ interface GestureUnlockScreenProps {
 }
 
 export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, onResetAndLogout }: GestureUnlockScreenProps) {
-  const [message, setMessage] = useState("画出手势");
+  const { t } = useI18n();
+  const [message, setMessage] = useState(() => t("gesture.draw"));
   const [tone, setTone] = useState<"normal" | "error" | "success">("normal");
   const [checking, setChecking] = useState(false);
 
@@ -395,25 +400,25 @@ export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, o
     setChecking(false);
     if (!ok) {
       setTone("error");
-      setMessage("手势不对");
+      setMessage(t("gesture.incorrect"));
       return;
     }
     markGestureUnlocked(scope);
     setTone("success");
-    setMessage("已解锁。");
+    setMessage(t("gesture.unlocked"));
     window.setTimeout(onUnlocked, 120);
   };
 
   return (
     <main className="gesture-lock-screen">
-      <section className="gesture-lock-card" aria-label="手势解锁">
+      <section className="gesture-lock-card" aria-label={t("gesture.title")}>
         <p className="eyebrow">Gesture</p>
-        <h1>手势解锁</h1>
-        <p>欢迎回来{userName ? `，${userName}` : ""}</p>
+        <h1>{t("gesture.title")}</h1>
+        <p>{userName ? t("gesture.welcomeUser", { name: userName }) : t("gesture.welcome")}</p>
         <PatternGrid disabled={checking} tone={tone} onComplete={(pattern) => void complete(pattern)} />
         <div className={`gesture-lock-message gesture-lock-message-${tone}`}>{message}</div>
         <button className="ghost-button gesture-lock-reset" onClick={onResetAndLogout} type="button">
-          退出登录
+          {t("auth.logout")}
         </button>
       </section>
     </main>
