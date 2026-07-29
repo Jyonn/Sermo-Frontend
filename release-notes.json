@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.29.8",
+  "id": "2026.07.29.9",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "把共同足迹铺在地图上",
+      "title": "气泡风格焕新",
       "items": [
-        "点亮去过的国家、省州和地区",
-        "在私聊中交换地图查看权",
-        "世界与中国地图支持缩放和共同足迹高亮"
+        "每款气泡现在拥有清晰的发送与接收样式",
+        "潮汐与电波风格重新设计",
+        "预览效果与真实聊天保持一致"
       ]
     },
     "en": {
-      "title": "Put shared journeys on the map",
+      "title": "Refined chat bubble styles",
       "items": [
-        "Light up countries, states, provinces, and regions",
-        "Exchange map access in direct messages",
-        "Zoom across World and China maps with shared footprints highlighted"
+        "Every style now has distinct sent and received states",
+        "Tide and Signal styles have been redesigned",
+        "Previews now match the real conversation"
       ]
     }
   }
