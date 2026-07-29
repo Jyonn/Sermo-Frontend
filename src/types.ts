@@ -399,6 +399,18 @@ export interface ChatTravelMapDTO {
   }>;
 }
 
+export interface TravelMapAccessOverviewEntryDTO {
+  chat_id: number;
+  chat_type: "direct" | "group";
+  title: string;
+  users: TinyUserDTO[];
+}
+
+export interface TravelMapAccessOverviewDTO {
+  shared_by_me: TravelMapAccessOverviewEntryDTO[];
+  shared_with_me: TravelMapAccessOverviewEntryDTO[];
+}
+
 export interface TravelMapComparisonDTO {
   me: TinyUserDTO;
   other: TinyUserDTO;

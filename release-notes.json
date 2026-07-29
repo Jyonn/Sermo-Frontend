@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.30.6",
+  "id": "2026.07.30.7",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "足迹打卡融入聊天",
+      "title": "足迹授权一目了然",
       "items": [
-        "共同足迹地图现在也能直接现场打卡",
-        "发送精确位置后自动记录所在地区",
-        "优化私聊共同足迹地图的标题"
+        "个人足迹地图新增授权总览",
+        "分别查看我授权的会话和授权给我的成员",
+        "群聊授权支持进入成员详情"
       ]
     },
     "en": {
-      "title": "Check-ins meet conversations",
+      "title": "Clearer travel map access",
       "items": [
-        "Check in directly from shared travel maps",
-        "Sending an exact location now records its region automatically",
-        "Improved shared travel map titles in direct chats"
+        "Added an access overview to the personal travel map",
+        "See chats you share with and people sharing with you",
+        "Open group access for a detailed member list"
       ]
     }
   }

@@ -1128,5 +1128,13 @@
   "travelMap.chatAccessGranted": "Your footprints are now shared in this chat",
   "travelMap.sharedMemberCount": "{{count}} members are sharing",
   "travelMap.chooseCurrentRegion": "Where are you now?",
-  "travelMap.directSharedTitle": "My travel map with {{name}}"
+  "travelMap.directSharedTitle": "My travel map with {{name}}",
+  "travelMap.sharedByMe": "Shared by me",
+  "travelMap.sharedWithMe": "Shared with me",
+  "travelMap.noSharedByMe": "No active sharing",
+  "travelMap.noSharedWithMe": "No one has shared yet",
+  "travelMap.directChat": "Direct chat",
+  "travelMap.groupMemberCount": "{{count}} members",
+  "travelMap.authorizedMemberCount": "{{count}} members sharing",
+  "travelMap.authorizedMembers": "Members sharing footprints"
 }

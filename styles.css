@@ -13649,6 +13649,88 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   color: var(--text-muted);
 }
 
+.travel-map-access-overview {
+  display: grid;
+  gap: 14px;
+}
+
+.travel-map-access-overview section {
+  display: grid;
+  gap: 7px;
+}
+
+.travel-map-access-overview h4 {
+  margin: 0 2px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
+.travel-map-access-overview section > p {
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--text-muted);
+  border: 1px dashed var(--line-soft);
+  border-radius: 12px;
+  font-size: 0.72rem;
+}
+
+.travel-map-access-overview-row {
+  display: flex;
+  width: 100%;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  color: var(--text-primary);
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--bg-panel);
+  text-align: left;
+}
+
+.travel-map-access-overview-row > span:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.travel-map-access-overview-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.travel-map-access-overview-row small {
+  color: var(--text-muted);
+}
+
+.travel-map-access-overview-avatars {
+  display: flex;
+  padding-left: 8px;
+}
+
+.travel-map-access-overview-avatars .mini-avatar {
+  margin-left: -8px;
+  border: 2px solid var(--bg-panel);
+}
+
+.travel-map-access-member-list {
+  display: grid;
+  gap: 8px;
+}
+
+.travel-map-access-member-list > div {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--bg-panel);
+}
+
 .travel-map-owner > span {
   display: grid;
   min-width: 0;

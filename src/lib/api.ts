@@ -44,6 +44,7 @@ import type {
   ChatTravelMapDTO,
   TravelMapAccessDTO,
   TravelMapComparisonDTO,
+  TravelMapAccessOverviewDTO,
 } from "../types";
 import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
@@ -621,6 +622,13 @@ export const api = {
 
   getTravelMapAccess(user_id: number) {
     return request<TravelMapAccessDTO>("/maps/access", { auth: true, query: { user_id } });
+  },
+
+  getTravelMapAccessOverview(signal?: AbortSignal) {
+    return request<TravelMapAccessOverviewDTO>("/maps/access/overview", {
+      auth: true,
+      signal,
+    });
   },
 
   grantTravelMapAccess(user_id: number) {

@@ -1128,5 +1128,13 @@
   "travelMap.chatAccessGranted": "已向此会话公开足迹",
   "travelMap.sharedMemberCount": "已有 {{count}} 人公开足迹",
   "travelMap.chooseCurrentRegion": "确认所在地区",
-  "travelMap.directSharedTitle": "我和{{name}}的足迹地图"
+  "travelMap.directSharedTitle": "我和{{name}}的足迹地图",
+  "travelMap.sharedByMe": "我授权的",
+  "travelMap.sharedWithMe": "授权给我的",
+  "travelMap.noSharedByMe": "暂无授权",
+  "travelMap.noSharedWithMe": "暂未收到授权",
+  "travelMap.directChat": "私聊",
+  "travelMap.groupMemberCount": "{{count}} 位成员",
+  "travelMap.authorizedMemberCount": "{{count}} 人已授权",
+  "travelMap.authorizedMembers": "已授权成员"
 }
