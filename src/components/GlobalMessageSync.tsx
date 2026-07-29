@@ -9,7 +9,7 @@ import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { loadMessagesAfterThrough } from "../lib/messageHistory";
-import { getActiveLanguage, getActiveLocale } from "../lib/language";
+import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
@@ -37,27 +37,27 @@ function formatChatListTime(value: number) {
   const diff = now.getTime() - date.getTime();
   const minutes = Math.max(1, Math.floor(diff / 60000));
 
-  if (minutes < 60) return getActiveLanguage() === "en" ? "Just now" : "刚刚";
+  if (minutes < 60) return i18n.t("time.justNow");
 
   const sameDay = date.toDateString() === now.toDateString();
   if (sameDay) {
-    return getActiveLanguage() === "en" ? `${Math.floor(minutes / 60)} hr ago` : `${Math.floor(minutes / 60)} 小时前`;
+    return i18n.t("time.hoursAgo", { count: Math.floor(minutes / 60) });
   }
 
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return getActiveLanguage() === "en" ? "Yesterday" : "昨天";
+  if (date.toDateString() === yesterday.toDateString()) return i18n.t("time.yesterday");
 
   return new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(date);
 }
 
 function formatPresence(user: UserDTO | null) {
-  if (!user) return getActiveLanguage() === "en" ? "Status unavailable" : "暂无状态";
-  if (user.is_alive) return getActiveLanguage() === "en" ? "Online" : "在线";
+  if (!user) return i18n.t("presence.unavailable");
+  if (user.is_alive) return i18n.t("presence.online");
 
   const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
-  if (minutes < 30) return getActiveLanguage() === "en" ? "Recently active" : "刚刚活跃";
-  return getActiveLanguage() === "en" ? "Offline" : "离线";
+  if (minutes < 30) return i18n.t("presence.recentlyActive");
+  return i18n.t("presence.offline");
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
@@ -149,7 +149,7 @@ function getDirectPeer(chat: ChatDTO, currentUserId: number) {
 
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
-  const title = chat.title || peer?.name || "未命名会话";
+  const title = chat.title || peer?.name || i18n.t("chat.unnamed");
   const presence = formatPresence(peer);
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
   const members = [...chat.members]
@@ -172,8 +172,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     id: chat.chat_id,
     title,
     avatarUri: peer?.avatar_uri,
-    subtitle: chat.group ? `${chat.members.length} 人` : presence,
-    preview: chat.last_message?.content || "暂无消息",
+    subtitle: chat.group ? i18n.t("chat.memberCount", { count: chat.members.length }) : presence,
+    preview: chat.last_message?.content || i18n.t("chat.noMessages"),
     time: formatChatListTime(lastActivity),
     lastActivity,
     unread: chat.unread_count ?? 0,
@@ -185,9 +185,11 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     detail: {
-      summary: chat.group ? "围绕同一主题的讨论会集中在这里。" : "先聊两句，再决定要不要进一步建立关系。",
-      relation: chat.group ? (isOwner ? "你是群主" : "你已加入该群聊") : "一对一会话",
-      actions: chat.group ? (isOwner ? ["邀请成员", "解散群聊"] : ["退出群聊"]) : ["发起好友申请", "静音通知"],
+      summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
+      relation: chat.group ? (isOwner ? i18n.t("chat.ownerRelation") : i18n.t("chat.memberRelation")) : i18n.t("chat.directRelation"),
+      actions: chat.group
+        ? (isOwner ? [i18n.t("chat.inviteMembers"), i18n.t("chat.disband")] : [i18n.t("chat.leave")])
+        : [i18n.t("chat.friendRequest"), i18n.t("chat.mute")],
       members,
     },
     messages: [],
@@ -232,12 +234,12 @@ function resolveNextCursor(
 }
 
 function previewFromMessage(message: ChatMessage) {
-  if (message.kind === "image") return "[图片]";
-  if (message.kind === "video") return "[视频]";
-  if (message.kind === "audio") return "[语音]";
-  if (message.kind === "file") return "[文件]";
-  if (message.kind === "location") return "[位置]";
-  return message.text || "收到一条新消息";
+  if (message.kind === "image") return i18n.t("message.imagePlaceholder");
+  if (message.kind === "video") return i18n.t("message.videoPlaceholder");
+  if (message.kind === "audio") return i18n.t("message.audioPlaceholder");
+  if (message.kind === "file") return i18n.t("message.filePlaceholder");
+  if (message.kind === "location") return i18n.t("message.locationPlaceholder");
+  return message.text || i18n.t("message.new");
 }
 
 function isChatMessageDTO(value: unknown): value is ChatMessageDTO {
@@ -451,7 +453,7 @@ export function GlobalMessageSync() {
             setPopup({
               chatId: newlyOnline.id,
               title: newlyOnline.title,
-              preview: "刚刚上线",
+              preview: i18n.t("presence.justOnline"),
               count: 1,
               avatarUri: newlyOnline.avatarUri,
             });
@@ -522,7 +524,7 @@ export function GlobalMessageSync() {
 
         setPopup({
           chatId: uniqueChatIds.size === 1 ? latest.chatId : null,
-          title: uniqueChatIds.size === 1 ? chat?.title ?? latest.message.name : `${uniqueChatIds.size} 个会话有新消息`,
+          title: uniqueChatIds.size === 1 ? chat?.title ?? latest.message.name : i18n.t("message.newInChats", { count: uniqueChatIds.size }),
           preview: uniqueChatIds.size === 1 ? previewFromMessage(latest.message) : `${chat?.title ?? latest.message.name}: ${previewFromMessage(latest.message)}`,
           count: otherChatItems.length,
           avatarUri: uniqueChatIds.size === 1 ? chat?.avatarUri ?? latest.message.avatarUri : undefined,
