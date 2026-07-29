@@ -9,6 +9,7 @@ import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { loadMessagesAfterThrough } from "../lib/messageHistory";
+import { getActiveLanguage, getActiveLocale } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
@@ -36,27 +37,27 @@ function formatChatListTime(value: number) {
   const diff = now.getTime() - date.getTime();
   const minutes = Math.max(1, Math.floor(diff / 60000));
 
-  if (minutes < 60) return "刚刚";
+  if (minutes < 60) return getActiveLanguage() === "en" ? "Just now" : "刚刚";
 
   const sameDay = date.toDateString() === now.toDateString();
   if (sameDay) {
-    return `${Math.floor(minutes / 60)} 小时前`;
+    return getActiveLanguage() === "en" ? `${Math.floor(minutes / 60)} hr ago` : `${Math.floor(minutes / 60)} 小时前`;
   }
 
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return "昨天";
+  if (date.toDateString() === yesterday.toDateString()) return getActiveLanguage() === "en" ? "Yesterday" : "昨天";
 
-  return new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(date);
 }
 
 function formatPresence(user: UserDTO | null) {
-  if (!user) return "暂无状态";
-  if (user.is_alive) return "在线";
+  if (!user) return getActiveLanguage() === "en" ? "Status unavailable" : "暂无状态";
+  if (user.is_alive) return getActiveLanguage() === "en" ? "Online" : "在线";
 
   const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
-  if (minutes < 30) return "刚刚活跃";
-  return "离线";
+  if (minutes < 30) return getActiveLanguage() === "en" ? "Recently active" : "刚刚活跃";
+  return getActiveLanguage() === "en" ? "Offline" : "离线";
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
@@ -162,7 +163,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     .sort((left, right) => {
       if (left.isOwner !== right.isOwner) return left.isOwner ? -1 : 1;
       if (left.isSelf !== right.isSelf) return left.isSelf ? -1 : 1;
-      return left.name.localeCompare(right.name, "zh-CN");
+      return left.name.localeCompare(right.name, getActiveLocale());
     });
 
   const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;

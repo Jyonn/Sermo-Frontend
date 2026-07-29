@@ -15,6 +15,7 @@ import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
+import { useI18n } from "../lib/language";
 
 const MAX_ORBS = 20;
 const CHARACTER_AREA_RATIO = 0.2;
@@ -196,6 +197,7 @@ function resolveOrbCollisions(orbs: OrbState[], lockedUserId: number | null) {
 }
 
 export default function SquarePage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
   const groupSquareEnabled = useGroupSquareEnabled();
@@ -489,12 +491,12 @@ export default function SquarePage() {
     : undefined;
 
   return (
-    <AppChrome title="广场" hideTopbar shellClassName="desktop-tab-shell">
+    <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack square-plaza-page">
         <div className="square-scene-title">
-          <strong>广场</strong>
+          <strong>{t("square.title")}</strong>
           <i aria-hidden="true" />
-          <span>{displayedOnlineUsers.length} 人</span>
+          <span>{t("square.people", { count: displayedOnlineUsers.length })}</span>
           <HeaderSyncIndicator syncing={syncing} />
         </div>
         <div className="square-plaza-toolbar">

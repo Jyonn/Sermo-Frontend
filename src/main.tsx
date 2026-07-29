@@ -7,6 +7,7 @@ import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { setupSpacePwaIdentity } from "./lib/pwaIdentity";
 import { watchPwaUpdates } from "./lib/pwaUpdate";
+import { LanguageProvider } from "./lib/language";
 
 void setupSpacePwaIdentity();
 
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <AdminAuthProvider>
         <AuthProvider>
-          <App />
+          <LanguageProvider>
+            <App />
+          </LanguageProvider>
         </AuthProvider>
       </AdminAuthProvider>
     </BrowserRouter>

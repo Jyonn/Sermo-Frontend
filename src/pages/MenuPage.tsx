@@ -32,6 +32,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import { getActiveLocale, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 
 const channelRows: Array<[NotificationChannel, number, string]> = [
   ["email", 1, "邮件"],
@@ -74,12 +75,12 @@ const growthLevelUnlocks: Record<number, string[]> = {
   18: ["尽兴徽记"],
 };
 const personalizationOptions = {
-  chat_bubble_style: [["default", "经典"], ["tide", "潮汐"], ["comic", "漫画"], ["neon", "霓虹"]],
-  avatar_frame_style: [["none", "无边界"], ["orbit", "星轨"], ["blaze", "烈焰"], ["pixel", "像素"]],
-  square_outfit_style: [["sunset", "落日夹克"], ["varsity", "学院棒球"], ["noir", "黑曜风衣"], ["cloud", "云朵卫衣"]],
-  square_prop_style: [["none", "空手"], ["star", "星光棒"], ["coffee", "咖啡杯"], ["flag", "言浪旗"]],
-  square_motion_style: [["walk", "漫步"], ["bounce", "弹跳"], ["float", "漂浮"], ["dash", "冲浪"]],
-  square_limb_style: [["line", "线条"], ["chunky", "软糖"], ["robot", "机械"], ["ribbon", "飘带"]],
+  chat_bubble_style: [["default", "menu.styleDefault"], ["tide", "menu.styleTide"], ["comic", "menu.styleComic"], ["neon", "menu.styleNeon"]],
+  avatar_frame_style: [["none", "menu.frameNone"], ["orbit", "menu.frameOrbit"], ["blaze", "menu.frameBlaze"], ["pixel", "menu.framePixel"]],
+  square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
+  square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
+  square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"]],
+  square_limb_style: [["line", "menu.limbLine"], ["chunky", "menu.limbChunky"], ["robot", "menu.limbRobot"], ["ribbon", "menu.limbRibbon"]],
 } as const;
 
 type NotificationMessageKind = "direct" | "group" | "online";
@@ -173,6 +174,7 @@ function BarkGuideIcon({ compact = false }: { compact?: boolean }) {
 }
 
 export default function MenuPage() {
+  const { t, preference: languagePreference, setPreference: setLanguagePreference, saving: languageSaving } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
@@ -411,7 +413,7 @@ export default function MenuPage() {
 
   const formatContactDate = (timestamp: number | null) => {
     if (!timestamp) return "从未解绑";
-    return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "short", day: "numeric" }).format(timestamp * 1000);
+    return new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "short", day: "numeric" }).format(timestamp * 1000);
   };
 
   const openUnbindConfirm = (channel: NotificationChannel) => {
@@ -1074,6 +1076,15 @@ export default function MenuPage() {
     }
   };
 
+  const saveLanguagePreference = async (nextPreference: LanguagePreference) => {
+    try {
+      await setLanguagePreference(nextPreference);
+      showToast(t("menu.languageUpdated"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("menu.languageUpdateFailed"), "error");
+    }
+  };
+
   const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -1113,7 +1124,7 @@ export default function MenuPage() {
       return;
     }
     if (field === "name" && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now()) {
-      showToast(`下次可修改：${new Date(me.nickname_change.available_at * 1000).toLocaleDateString("zh-CN")}`, "error");
+      showToast(`下次可修改：${new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale())}`, "error");
       return;
     }
     setBasicEditField(field);
@@ -1248,7 +1259,7 @@ export default function MenuPage() {
 
   const friendInviteExpireText = useMemo(() => {
     if (!friendInviteExpire) return "";
-    return new Date(friendInviteExpire * 1000).toLocaleString("zh-CN", {
+    return new Date(friendInviteExpire * 1000).toLocaleString(getActiveLocale(), {
       month: "numeric",
       day: "numeric",
       hour: "2-digit",
@@ -1287,26 +1298,26 @@ export default function MenuPage() {
   };
 
   return (
-    <AppChrome title="菜单" hideTopbar shellClassName="desktop-tab-shell">
+    <AppChrome title={t("menu.title")} hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
         <TabPageHeader
           title={
             <span className="menu-switch-title">
-              <span>菜单</span>
+              <span>{t("menu.title")}</span>
               <span className="menu-switch-separator">·</span>
               {canSwitchAccount ? (
                 <button
-                  aria-label="切换账号"
+                  aria-label={t("menu.switchAccount")}
                   className="menu-account-switch-trigger"
                   onClick={() => void openAccountSwitcher()}
                   type="button"
                 >
                   <span className="menu-account-switch-icon" aria-hidden="true">⇄</span>
-                  <span>{space?.name ?? "当前空间"}</span>
+                  <span>{space?.name ?? t("menu.currentSpace")}</span>
                 </button>
               ) : (
                 <span className="menu-account-switch-trigger is-static">
-                  {space?.name ?? "当前空间"}
+                  {space?.name ?? t("menu.currentSpace")}
                 </span>
               )}
             </span>
@@ -1653,7 +1664,7 @@ export default function MenuPage() {
                 <strong>昵称</strong>
                 {canRenameNickname && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now() ? (
                   <div className="row-subtle">
-                    下次可修改 {new Date(me.nickname_change.available_at * 1000).toLocaleDateString("zh-CN", {
+                    下次可修改 {new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale(), {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -1682,13 +1693,38 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title="个性化">
+      <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
+          <section className="personalization-section personalization-language-section">
+            <header><strong>{t("menu.language")}</strong><span>{t("menu.languageHint")}</span></header>
+            <div className="personalization-language-options" role="radiogroup" aria-label={t("menu.language")}>
+              {([
+                ["system", "common.system"],
+                ["zh-CN", "common.chinese"],
+                ["en", "common.english"],
+              ] as const).map(([value, labelKey]) => (
+                <button
+                  aria-checked={languagePreference === value}
+                  className={`personalization-language-option${languagePreference === value ? " is-selected" : ""}`}
+                  disabled={languageSaving}
+                  key={value}
+                  onClick={() => void saveLanguagePreference(value)}
+                  role="radio"
+                  type="button"
+                >
+                  <span>{t(labelKey)}</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    {languagePreference === value ? "check_circle" : "radio_button_unchecked"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
           <button
             className={`personalization-background-entry${canCustomizeChatBackground ? "" : " is-locked"}`}
             onClick={() => {
               if (!canCustomizeChatBackground) {
-                showToast("达到 Lv.8 后可自定义聊天背景", "error");
+                showToast(t("menu.levelUnlock", { level: 8 }), "error");
                 return;
               }
               setChatBackgroundDrawerOpen(true);
@@ -1696,19 +1732,19 @@ export default function MenuPage() {
             type="button"
           >
             <span className={`personalization-background-swatch theme-${me?.chat_background_theme ?? "default"}`} />
-            <span><strong>聊天背景</strong><small>{canCustomizeChatBackground ? "让整个对话进入你的世界" : "LV8 解锁"}</small></span>
+            <span><strong>{t("menu.chatBackground")}</strong><small>{canCustomizeChatBackground ? t("menu.chatBackgroundHint") : t("menu.levelUnlock", { level: 8 })}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           {([
-            ["chat_bubble_style", "聊天气泡", "让每一句话拥有自己的轮廓"],
-            ["avatar_frame_style", "头像框", "在任何出现头像的地方留下标记"],
-            ["square_outfit_style", "广场 · 衣服", "决定你的角色主色与剪影"],
-            ["square_prop_style", "广场 · 手持物", "带点东西再去认识新朋友"],
-            ["square_motion_style", "广场 · 动作", "漫步、弹跳、漂浮或冲浪"],
-            ["square_limb_style", "广场 · 四肢", "改变人物的肢体语言"],
+            ["chat_bubble_style", "menu.chatBubble", "menu.chatBubbleHint"],
+            ["avatar_frame_style", "menu.avatarFrame", "menu.avatarFrameHint"],
+            ["square_outfit_style", "menu.squareOutfit", "menu.squareOutfitHint"],
+            ["square_prop_style", "menu.squareProp", "menu.squarePropHint"],
+            ["square_motion_style", "menu.squareMotion", "menu.squareMotionHint"],
+            ["square_limb_style", "menu.squareLimbs", "menu.squareLimbsHint"],
           ] as const).map(([field, title, description]) => (
             <section className="personalization-section" key={field}>
-              <header><strong>{title}</strong><span>{description}</span></header>
+              <header><strong>{t(title)}</strong><span>{t(description)}</span></header>
               <div className={`personalization-option-grid field-${field}`}>
                 {personalizationOptions[field].map(([value, label]) => (
                   <button
@@ -1719,7 +1755,7 @@ export default function MenuPage() {
                     type="button"
                   >
                     <i aria-hidden="true"><span /></i>
-                    <strong>{label}</strong>
+                    <strong>{t(label as TranslationKey)}</strong>
                   </button>
                 ))}
               </div>
@@ -1728,21 +1764,21 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={chatBackgroundDrawerOpen} onClose={() => setChatBackgroundDrawerOpen(false)} title="聊天背景">
+      <SideDrawer open={chatBackgroundDrawerOpen} onClose={() => setChatBackgroundDrawerOpen(false)} title={t("menu.chatBackground")}>
         <div className="chat-background-settings">
           <div className="chat-background-preview" data-theme={me?.chat_background_theme ?? "default"}>
             {me?.chat_background_theme === "custom" && me.chat_background_uri ? (
               <img alt="" src={me.chat_background_uri} />
             ) : null}
-            <span className="chat-background-preview-bubble other">今天聊点什么？</span>
-            <span className="chat-background-preview-bubble self">尽兴开聊。</span>
+            <span className="chat-background-preview-bubble other">{t("menu.backgroundPreviewOther")}</span>
+            <span className="chat-background-preview-bubble self">{t("menu.backgroundPreviewSelf")}</span>
           </div>
           <div className="chat-background-grid">
             {([
-              ["default", "默认"],
-              ["paper", "纸感"],
-              ["mint", "薄荷"],
-              ["dusk", "暮色"],
+              ["default", "menu.themeDefault"],
+              ["paper", "menu.themePaper"],
+              ["mint", "menu.themeMint"],
+              ["dusk", "menu.themeDusk"],
             ] as const).map(([theme, label]) => (
               <button
                 className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
@@ -1752,7 +1788,7 @@ export default function MenuPage() {
                 type="button"
               >
                 <span />
-                <strong>{label}</strong>
+                <strong>{t(label)}</strong>
               </button>
             ))}
             <button

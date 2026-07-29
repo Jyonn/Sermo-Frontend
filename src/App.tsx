@@ -25,6 +25,7 @@ import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
 import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
+import { useI18n } from "./lib/language";
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -45,11 +46,12 @@ function LegacyAdminRedirect({ mode }: { mode: "create" | "login" }) {
 }
 
 function LegacyJoinHostRedirect({ slug }: { slug: string }) {
+  const { t } = useI18n();
   useEffect(() => {
     window.location.replace(buildJoinHrefForCurrentHost(slug));
   }, [slug]);
 
-  return <FeedbackState title="正在进入空间..." />;
+  return <FeedbackState title={t("app.enteringSpace")} />;
 }
 
 function LegacySlugRedirect() {

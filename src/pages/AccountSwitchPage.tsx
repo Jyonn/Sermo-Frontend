@@ -5,6 +5,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { JoinResponseDTO } from "../types";
+import { useI18n } from "../lib/language";
 
 const exchangeRequests = new Map<string, Promise<JoinResponseDTO>>();
 
@@ -24,6 +25,7 @@ function exchangeTicketOnce(ticket: string) {
 export default function AccountSwitchPage() {
   const navigate = useNavigate();
   const { loginFromJoin } = useAuth();
+  const { t } = useI18n();
   const ticket = useMemo(readTicketFromHash, []);
   const [error, setError] = useState("");
 
@@ -49,11 +51,11 @@ export default function AccountSwitchPage() {
   }, [loginFromJoin, navigate, ticket]);
 
   return (
-    <AppChrome hideMobileNav hidePageTitle title="切换账号">
+    <AppChrome hideMobileNav hidePageTitle title={t("menu.switchAccount")}>
       <section className="auth-shell">
         <div className="auth-card is-space-state">
           <FeedbackState
-            title={error ? "无法切换账号" : "正在切换账号"}
+            title={error ? t("account.switchFailed") : t("account.switching")}
             description={error || ""}
             tone={error ? "error" : "loading"}
           />

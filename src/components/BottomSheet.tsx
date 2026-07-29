@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
+import { useI18n } from "../lib/language";
 
 interface BottomSheetProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function BottomSheet({
   className,
   bodyClassName,
 }: BottomSheetProps) {
+  const { t } = useI18n();
   const [desktopModal, setDesktopModal] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches
   );
@@ -101,7 +103,7 @@ export function BottomSheet({
         role="dialog"
       >
         {showCloseButton ? (
-          <button className="sheet-close" onClick={onClose} type="button" aria-label="关闭面板">
+          <button className="sheet-close" onClick={onClose} type="button" aria-label={t("common.closePanel")}>
             <span className="material-symbols-outlined">close</span>
           </button>
         ) : null}
@@ -111,7 +113,7 @@ export function BottomSheet({
             onMouseDown={(event) => startDrag(event.clientY)}
             onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
             type="button"
-            aria-label="拖动关闭"
+            aria-label={t("common.dragToClose")}
           >
             <div className="sheet-handle" />
           </button>

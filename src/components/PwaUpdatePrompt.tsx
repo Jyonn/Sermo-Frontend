@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { activatePwaUpdate, PWA_UPDATE_AVAILABLE_EVENT } from "../lib/pwaUpdate";
+import { useI18n } from "../lib/language";
 
 export function PwaUpdatePrompt() {
+  const { t } = useI18n();
   const [available, setAvailable] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -24,11 +26,11 @@ export function PwaUpdatePrompt() {
         <span className="material-symbols-outlined">refresh</span>
       </div>
       <div className="pwa-recommendation-copy">
-        <strong>发现新版本</strong>
-        <span>更新后即可使用最新功能</span>
+        <strong>{t("common.updateAvailable")}</strong>
+        <span>{t("common.updateHint")}</span>
       </div>
       <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
-        {updating ? "更新中" : "立即更新"}
+        {updating ? t("common.updating") : t("common.updateNow")}
       </button>
     </aside>
   );

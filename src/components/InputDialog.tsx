@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
+import { useI18n } from "../lib/language";
 
 interface InputDialogProps {
   open: boolean;
@@ -22,13 +23,14 @@ export function InputDialog({
   value,
   placeholder,
   type = "text",
-  confirmLabel = "确认",
-  cancelLabel = "取消",
+  confirmLabel,
+  cancelLabel,
   busy = false,
   onChange,
   onClose,
   onConfirm,
 }: InputDialogProps) {
+  const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const closeRef = useRef(onClose);
   const confirmRef = useRef(onConfirm);
@@ -81,10 +83,10 @@ export function InputDialog({
         />
         <div className="input-dialog-actions">
           <button className="ghost-button" disabled={busy} onClick={onClose} type="button">
-            {cancelLabel}
+            {cancelLabel ?? t("common.cancel")}
           </button>
           <button className="button" disabled={busy} onClick={onConfirm} type="button">
-            {busy ? "处理中..." : confirmLabel}
+            {busy ? t("common.processing") : confirmLabel ?? t("common.confirm")}
           </button>
         </div>
       </section>

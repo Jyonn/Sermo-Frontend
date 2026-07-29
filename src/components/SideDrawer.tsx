@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
+import { useI18n } from "../lib/language";
 
 const activeDrawerIds = new Set<string>();
 
@@ -29,6 +30,7 @@ export function SideDrawer({
   children,
   historyKey,
 }: SideDrawerProps) {
+  const { t } = useI18n();
   const drawerId = useId();
   const registeredRef = useRef(false);
   const onCloseRef = useRef(onClose);
@@ -143,7 +145,7 @@ export function SideDrawer({
       <aside aria-modal="true" className="side-drawer" onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="drawer-topbar">
           <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
-            <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label="返回">
+            <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label={t("common.back")}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <div className="drawer-topbar-copy">
@@ -161,7 +163,7 @@ export function SideDrawer({
                 onClick={onAction}
                 type="button"
               >
-                {actionBusy ? "处理中..." : actionLabel}
+                {actionBusy ? t("common.processing") : actionLabel}
               </button>
             ) : null}
           </div>

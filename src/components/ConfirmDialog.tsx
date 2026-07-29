@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
+import { useI18n } from "../lib/language";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -19,14 +20,15 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = "确认",
-  cancelLabel = "取消",
+  confirmLabel,
+  cancelLabel,
   busy = false,
   danger = false,
   showCancelButton = true,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
+  const { t } = useI18n();
   useBodyScrollLock(open);
 
   useEffect(() => {
@@ -55,11 +57,11 @@ export function ConfirmDialog({
         <div className="confirm-dialog-actions">
           {showCancelButton ? (
             <button className="ghost-button" disabled={busy} onClick={onClose} type="button">
-              {cancelLabel}
+              {cancelLabel ?? t("common.cancel")}
             </button>
           ) : null}
           <button className={danger ? "danger-button" : "button"} disabled={busy} onClick={onConfirm} type="button">
-            {busy ? "处理中..." : confirmLabel}
+            {busy ? `${t("common.loading")}...` : confirmLabel ?? t("common.confirm")}
           </button>
         </div>
       </section>

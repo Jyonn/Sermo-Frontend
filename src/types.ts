@@ -131,12 +131,14 @@ export interface AccessPayload {
   time?: number;
   type?: string;
   language?: string;
+  language_preference?: "system" | "en" | "zh-CN";
 }
 
 export interface UserMeDTO extends UserDTO {
   has_password: boolean;
   official?: boolean;
   language?: string;
+  language_preference?: "system" | "en" | "zh-CN";
   welcome_message?: string;
   email?: string | null;
   phone?: string | null;

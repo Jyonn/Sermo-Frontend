@@ -5,6 +5,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useI18n } from "../lib/language";
 
 const officialLoginExchanges = new Map<string, ReturnType<typeof api.exchangeOfficialLoginTicket>>();
 
@@ -26,6 +27,7 @@ function exchangeOfficialLoginTicketOnce(ticket: string) {
 export default function OfficialLoginPage() {
   const navigate = useNavigate();
   const { loginFromJoin } = useAuth();
+  const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<"loading" | "error">("loading");
   const ticket = useMemo(() => readTicketFromHash(), []);
@@ -59,11 +61,11 @@ export default function OfficialLoginPage() {
   }, [loginFromJoin, navigate, ticket]);
 
   return (
-    <AppChrome hideMobileNav hidePageTitle title="官方账号登录">
+    <AppChrome hideMobileNav hidePageTitle title={t("account.officialLogin")}>
       <section className="auth-shell">
         <div className="auth-card is-space-state">
-          {state === "loading" ? <FeedbackState title="正在登录官方账号" description="" tone="loading" /> : null}
-          {state === "error" ? <FeedbackState title="官方账号登录失败" description="这个桥接链接可能已经过期。请回到空间后台重新发起登录。" tone="error" /> : null}
+          {state === "loading" ? <FeedbackState title={t("account.officialLoggingIn")} description="" tone="loading" /> : null}
+          {state === "error" ? <FeedbackState title={t("account.officialLoginFailed")} description={t("account.officialExpired")} tone="error" /> : null}
         </div>
       </section>
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />

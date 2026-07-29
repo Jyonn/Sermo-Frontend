@@ -4,8 +4,10 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { InputDialog } from "../components/InputDialog";
 import { buildAdminEntryHref, buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
 import { listRecentSpaces, type RecentSpaceEntry } from "../lib/recentSpaces";
+import { useI18n } from "../lib/language";
 
 export default function LandingPage() {
+  const { t } = useI18n();
   const [slugInput, setSlugInput] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
@@ -18,7 +20,7 @@ export default function LandingPage() {
 
   const joinSpace = () => {
     if (!normalizedSlug) {
-      setSubmitError("请输入空间标识。");
+      setSubmitError(t("landing.slugRequired"));
       return;
     }
 
@@ -34,10 +36,10 @@ export default function LandingPage() {
       topbarAction={
         <>
           <a className="ghost-chip" href={buildAdminEntryHref("create")}>
-            创建空间
+            {t("landing.createSpace")}
           </a>
           <button className="ghost-chip" onClick={() => setJoinDialogOpen(true)} type="button">
-            加入空间
+            {t("landing.joinSpace")}
           </button>
         </>
       }
@@ -46,14 +48,14 @@ export default function LandingPage() {
         <section className="landing-hero">
           <div className="landing-copy">
             <p className="landing-eyebrow">Sermo 言浪</p>
-            <h1>一方空间，尽兴开聊。</h1>
-            <p className="landing-description">成员通过专属子域名进入，关系、聊天和通知自然围绕同一个空间发生。</p>
+            <h1>{t("landing.slogan")}</h1>
+            <p className="landing-description">{t("landing.description")}</p>
             <div className="landing-actions">
               <a className="button" href={buildAdminEntryHref("create")}>
-                创建我的空间
+                {t("landing.createMine")}
               </a>
               <button className="ghost-button landing-secondary" onClick={() => setJoinDialogOpen(true)} type="button">
-                加入空间
+                {t("landing.joinSpace")}
               </button>
             </div>
           </div>
@@ -63,8 +65,8 @@ export default function LandingPage() {
           <section className="landing-entry-panel">
             <div className="landing-entry-copy">
               <p className="landing-eyebrow">My Entrances</p>
-              <h2>我的入口</h2>
-              <p>你最近进入过的空间会显示在这里，下次可以直接跳转。</p>
+              <h2>{t("landing.myEntrances")}</h2>
+              <p>{t("landing.entrancesHint")}</p>
             </div>
             <div className="landing-entry-list">
               {recentSpaces.map((space) => (
@@ -73,7 +75,7 @@ export default function LandingPage() {
                     <strong>{space.name}</strong>
                     <span>{space.domain}</span>
                   </div>
-                  <span className="landing-entry-action">进入</span>
+                  <span className="landing-entry-action">{t("landing.enter")}</span>
                 </a>
               ))}
             </div>
@@ -82,13 +84,13 @@ export default function LandingPage() {
       </div>
 
       <InputDialog
-        confirmLabel="进入空间"
+        confirmLabel={t("landing.enterSpace")}
         onChange={setSlugInput}
         onClose={() => setJoinDialogOpen(false)}
         onConfirm={joinSpace}
         open={joinDialogOpen}
-        placeholder="输入空间标识"
-        title="加入空间"
+        placeholder={t("landing.slugPlaceholder")}
+        title={t("landing.joinSpace")}
         value={slugInput}
       />
       <AsyncErrorDialog message={submitError ?? ""} onClose={() => setSubmitError(null)} open={Boolean(submitError)} />

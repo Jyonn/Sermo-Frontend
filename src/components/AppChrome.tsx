@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
+import { useI18n } from "../lib/language";
 
 interface AppChromeProps {
   children: ReactNode;
@@ -41,6 +42,7 @@ export function AppChrome({
   const { session } = useAuth();
   const sessionSpace = useSpaceBrand();
   const location = useLocation();
+  const { t } = useI18n();
 
   const brandTarget = session ? "/app/chats" : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
@@ -84,12 +86,12 @@ export function AppChrome({
             {topbarAction}
             {!hideGuestEntryLink && !session && location.pathname !== "/entry" && !location.pathname.startsWith("/space/") ? (
               <Link className="ghost-chip" to="/entry">
-                返回入口
+                {t("nav.returnEntry")}
               </Link>
             ) : null}
           </div>
           {topbarProgress !== null && topbarProgress !== undefined ? (
-            <div className="topbar-progress" aria-label={`发送进度 ${Math.round(topbarProgress * 100)}%`} role="progressbar">
+            <div className="topbar-progress" aria-label={t("app.sendProgress", { progress: Math.round(topbarProgress * 100) })} role="progressbar">
               <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, topbarProgress))})` }} />
             </div>
           ) : null}

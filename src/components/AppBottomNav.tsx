@@ -7,12 +7,13 @@ import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
+import { useI18n, type TranslationKey } from "../lib/language";
 
 const mobileRoutes = [
-  { key: "chats", href: "/app/chats", icon: "chat", label: "聊天" },
-  { key: "square", href: "/app/square", icon: "explore", label: "广场" },
-  { key: "notifications", href: "/app/notifications", icon: "forum", label: "通讯" },
-  { key: "menu", href: "/app/menu", icon: "menu", label: "菜单" },
+  { key: "chats", href: "/app/chats", icon: "chat", labelKey: "nav.chats" },
+  { key: "square", href: "/app/square", icon: "explore", labelKey: "nav.square" },
+  { key: "notifications", href: "/app/notifications", icon: "forum", labelKey: "nav.contacts" },
+  { key: "menu", href: "/app/menu", icon: "menu", labelKey: "nav.menu" },
 ] as const;
 
 function activeKey(pathname: string) {
@@ -28,6 +29,7 @@ export function AppBottomNav() {
   const { session, patchSessionUser } = useAuth();
   const space = useSpaceBrand();
   const groupSquareEnabled = useGroupSquareEnabled();
+  const { t } = useI18n();
   const loadedIdentityRef = useRef<string | null>(null);
   const effectivePathname = location.pathname === "/friend-invite" && session ? "/app/chats" : location.pathname;
   const cacheScope = useMemo(
@@ -185,9 +187,9 @@ export function AppBottomNav() {
         {visibleRoutes.map((route) => (
           <Link
             key={route.key}
-            aria-label={route.label}
+            aria-label={t(route.labelKey as TranslationKey)}
             className={`nav-button ${current === route.key ? "active" : ""}`}
-            title={desktopCollapsed ? route.label : undefined}
+            title={desktopCollapsed ? t(route.labelKey as TranslationKey) : undefined}
             to={route.href}
           >
             <span className="nav-button-icon-wrap">
@@ -199,7 +201,7 @@ export function AppBottomNav() {
                 <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>
               ) : null}
             </span>
-            <span className="nav-button-label">{route.label}</span>
+            <span className="nav-button-label">{t(route.labelKey as TranslationKey)}</span>
           </Link>
         ))}
       </div>

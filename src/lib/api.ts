@@ -169,6 +169,11 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   const adminSession = adminAuth ? adminAuthConfig.getSession() : null;
   const headers = new Headers();
   headers.set("Accept", "application/json");
+  headers.set(
+    "Accept-Language",
+    session?.user.language
+      ?? (typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("zh") ? "zh-CN" : "en")
+  );
   if (body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
@@ -932,6 +937,14 @@ export const api = {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  setLanguagePreference(language_preference: "system" | "en" | "zh-CN", system_language: "en" | "zh-CN") {
+    return request<UserMeDTO>("/users/me/language", {
+      method: "POST",
+      auth: true,
+      body: { language_preference, system_language },
     });
   },
 };

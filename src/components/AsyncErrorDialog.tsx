@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
+import { useI18n } from "../lib/language";
 
 interface AsyncErrorDialogProps {
   open: boolean;
@@ -15,14 +16,15 @@ interface AsyncErrorDialogProps {
 
 export function AsyncErrorDialog({
   open,
-  title = "操作没有完成",
+  title,
   message,
   onClose,
   onRetry,
-  confirmLabel = "确认",
-  retryLabel = "重试",
+  confirmLabel,
+  retryLabel,
   extra,
 }: AsyncErrorDialogProps) {
+  const { t } = useI18n();
   useBodyScrollLock(open);
 
   if (!open || typeof document === "undefined") return null;
@@ -39,18 +41,18 @@ export function AsyncErrorDialog({
           <span className="material-symbols-outlined">error</span>
         </div>
         <div className="async-dialog-copy">
-          <h2>{title}</h2>
+          <h2>{title ?? t("common.operationFailed")}</h2>
           <p>{message}</p>
           {extra}
         </div>
         <div className="async-dialog-actions">
           {onRetry ? (
             <button className="ghost-button" onClick={onRetry} type="button">
-              {retryLabel}
+              {retryLabel ?? t("common.retry")}
             </button>
           ) : null}
           <button className="button" onClick={onClose} type="button">
-            {confirmLabel}
+            {confirmLabel ?? t("common.confirm")}
           </button>
         </div>
       </section>

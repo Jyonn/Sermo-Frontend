@@ -38,6 +38,7 @@ import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResou
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
 import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import { getActiveLanguage, getActiveLocale, useI18n } from "../lib/language";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -567,7 +568,7 @@ function formatThreadDivider(value: number) {
 
   if (isSameDay) return formatTime(value);
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat(getActiveLocale(), {
     month: "numeric",
     day: "numeric",
     hour: "2-digit",
@@ -585,21 +586,21 @@ function formatChatListTime(value: number) {
 
   const sameDay = date.toDateString() === now.toDateString();
   if (sameDay) {
-    return `${Math.floor(minutes / 60)} 小时前`;
+    return getActiveLanguage() === "en" ? `${Math.floor(minutes / 60)} hr ago` : `${Math.floor(minutes / 60)} 小时前`;
   }
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return "昨天";
-  return new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" }).format(date);
+  if (date.toDateString() === yesterday.toDateString()) return getActiveLanguage() === "en" ? "Yesterday" : "昨天";
+  return new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(date);
 }
 
 function formatPresence(user: UserDTO | null) {
-  if (!user) return "暂无状态";
-  if (user.is_alive) return "在线";
+  if (!user) return getActiveLanguage() === "en" ? "Status unavailable" : "暂无状态";
+  if (user.is_alive) return getActiveLanguage() === "en" ? "Online" : "在线";
 
   const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
-  if (minutes < 30) return "刚刚活跃";
-  return "离线";
+  if (minutes < 30) return getActiveLanguage() === "en" ? "Recently active" : "刚刚活跃";
+  return getActiveLanguage() === "en" ? "Offline" : "离线";
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
@@ -1575,7 +1576,7 @@ function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null })
     ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
     : "";
   const takenAt = metadata.taken_at
-    ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN", {
+    ? new Date(metadata.taken_at * 1000).toLocaleString(getActiveLocale(), {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -1634,7 +1635,7 @@ function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null })
     ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
     : "";
   const takenAt = metadata.taken_at
-    ? new Date(metadata.taken_at * 1000).toLocaleString("zh-CN", {
+    ? new Date(metadata.taken_at * 1000).toLocaleString(getActiveLocale(), {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -1696,7 +1697,7 @@ function sortChatDetailMembers(
   return [...members].sort((left, right) => {
     if (left.isOwner !== right.isOwner) return left.isOwner ? -1 : 1;
     if (left.isSelf !== right.isSelf) return left.isSelf ? -1 : 1;
-    return left.name.localeCompare(right.name, "zh-CN");
+    return left.name.localeCompare(right.name, getActiveLocale());
   });
 }
 
@@ -1801,6 +1802,7 @@ function chatAccessBoundaryMessage(error: unknown) {
 }
 
 export default function ChatsPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const { chatId } = useParams();
@@ -4129,7 +4131,7 @@ export default function ChatsPage() {
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
-        {chat.pinned ? <span className="chat-pin-label">置顶</span> : null}
+        {chat.pinned ? <span className="chat-pin-label">{t("chat.pinned")}</span> : null}
       </div>
     </button>
   );
@@ -4137,13 +4139,13 @@ export default function ChatsPage() {
   const renderChatList = () => (
     <>
       <TabPageHeader
-        title="聊天"
+        title={t("chat.title")}
         syncing={viewState === "loading"}
         status={
           <span
-            aria-label={chatHealth === "healthy" ? "聊天连接正常" : chatHealth === "warning" ? "聊天连接不稳定" : "聊天连接中断"}
+            aria-label={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
             className={`chat-health-indicator is-${chatHealth}`}
-            title={chatHealth === "healthy" ? "连接正常" : chatHealth === "warning" ? "连接不稳定" : "连接中断"}
+            title={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
           >
             <span className="chat-health-dot" />
           </span>
@@ -4154,15 +4156,15 @@ export default function ChatsPage() {
       <div className="chat-list-screen-body">
         {chatAccessNotice ? (
           <FeedbackState
-            title="无法打开这个会话"
+            title={t("chat.unavailable")}
             description={chatAccessNotice}
             action={
               <div className="button-row">
                 <Link className="button" replace to="/app/chats">
-                  查看聊天列表
+                  {t("chat.viewList")}
                 </Link>
                 <Link className="ghost-button" to="/app/notifications">
-                  去通讯
+                  {t("chat.goContacts")}
                 </Link>
               </div>
             }
@@ -4173,12 +4175,12 @@ export default function ChatsPage() {
         </div>
         {!chatAccessNotice && !filteredChats.length && viewState === "ready" ? (
           <FeedbackState
-            title="还没有会话"
-            description={groupSquareEnabled ? "先从广场里找到一个人，再开始第一段对话。" : "新的会话出现后会显示在这里。"}
+            title={t("chat.empty")}
+            description={groupSquareEnabled ? t("chat.emptyHint") : t("chat.emptyHintNoSquare")}
             action={
               groupSquareEnabled ? (
                 <Link className="button" to="/app/square">
-                  去广场
+                  {t("chat.goSquare")}
                 </Link>
               ) : undefined
             }
@@ -4201,7 +4203,7 @@ export default function ChatsPage() {
 
   return (
     <AppChrome
-      title="聊天"
+      title={t("chat.title")}
       hideTopbar={!displayedChat}
       hideMobileNav={Boolean(displayedChat)}
       hidePageTitle={Boolean(displayedChat)}

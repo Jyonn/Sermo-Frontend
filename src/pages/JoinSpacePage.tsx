@@ -7,7 +7,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
-import { getBrowserJoinLanguage } from "../lib/language";
+import { getBrowserJoinLanguage, useI18n } from "../lib/language";
 import { buildAdminEntryHref, buildAdminHrefForCurrentHost, buildAdminPath, buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
 import type { SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
@@ -26,6 +26,7 @@ function isPasswordRequiredJoinError(error: unknown) {
 }
 
 export default function JoinSpacePage() {
+  const { t } = useI18n();
   const { slug: routeSlug = "" } = useParams();
   const navigate = useNavigate();
   const { loginFromJoin, session } = useAuth();
@@ -247,7 +248,7 @@ export default function JoinSpacePage() {
       title={space?.name || displaySlug(slug) || slug}
       topbarAction={
         <a className="ghost-chip" href={adminHref}>
-          管理员登录
+          {t("join.adminLogin")}
         </a>
       }
     >
@@ -257,7 +258,7 @@ export default function JoinSpacePage() {
             <div className="join-space-state loading">
               <div className="join-space-state-icon is-loading" aria-hidden="true"><span /></div>
               <div className="join-space-state-copy">
-                <h2>正在确认空间</h2>
+                <h2>{t("join.checking")}</h2>
                 <div className="join-space-domain">{spaceDomainLabel}</div>
               </div>
             </div>
@@ -267,16 +268,16 @@ export default function JoinSpacePage() {
             <div className="join-space-state missing">
               <div className="join-space-state-icon" aria-hidden="true"><span>404</span></div>
               <div className="join-space-state-copy">
-                <h2>这个空间还没有创建</h2>
+                <h2>{t("join.missing")}</h2>
                 <div className="join-space-domain">{spaceDomainLabel}</div>
-                <p>创建它，或返回言浪主页。</p>
+                <p>{t("join.missingHint")}</p>
               </div>
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
-                  了解 Sermo 言浪
+                  {t("join.about")}
                 </a>
                 <a className="ghost-button" href={buildAdminEntryHref("create", slug)}>
-                  创建这个空间
+                  {t("join.createThis")}
                 </a>
               </div>
             </div>
@@ -286,13 +287,13 @@ export default function JoinSpacePage() {
             <div className="join-space-state error">
               <div className="join-space-state-icon" aria-hidden="true"><span>!</span></div>
               <div className="join-space-state-copy">
-                <h2>暂时无法确认这个空间</h2>
+                <h2>{t("join.checkFailed")}</h2>
                 <div className="join-space-domain">{spaceDomainLabel}</div>
-                <p>检查网络后再试一次。</p>
+                <p>{t("join.checkNetwork")}</p>
               </div>
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
-                  了解 Sermo 言浪
+                  {t("join.about")}
                 </a>
                 <button
                   className="ghost-button"
@@ -301,7 +302,7 @@ export default function JoinSpacePage() {
                   }}
                   type="button"
                 >
-                  重新检查
+                  {t("join.retry")}
                 </button>
               </div>
             </div>
@@ -310,8 +311,8 @@ export default function JoinSpacePage() {
           {lookupState === "ready" ? (
             <form className="auth-form" onSubmit={(event) => void submit(event)}>
               <div className="join-space-head">
-                <p className="join-space-kicker">欢迎来到 {space?.name || displaySlug(slug)}</p>
-                <h2>先用一个昵称，进入这个空间</h2>
+                <p className="join-space-kicker">{t("join.welcome", { name: space?.name || displaySlug(slug) })}</p>
+                <h2>{t("join.nicknamePrompt")}</h2>
               </div>
 
               {space?.official_user ? (
@@ -329,10 +330,10 @@ export default function JoinSpacePage() {
               ) : null}
 
               <div>
-                <label className="field-label">昵称</label>
+                <label className="field-label">{t("join.nickname")}</label>
                 <input
                   className="input"
-                  placeholder="你在聊天里显示的名字"
+                  placeholder={t("join.nicknamePlaceholder")}
                   value={nickname}
                   onChange={(event) => {
                     setNickname(event.target.value);
@@ -343,13 +344,13 @@ export default function JoinSpacePage() {
 
               {!showPasswordField ? (
                 <button className="ghost-button auth-toggle" onClick={() => setShowPasswordField(true)} type="button">
-                  有访问密码？
+                  {t("join.hasPassword")}
                 </button>
               ) : (
                 <div>
                   <div className="auth-password-label">
-                    <label className="field-label">访问密码</label>
-                    <button className="auth-forgot-button" onClick={() => void openRecovery()} type="button">忘记密码</button>
+                    <label className="field-label">{t("join.password")}</label>
+                    <button className="auth-forgot-button" onClick={() => void openRecovery()} type="button">{t("join.forgotPassword")}</button>
                   </div>
                   <input
                     autoFocus
@@ -366,7 +367,7 @@ export default function JoinSpacePage() {
               )}
 
               <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">
-                {submitState === "submitting" ? "进入中..." : "进入空间"}
+                {submitState === "submitting" ? t("join.entering") : t("join.enter")}
               </button>
             </form>
           ) : null}

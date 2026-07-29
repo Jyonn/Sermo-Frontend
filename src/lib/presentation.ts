@@ -1,6 +1,13 @@
+import { getActiveLanguage } from "./language";
+
 export function formatRelativeTime(timestampSeconds: number) {
   const deltaMinutes = Math.max(1, Math.floor((Date.now() / 1000 - timestampSeconds) / 60));
 
+  if (getActiveLanguage() === "en") {
+    if (deltaMinutes < 60) return deltaMinutes <= 1 ? "Just now" : `${deltaMinutes} min ago`;
+    if (deltaMinutes < 1440) return `${Math.floor(deltaMinutes / 60)} hr ago`;
+    return `${Math.floor(deltaMinutes / 1440)} d ago`;
+  }
   if (deltaMinutes < 60) return deltaMinutes <= 1 ? "刚刚" : `${deltaMinutes} 分钟前`;
   if (deltaMinutes < 1440) return `${Math.floor(deltaMinutes / 60)} 小时前`;
   return `${Math.floor(deltaMinutes / 1440)} 天前`;

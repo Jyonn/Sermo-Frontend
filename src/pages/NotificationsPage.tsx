@@ -16,6 +16,7 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
+import { useI18n } from "../lib/language";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
 const FRIEND_REQUEST_STATUS_ACCEPTED = 1;
@@ -107,6 +108,7 @@ function notificationChatAvatar(chat: ChatDTO) {
 }
 
 export default function NotificationsPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
   const friendDirectoryRef = useRef<HTMLDivElement | null>(null);
@@ -243,9 +245,9 @@ export default function NotificationsPage() {
   };
 
   return (
-    <AppChrome title="通讯" hideTopbar shellClassName="desktop-tab-shell">
+    <AppChrome title={t("contacts.title")} hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <TabPageHeader title="通讯" syncing={syncing} />
+        <TabPageHeader title={t("contacts.title")} syncing={syncing} />
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
         <section className="list-section">
@@ -255,8 +257,8 @@ export default function NotificationsPage() {
                 <span className="material-symbols-outlined">person_add</span>
               </div>
               <div className="row-main">
-                <strong>好友申请</strong>
-                <div className="row-subtle">{pendingRequestCount ? `${pendingRequestCount} 条待处理` : "现在没有新的好友申请"}</div>
+                <strong>{t("contacts.requests")}</strong>
+                <div className="row-subtle">{pendingRequestCount ? t("contacts.pending", { count: pendingRequestCount }) : t("contacts.noRequests")}</div>
               </div>
               {pendingRequestCount ? <span className="small-badge">{pendingRequestCount}</span> : <span className="material-symbols-outlined chevron-inline">chevron_right</span>}
             </button>
@@ -266,8 +268,8 @@ export default function NotificationsPage() {
                 <span className="material-symbols-outlined">groups</span>
               </div>
               <div className="row-main">
-                <strong>群聊</strong>
-                <div className="row-subtle">{groupChats.length ? `你已加入 ${groupChats.length} 个群聊` : "还没有加入任何群聊"}</div>
+                <strong>{t("contacts.groups")}</strong>
+                <div className="row-subtle">{groupChats.length ? t("contacts.groupCount", { count: groupChats.length }) : t("contacts.noGroups")}</div>
               </div>
               <span className="material-symbols-outlined chevron-inline">chevron_right</span>
             </button>
