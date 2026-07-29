@@ -10,15 +10,17 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
+import { i18n, useI18n } from "../lib/language";
 
 function productizeFriendRequestError(message: string) {
   if (/verified|认证|验证|权限|forbidden/i.test(message)) {
-    return "完成邮箱验证后，你会更顺畅地发起好友申请。";
+    return i18n.t("members.verifyHint");
   }
   return message;
 }
 
 export default function SpaceUsersPage() {
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -58,7 +60,7 @@ export default function SpaceUsersPage() {
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         if (!cached && !users.length) {
-          const message = apiError instanceof ApiError ? apiError.message : "加载用户列表失败";
+          const message = apiError instanceof ApiError ? apiError.message : t("members.loadFailed");
           setError(message);
           setViewState("error");
         }
@@ -81,7 +83,7 @@ export default function SpaceUsersPage() {
       const chat = await api.createDirectChat(userId);
       navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "发起私聊失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("members.chatFailed");
       setError(message);
     }
   };
@@ -91,20 +93,20 @@ export default function SpaceUsersPage() {
       await api.createFriendRequest(userId);
       navigate("/app/friends/requests");
     } catch (apiError) {
-      const message = apiError instanceof ApiError ? apiError.message : "发起好友申请失败";
+      const message = apiError instanceof ApiError ? apiError.message : t("members.requestFailed");
       setError(productizeFriendRequestError(message));
     }
   };
 
   return (
-    <AppChrome title={onlineOnly ? "在线成员" : "成员"} hideTopbar>
+    <AppChrome title={onlineOnly ? t("members.onlineTitle") : t("members.title")} hideTopbar>
       <section className="page-stack">
         <div className="page-tabs">
           <Link className={`tab-chip ${!onlineOnly ? "active" : ""}`} to="/app/space-users">
-            全部
+            {t("members.all")}
           </Link>
           <Link className={`tab-chip ${onlineOnly ? "active" : ""}`} to="/app/space-users/online">
-            在线
+            {t("members.online")}
           </Link>
           <HeaderSyncIndicator syncing={syncing} />
         </div>
@@ -114,7 +116,7 @@ export default function SpaceUsersPage() {
           <input
             className="input"
             style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-            placeholder="搜索成员"
+            placeholder={t("members.search")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -127,10 +129,10 @@ export default function SpaceUsersPage() {
                 <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
                 <div className="row-main">
                   <strong>{user.name}</strong>
-                  <div className="row-subtle">{user.is_alive ? "在线" : "离线"}</div>
+                  <div className="row-subtle">{user.is_alive ? t("presence.online") : t("presence.offline")}</div>
                 </div>
                 <button className="button row-button" onClick={() => void createDirectChat(user.user_id)} type="button">
-                  发消息
+                  {t("members.sendMessage")}
                 </button>
                 <button className="icon-button row-trailing-button" onClick={() => setSheetUser(user)} type="button">
                   <span className="material-symbols-outlined">more_horiz</span>
@@ -142,25 +144,25 @@ export default function SpaceUsersPage() {
 
         {!users.length && viewState === "ready" ? (
           <FeedbackState
-            title="没有找到成员"
-            description={query.trim() ? "换个关键词试试。" : "稍后再回来看看。"}
-            action={onlineOnly ? <Link className="button" to="/app/space-users">查看全部</Link> : undefined}
+            title={t("members.empty")}
+            description={query.trim() ? t("members.tryKeyword") : t("members.comeBack")}
+            action={onlineOnly ? <Link className="button" to="/app/space-users">{t("members.viewAll")}</Link> : undefined}
           />
         ) : null}
       </section>
 
       <BottomSheet
         open={Boolean(sheetUser)}
-        title={sheetUser?.name ?? "成员"}
+        title={sheetUser?.name ?? t("members.title")}
         onClose={() => setSheetUser(null)}
       >
         {sheetUser ? (
           <div className="sheet-action-list">
             <button className="button" onClick={() => void createDirectChat(sheetUser.user_id)} type="button">
-              发消息
+              {t("members.sendMessage")}
             </button>
             <button className="ghost-button" onClick={() => void sendFriendRequest(sheetUser.user_id)} type="button">
-              加好友
+              {t("members.addFriend")}
             </button>
           </div>
         ) : null}

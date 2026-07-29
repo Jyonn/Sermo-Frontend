@@ -8,6 +8,7 @@ import { ApiError, api } from "../lib/api";
 import { clearPendingFriendInviteToken, storePendingFriendInviteToken } from "../lib/friendInvite";
 import { useAuth } from "../lib/auth";
 import type { FriendInvitePreviewDTO } from "../types";
+import { getActiveLocale, i18n, useI18n } from "../lib/language";
 
 function readInviteToken() {
   if (typeof window === "undefined") return "";
@@ -21,7 +22,7 @@ function readInviteToken() {
 
 function formatExpire(value?: number) {
   if (!value) return "";
-  return new Date(value * 1000).toLocaleString("zh-CN", {
+  return new Date(value * 1000).toLocaleString(getActiveLocale(), {
     month: "numeric",
     day: "numeric",
     hour: "2-digit",
@@ -30,8 +31,8 @@ function formatExpire(value?: number) {
 }
 
 function inviteValidityLabel(preview: FriendInvitePreviewDTO) {
-  if (preview.permanent) return "长期有效";
-  return preview.expire ? `有效期至 ${formatExpire(preview.expire)}` : "";
+  if (preview.permanent) return i18n.t("invite.permanent");
+  return preview.expire ? i18n.t("invite.expires", { date: formatExpire(preview.expire) }) : "";
 }
 
 interface FriendInvitePageProps {
@@ -39,6 +40,7 @@ interface FriendInvitePageProps {
 }
 
 export default function FriendInvitePage({ overlay = false }: FriendInvitePageProps) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
   const [preview, setPreview] = useState<FriendInvitePreviewDTO | null>(null);
@@ -55,7 +57,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
   useEffect(() => {
     if (!token) {
       setPreviewState("error");
-      setPreviewError("这个好友邀请链接不完整。");
+      setPreviewError(t("invite.incomplete"));
       return;
     }
 
@@ -72,7 +74,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         setPreviewState("error");
-        setPreviewError(apiError instanceof ApiError ? apiError.message : "好友邀请无法读取");
+        setPreviewError(apiError instanceof ApiError ? apiError.message : t("invite.readFailed"));
       });
 
     return () => controller.abort();
@@ -99,7 +101,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
       }, 900);
     } catch (apiError) {
       setRedeemState("idle");
-      setDialogError(apiError instanceof ApiError ? apiError.message : "好友邀请处理失败");
+      setDialogError(apiError instanceof ApiError ? apiError.message : t("invite.handleFailed"));
     }
   };
 
@@ -112,14 +114,14 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
           <div className="friend-invite-copy">
             <h2>{preview.inviter.name}</h2>
             <p>
-              来自 <span className="friend-invite-space-handle">@{preview.space.name}</span>
+              {t("invite.from")} <span className="friend-invite-space-handle">@{preview.space.name}</span>
             </p>
           </div>
         </div>
 
         <div className="friend-invite-body">
           <div className="friend-invite-space-row">
-            <span>所在空间</span>
+            <span>{t("invite.space")}</span>
             <strong>{preview.space.name}</strong>
           </div>
           {inviteValidityLabel(preview) ? <div className="count-badge">{inviteValidityLabel(preview)}</div> : null}
@@ -128,16 +130,16 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
         {!session ? (
           <div className="friend-invite-actions">
             <Link className="button" to="/">
-              登录或加入
+              {t("invite.login")}
             </Link>
-            <div className="detail-text">进入空间后再继续。</div>
+            <div className="detail-text">{t("invite.loginHint")}</div>
           </div>
         ) : (
           <div className="friend-invite-actions">
             <button className="button" disabled={redeemState === "loading" || redeemState === "success"} onClick={() => void redeemInvite()} type="button">
-              {redeemState === "loading" ? "发送中..." : redeemState === "success" ? "好友申请已发出" : "发送好友申请"}
+              {redeemState === "loading" ? t("invite.sending") : redeemState === "success" ? t("invite.sent") : t("invite.send")}
             </button>
-            <div className="detail-text">二维码邀请可直接发申请。</div>
+            <div className="detail-text">{t("invite.qrHint")}</div>
           </div>
         )}
       </section>
@@ -145,9 +147,9 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
 
   const content = (
     <>
-      {previewState === "loading" ? <FeedbackState title="正在读取好友邀请" description="" tone="loading" /> : null}
+      {previewState === "loading" ? <FeedbackState title={t("invite.reading")} description="" tone="loading" /> : null}
       {readyCard}
-      {previewState === "error" ? <FeedbackState title="好友邀请无法使用" description={previewError ?? "这个链接已经失效。"} tone="error" /> : null}
+      {previewState === "error" ? <FeedbackState title={t("invite.unavailable")} description={previewError ?? t("invite.expired")} tone="error" /> : null}
       <AsyncErrorDialog message={dialogError ?? ""} onClose={() => setDialogError(null)} open={Boolean(dialogError)} />
     </>
   );
@@ -163,7 +165,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
   }
 
   return (
-    <AppChrome hideMobileNav title="好友邀请">
+    <AppChrome hideMobileNav title={t("invite.title")}>
       <section className="auth-shell friend-invite-shell">
         <div className="auth-card is-space-state">{content}</div>
       </section>
