@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.29.9",
+  "id": "2026.07.29.10",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "气泡风格焕新",
+      "title": "聊天深色模式更完整",
       "items": [
-        "每款气泡现在拥有清晰的发送与接收样式",
-        "潮汐与电波风格重新设计",
-        "预览效果与真实聊天保持一致"
+        "聊天标题栏与输入区统一为深色玻璃质感",
+        "不同聊天背景拥有对应的深色版本",
+        "链接、录音与更多操作在夜间更清晰"
       ]
     },
     "en": {
-      "title": "Refined chat bubble styles",
+      "title": "A more complete dark chat",
       "items": [
-        "Every style now has distinct sent and received states",
-        "Tide and Signal styles have been redesigned",
-        "Previews now match the real conversation"
+        "Chat headers and composers now share a dark glass surface",
+        "Every chat background has a matching dark variant",
+        "Links, recording, and more actions are clearer at night"
       ]
     }
   }
