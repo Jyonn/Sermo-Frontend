@@ -32,7 +32,7 @@ export default function LandingPage() {
     <AppChrome
       hidePageTitle
       publicHeader
-      title="Sermo 言浪"
+      title={t("brand.fullName")}
       topbarAction={
         <>
           <a className="ghost-chip" href={buildAdminEntryHref("create")}>
@@ -47,7 +47,7 @@ export default function LandingPage() {
       <div className="landing-page">
         <section className="landing-hero">
           <div className="landing-copy">
-            <p className="landing-eyebrow">Sermo 言浪</p>
+            <p className="landing-eyebrow">{t("brand.fullName")}</p>
             <h1>{t("landing.slogan")}</h1>
             <p className="landing-description">{t("landing.description")}</p>
             <div className="landing-actions">

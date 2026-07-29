@@ -500,5 +500,7 @@
   "message.locationPlaceholder": "[位置]",
   "message.new": "收到一条新消息",
   "presence.justOnline": "刚刚上线",
-  "message.newInChats": "{{count}} 个会话有新消息"
+  "message.newInChats": "{{count}} 个会话有新消息",
+  "account.invalidSwitchLink": "切换链接无效，请返回原账号重试。",
+  "account.officialLinkExpired": "这个官方账号登录链接已经失效，请回到空间后台重新获取。"
 }

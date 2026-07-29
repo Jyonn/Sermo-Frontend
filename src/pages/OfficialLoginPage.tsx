@@ -35,7 +35,7 @@ export default function OfficialLoginPage() {
   useEffect(() => {
     if (!ticket) {
       setState("error");
-      setError("这个官方账号登录链接已经失效，请回到空间后台重新获取。");
+      setError(t("account.officialLinkExpired"));
       return;
     }
 
@@ -52,7 +52,7 @@ export default function OfficialLoginPage() {
       .catch((apiError) => {
         if (cancelled) return;
         setState("error");
-        setError(apiError instanceof ApiError ? apiError.message : "官方账号登录失败");
+        setError(apiError instanceof ApiError ? apiError.message : t("account.officialLoginFailed"));
       });
 
     return () => {

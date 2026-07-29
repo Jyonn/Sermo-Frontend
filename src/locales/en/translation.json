@@ -500,5 +500,7 @@
   "message.locationPlaceholder": "[Location]",
   "message.new": "New message",
   "presence.justOnline": "Just came online",
-  "message.newInChats": "New messages in {{count}} chats"
+  "message.newInChats": "New messages in {{count}} chats",
+  "account.invalidSwitchLink": "This switch link is invalid. Return to the original account and try again.",
+  "account.officialLinkExpired": "This official account login link has expired. Generate a new one from the space dashboard."
 }

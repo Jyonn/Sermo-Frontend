@@ -31,7 +31,7 @@ export default function AccountSwitchPage() {
 
   useEffect(() => {
     if (!ticket) {
-      setError("切换链接无效，请返回原账号重试。");
+      setError(t("account.invalidSwitchLink"));
       return;
     }
     let cancelled = false;
@@ -43,7 +43,7 @@ export default function AccountSwitchPage() {
       })
       .catch((apiError) => {
         if (cancelled) return;
-        setError(apiError instanceof ApiError ? apiError.message : "账号切换失败");
+        setError(apiError instanceof ApiError ? apiError.message : t("account.switchFailed"));
       });
     return () => {
       cancelled = true;
