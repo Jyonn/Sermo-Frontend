@@ -1,21 +1,19 @@
 {
-  "id": "2026.07.29.14",
-  "publishedAt": "2026-07-29",
+  "id": "2026.07.30.1",
+  "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "空间入口迁移至统一域名",
+      "title": "图标字体加载更稳定",
       "items": [
-        "空间入口统一为 sermo.jyonn.space/空间标识",
-        "旧空间链接可平滑跳转至新入口",
-        "桌面安装与消息通知会打开正确空间"
+        "修复部分图标在新空间地址下无法显示的问题",
+        "图标字体随应用一同加载，不再受页面路径影响"
       ]
     },
     "en": {
-      "title": "Spaces move to one shared domain",
+      "title": "More reliable icon loading",
       "items": [
-        "Space links now use sermo.jyonn.space/space-slug",
-        "Legacy space links can redirect smoothly to the new entry",
-        "Installed apps and notifications open the correct space"
+        "Fixed missing icons on the new path-based space URLs",
+        "Icon fonts now ship with the app and no longer depend on the current route"
       ]
     }
   }
