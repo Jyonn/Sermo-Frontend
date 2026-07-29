@@ -1,19 +1,21 @@
 {
-  "id": "2026.07.30.5",
+  "id": "2026.07.30.6",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "现场打卡更稳定",
+      "title": "足迹打卡融入聊天",
       "items": [
-        "使用内置地图边界直接判断所在国家和地区",
-        "定位靠近边界时可自行确认所在地区"
+        "共同足迹地图现在也能直接现场打卡",
+        "发送精确位置后自动记录所在地区",
+        "优化私聊共同足迹地图的标题"
       ]
     },
     "en": {
-      "title": "More reliable on-site check-ins",
+      "title": "Check-ins meet conversations",
       "items": [
-        "Check-ins now resolve countries and regions from bundled boundaries",
-        "Choose the correct region when location accuracy crosses a boundary"
+        "Check in directly from shared travel maps",
+        "Sending an exact location now records its region automatically",
+        "Improved shared travel map titles in direct chats"
       ]
     }
   }

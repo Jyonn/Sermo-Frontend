@@ -1127,5 +1127,6 @@
   "travelMap.authorize": "授权并查看",
   "travelMap.chatAccessGranted": "已向此会话公开足迹",
   "travelMap.sharedMemberCount": "已有 {{count}} 人公开足迹",
-  "travelMap.chooseCurrentRegion": "确认所在地区"
+  "travelMap.chooseCurrentRegion": "确认所在地区",
+  "travelMap.directSharedTitle": "我和{{name}}的足迹地图"
 }

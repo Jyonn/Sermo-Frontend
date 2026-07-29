@@ -1127,5 +1127,6 @@
   "travelMap.authorize": "Share and continue",
   "travelMap.chatAccessGranted": "Your footprints are now shared in this chat",
   "travelMap.sharedMemberCount": "{{count}} members are sharing",
-  "travelMap.chooseCurrentRegion": "Where are you now?"
+  "travelMap.chooseCurrentRegion": "Where are you now?",
+  "travelMap.directSharedTitle": "My travel map with {{name}}"
 }

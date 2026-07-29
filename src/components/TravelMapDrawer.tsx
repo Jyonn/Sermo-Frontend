@@ -24,6 +24,7 @@ interface TravelMapDrawerProps {
   onClose: () => void;
   chatId?: number | null;
   chatTitle?: string;
+  chatType?: "direct" | "group";
   otherUser?: TinyUserDTO | null;
 }
 
@@ -43,14 +44,15 @@ interface MapTransform {
   scale: number;
 }
 
-interface CheckInCandidate {
+export interface CheckInCandidate {
   regionCode: string;
   regionName: string;
   countryCode: string;
   countryName: string;
+  isExact?: boolean;
 }
 
-interface CheckInPosition {
+export interface CheckInPosition {
   latitude: number;
   longitude: number;
   accuracy: number;
@@ -144,7 +146,44 @@ function accuracySamples(position: CheckInPosition) {
   ] as [number, number][];
 }
 
-export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }: TravelMapDrawerProps) {
+export async function resolveTravelMapCandidates(position: CheckInPosition, language: string) {
+  const samples = accuracySamples(position);
+  const candidateCountries = worldFeatures()
+    .filter((item) => samples.some((point) => geoContains(item, point)))
+    .map((item) => countryCodeOf(item))
+    .filter(Boolean);
+  const candidates: CheckInCandidate[] = [];
+  for (const code of [...new Set(candidateCountries)]) {
+    const countryLabel = countryName(code, language);
+    const collection = await loadCountryBoundary(code);
+    if (!collection) {
+      candidates.push({
+        regionCode: `COUNTRY:${code}`,
+        regionName: countryLabel,
+        countryCode: code,
+        countryName: countryLabel,
+        isExact: true,
+      });
+      continue;
+    }
+    collection.features.forEach((item) => {
+      if (!samples.some((point) => geoContains(item, point))) return;
+      const name = item.properties?.name || countryLabel;
+      candidates.push({
+        regionCode: regionCode(code, item),
+        regionName: name,
+        countryCode: code,
+        countryName: countryLabel,
+        isExact: geoContains(item, samples[0]),
+      });
+    });
+  }
+  return [...new Map(
+    candidates.sort((left, right) => Number(right.isExact) - Number(left.isExact)).map((item) => [item.regionCode, item]),
+  ).values()];
+}
+
+export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, otherUser }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
   const [mode, setMode] = useState<"world" | "china">("world");
@@ -238,7 +277,13 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
         country_code: candidate.countryCode,
         country_name: candidate.countryName,
       });
-      setMaps([{ owner: payload.owner, regions: payload.regions }]);
+      setMaps((current) => {
+        if (!chatId) return [{ owner: payload.owner, regions: payload.regions }];
+        const exists = current.some((item) => item.owner.user_id === payload.owner.user_id);
+        return exists
+          ? current.map((item) => item.owner.user_id === payload.owner.user_id ? { owner: payload.owner, regions: payload.regions } : item)
+          : [...current, { owner: payload.owner, regions: payload.regions }];
+      });
       setMode(payload.checked_region.country_code === "CHN" ? "china" : "world");
       setSelectedCountry(payload.checked_region.country_code);
       setCheckInCandidates([]);
@@ -252,36 +297,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
   };
 
   const resolveCheckIn = async (position: CheckInPosition) => {
-    const samples = accuracySamples(position);
-    const candidateCountries = world
-      .filter((item) => samples.some((point) => geoContains(item, point)))
-      .map((item) => countryCodeOf(item))
-      .filter(Boolean);
-    const candidates: CheckInCandidate[] = [];
-    for (const code of [...new Set(candidateCountries)]) {
-      const countryLabel = countryName(code, language);
-      const collection = await loadCountryBoundary(code);
-      if (!collection) {
-        candidates.push({
-          regionCode: `COUNTRY:${code}`,
-          regionName: countryLabel,
-          countryCode: code,
-          countryName: countryLabel,
-        });
-        continue;
-      }
-      collection.features.forEach((item) => {
-        if (!samples.some((point) => geoContains(item, point))) return;
-        const name = item.properties?.name || countryLabel;
-        candidates.push({
-          regionCode: regionCode(code, item),
-          regionName: name,
-          countryCode: code,
-          countryName: countryLabel,
-        });
-      });
-    }
-    const unique = [...new Map(candidates.map((item) => [item.regionCode, item])).values()];
+    const unique = await resolveTravelMapCandidates(position, language);
     if (!unique.length) throw new Error("region unavailable");
     if (unique.length === 1) {
       await saveCheckIn(position, unique[0]);
@@ -344,7 +360,11 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
     }));
   };
 
-  const title = chatId ? (chatTitle || t("travelMap.sharedFootprints")) : otherUser
+  const title = chatId
+    ? chatType === "direct"
+      ? t("travelMap.directSharedTitle", { name: chatTitle || t("brand.user") })
+      : (chatTitle || t("travelMap.sharedFootprints"))
+    : otherUser
     ? t("travelMap.sharedTitle", { name: otherUser.name })
     : t("travelMap.myTitle");
   const totalRegions = maps.reduce((sum, item) => sum + item.regions.length, 0);
@@ -427,7 +447,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, otherUser }:
           </button>
         ) : null}
 
-        {!chatId && !otherUser ? (
+        {!otherUser ? (
           <button className="button travel-map-check-in-button" disabled={checkingIn} onClick={checkIn} type="button">
             {checkingIn ? t("travelMap.locating") : t("travelMap.checkInHere")}
           </button>

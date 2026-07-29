@@ -20,7 +20,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox } from "../components/ImageLightbox";
 import { TabPageHeader } from "../components/TabPageHeader";
-import { TravelMapDrawer } from "../components/TravelMapDrawer";
+import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
@@ -121,6 +121,7 @@ type LocationDraft = {
   phase: "locating" | "ready" | "sending" | "error";
   latitude?: number;
   longitude?: number;
+  accuracy?: number;
   obscure?: boolean;
   error?: string;
 };
@@ -3512,6 +3513,7 @@ export default function ChatsPage() {
           phase: "ready",
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
           obscure: false,
         });
       },
@@ -3529,6 +3531,7 @@ export default function ChatsPage() {
     if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
     const latitude = locationDraft.latitude;
     const longitude = locationDraft.longitude;
+    const accuracy = locationDraft.accuracy ?? 100;
     const obscure = Boolean(locationDraft.obscure);
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
@@ -3584,6 +3587,23 @@ export default function ChatsPage() {
         chat.id === selectedChat.id ? updateChatSummary(chat, t("message.locationPlaceholder"), deliveredMessage.createdAt) : chat
       ))));
       setLocationDraft(null);
+      if (!obscure) {
+        void resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale())
+          .then((candidates) => {
+            const candidate = candidates[0];
+            if (!candidate) return;
+            return api.checkInTravelMap({
+              latitude,
+              longitude,
+              accuracy_meters: accuracy,
+              region_code: candidate.regionCode,
+              region_name: candidate.regionName,
+              country_code: candidate.countryCode,
+              country_name: candidate.countryName,
+            });
+          })
+          .catch(() => undefined);
+      }
     } catch (error) {
       setMessages((current) => ({
         ...current,
@@ -5407,6 +5427,7 @@ export default function ChatsPage() {
       <TravelMapDrawer
         chatId={selectedChat?.id}
         chatTitle={selectedChat?.title}
+        chatType={selectedChat?.type}
         open={chatTravelMapOpen}
         onClose={() => setChatTravelMapOpen(false)}
       />
