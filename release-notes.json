@@ -1,19 +1,21 @@
 {
-  "id": "2026.07.29.2",
+  "id": "2026.07.29.3",
   "publishedAt": "2026-07-29",
   "locales": {
     "zh-CN": {
-      "title": "个性化体验更完整",
+      "title": "个性化空间重新整理",
       "items": [
-        "修复自定义聊天背景的相册图标显示异常",
-        "新版本提示现在会展示清晰的更新内容"
+        "聊天气泡、头像框和广场人物拥有独立设置页",
+        "新增实时预览，选择样式时即可看到效果",
+        "广场人物的衣服、手持物和动作调整更清晰"
       ]
     },
     "en": {
-      "title": "A more polished personalization experience",
+      "title": "A redesigned personalization space",
       "items": [
-        "Fixed the gallery icon in custom chat backgrounds",
-        "Update prompts now include a clear summary of changes"
+        "Chat bubbles, avatar frames, and Square characters now have dedicated editors",
+        "New live previews show each style before you leave",
+        "Square outfits, props, and motions are now easier to customize"
       ]
     }
   }
