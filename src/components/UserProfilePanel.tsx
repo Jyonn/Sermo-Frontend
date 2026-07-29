@@ -14,6 +14,7 @@ import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { showToast } from "../lib/toast";
 import type { AppViewState, ChatDTO, UserDTO, UserMeDTO } from "../types";
+import { i18n, useI18n } from "../lib/language";
 
 export interface UserProfileSeed {
   user_id: number;
@@ -39,12 +40,13 @@ interface UserProfileCacheSnapshot {
 }
 
 function friendshipAge(respondedAt?: number | null) {
-  if (!respondedAt) return "已是好友";
+  if (!respondedAt) return i18n.t("profile.friend");
   const days = Math.max(1, Math.floor((Date.now() / 1000 - respondedAt) / 86400));
-  return days < 30 ? `认识 ${days} 天` : `认识 ${Math.floor(days / 30)} 个月`;
+  return days < 30 ? i18n.t("profile.knownDays", { count: days }) : i18n.t("profile.knownMonths", { count: Math.floor(days / 30) });
 }
 
 export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat }: UserProfilePanelProps) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
@@ -91,7 +93,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       .then(([friends, chats, users, status]) => {
         const matchedFriend = friends.find((row) => row.user_id === userId) ?? null;
         const matchedUser = matchedFriend ?? users.find((row) => row.user_id === userId) ?? null;
-        if (!matchedUser) throw new Error("没有找到这个用户");
+        if (!matchedUser) throw new Error(t("profile.userMissing"));
         setUser(matchedUser);
         setIsFriend(status.is_friend);
         const nextRespondedAt = status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null;
@@ -109,7 +111,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       })
       .catch((apiError) => {
         if (controller.signal.aborted) return;
-        const message = apiError instanceof ApiError || apiError instanceof Error ? apiError.message : "用户详情加载失败";
+        const message = apiError instanceof ApiError || apiError instanceof Error ? apiError.message : t("profile.loadFailed");
         if (!cached && !initialUser) {
           setError(message);
           setViewState("error");
@@ -127,7 +129,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   const presence = useMemo(() => {
     if (!user) return "";
-    return user.is_alive ? "现在在线" : user.last_heartbeat ? `上次活跃 ${formatRelativeTime(user.last_heartbeat)}` : "暂时离线";
+    return user.is_alive ? t("profile.onlineNow") : user.last_heartbeat ? t("profile.lastActive", { time: formatRelativeTime(user.last_heartbeat) }) : t("profile.offline");
   }, [user]);
   const createGroupCapability = currentUserMe?.growth?.capabilities?.create_group;
   const canCreateGroup = createGroupCapability?.available ?? false;
@@ -139,7 +141,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       if (onOpenChat) onOpenChat(chat.chat_id);
       else navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
-      setError(apiError instanceof ApiError ? apiError.message : "发起私聊失败");
+      setError(apiError instanceof ApiError ? apiError.message : t("profile.chatFailed"));
     }
   };
 
@@ -175,11 +177,11 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       }
       const chat = await api.createGroupChat(groupSelectedIds);
       setGroupPickerOpen(false);
-      showToast("群聊已创建");
+      showToast(t("profile.groupCreated"));
       if (onOpenChat) onOpenChat(chat.chat_id);
       else navigate(`/app/chats/${chat.chat_id}`);
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "新建群聊失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("profile.groupFailed"), "error");
     } finally {
       setGroupCreating(false);
     }
@@ -199,10 +201,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     try {
       await api.createFriendRequest(user.user_id);
       setRequestState("sent");
-      showToast("好友申请已发送");
+      showToast(t("profile.requestSent"));
     } catch (apiError) {
       setRequestState("idle");
-      showToast(apiError instanceof ApiError ? apiError.message : "发送失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("profile.sendFailed"), "error");
     }
   };
 
@@ -216,9 +218,9 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       setRemoveConfirmOpen(false);
       const cached = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data;
       if (cached) writeTabCache(cacheScope, `user-profile:${userId}`, { ...cached, isFriend: false, respondedAt: null });
-      showToast("好友已删除");
+      showToast(t("profile.friendRemoved"));
     } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : "删除失败", "error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("profile.removeFailed"), "error");
     } finally {
       setRemovingFriend(false);
     }
@@ -235,13 +237,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       </div>
     );
   }
-  if (!user || viewState === "error") return <FeedbackState title="无法打开用户资料" description={error ?? "请稍后重试"} />;
+  if (!user || viewState === "error") return <FeedbackState title={t("profile.unavailable")} description={error ?? t("profile.tryLater")} />;
 
   return (
     <div className="user-profile-panel">
       <section className="user-profile-identity">
         <button
-          aria-label={`查看${user.name}的头像`}
+          aria-label={t("profile.avatarLabel", { name: user.name })}
           className="user-profile-avatar-wrap"
           disabled={!user.avatar_uri}
           onClick={() => setAvatarPreviewOpen(true)}
@@ -250,7 +252,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           <UserAvatar className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
         </button>
         <div className="user-profile-copy">
-          <div className="user-profile-kicker">{isFriend ? friendshipAge(respondedAt) : "同一空间成员"}</div>
+          <div className="user-profile-kicker">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</div>
           <h2>{user.name}</h2>
           <p className={user.is_alive ? "is-online" : ""}>{presence}</p>
         </div>
@@ -258,23 +260,23 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
       <div className="user-profile-primary-actions">
         {isFriend === true ? (
-          <button className="button" onClick={() => void openChat()} type="button">发消息</button>
+          <button className="button" onClick={() => void openChat()} type="button">{t("profile.sendMessage")}</button>
         ) : isFriend === false ? (
           <button className="button" disabled={requestState !== "idle"} onClick={() => void sendRequest()} type="button">
-            {requestState === "sending" ? "发送中" : requestState === "sent" ? "已发送" : "加好友"}
+            {requestState === "sending" ? t("profile.sending") : requestState === "sent" ? t("profile.sent") : t("profile.addFriend")}
           </button>
         ) : null}
       </div>
 
       <section className="user-profile-section">
         <div className="user-profile-section-head">
-          <div className="section-label">共同群聊 · {groupChats.length}</div>
-          {groupChats.length > 3 ? <button className="user-profile-section-more" onClick={() => setAllGroupsOpen(true)} type="button">查看全部</button> : null}
+          <div className="section-label">{t("profile.sharedGroups", { count: groupChats.length })}</div>
+          {groupChats.length > 3 ? <button className="user-profile-section-more" onClick={() => setAllGroupsOpen(true)} type="button">{t("profile.viewAll")}</button> : null}
         </div>
         <div className="user-profile-groups">
           <button className={`user-profile-group-row user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
             <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
-            <span><strong>新建群聊</strong><small>{canCreateGroup ? "邀请共同好友加入" : `Lv.${createGroupCapability?.required_level ?? 4} 解锁`}</small></span>
+            <span><strong>{t("profile.newGroup")}</strong><small>{canCreateGroup ? t("profile.inviteFriends") : t("profile.levelUnlock", { level: createGroupCapability?.required_level ?? 4 })}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           {groupChats.slice(0, 3).map(renderGroupRow)}
@@ -283,13 +285,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
       {isFriend === true ? (
         <section className="user-profile-relationship-actions">
-          <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">删除好友</button>
+          <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">{t("profile.removeFriend")}</button>
         </section>
       ) : null}
 
       <BottomSheet
         open={groupPickerOpen}
-        title="新建群聊"
+        title={t("profile.newGroup")}
         titleAccessory={<HeaderSyncIndicator syncing={groupCandidatesLoading} />}
         onClose={() => setGroupPickerOpen(false)}
       >
@@ -312,21 +314,21 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
                     <UserAvatar className="mini-avatar" name={candidate.name} uri={candidate.avatar_uri} />
                     <span className="row-main">
                       <strong>{candidate.name}</strong>
-                      {locked ? <small className="row-subtle">当前好友</small> : null}
+                      {locked ? <small className="row-subtle">{t("profile.currentFriend")}</small> : null}
                     </span>
                     <span aria-hidden="true" className="user-profile-picker-check">{selected ? "✓" : ""}</span>
                   </button>
                 );
               })}
             </div>
-          ) : !groupCandidatesLoading ? <FeedbackState title="没有可邀请的好友" description="" /> : null}
+          ) : !groupCandidatesLoading ? <FeedbackState title={t("profile.noCandidates")} description="" /> : null}
           <button className="button user-profile-create-confirm" disabled={groupSelectedIds.length < 2 || groupCreating} onClick={() => void createGroupChat()} type="button">
-            {groupCreating ? "创建中" : `创建群聊 · ${groupSelectedIds.length + 1} 人`}
+            {groupCreating ? t("profile.creating") : t("profile.createGroup", { count: groupSelectedIds.length + 1 })}
           </button>
         </div>
       </BottomSheet>
 
-      <SideDrawer open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title="共同群聊">
+      <SideDrawer open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title={t("contacts.groups")}>
         <div className="user-profile-groups user-profile-all-groups">{groupChats.map(renderGroupRow)}</div>
       </SideDrawer>
 
@@ -335,9 +337,9 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         busy={removingFriend}
         danger
         open={removeConfirmOpen}
-        title="删除好友？"
-        description="已有聊天记录仍会保留。"
-        confirmLabel="删除"
+        title={t("profile.removeTitle")}
+        description={t("profile.removeHint")}
+        confirmLabel={t("profile.remove")}
         onClose={() => {
           if (removingFriend) return;
           setRemoveConfirmOpen(false);
