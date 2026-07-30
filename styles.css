@@ -3601,8 +3601,38 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble-wrap.is-selection-mode {
+  position: relative;
   cursor: pointer;
   transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.message-bubble-wrap.self.is-selection-mode {
+  width: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+  justify-content: center;
+  padding-left: 34px;
+}
+
+.message-group.self.is-selection-mode {
+  width: 100%;
+  max-width: 100%;
+}
+
+.message-group.self.is-selection-mode > .message-bubbles {
+  width: 100%;
+}
+
+.message-bubble-wrap.self.is-selection-mode > .message-bubble-shell {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.message-bubble-wrap.self.is-selection-mode > .message-selection-check {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
 }
 
 .message-group.other .message-bubble-wrap.is-selection-mode,
@@ -15190,13 +15220,13 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 }
 
 /* VIP is an explicit bubble theme, never an automatic identity overlay. */
-.message-group.bubble-style-vip .message-bubble-shell,
+.message-group.bubble-style-vip .message-bubble,
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble {
   position: relative;
   isolation: isolate;
 }
 
-.message-group.bubble-style-vip .message-bubble-shell::before,
+.message-group.bubble-style-vip .message-bubble::before,
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble::before {
   position: absolute;
   z-index: 8;
@@ -15224,19 +15254,19 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   pointer-events: none;
 }
 
-.message-group.bubble-style-vip.other .message-bubble-shell::before,
+.message-group.bubble-style-vip.other .message-bubble::before,
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other .personalization-preview-bubble::before {
   right: 9px;
   transform: rotate(1deg);
 }
 
-.message-group.bubble-style-vip.self .message-bubble-shell::before,
+.message-group.bubble-style-vip.self .message-bubble::before,
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self .personalization-preview-bubble::before {
   left: 9px;
   transform: rotate(-1deg);
 }
 
-.message-group.bubble-style-vip .message-bubble-shell,
+.message-group.bubble-style-vip .message-bubble,
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble {
   margin-top: 4px;
 }
@@ -15520,6 +15550,10 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 
 .personalization-bubble-stage.bubble-style-comic .personalization-preview-bubble.type-link {
   background: #fffdf5 !important;
+}
+
+.message-group.bubble-style-vip .message-bubble.is-pending:not(.is-media):not(.is-link-preview)::before {
+  top: 2px;
 }
 
 @media (max-width: 520px) {

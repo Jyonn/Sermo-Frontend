@@ -1446,9 +1446,16 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     .join(" ");
 
   return (
-    <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}`}>
+    <div
+      className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}`}
+      onClick={selectionMode && from === "self" ? (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onToggleSelection(message);
+      } : undefined}
+    >
+      {selectionMode && from === "self" ? <span className="message-selection-check" aria-hidden="true" /> : null}
       <div className={`message-bubble-shell ${from}`}>
-        {selectionMode && from === "self" ? <span className="message-selection-check" aria-hidden="true" /> : null}
         {showRetry ? (
           <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">refresh</span>
@@ -1559,7 +1566,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-      <div className={`message-group ${group.from} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
+      <div className={`message-group ${group.from}${selectionMode ? " is-selection-mode" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
         {group.from === "other" ? <UserAvatar className="avatar message-avatar" frame={group.avatarFrameStyle} name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
