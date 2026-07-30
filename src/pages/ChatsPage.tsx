@@ -974,6 +974,9 @@ const MessageImageGallery = memo(function MessageImageGallery({
   messages,
   onOpenImage,
   onOpenActions,
+  onToggleSelection,
+  selectedClientIds,
+  selectionMode,
 }: {
   from: "self" | "other";
   isEntering: boolean;
@@ -982,6 +985,9 @@ const MessageImageGallery = memo(function MessageImageGallery({
   messages: ChatMessage[];
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
+  onToggleSelection: (message: ChatMessage) => void;
+  selectedClientIds: string[];
+  selectionMode: boolean;
 }) {
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ index: number; x: number; y: number } | null>(null);
@@ -1009,6 +1015,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   useEffect(() => clearLongPress, []);
 
   const startLongPress = (event: ReactPointerEvent<HTMLButtonElement>, message: ChatMessage, index: number) => {
+    if (selectionMode) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     clearLongPress();
     const element = event.currentTarget;
@@ -1037,8 +1044,14 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 key={message.clientId}
                 data-message-id={typeof message.id === "number" ? message.id : undefined}
                 aria-label={i18n.t("image.viewNumber", { index: index + 1 })}
-                className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}`}
+                aria-pressed={selectionMode ? selectedClientIds.includes(message.clientId) : undefined}
+                className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}${selectionMode ? " is-selection-mode" : ""}${selectedClientIds.includes(message.clientId) ? " is-selected" : ""}`}
                 onClick={(event) => {
+                  if (selectionMode) {
+                    event.preventDefault();
+                    if (from === "self") onToggleSelection(message);
+                    return;
+                  }
                   if (suppressClickRef.current === index) {
                     suppressClickRef.current = null;
                     event.preventDefault();
@@ -1048,6 +1061,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 }}
                 onContextMenu={(event) => {
                   event.preventDefault();
+                  if (selectionMode) return;
                   clearLongPress();
                   onOpenActions(message, event.currentTarget, event.clientX);
                 }}
@@ -1063,6 +1077,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 type="button"
               >
                 <img alt="" loading="lazy" src={displayUri} />
+                {selectionMode && from === "self" ? <span className="message-selection-check" aria-hidden="true" /> : null}
                 {hasMore ? (
                   <span className="message-image-gallery-more">
                     <span className="material-symbols-outlined" aria-hidden="true">photo_library</span>
@@ -1377,6 +1392,9 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   onOpenVideo,
   onOpenActions,
   onRetry,
+  onToggleSelection,
+  selected,
+  selectionMode,
 }: MessageBubbleRowProps) {
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio"].includes(message.kind);
   const canOpenActions = message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri));
@@ -1403,6 +1421,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   };
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (selectionMode) return;
     if (!canOpenActions) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     clearLongPress();
@@ -1427,8 +1446,9 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
     .join(" ");
 
   return (
-    <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}`}>
+    <div className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}`}>
       <div className={`message-bubble-shell ${from}`}>
+        {selectionMode && from === "self" ? <span className="message-selection-check" aria-hidden="true" /> : null}
         {showRetry ? (
           <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">refresh</span>
@@ -1452,7 +1472,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             .filter(Boolean)
             .join(" ")}
           onContextMenu={
-            canOpenActions
+            canOpenActions && !selectionMode
               ? (event) => {
                   event.preventDefault();
                   clearLongPress();
@@ -1461,13 +1481,19 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               : undefined
           }
           onClickCapture={(event) => {
+            if (selectionMode) {
+              event.preventDefault();
+              event.stopPropagation();
+              if (from === "self") onToggleSelection(message);
+              return;
+            }
             if (!suppressClickRef.current) return;
             suppressClickRef.current = false;
             event.preventDefault();
             event.stopPropagation();
           }}
           onPointerCancel={clearLongPress}
-          onPointerDown={canOpenActions ? handlePointerDown : undefined}
+          onPointerDown={canOpenActions && !selectionMode ? handlePointerDown : undefined}
           onPointerLeave={clearLongPress}
           onPointerMove={canOpenActions ? handlePointerMove : undefined}
           onPointerUp={clearLongPress}
@@ -1493,7 +1519,18 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   );
 });
 
-const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, group, onOpenImage, onOpenVideo, onOpenActions, onRetry, showAuthor }: MessageGroupBlockProps) {
+const MessageGroupBlock = memo(function MessageGroupBlock({
+  enteringMessageIds,
+  group,
+  onOpenImage,
+  onOpenVideo,
+  onOpenActions,
+  onRetry,
+  onToggleSelection,
+  selectedClientIds,
+  selectionMode,
+  showAuthor,
+}: MessageGroupBlockProps) {
   const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
@@ -1536,6 +1573,9 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
               messages={row.messages}
               onOpenImage={onOpenImage}
               onOpenActions={onOpenActions}
+              onToggleSelection={onToggleSelection}
+              selectedClientIds={selectedClientIds}
+              selectionMode={selectionMode}
             />
           ) : (
             <MessageBubbleRow
@@ -1549,13 +1589,21 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
               onOpenVideo={onOpenVideo}
               onOpenActions={onOpenActions}
               onRetry={onRetry}
+              onToggleSelection={onToggleSelection}
+              selected={selectedClientIds.includes(row.message.clientId)}
+              selectionMode={selectionMode}
             />
           ))}
         </div>
       </div>
     </div>
   );
-}, (prev, next) => prev.showAuthor === next.showAuthor && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds));
+}, (prev, next) => (
+  prev.showAuthor === next.showAuthor
+  && prev.selectionMode === next.selectionMode
+  && prev.selectedClientIds.join("|") === next.selectedClientIds.join("|")
+  && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds)
+));
 
 interface MessageGroup {
   key: string;
@@ -1579,6 +1627,9 @@ interface MessageBubbleRowProps {
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
+  onToggleSelection: (message: ChatMessage) => void;
+  selected: boolean;
+  selectionMode: boolean;
 }
 
 interface MessageGroupBlockProps {
@@ -1588,6 +1639,9 @@ interface MessageGroupBlockProps {
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
+  onToggleSelection: (message: ChatMessage) => void;
+  selectedClientIds: string[];
+  selectionMode: boolean;
   showAuthor: boolean;
 }
 
@@ -1903,6 +1957,9 @@ export default function ChatsPage() {
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
   const [messageDeleteState, setMessageDeleteState] = useState<"idle" | "deleting">("idle");
+  const [messageSelectionMode, setMessageSelectionMode] = useState(false);
+  const [selectedMessageClientIds, setSelectedMessageClientIds] = useState<string[]>([]);
+  const [batchDeleteConfirmOpen, setBatchDeleteConfirmOpen] = useState(false);
   const [closingChatSnapshot, setClosingChatSnapshot] = useState<Chat | null>(null);
   const [isClosingChatView, setIsClosingChatView] = useState(false);
   const [groupTitle, setGroupTitle] = useState("");
@@ -2281,6 +2338,7 @@ export default function ChatsPage() {
   };
 
   const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
+    if (messageSelectionMode) return;
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
     setMessageMenu({
@@ -2290,6 +2348,35 @@ export default function ChatsPage() {
       placement,
       confirmDelete: false,
     });
+  };
+
+  const cancelMessageSelection = () => {
+    if (messageDeleteState === "deleting") return;
+    setMessageSelectionMode(false);
+    setSelectedMessageClientIds([]);
+    setBatchDeleteConfirmOpen(false);
+  };
+
+  const toggleMessageSelection = (message: ChatMessage) => {
+    if (message.from !== "self" || messageDeleteState === "deleting") return;
+    setSelectedMessageClientIds((current) => {
+      if (current.includes(message.clientId)) return current.filter((item) => item !== message.clientId);
+      if (current.length >= 50) {
+        showToast(t("message.selectionLimit", { count: 50 }), "error");
+        return current;
+      }
+      return [...current, message.clientId];
+    });
+  };
+
+  const startMessageSelection = (message: ChatMessage) => {
+    if (message.from !== "self") return;
+    setMessageMenu(null);
+    setReplyTarget(null);
+    setComposerMoreOpen(false);
+    setEmojiPickerOpen(false);
+    setMessageSelectionMode(true);
+    setSelectedMessageClientIds([message.clientId]);
   };
 
   useLayoutEffect(() => {
@@ -2435,6 +2522,9 @@ export default function ChatsPage() {
 
   useEffect(() => {
     setReplyTarget(null);
+    setMessageSelectionMode(false);
+    setSelectedMessageClientIds([]);
+    setBatchDeleteConfirmOpen(false);
   }, [selectedChat?.id]);
 
   useEffect(() => {
@@ -4179,6 +4269,63 @@ export default function ChatsPage() {
     }
   };
 
+  const deleteSelectedMessages = async () => {
+    if (!selectedChat || !selectedMessageClientIds.length) return;
+    const selectedIdSet = new Set(selectedMessageClientIds);
+    const targets = selectedMessages.filter((message) => message.from === "self" && selectedIdSet.has(message.clientId));
+    if (!targets.length) {
+      cancelMessageSelection();
+      return;
+    }
+    const remoteIds = targets
+      .map((message) => message.id)
+      .filter((messageId): messageId is number => typeof messageId === "number");
+
+    try {
+      setMessageDeleteState("deleting");
+      if (remoteIds.length) await api.deleteMessages(remoteIds);
+
+      targets.forEach((message) => {
+        if (message.status === "pending") cancelledSendIdsRef.current.add(message.clientId);
+        purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]);
+        if (message.localPreviewUri) {
+          URL.revokeObjectURL(message.localPreviewUri);
+          localObjectUrlsRef.current.delete(message.localPreviewUri);
+        }
+      });
+      setSendTasks((current) => {
+        const next = { ...current };
+        targets.forEach((message) => delete next[message.clientId]);
+        return next;
+      });
+      const nextThreadMessages = selectedMessages.filter((message) => !selectedIdSet.has(message.clientId));
+      setPinnedMessages((current) => current.filter((pin) => !remoteIds.includes(pin.message.message_id)));
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: nextThreadMessages,
+      }));
+      if (cacheScope) {
+        const nextSnapshot = {
+          messages: nextThreadMessages,
+          hasOlderMessages,
+          scrollTop: messageScrollRef.current?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        };
+        chatCache.setThread(cacheScope, selectedChat.id, nextSnapshot);
+        void chatCache.persistThread(cacheScope, selectedChat.id, nextSnapshot);
+      }
+      setBatchDeleteConfirmOpen(false);
+      setMessageSelectionMode(false);
+      setSelectedMessageClientIds([]);
+      await refreshChats();
+      showToast(t("message.batchDeleted", { count: targets.length }));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("message.batchDeleteFailed"), "error");
+    } finally {
+      setMessageDeleteState("idle");
+    }
+  };
+
   const toggleGroupCandidate = (userId: number) => {
     if (chatMemberLockedIds.includes(userId)) return;
     setGroupSelectedIds((current) => (current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId]));
@@ -4627,11 +4774,34 @@ export default function ChatsPage() {
                     onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
+                    onToggleSelection={toggleMessageSelection}
+                    selectedClientIds={selectedMessageClientIds}
+                    selectionMode={messageSelectionMode}
                     showAuthor={Boolean(selectedChat?.type === "group")}
                   />
                 ))}
               </div>
 
+              {messageSelectionMode ? (
+                <div className="composer message-selection-toolbar">
+                  <button className="message-selection-cancel" disabled={messageDeleteState === "deleting"} onClick={cancelMessageSelection} type="button">
+                    {t("common.cancel")}
+                  </button>
+                  <div className="message-selection-count">
+                    <strong>{selectedMessageClientIds.length}</strong>
+                    <span>{t("message.selected")}</span>
+                  </div>
+                  <button
+                    className="message-selection-delete"
+                    disabled={!selectedMessageClientIds.length || messageDeleteState === "deleting"}
+                    onClick={() => setBatchDeleteConfirmOpen(true)}
+                    type="button"
+                  >
+                    <ComposerSvgIcon kind="delete" />
+                    <span>{t("common.delete")}</span>
+                  </button>
+                </div>
+              ) : (
               <form ref={composerRef} className={`composer ${voiceComposer.open ? "is-recording-mode" : ""}`} onSubmit={submit}>
                 {replyingTo && !voiceComposer.open ? (
                   <div className="composer-reply-preview">
@@ -4824,6 +4994,7 @@ export default function ChatsPage() {
                   </div>
                 ) : null}
               </form>
+              )}
               </div>
             </>
           ) : (
@@ -5241,6 +5412,19 @@ export default function ChatsPage() {
         }}
         onConfirm={() => void removeFriend()}
       />
+      <ConfirmDialog
+        open={batchDeleteConfirmOpen}
+        title={t("message.batchDeleteConfirmTitle", { count: selectedMessageClientIds.length })}
+        description={t("message.batchDeleteConfirmHint")}
+        confirmLabel={t("message.deleteSelected")}
+        busy={messageDeleteState === "deleting"}
+        danger
+        onClose={() => {
+          if (messageDeleteState === "deleting") return;
+          setBatchDeleteConfirmOpen(false);
+        }}
+        onConfirm={() => void deleteSelectedMessages()}
+      />
       <BottomSheet
         open={chatMemberPickerOpen}
         title=""
@@ -5590,6 +5774,11 @@ export default function ChatsPage() {
                 {(["image", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
                   <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
                     {t("common.download")}
+                  </button>
+                ) : null}
+                {messageMenu.message.from === "self" ? (
+                  <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
+                    {t("message.multiSelect")}
                   </button>
                 ) : null}
                 {messageMenu.message.from === "self" && (typeof messageMenu.message.id === "number" || messageMenu.message.kind === "image") ? (

@@ -3600,6 +3600,73 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   object-fit: cover;
 }
 
+.message-bubble-wrap.is-selection-mode {
+  cursor: pointer;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.message-group.other .message-bubble-wrap.is-selection-mode,
+.message-bubble-wrap.self.is-selection-mode:not(.is-selected) {
+  opacity: 0.48;
+}
+
+.message-bubble-wrap.self.is-selection-mode.is-selected {
+  transform: translateX(-2px);
+}
+
+.message-bubble-wrap.self.is-selection-mode.is-selected .message-bubble,
+.message-bubble-wrap.self.is-selection-mode.is-selected .message-media-frame,
+.message-image-gallery-item.is-selection-mode.is-selected {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+.message-image-gallery-item.is-selection-mode {
+  cursor: pointer;
+}
+
+.message-image-gallery-item.is-selection-mode:not(.is-selected) img {
+  filter: saturate(0.72) brightness(0.74);
+}
+
+.message-selection-check {
+  z-index: 6;
+  display: grid;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1.5px solid rgba(78, 94, 86, 0.42);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 3px 9px rgba(17, 19, 24, 0.1);
+}
+
+.message-bubble-wrap.is-selected .message-selection-check,
+.message-image-gallery-item.is-selected .message-selection-check {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+}
+
+.message-bubble-wrap.is-selected .message-selection-check::after,
+.message-image-gallery-item.is-selected .message-selection-check::after {
+  width: 8px;
+  height: 4px;
+  content: "";
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #fff;
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.message-image-gallery-item > .message-selection-check {
+  position: absolute;
+  z-index: 5;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+}
+
 .message-image-gallery-item.is-pending::after {
   content: "";
   position: absolute;
@@ -4921,6 +4988,66 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(250, 252, 255, 0.88));
   box-shadow: 0 12px 34px rgba(17, 19, 24, 0.08);
+}
+
+.message-selection-toolbar {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) auto minmax(72px, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.message-selection-toolbar button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 13px;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.message-selection-cancel {
+  justify-self: start;
+  color: var(--text-secondary);
+  background: rgba(112, 127, 120, 0.09);
+}
+
+.message-selection-count {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.message-selection-count strong {
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+}
+
+.message-selection-count span {
+  font-size: 0.7rem;
+}
+
+.message-selection-delete {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  background: #c84250;
+  box-shadow: 0 7px 16px rgba(173, 47, 63, 0.2);
+}
+
+.message-selection-delete svg {
+  width: 18px;
+  height: 18px;
+}
+
+.message-selection-delete:disabled {
+  opacity: 0.42;
+  box-shadow: none;
 }
 
 .composer:focus-within {

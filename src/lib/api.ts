@@ -703,6 +703,14 @@ export const api = {
     });
   },
 
+  deleteMessages(message_ids: number[]) {
+    return request<{ deleted_message_ids: number[] }>("/messages/batch", {
+      method: "DELETE",
+      auth: true,
+      body: { message_ids },
+    });
+  },
+
   getMessageLinkPreview(message_id: number) {
     return request<LinkPreviewDTO>("/messages/link-preview", {
       auth: true,
