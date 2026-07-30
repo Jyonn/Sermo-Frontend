@@ -5749,6 +5749,224 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background: rgba(46, 72, 59, 0.2);
 }
 
+.personalization-chat-preview {
+  display: flex;
+  height: min(62vh, 560px);
+  min-height: 430px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(24, 35, 29, 0.1);
+  border-radius: 22px;
+  background: #f7f8f5;
+  box-shadow: 0 18px 42px rgba(24, 35, 29, 0.1);
+}
+
+.personalization-chat-preview-header {
+  z-index: 2;
+  min-height: 58px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.9));
+  background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.88));
+  backdrop-filter: blur(18px);
+}
+
+.personalization-chat-preview-header .chat-conversation-topbar {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.personalization-chat-preview-back {
+  display: grid;
+  width: 28px;
+  height: 34px;
+  place-items: center;
+  margin-right: -5px;
+  color: var(--text-primary);
+  font-size: 20px;
+}
+
+.personalization-chat-preview-header .chat-topbar-meta {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.personalization-chat-preview-header .chat-topbar-name {
+  overflow: hidden;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.personalization-chat-preview-header > .material-symbols-outlined {
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+
+.personalization-chat-preview-scroll.message-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  gap: 11px;
+  padding: 18px 14px 22px;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(77, 173, 137, 0.08), transparent 32%),
+    #f7f8f5;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.personalization-chat-preview-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.personalization-chat-preview-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(46, 72, 59, 0.2);
+}
+
+.personalization-chat-preview .message-group {
+  width: fit-content;
+  max-width: 88%;
+  margin-top: 2px;
+}
+
+.personalization-chat-preview .message-group.self {
+  margin-left: auto;
+}
+
+.personalization-chat-preview .message-avatar {
+  width: 28px;
+  height: 28px;
+  flex-basis: 28px;
+  border-radius: 10px;
+}
+
+.personalization-chat-preview :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  min-width: 0;
+  max-width: min(100%, 270px);
+}
+
+.personalization-chat-preview .message-audio-card {
+  width: min(68vw, 250px);
+}
+
+.personalization-live-media {
+  position: relative;
+  width: 164px;
+  height: 112px;
+  overflow: hidden;
+  padding: 3px;
+}
+
+.personalization-live-media > i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 72% 24%, #fff7c2 0 7%, transparent 8%),
+    linear-gradient(145deg, transparent 0 42%, #467c67 43% 64%, transparent 65%),
+    linear-gradient(30deg, #9bcbb9, #dce8c7 46%, #edc57d);
+}
+
+.personalization-live-media.type-video > i {
+  background:
+    linear-gradient(25deg, transparent 0 46%, rgba(255, 255, 255, 0.55) 47% 50%, transparent 51%),
+    linear-gradient(145deg, #48665b, #91b9a8 54%, #e8b56d);
+}
+
+.personalization-live-media .message-video-play {
+  pointer-events: none;
+}
+
+.personalization-live-media .message-video-play .material-symbols-outlined {
+  color: #fff;
+  font-size: 20px;
+}
+
+.personalization-live-video-time {
+  position: absolute;
+  z-index: 3;
+  right: 8px;
+  bottom: 6px;
+  color: #fff;
+  font-size: 0.62rem;
+}
+
+.personalization-live-link-image {
+  display: block;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.66), transparent 22%),
+    linear-gradient(145deg, #66b596, #f0ca79);
+}
+
+.personalization-chat-preview .message-file-icon .material-symbols-outlined,
+.personalization-chat-preview .message-location-mark .material-symbols-outlined,
+.personalization-chat-preview .message-travel-map-art .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.personalization-chat-preview-composer.composer {
+  min-height: 58px;
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 9px 12px;
+  border: 0;
+  border-top: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.9));
+  border-radius: 0;
+  background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.86));
+  box-shadow: none;
+  backdrop-filter: blur(18px);
+}
+
+.personalization-chat-preview-composer > .material-symbols-outlined {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+
+.personalization-chat-preview-input {
+  display: flex;
+  min-width: 0;
+  min-height: 36px;
+  align-items: center;
+  padding: 0 12px;
+  overflow: hidden;
+  color: var(--text-muted);
+  border: 1px solid rgba(160, 174, 166, 0.16);
+  border-radius: 13px;
+  background: var(--chat-input-surface, rgba(255, 255, 255, 0.78));
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .personalization-chat-preview,
+html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
+  background: #111a16;
+}
+
 .personalization-bubble-stage.bubble-style-comic,
 .message-group.bubble-style-comic {
   --bubble-skin-other-bg: #fff9df;

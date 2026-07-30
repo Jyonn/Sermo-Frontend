@@ -134,6 +134,8 @@
   "menu.styleComic": "漫画",
   "menu.styleVip": "VIP",
   "menu.vipBubbleOnly": "永久 VIP 专属气泡",
+  "menu.bubblePreviewToday": "今天",
+  "menu.bubblePreviewSending": "这条消息正在发送",
   "menu.frameNone": "无",
   "menu.frameOrbit": "星轨",
   "menu.frameBlaze": "烈焰",

@@ -134,6 +134,8 @@
   "menu.styleComic": "Comic",
   "menu.styleVip": "VIP",
   "menu.vipBubbleOnly": "Exclusive to lifetime VIP members",
+  "menu.bubblePreviewToday": "Today",
+  "menu.bubblePreviewSending": "This message is sending",
   "menu.frameNone": "None",
   "menu.frameOrbit": "Orbit",
   "menu.frameBlaze": "Blaze",
