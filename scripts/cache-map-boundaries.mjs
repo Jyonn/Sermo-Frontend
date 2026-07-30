@@ -8,7 +8,8 @@ countries.registerLocale(en);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputDir = resolve(root, "public/maps/adm1");
-const requested = process.argv.slice(2).map((code) => code.toUpperCase());
+const indexOnly = process.argv.includes("--index-only");
+const requested = process.argv.slice(2).filter((value) => value !== "--index-only").map((code) => code.toUpperCase());
 const countryCodes = requested.length ? requested : Object.keys(countries.getAlpha3Codes()).sort();
 const chinaSubdivisionCodes = {
   Hainan: "CN-HI", Taiwan: "CN-TW", Guangxi: "CN-GX", Fujian: "CN-FJ",
@@ -39,6 +40,23 @@ function compactFeature(feature, countryCode) {
   };
 }
 
+function geometryBounds(features) {
+  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  const visit = (value) => {
+    if (!Array.isArray(value)) return;
+    if (typeof value[0] === "number" && typeof value[1] === "number") {
+      bounds[0] = Math.min(bounds[0], value[0]);
+      bounds[1] = Math.min(bounds[1], value[1]);
+      bounds[2] = Math.max(bounds[2], value[0]);
+      bounds[3] = Math.max(bounds[3], value[1]);
+      return;
+    }
+    value.forEach(visit);
+  };
+  features.forEach((item) => visit(item.geometry?.coordinates));
+  return bounds.every(Number.isFinite) ? bounds : undefined;
+}
+
 async function download(code) {
   const geometryUrl = `https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/main/releaseData/gbOpen/${code}/ADM1/geoBoundaries-${code}-ADM1_simplified.geojson`;
   const geometryResponse = await fetch(geometryUrl, { signal: AbortSignal.timeout(30000) });
@@ -51,11 +69,17 @@ async function download(code) {
   if (!payload.features.length) throw new Error("empty geometry");
   const serialized = JSON.stringify(payload);
   await writeFile(resolve(outputDir, `${code}.json`), serialized);
-  return { code, available: true, regions: payload.features.length, bytes: Buffer.byteLength(serialized) };
+  return {
+    code,
+    available: true,
+    regions: payload.features.length,
+    bytes: Buffer.byteLength(serialized),
+    bounds: geometryBounds(payload.features),
+  };
 }
 
 const index = [];
-for (let offset = 0; offset < countryCodes.length; offset += 5) {
+for (let offset = 0; !indexOnly && offset < countryCodes.length; offset += 5) {
   const batch = countryCodes.slice(offset, offset + 5);
   const results = await Promise.all(batch.map(async (code) => {
     try {
@@ -79,6 +103,15 @@ try {
 }
 const merged = new Map(previous.map((item) => [item.code, item]));
 index.forEach((item) => merged.set(item.code, item));
+await Promise.all([...merged.values()].map(async (item) => {
+  if (!item.available || item.bounds) return;
+  try {
+    const payload = JSON.parse(await readFile(resolve(outputDir, `${item.code}.json`), "utf8"));
+    item.bounds = geometryBounds(payload.features ?? []);
+  } catch {
+    // Keep unavailable legacy entries unchanged.
+  }
+}));
 await writeFile(previousIndexPath, JSON.stringify({
   source: "geoBoundaries gbOpen ADM1",
   license: "CC BY 4.0",

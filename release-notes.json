@@ -1,19 +1,17 @@
 {
-  "id": "2026.07.30.12",
+  "id": "2026.07.30.13",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "菜单分区更清晰",
+      "title": "离岛打卡更准确",
       "items": [
-        "语言与个性化、足迹与打卡现在拥有独立分区",
-        "通知入口统一更名为“通知与提醒”"
+        "修复济州岛等被简化世界地图遗漏的地区无法打卡"
       ]
     },
     "en": {
-      "title": "A clearer menu structure",
+      "title": "More accurate island check-ins",
       "items": [
-        "Language & personalization and Footprints & check-ins now have their own section",
-        "The notification entry has consistent naming"
+        "Fixed check-ins for Jeju and other islands omitted by the simplified world map"
       ]
     }
   }

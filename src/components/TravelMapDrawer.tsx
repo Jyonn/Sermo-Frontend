@@ -63,6 +63,7 @@ type CheckInPhase = "idle" | "locating" | "matching" | "saving";
 const WIDTH = 920;
 const HEIGHT = 500;
 const boundaryCache = new Map<string, FeatureCollection<Geometry, RegionProperties>>();
+let countryIndexPromise: Promise<Array<{ code: string; available: boolean; bounds?: [number, number, number, number] }>> | null = null;
 
 function worldFeatures() {
   const topology = worldTopology as unknown as { objects: { countries: Parameters<typeof feature>[1] } };
@@ -132,6 +133,16 @@ async function loadCountryBoundary(code: string) {
   return collection;
 }
 
+async function loadCountryIndex() {
+  if (!countryIndexPromise) {
+    countryIndexPromise = fetch("/maps/index.json")
+      .then((response) => response.ok ? response.json() : { countries: [] })
+      .then((payload) => payload.countries ?? [])
+      .catch(() => []);
+  }
+  return countryIndexPromise;
+}
+
 function accuracySamples(position: CheckInPosition) {
   const radius = Math.min(Math.max(position.accuracy, 20), 5000);
   const latitudeStep = radius / 111_320;
@@ -151,12 +162,13 @@ function accuracySamples(position: CheckInPosition) {
 export async function resolveTravelMapCandidates(position: CheckInPosition, language: string) {
   const samples = accuracySamples(position);
   const world = worldFeatures();
-  let candidateCountries = world
+  const exactCountries = world
     .filter((item) => samples.some((point) => geoContains(item, point)))
     .map((item) => countryCodeOf(item))
     .filter(Boolean);
-  if (!candidateCountries.length) {
-    candidateCountries = world
+  let candidateCountries = exactCountries;
+  if (!exactCountries.length) {
+    const nearbyWorldCountries = world
       .filter((item) => {
         const [[west, south], [east, north]] = geoBounds(item);
         return position.latitude >= south - 0.25
@@ -166,6 +178,18 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
       })
       .map((item) => countryCodeOf(item))
       .filter(Boolean);
+    const index = await loadCountryIndex();
+    const indexedCountries = index
+      .filter((item) => {
+        if (!item.available || !item.bounds) return false;
+        const [west, south, east, north] = item.bounds;
+        return position.latitude >= south - 0.25
+          && position.latitude <= north + 0.25
+          && position.longitude >= west - 0.25
+          && position.longitude <= east + 0.25;
+      })
+      .map((item) => item.code);
+    candidateCountries = [...new Set([...nearbyWorldCountries, ...indexedCountries])];
   }
   const candidates: CheckInCandidate[] = [];
   for (const code of [...new Set(candidateCountries)]) {
@@ -335,27 +359,20 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     { type: "FeatureCollection", features: world } as FeatureCollection,
   ), [world]);
   const worldPath = useMemo(() => geoPath(worldProjection), [worldProjection]);
-  const currentLocationCountry = useMemo(() => {
-    if (!currentLocation) return "";
-    const point: [number, number] = [currentLocation.longitude, currentLocation.latitude];
-    const country = world.find((item) => geoContains(item, point));
-    if (country) return countryCodeOf(country);
-    const nearby = world.find((item) => {
-      const [[west, south], [east, north]] = geoBounds(item);
-      return currentLocation.latitude >= south - 0.25
-        && currentLocation.latitude <= north + 0.25
-        && currentLocation.longitude >= west - 0.25
-        && currentLocation.longitude <= east + 0.25;
-    });
-    return nearby ? countryCodeOf(nearby) : "";
-  }, [currentLocation, world]);
   const currentLocationPoint = useMemo(() => {
     if (!currentLocation) return null;
     const coordinate: [number, number] = [currentLocation.longitude, currentLocation.latitude];
     if (!activeCountry) return worldProjection(coordinate);
-    if (activeCountry !== currentLocationCountry || !detailProjection) return null;
+    if (!detailProjection || !geometry?.features.some((item) => {
+      if (geoContains(item, coordinate)) return true;
+      const [[west, south], [east, north]] = geoBounds(item);
+      return currentLocation.latitude >= south - 0.15
+        && currentLocation.latitude <= north + 0.15
+        && currentLocation.longitude >= west - 0.15
+        && currentLocation.longitude <= east + 0.15;
+    })) return null;
     return detailProjection(coordinate);
-  }, [activeCountry, currentLocation, currentLocationCountry, detailProjection, worldProjection]);
+  }, [activeCountry, currentLocation, detailProjection, geometry, worldProjection]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
