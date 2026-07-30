@@ -1463,6 +1463,11 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+          </div>
+        </section>
+
+        <section className="list-section">
+          <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setPersonalizationDrawerOpen(true)} type="button">
               <div className="row-main">
                 <strong>{t("menu.personalization")}</strong>

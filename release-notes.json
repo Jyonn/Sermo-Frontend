@@ -1,17 +1,19 @@
 {
-  "id": "2026.07.30.11",
+  "id": "2026.07.30.12",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "桌面安装入口更简洁",
+      "title": "菜单分区更清晰",
       "items": [
-        "菜单中的 WebApp 入口统一为“安装到桌面”"
+        "语言与个性化、足迹与打卡现在拥有独立分区",
+        "通知入口统一更名为“通知与提醒”"
       ]
     },
     "en": {
-      "title": "A simpler desktop install entry",
+      "title": "A clearer menu structure",
       "items": [
-        "The WebApp menu entry is now consistently labeled “Install on desktop”"
+        "Language & personalization and Footprints & check-ins now have their own section",
+        "The notification entry has consistent naming"
       ]
     }
   }
