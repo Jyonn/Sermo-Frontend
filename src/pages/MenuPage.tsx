@@ -1452,11 +1452,7 @@ export default function MenuPage() {
             {!standalonePwa ? (
               <button className="simple-row menu-link-row" onClick={() => setPwaInstallSheetOpen(true)} type="button">
                 <div className="row-main">
-                  <strong className="menu-install-title">
-                    <span>{t("pwa.installSpace", { name: space?.name ?? t("space.current") })}</span>
-                    <UserAvatar className="menu-install-avatar" name={space?.official_user?.name ?? space?.name ?? t("space.title")} uri={space?.official_user?.avatar_uri} />
-                    <span>{t("pwa.toDesktop")}</span>
-                  </strong>
+                  <strong>{t("pwa.installDesktop")}</strong>
                 </div>
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>

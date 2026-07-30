@@ -1,21 +1,17 @@
 {
-  "id": "2026.07.30.10",
+  "id": "2026.07.30.11",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "定位足迹更直观",
+      "title": "桌面安装入口更简洁",
       "items": [
-        "已授权定位时，在世界和国家地图展示当前位置头像",
-        "优化沿海与边界附近的地区识别",
-        "定位失败会展示更准确的原因"
+        "菜单中的 WebApp 入口统一为“安装到桌面”"
       ]
     },
     "en": {
-      "title": "A clearer location on your map",
+      "title": "A simpler desktop install entry",
       "items": [
-        "Show your avatar on world and country maps when location is allowed",
-        "Improved region matching near coasts and boundaries",
-        "Location failures now explain what went wrong"
+        "The WebApp menu entry is now consistently labeled “Install on desktop”"
       ]
     }
   }
