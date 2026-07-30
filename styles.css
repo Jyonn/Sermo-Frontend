@@ -5648,13 +5648,13 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
     inset 0 0 0 1px rgba(255, 255, 255, 0.9),
     0 8px 20px rgba(116, 79, 18, 0.16);
   --bubble-skin-self-bg:
-    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
-    linear-gradient(145deg, #285646, #15372e);
-  --bubble-skin-self-color: #fff8df;
-  --bubble-skin-self-border: #e0b555;
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4);
+  --bubble-skin-self-color: #342d1f;
+  --bubble-skin-self-border: rgba(190, 137, 40, 0.78);
   --bubble-skin-self-shadow:
-    inset 0 0 0 1px rgba(255, 245, 199, 0.12),
-    0 9px 22px rgba(20, 48, 39, 0.22);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 8px 20px rgba(116, 79, 18, 0.16);
   --bubble-skin-other-radius: 18px;
   --bubble-skin-self-radius: 18px;
   --bubble-skin-border-width: 1px;
@@ -14851,49 +14851,49 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   isolation: isolate;
 }
 
-.message-group.bubble-style-vip .message-bubble-shell.group-start::before,
-.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.vip-tag-anchor::before {
+.message-group.bubble-style-vip .message-bubble-shell::before,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble::before {
   position: absolute;
   z-index: 8;
-  top: -9px;
+  top: -6px;
   display: grid;
-  min-width: 30px;
-  height: 17px;
+  min-width: 19px;
+  height: 12px;
   place-items: center;
-  padding: 0 7px;
+  padding: 0 4px;
   color: #744313;
   border: 1px solid rgba(190, 133, 35, 0.48);
-  border-radius: 7px;
+  border-radius: 5px;
   background:
     linear-gradient(115deg, rgba(255, 255, 255, 0.72), transparent 38%),
     linear-gradient(135deg, #fff2c7, #eac373);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.48),
-    0 3px 8px rgba(112, 68, 16, 0.18);
+    0 2px 5px rgba(112, 68, 16, 0.16);
   content: "VIP";
   font-family: var(--font-heading);
-  font-size: 0.56rem;
+  font-size: 0.42rem;
   font-weight: 900;
   letter-spacing: 0.1em;
   line-height: 1;
   pointer-events: none;
 }
 
-.message-group.bubble-style-vip.other .message-bubble-shell.group-start::before,
-.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other .vip-tag-anchor::before {
-  left: 12px;
-  transform: rotate(-2deg);
+.message-group.bubble-style-vip.other .message-bubble-shell::before,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other .personalization-preview-bubble::before {
+  right: 9px;
+  transform: rotate(1deg);
 }
 
-.message-group.bubble-style-vip.self .message-bubble-shell.group-start::before,
-.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self .vip-tag-anchor::before {
-  right: 12px;
-  transform: rotate(2deg);
+.message-group.bubble-style-vip.self .message-bubble-shell::before,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self .personalization-preview-bubble::before {
+  left: 9px;
+  transform: rotate(-1deg);
 }
 
-.message-group.bubble-style-vip .message-bubble-shell.group-start,
-.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.vip-tag-anchor {
-  margin-top: 5px;
+.message-group.bubble-style-vip .message-bubble-shell,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble {
+  margin-top: 4px;
 }
 
 .message-group.bubble-style-vip :is(
@@ -14924,11 +14924,11 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-file-card.self,
   .message-location-card.self
 ) {
-  color: #fff8df;
-  border-color: #e0b555;
+  color: #342d1f;
+  border-color: rgba(190, 137, 40, 0.78);
   background:
-    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
-    linear-gradient(145deg, #285646, #15372e);
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4);
 }
 
 .message-group.bubble-style-vip .message-bubble.other :is(
@@ -14946,11 +14946,11 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-link-preview-card,
   .message-travel-map-card
 ) {
-  color: #fff8df;
-  border-color: #e0b555;
+  color: #342d1f;
+  border-color: rgba(190, 137, 40, 0.78);
   background:
-    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
-    linear-gradient(145deg, #285646, #15372e);
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4);
 }
 
 .message-group.bubble-style-vip .message-bubble.self :is(
@@ -14970,7 +14970,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-location-copy small,
   .message-location-open
 ) {
-  color: rgba(255, 248, 223, 0.68);
+  color: rgba(52, 45, 31, 0.62);
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other > span {
@@ -14982,11 +14982,11 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self > span {
-  color: #fff8df !important;
-  border-color: #e0b555 !important;
+  color: #342d1f !important;
+  border-color: rgba(190, 137, 40, 0.78) !important;
   background:
-    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
-    linear-gradient(145deg, #285646, #15372e) !important;
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4) !important;
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-travel {
@@ -14995,8 +14995,8 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-link {
-  color: #fff8df !important;
-  background: linear-gradient(145deg, #234d40, #17382f) !important;
+  color: #342d1f !important;
+  background: linear-gradient(145deg, #fffdf4, #f4e7c4) !important;
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-link small {

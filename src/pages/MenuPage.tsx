@@ -1874,7 +1874,7 @@ export default function MenuPage() {
           <div className={`personalization-bubble-stage bubble-style-${visibleBubbleStyle(me?.chat_bubble_style)}`}>
             <div className="personalization-preview-message other">
               <UserAvatar className="personalization-preview-avatar" name={space?.official_user?.name ?? t("brand.user")} uri={space?.official_user?.avatar_uri} />
-              <span className="personalization-preview-bubble type-text vip-tag-anchor">{t("menu.bubblePreviewOther")}</span>
+              <span className="personalization-preview-bubble type-text">{t("menu.bubblePreviewOther")}</span>
             </div>
             <div className="personalization-preview-message self">
               <span className="personalization-preview-bubble type-image" aria-label={t("message.imagePlaceholder")}><i /></span>
