@@ -1,21 +1,21 @@
 {
-  "id": "2026.07.30.17",
+  "id": "2026.07.30.18",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "气泡预览更真实",
+      "title": "漫画气泡全面重绘",
       "items": [
-        "气泡预览覆盖文字、图片、语音、视频与各类卡片",
-        "结构化消息现在也会继承气泡外框和分组圆角",
-        "预览可直接查看消息发送中的走马灯效果"
+        "漫画语音、文件、定位与卡片拥有统一的新视觉",
+        "气泡预览改为紧凑的内部滚动窗口",
+        "媒体与文件发送中的扫光效果更加清晰"
       ]
     },
     "en": {
-      "title": "A more realistic bubble preview",
+      "title": "Comic bubbles, fully redrawn",
       "items": [
-        "Bubble previews now cover text, media, and every card type",
-        "Structured messages inherit bubble borders and grouped corners",
-        "The preview now demonstrates the sending sheen effect"
+        "Comic audio, files, locations, and cards now share one visual language",
+        "The bubble preview is now a compact, internally scrolling window",
+        "Sending media and files now show a clearer sweep effect"
       ]
     }
   }

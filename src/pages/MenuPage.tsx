@@ -1893,20 +1893,23 @@ export default function MenuPage() {
             </div>
             <div className="personalization-preview-message other">
               <span className="personalization-preview-bubble type-file">
-                <span className="material-symbols-outlined">description</span>
+                <span className="material-symbols-outlined preview-card-icon">description</span>
                 <i><strong>{t("menu.bubblePreviewFile")}</strong><small>2.4 MB</small></i>
+                <span className="material-symbols-outlined preview-card-arrow">north_east</span>
               </span>
             </div>
             <div className="personalization-preview-message self">
               <span className="personalization-preview-bubble type-location">
-                <span className="material-symbols-outlined">location_on</span>
+                <span className="material-symbols-outlined preview-card-icon">location_on</span>
                 <i><strong>{t("menu.bubblePreviewLocation")}</strong><small>{t("location.viewOnMap")}</small></i>
+                <span className="material-symbols-outlined preview-card-arrow">north_east</span>
               </span>
             </div>
             <div className="personalization-preview-message other">
               <span className="personalization-preview-bubble type-travel">
-                <span className="material-symbols-outlined">map</span>
-                <i><strong>{t("travelMap.messageJoin")}</strong><small>{t("travelMap.tapToAuthorize")}</small></i>
+                <span className="material-symbols-outlined preview-card-icon">map</span>
+                <i><small>{space?.name ?? t("space.current")}</small><strong>{t("travelMap.messageJoin")}</strong><small>{t("travelMap.tapToAuthorize")}</small></i>
+                <span className="material-symbols-outlined preview-card-arrow">arrow_forward</span>
               </span>
             </div>
             <div className="personalization-preview-message self">

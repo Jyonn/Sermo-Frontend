@@ -4809,9 +4809,32 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-media-frame.is-pending,
 .message-audio-card.is-pending,
 .message-file-card.is-pending {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background-size: 220% 100%;
   animation: message-pending-sheen 1.2s linear infinite;
   opacity: 0.9;
+}
+
+.message-location-card.is-pending {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.message-media-frame.is-pending::after,
+.message-audio-card.is-pending::after,
+.message-file-card.is-pending::after,
+.message-location-card.is-pending::after {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 24%, rgba(255, 255, 255, 0.42) 48%, transparent 72%);
+  transform: translateX(-120%);
+  animation: message-pending-sweep 1.15s linear infinite;
 }
 
 .message-media-frame.is-failed,
@@ -4855,6 +4878,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   to {
     background-position: -100% 0;
   }
+}
+
+@keyframes message-pending-sweep {
+  to { transform: translateX(120%); }
 }
 
 @keyframes preview-shimmer {
@@ -5581,15 +5608,28 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .personalization-bubble-stage {
   display: grid;
   gap: 9px;
-  min-height: 680px;
+  height: min(52vh, 480px);
+  min-height: 360px;
   align-content: start;
   padding: 20px 16px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   border: 1px solid rgba(24, 35, 29, 0.08);
   border-radius: 20px;
   background:
     radial-gradient(circle at 85% 12%, rgba(114, 197, 162, 0.18), transparent 34%),
     linear-gradient(145deg, #f7f4ed, #edf2ed);
+}
+
+.personalization-bubble-stage::-webkit-scrollbar {
+  width: 5px;
+}
+
+.personalization-bubble-stage::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(46, 72, 59, 0.2);
 }
 
 .personalization-bubble-stage.bubble-style-comic,
@@ -5763,13 +5803,13 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .personalization-preview-bubble:is(.type-file, .type-location, .type-travel) {
   width: min(82%, 260px);
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-columns: 38px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
 }
 
-.personalization-preview-bubble:is(.type-file, .type-location, .type-travel) > .material-symbols-outlined {
+.personalization-preview-bubble:is(.type-file, .type-location, .type-travel) > .preview-card-icon {
   display: grid;
   width: 36px;
   height: 36px;
@@ -5778,6 +5818,20 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   border-radius: 11px;
   background: rgba(19, 129, 91, 0.11);
   font-size: 21px;
+}
+
+.personalization-preview-bubble.type-location {
+  width: min(88%, 290px);
+}
+
+.personalization-preview-bubble.type-travel {
+  width: min(90%, 300px);
+}
+
+.personalization-preview-bubble .preview-card-arrow {
+  align-self: center;
+  font-size: 17px;
+  opacity: 0.55;
 }
 
 .personalization-preview-bubble:is(.type-file, .type-location, .type-travel) > i {
@@ -5808,6 +5862,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .personalization-preview-bubble.type-travel {
   color: #173c30 !important;
   background: linear-gradient(145deg, #e8f7ef, #cceadd) !important;
+}
+
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-message.self > .type-location {
+  background: var(--bubble-skin-self-bg) !important;
 }
 
 .personalization-preview-bubble.type-link {
@@ -14567,4 +14625,202 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 ):not(.group-start):not(.group-end) {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+}
+
+/* Comic is a full component theme, not a border applied over default green cards. */
+.message-group.bubble-style-comic {
+  --comic-ink: #26342e;
+  --comic-paper: #fff9df;
+  --comic-self: #ffd36a;
+  --comic-shadow: #e99425;
+  --comic-mint: #d9f3e6;
+}
+
+.message-group.bubble-style-comic :is(
+  .message-media-frame,
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  color: var(--comic-ink);
+  border-width: 2px;
+  border-color: var(--comic-ink);
+  box-shadow: 5px 6px 0 var(--comic-shadow);
+}
+
+.message-group.bubble-style-comic :is(
+  .message-audio-card.other,
+  .message-file-card.other,
+  .message-location-card.other
+) {
+  color: var(--comic-ink);
+  background: var(--comic-paper);
+}
+
+.message-group.bubble-style-comic :is(
+  .message-audio-card.self,
+  .message-file-card.self,
+  .message-location-card.self
+) {
+  color: var(--comic-ink);
+  background: var(--comic-self);
+}
+
+.message-group.bubble-style-comic .message-audio-card {
+  min-width: min(66vw, 260px);
+  min-height: 0;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  padding: 8px 11px;
+}
+
+.message-group.bubble-style-comic .message-audio-play {
+  width: 34px;
+  height: 34px;
+  color: var(--comic-ink);
+  background: rgba(38, 52, 46, 0.09);
+  box-shadow: none;
+}
+
+.message-group.bubble-style-comic .message-audio-play-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.message-group.bubble-style-comic .message-audio-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.message-group.bubble-style-comic .message-audio-head {
+  display: contents;
+}
+
+.message-group.bubble-style-comic .message-audio-meta {
+  display: none;
+}
+
+.message-group.bubble-style-comic .message-audio-wave {
+  grid-column: 1;
+  grid-row: 1;
+  height: 20px;
+  gap: 3px;
+}
+
+.message-group.bubble-style-comic .message-audio-wave-bar {
+  width: 3px;
+  color: var(--comic-ink);
+  background: currentColor;
+  opacity: 0.32;
+}
+
+.message-group.bubble-style-comic .message-audio-wave-bar.is-active {
+  background: #087751;
+  opacity: 0.9;
+}
+
+.message-group.bubble-style-comic .message-audio-progress,
+.message-group.bubble-style-comic .message-audio-card.self .message-audio-progress {
+  grid-column: 2;
+  grid-row: 1;
+  color: rgba(38, 52, 46, 0.64);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.message-group.bubble-style-comic .message-file-card {
+  min-height: 64px;
+  padding: 9px 11px;
+}
+
+.message-group.bubble-style-comic .message-file-icon {
+  width: 40px;
+  height: 40px;
+  color: #087751;
+  border: 1px solid rgba(38, 52, 46, 0.08);
+  background: rgba(8, 119, 81, 0.1);
+}
+
+.message-group.bubble-style-comic .message-file-card.self :is(.message-file-copy small, .message-file-open),
+.message-group.bubble-style-comic .message-file-card.other :is(.message-file-copy small, .message-file-open) {
+  color: rgba(38, 52, 46, 0.58);
+}
+
+.message-group.bubble-style-comic .message-location-card {
+  min-height: 68px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+}
+
+.message-group.bubble-style-comic .message-location-mark {
+  width: 36px;
+  height: 36px;
+  color: #087751;
+  background: rgba(8, 119, 81, 0.1);
+}
+
+.message-group.bubble-style-comic .message-location-copy {
+  gap: 4px;
+  padding-block: 10px;
+}
+
+.message-group.bubble-style-comic .message-location-copy small,
+.message-group.bubble-style-comic .message-location-open {
+  color: rgba(38, 52, 46, 0.58);
+}
+
+.message-group.bubble-style-comic .message-travel-map-card {
+  color: var(--comic-ink);
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.7), transparent 28%),
+    var(--comic-mint);
+}
+
+.message-group.bubble-style-comic .message-travel-map-art {
+  color: #087751;
+  border: 1px solid rgba(38, 52, 46, 0.12);
+  background: rgba(255, 249, 223, 0.78);
+  box-shadow: none;
+}
+
+.message-group.bubble-style-comic .message-travel-map-copy :is(small, span),
+.message-group.bubble-style-comic .message-travel-map-arrow {
+  color: rgba(38, 52, 46, 0.62);
+}
+
+.message-group.bubble-style-comic .message-link-preview-card,
+html[data-theme="dark"] .message-group.bubble-style-comic .message-link-preview-card {
+  color: var(--comic-ink);
+  background: #fffdf5;
+}
+
+.message-group.bubble-style-comic .message-link-preview-title {
+  color: var(--comic-ink);
+}
+
+.message-group.bubble-style-comic .message-link-preview-site {
+  color: #087751;
+}
+
+.message-group.bubble-style-comic .message-link-preview-desc {
+  color: rgba(38, 52, 46, 0.58);
+}
+
+html[data-theme="dark"] .message-group.bubble-style-comic :is(
+  .message-audio-card.other,
+  .message-file-card.other,
+  .message-location-card.other
+) {
+  background: #fff9df;
+}
+
+html[data-theme="dark"] .message-group.bubble-style-comic :is(
+  .message-audio-card.self,
+  .message-file-card.self,
+  .message-location-card.self
+) {
+  background: #ffd36a;
 }
