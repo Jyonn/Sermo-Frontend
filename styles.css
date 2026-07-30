@@ -14824,3 +14824,186 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 ) {
   background: #ffd36a;
 }
+
+/* Keep preview and live cards on one compact sizing and surface system. */
+.message-text-stack.has-link-preview {
+  width: min(100%, 330px);
+}
+
+.message-link-preview-card {
+  width: 100%;
+  max-width: 330px;
+  min-height: 88px;
+  box-sizing: border-box;
+}
+
+.message-link-preview-card.no-image {
+  width: fit-content;
+  min-width: min(100%, 220px);
+  max-width: min(100%, 286px);
+  min-height: 0;
+  padding: 12px 14px;
+}
+
+.message-link-preview-card.no-image .message-link-preview-text {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.message-link-preview-card.no-image .message-link-preview-title,
+.message-link-preview-card.no-image .message-link-preview-desc {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.message-travel-map-card {
+  width: min(100%, 310px);
+  box-sizing: border-box;
+  border-radius: var(--radius-bubble);
+}
+
+.message-group:not(.bubble-style-default) .message-bubble.other :is(
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  border-radius: var(--bubble-skin-other-radius);
+}
+
+.message-group.self:not(.bubble-style-default) .message-bubble.self :is(
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  border-radius: var(--bubble-skin-self-radius);
+}
+
+/* Structured cards are the visible bubble, so grouping corners belong on them. */
+.message-text-stack.other.group-start:not(.group-end) > :last-child,
+.message-travel-map-card.other.group-start:not(.group-end) {
+  border-bottom-left-radius: 5px;
+}
+
+.message-text-stack.other:not(.group-start).group-end > :first-child,
+.message-travel-map-card.other:not(.group-start).group-end {
+  border-top-left-radius: 5px;
+}
+
+.message-text-stack.other:not(.group-start):not(.group-end) > :first-child,
+.message-text-stack.other:not(.group-start):not(.group-end) > :last-child,
+.message-travel-map-card.other:not(.group-start):not(.group-end) {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.message-text-stack.self.group-start:not(.group-end) > :last-child,
+.message-travel-map-card.self.group-start:not(.group-end) {
+  border-bottom-right-radius: 5px;
+}
+
+.message-text-stack.self:not(.group-start).group-end > :first-child,
+.message-travel-map-card.self:not(.group-start).group-end {
+  border-top-right-radius: 5px;
+}
+
+.message-text-stack.self:not(.group-start):not(.group-end) > :first-child,
+.message-text-stack.self:not(.group-start):not(.group-end) > :last-child,
+.message-travel-map-card.self:not(.group-start):not(.group-end) {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+/* Sending is an overlay state; it must not replace the selected bubble skin. */
+.message-group:not(.bubble-style-default) .message-bubble.is-pending:not(.is-media):not(.is-link-preview) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--bubble-skin-self-color);
+  border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-self-border);
+  background: var(--bubble-skin-self-bg);
+  background-size: auto;
+  box-shadow: var(--bubble-skin-self-shadow);
+  animation: none;
+}
+
+.message-group:not(.bubble-style-default) .message-bubble.is-pending:not(.is-media):not(.is-link-preview)::after,
+.personalization-bubble-stage:not(.bubble-style-default) .personalization-preview-bubble.is-pending::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 24%, rgba(255, 255, 255, 0.5) 48%, transparent 72%);
+  transform: translateX(-120%);
+  animation: message-pending-sweep 1.15s linear infinite;
+}
+
+.personalization-preview-bubble.is-pending {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.personalization-bubble-stage:not(.bubble-style-default) .personalization-preview-bubble.is-pending {
+  color: var(--bubble-skin-self-color) !important;
+  border-color: var(--bubble-skin-self-border) !important;
+  background: var(--bubble-skin-self-bg) !important;
+  background-size: auto !important;
+  box-shadow: var(--bubble-skin-self-shadow) !important;
+  animation: none;
+}
+
+/* The editor mirrors the dimensions and hierarchy of live message cards. */
+.personalization-preview-bubble:is(.type-file, .type-location, .type-travel) {
+  width: min(100%, 310px);
+  min-height: 64px;
+  box-sizing: border-box;
+}
+
+.personalization-preview-bubble.type-link {
+  width: min(100%, 330px);
+  min-height: 88px;
+  box-sizing: border-box;
+}
+
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-bubble:is(
+  .type-image,
+  .type-audio,
+  .type-video,
+  .type-file,
+  .type-location,
+  .type-travel,
+  .type-link
+) {
+  color: var(--comic-ink, #26342e) !important;
+  border: 2px solid var(--comic-ink, #26342e);
+  box-shadow: 5px 6px 0 var(--comic-shadow, #e99425);
+}
+
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-message.other > .type-file,
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-message.other > .type-audio {
+  background: var(--comic-paper, #fff9df) !important;
+}
+
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-message.self > :is(
+  .type-location,
+  .type-file,
+  .type-audio
+) {
+  background: var(--comic-self, #ffd36a) !important;
+}
+
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-bubble.type-travel {
+  background: var(--comic-mint, #d9f3e6) !important;
+}
+
+.personalization-bubble-stage.bubble-style-comic .personalization-preview-bubble.type-link {
+  background: #fffdf5 !important;
+}
+
+@media (max-width: 520px) {
+  .message-text-stack.has-link-preview,
+  .message-link-preview-card,
+  .message-travel-map-card,
+  .message-location-card {
+    max-width: calc(100vw - 92px);
+  }
+}
