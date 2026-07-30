@@ -7636,7 +7636,6 @@ html[data-theme="dark"] :is(
   .gesture-range-row,
   .stepper button,
   .friend-directory-index,
-  .menu-account-switch-trigger.is-static,
   .bark-guide-step.is-action,
   .bark-store-link
 ) {
@@ -10037,59 +10036,6 @@ html[data-theme="dark"] .message-link-preview-site {
 
 .minimal-page-header .panel-title {
   font-size: 1.45rem;
-}
-
-.menu-switch-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.menu-switch-separator {
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.menu-account-switch-trigger {
-  min-width: 0;
-  max-width: min(58vw, 280px);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px 5px 7px;
-  border: 1px solid rgba(0, 208, 132, 0.22);
-  border-radius: 999px;
-  color: var(--brand-primary);
-  background: rgba(0, 208, 132, 0.08);
-  font-size: 0.76rem;
-  font-weight: 750;
-}
-
-.menu-account-switch-trigger > span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menu-account-switch-trigger.is-static {
-  padding-left: 10px;
-  color: var(--text-secondary);
-  border-color: rgba(121, 139, 132, 0.18);
-  background: rgba(255, 255, 255, 0.46);
-  cursor: default;
-}
-
-.menu-account-switch-icon {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  color: white;
-  background: var(--brand-primary);
-  font-size: 0.85rem;
-  line-height: 1;
 }
 
 .account-switch-list {

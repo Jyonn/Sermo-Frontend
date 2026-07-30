@@ -263,6 +263,7 @@ export default function MenuPage() {
   const chatBackgroundFileInputRef = useRef<HTMLInputElement | null>(null);
   const pwaGrowthClaimedRef = useRef(false);
   const growthLevelTrackRef = useRef<HTMLDivElement | null>(null);
+  const accountSwitcherRouteHandledRef = useRef(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, currentUserId);
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const hasGrowthCapability = (key: string, fallbackLevel: number) =>
@@ -273,7 +274,6 @@ export default function MenuPage() {
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const canCustomizeChatBackground = hasGrowthCapability("chat_background", 8);
   const canCustomizeNotificationMessage = hasGrowthCapability("custom_notification_message", 10);
-  const canSwitchAccount = switchAccounts.length > 0;
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -325,7 +325,6 @@ export default function MenuPage() {
   };
 
   const openAccountSwitcher = async () => {
-    if (!canSwitchAccount) return;
     setAccountSwitcherOpen(true);
     setAccountSwitcherLoading(true);
     try {
@@ -338,13 +337,16 @@ export default function MenuPage() {
   };
 
   useEffect(() => {
-    if (!currentUserId) return;
-    const controller = new AbortController();
-    void api.getSwitchAccounts(controller.signal)
-      .then(setSwitchAccounts)
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, [currentUserId]);
+    const requested = new URLSearchParams(location.search).get("switch-account") === "1";
+    if (!requested) {
+      accountSwitcherRouteHandledRef.current = false;
+      return;
+    }
+    if (accountSwitcherRouteHandledRef.current) return;
+    accountSwitcherRouteHandledRef.current = true;
+    navigate(location.pathname, { replace: true });
+    void openAccountSwitcher();
+  }, [location.pathname, location.search, navigate]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
     setSwitchingUserId(account.user.user_id);
@@ -1310,30 +1312,7 @@ export default function MenuPage() {
   return (
     <AppChrome title={t("menu.title")} hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <TabPageHeader
-          title={
-            <span className="menu-switch-title">
-              <span>{t("menu.title")}</span>
-              <span className="menu-switch-separator">·</span>
-              {canSwitchAccount ? (
-                <button
-                  aria-label={t("menu.switchAccount")}
-                  className="menu-account-switch-trigger"
-                  onClick={() => void openAccountSwitcher()}
-                  type="button"
-                >
-                  <span className="menu-account-switch-icon" aria-hidden="true">⇄</span>
-                  <span>{space?.name ?? t("menu.currentSpace")}</span>
-                </button>
-              ) : (
-                <span className="menu-account-switch-trigger is-static">
-                  {space?.name ?? t("menu.currentSpace")}
-                </span>
-              )}
-            </span>
-          }
-          syncing={syncing}
-        />
+        <TabPageHeader title={t("menu.title")} syncing={syncing} />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
             <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
@@ -1477,6 +1456,17 @@ export default function MenuPage() {
             <button className="simple-row menu-link-row" onClick={() => setTravelMapOpen(true)} type="button">
               <div className="row-main">
                 <strong>{t("travelMap.myTitle")}</strong>
+              </div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </section>
+
+        <section className="list-section">
+          <div className="simple-list">
+            <button className="simple-row menu-link-row" onClick={() => void openAccountSwitcher()} type="button">
+              <div className="row-main">
+                <strong>{t("menu.switchAccount")}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>

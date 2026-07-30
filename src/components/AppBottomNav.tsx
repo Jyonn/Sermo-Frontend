@@ -208,7 +208,7 @@ export function AppBottomNav() {
           </Link>
         ))}
       </div>
-      <Link aria-label={t("nav.openMenu")} className="desktop-nav-user" to="/app/menu">
+      <Link aria-label={t("menu.switchAccount")} className="desktop-nav-user" title={t("menu.switchAccount")} to="/app/menu?switch-account=1">
         <UserAvatar className="mini-avatar" name={session.user.name} uri={session.user.avatar_uri} />
         <span>{session.user.name}</span>
       </Link>

@@ -1,17 +1,19 @@
 {
-  "id": "2026.07.30.13",
+  "id": "2026.07.30.14",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "离岛打卡更准确",
+      "title": "切换账号更顺手",
       "items": [
-        "修复济州岛等被简化世界地图遗漏的地区无法打卡"
+        "桌面端可点击左下角头像切换账号",
+        "菜单新增独立的切换账号入口"
       ]
     },
     "en": {
-      "title": "More accurate island check-ins",
+      "title": "Easier account switching",
       "items": [
-        "Fixed check-ins for Jeju and other islands omitted by the simplified world map"
+        "Switch accounts from your avatar in the desktop sidebar",
+        "Added a dedicated account switch entry in the menu"
       ]
     }
   }
