@@ -1,19 +1,21 @@
 {
-  "id": "2026.07.30.14",
+  "id": "2026.07.30.15",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "切换账号更顺手",
+      "title": "聊天背景焕新",
       "items": [
-        "桌面端可点击左下角头像切换账号",
-        "菜单新增独立的切换账号入口"
+        "聊天背景按朴素、风格与自定义分区展示",
+        "新增与漫画气泡呼应的漫画背景",
+        "完整图标字体解决缺失图标与文字占位"
       ]
     },
     "en": {
-      "title": "Easier account switching",
+      "title": "Refreshed chat backgrounds",
       "items": [
-        "Switch accounts from your avatar in the desktop sidebar",
-        "Added a dedicated account switch entry in the menu"
+        "Chat backgrounds are now grouped into Essentials, Styles, and Custom",
+        "Added a comic background designed to pair with comic bubbles",
+        "The complete icon font fixes missing icons and text placeholders"
       ]
     }
   }

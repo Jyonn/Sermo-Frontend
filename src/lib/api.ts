@@ -1036,7 +1036,7 @@ export const api = {
     });
   },
 
-  setChatBackground(theme: "default" | "paper" | "mint" | "dusk" | "custom", key = "") {
+  setChatBackground(theme: "default" | "paper" | "mint" | "dusk" | "comic" | "custom", key = "") {
     return request<UserMeDTO>("/users/me/chat-background", {
       method: "POST",
       auth: true,

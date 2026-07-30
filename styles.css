@@ -1,11 +1,3 @@
-@font-face {
-  font-family: "Material Symbols Outlined";
-  font-style: normal;
-  font-weight: 400;
-  font-display: block;
-  src: url("./src/assets/fonts/MaterialSymbolsOutlined-subset.woff2") format("woff2");
-}
-
 .pwa-recommendation {
   position: fixed;
   left: 50%;
@@ -2887,6 +2879,12 @@ img {
   --chat-input-surface: rgba(252, 247, 245, 0.62);
 }
 
+.chat-background-comic {
+  --chat-chrome-surface: rgba(248, 232, 184, 0.76);
+  --chat-chrome-border: rgba(44, 48, 42, 0.26);
+  --chat-input-surface: rgba(255, 247, 218, 0.72);
+}
+
 .chat-background-custom {
   --chat-chrome-surface: rgba(244, 244, 240, 0.58);
   --chat-chrome-border: rgba(255, 255, 255, 0.42);
@@ -2915,6 +2913,12 @@ html[data-theme="dark"] .chat-background-dusk {
   --chat-chrome-surface: rgba(35, 28, 31, 0.84);
   --chat-chrome-border: rgba(111, 83, 96, 0.46);
   --chat-input-surface: rgba(46, 35, 40, 0.86);
+}
+
+html[data-theme="dark"] .chat-background-comic {
+  --chat-chrome-surface: rgba(40, 36, 27, 0.86);
+  --chat-chrome-border: rgba(222, 190, 105, 0.32);
+  --chat-input-surface: rgba(50, 44, 31, 0.88);
 }
 
 html[data-theme="dark"] .chat-background-custom {
@@ -2991,6 +2995,22 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-dusk::before {
     #251e21;
 }
 
+.chat-detail-scene.chat-background-comic::before {
+  background:
+    linear-gradient(112deg, transparent 0 47%, rgba(39, 46, 41, 0.08) 47.2% 47.65%, transparent 47.85%),
+    repeating-conic-gradient(from -18deg at 88% 12%, rgba(225, 153, 31, 0.075) 0deg 2deg, transparent 2deg 13deg),
+    radial-gradient(circle at 1px 1px, rgba(39, 46, 41, 0.13) 0.85px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(145deg, #f8e7b5, #fff4cf 52%, #efcf78);
+}
+
+html[data-theme="dark"] .chat-detail-scene.chat-background-comic::before {
+  background:
+    linear-gradient(112deg, transparent 0 47%, rgba(242, 210, 126, 0.1) 47.2% 47.65%, transparent 47.85%),
+    repeating-conic-gradient(from -18deg at 88% 12%, rgba(221, 164, 51, 0.07) 0deg 2deg, transparent 2deg 13deg),
+    radial-gradient(circle at 1px 1px, rgba(235, 215, 161, 0.11) 0.85px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(145deg, #28241b, #30291b 52%, #201e19);
+}
+
 .chat-detail-scene.chat-background-custom::before {
   background:
     linear-gradient(rgba(250, 250, 247, 0.12), rgba(250, 250, 247, 0.12)),
@@ -3038,6 +3058,15 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
     #f4f0ee;
 }
 
+.chat-background-preview[data-theme="comic"] {
+  border-color: rgba(44, 48, 42, 0.32);
+  background:
+    linear-gradient(112deg, transparent 0 47%, rgba(39, 46, 41, 0.1) 47.2% 47.8%, transparent 48%),
+    repeating-conic-gradient(from -18deg at 88% 12%, rgba(225, 153, 31, 0.09) 0deg 2deg, transparent 2deg 13deg),
+    radial-gradient(circle at 1px 1px, rgba(39, 46, 41, 0.14) 0.85px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(145deg, #f8e7b5, #fff4cf 52%, #efcf78);
+}
+
 .chat-background-preview > img {
   width: 100%;
   height: 100%;
@@ -3072,8 +3101,21 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .chat-background-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 8px;
+}
+
+.chat-background-section {
+  display: grid;
+  gap: 10px;
+}
+
+.chat-background-section h3 {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
 }
 
 .chat-background-choice {
@@ -3122,6 +3164,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .chat-background-choice.theme-dusk > span {
   background: linear-gradient(135deg, #e8c7b1, #eee8e4 48%, #b9bfd1);
+}
+
+.chat-background-choice.theme-comic > span {
+  background:
+    linear-gradient(112deg, transparent 0 47%, rgba(39, 46, 41, 0.14) 47.4% 48%, transparent 48.3%),
+    repeating-conic-gradient(from -18deg at 88% 12%, rgba(225, 153, 31, 0.13) 0deg 3deg, transparent 3deg 16deg),
+    radial-gradient(circle at 1px 1px, rgba(39, 46, 41, 0.2) 0.7px, transparent 0.9px) 0 0 / 9px 9px,
+    #f7df98;
 }
 
 .chat-background-choice.theme-custom > span {
@@ -5404,6 +5454,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .personalization-background-swatch.theme-paper { background: linear-gradient(145deg, #f7f2e8, #eadfc9); }
 .personalization-background-swatch.theme-mint { background: linear-gradient(145deg, #dff4e8, #beded3); }
 .personalization-background-swatch.theme-dusk { background: linear-gradient(145deg, #ead6ce, #b9bfd5); }
+.personalization-background-swatch.theme-comic {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(39, 46, 41, 0.2) 0.7px, transparent 0.9px) 0 0 / 8px 8px,
+    #f7df98;
+}
 .personalization-background-swatch.theme-custom { background: conic-gradient(from 30deg, #ffbc78, #7bcfac, #79a9de, #ffbc78); }
 
 .personalization-section {

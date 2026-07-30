@@ -1022,7 +1022,7 @@ export default function MenuPage() {
     avatarFileInputRef.current?.click();
   };
 
-  const saveChatBackgroundTheme = async (theme: "default" | "paper" | "mint" | "dusk") => {
+  const saveChatBackgroundTheme = async (theme: "default" | "paper" | "mint" | "dusk" | "comic") => {
     if (!canCustomizeChatBackground) {
       showToast(t("background.levelRequired", { level: 8 }), "error");
       return;
@@ -1807,36 +1807,58 @@ export default function MenuPage() {
             <span className="chat-background-preview-bubble other">{t("menu.backgroundPreviewOther")}</span>
             <span className="chat-background-preview-bubble self">{t("menu.backgroundPreviewSelf")}</span>
           </div>
-          <div className="chat-background-grid">
-            {([
-              ["default", "menu.themeDefault"],
-              ["paper", "menu.themePaper"],
-              ["mint", "menu.themeMint"],
-              ["dusk", "menu.themeDusk"],
-            ] as const).map(([theme, label]) => (
+          <section className="chat-background-section">
+            <h3>{t("menu.backgroundSectionPlain")}</h3>
+            <div className="chat-background-grid">
+              {([
+                ["default", "menu.themeDefault"],
+                ["paper", "menu.themePaper"],
+                ["mint", "menu.themeMint"],
+                ["dusk", "menu.themeDusk"],
+              ] as const).map(([theme, label]) => (
+                <button
+                  className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
+                  disabled={chatBackgroundSaving}
+                  key={theme}
+                  onClick={() => void saveChatBackgroundTheme(theme)}
+                  type="button"
+                >
+                  <span />
+                  <strong>{t(label)}</strong>
+                </button>
+              ))}
+            </div>
+          </section>
+          <section className="chat-background-section">
+            <h3>{t("menu.backgroundSectionStyle")}</h3>
+            <div className="chat-background-grid">
               <button
-                className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
+                className={`chat-background-choice theme-comic${me?.chat_background_theme === "comic" ? " is-selected" : ""}`}
                 disabled={chatBackgroundSaving}
-                key={theme}
-                onClick={() => void saveChatBackgroundTheme(theme)}
+                onClick={() => void saveChatBackgroundTheme("comic")}
                 type="button"
               >
                 <span />
-                <strong>{t(label)}</strong>
+                <strong>{t("menu.themeComic")}</strong>
               </button>
-            ))}
-            <button
-              className={`chat-background-choice theme-custom${me?.chat_background_theme === "custom" ? " is-selected" : ""}`}
-              disabled={chatBackgroundSaving}
-              onClick={() => chatBackgroundFileInputRef.current?.click()}
-              type="button"
-            >
-              <span>
-                {me?.chat_background_uri ? <img alt="" src={me.chat_background_uri} /> : <span className="material-symbols-outlined">photo_library</span>}
-              </span>
-              <strong>{chatBackgroundSaving ? t("common.processing") : t("common.custom")}</strong>
-            </button>
-          </div>
+            </div>
+          </section>
+          <section className="chat-background-section">
+            <h3>{t("common.custom")}</h3>
+            <div className="chat-background-grid">
+              <button
+                className={`chat-background-choice theme-custom${me?.chat_background_theme === "custom" ? " is-selected" : ""}`}
+                disabled={chatBackgroundSaving}
+                onClick={() => chatBackgroundFileInputRef.current?.click()}
+                type="button"
+              >
+                <span>
+                  {me?.chat_background_uri ? <img alt="" src={me.chat_background_uri} /> : <span className="material-symbols-outlined">add_photo_alternate</span>}
+                </span>
+                <strong>{chatBackgroundSaving ? t("common.processing") : t("common.custom")}</strong>
+              </button>
+            </div>
+          </section>
           <input
             ref={chatBackgroundFileInputRef}
             accept="image/*"
