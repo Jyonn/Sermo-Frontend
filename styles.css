@@ -5639,20 +5639,24 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .personalization-bubble-stage.bubble-style-vip,
 .message-group.bubble-style-vip {
-  --bubble-skin-other-bg: linear-gradient(145deg, #fffef8, #f8f2df);
+  --bubble-skin-other-bg:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4);
   --bubble-skin-other-color: #342d1f;
-  --bubble-skin-other-border: rgba(177, 127, 35, 0.72);
+  --bubble-skin-other-border: rgba(190, 137, 40, 0.78);
   --bubble-skin-other-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.9),
-    0 7px 18px rgba(116, 79, 18, 0.14);
-  --bubble-skin-self-bg: linear-gradient(145deg, #234d40, #17382f);
+    0 8px 20px rgba(116, 79, 18, 0.16);
+  --bubble-skin-self-bg:
+    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
+    linear-gradient(145deg, #285646, #15372e);
   --bubble-skin-self-color: #fff8df;
-  --bubble-skin-self-border: #d8aa4f;
+  --bubble-skin-self-border: #e0b555;
   --bubble-skin-self-shadow:
     inset 0 0 0 1px rgba(255, 245, 199, 0.12),
-    0 8px 20px rgba(20, 48, 39, 0.18);
-  --bubble-skin-other-radius: 16px;
-  --bubble-skin-self-radius: 16px;
+    0 9px 22px rgba(20, 48, 39, 0.22);
+  --bubble-skin-other-radius: 18px;
+  --bubble-skin-self-radius: 18px;
   --bubble-skin-border-width: 1px;
 }
 
@@ -14841,6 +14845,57 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 }
 
 /* VIP is an explicit bubble theme, never an automatic identity overlay. */
+.message-group.bubble-style-vip .message-bubble-shell,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble {
+  position: relative;
+  isolation: isolate;
+}
+
+.message-group.bubble-style-vip .message-bubble-shell.group-start::before,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.vip-tag-anchor::before {
+  position: absolute;
+  z-index: 8;
+  top: -9px;
+  display: grid;
+  min-width: 30px;
+  height: 17px;
+  place-items: center;
+  padding: 0 7px;
+  color: #744313;
+  border: 1px solid rgba(190, 133, 35, 0.48);
+  border-radius: 7px;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.72), transparent 38%),
+    linear-gradient(135deg, #fff2c7, #eac373);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.48),
+    0 3px 8px rgba(112, 68, 16, 0.18);
+  content: "VIP";
+  font-family: var(--font-heading);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.message-group.bubble-style-vip.other .message-bubble-shell.group-start::before,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other .vip-tag-anchor::before {
+  left: 12px;
+  transform: rotate(-2deg);
+}
+
+.message-group.bubble-style-vip.self .message-bubble-shell.group-start::before,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self .vip-tag-anchor::before {
+  right: 12px;
+  transform: rotate(2deg);
+}
+
+.message-group.bubble-style-vip .message-bubble-shell.group-start,
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.vip-tag-anchor {
+  margin-top: 5px;
+}
+
 .message-group.bubble-style-vip :is(
   .message-media-frame,
   .message-audio-card,
@@ -14858,8 +14913,10 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-location-card.other
 ) {
   color: #342d1f;
-  border-color: rgba(177, 127, 35, 0.72);
-  background: linear-gradient(145deg, #fffef8, #f8f2df);
+  border-color: rgba(190, 137, 40, 0.78);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4);
 }
 
 .message-group.bubble-style-vip :is(
@@ -14868,8 +14925,10 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-location-card.self
 ) {
   color: #fff8df;
-  border-color: #d8aa4f;
-  background: linear-gradient(145deg, #234d40, #17382f);
+  border-color: #e0b555;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
+    linear-gradient(145deg, #285646, #15372e);
 }
 
 .message-group.bubble-style-vip .message-bubble.other :is(
@@ -14877,8 +14936,10 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-travel-map-card
 ) {
   color: #342d1f;
-  border-color: rgba(177, 127, 35, 0.72);
-  background: linear-gradient(145deg, #fffef8, #f8f2df);
+  border-color: rgba(190, 137, 40, 0.78);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4);
 }
 
 .message-group.bubble-style-vip .message-bubble.self :is(
@@ -14886,8 +14947,10 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-travel-map-card
 ) {
   color: #fff8df;
-  border-color: #d8aa4f;
-  background: linear-gradient(145deg, #234d40, #17382f);
+  border-color: #e0b555;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
+    linear-gradient(145deg, #285646, #15372e);
 }
 
 .message-group.bubble-style-vip .message-bubble.self :is(
@@ -14912,14 +14975,18 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other > span {
   color: #342d1f;
-  border-color: rgba(177, 127, 35, 0.72);
-  background: linear-gradient(145deg, #fffef8, #f8f2df) !important;
+  border-color: rgba(190, 137, 40, 0.78);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(145deg, #fffdf4, #f4e7c4) !important;
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self > span {
   color: #fff8df !important;
-  border-color: #d8aa4f !important;
-  background: linear-gradient(145deg, #234d40, #17382f) !important;
+  border-color: #e0b555 !important;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255, 222, 143, 0.18), transparent 34%),
+    linear-gradient(145deg, #285646, #15372e) !important;
 }
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-travel {

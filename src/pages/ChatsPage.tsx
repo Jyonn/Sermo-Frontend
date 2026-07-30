@@ -1022,7 +1022,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
 
   return (
     <div className={`message-bubble-wrap ${from} is-sent ${isEntering ? "is-entering" : ""}`}>
-      <div className={`message-bubble-shell ${from}`}>
+      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}`}>
         <div
           className={`message-image-gallery message-media-frame ${groupClassName}`}
           style={{ "--message-gallery-columns": columns } as CSSProperties}
