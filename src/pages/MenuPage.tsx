@@ -1874,9 +1874,50 @@ export default function MenuPage() {
           <div className={`personalization-bubble-stage bubble-style-${visibleBubbleStyle(me?.chat_bubble_style)}`}>
             <div className="personalization-preview-message other">
               <UserAvatar className="personalization-preview-avatar" name={space?.official_user?.name ?? t("brand.user")} uri={space?.official_user?.avatar_uri} />
-              <span>{t("menu.bubblePreviewOther")}</span>
+              <span className="personalization-preview-bubble type-text">{t("menu.bubblePreviewOther")}</span>
             </div>
-            <div className="personalization-preview-message self"><span>{t("menu.bubblePreviewSelf")}</span></div>
+            <div className="personalization-preview-message self">
+              <span className="personalization-preview-bubble type-image" aria-label={t("message.imagePlaceholder")}><i /></span>
+            </div>
+            <div className="personalization-preview-message other">
+              <span className="personalization-preview-bubble type-audio">
+                <span className="material-symbols-outlined">play_arrow</span>
+                <i><b /><b /><b /><b /><b /></i>
+                <small>0:12</small>
+              </span>
+            </div>
+            <div className="personalization-preview-message self">
+              <span className="personalization-preview-bubble type-video">
+                <i /><span className="material-symbols-outlined">play_arrow</span><small>0:28</small>
+              </span>
+            </div>
+            <div className="personalization-preview-message other">
+              <span className="personalization-preview-bubble type-file">
+                <span className="material-symbols-outlined">description</span>
+                <i><strong>{t("menu.bubblePreviewFile")}</strong><small>2.4 MB</small></i>
+              </span>
+            </div>
+            <div className="personalization-preview-message self">
+              <span className="personalization-preview-bubble type-location">
+                <span className="material-symbols-outlined">location_on</span>
+                <i><strong>{t("menu.bubblePreviewLocation")}</strong><small>{t("location.viewOnMap")}</small></i>
+              </span>
+            </div>
+            <div className="personalization-preview-message other">
+              <span className="personalization-preview-bubble type-travel">
+                <span className="material-symbols-outlined">map</span>
+                <i><strong>{t("travelMap.messageJoin")}</strong><small>{t("travelMap.tapToAuthorize")}</small></i>
+              </span>
+            </div>
+            <div className="personalization-preview-message self">
+              <span className="personalization-preview-bubble type-link">
+                <i><small>SERMO</small><strong>{t("menu.bubblePreviewLink")}</strong><span>{t("menu.bubblePreviewLinkHint")}</span></i>
+                <b />
+              </span>
+            </div>
+            <div className="personalization-preview-message self">
+              <span className="personalization-preview-bubble type-text is-pending">{t("menu.bubblePreviewSelf")}</span>
+            </div>
           </div>
           <div className="personalization-option-grid field-chat_bubble_style">
             {personalizationOptions.chat_bubble_style.map(([value, label]) => (

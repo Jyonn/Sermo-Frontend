@@ -1,19 +1,21 @@
 {
-  "id": "2026.07.30.16",
+  "id": "2026.07.30.17",
   "publishedAt": "2026-07-30",
   "locales": {
     "zh-CN": {
-      "title": "足迹邀请进入会话",
+      "title": "气泡预览更真实",
       "items": [
-        "授权足迹后自动发送一张足迹地图邀请卡片",
-        "已授权可直接打开地图，未授权会先请求确认"
+        "气泡预览覆盖文字、图片、语音、视频与各类卡片",
+        "结构化消息现在也会继承气泡外框和分组圆角",
+        "预览可直接查看消息发送中的走马灯效果"
       ]
     },
     "en": {
-      "title": "Travel map invitations in chat",
+      "title": "A more realistic bubble preview",
       "items": [
-        "Authorizing footprints now sends a travel map invitation card",
-        "Authorized members open the map directly; others confirm access first"
+        "Bubble previews now cover text, media, and every card type",
+        "Structured messages inherit bubble borders and grouped corners",
+        "The preview now demonstrates the sending sheen effect"
       ]
     }
   }
