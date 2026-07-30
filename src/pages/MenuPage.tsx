@@ -70,7 +70,7 @@ const growthLevelUnlockKeys: Record<number, TranslationKey[]> = {
   18: ["growth.unlockFinalBadge"],
 };
 const personalizationOptions = {
-  chat_bubble_style: [["default", "menu.styleDefault"], ["comic", "menu.styleComic"]],
+  chat_bubble_style: [["default", "menu.styleDefault"], ["comic", "menu.styleComic"], ["vip", "menu.styleVip"]],
   avatar_frame_style: [["none", "menu.frameNone"], ["orbit", "menu.frameOrbit"], ["blaze", "menu.frameBlaze"], ["pixel", "menu.framePixel"]],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
@@ -79,7 +79,7 @@ const personalizationOptions = {
 } as const;
 
 function visibleBubbleStyle(style?: string) {
-  return style === "comic" ? "comic" : "default";
+  return style === "comic" || style === "vip" ? style : "default";
 }
 
 type NotificationMessageKind = "direct" | "group" | "online";
@@ -1926,9 +1926,15 @@ export default function MenuPage() {
             {personalizationOptions.chat_bubble_style.map(([value, label]) => (
               <button
                 className={`personalization-option preview-${value}${visibleBubbleStyle(me?.chat_bubble_style) === value ? " is-selected" : ""}`}
-                disabled={personalizationSaving}
+                disabled={personalizationSaving || (value === "vip" && !me?.is_permanent_vip)}
                 key={value}
-                onClick={() => void savePersonalization("chat_bubble_style", value)}
+                onClick={() => {
+                  if (value === "vip" && !me?.is_permanent_vip) {
+                    showToast(t("menu.vipBubbleOnly"), "error");
+                    return;
+                  }
+                  void savePersonalization("chat_bubble_style", value);
+                }}
                 type="button"
               >
                 <i aria-hidden="true"><span /></i>

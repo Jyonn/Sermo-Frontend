@@ -132,6 +132,8 @@
   "menu.themeCustom": "Custom",
   "menu.styleDefault": "Classic",
   "menu.styleComic": "Comic",
+  "menu.styleVip": "VIP",
+  "menu.vipBubbleOnly": "Exclusive to lifetime VIP members",
   "menu.frameNone": "None",
   "menu.frameOrbit": "Orbit",
   "menu.frameBlaze": "Blaze",

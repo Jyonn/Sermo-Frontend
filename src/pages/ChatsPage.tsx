@@ -166,7 +166,7 @@ function avatarLabel(name: string) {
 }
 
 function visibleBubbleStyle(style?: string) {
-  return style === "comic" ? "comic" : "default";
+  return style === "comic" || style === "vip" ? style : "default";
 }
 
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
@@ -1522,7 +1522,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({ enteringMessageIds, 
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-      <div className={`message-group ${group.from}${group.isPermanentVip ? " is-permanent-vip" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
+      <div className={`message-group ${group.from} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
         {group.from === "other" ? <UserAvatar className="avatar message-avatar" frame={group.avatarFrameStyle} name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
@@ -4510,7 +4510,7 @@ export default function ChatsPage() {
         ) : undefined
       }
     >
-      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}${currentUserMe?.is_permanent_vip ? " chat-user-vip" : ""}`} style={chatLayoutStyle}>
+      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>

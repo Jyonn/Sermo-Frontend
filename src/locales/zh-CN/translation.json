@@ -132,6 +132,8 @@
   "menu.themeCustom": "自定义",
   "menu.styleDefault": "经典",
   "menu.styleComic": "漫画",
+  "menu.styleVip": "VIP",
+  "menu.vipBubbleOnly": "永久 VIP 专属气泡",
   "menu.frameNone": "无",
   "menu.frameOrbit": "星轨",
   "menu.frameBlaze": "烈焰",

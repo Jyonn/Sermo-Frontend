@@ -3200,22 +3200,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   flex-direction: row-reverse;
 }
 
-.message-group.is-permanent-vip .message-bubble:not(.is-media),
-.chat-user-vip .message-group.self .message-bubble:not(.is-media) {
-  border: 1px solid rgba(191, 144, 55, 0.34);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-    0 7px 20px rgba(112, 80, 29, 0.1);
-}
-
-.message-group.is-permanent-vip.other .message-bubble:not(.is-media) {
-  background: linear-gradient(140deg, #fffdf7, #f4f8ef);
-}
-
-.chat-user-vip .message-group.self .message-bubble:not(.is-media) {
-  background: linear-gradient(140deg, #315d4d, #25483d);
-}
-
 .message-bubbles {
   display: flex;
   flex-direction: column;
@@ -5438,6 +5422,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   box-shadow: 3px 3px 0 #f0a54e;
 }
 
+.personalization-entry-preview.bubble-preview.preview-vip i {
+  border: 1px solid #d2a348;
+  background: linear-gradient(145deg, #265344, #17382f);
+  box-shadow: inset 0 0 0 1px rgba(255, 245, 199, 0.14), 0 5px 12px rgba(121, 82, 19, 0.2);
+}
+
 .avatar-frame-preview {
   overflow: visible;
 }
@@ -5552,7 +5542,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .field-chat_bubble_style {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .personalization-option {
@@ -5645,6 +5635,25 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   --bubble-skin-other-radius: 16px;
   --bubble-skin-self-radius: 16px;
   --bubble-skin-border-width: 2px;
+}
+
+.personalization-bubble-stage.bubble-style-vip,
+.message-group.bubble-style-vip {
+  --bubble-skin-other-bg: linear-gradient(145deg, #fffef8, #f8f2df);
+  --bubble-skin-other-color: #342d1f;
+  --bubble-skin-other-border: rgba(177, 127, 35, 0.72);
+  --bubble-skin-other-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 7px 18px rgba(116, 79, 18, 0.14);
+  --bubble-skin-self-bg: linear-gradient(145deg, #234d40, #17382f);
+  --bubble-skin-self-color: #fff8df;
+  --bubble-skin-self-border: #d8aa4f;
+  --bubble-skin-self-shadow:
+    inset 0 0 0 1px rgba(255, 245, 199, 0.12),
+    0 8px 20px rgba(20, 48, 39, 0.18);
+  --bubble-skin-other-radius: 16px;
+  --bubble-skin-self-radius: 16px;
+  --bubble-skin-border-width: 1px;
 }
 
 .personalization-preview-message {
@@ -6051,6 +6060,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .field-chat_bubble_style .preview-comic i span { border: 2px solid #26352e; border-radius: 13px; background: #fff9df; box-shadow: 3px 3px 0 #f0a54e; }
+.field-chat_bubble_style .preview-vip i span {
+  border: 1px solid #d2a348;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #265344, #17382f);
+  box-shadow: inset 0 0 0 1px rgba(255, 245, 199, 0.14), 0 4px 10px rgba(121, 82, 19, 0.18);
+}
 
 .field-avatar_frame_style .personalization-option > i > span,
 .field-square_outfit_style .personalization-option > i > span,
@@ -14823,6 +14838,102 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-location-card.self
 ) {
   background: #ffd36a;
+}
+
+/* VIP is an explicit bubble theme, never an automatic identity overlay. */
+.message-group.bubble-style-vip :is(
+  .message-media-frame,
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  border-width: 1px;
+}
+
+.message-group.bubble-style-vip :is(
+  .message-audio-card.other,
+  .message-file-card.other,
+  .message-location-card.other
+) {
+  color: #342d1f;
+  border-color: rgba(177, 127, 35, 0.72);
+  background: linear-gradient(145deg, #fffef8, #f8f2df);
+}
+
+.message-group.bubble-style-vip :is(
+  .message-audio-card.self,
+  .message-file-card.self,
+  .message-location-card.self
+) {
+  color: #fff8df;
+  border-color: #d8aa4f;
+  background: linear-gradient(145deg, #234d40, #17382f);
+}
+
+.message-group.bubble-style-vip .message-bubble.other :is(
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  color: #342d1f;
+  border-color: rgba(177, 127, 35, 0.72);
+  background: linear-gradient(145deg, #fffef8, #f8f2df);
+}
+
+.message-group.bubble-style-vip .message-bubble.self :is(
+  .message-link-preview-card,
+  .message-travel-map-card
+) {
+  color: #fff8df;
+  border-color: #d8aa4f;
+  background: linear-gradient(145deg, #234d40, #17382f);
+}
+
+.message-group.bubble-style-vip .message-bubble.self :is(
+  .message-link-preview-title,
+  .message-link-preview-site,
+  .message-link-preview-desc,
+  .message-travel-map-copy small,
+  .message-travel-map-copy span,
+  .message-travel-map-arrow
+) {
+  color: inherit;
+}
+
+.message-group.bubble-style-vip .message-bubble.self :is(
+  .message-file-copy small,
+  .message-file-open,
+  .message-location-copy small,
+  .message-location-open
+) {
+  color: rgba(255, 248, 223, 0.68);
+}
+
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.other > span {
+  color: #342d1f;
+  border-color: rgba(177, 127, 35, 0.72);
+  background: linear-gradient(145deg, #fffef8, #f8f2df) !important;
+}
+
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-message.self > span {
+  color: #fff8df !important;
+  border-color: #d8aa4f !important;
+  background: linear-gradient(145deg, #234d40, #17382f) !important;
+}
+
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-travel {
+  color: #342d1f !important;
+  background: linear-gradient(145deg, #fffdf5, #efe4bf) !important;
+}
+
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-link {
+  color: #fff8df !important;
+  background: linear-gradient(145deg, #234d40, #17382f) !important;
+}
+
+.personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-link small {
+  color: #efc86f;
 }
 
 /* Keep preview and live cards on one compact sizing and surface system. */
