@@ -1098,6 +1098,8 @@
   "travelMap.action": "Travel map",
   "travelMap.actionHint": "Share the places you have been",
   "travelMap.messageTitle": "Wants to swap travel maps",
+  "travelMap.messageJoin": "Join our travel map",
+  "travelMap.tapToAuthorize": "Tap to authorize and view",
   "travelMap.messageOwn": "You shared your travel map",
   "travelMap.messageFirstTap": "Tap once to let each other view your maps",
   "travelMap.messageReady": "Your maps are now connected",

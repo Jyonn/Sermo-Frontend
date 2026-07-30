@@ -1280,14 +1280,18 @@ function renderMessageContent(
   if (message.kind === "map_access") {
     const owner = message.payload?.owner;
     const access = message.payload?.access;
-    const connected = Boolean(access?.can_view_theirs && access?.they_can_view_mine);
+    const chatGrant = Boolean(message.payload?.chat_grant);
+    const chatAccess = message.payload?.chat_access;
+    const connected = chatGrant
+      ? Boolean(chatAccess?.authorized_by_me)
+      : Boolean(access?.can_view_theirs && access?.they_can_view_mine);
     return (
       <button
         className={`message-travel-map-card ${groupClassName}`.trim()}
         onClick={(event) => {
           event.stopPropagation();
           window.dispatchEvent(new CustomEvent("sermo:travel-map-message", {
-            detail: { messageId: message.id, owner, access, from: message.from },
+            detail: { messageId: message.id, owner, access, chatGrant, chatAccess, from: message.from },
           }));
         }}
         type="button"
@@ -1299,8 +1303,8 @@ function renderMessageContent(
         </span>
         <span className="message-travel-map-copy">
           <small>{message.from === "self" ? i18n.t("travelMap.messageOwn") : owner?.name}</small>
-          <strong>{i18n.t("travelMap.messageTitle")}</strong>
-          <span>{connected ? i18n.t("travelMap.messageReady") : i18n.t("travelMap.messageFirstTap")}</span>
+          <strong>{message.payload?.text || i18n.t("travelMap.messageJoin")}</strong>
+          <span>{connected ? i18n.t("travelMap.openMap") : i18n.t("travelMap.tapToAuthorize")}</span>
         </span>
         <span className="message-travel-map-arrow" aria-hidden="true">→</span>
       </button>
@@ -3638,6 +3642,21 @@ export default function ChatsPage() {
     try {
       const access = await api.grantChatTravelMapAccess(selectedChat.id);
       setChatTravelMapAccess(access);
+      if (access.invitation_message) {
+        const delivered = mapChatMessage(access.invitation_message, currentUserId);
+        setMessages((current) => {
+          const existing = current[selectedChat.id] ?? [];
+          if (existing.some((message) => message.id === delivered.id)) return current;
+          return { ...current, [selectedChat.id]: sortMessages([...existing, delivered]) };
+        });
+        setChats((current) => sortChats(current.map((chat) => (
+          chat.id === selectedChat.id
+            ? updateChatSummary(chat, t("travelMap.action"), delivered.createdAt)
+            : chat
+        ))));
+        stickToBottomRef.current = true;
+        triggerMessageEntrance(String(delivered.id));
+      }
       setChatTravelMapGrantConfirmOpen(false);
       setChatTravelMapOpen(true);
       showToast(t("travelMap.chatAccessGranted"));
@@ -3681,8 +3700,27 @@ export default function ChatsPage() {
         messageId: number | string;
         owner?: TinyUserDTO;
         access?: TravelMapAccessDTO;
+        chatGrant?: boolean;
+        chatAccess?: ChatTravelMapAccessDTO;
         from: "self" | "other";
       }>).detail;
+      if (detail.chatGrant) {
+        const openFromStatus = (status: ChatTravelMapAccessDTO) => {
+          setChatTravelMapAccess(status);
+          if (status.authorized_by_me) setChatTravelMapOpen(true);
+          else setChatTravelMapGrantConfirmOpen(true);
+        };
+        if (detail.chatAccess) {
+          openFromStatus(detail.chatAccess);
+        } else if (selectedChat) {
+          setTravelMapSaving(true);
+          void api.getChatTravelMapAccess(selectedChat.id)
+            .then(openFromStatus)
+            .catch((error) => showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error"))
+            .finally(() => setTravelMapSaving(false));
+        }
+        return;
+      }
       const peer = detail.from === "self" ? selectedDirectPeer : (detail.owner ?? selectedDirectPeer);
       if (!peer || travelMapSaving) return;
       const access = detail.access ?? { can_view_theirs: false, they_can_view_mine: false };

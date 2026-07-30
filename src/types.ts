@@ -361,6 +361,8 @@ export interface ChatMessagePayloadDTO {
   owner?: TinyUserDTO;
   target_user_id?: number;
   access?: TravelMapAccessDTO;
+  chat_grant?: boolean;
+  chat_access?: ChatTravelMapAccessDTO;
 }
 
 export interface TravelMapRegionDTO {
@@ -388,6 +390,7 @@ export interface TravelMapCheckInDTO extends MyTravelMapDTO {
 export interface ChatTravelMapAccessDTO {
   authorized_by_me: boolean;
   shared_members: TinyUserDTO[];
+  invitation_message?: ChatMessageDTO;
 }
 
 export interface ChatTravelMapDTO {
