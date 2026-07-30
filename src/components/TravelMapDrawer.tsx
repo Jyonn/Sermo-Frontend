@@ -507,6 +507,9 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     ? t("travelMap.sharedTitle", { name: otherUser.name })
     : t("travelMap.myTitle");
   const totalRegions = maps.reduce((sum, item) => sum + item.regions.length, 0);
+  const otherLegendLabel = chatType === "direct"
+    ? (others[0]?.owner.name || chatTitle || t("travelMap.others"))
+    : otherUser?.name || t("travelMap.others");
 
   return (
     <SideDrawer open={open} onClose={onClose} title={title}>
@@ -592,7 +595,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
 
         <div className="travel-map-legend">
           <span><i className="is-mine" />{t("travelMap.mine")}</span>
-          {others.length ? <span><i className="is-theirs" />{t("travelMap.others")}</span> : null}
+          {others.length ? <span><i className="is-theirs" />{otherLegendLabel}</span> : null}
           {others.length ? <span><i className="is-overlap" />{t("travelMap.overlap")}</span> : null}
         </div>
 
