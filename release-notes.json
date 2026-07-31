@@ -1,19 +1,19 @@
 {
-  "id": "2026.07.31.6",
+  "id": "2026.07.31.7",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "聊天草稿自动保留",
+      "title": "桌面深色模式更协调",
       "items": [
-        "离开当前聊天后，未发送的文字会自动保存",
-        "再次进入同一会话即可继续输入"
+        "四个 Tab 的标题区域统一为深色中性表面",
+        "左侧导航选中项拥有更清晰的文字与图标对比度"
       ]
     },
     "en": {
-      "title": "Chat drafts are saved",
+      "title": "A more cohesive desktop dark mode",
       "items": [
-        "Unsent text is preserved when you leave a conversation",
-        "Return to the same chat and continue where you left off"
+        "Tab headers now use a consistent dark neutral surface",
+        "Selected sidebar items now have clearer text and icon contrast"
       ]
     }
   }
