@@ -1,19 +1,19 @@
 {
-  "id": "2026.07.31.8",
+  "id": "2026.07.31.9",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "烈焰头像框焕新",
+      "title": "头像框预览保持一致",
       "items": [
-        "火焰改为独立外框，不再裁切或遮挡头像",
-        "大头像与聊天小头像均拥有更清晰的暖色层次"
+        "头像框选项直接使用真实头像与框体渲染",
+        "烈焰、星轨和像素预览会与实际使用效果同步"
       ]
     },
     "en": {
-      "title": "A redesigned blaze avatar frame",
+      "title": "Consistent avatar frame previews",
       "items": [
-        "Flames now decorate the outside without clipping or covering avatars",
-        "Large and compact avatars now share a clearer layered flame treatment"
+        "Frame options now render with the real avatar and frame component",
+        "Blaze, orbit, and pixel previews now stay in sync with their applied appearance"
       ]
     }
   }

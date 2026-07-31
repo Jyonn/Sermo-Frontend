@@ -2116,7 +2116,14 @@ export default function MenuPage() {
                 onClick={() => void savePersonalization("avatar_frame_style", value)}
                 type="button"
               >
-                <i aria-hidden="true"><span /></i>
+                <i aria-hidden="true">
+                  <UserAvatar
+                    className="mini-avatar personalization-option-avatar"
+                    frame={value}
+                    name={session?.user.name ?? t("brand.user")}
+                    uri={me?.avatar_uri ?? session?.user.avatar_uri}
+                  />
+                </i>
                 <strong>{t(label)}</strong>
               </button>
             ))}

@@ -6464,7 +6464,6 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   box-shadow: inset 0 0 0 1px rgba(255, 245, 199, 0.14), 0 4px 10px rgba(121, 82, 19, 0.18);
 }
 
-.field-avatar_frame_style .personalization-option > i > span,
 .field-square_outfit_style .personalization-option > i > span,
 .field-square_prop_style .personalization-option > i > span,
 .field-square_motion_style .personalization-option > i > span,
@@ -6475,14 +6474,16 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   background: #d9e4dd;
 }
 
-.field-avatar_frame_style .preview-orbit i span { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #b18442, 0 0 12px #2d9b78; }
-.field-avatar_frame_style .preview-blaze i span {
-  position: relative;
-  border: 2px solid #ffe7a4;
-  background: #d9e4dd;
-  box-shadow: 0 0 0 3px #f28a32, 0 -5px 0 1px #e84a32, 5px -2px 0 1px #ffb638, -4px 2px 0 #d93c31;
+.field-avatar_frame_style .personalization-option > i {
+  overflow: visible;
 }
-.field-avatar_frame_style .preview-pixel i span { border-radius: 0; box-shadow: -4px 0 #23664f, 4px 0 #e7b251, 0 -4px #23664f, 0 4px #e7b251; }
+
+.field-avatar_frame_style .personalization-option-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 38%;
+  font-size: 0.58rem;
+}
 .field-square_outfit_style .preview-sunset i span { background: linear-gradient(145deg, #ffba68, #df6948); }
 .field-square_outfit_style .preview-varsity i span { background: linear-gradient(90deg, #ecf0e7 28%, #34735c 28% 72%, #ecf0e7 72%); }
 .field-square_outfit_style .preview-noir i span { background: linear-gradient(145deg, #343c39, #111817); }
