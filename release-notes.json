@@ -1,19 +1,19 @@
 {
-  "id": "2026.07.31.7",
+  "id": "2026.07.31.8",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "桌面深色模式更协调",
+      "title": "烈焰头像框焕新",
       "items": [
-        "四个 Tab 的标题区域统一为深色中性表面",
-        "左侧导航选中项拥有更清晰的文字与图标对比度"
+        "火焰改为独立外框，不再裁切或遮挡头像",
+        "大头像与聊天小头像均拥有更清晰的暖色层次"
       ]
     },
     "en": {
-      "title": "A more cohesive desktop dark mode",
+      "title": "A redesigned blaze avatar frame",
       "items": [
-        "Tab headers now use a consistent dark neutral surface",
-        "Selected sidebar items now have clearer text and icon contrast"
+        "Flames now decorate the outside without clipping or covering avatars",
+        "Large and compact avatars now share a clearer layered flame treatment"
       ]
     }
   }

@@ -110,7 +110,7 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false, fr
           }}
         />
       ) : (
-        avatarLabel(resolvedName)
+        <span className="avatar-label">{avatarLabel(resolvedName)}</span>
       )}
     </div>
   );

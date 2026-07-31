@@ -2498,6 +2498,11 @@ img {
   border-radius: inherit;
 }
 
+.avatar-label {
+  position: relative;
+  z-index: 1;
+}
+
 .avatar-group-stack {
   position: absolute;
   inset: 0;
@@ -6471,7 +6476,12 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 }
 
 .field-avatar_frame_style .preview-orbit i span { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #b18442, 0 0 12px #2d9b78; }
-.field-avatar_frame_style .preview-blaze i span { border-radius: 50% 50% 38% 42%; box-shadow: 0 -5px 0 3px #ef6945, 5px -2px 0 2px #f1aa42; }
+.field-avatar_frame_style .preview-blaze i span {
+  position: relative;
+  border: 2px solid #ffe7a4;
+  background: #d9e4dd;
+  box-shadow: 0 0 0 3px #f28a32, 0 -5px 0 1px #e84a32, 5px -2px 0 1px #ffb638, -4px 2px 0 #d93c31;
+}
 .field-avatar_frame_style .preview-pixel i span { border-radius: 0; box-shadow: -4px 0 #23664f, 4px 0 #e7b251, 0 -4px #23664f, 0 4px #e7b251; }
 .field-square_outfit_style .preview-sunset i span { background: linear-gradient(145deg, #ffba68, #df6948); }
 .field-square_outfit_style .preview-varsity i span { background: linear-gradient(90deg, #ecf0e7 28%, #34735c 28% 72%, #ecf0e7 72%); }
@@ -6507,9 +6517,60 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 }
 
 .avatar-frame-blaze {
-  clip-path: polygon(8% 14%, 25% 16%, 32% 0, 46% 14%, 61% 3%, 68% 18%, 92% 12%, 88% 35%, 100% 46%, 88% 60%, 94% 84%, 70% 82%, 61% 100%, 47% 86%, 30% 98%, 25% 80%, 3% 86%, 12% 62%, 0 48%, 13% 35%);
-  padding: 4px;
-  background: linear-gradient(145deg, #f6b341, #e24e3e 60%, #762f64) !important;
+  isolation: isolate;
+  clip-path: none;
+  padding: 0;
+  background: var(--avatar-bg) !important;
+  box-shadow: 0 3px 9px rgba(178, 55, 29, 0.2) !important;
+}
+
+.avatar-frame-blaze::before,
+.avatar-frame-blaze::after {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+}
+
+.avatar-frame-blaze::before {
+  z-index: -2;
+  inset: -9px -8px -7px;
+  clip-path: polygon(4% 55%, 14% 38%, 9% 18%, 30% 25%, 38% 0, 51% 20%, 67% 5%, 72% 28%, 94% 18%, 88% 42%, 100% 58%, 82% 67%, 88% 91%, 65% 82%, 50% 100%, 37% 82%, 13% 92%, 19% 69%);
+  border-radius: 42%;
+  background:
+    radial-gradient(circle at 50% 62%, #ffd96a 0 30%, transparent 56%),
+    conic-gradient(from -20deg, #d83b31, #ff9632 18%, #ffd45a 36%, #ec5731 54%, #ffb43c 72%, #c92f32 100%);
+  filter: drop-shadow(0 4px 4px rgba(181, 52, 29, 0.3));
+}
+
+.avatar-frame-blaze::after {
+  z-index: -1;
+  inset: -3px;
+  border: 2px solid #ffe8a3;
+  border-radius: calc(38% + 2px);
+  background: linear-gradient(145deg, #ffbd42, #eb5b30 68%, #b92e31);
+  box-shadow: 0 0 0 1px rgba(124, 40, 24, 0.24), inset 0 0 0 1px rgba(255, 250, 214, 0.7);
+}
+
+.avatar-frame-blaze > .avatar-image {
+  position: relative;
+  z-index: 1;
+}
+
+.avatar-frame-blaze > .avatar-group-stack {
+  z-index: 1;
+}
+
+.mini-avatar.avatar-frame-blaze::before,
+.message-avatar.avatar-frame-blaze::before,
+.square-character-head.avatar-frame-blaze::before {
+  inset: -6px -5px -5px;
+}
+
+.mini-avatar.avatar-frame-blaze::after,
+.message-avatar.avatar-frame-blaze::after,
+.square-character-head.avatar-frame-blaze::after {
+  inset: -2px;
+  border-width: 1px;
 }
 
 .avatar-frame-pixel {
