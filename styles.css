@@ -4904,6 +4904,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   overflow: hidden;
 }
 
+.message-bubble.is-media.is-pending {
+  color: inherit;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+
 .message-media-frame.is-pending::after,
 .message-audio-card.is-pending::after,
 .message-file-card.is-pending::after,

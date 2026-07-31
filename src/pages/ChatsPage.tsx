@@ -721,7 +721,15 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   return sortMessages([...bucket.values()]);
 }
 
-function createPendingMessage(text: string, name: string, userId: number, replyTo?: QuotedMessageDTO | null): ChatMessage {
+type PendingMessageAppearance = Pick<ChatMessage, "isPermanentVip" | "chatBubbleStyle" | "avatarFrameStyle">;
+
+function createPendingMessage(
+  text: string,
+  name: string,
+  userId: number,
+  appearance: PendingMessageAppearance,
+  replyTo?: QuotedMessageDTO | null,
+): ChatMessage {
   const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
   const createdAt = Math.floor(Date.now() / 1000);
   const linkUrl = extractFirstMessageUrl(text);
@@ -733,6 +741,7 @@ function createPendingMessage(text: string, name: string, userId: number, replyT
     type: MESSAGE_TYPE_TEXT,
     kind: "text",
     name,
+    ...appearance,
     time: formatTime(createdAt),
     createdAt,
     text,
@@ -2187,6 +2196,11 @@ export default function ChatsPage() {
     return () => controller.abort();
   }, [emojiUsageCacheKey]);
   const currentUserName = session?.user.name ?? t("common.me");
+  const pendingMessageAppearance: PendingMessageAppearance = {
+    isPermanentVip: currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip,
+    chatBubbleStyle: currentUserMe?.chat_bubble_style ?? session?.user.chat_bubble_style,
+    avatarFrameStyle: currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style,
+  };
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
   const routeState = location.state as ChatRouteState | null;
@@ -3321,7 +3335,7 @@ export default function ChatsPage() {
     if (!message) return;
 
     const reply = consumeReplyTarget();
-    const optimisticMessage = createPendingMessage(message, currentUserName, currentUserId, reply);
+    const optimisticMessage = createPendingMessage(message, currentUserName, currentUserId, pendingMessageAppearance, reply);
 
     try {
       setSendState("sending");
@@ -3512,6 +3526,7 @@ export default function ChatsPage() {
       type: messageTypeFromKind(kind),
       kind,
       name: currentUserName,
+      ...pendingMessageAppearance,
       time: formatTime(createdAt),
       createdAt,
       text: previewFromKind(kind, ""),
@@ -3651,6 +3666,7 @@ export default function ChatsPage() {
       type: MESSAGE_TYPE_LOCATION,
       kind: "location",
       name: currentUserName,
+      ...pendingMessageAppearance,
       time: formatTime(createdAt),
       createdAt,
       text: t("message.locationPlaceholder"),

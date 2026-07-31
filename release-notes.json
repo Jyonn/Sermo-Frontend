@@ -1,17 +1,19 @@
 {
-  "id": "2026.07.31.3",
+  "id": "2026.07.31.4",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "足迹邀请更加简洁",
+      "title": "发送中的气泡不再变样",
       "items": [
-        "足迹地图卡片精简标题并移除重复的昵称"
+        "消息发送时立即展示你选择的气泡样式",
+        "发送完成后不再发生默认气泡与个性化气泡之间的跳变"
       ]
     },
     "en": {
-      "title": "A cleaner travel map invitation",
+      "title": "Sending bubbles keep their style",
       "items": [
-        "Travel map cards now use a shorter title without a repeated name"
+        "Messages now use your selected bubble style immediately while sending",
+        "Bubbles no longer jump from the default style after delivery"
       ]
     }
   }
