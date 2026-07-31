@@ -1932,6 +1932,30 @@ function chatAccessBoundaryMessage(error: unknown) {
   return i18n.t("chat.accessDenied");
 }
 
+const CHAT_DRAFT_STORAGE_PREFIX = "sermo:chat-draft:v1";
+
+function chatDraftStorageKey(scope: string, chatId: number) {
+  return `${CHAT_DRAFT_STORAGE_PREFIX}:${scope}:${chatId}`;
+}
+
+function readChatDraft(scope: string, chatId: number) {
+  try {
+    return window.localStorage.getItem(chatDraftStorageKey(scope, chatId)) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeChatDraft(scope: string, chatId: number, value: string) {
+  try {
+    const key = chatDraftStorageKey(scope, chatId);
+    if (value) window.localStorage.setItem(key, value);
+    else window.localStorage.removeItem(key);
+  } catch {
+    // Draft persistence should never interrupt typing or sending.
+  }
+}
+
 export default function ChatsPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -2202,6 +2226,10 @@ export default function ChatsPage() {
     avatarFrameStyle: currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style,
   };
   const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
+  const updateDraft = (value: string) => {
+    setDraft(value);
+    if (cacheScope && selectedChat) writeChatDraft(cacheScope, selectedChat.id, value);
+  };
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
@@ -2905,13 +2933,17 @@ export default function ChatsPage() {
     setEmojiPage(0);
   }, [selectedChat?.id]);
 
+  useEffect(() => {
+    setDraft(cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "");
+  }, [cacheScope, selectedChat?.id]);
+
   const insertEmoji = (emoji: string) => {
     const input = textareaRef.current;
     const start = input?.selectionStart ?? draft.length;
     const end = input?.selectionEnd ?? start;
     const nextDraft = `${draft.slice(0, start)}${emoji}${draft.slice(end)}`;
     const nextCursor = start + emoji.length;
-    setDraft(nextDraft);
+    updateDraft(nextDraft);
     window.requestAnimationFrame(() => {
       const nextInput = textareaRef.current;
       nextInput?.focus();
@@ -3360,7 +3392,7 @@ export default function ChatsPage() {
             )
           )
         );
-        setDraft("");
+        updateDraft("");
       });
       if (DEBUG_CHAT_SEND) {
         console.log("[chat] optimistic inserted", {
@@ -4859,7 +4891,7 @@ export default function ChatsPage() {
                         placeholder={t("chat.inputPlaceholder")}
                         value={draft}
                         rows={1}
-                        onChange={(event) => setDraft(event.target.value)}
+                        onChange={(event) => updateDraft(event.target.value)}
                         onCompositionStart={() => {
                           isComposingRef.current = true;
                         }}

@@ -1,17 +1,19 @@
 {
-  "id": "2026.07.31.5",
+  "id": "2026.07.31.6",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "VIP 解锁自定义提醒",
+      "title": "聊天草稿自动保留",
       "items": [
-        "达到 LV10 或成为永久 VIP 均可自定义渠道消息提示"
+        "离开当前聊天后，未发送的文字会自动保存",
+        "再次进入同一会话即可继续输入"
       ]
     },
     "en": {
-      "title": "VIP unlocks custom reminders",
+      "title": "Chat drafts are saved",
       "items": [
-        "Custom channel messages now unlock at LV10 or with permanent VIP"
+        "Unsent text is preserved when you leave a conversation",
+        "Return to the same chat and continue where you left off"
       ]
     }
   }
