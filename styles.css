@@ -9802,13 +9802,25 @@ html[data-theme="dark"] .message-link-preview-site {
   height: 30px;
   justify-content: center;
   margin-left: 2px;
-  padding: 0;
-  width: 34px;
+  gap: 6px;
+  max-width: min(52vw, 210px);
+  padding: 0 11px 0 9px;
 }
 
 .menu-header-account-switch svg {
+  flex: 0 0 auto;
   height: 18px;
   width: 18px;
+}
+
+.menu-header-account-switch span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menu-header-account-switch path {
