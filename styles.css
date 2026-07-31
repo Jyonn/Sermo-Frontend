@@ -15564,6 +15564,10 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   overflow: hidden;
 }
 
+.message-group.bubble-style-vip .message-bubble.is-travel-map {
+  overflow: visible;
+}
+
 .message-bubble.is-travel-map > .message-travel-map-card,
 .message-group:not(.bubble-style-default) .message-bubble.is-travel-map > .message-travel-map-card,
 .message-group.bubble-style-comic .message-bubble.is-travel-map > .message-travel-map-card,
