@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.01.1",
+  "id": "2026.08.01.2",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "聊天操作更简洁",
+      "title": "发送中的气泡保持原貌",
       "items": [
-        "聊天输入框下方的足迹地图操作缩短为足迹"
+        "乐观消息从出现起就使用最终的个性化气泡",
+        "发送动画改为独立覆盖层，不再干扰标签、边框与未来气泡样式"
       ]
     },
     "en": {
-      "title": "A cleaner chat action",
+      "title": "Bubble styles stay intact while sending",
       "items": [
-        "The travel map action below the composer is now labeled Footprints"
+        "Optimistic messages now use their final personalized bubble immediately",
+        "Sending animation now lives in an isolated overlay that cannot disturb tags, borders, or future skins"
       ]
     }
   }

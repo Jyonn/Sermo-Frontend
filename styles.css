@@ -3275,6 +3275,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble {
+  position: relative;
+  isolation: isolate;
   padding: 9px 13px;
   border-radius: var(--radius-bubble);
   line-height: 1.45;
@@ -4583,13 +4585,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble.is-pending {
-  color: rgba(255, 255, 255, 0.96);
-  background:
-    linear-gradient(110deg, #1a3d33 22%, #376c5d 48%, #17372f 72%),
-    #193b32;
-  background-size: 220% 100%;
-  box-shadow: 0 5px 16px rgba(17, 19, 24, 0.1);
-  animation: message-pending-sheen 1.2s linear infinite;
   transition:
     opacity 160ms ease,
     box-shadow 160ms ease,
@@ -4598,9 +4593,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble.is-failed {
-  color: rgba(255, 255, 255, 0.98);
-  background: linear-gradient(180deg, #2d2326, #21181b);
-  box-shadow: 0 5px 16px rgba(58, 28, 34, 0.16);
+  opacity: 0.82;
   transition:
     opacity 160ms ease,
     box-shadow 160ms ease,
@@ -4887,45 +4880,19 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-location-card.self:not(.group-start).group-end { border-top-right-radius: 6px; }
 .message-location-card.self:not(.group-start):not(.group-end) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
 
-.message-location-card.is-pending {
-  background-size: 220% 100%;
-  animation: message-pending-sheen 1.2s linear infinite;
-}
-
-.message-media-frame.is-pending,
-.message-audio-card.is-pending,
-.message-file-card.is-pending {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background-size: 220% 100%;
-  animation: message-pending-sheen 1.2s linear infinite;
-  opacity: 0.9;
-}
-
-.message-location-card.is-pending {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-.message-bubble.is-media.is-pending {
-  color: inherit;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  animation: none;
-}
-
-.message-media-frame.is-pending::after,
-.message-audio-card.is-pending::after,
-.message-file-card.is-pending::after,
-.message-location-card.is-pending::after {
+.message-send-state-overlay {
   position: absolute;
   inset: 0;
-  z-index: 4;
-  content: "";
+  z-index: 7;
+  overflow: hidden;
+  border-radius: inherit;
   pointer-events: none;
+}
+
+.message-send-state-overlay::after {
+  position: absolute;
+  inset: 0;
+  content: "";
   background: linear-gradient(105deg, transparent 24%, rgba(255, 255, 255, 0.42) 48%, transparent 72%);
   transform: translateX(-120%);
   animation: message-pending-sweep 1.15s linear infinite;
@@ -6580,7 +6547,7 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   box-shadow: 4px 4px 0 #e4b14f, -3px -3px 0 #83d3b9 !important;
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other:where(:not(.is-media):not(.is-link-preview):not(.is-pending):not(.is-failed)) {
+.message-group:not(.bubble-style-default) .message-bubble.other:where(:not(.is-media):not(.is-link-preview)) {
   color: var(--bubble-skin-other-color);
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-other-border);
   border-radius: var(--bubble-skin-other-radius);
@@ -6588,7 +6555,7 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   box-shadow: var(--bubble-skin-other-shadow);
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self:where(:not(.is-media):not(.is-link-preview):not(.is-pending):not(.is-failed)) {
+.message-group.self:not(.bubble-style-default) .message-bubble.self:where(:not(.is-media):not(.is-link-preview)) {
   color: var(--bubble-skin-self-color);
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-self-border);
   border-radius: var(--bubble-skin-self-radius);
@@ -15616,20 +15583,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   box-shadow: none;
 }
 
-/* Sending is an overlay state; it must not replace the selected bubble skin. */
-.message-group:not(.bubble-style-default) .message-bubble.is-pending:not(.is-media):not(.is-link-preview) {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  color: var(--bubble-skin-self-color);
-  border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-self-border);
-  background: var(--bubble-skin-self-bg);
-  background-size: auto;
-  box-shadow: var(--bubble-skin-self-shadow);
-  animation: none;
-}
-
-.message-group:not(.bubble-style-default) .message-bubble.is-pending:not(.is-media):not(.is-link-preview)::after,
+/* Preview uses its own isolated status layer; live messages use .message-send-state-overlay. */
 .personalization-bubble-stage:not(.bubble-style-default) .personalization-preview-bubble.is-pending::after {
   position: absolute;
   inset: 0;
@@ -15702,10 +15656,6 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 
 .personalization-bubble-stage.bubble-style-comic .personalization-preview-bubble.type-link {
   background: #fffdf5 !important;
-}
-
-.message-group.bubble-style-vip .message-bubble.is-pending:not(.is-media):not(.is-link-preview)::before {
-  top: 2px;
 }
 
 @media (max-width: 520px) {

@@ -1534,6 +1534,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             </button>
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName)}
+          {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
         </div>
       </div>
     </div>
