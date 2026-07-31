@@ -552,6 +552,7 @@ export interface AuthSession {
 export interface ChatMessage {
   id: number | string;
   clientId: string;
+  userId?: number;
   from: "self" | "other";
   type: number;
   kind: MessageKind;

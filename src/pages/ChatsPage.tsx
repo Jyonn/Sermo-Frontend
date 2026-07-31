@@ -629,6 +629,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
+    userId: message.user.user_id,
     from: message.user.user_id === currentUserId ? "self" : "other",
     type: message.type,
     kind,
@@ -720,13 +721,14 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   return sortMessages([...bucket.values()]);
 }
 
-function createPendingMessage(text: string, name: string, replyTo?: QuotedMessageDTO | null): ChatMessage {
+function createPendingMessage(text: string, name: string, userId: number, replyTo?: QuotedMessageDTO | null): ChatMessage {
   const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
   const createdAt = Math.floor(Date.now() / 1000);
   const linkUrl = extractFirstMessageUrl(text);
   return {
     id: clientId,
     clientId,
+    userId,
     from: "self",
     type: MESSAGE_TYPE_TEXT,
     kind: "text",
@@ -745,7 +747,7 @@ function quoteFromMessage(message: ChatMessage): QuotedMessageDTO | null {
   return {
     message_id: message.id,
     user: {
-      user_id: 0,
+      user_id: message.userId ?? 0,
       name: message.name,
       avatar_type: message.avatarUri ? "custom" : "preset",
       avatar_uri: message.avatarUri ?? "",
@@ -807,7 +809,10 @@ function clearChatUnread(chat: Chat) {
 
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
-  return current.from === neighbor.from && Math.abs(current.createdAt - neighbor.createdAt) < 5 * 60;
+  if (current.from !== neighbor.from || Math.abs(current.createdAt - neighbor.createdAt) >= 5 * 60) return false;
+  if (current.from === "self") return true;
+  if (current.userId !== undefined && neighbor.userId !== undefined) return current.userId === neighbor.userId;
+  return current.name === neighbor.name && current.avatarUri === neighbor.avatarUri;
 }
 
 function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
@@ -3316,7 +3321,7 @@ export default function ChatsPage() {
     if (!message) return;
 
     const reply = consumeReplyTarget();
-    const optimisticMessage = createPendingMessage(message, currentUserName, reply);
+    const optimisticMessage = createPendingMessage(message, currentUserName, currentUserId, reply);
 
     try {
       setSendState("sending");
@@ -3502,6 +3507,7 @@ export default function ChatsPage() {
     const pendingMessage: ChatMessage = {
       id: clientId,
       clientId,
+      userId: currentUserId,
       from: "self",
       type: messageTypeFromKind(kind),
       kind,
@@ -3640,6 +3646,7 @@ export default function ChatsPage() {
     const pendingMessage: ChatMessage = {
       id: clientId,
       clientId,
+      userId: currentUserId,
       from: "self",
       type: MESSAGE_TYPE_LOCATION,
       kind: "location",
