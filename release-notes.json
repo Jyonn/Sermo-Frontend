@@ -1,19 +1,17 @@
 {
-  "id": "2026.07.31.9",
-  "publishedAt": "2026-07-31",
+  "id": "2026.08.01.1",
+  "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "头像框预览保持一致",
+      "title": "聊天操作更简洁",
       "items": [
-        "头像框选项直接使用真实头像与框体渲染",
-        "烈焰、星轨和像素预览会与实际使用效果同步"
+        "聊天输入框下方的足迹地图操作缩短为足迹"
       ]
     },
     "en": {
-      "title": "Consistent avatar frame previews",
+      "title": "A cleaner chat action",
       "items": [
-        "Frame options now render with the real avatar and frame component",
-        "Blaze, orbit, and pixel previews now stay in sync with their applied appearance"
+        "The travel map action below the composer is now labeled Footprints"
       ]
     }
   }

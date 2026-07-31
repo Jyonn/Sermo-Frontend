@@ -1115,6 +1115,7 @@
   "travelMap.checkedIn": "点亮了{{region}}",
   "travelMap.checkInRemoved": "已取消{{region}}",
   "travelMap.action": "足迹地图",
+  "travelMap.actionShort": "足迹",
   "travelMap.actionHint": "交换彼此走过的地方",
   "travelMap.messageTitle": "邀请你交换足迹地图",
   "travelMap.messageJoin": "加入足迹地图吧～",

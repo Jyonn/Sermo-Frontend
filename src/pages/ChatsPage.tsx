@@ -5049,7 +5049,7 @@ export default function ChatsPage() {
                       {selectedChat ? (
                         <button className="composer-action-tile" disabled={composerBusy || travelMapSaving} onClick={() => void openChatTravelMap()} type="button">
                           <span className="composer-action-tile-icon"><ComposerSvgIcon kind="map" /></span>
-                          <span>{t("travelMap.action")}</span>
+                          <span>{t("travelMap.actionShort")}</span>
                         </button>
                       ) : null}
                     </div>

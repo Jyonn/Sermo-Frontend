@@ -1115,6 +1115,7 @@
   "travelMap.checkedIn": "{{region}} is now lit up",
   "travelMap.checkInRemoved": "{{region}} was removed",
   "travelMap.action": "Travel map",
+  "travelMap.actionShort": "Footprints",
   "travelMap.actionHint": "Share the places you have been",
   "travelMap.messageTitle": "Wants to swap travel maps",
   "travelMap.messageJoin": "Join the travel map",
