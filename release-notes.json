@@ -1,19 +1,17 @@
 {
-  "id": "2026.07.31.2",
+  "id": "2026.07.31.3",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "足迹气泡回归单层",
+      "title": "足迹邀请更加简洁",
       "items": [
-        "足迹地图消息现在只保留一层气泡边框",
-        "连续消息的圆角与个性化气泡保持一致"
+        "足迹地图卡片精简标题并移除重复的昵称"
       ]
     },
     "en": {
-      "title": "One clean travel map bubble",
+      "title": "A cleaner travel map invitation",
       "items": [
-        "Travel map messages now render with a single bubble border",
-        "Grouped corners stay consistent with the selected bubble style"
+        "Travel map cards now use a shorter title without a repeated name"
       ]
     }
   }

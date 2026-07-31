@@ -1322,7 +1322,6 @@ function renderMessageContent(
           <ComposerSvgIcon kind="map" />
         </span>
         <span className="message-travel-map-copy">
-          <small>{message.from === "self" ? i18n.t("travelMap.messageOwn") : owner?.name}</small>
           <strong>{message.payload?.text || i18n.t("travelMap.messageJoin")}</strong>
           <span>{connected ? i18n.t("travelMap.openMap") : i18n.t("travelMap.tapToAuthorize")}</span>
         </span>
