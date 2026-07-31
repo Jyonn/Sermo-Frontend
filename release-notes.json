@@ -1,19 +1,17 @@
 {
-  "id": "2026.07.31.4",
+  "id": "2026.07.31.5",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "发送中的气泡不再变样",
+      "title": "VIP 解锁自定义提醒",
       "items": [
-        "消息发送时立即展示你选择的气泡样式",
-        "发送完成后不再发生默认气泡与个性化气泡之间的跳变"
+        "达到 LV10 或成为永久 VIP 均可自定义渠道消息提示"
       ]
     },
     "en": {
-      "title": "Sending bubbles keep their style",
+      "title": "VIP unlocks custom reminders",
       "items": [
-        "Messages now use your selected bubble style immediately while sending",
-        "Bubbles no longer jump from the default style after delivery"
+        "Custom channel messages now unlock at LV10 or with permanent VIP"
       ]
     }
   }

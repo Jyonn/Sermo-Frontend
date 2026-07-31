@@ -655,6 +655,8 @@
   "invite.generateFailed": "生成好友邀请链接失败",
   "notification.updateFailed": "更新通知设置失败",
   "notification.levelRequired": "达到 Lv.{{level}} 后可自定义消息提示",
+  "notification.levelOrVipRequired": "达到 LV{{level}} 或成为 VIP 后可用",
+  "growth.unlockAtLevelOrVip": "LV{{level}} 或 VIP",
   "contact.emailVerified": "邮箱认证成功",
   "contact.phoneBound": "手机绑定成功",
   "contact.bound": "绑定成功",

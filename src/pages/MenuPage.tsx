@@ -421,7 +421,9 @@ export default function MenuPage() {
   const canEditWelcome = hasGrowthCapability("welcome_message", 6);
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const canCustomizeChatBackground = hasGrowthCapability("chat_background", 8);
-  const canCustomizeNotificationMessage = hasGrowthCapability("custom_notification_message", 10);
+  const canCustomizeNotificationMessage =
+    Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip)
+    || hasGrowthCapability("custom_notification_message", 10);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -1019,7 +1021,7 @@ export default function MenuPage() {
 
   const openMessageEditor = (channel: NotificationChannel, kind: NotificationMessageKind, field: "title" | "content") => {
     if (!canCustomizeNotificationMessage) {
-      showToast(t("notification.levelRequired", { level: 10 }), "error");
+      showToast(t("notification.levelOrVipRequired", { level: 10 }), "error");
       return;
     }
     setPrefEditor({ type: "message", channel, kind, field });
@@ -2523,7 +2525,7 @@ export default function MenuPage() {
                       disabled={!activePref.enabled}
                       onClick={() => {
                         if (!canCustomizeNotificationMessage) {
-                          showToast(t("notification.levelRequired", { level: 10 }), "error");
+                          showToast(t("notification.levelOrVipRequired", { level: 10 }), "error");
                           return;
                         }
                         setPrefCustomDrawerOpen(true);
@@ -2534,7 +2536,7 @@ export default function MenuPage() {
                         <strong>{t("notification.customMessages")}</strong>
                       </div>
                       <div className="menu-pref-row-value">
-                        {!canCustomizeNotificationMessage ? <span>{t("growth.unlockAtLevel", { level: 10 })}</span> : null}
+                        {!canCustomizeNotificationMessage ? <span>{t("growth.unlockAtLevelOrVip", { level: 10 })}</span> : null}
                         <span className="material-symbols-outlined">
                           {canCustomizeNotificationMessage ? "chevron_right" : "lock"}
                         </span>

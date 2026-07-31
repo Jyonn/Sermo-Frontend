@@ -655,6 +655,8 @@
   "invite.generateFailed": "Could not generate friend invite link",
   "notification.updateFailed": "Could not update notification settings",
   "notification.levelRequired": "Reach Lv.{{level}} to customize notification messages",
+  "notification.levelOrVipRequired": "Available at LV{{level}} or with VIP",
+  "growth.unlockAtLevelOrVip": "LV{{level}} or VIP",
   "contact.emailVerified": "Email verified",
   "contact.phoneBound": "Phone linked",
   "contact.bound": "Linked",
