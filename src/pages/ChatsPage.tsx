@@ -1474,6 +1474,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             from === "self" ? "self" : "other",
             isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
             message.kind === "location" ? "is-location" : "",
+            message.kind === "map_access" ? "is-travel-map" : "",
             message.payload?.link_preview && message.payload.link_preview.status !== "none" && message.payload.link_preview.status !== "failed" ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
