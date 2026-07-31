@@ -15566,6 +15566,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 
 .message-group.bubble-style-vip .message-bubble.is-travel-map {
   overflow: visible;
+  box-shadow: 0 8px 20px rgba(116, 79, 18, 0.16);
 }
 
 .message-bubble.is-travel-map > .message-travel-map-card,
