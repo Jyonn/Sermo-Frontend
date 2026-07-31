@@ -327,6 +327,9 @@ export default function MenuPage() {
   const { setSession: setAdminSession } = useAdminAuth();
   const currentUserId = session?.user.user_id;
   const [viewState, setViewState] = useState<AppViewState>("idle");
+  const [isDesktopViewport, setIsDesktopViewport] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches
+  );
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [space, setSpace] = useState<SpaceDTO | null>(null);
@@ -434,6 +437,17 @@ export default function MenuPage() {
     webReminderPrefs.titleEnabled ? t("webReminder.titleOn") : t("webReminder.titleOff"),
   ].join(" · ");
   const vipCampaign = me?.permanent_vip_campaign;
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 901px)");
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsDesktopViewport(event.matches);
+      if (event.matches) setChatBackgroundDrawerOpen(false);
+    };
+    setIsDesktopViewport(media.matches);
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
+  }, []);
 
   const claimPermanentVip = async () => {
     if (!vipCampaign?.eligible || vipClaiming) return;
@@ -1457,7 +1471,23 @@ export default function MenuPage() {
   return (
     <AppChrome title={t("menu.title")} hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <TabPageHeader title={t("menu.title")} syncing={syncing} />
+        <TabPageHeader
+          title={t("menu.title")}
+          syncing={syncing}
+          status={!isDesktopViewport ? (
+            <button
+              aria-label={t("menu.switchAccount")}
+              className="menu-header-account-switch"
+              onClick={() => void openAccountSwitcher()}
+              title={t("menu.switchAccount")}
+              type="button"
+            >
+              <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
+                <path d="M6.5 7.5h11m0 0-3-3m3 3-3 3M17.5 16.5h-11m0 0 3 3m-3-3 3-3" />
+              </svg>
+            </button>
+          ) : null}
+        />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
             <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
@@ -1607,16 +1637,18 @@ export default function MenuPage() {
           </div>
         </section>
 
-        <section className="list-section">
-          <div className="simple-list">
-            <button className="simple-row menu-link-row" onClick={() => void openAccountSwitcher()} type="button">
-              <div className="row-main">
-                <strong>{t("menu.switchAccount")}</strong>
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
-        </section>
+        {isDesktopViewport ? (
+          <section className="list-section">
+            <div className="simple-list">
+              <button className="simple-row menu-link-row" onClick={() => void openAccountSwitcher()} type="button">
+                <div className="row-main">
+                  <strong>{t("menu.switchAccount")}</strong>
+                </div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <section className="list-section">
           <div className="simple-list">
@@ -1904,8 +1936,13 @@ export default function MenuPage() {
             </div>
           </section>
           <button
-            className={`personalization-background-entry${canCustomizeChatBackground ? "" : " is-locked"}`}
+            aria-disabled={isDesktopViewport || !canCustomizeChatBackground}
+            className={`personalization-background-entry${isDesktopViewport || !canCustomizeChatBackground ? " is-locked" : ""}`}
             onClick={() => {
+              if (isDesktopViewport) {
+                showToast(t("menu.chatBackgroundDesktopDefault"));
+                return;
+              }
               if (!canCustomizeChatBackground) {
                 showToast(t("menu.levelUnlock", { level: 8 }), "error");
                 return;
@@ -1915,8 +1952,17 @@ export default function MenuPage() {
             type="button"
           >
             <span className={`personalization-background-swatch theme-${me?.chat_background_theme ?? "default"}`} />
-            <span><strong>{t("menu.chatBackground")}</strong><small>{canCustomizeChatBackground ? t("menu.chatBackgroundHint") : t("menu.levelUnlock", { level: 8 })}</small></span>
-            <span className="material-symbols-outlined">chevron_right</span>
+            <span>
+              <strong>{t("menu.chatBackground")}</strong>
+              <small>
+                {isDesktopViewport
+                  ? t("menu.chatBackgroundDesktopDefault")
+                  : canCustomizeChatBackground
+                    ? t("menu.chatBackgroundHint")
+                    : t("menu.levelUnlock", { level: 8 })}
+              </small>
+            </span>
+            {!isDesktopViewport ? <span className="material-symbols-outlined">chevron_right</span> : null}
           </button>
           <button className="personalization-background-entry personalization-feature-entry" onClick={() => setChatBubbleDrawerOpen(true)} type="button">
             <span className={`personalization-entry-preview bubble-preview preview-${visibleBubbleStyle(me?.chat_bubble_style)}`}><i /></span>

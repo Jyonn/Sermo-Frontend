@@ -5550,6 +5550,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.7rem;
 }
 
+.personalization-background-entry.is-locked {
+  cursor: default;
+  opacity: 0.62;
+}
+
 .personalization-feature-entry {
   margin-top: -12px;
 }
@@ -9786,6 +9791,39 @@ html[data-theme="dark"] .message-link-preview-site {
   height: 20px;
 }
 
+.menu-header-account-switch {
+  align-items: center;
+  background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+  border: 0;
+  border-radius: 999px;
+  color: var(--brand-primary-press);
+  cursor: pointer;
+  display: inline-flex;
+  height: 30px;
+  justify-content: center;
+  margin-left: 2px;
+  padding: 0;
+  width: 34px;
+}
+
+.menu-header-account-switch svg {
+  height: 18px;
+  width: 18px;
+}
+
+.menu-header-account-switch path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+@media (min-width: 901px) {
+  .menu-header-account-switch {
+    display: none;
+  }
+}
+
 .tab-sticky-header {
   position: sticky;
   top: 0;
@@ -13376,6 +13414,48 @@ html[data-theme="dark"] .message-link-preview-site {
 }
 
 @media (min-width: 901px) {
+  .chat-background-paper,
+  .chat-background-mint,
+  .chat-background-dusk,
+  .chat-background-comic,
+  .chat-background-custom {
+    --chat-chrome-surface: rgba(247, 248, 244, 0.7);
+    --chat-chrome-border: rgba(222, 226, 220, 0.72);
+    --chat-input-surface: rgba(255, 255, 255, 0.66);
+  }
+
+  .chat-detail-scene:is(
+    .chat-background-paper,
+    .chat-background-mint,
+    .chat-background-dusk,
+    .chat-background-comic,
+    .chat-background-custom
+  )::before {
+    background: rgba(248, 249, 246, 0.72);
+  }
+
+  html[data-theme="dark"] :is(
+    .chat-background-paper,
+    .chat-background-mint,
+    .chat-background-dusk,
+    .chat-background-comic,
+    .chat-background-custom
+  ) {
+    --chat-chrome-surface: rgba(17, 26, 22, 0.82);
+    --chat-chrome-border: rgba(73, 92, 82, 0.62);
+    --chat-input-surface: rgba(27, 39, 33, 0.86);
+  }
+
+  html[data-theme="dark"] .chat-detail-scene:is(
+    .chat-background-paper,
+    .chat-background-mint,
+    .chat-background-dusk,
+    .chat-background-comic,
+    .chat-background-custom
+  )::before {
+    background: rgba(14, 21, 17, 0.88);
+  }
+
   .composer-row-text {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
   }
