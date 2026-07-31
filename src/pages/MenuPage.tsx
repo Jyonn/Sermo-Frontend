@@ -145,7 +145,7 @@ function BubblePreviewContent({ from, kind, t }: { from: "self" | "other"; kind:
   }
   if (kind === "travel") {
     return (
-      <div className={`message-bubble ${groupClassName}`}>
+      <div className={`message-bubble is-travel-map ${groupClassName}`}>
         <div className={`message-travel-map-card ${groupClassName}`}>
           <span className="message-travel-map-art"><span className="material-symbols-outlined">map</span></span>
           <span className="message-travel-map-copy"><small>{t("space.current")}</small><strong>{t("travelMap.messageJoin")}</strong><span>{t("travelMap.tapToAuthorize")}</span></span>

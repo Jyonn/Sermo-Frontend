@@ -14886,14 +14886,11 @@ html[data-theme="dark"] body .travel-map-view-switch button.is-active {
   align-items: center;
   gap: 12px;
   padding: 13px 12px;
-  overflow: hidden;
   color: #173c30;
-  border: 1px solid rgba(34, 105, 78, 0.2);
+  border: 0;
   border-radius: inherit;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.72), transparent 28%),
-    linear-gradient(145deg, #e8f7ef, #cceadd);
-  box-shadow: 0 8px 22px rgba(35, 91, 70, 0.1);
+  background: transparent;
+  box-shadow: none;
   text-align: left;
 }
 
@@ -15008,8 +15005,6 @@ html[data-theme="dark"] body .travel-map-view-switch button.is-active {
 
 html[data-theme="dark"] body .message-travel-map-card {
   color: #dff7ec;
-  border-color: rgba(119, 223, 184, 0.2);
-  background: linear-gradient(145deg, #1f3b31, #21332c);
 }
 
 html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
@@ -15039,19 +15034,13 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   box-shadow: var(--bubble-skin-self-shadow);
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other :is(
-  .message-link-preview-card,
-  .message-travel-map-card
-) {
+.message-group:not(.bubble-style-default) .message-bubble.other .message-link-preview-card {
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-other-border);
   border-radius: inherit;
   box-shadow: var(--bubble-skin-other-shadow);
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self :is(
-  .message-link-preview-card,
-  .message-travel-map-card
-) {
+.message-group.self:not(.bubble-style-default) .message-bubble.self .message-link-preview-card {
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-self-border);
   border-radius: inherit;
   box-shadow: var(--bubble-skin-self-shadow);
@@ -15127,8 +15116,7 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   .message-audio-card,
   .message-file-card,
   .message-location-card,
-  .message-link-preview-card,
-  .message-travel-map-card
+  .message-link-preview-card
 ) {
   color: var(--comic-ink);
   border-width: 2px;
@@ -15260,9 +15248,6 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .message-group.bubble-style-comic .message-travel-map-card {
   color: var(--comic-ink);
-  background:
-    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.7), transparent 28%),
-    var(--comic-mint);
 }
 
 .message-group.bubble-style-comic .message-travel-map-art {
@@ -15368,8 +15353,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
   .message-audio-card,
   .message-file-card,
   .message-location-card,
-  .message-link-preview-card,
-  .message-travel-map-card
+  .message-link-preview-card
 ) {
   border-width: 1px;
 }
@@ -15398,10 +15382,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
     linear-gradient(145deg, #fffdf4, #f4e7c4);
 }
 
-.message-group.bubble-style-vip .message-bubble.other :is(
-  .message-link-preview-card,
-  .message-travel-map-card
-) {
+.message-group.bubble-style-vip .message-bubble.other .message-link-preview-card {
   color: #342d1f;
   border-color: rgba(190, 137, 40, 0.78);
   background:
@@ -15409,10 +15390,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
     linear-gradient(145deg, #fffdf4, #f4e7c4);
 }
 
-.message-group.bubble-style-vip .message-bubble.self :is(
-  .message-link-preview-card,
-  .message-travel-map-card
-) {
+.message-group.bubble-style-vip .message-bubble.self .message-link-preview-card {
   color: #342d1f;
   border-color: rgba(190, 137, 40, 0.78);
   background:
@@ -15504,54 +15482,41 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 .message-travel-map-card {
   width: min(100%, 310px);
   box-sizing: border-box;
-  border-radius: var(--radius-bubble);
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other :is(
-  .message-link-preview-card,
-  .message-travel-map-card
-) {
+.message-group:not(.bubble-style-default) .message-bubble.other .message-link-preview-card {
   border-radius: var(--bubble-skin-other-radius);
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self :is(
-  .message-link-preview-card,
-  .message-travel-map-card
-) {
+.message-group.self:not(.bubble-style-default) .message-bubble.self .message-link-preview-card {
   border-radius: var(--bubble-skin-self-radius);
 }
 
-/* Structured cards are the visible bubble, so grouping corners belong on them. */
-.message-text-stack.other.group-start:not(.group-end) > :last-child,
-.message-travel-map-card.other.group-start:not(.group-end) {
+/* Link preview cards are visible bubble surfaces, so grouping corners belong on them. */
+.message-text-stack.other.group-start:not(.group-end) > :last-child {
   border-bottom-left-radius: 5px;
 }
 
-.message-text-stack.other:not(.group-start).group-end > :first-child,
-.message-travel-map-card.other:not(.group-start).group-end {
+.message-text-stack.other:not(.group-start).group-end > :first-child {
   border-top-left-radius: 5px;
 }
 
 .message-text-stack.other:not(.group-start):not(.group-end) > :first-child,
-.message-text-stack.other:not(.group-start):not(.group-end) > :last-child,
-.message-travel-map-card.other:not(.group-start):not(.group-end) {
+.message-text-stack.other:not(.group-start):not(.group-end) > :last-child {
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
 }
 
-.message-text-stack.self.group-start:not(.group-end) > :last-child,
-.message-travel-map-card.self.group-start:not(.group-end) {
+.message-text-stack.self.group-start:not(.group-end) > :last-child {
   border-bottom-right-radius: 5px;
 }
 
-.message-text-stack.self:not(.group-start).group-end > :first-child,
-.message-travel-map-card.self:not(.group-start).group-end {
+.message-text-stack.self:not(.group-start).group-end > :first-child {
   border-top-right-radius: 5px;
 }
 
 .message-text-stack.self:not(.group-start):not(.group-end) > :first-child,
-.message-text-stack.self:not(.group-start):not(.group-end) > :last-child,
-.message-travel-map-card.self:not(.group-start):not(.group-end) {
+.message-text-stack.self:not(.group-start):not(.group-end) > :last-child {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }

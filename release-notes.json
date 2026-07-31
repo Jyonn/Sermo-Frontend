@@ -1,21 +1,19 @@
 {
-  "id": "2026.07.31.1",
+  "id": "2026.07.31.2",
   "publishedAt": "2026-07-31",
   "locales": {
     "zh-CN": {
-      "title": "聊天细节更准确",
+      "title": "足迹气泡回归单层",
       "items": [
-        "群聊连续消息会正确展示每位发送者的头像",
-        "移动端可从菜单标题旁快速切换空间账号",
-        "足迹地图消息改为统一的单层气泡"
+        "足迹地图消息现在只保留一层气泡边框",
+        "连续消息的圆角与个性化气泡保持一致"
       ]
     },
     "en": {
-      "title": "More accurate chat details",
+      "title": "One clean travel map bubble",
       "items": [
-        "Consecutive group messages now show the correct sender avatar",
-        "Switch space accounts quickly beside the mobile Menu title",
-        "Travel map messages now use one consistent bubble surface"
+        "Travel map messages now render with a single bubble border",
+        "Grouped corners stay consistent with the selected bubble style"
       ]
     }
   }
