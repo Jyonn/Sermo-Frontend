@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.6",
+  "id": "2026.08.01.7",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "位置地址完整展示",
+      "title": "引用消息融入气泡风格",
       "items": [
-        "位置卡片与普通消息共用相同的最大宽度",
-        "长地址会自然换行并完整展示"
+        "默认、漫画和 VIP 气泡拥有各自匹配的引用样式",
+        "气泡预览现在会真实展示己方与他方引用效果"
       ]
     },
     "en": {
-      "title": "Full addresses in location cards",
+      "title": "Replies now belong to each bubble style",
       "items": [
-        "Location cards now share the same maximum width as regular messages",
-        "Long addresses now wrap naturally without truncation"
+        "Default, comic, and VIP bubbles now have matching reply treatments",
+        "Bubble previews now show realistic replies from both sides"
       ]
     }
   }

@@ -3308,21 +3308,49 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-reply-preview {
+  position: relative;
   display: grid;
   width: 100%;
   min-width: 0;
-  padding: 6px 8px;
-  gap: 1px;
-  color: inherit;
+  padding: 7px 9px;
+  gap: 2px;
+  overflow: hidden;
+  color: var(--reply-preview-color, inherit);
   text-align: left;
-  background: rgba(255, 255, 255, 0.09);
-  border: 0;
-  border-left: 2px solid var(--brand-primary);
-  border-radius: 7px;
+  border: 1px solid var(--reply-preview-border, rgba(8, 119, 81, 0.12));
+  border-radius: var(--reply-preview-radius, 9px);
+  background: var(--reply-preview-bg, rgba(255, 255, 255, 0.12));
+  box-shadow: var(--reply-preview-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.12));
 }
 
-.message-bubble.other .message-reply-preview {
-  background: rgba(120, 132, 150, 0.09);
+.message-reply-preview::after {
+  position: absolute;
+  top: -8px;
+  right: 6px;
+  color: var(--reply-preview-accent, var(--brand-primary));
+  content: "“";
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.message-bubble.other {
+  --reply-preview-accent: #087751;
+  --reply-preview-bg: #edf4ef;
+  --reply-preview-border: rgba(8, 119, 81, 0.11);
+  --reply-preview-color: #53655d;
+  --reply-preview-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.message-bubble.self {
+  --reply-preview-accent: #b8f5d9;
+  --reply-preview-bg: rgba(238, 255, 248, 0.11);
+  --reply-preview-border: rgba(226, 255, 242, 0.15);
+  --reply-preview-color: rgba(240, 255, 248, 0.78);
+  --reply-preview-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .message-reply-preview strong,
@@ -3333,12 +3361,16 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-reply-preview strong {
-  color: var(--brand-primary);
+  position: relative;
+  z-index: 1;
+  color: var(--reply-preview-accent, var(--brand-primary));
   font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .message-reply-preview span {
-  opacity: 0.72;
+  position: relative;
+  z-index: 1;
   font-size: 0.76rem;
 }
 
@@ -15173,6 +15205,24 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   --comic-mint: #d9f3e6;
 }
 
+.message-group.bubble-style-comic .message-bubble.other {
+  --reply-preview-accent: #087751;
+  --reply-preview-bg: #ffd36a;
+  --reply-preview-border: var(--comic-ink);
+  --reply-preview-color: rgba(38, 52, 46, 0.76);
+  --reply-preview-radius: 7px;
+  --reply-preview-shadow: 2px 2px 0 var(--comic-shadow);
+}
+
+.message-group.bubble-style-comic .message-bubble.self {
+  --reply-preview-accent: #087751;
+  --reply-preview-bg: #fff9df;
+  --reply-preview-border: var(--comic-ink);
+  --reply-preview-color: rgba(38, 52, 46, 0.76);
+  --reply-preview-radius: 7px;
+  --reply-preview-shadow: 2px 2px 0 rgba(38, 52, 46, 0.18);
+}
+
 .message-group.bubble-style-comic :is(
   .message-media-frame,
   .message-audio-card,
@@ -15363,6 +15413,27 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble {
   position: relative;
   isolation: isolate;
+}
+
+.message-group.bubble-style-vip .message-bubble {
+  --reply-preview-accent: #8a571c;
+  --reply-preview-bg:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.72), transparent 42%),
+    rgba(226, 194, 122, 0.18);
+  --reply-preview-border: rgba(174, 119, 27, 0.34);
+  --reply-preview-color: rgba(68, 55, 31, 0.72);
+  --reply-preview-radius: 10px;
+  --reply-preview-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+    0 2px 6px rgba(112, 68, 16, 0.08);
+}
+
+html[data-theme="dark"] .message-group.bubble-style-default .message-bubble.other {
+  --reply-preview-accent: #75e0b7;
+  --reply-preview-bg: rgba(83, 119, 101, 0.16);
+  --reply-preview-border: rgba(117, 224, 183, 0.13);
+  --reply-preview-color: rgba(218, 236, 226, 0.72);
+  --reply-preview-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .message-group.bubble-style-vip .message-bubble::before,

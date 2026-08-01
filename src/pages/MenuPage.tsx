@@ -84,10 +84,18 @@ function visibleBubbleStyle(style?: string) {
 
 type BubblePreviewKind = "text" | "image" | "audio" | "video" | "file" | "location" | "travel" | "link";
 
-function BubblePreviewContent({ from, kind, t }: { from: "self" | "other"; kind: BubblePreviewKind; t: ReturnType<typeof useI18n>["t"] }) {
+function BubblePreviewContent({ avatarName, from, kind, t }: { avatarName: string; from: "self" | "other"; kind: BubblePreviewKind; t: ReturnType<typeof useI18n>["t"] }) {
   const groupClassName = `${from} group-start group-end`;
   if (kind === "text") {
-    return <div className={`message-bubble ${groupClassName}`}>{from === "self" ? t("menu.bubblePreviewSelf") : t("menu.bubblePreviewOther")}</div>;
+    return (
+      <div className={`message-bubble has-reply ${groupClassName}`}>
+        <button className="message-reply-preview" type="button">
+          <strong>{from === "self" ? avatarName : t("common.me")}</strong>
+          <span>{from === "self" ? t("menu.bubblePreviewOther") : t("menu.bubblePreviewSelf")}</span>
+        </button>
+        {from === "self" ? t("menu.bubblePreviewSelf") : t("menu.bubblePreviewOther")}
+      </div>
+    );
   }
   if (kind === "image" || kind === "video") {
     return (
@@ -202,7 +210,7 @@ function ChatBubblePreview({
             <div className="message-bubbles">
               <div className={`message-bubble-wrap ${from} is-sent`}>
                 <div className={`message-bubble-shell ${from}`}>
-                  <BubblePreviewContent from={from} kind={kind} t={t} />
+                  <BubblePreviewContent avatarName={avatarName} from={from} kind={kind} t={t} />
                 </div>
               </div>
             </div>
