@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.04",
+  "id": "2026.08.02.05",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "置顶消息现在整齐又清楚",
+      "title": "聊天记录可以搜索了",
       "items": [
-        "置顶列表使用稳定的操作栏，不再因能否取消置顶而左右跳动",
-        "仅他人置顶时展示只读图钉，自己参与置顶时提供清晰的取消操作",
-        "多人置顶的姓名会自然收起，同时完整保留消息与时间信息"
+        "在聊天详情中按关键词查找历史消息",
+        "无需输入文字，也能直接浏览全部图片、视频、语音、文件、位置与足迹",
+        "点击搜索结果会自动回到原消息并高亮定位"
       ]
     },
     "en": {
-      "title": "Pinned messages are now aligned and clear",
+      "title": "Chat history is now searchable",
       "items": [
-        "The pinned list now keeps a stable action rail instead of shifting with unpin permissions",
-        "Pins created only by others show a quiet read-only mark, while your own pins expose a clear unpin action",
-        "Long multi-user attribution truncates gracefully while preserving message and time information"
+        "Search historical messages by keyword from chat details",
+        "Browse all images, videos, audio, files, locations, and footprints without entering text",
+        "Selecting a result returns to and highlights the original message"
       ]
     }
   }

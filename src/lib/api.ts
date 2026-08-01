@@ -8,6 +8,7 @@ import type {
   ChatPreferenceDTO,
   ChatMessageDTO,
   MessageMediaKind,
+  MessageSearchResponseDTO,
   MessageUploadDTO,
   ChatSyncResponseDTO,
   MessageEventSyncResponseDTO,
@@ -538,6 +539,14 @@ export const api = {
 
   getMessages(params: { chat_id: number; limit: number; before?: number; after?: number }, signal?: AbortSignal) {
     return request<ChatMessageDTO[]>("/messages/", {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  searchMessages(params: { chat_id: number; limit: number; keyword?: string; type?: number; before?: number }, signal?: AbortSignal) {
+    return request<MessageSearchResponseDTO>("/messages/search", {
       auth: true,
       query: params,
       signal,

@@ -51,6 +51,16 @@ const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
 const MESSAGE_TYPE_MAP_ACCESS = 7;
+const MESSAGE_SEARCH_TYPES = [
+  { value: null, label: "messageSearch.all" },
+  { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
+  { value: MESSAGE_TYPE_IMAGE, label: "messageSearch.images" },
+  { value: MESSAGE_TYPE_VIDEO, label: "messageSearch.videos" },
+  { value: MESSAGE_TYPE_AUDIO, label: "messageSearch.audio" },
+  { value: MESSAGE_TYPE_FILE, label: "messageSearch.files" },
+  { value: MESSAGE_TYPE_LOCATION, label: "messageSearch.locations" },
+  { value: MESSAGE_TYPE_MAP_ACCESS, label: "messageSearch.travelMaps" },
+] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const EMOJI_PAGES = [
   {
@@ -139,8 +149,7 @@ function sortEmojiUsage(rows: EmojiUsageDTO[]) {
   });
 }
 
-function pinnedMessagePreview(pin: PinnedMessageDTO) {
-  const message = pin.message;
+function messageResultPreview(message: ChatMessageDTO) {
   if (message.type === MESSAGE_TYPE_TEXT) return message.content;
   return {
     [MESSAGE_TYPE_IMAGE]: i18n.t("media.image"),
@@ -152,6 +161,10 @@ function pinnedMessagePreview(pin: PinnedMessageDTO) {
     [MESSAGE_TYPE_LOCATION]: i18n.t("media.location"),
     [MESSAGE_TYPE_MAP_ACCESS]: i18n.t("travelMap.action"),
   }[message.type] ?? i18n.t("message.generic");
+}
+
+function pinnedMessagePreview(pin: PinnedMessageDTO) {
+  return messageResultPreview(pin.message);
 }
 
 function pinnedByLabel(pin: PinnedMessageDTO) {
@@ -1978,6 +1991,13 @@ export default function ChatsPage() {
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
+  const [messageSearchOpen, setMessageSearchOpen] = useState(false);
+  const [messageSearchKeyword, setMessageSearchKeyword] = useState("");
+  const [messageSearchType, setMessageSearchType] = useState<number | null>(null);
+  const [messageSearchResults, setMessageSearchResults] = useState<ChatMessageDTO[]>([]);
+  const [messageSearchState, setMessageSearchState] = useState<"idle" | "loading" | "loading-more" | "error">("idle");
+  const [messageSearchNextBefore, setMessageSearchNextBefore] = useState<number | null>(null);
+  const [messageSearchHasMore, setMessageSearchHasMore] = useState(false);
   const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
@@ -2712,6 +2732,56 @@ export default function ChatsPage() {
     }
     resetVoiceComposer();
   }, [selectedChat?.id]);
+
+  const loadMoreMessageSearchResults = async () => {
+    if (!selectedChat || !messageSearchHasMore || messageSearchNextBefore === null || messageSearchState === "loading-more") return;
+    setMessageSearchState("loading-more");
+    try {
+      const response = await api.searchMessages({
+        chat_id: selectedChat.id,
+        limit: 30,
+        keyword: messageSearchKeyword.trim() || undefined,
+        type: messageSearchType ?? undefined,
+        before: messageSearchNextBefore,
+      });
+      setMessageSearchResults((current) => {
+        const known = new Set(current.map((message) => message.message_id));
+        return [...current, ...response.items.filter((message) => !known.has(message.message_id))];
+      });
+      setMessageSearchHasMore(response.has_more);
+      setMessageSearchNextBefore(response.next_before);
+      setMessageSearchState("idle");
+    } catch {
+      setMessageSearchState("error");
+    }
+  };
+
+  useEffect(() => {
+    if (!messageSearchOpen || !selectedChat) return;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setMessageSearchState("loading");
+      api.searchMessages({
+        chat_id: selectedChat.id,
+        limit: 30,
+        keyword: messageSearchKeyword.trim() || undefined,
+        type: messageSearchType ?? undefined,
+      }, controller.signal)
+        .then((response) => {
+          setMessageSearchResults(response.items);
+          setMessageSearchHasMore(response.has_more);
+          setMessageSearchNextBefore(response.next_before);
+          setMessageSearchState("idle");
+        })
+        .catch((error) => {
+          if ((error as Error).name !== "AbortError") setMessageSearchState("error");
+        });
+    }, 220);
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [messageSearchKeyword, messageSearchOpen, messageSearchType, selectedChat?.id]);
 
   useEffect(() => {
     if (!detailsSheetOpen) return;
@@ -5422,6 +5492,29 @@ export default function ChatsPage() {
             </section>
 
             <section className="chat-detail-settings-section">
+              <div className="section-label">{t("messageSearch.section")}</div>
+              <div className="chat-detail-settings-list">
+                <button
+                  className="chat-detail-setting-row"
+                  onClick={() => {
+                    setMessageSearchKeyword("");
+                    setMessageSearchType(null);
+                    setDetailsSheetOpen(false);
+                    setMessageSearchOpen(true);
+                  }}
+                  type="button"
+                >
+                  <span className="chat-detail-search-mark material-symbols-outlined" aria-hidden="true">search</span>
+                  <div className="row-main">
+                    <strong>{t("messageSearch.action")}</strong>
+                    <div className="row-subtle">{t("messageSearch.hint")}</div>
+                  </div>
+                  <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </button>
+              </div>
+            </section>
+
+            <section className="chat-detail-settings-section">
               <div className="section-label">{t("chat.settings")}</div>
               <div className="chat-detail-settings-list">
                 <div className="chat-detail-setting-row">
@@ -5476,6 +5569,103 @@ export default function ChatsPage() {
             </section>
           </div>
         ) : null}
+      </SideDrawer>
+      <SideDrawer
+        open={messageSearchOpen}
+        title={t("messageSearch.title")}
+        onClose={() => {
+          setMessageSearchOpen(false);
+          setDetailsSheetOpen(true);
+        }}
+      >
+        <div className="message-search-panel">
+          <div className="message-search-controls">
+            <label className="message-search-input-wrap">
+              <span className="material-symbols-outlined" aria-hidden="true">search</span>
+              <input
+                autoComplete="off"
+                autoFocus
+                onChange={(event) => setMessageSearchKeyword(event.target.value)}
+                placeholder={t("messageSearch.placeholder")}
+                type="search"
+                value={messageSearchKeyword}
+              />
+              {messageSearchKeyword ? (
+                <button aria-label={t("common.clear")} onClick={() => setMessageSearchKeyword("")} type="button">
+                  <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+              ) : null}
+            </label>
+            <div className="message-search-filters" role="tablist" aria-label={t("messageSearch.filter") }>
+              {MESSAGE_SEARCH_TYPES.map((filter) => (
+                <button
+                  aria-selected={messageSearchType === filter.value}
+                  className={messageSearchType === filter.value ? "active" : ""}
+                  key={filter.label}
+                  onClick={() => setMessageSearchType(filter.value)}
+                  role="tab"
+                  type="button"
+                >
+                  {t(filter.label as TranslationKey)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="message-search-results" aria-busy={messageSearchState === "loading"}>
+            {messageSearchState === "loading" ? (
+              <div className="message-search-loading"><HeaderSyncIndicator syncing /></div>
+            ) : null}
+            {messageSearchState !== "loading" && !messageSearchResults.length ? (
+              <FeedbackState title={messageSearchState === "error" ? t("messageSearch.failed") : t("messageSearch.empty")} />
+            ) : null}
+            {messageSearchResults.map((message) => {
+              const mediaUri = [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(message.type)
+                ? message.payload?.thumbnail_uri || message.payload?.uri
+                : null;
+              const typeIcon = {
+                [MESSAGE_TYPE_TEXT]: "chat_bubble",
+                [MESSAGE_TYPE_IMAGE]: "image",
+                [MESSAGE_TYPE_VIDEO]: "movie",
+                [MESSAGE_TYPE_AUDIO]: "mic",
+                [MESSAGE_TYPE_FILE]: "draft",
+                [MESSAGE_TYPE_LOCATION]: "location_on",
+                [MESSAGE_TYPE_MAP_ACCESS]: "map",
+              }[message.type] ?? "chat_bubble";
+              return (
+                <button
+                  className="message-search-result"
+                  key={message.message_id}
+                  onClick={() => {
+                    setMessageSearchOpen(false);
+                    setDetailsSheetOpen(false);
+                    window.setTimeout(() => window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId: message.message_id } })), 180);
+                  }}
+                  type="button"
+                >
+                  {mediaUri ? (
+                    <img alt="" className="message-search-result-media" src={mediaUri} />
+                  ) : (
+                    <span className="message-search-result-icon material-symbols-outlined" aria-hidden="true">{typeIcon}</span>
+                  )}
+                  <span className="message-search-result-main">
+                    <span className="message-search-result-meta">
+                      <strong>{message.user.name}</strong>
+                      <time>{formatRelativeTime(message.created_at)}</time>
+                    </span>
+                    <span className="message-search-result-preview">{messageResultPreview(message)}</span>
+                  </span>
+                  <span className="material-symbols-outlined message-search-result-arrow" aria-hidden="true">chevron_right</span>
+                </button>
+              );
+            })}
+            {messageSearchHasMore && messageSearchResults.length ? (
+              <button className="message-search-more" disabled={messageSearchState === "loading-more"} onClick={() => void loadMoreMessageSearchResults()} type="button">
+                {messageSearchState === "loading-more" ? t("common.loading") : t("common.loadMore")}
+              </button>
+            ) : null}
+          </div>
+        </div>
       </SideDrawer>
       <SideDrawer
         open={profileDrawerUserId !== null}

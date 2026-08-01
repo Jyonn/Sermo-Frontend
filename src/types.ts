@@ -503,6 +503,12 @@ export interface PinnedMessageDTO {
   pinned_at: number;
 }
 
+export interface MessageSearchResponseDTO {
+  items: ChatMessageDTO[];
+  has_more: boolean;
+  next_before: number | null;
+}
+
 export interface QuotedMessageDTO {
   message_id: number;
   user: TinyUserDTO;
