@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.20",
+  "id": "2026.08.01.21",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "VIP语音气泡更加清晰",
+      "title": "发送中的卡片保持个性",
       "items": [
-        "修复己方VIP语音消息时长与进度文字对比度不足的问题",
-        "播放按钮、波形和文字统一为清晰的象牙金配色"
+        "位置解析和消息发送期间立即使用当前聊天气泡样式",
+        "临时消息转为正式消息时平滑保留个性化外观"
       ]
     },
     "en": {
-      "title": "Clearer VIP voice bubbles",
+      "title": "Personalized cards stay styled while sending",
       "items": [
-        "Fixed low-contrast duration and progress text in your own VIP voice messages",
-        "Playback controls, waveforms, and text now share a clear ivory-gold palette"
+        "Location cards now use your selected bubble style while resolving and sending",
+        "Optimistic messages retain their personalized appearance when delivery completes"
       ]
     }
   }

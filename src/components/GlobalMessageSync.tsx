@@ -100,7 +100,14 @@ function sortMessages(items: ChatMessage[]) {
 
 function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: ChatMessage) {
   if (!existing) return incoming;
-  const reconciled = { ...incoming, clientId: existing.clientId, localPreviewUri: existing.localPreviewUri };
+  const reconciled = {
+    ...incoming,
+    clientId: existing.clientId,
+    localPreviewUri: existing.localPreviewUri,
+    isPermanentVip: incoming.isPermanentVip ?? existing.isPermanentVip,
+    chatBubbleStyle: incoming.chatBubbleStyle ?? existing.chatBubbleStyle,
+    avatarFrameStyle: incoming.avatarFrameStyle ?? existing.avatarFrameStyle,
+  };
   if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
   if (existing.kind !== incoming.kind) return reconciled;
   if (!(existing.kind === "image" || existing.kind === "video" || existing.kind === "audio" || existing.kind === "file")) return reconciled;

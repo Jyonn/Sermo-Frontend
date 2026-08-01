@@ -661,6 +661,9 @@ function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: Cha
     ...incoming,
     clientId: existing.clientId,
     localPreviewUri: existing.localPreviewUri,
+    isPermanentVip: incoming.isPermanentVip ?? existing.isPermanentVip,
+    chatBubbleStyle: incoming.chatBubbleStyle ?? existing.chatBubbleStyle,
+    avatarFrameStyle: incoming.avatarFrameStyle ?? existing.avatarFrameStyle,
   };
   if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
   if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return reconciled;
@@ -808,6 +811,7 @@ function clearChatUnread(chat: Chat) {
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
   if (current.from !== neighbor.from || Math.abs(current.createdAt - neighbor.createdAt) >= 5 * 60) return false;
+  if (visibleBubbleStyle(current.chatBubbleStyle) !== visibleBubbleStyle(neighbor.chatBubbleStyle)) return false;
   if (current.from === "self") return true;
   if (current.userId !== undefined && neighbor.userId !== undefined) return current.userId === neighbor.userId;
   return current.name === neighbor.name && current.avatarUri === neighbor.avatarUri;
