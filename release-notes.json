@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.14",
+  "id": "2026.08.01.15",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "地球手势更可靠",
+      "title": "地图定位更醒目",
       "items": [
-        "双指只缩放足迹地球，不再误放大整个网页",
-        "轻点地球上的国家即可稳定进入国家地图"
+        "当前位置头像改为清晰的圆形裁切",
+        "双层呼吸波纹帮助快速找到地图中的自己"
       ]
     },
     "en": {
-      "title": "More reliable globe gestures",
+      "title": "A clearer location marker",
       "items": [
-        "Pinch gestures now zoom the footprint globe without scaling the page",
-        "Tap a country on the globe to reliably open its map"
+        "Your location avatar is now cropped into a clear circle",
+        "A double breathing pulse makes your position easier to spot"
       ]
     }
   }
