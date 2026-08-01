@@ -78,6 +78,10 @@ const personalizationOptions = {
     ["dragon", "menu.styleDragon"],
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
+    ["pebble", "menu.stylePebble"], ["leaf", "menu.styleLeaf"], ["cloud", "menu.styleCloud"], ["ice", "menu.styleIce"], ["lava", "menu.styleLava"],
+    ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"], ["postcard", "menu.stylePostcard"], ["blueprint", "menu.styleBlueprint"],
+    ["terminal", "menu.styleTerminal"], ["hologram", "menu.styleHologram"], ["mech", "menu.styleMech"], ["synthwave", "menu.styleSynthwave"], ["orbital", "menu.styleOrbital"],
+    ["sticker", "menu.styleSticker"], ["candy", "menu.styleCandy"], ["toybrick", "menu.styleToybrick"], ["doodle", "menu.styleDoodle"], ["plush", "menu.stylePlush"],
     ["vip", "menu.styleVip"],
   ],
   avatar_frame_style: [
@@ -89,6 +93,10 @@ const personalizationOptions = {
     ["soundwave", "menu.frameSoundwave"],
     ["lucky", "menu.frameLucky"],
     ["portal", "menu.framePortal"],
+    ["vine", "menu.frameVine"], ["blossom", "menu.frameBlossom"], ["butterfly", "menu.frameButterfly"], ["coral", "menu.frameCoral"], ["moon", "menu.frameMoon"],
+    ["crown", "menu.frameCrown"], ["headphones", "menu.frameHeadphones"], ["cat-ears", "menu.frameCatEars"], ["ribbon-bow", "menu.frameRibbonBow"], ["camera", "menu.frameCamera"],
+    ["comet", "menu.frameComet"], ["radar", "menu.frameRadar"], ["pulse", "menu.framePulse"], ["snowfall", "menu.frameSnowfall"], ["firefly", "menu.frameFirefly"],
+    ["stamp", "menu.frameStamp"], ["embroidery", "menu.frameEmbroidery"], ["stainedglass", "menu.frameStainedglass"], ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"],
   ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
@@ -105,11 +113,19 @@ const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclu
     label: "menu.collectionCulture",
     items: [["comic", "menu.themeComic"], ["zen", "menu.themeZen"], ["hero", "menu.themeHero"], ["dragon", "menu.themeDragon"], ["bauhaus", "menu.themeBauhaus"], ["mosaic", "menu.themeMosaic"]],
   },
+  { label: "menu.collectionNature", items: [["tidepool", "menu.themeTidepool"], ["forest", "menu.themeForest"], ["desert", "menu.themeDesert"], ["snowfield", "menu.themeSnowfield"], ["sakura", "menu.themeSakura"]] },
+  { label: "menu.collectionAtmosphere", items: [["sunrise", "menu.themeSunrise"], ["midnight", "menu.themeMidnight"], ["rain", "menu.themeRain"], ["galaxy", "menu.themeGalaxy"], ["aurora-sky", "menu.themeAuroraSky"]] },
+  { label: "menu.collectionMaterial", items: [["linen", "menu.themeLinen"], ["terrazzo", "menu.themeTerrazzo"], ["blueprint", "menu.themeBlueprint"], ["newsprint", "menu.themeNewsprint"], ["hologram", "menu.themeHologram"]] },
+  { label: "menu.collectionFantasy", items: [["arcade", "menu.themeArcade"], ["jazz", "menu.themeJazz"], ["spaceport", "menu.themeSpaceport"], ["candy", "menu.themeCandy"], ["noir-film", "menu.themeNoirFilm"]] },
 ];
 
 const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.chat_bubble_style[number]> }> = [
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
+  { label: "menu.collectionOrganic", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["pebble", "leaf", "cloud", "ice", "lava"].includes(value)) },
+  { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
+  { label: "menu.collectionFuture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["terminal", "hologram", "mech", "synthwave", "orbital"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "candy", "toybrick", "doodle", "plush"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
 
@@ -117,10 +133,14 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "pixel"].includes(value)) },
   { label: "menu.collectionWearable", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["polaroid", "lucky"].includes(value)) },
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal"].includes(value)) },
+  { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["vine", "blossom", "butterfly", "coral", "moon"].includes(value)) },
+  { label: "menu.collectionAccessory", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["crown", "headphones", "cat-ears", "ribbon-bow", "camera"].includes(value)) },
+  { label: "menu.collectionKinetic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["comet", "radar", "pulse", "snowfall", "firefly"].includes(value)) },
+  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["stamp", "embroidery", "stainedglass", "papercut", "mechanical"].includes(value)) },
 ];
 
 function visibleBubbleStyle(style?: string) {
-  return ["comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic"].includes(style ?? "") ? style as ChatBubbleStyle : "default";
+  return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
 }
 
 type BubblePreviewKind = "text" | "image" | "audio" | "video" | "file" | "location" | "travel" | "link";

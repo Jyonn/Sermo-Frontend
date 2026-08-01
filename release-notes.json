@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.02.02",
+  "id": "2026.08.02.03",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "位置探索始终停留在地球上",
+      "title": "六十件新藏品进入个性化库",
       "items": [
-        "位置页取消世界与国家切换，不再突然进入二维平面地图",
-        "地球仪先聚焦国家，再渲染省级边界并继续放大到具体位置"
+        "聊天背景、聊天气泡与头像框各新增 20 款，并按风格系列重新分组",
+        "每套气泡完整覆盖文字、语音、文件、位置、链接与足迹等消息卡片",
+        "头像框加入挂件、材质与动态效果，系统减少动态时会自动静止"
       ]
     },
     "en": {
-      "title": "Location journeys now stay on the globe",
+      "title": "Sixty new pieces join the personalization library",
       "items": [
-        "Location views no longer switch between world and country tabs or jump into a flat map",
-        "The globe first approaches the country, reveals regional boundaries, then continues into the exact place"
+        "Chat backgrounds, bubbles, and avatar frames each gain 20 new designs grouped into clear collections",
+        "Every bubble skin now covers text, audio, files, locations, links, travel maps, and other message cards",
+        "Avatar frames introduce distinct ornaments, materials, and motion that respects reduced-motion preferences"
       ]
     }
   }

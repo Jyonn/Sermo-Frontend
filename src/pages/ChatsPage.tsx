@@ -166,7 +166,11 @@ function avatarLabel(name: string) {
 }
 
 function visibleBubbleStyle(style?: string) {
-  return ["comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic"].includes(style ?? "") ? style as ChatBubbleStyle : "default";
+  return [
+    "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic", "pebble", "leaf", "cloud", "ice", "lava",
+    "typewriter", "newspaper", "receipt", "postcard", "blueprint", "terminal", "hologram", "mech", "synthwave",
+    "orbital", "sticker", "candy", "toybrick", "doodle", "plush",
+  ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
