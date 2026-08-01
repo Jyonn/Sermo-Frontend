@@ -3276,6 +3276,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble {
+  --message-bubble-max-width: min(100%, 68vw, 320px);
   position: relative;
   isolation: isolate;
   padding: 9px 13px;
@@ -3284,7 +3285,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.96rem;
   box-shadow: var(--message-card-shadow);
   word-break: break-word;
-  max-width: min(100%, 68vw, 320px);
+  max-width: var(--message-bubble-max-width);
   min-width: 0;
   transition:
     border-radius 180ms ease,
@@ -3528,8 +3529,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble.is-location {
-  width: min(100%, 340px);
-  max-width: 100%;
+  width: var(--message-bubble-max-width);
+  max-width: var(--message-bubble-max-width);
   margin-inline: 0;
   box-sizing: border-box;
 }
@@ -4873,10 +4874,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-location-copy strong {
+  display: -webkit-box;
+  overflow: hidden;
   font-size: 0.88rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
   white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .message-location-copy small {

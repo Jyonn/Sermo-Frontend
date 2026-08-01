@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.4",
+  "id": "2026.08.01.5",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "位置卡片不再撑开聊天页",
+      "title": "位置卡片回归气泡尺度",
       "items": [
-        "位置卡片改为根据消息区剩余宽度布局",
-        "恢复卡片与屏幕边缘间距并阻止聊天页横向滚动"
+        "位置卡片与普通消息共用相同的最大宽度",
+        "地址最多展示两行，点击仍可查看完整地点"
       ]
     },
     "en": {
-      "title": "Location cards stay within the chat",
+      "title": "Location cards match regular bubbles",
       "items": [
-        "Location cards now size themselves from the available message area",
-        "Screen-edge spacing is restored and horizontal chat scrolling is prevented"
+        "Location cards now share the same maximum width as regular messages",
+        "Addresses are limited to two lines while the full place remains available on tap"
       ]
     }
   }

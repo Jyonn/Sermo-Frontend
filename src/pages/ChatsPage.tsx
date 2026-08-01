@@ -1292,7 +1292,7 @@ function renderMessageContent(
           <ComposerSvgIcon kind="location" />
         </span>
         <span className="message-location-copy">
-          <strong>{address || (message.status === "pending" ? obscured ? i18n.t("location.generatingApproximate") : i18n.t("location.resolving") : obscured ? i18n.t("location.approximate") : i18n.t("location.shared"))}</strong>
+          <strong title={address || undefined}>{address || (message.status === "pending" ? obscured ? i18n.t("location.generatingApproximate") : i18n.t("location.resolving") : obscured ? i18n.t("location.approximate") : i18n.t("location.shared"))}</strong>
           <small>
             {obscured
               ? i18n.t("location.withinKm", { distance: obscureRadius })
