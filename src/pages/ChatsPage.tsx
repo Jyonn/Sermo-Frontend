@@ -1063,7 +1063,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 onClick={(event) => {
                   if (selectionMode) {
                     event.preventDefault();
-                    if (from === "self") onToggleSelection(message);
+                    onToggleSelection(message);
                     return;
                   }
                   if (suppressClickRef.current === index) {
@@ -1091,7 +1091,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
                 type="button"
               >
                 <img alt="" loading="lazy" src={displayUri} />
-                {selectionMode && from === "self" ? <span className="message-selection-check" aria-hidden="true" /> : null}
+                {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
                 {hasMore ? (
                   <span className="message-image-gallery-more">
                     <span className="material-symbols-outlined" aria-hidden="true">photo_library</span>
@@ -1461,13 +1461,13 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   return (
     <div
       className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}`}
-      onClick={selectionMode && from === "self" ? (event) => {
+      onClick={selectionMode ? (event) => {
         event.preventDefault();
         event.stopPropagation();
         onToggleSelection(message);
       } : undefined}
     >
-      {selectionMode && from === "self" ? <span className="message-selection-check" aria-hidden="true" /> : null}
+      {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
       <div className={`message-bubble-shell ${from}`}>
         {showRetry ? (
           <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
@@ -1505,7 +1505,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             if (selectionMode) {
               event.preventDefault();
               event.stopPropagation();
-              if (from === "self") onToggleSelection(message);
+              onToggleSelection(message);
               return;
             }
             if (!suppressClickRef.current) return;
@@ -2413,7 +2413,7 @@ export default function ChatsPage() {
   };
 
   const toggleMessageSelection = (message: ChatMessage) => {
-    if (message.from !== "self" || messageDeleteState === "deleting") return;
+    if (messageDeleteState === "deleting") return;
     setSelectedMessageClientIds((current) => {
       if (current.includes(message.clientId)) return current.filter((item) => item !== message.clientId);
       if (current.length >= 50) {
@@ -2425,7 +2425,6 @@ export default function ChatsPage() {
   };
 
   const startMessageSelection = (message: ChatMessage) => {
-    if (message.from !== "self") return;
     setMessageMenu(null);
     setReplyTarget(null);
     setComposerMoreOpen(false);
@@ -4358,7 +4357,7 @@ export default function ChatsPage() {
   const deleteSelectedMessages = async () => {
     if (!selectedChat || !selectedMessageClientIds.length) return;
     const selectedIdSet = new Set(selectedMessageClientIds);
-    const targets = selectedMessages.filter((message) => message.from === "self" && selectedIdSet.has(message.clientId));
+    const targets = selectedMessages.filter((message) => selectedIdSet.has(message.clientId));
     if (!targets.length) {
       cancelMessageSelection();
       return;
@@ -5867,11 +5866,9 @@ export default function ChatsPage() {
                     {t("common.download")}
                   </button>
                 ) : null}
-                {messageMenu.message.from === "self" ? (
-                  <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
-                    {t("message.multiSelect")}
-                  </button>
-                ) : null}
+                <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
+                  {t("message.multiSelect")}
+                </button>
                 {(typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image")) ? (
                   <button
                     className="message-context-button danger"

@@ -958,7 +958,7 @@
   "message.selected": "selected",
   "message.deleteSelected": "Delete selected",
   "message.batchDeleteConfirmTitle": "Delete {{count}} selected messages?",
-  "message.batchDeleteConfirmHint": "This cannot be undone.",
+  "message.batchDeleteConfirmHint": "Removed only for you. Other members keep their copies.",
   "message.batchDeleted": "Deleted {{count}} messages",
   "message.batchDeleteFailed": "Could not delete selected messages",
   "message.selectionLimit": "Select up to {{count}} messages at a time",

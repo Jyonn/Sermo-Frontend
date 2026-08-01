@@ -958,7 +958,7 @@
   "message.selected": "条已选",
   "message.deleteSelected": "删除所选",
   "message.batchDeleteConfirmTitle": "删除选中的 {{count}} 条消息？",
-  "message.batchDeleteConfirmHint": "删除后无法恢复。",
+  "message.batchDeleteConfirmHint": "仅从你这里删除，不影响其他成员。",
   "message.batchDeleted": "已删除 {{count}} 条消息",
   "message.batchDeleteFailed": "批量删除失败",
   "message.selectionLimit": "一次最多选择 {{count}} 条消息",

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.11",
+  "id": "2026.08.01.12",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "更新说明适配小屏",
+      "title": "批量整理聊天记录",
       "items": [
-        "窄屏和大字体下，更新内容不再溢出卡片",
-        "标题、版本号与更新条目会自然换行"
+        "多选删除现在可以同时选择双方发送的消息",
+        "删除只影响自己的聊天记录，不会移除其他人的内容"
       ]
     },
     "en": {
-      "title": "Release notes now fit small screens",
+      "title": "Clean up conversations in batches",
       "items": [
-        "Update details no longer overflow with narrow screens or large text",
-        "Titles, versions, and notes now wrap naturally"
+        "Multi-select deletion now supports messages from every sender",
+        "Deletion affects only your conversation history and leaves others untouched"
       ]
     }
   }
