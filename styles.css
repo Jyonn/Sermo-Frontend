@@ -15416,6 +15416,21 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   cursor: pointer;
 }
 
+.travel-map-focus-region {
+  fill: rgba(255, 249, 223, 0.1);
+  stroke: rgba(244, 238, 207, 0.82);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+  transition: fill 320ms ease, stroke 320ms ease;
+}
+
+.travel-map-focus-region.is-target {
+  fill: rgba(39, 201, 143, 0.42);
+  stroke: rgba(255, 251, 218, 0.98);
+  stroke-width: 1.35;
+  filter: drop-shadow(0 0 5px rgba(39, 201, 143, 0.4));
+}
+
 .travel-map-current-location {
   overflow: visible;
   pointer-events: none;

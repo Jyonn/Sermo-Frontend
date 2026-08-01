@@ -73,7 +73,7 @@ export interface CheckInPosition {
 }
 
 type CheckInPhase = "idle" | "locating" | "matching" | "saving";
-type LocationFocusPhase = "idle" | "flying" | "arrived" | "selecting" | "country";
+type LocationFocusPhase = "idle" | "flying" | "arrived" | "selecting" | "country" | "focused";
 
 const WIDTH = 920;
 const HEIGHT = 500;
@@ -378,7 +378,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         startRotation[0] + longitudeDelta * eased,
         startRotation[1] + (targetRotation[1] - startRotation[1]) * eased,
       ]);
-      setTransform({ x: 0, y: 0, scale: 1 + 3 * eased });
+      setTransform({ x: 0, y: 0, scale: 1 + 1.5 * eased });
       if (progress < 1) frame = requestAnimationFrame(animate);
       else setLocationFocusPhase("arrived");
     };
@@ -425,7 +425,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     }
     const controller = new AbortController();
     setLoading(true);
-    setTransform({ x: 0, y: 0, scale: 1 });
+    if (!focusLocation) setTransform({ x: 0, y: 0, scale: 1 });
     void loadCountryBoundary(activeCountry)
       .then((payload) => {
         if (!payload) throw new Error("geometry unavailable");
@@ -440,7 +440,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [activeCountry, open]);
+  }, [activeCountry, focusLocation, open]);
 
   const detailProjection = useMemo(() => geometry
     ? geoMercator().fitExtent([[26, 26], [WIDTH - 26, HEIGHT - 26]], geometry)
@@ -460,16 +460,13 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const displayedLocationOwner = focusOwner ?? session?.user;
 
   useEffect(() => {
-    if (!focusLocation || locationFocusPhase !== "country" || !detailProjection) return;
-    const point = detailProjection([focusLocation.longitude, focusLocation.latitude]);
-    if (!point) return;
+    if (!focusLocation || locationFocusPhase !== "country" || !geometry) return;
     let cancelled = false;
     let frame = 0;
     const startedAt = performance.now();
-    const duration = 1250;
-    const targetScale = 2.75;
-    const targetX = WIDTH / 2 - point[0] * targetScale;
-    const targetY = HEIGHT / 2 - point[1] * targetScale;
+    const duration = 1500;
+    const startScale = 2.5;
+    const targetScale = 7;
     const easeInOutQuint = (value: number) => value < 0.5
       ? 16 * Math.pow(value, 5)
       : 1 - Math.pow(-2 * value + 2, 5) / 2;
@@ -478,24 +475,25 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       const progress = Math.min(1, (now - startedAt) / duration);
       const eased = easeInOutQuint(progress);
       setTransform({
-        x: targetX * eased,
-        y: targetY * eased,
-        scale: 1 + (targetScale - 1) * eased,
+        x: 0,
+        y: 0,
+        scale: startScale + (targetScale - startScale) * eased,
       });
       if (progress < 1) frame = requestAnimationFrame(animate);
+      else setLocationFocusPhase("focused");
     };
-    setTransform({ x: 0, y: 0, scale: 1 });
+    setTransform({ x: 0, y: 0, scale: startScale });
     frame = requestAnimationFrame(animate);
     return () => {
       cancelled = true;
       cancelAnimationFrame(frame);
     };
-  }, [detailProjection, focusLocation, locationFocusPhase]);
+  }, [focusLocation, geometry, locationFocusPhase]);
 
   const currentLocationPoint = useMemo(() => {
     if (!displayedLocation) return null;
     const coordinate: [number, number] = [displayedLocation.longitude, displayedLocation.latitude];
-    if (!activeCountry) {
+    if (!activeCountry || focusLocation) {
       const globeCenter: [number, number] = [-globeRotation[0], -globeRotation[1]];
       return geoDistance(coordinate, globeCenter) <= Math.PI / 2 ? worldProjection(coordinate) : null;
     }
@@ -508,7 +506,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         && displayedLocation.longitude <= east + 0.15;
     })) return null;
     return detailProjection(coordinate);
-  }, [activeCountry, detailProjection, displayedLocation, geometry, globeRotation, worldProjection]);
+  }, [activeCountry, detailProjection, displayedLocation, focusLocation, geometry, globeRotation, worldProjection]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -608,9 +606,10 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     }, 0);
   };
 
+  const maxZoom = focusLocation ? 8 : 4;
   const zoom = (delta: number) => setTransform((current) => ({
     ...current,
-    scale: Math.min(4, Math.max(1, current.scale + delta)),
+    scale: Math.min(maxZoom, Math.max(1, current.scale + delta)),
   }));
   const resetView = () => {
     setMode("world");
@@ -682,11 +681,11 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       const ratio = metrics.distance / previousDistance;
       if (Math.abs(ratio - 1) > 0.002) {
         gesture.moved = true;
-        setTransform((current) => ({ ...current, scale: Math.min(4, Math.max(1, current.scale * ratio)) }));
+        setTransform((current) => ({ ...current, scale: Math.min(maxZoom, Math.max(1, current.scale * ratio)) }));
       }
     }
 
-    if (!activeCountry) {
+    if (!activeCountry || focusLocation) {
       setGlobeRotation(([longitude, latitude]) => [
         longitude + dx * 0.32 / transform.scale,
         Math.min(82, Math.max(-82, latitude - dy * 0.32 / transform.scale)),
@@ -703,6 +702,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       && gesture.pointers.size === 1
       && !gesture.moved
       && !activeCountry
+      && !focusLocation
       && gesture.tapCountryCode;
     gesture.pointers.delete(event.pointerId);
     const metrics = gestureMetrics(gesture.pointers);
@@ -765,7 +765,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
               <small>{focusLocation ? t("location.focusing") : t("travelMap.regionCount", { count: totalRegions })}</small>
             </span>
           </div>
-          <div className="travel-map-view-switch">
+          {!focusLocation ? <div className="travel-map-view-switch">
             <button className={!activeCountry ? "is-active" : ""} onClick={resetView} type="button">{t("travelMap.world")}</button>
             <button
               className={activeCountry ? "is-active" : ""}
@@ -783,16 +783,16 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                 ? countryName(locationFocusCandidate.countryCode, language)
                 : t("travelMap.china")}
             </button>
-          </div>
+          </div> : null}
         </div>
 
         <div className="travel-map-canvas">
           <div className="travel-map-paper-heading">
-            <span>{activeCountry ? t("travelMap.exploring") : t("travelMap.worldAtlas")}</span>
-            <strong>{activeCountry || t("travelMap.worldCode")}</strong>
+            <span>{focusLocation ? t("location.focusing") : activeCountry ? t("travelMap.exploring") : t("travelMap.worldAtlas")}</span>
+            <strong>{focusLocation ? locationFocusCandidate?.regionName || locationFocusCandidate?.countryCode || t("travelMap.worldCode") : activeCountry || t("travelMap.worldCode")}</strong>
           </div>
           <svg
-            aria-label={activeCountry ? countryName(activeCountry, language) : t("travelMap.world")}
+            aria-label={focusLocation ? focusLocation.address || t("location.shared") : activeCountry ? countryName(activeCountry, language) : t("travelMap.world")}
             onPointerCancel={(event) => handlePointerEnd(event, true)}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
@@ -801,8 +801,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
             role="img"
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           >
-            <g transform={activeCountry ? `translate(${transform.x} ${transform.y}) scale(${transform.scale})` : undefined}>
-              {!activeCountry ? (
+            <g transform={activeCountry && !focusLocation ? `translate(${transform.x} ${transform.y}) scale(${transform.scale})` : undefined}>
+              {!activeCountry || focusLocation ? (
                 <>
                   <path className="travel-map-globe-sphere" d={worldPath({ type: "Sphere" }) ?? undefined} />
                   <path className="travel-map-globe-graticule" d={worldPath(worldGraticule) ?? undefined} />
@@ -816,6 +816,17 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                   </path>
                 );
                   })}
+                  {focusLocation && geometry ? geometry.features.map((region, index) => {
+                    const code = regionCode(activeCountry || locationFocusCandidate?.countryCode || "", region);
+                    const name = region.properties?.name || code;
+                    const path = worldPath(region);
+                    const isTarget = code === locationFocusCandidate?.regionCode || name === locationFocusCandidate?.regionName;
+                    return path ? (
+                      <path className={`travel-map-focus-region${isTarget ? " is-target" : ""}`} d={path} key={`focus:${code}:${index}`}>
+                        <title>{name}</title>
+                      </path>
+                    ) : null;
+                  }) : null}
                 </>
               ) : geometry?.features.map((region, index) => {
                 const code = regionCode(activeCountry, region);
@@ -832,7 +843,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
               {currentLocationPoint ? (
                 <g
                   className="travel-map-current-location-anchor"
-                  transform={`translate(${currentLocationPoint[0]} ${currentLocationPoint[1]}) scale(${activeCountry ? 1 / transform.scale : 1})`}
+                  transform={`translate(${currentLocationPoint[0]} ${currentLocationPoint[1]}) scale(${activeCountry && !focusLocation ? 1 / transform.scale : 1})`}
                 >
                   <foreignObject
                     className="travel-map-current-location"
@@ -865,17 +876,17 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           <div className="travel-map-zoom">
             <button aria-label={t("travelMap.zoomOut")} disabled={transform.scale <= 1} onClick={() => zoom(-0.5)} type="button">−</button>
             <button aria-label={t("travelMap.resetZoom")} onClick={() => setTransform({ x: 0, y: 0, scale: 1 })} type="button">{Math.round(transform.scale * 100)}%</button>
-            <button aria-label={t("travelMap.zoomIn")} disabled={transform.scale >= 4} onClick={() => zoom(0.5)} type="button">＋</button>
+            <button aria-label={t("travelMap.zoomIn")} disabled={transform.scale >= maxZoom} onClick={() => zoom(0.5)} type="button">＋</button>
           </div>
         </div>
 
-        <div className="travel-map-legend">
+        {!focusLocation ? <div className="travel-map-legend">
           <span><i className="is-mine" />{t("travelMap.mine")}</span>
           {others.length ? <span><i className="is-theirs" />{otherLegendLabel}</span> : null}
           {others.length ? <span><i className="is-overlap" />{t("travelMap.overlap")}</span> : null}
-        </div>
+        </div> : null}
 
-        {activeCountry ? (
+        {activeCountry && !focusLocation ? (
           <button className="travel-map-country-back" onClick={resetView} type="button">
             <span>←</span>
             <span><strong>{countryName(activeCountry, language)}</strong><small>{t("travelMap.readOnlyRegions")}</small></span>
