@@ -32,7 +32,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 
@@ -70,7 +70,16 @@ const growthLevelUnlockKeys: Record<number, TranslationKey[]> = {
   18: ["growth.unlockFinalBadge"],
 };
 const personalizationOptions = {
-  chat_bubble_style: [["default", "menu.styleDefault"], ["comic", "menu.styleComic"], ["vip", "menu.styleVip"]],
+  chat_bubble_style: [
+    ["default", "menu.styleDefault"],
+    ["comic", "menu.styleComic"],
+    ["zen", "menu.styleZen"],
+    ["hero", "menu.styleHero"],
+    ["dragon", "menu.styleDragon"],
+    ["bauhaus", "menu.styleBauhaus"],
+    ["mosaic", "menu.styleMosaic"],
+    ["vip", "menu.styleVip"],
+  ],
   avatar_frame_style: [
     ["none", "menu.frameNone"],
     ["orbit", "menu.frameOrbit"],
@@ -88,7 +97,7 @@ const personalizationOptions = {
 } as const;
 
 function visibleBubbleStyle(style?: string) {
-  return style === "comic" || style === "vip" ? style : "default";
+  return ["comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic"].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
 type BubblePreviewKind = "text" | "image" | "audio" | "video" | "file" | "location" | "travel" | "link";

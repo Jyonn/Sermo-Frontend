@@ -160,7 +160,7 @@ export interface UserMeDTO extends UserDTO {
   chat_background_uri?: string;
 }
 
-export type ChatBubbleStyle = "default" | "comic" | "vip";
+export type ChatBubbleStyle = "default" | "comic" | "vip" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic";
 export type AvatarFrameStyle = "none" | "orbit" | "pixel" | "aurora" | "polaroid" | "soundwave" | "lucky" | "portal";
 export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud";
 export type SquarePropStyle = "none" | "star" | "coffee" | "flag";

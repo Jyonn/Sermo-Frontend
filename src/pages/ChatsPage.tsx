@@ -38,7 +38,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
@@ -166,7 +166,7 @@ function avatarLabel(name: string) {
 }
 
 function visibleBubbleStyle(style?: string) {
-  return style === "comic" || style === "vip" ? style : "default";
+  return ["comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic"].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {

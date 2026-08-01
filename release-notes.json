@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.22",
+  "id": "2026.08.01.23",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "头像框成为真正的穿搭",
+      "title": "五种文化化作聊天气泡",
       "items": [
-        "移除烈焰头像框，新增极光、拍立得、声浪、祈愿结与时隙五种设计",
-        "头像框加入挂件、结构变化和动态效果，并在聊天与广场等场景保持一致"
+        "新增枯山水、英雄刊、游龙、包豪斯与马赛克五套聊天气泡",
+        "文本、语音、图片、视频、文件、位置、足迹、链接、引用与发送状态均采用完整主题设计"
       ]
     },
     "en": {
-      "title": "Avatar frames become expressive wearables",
+      "title": "Five cultures, five complete bubble worlds",
       "items": [
-        "Removed Blaze and introduced Aurora, Polaroid, Soundwave, Wish Knot, and Portal frames",
-        "Frames now feature ornaments, distinct silhouettes, and motion across chats and the plaza"
+        "Added Zen Garden, Hero Pulp, Jade Dragon, Bauhaus, and Mosaic chat themes",
+        "Text, voice, media, files, locations, maps, links, replies, and sending states now share each theme"
       ]
     }
   }

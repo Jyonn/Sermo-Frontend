@@ -6110,6 +6110,129 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   --bubble-skin-border-width: 1px;
 }
 
+.personalization-bubble-stage.bubble-style-zen,
+.message-group.bubble-style-zen {
+  --bubble-skin-other-bg:
+    repeating-radial-gradient(ellipse at 15% 115%, transparent 0 9px, rgba(43, 52, 47, 0.045) 10px 11px),
+    #f5f1e7;
+  --bubble-skin-other-color: #303630;
+  --bubble-skin-other-border: rgba(53, 61, 55, 0.2);
+  --bubble-skin-other-shadow: 0 7px 18px rgba(38, 43, 39, 0.08);
+  --bubble-skin-self-bg:
+    repeating-radial-gradient(ellipse at 85% 115%, transparent 0 10px, rgba(255, 255, 255, 0.055) 11px 12px),
+    #303a34;
+  --bubble-skin-self-color: #f6f1e6;
+  --bubble-skin-self-border: rgba(30, 35, 32, 0.58);
+  --bubble-skin-self-shadow: 0 8px 18px rgba(26, 32, 28, 0.16);
+  --bubble-skin-other-radius: 5px 18px 18px 18px;
+  --bubble-skin-self-radius: 18px 5px 18px 18px;
+  --bubble-skin-border-width: 1px;
+  --bubble-theme-accent: #b84b3c;
+  --bubble-theme-muted-other: rgba(48, 54, 48, 0.58);
+  --bubble-theme-muted-self: rgba(246, 241, 230, 0.66);
+  --bubble-theme-icon-other: rgba(184, 75, 60, 0.11);
+  --bubble-theme-icon-self: rgba(246, 241, 230, 0.1);
+}
+
+.personalization-bubble-stage.bubble-style-hero,
+.message-group.bubble-style-hero {
+  --bubble-skin-other-bg:
+    radial-gradient(circle, rgba(23, 43, 63, 0.13) 0 1px, transparent 1.5px) 0 0 / 7px 7px,
+    #fff5cf;
+  --bubble-skin-other-color: #172b3f;
+  --bubble-skin-other-border: #172b3f;
+  --bubble-skin-other-shadow: 5px 5px 0 #1c8aa5;
+  --bubble-skin-self-bg:
+    linear-gradient(125deg, transparent 0 70%, rgba(255, 228, 77, 0.92) 71%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.17) 0 1px, transparent 1.5px) 0 0 / 7px 7px,
+    #d9473f;
+  --bubble-skin-self-color: #fff8db;
+  --bubble-skin-self-border: #172b3f;
+  --bubble-skin-self-shadow: 5px 5px 0 #f1c93b;
+  --bubble-skin-other-radius: 14px;
+  --bubble-skin-self-radius: 14px;
+  --bubble-skin-border-width: 2px;
+  --bubble-theme-accent: #d9473f;
+  --bubble-theme-muted-other: rgba(23, 43, 63, 0.62);
+  --bubble-theme-muted-self: rgba(255, 248, 219, 0.74);
+  --bubble-theme-icon-other: #f1c93b;
+  --bubble-theme-icon-self: rgba(23, 43, 63, 0.22);
+}
+
+.personalization-bubble-stage.bubble-style-dragon,
+.message-group.bubble-style-dragon {
+  --bubble-skin-other-bg:
+    radial-gradient(circle at 0 100%, transparent 0 15px, rgba(168, 45, 38, 0.08) 16px 17px, transparent 18px),
+    linear-gradient(145deg, #fffdf3, #efe5c9);
+  --bubble-skin-other-color: #2d352d;
+  --bubble-skin-other-border: rgba(162, 119, 43, 0.72);
+  --bubble-skin-other-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72), 0 7px 18px rgba(96, 70, 26, 0.13);
+  --bubble-skin-self-bg:
+    radial-gradient(circle at 100% 100%, transparent 0 15px, rgba(239, 205, 117, 0.16) 16px 17px, transparent 18px),
+    linear-gradient(145deg, #176a58, #0d473e);
+  --bubble-skin-self-color: #fff4d2;
+  --bubble-skin-self-border: #d3a84e;
+  --bubble-skin-self-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.13), 0 8px 20px rgba(9, 63, 52, 0.22);
+  --bubble-skin-other-radius: 20px 20px 20px 7px;
+  --bubble-skin-self-radius: 20px 20px 7px 20px;
+  --bubble-skin-border-width: 1px;
+  --bubble-theme-accent: #a82d26;
+  --bubble-theme-muted-other: rgba(45, 53, 45, 0.6);
+  --bubble-theme-muted-self: rgba(255, 244, 210, 0.68);
+  --bubble-theme-icon-other: rgba(168, 45, 38, 0.1);
+  --bubble-theme-icon-self: rgba(255, 232, 166, 0.12);
+}
+
+.personalization-bubble-stage.bubble-style-bauhaus,
+.message-group.bubble-style-bauhaus {
+  --bubble-skin-other-bg:
+    linear-gradient(90deg, #1767a0 0 8px, transparent 8px),
+    linear-gradient(150deg, #f7f2df 0 76%, #e8c93a 77%);
+  --bubble-skin-other-color: #18232c;
+  --bubble-skin-other-border: #18232c;
+  --bubble-skin-other-shadow: 4px 4px 0 rgba(24, 35, 44, 0.2);
+  --bubble-skin-self-bg:
+    radial-gradient(circle at 91% 18%, #d84638 0 11px, transparent 12px),
+    linear-gradient(145deg, #e9c933, #f6e06b);
+  --bubble-skin-self-color: #19242c;
+  --bubble-skin-self-border: #19242c;
+  --bubble-skin-self-shadow: 5px 5px 0 #1767a0;
+  --bubble-skin-other-radius: 3px 17px 3px 17px;
+  --bubble-skin-self-radius: 17px 3px 17px 3px;
+  --bubble-skin-border-width: 2px;
+  --bubble-theme-accent: #d84638;
+  --bubble-theme-muted-other: rgba(24, 35, 44, 0.62);
+  --bubble-theme-muted-self: rgba(25, 36, 44, 0.66);
+  --bubble-theme-icon-other: #1767a0;
+  --bubble-theme-icon-self: rgba(216, 70, 56, 0.18);
+}
+
+.personalization-bubble-stage.bubble-style-mosaic,
+.message-group.bubble-style-mosaic {
+  --bubble-skin-other-bg:
+    linear-gradient(135deg, rgba(37, 111, 123, 0.1) 25%, transparent 25%) 0 0 / 12px 12px,
+    linear-gradient(315deg, rgba(216, 144, 78, 0.09) 25%, transparent 25%) 0 0 / 12px 12px,
+    #fff9e9;
+  --bubble-skin-other-color: #263d40;
+  --bubble-skin-other-border: #3f8e94;
+  --bubble-skin-other-shadow: 0 0 0 3px rgba(255, 249, 233, 0.92), 0 0 0 5px rgba(63, 142, 148, 0.26), 0 8px 18px rgba(43, 86, 88, 0.11);
+  --bubble-skin-self-bg:
+    linear-gradient(45deg, rgba(255, 248, 222, 0.12) 25%, transparent 25%) 0 0 / 12px 12px,
+    linear-gradient(225deg, rgba(255, 248, 222, 0.1) 25%, transparent 25%) 0 0 / 12px 12px,
+    #b65e48;
+  --bubble-skin-self-color: #fff8de;
+  --bubble-skin-self-border: #e7bd6c;
+  --bubble-skin-self-shadow: 0 0 0 3px rgba(255, 248, 222, 0.92), 0 0 0 5px rgba(182, 94, 72, 0.28), 0 8px 18px rgba(98, 43, 33, 0.15);
+  --bubble-skin-other-radius: 16px 16px 8px 16px;
+  --bubble-skin-self-radius: 16px 16px 16px 8px;
+  --bubble-skin-border-width: 1px;
+  --bubble-theme-accent: #d8904e;
+  --bubble-theme-muted-other: rgba(38, 61, 64, 0.6);
+  --bubble-theme-muted-self: rgba(255, 248, 222, 0.72);
+  --bubble-theme-icon-other: rgba(63, 142, 148, 0.13);
+  --bubble-theme-icon-self: rgba(255, 248, 222, 0.12);
+}
+
 .personalization-preview-message {
   display: flex;
   align-items: end;
@@ -6514,6 +6637,11 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 }
 
 .field-chat_bubble_style .preview-comic i span { border: 2px solid #26352e; border-radius: 13px; background: #fff9df; box-shadow: 3px 3px 0 #f0a54e; }
+.field-chat_bubble_style .preview-zen i span { border: 1px solid rgba(48, 54, 48, 0.3); border-radius: 4px 13px 13px; background: repeating-radial-gradient(ellipse at 0 100%, transparent 0 5px, rgba(48, 54, 48, 0.1) 6px 7px), #f5f1e7; }
+.field-chat_bubble_style .preview-hero i span { border: 2px solid #172b3f; border-radius: 10px; background: radial-gradient(circle, rgba(23, 43, 63, 0.18) 0 1px, transparent 1.5px) 0 0 / 6px 6px, #fff5cf; box-shadow: 3px 3px 0 #1c8aa5; }
+.field-chat_bubble_style .preview-dragon i span { border: 1px solid #d3a84e; border-radius: 14px 14px 5px; background: linear-gradient(145deg, #176a58, #0d473e); box-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.16); }
+.field-chat_bubble_style .preview-bauhaus i span { border: 2px solid #18232c; border-radius: 3px 12px 3px 12px; background: radial-gradient(circle at 85% 20%, #d84638 0 5px, transparent 6px), linear-gradient(145deg, #e9c933, #f6e06b); box-shadow: 3px 3px 0 #1767a0; }
+.field-chat_bubble_style .preview-mosaic i span { border: 1px solid #3f8e94; border-radius: 12px 12px 5px; background: linear-gradient(135deg, rgba(37, 111, 123, 0.13) 25%, transparent 25%) 0 0 / 9px 9px, #fff9e9; box-shadow: 0 0 0 3px rgba(63, 142, 148, 0.18); }
 .field-chat_bubble_style .preview-vip i span {
   border: 1px solid #d2a348;
   border-radius: 13px;
@@ -15947,6 +16075,376 @@ html[data-theme="dark"] .message-group.bubble-style-default .message-bubble.othe
 
 .personalization-bubble-stage.bubble-style-vip .personalization-preview-bubble.type-link small {
   color: #efc86f;
+}
+
+/* Cultural bubble collections theme every message surface, not only text. */
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+).other {
+  --bubble-theme-surface: var(--bubble-skin-other-bg);
+  --bubble-theme-color: var(--bubble-skin-other-color);
+  --bubble-theme-muted: var(--bubble-theme-muted-other);
+  --bubble-theme-icon: var(--bubble-theme-icon-other);
+  --bubble-theme-shadow: var(--bubble-skin-other-shadow);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+).self {
+  --bubble-theme-surface: var(--bubble-skin-self-bg);
+  --bubble-theme-color: var(--bubble-skin-self-color);
+  --bubble-theme-muted: var(--bubble-theme-muted-self);
+  --bubble-theme-icon: var(--bubble-theme-icon-self);
+  --bubble-theme-shadow: var(--bubble-skin-self-shadow);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-bubble {
+  --reply-preview-accent: var(--bubble-theme-accent);
+  --reply-preview-bg: var(--bubble-theme-icon);
+  --reply-preview-border: color-mix(in srgb, var(--bubble-theme-accent) 32%, transparent);
+  --reply-preview-color: var(--bubble-theme-muted);
+  --reply-preview-radius: 8px;
+  --reply-preview-shadow: none;
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-bubble.has-reply {
+  color: var(--bubble-theme-color);
+  border-color: color-mix(in srgb, var(--bubble-theme-accent) 38%, transparent);
+  background: var(--bubble-theme-surface);
+  box-shadow: var(--bubble-theme-shadow);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-bubble.has-reply > :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-link-preview-card
+) {
+  background: transparent;
+  box-shadow: none;
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card
+) {
+  color: var(--bubble-theme-color);
+  background: var(--bubble-theme-surface);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-link-preview-card,
+html[data-theme="dark"] :is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-link-preview-card {
+  color: var(--bubble-theme-color);
+  background: var(--bubble-theme-surface);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) :is(
+  .message-audio-meta,
+  .message-audio-progress,
+  .message-file-copy small,
+  .message-file-open,
+  .message-location-copy small,
+  .message-location-open,
+  .message-link-preview-site,
+  .message-link-preview-desc,
+  .message-travel-map-copy small,
+  .message-travel-map-copy span,
+  .message-travel-map-arrow
+) {
+  color: var(--bubble-theme-muted);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) :is(.message-link-preview-title, .message-travel-map-card) {
+  color: var(--bubble-theme-color);
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) :is(.message-file-icon, .message-location-mark, .message-travel-map-art, .message-audio-play) {
+  color: var(--bubble-theme-accent);
+  border: 1px solid color-mix(in srgb, var(--bubble-theme-accent) 18%, transparent);
+  background: var(--bubble-theme-icon);
+  box-shadow: none;
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-audio-card {
+  min-width: min(66vw, 260px);
+  min-height: 0;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  padding: 8px 11px;
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-audio-play {
+  width: 34px;
+  height: 34px;
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-audio-wave-bar {
+  width: 3px;
+  background: var(--bubble-theme-muted);
+  opacity: 0.4;
+}
+
+:is(
+  .message-group.bubble-style-zen,
+  .message-group.bubble-style-hero,
+  .message-group.bubble-style-dragon,
+  .message-group.bubble-style-bauhaus,
+  .message-group.bubble-style-mosaic
+) .message-audio-wave-bar.is-active {
+  background: var(--bubble-theme-accent);
+  opacity: 0.95;
+}
+
+/* Zen: rice paper, raked sand, and a restrained vermilion seal. */
+.message-group.bubble-style-zen .message-bubble:where(:not(.is-media):not(.is-link-preview))::after {
+  position: absolute;
+  right: 7px;
+  bottom: 6px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+  color: #b84b3c;
+  content: "";
+  opacity: 0.72;
+}
+
+.message-group.bubble-style-zen .message-audio-play,
+.message-group.bubble-style-zen :is(.message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border-radius: 50% 50% 46% 54%;
+}
+
+/* Hero pulp: halftone print, offset ink, and assertive angular controls. */
+.message-group.bubble-style-hero .message-bubble,
+.personalization-bubble-stage.bubble-style-hero .personalization-preview-bubble {
+  letter-spacing: 0.005em;
+}
+
+.message-group.bubble-style-hero .message-bubble:where(:not(.is-media):not(.is-link-preview))::after {
+  position: absolute;
+  top: -2px;
+  right: 10px;
+  width: 22px;
+  height: 5px;
+  background: #f1c93b;
+  content: "";
+  transform: skewX(-28deg);
+}
+
+.message-group.bubble-style-hero :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border: 2px solid #172b3f;
+  border-radius: 6px;
+  transform: rotate(-2deg);
+}
+
+.message-group.bubble-style-hero .message-send-state-overlay::after {
+  background: linear-gradient(105deg, transparent 24%, rgba(255, 229, 77, 0.72) 48%, transparent 72%);
+}
+
+/* Dragon: jade, porcelain, cloud lines, and a small moving pearl. */
+.message-group.bubble-style-dragon .message-bubble:where(:not(.is-media):not(.is-link-preview))::after {
+  position: absolute;
+  z-index: 2;
+  top: -4px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid #9c6d25;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff9cf, #d6a947 62%, #8c5b1c);
+  box-shadow: 0 2px 5px rgba(93, 62, 20, 0.22);
+  content: "";
+  animation: bubble-dragon-pearl 2.8s ease-in-out infinite alternate;
+}
+
+.message-group.bubble-style-dragon.self .message-bubble::after { left: 12px; }
+.message-group.bubble-style-dragon.other .message-bubble::after { right: 12px; }
+
+.message-group.bubble-style-dragon :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.18);
+}
+
+/* Bauhaus: primary geometry controls the silhouette and information hierarchy. */
+.message-group.bubble-style-bauhaus .message-bubble:where(:not(.is-media):not(.is-link-preview))::after {
+  position: absolute;
+  bottom: 5px;
+  width: 8px;
+  height: 8px;
+  background: #d84638;
+  content: "";
+}
+
+.message-group.bubble-style-bauhaus.self .message-bubble::after { left: 6px; border-radius: 50%; }
+.message-group.bubble-style-bauhaus.other .message-bubble::after { right: 6px; }
+
+.message-group.bubble-style-bauhaus :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border: 2px solid #18232c;
+  border-radius: 2px 12px 2px 12px;
+}
+
+.message-group.bubble-style-bauhaus .message-audio-wave-bar {
+  border-radius: 0;
+}
+
+/* Mediterranean mosaic: layered tile borders and ceramic icon wells. */
+.message-group.bubble-style-mosaic .message-bubble:where(:not(.is-media):not(.is-link-preview))::after {
+  position: absolute;
+  right: 8px;
+  bottom: 7px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  background: currentColor;
+  content: "";
+  opacity: 0.34;
+  transform: rotate(45deg);
+}
+
+.message-group.bubble-style-mosaic :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border: 2px double #3f8e94;
+  border-radius: 10px 10px 4px 10px;
+}
+
+.personalization-bubble-stage:is(
+  .bubble-style-zen,
+  .bubble-style-hero,
+  .bubble-style-dragon,
+  .bubble-style-bauhaus,
+  .bubble-style-mosaic
+) .personalization-preview-message.other {
+  --bubble-theme-color: var(--bubble-skin-other-color);
+  --bubble-theme-muted: var(--bubble-theme-muted-other);
+  --bubble-theme-icon: var(--bubble-theme-icon-other);
+}
+
+.personalization-bubble-stage:is(
+  .bubble-style-zen,
+  .bubble-style-hero,
+  .bubble-style-dragon,
+  .bubble-style-bauhaus,
+  .bubble-style-mosaic
+) .personalization-preview-message.self {
+  --bubble-theme-color: var(--bubble-skin-self-color);
+  --bubble-theme-muted: var(--bubble-theme-muted-self);
+  --bubble-theme-icon: var(--bubble-theme-icon-self);
+}
+
+.personalization-bubble-stage:is(
+  .bubble-style-zen,
+  .bubble-style-hero,
+  .bubble-style-dragon,
+  .bubble-style-bauhaus,
+  .bubble-style-mosaic
+) .personalization-preview-bubble :is(.message-audio-card, .message-file-card, .message-location-card) {
+  color: inherit;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.personalization-bubble-stage:is(
+  .bubble-style-zen,
+  .bubble-style-hero,
+  .bubble-style-dragon,
+  .bubble-style-bauhaus,
+  .bubble-style-mosaic
+) .personalization-preview-bubble :is(
+  .message-audio-meta,
+  .message-audio-progress,
+  .message-file-copy small,
+  .message-file-open,
+  .message-location-copy small,
+  .message-location-open
+) {
+  color: var(--bubble-theme-muted);
+}
+
+@keyframes bubble-dragon-pearl {
+  to { transform: translateY(2px) scale(0.82); opacity: 0.72; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-group.bubble-style-dragon .message-bubble::after { animation: none; }
 }
 
 /* Keep preview and live cards on one compact sizing and surface system. */
