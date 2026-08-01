@@ -5717,7 +5717,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .pinned-message-card {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr) 42px;
   align-items: center;
   min-height: 76px;
   border-bottom: 1px solid color-mix(in srgb, var(--line, #e3e8e5) 76%, transparent);
@@ -5729,7 +5730,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .pinned-message-sequence {
   width: 27px;
-  flex: 0 0 27px;
   color: color-mix(in srgb, var(--text-muted) 68%, #087751);
   font-family: "Space Grotesk", sans-serif;
   font-size: 0.62rem;
@@ -5740,7 +5740,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .pinned-message-content {
   display: flex;
-  flex: 1;
+  width: 100%;
   align-items: center;
   min-width: 0;
   gap: 11px;
@@ -5807,6 +5807,23 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   gap: 5px;
 }
 
+.pinned-message-attribution {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.pinned-message-attribution > span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+
+.pinned-message-attribution > time {
+  flex: 0 0 auto;
+  color: inherit;
+  font: inherit;
+}
+
 .pinned-message-media {
   width: 43px;
   height: 43px;
@@ -5821,13 +5838,44 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   display: grid;
   width: 36px;
   height: 36px;
-  flex: 0 0 36px;
-  margin-left: 5px;
+  margin: 0;
   place-items: center;
   border-radius: 10px;
   color: var(--text-muted);
   opacity: 0.68;
   transition: color 150ms ease, background 150ms ease, opacity 150ms ease;
+}
+
+.pinned-message-action-slot {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  justify-self: end;
+}
+
+.pinned-message-readonly {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  color: color-mix(in srgb, var(--text-muted) 62%, #087751);
+  background: color-mix(in srgb, #087751 5%, transparent);
+}
+
+.pinned-message-readonly-icon {
+  width: 15px;
+  height: 15px;
+  opacity: 0.66;
+}
+
+.pinned-message-card.is-mine .pinned-message-action-slot {
+  color: #087751;
+}
+
+.pinned-message-card.is-readonly .pinned-message-content {
+  padding-right: 6px;
 }
 
 .pinned-message-remove:hover {

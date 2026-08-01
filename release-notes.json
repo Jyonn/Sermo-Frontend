@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.03",
+  "id": "2026.08.02.04",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "六十件新藏品进入个性化库",
+      "title": "置顶消息现在整齐又清楚",
       "items": [
-        "聊天背景、聊天气泡与头像框各新增 20 款，并按风格系列重新分组",
-        "每套气泡完整覆盖文字、语音、文件、位置、链接与足迹等消息卡片",
-        "头像框加入挂件、材质与动态效果，系统减少动态时会自动静止"
+        "置顶列表使用稳定的操作栏，不再因能否取消置顶而左右跳动",
+        "仅他人置顶时展示只读图钉，自己参与置顶时提供清晰的取消操作",
+        "多人置顶的姓名会自然收起，同时完整保留消息与时间信息"
       ]
     },
     "en": {
-      "title": "Sixty new pieces join the personalization library",
+      "title": "Pinned messages are now aligned and clear",
       "items": [
-        "Chat backgrounds, bubbles, and avatar frames each gain 20 new designs grouped into clear collections",
-        "Every bubble skin now covers text, audio, files, locations, links, travel maps, and other message cards",
-        "Avatar frames introduce distinct ornaments, materials, and motion that respects reduced-motion preferences"
+        "The pinned list now keeps a stable action rail instead of shifting with unpin permissions",
+        "Pins created only by others show a quiet read-only mark, while your own pins expose a clear unpin action",
+        "Long multi-user attribution truncates gracefully while preserving message and time information"
       ]
     }
   }

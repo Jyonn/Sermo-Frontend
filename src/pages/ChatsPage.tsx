@@ -5318,8 +5318,11 @@ export default function ChatsPage() {
         onClose={() => setPinnedDrawerOpen(false)}
       >
         <div className="pinned-message-list">
-          {pinnedMessages.map((pin, index) => (
-            <article className="pinned-message-card" key={pin.pin_id}>
+          {pinnedMessages.map((pin, index) => {
+            const pinnedByCurrentUser = pin.pinned_by_users.some((user) => user.user_id === currentUserId);
+            const canUnpin = canManagePinnedMessages && pinnedByCurrentUser;
+            return (
+            <article className={`pinned-message-card${pinnedByCurrentUser ? " is-mine" : " is-readonly"}`} key={pin.pin_id}>
               <span className="pinned-message-sequence">{String(index + 1).padStart(2, "0")}</span>
               <button className="pinned-message-content" onClick={() => revealPinnedMessage(pin.message.message_id)} type="button">
                 <UserAvatar className="pinned-message-avatar" name={pin.message.user.name} uri={pin.message.user.avatar_uri} />
@@ -5329,10 +5332,10 @@ export default function ChatsPage() {
                     <time>{formatRelativeTime(pin.message.created_at)}</time>
                   </span>
                   <span className="pinned-message-preview">{pinnedMessagePreview(pin)}</span>
-                  <small>
-                    {t("pin.by", { names: pinnedByLabel(pin) })}
+                  <small className="pinned-message-attribution" title={t("pin.by", { names: pinnedByLabel(pin) })}>
+                    <span>{t("pin.by", { names: pinnedByLabel(pin) })}</span>
                     <i />
-                    {formatRelativeTime(pin.pinned_at)}
+                    <time>{formatRelativeTime(pin.pinned_at)}</time>
                   </small>
                 </span>
                 {[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(pin.message.type) && (pin.message.payload?.thumbnail_uri || pin.message.payload?.uri) ? (
@@ -5344,7 +5347,8 @@ export default function ChatsPage() {
                   />
                 ) : null}
               </button>
-              {canManagePinnedMessages && pin.pinned_by_users.some((user) => user.user_id === currentUserId) ? (
+              <span className="pinned-message-action-slot">
+              {canUnpin ? (
                 <button
                   aria-label={t("pin.remove")}
                   className="pinned-message-remove"
@@ -5354,9 +5358,15 @@ export default function ChatsPage() {
                 >
                   <ComposerSvgIcon className="pinned-message-remove-icon" kind="pin-off" />
                 </button>
-              ) : null}
+              ) : (
+                <span aria-hidden="true" className="pinned-message-readonly">
+                  <ComposerSvgIcon className="pinned-message-readonly-icon" kind="pin" />
+                </span>
+              )}
+              </span>
             </article>
-          ))}
+            );
+          })}
         </div>
       </SideDrawer>
 
