@@ -45,10 +45,11 @@ interface MapTransform {
 }
 
 interface MapGesture {
-  pointers: Map<number, { x: number; y: number }>;
+  pointers: Map<number, { x: number; y: number; startX: number; startY: number }>;
   center: { x: number; y: number } | null;
   distance: number | null;
   moved: boolean;
+  tapCountryCode: string | null;
 }
 
 export interface CheckInCandidate {
@@ -269,8 +270,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const [accessDetail, setAccessDetail] = useState<TravelMapAccessOverviewEntryDTO | null>(null);
   const [transform, setTransform] = useState<MapTransform>({ x: 0, y: 0, scale: 1 });
   const [globeRotation, setGlobeRotation] = useState<[number, number]>(INITIAL_GLOBE_ROTATION);
-  const gestureRef = useRef<MapGesture>({ pointers: new Map(), center: null, distance: null, moved: false });
-  const suppressCountryClickRef = useRef(false);
+  const gestureRef = useRef<MapGesture>({ pointers: new Map(), center: null, distance: null, moved: false, tapCountryCode: null });
 
   const world = useMemo(worldFeatures, []);
   const activeCountry = mode === "china" ? "CHN" : selectedCountry;
@@ -527,13 +527,23 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     const gesture = gestureRef.current;
-    gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    gesture.pointers.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+      startX: event.clientX,
+      startY: event.clientY,
+    });
     const metrics = gestureMetrics(gesture.pointers);
     gesture.center = metrics.center;
     gesture.distance = metrics.distance;
     if (gesture.pointers.size === 1) {
       gesture.moved = false;
-      suppressCountryClickRef.current = false;
+      gesture.tapCountryCode = event.target instanceof Element
+        ? event.target.closest<SVGPathElement>("[data-country-code]")?.dataset.countryCode ?? null
+        : null;
+    } else {
+      gesture.moved = true;
+      gesture.tapCountryCode = null;
     }
   };
   const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
@@ -541,12 +551,21 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     if (!gesture.pointers.has(event.pointerId)) return;
     const previousCenter = gesture.center;
     const previousDistance = gesture.distance;
-    gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const pointer = gesture.pointers.get(event.pointerId);
+    gesture.pointers.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+      startX: pointer?.startX ?? event.clientX,
+      startY: pointer?.startY ?? event.clientY,
+    });
     const metrics = gestureMetrics(gesture.pointers);
     if (!previousCenter || !metrics.center) return;
     const dx = metrics.center.x - previousCenter.x;
     const dy = metrics.center.y - previousCenter.y;
-    if (Math.abs(dx) + Math.abs(dy) > 1) gesture.moved = true;
+    if (pointer && Math.hypot(event.clientX - pointer.startX, event.clientY - pointer.startY) > 6) {
+      gesture.moved = true;
+      gesture.tapCountryCode = null;
+    }
 
     if (metrics.distance && previousDistance) {
       const ratio = metrics.distance / previousDistance;
@@ -567,20 +586,22 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     gesture.center = metrics.center;
     gesture.distance = metrics.distance;
   };
-  const handlePointerEnd = (event: ReactPointerEvent<SVGSVGElement>) => {
+  const handlePointerEnd = (event: ReactPointerEvent<SVGSVGElement>, cancelled = false) => {
     const gesture = gestureRef.current;
+    const shouldOpenCountry = !cancelled
+      && gesture.pointers.size === 1
+      && !gesture.moved
+      && !activeCountry
+      && gesture.tapCountryCode;
     gesture.pointers.delete(event.pointerId);
-    suppressCountryClickRef.current = gesture.moved;
     const metrics = gestureMetrics(gesture.pointers);
     gesture.center = metrics.center;
     gesture.distance = metrics.distance;
-  };
-  const openCountry = (code: string) => {
-    if (suppressCountryClickRef.current) {
-      suppressCountryClickRef.current = false;
-      return;
+    if (!gesture.pointers.size) {
+      gesture.tapCountryCode = null;
+      gesture.moved = false;
     }
-    setSelectedCountry(code);
+    if (shouldOpenCountry) setSelectedCountry(shouldOpenCountry);
   };
 
   const title = chatId
@@ -635,7 +656,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           </div>
           <svg
             aria-label={activeCountry ? countryName(activeCountry, language) : t("travelMap.world")}
-            onPointerCancel={handlePointerEnd}
+            onPointerCancel={(event) => handlePointerEnd(event, true)}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerEnd}
@@ -653,7 +674,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                 const path = worldPath(country);
                 if (!code || !path) return null;
                 return (
-                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)} is-country`} d={path} key={String(country.id)} onClick={() => openCountry(code)}>
+                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)} is-country`} d={path} data-country-code={code} key={String(country.id)}>
                     <title>{countryName(code, language)}</title>
                   </path>
                 );

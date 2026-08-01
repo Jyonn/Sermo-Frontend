@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.13",
+  "id": "2026.08.01.14",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "足迹授权入口归位",
+      "title": "地球手势更可靠",
       "items": [
-        "足迹授权图标现已固定在标题栏右侧",
-        "标题再长也能保持清晰稳定的操作布局"
+        "双指只缩放足迹地球，不再误放大整个网页",
+        "轻点地球上的国家即可稳定进入国家地图"
       ]
     },
     "en": {
-      "title": "Footprint access is back in place",
+      "title": "More reliable globe gestures",
       "items": [
-        "The footprint access icon now stays at the right edge of the header",
-        "Long titles no longer disrupt the action layout"
+        "Pinch gestures now zoom the footprint globe without scaling the page",
+        "Tap a country on the globe to reliably open its map"
       ]
     }
   }
