@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.12",
+  "id": "2026.08.01.13",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "批量整理聊天记录",
+      "title": "足迹授权入口归位",
       "items": [
-        "多选删除现在可以同时选择双方发送的消息",
-        "删除只影响自己的聊天记录，不会移除其他人的内容"
+        "足迹授权图标现已固定在标题栏右侧",
+        "标题再长也能保持清晰稳定的操作布局"
       ]
     },
     "en": {
-      "title": "Clean up conversations in batches",
+      "title": "Footprint access is back in place",
       "items": [
-        "Multi-select deletion now supports messages from every sender",
-        "Deletion affects only your conversation history and leaves others untouched"
+        "The footprint access icon now stays at the right edge of the header",
+        "Long titles no longer disrupt the action layout"
       ]
     }
   }

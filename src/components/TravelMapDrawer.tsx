@@ -600,7 +600,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       open={open}
       onClose={onClose}
       title={title}
-      titleAccessory={!chatId && !otherUser ? (
+      headerAction={!chatId && !otherUser ? (
         <button
           aria-label={t("travelMap.accessManagement")}
           className="travel-map-access-header-button"

@@ -9,6 +9,7 @@ interface SideDrawerProps {
   open: boolean;
   title: string;
   titleAccessory?: ReactNode;
+  headerAction?: ReactNode;
   actionLabel?: string;
   actionDisabled?: boolean;
   actionBusy?: boolean;
@@ -22,6 +23,7 @@ export function SideDrawer({
   open,
   title,
   titleAccessory,
+  headerAction,
   actionLabel,
   actionDisabled = false,
   actionBusy = false,
@@ -156,6 +158,7 @@ export function SideDrawer({
                 </div>
               </div>
             </div>
+            {headerAction}
             {actionLabel && onAction ? (
               <button
                 className="drawer-topbar-action"

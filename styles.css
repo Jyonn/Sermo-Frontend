@@ -14558,6 +14558,7 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
 
 .travel-map-access-header-button {
   display: inline-grid;
+  flex: 0 0 auto;
   width: 30px;
   height: 30px;
   align-items: center;
