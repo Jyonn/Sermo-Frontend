@@ -2827,6 +2827,7 @@ img {
 .message-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   overflow-anchor: none;
   padding: 24px 24px 14px;
@@ -3527,7 +3528,24 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble.is-location {
-  margin-inline: 4px;
+  width: min(100%, 340px);
+  max-width: 100%;
+  margin-inline: 0;
+  box-sizing: border-box;
+}
+
+.message-group:has(.message-location-card) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.message-group:has(.message-location-card) .message-bubbles {
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+
+.message-group.other:has(.message-location-card) .message-bubbles {
+  max-width: calc(100% - 38px);
 }
 
 .message-bubble.is-location:not(.has-reply) {
@@ -4767,8 +4785,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-file-card.self:not(.group-start):not(.group-end) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
 
 .message-location-card {
-  width: min(78vw, 340px);
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) auto;
   align-items: stretch;
@@ -15666,8 +15685,7 @@ html[data-theme="dark"] .message-group.bubble-style-comic :is(
 @media (max-width: 520px) {
   .message-text-stack.has-link-preview,
   .message-link-preview-card,
-  .message-travel-map-card,
-  .message-location-card {
+  .message-travel-map-card {
     max-width: calc(100vw - 92px);
   }
 }

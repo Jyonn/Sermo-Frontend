@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.3",
+  "id": "2026.08.01.4",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "烈焰头像框更柔和",
+      "title": "位置卡片不再撑开聊天页",
       "items": [
-        "烈焰外框改为多层曲线圆形叠加效果",
-        "移除头像周围类似太阳光芒的三角尖角"
+        "位置卡片改为根据消息区剩余宽度布局",
+        "恢复卡片与屏幕边缘间距并阻止聊天页横向滚动"
       ]
     },
     "en": {
-      "title": "A softer blaze avatar frame",
+      "title": "Location cards stay within the chat",
       "items": [
-        "The blaze frame now uses layered curved circles",
-        "Sharp sun-ray triangles around avatars have been removed"
+        "Location cards now size themselves from the available message area",
+        "Screen-edge spacing is restored and horizontal chat scrolling is prevented"
       ]
     }
   }
