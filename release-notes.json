@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.8",
+  "id": "2026.08.01.9",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "消息删除在所有设备保持同步",
+      "title": "足迹地图更直接",
       "items": [
-        "可以从自己这里删除任意消息，己方消息还可为所有人撤回",
-        "删除会同步清理其他设备的聊天记录与媒体缓存"
+        "足迹地图默认打开中国，可随时切换到世界",
+        "足迹授权移至标题栏，打卡入口更清晰"
       ]
     },
     "en": {
-      "title": "Message deletion now syncs across devices",
+      "title": "A more direct footprint map",
       "items": [
-        "Any message can be deleted locally, while your own messages can also be recalled for everyone",
-        "Deletions now clear chat history and cached media across devices"
+        "Footprints now open on China by default, with the world map one tab away",
+        "Access management now lives in the header for a clearer check-in flow"
       ]
     }
   }

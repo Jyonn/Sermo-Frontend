@@ -245,8 +245,8 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
 export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, otherUser }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
-  const [mode, setMode] = useState<"world" | "china">("world");
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [mode, setMode] = useState<"world" | "china">("china");
+  const [selectedCountry, setSelectedCountry] = useState<string | null>("CHN");
   const [maps, setMaps] = useState<MapOwner[]>([]);
   const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -271,6 +271,14 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const otherRegions = useMemo(() => others.flatMap((item) => item.regions), [others]);
   const myCountries = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.country_code)), [mine]);
   const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
+
+  useEffect(() => {
+    if (!open) return;
+    setMode("china");
+    setSelectedCountry("CHN");
+    setGeometry(null);
+    setTransform({ x: 0, y: 0, scale: 1 });
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -512,7 +520,22 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     : otherUser?.name || t("travelMap.others");
 
   return (
-    <SideDrawer open={open} onClose={onClose} title={title}>
+    <SideDrawer
+      open={open}
+      onClose={onClose}
+      title={title}
+      titleAccessory={!chatId && !otherUser ? (
+        <button
+          aria-label={t("travelMap.accessManagement")}
+          className="travel-map-access-header-button"
+          onClick={() => setAccessOverviewOpen(true)}
+          title={t("travelMap.accessManagement")}
+          type="button"
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">key</span>
+        </button>
+      ) : null}
+    >
       <div className="travel-map-drawer">
         <div className="travel-map-owner-row">
           <div className="travel-map-owner">
@@ -619,12 +642,6 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           </button>
         ) : null}
 
-        {!chatId && !otherUser ? (
-          <button className="travel-map-access-entry" onClick={() => setAccessOverviewOpen(true)} type="button">
-            <span><strong>{t("travelMap.accessManagement")}</strong><small>{t("travelMap.accessManagementHint")}</small></span>
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
-        ) : null}
       </div>
       <BottomSheet
         open={checkInCandidates.length > 1}

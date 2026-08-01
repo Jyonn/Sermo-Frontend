@@ -1142,7 +1142,7 @@
   "travelMap.others": "其他成员",
   "travelMap.sharedFootprints": "共同足迹",
   "travelMap.readOnlyRegions": "足迹仅可现场打卡",
-  "travelMap.checkInHere": "现场打卡",
+  "travelMap.checkInHere": "立即打卡",
   "travelMap.locating": "正在定位…",
   "travelMap.locationUnsupported": "当前设备无法获取位置",
   "travelMap.locationFailed": "未能确认当前位置",
