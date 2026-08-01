@@ -156,11 +156,12 @@ export interface UserMeDTO extends UserDTO {
     interval_days: number | null;
     available_at: number | null;
   };
-  chat_background_theme?: "default" | "paper" | "mint" | "dusk" | "comic" | "custom";
+  chat_background_theme?: ChatBackgroundTheme;
   chat_background_uri?: string;
 }
 
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic";
+export type ChatBackgroundTheme = "default" | "paper" | "mint" | "dusk" | "comic" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "custom";
 export type AvatarFrameStyle = "none" | "orbit" | "pixel" | "aurora" | "polaroid" | "soundwave" | "lucky" | "portal";
 export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud";
 export type SquarePropStyle = "none" | "star" | "coffee" | "flag";

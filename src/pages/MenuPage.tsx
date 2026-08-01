@@ -32,7 +32,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 
@@ -95,6 +95,29 @@ const personalizationOptions = {
   square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"]],
   square_limb_style: [["line", "menu.limbLine"], ["chunky", "menu.limbChunky"], ["robot", "menu.limbRobot"], ["ribbon", "menu.limbRibbon"]],
 } as const;
+
+const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclude<ChatBackgroundTheme, "custom">, TranslationKey]> }> = [
+  {
+    label: "menu.collectionEssential",
+    items: [["default", "menu.themeDefault"], ["paper", "menu.themePaper"], ["mint", "menu.themeMint"], ["dusk", "menu.themeDusk"]],
+  },
+  {
+    label: "menu.collectionCulture",
+    items: [["comic", "menu.themeComic"], ["zen", "menu.themeZen"], ["hero", "menu.themeHero"], ["dragon", "menu.themeDragon"], ["bauhaus", "menu.themeBauhaus"], ["mosaic", "menu.themeMosaic"]],
+  },
+];
+
+const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.chat_bubble_style[number]> }> = [
+  { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
+  { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
+];
+
+const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.avatar_frame_style[number]> }> = [
+  { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "pixel"].includes(value)) },
+  { label: "menu.collectionWearable", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["polaroid", "lucky"].includes(value)) },
+  { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal"].includes(value)) },
+];
 
 function visibleBubbleStyle(style?: string) {
   return ["comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic"].includes(style ?? "") ? style as ChatBubbleStyle : "default";
@@ -1209,7 +1232,7 @@ export default function MenuPage() {
     avatarFileInputRef.current?.click();
   };
 
-  const saveChatBackgroundTheme = async (theme: "default" | "paper" | "mint" | "dusk" | "comic") => {
+  const saveChatBackgroundTheme = async (theme: Exclude<ChatBackgroundTheme, "custom">) => {
     if (!canCustomizeChatBackground) {
       showToast(t("background.levelRequired", { level: 8 }), "error");
       return;
@@ -2027,42 +2050,26 @@ export default function MenuPage() {
             <span className="chat-background-preview-bubble other">{t("menu.backgroundPreviewOther")}</span>
             <span className="chat-background-preview-bubble self">{t("menu.backgroundPreviewSelf")}</span>
           </div>
-          <section className="chat-background-section">
-            <h3>{t("menu.backgroundSectionPlain")}</h3>
-            <div className="chat-background-grid">
-              {([
-                ["default", "menu.themeDefault"],
-                ["paper", "menu.themePaper"],
-                ["mint", "menu.themeMint"],
-                ["dusk", "menu.themeDusk"],
-              ] as const).map(([theme, label]) => (
-                <button
-                  className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
-                  disabled={chatBackgroundSaving}
-                  key={theme}
-                  onClick={() => void saveChatBackgroundTheme(theme)}
-                  type="button"
-                >
-                  <span />
-                  <strong>{t(label)}</strong>
-                </button>
-              ))}
-            </div>
-          </section>
-          <section className="chat-background-section">
-            <h3>{t("menu.backgroundSectionStyle")}</h3>
-            <div className="chat-background-grid">
-              <button
-                className={`chat-background-choice theme-comic${me?.chat_background_theme === "comic" ? " is-selected" : ""}`}
-                disabled={chatBackgroundSaving}
-                onClick={() => void saveChatBackgroundTheme("comic")}
-                type="button"
-              >
-                <span />
-                <strong>{t("menu.themeComic")}</strong>
-              </button>
-            </div>
-          </section>
+          {chatBackgroundSections.map((section) => (
+            <section className="personalization-library-section chat-background-section" key={section.label}>
+              <header><h3>{t(section.label)}</h3><span>{section.items.length}</span></header>
+              <div className="chat-background-grid">
+                {section.items.map(([theme, label]) => (
+                  <button
+                    aria-pressed={(me?.chat_background_theme ?? "default") === theme}
+                    className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
+                    disabled={chatBackgroundSaving}
+                    key={theme}
+                    onClick={() => void saveChatBackgroundTheme(theme)}
+                    type="button"
+                  >
+                    <span />
+                    <strong>{t(label)}</strong>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
           <section className="chat-background-section">
             <h3>{t("common.custom")}</h3>
             <div className="chat-background-grid">
@@ -2096,24 +2103,33 @@ export default function MenuPage() {
             avatarUri={space?.official_user?.avatar_uri}
             style={visibleBubbleStyle(me?.chat_bubble_style)}
           />
-          <div className="personalization-option-grid field-chat_bubble_style">
-            {personalizationOptions.chat_bubble_style.map(([value, label]) => (
-              <button
-                className={`personalization-option preview-${value}${visibleBubbleStyle(me?.chat_bubble_style) === value ? " is-selected" : ""}`}
-                disabled={personalizationSaving || (value === "vip" && !me?.is_permanent_vip)}
-                key={value}
-                onClick={() => {
-                  if (value === "vip" && !me?.is_permanent_vip) {
-                    showToast(t("menu.vipBubbleOnly"), "error");
-                    return;
-                  }
-                  void savePersonalization("chat_bubble_style", value);
-                }}
-                type="button"
-              >
-                <i aria-hidden="true"><span /></i>
-                <strong>{t(label)}</strong>
-              </button>
+          <div className="personalization-library">
+            {chatBubbleSections.map((section) => (
+              <section className="personalization-library-section" key={section.label}>
+                <header><h3>{t(section.label)}</h3><span>{section.items.length}</span></header>
+                <div className="personalization-option-grid field-chat_bubble_style">
+                  {section.items.map(([value, label]) => (
+                    <button
+                      aria-pressed={visibleBubbleStyle(me?.chat_bubble_style) === value}
+                      className={`personalization-option preview-${value}${visibleBubbleStyle(me?.chat_bubble_style) === value ? " is-selected" : ""}`}
+                      disabled={personalizationSaving || (value === "vip" && !me?.is_permanent_vip)}
+                      key={value}
+                      onClick={() => {
+                        if (value === "vip" && !me?.is_permanent_vip) {
+                          showToast(t("menu.vipBubbleOnly"), "error");
+                          return;
+                        }
+                        void savePersonalization("chat_bubble_style", value);
+                      }}
+                      type="button"
+                    >
+                      <i aria-hidden="true"><span /></i>
+                      <strong>{t(label)}</strong>
+                      {value === "vip" ? <small>VIP</small> : null}
+                    </button>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         </div>
@@ -2133,25 +2149,33 @@ export default function MenuPage() {
             <strong>{session?.user.name ?? t("brand.user")}</strong>
             <span>{t("menu.avatarFramePreviewHint")}</span>
           </div>
-          <div className="personalization-option-grid field-avatar_frame_style">
-            {personalizationOptions.avatar_frame_style.map(([value, label]) => (
-              <button
-                className={`personalization-option preview-${value}${(me?.avatar_frame_style ?? "none") === value ? " is-selected" : ""}`}
-                disabled={personalizationSaving}
-                key={value}
-                onClick={() => void savePersonalization("avatar_frame_style", value)}
-                type="button"
-              >
-                <i aria-hidden="true">
-                  <UserAvatar
-                    className="mini-avatar personalization-option-avatar"
-                    frame={value}
-                    name={session?.user.name ?? t("brand.user")}
-                    uri={me?.avatar_uri ?? session?.user.avatar_uri}
-                  />
-                </i>
-                <strong>{t(label)}</strong>
-              </button>
+          <div className="personalization-library">
+            {avatarFrameSections.map((section) => (
+              <section className="personalization-library-section" key={section.label}>
+                <header><h3>{t(section.label)}</h3><span>{section.items.length}</span></header>
+                <div className="personalization-option-grid field-avatar_frame_style">
+                  {section.items.map(([value, label]) => (
+                    <button
+                      aria-pressed={(me?.avatar_frame_style ?? "none") === value}
+                      className={`personalization-option preview-${value}${(me?.avatar_frame_style ?? "none") === value ? " is-selected" : ""}`}
+                      disabled={personalizationSaving}
+                      key={value}
+                      onClick={() => void savePersonalization("avatar_frame_style", value)}
+                      type="button"
+                    >
+                      <i aria-hidden="true">
+                        <UserAvatar
+                          className="mini-avatar personalization-option-avatar"
+                          frame={value}
+                          name={session?.user.name ?? t("brand.user")}
+                          uri={me?.avatar_uri ?? session?.user.avatar_uri}
+                        />
+                      </i>
+                      <strong>{t(label)}</strong>
+                    </button>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         </div>

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.23",
-  "publishedAt": "2026-08-01",
+  "id": "2026.08.02.01",
+  "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "五种文化化作聊天气泡",
+      "title": "个性化从选项变成藏品库",
       "items": [
-        "新增枯山水、英雄刊、游龙、包豪斯与马赛克五套聊天气泡",
-        "文本、语音、图片、视频、文件、位置、足迹、链接、引用与发送状态均采用完整主题设计"
+        "聊天背景、气泡与头像框按照基础、文化、挂件、动态和身份系列分类陈列",
+        "新增五套文化背景，与同名气泡形成完整搭配，并强化选中与限定状态"
       ]
     },
     "en": {
-      "title": "Five cultures, five complete bubble worlds",
+      "title": "Personalization grows into a curated library",
       "items": [
-        "Added Zen Garden, Hero Pulp, Jade Dragon, Bauhaus, and Mosaic chat themes",
-        "Text, voice, media, files, locations, maps, links, replies, and sending states now share each theme"
+        "Backgrounds, bubbles, and frames are now organized into essential, cultural, wearable, motion, and identity collections",
+        "Five matching cultural backgrounds complete each bubble world with clearer selected and limited states"
       ]
     }
   }
