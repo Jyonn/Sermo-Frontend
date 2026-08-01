@@ -4874,14 +4874,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-location-copy strong {
-  display: -webkit-box;
-  overflow: hidden;
   font-size: 0.88rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
   white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .message-location-copy small {

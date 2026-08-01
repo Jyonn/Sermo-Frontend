@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.5",
+  "id": "2026.08.01.6",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "位置卡片回归气泡尺度",
+      "title": "位置地址完整展示",
       "items": [
         "位置卡片与普通消息共用相同的最大宽度",
-        "地址最多展示两行，点击仍可查看完整地点"
+        "长地址会自然换行并完整展示"
       ]
     },
     "en": {
-      "title": "Location cards match regular bubbles",
+      "title": "Full addresses in location cards",
       "items": [
         "Location cards now share the same maximum width as regular messages",
-        "Addresses are limited to two lines while the full place remains available on tap"
+        "Long addresses now wrap naturally without truncation"
       ]
     }
   }
