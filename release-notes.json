@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.19",
+  "id": "2026.08.01.20",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "定位头像准确跟随地图",
+      "title": "VIP语音气泡更加清晰",
       "items": [
-        "修复地图缩放时定位头像与实际位置偏移的问题",
-        "头像保持固定尺寸和呼吸动效，并准确跟随地图移动"
+        "修复己方VIP语音消息时长与进度文字对比度不足的问题",
+        "播放按钮、波形和文字统一为清晰的象牙金配色"
       ]
     },
     "en": {
-      "title": "Location avatars now stay accurately pinned",
+      "title": "Clearer VIP voice bubbles",
       "items": [
-        "Fixed location avatars drifting away from their actual map coordinates during zoom",
-        "Avatars retain their fixed size and breathing motion while following the map"
+        "Fixed low-contrast duration and progress text in your own VIP voice messages",
+        "Playback controls, waveforms, and text now share a clear ivory-gold palette"
       ]
     }
   }
