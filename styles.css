@@ -6502,12 +6502,17 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 .avatar-frame-blaze::before {
   z-index: -2;
   inset: -9px -8px -7px;
-  clip-path: polygon(4% 55%, 14% 38%, 9% 18%, 30% 25%, 38% 0, 51% 20%, 67% 5%, 72% 28%, 94% 18%, 88% 42%, 100% 58%, 82% 67%, 88% 91%, 65% 82%, 50% 100%, 37% 82%, 13% 92%, 19% 69%);
-  border-radius: 42%;
   background:
-    radial-gradient(circle at 50% 62%, #ffd96a 0 30%, transparent 56%),
-    conic-gradient(from -20deg, #d83b31, #ff9632 18%, #ffd45a 36%, #ec5731 54%, #ffb43c 72%, #c92f32 100%);
-  filter: drop-shadow(0 4px 4px rgba(181, 52, 29, 0.3));
+    radial-gradient(circle at 39% 8%, #ffcc52 0 17%, transparent 18%),
+    radial-gradient(circle at 66% 10%, #f57a32 0 19%, transparent 20%),
+    radial-gradient(circle at 88% 29%, #e94b31 0 18%, transparent 19%),
+    radial-gradient(circle at 92% 61%, #ff9d35 0 20%, transparent 21%),
+    radial-gradient(circle at 72% 88%, #d93b31 0 19%, transparent 20%),
+    radial-gradient(circle at 43% 94%, #ffb43f 0 18%, transparent 19%),
+    radial-gradient(circle at 14% 72%, #ed5731 0 20%, transparent 21%),
+    radial-gradient(circle at 10% 35%, #ff9a35 0 19%, transparent 20%),
+    radial-gradient(ellipse at 50% 52%, #f36a31 0 59%, transparent 60%);
+  filter: drop-shadow(0 4px 5px rgba(181, 52, 29, 0.26));
 }
 
 .avatar-frame-blaze::after {

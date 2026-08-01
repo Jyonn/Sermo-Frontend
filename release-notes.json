@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.2",
+  "id": "2026.08.01.3",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "发送中的气泡保持原貌",
+      "title": "烈焰头像框更柔和",
       "items": [
-        "乐观消息从出现起就使用最终的个性化气泡",
-        "发送动画改为独立覆盖层，不再干扰标签、边框与未来气泡样式"
+        "烈焰外框改为多层曲线圆形叠加效果",
+        "移除头像周围类似太阳光芒的三角尖角"
       ]
     },
     "en": {
-      "title": "Bubble styles stay intact while sending",
+      "title": "A softer blaze avatar frame",
       "items": [
-        "Optimistic messages now use their final personalized bubble immediately",
-        "Sending animation now lives in an isolated overlay that cannot disturb tags, borders, or future skins"
+        "The blaze frame now uses layered curved circles",
+        "Sharp sun-ray triangles around avatars have been removed"
       ]
     }
   }
