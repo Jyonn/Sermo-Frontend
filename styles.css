@@ -14536,6 +14536,20 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   gap: 8px;
 }
 
+.travel-map-amap-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.travel-map-amap-button .material-symbols-outlined {
+  font-size: 19px;
+}
+
 .travel-map-check-in-button:disabled {
   cursor: wait;
   opacity: 0.72;
@@ -14963,6 +14977,33 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   box-shadow:
     0 0 0 1px rgba(16, 117, 80, 0.24),
     0 6px 16px rgba(19, 72, 52, 0.3);
+  transform-origin: center;
+  animation: travel-map-avatar-breathe 2.2s ease-in-out infinite;
+}
+
+.travel-map-focus-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: rgba(255, 255, 255, 0.98);
+  pointer-events: none;
+  animation: travel-map-focus-flash 740ms ease-in-out both;
+}
+
+@keyframes travel-map-avatar-breathe {
+  0%, 100% {
+    opacity: 0.68;
+    transform: scale(0.84);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes travel-map-focus-flash {
+  0%, 100% { opacity: 0; }
+  48%, 58% { opacity: 1; }
 }
 
 @keyframes travel-map-location-pulse {

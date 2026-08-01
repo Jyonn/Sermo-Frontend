@@ -908,6 +908,7 @@
   "location.viewOnMap": "在地图中查看",
   "location.drawerTitle": "位置",
   "location.focusing": "正在前往这个位置",
+  "location.openInAmap": "使用高德地图打开",
   "message.retrySend": "重试发送",
   "message.original": "原消息",
   "media.metadataMissing": "影像资料尚未写入",

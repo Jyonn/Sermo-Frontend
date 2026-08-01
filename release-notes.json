@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.17",
+  "id": "2026.08.01.18",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "沿着地球查看位置",
+      "title": "位置镜头更加连贯",
       "items": [
-        "位置卡片改为两行摘要，完整地址在位置页清晰展示",
-        "地球会旋转并放大到发送者的位置，再进入国家地图"
+        "世界与国家地图通过白光自然衔接，并继续聚焦具体位置",
+        "定位头像加入呼吸动效，位置页也可使用高德地图打开"
       ]
     },
     "en": {
-      "title": "Follow a location across the globe",
+      "title": "A smoother journey to shared locations",
       "items": [
-        "Location cards now show a two-line summary with the full address in the location view",
-        "The globe rotates and zooms to the sender before opening the country map"
+        "A soft flash connects the globe to a country map that continues zooming into place",
+        "Location avatars now breathe, with an option to open the place in Amap"
       ]
     }
   }

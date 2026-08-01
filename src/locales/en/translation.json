@@ -908,6 +908,7 @@
   "location.viewOnMap": "View on map",
   "location.drawerTitle": "Location",
   "location.focusing": "Travelling to this location",
+  "location.openInAmap": "Open in Amap",
   "message.retrySend": "Retry sending",
   "message.original": "Original message",
   "media.metadataMissing": "Media details unavailable",
