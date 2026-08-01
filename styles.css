@@ -3590,7 +3590,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-bubble.is-media {
-  padding: 2px;
+  padding: 0;
   overflow: visible;
   background: transparent;
   box-shadow: none;
@@ -3615,10 +3615,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-group.other:has(.message-location-card) .message-bubbles {
   max-width: calc(100% - 38px);
-}
-
-.message-bubble.is-location:not(.has-reply) {
-  padding: 4px;
 }
 
 .message-media-frame {

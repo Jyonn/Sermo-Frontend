@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.15",
+  "id": "2026.08.01.16",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "地图定位更醒目",
+      "title": "消息卡片边线对齐",
       "items": [
-        "当前位置头像改为清晰的圆形裁切",
-        "双层呼吸波纹帮助快速找到地图中的自己"
+        "移除媒体气泡遗留的额外内缩",
+        "位置、文件、语音和图片卡片现在与文字气泡边缘一致"
       ]
     },
     "en": {
-      "title": "A clearer location marker",
+      "title": "Aligned message card edges",
       "items": [
-        "Your location avatar is now cropped into a clear circle",
-        "A double breathing pulse makes your position easier to spot"
+        "Removed legacy inner spacing from media bubbles",
+        "Location, file, audio, and image cards now align with text bubbles"
       ]
     }
   }
