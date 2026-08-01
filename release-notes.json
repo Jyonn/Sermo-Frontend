@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.7",
+  "id": "2026.08.01.8",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "引用消息融入气泡风格",
+      "title": "消息删除在所有设备保持同步",
       "items": [
-        "默认、漫画和 VIP 气泡拥有各自匹配的引用样式",
-        "气泡预览现在会真实展示己方与他方引用效果"
+        "可以从自己这里删除任意消息，己方消息还可为所有人撤回",
+        "删除会同步清理其他设备的聊天记录与媒体缓存"
       ]
     },
     "en": {
-      "title": "Replies now belong to each bubble style",
+      "title": "Message deletion now syncs across devices",
       "items": [
-        "Default, comic, and VIP bubbles now have matching reply treatments",
-        "Bubble previews now show realistic replies from both sides"
+        "Any message can be deleted locally, while your own messages can also be recalled for everyone",
+        "Deletions now clear chat history and cached media across devices"
       ]
     }
   }

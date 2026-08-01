@@ -2821,8 +2821,19 @@ export default function ChatsPage() {
         );
         recordChatHealth(cacheScope, true);
         const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
-        const cachedMessages = restoredThread?.messages ?? [];
+        let cachedMessages = restoredThread?.messages ?? [];
         const cachedIds = cachedMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
+        const reconciledDeletedIds = new Set<number>();
+        for (let index = 0; index < cachedIds.length; index += 50) {
+          const result = await api.reconcileMessages(selectedChat.id, cachedIds.slice(index, index + 50));
+          result.deleted_message_ids.forEach((messageId) => reconciledDeletedIds.add(messageId));
+        }
+        if (reconciledDeletedIds.size) {
+          cachedMessages
+            .filter((message) => typeof message.id === "number" && reconciledDeletedIds.has(message.id))
+            .forEach((message) => purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]));
+          cachedMessages = cachedMessages.filter((message) => typeof message.id !== "number" || !reconciledDeletedIds.has(message.id));
+        }
         const latestIds = normalized.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
         const cachedMaxId = cachedIds.length ? Math.max(...cachedIds) : null;
         const latestMaxId = latestIds.length ? Math.max(...latestIds) : null;
@@ -2847,7 +2858,9 @@ export default function ChatsPage() {
           });
         }
         setMessages((current) => {
-          const currentThreadMessages = current[selectedChat.id] ?? [];
+          const currentThreadMessages = (current[selectedChat.id] ?? []).filter(
+            (message) => typeof message.id !== "number" || !reconciledDeletedIds.has(message.id)
+          );
           mergedMessages = mergeMessages(mergeMessages(currentThreadMessages, bridged), normalized);
           if (DEBUG_CHAT_SEND) {
             console.log("[chat] loadLatestMessages merge", {
@@ -3046,7 +3059,7 @@ export default function ChatsPage() {
   useEffect(() => {
     const handleSync = (event: Event) => {
       const detail = (event as CustomEvent<ChatSyncEventDetail>).detail;
-      if (!detail?.items.length) return;
+      if (!detail || (!detail.items.length && !detail.removed?.length)) return;
 
       const grouped = new Map<number, ChatSyncEventDetail["items"]>();
       detail.items.forEach((item) => {
@@ -3063,11 +3076,21 @@ export default function ChatsPage() {
 
       setMessages((current) => {
         const next = { ...current };
+        for (const removed of detail.removed ?? []) {
+          const existing = next[removed.chatId] ?? [];
+          const target = existing.find((message) => message.id === removed.messageId);
+          if (target) purgeCachedMedia([target.payload?.uri, target.payload?.thumbnail_uri]);
+          next[removed.chatId] = existing.filter((message) => message.id !== removed.messageId);
+        }
         for (const [chatId, items] of grouped) {
-          next[chatId] = mergeMessages(current[chatId] ?? [], items.map((item) => item.message));
+          next[chatId] = mergeMessages(next[chatId] ?? [], items.map((item) => item.message));
         }
         return next;
       });
+      if (detail.removed?.length) {
+        const removedIds = new Set(detail.removed.map((item) => item.messageId));
+        setPinnedMessages((current) => current.filter((pin) => !removedIds.has(pin.message.message_id)));
+      }
 
       setChats((currentChats) =>
         sortChats(
@@ -4269,7 +4292,7 @@ export default function ChatsPage() {
     }
   };
 
-  const deleteMessage = async () => {
+  const deleteMessage = async (scope: "me" | "everyone") => {
     if (!selectedChat || !messageMenu) return;
 
     if (typeof messageMenu.message.id !== "number") {
@@ -4295,7 +4318,7 @@ export default function ChatsPage() {
     try {
       setMessageDeleteState("deleting");
       const deletedMessage = messageMenu.message;
-      await api.deleteMessage(deletedMessage.id as number);
+      await api.deleteMessage(deletedMessage.id as number, scope);
       purgeCachedMedia([
         deletedMessage.payload?.uri,
         deletedMessage.payload?.thumbnail_uri,
@@ -5804,9 +5827,14 @@ export default function ChatsPage() {
                   >
                     {t("common.cancel")}
                   </button>
-                  <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage()} type="button">
-                    {messageDeleteState === "deleting" ? t("common.deleting") : t("common.confirmDelete")}
+                  <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("me")} type="button">
+                    {messageDeleteState === "deleting" ? t("common.deleting") : t("message.deleteForMe")}
                   </button>
+                  {messageMenu.message.from === "self" ? (
+                    <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
+                      {t("message.recallForEveryone")}
+                    </button>
+                  ) : null}
                 </div>
               </>
             ) : (
@@ -5844,7 +5872,7 @@ export default function ChatsPage() {
                     {t("message.multiSelect")}
                   </button>
                 ) : null}
-                {messageMenu.message.from === "self" && (typeof messageMenu.message.id === "number" || messageMenu.message.kind === "image") ? (
+                {(typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image")) ? (
                   <button
                     className="message-context-button danger"
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: true } : current))}

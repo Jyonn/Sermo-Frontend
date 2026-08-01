@@ -9,12 +9,13 @@ import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { loadMessagesAfterThrough } from "../lib/messageHistory";
+import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
-const CURSOR_KEY_PREFIX = "sermo-sync-cursor:";
+const CURSOR_KEY_PREFIX = "sermo-sync-v2-cursor:";
 const DEBUG_SYNC = false;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
@@ -202,35 +203,15 @@ function getCursorKey(scope: string) {
 
 function readCursor(scope: string) {
   if (typeof window === "undefined") return null;
-  const value = window.sessionStorage.getItem(getCursorKey(scope));
+  const value = window.localStorage.getItem(getCursorKey(scope));
   if (!value) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function clearCursor(scope: string) {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(getCursorKey(scope));
-}
-
 function persistCursor(scope: string, value: number) {
   if (typeof window === "undefined") return;
-  window.sessionStorage.setItem(getCursorKey(scope), String(value));
-}
-
-function resolveNextCursor(
-  currentCursor: number,
-  response: { after_message_id?: number | string; next_after?: number | string; items: SyncedChatMessageItem[] }
-) {
-  const explicitCursor = response.after_message_id ?? response.next_after;
-  const normalizedExplicitCursor =
-    typeof explicitCursor === "string" ? Number(explicitCursor) : typeof explicitCursor === "number" ? explicitCursor : null;
-  if (typeof normalizedExplicitCursor === "number" && Number.isFinite(normalizedExplicitCursor)) {
-    return normalizedExplicitCursor;
-  }
-
-  const maxMessageId = response.items.reduce((max, item) => Math.max(max, Number(item.message.id)), currentCursor);
-  return maxMessageId;
+  window.localStorage.setItem(getCursorKey(scope), String(value));
 }
 
 function previewFromMessage(message: ChatMessage) {
@@ -307,7 +288,7 @@ export function GlobalMessageSync() {
     }
 
     const existing = readCursor(scope);
-    if (existing !== null && existing > 0) {
+    if (existing !== null && existing >= 0) {
       if (DEBUG_SYNC) {
         console.log("[sync] reuse stored cursor", { scope, after: existing });
       }
@@ -316,39 +297,9 @@ export function GlobalMessageSync() {
       return;
     }
 
-    if (existing === 0) {
-      if (DEBUG_SYNC) {
-        console.log("[sync] discard stale zero cursor", { scope });
-      }
-      clearCursor(scope);
-    }
-
-    const controller = new AbortController();
-
-    api
-      .getChats(controller.signal)
-      .then((rows) => {
-        const nextCursor = rows.reduce((max, chat) => Math.max(max, chat.last_message?.message_id ?? 0), 0);
-        if (DEBUG_SYNC) {
-          console.log("[sync] bootstrap cursor from chats", {
-            scope,
-            after: nextCursor,
-            chats: rows.length,
-          });
-        }
-        cursorRef.current = nextCursor;
-        setAfterMessageId(nextCursor);
-        persistCursor(scope, nextCursor);
-      })
-      .catch(() => {
-        if (DEBUG_SYNC) {
-          console.log("[sync] bootstrap cursor fallback", { scope, after: 0 });
-        }
-        cursorRef.current = 0;
-        setAfterMessageId(0);
-      });
-
-    return () => controller.abort();
+    cursorRef.current = 0;
+    setAfterMessageId(0);
+    persistCursor(scope, 0);
   }, [scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
@@ -426,6 +377,28 @@ export function GlobalMessageSync() {
       void chatCache.persistChatList(scope, nextChats);
     };
 
+    const applyRemovalsToCache = async (removed: Array<{ chatId: number; messageId: number }>) => {
+      const grouped = new Map<number, Set<number>>();
+      removed.forEach(({ chatId, messageId }) => {
+        const ids = grouped.get(chatId) ?? new Set<number>();
+        ids.add(messageId);
+        grouped.set(chatId, ids);
+      });
+      for (const [chatId, ids] of grouped) {
+        const thread = chatCache.getThread(scope, chatId) ?? (await chatCache.hydrateThread(scope, chatId));
+        if (!thread) continue;
+        const removedMessages = thread.messages.filter((message) => typeof message.id === "number" && ids.has(message.id));
+        removedMessages.forEach((message) => purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]));
+        const snapshot = {
+          ...thread,
+          messages: thread.messages.filter((message) => typeof message.id !== "number" || !ids.has(message.id)),
+          updatedAt: Date.now(),
+        };
+        chatCache.setThread(scope, chatId, snapshot);
+        await chatCache.persistThread(scope, chatId, snapshot);
+      }
+    };
+
     const poll = async () => {
       if (isGestureAccessSuppressed(gestureScope)) {
         setPopup(null);
@@ -467,23 +440,26 @@ export function GlobalMessageSync() {
         let hasMore = true;
         let loopCount = 0;
         const allItems: SyncedChatMessageItem[] = [];
+        const allRemoved: Array<{ chatId: number; messageId: number }> = [];
 
         while (hasMore && loopCount < 5) {
           if (DEBUG_SYNC) {
             console.log("[sync] request", { after: cursor, limit: SYNC_LIMIT, loopCount });
           }
-          const response = await api.getMessagesSync({ after: cursor, limit: SYNC_LIMIT });
-          const normalizedItems = normalizeSyncItems(response.items as unknown[], session.user.user_id, activeChatId);
-          const nextCursor = resolveNextCursor(cursor, {
-            after_message_id: response.after_message_id,
-            next_after: response.next_after,
-            items: normalizedItems,
-          });
+          const response = await api.getMessageEventsSync({ after: cursor, limit: SYNC_LIMIT });
+          const normalizedItems = normalizeSyncItems(
+            response.events.filter((event) => event.type === "message.created" && event.message).map((event) => ({ chat_id: event.chat_id, message: event.message })),
+            session.user.user_id,
+            activeChatId
+          );
+          const removed = response.events
+            .filter((event) => event.type === "message.hidden" || event.type === "message.recalled")
+            .map((event) => ({ chatId: event.chat_id, messageId: event.message_id }));
+          const nextCursor = response.next_after;
           if (DEBUG_SYNC) {
             console.log("[sync] response", {
-              rawAfterMessageId: response.after_message_id,
               rawNextAfter: response.next_after,
-              items: response.items.length,
+              items: response.events.length,
               hasMore: response.has_more,
               resolvedNextCursor: nextCursor,
             });
@@ -493,8 +469,9 @@ export function GlobalMessageSync() {
           loopCount += 1;
 
           allItems.push(...normalizedItems);
+          allRemoved.push(...removed);
 
-          if (!response.items.length && !response.has_more) break;
+          if (!response.events.length && !response.has_more) break;
         }
 
         recordChatHealth(scope, true);
@@ -507,10 +484,16 @@ export function GlobalMessageSync() {
           persistCursor(scope, cursor);
         }
 
-        if (!allItems.length) return;
+        if (!allItems.length && !allRemoved.length) return;
 
-        await applyToCache(allItems);
-        emitChatSync({ afterMessageId: cursor, items: allItems });
+        if (allItems.length) await applyToCache(allItems);
+        if (allRemoved.length) {
+          await applyRemovalsToCache(allRemoved);
+          const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
+          chatCache.setChatList(scope, freshChats);
+          void chatCache.persistChatList(scope, freshChats);
+        }
+        emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved });
 
         const otherChatItems = allItems.filter((item) => item.chatId !== activeChatId && item.message.from === "other");
         if (!otherChatItems.length) return;

@@ -10,6 +10,7 @@ import type {
   MessageMediaKind,
   MessageUploadDTO,
   ChatSyncResponseDTO,
+  MessageEventSyncResponseDTO,
   FriendshipRequestDTO,
   FriendInvitePreviewDTO,
   FriendshipStatusDTO,
@@ -575,6 +576,14 @@ export const api = {
     });
   },
 
+  getMessageEventsSync(params: { after: number; limit: number }, signal?: AbortSignal) {
+    return request<MessageEventSyncResponseDTO>("/messages/sync-v2", {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
   createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string) {
     return request<MessageUploadDTO>("/messages/upload", {
       method: "POST",
@@ -695,11 +704,11 @@ export const api = {
     });
   },
 
-  deleteMessage(message_id: number) {
+  deleteMessage(message_id: number, scope: "me" | "everyone" = "everyone") {
     return request<Record<string, never>>("/messages/", {
       method: "DELETE",
       auth: true,
-      query: { message_id },
+      query: { message_id, scope },
     });
   },
 
@@ -708,6 +717,14 @@ export const api = {
       method: "DELETE",
       auth: true,
       body: { message_ids },
+    });
+  },
+
+  reconcileMessages(chat_id: number, message_ids: number[]) {
+    return request<{ deleted_message_ids: number[] }>("/messages/reconcile", {
+      method: "POST",
+      auth: true,
+      body: { chat_id, message_ids },
     });
   },
 

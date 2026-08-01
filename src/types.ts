@@ -522,6 +522,20 @@ export interface ChatSyncResponseDTO {
   has_more: boolean;
 }
 
+export interface MessageSyncEventDTO {
+  event_id: number;
+  type: "message.created" | "message.hidden" | "message.recalled";
+  chat_id: number;
+  message_id: number;
+  message?: ChatMessageDTO;
+}
+
+export interface MessageEventSyncResponseDTO {
+  events: MessageSyncEventDTO[];
+  next_after: number;
+  has_more: boolean;
+}
+
 export interface ChatDTO {
   chat_id: number;
   chat_type: number;

@@ -10,6 +10,7 @@ export interface SyncedChatMessageItem {
 export interface ChatSyncEventDetail {
   afterMessageId: number;
   items: SyncedChatMessageItem[];
+  removed: Array<{ chatId: number; messageId: number }>;
 }
 
 export function emitChatSync(detail: ChatSyncEventDetail) {

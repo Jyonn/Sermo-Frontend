@@ -951,6 +951,8 @@
   "audio.sendRetry": "语音发送失败，可在消息旁重试",
   "audio.download": "下载语音",
   "message.deleted": "消息已删除",
+  "message.deleteForMe": "从我这里删除",
+  "message.recallForEveryone": "为所有人撤回",
   "message.deleteFailed": "删除消息失败",
   "message.multiSelect": "多选",
   "message.selected": "条已选",
