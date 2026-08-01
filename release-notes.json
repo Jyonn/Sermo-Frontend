@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.16",
+  "id": "2026.08.01.17",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "消息卡片边线对齐",
+      "title": "沿着地球查看位置",
       "items": [
-        "移除媒体气泡遗留的额外内缩",
-        "位置、文件、语音和图片卡片现在与文字气泡边缘一致"
+        "位置卡片改为两行摘要，完整地址在位置页清晰展示",
+        "地球会旋转并放大到发送者的位置，再进入国家地图"
       ]
     },
     "en": {
-      "title": "Aligned message card edges",
+      "title": "Follow a location across the globe",
       "items": [
-        "Removed legacy inner spacing from media bubbles",
-        "Location, file, audio, and image cards now align with text bubbles"
+        "Location cards now show a two-line summary with the full address in the location view",
+        "The globe rotates and zooms to the sender before opening the country map"
       ]
     }
   }

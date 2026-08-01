@@ -26,6 +26,12 @@ interface TravelMapDrawerProps {
   chatTitle?: string;
   chatType?: "direct" | "group";
   otherUser?: TinyUserDTO | null;
+  focusLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  } | null;
+  focusOwner?: TinyUserDTO | null;
 }
 
 interface RegionProperties {
@@ -67,6 +73,7 @@ export interface CheckInPosition {
 }
 
 type CheckInPhase = "idle" | "locating" | "matching" | "saving";
+type LocationFocusPhase = "idle" | "flying" | "arrived" | "selecting" | "country";
 
 const WIDTH = 920;
 const HEIGHT = 500;
@@ -251,7 +258,7 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
   ).values()];
 }
 
-export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, otherUser }: TravelMapDrawerProps) {
+export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
   const [mode, setMode] = useState<"world" | "china">("china");
@@ -270,6 +277,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const [accessDetail, setAccessDetail] = useState<TravelMapAccessOverviewEntryDTO | null>(null);
   const [transform, setTransform] = useState<MapTransform>({ x: 0, y: 0, scale: 1 });
   const [globeRotation, setGlobeRotation] = useState<[number, number]>(INITIAL_GLOBE_ROTATION);
+  const [locationFocusPhase, setLocationFocusPhase] = useState<LocationFocusPhase>("idle");
+  const [locationFocusCandidate, setLocationFocusCandidate] = useState<CheckInCandidate | null>(null);
   const gestureRef = useRef<MapGesture>({ pointers: new Map(), center: null, distance: null, moved: false, tapCountryCode: null });
 
   const world = useMemo(worldFeatures, []);
@@ -284,18 +293,22 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
 
   useEffect(() => {
     if (!open) return;
-    setMode("china");
-    setSelectedCountry("CHN");
+    setMode(focusLocation ? "world" : "china");
+    setSelectedCountry(focusLocation ? null : "CHN");
     setGeometry(null);
     setTransform({ x: 0, y: 0, scale: 1 });
     setGlobeRotation(INITIAL_GLOBE_ROTATION);
-  }, [open]);
+    setLocationFocusPhase(focusLocation ? "flying" : "idle");
+    setLocationFocusCandidate(null);
+  }, [focusLocation, open]);
 
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();
     setLoading(true);
-    const request = chatId
+    const request = focusLocation && focusOwner
+      ? Promise.resolve(setMaps([{ owner: focusOwner, regions: [] }]))
+      : chatId
       ? api.getChatTravelMaps(chatId, controller.signal).then((payload) => setMaps(payload.maps))
       : otherUser
         ? api.getTravelMap(otherUser.user_id, controller.signal).then((payload) => setMaps([
@@ -303,7 +316,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           { owner: payload.other, regions: payload.other_regions },
         ]))
         : api.getMyTravelMap(controller.signal).then((payload) => setMaps([{ owner: payload.owner, regions: payload.regions }]));
-    if (!chatId && !otherUser) {
+    if (!focusLocation && !chatId && !otherUser) {
       void api.getTravelMapAccessOverview(controller.signal)
         .then(setAccessOverview)
         .catch(() => {
@@ -318,10 +331,10 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       if (!controller.signal.aborted) setLoading(false);
     });
     return () => controller.abort();
-  }, [open, chatId, otherUser?.user_id]);
+  }, [open, chatId, focusLocation, focusOwner, otherUser?.user_id]);
 
   useEffect(() => {
-    if (!open || !navigator.geolocation || !navigator.permissions) return;
+    if (!open || focusLocation || !navigator.geolocation || !navigator.permissions) return;
     let cancelled = false;
     void navigator.permissions.query({ name: "geolocation" }).then((permission) => {
       if (cancelled || permission.state !== "granted") return;
@@ -341,7 +354,61 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [focusLocation, open]);
+
+  useEffect(() => {
+    if (!open || !focusLocation) return;
+    let cancelled = false;
+    let frame = 0;
+    const startedAt = performance.now();
+    const duration = 1650;
+    const targetRotation: [number, number] = [-focusLocation.longitude, -focusLocation.latitude];
+    const startRotation = INITIAL_GLOBE_ROTATION;
+    const longitudeDelta = ((targetRotation[0] - startRotation[0] + 540) % 360) - 180;
+    const easeInOutCubic = (value: number) => value < 0.5
+      ? 4 * value * value * value
+      : 1 - Math.pow(-2 * value + 2, 3) / 2;
+    const animate = (now: number) => {
+      if (cancelled) return;
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = easeInOutCubic(progress);
+      setGlobeRotation([
+        startRotation[0] + longitudeDelta * eased,
+        startRotation[1] + (targetRotation[1] - startRotation[1]) * eased,
+      ]);
+      setTransform({ x: 0, y: 0, scale: 1 + 3 * eased });
+      if (progress < 1) frame = requestAnimationFrame(animate);
+      else setLocationFocusPhase("arrived");
+    };
+    frame = requestAnimationFrame(animate);
+    void resolveTravelMapCandidates({
+      latitude: focusLocation.latitude,
+      longitude: focusLocation.longitude,
+      accuracy: 0,
+    }, language).then((candidates) => {
+      if (!cancelled) setLocationFocusCandidate(candidates[0] ?? null);
+    }).catch(() => undefined);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
+  }, [focusLocation, language, open]);
+
+  useEffect(() => {
+    if (locationFocusPhase !== "arrived") return;
+    const timer = window.setTimeout(() => setLocationFocusPhase("selecting"), 520);
+    return () => window.clearTimeout(timer);
+  }, [locationFocusPhase]);
+
+  useEffect(() => {
+    if (locationFocusPhase !== "selecting" || !locationFocusCandidate) return;
+    const timer = window.setTimeout(() => {
+      setMode("world");
+      setSelectedCountry(locationFocusCandidate.countryCode);
+      setLocationFocusPhase("country");
+    }, 760);
+    return () => window.clearTimeout(timer);
+  }, [locationFocusCandidate, locationFocusPhase]);
 
   useEffect(() => {
     if (!open || !activeCountry) {
@@ -381,9 +448,11 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     .precision(0.35), [globeRotation, transform.scale]);
   const worldPath = useMemo(() => geoPath(worldProjection), [worldProjection]);
   const worldGraticule = useMemo(geoGraticule10, []);
+  const displayedLocation = focusLocation ?? currentLocation;
+  const displayedLocationOwner = focusOwner ?? session?.user;
   const currentLocationPoint = useMemo(() => {
-    if (!currentLocation) return null;
-    const coordinate: [number, number] = [currentLocation.longitude, currentLocation.latitude];
+    if (!displayedLocation) return null;
+    const coordinate: [number, number] = [displayedLocation.longitude, displayedLocation.latitude];
     if (!activeCountry) {
       const globeCenter: [number, number] = [-globeRotation[0], -globeRotation[1]];
       return geoDistance(coordinate, globeCenter) <= Math.PI / 2 ? worldProjection(coordinate) : null;
@@ -391,13 +460,13 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     if (!detailProjection || !geometry?.features.some((item) => {
       if (geoContains(item, coordinate)) return true;
       const [[west, south], [east, north]] = geoBounds(item);
-      return currentLocation.latitude >= south - 0.15
-        && currentLocation.latitude <= north + 0.15
-        && currentLocation.longitude >= west - 0.15
-        && currentLocation.longitude <= east + 0.15;
+      return displayedLocation.latitude >= south - 0.15
+        && displayedLocation.latitude <= north + 0.15
+        && displayedLocation.longitude >= west - 0.15
+        && displayedLocation.longitude <= east + 0.15;
     })) return null;
     return detailProjection(coordinate);
-  }, [activeCountry, currentLocation, detailProjection, geometry, globeRotation, worldProjection]);
+  }, [activeCountry, detailProjection, displayedLocation, geometry, globeRotation, worldProjection]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -604,7 +673,9 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     if (shouldOpenCountry) setSelectedCountry(shouldOpenCountry);
   };
 
-  const title = chatId
+  const title = focusLocation
+    ? t("location.drawerTitle")
+    : chatId
     ? chatType === "direct"
       ? t("travelMap.directSharedTitle", { name: chatTitle || t("brand.user") })
       : (chatTitle || t("travelMap.sharedFootprints"))
@@ -621,7 +692,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       open={open}
       onClose={onClose}
       title={title}
-      headerAction={!chatId && !otherUser ? (
+      headerAction={!focusLocation && !chatId && !otherUser ? (
         <button
           aria-label={t("travelMap.accessManagement")}
           className="travel-map-access-header-button"
@@ -634,6 +705,12 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
       ) : null}
     >
       <div className="travel-map-drawer">
+        {focusLocation ? (
+          <div className="travel-map-focus-address">
+            <span className="material-symbols-outlined" aria-hidden="true">location_on</span>
+            <strong>{focusLocation.address || t("location.shared")}</strong>
+          </div>
+        ) : null}
         <div className="travel-map-owner-row">
           <div className="travel-map-owner">
             <div className="travel-map-owner-avatars">
@@ -641,11 +718,29 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                 <UserAvatar className="mini-avatar" key={item.owner.user_id} name={item.owner.name} uri={item.owner.avatar_uri} />
               ))}
             </div>
-            <span><strong>{chatId ? t("travelMap.sharedFootprints") : t("travelMap.myFootprints")}</strong><small>{t("travelMap.regionCount", { count: totalRegions })}</small></span>
+            <span>
+              <strong>{focusLocation ? focusOwner?.name : chatId ? t("travelMap.sharedFootprints") : t("travelMap.myFootprints")}</strong>
+              <small>{focusLocation ? t("location.focusing") : t("travelMap.regionCount", { count: totalRegions })}</small>
+            </span>
           </div>
           <div className="travel-map-view-switch">
-            <button className={mode === "world" ? "is-active" : ""} onClick={resetView} type="button">{t("travelMap.world")}</button>
-            <button className={mode === "china" ? "is-active" : ""} onClick={() => { setMode("china"); setSelectedCountry("CHN"); }} type="button">{t("travelMap.china")}</button>
+            <button className={!activeCountry ? "is-active" : ""} onClick={resetView} type="button">{t("travelMap.world")}</button>
+            <button
+              className={activeCountry ? "is-active" : ""}
+              disabled={Boolean(focusLocation && !locationFocusCandidate)}
+              onClick={() => {
+                const countryCode = focusLocation ? locationFocusCandidate?.countryCode : "CHN";
+                if (!countryCode) return;
+                setMode(countryCode === "CHN" ? "china" : "world");
+                setSelectedCountry(countryCode);
+                if (focusLocation) setLocationFocusPhase("country");
+              }}
+              type="button"
+            >
+              {focusLocation && locationFocusCandidate
+                ? countryName(locationFocusCandidate.countryCode, language)
+                : t("travelMap.china")}
+            </button>
           </div>
         </div>
 
@@ -703,9 +798,16 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                   <div>
                     <UserAvatar
                       className="travel-map-current-avatar"
-                      name={session?.user.name ?? t("travelMap.me")}
-                      uri={session?.user.avatar_uri}
+                      frame={displayedLocationOwner?.avatar_frame_style}
+                      name={displayedLocationOwner?.name ?? t("travelMap.me")}
+                      uri={displayedLocationOwner?.avatar_uri}
+                      vip={displayedLocationOwner?.is_permanent_vip}
                     />
+                    {focusLocation && locationFocusPhase === "selecting" ? (
+                      <span className="travel-map-focus-tap" aria-hidden="true">
+                        <span className="material-symbols-outlined">touch_app</span>
+                      </span>
+                    ) : null}
                   </div>
                 </foreignObject>
               ) : null}
@@ -732,7 +834,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           </button>
         ) : null}
 
-        {!otherUser ? (
+        {!focusLocation && !otherUser ? (
           <button className="button travel-map-check-in-button" disabled={checkingIn} onClick={checkIn} type="button">
             {checkingIn ? <span className="travel-map-check-in-spinner" aria-hidden="true" /> : null}
             {checkInPhase === "locating"

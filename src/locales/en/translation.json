@@ -906,6 +906,8 @@
   "location.approximate": "Approximate location",
   "location.withinKm": "Approximate within {{distance}} km",
   "location.viewOnMap": "View on map",
+  "location.drawerTitle": "Location",
+  "location.focusing": "Travelling to this location",
   "message.retrySend": "Retry sending",
   "message.original": "Original message",
   "media.metadataMissing": "Media details unavailable",

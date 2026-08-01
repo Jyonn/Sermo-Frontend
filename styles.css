@@ -4863,6 +4863,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--message-card-shadow);
   text-decoration: none;
+  text-align: left;
+  cursor: pointer;
 }
 
 .location-share-preview {
@@ -4938,10 +4940,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-location-copy strong {
+  display: -webkit-box;
+  overflow: hidden;
   font-size: 0.88rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
   white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .message-location-copy small {
@@ -14474,6 +14480,29 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   padding-bottom: 24px;
 }
 
+.travel-map-focus-address {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 2px 2px 10px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.travel-map-focus-address > .material-symbols-outlined {
+  margin-top: 1px;
+  color: var(--brand-primary);
+  font-size: 19px;
+}
+
+.travel-map-focus-address strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
 .travel-map-owner-row {
   display: flex;
   align-items: center;
@@ -14730,6 +14759,11 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   box-shadow: 0 3px 10px rgba(24, 35, 29, 0.08);
 }
 
+.travel-map-view-switch button:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
 .travel-map-canvas {
   position: relative;
   min-height: 330px;
@@ -14874,6 +14908,48 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
 
 .travel-map-current-location > div::after {
   animation-delay: 1.1s;
+}
+
+.travel-map-focus-tap {
+  position: absolute;
+  z-index: 4;
+  right: -22px;
+  bottom: -25px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #0b6748;
+  border: 1px solid rgba(16, 117, 80, 0.2);
+  border-radius: 50%;
+  background: rgba(255, 253, 245, 0.94);
+  box-shadow: 0 7px 18px rgba(18, 71, 52, 0.22);
+  animation: travel-map-focus-tap 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.travel-map-focus-tap::before {
+  position: absolute;
+  inset: -8px;
+  border: 2px solid rgba(18, 187, 124, 0.48);
+  border-radius: 50%;
+  content: "";
+  animation: travel-map-focus-tap-ring 760ms ease-out both;
+}
+
+.travel-map-focus-tap .material-symbols-outlined {
+  font-size: 20px;
+}
+
+@keyframes travel-map-focus-tap {
+  from { opacity: 0; transform: translate(10px, 14px) scale(0.82); }
+  42%, 72% { opacity: 1; transform: translate(0, 0) scale(0.92); }
+  to { opacity: 0; transform: translate(0, 0) scale(1); }
+}
+
+@keyframes travel-map-focus-tap-ring {
+  from { opacity: 0; transform: scale(0.5); }
+  48% { opacity: 0.8; }
+  to { opacity: 0; transform: scale(1.3); }
 }
 
 .travel-map-current-avatar {

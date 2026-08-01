@@ -564,17 +564,6 @@ function isMediaMessageKind(kind: MessageKind) {
   return kind === "image" || kind === "video" || kind === "audio" || kind === "file";
 }
 
-function buildAmapLocationUrl(latitude: number, longitude: number, address?: string) {
-  const params = new URLSearchParams({
-    position: `${longitude},${latitude}`,
-    name: address || i18n.t("location.shared"),
-    src: "Sermo",
-    coordinate: "wgs84",
-    callnative: "1",
-  });
-  return `https://uri.amap.com/marker?${params.toString()}`;
-}
-
 function formatFileSize(value?: number) {
   const bytes = Math.max(0, Number(value) || 0);
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
@@ -1282,11 +1271,25 @@ function renderMessageContent(
     const obscured = Boolean(message.payload?.obscured);
     const obscureRadius = message.payload?.obscure_radius_km ?? 50;
     return (
-      <a
+      <button
         className={`message-location-card ${groupClassName}`.trim()}
-        href={obscured && message.status === "pending" ? undefined : buildAmapLocationUrl(latitude, longitude, address)}
-        rel="noreferrer"
-        target="_blank"
+        disabled={obscured && message.status === "pending"}
+        onClick={(event) => {
+          event.stopPropagation();
+          window.dispatchEvent(new CustomEvent("sermo:location-message", {
+            detail: {
+              location: { latitude, longitude, address },
+              owner: {
+                user_id: message.userId ?? 0,
+                name: message.name,
+                avatar_uri: message.avatarUri,
+                is_permanent_vip: message.isPermanentVip,
+                avatar_frame_style: message.avatarFrameStyle,
+              } satisfies TinyUserDTO,
+            },
+          }));
+        }}
+        type="button"
       >
         <span className="message-location-mark" aria-hidden="true">
           <ComposerSvgIcon kind="location" />
@@ -1301,8 +1304,8 @@ function renderMessageContent(
                 : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
           </small>
         </span>
-        <span className="message-location-open" aria-hidden="true">↗</span>
-      </a>
+        <span className="message-location-open material-symbols-outlined" aria-hidden="true">chevron_right</span>
+      </button>
     );
   }
 
@@ -1980,6 +1983,10 @@ export default function ChatsPage() {
   const [emojiPage, setEmojiPage] = useState(0);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
+  const [locationMessagePreview, setLocationMessagePreview] = useState<{
+    location: { latitude: number; longitude: number; address?: string };
+    owner: TinyUserDTO;
+  } | null>(null);
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [travelMapOtherUser, setTravelMapOtherUser] = useState<TinyUserDTO | null>(null);
   const [travelMapMenu, setTravelMapMenu] = useState<{ user: TinyUserDTO; access: TravelMapAccessDTO } | null>(null);
@@ -3767,11 +3774,11 @@ export default function ChatsPage() {
       ))));
       setLocationDraft(null);
       if (!obscure) {
-        void resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale())
-          .then((candidates) => {
-            const candidate = candidates[0];
-            if (!candidate) return;
-            return api.checkInTravelMap({
+        try {
+          const candidates = await resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale());
+          const candidate = candidates[0];
+          if (candidate) {
+            await api.checkInTravelMap({
               latitude,
               longitude,
               accuracy_meters: accuracy,
@@ -3780,8 +3787,10 @@ export default function ChatsPage() {
               country_code: candidate.countryCode,
               country_name: candidate.countryName,
             });
-          })
-          .catch(() => undefined);
+          }
+        } catch (checkInError) {
+          console.warn("[location] automatic footprint check-in failed", checkInError);
+        }
       }
     } catch (error) {
       setMessages((current) => ({
@@ -3868,6 +3877,17 @@ export default function ChatsPage() {
       )),
     }));
   };
+
+  useEffect(() => {
+    const openLocationMessage = (event: Event) => {
+      setLocationMessagePreview((event as CustomEvent<{
+        location: { latitude: number; longitude: number; address?: string };
+        owner: TinyUserDTO;
+      }>).detail);
+    };
+    window.addEventListener("sermo:location-message", openLocationMessage);
+    return () => window.removeEventListener("sermo:location-message", openLocationMessage);
+  }, []);
 
   useEffect(() => {
     const handleMapMessage = (event: Event) => {
@@ -5737,6 +5757,12 @@ export default function ChatsPage() {
         chatType={selectedChat?.type}
         open={chatTravelMapOpen}
         onClose={() => setChatTravelMapOpen(false)}
+      />
+      <TravelMapDrawer
+        focusLocation={locationMessagePreview?.location}
+        focusOwner={locationMessagePreview?.owner}
+        open={Boolean(locationMessagePreview)}
+        onClose={() => setLocationMessagePreview(null)}
       />
       <ConfirmDialog
         open={chatTravelMapGrantConfirmOpen}
