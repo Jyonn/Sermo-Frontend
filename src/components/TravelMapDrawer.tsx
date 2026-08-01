@@ -507,9 +507,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         && displayedLocation.longitude >= west - 0.15
         && displayedLocation.longitude <= east + 0.15;
     })) return null;
-    const point = detailProjection(coordinate);
-    return point ? [point[0] * transform.scale + transform.x, point[1] * transform.scale + transform.y] as [number, number] : null;
-  }, [activeCountry, detailProjection, displayedLocation, geometry, globeRotation, transform, worldProjection]);
+    return detailProjection(coordinate);
+  }, [activeCountry, detailProjection, displayedLocation, geometry, globeRotation, worldProjection]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -830,31 +829,36 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
                   </path>
                 ) : null;
               })}
+              {currentLocationPoint ? (
+                <g
+                  className="travel-map-current-location-anchor"
+                  transform={`translate(${currentLocationPoint[0]} ${currentLocationPoint[1]}) scale(${activeCountry ? 1 / transform.scale : 1})`}
+                >
+                  <foreignObject
+                    className="travel-map-current-location"
+                    height="44"
+                    width="44"
+                    x="-22"
+                    y="-22"
+                  >
+                    <div>
+                      <UserAvatar
+                        className="travel-map-current-avatar"
+                        frame={displayedLocationOwner?.avatar_frame_style}
+                        name={displayedLocationOwner?.name ?? t("travelMap.me")}
+                        uri={displayedLocationOwner?.avatar_uri}
+                        vip={displayedLocationOwner?.is_permanent_vip}
+                      />
+                      {focusLocation && locationFocusPhase === "selecting" ? (
+                        <span className="travel-map-focus-tap" aria-hidden="true">
+                          <span className="material-symbols-outlined">touch_app</span>
+                        </span>
+                      ) : null}
+                    </div>
+                  </foreignObject>
+                </g>
+              ) : null}
             </g>
-            {currentLocationPoint ? (
-              <foreignObject
-                className="travel-map-current-location"
-                height="44"
-                width="44"
-                x={currentLocationPoint[0] - 22}
-                y={currentLocationPoint[1] - 22}
-              >
-                <div>
-                  <UserAvatar
-                    className="travel-map-current-avatar"
-                    frame={displayedLocationOwner?.avatar_frame_style}
-                    name={displayedLocationOwner?.name ?? t("travelMap.me")}
-                    uri={displayedLocationOwner?.avatar_uri}
-                    vip={displayedLocationOwner?.is_permanent_vip}
-                  />
-                  {focusLocation && locationFocusPhase === "selecting" ? (
-                    <span className="travel-map-focus-tap" aria-hidden="true">
-                      <span className="material-symbols-outlined">touch_app</span>
-                    </span>
-                  ) : null}
-                </div>
-              </foreignObject>
-            ) : null}
           </svg>
           {loading ? <div className="travel-map-loading"><span /></div> : null}
           {locationFlashVisible ? <div className="travel-map-focus-flash" aria-hidden="true" /> : null}

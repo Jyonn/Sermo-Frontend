@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.18",
+  "id": "2026.08.01.19",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "位置镜头更加连贯",
+      "title": "定位头像准确跟随地图",
       "items": [
-        "世界与国家地图通过白光自然衔接，并继续聚焦具体位置",
-        "定位头像加入呼吸动效，位置页也可使用高德地图打开"
+        "修复地图缩放时定位头像与实际位置偏移的问题",
+        "头像保持固定尺寸和呼吸动效，并准确跟随地图移动"
       ]
     },
     "en": {
-      "title": "A smoother journey to shared locations",
+      "title": "Location avatars now stay accurately pinned",
       "items": [
-        "A soft flash connects the globe to a country map that continues zooming into place",
-        "Location avatars now breathe, with an option to open the place in Amap"
+        "Fixed location avatars drifting away from their actual map coordinates during zoom",
+        "Avatars retain their fixed size and breathing motion while following the map"
       ]
     }
   }

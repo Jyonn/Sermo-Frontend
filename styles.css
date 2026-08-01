@@ -14897,6 +14897,10 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   pointer-events: none;
 }
 
+.travel-map-current-location-anchor {
+  pointer-events: none;
+}
+
 .travel-map-current-location > div {
   position: relative;
   display: grid;
