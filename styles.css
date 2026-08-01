@@ -14768,6 +14768,20 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   transition: fill 150ms ease, filter 150ms ease;
 }
 
+.travel-map-globe-sphere {
+  fill: rgba(238, 250, 246, 0.82);
+  stroke: rgba(38, 92, 71, 0.48);
+  stroke-width: 1.6;
+  filter: drop-shadow(0 15px 20px rgba(29, 86, 65, 0.18));
+}
+
+.travel-map-globe-graticule {
+  fill: none;
+  stroke: rgba(44, 105, 81, 0.14);
+  stroke-width: 0.65;
+  pointer-events: none;
+}
+
 .travel-map-region:hover,
 .travel-map-region.is-editable:hover {
   fill: #f5d68b;

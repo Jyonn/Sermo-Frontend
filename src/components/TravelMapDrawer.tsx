@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent } from "react";
-import { geoBounds, geoContains, geoMercator, geoNaturalEarth1, geoPath } from "d3-geo";
+import { geoBounds, geoContains, geoDistance, geoGraticule10, geoMercator, geoOrthographic, geoPath } from "d3-geo";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
@@ -44,6 +44,13 @@ interface MapTransform {
   scale: number;
 }
 
+interface MapGesture {
+  pointers: Map<number, { x: number; y: number }>;
+  center: { x: number; y: number } | null;
+  distance: number | null;
+  moved: boolean;
+}
+
 export interface CheckInCandidate {
   regionCode: string;
   regionName: string;
@@ -62,6 +69,7 @@ type CheckInPhase = "idle" | "locating" | "matching" | "saving";
 
 const WIDTH = 920;
 const HEIGHT = 500;
+const INITIAL_GLOBE_ROTATION: [number, number] = [-104, -28];
 const boundaryCache = new Map<string, FeatureCollection<Geometry, RegionProperties>>();
 let countryIndexPromise: Promise<Array<{ code: string; available: boolean; bounds?: [number, number, number, number] }>> | null = null;
 
@@ -260,7 +268,9 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const [accessTab, setAccessTab] = useState<"shared_by_me" | "shared_with_me">("shared_by_me");
   const [accessDetail, setAccessDetail] = useState<TravelMapAccessOverviewEntryDTO | null>(null);
   const [transform, setTransform] = useState<MapTransform>({ x: 0, y: 0, scale: 1 });
-  const dragRef = useRef<{ pointerId: number; x: number; y: number; originX: number; originY: number } | null>(null);
+  const [globeRotation, setGlobeRotation] = useState<[number, number]>(INITIAL_GLOBE_ROTATION);
+  const gestureRef = useRef<MapGesture>({ pointers: new Map(), center: null, distance: null, moved: false });
+  const suppressCountryClickRef = useRef(false);
 
   const world = useMemo(worldFeatures, []);
   const activeCountry = mode === "china" ? "CHN" : selectedCountry;
@@ -278,6 +288,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     setSelectedCountry("CHN");
     setGeometry(null);
     setTransform({ x: 0, y: 0, scale: 1 });
+    setGlobeRotation(INITIAL_GLOBE_ROTATION);
   }, [open]);
 
   useEffect(() => {
@@ -362,15 +373,21 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
   const detailPath = useMemo(() => detailProjection
     ? geoPath(detailProjection)
     : null, [detailProjection]);
-  const worldProjection = useMemo(() => geoNaturalEarth1().fitExtent(
-    [[18, 18], [WIDTH - 18, HEIGHT - 18]],
-    { type: "FeatureCollection", features: world } as FeatureCollection,
-  ), [world]);
+  const worldProjection = useMemo(() => geoOrthographic()
+    .translate([WIDTH / 2, HEIGHT / 2])
+    .scale(HEIGHT * 0.43 * transform.scale)
+    .rotate(globeRotation)
+    .clipAngle(90)
+    .precision(0.35), [globeRotation, transform.scale]);
   const worldPath = useMemo(() => geoPath(worldProjection), [worldProjection]);
+  const worldGraticule = useMemo(geoGraticule10, []);
   const currentLocationPoint = useMemo(() => {
     if (!currentLocation) return null;
     const coordinate: [number, number] = [currentLocation.longitude, currentLocation.latitude];
-    if (!activeCountry) return worldProjection(coordinate);
+    if (!activeCountry) {
+      const globeCenter: [number, number] = [-globeRotation[0], -globeRotation[1]];
+      return geoDistance(coordinate, globeCenter) <= Math.PI / 2 ? worldProjection(coordinate) : null;
+    }
     if (!detailProjection || !geometry?.features.some((item) => {
       if (geoContains(item, coordinate)) return true;
       const [[west, south], [east, north]] = geoBounds(item);
@@ -380,7 +397,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         && currentLocation.longitude <= east + 0.15;
     })) return null;
     return detailProjection(coordinate);
-  }, [activeCountry, currentLocation, detailProjection, geometry, worldProjection]);
+  }, [activeCountry, currentLocation, detailProjection, geometry, globeRotation, worldProjection]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -489,22 +506,81 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
     setSelectedCountry(null);
     setGeometry(null);
     setTransform({ x: 0, y: 0, scale: 1 });
+    setGlobeRotation(INITIAL_GLOBE_ROTATION);
   };
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
     zoom(event.deltaY < 0 ? 0.25 : -0.25);
   };
+  const gestureMetrics = (pointers: MapGesture["pointers"]) => {
+    const points = [...pointers.values()];
+    if (!points.length) return { center: null, distance: null };
+    const center = {
+      x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
+      y: points.reduce((sum, point) => sum + point.y, 0) / points.length,
+    };
+    const distance = points.length >= 2
+      ? Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y)
+      : null;
+    return { center, distance };
+  };
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
-    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, originX: transform.x, originY: transform.y };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const gesture = gestureRef.current;
+    gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const metrics = gestureMetrics(gesture.pointers);
+    gesture.center = metrics.center;
+    gesture.distance = metrics.distance;
+    if (gesture.pointers.size === 1) {
+      gesture.moved = false;
+      suppressCountryClickRef.current = false;
+    }
   };
   const handlePointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId || transform.scale <= 1) return;
-    setTransform((current) => ({
-      ...current,
-      x: drag.originX + event.clientX - drag.x,
-      y: drag.originY + event.clientY - drag.y,
-    }));
+    const gesture = gestureRef.current;
+    if (!gesture.pointers.has(event.pointerId)) return;
+    const previousCenter = gesture.center;
+    const previousDistance = gesture.distance;
+    gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const metrics = gestureMetrics(gesture.pointers);
+    if (!previousCenter || !metrics.center) return;
+    const dx = metrics.center.x - previousCenter.x;
+    const dy = metrics.center.y - previousCenter.y;
+    if (Math.abs(dx) + Math.abs(dy) > 1) gesture.moved = true;
+
+    if (metrics.distance && previousDistance) {
+      const ratio = metrics.distance / previousDistance;
+      if (Math.abs(ratio - 1) > 0.002) {
+        gesture.moved = true;
+        setTransform((current) => ({ ...current, scale: Math.min(4, Math.max(1, current.scale * ratio)) }));
+      }
+    }
+
+    if (!activeCountry) {
+      setGlobeRotation(([longitude, latitude]) => [
+        longitude + dx * 0.32 / transform.scale,
+        Math.min(82, Math.max(-82, latitude - dy * 0.32 / transform.scale)),
+      ]);
+    } else if (transform.scale > 1) {
+      setTransform((current) => ({ ...current, x: current.x + dx, y: current.y + dy }));
+    }
+    gesture.center = metrics.center;
+    gesture.distance = metrics.distance;
+  };
+  const handlePointerEnd = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const gesture = gestureRef.current;
+    gesture.pointers.delete(event.pointerId);
+    suppressCountryClickRef.current = gesture.moved;
+    const metrics = gestureMetrics(gesture.pointers);
+    gesture.center = metrics.center;
+    gesture.distance = metrics.distance;
+  };
+  const openCountry = (code: string) => {
+    if (suppressCountryClickRef.current) {
+      suppressCountryClickRef.current = false;
+      return;
+    }
+    setSelectedCountry(code);
   };
 
   const title = chatId
@@ -559,25 +635,31 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
           </div>
           <svg
             aria-label={activeCountry ? countryName(activeCountry, language) : t("travelMap.world")}
-            onPointerCancel={() => { dragRef.current = null; }}
+            onPointerCancel={handlePointerEnd}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
-            onPointerUp={() => { dragRef.current = null; }}
+            onPointerUp={handlePointerEnd}
             onWheel={handleWheel}
             role="img"
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           >
-            <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
-              {!activeCountry ? world.map((country) => {
+            <g transform={activeCountry ? `translate(${transform.x} ${transform.y}) scale(${transform.scale})` : undefined}>
+              {!activeCountry ? (
+                <>
+                  <path className="travel-map-globe-sphere" d={worldPath({ type: "Sphere" }) ?? undefined} />
+                  <path className="travel-map-globe-graticule" d={worldPath(worldGraticule) ?? undefined} />
+                  {world.map((country) => {
                 const code = countryCodeOf(country);
                 const path = worldPath(country);
                 if (!code || !path) return null;
                 return (
-                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)} is-country`} d={path} key={String(country.id)} onClick={() => setSelectedCountry(code)}>
+                  <path className={`travel-map-region is-${tone(myCountries, otherCountries, code)} is-country`} d={path} key={String(country.id)} onClick={() => openCountry(code)}>
                     <title>{countryName(code, language)}</title>
                   </path>
                 );
-              }) : geometry?.features.map((region, index) => {
+                  })}
+                </>
+              ) : geometry?.features.map((region, index) => {
                 const code = regionCode(activeCountry, region);
                 const name = region.properties?.name || code;
                 const mineVisited = hasRegion(myRegions, code, name);

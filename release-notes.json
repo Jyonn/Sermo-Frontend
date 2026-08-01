@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.9",
+  "id": "2026.08.01.10",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "足迹地图更直接",
+      "title": "把世界握在手中",
       "items": [
-        "足迹地图默认打开中国，可随时切换到世界",
-        "足迹授权移至标题栏，打卡入口更清晰"
+        "世界地图升级为可旋转的立体地球",
+        "支持单指旋转与双指缩放，浏览足迹更顺手"
       ]
     },
     "en": {
-      "title": "A more direct footprint map",
+      "title": "The world in your hands",
       "items": [
-        "Footprints now open on China by default, with the world map one tab away",
-        "Access management now lives in the header for a clearer check-in flow"
+        "The world map is now an interactive globe",
+        "Rotate with one finger and pinch with two to explore naturally"
       ]
     }
   }
