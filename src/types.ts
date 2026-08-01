@@ -161,7 +161,7 @@ export interface UserMeDTO extends UserDTO {
 }
 
 export type ChatBubbleStyle = "default" | "comic" | "vip";
-export type AvatarFrameStyle = "none" | "orbit" | "blaze" | "pixel";
+export type AvatarFrameStyle = "none" | "orbit" | "pixel" | "aurora" | "polaroid" | "soundwave" | "lucky" | "portal";
 export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud";
 export type SquarePropStyle = "none" | "star" | "coffee" | "flag";
 export type SquareMotionStyle = "walk" | "bounce" | "float" | "dash";

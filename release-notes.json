@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.01.21",
+  "id": "2026.08.01.22",
   "publishedAt": "2026-08-01",
   "locales": {
     "zh-CN": {
-      "title": "发送中的卡片保持个性",
+      "title": "头像框成为真正的穿搭",
       "items": [
-        "位置解析和消息发送期间立即使用当前聊天气泡样式",
-        "临时消息转为正式消息时平滑保留个性化外观"
+        "移除烈焰头像框，新增极光、拍立得、声浪、祈愿结与时隙五种设计",
+        "头像框加入挂件、结构变化和动态效果，并在聊天与广场等场景保持一致"
       ]
     },
     "en": {
-      "title": "Personalized cards stay styled while sending",
+      "title": "Avatar frames become expressive wearables",
       "items": [
-        "Location cards now use your selected bubble style while resolving and sending",
-        "Optimistic messages retain their personalized appearance when delivery completes"
+        "Removed Blaze and introduced Aurora, Polaroid, Soundwave, Wish Knot, and Portal frames",
+        "Frames now feature ornaments, distinct silhouettes, and motion across chats and the plaza"
       ]
     }
   }

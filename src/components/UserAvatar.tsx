@@ -112,6 +112,11 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false, fr
       ) : (
         <span className="avatar-label">{avatarLabel(resolvedName)}</span>
       )}
+      {frame !== "none" ? (
+        <span aria-hidden="true" className="avatar-frame-ornament">
+          <i /><i /><i /><i />
+        </span>
+      ) : null}
     </div>
   );
 }

@@ -71,7 +71,16 @@ const growthLevelUnlockKeys: Record<number, TranslationKey[]> = {
 };
 const personalizationOptions = {
   chat_bubble_style: [["default", "menu.styleDefault"], ["comic", "menu.styleComic"], ["vip", "menu.styleVip"]],
-  avatar_frame_style: [["none", "menu.frameNone"], ["orbit", "menu.frameOrbit"], ["blaze", "menu.frameBlaze"], ["pixel", "menu.framePixel"]],
+  avatar_frame_style: [
+    ["none", "menu.frameNone"],
+    ["orbit", "menu.frameOrbit"],
+    ["pixel", "menu.framePixel"],
+    ["aurora", "menu.frameAurora"],
+    ["polaroid", "menu.framePolaroid"],
+    ["soundwave", "menu.frameSoundwave"],
+    ["lucky", "menu.frameLucky"],
+    ["portal", "menu.framePortal"],
+  ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
   square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"]],
