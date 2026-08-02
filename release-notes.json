@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.06",
+  "id": "2026.08.02.07",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "头像框在每个尺寸都保持一致",
+      "title": "每款头像框重新找回自己的个性",
       "items": [
-        "头像框会随头像等比例缩放，小头像和大预览保持相同粗细",
-        "边框紧贴头像并共享同一轮廓，不再出现圆框与圆角头像错位",
-        "装饰被限制在固定头像范围内，不会挤占列表空间或覆盖相邻内容"
+        "逐一重绘全部头像框，让星轨、声浪、月相、王冠等名称都能被直观看见",
+        "小头像保留清晰主符号，大预览会呈现更完整的材质与动态细节",
+        "所有设计仍紧贴头像并限制在固定范围内，不会挤占相邻内容"
       ]
     },
     "en": {
-      "title": "Avatar frames now stay consistent at every size",
+      "title": "Every avatar frame has reclaimed its identity",
       "items": [
-        "Frames scale proportionally so compact avatars and large previews keep the same visual weight",
-        "Frames now hug the avatar and share its silhouette instead of mixing circles with rounded portraits",
-        "Ornaments remain inside a fixed avatar footprint and no longer collide with nearby content"
+        "Every frame was redrawn so names such as Orbit, Soundwave, Moon, and Crown are immediately recognizable",
+        "Compact avatars retain one clear motif while large previews reveal richer material and motion",
+        "All designs still hug the portrait and remain inside a fixed footprint without colliding with nearby content"
       ]
     }
   }
