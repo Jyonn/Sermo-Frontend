@@ -17355,9 +17355,9 @@ html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;ba
 .avatar-frame-pixel { --avatar-frame-paint: linear-gradient(135deg,#1d5a45 0 32%,#e4b14f 32% 62%,#83d3b9 62%); }
 .avatar-frame-aurora { --avatar-frame-paint: conic-gradient(from 20deg,#2dd4a4,#8ad8ff,#f6cf72,#42b7a5,#2dd4a4); }
 .avatar-frame-polaroid { --avatar-frame-inset: 7%;--avatar-frame-paint: linear-gradient(#fffdf5 0 78%,#eee5ce 78%); }
-.avatar-frame-soundwave { --avatar-frame-paint: repeating-linear-gradient(90deg,#176d59 0 8%,#32c99a 8% 13%,#e8fff7 13% 18%); }
+.avatar-frame-soundwave { --avatar-frame-paint: linear-gradient(145deg,#155d50,#32c99a 48%,#d9fff3); }
 .avatar-frame-lucky { --avatar-frame-paint: conic-gradient(from 45deg,#b53d31,#f4c35f,#8e2825,#f5dc8c,#b53d31); }
-.avatar-frame-portal { --avatar-frame-paint: repeating-conic-gradient(#175f51 0 13deg,#d9ac50 13deg 19deg,#83d2ba 19deg 27deg); }
+.avatar-frame-portal { --avatar-frame-paint: linear-gradient(145deg,#173f38,#9ed8c3 48%,#d9ac50); }
 .avatar-frame-vine { --avatar-frame-inset: 7%;--avatar-frame-paint: conic-gradient(#4f7c4a,#9ebf72,#6d9b58,#e7dcae,#4f7c4a); }
 .avatar-frame-blossom { --avatar-frame-inset: 7%;--avatar-frame-paint: radial-gradient(circle at 18% 16%,#f8d15e 0 5%,transparent 6%),radial-gradient(circle at 80% 76%,#fff0f4 0 8%,transparent 9%),#d98b9c; }
 .avatar-frame-butterfly { --avatar-frame-inset: 7%;--avatar-frame-paint: conic-gradient(from 45deg,#7bd9d0,#9b6bc1,#f2b964,#7759a7,#7bd9d0); }
@@ -17432,8 +17432,8 @@ html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;ba
 .avatar-frame-polaroid::after { position:absolute;z-index:2;right:5%;bottom:3%;left:5%;display:block;height:12%;border-radius:0 0 8% 8%;background:#fffdf5;content:"" !important;box-shadow:0 -1px #776c5724; }
 .avatar-frame-polaroid .avatar-frame-ornament > i:first-child { display:block;top:1%;left:30%;width:40%;height:9%;border-radius:2px;background:#e7bd7399;transform:rotate(-4deg); }
 
-/* 05 Soundwave: a headphone arc with four animated equalizer bars. */
-.avatar-frame-soundwave::before { position:absolute;z-index:2;inset:3% 5% 38%;display:block;border:max(1px,.06em) solid #176d59;border-bottom:0;border-radius:50% 50% 0 0;content:"" !important; }
+/* 05 Soundwave: a clean baseline and four animated equalizer bars. */
+.avatar-frame-soundwave::before { position:absolute;z-index:2;right:20%;bottom:10%;left:20%;display:block;height:max(1px,.025em);border-radius:999px;background:#176d59;content:"" !important;opacity:.7; }
 .avatar-frame-soundwave .avatar-frame-ornament > i { display:block;bottom:3%;width:7%;border-radius:999px;background:#32c99a;transform-origin:center bottom;animation:avatar-soundwave 680ms ease-in-out infinite alternate; }
 .avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(1){left:27%;height:13%}.avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(2){left:40%;height:24%;animation-delay:-480ms}.avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(3){right:39%;height:18%;animation-delay:-240ms}.avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(4){right:27%;height:10%;animation-delay:-600ms}
 
@@ -17531,4 +17531,26 @@ html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;ba
   .user-avatar.has-avatar-frame > .avatar-frame-clip::before,
   .user-avatar.has-avatar-frame > .avatar-frame-clip::after,
   .user-avatar.has-avatar-frame .avatar-frame-ornament > i { animation:none !important; }
+}
+
+/* Personalization choices edit a draft while the preview remains in view. */
+.personalization-sticky-preview {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+}
+
+.personalization-editor > .personalization-sticky-preview {
+  margin-bottom: 10px;
+  box-shadow: 0 12px 22px rgba(26, 61, 51, .12);
+}
+
+.personalization-editor > div.personalization-sticky-preview {
+  background-color: var(--surface, #fffdf8);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .personalization-editor > div.personalization-sticky-preview {
+    background-color: var(--surface, #12231e);
+  }
 }

@@ -442,6 +442,15 @@ export default function MenuPage() {
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
+  const [chatBackgroundDraft, setChatBackgroundDraft] = useState<ChatBackgroundTheme>("default");
+  const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
+    chat_bubble_style: "default",
+    avatar_frame_style: "none",
+    square_outfit_style: "sunset",
+    square_prop_style: "none",
+    square_motion_style: "walk",
+    square_limb_style: "line",
+  });
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
@@ -577,6 +586,33 @@ export default function MenuPage() {
     navigate(location.pathname, { replace: true });
     void openAccountSwitcher();
   }, [location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    if (!chatBackgroundDrawerOpen || !me) return;
+    setChatBackgroundDraft(me.chat_background_theme ?? "default");
+  }, [chatBackgroundDrawerOpen, me?.chat_background_theme]);
+
+  useEffect(() => {
+    if (!(chatBubbleDrawerOpen || avatarFrameDrawerOpen || squareCharacterDrawerOpen) || !me) return;
+    setPersonalizationDraft({
+      chat_bubble_style: me.chat_bubble_style ?? "default",
+      avatar_frame_style: me.avatar_frame_style ?? "none",
+      square_outfit_style: me.square_outfit_style ?? "sunset",
+      square_prop_style: me.square_prop_style ?? "none",
+      square_motion_style: me.square_motion_style ?? "walk",
+      square_limb_style: me.square_limb_style ?? "line",
+    });
+  }, [
+    avatarFrameDrawerOpen,
+    chatBubbleDrawerOpen,
+    me?.avatar_frame_style,
+    me?.chat_bubble_style,
+    me?.square_limb_style,
+    me?.square_motion_style,
+    me?.square_outfit_style,
+    me?.square_prop_style,
+    squareCharacterDrawerOpen,
+  ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
     setSwitchingUserId(account.user.user_id);
@@ -1252,14 +1288,15 @@ export default function MenuPage() {
     avatarFileInputRef.current?.click();
   };
 
-  const saveChatBackgroundTheme = async (theme: Exclude<ChatBackgroundTheme, "custom">) => {
+  const saveChatBackgroundTheme = async () => {
+    if (chatBackgroundDraft === "custom") return;
     if (!canCustomizeChatBackground) {
       showToast(t("background.levelRequired", { level: 8 }), "error");
       return;
     }
     try {
       setChatBackgroundSaving(true);
-      const payload = await api.setChatBackground(theme);
+      const payload = await api.setChatBackground(chatBackgroundDraft);
       setMe(payload);
       showToast(t("background.updated"));
     } catch (apiError) {
@@ -1290,20 +1327,15 @@ export default function MenuPage() {
     }
   };
 
-  const savePersonalization = async <K extends keyof PersonalizationDTO>(field: K, value: PersonalizationDTO[K]) => {
+  const savePersonalization = async () => {
     if (!me || personalizationSaving) return;
-    const payload: PersonalizationDTO = {
-      chat_bubble_style: me.chat_bubble_style ?? "default",
-      avatar_frame_style: me.avatar_frame_style ?? "none",
-      square_outfit_style: me.square_outfit_style ?? "sunset",
-      square_prop_style: me.square_prop_style ?? "none",
-      square_motion_style: me.square_motion_style ?? "walk",
-      square_limb_style: me.square_limb_style ?? "line",
-      [field]: value,
-    };
+    if (personalizationDraft.chat_bubble_style === "vip" && !me.is_permanent_vip) {
+      showToast(t("menu.vipBubbleOnly"), "error");
+      return;
+    }
     setPersonalizationSaving(true);
     try {
-      const nextMe = await api.setPersonalization(payload);
+      const nextMe = await api.setPersonalization(personalizationDraft);
       setMe(nextMe);
       patchSessionUser(nextMe);
       showToast(t("personalization.updated"));
@@ -2008,19 +2040,8 @@ export default function MenuPage() {
             </div>
           </section>
           <button
-            aria-disabled={isDesktopViewport || !canCustomizeChatBackground}
-            className={`personalization-background-entry${isDesktopViewport || !canCustomizeChatBackground ? " is-locked" : ""}`}
-            onClick={() => {
-              if (isDesktopViewport) {
-                showToast(t("menu.chatBackgroundDesktopDefault"));
-                return;
-              }
-              if (!canCustomizeChatBackground) {
-                showToast(t("menu.levelUnlock", { level: 8 }), "error");
-                return;
-              }
-              setChatBackgroundDrawerOpen(true);
-            }}
+            className="personalization-background-entry"
+            onClick={() => setChatBackgroundDrawerOpen(true)}
             type="button"
           >
             <span className={`personalization-background-swatch theme-${me?.chat_background_theme ?? "default"}`} />
@@ -2061,10 +2082,18 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={chatBackgroundDrawerOpen} onClose={() => setChatBackgroundDrawerOpen(false)} title={t("menu.chatBackground")}>
+      <SideDrawer
+        actionBusy={chatBackgroundSaving}
+        actionDisabled={chatBackgroundDraft === (me?.chat_background_theme ?? "default")}
+        actionLabel={t("common.save")}
+        onAction={() => void saveChatBackgroundTheme()}
+        open={chatBackgroundDrawerOpen}
+        onClose={() => setChatBackgroundDrawerOpen(false)}
+        title={t("menu.chatBackground")}
+      >
         <div className="chat-background-settings">
-          <div className="chat-background-preview" data-theme={me?.chat_background_theme ?? "default"}>
-            {me?.chat_background_theme === "custom" && me.chat_background_uri ? (
+          <div className="chat-background-preview personalization-sticky-preview" data-theme={chatBackgroundDraft}>
+            {chatBackgroundDraft === "custom" && me?.chat_background_uri ? (
               <img alt="" src={me.chat_background_uri} />
             ) : null}
             <span className="chat-background-preview-bubble other">{t("menu.backgroundPreviewOther")}</span>
@@ -2076,11 +2105,11 @@ export default function MenuPage() {
               <div className="chat-background-grid">
                 {section.items.map(([theme, label]) => (
                   <button
-                    aria-pressed={(me?.chat_background_theme ?? "default") === theme}
-                    className={`chat-background-choice theme-${theme}${(me?.chat_background_theme ?? "default") === theme ? " is-selected" : ""}`}
+                    aria-pressed={chatBackgroundDraft === theme}
+                    className={`chat-background-choice theme-${theme}${chatBackgroundDraft === theme ? " is-selected" : ""}`}
                     disabled={chatBackgroundSaving}
                     key={theme}
-                    onClick={() => void saveChatBackgroundTheme(theme)}
+                    onClick={() => setChatBackgroundDraft(theme)}
                     type="button"
                   >
                     <span />
@@ -2094,8 +2123,8 @@ export default function MenuPage() {
             <h3>{t("common.custom")}</h3>
             <div className="chat-background-grid">
               <button
-                className={`chat-background-choice theme-custom${me?.chat_background_theme === "custom" ? " is-selected" : ""}`}
-                disabled={chatBackgroundSaving}
+                className={`chat-background-choice theme-custom${chatBackgroundDraft === "custom" ? " is-selected" : ""}`}
+                disabled={chatBackgroundSaving || !canCustomizeChatBackground}
                 onClick={() => chatBackgroundFileInputRef.current?.click()}
                 type="button"
               >
@@ -2116,13 +2145,23 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={chatBubbleDrawerOpen} onClose={() => setChatBubbleDrawerOpen(false)} title={t("menu.chatBubble")}>
+      <SideDrawer
+        actionBusy={personalizationSaving}
+        actionDisabled={personalizationDraft.chat_bubble_style === (me?.chat_bubble_style ?? "default")}
+        actionLabel={t("common.save")}
+        onAction={() => void savePersonalization()}
+        open={chatBubbleDrawerOpen}
+        onClose={() => setChatBubbleDrawerOpen(false)}
+        title={t("menu.chatBubble")}
+      >
         <div className="personalization-editor">
-          <ChatBubblePreview
-            avatarName={space?.official_user?.name ?? t("brand.user")}
-            avatarUri={space?.official_user?.avatar_uri}
-            style={visibleBubbleStyle(me?.chat_bubble_style)}
-          />
+          <div className="personalization-sticky-preview">
+            <ChatBubblePreview
+              avatarName={space?.official_user?.name ?? t("brand.user")}
+              avatarUri={space?.official_user?.avatar_uri}
+              style={visibleBubbleStyle(personalizationDraft.chat_bubble_style)}
+            />
+          </div>
           <div className="personalization-library">
             {chatBubbleSections.map((section) => (
               <section className="personalization-library-section" key={section.label}>
@@ -2130,17 +2169,11 @@ export default function MenuPage() {
                 <div className="personalization-option-grid field-chat_bubble_style">
                   {section.items.map(([value, label]) => (
                     <button
-                      aria-pressed={visibleBubbleStyle(me?.chat_bubble_style) === value}
-                      className={`personalization-option preview-${value}${visibleBubbleStyle(me?.chat_bubble_style) === value ? " is-selected" : ""}`}
-                      disabled={personalizationSaving || (value === "vip" && !me?.is_permanent_vip)}
+                      aria-pressed={personalizationDraft.chat_bubble_style === value}
+                      className={`personalization-option preview-${value}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}`}
+                      disabled={personalizationSaving}
                       key={value}
-                      onClick={() => {
-                        if (value === "vip" && !me?.is_permanent_vip) {
-                          showToast(t("menu.vipBubbleOnly"), "error");
-                          return;
-                        }
-                        void savePersonalization("chat_bubble_style", value);
-                      }}
+                      onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: value }))}
                       type="button"
                     >
                       <i aria-hidden="true"><span /></i>
@@ -2155,13 +2188,21 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={avatarFrameDrawerOpen} onClose={() => setAvatarFrameDrawerOpen(false)} title={t("menu.avatarFrame")}>
+      <SideDrawer
+        actionBusy={personalizationSaving}
+        actionDisabled={personalizationDraft.avatar_frame_style === (me?.avatar_frame_style ?? "none")}
+        actionLabel={t("common.save")}
+        onAction={() => void savePersonalization()}
+        open={avatarFrameDrawerOpen}
+        onClose={() => setAvatarFrameDrawerOpen(false)}
+        title={t("menu.avatarFrame")}
+      >
         <div className="personalization-editor">
-          <div className="personalization-avatar-stage">
+          <div className="personalization-avatar-stage personalization-sticky-preview">
             <div className="personalization-avatar-orbit" aria-hidden="true" />
             <UserAvatar
               className="personalization-avatar-stage-image"
-              frame={me?.avatar_frame_style}
+              frame={personalizationDraft.avatar_frame_style}
               name={session?.user.name ?? t("brand.user")}
               uri={me?.avatar_uri ?? session?.user.avatar_uri}
               vip={Boolean(me?.is_permanent_vip)}
@@ -2176,11 +2217,11 @@ export default function MenuPage() {
                 <div className="personalization-option-grid field-avatar_frame_style">
                   {section.items.map(([value, label]) => (
                     <button
-                      aria-pressed={(me?.avatar_frame_style ?? "none") === value}
-                      className={`personalization-option preview-${value}${(me?.avatar_frame_style ?? "none") === value ? " is-selected" : ""}`}
+                      aria-pressed={personalizationDraft.avatar_frame_style === value}
+                      className={`personalization-option preview-${value}${personalizationDraft.avatar_frame_style === value ? " is-selected" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
-                      onClick={() => void savePersonalization("avatar_frame_style", value)}
+                      onClick={() => setPersonalizationDraft((current) => ({ ...current, avatar_frame_style: value }))}
                       type="button"
                     >
                       <i aria-hidden="true">
@@ -2201,11 +2242,24 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={squareCharacterDrawerOpen} onClose={() => setSquareCharacterDrawerOpen(false)} title={t("menu.squareCharacter")}>
+      <SideDrawer
+        actionBusy={personalizationSaving}
+        actionDisabled={
+          personalizationDraft.square_outfit_style === (me?.square_outfit_style ?? "sunset")
+          && personalizationDraft.square_prop_style === (me?.square_prop_style ?? "none")
+          && personalizationDraft.square_motion_style === (me?.square_motion_style ?? "walk")
+          && personalizationDraft.square_limb_style === (me?.square_limb_style ?? "line")
+        }
+        actionLabel={t("common.save")}
+        onAction={() => void savePersonalization()}
+        open={squareCharacterDrawerOpen}
+        onClose={() => setSquareCharacterDrawerOpen(false)}
+        title={t("menu.squareCharacter")}
+      >
         <div className="personalization-editor square-character-editor">
-          <div className="personalization-square-stage">
+          <div className="personalization-square-stage personalization-sticky-preview">
             <div
-              className={`square-character personalization-square-character outfit-${me?.square_outfit_style ?? "sunset"} prop-${me?.square_prop_style ?? "none"} motion-${me?.square_motion_style ?? "walk"} limbs-${me?.square_limb_style ?? "line"}`}
+              className={`square-character personalization-square-character outfit-${personalizationDraft.square_outfit_style} prop-${personalizationDraft.square_prop_style} motion-${personalizationDraft.square_motion_style} limbs-${personalizationDraft.square_limb_style}`}
             >
               <span className="square-character-figure" aria-hidden="true">
                 <UserAvatar
@@ -2249,7 +2303,7 @@ export default function MenuPage() {
             <div className="personalization-tab-panel">
               <div className="personalization-option-grid field-square_outfit_style">
                 {personalizationOptions.square_outfit_style.map(([value, label]) => (
-                  <button className={`personalization-option preview-${value}${(me?.square_outfit_style ?? "sunset") === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => void savePersonalization("square_outfit_style", value)} type="button">
+                  <button className={`personalization-option preview-${value}${personalizationDraft.square_outfit_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_outfit_style: value }))} type="button">
                     <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
                   </button>
                 ))}
@@ -2258,7 +2312,7 @@ export default function MenuPage() {
                 <span>{t("menu.squareLimbs")}</span>
                 <div className="personalization-option-grid field-square_limb_style">
                   {personalizationOptions.square_limb_style.map(([value, label]) => (
-                    <button className={`personalization-option preview-${value}${(me?.square_limb_style ?? "line") === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => void savePersonalization("square_limb_style", value)} type="button">
+                    <button className={`personalization-option preview-${value}${personalizationDraft.square_limb_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_limb_style: value }))} type="button">
                       <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
                     </button>
                   ))}
@@ -2269,7 +2323,7 @@ export default function MenuPage() {
           {squareCharacterTab === "prop" ? (
             <div className="personalization-option-grid field-square_prop_style">
               {personalizationOptions.square_prop_style.map(([value, label]) => (
-                <button className={`personalization-option preview-${value}${(me?.square_prop_style ?? "none") === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => void savePersonalization("square_prop_style", value)} type="button">
+                <button className={`personalization-option preview-${value}${personalizationDraft.square_prop_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_prop_style: value }))} type="button">
                   <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
                 </button>
               ))}
@@ -2278,7 +2332,7 @@ export default function MenuPage() {
           {squareCharacterTab === "motion" ? (
             <div className="personalization-option-grid field-square_motion_style">
               {personalizationOptions.square_motion_style.map(([value, label]) => (
-                <button className={`personalization-option preview-${value}${(me?.square_motion_style ?? "walk") === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => void savePersonalization("square_motion_style", value)} type="button">
+                <button className={`personalization-option preview-${value}${personalizationDraft.square_motion_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_motion_style: value }))} type="button">
                   <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
                 </button>
               ))}

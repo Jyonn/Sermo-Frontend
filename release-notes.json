@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.07",
+  "id": "2026.08.02.08",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "每款头像框重新找回自己的个性",
+      "title": "个性化改为先预览，再保存",
       "items": [
-        "逐一重绘全部头像框，让星轨、声浪、月相、王冠等名称都能被直观看见",
-        "小头像保留清晰主符号，大预览会呈现更完整的材质与动态细节",
-        "所有设计仍紧贴头像并限制在固定范围内，不会挤占相邻内容"
+        "选择背景、气泡、头像框或广场人物时只更新预览，点击右上角保存后才正式生效",
+        "未解锁的候选也可以自由试览，保存时会清楚提示所需条件",
+        "预览区域会随列表保持可见，并重新梳理了时隙与声浪头像框的层次"
       ]
     },
     "en": {
-      "title": "Every avatar frame has reclaimed its identity",
+      "title": "Preview personalization before saving",
       "items": [
-        "Every frame was redrawn so names such as Orbit, Soundwave, Moon, and Crown are immediately recognizable",
-        "Compact avatars retain one clear motif while large previews reveal richer material and motion",
-        "All designs still hug the portrait and remain inside a fixed footprint without colliding with nearby content"
+        "Choosing a background, bubble, avatar frame, or plaza character now updates only the preview until Save is pressed",
+        "Locked choices remain available to try, with requirements explained only when saving",
+        "Previews stay visible while browsing, and the Portal and Soundwave frame layers have been refined"
       ]
     }
   }
