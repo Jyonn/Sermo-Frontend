@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.11",
+  "id": "2026.08.02.12",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "落雪与月相重新拥有动态生命力",
+      "title": "聊天气泡不再只是换一种颜色",
       "items": [
-        "花枝与流萤头像框正式下架，历史选择会平滑迁移到保留款式",
-        "落雪重做为多层错速雪花，大小头像都能清楚看到飘落轨迹",
-        "月相会循环展示阴晴圆缺，并保留夜空星点的细微闪烁"
+        "下架十二款缺少结构辨识度的气泡，把候选库收敛到真正有设计差异的十六款",
+        "打字机、报纸、票据、终端、全息、机械、贴纸与积木均获得独立轮廓和排版语言",
+        "预览与真实聊天统一由外层气泡承载皮肤，音频、文件、位置、足迹和链接不再冒出默认白卡"
       ]
     },
     "en": {
-      "title": "Snowfall and Moon Phase are alive again",
+      "title": "Chat bubbles are more than color swaps",
       "items": [
-        "Blossom and Firefly have been retired, with existing selections smoothly migrated to retained designs",
-        "Snowfall now uses layered flakes at varied speeds so its motion remains clear at every avatar size",
-        "Moon Phase cycles through waxing and waning while retaining subtle starlight"
+        "Twelve low-identity bubbles have been retired, focusing the library on sixteen genuinely distinct designs",
+        "Typewriter, Newspaper, Receipt, Terminal, Hologram, Mechanical, Sticker, and Toy Brick now have unique silhouettes and typography",
+        "Preview and live chat share one outer bubble skin, preventing audio, files, locations, travel maps, and links from reverting to white cards"
       ]
     }
   }

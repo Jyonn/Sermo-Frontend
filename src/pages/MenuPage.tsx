@@ -78,10 +78,9 @@ const personalizationOptions = {
     ["dragon", "menu.styleDragon"],
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
-    ["pebble", "menu.stylePebble"], ["leaf", "menu.styleLeaf"], ["cloud", "menu.styleCloud"], ["ice", "menu.styleIce"], ["lava", "menu.styleLava"],
-    ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"], ["postcard", "menu.stylePostcard"], ["blueprint", "menu.styleBlueprint"],
-    ["terminal", "menu.styleTerminal"], ["hologram", "menu.styleHologram"], ["mech", "menu.styleMech"], ["synthwave", "menu.styleSynthwave"], ["orbital", "menu.styleOrbital"],
-    ["sticker", "menu.styleSticker"], ["candy", "menu.styleCandy"], ["toybrick", "menu.styleToybrick"], ["doodle", "menu.styleDoodle"], ["plush", "menu.stylePlush"],
+    ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
+    ["terminal", "menu.styleTerminal"], ["hologram", "menu.styleHologram"], ["mech", "menu.styleMech"],
+    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"],
     ["vip", "menu.styleVip"],
   ],
   avatar_frame_style: [
@@ -120,10 +119,9 @@ const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclu
 const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.chat_bubble_style[number]> }> = [
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
-  { label: "menu.collectionOrganic", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["pebble", "leaf", "cloud", "ice", "lava"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionFuture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["terminal", "hologram", "mech", "synthwave", "orbital"].includes(value)) },
-  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "candy", "toybrick", "doodle", "plush"].includes(value)) },
+  { label: "menu.collectionFuture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["terminal", "hologram", "mech"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
 

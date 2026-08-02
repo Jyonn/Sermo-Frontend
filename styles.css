@@ -17684,6 +17684,205 @@ html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;ba
 }
 
 /* Personalization choices edit a draft while the preview remains in view. */
+.message-group:is(
+  .bubble-style-typewriter,
+  .bubble-style-newspaper,
+  .bubble-style-receipt,
+  .bubble-style-terminal,
+  .bubble-style-hologram,
+  .bubble-style-mech,
+  .bubble-style-sticker,
+  .bubble-style-toybrick
+) .message-bubble {
+  position: relative;
+  isolation: isolate;
+  color: var(--bubble-theme-color);
+  border-color: currentColor;
+  background: var(--bubble-theme-surface);
+  box-shadow: var(--bubble-theme-shadow);
+}
+
+/* The outer message bubble is the only skin surface in both live chat and preview. */
+.message-group:is(
+  .bubble-style-typewriter,
+  .bubble-style-newspaper,
+  .bubble-style-receipt,
+  .bubble-style-terminal,
+  .bubble-style-hologram,
+  .bubble-style-mech,
+  .bubble-style-sticker,
+  .bubble-style-toybrick
+) .message-bubble > :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-travel-map-card,
+  .message-text-stack
+) {
+  color: inherit;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.message-group:is(
+  .bubble-style-typewriter,
+  .bubble-style-newspaper,
+  .bubble-style-receipt,
+  .bubble-style-terminal,
+  .bubble-style-hologram,
+  .bubble-style-mech,
+  .bubble-style-sticker,
+  .bubble-style-toybrick
+) .message-link-preview-card {
+  color: inherit !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.message-group:is(
+  .bubble-style-typewriter,
+  .bubble-style-newspaper,
+  .bubble-style-receipt,
+  .bubble-style-terminal,
+  .bubble-style-hologram,
+  .bubble-style-mech,
+  .bubble-style-sticker,
+  .bubble-style-toybrick
+) :is(
+  .message-file-copy small,
+  .message-file-open,
+  .message-location-copy small,
+  .message-location-open,
+  .message-link-preview-site,
+  .message-link-preview-desc,
+  .message-travel-map-copy span,
+  .message-travel-map-arrow,
+  .message-audio-meta,
+  .message-audio-progress
+) {
+  color: var(--bubble-theme-muted);
+}
+
+/* Typewriter: ruled stationery, monospaced copy, and a red margin line. */
+.message-group.bubble-style-typewriter {
+  --bubble-skin-other-radius: 5px;
+  --bubble-skin-self-radius: 5px;
+}
+.message-group.bubble-style-typewriter .message-bubble {
+  font-family: "JetBrains Mono", monospace;
+  background:
+    linear-gradient(90deg, transparent 0 13px, rgba(156,63,53,.34) 13px 14px, transparent 14px),
+    repeating-linear-gradient(0deg, transparent 0 20px, rgba(77,71,62,.08) 20px 21px),
+    var(--bubble-theme-surface) !important;
+  box-shadow: 3px 4px 0 rgba(37,34,29,.18) !important;
+}
+
+/* Newspaper: hard editorial edges, serif typography, and print registration rules. */
+.message-group.bubble-style-newspaper {
+  --bubble-skin-other-radius: 1px;
+  --bubble-skin-self-radius: 1px;
+}
+.message-group.bubble-style-newspaper .message-bubble {
+  font-family: Georgia, "Noto Serif SC", serif;
+  border-width: 1px 0 3px !important;
+  background:
+    radial-gradient(circle, rgba(20,20,20,.07) 0 1px, transparent 1.2px) 0 0/5px 5px,
+    var(--bubble-theme-surface) !important;
+  box-shadow: inset 0 3px 0 currentColor !important;
+}
+
+/* Receipt: narrow thermal paper with perforated edges and dashed accounting rules. */
+.message-group.bubble-style-receipt {
+  --bubble-skin-other-radius: 2px;
+  --bubble-skin-self-radius: 2px;
+}
+.message-group.bubble-style-receipt .message-bubble {
+  border-style: dashed !important;
+  font-family: "JetBrains Mono", monospace;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(45,60,53,.08) 23px 24px),
+    var(--bubble-theme-surface) !important;
+  clip-path: polygon(0 3px,3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px));
+}
+
+/* Terminal: command-line slab with a luminous prompt rail. */
+.message-group.bubble-style-terminal {
+  --bubble-skin-other-radius: 4px;
+  --bubble-skin-self-radius: 4px;
+}
+.message-group.bubble-style-terminal .message-bubble {
+  padding-left: 18px;
+  font-family: "JetBrains Mono", monospace;
+  background:
+    linear-gradient(90deg, #4cec91 0 4px, transparent 4px),
+    repeating-linear-gradient(0deg, transparent 0 18px, rgba(76,236,145,.055) 18px 19px),
+    var(--bubble-theme-surface) !important;
+  box-shadow: 0 0 0 1px rgba(76,236,145,.35), 0 0 16px rgba(66,229,142,.24) !important;
+}
+
+/* Hologram: chamfered glass with moving scan light, not a rounded translucent card. */
+.message-group.bubble-style-hologram {
+  --bubble-skin-other-radius: 0;
+  --bubble-skin-self-radius: 0;
+}
+.message-group.bubble-style-hologram .message-bubble {
+  overflow: hidden;
+  clip-path: polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+  background:
+    linear-gradient(112deg, transparent 20%, rgba(255,255,255,.35) 46%, transparent 70%) -140% 0/55% 100% no-repeat,
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(99,203,210,.1) 5px 6px),
+    var(--bubble-theme-surface) !important;
+  animation: bubble-hologram-scan 4s ease-in-out infinite;
+  backdrop-filter: blur(9px) saturate(1.35);
+}
+
+/* Mechanical: armored cut corners, inset panel, and brass fasteners. */
+.message-group.bubble-style-mech {
+  --bubble-skin-other-radius: 0;
+  --bubble-skin-self-radius: 0;
+}
+.message-group.bubble-style-mech .message-bubble {
+  clip-path: polygon(8px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 8px),calc(100% - 8px) 100%,3px 100%,0 calc(100% - 3px),0 8px);
+  background:
+    radial-gradient(circle at 7px 7px,#e5a62e 0 2px,transparent 2.5px),
+    radial-gradient(circle at calc(100% - 7px) calc(100% - 7px),#e5a62e 0 2px,transparent 2.5px),
+    linear-gradient(135deg,rgba(255,255,255,.18),transparent 40%),
+    var(--bubble-theme-surface) !important;
+  box-shadow: inset 0 0 0 2px rgba(83,98,92,.45), 3px 4px 0 rgba(25,35,31,.34) !important;
+}
+
+/* Sticker: deliberately offset white die-cut border and printed shadow. */
+.message-group.bubble-style-sticker .message-bubble {
+  border: 3px solid #fff !important;
+  box-shadow: 0 4px 0 rgba(39,70,61,.36), 0 0 0 2px #263c38 !important;
+}
+.message-group.bubble-style-sticker.other .message-bubble { transform: rotate(-.55deg); }
+.message-group.bubble-style-sticker.self .message-bubble { transform: rotate(.55deg); }
+
+/* Toy brick: square modules with visible top studs and a hard plastic base. */
+.message-group.bubble-style-toybrick {
+  --bubble-skin-other-radius: 6px;
+  --bubble-skin-self-radius: 6px;
+}
+.message-group.bubble-style-toybrick .message-bubble {
+  padding-top: 15px;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,.38) 0 27%, rgba(35,45,49,.24) 30% 43%, transparent 46%) 8px 3px/18px 9px repeat-x,
+    var(--bubble-theme-surface) !important;
+  box-shadow: inset 0 -3px rgba(0,0,0,.15), 0 5px 0 color-mix(in srgb,currentColor 45%,transparent) !important;
+}
+
+@keyframes bubble-hologram-scan {
+  0%, 18% { background-position: -140% 0, 0 0, 0 0; }
+  72%, 100% { background-position: 260% 0, 0 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-group.bubble-style-hologram .message-bubble { animation: none !important; }
+}
+
 .personalization-sticky-preview {
   position: sticky;
   top: 0;
