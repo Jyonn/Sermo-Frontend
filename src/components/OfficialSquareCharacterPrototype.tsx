@@ -1,30 +1,43 @@
-import { useState, type ReactNode } from "react";
-import { Alignment, Fit, Layout, useRive } from "@rive-app/react-canvas";
-
-const OFFICIAL_CHARACTER_RIVE_URL = `${import.meta.env.BASE_URL}rive/official-character.riv`;
+import type { CSSProperties } from "react";
 
 interface OfficialSquareCharacterPrototypeProps {
   active?: boolean;
-  fallback: ReactNode;
+  direction?: -1 | 1;
 }
 
-export default function OfficialSquareCharacterPrototype({ active = false, fallback }: OfficialSquareCharacterPrototypeProps) {
-  const [failed, setFailed] = useState(false);
-  const { RiveComponent } = useRive({
-    src: OFFICIAL_CHARACTER_RIVE_URL,
-    autoplay: true,
-    layout: new Layout({ fit: Fit.Contain, alignment: Alignment.BottomCenter }),
-    onLoadError: () => setFailed(true),
-  });
+function PuppetLimb({ kind, side }: { kind: "arm" | "leg"; side: "left" | "right" }) {
+  return (
+    <i className={`official-puppet-${kind} is-${side}`} aria-hidden="true">
+      <span className="official-puppet-limb is-upper" />
+      <span className="official-puppet-joint" />
+      <span className="official-puppet-limb is-lower" />
+      <span className={`official-puppet-end is-${kind === "arm" ? "hand" : "foot"}`} />
+    </i>
+  );
+}
 
-  if (failed) return fallback;
-
+export default function OfficialSquareCharacterPrototype({
+  active = false,
+  direction = 1,
+}: OfficialSquareCharacterPrototypeProps) {
   return (
     <span
-      className={`square-character-figure square-official-rive-character${active ? " is-active" : ""}`}
-      title="Sermo official account character prototype"
+      className={`square-character-figure square-official-puppet${active ? " is-active" : ""}`}
+      style={{ "--walk-direction": direction } as CSSProperties}
+      aria-hidden="true"
     >
-      <RiveComponent aria-hidden="true" className="square-official-rive-canvas" />
+      <span className="official-puppet-rig">
+        <i className="official-puppet-cape" />
+        <PuppetLimb kind="leg" side="left" />
+        <PuppetLimb kind="leg" side="right" />
+        <i className="official-puppet-torso">
+          <span className="official-puppet-sash" />
+          <span className="official-puppet-mark">S</span>
+        </i>
+        <PuppetLimb kind="arm" side="left" />
+        <PuppetLimb kind="arm" side="right" />
+        <i className="official-puppet-head" />
+      </span>
       <i className="square-character-ground-shadow" />
     </span>
   );

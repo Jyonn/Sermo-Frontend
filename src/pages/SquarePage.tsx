@@ -1,7 +1,8 @@
 import type { CSSProperties } from "react";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import OfficialSquareCharacterPrototype from "../components/OfficialSquareCharacterPrototype";
 import { UserAvatar } from "../components/UserAvatar";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { FeedbackState } from "../components/FeedbackState";
@@ -30,7 +31,6 @@ const CHARACTER_GAP = 10;
 const MAX_FRAME_DELTA = 0.028;
 const ORB_ENTER_DURATION_MS = 320;
 const ORB_EXIT_DURATION_MS = 260;
-const OfficialSquareCharacterPrototype = lazy(() => import("../components/OfficialSquareCharacterPrototype"));
 
 type OrbState = {
   user: UserDTO;
@@ -569,12 +569,10 @@ export default function SquarePage() {
               type="button"
             >
               {orb.user.official ? (
-                <Suspense fallback={<SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />}>
-                  <OfficialSquareCharacterPrototype
-                    active={interactingUserIds.includes(orb.user.user_id) || selectedUser?.user_id === orb.user.user_id}
-                    fallback={<SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />}
-                  />
-                </Suspense>
+                <OfficialSquareCharacterPrototype
+                  active={interactingUserIds.includes(orb.user.user_id) || selectedUser?.user_id === orb.user.user_id}
+                  direction={orb.vx < 0 ? -1 : 1}
+                />
               ) : (
                 <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
               )}
@@ -597,9 +595,7 @@ export default function SquarePage() {
               }
             >
               {orb.user.official ? (
-                <Suspense fallback={<SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />}>
-                  <OfficialSquareCharacterPrototype fallback={<SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />} />
-                </Suspense>
+                <OfficialSquareCharacterPrototype direction={orb.vx < 0 ? -1 : 1} />
               ) : (
                 <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
               )}
