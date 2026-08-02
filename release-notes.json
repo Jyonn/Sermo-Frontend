@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.19",
+  "id": "2026.08.02.20",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "官方账号启用 Rive 人物原型",
+      "title": "官方账号 Rive 原型改为本地资源",
       "items": [
         "每个空间的官方账号会常驻广场，并优先展示动态 Rive 人物",
         "人物支持平滑待机与点击反馈，为后续服装和动作状态机验证基础能力",
-        "资源加载失败或设备不支持时自动回退到原有广场人物"
+        "Rive 人物文件随网页同站发布，修复第三方资源 403；设备不支持时仍自动回退"
       ]
     },
     "en": {
-      "title": "Rive character prototype for official accounts",
+      "title": "Official Rive prototype now uses a local asset",
       "items": [
         "Every space's official account now remains in the plaza and prefers an animated Rive character",
         "Smooth idle motion and selection feedback establish the foundation for future outfits and action states",
-        "Unsupported devices or failed resources automatically fall back to the existing plaza character"
+        "The Rive file now ships with the web app to eliminate third-party 403 errors, while unsupported devices still fall back safely"
       ]
     }
   }

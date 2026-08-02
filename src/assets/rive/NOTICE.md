@@ -1,8 +1,8 @@
-# Rive prototype attribution
+# Rive prototype asset
 
-The official-account plaza prototype loads **Assistant Character** by HaiDo
-from the Rive Marketplace under the CC BY license.
+The official-account plaza prototype bundles the `avatars.riv` example from
+Rive's official open-source React runtime repository.
 
-- Source: https://www.rive.app/marketplace/20733-39021-assistant-character/
-- Runtime asset: https://public.rive.app/community/runtime-files/21737171.riv
-- License: https://creativecommons.org/licenses/by/4.0/
+- Source: https://github.com/rive-app/rive-react/blob/main/examples/public/avatars.riv
+- Local asset: `/public/rive/official-character.riv`
+- Repository license: https://github.com/rive-app/rive-react/blob/main/LICENSE
