@@ -9177,6 +9177,53 @@ html[data-theme="dark"] .personalization-bubble-stage {
   animation: square-emote-in 1.9s cubic-bezier(.22,1,.36,1) both;
 }
 
+.square-official-rive-character {
+  position: relative;
+  overflow: visible;
+  filter: drop-shadow(0 10px 10px rgba(24, 40, 32, 0.2));
+}
+
+.square-official-rive-character::before {
+  position: absolute;
+  inset: 5% 8% 10%;
+  z-index: -1;
+  content: "";
+  border: 1px solid rgba(247, 215, 123, 0.74);
+  border-radius: 46% 54% 48% 52%;
+  background: radial-gradient(circle, rgba(255, 243, 194, 0.52), transparent 67%);
+  animation: official-rive-orbit 6s linear infinite;
+}
+
+.square-official-rive-character::after {
+  position: absolute;
+  top: 1%;
+  right: 4%;
+  z-index: 3;
+  padding: 2px 5px;
+  color: #7e551a;
+  content: "OFFICIAL";
+  font-size: calc(var(--orb-size) * 0.095);
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(195, 145, 54, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 247, 219, 0.9);
+}
+
+.square-official-rive-canvas,
+.square-official-rive-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.square-official-rive-character.is-active {
+  animation: official-rive-hello 560ms cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes official-rive-orbit { to { rotate: 360deg; } }
+@keyframes official-rive-hello { 40% { scale: 1.1; translate: 0 -4px; } }
+
 .square-person-card-actions { flex-wrap: wrap; }
 .square-person-card-actions .square-wave-button { color: #80511e; background: rgba(238, 185, 88, .16); }
 

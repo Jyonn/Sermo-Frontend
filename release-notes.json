@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.18",
+  "id": "2026.08.02.19",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "小票气泡更加轻巧",
+      "title": "官方账号启用 Rive 人物原型",
       "items": [
-        "压缩票号与条码区域，短消息不再被上下装饰过度拉高",
-        "语音、文件、位置、足迹和链接卡片采用更紧凑的小票排版",
-        "锯齿边、票号、分隔线和条码仍完整保留"
+        "每个空间的官方账号会常驻广场，并优先展示动态 Rive 人物",
+        "人物支持平滑待机与点击反馈，为后续服装和动作状态机验证基础能力",
+        "资源加载失败或设备不支持时自动回退到原有广场人物"
       ]
     },
     "en": {
-      "title": "A lighter receipt bubble",
+      "title": "Rive character prototype for official accounts",
       "items": [
-        "The serial and barcode strips are slimmer, so short messages no longer feel vertically stretched",
-        "Audio, file, location, travel map, and link cards now use a more compact receipt layout",
-        "Perforated edges, serial line, separators, and barcode remain intact"
+        "Every space's official account now remains in the plaza and prefers an animated Rive character",
+        "Smooth idle motion and selection feedback establish the foundation for future outfits and action states",
+        "Unsupported devices or failed resources automatically fall back to the existing plaza character"
       ]
     }
   }
