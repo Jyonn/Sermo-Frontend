@@ -80,7 +80,6 @@ const personalizationOptions = {
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
     ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
-    ["terminal", "menu.styleTerminal"], ["hologram", "menu.styleHologram"], ["mech", "menu.styleMech"],
     ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"],
     ["vip", "menu.styleVip"],
   ],
@@ -121,7 +120,6 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionFuture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["terminal", "hologram", "mech"].includes(value)) },
   { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];

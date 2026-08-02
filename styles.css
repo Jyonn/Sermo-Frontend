@@ -17838,18 +17838,67 @@ html[data-theme="dark"] .chat-conversation-preview {
   color: var(--bubble-theme-muted);
 }
 
-/* Typewriter: ruled stationery, monospaced copy, and a red margin line. */
+/* Typewriter: a sheet held by the platen, with carbon ribbon ink and paper offset. */
 .message-group.bubble-style-typewriter {
-  --bubble-skin-other-radius: 5px;
-  --bubble-skin-self-radius: 5px;
+  --bubble-skin-other-radius: 3px;
+  --bubble-skin-self-radius: 3px;
+  --bubble-skin-other-bg: #f3ead8;
+  --bubble-skin-other-color: #282621;
+  --bubble-skin-other-border: #49453d;
+  --bubble-skin-other-shadow: 4px 5px 0 rgba(48,43,34,.2);
+  --bubble-skin-self-bg: #26383a;
+  --bubble-skin-self-color: #f5ebd6;
+  --bubble-skin-self-border: #111d1e;
+  --bubble-skin-self-shadow: 4px 5px 0 rgba(10,20,20,.38);
 }
 .message-group.bubble-style-typewriter .message-bubble {
+  overflow: hidden;
+  padding-top: 22px;
+  border-width: 1px 2px 3px !important;
   font-family: "JetBrains Mono", monospace;
+  letter-spacing: .012em;
+  text-shadow: .35px 0 currentColor;
   background:
-    linear-gradient(90deg, transparent 0 13px, rgba(156,63,53,.34) 13px 14px, transparent 14px),
-    repeating-linear-gradient(0deg, transparent 0 20px, rgba(77,71,62,.08) 20px 21px),
+    linear-gradient(90deg, transparent 0 10px, color-mix(in srgb,currentColor 18%,transparent) 10px 11px, transparent 11px),
+    repeating-linear-gradient(0deg, transparent 0 21px, color-mix(in srgb,currentColor 7%,transparent) 21px 22px),
+    radial-gradient(ellipse at 20% 15%, color-mix(in srgb,currentColor 6%,transparent), transparent 42%),
     var(--bubble-theme-surface) !important;
-  box-shadow: 3px 4px 0 rgba(37,34,29,.18) !important;
+  box-shadow: var(--bubble-theme-shadow), inset 0 3px 0 color-mix(in srgb,currentColor 20%,transparent) !important;
+  clip-path: polygon(1px 0,calc(100% - 2px) 1px,100% calc(100% - 2px),2px 100%,0 2px);
+}
+.message-group.bubble-style-typewriter .message-bubble::before {
+  position: absolute;
+  z-index: 0;
+  top: 6px;
+  left: 12px;
+  display: block;
+  color: color-mix(in srgb,currentColor 58%,transparent);
+  content: "A · 01";
+  font-size: .48rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  line-height: 1;
+}
+.message-group.bubble-style-typewriter.self .message-bubble::before {
+  right: 12px;
+  left: auto;
+  content: "A · 02";
+}
+.message-group.bubble-style-typewriter .message-bubble::after {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 2px;
+  border-radius: 99px;
+  background: #9c3f35;
+  box-shadow: 0 3px 0 color-mix(in srgb,#9c3f35 55%,transparent);
+  content: "";
+  opacity: .78;
+}
+.message-group.bubble-style-typewriter.self .message-bubble::after {
+  right: auto;
+  left: 10px;
 }
 
 /* Newspaper: hard editorial edges, serif typography, and print registration rules. */
@@ -17866,18 +17915,70 @@ html[data-theme="dark"] .chat-conversation-preview {
   box-shadow: inset 0 3px 0 currentColor !important;
 }
 
-/* Receipt: narrow thermal paper with perforated edges and dashed accounting rules. */
+/* Receipt: thermal stock with perforated sides, serial line, totals rule, and barcode. */
 .message-group.bubble-style-receipt {
-  --bubble-skin-other-radius: 2px;
-  --bubble-skin-self-radius: 2px;
+  --bubble-skin-other-radius: 0;
+  --bubble-skin-self-radius: 0;
+  --bubble-skin-other-bg: #fffdf3;
+  --bubble-skin-other-color: #292b27;
+  --bubble-skin-other-border: transparent;
+  --bubble-skin-other-shadow: 2px 5px 10px rgba(57,51,43,.14);
+  --bubble-skin-self-bg: #e8f0e8;
+  --bubble-skin-self-color: #26372f;
+  --bubble-skin-self-border: transparent;
+  --bubble-skin-self-shadow: 2px 5px 10px rgba(38,59,49,.16);
 }
 .message-group.bubble-style-receipt .message-bubble {
-  border-style: dashed !important;
+  overflow: hidden;
+  min-width: min(100%, 150px);
+  padding-top: 27px;
+  padding-bottom: 30px;
+  border: 0 !important;
   font-family: "JetBrains Mono", monospace;
+  letter-spacing: -.01em;
   background:
-    repeating-linear-gradient(0deg, transparent 0 23px, rgba(45,60,53,.08) 23px 24px),
+    linear-gradient(90deg,transparent 10px,color-mix(in srgb,currentColor 20%,transparent) 10px calc(100% - 10px),transparent calc(100% - 10px)) 0 22px/100% 1px no-repeat,
+    linear-gradient(90deg,transparent 10px,color-mix(in srgb,currentColor 20%,transparent) 10px calc(100% - 10px),transparent calc(100% - 10px)) 0 calc(100% - 24px)/100% 1px no-repeat,
+    radial-gradient(circle at 28% 18%,color-mix(in srgb,currentColor 5%,transparent),transparent 36%),
     var(--bubble-theme-surface) !important;
-  clip-path: polygon(0 3px,3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px));
+  box-shadow: var(--bubble-theme-shadow) !important;
+  -webkit-mask:
+    linear-gradient(#000 0 0) center/calc(100% - 8px) 100% no-repeat,
+    radial-gradient(circle at left center,transparent 0 2.5px,#000 3px) left/8px 11px repeat-y,
+    radial-gradient(circle at right center,transparent 0 2.5px,#000 3px) right/8px 11px repeat-y;
+  mask:
+    linear-gradient(#000 0 0) center/calc(100% - 8px) 100% no-repeat,
+    radial-gradient(circle at left center,transparent 0 2.5px,#000 3px) left/8px 11px repeat-y,
+    radial-gradient(circle at right center,transparent 0 2.5px,#000 3px) right/8px 11px repeat-y;
+}
+.message-group.bubble-style-receipt .message-bubble::before {
+  position: absolute;
+  top: 8px;
+  right: 13px;
+  left: 13px;
+  display: block;
+  color: color-mix(in srgb,currentColor 60%,transparent);
+  content: "SERMO  /  IN  0018";
+  font-size: .46rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.message-group.bubble-style-receipt.self .message-bubble::before {
+  content: "SERMO  /  OUT  0024";
+  text-align: right;
+}
+.message-group.bubble-style-receipt .message-bubble::after {
+  position: absolute;
+  right: 14px;
+  bottom: 8px;
+  left: 14px;
+  display: block;
+  height: 10px;
+  background: repeating-linear-gradient(90deg,currentColor 0 1px,transparent 1px 3px,currentColor 3px 5px,transparent 5px 7px);
+  content: "";
+  opacity: .58;
 }
 
 /* Terminal: command-line slab with a luminous prompt rail. */

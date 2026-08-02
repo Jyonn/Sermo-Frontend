@@ -180,9 +180,8 @@ function avatarLabel(name: string) {
 
 function visibleBubbleStyle(style?: string) {
   return [
-    "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic", "pebble", "leaf", "cloud", "ice", "lava",
-    "typewriter", "newspaper", "receipt", "postcard", "blueprint", "terminal", "hologram", "mech", "synthwave",
-    "orbital", "sticker", "candy", "toybrick", "doodle", "plush",
+    "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic",
+    "typewriter", "newspaper", "receipt", "sticker", "toybrick",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
