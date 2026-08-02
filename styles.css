@@ -6950,7 +6950,7 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 
 .personalization-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   padding: 4px;
   border-radius: 13px;
   background: rgba(36, 53, 44, 0.07);
@@ -6958,7 +6958,7 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 
 .personalization-tabs button {
   min-height: 40px;
-  padding: 0 12px;
+  padding: 0 6px;
   color: var(--text-muted);
   font-size: 0.78rem;
   font-weight: 700;

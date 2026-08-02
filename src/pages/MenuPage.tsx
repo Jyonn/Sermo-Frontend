@@ -277,7 +277,7 @@ export default function MenuPage() {
   const [chatBubbleDrawerOpen, setChatBubbleDrawerOpen] = useState(false);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [squareCharacterDrawerOpen, setSquareCharacterDrawerOpen] = useState(false);
-  const [squareCharacterTab, setSquareCharacterTab] = useState<"outfit" | "prop" | "motion">("outfit");
+  const [squareCharacterTab, setSquareCharacterTab] = useState<"outfit" | "limbs" | "prop" | "motion">("outfit");
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
@@ -2123,6 +2123,7 @@ export default function MenuPage() {
           <div className="personalization-tabs" role="tablist" aria-label={t("menu.squareCharacter")}>
             {([
               ["outfit", "menu.squareTabOutfit"],
+              ["limbs", "menu.squareTabLimbs"],
               ["prop", "menu.squareTabProp"],
               ["motion", "menu.squareTabMotion"],
             ] as const).map(([value, label]) => (
@@ -2139,24 +2140,21 @@ export default function MenuPage() {
             ))}
           </div>
           {squareCharacterTab === "outfit" ? (
-            <div className="personalization-tab-panel">
-              <div className="personalization-option-grid field-square_outfit_style">
-                {personalizationOptions.square_outfit_style.map(([value, label]) => (
-                  <button className={`personalization-option preview-${value}${personalizationDraft.square_outfit_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_outfit_style: value }))} type="button">
-                    <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
-                  </button>
-                ))}
-              </div>
-              <div className="personalization-subsection">
-                <span>{t("menu.squareLimbs")}</span>
-                <div className="personalization-option-grid field-square_limb_style">
-                  {personalizationOptions.square_limb_style.map(([value, label]) => (
-                    <button className={`personalization-option preview-${value}${personalizationDraft.square_limb_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_limb_style: value }))} type="button">
-                      <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="personalization-option-grid field-square_outfit_style">
+              {personalizationOptions.square_outfit_style.map(([value, label]) => (
+                <button className={`personalization-option preview-${value}${personalizationDraft.square_outfit_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_outfit_style: value }))} type="button">
+                  <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {squareCharacterTab === "limbs" ? (
+            <div className="personalization-option-grid field-square_limb_style">
+              {personalizationOptions.square_limb_style.map(([value, label]) => (
+                <button className={`personalization-option preview-${value}${personalizationDraft.square_limb_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_limb_style: value }))} type="button">
+                  <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
+                </button>
+              ))}
             </div>
           ) : null}
           {squareCharacterTab === "prop" ? (

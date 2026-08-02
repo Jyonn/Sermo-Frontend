@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.14",
+  "id": "2026.08.02.15",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "打字机与小票拥有完整设计语言",
+      "title": "广场人物四肢拥有独立入口",
       "items": [
-        "未来界面系列正式下架，终端、全息和机械气泡会迁移到更成熟的保留款式",
-        "打字机加入纸张错位、色带油墨、机械压痕和编号标记，并为双方设计不同纸张",
-        "小票加入热敏纸齿边、流水号、分隔线与条码，所有消息卡片都遵循同一票据结构"
+        "广场人物 Drawer 新增独立的四肢 Tab，与衣服、手持物和动作并列",
+        "四肢选项不再收纳在衣服页面中，人物定制路径更加直接",
+        "切换四肢时顶部人物预览即时更新，点击右上角保存后正式生效"
       ]
     },
     "en": {
-      "title": "Typewriter and Receipt now speak complete design languages",
+      "title": "Plaza character limbs now have their own tab",
       "items": [
-        "The Future Interface collection has been retired, migrating Terminal, Hologram, and Mechanical to stronger retained designs",
-        "Typewriter now combines offset paper, ribbon ink, mechanical impressions, serial marks, and distinct sheets for both sides",
-        "Receipt now uses perforated thermal stock, serial lines, separators, and barcodes across every message card type"
+        "The plaza character drawer now includes a dedicated Limbs tab alongside Outfit, Prop, and Motion",
+        "Limb choices are no longer nested under Outfit, making character customization more direct",
+        "The sticky character preview updates instantly, while the top-right Save action applies the final choice"
       ]
     }
   }
