@@ -83,40 +83,43 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false, fr
   }, [sourceUri]);
 
   const canShowImage = Boolean(resolvedUri) && !failed;
+  const hasFrame = frame !== "none";
 
   return (
-    <div className={`${className} ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}${frame !== "none" ? ` avatar-frame-${frame}` : ""}`}>
-      {canShowGroup ? (
-        <div aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
-          {normalizedGroupMembers.map((member, index) => (
-            <div key={`${member.name}:${member.uri ?? "fallback"}:${index}`} className={`avatar-group-tile avatar-group-tile-${index + 1}`}>
-              <AvatarTile name={member.name} uri={member.uri} />
-            </div>
-          ))}
-        </div>
-      ) : canShowImage ? (
-        <img
-          alt={`${resolvedName} avatar`}
-          className="avatar-image"
-          loading="lazy"
-          src={resolvedUri ?? ""}
-          onError={() => {
-            if (!retryWithFreshUri && sourceUri) {
-              forgetStableResourceUri(sourceUri);
-              setRetryWithFreshUri(true);
-              return;
-            }
-            setFailed(true);
-          }}
-        />
-      ) : (
-        <span className="avatar-label">{avatarLabel(resolvedName)}</span>
-      )}
-      {frame !== "none" ? (
-        <span aria-hidden="true" className="avatar-frame-ornament">
-          <i /><i /><i /><i />
-        </span>
-      ) : null}
+    <div className={`${className} user-avatar ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
+      <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${frame}` : ""}`}>
+        {canShowGroup ? (
+          <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
+            {normalizedGroupMembers.map((member, index) => (
+              <span key={`${member.name}:${member.uri ?? "fallback"}:${index}`} className={`avatar-group-tile avatar-group-tile-${index + 1}`}>
+                <AvatarTile name={member.name} uri={member.uri} />
+              </span>
+            ))}
+          </span>
+        ) : canShowImage ? (
+          <img
+            alt={`${resolvedName} avatar`}
+            className="avatar-image"
+            loading="lazy"
+            src={resolvedUri ?? ""}
+            onError={() => {
+              if (!retryWithFreshUri && sourceUri) {
+                forgetStableResourceUri(sourceUri);
+                setRetryWithFreshUri(true);
+                return;
+              }
+              setFailed(true);
+            }}
+          />
+        ) : (
+          <span className="avatar-label">{avatarLabel(resolvedName)}</span>
+        )}
+        {hasFrame ? (
+          <span aria-hidden="true" className="avatar-frame-ornament">
+            <i /><i /><i /><i />
+          </span>
+        ) : null}
+      </span>
     </div>
   );
 }

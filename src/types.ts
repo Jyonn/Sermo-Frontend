@@ -630,6 +630,7 @@ export interface FriendAccepted {
   id: number;
   name: string;
   avatarUri?: string;
+  avatarFrameStyle?: AvatarFrameStyle;
   status: string;
   mood: string;
   verified: boolean;

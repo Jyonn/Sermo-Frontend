@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.05",
+  "id": "2026.08.02.06",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录可以搜索了",
+      "title": "头像框在每个尺寸都保持一致",
       "items": [
-        "在聊天详情中按关键词查找历史消息",
-        "无需输入文字，也能直接浏览全部图片、视频、语音、文件、位置与足迹",
-        "点击搜索结果会自动回到原消息并高亮定位"
+        "头像框会随头像等比例缩放，小头像和大预览保持相同粗细",
+        "边框紧贴头像并共享同一轮廓，不再出现圆框与圆角头像错位",
+        "装饰被限制在固定头像范围内，不会挤占列表空间或覆盖相邻内容"
       ]
     },
     "en": {
-      "title": "Chat history is now searchable",
+      "title": "Avatar frames now stay consistent at every size",
       "items": [
-        "Search historical messages by keyword from chat details",
-        "Browse all images, videos, audio, files, locations, and footprints without entering text",
-        "Selecting a result returns to and highlights the original message"
+        "Frames scale proportionally so compact avatars and large previews keep the same visual weight",
+        "Frames now hug the avatar and share its silhouette instead of mixing circles with rounded portraits",
+        "Ornaments remain inside a fixed avatar footprint and no longer collide with nearby content"
       ]
     }
   }

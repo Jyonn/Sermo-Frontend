@@ -34,6 +34,7 @@ function mapFriend(user: UserDTO): FriendAccepted {
     id: user.user_id,
     name: user.name,
     avatarUri: user.avatar_uri,
+    avatarFrameStyle: user.avatar_frame_style,
     status: user.is_alive ? i18n.t("presence.online") : i18n.t("presence.offline"),
     mood: user.verified ? i18n.t("friends.verifiedMember") : i18n.t("friends.member"),
     verified: user.verified,
@@ -183,6 +184,7 @@ export default function FriendsPage() {
                 <div key={friend.id} className="simple-row person-row">
                   <UserAvatar
                     className={`mini-avatar friend-avatar-neutral ${friend.status === t("presence.online") ? "status-online" : ""}`}
+                    frame={friend.avatarFrameStyle}
                     name={friend.name}
                     uri={friend.avatarUri}
                   />
@@ -207,6 +209,7 @@ export default function FriendsPage() {
                 <div key={request.request_id} className="simple-row request-row">
                   <UserAvatar
                     className="mini-avatar"
+                    frame={tab === "incoming" ? request.from_user.avatar_frame_style : request.to_user.avatar_frame_style}
                     name={requestName(request, tab)}
                     uri={tab === "incoming" ? request.from_user.avatar_uri : request.to_user.avatar_uri}
                   />

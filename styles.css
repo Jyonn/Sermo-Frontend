@@ -17268,3 +17268,129 @@ html[data-theme="dark"] :is(
 .message-search-more:disabled { opacity:.55; }
 
 html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;background:rgba(62,211,154,.14); }
+
+/* Avatar frame protocol: fixed footprint, proportional inset, shared silhouette. */
+.user-avatar {
+  --avatar-frame-inset: 0%;
+  --avatar-frame-paint: transparent;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  contain: layout;
+}
+
+.avatar-frame-clip {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border-radius: inherit;
+  background: inherit;
+}
+
+.user-avatar.has-avatar-frame {
+  --avatar-frame-inset: 6%;
+  overflow: visible !important;
+  background: transparent;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-clip {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding: var(--avatar-frame-inset);
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: inherit !important;
+  outline: 0 !important;
+  background: var(--avatar-frame-paint) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  isolation: isolate;
+}
+
+.user-avatar.has-avatar-frame .avatar-image,
+.user-avatar.has-avatar-frame .avatar-label,
+.user-avatar.has-avatar-frame .avatar-group-stack {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  border-radius: inherit;
+}
+
+.user-avatar.has-avatar-frame .avatar-image {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.user-avatar.has-avatar-frame .avatar-group-stack {
+  position: absolute;
+  inset: var(--avatar-frame-inset);
+}
+
+.user-avatar.has-avatar-frame .avatar-frame-ornament {
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: inherit;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-clip::before,
+.user-avatar.has-avatar-frame > .avatar-frame-clip::after {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Every material paints the same proportional frame band. */
+.avatar-frame-orbit { --avatar-frame-paint: conic-gradient(from 25deg,#9a7133,#f4e5b6,#315f52,#d1ad63,#9a7133); }
+.avatar-frame-pixel { --avatar-frame-paint: linear-gradient(135deg,#1d5a45 0 32%,#e4b14f 32% 62%,#83d3b9 62%); }
+.avatar-frame-aurora { --avatar-frame-paint: conic-gradient(from 20deg,#2dd4a4,#8ad8ff,#f6cf72,#42b7a5,#2dd4a4); }
+.avatar-frame-polaroid { --avatar-frame-inset: 7%;--avatar-frame-paint: linear-gradient(#fffdf5 0 78%,#eee5ce 78%); }
+.avatar-frame-soundwave { --avatar-frame-paint: repeating-linear-gradient(90deg,#176d59 0 8%,#32c99a 8% 13%,#e8fff7 13% 18%); }
+.avatar-frame-lucky { --avatar-frame-paint: conic-gradient(from 45deg,#b53d31,#f4c35f,#8e2825,#f5dc8c,#b53d31); }
+.avatar-frame-portal { --avatar-frame-paint: repeating-conic-gradient(#175f51 0 13deg,#d9ac50 13deg 19deg,#83d2ba 19deg 27deg); }
+.avatar-frame-vine { --avatar-frame-inset: 7%;--avatar-frame-paint: conic-gradient(#4f7c4a,#9ebf72,#6d9b58,#e7dcae,#4f7c4a); }
+.avatar-frame-blossom { --avatar-frame-inset: 7%;--avatar-frame-paint: radial-gradient(circle at 18% 16%,#f8d15e 0 5%,transparent 6%),radial-gradient(circle at 80% 76%,#fff0f4 0 8%,transparent 9%),#d98b9c; }
+.avatar-frame-butterfly { --avatar-frame-inset: 7%;--avatar-frame-paint: conic-gradient(from 45deg,#7bd9d0,#9b6bc1,#f2b964,#7759a7,#7bd9d0); }
+.avatar-frame-coral { --avatar-frame-inset: 7%;--avatar-frame-paint: repeating-linear-gradient(65deg,#e36c55 0 10%,#ffb58e 10% 17%,#fff3ea 17% 22%); }
+.avatar-frame-moon { --avatar-frame-inset: 7%;--avatar-frame-paint: radial-gradient(circle at 78% 18%,#f5d77c 0 11%,transparent 12%),linear-gradient(145deg,#293b68,#53699b); }
+.avatar-frame-crown { --avatar-frame-inset: 8%;--avatar-frame-paint: linear-gradient(135deg,#ffe491,#d99b27 48%,#fff0b2); }
+.avatar-frame-headphones { --avatar-frame-inset: 8%;--avatar-frame-paint: linear-gradient(90deg,#243d41 0 18%,#35bca0 18% 30%,#e7fbf7 30% 70%,#35bca0 70% 82%,#243d41 82%); }
+.avatar-frame-cat-ears { --avatar-frame-inset: 8%;--avatar-frame-paint: linear-gradient(145deg,#6a4d49,#efa59f 48%,#7a5550); }
+.avatar-frame-ribbon-bow { --avatar-frame-inset: 8%;--avatar-frame-paint: conic-gradient(from 30deg,#d95f8b,#f5c15c,#f5a4be,#d95f8b); }
+.avatar-frame-camera { --avatar-frame-inset: 7%;--avatar-frame-paint: linear-gradient(135deg,#263934 0 22%,#e5ad43 22% 28%,#f1ead7 28% 72%,#e5ad43 72% 78%,#263934 78%); }
+.avatar-frame-comet { --avatar-frame-inset: 7%;--avatar-frame-paint: conic-gradient(from 210deg,#436ca4,#65d9cb 35%,#f3c75a 43%,transparent 58%,#436ca4); }
+.avatar-frame-radar { --avatar-frame-inset: 7%;--avatar-frame-paint: conic-gradient(from 20deg,#197252,#51e1a7 18%,#e8fff7 19% 48%,#197252 49%); }
+.avatar-frame-pulse { --avatar-frame-inset: 6%;--avatar-frame-paint: radial-gradient(closest-side,transparent 55%,#25a97b 57% 70%,#9ae5ca 72%); }
+.avatar-frame-snowfall { --avatar-frame-inset: 7%;--avatar-frame-paint: radial-gradient(circle at 20% 15%,#fff 0 4%,transparent 5%),radial-gradient(circle at 70% 76%,#fff 0 5%,transparent 6%),#8bb9d3; }
+.avatar-frame-firefly { --avatar-frame-inset: 7%;--avatar-frame-paint: radial-gradient(circle at 20% 22%,#e8f26e 0 5%,transparent 8%),radial-gradient(circle at 78% 68%,#e8f26e 0 4%,transparent 8%),#385d3d; }
+.avatar-frame-stamp { --avatar-frame-inset: 8%;--avatar-frame-paint: repeating-conic-gradient(#af4a43 0 7deg,#fff8e9 7deg 12deg); }
+.avatar-frame-embroidery { --avatar-frame-inset: 7%;--avatar-frame-paint: repeating-linear-gradient(45deg,#285f55 0 8%,#f2be55 8% 12%,#fff8ed 12% 17%); }
+.avatar-frame-stainedglass { --avatar-frame-inset: 8%;--avatar-frame-paint: repeating-conic-gradient(#284c67 0 8deg,#e65b60 9deg 22deg,#efc84b 23deg 35deg,#4ab39e 36deg 50deg); }
+.avatar-frame-papercut { --avatar-frame-inset: 8%;--avatar-frame-paint: repeating-conic-gradient(#b72e35 0 12deg,#ef665f 12deg 20deg,#fff2df 20deg 24deg); }
+.avatar-frame-mechanical { --avatar-frame-inset: 8%;--avatar-frame-paint: repeating-conic-gradient(#48534f 0 8deg,#d8ddd9 8deg 15deg,#e7a83c 15deg 19deg); }
+
+/* Legacy frame ornaments stay expressive but can no longer escape the component. */
+.user-avatar.has-avatar-frame .avatar-frame-ornament > i {
+  max-width: 28%;
+  max-height: 34%;
+}
+
+.user-avatar.has-avatar-frame .avatar-frame-crown::before,
+.user-avatar.has-avatar-frame .avatar-frame-cat-ears::before,
+.user-avatar.has-avatar-frame .avatar-frame-cat-ears::after,
+.user-avatar.has-avatar-frame .avatar-frame-headphones::before,
+.user-avatar.has-avatar-frame .avatar-frame-headphones::after,
+.user-avatar.has-avatar-frame .avatar-frame-ribbon-bow::before {
+  inset-block-start: 0;
+  max-height: 30%;
+}
