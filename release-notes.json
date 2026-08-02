@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.15",
+  "id": "2026.08.02.16",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "广场人物四肢拥有独立入口",
+      "title": "失败图片可重试，消息操作更清晰",
       "items": [
-        "广场人物 Drawer 新增独立的四肢 Tab，与衣服、手持物和动作并列",
-        "四肢选项不再收纳在衣服页面中，人物定制路径更加直接",
-        "切换四肢时顶部人物预览即时更新，点击右上角保存后正式生效"
+        "九宫格中的单张图片上传失败后，可以直接点击失败标识重新上传",
+        "撤回移至消息首层操作，普通账号支持 2 分钟内撤回，VIP 支持 7 天内撤回",
+        "消息操作改为紧凑图标网格，操作增多时自动换行，不再横向挤出屏幕"
       ]
     },
     "en": {
-      "title": "Plaza character limbs now have their own tab",
+      "title": "Retry failed images and use clearer message actions",
       "items": [
-        "The plaza character drawer now includes a dedicated Limbs tab alongside Outfit, Prop, and Motion",
-        "Limb choices are no longer nested under Outfit, making character customization more direct",
-        "The sticky character preview updates instantly, while the top-right Save action applies the final choice"
+        "A failed photo inside an image grid can now be uploaded again directly from its retry badge",
+        "Recall is now a first-level message action, available for 2 minutes normally and 7 days for VIP members",
+        "Message actions now use a compact icon grid that wraps cleanly as more actions become available"
       ]
     }
   }

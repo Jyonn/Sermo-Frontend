@@ -997,6 +997,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   messages,
   onOpenImage,
   onOpenActions,
+  onRetry,
   onToggleSelection,
   selectedClientIds,
   selectionMode,
@@ -1008,6 +1009,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
   messages: ChatMessage[];
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
+  onRetry: (message: ChatMessage) => void;
   onToggleSelection: (message: ChatMessage) => void;
   selectedClientIds: string[];
   selectionMode: boolean;
@@ -1080,6 +1082,12 @@ const MessageImageGallery = memo(function MessageImageGallery({
                     event.preventDefault();
                     return;
                   }
+                  if (message.status === "failed") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onRetry(message);
+                    return;
+                  }
                   onOpenImage(fullUris, index, imageMetadata, imageMessageIds);
                 }}
                 onContextMenu={(event) => {
@@ -1108,8 +1116,8 @@ const MessageImageGallery = memo(function MessageImageGallery({
                   </span>
                 ) : null}
                 {message.status === "failed" ? (
-                  <span className="message-image-gallery-failed" aria-label={i18n.t("message.sendFailed")}>
-                    <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                  <span className="message-image-gallery-failed" aria-label={i18n.t("message.retrySend")} title={i18n.t("message.retrySend")}>
+                    <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
                   </span>
                 ) : null}
               </button>
@@ -1618,6 +1626,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
               messages={row.messages}
               onOpenImage={onOpenImage}
               onOpenActions={onOpenActions}
+              onRetry={onRetry}
               onToggleSelection={onToggleSelection}
               selectedClientIds={selectedClientIds}
               selectionMode={selectionMode}
@@ -2288,6 +2297,12 @@ function LiveChatsPage() {
   const canSendVideo = growthCapability("send_video", 5).available;
   const canUseOnlineReminder = growthCapability("online_reminder", 7).available;
   const canDownloadAudio = growthCapability("download_audio", 8).available;
+  const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
+  const canRecallMessage = (message: ChatMessage) => {
+    if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
+    const recallWindowSeconds = currentUserIsPermanentVip ? 7 * 24 * 60 * 60 : 2 * 60;
+    return Math.max(0, Math.floor(Date.now() / 1000) - message.createdAt) <= recallWindowSeconds;
+  };
 
   useEffect(() => () => {
     localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
@@ -3554,7 +3569,7 @@ function LiveChatsPage() {
   };
 
   const retryFailedMessage = async (message: ChatMessage) => {
-    if (!selectedChat || message.status !== "failed" || !["text", "audio"].includes(message.kind)) return;
+    if (!selectedChat || message.status !== "failed" || !["text", "image", "video", "audio", "file"].includes(message.kind)) return;
 
     const retryMessage: ChatMessage = {
       ...message,
@@ -3573,25 +3588,41 @@ function LiveChatsPage() {
 
     try {
       let created: ChatMessageDTO;
-      if (retryMessage.kind === "audio") {
+      if (["image", "video", "audio", "file"].includes(retryMessage.kind)) {
         const sourceUri = retryMessage.localPreviewUri ?? retryMessage.payload?.uri;
-        if (!sourceUri) throw new Error("audio_source_missing");
+        if (!sourceUri) throw new Error("media_source_missing");
         const response = await fetch(sourceUri);
-        if (!response.ok) throw new Error("audio_source_unavailable");
+        if (!response.ok) throw new Error("media_source_unavailable");
         const blob = await response.blob();
-        const mimeType = retryMessage.payload?.mime_type || blob.type || "audio/webm";
-        const extension = mimeType.includes("mp4") ? "m4a" : mimeType.includes("ogg") ? "ogg" : "webm";
-        const file = new File([blob], `voice-message.${extension}`, { type: mimeType });
-        const upload = await uploadMessageMedia(file, "audio", (progress) => {
+        const fallbackMimeType = retryMessage.kind === "image"
+          ? "image/jpeg"
+          : retryMessage.kind === "video"
+            ? "video/mp4"
+            : retryMessage.kind === "audio"
+              ? "audio/webm"
+              : "application/octet-stream";
+        const mimeType = retryMessage.payload?.mime_type || blob.type || fallbackMimeType;
+        const fallbackFileName = retryMessage.kind === "image"
+          ? "image-message.jpg"
+          : retryMessage.kind === "video"
+            ? "video-message.mp4"
+            : retryMessage.kind === "audio"
+              ? "voice-message.webm"
+              : "sermo-file";
+        const file = new File([blob], retryMessage.payload?.file_name || fallbackFileName, { type: mimeType });
+        const mediaKind = retryMessage.kind as MessageMediaKind;
+        const upload = await uploadMessageMedia(file, mediaKind, (progress) => {
           updateSendTask(retryMessage.clientId, 0.12 + progress * 0.76);
         });
         created = await api.sendMessage(
           selectedChat.id,
-          MESSAGE_TYPE_AUDIO,
+          messageTypeFromKind(mediaKind),
           JSON.stringify({
             key: upload.key,
             mime_type: mimeType,
             duration_seconds: retryMessage.payload?.duration_seconds,
+            file_name: retryMessage.payload?.file_name,
+            file_size: retryMessage.payload?.file_size ?? file.size,
           }),
           retryMessage.replyTo?.message_id,
           retryMessage.clientId,
@@ -6057,16 +6088,13 @@ function LiveChatsPage() {
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: false } : current))}
                     type="button"
                   >
+                    <span className="material-symbols-outlined" aria-hidden="true">close</span>
                     {t("common.cancel")}
                   </button>
                   <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("me")} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                     {messageDeleteState === "deleting" ? t("common.deleting") : t("message.deleteForMe")}
                   </button>
-                  {messageMenu.message.from === "self" ? (
-                    <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
-                      {t("message.recallForEveryone")}
-                    </button>
-                  ) : null}
                 </div>
               </>
             ) : (
@@ -6074,6 +6102,7 @@ function LiveChatsPage() {
                 className="message-context-actions"
               >
                 <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
+                  <span className="material-symbols-outlined" aria-hidden="true">reply</span>
                   {t("message.reply")}
                 </button>
                 {typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
@@ -6083,6 +6112,10 @@ function LiveChatsPage() {
                     onClick={() => void togglePinnedMessage(messageMenu.message)}
                     type="button"
                   >
+                    <ComposerSvgIcon className="message-context-action-icon" kind={pinnedMessages.some((pin) =>
+                      pin.message.message_id === messageMenu.message.id
+                      && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
+                    ) ? "pin-off" : "pin"} />
                     {pinnedMessages.some((pin) =>
                       pin.message.message_id === messageMenu.message.id
                       && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
@@ -6091,23 +6124,33 @@ function LiveChatsPage() {
                 ) : null}
                 {messageMenu.message.kind === "text" ? (
                   <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">content_copy</span>
                     {t("common.copy")}
                   </button>
                 ) : null}
                 {(["image", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
                   <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">download</span>
                     {t("common.download")}
                   </button>
                 ) : null}
                 <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
+                  <span className="material-symbols-outlined" aria-hidden="true">checklist</span>
                   {t("message.multiSelect")}
                 </button>
+                {canRecallMessage(messageMenu.message) ? (
+                  <button className="message-context-button recall" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">undo</span>
+                    {t("message.recallForEveryone")}
+                  </button>
+                ) : null}
                 {(typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image")) ? (
                   <button
                     className="message-context-button danger"
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: true } : current))}
                     type="button"
                   >
+                    <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                     {t("common.delete")}
                   </button>
                 ) : null}

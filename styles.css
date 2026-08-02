@@ -4090,7 +4090,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   height: 25px;
   border-radius: 50%;
   color: #fff;
-  background: rgba(255, 78, 96, 0.94);
+  background: rgba(22, 39, 34, 0.9);
   box-shadow: 0 4px 12px rgba(24, 18, 20, 0.24);
 }
 
@@ -4855,16 +4855,15 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-context-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  width: max-content;
-  max-width: calc(100vw - 42px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  width: min(320px, calc(100vw - 42px));
 }
 
 .message-context-actions.is-confirm {
-  justify-content: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(250px, calc(100vw - 42px));
 }
 
 .message-context-actions.is-single {
@@ -4875,20 +4874,31 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  min-height: 38px;
-  padding: 0 14px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 7px 4px 6px;
   border-radius: 12px;
   background: rgba(244, 246, 251, 0.94);
   color: var(--text-default);
-  font-size: 0.88rem;
+  font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .message-context-button .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: 1.2rem;
+}
+
+.message-context-action-icon {
+  width: 19px;
+  height: 19px;
+}
+
+.message-context-button.recall {
+  color: #9a5c10;
+  background: rgba(231, 174, 75, 0.14);
 }
 
 .message-context-button.danger {
