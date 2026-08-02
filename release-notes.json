@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.08",
+  "id": "2026.08.02.09",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "个性化改为先预览，再保存",
+      "title": "头像框从数量转向设计质量",
       "items": [
-        "选择背景、气泡、头像框或广场人物时只更新预览，点击右上角保存后才正式生效",
-        "未解锁的候选也可以自由试览，保存时会清楚提示所需条件",
-        "预览区域会随列表保持可见，并重新梳理了时隙与声浪头像框的层次"
+        "下架八款辨识度不足或过度依赖换色与条纹的头像框，候选库重新归为五个清晰系列",
+        "时隙、彗星与星轨改为装饰元素沿圆角边缘运动，不再旋转整个头像框",
+        "历史选择会自动迁移到最接近的保留款式，不会突然丢失头像装饰"
       ]
     },
     "en": {
-      "title": "Preview personalization before saving",
+      "title": "Avatar frames now favor design quality over quantity",
       "items": [
-        "Choosing a background, bubble, avatar frame, or plaza character now updates only the preview until Save is pressed",
-        "Locked choices remain available to try, with requirements explained only when saving",
-        "Previews stay visible while browsing, and the Portal and Soundwave frame layers have been refined"
+        "Eight low-identity frames built mainly from color or stripe changes have been retired, leaving five focused collections",
+        "Portal, Comet, and Orbit now move ornaments along the rounded perimeter instead of rotating the entire frame",
+        "Existing selections migrate to the closest retained design so avatar decoration is never lost unexpectedly"
       ]
     }
   }

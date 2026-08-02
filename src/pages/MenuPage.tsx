@@ -87,16 +87,15 @@ const personalizationOptions = {
   avatar_frame_style: [
     ["none", "menu.frameNone"],
     ["orbit", "menu.frameOrbit"],
-    ["pixel", "menu.framePixel"],
     ["aurora", "menu.frameAurora"],
     ["polaroid", "menu.framePolaroid"],
     ["soundwave", "menu.frameSoundwave"],
     ["lucky", "menu.frameLucky"],
     ["portal", "menu.framePortal"],
-    ["vine", "menu.frameVine"], ["blossom", "menu.frameBlossom"], ["butterfly", "menu.frameButterfly"], ["coral", "menu.frameCoral"], ["moon", "menu.frameMoon"],
+    ["blossom", "menu.frameBlossom"], ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
     ["crown", "menu.frameCrown"], ["headphones", "menu.frameHeadphones"], ["cat-ears", "menu.frameCatEars"], ["ribbon-bow", "menu.frameRibbonBow"], ["camera", "menu.frameCamera"],
-    ["comet", "menu.frameComet"], ["radar", "menu.frameRadar"], ["pulse", "menu.framePulse"], ["snowfall", "menu.frameSnowfall"], ["firefly", "menu.frameFirefly"],
-    ["stamp", "menu.frameStamp"], ["embroidery", "menu.frameEmbroidery"], ["stainedglass", "menu.frameStainedglass"], ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"],
+    ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"], ["firefly", "menu.frameFirefly"],
+    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"],
   ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
@@ -130,13 +129,11 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
 ];
 
 const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.avatar_frame_style[number]> }> = [
-  { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "pixel"].includes(value)) },
-  { label: "menu.collectionWearable", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["polaroid", "lucky"].includes(value)) },
-  { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal"].includes(value)) },
-  { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["vine", "blossom", "butterfly", "coral", "moon"].includes(value)) },
-  { label: "menu.collectionAccessory", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["crown", "headphones", "cat-ears", "ribbon-bow", "camera"].includes(value)) },
-  { label: "menu.collectionKinetic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["comet", "radar", "pulse", "snowfall", "firefly"].includes(value)) },
-  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["stamp", "embroidery", "stainedglass", "papercut", "mechanical"].includes(value)) },
+  { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "polaroid"].includes(value)) },
+  { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
+  { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["blossom", "butterfly", "moon", "snowfall", "firefly"].includes(value)) },
+  { label: "menu.collectionAccessory", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["lucky", "crown", "headphones", "cat-ears", "ribbon-bow", "camera"].includes(value)) },
+  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["papercut", "mechanical"].includes(value)) },
 ];
 
 function visibleBubbleStyle(style?: string) {

@@ -17533,6 +17533,97 @@ html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;ba
   .user-avatar.has-avatar-frame .avatar-frame-ornament > i { animation:none !important; }
 }
 
+/* Motion frames animate ornaments along the rounded perimeter, never the frame box. */
+.avatar-frame-orbit .avatar-frame-ornament > i:first-child {
+  top: 0;
+  left: 0;
+  offset-path: inset(7% round 22%);
+  offset-rotate: 0deg;
+  animation: avatar-frame-perimeter 8s linear infinite;
+}
+
+.avatar-frame-aurora::before {
+  inset: 1%;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, transparent 12%, rgba(138, 216, 255, .72) 34%, rgba(246, 207, 114, .62) 48%, rgba(45, 212, 164, .7) 64%, transparent 86%);
+  background-size: 180% 100%;
+  transform: none;
+  animation: avatar-aurora-drift 4.8s ease-in-out infinite alternate;
+}
+
+.avatar-frame-portal::before {
+  content: none !important;
+  animation: none;
+}
+
+.avatar-frame-portal .avatar-frame-ornament > i {
+  display: block;
+  top: 0;
+  left: 0;
+  width: 9%;
+  height: 4%;
+  border-radius: 999px;
+  background: #e0aa43;
+  box-shadow: 0 0 7px rgba(224, 170, 67, .75);
+  offset-path: inset(5% round 20%);
+  offset-rotate: auto;
+  animation: avatar-frame-perimeter 10s linear infinite;
+}
+.avatar-frame-portal .avatar-frame-ornament > i:nth-child(2) { background:#baf2df;animation-delay:-2.5s; }
+.avatar-frame-portal .avatar-frame-ornament > i:nth-child(3) { animation-delay:-5s; }
+.avatar-frame-portal .avatar-frame-ornament > i:nth-child(4) { background:#baf2df;animation-delay:-7.5s; }
+
+.avatar-frame-comet::before {
+  content: none !important;
+  animation: none;
+}
+.avatar-frame-comet .avatar-frame-ornament > i:first-child {
+  top: 0;
+  left: 0;
+  offset-path: inset(5% round 20%);
+  offset-rotate: auto;
+  animation: avatar-frame-perimeter 4.6s linear infinite;
+}
+
+.avatar-frame-mechanical::before {
+  inset: 3%;
+  border: max(1px, .035em) solid #d8ddd9;
+  border-radius: inherit;
+  background:
+    linear-gradient(#e7a83c,#e7a83c) 0 0/18% 5% no-repeat,
+    linear-gradient(#e7a83c,#e7a83c) 100% 0/18% 5% no-repeat,
+    linear-gradient(#e7a83c,#e7a83c) 0 100%/18% 5% no-repeat,
+    linear-gradient(#e7a83c,#e7a83c) 100% 100%/18% 5% no-repeat;
+  content: "" !important;
+  mask: none;
+  padding: 0;
+  animation: none;
+}
+.avatar-frame-mechanical .avatar-frame-ornament > i {
+  animation: avatar-mechanical-indicator 1.8s steps(2,end) infinite alternate;
+}
+.avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(2) { animation-delay:-.45s; }
+.avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(3) { animation-delay:-.9s; }
+.avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(4) { animation-delay:-1.35s; }
+
+@keyframes avatar-frame-perimeter { to { offset-distance: 100%; } }
+@keyframes avatar-aurora-drift {
+  from { background-position: 100% 50%; opacity: .72; }
+  to { background-position: 0 50%; opacity: 1; }
+}
+@keyframes avatar-mechanical-indicator { to { filter:brightness(1.45);opacity:.58; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-frame-orbit .avatar-frame-ornament > i,
+  .avatar-frame-aurora::before,
+  .avatar-frame-portal .avatar-frame-ornament > i,
+  .avatar-frame-comet .avatar-frame-ornament > i,
+  .avatar-frame-mechanical .avatar-frame-ornament > i {
+    animation: none !important;
+  }
+}
+
 /* Personalization choices edit a draft while the preview remains in view. */
 .personalization-sticky-preview {
   position: sticky;
