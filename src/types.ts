@@ -163,10 +163,10 @@ export interface UserMeDTO extends UserDTO {
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "dusk" | "comic" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "tidepool" | "forest" | "desert" | "snowfield" | "sakura" | "sunrise" | "midnight" | "rain" | "galaxy" | "aurora-sky" | "linen" | "terrazzo" | "blueprint" | "newsprint" | "hologram" | "arcade" | "jazz" | "spaceport" | "candy" | "noir-film" | "custom";
 export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "papercut" | "mechanical";
-export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud";
-export type SquarePropStyle = "none" | "star" | "coffee" | "flag";
-export type SquareMotionStyle = "walk" | "bounce" | "float" | "dash";
-export type SquareLimbStyle = "line" | "chunky" | "robot" | "ribbon";
+export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud" | "raincoat" | "hanfu" | "utility" | "sailor";
+export type SquarePropStyle = "none" | "star" | "coffee" | "flag" | "camera" | "bouquet" | "umbrella" | "skateboard";
+export type SquareMotionStyle = "walk" | "bounce" | "float" | "dash" | "wave" | "dance" | "skate" | "tiptoe";
+export type SquareLimbStyle = "line" | "chunky" | "robot" | "ribbon" | "hinged" | "wooden" | "spring" | "ink";
 
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;

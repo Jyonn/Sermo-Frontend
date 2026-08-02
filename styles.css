@@ -6028,6 +6028,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .square-character-preview.outfit-varsity::before { box-shadow: 0 17px 0 -5px #34735c; }
 .square-character-preview.outfit-noir::before { box-shadow: 0 17px 0 -5px #252c29; }
 .square-character-preview.outfit-cloud::before { box-shadow: 0 17px 0 -5px #dbeafa; }
+.square-character-preview.outfit-raincoat::before { clip-path: polygon(18% 0,82% 0,100% 100%,0 100%); box-shadow: 0 17px 0 -5px #e9bd3f; }
+.square-character-preview.outfit-hanfu::before { clip-path: polygon(20% 0,80% 0,100% 100%,0 100%); box-shadow: 0 17px 0 -5px #aecdbb; }
+.square-character-preview.outfit-utility::before { border-radius: 5px; box-shadow: 0 17px 0 -5px #385447; }
+.square-character-preview.outfit-sailor::before { box-shadow: 0 17px 0 -5px #4a7590; }
 
 .personalization-background-swatch {
   width: 64px;
@@ -8900,6 +8904,335 @@ html[data-theme="dark"] .personalization-bubble-stage {
   to {
     opacity: 0;
   }
+}
+
+/* Articulated plaza characters share this rendering system with personalization previews. */
+.square-plaza-page {
+  isolation: isolate;
+  background-image:
+    linear-gradient(180deg, rgba(244, 235, 210, 0.08), rgba(15, 38, 29, 0.2)),
+    var(--square-scene-image);
+  background-position: center top;
+  background-size: cover;
+}
+
+.square-plaza-page::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background: linear-gradient(180deg, rgba(246, 241, 226, 0.18), transparent 28%, rgba(11, 31, 24, 0.12));
+  pointer-events: none;
+}
+
+.square-plaza-stage::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 26%),
+    radial-gradient(ellipse at 50% 100%, rgba(16, 42, 32, 0.12), transparent 58%);
+  background-size: auto;
+  opacity: 1;
+}
+
+.square-scene-title {
+  color: #18271f;
+  border-color: rgba(255, 251, 237, 0.7);
+  background: rgba(255, 250, 235, 0.72);
+  box-shadow: 0 10px 30px rgba(28, 42, 33, 0.14);
+}
+
+.square-character-figure {
+  --limb-color: #315a4b;
+  --limb-width: max(3px, calc(var(--orb-size) * 0.055));
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(var(--orb-size) * 2.06);
+  transform: scaleX(var(--walk-direction));
+  transform-origin: center bottom;
+  transition: scale 180ms ease-out;
+}
+
+.square-character-body {
+  top: calc(var(--orb-size) * 0.78);
+  width: calc(var(--orb-size) * 1.02);
+  height: calc(var(--orb-size) * 1.27);
+}
+
+.square-character-torso {
+  top: calc(var(--orb-size) * 0.07);
+  width: calc(var(--orb-size) * 0.58);
+  height: calc(var(--orb-size) * 0.7);
+  overflow: hidden;
+  border: max(1px, calc(var(--orb-size) * 0.022)) solid color-mix(in srgb, var(--limb-color) 22%, transparent);
+  border-radius: 42% 42% 30% 30%;
+  background: linear-gradient(145deg, #f7b76f, #df7047);
+  box-shadow: 0 8px 13px rgba(43, 42, 31, 0.18);
+}
+
+.square-outfit-collar,
+.square-outfit-detail {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.square-outfit-collar {
+  top: -1px;
+  left: 50%;
+  width: 36%;
+  height: 24%;
+  border: max(1px, calc(var(--orb-size) * 0.018)) solid rgba(42, 61, 50, 0.4);
+  border-top: 0;
+  border-radius: 0 0 48% 48%;
+  transform: translateX(-50%);
+}
+
+.square-outfit-detail {
+  right: 13%;
+  bottom: 18%;
+  width: 15%;
+  height: 19%;
+  border: 1px solid rgba(31, 54, 44, 0.26);
+  border-radius: 3px;
+}
+
+.square-character-arm,
+.square-character-leg {
+  --upper-length: calc(var(--orb-size) * 0.34);
+  --lower-length: calc(var(--orb-size) * 0.31);
+  position: absolute;
+  display: block;
+  width: calc(var(--orb-size) * 0.3);
+  height: calc(var(--orb-size) * 0.72);
+  background: none;
+  transform-origin: 50% 0;
+}
+
+.square-character-arm {
+  top: calc(var(--orb-size) * 0.15);
+  z-index: 3;
+}
+
+.square-character-arm.is-left { left: calc(var(--orb-size) * 0.02); rotate: 14deg; }
+.square-character-arm.is-right { right: calc(var(--orb-size) * 0.02); rotate: -14deg; }
+
+.square-character-leg {
+  --upper-length: calc(var(--orb-size) * 0.34);
+  --lower-length: calc(var(--orb-size) * 0.3);
+  top: calc(var(--orb-size) * 0.65);
+  z-index: 1;
+  animation: none;
+}
+
+.square-character-leg.is-left { left: calc(50% - var(--orb-size) * 0.27); }
+.square-character-leg.is-right { right: calc(50% - var(--orb-size) * 0.27); }
+
+.square-limb-segment {
+  position: absolute;
+  left: 50%;
+  display: block;
+  width: var(--limb-width);
+  border-radius: 999px;
+  background: var(--limb-color);
+  box-shadow: inset 1px 0 rgba(255, 255, 255, 0.26);
+  transform: translateX(-50%);
+  transform-origin: center top;
+}
+
+.square-limb-segment.is-upper { top: 0; height: var(--upper-length); }
+.square-limb-segment.is-lower { top: var(--upper-length); height: var(--lower-length); rotate: var(--lower-rotation, 0deg); }
+
+.square-limb-joint {
+  position: absolute;
+  top: calc(var(--upper-length) - var(--limb-width) * 0.38);
+  left: 50%;
+  z-index: 2;
+  width: calc(var(--limb-width) * 1.75);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--limb-color) 62%, #f8f0d7);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--limb-color) 76%, #f8f0d7);
+  transform: translateX(-50%);
+}
+
+.square-limb-end {
+  position: absolute;
+  top: calc(var(--upper-length) + var(--lower-length) - 2px);
+  left: 50%;
+  width: calc(var(--limb-width) * 2.1);
+  height: calc(var(--limb-width) * 1.35);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--limb-color) 72%, #f3d7ad);
+  transform: translateX(-50%);
+}
+
+.square-limb-end.is-foot { width: calc(var(--limb-width) * 3.1); transform: translateX(-35%); }
+
+.square-character-ground-shadow {
+  position: absolute;
+  bottom: calc(var(--orb-size) * 0.01);
+  left: 50%;
+  z-index: -1;
+  width: calc(var(--orb-size) * 0.9);
+  height: calc(var(--orb-size) * 0.16);
+  border-radius: 50%;
+  background: rgba(18, 29, 23, 0.2);
+  filter: blur(4px);
+  transform: translateX(-50%);
+}
+
+/* Outfit silhouettes, not palette swaps. */
+.square-character-figure.outfit-varsity .square-character-torso { border-radius: 26% 26% 22% 22%; background: linear-gradient(90deg, #f5f0df 0 24%, #2f725b 24% 76%, #f5f0df 76%); }
+.square-character-figure.outfit-varsity .square-outfit-collar { width: 48%; border-color: #f5d56e; border-radius: 0; }
+.square-character-figure.outfit-noir .square-character-torso { height: calc(var(--orb-size) * 0.77); border-radius: 18% 18% 7% 7%; background: linear-gradient(110deg, #454d49, #151918 60%); }
+.square-character-figure.outfit-noir .square-outfit-detail { right: 48%; bottom: 0; width: 2px; height: 76%; border: 0; background: rgba(232, 213, 180, 0.4); }
+.square-character-figure.outfit-cloud .square-character-torso { width: calc(var(--orb-size) * 0.72); border-radius: 50% 50% 36% 36%; background: radial-gradient(circle at 30% 24%, #fff 0 16%, transparent 17%), linear-gradient(145deg, #cfe4f5, #f8fbff); }
+.square-character-figure.outfit-cloud .square-outfit-detail { border: 0; border-radius: 50%; background: #fff; box-shadow: -12px 3px 0 3px rgba(255,255,255,.76); }
+.square-character-figure.outfit-raincoat .square-character-torso { width: calc(var(--orb-size) * 0.7); height: calc(var(--orb-size) * 0.8); clip-path: polygon(16% 0,84% 0,100% 100%,0 100%); border-radius: 30% 30% 12% 12%; background: linear-gradient(110deg, #f3c541, #df9d28); }
+.square-character-figure.outfit-raincoat .square-outfit-collar { width: 55%; height: 30%; border: 0; border-radius: 50% 50% 20% 20%; background: #f8d866; }
+.square-character-figure.outfit-hanfu .square-character-torso { width: calc(var(--orb-size) * 0.72); height: calc(var(--orb-size) * 0.82); clip-path: polygon(20% 0,80% 0,100% 100%,0 100%); border-radius: 28% 28% 8% 8%; background: linear-gradient(135deg, #dce9df 0 43%, #a9c9b8 44% 56%, #f0e4ce 57%); }
+.square-character-figure.outfit-hanfu .square-outfit-collar { width: 44%; height: 48%; border-color: #9f7255; border-radius: 0; rotate: 18deg; }
+.square-character-figure.outfit-utility .square-character-torso { width: calc(var(--orb-size) * 0.66); border-radius: 16% 16% 22% 22%; background: repeating-linear-gradient(90deg, transparent 0 22%, rgba(246,198,89,.28) 22% 26%), #385447; }
+.square-character-figure.outfit-utility .square-outfit-detail { width: 28%; height: 24%; border-color: #e7bd5c; }
+.square-character-figure.outfit-sailor .square-character-torso { border-radius: 34% 34% 20% 20%; background: linear-gradient(180deg, #f4f1e8 0 29%, #4a7590 30% 100%); }
+.square-character-figure.outfit-sailor .square-outfit-collar { top: 0; width: 65%; height: 35%; border: 0; border-radius: 0; background: linear-gradient(135deg, transparent 42%, #31566e 43% 58%, transparent 59%); }
+
+/* Limb families change construction and articulation. */
+.square-character-figure.limbs-chunky { --limb-width: calc(var(--orb-size) * 0.105); --limb-color: #456e5d; }
+.square-character-figure.limbs-chunky .square-limb-joint { border-radius: 4px; }
+.square-character-figure.limbs-robot { --limb-width: calc(var(--orb-size) * 0.082); --limb-color: #71817b; }
+.square-character-figure.limbs-robot .square-limb-segment { border-radius: 2px; background: repeating-linear-gradient(#56645f 0 6px, #b4c0bc 6px 8px); }
+.square-character-figure.limbs-ribbon { --limb-width: calc(var(--orb-size) * 0.065); --limb-color: #d95f70; }
+.square-character-figure.limbs-ribbon .square-limb-segment { border-radius: 45% 55% 40% 60%; background: linear-gradient(#e95c75, #efb354); }
+.square-character-figure.limbs-hinged { --limb-width: calc(var(--orb-size) * 0.072); --limb-color: #455d55; }
+.square-character-figure.limbs-hinged .square-limb-joint { width: calc(var(--limb-width) * 2.5); background: #e4b657; box-shadow: inset 0 0 0 2px #455d55; }
+.square-character-figure.limbs-wooden { --limb-width: calc(var(--orb-size) * 0.085); --limb-color: #a66d3e; }
+.square-character-figure.limbs-wooden .square-limb-segment { border-radius: 25% 25% 42% 42%; background: linear-gradient(90deg, #83512d, #c28a53 55%, #704328); }
+.square-character-figure.limbs-spring { --limb-width: calc(var(--orb-size) * 0.09); --limb-color: #53736a; }
+.square-character-figure.limbs-spring .square-limb-segment { border: 2px solid var(--limb-color); background: repeating-linear-gradient(180deg, transparent 0 3px, #53736a 3px 5px); }
+.square-character-figure.limbs-ink { --limb-width: calc(var(--orb-size) * 0.045); --limb-color: #1f2b27; }
+.square-character-figure.limbs-ink .square-limb-segment { filter: url("#none"); transform: translateX(-50%) skewX(-4deg); }
+
+/* Hand-held objects use the same hand-side anchor in every context. */
+.square-character-prop {
+  top: calc(var(--orb-size) * 0.42);
+  right: calc(var(--orb-size) * -0.08);
+  z-index: 5;
+  display: none;
+  width: calc(var(--orb-size) * 0.3);
+  height: calc(var(--orb-size) * 0.3);
+  filter: drop-shadow(0 3px 3px rgba(24, 35, 29, 0.22));
+}
+.square-character-prop > span { position: absolute; inset: 0; display: block; }
+.square-character-figure:not(.prop-none) .square-character-prop { display: block; }
+.square-character-figure.prop-star .square-character-prop > span { clip-path: polygon(50% 0,62% 35%,100% 38%,69% 58%,79% 100%,50% 74%,21% 100%,31% 58%,0 38%,38% 35%); background: #f2bd45; }
+.square-character-figure.prop-coffee .square-character-prop > span { inset: 7% 18%; border-radius: 4px 4px 9px 9px; background: #865034; box-shadow: calc(var(--orb-size) * .08) 2px 0 calc(var(--orb-size) * -.05) #865034; }
+.square-character-figure.prop-flag .square-character-prop { height: calc(var(--orb-size) * .55); border-left: 2px solid #28493e; }
+.square-character-figure.prop-flag .square-character-prop > span { right: auto; bottom: auto; width: 90%; height: 48%; background: linear-gradient(135deg,#087751,#eab54c); }
+.square-character-figure.prop-camera .square-character-prop > span { inset: 20% 0; border-radius: 4px; background: #26312e; box-shadow: inset 0 0 0 2px #98aaa3; }
+.square-character-figure.prop-camera .square-character-prop > span::after { position:absolute; inset:22% 34%; content:""; border:2px solid #d7c68e; border-radius:50%; }
+.square-character-figure.prop-bouquet .square-character-prop { background: conic-gradient(from 20deg,#e77a86,#f2c456,#f8efe0,#d55d73,#e77a86); clip-path: polygon(50% 0,100% 35%,67% 58%,56% 100%,43% 100%,35% 58%,0 35%); }
+.square-character-figure.prop-umbrella .square-character-prop { top: calc(var(--orb-size) * -.05); right: calc(var(--orb-size) * -.22); width: calc(var(--orb-size) * .72); height: calc(var(--orb-size) * .72); border-top: calc(var(--orb-size) * .25) solid #d96958; border-radius: 50%; }
+.square-character-figure.prop-umbrella .square-character-prop::after { position:absolute; top:20%; left:50%; width:2px; height:70%; content:""; background:#42554e; }
+.square-character-figure.prop-skateboard .square-character-prop { top: auto; right: 5%; bottom: 1%; width: 88%; height: 8%; border-radius: 999px; background: #cf6d3d; box-shadow: -8px 4px 0 -2px #283a34, 8px 4px 0 -2px #283a34; }
+
+/* Motion presets are full-body poses with independent joint timing. */
+.square-character-figure.motion-walk .square-character-leg.is-left,
+.square-character-figure.motion-dash .square-character-leg.is-left,
+.square-character-figure.motion-tiptoe .square-character-leg.is-left { animation: square-jointed-step 620ms ease-in-out infinite alternate; }
+.square-character-figure.motion-walk .square-character-leg.is-right,
+.square-character-figure.motion-dash .square-character-leg.is-right,
+.square-character-figure.motion-tiptoe .square-character-leg.is-right { animation: square-jointed-step 620ms ease-in-out -620ms infinite alternate; }
+.square-character-figure.motion-bounce { animation: square-person-bounce 820ms ease-in-out infinite alternate; }
+.square-character-figure.motion-float { animation: square-person-float 2.4s ease-in-out infinite alternate; }
+.square-character-figure.motion-float .square-character-ground-shadow { animation: square-shadow-breathe 2.4s ease-in-out infinite alternate; }
+.square-character-figure.motion-dash { rotate: -7deg; }
+.square-character-figure.motion-dash .square-character-leg { animation-duration: 260ms; }
+.square-character-figure.motion-wave .square-character-arm.is-right { rotate: -142deg; animation: square-hand-wave 720ms ease-in-out infinite alternate; }
+.square-character-figure.motion-wave .square-character-arm.is-right .is-lower { --lower-rotation: 34deg; }
+.square-character-figure.motion-dance { animation: square-dance-body 900ms ease-in-out infinite alternate; }
+.square-character-figure.motion-dance .square-character-arm.is-left { rotate: 118deg; }
+.square-character-figure.motion-dance .square-character-arm.is-right { rotate: -118deg; }
+.square-character-figure.motion-skate { rotate: -4deg; animation: square-skate-sway 1.15s ease-in-out infinite alternate; }
+.square-character-figure.motion-skate .square-character-leg.is-left { rotate: 20deg; }
+.square-character-figure.motion-skate .square-character-leg.is-right { rotate: -18deg; }
+.square-character-figure.motion-tiptoe .square-limb-end.is-foot { rotate: -32deg; }
+.square-character.is-interacting .square-character-figure .square-character-arm.is-right { rotate: -142deg; animation: square-hand-wave 280ms ease-in-out 5 alternate; }
+
+.square-character-emote {
+  position: absolute;
+  top: calc(var(--orb-size) * -.1);
+  right: calc(var(--orb-size) * -.02);
+  z-index: 8;
+  display: grid;
+  width: calc(var(--orb-size) * .45);
+  aspect-ratio: 1;
+  place-items: center;
+  color: #9b5b19;
+  font-size: calc(var(--orb-size) * .22);
+  border: 1px solid rgba(255,255,255,.82);
+  border-radius: 50% 50% 50% 12%;
+  background: rgba(255,248,218,.92);
+  box-shadow: 0 6px 15px rgba(42,44,31,.16);
+  animation: square-emote-in 1.9s cubic-bezier(.22,1,.36,1) both;
+}
+
+.square-person-card-actions { flex-wrap: wrap; }
+.square-person-card-actions .square-wave-button { color: #80511e; background: rgba(238, 185, 88, .16); }
+
+.personalization-square-stage {
+  min-height: 330px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(24,46,36,.18)),
+    var(--square-scene-image, url("./src/assets/square/plaza-waterfront.jpg")) center / cover;
+}
+.personalization-square-stage::after { right: 20%; bottom: 12%; left: 20%; height: 14px; background: rgba(18,29,23,.22); filter: blur(7px); }
+
+.personalization-option-grid.field-square_outfit_style,
+.personalization-option-grid.field-square_prop_style,
+.personalization-option-grid.field-square_motion_style,
+.personalization-option-grid.field-square_limb_style { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.field-square_outfit_style .preview-raincoat i span { clip-path: polygon(18% 0,82% 0,100% 100%,0 100%); background: #e9bd3f; }
+.field-square_outfit_style .preview-hanfu i span { clip-path: polygon(20% 0,80% 0,100% 100%,0 100%); background: linear-gradient(135deg,#dce9df 45%,#a9c9b8 46% 57%,#f0e4ce 58%); }
+.field-square_outfit_style .preview-utility i span { border-radius: 4px; background: repeating-linear-gradient(90deg,#385447 0 7px,#d3a94c 7px 9px); }
+.field-square_outfit_style .preview-sailor i span { background: linear-gradient(#f4f1e8 0 34%,#4a7590 35%); }
+.field-square_prop_style .preview-camera i span { border-radius: 4px; background: radial-gradient(circle,#d7c68e 0 4px,#26312e 5px); }
+.field-square_prop_style .preview-bouquet i span { clip-path: polygon(50% 0,100% 35%,67% 58%,56% 100%,43% 100%,35% 58%,0 35%); background: conic-gradient(#e77a86,#f2c456,#d55d73); }
+.field-square_prop_style .preview-umbrella i span { height: 18px; border-radius: 50% 50% 4px 4px; background: #d96958; box-shadow: 0 10px 0 -8px #42554e; }
+.field-square_prop_style .preview-skateboard i span { height: 8px; border-radius: 999px; background: #cf6d3d; box-shadow: -7px 5px 0 -4px #283a34,7px 5px 0 -4px #283a34; }
+.field-square_motion_style .preview-wave i span { animation: square-option-wave 620ms ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.field-square_motion_style .preview-dance i span { animation: square-option-dance 700ms ease-in-out infinite alternate; }
+.field-square_motion_style .preview-skate i span { border-radius: 45% 55% 36% 64%; animation: square-option-skate 850ms ease-in-out infinite alternate; }
+.field-square_motion_style .preview-tiptoe i span { animation: square-option-tiptoe 600ms ease-in-out infinite alternate; }
+.field-square_limb_style .preview-hinged i span { background: radial-gradient(circle at 50% 28%,#e4b657 0 3px,transparent 4px),linear-gradient(90deg,transparent 42%,#455d55 43% 57%,transparent 58%); }
+.field-square_limb_style .preview-wooden i span { background: linear-gradient(90deg,#83512d,#c28a53 55%,#704328); }
+.field-square_limb_style .preview-spring i span { background: repeating-linear-gradient(180deg,transparent 0 3px,#53736a 3px 5px); }
+.field-square_limb_style .preview-ink i span { background: linear-gradient(102deg,transparent 44%,#1f2b27 45% 52%,transparent 53%); }
+
+@keyframes square-jointed-step { from { rotate: 20deg; } to { rotate: -22deg; } }
+@keyframes square-hand-wave { from { rotate: -132deg; } to { rotate: -154deg; } }
+@keyframes square-shadow-breathe { to { scale: .72; opacity: .48; } }
+@keyframes square-dance-body { from { rotate: -5deg; translate: -2px 0; } to { rotate: 5deg; translate: 2px -3px; } }
+@keyframes square-skate-sway { to { rotate: 4deg; translate: 3px -2px; } }
+@keyframes square-emote-in { 0% { opacity:0; scale:.5; translate:0 8px; } 18%,72% { opacity:1; scale:1; translate:0 0; } 100% { opacity:0; scale:.88; translate:0 -8px; } }
+@keyframes square-option-wave { to { rotate: 18deg; } }
+@keyframes square-option-dance { to { rotate: 8deg; translate: 2px -4px; } }
+@keyframes square-option-skate { to { translate: 6px 0; rotate: -6deg; } }
+@keyframes square-option-tiptoe { to { translate: 0 -7px; scale: .92 1.08; } }
+
+@media (max-width: 700px) {
+  .square-plaza-page { border-radius: 0; background-position: 54% top; }
+  .square-scene-title { margin-inline: 14px; }
+  .personalization-option-grid.field-square_outfit_style,
+  .personalization-option-grid.field-square_prop_style,
+  .personalization-option-grid.field-square_motion_style,
+  .personalization-option-grid.field-square_limb_style { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .square-character-figure,
+  .square-character-figure * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
 }
 
 .square-plaza-status {

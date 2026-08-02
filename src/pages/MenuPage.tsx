@@ -13,6 +13,7 @@ import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
+import { SquareCharacterFigure } from "../components/SquareCharacterFigure";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
@@ -95,10 +96,10 @@ const personalizationOptions = {
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"],
   ],
-  square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
-  square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"]],
-  square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"]],
-  square_limb_style: [["line", "menu.limbLine"], ["chunky", "menu.limbChunky"], ["robot", "menu.limbRobot"], ["ribbon", "menu.limbRibbon"]],
+  square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"], ["raincoat", "menu.outfitRaincoat"], ["hanfu", "menu.outfitHanfu"], ["utility", "menu.outfitUtility"], ["sailor", "menu.outfitSailor"]],
+  square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"], ["camera", "menu.propCamera"], ["bouquet", "menu.propBouquet"], ["umbrella", "menu.propUmbrella"], ["skateboard", "menu.propSkateboard"]],
+  square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"], ["wave", "menu.motionWave"], ["dance", "menu.motionDance"], ["skate", "menu.motionSkate"], ["tiptoe", "menu.motionTiptoe"]],
+  square_limb_style: [["line", "menu.limbLine"], ["chunky", "menu.limbChunky"], ["robot", "menu.limbRobot"], ["ribbon", "menu.limbRibbon"], ["hinged", "menu.limbHinged"], ["wooden", "menu.limbWooden"], ["spring", "menu.limbSpring"], ["ink", "menu.limbInk"]],
 } as const;
 
 const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclude<ChatBackgroundTheme, "custom">, TranslationKey]> }> = [
@@ -2100,23 +2101,17 @@ export default function MenuPage() {
             <div
               className={`square-character personalization-square-character outfit-${personalizationDraft.square_outfit_style} prop-${personalizationDraft.square_prop_style} motion-${personalizationDraft.square_motion_style} limbs-${personalizationDraft.square_limb_style}`}
             >
-              <span className="square-character-figure" aria-hidden="true">
-                <UserAvatar
-                  className="square-character-head status-online"
-                  frame={me?.avatar_frame_style}
-                  name={session?.user.name ?? t("brand.user")}
-                  uri={me?.avatar_uri ?? session?.user.avatar_uri}
-                  vip={Boolean(me?.is_permanent_vip)}
-                />
-                <span className="square-character-body">
-                  <i className="square-character-prop" />
-                  <i className="square-character-arm is-left" />
-                  <i className="square-character-arm is-right" />
-                  <i className="square-character-torso" />
-                  <i className="square-character-leg is-left" />
-                  <i className="square-character-leg is-right" />
-                </span>
-              </span>
+              <SquareCharacterFigure
+                avatarFrame={me?.avatar_frame_style}
+                avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
+                isOnline
+                isVip={Boolean(me?.is_permanent_vip)}
+                limb={personalizationDraft.square_limb_style}
+                motion={personalizationDraft.square_motion_style}
+                name={session?.user.name ?? t("brand.user")}
+                outfit={personalizationDraft.square_outfit_style}
+                prop={personalizationDraft.square_prop_style}
+              />
               <span className="square-character-name">{session?.user.name ?? t("brand.user")}</span>
             </div>
           </div>

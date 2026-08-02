@@ -16,6 +16,8 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
 import { useI18n } from "../lib/language";
+import { SquareCharacterFigure } from "../components/SquareCharacterFigure";
+import plazaBackground from "../assets/square/plaza-waterfront.jpg";
 
 const MAX_ORBS = 20;
 const CHARACTER_AREA_RATIO = 0.2;
@@ -162,12 +164,14 @@ function buildOrbSyncSignature(users: UserDTO[]) {
 }
 
 function resolveOrbCollisions(orbs: OrbState[], lockedUserId: number | null) {
-  if (!orbs.length) return;
+  const encounters: Array<[number, number]> = [];
+  if (!orbs.length) return encounters;
   for (let i = 0; i < orbs.length; i += 1) {
     for (let j = i + 1; j < orbs.length; j += 1) {
       const first = orbs[i];
       const second = orbs[j];
       if (!charactersOverlap(first, second)) continue;
+      encounters.push([first.user.user_id, second.user.user_id]);
       const firstBox = characterDimensions(first.size);
       const secondBox = characterDimensions(second.size);
       const dx = second.x - first.x || 1;
@@ -194,6 +198,7 @@ function resolveOrbCollisions(orbs: OrbState[], lockedUserId: number | null) {
       }
     }
   }
+  return encounters;
 }
 
 export default function SquarePage() {
@@ -213,6 +218,7 @@ export default function SquarePage() {
   const [orbRenderState, setOrbRenderState] = useState<OrbState[]>([]);
   const [exitingOrbs, setExitingOrbs] = useState<OrbState[]>([]);
   const [enteringOrbIds, setEnteringOrbIds] = useState<number[]>([]);
+  const [interactingUserIds, setInteractingUserIds] = useState<number[]>([]);
   const stageRef = useRef<HTMLElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastTickRef = useRef<number | null>(null);
@@ -221,6 +227,8 @@ export default function SquarePage() {
   const hasLoadedOnceRef = useRef(false);
   const cacheHydratedRef = useRef(false);
   const exitTimersRef = useRef<Record<number, number>>({});
+  const interactionTimersRef = useRef<Record<number, number>>({});
+  const encounterCooldownRef = useRef(new Map<string, number>());
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
 
@@ -405,7 +413,24 @@ export default function SquarePage() {
       });
 
       if (next.length) {
-        resolveOrbCollisions(next, selectedUserIdRef.current);
+        const encounters = resolveOrbCollisions(next, selectedUserIdRef.current);
+        const now = Date.now();
+        const encounter = encounters.find(([firstId, secondId]) => {
+          const key = [firstId, secondId].sort((a, b) => a - b).join(":");
+          return now - (encounterCooldownRef.current.get(key) ?? 0) > 9_000;
+        });
+        if (encounter && Math.random() < 0.025) {
+          const key = [...encounter].sort((a, b) => a - b).join(":");
+          encounterCooldownRef.current.set(key, now);
+          setInteractingUserIds(encounter);
+          encounter.forEach((userId) => {
+            if (interactionTimersRef.current[userId]) window.clearTimeout(interactionTimersRef.current[userId]);
+            interactionTimersRef.current[userId] = window.setTimeout(() => {
+              setInteractingUserIds((current) => current.filter((id) => id !== userId));
+              delete interactionTimersRef.current[userId];
+            }, 1_900);
+          });
+        }
       }
       orbsRef.current = next;
       setOrbRenderState(next.map((orb) => ({ ...orb })));
@@ -451,6 +476,7 @@ export default function SquarePage() {
   useEffect(() => {
     return () => {
       Object.values(exitTimersRef.current).forEach((timer) => window.clearTimeout(timer));
+      Object.values(interactionTimersRef.current).forEach((timer) => window.clearTimeout(timer));
     };
   }, []);
 
@@ -478,6 +504,20 @@ export default function SquarePage() {
     }
   };
 
+  const waveToUser = (userId: number) => {
+    const currentUserId = session?.user.user_id;
+    const ids = currentUserId ? [currentUserId, userId] : [userId];
+    setInteractingUserIds(ids);
+    ids.forEach((id) => {
+      if (interactionTimersRef.current[id]) window.clearTimeout(interactionTimersRef.current[id]);
+      interactionTimersRef.current[id] = window.setTimeout(() => {
+        setInteractingUserIds((current) => current.filter((item) => item !== id));
+        delete interactionTimersRef.current[id];
+      }, 2_200);
+    });
+    showToast(t("square.waved"));
+  };
+
   const selectedOrb = selectedUser
     ? orbRenderState.find((orb) => orb.user.user_id === selectedUser.user_id) ?? null
     : null;
@@ -492,7 +532,7 @@ export default function SquarePage() {
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell">
-      <section className="page-stack square-plaza-page">
+      <section className="page-stack square-plaza-page" style={{ "--square-scene-image": `url(${plazaBackground})` } as CSSProperties}>
         <div className="square-scene-title">
           <strong>{t("square.title")}</strong>
           <i aria-hidden="true" />
@@ -512,7 +552,7 @@ export default function SquarePage() {
           {orbRenderState.map((orb) => (
             <button
               key={orb.user.user_id}
-              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 10 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 18 ? " is-max-level" : ""}${orb.user.is_permanent_vip ? " is-permanent-vip" : ""} outfit-${orb.user.square_outfit_style ?? "sunset"} prop-${orb.user.square_prop_style ?? "none"} motion-${orb.user.square_motion_style ?? "walk"} limbs-${orb.user.square_limb_style ?? "line"}`}
+              className={`square-character${enteringOrbIds.includes(orb.user.user_id) ? " is-entering" : ""}${interactingUserIds.includes(orb.user.user_id) ? " is-interacting" : ""}${selectedUser?.user_id === orb.user.user_id ? " is-selected" : ""}${(orb.user.growth_level ?? 1) >= 10 ? " has-growth-aura" : ""}${(orb.user.growth_level ?? 1) >= 18 ? " is-max-level" : ""}${orb.user.is_permanent_vip ? " is-permanent-vip" : ""}`}
               onClick={(event) => {
                 event.stopPropagation();
                 setSelectedUser((current) => current?.user_id === orb.user.user_id ? null : orb.user);
@@ -527,23 +567,8 @@ export default function SquarePage() {
               }
               type="button"
             >
-              <span className="square-character-figure" aria-hidden="true">
-                <UserAvatar
-                  className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`}
-                  frame={orb.user.avatar_frame_style}
-                  name={orb.user.name}
-                  uri={orb.user.avatar_uri}
-                  vip={orb.user.is_permanent_vip}
-                />
-                <span className="square-character-body">
-                  <i className="square-character-prop" />
-                  <i className="square-character-arm is-left" />
-                  <i className="square-character-arm is-right" />
-                  <i className="square-character-torso" />
-                  <i className="square-character-leg is-left" />
-                  <i className="square-character-leg is-right" />
-                </span>
-              </span>
+              <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
+              {interactingUserIds.includes(orb.user.user_id) ? <span className="square-character-emote" aria-hidden="true">✦</span> : null}
               <span className="square-character-name">{orb.user.name}</span>
             </button>
           ))}
@@ -561,17 +586,7 @@ export default function SquarePage() {
                 } as CSSProperties
               }
             >
-              <span className="square-character-figure" aria-hidden="true">
-                <UserAvatar className={`square-character-head ${orb.user.is_alive ? "status-online" : ""}`} frame={orb.user.avatar_frame_style} name={orb.user.name} uri={orb.user.avatar_uri} vip={orb.user.is_permanent_vip} />
-                <span className="square-character-body">
-                  <i className="square-character-prop" />
-                  <i className="square-character-arm is-left" />
-                  <i className="square-character-arm is-right" />
-                  <i className="square-character-torso" />
-                  <i className="square-character-leg is-left" />
-                  <i className="square-character-leg is-right" />
-                </span>
-              </span>
+              <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
               <span className="square-character-name">{orb.user.name}</span>
             </div>
           ))}
@@ -610,6 +625,7 @@ export default function SquarePage() {
                 ) : (
                   <>
                     <button className="button" onClick={() => void startChat(selectedUser.user_id)} type="button">{t("profile.sendMessage")}</button>
+                    <button className="ghost-button square-wave-button" onClick={() => waveToUser(selectedUser.user_id)} type="button">{t("square.wave")}</button>
                     {selectedRelation !== "friend" ? (
                       <button
                         className="ghost-button"

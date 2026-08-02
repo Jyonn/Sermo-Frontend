@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.16",
+  "id": "2026.08.02.17",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "失败图片可重试，消息操作更清晰",
+      "title": "广场和人物个性化全面焕新",
       "items": [
-        "九宫格中的单张图片上传失败后，可以直接点击失败标识重新上传",
-        "撤回移至消息首层操作，普通账号支持 2 分钟内撤回，VIP 支持 7 天内撤回",
-        "消息操作改为紧凑图标网格，操作增多时自动换行，不再横向挤出屏幕"
+        "广场升级为有水景、街区、树木和聚会角落的真实社区场景",
+        "人物采用肩肘腕与髋膝踝关节骨架，服装、四肢、手持物和动作各扩展至 8 种",
+        "人物相遇会自然挥手，也可以从人物浮层主动打招呼"
       ]
     },
     "en": {
-      "title": "Retry failed images and use clearer message actions",
+      "title": "A richer plaza and articulated characters",
       "items": [
-        "A failed photo inside an image grid can now be uploaded again directly from its retry badge",
-        "Recall is now a first-level message action, available for 2 minutes normally and 7 days for VIP members",
-        "Message actions now use a compact icon grid that wraps cleanly as more actions become available"
+        "The plaza is now a believable community scene with water, streets, trees, and gathering pockets",
+        "Characters now use articulated shoulders, elbows, wrists, hips, knees, and ankles, with eight choices in every customization category",
+        "Nearby characters greet one another naturally, and you can wave from a person's quick panel"
       ]
     }
   }
