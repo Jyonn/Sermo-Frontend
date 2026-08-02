@@ -91,9 +91,9 @@ const personalizationOptions = {
     ["polaroid", "menu.framePolaroid"],
     ["soundwave", "menu.frameSoundwave"],
     ["portal", "menu.framePortal"],
-    ["blossom", "menu.frameBlossom"], ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
+    ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
     ["camera", "menu.frameCamera"],
-    ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"], ["firefly", "menu.frameFirefly"],
+    ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"],
   ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"]],
@@ -130,7 +130,7 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
 const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.avatar_frame_style[number]> }> = [
   { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "polaroid"].includes(value)) },
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
-  { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["blossom", "butterfly", "moon", "snowfall", "firefly"].includes(value)) },
+  { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["butterfly", "moon", "snowfall"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
 ];
 

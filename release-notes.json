@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.10",
+  "id": "2026.08.02.11",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "头像框库进一步精简",
+      "title": "落雪与月相重新拥有动态生命力",
       "items": [
-        "配饰系列正式下架，仅保留具有明确视觉结构的取景器",
-        "取景器现已归入工艺限定，与剪纸和机械共同展示",
-        "正在使用旧配饰的用户会自动迁移到最接近的保留款式"
+        "花枝与流萤头像框正式下架，历史选择会平滑迁移到保留款式",
+        "落雪重做为多层错速雪花，大小头像都能清楚看到飘落轨迹",
+        "月相会循环展示阴晴圆缺，并保留夜空星点的细微闪烁"
       ]
     },
     "en": {
-      "title": "The avatar frame library is now more focused",
+      "title": "Snowfall and Moon Phase are alive again",
       "items": [
-        "The accessory collection has been retired, leaving Viewfinder as its only structurally distinctive design",
-        "Viewfinder now sits in Crafted alongside Papercut and Mechanical",
-        "Existing accessory selections migrate automatically to the closest retained design"
+        "Blossom and Firefly have been retired, with existing selections smoothly migrated to retained designs",
+        "Snowfall now uses layered flakes at varied speeds so its motion remains clear at every avatar size",
+        "Moon Phase cycles through waxing and waning while retaining subtle starlight"
       ]
     }
   }

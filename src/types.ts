@@ -162,7 +162,7 @@ export interface UserMeDTO extends UserDTO {
 
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "pebble" | "leaf" | "cloud" | "ice" | "lava" | "typewriter" | "newspaper" | "receipt" | "postcard" | "blueprint" | "terminal" | "hologram" | "mech" | "synthwave" | "orbital" | "sticker" | "candy" | "toybrick" | "doodle" | "plush";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "dusk" | "comic" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "tidepool" | "forest" | "desert" | "snowfield" | "sakura" | "sunrise" | "midnight" | "rain" | "galaxy" | "aurora-sky" | "linen" | "terrazzo" | "blueprint" | "newsprint" | "hologram" | "arcade" | "jazz" | "spaceport" | "candy" | "noir-film" | "custom";
-export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "blossom" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "firefly" | "papercut" | "mechanical";
+export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "papercut" | "mechanical";
 export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud";
 export type SquarePropStyle = "none" | "star" | "coffee" | "flag";
 export type SquareMotionStyle = "walk" | "bounce" | "float" | "dash";

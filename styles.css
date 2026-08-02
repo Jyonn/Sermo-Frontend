@@ -17614,12 +17614,71 @@ html[data-theme="dark"] .message-search-filters button.active { color:#9cf0cf;ba
 }
 @keyframes avatar-mechanical-indicator { to { filter:brightness(1.45);opacity:.58; } }
 
+/* Moon phases: a shadow crosses the moon disc from waxing to waning. */
+.avatar-frame-moon::before {
+  right: 3%;
+  top: 3%;
+  width: 27%;
+  background: radial-gradient(circle at 36% 32%, #fff4b8 0 12%, #f5d77c 42%, #d9a94d 100%);
+  box-shadow: 0 0 .14em rgba(255, 232, 145, .78);
+}
+.avatar-frame-moon::after {
+  position: absolute;
+  z-index: 3;
+  top: 3%;
+  right: 3%;
+  display: block;
+  width: 27%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #293b68;
+  content: "" !important;
+  animation: avatar-moon-phase 8s ease-in-out infinite;
+}
+
+/* Snowfall: four flakes carry offset satellites to remain visible at every size. */
+.avatar-frame-snowfall .avatar-frame-ornament > i {
+  top: -18%;
+  width: 6%;
+  min-width: 2px;
+  max-width: none;
+  max-height: none;
+  background: #fff;
+  box-shadow:
+    .12em .28em 0 -.01em rgba(255,255,255,.92),
+    -.08em .54em 0 -.015em rgba(214,241,255,.88),
+    0 0 .1em rgba(122,195,230,.9);
+  opacity: .95;
+  animation: avatar-snowfall-drift 3.2s linear infinite;
+  will-change: transform, opacity;
+}
+.avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(1) { left: 8%; animation-duration: 2.7s; }
+.avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(2) { left: 34%; animation-delay: -1.9s; animation-duration: 3.6s; transform: scale(.7); }
+.avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(3) { right: 24%; animation-delay: -.8s; animation-duration: 3s; transform: scale(1.12); }
+.avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(4) { right: 5%; animation-delay: -2.5s; animation-duration: 4.1s; transform: scale(.62); }
+
+@keyframes avatar-moon-phase {
+  0% { transform: translateX(-108%); }
+  25% { transform: translateX(-48%); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(48%); }
+  100% { transform: translateX(108%); }
+}
+@keyframes avatar-snowfall-drift {
+  0% { opacity: 0; transform: translate3d(-80%, 0, 0) rotate(0deg); }
+  12% { opacity: .95; }
+  88% { opacity: .85; }
+  100% { opacity: 0; transform: translate3d(180%, 1900%, 0) rotate(180deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .avatar-frame-orbit .avatar-frame-ornament > i,
   .avatar-frame-aurora::before,
   .avatar-frame-portal .avatar-frame-ornament > i,
   .avatar-frame-comet .avatar-frame-ornament > i,
-  .avatar-frame-mechanical .avatar-frame-ornament > i {
+  .avatar-frame-mechanical .avatar-frame-ornament > i,
+  .avatar-frame-moon::after,
+  .avatar-frame-snowfall .avatar-frame-ornament > i {
     animation: none !important;
   }
 }
