@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.12",
+  "id": "2026.08.02.13",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "聊天气泡不再只是换一种颜色",
+      "title": "气泡预览现在就是真实聊天页",
       "items": [
-        "下架十二款缺少结构辨识度的气泡，把候选库收敛到真正有设计差异的十六款",
-        "打字机、报纸、票据、终端、全息、机械、贴纸与积木均获得独立轮廓和排版语言",
-        "预览与真实聊天统一由外层气泡承载皮肤，音频、文件、位置、足迹和链接不再冒出默认白卡"
+        "聊天页新增专用预览模式，个性化页面直接复用真实消息、Header 和输入栏结构",
+        "图片、视频、语音、文件、位置、足迹和链接均由正式消息组件渲染，不再使用近似 mock",
+        "预览内可以滚动浏览，但输入、语音、加号、媒体点击、长按和右键操作全部禁用"
       ]
     },
     "en": {
-      "title": "Chat bubbles are more than color swaps",
+      "title": "Bubble preview is now the real chat view",
       "items": [
-        "Twelve low-identity bubbles have been retired, focusing the library on sixteen genuinely distinct designs",
-        "Typewriter, Newspaper, Receipt, Terminal, Hologram, Mechanical, Sticker, and Toy Brick now have unique silhouettes and typography",
-        "Preview and live chat share one outer bubble skin, preventing audio, files, locations, travel maps, and links from reverting to white cards"
+        "The chat page now has a dedicated preview mode, letting personalization reuse the real message, header, and composer structure",
+        "Images, video, audio, files, locations, travel maps, and links are rendered by production message components instead of approximate mocks",
+        "The preview remains scrollable while input, voice, plus actions, media clicks, long press, and context menus are fully disabled"
       ]
     }
   }

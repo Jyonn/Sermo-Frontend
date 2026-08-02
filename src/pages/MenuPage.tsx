@@ -33,6 +33,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import ChatsPage from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 
@@ -134,159 +135,6 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
 
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
-}
-
-type BubblePreviewKind = "text" | "image" | "audio" | "video" | "file" | "location" | "travel" | "link";
-
-function BubblePreviewContent({ avatarName, from, kind, t }: { avatarName: string; from: "self" | "other"; kind: BubblePreviewKind; t: ReturnType<typeof useI18n>["t"] }) {
-  const groupClassName = `${from} group-start group-end`;
-  if (kind === "text") {
-    return (
-      <div className={`message-bubble has-reply ${groupClassName}`}>
-        <button className="message-reply-preview" type="button">
-          <strong>{from === "self" ? avatarName : t("common.me")}</strong>
-          <span>{from === "self" ? t("menu.bubblePreviewOther") : t("menu.bubblePreviewSelf")}</span>
-        </button>
-        {from === "self" ? t("menu.bubblePreviewSelf") : t("menu.bubblePreviewOther")}
-      </div>
-    );
-  }
-  if (kind === "image" || kind === "video") {
-    return (
-      <div className={`message-bubble is-media ${groupClassName}`}>
-        <div className={`message-media-frame personalization-live-media type-${kind} ${groupClassName}`}>
-          <i />
-          {kind === "video" ? (
-            <>
-              <span className="message-video-shade" />
-              <span className="message-video-play"><span className="material-symbols-outlined">play_arrow</span></span>
-              <span className="personalization-live-video-time">0:28</span>
-            </>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-  if (kind === "audio") {
-    return (
-      <div className={`message-bubble is-media ${groupClassName}`}>
-        <div className={`message-audio-card ${groupClassName}`}>
-          <span className="message-audio-play"><span className="material-symbols-outlined">play_arrow</span></span>
-          <span className="message-audio-body">
-            <span className="message-audio-head"><span className="message-audio-meta">0:12</span></span>
-            <span className="message-audio-wave">
-              {[8, 15, 21, 12, 18, 10, 16, 7].map((height, index) => <i className="message-audio-wave-bar" key={index} style={{ height }} />)}
-            </span>
-            <span className="message-audio-progress">0:00 / 0:12</span>
-          </span>
-        </div>
-      </div>
-    );
-  }
-  if (kind === "file") {
-    return (
-      <div className={`message-bubble is-media ${groupClassName}`}>
-        <div className={`message-file-card ${groupClassName}`}>
-          <span className="message-file-icon"><span className="material-symbols-outlined">description</span></span>
-          <span className="message-file-copy"><strong>{t("menu.bubblePreviewFile")}</strong><small>2.4 MB</small></span>
-          <span className="message-file-open">↗</span>
-        </div>
-      </div>
-    );
-  }
-  if (kind === "location") {
-    return (
-      <div className={`message-bubble is-media is-location ${groupClassName}`}>
-        <div className={`message-location-card ${groupClassName}`}>
-          <span className="message-location-mark"><span className="material-symbols-outlined">location_on</span></span>
-          <span className="message-location-copy"><strong>{t("menu.bubblePreviewLocation")}</strong><small>{t("location.viewOnMap")}</small></span>
-          <span className="message-location-open">↗</span>
-        </div>
-      </div>
-    );
-  }
-  if (kind === "travel") {
-    return (
-      <div className={`message-bubble is-travel-map ${groupClassName}`}>
-        <div className={`message-travel-map-card ${groupClassName}`}>
-          <span className="message-travel-map-art"><span className="material-symbols-outlined">map</span></span>
-          <span className="message-travel-map-copy"><strong>{t("travelMap.messageJoin")}</strong><span>{t("travelMap.tapToAuthorize")}</span></span>
-          <span className="message-travel-map-arrow">→</span>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className={`message-bubble is-link-preview ${groupClassName}`}>
-      <span className={`message-text-stack has-link-preview ${groupClassName}`}>
-        <span className="message-link-preview-card has-image">
-          <span className="message-link-preview-text">
-            <small className="message-link-preview-site">SERMO</small>
-            <strong className="message-link-preview-title">{t("menu.bubblePreviewLink")}</strong>
-            <span className="message-link-preview-desc">{t("menu.bubblePreviewLinkHint")}</span>
-          </span>
-          <span className="message-link-preview-image personalization-live-link-image" />
-        </span>
-      </span>
-    </div>
-  );
-}
-
-function ChatBubblePreview({
-  avatarName,
-  avatarUri,
-  style,
-}: {
-  avatarName: string;
-  avatarUri?: string;
-  style: string;
-}) {
-  const { t } = useI18n();
-  const kinds: BubblePreviewKind[] = ["text", "image", "audio", "video", "file", "location", "travel", "link"];
-  return (
-    <section className="personalization-chat-preview chat-background-default">
-      <header className="personalization-chat-preview-header">
-        <div className="chat-conversation-topbar">
-          <span className="material-symbols-outlined personalization-chat-preview-back">arrow_back</span>
-          <UserAvatar className="avatar" name={avatarName} uri={avatarUri} />
-          <div className="chat-topbar-meta">
-            <strong className="chat-topbar-name">{avatarName}</strong>
-            <span className="chat-topbar-status">{t("presence.online")}</span>
-          </div>
-        </div>
-        <span className="material-symbols-outlined">more_vert</span>
-      </header>
-      <div className="personalization-chat-preview-scroll message-scroll">
-        <div className="day-divider">{t("menu.bubblePreviewToday")}</div>
-        {kinds.flatMap((kind) => (["other", "self"] as const).map((from) => (
-          <div className={`message-group ${from} bubble-style-${style}`} key={`${kind}:${from}`}>
-            {from === "other" ? <UserAvatar className="avatar message-avatar" name={avatarName} uri={avatarUri} /> : null}
-            <div className="message-bubbles">
-              <div className={`message-bubble-wrap ${from} is-sent`}>
-                <div className={`message-bubble-shell ${from}`}>
-                  <BubblePreviewContent avatarName={avatarName} from={from} kind={kind} t={t} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )))}
-        <div className={`message-group self bubble-style-${style}`}>
-          <div className="message-bubbles">
-            <div className="message-bubble-wrap self is-pending">
-              <div className="message-bubble-shell self">
-                <div className="message-bubble self group-start group-end is-pending">{t("menu.bubblePreviewSending")}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="personalization-chat-preview-composer composer">
-        <span className="material-symbols-outlined">mic</span>
-        <span className="personalization-chat-preview-input">{t("chat.inputPlaceholder")}</span>
-        <span className="material-symbols-outlined">add</span>
-      </div>
-    </section>
-  );
 }
 
 type NotificationMessageKind = "direct" | "group" | "online";
@@ -2149,11 +1997,11 @@ export default function MenuPage() {
       >
         <div className="personalization-editor">
           <div className="personalization-sticky-preview">
-            <ChatBubblePreview
-              avatarName={space?.official_user?.name ?? t("brand.user")}
-              avatarUri={space?.official_user?.avatar_uri}
-              style={visibleBubbleStyle(personalizationDraft.chat_bubble_style)}
-            />
+            <ChatsPage preview={{
+              avatarName: space?.official_user?.name ?? t("brand.user"),
+              avatarUri: space?.official_user?.avatar_uri,
+              bubbleStyle: visibleBubbleStyle(personalizationDraft.chat_bubble_style),
+            }} />
           </div>
           <div className="personalization-library">
             {chatBubbleSections.map((section) => (

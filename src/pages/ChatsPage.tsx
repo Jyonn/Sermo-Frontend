@@ -1981,7 +1981,7 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
   }
 }
 
-export default function ChatsPage() {
+function LiveChatsPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
@@ -6120,4 +6120,136 @@ export default function ChatsPage() {
       <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
   );
+}
+
+export interface ChatsPagePreviewConfig {
+  avatarName: string;
+  avatarUri?: string;
+  bubbleStyle: ChatBubbleStyle;
+}
+
+const CHAT_PREVIEW_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 420'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='1' y2='1'%3E%3Cstop stop-color='%2390d8bf'/%3E%3Cstop offset='.52' stop-color='%23f6d47d'/%3E%3Cstop offset='1' stop-color='%235d7da0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='640' height='420' fill='url(%23g)'/%3E%3Ccircle cx='475' cy='110' r='48' fill='%23fff' fill-opacity='.58'/%3E%3Cpath d='M0 360 180 190l120 112 92-82 248 200H0Z' fill='%231e594c' fill-opacity='.62'/%3E%3C/svg%3E";
+
+function previewMessage(kind: MessageKind, from: "self" | "other", index: number, config: ChatsPagePreviewConfig): ChatMessage {
+  const now = 1785686400 + index;
+  const base: ChatMessage = {
+    id: `preview-${from}-${kind}-${index}`,
+    clientId: `preview-${from}-${kind}-${index}`,
+    userId: from === "self" ? 1 : 2,
+    from,
+    type: MESSAGE_TYPE_TEXT,
+    kind,
+    name: from === "self" ? i18n.t("common.me") : config.avatarName,
+    avatarUri: from === "other" ? config.avatarUri : undefined,
+    chatBubbleStyle: config.bubbleStyle,
+    time: "11:38",
+    createdAt: now,
+    text: from === "self" ? i18n.t("menu.bubblePreviewSelf") : i18n.t("menu.bubblePreviewOther"),
+    status: index === 15 ? "pending" : "sent",
+  };
+  if (kind === "image") return { ...base, type: MESSAGE_TYPE_IMAGE, payload: { kind, uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE, image_metadata: { status: 1, pixel_width: 640, pixel_height: 420 } } };
+  if (kind === "video") return { ...base, type: MESSAGE_TYPE_VIDEO, payload: { kind, uri: "data:video/mp4;base64,", thumbnail_uri: CHAT_PREVIEW_IMAGE, duration_seconds: 28, video_metadata: { status: 1, duration_seconds: 28, pixel_width: 640, pixel_height: 420 } } };
+  if (kind === "audio") return { ...base, type: MESSAGE_TYPE_AUDIO, payload: { kind, uri: "data:audio/wav;base64,UklGRgQAAABXQVZF", duration_seconds: 12 } };
+  if (kind === "file") return { ...base, type: MESSAGE_TYPE_FILE, payload: { kind, uri: "data:text/plain,preview", file_name: i18n.t("menu.bubblePreviewFile"), file_size: 2516582 } };
+  if (kind === "location") return { ...base, type: MESSAGE_TYPE_LOCATION, payload: { kind, latitude: 24.4798, longitude: 118.0894, address: i18n.t("menu.bubblePreviewLocation") } };
+  if (kind === "map_access") return { ...base, type: MESSAGE_TYPE_MAP_ACCESS, payload: { kind, text: i18n.t("travelMap.messageJoin"), owner: { user_id: 2, name: config.avatarName }, access: { can_view_theirs: true, they_can_view_mine: true } } };
+  if (index === 14) {
+    return {
+      ...base,
+      payload: {
+        kind: "text",
+        text: "https://sermo.jyonn.space",
+        link_preview: {
+          status: "ready",
+          url: "https://sermo.jyonn.space",
+          site_name: "SERMO",
+          title: i18n.t("menu.bubblePreviewLink"),
+          description: i18n.t("menu.bubblePreviewLinkHint"),
+          image_url: CHAT_PREVIEW_IMAGE,
+        },
+      },
+    };
+  }
+  return base;
+}
+
+function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig }) {
+  const { t } = useI18n();
+  const kinds: MessageKind[] = ["text", "image", "audio", "video", "file", "location", "map_access", "text"];
+  const groups = kinds.flatMap((kind, kindIndex) => (["other", "self"] as const).map((from, sideIndex): MessageGroup => {
+    const index = kindIndex * 2 + sideIndex;
+    return {
+      key: `preview-group-${index}`,
+      from,
+      name: from === "self" ? t("common.me") : config.avatarName,
+      avatarUri: from === "other" ? config.avatarUri : undefined,
+      chatBubbleStyle: config.bubbleStyle,
+      dividerLabel: index === 0 ? t("menu.bubblePreviewToday") : undefined,
+      messages: [previewMessage(kind, from, index, config)],
+    };
+  }));
+  const noop = () => undefined;
+
+  return (
+    <section
+      aria-label={t("menu.chatBubble")}
+      className="chat-conversation-panel chat-conversation-preview"
+      onClickCapture={(event) => {
+        if ((event.target as HTMLElement).closest(".message-scroll")) event.preventDefault();
+      }}
+      onContextMenu={(event) => event.preventDefault()}
+    >
+      <header className="desktop-conversation-header chat-preview-header chat-background-default">
+        <div className="chat-conversation-topbar">
+          <button aria-label={t("common.back")} className="chat-back-button" disabled type="button">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div className="avatar-wrap"><UserAvatar className="avatar" name={config.avatarName} uri={config.avatarUri} /></div>
+          <div className="chat-topbar-meta">
+            <strong className="chat-topbar-name"><span className="chat-topbar-title-text">{config.avatarName}</span></strong>
+            <div className="chat-topbar-status">{t("presence.online")}</div>
+          </div>
+        </div>
+        <button aria-label={t("chat.details")} className="icon-button" disabled type="button">
+          <span className="material-symbols-outlined">more_vert</span>
+        </button>
+      </header>
+      <div className="chat-detail-scene chat-background-default">
+        <div className="message-scroll">
+          {groups.map((group) => (
+            <MessageGroupBlock
+              enteringMessageIds={[]}
+              group={group}
+              key={group.key}
+              onOpenActions={noop}
+              onOpenImage={noop}
+              onOpenVideo={noop}
+              onRetry={noop}
+              onToggleSelection={noop}
+              selectedClientIds={[]}
+              selectionMode={false}
+              showAuthor={false}
+            />
+          ))}
+        </div>
+        <form className="composer chat-preview-composer" onSubmit={(event) => event.preventDefault()}>
+          <div className="composer-row composer-row-text">
+            <div className="composer-leading-actions">
+              <button aria-label={t("audio.record")} className="composer-action-button" disabled type="button"><ComposerSvgIcon className="composer-inline-svg" kind="mic" /></button>
+            </div>
+            <div className="composer-input-wrap">
+              <textarea className="textarea composer-input" disabled placeholder={t("chat.inputPlaceholder")} rows={1} />
+            </div>
+            <button aria-label={t("emoji.choose")} className="composer-emoji-button" disabled type="button"><ComposerSvgIcon className="composer-inline-svg" kind="emoji" /></button>
+            <button aria-label={t("common.expandMore")} className="composer-plus" disabled type="button"><span className="material-symbols-outlined">add</span></button>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+export default function ChatsPage({ preview }: { preview?: ChatsPagePreviewConfig }) {
+  if (preview) return <PreviewChatConversation config={preview} />;
+  return <LiveChatsPage />;
 }
