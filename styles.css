@@ -18274,14 +18274,14 @@ html[data-theme="dark"] .chat-conversation-preview {
 .message-group.bubble-style-receipt .message-bubble {
   overflow: hidden;
   min-width: min(100%, 150px);
-  padding-top: 27px;
-  padding-bottom: 30px;
+  padding-top: 17px;
+  padding-bottom: 18px;
   border: 0 !important;
   font-family: "JetBrains Mono", monospace;
   letter-spacing: -.01em;
   background:
-    linear-gradient(90deg,transparent 10px,color-mix(in srgb,currentColor 20%,transparent) 10px calc(100% - 10px),transparent calc(100% - 10px)) 0 22px/100% 1px no-repeat,
-    linear-gradient(90deg,transparent 10px,color-mix(in srgb,currentColor 20%,transparent) 10px calc(100% - 10px),transparent calc(100% - 10px)) 0 calc(100% - 24px)/100% 1px no-repeat,
+    linear-gradient(90deg,transparent 10px,color-mix(in srgb,currentColor 20%,transparent) 10px calc(100% - 10px),transparent calc(100% - 10px)) 0 14px/100% 1px no-repeat,
+    linear-gradient(90deg,transparent 10px,color-mix(in srgb,currentColor 20%,transparent) 10px calc(100% - 10px),transparent calc(100% - 10px)) 0 calc(100% - 15px)/100% 1px no-repeat,
     radial-gradient(circle at 28% 18%,color-mix(in srgb,currentColor 5%,transparent),transparent 36%),
     var(--bubble-theme-surface) !important;
   box-shadow: var(--bubble-theme-shadow) !important;
@@ -18296,13 +18296,13 @@ html[data-theme="dark"] .chat-conversation-preview {
 }
 .message-group.bubble-style-receipt .message-bubble::before {
   position: absolute;
-  top: 8px;
+  top: 4px;
   right: 13px;
   left: 13px;
   display: block;
   color: color-mix(in srgb,currentColor 60%,transparent);
   content: "SERMO  /  IN  0018";
-  font-size: .46rem;
+  font-size: .42rem;
   font-weight: 700;
   letter-spacing: .08em;
   line-height: 1;
@@ -18315,13 +18315,82 @@ html[data-theme="dark"] .chat-conversation-preview {
 .message-group.bubble-style-receipt .message-bubble::after {
   position: absolute;
   right: 14px;
-  bottom: 8px;
+  bottom: 5px;
   left: 14px;
   display: block;
-  height: 10px;
+  height: 7px;
   background: repeating-linear-gradient(90deg,currentColor 0 1px,transparent 1px 3px,currentColor 3px 5px,transparent 5px 7px);
   content: "";
   opacity: .58;
+}
+
+.message-group.bubble-style-receipt .message-audio-card {
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.message-group.bubble-style-receipt .message-audio-play {
+  width: 32px;
+  height: 32px;
+}
+
+.message-group.bubble-style-receipt .message-file-card {
+  min-height: 52px;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.message-group.bubble-style-receipt .message-file-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.message-group.bubble-style-receipt .message-file-copy {
+  gap: 2px;
+}
+
+.message-group.bubble-style-receipt .message-location-copy {
+  gap: 3px;
+  padding-block: 7px;
+}
+
+.message-group.bubble-style-receipt .message-location-mark {
+  width: 28px;
+  height: 28px;
+}
+
+.message-group.bubble-style-receipt .message-travel-map-card {
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 7px 8px;
+}
+
+.message-group.bubble-style-receipt .message-travel-map-art {
+  width: 52px;
+  height: 46px;
+  border-radius: 7px;
+}
+
+.message-group.bubble-style-receipt .message-travel-map-art svg {
+  width: 27px;
+  height: 27px;
+}
+
+.message-group.bubble-style-receipt .message-link-preview-card {
+  grid-template-columns: minmax(0, 1fr) 68px;
+  min-height: 72px;
+  padding: 7px;
+}
+
+.message-group.bubble-style-receipt .message-link-preview-card.no-image {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.message-group.bubble-style-receipt .message-link-preview-image {
+  width: 68px;
+  height: 68px;
+  border-radius: 7px;
 }
 
 /* Terminal: command-line slab with a luminous prompt rail. */

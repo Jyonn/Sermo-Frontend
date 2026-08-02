@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.17",
+  "id": "2026.08.02.18",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "广场和人物个性化全面焕新",
+      "title": "小票气泡更加轻巧",
       "items": [
-        "广场升级为有水景、街区、树木和聚会角落的真实社区场景",
-        "人物采用肩肘腕与髋膝踝关节骨架，服装、四肢、手持物和动作各扩展至 8 种",
-        "人物相遇会自然挥手，也可以从人物浮层主动打招呼"
+        "压缩票号与条码区域，短消息不再被上下装饰过度拉高",
+        "语音、文件、位置、足迹和链接卡片采用更紧凑的小票排版",
+        "锯齿边、票号、分隔线和条码仍完整保留"
       ]
     },
     "en": {
-      "title": "A richer plaza and articulated characters",
+      "title": "A lighter receipt bubble",
       "items": [
-        "The plaza is now a believable community scene with water, streets, trees, and gathering pockets",
-        "Characters now use articulated shoulders, elbows, wrists, hips, knees, and ankles, with eight choices in every customization category",
-        "Nearby characters greet one another naturally, and you can wave from a person's quick panel"
+        "The serial and barcode strips are slimmer, so short messages no longer feel vertically stretched",
+        "Audio, file, location, travel map, and link cards now use a more compact receipt layout",
+        "Perforated edges, serial line, separators, and barcode remain intact"
       ]
     }
   }
