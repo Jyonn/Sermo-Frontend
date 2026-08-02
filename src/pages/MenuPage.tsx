@@ -90,10 +90,9 @@ const personalizationOptions = {
     ["aurora", "menu.frameAurora"],
     ["polaroid", "menu.framePolaroid"],
     ["soundwave", "menu.frameSoundwave"],
-    ["lucky", "menu.frameLucky"],
     ["portal", "menu.framePortal"],
     ["blossom", "menu.frameBlossom"], ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
-    ["crown", "menu.frameCrown"], ["headphones", "menu.frameHeadphones"], ["cat-ears", "menu.frameCatEars"], ["ribbon-bow", "menu.frameRibbonBow"], ["camera", "menu.frameCamera"],
+    ["camera", "menu.frameCamera"],
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"], ["firefly", "menu.frameFirefly"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"],
   ],
@@ -132,8 +131,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "polaroid"].includes(value)) },
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
   { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["blossom", "butterfly", "moon", "snowfall", "firefly"].includes(value)) },
-  { label: "menu.collectionAccessory", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["lucky", "crown", "headphones", "cat-ears", "ribbon-bow", "camera"].includes(value)) },
-  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["papercut", "mechanical"].includes(value)) },
+  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
 ];
 
 function visibleBubbleStyle(style?: string) {

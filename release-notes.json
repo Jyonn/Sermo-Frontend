@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.09",
+  "id": "2026.08.02.10",
   "publishedAt": "2026-08-02",
   "locales": {
     "zh-CN": {
-      "title": "头像框从数量转向设计质量",
+      "title": "头像框库进一步精简",
       "items": [
-        "下架八款辨识度不足或过度依赖换色与条纹的头像框，候选库重新归为五个清晰系列",
-        "时隙、彗星与星轨改为装饰元素沿圆角边缘运动，不再旋转整个头像框",
-        "历史选择会自动迁移到最接近的保留款式，不会突然丢失头像装饰"
+        "配饰系列正式下架，仅保留具有明确视觉结构的取景器",
+        "取景器现已归入工艺限定，与剪纸和机械共同展示",
+        "正在使用旧配饰的用户会自动迁移到最接近的保留款式"
       ]
     },
     "en": {
-      "title": "Avatar frames now favor design quality over quantity",
+      "title": "The avatar frame library is now more focused",
       "items": [
-        "Eight low-identity frames built mainly from color or stripe changes have been retired, leaving five focused collections",
-        "Portal, Comet, and Orbit now move ornaments along the rounded perimeter instead of rotating the entire frame",
-        "Existing selections migrate to the closest retained design so avatar decoration is never lost unexpectedly"
+        "The accessory collection has been retired, leaving Viewfinder as its only structurally distinctive design",
+        "Viewfinder now sits in Crafted alongside Papercut and Mechanical",
+        "Existing accessory selections migrate automatically to the closest retained design"
       ]
     }
   }
