@@ -9,3 +9,4 @@ public/sw-release.js
 vite.config.js
 vite.config.d.ts
 src/assets
+design
