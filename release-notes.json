@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.04",
+  "id": "2026.08.03.05",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "Niko 动起来了",
+      "title": "Niko 主题焕新",
       "items": [
-        "Niko 招呼头像框加入挥手动画，小猫会从头像一角探出问候",
-        "Niko 巡游气泡加入环绕奔跑动画，并在四个方向自然切换动作",
-        "奔跑动效使用独立渲染层，不再干扰发送状态与气泡合并"
+        "头像框与聊天气泡统一调整为蓬松白与暖棕配色",
+        "气泡纹理改为低对比猫爪图案",
+        "Niko 现在固定在气泡上沿原地奔跑，不再环绕四边"
       ]
     },
     "en": {
-      "title": "Niko is now in motion",
+      "title": "A refreshed Niko theme",
       "items": [
-        "The Niko Hello avatar frame now features an animated greeting from the corner",
-        "The Niko Patrol bubble now runs around the message and changes direction at each corner",
-        "The runner uses an independent layer that preserves sending states and grouped corners"
+        "Avatar frames and chat bubbles now share a fluffy white and warm brown palette",
+        "Bubble textures now use subtle paw-print patterns",
+        "Niko now runs in place along the top edge instead of circling the bubble"
       ]
     }
   }

@@ -18842,28 +18842,28 @@ html[data-theme="dark"] .chat-conversation-preview {
 /* Niko IP: ivory fluff, eye green, and a quiet paw-print texture. */
 .personalization-bubble-stage.bubble-style-niko,
 .message-group.bubble-style-niko {
-  --bubble-skin-other-bg:
-    radial-gradient(circle at 17% 15%, rgba(255,255,255,.94), transparent 38%),
-    radial-gradient(circle at 88% 78%, rgba(164,177,156,.13) 0 2px, transparent 2.5px) 0 0 / 12px 12px,
-    linear-gradient(145deg,#fffdf7,#ece7dc);
-  --bubble-skin-other-color:#294238;
-  --bubble-skin-other-border:#aeb9aa;
-  --bubble-skin-other-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 7px 17px rgba(56,72,62,.11);
-  --bubble-skin-self-bg:
-    radial-gradient(circle at 16% 13%,rgba(151,190,137,.2),transparent 36%),
-    radial-gradient(circle at 88% 78%,rgba(229,240,218,.12) 0 2px,transparent 2.5px) 0 0 / 12px 12px,
-    linear-gradient(145deg,#315f4c,#1b3c31);
-  --bubble-skin-self-color:#fffaf0;
-  --bubble-skin-self-border:#77906f;
-  --bubble-skin-self-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 8px 18px rgba(20,48,38,.18);
+  --niko-paw-pattern:
+    radial-gradient(ellipse 3.8px 3px at 10px 12px,rgba(128,84,53,.08) 96%,transparent) 0 0/24px 22px,
+    radial-gradient(circle 1.7px at 5px 7px,rgba(128,84,53,.08) 96%,transparent) 0 0/24px 22px,
+    radial-gradient(circle 1.7px at 9px 5px,rgba(128,84,53,.08) 96%,transparent) 0 0/24px 22px,
+    radial-gradient(circle 1.7px at 13px 5px,rgba(128,84,53,.08) 96%,transparent) 0 0/24px 22px,
+    radial-gradient(circle 1.7px at 16px 8px,rgba(128,84,53,.08) 96%,transparent) 0 0/24px 22px;
+  --bubble-skin-other-bg:var(--niko-paw-pattern),linear-gradient(145deg,#fff,#f7f3ec);
+  --bubble-skin-other-color:#49372b;
+  --bubble-skin-other-border:#cbb9a8;
+  --bubble-skin-other-shadow:inset 0 1px 0 #fff,0 7px 17px rgba(83,57,39,.1);
+  --bubble-skin-self-bg:var(--niko-paw-pattern),linear-gradient(145deg,#fbf7ef,#efe6d9);
+  --bubble-skin-self-color:#402d21;
+  --bubble-skin-self-border:#b99a7f;
+  --bubble-skin-self-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(92,60,38,.13);
   --bubble-skin-other-radius:19px 19px 19px 7px;
   --bubble-skin-self-radius:19px 19px 7px 19px;
   --bubble-skin-border-width:1px;
-  --bubble-theme-accent:#668d52;
-  --bubble-theme-muted-other:rgba(41,66,56,.58);
-  --bubble-theme-muted-self:rgba(255,250,240,.68);
-  --bubble-theme-icon-other:#e4ece0;
-  --bubble-theme-icon-self:rgba(225,240,216,.13);
+  --bubble-theme-accent:#916846;
+  --bubble-theme-muted-other:rgba(73,55,43,.57);
+  --bubble-theme-muted-self:rgba(64,45,33,.6);
+  --bubble-theme-icon-other:#f4ede3;
+  --bubble-theme-icon-self:#eadbca;
 }
 
 .message-group.bubble-style-niko.other {
@@ -18918,35 +18918,37 @@ html[data-theme="dark"] .chat-conversation-preview {
 }
 
 .field-chat_bubble_style .preview-niko i span {
-  border:1px solid #9caa9a;
+  border:1px solid #c2aa94;
   border-radius:14px 14px 14px 5px;
-  background:linear-gradient(145deg,#fffef9,#e8e3d8);
-  box-shadow:0 4px 9px rgba(45,68,56,.12);
+  background:linear-gradient(145deg,#fff,#f0e6d9);
+  box-shadow:0 4px 9px rgba(91,61,41,.11);
 }
 
 .field-chat_bubble_style .preview-niko > i::after {
   position:absolute;
-  right:-3px;
-  bottom:-1px;
+  top:-9px;
+  left:50%;
   width:25px;
   height:25px;
-  background:url("/assets/niko/niko-greeting.webp") center/contain no-repeat;
+  background:url("/assets/niko/niko-run-right.webp") center/contain no-repeat;
   content:"";
   pointer-events:none;
+  transform:translateX(-50%);
 }
 
 html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.message-group.bubble-style-niko) {
-  --bubble-skin-other-bg:linear-gradient(145deg,#303934,#222b27);
-  --bubble-skin-other-color:#f4efe5;
-  --bubble-skin-other-border:#56655c;
-  --bubble-skin-self-bg:linear-gradient(145deg,#315f4c,#17352b);
-  --bubble-skin-self-color:#fffaf0;
+  --bubble-skin-other-bg:var(--niko-paw-pattern),linear-gradient(145deg,#f1ece4,#ded4c8);
+  --bubble-skin-other-color:#3d2c22;
+  --bubble-skin-other-border:#9e856f;
+  --bubble-skin-self-bg:var(--niko-paw-pattern),linear-gradient(145deg,#e9dfd3,#d5c5b5);
+  --bubble-skin-self-color:#36251c;
+  --bubble-skin-self-border:#92745d;
 }
 
 /* Niko Hello: the greeting animation peeks into the frame without enlarging it. */
 .avatar-frame-niko-run {
   --avatar-frame-inset:9%;
-  --avatar-frame-paint:linear-gradient(145deg,#fdfaf1 0 44%,#dfe9da 45% 72%,#6d8f5d 73% 100%);
+  --avatar-frame-paint:linear-gradient(145deg,#fff 0 62%,#f2e9df 63% 88%,#a67d5d 89% 100%);
 }
 
 .avatar-frame-niko-run::before {
@@ -18954,7 +18956,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   z-index:1;
   inset:3%;
   display:block;
-  border:1px solid rgba(73,105,78,.4);
+  border:1px solid rgba(139,99,70,.42);
   border-radius:inherit;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.72);
   content:"" !important;
@@ -18969,7 +18971,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   background-position:center;
   background-repeat:no-repeat;
   background-size:contain;
-  filter:drop-shadow(0 1px 1px rgba(30,48,38,.22));
+  filter:drop-shadow(0 1px 1px rgba(81,53,35,.2));
   pointer-events:none;
 }
 
@@ -18982,7 +18984,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   transform-origin:72% 100%;
 }
 
-/* Niko Patrol: switch directional animation assets as the cat rounds each corner. */
+/* Niko Patrol: the run cycle stays fixed on the top edge like a tiny moonwalk. */
 .message-group.bubble-style-niko .message-bubble-shell {
   position:relative;
   isolation:isolate;
@@ -18991,17 +18993,14 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 .message-group.bubble-style-niko .message-bubble-shell::after {
   position:absolute;
   z-index:5;
-  top:0;
-  left:0;
-  width:24px;
-  height:24px;
+  top:-17px;
+  left:50%;
+  width:28px;
+  height:28px;
   background:url("/assets/niko/niko-run-right.webp") center/contain no-repeat;
   content:"";
-  offset-path:inset(-8px round 19px);
-  offset-distance:0;
-  offset-rotate:0deg;
-  filter:drop-shadow(0 2px 2px rgba(27,53,42,.22));
-  animation:niko-bubble-patrol 7.2s linear infinite;
+  filter:drop-shadow(0 2px 2px rgba(82,53,35,.2));
+  transform:translateX(-50%);
   pointer-events:none;
 }
 
@@ -19010,20 +19009,9 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   50% { transform:translateY(-4%) rotate(2deg); }
 }
 
-@keyframes niko-bubble-patrol {
-  0% { offset-distance:0%;background-image:url("/assets/niko/niko-run-right.webp"); }
-  24.9% { offset-distance:24.9%;background-image:url("/assets/niko/niko-run-right.webp"); }
-  25% { offset-distance:25%;background-image:url("/assets/niko/niko-run-down.webp"); }
-  49.9% { offset-distance:49.9%;background-image:url("/assets/niko/niko-run-down.webp"); }
-  50% { offset-distance:50%;background-image:url("/assets/niko/niko-run-left.webp"); }
-  74.9% { offset-distance:74.9%;background-image:url("/assets/niko/niko-run-left.webp"); }
-  75% { offset-distance:75%;background-image:url("/assets/niko/niko-run-up.webp"); }
-  100% { offset-distance:100%;background-image:url("/assets/niko/niko-run-up.webp"); }
-}
-
 @media (prefers-reduced-motion:reduce) {
   .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;transform:none; }
-  .message-group.bubble-style-niko .message-bubble-shell::after { right:-4px;bottom:-4px;top:auto;left:auto;offset-path:none;animation:none; }
+  .message-group.bubble-style-niko .message-bubble-shell::after { display:none; }
 }
 /* Character motion lab: real 3D skeleton prototype. */
 .character-lab-page{--lab-ink:#191b2b;min-height:100dvh;padding:26px clamp(18px,4vw,64px) 50px;color:var(--lab-ink);background:radial-gradient(circle at 16% 8%,rgba(255,226,124,.72),transparent 27%),radial-gradient(circle at 88% 15%,rgba(112,233,206,.58),transparent 24%),#f5f0e8}
