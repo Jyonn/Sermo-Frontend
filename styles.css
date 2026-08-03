@@ -18979,24 +18979,24 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   position:absolute;
   z-index:3;
   display:none;
-  width:50%;
-  max-width:50%;
-  max-height:50%;
-  aspect-ratio:1;
-  background-position:center;
+  width:115%;
+  height:125%;
+  max-width:none;
+  max-height:none;
+  background-position:0 0;
   background-repeat:no-repeat;
-  background-size:contain;
+  background-size:800% 100%;
   filter:drop-shadow(0 1px 1px rgba(81,53,35,.2));
+  opacity:0;
   pointer-events:none;
 }
 
 .avatar-frame-niko-run .avatar-frame-ornament > i:first-child {
-  right:-2%;
-  bottom:-2%;
+  right:-7.5%;
+  bottom:0;
   display:block;
-  background-image:url("/assets/niko/niko-greeting.webp");
-  animation:niko-frame-hello 2.8s ease-in-out infinite;
-  transform-origin:72% 100%;
+  background-image:url("/assets/niko/niko-avatar-greeting-spritesheet.png");
+  animation:niko-frame-greeting 10s steps(1,end) infinite;
 }
 
 /* Niko Patrol: the run cycle stays fixed on the top edge like a tiny moonwalk. */
@@ -19024,13 +19024,20 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   display:block;
 }
 
-@keyframes niko-frame-hello {
-  0%,100% { transform:translateY(1%) rotate(-2deg); }
-  50% { transform:translateY(-4%) rotate(2deg); }
+@keyframes niko-frame-greeting {
+  0% { background-position:0 0;opacity:1; }
+  1.8% { background-position:14.285714% 0;opacity:1; }
+  3.6% { background-position:28.571429% 0;opacity:1; }
+  5.8% { background-position:42.857143% 0;opacity:1; }
+  7.7% { background-position:57.142857% 0;opacity:1; }
+  10.7% { background-position:71.428571% 0;opacity:1; }
+  13% { background-position:85.714286% 0;opacity:1; }
+  14.8%,16.59% { background-position:100% 0;opacity:1; }
+  16.6%,100% { background-position:100% 0;opacity:0; }
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;transform:none; }
+  .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
   .message-group.bubble-style-niko .message-bubble-shell::after { display:none; }
 }
 
@@ -19149,23 +19156,23 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   position:absolute;
   z-index:3;
   display:none;
-  width:52%;
-  max-width:52%;
-  max-height:64%;
-  aspect-ratio:1;
-  background-position:center;
+  width:118%;
+  height:128%;
+  max-width:none;
+  max-height:none;
+  background-position:0 0;
   background-repeat:no-repeat;
-  background-size:contain;
+  background-size:800% 100%;
   filter:drop-shadow(0 2px 2px rgba(39,31,22,.25));
+  opacity:0;
   pointer-events:none;
 }
 .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child {
-  bottom:-5%;
-  left:-4%;
+  bottom:0;
+  left:5%;
   display:block;
-  background-image:url("/assets/fufu/fufu-greeting.webp");
-  animation:fufu-frame-high-five 2.7s ease-in-out infinite;
-  transform-origin:34% 100%;
+  background-image:url("/assets/fufu/fufu-avatar-greeting-spritesheet.png");
+  animation:fufu-frame-greeting 10s steps(1,end) infinite;
 }
 
 .message-group.bubble-style-fufu .message-bubble-shell {
@@ -19190,9 +19197,16 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   display:block;
 }
 
-@keyframes fufu-frame-high-five {
-  0%,100% { transform:translateY(1%) rotate(1deg); }
-  50% { transform:translateY(-4%) rotate(-2deg); }
+@keyframes fufu-frame-greeting {
+  0% { background-position:0 0;opacity:1; }
+  .9% { background-position:14.285714% 0;opacity:1; }
+  2% { background-position:28.571429% 0;opacity:1; }
+  3.2% { background-position:42.857143% 0;opacity:1; }
+  4.25% { background-position:57.142857% 0;opacity:1; }
+  5.5% { background-position:71.428571% 0;opacity:1; }
+  6.7% { background-position:85.714286% 0;opacity:1; }
+  7.7%,8.59% { background-position:100% 0;opacity:1; }
+  8.6%,100% { background-position:100% 0;opacity:0; }
 }
 @keyframes fufu-bubble-dash {
   0% { left:-12px;opacity:0;transform:scale(.88); }
@@ -19202,7 +19216,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child { animation:none;transform:none; }
+  .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
   .message-group.bubble-style-fufu .message-bubble-shell::after { display:none; }
 }
 /* Character motion lab: real 3D skeleton prototype. */

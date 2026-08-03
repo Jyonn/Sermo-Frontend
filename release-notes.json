@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.09",
+  "id": "2026.08.03.10",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "个性化改为分级开放",
+      "title": "猫咪头像框会完整打招呼了",
       "items": [
-        "聊天背景不再统一要求 LV8，基础背景、气泡与头像框现在直接可用",
-        "更多个性化主题会随 LV4 至 LV12 逐步解锁，自定义上传背景保留 LV8",
-        "Niko 与 Fufu 主题需要永久 VIP 或达到 LV16"
+        "Niko 与 Fufu 头像框升级为完整 8 帧动画",
+        "猫咪会从头像框钻出、挥手，再自然退回消失",
+        "动画每 10 秒出现一次，不打扰聊天与浏览"
       ]
     },
     "en": {
-      "title": "Tiered personalization access",
+      "title": "Complete cat greetings for avatar frames",
       "items": [
-        "Chat backgrounds no longer require LV8 as a whole; basic backgrounds, bubbles, and frames are free",
-        "More themes unlock progressively from LV4 to LV12, while custom background uploads remain at LV8",
-        "Niko and Fufu themes require Lifetime VIP or LV16"
+        "Niko and Fufu avatar frames now use complete eight-frame animations",
+        "Each cat peeks out, waves, and naturally retreats from the frame",
+        "The greeting plays once every 10 seconds without distracting from chat"
       ]
     }
   }
