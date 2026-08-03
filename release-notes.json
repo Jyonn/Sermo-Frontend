@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.27",
-  "publishedAt": "2026-08-03",
+  "id": "2026.08.04.1",
+  "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "Niko 与 Fufu 胶囊焕新",
+      "title": "Fufu 奔跑轨迹归位",
       "items": [
-        "Niko 放大至气泡上沿原地奔跑，并补齐象牙猫爪场景",
-        "Fufu 沿气泡下沿横向奔跑，加入虎斑纹理与扬尘轨迹",
-        "两套胶囊完整预告角色在真实聊天气泡中的位置关系"
+        "Fufu 的奔跑坐标改为以居中气泡为基准",
+        "角色只沿气泡下边框移动，不再从选项卡左下角出现",
+        "扬尘轨迹同步收拢至气泡宽度"
       ]
     },
     "en": {
-      "title": "Refreshed Niko and Fufu capsules",
+      "title": "Re-aligned Fufu's capsule run",
       "items": [
-        "Niko is enlarged and runs in place along an ivory paw-print bubble edge",
-        "Fufu runs across the lower edge with tabby texture and a dust trail",
-        "Both capsules now preview the character-to-bubble relationship used in chat"
+        "Fufu's run is now anchored to the centered bubble",
+        "The character stays on the lower bubble edge instead of entering from the card corner",
+        "The dust trail is constrained to the bubble width"
       ]
     }
   }
