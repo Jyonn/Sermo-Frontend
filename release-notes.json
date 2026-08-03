@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.16",
+  "id": "2026.08.03.17",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "永久 VIP 头像框上线",
+      "title": "猫咪头像框尺寸微调",
       "items": [
-        "永久 VIP 不再自动叠加头像金边或广场人物光环",
-        "新增与 VIP 气泡同源的象牙金头像框和精致 VIP 标牌",
-        "VIP 头像框可自由预览，仅永久 VIP 可以保存使用"
+        "Niko 与 Fufu 的招呼和击掌动画缩小至当前尺寸的一半",
+        "底部居中钻出、完整 8 帧动作和退回消失保持不变",
+        "动画仍保持每 10 秒播放一次"
       ]
     },
     "en": {
-      "title": "Lifetime VIP avatar frame",
+      "title": "Refined cat avatar greeting size",
       "items": [
-        "Lifetime VIP no longer adds automatic gold avatar outlines or square character halos",
-        "A new ivory-gold avatar frame with a refined VIP tag now matches the VIP bubble",
-        "Anyone can preview the frame, while only Lifetime VIP members can save it"
+        "Niko and Fufu greeting animations are now half their previous size",
+        "The centered entrance, full eight-frame motion, and retreat remain unchanged",
+        "Each greeting continues to play once every 10 seconds"
       ]
     }
   }
