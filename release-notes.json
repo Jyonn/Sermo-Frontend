@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.26",
+  "id": "2026.08.03.27",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "漫画与文化气泡焕新",
+      "title": "Niko 与 Fufu 胶囊焕新",
       "items": [
-        "漫画与文化系列胶囊加入各自独立的视觉叙事",
-        "游龙气泡新增鳞纹、书法暗纹、云气边饰与动态龙珠",
-        "游龙的媒体卡片与功能图标同步使用玉石和描金语言"
+        "Niko 放大至气泡上沿原地奔跑，并补齐象牙猫爪场景",
+        "Fufu 沿气泡下沿横向奔跑，加入虎斑纹理与扬尘轨迹",
+        "两套胶囊完整预告角色在真实聊天气泡中的位置关系"
       ]
     },
     "en": {
-      "title": "Refreshed comic and culture bubbles",
+      "title": "Refreshed Niko and Fufu capsules",
       "items": [
-        "Comic and culture capsules now tell distinct visual stories",
-        "Dragon adds scale patterns, calligraphy, cloud trim, and an animated pearl",
-        "Dragon media cards and controls now share the same jade-and-gold language"
+        "Niko is enlarged and runs in place along an ivory paw-print bubble edge",
+        "Fufu runs across the lower edge with tabby texture and a dust trail",
+        "Both capsules now preview the character-to-bubble relationship used in chat"
       ]
     }
   }

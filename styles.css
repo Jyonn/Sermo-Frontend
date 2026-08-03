@@ -19825,6 +19825,153 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   pointer-events:none;
 }
 
+/* IP capsules preview the same relationship between character and bubble as live chat. */
+.field-chat_bubble_style .preview-niko > i {
+  overflow:visible;
+  background:
+    radial-gradient(ellipse 3px 2.5px at 9px 12px,rgba(128,84,53,.1) 96%,transparent) 0 0/20px 18px,
+    radial-gradient(circle 1.4px at 5px 7px,rgba(128,84,53,.1) 96%,transparent) 0 0/20px 18px,
+    radial-gradient(circle 1.4px at 9px 5px,rgba(128,84,53,.1) 96%,transparent) 0 0/20px 18px,
+    radial-gradient(circle at 50% 42%,rgba(255,255,255,.96),transparent 58%),
+    #f1eae0;
+}
+.field-chat_bubble_style .preview-niko > i::before {
+  position:absolute;
+  top:8px;
+  right:7px;
+  left:7px;
+  height:1px;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,#b99a7f 20% 80%,transparent);
+  box-shadow:0 2px 5px rgba(91,61,41,.08);
+  content:"";
+}
+.field-chat_bubble_style .preview-niko i span {
+  position:relative;
+  width:42px;
+  height:25px;
+  border:1px solid #bda58f;
+  border-radius:15px 15px 15px 5px;
+  background:
+    radial-gradient(ellipse 2.7px 2.2px at 8px 11px,rgba(128,84,53,.08) 96%,transparent) 0 0/18px 17px,
+    linear-gradient(145deg,#fff,#f0e6d9);
+  box-shadow:inset 0 1px #fff,0 4px 0 rgba(163,130,101,.18),0 6px 10px rgba(91,61,41,.1);
+  transform:translateY(5px);
+}
+.field-chat_bubble_style .preview-niko i span::before {
+  position:absolute;
+  right:7px;
+  bottom:6px;
+  left:8px;
+  height:2px;
+  border-radius:999px;
+  background:#916846;
+  box-shadow:0 -5px 0 rgba(145,104,70,.22);
+  content:"";
+  opacity:.7;
+}
+.field-chat_bubble_style .preview-niko i span::after {
+  position:absolute;
+  right:4px;
+  bottom:3px;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#c7a88e;
+  content:"";
+}
+.field-chat_bubble_style .preview-niko > i::after {
+  position:absolute;
+  z-index:3;
+  top:-15px;
+  left:50%;
+  width:40px;
+  height:40px;
+  background:url("/assets/niko/niko-run-right.webp") center/contain no-repeat;
+  content:"";
+  filter:drop-shadow(0 2px 2px rgba(83,57,39,.14));
+  pointer-events:none;
+  transform:translateX(-50%);
+}
+
+.field-chat_bubble_style .preview-fufu > i {
+  overflow:visible;
+  background:
+    repeating-linear-gradient(118deg,transparent 0 8px,rgba(50,43,32,.065) 8px 10px,transparent 10px 17px),
+    radial-gradient(circle at 48% 42%,rgba(255,237,205,.6),transparent 56%),
+    #d6c2a1;
+}
+.field-chat_bubble_style .preview-fufu > i::before {
+  position:absolute;
+  right:4px;
+  bottom:7px;
+  left:4px;
+  height:5px;
+  border-bottom:1px solid rgba(73,60,42,.32);
+  background:
+    radial-gradient(circle at 10% 100%,rgba(255,244,219,.72) 0 3px,transparent 3.5px),
+    radial-gradient(circle at 22% 100%,rgba(255,244,219,.5) 0 2px,transparent 2.5px);
+  content:"";
+}
+.field-chat_bubble_style .preview-fufu i span {
+  position:relative;
+  width:42px;
+  height:25px;
+  border:1px solid #6f5a42;
+  border-radius:13px 13px 13px 4px;
+  background:
+    repeating-radial-gradient(ellipse at -8% 52%,transparent 0 8px,rgba(48,42,31,.14) 9px 11px,transparent 12px 18px),
+    linear-gradient(145deg,#ddc8a6,#c1a37b);
+  box-shadow:inset 0 1px rgba(255,245,225,.44),0 4px 0 rgba(83,66,44,.2),0 6px 10px rgba(48,40,29,.13);
+  transform:translateY(-5px);
+}
+.field-chat_bubble_style .preview-fufu i span::before {
+  position:absolute;
+  top:6px;
+  right:7px;
+  left:8px;
+  height:2px;
+  border-radius:999px;
+  background:#584936;
+  box-shadow:0 5px 0 rgba(88,73,54,.28);
+  content:"";
+  opacity:.72;
+}
+.field-chat_bubble_style .preview-fufu i span::after {
+  position:absolute;
+  left:5px;
+  bottom:4px;
+  width:6px;
+  height:3px;
+  border-radius:50%;
+  background:#8a704f;
+  content:"";
+}
+.field-chat_bubble_style .preview-fufu > i::after {
+  position:absolute;
+  z-index:3;
+  bottom:-13px;
+  left:-12px;
+  width:42px;
+  height:32px;
+  background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
+  content:"";
+  filter:drop-shadow(0 2px 2px rgba(48,40,29,.16));
+  pointer-events:none;
+  animation:personalization-fufu-runway 3.2s linear infinite;
+}
+
+@keyframes personalization-fufu-runway {
+  0% { opacity:0;transform:translateX(-4px); }
+  8% { opacity:1; }
+  88% { opacity:1; }
+  100% { opacity:0;transform:translateX(32px); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .field-chat_bubble_style .preview-fufu > i::after { animation:none;transform:translateX(18px);opacity:1; }
+}
+
 html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.message-group.bubble-style-fufu) {
   --bubble-skin-other-bg:repeating-radial-gradient(ellipse at -8% 52%,transparent 0 12px,rgba(27,24,19,.18) 13px 16px,transparent 17px 27px),linear-gradient(145deg,#b49b77,#8d7659);
   --bubble-skin-other-color:#211d18;
