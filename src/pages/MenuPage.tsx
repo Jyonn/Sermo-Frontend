@@ -81,7 +81,7 @@ const personalizationOptions = {
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
     ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
-    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"],
+    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"],
     ["vip", "menu.styleVip"],
   ],
   avatar_frame_style: [
@@ -94,7 +94,7 @@ const personalizationOptions = {
     ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
     ["camera", "menu.frameCamera"],
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
-    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"],
+    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"],
   ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"], ["raincoat", "menu.outfitRaincoat"], ["hanfu", "menu.outfitHanfu"], ["utility", "menu.outfitUtility"], ["sailor", "menu.outfitSailor"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"], ["camera", "menu.propCamera"], ["bouquet", "menu.propBouquet"], ["umbrella", "menu.propUmbrella"], ["skateboard", "menu.propSkateboard"]],
@@ -121,7 +121,7 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
 
@@ -130,7 +130,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
   { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["butterfly", "moon", "snowfall"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => value === "niko-run") },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave"].includes(value)) },
 ];
 
 function visibleBubbleStyle(style?: string) {

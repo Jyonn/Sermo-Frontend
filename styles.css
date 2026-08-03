@@ -19015,6 +19015,174 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;transform:none; }
   .message-group.bubble-style-niko .message-bubble-shell::after { display:none; }
 }
+
+/* Fufu IP: sand tabby stripes, charcoal ink, olive eyes, and a coral-pink spark. */
+.personalization-bubble-stage.bubble-style-fufu,
+.message-group.bubble-style-fufu {
+  --bubble-skin-other-bg:
+    repeating-radial-gradient(ellipse at -8% 52%,transparent 0 12px,rgba(48,42,31,.09) 13px 16px,transparent 17px 27px),
+    linear-gradient(145deg,#ead9bd,#cdb18a);
+  --bubble-skin-other-color:#302a21;
+  --bubble-skin-other-border:#725e45;
+  --bubble-skin-other-shadow:inset 0 1px rgba(255,250,235,.7),0 7px 17px rgba(48,40,29,.14);
+  --bubble-skin-self-bg:
+    repeating-radial-gradient(ellipse at 108% 52%,transparent 0 13px,rgba(231,205,164,.1) 14px 17px,transparent 18px 28px),
+    linear-gradient(145deg,#514838,#2f2b23);
+  --bubble-skin-self-color:#fff5df;
+  --bubble-skin-self-border:#242019;
+  --bubble-skin-self-shadow:inset 0 1px rgba(255,255,255,.09),0 8px 18px rgba(34,29,22,.22);
+  --bubble-skin-other-radius:17px 17px 17px 6px;
+  --bubble-skin-self-radius:17px 17px 6px 17px;
+  --bubble-skin-border-width:1px;
+  --bubble-theme-accent:#747a28;
+  --bubble-theme-muted-other:rgba(48,42,33,.6);
+  --bubble-theme-muted-self:rgba(255,245,223,.66);
+  --bubble-theme-icon-other:rgba(116,122,40,.13);
+  --bubble-theme-icon-self:rgba(213,151,128,.14);
+}
+
+.message-group.bubble-style-fufu.other {
+  --bubble-theme-surface:var(--bubble-skin-other-bg);
+  --bubble-theme-color:var(--bubble-skin-other-color);
+  --bubble-theme-muted:var(--bubble-theme-muted-other);
+  --bubble-theme-icon:var(--bubble-theme-icon-other);
+  --bubble-theme-shadow:var(--bubble-skin-other-shadow);
+}
+
+.message-group.bubble-style-fufu.self {
+  --bubble-theme-surface:var(--bubble-skin-self-bg);
+  --bubble-theme-color:var(--bubble-skin-self-color);
+  --bubble-theme-muted:var(--bubble-theme-muted-self);
+  --bubble-theme-icon:var(--bubble-theme-icon-self);
+  --bubble-theme-shadow:var(--bubble-skin-self-shadow);
+}
+
+.message-group.bubble-style-fufu :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card,.message-travel-map-card) {
+  color:var(--bubble-theme-color);
+  background:var(--bubble-theme-surface);
+  box-shadow:var(--bubble-theme-shadow);
+}
+
+.message-group.bubble-style-fufu .message-bubble.has-reply {
+  --reply-preview-accent:var(--bubble-theme-accent);
+  --reply-preview-bg:var(--bubble-theme-icon);
+  --reply-preview-color:var(--bubble-theme-muted);
+  color:var(--bubble-theme-color);
+  background:var(--bubble-theme-surface);
+}
+
+.message-group.bubble-style-fufu .message-bubble.has-reply > :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card) {
+  background:transparent;
+  box-shadow:none;
+}
+
+.message-group.bubble-style-fufu :is(.message-audio-meta,.message-audio-progress,.message-file-copy small,.message-file-open,.message-location-copy small,.message-location-open,.message-link-preview-site,.message-link-preview-desc,.message-travel-map-copy small,.message-travel-map-copy span,.message-travel-map-arrow) {
+  color:var(--bubble-theme-muted);
+}
+
+.message-group.bubble-style-fufu :is(.message-file-icon,.message-location-mark,.message-travel-map-art,.message-audio-play) {
+  color:var(--bubble-theme-accent);
+  border:1px solid color-mix(in srgb,var(--bubble-theme-accent) 22%,transparent);
+  border-radius:35% 48% 38% 46%;
+  background:var(--bubble-theme-icon);
+  box-shadow:none;
+}
+
+.field-chat_bubble_style .preview-fufu > i { overflow:visible; }
+.field-chat_bubble_style .preview-fufu i span {
+  border:1px solid #725e45;
+  border-radius:13px 13px 13px 4px;
+  background:repeating-radial-gradient(ellipse at -8% 52%,transparent 0 8px,rgba(48,42,31,.13) 9px 11px,transparent 12px 18px),#d8c09c;
+  box-shadow:0 4px 9px rgba(48,40,29,.15);
+}
+.field-chat_bubble_style .preview-fufu > i::after {
+  position:absolute;
+  bottom:-9px;
+  left:-4px;
+  width:28px;
+  height:22px;
+  background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
+  content:"";
+  pointer-events:none;
+}
+
+html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.message-group.bubble-style-fufu) {
+  --bubble-skin-other-bg:repeating-radial-gradient(ellipse at -8% 52%,transparent 0 12px,rgba(27,24,19,.18) 13px 16px,transparent 17px 27px),linear-gradient(145deg,#b49b77,#8d7659);
+  --bubble-skin-other-color:#211d18;
+  --bubble-skin-other-border:#5e4e3b;
+  --bubble-skin-self-bg:repeating-radial-gradient(ellipse at 108% 52%,transparent 0 13px,rgba(222,190,147,.1) 14px 17px,transparent 18px 28px),linear-gradient(145deg,#484034,#28251f);
+}
+
+.avatar-frame-fufu-wave {
+  --avatar-frame-inset:10%;
+  --avatar-frame-paint:repeating-linear-gradient(118deg,#2e2a22 0 8%,#b99d75 8% 18%,#725f45 18% 25%,#d7bea0 25% 34%);
+}
+.avatar-frame-fufu-wave::before {
+  position:absolute;
+  z-index:1;
+  inset:3%;
+  display:block;
+  border:1px solid rgba(39,34,27,.64);
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,244,221,.42);
+  content:"" !important;
+}
+.avatar-frame-fufu-wave .avatar-frame-ornament > i {
+  position:absolute;
+  z-index:3;
+  display:none;
+  width:52%;
+  max-width:52%;
+  max-height:64%;
+  aspect-ratio:1;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter:drop-shadow(0 2px 2px rgba(39,31,22,.25));
+  pointer-events:none;
+}
+.avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child {
+  bottom:-5%;
+  left:-4%;
+  display:block;
+  background-image:url("/assets/fufu/fufu-greeting.webp");
+  animation:fufu-frame-high-five 2.7s ease-in-out infinite;
+  transform-origin:34% 100%;
+}
+
+.message-group.bubble-style-fufu .message-bubble-shell {
+  position:relative;
+  isolation:isolate;
+}
+.message-group.bubble-style-fufu .message-bubble-shell::after {
+  position:absolute;
+  z-index:5;
+  bottom:-18px;
+  left:-12px;
+  width:36px;
+  height:28px;
+  background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
+  content:"";
+  filter:drop-shadow(0 2px 2px rgba(39,31,22,.24));
+  animation:fufu-bubble-dash 5.6s cubic-bezier(.45,.05,.5,.95) infinite;
+  pointer-events:none;
+}
+
+@keyframes fufu-frame-high-five {
+  0%,100% { transform:translateY(1%) rotate(1deg); }
+  50% { transform:translateY(-4%) rotate(-2deg); }
+}
+@keyframes fufu-bubble-dash {
+  0% { left:-12px;opacity:0;transform:scale(.88); }
+  8% { opacity:1; }
+  68% { left:calc(100% - 24px);opacity:1;transform:scale(1); }
+  76%,100% { left:calc(100% - 18px);opacity:0;transform:scale(.92); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child { animation:none;transform:none; }
+  .message-group.bubble-style-fufu .message-bubble-shell::after { display:none; }
+}
 /* Character motion lab: real 3D skeleton prototype. */
 .character-lab-page{--lab-ink:#191b2b;min-height:100dvh;padding:26px clamp(18px,4vw,64px) 50px;color:var(--lab-ink);background:radial-gradient(circle at 16% 8%,rgba(255,226,124,.72),transparent 27%),radial-gradient(circle at 88% 15%,rgba(112,233,206,.58),transparent 24%),#f5f0e8}
 .character-lab-header{max-width:1280px;margin:0 auto 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}.character-lab-header span,.character-panel-heading span,.character-stage-meta,.character-motion-options button span{font:700 11px/1.2 "JetBrains Mono",monospace;letter-spacing:.14em}.character-lab-header h1{margin:8px 0 2px;font-size:clamp(30px,4vw,54px);line-height:1;letter-spacing:-.055em}.character-lab-header p,.character-panel-heading p{margin:8px 0 0;color:#697080}.character-lab-header a{flex:none;padding:11px 16px;color:inherit;font-weight:700;text-decoration:none;border:1px solid rgba(25,27,43,.18);border-radius:999px;background:rgba(255,255,255,.48)}

@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.03.06",
+  "id": "2026.08.03.07",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "Niko 动效位置优化",
+      "title": "Fufu 加入个性化家族",
       "items": [
-        "裁去奔跑动画的透明留白，让 Niko 的脚准确踩在气泡上边框",
-        "放大头像框中的挥手 Niko，使角色在不同头像尺寸下都更醒目"
+        "新增 Fufu 追风气泡，以暖沙棕、炭黑虎纹和橄榄绿呈现独立主题",
+        "Fufu 会沿气泡下沿短距离冲刺，并适配文字与多媒体消息",
+        "新增 Fufu 击掌头像框，抬爪动画会从头像边角探出"
       ]
     },
     "en": {
-      "title": "Refined Niko motion placement",
+      "title": "Fufu joins the personalization family",
       "items": [
-        "Cropped transparent padding from the run cycle so Niko's feet meet the bubble border",
-        "Enlarged the waving Niko in avatar frames for better visibility at every size"
+        "Added the Fufu Dash bubble with a sand, charcoal tabby, and olive visual identity",
+        "Fufu dashes along the lower edge across text and media messages",
+        "Added the Fufu High Five avatar frame with an animated raised paw"
       ]
     }
   }

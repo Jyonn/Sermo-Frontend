@@ -160,9 +160,9 @@ export interface UserMeDTO extends UserDTO {
   chat_background_uri?: string;
 }
 
-export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick";
+export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "dusk" | "comic" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "tidepool" | "forest" | "desert" | "snowfield" | "sakura" | "sunrise" | "midnight" | "rain" | "galaxy" | "aurora-sky" | "linen" | "terrazzo" | "blueprint" | "newsprint" | "hologram" | "arcade" | "jazz" | "spaceport" | "candy" | "noir-film" | "custom";
-export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "papercut" | "mechanical" | "niko-run";
+export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "papercut" | "mechanical" | "niko-run" | "fufu-wave";
 export type SquareOutfitStyle = "sunset" | "varsity" | "noir" | "cloud" | "raincoat" | "hanfu" | "utility" | "sailor";
 export type SquarePropStyle = "none" | "star" | "coffee" | "flag" | "camera" | "bouquet" | "umbrella" | "skateboard";
 export type SquareMotionStyle = "walk" | "bounce" | "float" | "dash" | "wave" | "dance" | "skate" | "tiptoe";
