@@ -9240,6 +9240,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
 .official-square-skin.skin-1 i { background: repeating-linear-gradient(0deg, #f8eee2 0 4px, #bd351e 4px 8px); }
 .official-square-skin.skin-2 i { background: linear-gradient(135deg, #eff7fa 0 62%, #9eb4d7 63%); }
 .official-square-skin.skin-3 i { background: linear-gradient(135deg, #2b1631 0 55%, #27a7de 56%); }
+.official-square-skin.skin-4 i { background: linear-gradient(135deg, #3074e9 0 52%, #d62b35 53%); }
 .official-square-skin.is-active i { transform: scale(.82); box-shadow: 0 0 0 4px rgba(255,255,255,.95), 0 0 0 6px rgba(37,17,48,.28); }
 .official-square-skin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 

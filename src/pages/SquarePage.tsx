@@ -203,9 +203,37 @@ function resolveOrbCollisions(orbs: OrbState[], lockedUserId: number | null) {
 }
 
 export default function SquarePage() {
-  const { session } = useAuth();
+  const { patchSessionUser, session } = useAuth();
   const { t } = useI18n();
-  return session?.user.official ? (
+  const [resolvedOfficial, setResolvedOfficial] = useState<boolean | null>(
+    typeof session?.user.official === "boolean" ? session.user.official : null
+  );
+
+  useEffect(() => {
+    if (!session || typeof session.user.official === "boolean") {
+      setResolvedOfficial(Boolean(session?.user.official));
+      return;
+    }
+    const controller = new AbortController();
+    api.getUserMe(controller.signal)
+      .then((user) => {
+        const official = Boolean(user.official);
+        patchSessionUser({ official });
+        setResolvedOfficial(official);
+      })
+      .catch(() => setResolvedOfficial(false));
+    return () => controller.abort();
+  }, [patchSessionUser, session?.user.official, session?.user.user_id]);
+
+  if (resolvedOfficial === null) {
+    return (
+      <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell official-square-shell">
+        <section className="official-square-prototype" aria-label={t("square.officialPrototype")} />
+      </AppChrome>
+    );
+  }
+
+  return resolvedOfficial ? (
     <Suspense
       fallback={(
         <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell official-square-shell">

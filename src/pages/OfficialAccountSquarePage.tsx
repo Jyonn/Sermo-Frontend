@@ -5,7 +5,7 @@ import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 
 const OFFICIAL_CHARACTER_SOURCE = `${import.meta.env.BASE_URL}rive/official-skin-demo.riv`;
-const SKIN_COUNT = 4;
+const SKIN_COUNT = 5;
 
 function readSavedSkin(userId?: number) {
   if (!userId) return 0;
@@ -20,8 +20,8 @@ export default function OfficialAccountSquarePage() {
   const [loadFailed, setLoadFailed] = useState(false);
   const { rive, RiveComponent } = useRive({
     src: OFFICIAL_CHARACTER_SOURCE,
-    artboard: "Character",
-    stateMachines: "Skin Demo",
+    artboard: "Skin Demo",
+    stateMachines: "Motion",
     autoplay: true,
     autoBind: true,
     layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),

@@ -1,21 +1,23 @@
 {
-  "id": "2026.08.03.01",
+  "id": "2026.08.03.02",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "官方账号启用独立 Rive 人物广场",
+      "title": "修复官方账号 Rive 人物加载",
       "items": [
         "官方账号进入广场时使用独立舞台，不再加载在线用户和旧人物系统",
-        "人物使用原始 Rive 文件持续播放原地行走动画",
-        "支持即时切换四套人物皮肤，并为每个官方账号记住当前选择"
+        "修正画板与状态机绑定，人物现在可以持续播放原地行走动画",
+        "支持即时切换五套人物皮肤，并为每个官方账号记住当前选择",
+        "旧会话会先确认官方身份，不再错误进入普通广场"
       ]
     },
     "en": {
-      "title": "Dedicated Rive character square for official accounts",
+      "title": "Fixed Rive character loading for official accounts",
       "items": [
         "Official accounts now enter a dedicated stage without loading online users or the legacy character system",
-        "The original Rive file continuously plays its walking-in-place animation",
-        "Four character skins can be switched instantly and remembered per official account"
+        "Correct artboard and state machine bindings now play the walking-in-place animation continuously",
+        "Five character skins can be switched instantly and remembered per official account",
+        "Legacy sessions now resolve official identity before choosing the square experience"
       ]
     }
   }
