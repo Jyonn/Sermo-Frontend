@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.02.21",
-  "publishedAt": "2026-08-02",
+  "id": "2026.08.03.01",
+  "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "官方账号启用全身动态人物原型",
+      "title": "官方账号启用独立 Rive 人物广场",
       "items": [
-        "官方账号改为无脸全身人物，不再使用头像式表情组件",
-        "头部、躯干、披风和两段式四肢独立分层，形成可扩展的角色骨架",
-        "人物方向、行走步态、披风摆动和点击招手会与广场交互同步"
+        "官方账号进入广场时使用独立舞台，不再加载在线用户和旧人物系统",
+        "人物使用原始 Rive 文件持续播放原地行走动画",
+        "支持即时切换四套人物皮肤，并为每个官方账号记住当前选择"
       ]
     },
     "en": {
-      "title": "Full-body animated prototype for official accounts",
+      "title": "Dedicated Rive character square for official accounts",
       "items": [
-        "Official accounts now use a faceless full-body character instead of an avatar expression widget",
-        "The head, torso, cape, and articulated limbs form an extensible layered character rig",
-        "Direction, walking gait, cape motion, and tap-to-wave feedback now follow plaza interactions"
+        "Official accounts now enter a dedicated stage without loading online users or the legacy character system",
+        "The original Rive file continuously plays its walking-in-place animation",
+        "Four character skins can be switched instantly and remembered per official account"
       ]
     }
   }

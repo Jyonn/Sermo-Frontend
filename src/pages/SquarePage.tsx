@@ -1,8 +1,7 @@
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
-import OfficialSquareCharacterPrototype from "../components/OfficialSquareCharacterPrototype";
 import { UserAvatar } from "../components/UserAvatar";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { FeedbackState } from "../components/FeedbackState";
@@ -21,6 +20,7 @@ import { SquareCharacterFigure } from "../components/SquareCharacterFigure";
 import plazaBackground from "../assets/square/plaza-waterfront.jpg";
 
 const MAX_ORBS = 20;
+const OfficialAccountSquarePage = lazy(() => import("./OfficialAccountSquarePage"));
 const CHARACTER_AREA_RATIO = 0.2;
 const CHARACTER_MIN_HEAD_SIZE = 38;
 const CHARACTER_MAX_HEAD_SIZE = 64;
@@ -203,6 +203,22 @@ function resolveOrbCollisions(orbs: OrbState[], lockedUserId: number | null) {
 }
 
 export default function SquarePage() {
+  const { session } = useAuth();
+  const { t } = useI18n();
+  return session?.user.official ? (
+    <Suspense
+      fallback={(
+        <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell official-square-shell">
+          <section className="official-square-prototype" aria-label={t("square.officialPrototype")} />
+        </AppChrome>
+      )}
+    >
+      <OfficialAccountSquarePage />
+    </Suspense>
+  ) : <CommunitySquarePage />;
+}
+
+function CommunitySquarePage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -568,14 +584,7 @@ export default function SquarePage() {
               }
               type="button"
             >
-              {orb.user.official ? (
-                <OfficialSquareCharacterPrototype
-                  active={interactingUserIds.includes(orb.user.user_id) || selectedUser?.user_id === orb.user.user_id}
-                  direction={orb.vx < 0 ? -1 : 1}
-                />
-              ) : (
-                <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
-              )}
+              <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
               {interactingUserIds.includes(orb.user.user_id) ? <span className="square-character-emote" aria-hidden="true">✦</span> : null}
               <span className="square-character-name">{orb.user.name}</span>
             </button>
@@ -594,11 +603,7 @@ export default function SquarePage() {
                 } as CSSProperties
               }
             >
-              {orb.user.official ? (
-                <OfficialSquareCharacterPrototype direction={orb.vx < 0 ? -1 : 1} />
-              ) : (
-                <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
-              )}
+              <SquareCharacterFigure avatarFrame={orb.user.avatar_frame_style} avatarUri={orb.user.avatar_uri} direction={orb.vx < 0 ? -1 : 1} isOnline={orb.user.is_alive} isVip={orb.user.is_permanent_vip} limb={orb.user.square_limb_style ?? "line"} motion={orb.user.square_motion_style ?? "walk"} name={orb.user.name} outfit={orb.user.square_outfit_style ?? "sunset"} prop={orb.user.square_prop_style ?? "none"} />
               <span className="square-character-name">{orb.user.name}</span>
             </div>
           ))}

@@ -9176,176 +9176,81 @@ html[data-theme="dark"] .personalization-bubble-stage {
   animation: square-emote-in 1.9s cubic-bezier(.22,1,.36,1) both;
 }
 
-.square-official-puppet {
-  --official-ink: #24162d;
-  --official-blue: #2e98d5;
-  --official-blue-deep: #2862bc;
-  --official-cape: #d4513f;
-  overflow: visible;
-  filter: drop-shadow(0 9px 8px rgba(25, 35, 31, 0.18));
+.official-square-shell .app-content,
+.official-square-shell .desktop-tab-content {
+  min-height: 100%;
 }
 
-.official-puppet-rig {
-  position: absolute;
-  inset: calc(var(--orb-size) * .08) calc(var(--orb-size) * .02) calc(var(--orb-size) * .12);
-  display: block;
-  transform-origin: center bottom;
-  animation: official-puppet-body 1.05s cubic-bezier(.45,.05,.55,.95) infinite alternate;
-}
-
-.official-puppet-head {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  z-index: 7;
-  width: calc(var(--orb-size) * .43);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 36% 28%, rgba(255,255,255,.18), transparent 27%),
-    var(--official-ink);
-  box-shadow: inset -4px -5px 0 rgba(5, 6, 10, .12);
-  transform: translateX(-50%);
-  animation: official-puppet-head 1.05s ease-in-out infinite alternate;
-}
-
-.official-puppet-torso {
-  position: absolute;
-  top: calc(var(--orb-size) * .48);
-  left: 50%;
-  z-index: 5;
-  width: calc(var(--orb-size) * .58);
-  height: calc(var(--orb-size) * .72);
+.official-square-prototype {
+  position: relative;
+  display: grid;
+  min-height: calc(100dvh - var(--app-bottom-nav-height, 76px));
   overflow: hidden;
-  border-radius: 38% 34% 22% 26%;
-  background: linear-gradient(125deg, var(--official-blue) 0 52%, var(--official-blue-deep) 53% 100%);
-  box-shadow: inset 3px 2px 0 rgba(126, 229, 233, .72);
-  transform: translateX(-50%) rotate(-2deg);
+  place-items: center;
+  background: #a278e8;
 }
 
-.official-puppet-sash {
-  position: absolute;
-  right: -22%;
-  bottom: 15%;
-  width: 145%;
-  height: 16%;
-  background: #e65848;
-  rotate: -4deg;
+.official-square-character-stage {
+  width: min(78vw, 620px);
+  height: min(76dvh, 720px);
 }
 
-.official-puppet-mark {
-  position: absolute;
-  top: 28%;
-  left: 50%;
-  color: rgba(238, 250, 242, .88);
-  font-size: calc(var(--orb-size) * .15);
-  font-style: normal;
-  font-weight: 900;
-  transform: translateX(-50%);
-}
-
-.official-puppet-cape {
-  position: absolute;
-  top: calc(var(--orb-size) * .55);
-  left: 50%;
-  z-index: 1;
-  width: calc(var(--orb-size) * .77);
-  height: calc(var(--orb-size) * .98);
-  clip-path: polygon(45% 0,100% 12%,78% 100%,0 82%,30% 13%);
-  background: linear-gradient(145deg, #e06147, #b8393a 74%);
-  filter: drop-shadow(-3px 5px 3px rgba(54, 29, 31, .18));
-  transform-origin: 52% 4%;
-  animation: official-puppet-cape 1.05s cubic-bezier(.45,.05,.55,.95) infinite alternate;
-}
-
-.official-puppet-arm,
-.official-puppet-leg {
-  position: absolute;
-  z-index: 4;
+.official-square-rive-character,
+.official-square-rive-character canvas {
   display: block;
-  width: calc(var(--orb-size) * .23);
-  transform-origin: 50% 10%;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.official-puppet-arm {
-  top: calc(var(--orb-size) * .53);
-  height: calc(var(--orb-size) * .78);
-}
-
-.official-puppet-arm.is-left { left: calc(50% - var(--orb-size) * .43); animation: official-puppet-arm-front 630ms ease-in-out infinite alternate; }
-.official-puppet-arm.is-right { left: calc(50% + var(--orb-size) * .20); animation: official-puppet-arm-back 630ms ease-in-out infinite alternate; }
-
-.official-puppet-leg {
-  top: calc(var(--orb-size) * 1.08);
-  z-index: 3;
-  height: calc(var(--orb-size) * .8);
-}
-
-.official-puppet-leg.is-left { left: calc(50% - var(--orb-size) * .29); animation: official-puppet-leg-front 630ms ease-in-out infinite alternate; }
-.official-puppet-leg.is-right { left: calc(50% + var(--orb-size) * .06); animation: official-puppet-leg-back 630ms ease-in-out infinite alternate; }
-
-.official-puppet-limb {
+.official-square-skin-switcher {
   position: absolute;
-  left: 50%;
-  display: block;
-  width: 100%;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+  display: flex;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,.38);
   border-radius: 999px;
-  transform: translateX(-50%);
-  transform-origin: 50% 8%;
+  background: rgba(38, 20, 61, .2);
+  backdrop-filter: blur(14px);
 }
 
-.official-puppet-arm .official-puppet-limb { background: linear-gradient(90deg, var(--official-blue), #37a9e5 62%, var(--official-blue-deep)); }
-.official-puppet-leg .official-puppet-limb { background: linear-gradient(90deg, var(--official-blue-deep), var(--official-blue) 68%); }
-.official-puppet-limb.is-upper { top: 0; height: 54%; }
-.official-puppet-limb.is-lower { top: 45%; height: 48%; rotate: var(--official-joint-angle, 5deg); }
-
-.official-puppet-joint {
-  position: absolute;
-  top: 44%;
-  left: 50%;
-  z-index: 2;
-  width: 82%;
-  aspect-ratio: 1;
+.official-square-skin {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  border: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--official-blue) 78%, #d8f2ee);
-  transform: translateX(-50%);
+  background: transparent;
+  cursor: pointer;
 }
 
-.official-puppet-end {
-  position: absolute;
-  top: 84%;
-  left: 50%;
-  z-index: 3;
+.official-square-skin i {
   display: block;
-  width: 104%;
-  height: 18%;
-  border-radius: 999px;
-  background: var(--official-ink);
-  transform: translateX(-50%);
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #39a8ee 0 55%, #ca1d16 56%);
+  box-shadow: 0 0 0 1px rgba(37, 17, 48, .2);
+  transition: transform 160ms ease-out, box-shadow 160ms ease-out;
 }
 
-.official-puppet-leg .official-puppet-end {
-  width: 122%;
-  height: 16%;
-  transform: translateX(-42%) rotate(-8deg);
+.official-square-skin.skin-1 i { background: repeating-linear-gradient(0deg, #f8eee2 0 4px, #bd351e 4px 8px); }
+.official-square-skin.skin-2 i { background: linear-gradient(135deg, #eff7fa 0 62%, #9eb4d7 63%); }
+.official-square-skin.skin-3 i { background: linear-gradient(135deg, #2b1631 0 55%, #27a7de 56%); }
+.official-square-skin.is-active i { transform: scale(.82); box-shadow: 0 0 0 4px rgba(255,255,255,.95), 0 0 0 6px rgba(37,17,48,.28); }
+.official-square-skin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.official-square-load-error {
+  margin: 0;
+  color: rgba(35, 16, 45, .82);
+  font-weight: 700;
 }
 
-.square-official-puppet.is-active .official-puppet-rig { animation: official-puppet-greet 620ms cubic-bezier(.22,1,.36,1); }
-.square-official-puppet.is-active .official-puppet-arm.is-right { animation: official-puppet-wave 210ms ease-in-out 3 alternate; }
-
-@keyframes official-puppet-body { from { translate: 0 0; rotate: -1.5deg; } to { translate: 0 calc(var(--orb-size) * -.04); rotate: 1.5deg; } }
-@keyframes official-puppet-head { from { translate: -50% 1px; rotate: 2deg; } to { translate: -50% -2px; rotate: -3deg; } }
-@keyframes official-puppet-cape { from { translate: -46% 0; rotate: 8deg; } to { translate: -55% 2px; rotate: -7deg; } }
-@keyframes official-puppet-arm-front { from { rotate: 31deg; } to { rotate: -35deg; } }
-@keyframes official-puppet-arm-back { from { rotate: -34deg; } to { rotate: 28deg; } }
-@keyframes official-puppet-leg-front { from { rotate: 26deg; } to { rotate: -25deg; } }
-@keyframes official-puppet-leg-back { from { rotate: -24deg; } to { rotate: 24deg; } }
-@keyframes official-puppet-greet { 42% { scale: 1.06; translate: 0 calc(var(--orb-size) * -.08); } }
-@keyframes official-puppet-wave { from { rotate: -115deg; } to { rotate: -151deg; } }
-
-@media (prefers-reduced-motion: reduce) {
-  .square-official-puppet *,
-  .square-official-puppet { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
+@media (min-width: 901px) {
+  .official-square-prototype { min-height: calc(100dvh - 32px); border-radius: 22px; }
 }
 
 .square-person-card-actions { flex-wrap: wrap; }
