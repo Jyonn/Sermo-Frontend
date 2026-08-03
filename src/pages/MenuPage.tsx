@@ -92,7 +92,7 @@ const personalizationOptions = {
     ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
     ["camera", "menu.frameCamera"],
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
-    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"],
+    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["vip", "menu.frameVip"],
   ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"], ["raincoat", "menu.outfitRaincoat"], ["hanfu", "menu.outfitHanfu"], ["utility", "menu.outfitUtility"], ["sailor", "menu.outfitSailor"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"], ["camera", "menu.propCamera"], ["bouquet", "menu.propBouquet"], ["umbrella", "menu.propUmbrella"], ["skateboard", "menu.propSkateboard"]],
@@ -128,7 +128,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
   { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["butterfly", "moon", "snowfall"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "vip"].includes(value)) },
 ];
 
 const chatBackgroundLevels: Record<Exclude<ChatBackgroundTheme, "custom">, number> = {
@@ -374,7 +374,9 @@ export default function MenuPage() {
   const canUseBubbleStyle = (style: ChatBubbleStyle) =>
     (vipOrLevelBubbleStyles.has(style) && permanentVip) || growthLevel >= (chatBubbleLevels[style] ?? 1);
   const canUseAvatarFrame = (frame: PersonalizationDTO["avatar_frame_style"]) =>
-    (vipOrLevelAvatarFrames.has(frame) && permanentVip) || growthLevel >= (avatarFrameLevels[frame] ?? 1);
+    (frame === "vip" && permanentVip)
+    || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
+    || (frame !== "vip" && growthLevel >= (avatarFrameLevels[frame] ?? 1));
   const canCustomizeNotificationMessage =
     Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip)
     || hasGrowthCapability("custom_notification_message", 10);
@@ -1223,6 +1225,10 @@ export default function MenuPage() {
       return;
     }
     if (avatarFrameChanged && !canUseAvatarFrame(personalizationDraft.avatar_frame_style)) {
+      if (personalizationDraft.avatar_frame_style === "vip") {
+        showToast(t("menu.vipBubbleOnly"), "error");
+        return;
+      }
       const level = avatarFrameLevels[personalizationDraft.avatar_frame_style] ?? 1;
       showToast(
         vipOrLevelAvatarFrames.has(personalizationDraft.avatar_frame_style)
@@ -2132,7 +2138,7 @@ export default function MenuPage() {
                       </i>
                       <strong>{t(label)}</strong>
                       {!canUseAvatarFrame(value) ? (
-                        <small>{vipOrLevelAvatarFrames.has(value) ? t("menu.levelOrVipUnlock", { level: avatarFrameLevels[value] ?? 1 }) : t("menu.levelUnlock", { level: avatarFrameLevels[value] ?? 1 })}</small>
+                        <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value) ? t("menu.levelOrVipUnlock", { level: avatarFrameLevels[value] ?? 1 }) : t("menu.levelUnlock", { level: avatarFrameLevels[value] ?? 1 })}</small>
                       ) : null}
                     </button>
                   ))}
