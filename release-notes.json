@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.23",
+  "id": "2026.08.03.24",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "气泡预览换上真实影像",
+      "title": "个性气泡胶囊补全",
       "items": [
-        "图片预览改用高分辨率实景照片",
-        "视频预览加入真实封面、电影化取景、播放标识和时长",
-        "预览媒体完全使用本地资源，不会触发无效网络请求"
+        "贴纸胶囊加入叠贴模切边、印刷文字和切割网格",
+        "积木胶囊加入凸点、拼装接缝和立体底座",
+        "VIP胶囊重绘为象牙金铭牌，并加入内嵌徽标与流光"
       ]
     },
     "en": {
-      "title": "Real imagery in bubble previews",
+      "title": "Completed personality bubble capsules",
       "items": [
-        "Image previews now use a high-resolution photographic scene",
-        "Video previews now include a real poster, cinematic crop, play mark, and duration",
-        "Preview media is fully local and no longer triggers invalid network requests"
+        "Sticker now features layered die-cut rims, print details, and a cutting grid",
+        "Toy Brick now shows studs, assembly seams, and a dimensional base",
+        "VIP is rebuilt as an ivory-gold plaque with an inset badge and glint"
       ]
     }
   }

@@ -7122,10 +7122,167 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   opacity:.72;
 }
 .field-chat_bubble_style .preview-vip i span {
-  border: 1px solid #d2a348;
-  border-radius: 13px;
-  background: linear-gradient(145deg, #265344, #17382f);
-  box-shadow: inset 0 0 0 1px rgba(255, 245, 199, 0.14), 0 4px 10px rgba(121, 82, 19, 0.18);
+  position:relative;
+  width:43px;
+  height:27px;
+  box-sizing:border-box;
+  border:1px solid #c9953c;
+  border-radius:14px;
+  background:
+    linear-gradient(112deg,transparent 0 28%,rgba(255,255,255,.86) 38%,transparent 49%) -24px 0/28px 100% no-repeat,
+    radial-gradient(circle at 78% 18%,rgba(255,255,255,.9),transparent 34%),
+    linear-gradient(145deg,#fffdf3,#f2dfae);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.92),0 3px 0 rgba(158,105,26,.2),0 5px 10px rgba(121,82,19,.14);
+  animation:personalization-vip-glint 4.5s ease-in-out infinite;
+}
+.field-chat_bubble_style .preview-vip > i {
+  overflow:visible;
+  background:radial-gradient(circle at 50% 52%,rgba(218,172,79,.18),transparent 48%),#f2efe7;
+}
+.field-chat_bubble_style .preview-vip > i::before {
+  position:absolute;
+  width:37px;
+  height:20px;
+  border:1px solid rgba(188,132,44,.23);
+  border-radius:50%;
+  content:"";
+  transform:rotate(-9deg);
+}
+.field-chat_bubble_style .preview-vip i span::before {
+  position:absolute;
+  z-index:2;
+  top:-5px;
+  left:5px;
+  padding:1px 5px;
+  color:#744313;
+  border:1px solid rgba(190,133,35,.55);
+  border-radius:4px;
+  background:linear-gradient(135deg,#fff4cf,#e7bd68);
+  box-shadow:0 2px 4px rgba(112,68,16,.16);
+  content:"VIP";
+  font:900 5px/1.15 var(--font-heading);
+  letter-spacing:.08em;
+}
+.field-chat_bubble_style .preview-vip i span::after {
+  position:absolute;
+  top:8px;
+  right:7px;
+  width:10px;
+  height:8px;
+  background:linear-gradient(#d5a64d,#9e681d);
+  clip-path:polygon(0 100%,5% 28%,28% 60%,49% 4%,69% 60%,95% 28%,100% 100%);
+  content:"";
+  opacity:.8;
+}
+
+.field-chat_bubble_style .preview-sticker > i {
+  overflow:visible;
+  background:
+    linear-gradient(rgba(49,92,78,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(49,92,78,.07) 1px,transparent 1px),
+    #e8f1ec;
+  background-size:8px 8px;
+}
+.field-chat_bubble_style .preview-sticker > i::before {
+  position:absolute;
+  width:31px;
+  height:20px;
+  border:3px solid #fff;
+  border-radius:11px;
+  background:#70d5b0;
+  box-shadow:0 0 0 1.5px #1f4d42,0 3px 0 rgba(39,87,75,.28);
+  content:"";
+  transform:translate(6px,-4px) rotate(7deg);
+}
+.field-chat_bubble_style .preview-sticker i span {
+  position:relative;
+  width:39px;
+  height:25px;
+  box-sizing:border-box;
+  border:3px solid #fff;
+  border-radius:13px;
+  background:#fff5b9;
+  box-shadow:0 0 0 1.5px #263c38,0 4px 0 rgba(45,60,56,.28);
+  transform:translate(-3px,2px) rotate(-4deg);
+}
+.field-chat_bubble_style .preview-sticker i span::before {
+  position:absolute;
+  top:5px;
+  left:7px;
+  color:#2f3934;
+  content:"HEY!";
+  font:900 6px/1 var(--font-heading);
+  letter-spacing:.04em;
+}
+.field-chat_bubble_style .preview-sticker i span::after {
+  position:absolute;
+  right:5px;
+  bottom:4px;
+  width:6px;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#e65f66;
+  box-shadow:inset 0 0 0 1px rgba(116,37,43,.18);
+  content:"";
+}
+
+.field-chat_bubble_style .preview-toybrick > i {
+  overflow:visible;
+  background:
+    linear-gradient(rgba(36,88,119,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(36,88,119,.07) 1px,transparent 1px),
+    #e7f0f3;
+  background-size:9px 9px;
+}
+.field-chat_bubble_style .preview-toybrick > i::before {
+  position:absolute;
+  bottom:8px;
+  width:45px;
+  height:8px;
+  border-radius:2px;
+  background:#f1cd4e;
+  box-shadow:inset 0 -3px rgba(158,120,27,.3),0 3px 0 rgba(105,79,21,.18);
+  content:"";
+}
+.field-chat_bubble_style .preview-toybrick i span {
+  position:relative;
+  width:38px;
+  height:23px;
+  box-sizing:border-box;
+  border:1px solid #19577f;
+  border-radius:4px;
+  background:linear-gradient(145deg,#55a2d0,#3b8ec4);
+  box-shadow:inset 0 -4px rgba(25,87,127,.24),0 4px 0 #225f85;
+  transform:translateY(-2px);
+}
+.field-chat_bubble_style .preview-toybrick i span::before {
+  position:absolute;
+  top:-5px;
+  left:4px;
+  width:7px;
+  height:5px;
+  border:1px solid #19577f;
+  border-bottom:0;
+  border-radius:50% 50% 2px 2px;
+  background:#68b0d8;
+  box-shadow:11px 0 0 #68b0d8,11px -1px 0 0 #19577f,22px 0 0 #68b0d8,22px -1px 0 0 #19577f;
+  content:"";
+}
+.field-chat_bubble_style .preview-toybrick i span::after {
+  position:absolute;
+  right:5px;
+  bottom:5px;
+  left:5px;
+  height:2px;
+  border-radius:2px;
+  background:rgba(235,250,255,.62);
+  box-shadow:0 -5px 0 rgba(235,250,255,.26);
+  content:"";
+}
+
+@keyframes personalization-vip-glint {
+  0%,58% { background-position:-24px 0,0 0,0 0; }
+  82%,100% { background-position:58px 0,0 0,0 0; }
 }
 
 .field-square_outfit_style .personalization-option > i > span,
