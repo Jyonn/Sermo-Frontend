@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.20",
+  "id": "2026.08.03.21",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "聊天气泡预览更轻量",
+      "title": "气泡样式缩略图补全",
       "items": [
-        "气泡预览模式取消展示聊天 Header 与底部输入框",
-        "整个预览区域最高不超过屏幕高度的 40%",
-        "不同类型消息继续在预览框内部滚动查看"
+        "打字机样式新增编号、墨带与纸张边缘缩略图",
+        "晨报样式新增报头、分栏和纸张纹理缩略图",
+        "小票样式新增锯齿纸边、金额行与条码缩略图"
       ]
     },
     "en": {
-      "title": "A lighter chat-bubble preview",
+      "title": "Complete bubble-style thumbnails",
       "items": [
-        "Bubble preview mode no longer shows the chat header or bottom composer",
-        "The complete preview is capped at 40% of the viewport height",
-        "All message types remain available through scrolling inside the preview"
+        "Typewriter now has a numbered paper-and-ribbon thumbnail",
+        "Morning News now shows a masthead, columns, and paper texture",
+        "Receipt now includes perforated edges, a total line, and a barcode"
       ]
     }
   }

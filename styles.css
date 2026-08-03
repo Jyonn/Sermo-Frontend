@@ -7020,6 +7020,102 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 .field-chat_bubble_style .preview-dragon i span { border: 1px solid #d3a84e; border-radius: 14px 14px 5px; background: linear-gradient(145deg, #176a58, #0d473e); box-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.16); }
 .field-chat_bubble_style .preview-bauhaus i span { border: 2px solid #18232c; border-radius: 3px 12px 3px 12px; background: radial-gradient(circle at 85% 20%, #d84638 0 5px, transparent 6px), linear-gradient(145deg, #e9c933, #f6e06b); box-shadow: 3px 3px 0 #1767a0; }
 .field-chat_bubble_style .preview-mosaic i span { border: 1px solid #3f8e94; border-radius: 12px 12px 5px; background: linear-gradient(135deg, rgba(37, 111, 123, 0.13) 25%, transparent 25%) 0 0 / 9px 9px, #fff9e9; box-shadow: 0 0 0 3px rgba(63, 142, 148, 0.18); }
+.field-chat_bubble_style :is(.preview-typewriter,.preview-newspaper,.preview-receipt) i span {
+  position:relative;
+  box-sizing:border-box;
+}
+.field-chat_bubble_style .preview-typewriter i span {
+  width:42px;
+  height:27px;
+  border:1px solid #625e55;
+  border-radius:3px 10px 10px 3px;
+  background:linear-gradient(90deg,#d9d1c0 0 4px,#f4efe4 4px);
+  box-shadow:2px 3px 0 rgba(73,67,57,.2);
+}
+.field-chat_bubble_style .preview-typewriter i span::before {
+  position:absolute;
+  top:5px;
+  left:8px;
+  color:#4d4942;
+  content:"A·01";
+  font:800 6px/1 "JetBrains Mono",monospace;
+  letter-spacing:.08em;
+}
+.field-chat_bubble_style .preview-typewriter i span::after {
+  position:absolute;
+  right:6px;
+  bottom:6px;
+  left:8px;
+  height:2px;
+  border-radius:99px;
+  background:#9c3f35;
+  box-shadow:0 4px 0 rgba(77,73,66,.24);
+  content:"";
+}
+.field-chat_bubble_style .preview-newspaper i span {
+  width:43px;
+  height:29px;
+  border:1px solid #292b28;
+  border-radius:1px;
+  background:radial-gradient(circle,rgba(20,20,20,.1) 0 1px,transparent 1.2px) 0 0/4px 4px,#f3f0e7;
+  box-shadow:inset 0 3px 0 #292b28,2px 3px 0 rgba(39,40,36,.15);
+}
+.field-chat_bubble_style .preview-newspaper i span::before {
+  position:absolute;
+  top:6px;
+  right:4px;
+  left:4px;
+  padding-bottom:2px;
+  color:#242622;
+  border-bottom:1px solid #242622;
+  content:"NEWS";
+  font:900 6px/1 Georgia,serif;
+  letter-spacing:.12em;
+  text-align:center;
+}
+.field-chat_bubble_style .preview-newspaper i span::after {
+  position:absolute;
+  right:5px;
+  bottom:5px;
+  left:5px;
+  height:7px;
+  background:repeating-linear-gradient(90deg,#777 0 1px,transparent 1px 4px),repeating-linear-gradient(0deg,#777 0 1px,transparent 1px 3px);
+  content:"";
+  opacity:.52;
+}
+.field-chat_bubble_style .preview-receipt i span {
+  width:32px;
+  height:36px;
+  border:0;
+  border-radius:0;
+  background:#fffdf3;
+  box-shadow:2px 4px 7px rgba(57,51,43,.18);
+  -webkit-mask:linear-gradient(#000 0 0) center/calc(100% - 6px) 100% no-repeat,radial-gradient(circle at left center,transparent 0 2px,#000 2.5px) left/6px 8px repeat-y,radial-gradient(circle at right center,transparent 0 2px,#000 2.5px) right/6px 8px repeat-y;
+  mask:linear-gradient(#000 0 0) center/calc(100% - 6px) 100% no-repeat,radial-gradient(circle at left center,transparent 0 2px,#000 2.5px) left/6px 8px repeat-y,radial-gradient(circle at right center,transparent 0 2px,#000 2.5px) right/6px 8px repeat-y;
+}
+.field-chat_bubble_style .preview-receipt i span::before {
+  position:absolute;
+  top:6px;
+  right:6px;
+  left:6px;
+  height:11px;
+  color:#383a35;
+  border-top:1px solid rgba(41,43,39,.35);
+  border-bottom:1px solid rgba(41,43,39,.35);
+  content:"¥ 18";
+  font:800 6px/11px "JetBrains Mono",monospace;
+  text-align:center;
+}
+.field-chat_bubble_style .preview-receipt i span::after {
+  position:absolute;
+  right:7px;
+  bottom:6px;
+  left:7px;
+  height:6px;
+  background:repeating-linear-gradient(90deg,#30322e 0 1px,transparent 1px 3px,#30322e 3px 5px,transparent 5px 7px);
+  content:"";
+  opacity:.72;
+}
 .field-chat_bubble_style .preview-vip i span {
   border: 1px solid #d2a348;
   border-radius: 13px;
