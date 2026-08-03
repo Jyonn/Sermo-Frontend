@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.14",
+  "id": "2026.08.03.15",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "Fufu 沿着气泡匀速奔跑",
+      "title": "猫咪头像框动画恢复",
       "items": [
-        "Fufu 现在紧贴实际气泡左下角起跑，不再从卡片外的远处出现",
-        "奔跑速度保持一致，气泡越长，完整跑过所需时间越长",
-        "文字、位置、文件、图片等不同消息类型共用同一轨道逻辑"
+        "修复样式优先级导致 Niko 与 Fufu 头像框动画被隐藏的问题",
+        "钻出、挥手或击掌、退回消失的完整 8 帧链路恢复展示",
+        "动画仍保持每 10 秒播放一次"
       ]
     },
     "en": {
-      "title": "Constant-speed Fufu bubble runs",
+      "title": "Cat avatar greetings restored",
       "items": [
-        "Fufu now starts at the actual bubble's lower-left edge instead of far outside location cards",
-        "Running speed stays constant, while wider bubbles naturally take longer to cross",
-        "Text, location, file, image, and other message types now share the same track logic"
+        "Fixed a style-specificity issue that hid the Niko and Fufu avatar-frame animations",
+        "The complete eight-frame peek, wave or high-five, and retreat sequence is visible again",
+        "The greeting continues to play once every 10 seconds"
       ]
     }
   }

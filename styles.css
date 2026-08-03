@@ -18991,7 +18991,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   pointer-events:none;
 }
 
-.avatar-frame-niko-run .avatar-frame-ornament > i:first-child {
+.user-avatar.has-avatar-frame .avatar-frame-niko-run .avatar-frame-ornament > i:first-child {
   right:auto;
   bottom:0;
   left:50%;
@@ -19039,7 +19039,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
+  .user-avatar.has-avatar-frame .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
   .message-group.bubble-style-niko .message-bubble-shell::after { display:none; }
 }
 
@@ -19169,7 +19169,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   opacity:0;
   pointer-events:none;
 }
-.avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child {
+.user-avatar.has-avatar-frame .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child {
   bottom:0;
   left:50%;
   display:block;
@@ -19214,7 +19214,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
+  .user-avatar.has-avatar-frame .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
   .fufu-bubble-runner { display:none!important; }
 }
 /* Character motion lab: real 3D skeleton prototype. */
