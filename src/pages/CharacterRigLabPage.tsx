@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { Application, Container, Graphics } from "pixi.js";
-import * as THREE from "three";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 type Variant = 0 | 1;
@@ -15,383 +13,160 @@ interface CharacterOptions {
   top: Variant;
 }
 
-const INITIAL_OPTIONS: CharacterOptions = {
-  cape: 0,
-  hat: 0,
-  motion: "moonwalk",
-  pants: 0,
-  shoes: 0,
-  top: 0,
-};
+const INITIAL_OPTIONS: CharacterOptions = { cape: 0, hat: 0, motion: "moonwalk", pants: 0, shoes: 0, top: 0 };
 
-const OPTION_GROUPS: Array<{
+const OUTFIT_GROUPS: Array<{
   key: keyof Omit<CharacterOptions, "motion">;
   label: string;
   values: [string, string];
 }> = [
-  { key: "hat", label: "头饰", values: ["贝雷帽", "星环"] },
-  { key: "top", label: "上衣", values: ["短夹克", "水手衫"] },
-  { key: "pants", label: "裤子", values: ["束脚裤", "运动裤"] },
-  { key: "shoes", label: "鞋子", values: ["短靴", "球鞋"] },
+  { key: "hat", label: "头饰", values: ["火焰盔", "星环帽"] },
+  { key: "top", label: "上衣", values: ["巡游服", "夜航夹克"] },
+  { key: "pants", label: "裤子", values: ["白色长裤", "靛蓝束裤"] },
+  { key: "shoes", label: "鞋子", values: ["圆头靴", "月面鞋"] },
   { key: "cape", label: "披风", values: ["长披风", "短斗篷"] },
 ];
 
-const COLORS = {
-  cape: [0xe14c43, 0xf2a93b],
-  hat: [0x243447, 0xf2c84b],
-  pants: [0x2878d0, 0x35326f],
-  shoes: [0x17212b, 0xf4efe3],
-  skin: 0x553044,
-  top: [0x39a9ee, 0x26b78f],
-} as const;
-
-function Choice({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) {
+function SegmentedControl({
+  active,
+  labels,
+  onChange,
+}: {
+  active: number;
+  labels: readonly [string, string];
+  onChange: (value: Variant) => void;
+}) {
   return (
-    <button className={`rig-lab-choice${active ? " is-active" : ""}`} onClick={onClick} type="button">
-      {children}
-    </button>
-  );
-}
-
-function OutfitControls({ options, setOptions }: { options: CharacterOptions; setOptions: React.Dispatch<React.SetStateAction<CharacterOptions>> }) {
-  return (
-    <div className="rig-lab-controls">
-      <div className="rig-lab-control-group is-motion">
-        <span>动作</span>
-        <div>
-          <Choice active={options.motion === "moonwalk"} onClick={() => setOptions((value) => ({ ...value, motion: "moonwalk" }))}>太空漫步</Choice>
-          <Choice active={options.motion === "wave"} onClick={() => setOptions((value) => ({ ...value, motion: "wave" }))}>挥手</Choice>
-        </div>
-      </div>
-      {OPTION_GROUPS.map((group) => (
-        <div className="rig-lab-control-group" key={group.key}>
-          <span>{group.label}</span>
-          <div>
-            {group.values.map((label, index) => (
-              <Choice
-                active={options[group.key] === index}
-                key={label}
-                onClick={() => setOptions((value) => ({ ...value, [group.key]: index as Variant }))}
-              >
-                {label}
-              </Choice>
-            ))}
-          </div>
-        </div>
+    <div className="motion-studio-segmented">
+      {labels.map((label, index) => (
+        <button className={active === index ? "is-active" : ""} key={label} onClick={() => onChange(index as Variant)} type="button">
+          {label}
+        </button>
       ))}
     </div>
   );
 }
 
-function SvgCharacter({ options }: { options: CharacterOptions }) {
+function MasterCharacter({ options }: { options: CharacterOptions }) {
   return (
-    <svg className={`rig-svg-character motion-${options.motion}`} viewBox="0 0 240 300" role="img" aria-label="SVG 骨骼人物">
-      <ellipse className="rig-shadow" cx="120" cy="272" rx="47" ry="9" />
-      <g className="rig-svg-body">
-        <path className={`rig-cape cape-${options.cape}`} d={options.cape ? "M91 109 Q55 143 67 226 Q96 213 113 178 L110 111Z" : "M91 108 Q46 157 57 247 Q94 229 116 180 L111 110Z"} />
-        <g className="rig-leg is-back">
-          <path className={`rig-pants pants-${options.pants}`} d="M112 185 L102 237" />
-          <path className={`rig-shoe shoes-${options.shoes}`} d={options.shoes ? "M103 233 q-13 9-22 2 q-3 9 5 13 h22z" : "M104 233 q-8 11-20 7 q-3 9 7 12 h18z"} />
+    <svg
+      className={`motion-master-character motion-${options.motion} hat-${options.hat} top-${options.top} pants-${options.pants} shoes-${options.shoes} cape-${options.cape}`}
+      viewBox="0 0 360 430"
+      role="img"
+      aria-label="侧面太空漫步人物母版"
+    >
+      <defs>
+        <linearGradient id="studio-cape" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#ff4f7d" />
+          <stop offset="1" stopColor="#e32058" />
+        </linearGradient>
+        <linearGradient id="studio-cape-alt" x1="0" x2="1">
+          <stop offset="0" stopColor="#ffbd3f" />
+          <stop offset="1" stopColor="#f37640" />
+        </linearGradient>
+        <filter id="studio-shadow" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="7" />
+        </filter>
+      </defs>
+
+      <ellipse className="motion-character-shadow" cx="182" cy="385" rx="70" ry="13" filter="url(#studio-shadow)" />
+
+      <g className="motion-character-rig">
+        <g className="motion-cape-bone">
+          <path className="motion-cape-shape" d={options.cape ? "M146 157 C102 173 79 218 91 287 C113 277 132 258 151 230 L166 169Z" : "M145 151 C83 176 51 241 62 339 C103 324 136 283 159 228 L168 164Z"} />
+          <path className="motion-cape-highlight" d={options.cape ? "M137 171 C108 190 101 223 105 258" : "M134 170 C91 201 79 260 83 308"} />
         </g>
-        <g className="rig-leg is-front">
-          <path className={`rig-pants pants-${options.pants}`} d="M128 185 L139 238" />
-          <path className={`rig-shoe shoes-${options.shoes}`} d={options.shoes ? "M137 234 q14 8 22 2 q4 9-4 13 h-22z" : "M137 234 q9 11 21 7 q3 9-7 12 h-18z"} />
+
+        <g className="motion-arm is-back">
+          <g className="motion-upper-arm"><path d="M148 174 C127 194 122 222 119 245" /></g>
+          <g className="motion-lower-arm"><path d="M119 244 C116 263 121 279 132 287" /><circle cx="133" cy="288" r="13" /></g>
         </g>
-        <g className="rig-arm is-back">
-          <path className={`rig-sleeve top-${options.top}`} d="M99 119 Q82 141 76 174" />
-          <circle className="rig-hand" cx="76" cy="176" r="8" />
+
+        <g className="motion-leg is-back">
+          <g className="motion-thigh"><path d="M165 278 C150 309 143 333 137 354" /></g>
+          <g className="motion-calf"><path d="M137 351 C129 369 126 377 126 384" /><path className="motion-shoe" d="M126 371 C111 376 98 388 104 398 C116 406 141 403 150 392 L148 379Z" /></g>
         </g>
-        <path className={`rig-torso top-${options.top}`} d={options.top ? "M97 111 Q120 101 143 113 L151 184 Q121 198 89 183Z" : "M98 110 Q120 102 142 112 L149 181 Q121 191 91 181Z"} />
-        {options.top ? <path className="rig-top-detail" d="M105 115 L137 177 M136 113 L103 176" /> : <path className="rig-top-detail" d="M106 115 L120 130 L136 114" />}
-        <g className="rig-arm is-front">
-          <path className={`rig-sleeve top-${options.top}`} d="M140 120 Q158 142 164 174" />
-          <circle className="rig-hand" cx="164" cy="176" r="8" />
+
+        <path className="motion-torso" d="M151 154 C180 137 218 147 235 174 C247 198 244 245 226 284 C205 299 171 297 150 277 C141 239 139 190 151 154Z" />
+        <path className="motion-jacket-panel" d="M180 154 C194 171 205 196 214 224" />
+        <path className="motion-belt" d="M151 258 C175 269 203 270 231 258" />
+        <circle className="motion-button is-one" cx="205" cy="184" r="6" />
+        <circle className="motion-button is-two" cx="216" cy="211" r="6" />
+        <circle className="motion-button is-three" cx="220" cy="240" r="6" />
+
+        <g className="motion-leg is-front">
+          <g className="motion-thigh"><path d="M207 281 C219 312 231 332 242 351" /></g>
+          <g className="motion-calf"><path d="M242 349 C252 365 256 375 255 384" /><path className="motion-shoe" d="M246 372 C253 368 266 373 280 388 C279 400 264 406 248 400 C238 393 236 383 246 372Z" /></g>
         </g>
-        <circle className="rig-head" cx="124" cy="82" r="29" />
-        <path className="rig-profile-nose" d="M150 76 q13 7 0 13z" />
-        {options.hat ? (
-          <g className="rig-hat-star"><ellipse cx="120" cy="48" rx="34" ry="9" /><ellipse cx="120" cy="48" rx="22" ry="5" /></g>
+
+        <g className="motion-arm is-front">
+          <g className="motion-upper-arm"><path d="M219 171 C239 186 254 205 265 224" /></g>
+          <g className="motion-lower-arm"><path d="M264 223 C275 239 278 252 277 266" /><circle cx="277" cy="270" r="13" /></g>
+        </g>
+
+        <path className="motion-neck" d="M169 151 C174 137 187 130 201 137 L210 154 C198 166 179 167 169 151Z" />
+        <path className="motion-head" d="M156 111 C154 77 179 54 208 59 C231 64 242 83 239 104 C237 119 226 131 210 139 C197 146 176 142 165 130 C159 124 156 117 156 111Z" />
+        <path className="motion-profile" d="M236 88 C248 92 254 99 244 105 C251 109 248 117 236 118Z" />
+
+        {options.hat === 0 ? (
+          <path className="motion-hat-flame" d="M158 108 C137 100 132 84 144 65 C158 43 151 20 180 15 C215 37 218 65 200 86 C186 102 173 109 158 108Z" />
         ) : (
-          <path className="rig-hat-beret" d="M91 67 Q94 36 126 38 Q151 40 153 59 Q124 53 91 67Z" />
+          <g className="motion-hat-orbit"><ellipse cx="195" cy="62" rx="54" ry="14" /><ellipse cx="195" cy="62" rx="35" ry="8" /></g>
         )}
       </g>
     </svg>
   );
 }
 
-function roundedRect(graphics: Graphics, x: number, y: number, width: number, height: number, radius: number, color: number) {
-  return graphics.roundRect(x, y, width, height, radius).fill(color);
-}
-
-function buildPixiCharacter(options: CharacterOptions, dataDriven = false) {
-  const root = new Container();
-  root.position.set(120, 260);
-
-  const shadow = new Graphics().ellipse(0, 4, 44, 8).fill({ color: 0x153b38, alpha: 0.16 });
-  root.addChild(shadow);
-
-  const body = new Container();
-  body.position.y = -72;
-  root.addChild(body);
-
-  const cape = new Graphics();
-  if (options.cape === 0) cape.moveTo(-22, -72).bezierCurveTo(-78, -18, -65, 65, -15, 80).lineTo(12, -20).closePath().fill(COLORS.cape[0]);
-  else cape.moveTo(-21, -70).bezierCurveTo(-62, -27, -45, 42, -10, 52).lineTo(12, -20).closePath().fill(COLORS.cape[1]);
-  body.addChild(cape);
-
-  const makeLeg = (side: -1 | 1) => {
-    const leg = new Container();
-    leg.position.set(side * 10, 24);
-    const lower = roundedRect(new Graphics(), -7, 0, 14, options.pants ? 58 : 52, 7, COLORS.pants[options.pants]);
-    const shoe = roundedRect(new Graphics(), side < 0 ? -18 : -4, 47, options.shoes ? 24 : 22, options.shoes ? 12 : 17, 6, COLORS.shoes[options.shoes]);
-    leg.addChild(lower, shoe);
-    body.addChild(leg);
-    return leg;
-  };
-  const backLeg = makeLeg(-1);
-  const frontLeg = makeLeg(1);
-
-  const torso = new Graphics();
-  roundedRect(torso, -31, -65, 62, 88, options.top ? 18 : 11, COLORS.top[options.top]);
-  if (options.top === 0) torso.moveTo(-13, -61).lineTo(0, -47).lineTo(13, -61).stroke({ color: 0xdaf4ff, width: 4 });
-  else {
-    torso.moveTo(-18, -54).lineTo(19, 13).stroke({ color: 0xf7f0d6, width: 5 });
-    torso.moveTo(18, -54).lineTo(-19, 13).stroke({ color: 0xf7f0d6, width: 5 });
-  }
-  body.addChild(torso);
-
-  const makeArm = (side: -1 | 1) => {
-    const arm = new Container();
-    arm.position.set(side * 27, -53);
-    const sleeve = roundedRect(new Graphics(), -7, 0, 14, 54, 7, COLORS.top[options.top]);
-    const hand = new Graphics().circle(0, 56, 8).fill(COLORS.skin);
-    arm.addChild(sleeve, hand);
-    body.addChild(arm);
-    return arm;
-  };
-  const backArm = makeArm(-1);
-  const frontArm = makeArm(1);
-
-  const head = new Graphics().circle(4, -96, 29).fill(COLORS.skin);
-  const nose = new Graphics().moveTo(30, -103).lineTo(42, -95).lineTo(30, -89).closePath().fill(COLORS.skin);
-  body.addChild(head, nose);
-  if (options.hat === 0) {
-    body.addChild(new Graphics().moveTo(-30, -108).bezierCurveTo(-26, -139, 24, -143, 34, -116).bezierCurveTo(6, -123, -12, -119, -30, -108).fill(COLORS.hat[0]));
-  } else {
-    body.addChild(new Graphics().ellipse(0, -129, 37, 10).stroke({ color: COLORS.hat[1], width: 6 }).ellipse(0, -129, 23, 5).stroke({ color: 0xfff1a8, width: 2 }));
-  }
-
-  root.onRender = () => {
-    const time = performance.now() / 1000;
-    const phase = Math.sin(time * (dataDriven ? 4.5 : 5.2));
-    if (options.motion === "moonwalk") {
-      const cycle = (time * 1.25) % 1;
-      const glide = cycle < 0.5 ? cycle * 2 : (1 - cycle) * 2;
-      body.x = -5 + glide * 10;
-      body.y = -72 + Math.sin(time * 5) * 2;
-      body.rotation = -0.07;
-      frontLeg.rotation = -0.18 + glide * 0.35;
-      backLeg.rotation = 0.24 - glide * 0.42;
-      frontLeg.scale.y = 0.92 + glide * 0.08;
-      backLeg.scale.y = 1 - glide * 0.08;
-      frontArm.rotation = 0.22 - phase * 0.12;
-      backArm.rotation = -0.18 + phase * 0.1;
-      cape.skew.x = -0.06 + phase * 0.02;
-    } else {
-      body.y = -72 + Math.sin(time * 2.4) * 2;
-      body.x = 0;
-      body.rotation = -0.03;
-      frontArm.rotation = -2.45 + Math.sin(time * 6) * 0.22;
-      backArm.rotation = 0.1;
-      frontLeg.rotation = 0.05;
-      backLeg.rotation = -0.05;
-      cape.skew.x = Math.sin(time * 2.4) * 0.025;
-    }
-  };
-  return root;
-}
-
-function PixiCharacter({ dataDriven = false, options }: { dataDriven?: boolean; options: CharacterOptions }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    let cancelled = false;
-    let initialized = false;
-    const app = new Application();
-    void app.init({ antialias: true, backgroundAlpha: 0, height: 300, preference: "webgl", resolution: Math.min(devicePixelRatio, 2), width: 240 }).then(() => {
-      initialized = true;
-      if (cancelled) {
-        app.destroy(true);
-        return;
-      }
-      app.canvas.setAttribute("aria-label", dataDriven ? "数据驱动骨骼人物" : "PixiJS 骨骼人物");
-      host.replaceChildren(app.canvas);
-      app.stage.addChild(buildPixiCharacter(options, dataDriven));
-    });
-    return () => {
-      cancelled = true;
-      if (initialized) app.destroy(true, { children: true });
-    };
-  }, [dataDriven, options]);
-
-  return <div className="rig-canvas-host" ref={hostRef} />;
-}
-
-function makeThreeMaterial(color: number) {
-  return new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
-}
-
-function ThreeCharacter({ options }: { options: CharacterOptions }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1.2, 1.2, 1.5, -1.5, 0.1, 20);
-    camera.position.z = 8;
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(240, 300, false);
-    host.replaceChildren(renderer.domElement);
-
-    const root = new THREE.Group();
-    scene.add(root);
-    const body = new THREE.Group();
-    body.position.y = 0.1;
-    root.add(body);
-    const plane = (width: number, height: number, color: number, radius = 0) => {
-      const geometry = radius ? new THREE.CircleGeometry(width / 2, 36) : new THREE.PlaneGeometry(width, height);
-      const mesh = new THREE.Mesh(geometry, makeThreeMaterial(color));
-      if (radius) mesh.scale.y = height / width;
-      return mesh;
-    };
-    const cape = plane(options.cape ? 0.72 : 0.9, options.cape ? 1.05 : 1.35, COLORS.cape[options.cape]);
-    cape.position.set(-0.22, -0.08, -0.5);
-    cape.rotation.z = options.cape ? -0.12 : -0.18;
-    body.add(cape);
-    const torso = plane(0.66, 0.9, COLORS.top[options.top], 1);
-    torso.position.z = 0.1;
-    body.add(torso);
-    const limb = (x: number, y: number, color: number, width: number, height: number, z: number) => {
-      const pivot = new THREE.Group();
-      pivot.position.set(x, y, z);
-      const mesh = plane(width, height, color, 1);
-      mesh.position.y = -height / 2;
-      pivot.add(mesh);
-      body.add(pivot);
-      return pivot;
-    };
-    const backArm = limb(-0.34, 0.32, COLORS.top[options.top], 0.16, 0.78, -0.1);
-    const frontArm = limb(0.34, 0.32, COLORS.top[options.top], 0.16, 0.78, 0.3);
-    const backLeg = limb(-0.16, -0.37, COLORS.pants[options.pants], 0.19, 0.82, -0.2);
-    const frontLeg = limb(0.16, -0.37, COLORS.pants[options.pants], 0.19, 0.82, 0.2);
-    [backLeg, frontLeg].forEach((leg, index) => {
-      const shoe = plane(options.shoes ? 0.28 : 0.25, options.shoes ? 0.14 : 0.2, COLORS.shoes[options.shoes], 1);
-      shoe.position.set(index ? 0.05 : -0.05, -0.82, 0.1);
-      leg.add(shoe);
-    });
-    const head = plane(0.58, 0.58, COLORS.skin, 1);
-    head.position.set(0.06, 0.78, 0.4);
-    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.28, 3), makeThreeMaterial(COLORS.skin));
-    nose.position.set(0.34, 0.78, 0.42);
-    nose.rotation.z = -Math.PI / 2;
-    body.add(head, nose);
-    const hat = options.hat === 0 ? plane(0.65, 0.24, COLORS.hat[0], 1) : new THREE.Mesh(new THREE.RingGeometry(0.25, 0.35, 48), makeThreeMaterial(COLORS.hat[1]));
-    hat.position.set(0, options.hat ? 1.12 : 1.04, 0.5);
-    if (!options.hat) hat.rotation.z = -0.12;
-    body.add(hat);
-
-    let frame = 0;
-    const clock = new THREE.Clock();
-    const animate = () => {
-      frame = requestAnimationFrame(animate);
-      const time = clock.getElapsedTime();
-      const phase = Math.sin(time * 5);
-      if (options.motion === "moonwalk") {
-        const cycle = (time * 1.25) % 1;
-        const glide = cycle < 0.5 ? cycle * 2 : (1 - cycle) * 2;
-        body.position.x = -0.05 + glide * 0.1;
-        body.position.y = 0.08 + Math.sin(time * 5) * 0.02;
-        body.rotation.z = -0.07;
-        frontLeg.rotation.z = -0.18 + glide * 0.35;
-        backLeg.rotation.z = 0.24 - glide * 0.42;
-        frontArm.rotation.z = 0.22 - phase * 0.12;
-        backArm.rotation.z = -0.18 + phase * 0.1;
-      } else {
-        body.position.y = 0.1 + Math.sin(time * 2.2) * 0.025;
-        body.position.x = 0;
-        body.rotation.z = -0.03;
-        frontArm.rotation.z = -2.5 + Math.sin(time * 6) * 0.2;
-        backArm.rotation.z = 0.1;
-        frontLeg.rotation.z = 0.05;
-        backLeg.rotation.z = -0.05;
-      }
-      cape.rotation.z = (options.cape ? -0.12 : -0.18) + Math.sin(time * 2.8) * 0.035;
-      renderer.render(scene, camera);
-    };
-    animate();
-    return () => {
-      cancelAnimationFrame(frame);
-      scene.traverse((object) => {
-        if (!(object instanceof THREE.Mesh)) return;
-        object.geometry.dispose();
-        const materials = Array.isArray(object.material) ? object.material : [object.material];
-        materials.forEach((material) => material.dispose());
-      });
-      renderer.dispose();
-    };
-  }, [options]);
-
-  return <div className="rig-canvas-host" ref={hostRef} />;
-}
-
-const DEMOS = [
-  { id: "svg", index: "01", title: "原生 SVG", subtitle: "零运行时依赖", note: "最轻，React 与样式控制直接；复杂蒙皮需要自研。" },
-  { id: "pixi", index: "02", title: "PixiJS", subtitle: "层级关节容器", note: "多人广场性能最好，换装和特效都容易扩展。" },
-  { id: "bones", index: "03", title: "数据骨骼", subtitle: "DragonBones / SkelForm 思路", note: "动作与皮肤彻底分离，但资产管线依赖专用编辑器。" },
-  { id: "three", index: "04", title: "Three.js", subtitle: "2.5D 骨骼舞台", note: "空间感和镜头能力强，对当前扁平人物略显过重。" },
+const PIPELINE = [
+  { index: "01", title: "视觉母版", state: "正在验收", copy: "轮廓、关节、服装裁片与动作节奏先形成唯一标准。" },
+  { index: "02", title: "PixiJS 移植", state: "下一步", copy: "保持相同矢量外观，验证多人同屏、换装和移动端帧率。" },
+  { index: "03", title: "数据骨骼移植", state: "待开始", copy: "接入蒙皮、IK 与动作混合，评估资产制作工作量。" },
 ] as const;
 
 export default function CharacterRigLabPage() {
   const [options, setOptions] = useState<CharacterOptions>(INITIAL_OPTIONS);
 
   return (
-    <main className="rig-lab-page">
-      <header className="rig-lab-header">
-        <div>
-          <span className="rig-lab-kicker">SERMO MOTION LAB · 01</span>
-          <h1>同一个人物，四种骨骼路线</h1>
-          <p>统一动作、统一换装，只比较渲染与资产结构。</p>
-        </div>
+    <main className="motion-studio-page">
+      <header className="motion-studio-header">
+        <div><span>SERMO CHARACTER STUDIO · PHASE 01</span><h1>先把一个人物做好</h1><p>母版没有通过，就不复制四份问题。</p></div>
         <Link to="/app/square">返回广场</Link>
       </header>
 
-      <section className="rig-lab-console" aria-label="人物控制台">
-        <OutfitControls options={options} setOptions={setOptions} />
+      <section className="motion-studio-workbench">
+        <div className="motion-studio-stage">
+          <div className="motion-studio-stage-label"><span>MASTER RIG</span><i>侧面 · 12 关节</i></div>
+          <MasterCharacter options={options} />
+          <div className="motion-studio-floor" aria-hidden="true" />
+          <div className="motion-studio-playback"><span /><b>{options.motion === "moonwalk" ? "太空漫步" : "挥手"}</b><i>2.4s LOOP</i></div>
+        </div>
+
+        <aside className="motion-studio-inspector">
+          <div className="motion-studio-inspector-head"><span>LOOK 01</span><h2>巡游者</h2><p>服装只是附件，动作属于骨架。</p></div>
+          <div className="motion-studio-field is-motion">
+            <label>动作</label>
+            <SegmentedControl
+              active={options.motion === "moonwalk" ? 0 : 1}
+              labels={["太空漫步", "挥手"]}
+              onChange={(value) => setOptions((current) => ({ ...current, motion: value ? "wave" : "moonwalk" }))}
+            />
+          </div>
+          {OUTFIT_GROUPS.map((group) => (
+            <div className="motion-studio-field" key={group.key}>
+              <label>{group.label}</label>
+              <SegmentedControl
+                active={options[group.key]}
+                labels={group.values}
+                onChange={(value) => setOptions((current) => ({ ...current, [group.key]: value }))}
+              />
+            </div>
+          ))}
+        </aside>
       </section>
 
-      <section className="rig-lab-grid">
-        {DEMOS.map((demo) => (
-          <article className={`rig-lab-demo is-${demo.id}`} key={demo.id}>
-            <header>
-              <span>{demo.index}</span>
-              <div><h2>{demo.title}</h2><p>{demo.subtitle}</p></div>
-              <i className="rig-lab-live">LIVE</i>
-            </header>
-            <div className="rig-lab-stage">
-              <span className="rig-lab-stage-grid" aria-hidden="true" />
-              {demo.id === "svg" ? <SvgCharacter options={options} /> : null}
-              {demo.id === "pixi" ? <PixiCharacter options={options} /> : null}
-              {demo.id === "bones" ? <PixiCharacter dataDriven options={options} /> : null}
-              {demo.id === "three" ? <ThreeCharacter options={options} /> : null}
-              <span className="rig-lab-floor" aria-hidden="true" />
-            </div>
-            <footer><p>{demo.note}</p><span>{demo.id === "svg" ? "~4 KB" : demo.id === "pixi" ? "WebGL 2D" : demo.id === "bones" ? "JSON + ATLAS" : "WebGL 3D"}</span></footer>
-          </article>
-        ))}
+      <section className="motion-studio-pipeline">
+        {PIPELINE.map((step) => <article key={step.index}><span>{step.index}</span><div><h2>{step.title}</h2><p>{step.copy}</p></div><i>{step.state}</i></article>)}
       </section>
     </main>
   );

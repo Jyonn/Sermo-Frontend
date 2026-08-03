@@ -18743,3 +18743,98 @@ html[data-theme="dark"] .chat-conversation-preview {
 @media (prefers-reduced-motion: reduce) {
   .rig-svg-character * { animation: none !important; }
 }
+
+/* Motion studio phase one: establish a single production-quality master rig. */
+.motion-studio-page {
+  min-height: 100dvh;
+  padding: clamp(22px, 4vw, 58px);
+  color: #20182b;
+  background: radial-gradient(circle at 8% 0, #ffe8a6 0, transparent 25%), #f6f1e8;
+  font-family: "Noto Sans SC", sans-serif;
+}
+.motion-studio-header { display:flex;align-items:flex-end;justify-content:space-between;max-width:1240px;margin:0 auto 28px; }
+.motion-studio-header span { color:#6c4dc2;font:700 11px/1.2 "JetBrains Mono",monospace;letter-spacing:.13em; }
+.motion-studio-header h1 { margin:9px 0 0;font-size:clamp(34px,5vw,68px);line-height:.98;letter-spacing:-.065em; }
+.motion-studio-header p { margin:13px 0 0;color:#7a7181;font-size:14px; }
+.motion-studio-header a { color:#20182b;font-size:13px;font-weight:800;text-decoration:none;border-bottom:1px solid; }
+.motion-studio-workbench { display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,.75fr);max-width:1240px;min-height:650px;margin:auto;overflow:hidden;border:1px solid rgba(32,24,43,.18);border-radius:30px;background:#fffaf1;box-shadow:0 30px 80px rgba(45,33,64,.12); }
+.motion-studio-stage { position:relative;display:grid;place-items:center;min-width:0;overflow:hidden;background:linear-gradient(135deg,#a985ef,#9870e4); }
+.motion-studio-stage::before { position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.16),transparent 35%),linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:auto,48px 48px,48px 48px;content:""; }
+.motion-studio-stage-label { position:absolute;z-index:2;top:25px;left:28px;display:flex;gap:12px;align-items:center;color:#fff; }
+.motion-studio-stage-label span { font:800 11px/1 "JetBrains Mono",monospace;letter-spacing:.12em; }
+.motion-studio-stage-label i { padding:6px 9px;border-radius:999px;background:rgba(39,20,62,.19);font-size:10px;font-style:normal; }
+.motion-master-character { position:relative;z-index:1;width:min(76%,480px);height:auto;overflow:visible;filter:drop-shadow(0 18px 18px rgba(39,20,62,.16)); }
+.motion-character-shadow { fill:rgba(35,19,50,.24); }
+.motion-character-rig,.motion-cape-bone,.motion-arm,.motion-upper-arm,.motion-lower-arm,.motion-leg,.motion-thigh,.motion-calf { transform-box:fill-box; }
+.motion-character-rig { transform-origin:50% 90%; }
+.motion-cape-bone { transform-origin:80% 18%; }
+.motion-cape-shape { fill:url(#studio-cape); }
+.motion-master-character.cape-1 .motion-cape-shape { fill:url(#studio-cape-alt); }
+.motion-cape-highlight { fill:none;stroke:rgba(255,255,255,.28);stroke-width:5;stroke-linecap:round; }
+.motion-arm path:not(.motion-shoe) { fill:none;stroke:#f9f6ee;stroke-width:30;stroke-linecap:round; }
+.motion-arm.is-back { opacity:.86; }
+.motion-arm circle { fill:#2b1435; }
+.motion-upper-arm { transform-origin:50% 8%; }
+.motion-lower-arm { transform-origin:50% 8%; }
+.motion-leg .motion-thigh>path,.motion-leg .motion-calf>path:first-child { fill:none;stroke:#f9f6ee;stroke-width:34;stroke-linecap:round; }
+.motion-master-character.pants-1 .motion-leg .motion-thigh>path,.motion-master-character.pants-1 .motion-leg .motion-calf>path:first-child { stroke:#24315f; }
+.motion-thigh { transform-origin:50% 5%; }
+.motion-calf { transform-origin:50% 5%; }
+.motion-shoe { fill:#2b1435; }
+.motion-master-character.shoes-1 .motion-shoe { fill:#e7e9f3;stroke:#2b1435;stroke-width:5; }
+.motion-torso { fill:#fffdf7;stroke:rgba(64,31,73,.12);stroke-width:2; }
+.motion-master-character.top-1 .motion-torso { fill:#24315f; }
+.motion-master-character.top-1 .motion-arm path:not(.motion-shoe) { stroke:#24315f; }
+.motion-jacket-panel,.motion-belt { fill:none;stroke:#e8a7d9;stroke-width:4;stroke-linecap:round; }
+.motion-master-character.top-1 :is(.motion-jacket-panel,.motion-belt) { stroke:#7bd5d1; }
+.motion-button { fill:#ff9714; }
+.motion-master-character.top-1 .motion-button { fill:#7bd5d1; }
+.motion-neck { fill:#ff9c13; }
+.motion-head,.motion-profile { fill:#2b1435; }
+.motion-hat-flame { fill:#ff087b;stroke:rgba(255,255,255,.24);stroke-width:4; }
+.motion-hat-orbit ellipse:first-child { fill:none;stroke:#ffd148;stroke-width:11; }
+.motion-hat-orbit ellipse:last-child { fill:none;stroke:#fff3a7;stroke-width:3; }
+.motion-studio-floor { position:absolute;bottom:78px;width:50%;height:1px;background:rgba(255,255,255,.26); }
+.motion-studio-playback { position:absolute;right:24px;bottom:22px;left:24px;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;color:#fff; }
+.motion-studio-playback>span { height:2px;overflow:hidden;background:rgba(255,255,255,.25); }
+.motion-studio-playback>span::after { display:block;width:38%;height:100%;background:#fff;content:"";animation:motion-progress 2.4s linear infinite; }
+.motion-studio-playback b { font-size:11px; }.motion-studio-playback i { opacity:.65;font:700 9px/1 "JetBrains Mono",monospace;font-style:normal; }
+.motion-studio-inspector { padding:28px 24px;background:#fffaf1; }
+.motion-studio-inspector-head { padding-bottom:22px;border-bottom:1px solid rgba(32,24,43,.12); }
+.motion-studio-inspector-head span { color:#d94f68;font:800 10px/1 "JetBrains Mono",monospace;letter-spacing:.12em; }
+.motion-studio-inspector-head h2 { margin:7px 0 4px;font-size:27px;letter-spacing:-.04em; }.motion-studio-inspector-head p { margin:0;color:#857c88;font-size:12px; }
+.motion-studio-field { margin-top:18px; }.motion-studio-field label { display:block;margin:0 0 7px 3px;color:#736979;font-size:11px;font-weight:800; }
+.motion-studio-segmented { display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:13px;background:#eee8df; }
+.motion-studio-segmented button { min-height:38px;border:0;border-radius:10px;color:#746a77;background:transparent;font:700 12px/1 "Noto Sans SC",sans-serif;cursor:pointer;transition:transform .18s ease,background .18s ease,color .18s ease; }
+.motion-studio-segmented button:active { transform:scale(.97); }.motion-studio-segmented button.is-active { color:#fff;background:#2d2137;box-shadow:0 4px 12px rgba(45,33,55,.18); }
+.motion-studio-field.is-motion .motion-studio-segmented button.is-active { background:#e95461; }
+.motion-studio-pipeline { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:1240px;margin:14px auto 0; }
+.motion-studio-pipeline article { display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:18px;border:1px solid rgba(32,24,43,.13);border-radius:18px;background:rgba(255,250,241,.82); }
+.motion-studio-pipeline article>span { color:#e95461;font:800 11px/1 "JetBrains Mono",monospace; }.motion-studio-pipeline h2 { margin:0;font-size:14px; }.motion-studio-pipeline p { margin:5px 0 0;color:#7b727e;font-size:11px;line-height:1.5; }.motion-studio-pipeline i { color:#5d4d75;font-size:10px;font-style:normal;font-weight:800; }
+
+.motion-master-character.motion-moonwalk .motion-character-rig { animation:master-moon-body 2.4s cubic-bezier(.45,.05,.55,.95) infinite; }
+.motion-master-character.motion-moonwalk .motion-cape-bone { animation:master-moon-cape 2.4s ease-in-out infinite; }
+.motion-master-character.motion-moonwalk .motion-leg.is-front .motion-thigh { animation:master-moon-front-thigh 2.4s cubic-bezier(.45,.05,.55,.95) infinite; }
+.motion-master-character.motion-moonwalk .motion-leg.is-front .motion-calf { animation:master-moon-front-calf 2.4s cubic-bezier(.45,.05,.55,.95) infinite; }
+.motion-master-character.motion-moonwalk .motion-leg.is-back .motion-thigh { animation:master-moon-back-thigh 2.4s cubic-bezier(.45,.05,.55,.95) infinite; }
+.motion-master-character.motion-moonwalk .motion-leg.is-back .motion-calf { animation:master-moon-back-calf 2.4s cubic-bezier(.45,.05,.55,.95) infinite; }
+.motion-master-character.motion-moonwalk .motion-arm.is-front .motion-upper-arm { animation:master-moon-arm 2.4s ease-in-out infinite; }
+.motion-master-character.motion-moonwalk .motion-arm.is-back .motion-upper-arm { animation:master-moon-arm-back 2.4s ease-in-out infinite; }
+.motion-master-character.motion-wave .motion-character-rig { animation:master-wave-body 1.8s ease-in-out infinite; }
+.motion-master-character.motion-wave .motion-arm.is-front .motion-upper-arm { animation:master-wave-upper 1.8s ease-in-out infinite; }
+.motion-master-character.motion-wave .motion-arm.is-front .motion-lower-arm { animation:master-wave-lower .45s ease-in-out infinite alternate; }
+.motion-master-character.motion-wave .motion-cape-bone { animation:master-moon-cape 2.6s ease-in-out infinite; }
+@keyframes master-moon-body { 0%,100%{transform:translate(12px,0) rotate(-5deg)}25%{transform:translate(1px,-5px) rotate(-6deg)}50%{transform:translate(-12px,0) rotate(-4deg)}75%{transform:translate(0,-4px) rotate(-6deg)} }
+@keyframes master-moon-cape { 0%,100%{transform:rotate(-3deg) skewX(-4deg)}50%{transform:rotate(2deg) skewX(4deg)} }
+@keyframes master-moon-front-thigh { 0%,100%{transform:translateX(18px) rotate(13deg)}50%{transform:translateX(-22px) rotate(-14deg)} }
+@keyframes master-moon-front-calf { 0%,100%{transform:rotate(-8deg) translateY(-2px)}45%{transform:rotate(13deg) translateY(5px)}50%{transform:rotate(20deg) translateY(8px)} }
+@keyframes master-moon-back-thigh { 0%,100%{transform:translateX(-20px) rotate(-12deg)}50%{transform:translateX(18px) rotate(14deg)} }
+@keyframes master-moon-back-calf { 0%,100%{transform:rotate(18deg) translateY(8px)}50%{transform:rotate(-8deg) translateY(-2px)} }
+@keyframes master-moon-arm { 0%,100%{transform:rotate(-9deg)}50%{transform:rotate(7deg)} }
+@keyframes master-moon-arm-back { 0%,100%{transform:rotate(8deg)}50%{transform:rotate(-7deg)} }
+@keyframes master-wave-body { 0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(0)} }
+@keyframes master-wave-upper { 0%,100%{transform:rotate(-105deg)}50%{transform:rotate(-112deg)} }
+@keyframes master-wave-lower { from{transform:rotate(-35deg)}to{transform:rotate(12deg)} }
+@keyframes motion-progress { from{transform:translateX(-100%)}to{transform:translateX(265%)} }
+@media(max-width:800px){.motion-studio-page{padding:20px 12px 36px}.motion-studio-workbench{grid-template-columns:1fr}.motion-studio-stage{min-height:500px}.motion-studio-inspector{padding:22px 16px}.motion-studio-pipeline{grid-template-columns:1fr}.motion-studio-header h1{font-size:38px}.motion-studio-header p{max-width:260px}.motion-master-character{width:min(82%,390px)}}
+@media(prefers-reduced-motion:reduce){.motion-master-character *,.motion-studio-playback>span::after{animation:none!important}}
