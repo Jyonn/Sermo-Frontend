@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.03.08",
+  "id": "2026.08.03.09",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "IP 气泡分组更自然",
+      "title": "个性化改为分级开放",
       "items": [
-        "连续消息合并时，Niko 只在第一条气泡上方出现",
-        "连续消息合并时，Fufu 只在最后一条气泡下方出现"
+        "聊天背景不再统一要求 LV8，基础背景、气泡与头像框现在直接可用",
+        "更多个性化主题会随 LV4 至 LV12 逐步解锁，自定义上传背景保留 LV8",
+        "Niko 与 Fufu 主题需要永久 VIP 或达到 LV16"
       ]
     },
     "en": {
-      "title": "More natural grouped IP bubbles",
+      "title": "Tiered personalization access",
       "items": [
-        "Niko now appears only above the first bubble in a grouped conversation",
-        "Fufu now appears only below the final bubble in a grouped conversation"
+        "Chat backgrounds no longer require LV8 as a whole; basic backgrounds, bubbles, and frames are free",
+        "More themes unlock progressively from LV4 to LV12, while custom background uploads remain at LV8",
+        "Niko and Fufu themes require Lifetime VIP or LV16"
       ]
     }
   }

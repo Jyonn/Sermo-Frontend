@@ -6186,6 +6186,19 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   box-shadow: inset 0 0 0 1px rgba(8, 119, 81, 0.08);
 }
 
+.personalization-option.is-locked:not(.is-selected),
+.chat-background-choice.is-locked:not(.is-selected) {
+  opacity:.72;
+}
+
+.chat-background-choice > small {
+  min-height:16px;
+  padding-left:2px;
+  color:var(--text-muted);
+  font-size:.58rem;
+  font-weight:750;
+}
+
 .personalization-editor {
   display: grid;
   gap: 20px;
