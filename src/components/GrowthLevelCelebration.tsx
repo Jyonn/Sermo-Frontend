@@ -74,7 +74,9 @@ export function GrowthLevelCelebration() {
   if (!growth || !pendingLevel || !level) return null;
 
   const isLastPendingLevel = pendingLevel === growth.level;
-  const unlocks = level.unlocks.length ? level.unlocks : [t("growth.defaultUnlock")];
+  const unlocks = level.rewards?.length
+    ? level.rewards.map((reward) => ({ id: reward.id, title: reward.title, rarity: reward.rarity }))
+    : [{ id: "default", title: t("growth.defaultUnlock"), rarity: "common" }];
 
   const acknowledge = async () => {
     if (acknowledging) return;
@@ -124,9 +126,9 @@ export function GrowthLevelCelebration() {
           <p>{t("growth.unlocked")}</p>
           <div>
             {unlocks.map((unlock, index) => (
-              <span key={unlock} style={{ "--unlock-index": index } as CSSProperties}>
+              <span className={`is-${unlock.rarity}`} key={unlock.id} style={{ "--unlock-index": index } as CSSProperties}>
                 <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
-                <strong>{unlock}</strong>
+                <strong>{unlock.title}</strong>
               </span>
             ))}
           </div>

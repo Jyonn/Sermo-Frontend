@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.1",
+  "id": "2026.08.04.2",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "Fufu 奔跑轨迹归位",
+      "title": "成长体系焕新",
       "items": [
-        "Fufu 的奔跑坐标改为以居中气泡为基准",
-        "角色只沿气泡下边框移动，不再从选项卡左下角出现",
-        "扬尘轨迹同步收拢至气泡宽度"
+        "成长值按新版有效事件重新核算，异常与过期记录不再计分",
+        "18 个等级现在逐项展示能力、背景、气泡和头像框奖励",
+        "每日有效互动上限调整为 40，升级节奏与奖励路线同步更新"
       ]
     },
     "en": {
-      "title": "Re-aligned Fufu's capsule run",
+      "title": "A rebuilt growth journey",
       "items": [
-        "Fufu's run is now anchored to the centered bubble",
-        "The character stays on the lower bubble edge instead of entering from the card corner",
-        "The dust trail is constrained to the bubble width"
+        "Growth is recalculated from valid events under the new rules",
+        "All 18 levels now show their exact abilities and cosmetic rewards",
+        "The verified daily activity cap is now 40 points"
       ]
     }
   }

@@ -51,24 +51,6 @@ const emptyPrefs: NotificationPreferences = {
 };
 
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
-const growthLevelScores = [0, 20, 45, 80, 130, 200, 300, 440, 620, 850, 1150, 1530, 2000, 2580, 3300, 4180, 5250, 6550];
-const growthLevelUnlockKeys: Record<number, TranslationKey[]> = {
-  1: ["growth.unlockBasic", "growth.unlockBasicPersonalization"],
-  2: ["growth.unlockImages"],
-  3: ["growth.unlockAudioLocation", "growth.unlockLevelTag"],
-  4: ["growth.unlockCustomAvatar", "growth.unlockCreateGroup", "growth.unlockPersonalizationTierOne"],
-  5: ["growth.unlockVideo", "growth.unlockGroupName", "growth.unlockAnnualNickname"],
-  6: ["growth.unlockWelcome", "growth.unlockPlazaGreeting", "growth.unlockMonthlyNickname", "growth.unlockShowcase", "growth.unlockPersonalizationTierTwo"],
-  7: ["growth.unlockOnlineReminder", "growth.unlockWeeklyNickname"],
-  8: ["growth.unlockAudioDownload", "growth.unlockChatBackground", "growth.unlockPersonalizationTierThree"],
-  10: ["growth.unlockPlazaHalo", "growth.unlockNotificationText", "growth.unlockPersonalizationTierFour"],
-  12: ["growth.unlockProfileTheme", "growth.unlockPersonalizationTierFive"],
-  14: ["growth.unlockMotionTrail"],
-  15: ["growth.unlockEntrance"],
-  16: ["growth.unlockReport", "growth.unlockIpThemes"],
-  17: ["growth.unlockRareFrame"],
-  18: ["growth.unlockFinalBadge"],
-};
 const personalizationOptions = {
   chat_bubble_style: [
     ["default", "menu.styleDefault"],
@@ -130,34 +112,6 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "vip"].includes(value)) },
 ];
-
-const chatBackgroundLevels: Record<Exclude<ChatBackgroundTheme, "custom">, number> = {
-  default: 1, paper: 1, mint: 1, dusk: 1,
-  comic: 4, zen: 4,
-  hero: 6, dragon: 6, bauhaus: 6, mosaic: 6,
-  tidepool: 8, forest: 8, desert: 8, snowfield: 8, sakura: 8,
-  sunrise: 10, midnight: 10, rain: 10, galaxy: 10, "aurora-sky": 10,
-  linen: 10, terrazzo: 10, blueprint: 10, newsprint: 10, hologram: 10,
-  arcade: 12, jazz: 12, spaceport: 12, candy: 12, "noir-film": 12,
-};
-
-const chatBubbleLevels: Partial<Record<ChatBubbleStyle, number>> = {
-  default: 1, comic: 1,
-  typewriter: 4, sticker: 4,
-  zen: 6, newspaper: 6, toybrick: 6,
-  hero: 8, bauhaus: 8, receipt: 8,
-  dragon: 10, mosaic: 10,
-  niko: 16, fufu: 16,
-};
-
-const avatarFrameLevels: Partial<Record<PersonalizationDTO["avatar_frame_style"], number>> = {
-  none: 1, orbit: 1, polaroid: 1,
-  camera: 4, soundwave: 4,
-  aurora: 6, butterfly: 6,
-  moon: 8, snowfall: 8, papercut: 8,
-  portal: 10, comet: 10, mechanical: 10,
-  "niko-run": 16, "fufu-wave": 16,
-};
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
@@ -370,13 +324,15 @@ export default function MenuPage() {
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const growthLevel = me?.growth?.level ?? 1;
   const permanentVip = Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip);
+  const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
+    me?.growth?.levels?.find((item) => item.rewards?.some((reward) => reward.category === category && reward.asset_key === assetKey))?.level ?? 1;
   const canCustomizeChatBackground = hasGrowthCapability("custom_chat_background", 8);
   const canUseBubbleStyle = (style: ChatBubbleStyle) =>
-    (vipOrLevelBubbleStyles.has(style) && permanentVip) || growthLevel >= (chatBubbleLevels[style] ?? 1);
+    (vipOrLevelBubbleStyles.has(style) && permanentVip) || growthLevel >= rewardLevel("bubble", style);
   const canUseAvatarFrame = (frame: PersonalizationDTO["avatar_frame_style"]) =>
     (frame === "vip" && permanentVip)
     || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
-    || (frame !== "vip" && growthLevel >= (avatarFrameLevels[frame] ?? 1));
+    || (frame !== "vip" && growthLevel >= rewardLevel("frame", frame));
   const canCustomizeNotificationMessage =
     Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip)
     || hasGrowthCapability("custom_notification_message", 10);
@@ -1168,7 +1124,7 @@ export default function MenuPage() {
 
   const saveChatBackgroundTheme = async () => {
     if (chatBackgroundDraft === "custom") return;
-    const requiredLevel = chatBackgroundLevels[chatBackgroundDraft];
+    const requiredLevel = rewardLevel("background", chatBackgroundDraft);
     if (growthLevel < requiredLevel) {
       showToast(t("background.levelRequired", { level: requiredLevel }), "error");
       return;
@@ -1215,7 +1171,7 @@ export default function MenuPage() {
       return;
     }
     if (bubbleChanged && !canUseBubbleStyle(personalizationDraft.chat_bubble_style)) {
-      const level = chatBubbleLevels[personalizationDraft.chat_bubble_style] ?? 1;
+      const level = rewardLevel("bubble", personalizationDraft.chat_bubble_style);
       showToast(
         vipOrLevelBubbleStyles.has(personalizationDraft.chat_bubble_style)
           ? t("menu.levelOrVipUnlock", { level })
@@ -1229,7 +1185,7 @@ export default function MenuPage() {
         showToast(t("menu.vipBubbleOnly"), "error");
         return;
       }
-      const level = avatarFrameLevels[personalizationDraft.avatar_frame_style] ?? 1;
+      const level = rewardLevel("frame", personalizationDraft.avatar_frame_style);
       showToast(
         vipOrLevelAvatarFrames.has(personalizationDraft.avatar_frame_style)
           ? t("menu.levelOrVipUnlock", { level })
@@ -1370,13 +1326,7 @@ export default function MenuPage() {
     const value = (me?.welcome_message ?? session?.user?.welcome_message ?? "").trim();
     return value || t("profile.noWelcome");
   }, [me?.welcome_message, session?.user?.welcome_message]);
-  const growthLevels = me?.growth?.levels ?? growthLevelScores.map((score, index) => ({
-    level: index + 1,
-    name: space?.level_names?.[index] ?? `Lv.${index + 1}`,
-    score,
-    unlocks: (growthLevelUnlockKeys[index + 1] ?? []).map((key) => t(key)),
-    unlocked: (me?.growth?.level ?? 1) >= index + 1,
-  }));
+  const growthLevels = me?.growth?.levels ?? [];
 
   useEffect(() => {
     if (!growthLevelsOpen) return;
@@ -1713,13 +1663,13 @@ export default function MenuPage() {
           </button>
           <section className="growth-daily-card">
             <div className="growth-daily-copy">
-              <strong>{t("growth.todayChat")}</strong>
+              <strong>{t("growth.todayInteraction")}</strong>
               <span>{t("growth.daily")}</span>
             </div>
             <div className="growth-daily-meter">
-              <i style={{ transform: `scaleX(${Math.min(1, (me?.growth?.daily_chat?.earned ?? 0) / Math.max(1, me?.growth?.daily_chat?.limit ?? 20))})` }} />
+              <i style={{ transform: `scaleX(${Math.min(1, (me?.growth?.daily?.earned ?? 0) / Math.max(1, me?.growth?.daily?.limit ?? 40))})` }} />
             </div>
-            <b>{me?.growth?.daily_chat?.earned ?? 0}<small>/{me?.growth?.daily_chat?.limit ?? 20}</small></b>
+            <b>{me?.growth?.daily?.earned ?? 0}<small>/{me?.growth?.daily?.limit ?? 40}</small></b>
           </section>
           <section className="growth-drawer-section">
             <h3>{t("growth.explore")}</h3>
@@ -1813,9 +1763,9 @@ export default function MenuPage() {
               <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>{t("growth.points")}</small></strong>
             </div>
             <div className="growth-level-detail-unlocks">
-              {(growthLevels[activeGrowthGuideLevel - 1]?.unlocks ?? []).length ? (
-                growthLevels[activeGrowthGuideLevel - 1].unlocks.map((unlock) => (
-                  <span key={unlock}><i />{unlock}</span>
+              {(growthLevels[activeGrowthGuideLevel - 1]?.rewards ?? []).length ? (
+                growthLevels[activeGrowthGuideLevel - 1].rewards.map((reward) => (
+                  <span className={`is-${reward.rarity}`} key={reward.id}><i />{reward.title}{reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}</span>
                 ))
               ) : (
                 <span><i />{t("growth.stage")}</span>
@@ -2007,7 +1957,7 @@ export default function MenuPage() {
                 {section.items.map(([theme, label]) => (
                   <button
                     aria-pressed={chatBackgroundDraft === theme}
-                    className={`chat-background-choice theme-${theme}${chatBackgroundDraft === theme ? " is-selected" : ""}${growthLevel < chatBackgroundLevels[theme] ? " is-locked" : ""}`}
+                    className={`chat-background-choice theme-${theme}${chatBackgroundDraft === theme ? " is-selected" : ""}${growthLevel < rewardLevel("background", theme) ? " is-locked" : ""}`}
                     disabled={chatBackgroundSaving}
                     key={theme}
                     onClick={() => setChatBackgroundDraft(theme)}
@@ -2015,7 +1965,7 @@ export default function MenuPage() {
                   >
                     <span />
                     <strong>{t(label)}</strong>
-                    {growthLevel < chatBackgroundLevels[theme] ? <small>{t("menu.levelUnlock", { level: chatBackgroundLevels[theme] })}</small> : null}
+                    {growthLevel < rewardLevel("background", theme) ? <small>{t("menu.levelUnlock", { level: rewardLevel("background", theme) })}</small> : null}
                   </button>
                 ))}
               </div>
@@ -2081,7 +2031,7 @@ export default function MenuPage() {
                       <i aria-hidden="true"><span /></i>
                       <strong>{t(label)}</strong>
                       {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value) ? (
-                        <small>{vipOrLevelBubbleStyles.has(value) ? t("menu.levelOrVipUnlock", { level: chatBubbleLevels[value] ?? 1 }) : t("menu.levelUnlock", { level: chatBubbleLevels[value] ?? 1 })}</small>
+                        <small>{vipOrLevelBubbleStyles.has(value) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
                       ) : null}
                     </button>
                   ))}
@@ -2138,7 +2088,7 @@ export default function MenuPage() {
                       </i>
                       <strong>{t(label)}</strong>
                       {!canUseAvatarFrame(value) ? (
-                        <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value) ? t("menu.levelOrVipUnlock", { level: avatarFrameLevels[value] ?? 1 }) : t("menu.levelUnlock", { level: avatarFrameLevels[value] ?? 1 })}</small>
+                        <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
                     </button>
                   ))}

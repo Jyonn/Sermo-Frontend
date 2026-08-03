@@ -75,7 +75,11 @@ export interface UserGrowthDTO {
     points: number;
     created_at: number;
   }>;
-  daily_chat?: {
+  daily?: {
+    earned: number;
+    limit: number;
+  };
+  weekly?: {
     earned: number;
     limit: number;
   };
@@ -91,12 +95,24 @@ export interface UserGrowthDTO {
     name: string;
     score: number;
     unlocks: string[];
+    rewards: GrowthRewardDTO[];
     unlocked: boolean;
   }>;
   capabilities?: Record<string, {
     required_level: number;
     available: boolean;
   }>;
+}
+
+export interface GrowthRewardDTO {
+  id: string;
+  level: number;
+  category: "capability" | "background" | "bubble" | "frame" | "identity";
+  title: string;
+  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
+  asset_key?: string | null;
+  capability_key?: string | null;
+  implementation_status: "available" | "planned";
 }
 
 export interface AccessPayload {
