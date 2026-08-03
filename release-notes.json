@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.2",
+  "id": "2026.08.04.3",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "成长体系焕新",
+      "title": "奖励品质一眼可见",
       "items": [
-        "成长值按新版有效事件重新核算，异常与过期记录不再计分",
-        "18 个等级现在逐项展示能力、背景、气泡和头像框奖励",
-        "每日有效互动上限调整为 40，升级节奏与奖励路线同步更新"
+        "升级页面用独立颜色、纹理和标记区分五种奖励品质",
+        "聊天背景、气泡与头像框现在直接展示各自品质",
+        "菜单成长入口会随本级最高品质呈现对应视觉"
       ]
     },
     "en": {
-      "title": "A rebuilt growth journey",
+      "title": "Reward rarity at a glance",
       "items": [
-        "Growth is recalculated from valid events under the new rules",
-        "All 18 levels now show their exact abilities and cosmetic rewards",
-        "The verified daily activity cap is now 40 points"
+        "Level-up rewards now use distinct colors, textures, and markers for all five rarities",
+        "Backgrounds, bubbles, and avatar frames show their rarity directly",
+        "The menu growth entry reflects the highest rarity unlocked at the current level"
       ]
     }
   }

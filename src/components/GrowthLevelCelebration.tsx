@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { UserGrowthDTO } from "../types";
-import { useI18n } from "../lib/language";
+import { useI18n, type TranslationKey } from "../lib/language";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
@@ -127,8 +127,9 @@ export function GrowthLevelCelebration() {
           <div>
             {unlocks.map((unlock, index) => (
               <span className={`is-${unlock.rarity}`} key={unlock.id} style={{ "--unlock-index": index } as CSSProperties}>
-                <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                <i aria-hidden="true" />
                 <strong>{unlock.title}</strong>
+                <em>{t(`growth.rarity.${unlock.rarity}` as TranslationKey)}</em>
               </span>
             ))}
           </div>
