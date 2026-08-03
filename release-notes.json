@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.24",
+  "id": "2026.08.03.25",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "个性气泡胶囊补全",
+      "title": "积木气泡全面重构",
       "items": [
-        "贴纸胶囊加入叠贴模切边、印刷文字和切割网格",
-        "积木胶囊加入凸点、拼装接缝和立体底座",
-        "VIP胶囊重绘为象牙金铭牌，并加入内嵌徽标与流光"
+        "重绘顶部凸点、硬塑料高光、底部咬合槽与立体投影",
+        "图片、视频、语音、文件、位置和链接统一嵌入积木外壳",
+        "引用区与功能图标同步改为可拼装的积木组件"
       ]
     },
     "en": {
-      "title": "Completed personality bubble capsules",
+      "title": "Rebuilt Toy Brick bubbles",
       "items": [
-        "Sticker now features layered die-cut rims, print details, and a cutting grid",
-        "Toy Brick now shows studs, assembly seams, and a dimensional base",
-        "VIP is rebuilt as an ivory-gold plaque with an inset badge and glint"
+        "Redrawn with raised studs, hard-plastic highlights, coupling slots, and depth",
+        "Images, video, audio, files, locations, and links now share one brick shell",
+        "Replies and utility icons now follow the same modular brick language"
       ]
     }
   }
