@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.03.05",
+  "id": "2026.08.03.06",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "Niko 主题焕新",
+      "title": "Niko 动效位置优化",
       "items": [
-        "头像框与聊天气泡统一调整为蓬松白与暖棕配色",
-        "气泡纹理改为低对比猫爪图案",
-        "Niko 现在固定在气泡上沿原地奔跑，不再环绕四边"
+        "裁去奔跑动画的透明留白，让 Niko 的脚准确踩在气泡上边框",
+        "放大头像框中的挥手 Niko，使角色在不同头像尺寸下都更醒目"
       ]
     },
     "en": {
-      "title": "A refreshed Niko theme",
+      "title": "Refined Niko motion placement",
       "items": [
-        "Avatar frames and chat bubbles now share a fluffy white and warm brown palette",
-        "Bubble textures now use subtle paw-print patterns",
-        "Niko now runs in place along the top edge instead of circling the bubble"
+        "Cropped transparent padding from the run cycle so Niko's feet meet the bubble border",
+        "Enlarged the waving Niko in avatar frames for better visibility at every size"
       ]
     }
   }
