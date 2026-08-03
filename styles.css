@@ -18684,8 +18684,8 @@ html[data-theme="dark"] .chat-conversation-preview {
 .rig-svg-character { overflow: visible; }
 .rig-svg-character * { transform-box: fill-box; }
 .rig-shadow { fill: rgba(21,59,56,.15); transform-origin: center; }
-.rig-svg-body { transform-origin: 120px 210px; }
-.rig-head, .rig-hand { fill: #553044; }
+.rig-svg-body { transform-origin: 120px 210px; transform: scaleX(.86) rotate(-2deg); }
+.rig-head, .rig-hand, .rig-profile-nose { fill: #553044; }
 .rig-cape.cape-0 { fill: #e14c43; }
 .rig-cape.cape-1 { fill: #f2a93b; }
 .rig-torso.top-0, .rig-sleeve.top-0 { fill: none; stroke: #39a9ee; stroke-width: 16; stroke-linecap: round; stroke-linejoin: round; }
@@ -18704,20 +18704,27 @@ html[data-theme="dark"] .chat-conversation-preview {
 .rig-arm, .rig-leg { transform-origin: 50% 8%; }
 .rig-cape { transform-origin: 62% 15%; }
 
-.rig-svg-character.motion-walk .rig-svg-body { animation: rig-body-walk .58s ease-in-out infinite alternate; }
-.rig-svg-character.motion-walk .rig-arm.is-front, .rig-svg-character.motion-walk .rig-leg.is-back { animation: rig-limb-forward .58s ease-in-out infinite alternate; }
-.rig-svg-character.motion-walk .rig-arm.is-back, .rig-svg-character.motion-walk .rig-leg.is-front { animation: rig-limb-back .58s ease-in-out infinite alternate; }
-.rig-svg-character.motion-walk .rig-cape { animation: rig-cape-wave 1.1s ease-in-out infinite alternate; }
+.rig-svg-character.motion-moonwalk .rig-svg-body { animation: rig-body-moonwalk .8s cubic-bezier(.45,.05,.55,.95) infinite alternate; }
+.rig-svg-character.motion-moonwalk .rig-arm.is-front { animation: rig-moon-arm-front .8s ease-in-out infinite alternate; }
+.rig-svg-character.motion-moonwalk .rig-arm.is-back { animation: rig-moon-arm-back .8s ease-in-out infinite alternate; }
+.rig-svg-character.motion-moonwalk .rig-leg.is-front { animation: rig-moon-leg-glide .8s cubic-bezier(.45,.05,.55,.95) infinite alternate; }
+.rig-svg-character.motion-moonwalk .rig-leg.is-back { animation: rig-moon-leg-return .8s cubic-bezier(.45,.05,.55,.95) infinite alternate; }
+.rig-svg-character.motion-moonwalk .rig-cape { animation: rig-cape-moonwalk 1s ease-in-out infinite alternate; }
 .rig-svg-character.motion-wave .rig-svg-body { animation: rig-body-wave 1.1s ease-in-out infinite alternate; }
 .rig-svg-character.motion-wave .rig-arm.is-front { animation: rig-hand-wave .42s ease-in-out infinite alternate; }
 .rig-svg-character.motion-wave .rig-cape { animation: rig-cape-wave 1.25s ease-in-out infinite alternate; }
 
-@keyframes rig-body-walk { to { transform: translateY(-6px) rotate(1deg); } }
-@keyframes rig-body-wave { to { transform: translateY(-2px) rotate(-1deg); } }
+@keyframes rig-body-moonwalk { from { transform: translate(-6px, 0) scaleX(.86) rotate(-7deg); } to { transform: translate(6px, -3px) scaleX(.86) rotate(-5deg); } }
+@keyframes rig-body-wave { from { transform: scaleX(.86) rotate(-3deg); } to { transform: translateY(-2px) scaleX(.86) rotate(-1deg); } }
 @keyframes rig-limb-forward { from { transform: rotate(-23deg); } to { transform: rotate(23deg); } }
 @keyframes rig-limb-back { from { transform: rotate(23deg); } to { transform: rotate(-23deg); } }
+@keyframes rig-moon-leg-glide { from { transform: translateX(-17px) rotate(-6deg) scaleY(.94); } to { transform: translateX(13px) rotate(13deg) scaleY(1); } }
+@keyframes rig-moon-leg-return { from { transform: translateX(14px) rotate(16deg) scaleY(1); } to { transform: translateX(-12px) rotate(-12deg) scaleY(.91); } }
+@keyframes rig-moon-arm-front { from { transform: rotate(7deg); } to { transform: rotate(-8deg); } }
+@keyframes rig-moon-arm-back { from { transform: rotate(-7deg); } to { transform: rotate(6deg); } }
 @keyframes rig-hand-wave { from { transform: rotate(-126deg); } to { transform: rotate(-154deg); } }
 @keyframes rig-cape-wave { to { transform: skewX(-4deg) rotate(-2deg); } }
+@keyframes rig-cape-moonwalk { from { transform: skewX(-7deg) rotate(-4deg); } to { transform: skewX(-2deg) rotate(-1deg); } }
 
 @media (max-width: 1120px) {
   .rig-lab-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

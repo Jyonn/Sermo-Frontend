@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { Link } from "react-router-dom";
 
 type Variant = 0 | 1;
-type Motion = "walk" | "wave";
+type Motion = "moonwalk" | "wave";
 
 interface CharacterOptions {
   cape: Variant;
@@ -18,7 +18,7 @@ interface CharacterOptions {
 const INITIAL_OPTIONS: CharacterOptions = {
   cape: 0,
   hat: 0,
-  motion: "walk",
+  motion: "moonwalk",
   pants: 0,
   shoes: 0,
   top: 0,
@@ -59,7 +59,7 @@ function OutfitControls({ options, setOptions }: { options: CharacterOptions; se
       <div className="rig-lab-control-group is-motion">
         <span>动作</span>
         <div>
-          <Choice active={options.motion === "walk"} onClick={() => setOptions((value) => ({ ...value, motion: "walk" }))}>原地行走</Choice>
+          <Choice active={options.motion === "moonwalk"} onClick={() => setOptions((value) => ({ ...value, motion: "moonwalk" }))}>太空漫步</Choice>
           <Choice active={options.motion === "wave"} onClick={() => setOptions((value) => ({ ...value, motion: "wave" }))}>挥手</Choice>
         </div>
       </div>
@@ -107,7 +107,8 @@ function SvgCharacter({ options }: { options: CharacterOptions }) {
           <path className={`rig-sleeve top-${options.top}`} d="M140 120 Q158 142 164 174" />
           <circle className="rig-hand" cx="164" cy="176" r="8" />
         </g>
-        <circle className="rig-head" cx="120" cy="82" r="29" />
+        <circle className="rig-head" cx="124" cy="82" r="29" />
+        <path className="rig-profile-nose" d="M150 76 q13 7 0 13z" />
         {options.hat ? (
           <g className="rig-hat-star"><ellipse cx="120" cy="48" rx="34" ry="9" /><ellipse cx="120" cy="48" rx="22" ry="5" /></g>
         ) : (
@@ -171,8 +172,9 @@ function buildPixiCharacter(options: CharacterOptions, dataDriven = false) {
   const backArm = makeArm(-1);
   const frontArm = makeArm(1);
 
-  const head = new Graphics().circle(0, -96, 29).fill(COLORS.skin);
-  body.addChild(head);
+  const head = new Graphics().circle(4, -96, 29).fill(COLORS.skin);
+  const nose = new Graphics().moveTo(30, -103).lineTo(42, -95).lineTo(30, -89).closePath().fill(COLORS.skin);
+  body.addChild(head, nose);
   if (options.hat === 0) {
     body.addChild(new Graphics().moveTo(-30, -108).bezierCurveTo(-26, -139, 24, -143, 34, -116).bezierCurveTo(6, -123, -12, -119, -30, -108).fill(COLORS.hat[0]));
   } else {
@@ -182,15 +184,23 @@ function buildPixiCharacter(options: CharacterOptions, dataDriven = false) {
   root.onRender = () => {
     const time = performance.now() / 1000;
     const phase = Math.sin(time * (dataDriven ? 4.5 : 5.2));
-    if (options.motion === "walk") {
-      body.y = -72 + Math.abs(Math.sin(time * 5.2)) * 4;
-      frontLeg.rotation = phase * 0.42;
-      backLeg.rotation = -phase * 0.42;
-      frontArm.rotation = -phase * 0.38;
-      backArm.rotation = phase * 0.38;
-      cape.skew.x = phase * 0.025;
+    if (options.motion === "moonwalk") {
+      const cycle = (time * 1.25) % 1;
+      const glide = cycle < 0.5 ? cycle * 2 : (1 - cycle) * 2;
+      body.x = -5 + glide * 10;
+      body.y = -72 + Math.sin(time * 5) * 2;
+      body.rotation = -0.07;
+      frontLeg.rotation = -0.18 + glide * 0.35;
+      backLeg.rotation = 0.24 - glide * 0.42;
+      frontLeg.scale.y = 0.92 + glide * 0.08;
+      backLeg.scale.y = 1 - glide * 0.08;
+      frontArm.rotation = 0.22 - phase * 0.12;
+      backArm.rotation = -0.18 + phase * 0.1;
+      cape.skew.x = -0.06 + phase * 0.02;
     } else {
       body.y = -72 + Math.sin(time * 2.4) * 2;
+      body.x = 0;
+      body.rotation = -0.03;
       frontArm.rotation = -2.45 + Math.sin(time * 6) * 0.22;
       backArm.rotation = 0.1;
       frontLeg.rotation = 0.05;
@@ -284,8 +294,11 @@ function ThreeCharacter({ options }: { options: CharacterOptions }) {
       leg.add(shoe);
     });
     const head = plane(0.58, 0.58, COLORS.skin, 1);
-    head.position.set(0, 0.78, 0.4);
-    body.add(head);
+    head.position.set(0.06, 0.78, 0.4);
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.28, 3), makeThreeMaterial(COLORS.skin));
+    nose.position.set(0.34, 0.78, 0.42);
+    nose.rotation.z = -Math.PI / 2;
+    body.add(head, nose);
     const hat = options.hat === 0 ? plane(0.65, 0.24, COLORS.hat[0], 1) : new THREE.Mesh(new THREE.RingGeometry(0.25, 0.35, 48), makeThreeMaterial(COLORS.hat[1]));
     hat.position.set(0, options.hat ? 1.12 : 1.04, 0.5);
     if (!options.hat) hat.rotation.z = -0.12;
@@ -297,14 +310,20 @@ function ThreeCharacter({ options }: { options: CharacterOptions }) {
       frame = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
       const phase = Math.sin(time * 5);
-      if (options.motion === "walk") {
-        body.position.y = 0.08 + Math.abs(Math.sin(time * 5)) * 0.05;
-        frontLeg.rotation.z = phase * 0.42;
-        backLeg.rotation.z = -phase * 0.42;
-        frontArm.rotation.z = -phase * 0.38;
-        backArm.rotation.z = phase * 0.38;
+      if (options.motion === "moonwalk") {
+        const cycle = (time * 1.25) % 1;
+        const glide = cycle < 0.5 ? cycle * 2 : (1 - cycle) * 2;
+        body.position.x = -0.05 + glide * 0.1;
+        body.position.y = 0.08 + Math.sin(time * 5) * 0.02;
+        body.rotation.z = -0.07;
+        frontLeg.rotation.z = -0.18 + glide * 0.35;
+        backLeg.rotation.z = 0.24 - glide * 0.42;
+        frontArm.rotation.z = 0.22 - phase * 0.12;
+        backArm.rotation.z = -0.18 + phase * 0.1;
       } else {
         body.position.y = 0.1 + Math.sin(time * 2.2) * 0.025;
+        body.position.x = 0;
+        body.rotation.z = -0.03;
         frontArm.rotation.z = -2.5 + Math.sin(time * 6) * 0.2;
         backArm.rotation.z = 0.1;
         frontLeg.rotation.z = 0.05;
