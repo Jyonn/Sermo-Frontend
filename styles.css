@@ -18838,6 +18838,156 @@ html[data-theme="dark"] .chat-conversation-preview {
 @keyframes motion-progress { from{transform:translateX(-100%)}to{transform:translateX(265%)} }
 @media(max-width:800px){.motion-studio-page{padding:20px 12px 36px}.motion-studio-workbench{grid-template-columns:1fr}.motion-studio-stage{min-height:500px}.motion-studio-inspector{padding:22px 16px}.motion-studio-pipeline{grid-template-columns:1fr}.motion-studio-header h1{font-size:38px}.motion-studio-header p{max-width:260px}.motion-master-character{width:min(82%,390px)}}
 @media(prefers-reduced-motion:reduce){.motion-master-character *,.motion-studio-playback>span::after{animation:none!important}}
+
+/* Niko IP: ivory fluff, eye green, and a quiet paw-print texture. */
+.personalization-bubble-stage.bubble-style-niko,
+.message-group.bubble-style-niko {
+  --bubble-skin-other-bg:
+    radial-gradient(circle at 17% 15%, rgba(255,255,255,.94), transparent 38%),
+    radial-gradient(circle at 88% 78%, rgba(164,177,156,.13) 0 2px, transparent 2.5px) 0 0 / 12px 12px,
+    linear-gradient(145deg,#fffdf7,#ece7dc);
+  --bubble-skin-other-color:#294238;
+  --bubble-skin-other-border:#aeb9aa;
+  --bubble-skin-other-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 7px 17px rgba(56,72,62,.11);
+  --bubble-skin-self-bg:
+    radial-gradient(circle at 16% 13%,rgba(151,190,137,.2),transparent 36%),
+    radial-gradient(circle at 88% 78%,rgba(229,240,218,.12) 0 2px,transparent 2.5px) 0 0 / 12px 12px,
+    linear-gradient(145deg,#315f4c,#1b3c31);
+  --bubble-skin-self-color:#fffaf0;
+  --bubble-skin-self-border:#77906f;
+  --bubble-skin-self-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 8px 18px rgba(20,48,38,.18);
+  --bubble-skin-other-radius:19px 19px 19px 7px;
+  --bubble-skin-self-radius:19px 19px 7px 19px;
+  --bubble-skin-border-width:1px;
+  --bubble-theme-accent:#668d52;
+  --bubble-theme-muted-other:rgba(41,66,56,.58);
+  --bubble-theme-muted-self:rgba(255,250,240,.68);
+  --bubble-theme-icon-other:#e4ece0;
+  --bubble-theme-icon-self:rgba(225,240,216,.13);
+}
+
+.message-group.bubble-style-niko.other {
+  --bubble-theme-surface:var(--bubble-skin-other-bg);
+  --bubble-theme-color:var(--bubble-skin-other-color);
+  --bubble-theme-muted:var(--bubble-theme-muted-other);
+  --bubble-theme-icon:var(--bubble-theme-icon-other);
+  --bubble-theme-shadow:var(--bubble-skin-other-shadow);
+}
+
+.message-group.bubble-style-niko.self {
+  --bubble-theme-surface:var(--bubble-skin-self-bg);
+  --bubble-theme-color:var(--bubble-skin-self-color);
+  --bubble-theme-muted:var(--bubble-theme-muted-self);
+  --bubble-theme-icon:var(--bubble-theme-icon-self);
+  --bubble-theme-shadow:var(--bubble-skin-self-shadow);
+}
+
+.message-group.bubble-style-niko :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card,.message-travel-map-card) {
+  color:var(--bubble-theme-color);
+  background:var(--bubble-theme-surface);
+  box-shadow:var(--bubble-theme-shadow);
+}
+
+.message-group.bubble-style-niko .message-bubble.has-reply {
+  --reply-preview-accent:var(--bubble-theme-accent);
+  --reply-preview-bg:var(--bubble-theme-icon);
+  --reply-preview-color:var(--bubble-theme-muted);
+  color:var(--bubble-theme-color);
+  background:var(--bubble-theme-surface);
+}
+
+.message-group.bubble-style-niko .message-bubble.has-reply > :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card) {
+  background:transparent;
+  box-shadow:none;
+}
+
+.message-group.bubble-style-niko :is(.message-audio-meta,.message-audio-progress,.message-file-copy small,.message-file-open,.message-location-copy small,.message-location-open,.message-link-preview-site,.message-link-preview-desc,.message-travel-map-copy small,.message-travel-map-copy span,.message-travel-map-arrow) {
+  color:var(--bubble-theme-muted);
+}
+
+.message-group.bubble-style-niko :is(.message-file-icon,.message-location-mark,.message-travel-map-art,.message-audio-play) {
+  color:var(--bubble-theme-accent);
+  border:1px solid color-mix(in srgb,var(--bubble-theme-accent) 18%,transparent);
+  border-radius:42% 52% 44% 48%;
+  background:var(--bubble-theme-icon);
+  box-shadow:none;
+}
+
+.field-chat_bubble_style .preview-niko > i {
+  overflow:visible;
+}
+
+.field-chat_bubble_style .preview-niko i span {
+  border:1px solid #9caa9a;
+  border-radius:14px 14px 14px 5px;
+  background:linear-gradient(145deg,#fffef9,#e8e3d8);
+  box-shadow:0 4px 9px rgba(45,68,56,.12);
+}
+
+.field-chat_bubble_style .preview-niko > i::after {
+  position:absolute;
+  right:-3px;
+  bottom:-1px;
+  width:25px;
+  height:25px;
+  background:url("/assets/niko/niko-greeting.webp") center/contain no-repeat;
+  content:"";
+  pointer-events:none;
+}
+
+html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.message-group.bubble-style-niko) {
+  --bubble-skin-other-bg:linear-gradient(145deg,#303934,#222b27);
+  --bubble-skin-other-color:#f4efe5;
+  --bubble-skin-other-border:#56655c;
+  --bubble-skin-self-bg:linear-gradient(145deg,#315f4c,#17352b);
+  --bubble-skin-self-color:#fffaf0;
+}
+
+/* Niko Patrol: the supplied four-direction run cycles around one bounded frame. */
+.avatar-frame-niko-run {
+  --avatar-frame-inset:9%;
+  --avatar-frame-paint:linear-gradient(145deg,#fdfaf1 0 44%,#dfe9da 45% 72%,#6d8f5d 73% 100%);
+}
+
+.avatar-frame-niko-run::before {
+  position:absolute;
+  z-index:1;
+  inset:3%;
+  display:block;
+  border:1px solid rgba(73,105,78,.4);
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.72);
+  content:"" !important;
+}
+
+.avatar-frame-niko-run .avatar-frame-ornament > i {
+  position:absolute;
+  z-index:3;
+  display:block;
+  width:24%;
+  aspect-ratio:1;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter:drop-shadow(0 1px 1px rgba(30,48,38,.22));
+  opacity:0;
+  pointer-events:none;
+}
+
+.avatar-frame-niko-run .avatar-frame-ornament > i:nth-child(1) { top:0;left:1%;background-image:url("/assets/niko/niko-run-right.webp");animation:niko-run-top 8s linear infinite; }
+.avatar-frame-niko-run .avatar-frame-ornament > i:nth-child(2) { top:1%;right:0;background-image:url("/assets/niko/niko-run-down.webp");animation:niko-run-right 8s linear infinite; }
+.avatar-frame-niko-run .avatar-frame-ornament > i:nth-child(3) { right:1%;bottom:0;background-image:url("/assets/niko/niko-run-left.webp");animation:niko-run-bottom 8s linear infinite; }
+.avatar-frame-niko-run .avatar-frame-ornament > i:nth-child(4) { bottom:1%;left:0;background-image:url("/assets/niko/niko-run-up.webp");animation:niko-run-left 8s linear infinite; }
+
+@keyframes niko-run-top { 0%{opacity:1;transform:translateX(0)} 23%{opacity:1;transform:translateX(300%)} 24%,100%{opacity:0;transform:translateX(300%)} }
+@keyframes niko-run-right { 0%,24%{opacity:0;transform:translateY(0)} 25%{opacity:1;transform:translateY(0)} 48%{opacity:1;transform:translateY(300%)} 49%,100%{opacity:0;transform:translateY(300%)} }
+@keyframes niko-run-bottom { 0%,49%{opacity:0;transform:translateX(0)} 50%{opacity:1;transform:translateX(0)} 73%{opacity:1;transform:translateX(-300%)} 74%,100%{opacity:0;transform:translateX(-300%)} }
+@keyframes niko-run-left { 0%,74%{opacity:0;transform:translateY(0)} 75%{opacity:1;transform:translateY(0)} 98%{opacity:1;transform:translateY(-300%)} 99%,100%{opacity:0;transform:translateY(-300%)} }
+
+@media (prefers-reduced-motion:reduce) {
+  .avatar-frame-niko-run .avatar-frame-ornament > i { display:none; }
+  .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { right:2%;bottom:0;left:auto;display:block;opacity:1;transform:none; }
+}
 /* Character motion lab: real 3D skeleton prototype. */
 .character-lab-page{--lab-ink:#191b2b;min-height:100dvh;padding:26px clamp(18px,4vw,64px) 50px;color:var(--lab-ink);background:radial-gradient(circle at 16% 8%,rgba(255,226,124,.72),transparent 27%),radial-gradient(circle at 88% 15%,rgba(112,233,206,.58),transparent 24%),#f5f0e8}
 .character-lab-header{max-width:1280px;margin:0 auto 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}.character-lab-header span,.character-panel-heading span,.character-stage-meta,.character-motion-options button span{font:700 11px/1.2 "JetBrains Mono",monospace;letter-spacing:.14em}.character-lab-header h1{margin:8px 0 2px;font-size:clamp(30px,4vw,54px);line-height:1;letter-spacing:-.055em}.character-lab-header p,.character-panel-heading p{margin:8px 0 0;color:#697080}.character-lab-header a{flex:none;padding:11px 16px;color:inherit;font-weight:700;text-decoration:none;border:1px solid rgba(25,27,43,.18);border-radius:999px;background:rgba(255,255,255,.48)}
