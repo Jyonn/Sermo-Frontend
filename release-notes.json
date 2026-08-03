@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.22",
+  "id": "2026.08.03.23",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "贴纸气泡媒体卡片重绘",
+      "title": "气泡预览换上真实影像",
       "items": [
-        "图片、视频、语音、文件与位置消息统一使用单层贴纸轮廓",
-        "内部内容会跟随连续消息的合并圆角，不再露出冲突的直角边框",
-        "多图宫格补齐独立的白色模切边与印刷阴影"
+        "图片预览改用高分辨率实景照片",
+        "视频预览加入真实封面、电影化取景、播放标识和时长",
+        "预览媒体完全使用本地资源，不会触发无效网络请求"
       ]
     },
     "en": {
-      "title": "Refined sticker media bubbles",
+      "title": "Real imagery in bubble previews",
       "items": [
-        "Images, videos, audio, files, and locations now share one sticker outline",
-        "Inner content follows grouped-message corners without conflicting square borders",
-        "Image galleries now carry the same die-cut rim and printed shadow"
+        "Image previews now use a high-resolution photographic scene",
+        "Video previews now include a real poster, cinematic crop, play mark, and duration",
+        "Preview media is fully local and no longer triggers invalid network requests"
       ]
     }
   }

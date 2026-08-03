@@ -40,6 +40,7 @@ import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
 import type { AppViewState, Chat, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
+import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -952,19 +953,28 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
   uri: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const previewPosterOnly = uri === "preview://video";
+  const [loaded, setLoaded] = useState(previewPosterOnly);
   const [duration, setDuration] = useState(0);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(
+    previewPosterOnly && metadata?.pixel_width && metadata.pixel_height
+      ? metadata.pixel_width / metadata.pixel_height
+      : null
+  );
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
   const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
 
   useEffect(() => {
-    setLoaded(false);
+    setLoaded(previewPosterOnly);
     setDuration(0);
-    setAspectRatio(null);
+    setAspectRatio(
+      previewPosterOnly && metadata?.pixel_width && metadata.pixel_height
+        ? metadata.pixel_width / metadata.pixel_height
+        : null
+    );
     setRetryWithFreshUri(false);
-  }, [uri]);
+  }, [metadata?.pixel_height, metadata?.pixel_width, previewPosterOnly, uri]);
 
   return (
     <div
@@ -977,33 +987,37 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
         onClick={() => onOpenVideo?.(resolvedUri, metadata ?? null, messageId ?? null)}
         type="button"
       >
-        <video
-          className="message-media-video"
-          onCanPlay={() => setLoaded(true)}
-          onDurationChange={(event) => {
-            const value = event.currentTarget.duration;
-            if (Number.isFinite(value)) setDuration(value);
-          }}
-          onError={() => {
-            if (!retryWithFreshUri) {
-              forgetStableResourceUri(uri);
-              setRetryWithFreshUri(true);
-            }
-          }}
-          onLoadedMetadata={(event) => {
-            const video = event.currentTarget;
-            setLoaded(true);
-            if (video.videoWidth > 0 && video.videoHeight > 0) {
-              setAspectRatio(video.videoWidth / video.videoHeight);
-            }
-            if (Number.isFinite(video.duration)) setDuration(video.duration);
-          }}
-          playsInline
-          poster={resolvedThumbnailUri}
-          preload="metadata"
-          ref={videoRef}
-          src={resolvedUri}
-        />
+        {previewPosterOnly ? (
+          <img alt="" aria-hidden="true" className="message-media-video message-video-preview-poster" src={resolvedThumbnailUri} />
+        ) : (
+          <video
+            className="message-media-video"
+            onCanPlay={() => setLoaded(true)}
+            onDurationChange={(event) => {
+              const value = event.currentTarget.duration;
+              if (Number.isFinite(value)) setDuration(value);
+            }}
+            onError={() => {
+              if (!retryWithFreshUri) {
+                forgetStableResourceUri(uri);
+                setRetryWithFreshUri(true);
+              }
+            }}
+            onLoadedMetadata={(event) => {
+              const video = event.currentTarget;
+              setLoaded(true);
+              if (video.videoWidth > 0 && video.videoHeight > 0) {
+                setAspectRatio(video.videoWidth / video.videoHeight);
+              }
+              if (Number.isFinite(video.duration)) setDuration(video.duration);
+            }}
+            playsInline
+            poster={resolvedThumbnailUri}
+            preload="metadata"
+            ref={videoRef}
+            src={resolvedUri}
+          />
+        )}
         <span className="message-video-shade" aria-hidden="true" />
         <span className="message-video-play" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z" /></svg>
@@ -6188,7 +6202,7 @@ export interface ChatsPagePreviewConfig {
   bubbleStyle: ChatBubbleStyle;
 }
 
-const CHAT_PREVIEW_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 420'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='1' y2='1'%3E%3Cstop stop-color='%2390d8bf'/%3E%3Cstop offset='.52' stop-color='%23f6d47d'/%3E%3Cstop offset='1' stop-color='%235d7da0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='640' height='420' fill='url(%23g)'/%3E%3Ccircle cx='475' cy='110' r='48' fill='%23fff' fill-opacity='.58'/%3E%3Cpath d='M0 360 180 190l120 112 92-82 248 200H0Z' fill='%231e594c' fill-opacity='.62'/%3E%3C/svg%3E";
+const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
 
 function previewMessage(kind: MessageKind, from: "self" | "other", index: number, config: ChatsPagePreviewConfig): ChatMessage {
   const now = 1785686400 + index;
@@ -6208,7 +6222,7 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
     status: index === 15 ? "pending" : "sent",
   };
   if (kind === "image") return { ...base, type: MESSAGE_TYPE_IMAGE, payload: { kind, uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE, image_metadata: { status: 1, pixel_width: 640, pixel_height: 420 } } };
-  if (kind === "video") return { ...base, type: MESSAGE_TYPE_VIDEO, payload: { kind, uri: "data:video/mp4;base64,", thumbnail_uri: CHAT_PREVIEW_IMAGE, duration_seconds: 28, video_metadata: { status: 1, duration_seconds: 28, pixel_width: 640, pixel_height: 420 } } };
+  if (kind === "video") return { ...base, type: MESSAGE_TYPE_VIDEO, payload: { kind, uri: "preview://video", thumbnail_uri: CHAT_PREVIEW_IMAGE, duration_seconds: 28, video_metadata: { status: 1, duration_seconds: 28, pixel_width: 640, pixel_height: 420 } } };
   if (kind === "audio") return { ...base, type: MESSAGE_TYPE_AUDIO, payload: { kind, uri: "data:audio/wav;base64,UklGRgQAAABXQVZF", duration_seconds: 12 } };
   if (kind === "file") return { ...base, type: MESSAGE_TYPE_FILE, payload: { kind, uri: "data:text/plain,preview", file_name: i18n.t("menu.bubblePreviewFile"), file_size: 2516582 } };
   if (kind === "location") return { ...base, type: MESSAGE_TYPE_LOCATION, payload: { kind, latitude: 24.4798, longitude: 118.0894, address: i18n.t("menu.bubblePreviewLocation") } };

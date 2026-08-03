@@ -4244,6 +4244,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   opacity: 0;
 }
 
+.message-video-preview-poster {
+  object-position: 68% 48%;
+  filter: saturate(.92) contrast(1.04);
+}
+
 .message-media-image-thumb {
   position: absolute;
   inset: 0;
