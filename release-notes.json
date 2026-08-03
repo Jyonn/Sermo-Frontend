@@ -1,23 +1,21 @@
 {
-  "id": "2026.08.03.02",
+  "id": "2026.08.03.03",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "修复官方账号 Rive 人物加载",
+      "title": "Niko 来到言浪",
       "items": [
-        "官方账号进入广场时使用独立舞台，不再加载在线用户和旧人物系统",
-        "修正画板与状态机绑定，人物现在可以持续播放原地行走动画",
-        "支持即时切换五套人物皮肤，并为每个官方账号记住当前选择",
-        "旧会话会先确认官方身份，不再错误进入普通广场"
+        "新增 Niko 毛团聊天气泡，使用象牙白与猫眼绿呈现双方消息",
+        "新增 Niko 巡游头像框，小猫会沿头像四周持续奔跑",
+        "Niko 主题已适配真实聊天、多媒体卡片与深色模式"
       ]
     },
     "en": {
-      "title": "Fixed Rive character loading for official accounts",
+      "title": "Niko arrives in Sermo",
       "items": [
-        "Official accounts now enter a dedicated stage without loading online users or the legacy character system",
-        "Correct artboard and state machine bindings now play the walking-in-place animation continuously",
-        "Five character skins can be switched instantly and remembered per official account",
-        "Legacy sessions now resolve official identity before choosing the square experience"
+        "Added the Niko Fluff chat bubble with ivory and cat-eye green styles for both sides",
+        "Added the Niko Patrol avatar frame with a cat running around the portrait",
+        "The Niko theme now supports real chats, media cards, and dark mode"
       ]
     }
   }
