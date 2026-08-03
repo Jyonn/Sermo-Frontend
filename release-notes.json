@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.03.07",
+  "id": "2026.08.03.08",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "Fufu 加入个性化家族",
+      "title": "IP 气泡分组更自然",
       "items": [
-        "新增 Fufu 追风气泡，以暖沙棕、炭黑虎纹和橄榄绿呈现独立主题",
-        "Fufu 会沿气泡下沿短距离冲刺，并适配文字与多媒体消息",
-        "新增 Fufu 击掌头像框，抬爪动画会从头像边角探出"
+        "连续消息合并时，Niko 只在第一条气泡上方出现",
+        "连续消息合并时，Fufu 只在最后一条气泡下方出现"
       ]
     },
     "en": {
-      "title": "Fufu joins the personalization family",
+      "title": "More natural grouped IP bubbles",
       "items": [
-        "Added the Fufu Dash bubble with a sand, charcoal tabby, and olive visual identity",
-        "Fufu dashes along the lower edge across text and media messages",
-        "Added the Fufu High Five avatar frame with an animated raised paw"
+        "Niko now appears only above the first bubble in a grouped conversation",
+        "Fufu now appears only below the final bubble in a grouped conversation"
       ]
     }
   }

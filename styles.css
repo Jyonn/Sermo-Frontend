@@ -19001,9 +19001,14 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   height:28px;
   background:url("/assets/niko/niko-run-right.webp") center calc(100% + 4px)/38px 38px no-repeat;
   content:"";
+  display:none;
   filter:drop-shadow(0 2px 2px rgba(82,53,35,.2));
   transform:translateX(-50%);
   pointer-events:none;
+}
+
+.message-group.bubble-style-niko .message-bubble-shell:has(.group-start)::after {
+  display:block;
 }
 
 @keyframes niko-frame-hello {
@@ -19163,9 +19168,13 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   height:28px;
   background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
   content:"";
+  display:none;
   filter:drop-shadow(0 2px 2px rgba(39,31,22,.24));
   animation:fufu-bubble-dash 5.6s cubic-bezier(.45,.05,.5,.95) infinite;
   pointer-events:none;
+}
+.message-group.bubble-style-fufu .message-bubble-shell:has(.group-end)::after {
+  display:block;
 }
 
 @keyframes fufu-frame-high-five {
