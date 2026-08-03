@@ -18990,12 +18990,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 }
 
 /* Niko Patrol: the run cycle stays fixed on the top edge like a tiny moonwalk. */
-.message-group.bubble-style-niko .message-bubble-shell {
-  position:relative;
-  isolation:isolate;
-}
-
-.message-group.bubble-style-niko .message-bubble-shell::after {
+.niko-bubble-runner {
   position:absolute;
   z-index:5;
   top:-28px;
@@ -19003,14 +18998,13 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   width:34px;
   height:28px;
   background:url("/assets/niko/niko-run-right.webp") center calc(100% + 4px)/38px 38px no-repeat;
-  content:"";
   display:none;
   filter:drop-shadow(0 2px 2px rgba(82,53,35,.2));
   transform:translateX(-50%);
   pointer-events:none;
 }
 
-.message-group.bubble-style-niko .message-bubble-shell:has(.group-start)::after {
+.message-group.bubble-style-niko .group-start > .niko-bubble-runner {
   display:block;
 }
 
@@ -19028,7 +19022,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 
 @media (prefers-reduced-motion:reduce) {
   .user-avatar.has-avatar-frame .avatar-frame-niko-run .avatar-frame-ornament > i:first-child { animation:none;background-position:57.142857% 0;opacity:1; }
-  .message-group.bubble-style-niko .message-bubble-shell::after { display:none; }
+  .niko-bubble-runner { display:none!important; }
 }
 
 /* Fufu IP: sand tabby stripes, charcoal ink, olive eyes, and a coral-pink spark. */
@@ -19181,6 +19175,10 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
 }
 .message-group.bubble-style-fufu .group-end > .fufu-bubble-runner {
   display:block;
+}
+
+.message-group:is(.bubble-style-niko,.bubble-style-fufu) .message-bubble.is-travel-map {
+  overflow:visible;
 }
 
 @keyframes fufu-frame-greeting {

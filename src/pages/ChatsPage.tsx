@@ -314,6 +314,10 @@ function FufuBubbleRunner() {
   return <span ref={runnerRef} aria-hidden="true" className="fufu-bubble-runner" />;
 }
 
+function NikoBubbleRunner() {
+  return <span aria-hidden="true" className="niko-bubble-runner" />;
+}
+
 function formatTime(value: number) {
   return new Date(value * 1000).toLocaleTimeString("zh-CN", {
     hour: "2-digit",
@@ -1146,6 +1150,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
               </button>
             );
           })}
+          {isFirst ? <NikoBubbleRunner /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -1590,6 +1595,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
+          {isFirst ? <NikoBubbleRunner /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
