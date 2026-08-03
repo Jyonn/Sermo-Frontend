@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.25",
+  "id": "2026.08.03.26",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "积木气泡全面重构",
+      "title": "漫画与文化气泡焕新",
       "items": [
-        "重绘顶部凸点、硬塑料高光、底部咬合槽与立体投影",
-        "图片、视频、语音、文件、位置和链接统一嵌入积木外壳",
-        "引用区与功能图标同步改为可拼装的积木组件"
+        "漫画与文化系列胶囊加入各自独立的视觉叙事",
+        "游龙气泡新增鳞纹、书法暗纹、云气边饰与动态龙珠",
+        "游龙的媒体卡片与功能图标同步使用玉石和描金语言"
       ]
     },
     "en": {
-      "title": "Rebuilt Toy Brick bubbles",
+      "title": "Refreshed comic and culture bubbles",
       "items": [
-        "Redrawn with raised studs, hard-plastic highlights, coupling slots, and depth",
-        "Images, video, audio, files, locations, and links now share one brick shell",
-        "Replies and utility icons now follow the same modular brick language"
+        "Comic and culture capsules now tell distinct visual stories",
+        "Dragon adds scale patterns, calligraphy, cloud trim, and an animated pearl",
+        "Dragon media cards and controls now share the same jade-and-gold language"
       ]
     }
   }

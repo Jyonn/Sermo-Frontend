@@ -6545,20 +6545,22 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 .personalization-bubble-stage.bubble-style-dragon,
 .message-group.bubble-style-dragon {
   --bubble-skin-other-bg:
-    radial-gradient(circle at 0 100%, transparent 0 15px, rgba(168, 45, 38, 0.08) 16px 17px, transparent 18px),
-    linear-gradient(145deg, #fffdf3, #efe5c9);
+    radial-gradient(circle at 8px 100%, transparent 0 10px, rgba(20, 103, 83, 0.12) 11px 12px, transparent 13px) 0 0 / 25px 19px repeat-x,
+    radial-gradient(circle at 92% 12%, rgba(178, 44, 38, 0.12) 0 2px, transparent 3px),
+    linear-gradient(145deg, #fffdf3, #efe3bf);
   --bubble-skin-other-color: #2d352d;
-  --bubble-skin-other-border: rgba(162, 119, 43, 0.72);
-  --bubble-skin-other-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72), 0 7px 18px rgba(96, 70, 26, 0.13);
+  --bubble-skin-other-border: rgba(166, 116, 32, 0.86);
+  --bubble-skin-other-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.82), inset 0 -3px rgba(180, 137, 54, 0.09), 0 7px 18px rgba(96, 70, 26, 0.16);
   --bubble-skin-self-bg:
-    radial-gradient(circle at 100% 100%, transparent 0 15px, rgba(239, 205, 117, 0.16) 16px 17px, transparent 18px),
-    linear-gradient(145deg, #176a58, #0d473e);
+    radial-gradient(circle at 9px 100%, transparent 0 10px, rgba(255, 229, 151, 0.16) 11px 12px, transparent 13px) 0 0 / 25px 19px repeat-x,
+    repeating-radial-gradient(ellipse at 100% 118%, transparent 0 13px, rgba(255, 232, 166, 0.08) 14px 15px),
+    linear-gradient(145deg, #176a58, #093d35);
   --bubble-skin-self-color: #fff4d2;
   --bubble-skin-self-border: #d3a84e;
-  --bubble-skin-self-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.13), 0 8px 20px rgba(9, 63, 52, 0.22);
+  --bubble-skin-self-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.19), inset 0 -3px rgba(3, 42, 35, 0.3), 0 8px 20px rgba(9, 63, 52, 0.27);
   --bubble-skin-other-radius: 20px 20px 20px 7px;
   --bubble-skin-self-radius: 20px 20px 7px 20px;
-  --bubble-skin-border-width: 1px;
+  --bubble-skin-border-width: 1.5px;
   --bubble-theme-accent: #a82d26;
   --bubble-theme-muted-other: rgba(45, 53, 45, 0.6);
   --bubble-theme-muted-self: rgba(255, 244, 210, 0.68);
@@ -7284,6 +7286,265 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   0%,58% { background-position:-24px 0,0 0,0 0; }
   82%,100% { background-position:58px 0,0 0,0 0; }
 }
+
+/* Editorial capsules for comic and culture collections. */
+.field-chat_bubble_style :is(.preview-comic,.preview-zen,.preview-hero,.preview-dragon,.preview-bauhaus,.preview-mosaic) > i {
+  overflow:visible;
+}
+.field-chat_bubble_style .preview-comic > i {
+  background:radial-gradient(circle,rgba(38,53,46,.15) 0 1px,transparent 1.4px) 0 0/5px 5px,#f7eecf;
+}
+.field-chat_bubble_style .preview-comic > i::before {
+  position:absolute;
+  width:43px;
+  height:37px;
+  background:#efad3f;
+  clip-path:polygon(48% 0,58% 25%,79% 7%,76% 31%,100% 30%,80% 48%,97% 65%,72% 64%,76% 93%,55% 72%,42% 100%,37% 73%,12% 91%,25% 62%,0 57%,25% 44%,5% 25%,34% 30%);
+  content:"";
+  transform:rotate(-5deg);
+}
+.field-chat_bubble_style .preview-comic i span {
+  position:relative;
+  width:40px;
+  height:25px;
+  border:2px solid #26352e;
+  border-radius:12px;
+  background:#fff9df;
+  box-shadow:3px 3px 0 #e48c25;
+  transform:rotate(-2deg);
+}
+.field-chat_bubble_style .preview-comic i span::before {
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#26352e;
+  content:"BAM!";
+  font:900 7px/1 var(--font-heading);
+  letter-spacing:-.03em;
+}
+.field-chat_bubble_style .preview-comic i span::after {
+  position:absolute;
+  right:3px;
+  bottom:-7px;
+  width:9px;
+  height:9px;
+  border-right:2px solid #26352e;
+  background:#fff9df;
+  clip-path:polygon(0 0,100% 0,100% 100%);
+  content:"";
+}
+
+.field-chat_bubble_style .preview-zen > i {
+  background:radial-gradient(circle at 50% 50%,rgba(91,75,57,.06),transparent 52%),#f1ede2;
+}
+.field-chat_bubble_style .preview-zen > i::before {
+  position:absolute;
+  width:33px;
+  height:33px;
+  border:3px solid rgba(49,54,49,.52);
+  border-right-color:transparent;
+  border-radius:50%;
+  content:"";
+  filter:blur(.15px);
+  transform:rotate(-28deg);
+}
+.field-chat_bubble_style .preview-zen i span {
+  position:relative;
+  width:37px;
+  height:23px;
+  border:1px solid rgba(48,54,48,.28);
+  border-radius:3px 13px 13px;
+  background:rgba(248,244,233,.92);
+  box-shadow:0 3px 8px rgba(49,43,34,.1);
+}
+.field-chat_bubble_style .preview-zen i span::before {
+  position:absolute;
+  top:6px;
+  right:7px;
+  left:7px;
+  height:1px;
+  background:rgba(48,54,48,.5);
+  box-shadow:0 5px 0 rgba(48,54,48,.24);
+  content:"";
+}
+.field-chat_bubble_style .preview-zen i span::after {
+  position:absolute;
+  right:4px;
+  bottom:3px;
+  width:5px;
+  height:5px;
+  border:1px solid #b84b3c;
+  content:"";
+}
+
+.field-chat_bubble_style .preview-hero > i {
+  background:radial-gradient(circle,rgba(23,43,63,.18) 0 1px,transparent 1.4px) 0 0/5px 5px,#8bd0df;
+}
+.field-chat_bubble_style .preview-hero > i::before {
+  position:absolute;
+  width:46px;
+  height:36px;
+  background:#f1c93b;
+  clip-path:polygon(50% 0,59% 30%,78% 8%,75% 34%,100% 25%,78% 50%,100% 67%,70% 64%,75% 100%,52% 72%,35% 98%,35% 69%,4% 79%,27% 53%,0 38%,32% 38%);
+  content:"";
+  transform:rotate(5deg);
+}
+.field-chat_bubble_style .preview-hero i span {
+  position:relative;
+  width:38px;
+  height:25px;
+  border:2px solid #172b3f;
+  border-radius:6px 12px 6px 12px;
+  background:#d9473f;
+  box-shadow:3px 3px 0 #1c8aa5;
+  transform:rotate(2deg);
+}
+.field-chat_bubble_style .preview-hero i span::before {
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#fff8db;
+  content:"GO!";
+  font:900 7px/1 var(--font-heading);
+  transform:skewX(-8deg);
+}
+.field-chat_bubble_style .preview-hero i span::after {
+  position:absolute;
+  top:-4px;
+  right:5px;
+  width:13px;
+  height:3px;
+  background:#f1c93b;
+  content:"";
+  transform:skewX(-28deg);
+}
+
+.field-chat_bubble_style .preview-dragon > i {
+  background:
+    radial-gradient(circle at 7px 100%,transparent 0 7px,rgba(18,105,82,.13) 8px 9px,transparent 10px) 0 0/20px 14px repeat-x,
+    #f3ead2;
+}
+.field-chat_bubble_style .preview-dragon > i::before {
+  position:absolute;
+  width:45px;
+  height:28px;
+  border-top:2px solid rgba(19,96,77,.42);
+  border-radius:50%;
+  content:"";
+  transform:rotate(-8deg) translateY(5px);
+}
+.field-chat_bubble_style .preview-dragon i span {
+  position:relative;
+  width:40px;
+  height:26px;
+  border:1.5px solid #d3a84e;
+  border-radius:14px 14px 5px 14px;
+  background:
+    repeating-radial-gradient(ellipse at 100% 118%,transparent 0 8px,rgba(255,232,166,.13) 9px 10px),
+    linear-gradient(145deg,#176a58,#093d35);
+  box-shadow:inset 0 0 0 1px rgba(255,244,210,.16),0 4px 8px rgba(9,63,52,.22);
+}
+.field-chat_bubble_style .preview-dragon i span::before {
+  position:absolute;
+  top:3px;
+  left:7px;
+  color:#f0d58b;
+  content:"龍";
+  font:900 13px/1 "Noto Serif SC",serif;
+  opacity:.82;
+  transform:rotate(-8deg);
+}
+.field-chat_bubble_style .preview-dragon i span::after {
+  position:absolute;
+  top:-5px;
+  right:6px;
+  width:8px;
+  height:8px;
+  border:1px solid #9c6d25;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff9cf,#d6a947 62%,#8c5b1c);
+  box-shadow:0 0 0 2px rgba(255,244,205,.42),0 2px 4px rgba(93,62,20,.24);
+  content:"";
+}
+
+.field-chat_bubble_style .preview-bauhaus > i {
+  background:linear-gradient(135deg,#f4f0df 0 62%,#1767a0 63%);
+}
+.field-chat_bubble_style .preview-bauhaus > i::before {
+  position:absolute;
+  left:8px;
+  width:17px;
+  height:17px;
+  border:2px solid #18232c;
+  border-radius:50%;
+  background:#d84638;
+  content:"";
+}
+.field-chat_bubble_style .preview-bauhaus i span {
+  position:relative;
+  width:38px;
+  height:25px;
+  border:2px solid #18232c;
+  border-radius:2px 12px 2px 12px;
+  background:linear-gradient(90deg,#1767a0 0 7px,transparent 7px),linear-gradient(145deg,#e9c933,#f6e06b);
+  box-shadow:3px 3px 0 rgba(24,35,44,.24);
+}
+.field-chat_bubble_style .preview-bauhaus i span::before {
+  position:absolute;
+  top:4px;
+  right:5px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#d84638;
+  content:"";
+}
+.field-chat_bubble_style .preview-bauhaus i span::after {
+  position:absolute;
+  right:5px;
+  bottom:4px;
+  width:14px;
+  height:2px;
+  background:#18232c;
+  content:"";
+}
+
+.field-chat_bubble_style .preview-mosaic > i {
+  background:#e7eee7;
+}
+.field-chat_bubble_style .preview-mosaic > i::before {
+  position:absolute;
+  width:46px;
+  height:34px;
+  background:conic-gradient(from 25deg at 50% 50%,#3f8e94 0 18%,#f0c46d 18% 34%,#b65e48 34% 50%,#f9edc9 50% 67%,#3f8e94 67% 82%,#d8904e 82%);
+  clip-path:polygon(8% 18%,42% 0,64% 12%,100% 5%,92% 44%,100% 77%,63% 100%,29% 88%,0 68%);
+  content:"";
+  opacity:.28;
+}
+.field-chat_bubble_style .preview-mosaic i span {
+  position:relative;
+  width:40px;
+  height:26px;
+  border:1px solid #3f8e94;
+  border-radius:12px 12px 5px 12px;
+  background:
+    linear-gradient(135deg,transparent 46%,rgba(38,61,64,.22) 47% 50%,transparent 51%),
+    linear-gradient(45deg,rgba(37,111,123,.17) 25%,transparent 25%) 0 0/9px 9px,
+    #fff9e9;
+  box-shadow:0 0 0 3px rgba(255,249,233,.9),0 0 0 4px rgba(63,142,148,.26),0 4px 8px rgba(43,86,88,.12);
+}
+.field-chat_bubble_style .preview-mosaic i span::before,
+.field-chat_bubble_style .preview-mosaic i span::after {
+  position:absolute;
+  width:8px;
+  height:8px;
+  content:"";
+  transform:rotate(45deg);
+}
+.field-chat_bubble_style .preview-mosaic i span::before { top:4px;right:6px;background:#d8904e; }
+.field-chat_bubble_style .preview-mosaic i span::after { bottom:4px;left:7px;background:#3f8e94; }
 
 .field-square_outfit_style .personalization-option > i > span,
 .field-square_prop_style .personalization-option > i > span,
@@ -17385,16 +17646,34 @@ html[data-theme="dark"] :is(
 }
 
 /* Dragon: jade, porcelain, cloud lines, and a small moving pearl. */
+.message-group.bubble-style-dragon .message-bubble:where(:not(.is-media):not(.is-link-preview))::before {
+  position:absolute;
+  z-index:0;
+  top:50%;
+  width:34px;
+  color:currentColor;
+  content:"龍";
+  font-family:"Noto Serif SC",serif;
+  font-size:30px;
+  font-weight:900;
+  line-height:1;
+  opacity:.09;
+  pointer-events:none;
+  transform:translateY(-50%) rotate(-8deg);
+}
+.message-group.bubble-style-dragon.self .message-bubble::before { left:8px; }
+.message-group.bubble-style-dragon.other .message-bubble::before { right:8px; }
+
 .message-group.bubble-style-dragon .message-bubble:where(:not(.is-media):not(.is-link-preview))::after {
   position: absolute;
   z-index: 2;
-  top: -4px;
-  width: 9px;
-  height: 9px;
+  top: -6px;
+  width: 11px;
+  height: 11px;
   border: 1px solid #9c6d25;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff9cf, #d6a947 62%, #8c5b1c);
-  box-shadow: 0 2px 5px rgba(93, 62, 20, 0.22);
+  box-shadow:0 0 0 2px rgba(255,244,205,.45),0 3px 7px rgba(93,62,20,.28),-8px 3px 0 -4px rgba(211,168,78,.58);
   content: "";
   animation: bubble-dragon-pearl 2.8s ease-in-out infinite alternate;
 }
@@ -17404,7 +17683,22 @@ html[data-theme="dark"] :is(
 
 .message-group.bubble-style-dragon :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(255, 244, 210, 0.18);
+  border-color:color-mix(in srgb,#d3a84e 58%,transparent);
+  background:
+    radial-gradient(circle at 35% 30%,rgba(255,255,255,.34),transparent 34%),
+    var(--bubble-theme-icon);
+  box-shadow:inset 0 0 0 1px rgba(255,244,210,.2),0 2px 0 color-mix(in srgb,#9c6d25 28%,transparent);
+}
+.message-group.bubble-style-dragon :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card,.message-travel-map-card) {
+  border-color:color-mix(in srgb,#d3a84e 72%,transparent);
+  background:
+    radial-gradient(circle at 9px 100%,transparent 0 10px,color-mix(in srgb,#d3a84e 12%,transparent) 11px 12px,transparent 13px) 0 0/25px 19px repeat-x,
+    var(--bubble-theme-surface);
+  box-shadow:var(--bubble-theme-shadow);
+}
+.message-group.bubble-style-dragon .message-media-frame {
+  border-color:#d3a84e;
+  box-shadow:inset 0 0 0 1px rgba(255,244,210,.22),0 6px 16px rgba(66,52,21,.16);
 }
 
 /* Bauhaus: primary geometry controls the silhouette and information hierarchy. */
