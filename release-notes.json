@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.21",
+  "id": "2026.08.03.22",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "气泡样式缩略图补全",
+      "title": "贴纸气泡媒体卡片重绘",
       "items": [
-        "打字机样式新增编号、墨带与纸张边缘缩略图",
-        "晨报样式新增报头、分栏和纸张纹理缩略图",
-        "小票样式新增锯齿纸边、金额行与条码缩略图"
+        "图片、视频、语音、文件与位置消息统一使用单层贴纸轮廓",
+        "内部内容会跟随连续消息的合并圆角，不再露出冲突的直角边框",
+        "多图宫格补齐独立的白色模切边与印刷阴影"
       ]
     },
     "en": {
-      "title": "Complete bubble-style thumbnails",
+      "title": "Refined sticker media bubbles",
       "items": [
-        "Typewriter now has a numbered paper-and-ribbon thumbnail",
-        "Morning News now shows a masthead, columns, and paper texture",
-        "Receipt now includes perforated edges, a total line, and a barcode"
+        "Images, videos, audio, files, and locations now share one sticker outline",
+        "Inner content follows grouped-message corners without conflicting square borders",
+        "Image galleries now carry the same die-cut rim and printed shadow"
       ]
     }
   }

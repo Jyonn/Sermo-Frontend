@@ -18597,10 +18597,47 @@ html[data-theme="dark"] .chat-conversation-preview {
 /* Sticker: deliberately offset white die-cut border and printed shadow. */
 .message-group.bubble-style-sticker .message-bubble {
   border: 3px solid #fff !important;
+  overflow: hidden;
+  background: var(--bubble-theme-surface) !important;
   box-shadow: 0 4px 0 rgba(39,70,61,.36), 0 0 0 2px #263c38 !important;
 }
 .message-group.bubble-style-sticker.other .message-bubble { transform: rotate(-.55deg); }
 .message-group.bubble-style-sticker.self .message-bubble { transform: rotate(.55deg); }
+
+/* The die-cut rim is the only card outline; inner media follows its grouped corners. */
+.message-group.bubble-style-sticker .message-bubble > :is(
+  .message-media-frame,
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card
+) {
+  overflow: hidden;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.message-group.bubble-style-sticker .message-bubble.is-media:not(.has-reply) {
+  padding: 0;
+}
+
+.message-group.bubble-style-sticker .message-bubble.has-reply > :is(
+  .message-media-frame,
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card
+) {
+  border-radius: max(5px, calc(var(--radius-bubble) - 5px));
+}
+
+/* Galleries do not have a message-bubble wrapper, so they own the same sticker rim. */
+.message-group.bubble-style-sticker .message-image-gallery.message-media-frame {
+  border: 3px solid #fff;
+  background: var(--bubble-theme-surface);
+  box-shadow: 0 4px 0 rgba(39,70,61,.36), 0 0 0 2px #263c38;
+}
 
 /* Toy brick: square modules with visible top studs and a hard plastic base. */
 .message-group.bubble-style-toybrick {
