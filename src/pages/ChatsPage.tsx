@@ -6098,40 +6098,18 @@ function LiveChatsPage() {
         onClose={() => setTravelMapRevokeConfirmOpen(false)}
         onConfirm={() => void revokeTravelMapAccess()}
       />
-      {messageMenu ? (
+      {messageMenu && !messageMenu.confirmDelete ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
             ref={messageMenuRef}
-            className={`message-context-menu ${messageMenu.placement === "bottom" ? "below" : "above"} ${messageMenu.confirmDelete ? "confirming" : ""}`}
+            className={`message-context-menu ${messageMenu.placement === "bottom" ? "below" : "above"}`}
             onClick={(event) => event.stopPropagation()}
             style={{
               left: messageMenu.anchorX,
               top: messageMenu.anchorY,
             }}
           >
-            {messageMenu.confirmDelete ? (
-              <>
-                <div className="message-context-title">{t("message.deleteConfirmTitle")}</div>
-                <div className="message-context-actions is-confirm">
-                  <button
-                    className="message-context-button"
-                    disabled={messageDeleteState === "deleting"}
-                    onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: false } : current))}
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined" aria-hidden="true">close</span>
-                    {t("common.cancel")}
-                  </button>
-                  <button className="message-context-button danger" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("me")} type="button">
-                    <span className="material-symbols-outlined" aria-hidden="true">delete</span>
-                    {messageDeleteState === "deleting" ? t("common.deleting") : t("message.deleteForMe")}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div
-                className="message-context-actions"
-              >
+            <div className="message-context-actions">
                 <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
                   <span className="material-symbols-outlined" aria-hidden="true">reply</span>
                   {t("message.reply")}
@@ -6185,11 +6163,20 @@ function LiveChatsPage() {
                     {t("common.delete")}
                   </button>
                 ) : null}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       ) : null}
+      <ConfirmDialog
+        open={Boolean(messageMenu?.confirmDelete)}
+        title={t("message.deleteConfirmTitle")}
+        description={t("message.deleteConfirmHint")}
+        confirmLabel={t("common.delete")}
+        busy={messageDeleteState === "deleting"}
+        danger
+        onClose={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: false } : current))}
+        onConfirm={() => void deleteMessage("me")}
+      />
       <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
     </AppChrome>
   );

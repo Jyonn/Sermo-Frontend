@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.18",
+  "id": "2026.08.03.19",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "足迹卡片补齐猫咪特效",
+      "title": "消息操作更简洁",
       "items": [
-        "足迹地图消息现在支持 Niko 的太空漫步与 Fufu 的奔跑特效",
-        "Niko 改为真实气泡内元素，不再依赖外层结构判断",
-        "足迹卡片仅为猫咪特效开放边缘空间，卡片圆角保持不变"
+        "“为所有人撤回”简化为“撤回”，“从我这里删除”简化为“删除”",
+        "点击删除后改用统一模态框确认，不再挤在消息操作条中",
+        "确认框会简要说明删除只影响自己的聊天记录"
       ]
     },
     "en": {
-      "title": "Cat effects for travel-map cards",
+      "title": "Simpler message actions",
       "items": [
-        "Travel-map messages now support Niko's moonwalk and Fufu's running effect",
-        "Niko now renders as a real bubble child instead of relying on outer structure detection",
-        "Only the cat-effect edge is allowed outside the card while its rounded surface remains intact"
+        "Recall for everyone is now Recall, and Delete for me is now Delete",
+        "Deleting now opens the standard confirmation dialog instead of expanding the action bar",
+        "The dialog briefly explains that deletion only affects your own chat history"
       ]
     }
   }
