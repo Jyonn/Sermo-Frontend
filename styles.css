@@ -18979,8 +18979,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   position:absolute;
   z-index:3;
   display:none;
-  width:115%;
-  height:125%;
+  width:230%;
+  height:250%;
   max-width:none;
   max-height:none;
   background-position:0 0;
@@ -18992,11 +18992,13 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 }
 
 .avatar-frame-niko-run .avatar-frame-ornament > i:first-child {
-  right:-7.5%;
+  right:auto;
   bottom:0;
+  left:50%;
   display:block;
   background-image:url("/assets/niko/niko-avatar-greeting-spritesheet.png");
   animation:niko-frame-greeting 10s steps(1,end) infinite;
+  transform:translateX(-50%);
 }
 
 /* Niko Patrol: the run cycle stays fixed on the top edge like a tiny moonwalk. */
@@ -19156,8 +19158,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   position:absolute;
   z-index:3;
   display:none;
-  width:118%;
-  height:128%;
+  width:236%;
+  height:256%;
   max-width:none;
   max-height:none;
   background-position:0 0;
@@ -19169,10 +19171,11 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
 }
 .avatar-frame-fufu-wave .avatar-frame-ornament > i:first-child {
   bottom:0;
-  left:5%;
+  left:50%;
   display:block;
   background-image:url("/assets/fufu/fufu-avatar-greeting-spritesheet.png");
   animation:fufu-frame-greeting 10s steps(1,end) infinite;
+  transform:translateX(-50%);
 }
 
 .message-group.bubble-style-fufu .message-bubble-shell {

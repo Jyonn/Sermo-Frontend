@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.10",
+  "id": "2026.08.03.11",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "猫咪头像框会完整打招呼了",
+      "title": "猫咪招呼更醒目了",
       "items": [
-        "Niko 与 Fufu 头像框升级为完整 8 帧动画",
-        "猫咪会从头像框钻出、挥手，再自然退回消失",
-        "动画每 10 秒出现一次，不打扰聊天与浏览"
+        "Niko 与 Fufu 现在统一从头像框底部中央钻出",
+        "猫咪尺寸扩大一倍，挥手动作更加清晰醒目",
+        "完整 8 帧动画仍保持每 10 秒播放一次"
       ]
     },
     "en": {
-      "title": "Complete cat greetings for avatar frames",
+      "title": "Bolder cat greetings",
       "items": [
-        "Niko and Fufu avatar frames now use complete eight-frame animations",
-        "Each cat peeks out, waves, and naturally retreats from the frame",
-        "The greeting plays once every 10 seconds without distracting from chat"
+        "Niko and Fufu now emerge from the bottom center of the avatar frame",
+        "Both cats are twice as large, making every wave clearer and more expressive",
+        "The complete eight-frame greeting still plays once every 10 seconds"
       ]
     }
   }
