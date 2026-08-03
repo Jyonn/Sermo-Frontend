@@ -6259,21 +6259,6 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       }}
       onContextMenu={(event) => event.preventDefault()}
     >
-      <header className="desktop-conversation-header chat-preview-header chat-background-default">
-        <div className="chat-conversation-topbar">
-          <button aria-label={t("common.back")} className="chat-back-button" disabled type="button">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <div className="avatar-wrap"><UserAvatar className="avatar" name={config.avatarName} uri={config.avatarUri} /></div>
-          <div className="chat-topbar-meta">
-            <strong className="chat-topbar-name"><span className="chat-topbar-title-text">{config.avatarName}</span></strong>
-            <div className="chat-topbar-status">{t("presence.online")}</div>
-          </div>
-        </div>
-        <button aria-label={t("chat.details")} className="icon-button" disabled type="button">
-          <span className="material-symbols-outlined">more_vert</span>
-        </button>
-      </header>
       <div className="chat-detail-scene chat-background-default">
         <div className="message-scroll">
           {groups.map((group) => (
@@ -6292,18 +6277,6 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
             />
           ))}
         </div>
-        <form className="composer chat-preview-composer" onSubmit={(event) => event.preventDefault()}>
-          <div className="composer-row composer-row-text">
-            <div className="composer-leading-actions">
-              <button aria-label={t("audio.record")} className="composer-action-button" disabled type="button"><ComposerSvgIcon className="composer-inline-svg" kind="mic" /></button>
-            </div>
-            <div className="composer-input-wrap">
-              <textarea className="textarea composer-input" disabled placeholder={t("chat.inputPlaceholder")} rows={1} />
-            </div>
-            <button aria-label={t("emoji.choose")} className="composer-emoji-button" disabled type="button"><ComposerSvgIcon className="composer-inline-svg" kind="emoji" /></button>
-            <button aria-label={t("common.expandMore")} className="composer-plus" disabled type="button"><span className="material-symbols-outlined">add</span></button>
-          </div>
-        </form>
       </div>
     </section>
   );

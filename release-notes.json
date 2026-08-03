@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.19",
+  "id": "2026.08.03.20",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "消息操作更简洁",
+      "title": "聊天气泡预览更轻量",
       "items": [
-        "“为所有人撤回”简化为“撤回”，“从我这里删除”简化为“删除”",
-        "点击删除后改用统一模态框确认，不再挤在消息操作条中",
-        "确认框会简要说明删除只影响自己的聊天记录"
+        "气泡预览模式取消展示聊天 Header 与底部输入框",
+        "整个预览区域最高不超过屏幕高度的 40%",
+        "不同类型消息继续在预览框内部滚动查看"
       ]
     },
     "en": {
-      "title": "Simpler message actions",
+      "title": "A lighter chat-bubble preview",
       "items": [
-        "Recall for everyone is now Recall, and Delete for me is now Delete",
-        "Deleting now opens the standard confirmation dialog instead of expanding the action bar",
-        "The dialog briefly explains that deletion only affects your own chat history"
+        "Bubble preview mode no longer shows the chat header or bottom composer",
+        "The complete preview is capped at 40% of the viewport height",
+        "All message types remain available through scrolling inside the preview"
       ]
     }
   }
