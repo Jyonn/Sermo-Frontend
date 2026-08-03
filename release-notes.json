@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.13",
+  "id": "2026.08.03.14",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "猫咪招呼尺寸修复",
+      "title": "Fufu 沿着气泡匀速奔跑",
       "items": [
-        "Niko 与 Fufu 现在统一从头像框底部中央钻出",
-        "修复通用头像框约束覆盖猫咪尺寸的问题，放大现在会真实生效",
-        "完整 8 帧动画仍保持每 10 秒播放一次"
+        "Fufu 现在紧贴实际气泡左下角起跑，不再从卡片外的远处出现",
+        "奔跑速度保持一致，气泡越长，完整跑过所需时间越长",
+        "文字、位置、文件、图片等不同消息类型共用同一轨道逻辑"
       ]
     },
     "en": {
-      "title": "Cat greeting size fix",
+      "title": "Constant-speed Fufu bubble runs",
       "items": [
-        "Niko and Fufu now emerge from the bottom center of the avatar frame",
-        "Fixed a shared avatar-frame constraint that prevented the larger cat size from taking effect",
-        "The complete eight-frame greeting still plays once every 10 seconds"
+        "Fufu now starts at the actual bubble's lower-left edge instead of far outside location cards",
+        "Running speed stays constant, while wider bubbles naturally take longer to cross",
+        "Text, location, file, image, and other message types now share the same track logic"
       ]
     }
   }

@@ -291,6 +291,29 @@ function MessageControlIcon({ kind, className }: { kind: "play" | "pause"; class
   );
 }
 
+function FufuBubbleRunner() {
+  const runnerRef = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    const runner = runnerRef.current;
+    const track = runner?.parentElement;
+    if (!runner || !track) return;
+
+    const updateTrack = () => {
+      const distance = Math.max(0, track.clientWidth - 32);
+      const duration = Math.max(1.1, distance / 64.8);
+      runner.style.setProperty("--fufu-run-distance", `${distance}px`);
+      runner.style.setProperty("--fufu-run-duration", `${duration}s`);
+    };
+    updateTrack();
+    const observer = new ResizeObserver(updateTrack);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, []);
+
+  return <span ref={runnerRef} aria-hidden="true" className="fufu-bubble-runner" />;
+}
+
 function formatTime(value: number) {
   return new Date(value * 1000).toLocaleTimeString("zh-CN", {
     hour: "2-digit",
@@ -1123,6 +1146,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
               </button>
             );
           })}
+          {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
     </div>
@@ -1566,6 +1590,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           ) : null}
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
+          {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
     </div>
