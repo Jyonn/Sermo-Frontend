@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.03.03",
+  "id": "2026.08.03.04",
   "publishedAt": "2026-08-03",
   "locales": {
     "zh-CN": {
-      "title": "Niko 来到言浪",
+      "title": "Niko 动起来了",
       "items": [
-        "新增 Niko 毛团聊天气泡，使用象牙白与猫眼绿呈现双方消息",
-        "新增 Niko 巡游头像框，小猫会沿头像四周持续奔跑",
-        "Niko 主题已适配真实聊天、多媒体卡片与深色模式"
+        "Niko 招呼头像框加入挥手动画，小猫会从头像一角探出问候",
+        "Niko 巡游气泡加入环绕奔跑动画，并在四个方向自然切换动作",
+        "奔跑动效使用独立渲染层，不再干扰发送状态与气泡合并"
       ]
     },
     "en": {
-      "title": "Niko arrives in Sermo",
+      "title": "Niko is now in motion",
       "items": [
-        "Added the Niko Fluff chat bubble with ivory and cat-eye green styles for both sides",
-        "Added the Niko Patrol avatar frame with a cat running around the portrait",
-        "The Niko theme now supports real chats, media cards, and dark mode"
+        "The Niko Hello avatar frame now features an animated greeting from the corner",
+        "The Niko Patrol bubble now runs around the message and changes direction at each corner",
+        "The runner uses an independent layer that preserves sending states and grouped corners"
       ]
     }
   }
