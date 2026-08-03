@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
@@ -26,6 +26,8 @@ import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
 import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
+
+const CharacterRigLabPage = lazy(() => import("./pages/CharacterRigLabPage"));
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -87,6 +89,14 @@ export default function App() {
         <Route path="/friend-invite" element={<FriendInvitePage />} />
         <Route path="/official-login" element={<OfficialLoginPage />} />
         <Route path="/account-switch" element={<AccountSwitchPage />} />
+        <Route
+          path="/labs/character-rigs"
+          element={
+            <Suspense fallback={<FeedbackState title="Loading motion lab" />}>
+              <CharacterRigLabPage />
+            </Suspense>
+          }
+        />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"
