@@ -18979,8 +18979,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   position:absolute;
   z-index:3;
   display:none;
-  width:230%;
-  height:250%;
+  width:460%;
+  height:500%;
   max-width:none;
   max-height:none;
   background-position:0 0;
@@ -19158,8 +19158,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   position:absolute;
   z-index:3;
   display:none;
-  width:236%;
-  height:256%;
+  width:472%;
+  height:512%;
   max-width:none;
   max-height:none;
   background-position:0 0;
