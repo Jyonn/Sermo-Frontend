@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.3",
+  "id": "2026.08.04.4",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励品质一眼可见",
+      "title": "升级仪式全面焕新",
       "items": [
-        "升级页面用独立颜色、纹理和标记区分五种奖励品质",
-        "聊天背景、气泡与头像框现在直接展示各自品质",
-        "菜单成长入口会随本级最高品质呈现对应视觉"
+        "升级改为庆祝、奖励揭晓和下一级预告三幕全屏流程",
+        "等级数字与成长进度通过动态效果完成跃迁",
+        "五个成长阶段和不同奖励类型拥有独立视觉语言"
       ]
     },
     "en": {
-      "title": "Reward rarity at a glance",
+      "title": "A new three-act level-up ceremony",
       "items": [
-        "Level-up rewards now use distinct colors, textures, and markers for all five rarities",
-        "Backgrounds, bubbles, and avatar frames show their rarity directly",
-        "The menu growth entry reflects the highest rarity unlocked at the current level"
+        "Level-ups now unfold across celebration, reward reveal, and next-level preview screens",
+        "Animated level numbers and progress make every milestone feel earned",
+        "Five growth stages and every reward category now have distinct visual identities"
       ]
     }
   }
