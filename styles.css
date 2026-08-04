@@ -16490,23 +16490,23 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-earned-strip > div::-webkit-scrollbar-thumb { border-radius: 99px; background: color-mix(in srgb, var(--stage-color) 42%, transparent); }
 .growth-earned-strip > div::-webkit-scrollbar-track { background: transparent; }
 .growth-earned-strip > div > span { flex: 0 0 auto; scroll-snap-align: center; }
-.growth-earned-chip { --reward-color: #64748b; width: 126px; display: grid; gap: 6px; padding: 7px; color: inherit; border: 1px solid color-mix(in srgb, var(--reward-color) 22%, transparent); border-radius: 11px; background: rgba(255,255,255,.72); text-align: left; transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
+.growth-earned-chip { --reward-color: #64748b; width: 126px; min-height: 94px; display: grid; grid-template-rows: 58px 20px; align-content: start; gap: 6px; padding: 7px; color: inherit; border: 1px solid color-mix(in srgb, var(--reward-color) 22%, transparent); border-radius: 11px; background: rgba(255,255,255,.72); text-align: left; transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
 .growth-earned-chip.is-active { border-color: var(--reward-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--reward-color) 16%, transparent), 0 9px 22px color-mix(in srgb, var(--reward-color) 13%, transparent); transform: translateY(-2px); }
 .growth-earned-chip.rarity-uncommon { --reward-color: #159a8c; }
 .growth-earned-chip.rarity-rare { --reward-color: #3478d4; }
 .growth-earned-chip.rarity-epic { --reward-color: #8557c7; }
 .growth-earned-chip.rarity-legendary { --reward-color: #c88719; }
-.growth-earned-chip .growth-reward-real-preview { width: 100%; aspect-ratio: 16 / 8; border-radius: 7px; }
+.growth-earned-chip .growth-reward-real-preview { width: 100%; height: 58px; aspect-ratio: auto; border-radius: 7px; }
 .growth-earned-chip .growth-reward-track-background.chat-background-choice { width: 100%; display: block; }
-.growth-earned-chip .growth-reward-track-background.chat-background-choice > span { width: 100%; aspect-ratio: 1.22; border-radius: 7px; }
+.growth-earned-chip .growth-reward-track-background.chat-background-choice > span { width: 100%; height: 58px; aspect-ratio: auto; border-radius: 7px; }
 .growth-earned-chip .growth-reward-track-bubble { width: 100%; min-width: 0; display: block; }
 .growth-earned-chip .growth-reward-track-bubble > .personalization-option { width: 100%; display: block; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .growth-earned-chip .growth-reward-track-bubble > .personalization-option > i { width: 100%; height: 58px; border-radius: 7px; }
 .growth-earned-chip .growth-reward-avatar { width: 34px; height: 34px; }
 .growth-earned-chip .growth-reward-real-preview.reward-bubble > .personalization-entry-preview > i > span { min-width: 34px; min-height: 16px; }
-.growth-earned-chip > span { min-width: 0; display: flex; align-items: center; gap: 5px; }
-.growth-earned-chip > span i { width: 15px; height: 15px; display: grid; flex: 0 0 15px; place-items: center; border-radius: 50%; color: #fff; background: var(--reward-color); font-size: .48rem; font-style: normal; }
-.growth-earned-chip > span strong { overflow: hidden; font-size: .61rem; text-overflow: ellipsis; white-space: nowrap; }
+.growth-earned-chip > span:last-child { min-width: 0; height: 20px; display: flex; align-items: center; gap: 5px; }
+.growth-earned-chip > span:last-child > i { width: 15px; height: 15px; display: grid; flex: 0 0 15px; place-items: center; border-radius: 50%; color: #fff; background: var(--reward-color); font-size: .48rem; font-style: normal; }
+.growth-earned-chip > span:last-child > strong { overflow: hidden; font-size: .61rem; text-overflow: ellipsis; white-space: nowrap; }
 .growth-quick-apply { width: min(650px, 100%); min-height: 48px; display: flex; align-items: center; justify-content: space-between; margin: -7px auto 0; padding: 0 16px; color: #fff; border: 0; border-radius: 13px; background: var(--reward-color, var(--stage-deep)); box-shadow: 0 12px 26px color-mix(in srgb, var(--reward-color, var(--stage-color)) 22%, transparent); font-size: .76rem; font-weight: 800; }
 .growth-quick-apply i { font-size: 1rem; font-style: normal; }
 .growth-quick-apply:disabled { opacity: .58; }

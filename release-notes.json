@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.10",
+  "id": "2026.08.04.11",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励轨道不再带动页面",
+      "title": "奖励轨道整齐对齐",
       "items": [
-        "自动展映只滚动底部奖励轨道，不再滚动全屏页面祖先",
-        "第四项奖励居中时页面保持在原位",
-        "全屏成长仪式增加严格的横向边界约束"
+        "背景、气泡、头像框和功能奖励统一预览槽高度",
+        "奖励名称使用固定高度的信息栏",
+        "修复轨道卡片因素材比例不同而上下参差的问题"
       ]
     },
     "en": {
-      "title": "The reward rail no longer shifts the page",
+      "title": "The reward rail now aligns cleanly",
       "items": [
-        "Autoplay now scrolls only the reward rail instead of its fullscreen ancestors",
-        "The page remains anchored when the fourth reward is centered",
-        "The growth ceremony now enforces strict horizontal viewport boundaries"
+        "Background, bubble, frame, and ability rewards now share one preview height",
+        "Reward names use a fixed-height information row",
+        "Fixed uneven card heights caused by differing asset proportions"
       ]
     }
   }
