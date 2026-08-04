@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.04.11",
+  "id": "2026.08.04.12",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励轨道整齐对齐",
+      "title": "奖励轨道更加清爽",
       "items": [
-        "背景、气泡、头像框和功能奖励统一预览槽高度",
-        "奖励名称使用固定高度的信息栏",
-        "修复轨道卡片因素材比例不同而上下参差的问题"
+        "隐藏奖励轨道的可见滚动条",
+        "继续支持手势横滑、自动居中与点击回放"
       ]
     },
     "en": {
-      "title": "The reward rail now aligns cleanly",
+      "title": "A cleaner reward rail",
       "items": [
-        "Background, bubble, frame, and ability rewards now share one preview height",
-        "Reward names use a fixed-height information row",
-        "Fixed uneven card heights caused by differing asset proportions"
+        "The visible reward rail scrollbar is now hidden",
+        "Swipe, automatic centering, and tap-to-replay remain available"
       ]
     }
   }

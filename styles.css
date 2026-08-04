@@ -16485,10 +16485,8 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-reward-theater { width: 100%; min-width: 0; display: grid; gap: 18px; overflow: hidden; }
 .growth-earned-strip { width: min(760px, 100%); min-width: 0; max-width: 100%; display: grid; gap: 7px; margin-inline: auto; overflow: hidden; contain: inline-size; }
 .growth-earned-strip > small { color: #7c8881; font-size: .6rem; font-weight: 760; letter-spacing: .08em; }
-.growth-earned-strip > div { width: 100%; min-width: 0; max-width: 100%; display: flex; gap: 8px; padding: 2px 1px 9px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; scroll-padding-inline: 1px; scroll-snap-type: x proximity; scrollbar-color: color-mix(in srgb, var(--stage-color) 42%, transparent) transparent; scrollbar-width: thin; touch-action: pan-x; }
-.growth-earned-strip > div::-webkit-scrollbar { height: 4px; }
-.growth-earned-strip > div::-webkit-scrollbar-thumb { border-radius: 99px; background: color-mix(in srgb, var(--stage-color) 42%, transparent); }
-.growth-earned-strip > div::-webkit-scrollbar-track { background: transparent; }
+.growth-earned-strip > div { width: 100%; min-width: 0; max-width: 100%; display: flex; gap: 8px; padding: 2px 1px 9px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; scroll-padding-inline: 1px; scroll-snap-type: x proximity; scrollbar-width: none; touch-action: pan-x; }
+.growth-earned-strip > div::-webkit-scrollbar { display: none; }
 .growth-earned-strip > div > span { flex: 0 0 auto; scroll-snap-align: center; }
 .growth-earned-chip { --reward-color: #64748b; width: 126px; min-height: 94px; display: grid; grid-template-rows: 58px 20px; align-content: start; gap: 6px; padding: 7px; color: inherit; border: 1px solid color-mix(in srgb, var(--reward-color) 22%, transparent); border-radius: 11px; background: rgba(255,255,255,.72); text-align: left; transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
 .growth-earned-chip.is-active { border-color: var(--reward-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--reward-color) 16%, transparent), 0 9px 22px color-mix(in srgb, var(--reward-color) 13%, transparent); transform: translateY(-2px); }
