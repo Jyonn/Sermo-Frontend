@@ -16222,6 +16222,7 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   min-height: 100dvh;
   padding: max(24px, env(safe-area-inset-top)) clamp(22px, 4.5vw, 72px) max(20px, env(safe-area-inset-bottom));
   overflow: hidden;
+  max-width: 100vw;
   color: #16221d;
   background:
     radial-gradient(circle at 76% 28%, var(--stage-glow), transparent 35%),
@@ -16280,8 +16281,10 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-arrival-page,
 .growth-rewards-page,
 .growth-next-page {
+  min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
   animation: growth-page-enter 560ms cubic-bezier(.16, 1, .3, 1) both;
 }
@@ -16392,6 +16395,28 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   height: auto;
   border-radius: 13px;
 }
+.growth-reward-real-preview.reward-chat-page {
+  aspect-ratio: 3 / 1;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+}
+.growth-reward-real-preview.reward-chat-page > .chat-conversation-preview {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: none;
+}
+.chat-conversation-preview.is-single-message .message-scroll {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 18px clamp(14px, 4vw, 34px);
+  overflow: hidden;
+}
+.chat-conversation-preview.is-single-message .message-group { width: 100%; }
 .growth-reward-real-preview.reward-background::after { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(15,25,21,.08)); content: ""; }
 .growth-reward-real-preview.reward-background i { position: absolute; z-index: 1; width: 30%; height: 19%; border-radius: 99px; box-shadow: 0 4px 10px rgba(20, 28, 24, .1); }
 .growth-reward-real-preview.reward-background i.other { left: 12%; bottom: 41%; background: rgba(255,255,255,.9); }
@@ -16454,10 +16479,10 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-reveal-card.is-spotlight .growth-reveal-card-copy strong { font-size: clamp(1.35rem, 3vw, 2.4rem); }
 .growth-reveal-card.is-spotlight::before { position: absolute; top: 18px; right: 22px; color: var(--reward-color); content: "SPOTLIGHT"; font: 800 .58rem/1 "Space Grotesk", sans-serif; letter-spacing: .16em; }
 
-.growth-reward-theater { display: grid; gap: 18px; }
-.growth-earned-strip { width: min(760px, 100%); display: grid; gap: 7px; margin-inline: auto; }
+.growth-reward-theater { width: 100%; min-width: 0; display: grid; gap: 18px; overflow: hidden; }
+.growth-earned-strip { width: min(760px, 100%); min-width: 0; max-width: 100%; display: grid; gap: 7px; margin-inline: auto; overflow: hidden; contain: inline-size; }
 .growth-earned-strip > small { color: #7c8881; font-size: .6rem; font-weight: 760; letter-spacing: .08em; }
-.growth-earned-strip > div { display: flex; gap: 8px; padding: 2px 1px 9px; overflow-x: auto; scroll-padding-inline: 1px; scroll-snap-type: x proximity; scrollbar-color: color-mix(in srgb, var(--stage-color) 42%, transparent) transparent; scrollbar-width: thin; }
+.growth-earned-strip > div { width: 100%; min-width: 0; max-width: 100%; display: flex; gap: 8px; padding: 2px 1px 9px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; scroll-padding-inline: 1px; scroll-snap-type: x proximity; scrollbar-color: color-mix(in srgb, var(--stage-color) 42%, transparent) transparent; scrollbar-width: thin; touch-action: pan-x; }
 .growth-earned-strip > div::-webkit-scrollbar { height: 4px; }
 .growth-earned-strip > div::-webkit-scrollbar-thumb { border-radius: 99px; background: color-mix(in srgb, var(--stage-color) 42%, transparent); }
 .growth-earned-strip > div::-webkit-scrollbar-track { background: transparent; }
@@ -16469,6 +16494,10 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-earned-chip.rarity-epic { --reward-color: #8557c7; }
 .growth-earned-chip.rarity-legendary { --reward-color: #c88719; }
 .growth-earned-chip .growth-reward-real-preview { width: 100%; aspect-ratio: 16 / 8; border-radius: 7px; }
+.growth-earned-chip .growth-reward-track-background.chat-background-choice { width: 100%; display: block; }
+.growth-earned-chip .growth-reward-track-background.chat-background-choice > span { width: 100%; aspect-ratio: 1.22; border-radius: 7px; }
+.growth-earned-chip .growth-reward-track-bubble.personalization-option { width: 100%; display: block; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.growth-earned-chip .growth-reward-track-bubble.personalization-option > i { width: 100%; height: 58px; border-radius: 7px; }
 .growth-earned-chip .growth-reward-avatar { width: 34px; height: 34px; }
 .growth-earned-chip .growth-reward-real-preview.reward-bubble > .personalization-entry-preview > i > span { min-width: 34px; min-height: 16px; }
 .growth-earned-chip > span { min-width: 0; display: flex; align-items: center; gap: 5px; }

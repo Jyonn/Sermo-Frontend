@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.7",
+  "id": "2026.08.04.8",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "成长奖励进入展映模式",
+      "title": "奖励预览与真实聊天对齐",
       "items": [
-        "奖励以 3:1 核心画幅自动轮播，不再逐项阻塞揭晓流程",
-        "底部奖励改为可横滑、可点击回放的完整奖励轨道",
-        "聊天背景、气泡和头像框支持在升级现场直接换上"
+        "聊天背景与气泡奖励改用真实聊天页预览，仅展示一条己方消息",
+        "底部轨道复用个性化中的背景样片和气泡胶囊",
+        "修复竖屏滑动第四项时整个奖励页面被横向拖动的问题"
       ]
     },
     "en": {
-      "title": "Growth rewards enter showcase mode",
+      "title": "Reward previews now match real chats",
       "items": [
-        "Rewards now autoplay in a 3:1 showcase without blocking the reveal flow",
-        "The complete reward rail supports horizontal scrolling and instant replay",
-        "Chat backgrounds, bubbles, and avatar frames can now be equipped during the celebration"
+        "Chat background and bubble rewards now use the real chat preview with one outgoing message",
+        "The reward rail reuses the same background swatches and bubble capsules as personalization",
+        "Fixed the entire reward page sliding sideways when reaching the fourth item in portrait mode"
       ]
     }
   }

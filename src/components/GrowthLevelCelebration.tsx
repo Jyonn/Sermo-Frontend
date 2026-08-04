@@ -5,6 +5,7 @@ import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, GrowthRewa
 import { useI18n, type TranslationKey } from "../lib/language";
 import { showToast } from "../lib/toast";
 import { UserAvatar } from "./UserAvatar";
+import ChatsPage from "../pages/ChatsPage";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
@@ -36,16 +37,15 @@ function RewardVisual({ reward }: { reward: GrowthRewardDTO }) {
   const assetKey = reward.asset_key ?? "default";
   if (reward.category === "background") {
     return (
-      <div className={`growth-reward-real-preview reward-background personalization-background-swatch theme-${assetKey}`}>
-        <i className="other" />
-        <i className="self" />
+      <div className="growth-reward-real-preview reward-chat-page">
+        <ChatsPage preview={{ avatarName: session?.user.name ?? "Sermo", backgroundTheme: assetKey as ChatBackgroundTheme, bubbleStyle: "default", selfOnly: true }} />
       </div>
     );
   }
   if (reward.category === "bubble") {
     return (
-      <div className="growth-reward-real-preview reward-bubble field-chat_bubble_style">
-        <div className={`personalization-entry-preview bubble-preview preview-${assetKey}`}><i><span /></i></div>
+      <div className="growth-reward-real-preview reward-chat-page">
+        <ChatsPage preview={{ avatarName: session?.user.name ?? "Sermo", bubbleStyle: assetKey as ChatBubbleStyle, selfOnly: true }} />
       </div>
     );
   }
@@ -61,6 +61,15 @@ function RewardVisual({ reward }: { reward: GrowthRewardDTO }) {
       </div>
     );
   }
+  return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
+}
+
+function RewardThumbnail({ reward }: { reward: GrowthRewardDTO }) {
+  const { session } = useAuth();
+  const assetKey = reward.asset_key ?? "default";
+  if (reward.category === "background") return <span className={`growth-reward-track-background chat-background-choice theme-${assetKey}`}><span /></span>;
+  if (reward.category === "bubble") return <span className={`growth-reward-track-bubble personalization-option preview-${assetKey}`}><i aria-hidden="true"><span /></i></span>;
+  if (reward.category === "frame") return <div className={`growth-reward-real-preview reward-frame frame-${assetKey}`}><UserAvatar className="growth-reward-avatar" frame={assetKey as AvatarFrameStyle} name={session?.user.name ?? "Sermo"} uri={session?.user.avatar_uri} /></div>;
   return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
 }
 
@@ -85,7 +94,7 @@ function RewardCard({ reward, index, compact = false, spotlight = false, active 
 function RewardTrackItem({ active, onClick, reward }: { active: boolean; onClick: () => void; reward: GrowthRewardDTO }) {
   return (
     <button aria-pressed={active} className={`growth-earned-chip rarity-${reward.rarity}${active ? " is-active" : ""}`} onClick={onClick} type="button">
-      <RewardVisual reward={reward} />
+      <RewardThumbnail reward={reward} />
       <span><i aria-hidden="true">{active ? "▶" : "✓"}</i><strong>{reward.title}</strong></span>
     </button>
   );

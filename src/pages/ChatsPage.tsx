@@ -38,7 +38,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -6200,6 +6200,8 @@ export interface ChatsPagePreviewConfig {
   avatarName: string;
   avatarUri?: string;
   bubbleStyle: ChatBubbleStyle;
+  backgroundTheme?: ChatBackgroundTheme;
+  selfOnly?: boolean;
 }
 
 const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
@@ -6249,6 +6251,25 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
 
 function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig }) {
   const { t } = useI18n();
+  if (config.selfOnly) {
+    const group: MessageGroup = {
+      key: "preview-self-text",
+      from: "self",
+      name: t("common.me"),
+      chatBubbleStyle: config.bubbleStyle,
+      messages: [previewMessage("text", "self", 1, config)],
+    };
+    const noop = () => undefined;
+    return (
+      <section aria-label={t("menu.chatBubble")} className="chat-conversation-panel chat-conversation-preview is-single-message" onContextMenu={(event) => event.preventDefault()}>
+        <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`}>
+          <div className="message-scroll">
+            <MessageGroupBlock enteringMessageIds={[]} group={group} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />
+          </div>
+        </div>
+      </section>
+    );
+  }
   const kinds: MessageKind[] = ["text", "image", "audio", "video", "file", "location", "map_access", "text"];
   const groups = kinds.flatMap((kind, kindIndex) => (["other", "self"] as const).map((from, sideIndex): MessageGroup => {
     const index = kindIndex * 2 + sideIndex;
