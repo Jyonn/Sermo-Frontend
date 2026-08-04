@@ -16496,8 +16496,9 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-earned-chip .growth-reward-real-preview { width: 100%; aspect-ratio: 16 / 8; border-radius: 7px; }
 .growth-earned-chip .growth-reward-track-background.chat-background-choice { width: 100%; display: block; }
 .growth-earned-chip .growth-reward-track-background.chat-background-choice > span { width: 100%; aspect-ratio: 1.22; border-radius: 7px; }
-.growth-earned-chip .growth-reward-track-bubble.personalization-option { width: 100%; display: block; padding: 0; border: 0; border-radius: 0; background: transparent; }
-.growth-earned-chip .growth-reward-track-bubble.personalization-option > i { width: 100%; height: 58px; border-radius: 7px; }
+.growth-earned-chip .growth-reward-track-bubble { width: 100%; min-width: 0; display: block; }
+.growth-earned-chip .growth-reward-track-bubble > .personalization-option { width: 100%; display: block; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.growth-earned-chip .growth-reward-track-bubble > .personalization-option > i { width: 100%; height: 58px; border-radius: 7px; }
 .growth-earned-chip .growth-reward-avatar { width: 34px; height: 34px; }
 .growth-earned-chip .growth-reward-real-preview.reward-bubble > .personalization-entry-preview > i > span { min-width: 34px; min-height: 16px; }
 .growth-earned-chip > span { min-width: 0; display: flex; align-items: center; gap: 5px; }

@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.8",
+  "id": "2026.08.04.9",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励预览与真实聊天对齐",
+      "title": "气泡奖励忠实还原",
       "items": [
-        "聊天背景与气泡奖励改用真实聊天页预览，仅展示一条己方消息",
-        "底部轨道复用个性化中的背景样片和气泡胶囊",
-        "修复竖屏滑动第四项时整个奖励页面被横向拖动的问题"
+        "成长奖励中的气泡胶囊现在复用完整个性化样式环境",
+        "修复漫画气泡丢失网点、拟声词、描边与错位阴影的问题",
+        "同步修复其他文化、编辑、趣味系列气泡的退化预览"
       ]
     },
     "en": {
-      "title": "Reward previews now match real chats",
+      "title": "Bubble rewards now render faithfully",
       "items": [
-        "Chat background and bubble rewards now use the real chat preview with one outgoing message",
-        "The reward rail reuses the same background swatches and bubble capsules as personalization",
-        "Fixed the entire reward page sliding sideways when reaching the fourth item in portrait mode"
+        "Reward capsules now reuse the complete personalization style scope",
+        "Fixed the comic bubble losing its halftone, caption, outline, and offset shadow",
+        "Restored faithful previews across the cultural, editorial, and playful bubble collections"
       ]
     }
   }

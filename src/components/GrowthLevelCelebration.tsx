@@ -68,7 +68,7 @@ function RewardThumbnail({ reward }: { reward: GrowthRewardDTO }) {
   const { session } = useAuth();
   const assetKey = reward.asset_key ?? "default";
   if (reward.category === "background") return <span className={`growth-reward-track-background chat-background-choice theme-${assetKey}`}><span /></span>;
-  if (reward.category === "bubble") return <span className={`growth-reward-track-bubble personalization-option preview-${assetKey}`}><i aria-hidden="true"><span /></i></span>;
+  if (reward.category === "bubble") return <span className="growth-reward-track-bubble field-chat_bubble_style"><span className={`personalization-option preview-${assetKey}`}><i aria-hidden="true"><span /></i></span></span>;
   if (reward.category === "frame") return <div className={`growth-reward-real-preview reward-frame frame-${assetKey}`}><UserAvatar className="growth-reward-avatar" frame={assetKey as AvatarFrameStyle} name={session?.user.name ?? "Sermo"} uri={session?.user.avatar_uri} /></div>;
   return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
 }
