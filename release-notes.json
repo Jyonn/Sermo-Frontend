@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.5",
+  "id": "2026.08.04.6",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励以真实外观登场",
+      "title": "奖励揭晓舞台重新聚焦",
       "items": [
-        "背景、气泡和头像框奖励直接展示真实外观预览",
-        "全部奖励严格按等级顺序逐项揭晓",
-        "史诗与典藏奖励会进入独占聚光舞台"
+        "当前奖励改为单张主舞台，已领取奖励收纳进横向成长轨道",
+        "修复奖励名称断行、默认气泡和无边框头像的失真预览",
+        "个性化奖励以统一尺寸复用真实外观，不再使用空白占位"
       ]
     },
     "en": {
-      "title": "Rewards now arrive in their true form",
+      "title": "A sharper reward reveal stage",
       "items": [
-        "Background, bubble, and avatar-frame rewards now use faithful live previews",
-        "Every reward is revealed in its exact level order",
-        "Epic and legendary rewards receive a dedicated spotlight stage"
+        "The current reward now owns the stage while received rewards move into a compact history rail",
+        "Fixed broken reward titles and inaccurate default bubble and frameless avatar previews",
+        "Personalization rewards now share consistent proportions and reuse their real appearance"
       ]
     }
   }

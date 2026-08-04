@@ -51,7 +51,7 @@ function RewardVisual({ reward }: { reward: GrowthRewardDTO }) {
   }
   if (reward.category === "frame") {
     return (
-      <div className="growth-reward-real-preview reward-frame">
+      <div className={`growth-reward-real-preview reward-frame frame-${assetKey}`}>
         <UserAvatar
           className="growth-reward-avatar"
           frame={assetKey as AvatarFrameStyle}
@@ -64,11 +64,11 @@ function RewardVisual({ reward }: { reward: GrowthRewardDTO }) {
   return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
 }
 
-function RewardCard({ reward, index, compact = false, spotlight = false }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean }) {
+function RewardCard({ reward, index, compact = false, spotlight = false, active = false }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean; active?: boolean }) {
   const { t } = useI18n();
   return (
     <article
-      className={`growth-reveal-card category-${reward.category} rarity-${reward.rarity}${compact ? " is-compact" : ""}${spotlight ? " is-spotlight" : ""}`}
+      className={`growth-reveal-card category-${reward.category} rarity-${reward.rarity}${compact ? " is-compact" : ""}${spotlight ? " is-spotlight" : ""}${active ? " is-active-reward" : ""}`}
       style={{ "--reward-index": index } as CSSProperties}
     >
       <RewardVisual reward={reward} />
@@ -78,6 +78,15 @@ function RewardCard({ reward, index, compact = false, spotlight = false }: { rew
       </div>
       <em>{t(`growth.rarity.${reward.rarity}` as TranslationKey)}</em>
       {reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}
+    </article>
+  );
+}
+
+function EarnedRewardChip({ reward }: { reward: GrowthRewardDTO }) {
+  return (
+    <article className={`growth-earned-chip rarity-${reward.rarity}`}>
+      <RewardVisual reward={reward} />
+      <span><i aria-hidden="true">✓</i><strong>{reward.title}</strong></span>
     </article>
   );
 }
@@ -210,15 +219,13 @@ export function GrowthLevelCelebration() {
             <p>{t("growth.rewardSequence", { current: rewardCursor + 1, count: level.rewards.length })}</p>
           </div>
           <div className={`growth-reward-theater${currentRewardIsSpotlight ? " is-spotlight" : ""}`}>
-            {currentRewardIsSpotlight ? (
-              <RewardCard index={rewardCursor} key={`${currentReward.id}-${rewardCursor}`} reward={currentReward} spotlight />
-            ) : (
-              <div className="growth-reveal-grid">
-                {level.rewards.slice(0, rewardCursor + 1).map((reward, index) => (
-                  <RewardCard index={index} key={reward.id} reward={reward} />
-                ))}
+            <RewardCard active index={rewardCursor} key={`${currentReward.id}-${rewardCursor}`} reward={currentReward} spotlight={currentRewardIsSpotlight} />
+            {rewardCursor > 0 ? (
+              <div className="growth-earned-strip">
+                <small>{t("growth.alreadyReceived")}</small>
+                <div>{level.rewards.slice(0, rewardCursor).map((reward) => <EarnedRewardChip key={reward.id} reward={reward} />)}</div>
               </div>
-            )}
+            ) : null}
             <div className="growth-reward-sequence-rail" aria-hidden="true">
               {level.rewards.map((reward, index) => <i className={`${index <= rewardCursor ? "is-revealed" : ""} rarity-${reward.rarity}`} key={reward.id} />)}
             </div>
