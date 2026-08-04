@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.6",
+  "id": "2026.08.04.7",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励揭晓舞台重新聚焦",
+      "title": "成长奖励进入展映模式",
       "items": [
-        "当前奖励改为单张主舞台，已领取奖励收纳进横向成长轨道",
-        "修复奖励名称断行、默认气泡和无边框头像的失真预览",
-        "个性化奖励以统一尺寸复用真实外观，不再使用空白占位"
+        "奖励以 3:1 核心画幅自动轮播，不再逐项阻塞揭晓流程",
+        "底部奖励改为可横滑、可点击回放的完整奖励轨道",
+        "聊天背景、气泡和头像框支持在升级现场直接换上"
       ]
     },
     "en": {
-      "title": "A sharper reward reveal stage",
+      "title": "Growth rewards enter showcase mode",
       "items": [
-        "The current reward now owns the stage while received rewards move into a compact history rail",
-        "Fixed broken reward titles and inaccurate default bubble and frameless avatar previews",
-        "Personalization rewards now share consistent proportions and reuse their real appearance"
+        "Rewards now autoplay in a 3:1 showcase without blocking the reveal flow",
+        "The complete reward rail supports horizontal scrolling and instant replay",
+        "Chat backgrounds, bubbles, and avatar frames can now be equipped during the celebration"
       ]
     }
   }
