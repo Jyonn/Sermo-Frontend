@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.9",
+  "id": "2026.08.04.10",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "气泡奖励忠实还原",
+      "title": "奖励轨道不再带动页面",
       "items": [
-        "成长奖励中的气泡胶囊现在复用完整个性化样式环境",
-        "修复漫画气泡丢失网点、拟声词、描边与错位阴影的问题",
-        "同步修复其他文化、编辑、趣味系列气泡的退化预览"
+        "自动展映只滚动底部奖励轨道，不再滚动全屏页面祖先",
+        "第四项奖励居中时页面保持在原位",
+        "全屏成长仪式增加严格的横向边界约束"
       ]
     },
     "en": {
-      "title": "Bubble rewards now render faithfully",
+      "title": "The reward rail no longer shifts the page",
       "items": [
-        "Reward capsules now reuse the complete personalization style scope",
-        "Fixed the comic bubble losing its halftone, caption, outline, and offset shadow",
-        "Restored faithful previews across the cultural, editorial, and playful bubble collections"
+        "Autoplay now scrolls only the reward rail instead of its fullscreen ancestors",
+        "The page remains anchored when the fourth reward is centered",
+        "The growth ceremony now enforces strict horizontal viewport boundaries"
       ]
     }
   }

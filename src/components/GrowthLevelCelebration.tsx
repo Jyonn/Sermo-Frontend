@@ -166,7 +166,11 @@ export function GrowthLevelCelebration() {
 
   useEffect(() => {
     if (page !== "rewards") return;
-    rewardTrackRef.current?.querySelector<HTMLElement>(`[data-reward-index="${rewardCursor}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    const track = rewardTrackRef.current;
+    const item = track?.querySelector<HTMLElement>(`[data-reward-index="${rewardCursor}"]`);
+    if (!track || !item) return;
+    const targetLeft = item.offsetLeft - (track.clientWidth - item.offsetWidth) / 2;
+    track.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
   }, [page, rewardCursor]);
 
   useEffect(() => {
