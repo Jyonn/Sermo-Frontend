@@ -169,8 +169,13 @@ export function GrowthLevelCelebration() {
     const track = rewardTrackRef.current;
     const item = track?.querySelector<HTMLElement>(`[data-reward-index="${rewardCursor}"]`);
     if (!track || !item) return;
-    const targetLeft = item.offsetLeft - (track.clientWidth - item.offsetWidth) / 2;
-    track.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+    if (window.matchMedia("(min-width: 900px)").matches) {
+      const targetTop = item.offsetTop - (track.clientHeight - item.offsetHeight) / 2;
+      track.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    } else {
+      const targetLeft = item.offsetLeft - (track.clientWidth - item.offsetWidth) / 2;
+      track.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+    }
   }, [page, rewardCursor]);
 
   useEffect(() => {

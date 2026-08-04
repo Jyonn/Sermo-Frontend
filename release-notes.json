@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.04.12",
+  "id": "2026.08.04.13",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "奖励轨道更加清爽",
+      "title": "宽屏奖励改用左侧纵向轨道",
       "items": [
-        "隐藏奖励轨道的可见滚动条",
-        "继续支持手势横滑、自动居中与点击回放"
+        "桌面宽屏下奖励列表移动到主预览左侧",
+        "奖励改为纵向滚动并自动垂直居中",
+        "手机端继续使用底部横向轨道"
       ]
     },
     "en": {
-      "title": "A cleaner reward rail",
+      "title": "A vertical reward rail for wide screens",
       "items": [
-        "The visible reward rail scrollbar is now hidden",
-        "Swipe, automatic centering, and tap-to-replay remain available"
+        "The reward list now sits to the left of the main preview on wide desktop screens",
+        "Rewards scroll vertically and center automatically",
+        "Mobile keeps the bottom horizontal rail"
       ]
     }
   }
