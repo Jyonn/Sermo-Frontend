@@ -873,6 +873,8 @@
   "growth.arrivalProgress": "成长值已抵达 LV.{{level}}",
   "growth.rewardsReceived": "本级奖励已抵达",
   "growth.rewardsReceivedHint": "{{count}} 项新能力与收藏，逐一收入成长档案",
+  "growth.rewardSequence": "正在揭晓第 {{current}} / {{count}} 项奖励",
+  "growth.revealingRewards": "奖励正在抵达",
   "growth.nextLevelPreview": "下一浪，已经可见",
   "growth.nextLevelScore": "累计 {{score}} 成长值后解锁",
   "growth.maxLevelReached": "你已抵达尽兴之巅",

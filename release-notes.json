@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.4",
+  "id": "2026.08.04.5",
   "publishedAt": "2026-08-04",
   "locales": {
     "zh-CN": {
-      "title": "升级仪式全面焕新",
+      "title": "奖励以真实外观登场",
       "items": [
-        "升级改为庆祝、奖励揭晓和下一级预告三幕全屏流程",
-        "等级数字与成长进度通过动态效果完成跃迁",
-        "五个成长阶段和不同奖励类型拥有独立视觉语言"
+        "背景、气泡和头像框奖励直接展示真实外观预览",
+        "全部奖励严格按等级顺序逐项揭晓",
+        "史诗与典藏奖励会进入独占聚光舞台"
       ]
     },
     "en": {
-      "title": "A new three-act level-up ceremony",
+      "title": "Rewards now arrive in their true form",
       "items": [
-        "Level-ups now unfold across celebration, reward reveal, and next-level preview screens",
-        "Animated level numbers and progress make every milestone feel earned",
-        "Five growth stages and every reward category now have distinct visual identities"
+        "Background, bubble, and avatar-frame rewards now use faithful live previews",
+        "Every reward is revealed in its exact level order",
+        "Epic and legendary rewards receive a dedicated spotlight stage"
       ]
     }
   }

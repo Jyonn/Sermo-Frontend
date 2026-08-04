@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { GrowthRewardDTO, UserGrowthDTO } from "../types";
+import type { AvatarFrameStyle } from "../types";
 import { useI18n, type TranslationKey } from "../lib/language";
+import { UserAvatar } from "./UserAvatar";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
@@ -29,14 +31,47 @@ function RewardIcon({ category }: { category: GrowthRewardDTO["category"] }) {
   return <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">{paths[category]}</svg>;
 }
 
-function RewardCard({ reward, index, compact = false }: { reward: GrowthRewardDTO; index: number; compact?: boolean }) {
+function RewardVisual({ reward }: { reward: GrowthRewardDTO }) {
+  const { session } = useAuth();
+  const assetKey = reward.asset_key ?? "default";
+  if (reward.category === "background") {
+    return (
+      <div className={`growth-reward-real-preview reward-background personalization-background-swatch theme-${assetKey}`}>
+        <i className="other" />
+        <i className="self" />
+      </div>
+    );
+  }
+  if (reward.category === "bubble") {
+    return (
+      <div className="growth-reward-real-preview reward-bubble field-chat_bubble_style">
+        <div className={`personalization-entry-preview bubble-preview preview-${assetKey}`}><i><span /></i></div>
+      </div>
+    );
+  }
+  if (reward.category === "frame") {
+    return (
+      <div className="growth-reward-real-preview reward-frame">
+        <UserAvatar
+          className="growth-reward-avatar"
+          frame={assetKey as AvatarFrameStyle}
+          name={session?.user.name ?? "Sermo"}
+          uri={session?.user.avatar_uri}
+        />
+      </div>
+    );
+  }
+  return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
+}
+
+function RewardCard({ reward, index, compact = false, spotlight = false }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean }) {
   const { t } = useI18n();
   return (
     <article
-      className={`growth-reveal-card category-${reward.category} rarity-${reward.rarity}${compact ? " is-compact" : ""}`}
+      className={`growth-reveal-card category-${reward.category} rarity-${reward.rarity}${compact ? " is-compact" : ""}${spotlight ? " is-spotlight" : ""}`}
       style={{ "--reward-index": index } as CSSProperties}
     >
-      <div className="growth-reveal-card-icon"><RewardIcon category={reward.category} /></div>
+      <RewardVisual reward={reward} />
       <div className="growth-reveal-card-copy">
         <span>{t(`growth.rewardCategory.${reward.category}` as TranslationKey)}</span>
         <strong>{reward.title}</strong>
@@ -52,6 +87,7 @@ export function GrowthLevelCelebration() {
   const { session } = useAuth();
   const [growth, setGrowth] = useState<UserGrowthDTO | null>(null);
   const [page, setPage] = useState<CelebrationPage>("arrival");
+  const [rewardCursor, setRewardCursor] = useState(0);
   const [acknowledging, setAcknowledging] = useState(false);
   const [error, setError] = useState("");
   const requestInFlightRef = useRef(false);
@@ -98,8 +134,17 @@ export function GrowthLevelCelebration() {
 
   useEffect(() => {
     setPage("arrival");
+    setRewardCursor(0);
     setError("");
   }, [pendingLevel]);
+
+  useEffect(() => {
+    if (page !== "rewards" || !level || rewardCursor >= level.rewards.length - 1) return;
+    const current = level.rewards[rewardCursor];
+    const delay = current.rarity === "epic" || current.rarity === "legendary" ? 1900 : 1050;
+    const timer = window.setTimeout(() => setRewardCursor((value) => value + 1), delay);
+    return () => window.clearTimeout(timer);
+  }, [level, page, rewardCursor]);
 
   useEffect(() => {
     if (!pendingLevel) return;
@@ -113,6 +158,10 @@ export function GrowthLevelCelebration() {
   }, [pendingLevel, page]);
 
   if (!growth || !pendingLevel || !level) return null;
+
+  const rewardSequenceComplete = rewardCursor >= level.rewards.length - 1;
+  const currentReward = level.rewards[rewardCursor];
+  const currentRewardIsSpotlight = currentReward?.rarity === "epic" || currentReward?.rarity === "legendary";
 
   const acknowledge = async () => {
     if (acknowledging) return;
@@ -158,10 +207,21 @@ export function GrowthLevelCelebration() {
           <div className="growth-ceremony-heading">
             <span>LEVEL {String(pendingLevel).padStart(2, "0")}</span>
             <h2 id="growth-celebration-title">{t("growth.rewardsReceived")}</h2>
-            <p>{t("growth.rewardsReceivedHint", { count: level.rewards.length })}</p>
+            <p>{t("growth.rewardSequence", { current: rewardCursor + 1, count: level.rewards.length })}</p>
           </div>
-          <div className="growth-reveal-grid">
-            {level.rewards.map((reward, index) => <RewardCard index={index} key={reward.id} reward={reward} />)}
+          <div className={`growth-reward-theater${currentRewardIsSpotlight ? " is-spotlight" : ""}`}>
+            {currentRewardIsSpotlight ? (
+              <RewardCard index={rewardCursor} key={`${currentReward.id}-${rewardCursor}`} reward={currentReward} spotlight />
+            ) : (
+              <div className="growth-reveal-grid">
+                {level.rewards.slice(0, rewardCursor + 1).map((reward, index) => (
+                  <RewardCard index={index} key={reward.id} reward={reward} />
+                ))}
+              </div>
+            )}
+            <div className="growth-reward-sequence-rail" aria-hidden="true">
+              {level.rewards.map((reward, index) => <i className={`${index <= rewardCursor ? "is-revealed" : ""} rarity-${reward.rarity}`} key={reward.id} />)}
+            </div>
           </div>
         </main>
       ) : null}
@@ -184,12 +244,12 @@ export function GrowthLevelCelebration() {
       <footer className="growth-ceremony-footer">
         {error ? <p role="alert">{error}</p> : null}
         <button
-          disabled={acknowledging}
+          disabled={acknowledging || (page === "rewards" && !rewardSequenceComplete)}
           onClick={() => page === "arrival" ? setPage("rewards") : page === "rewards" ? setPage("next") : void acknowledge()}
           ref={actionRef}
           type="button"
         >
-          <span>{page === "arrival" ? t("growth.viewRewards") : page === "rewards" ? t("growth.viewNextLevel") : acknowledging ? t("growth.confirming") : t("growth.gotIt")}</span>
+          <span>{page === "arrival" ? t("growth.viewRewards") : page === "rewards" ? rewardSequenceComplete ? t("growth.viewNextLevel") : t("growth.revealingRewards") : acknowledging ? t("growth.confirming") : t("growth.gotIt")}</span>
           <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><path d="M5 12h13M13.5 6.5 19 12l-5.5 5.5" /></svg>
         </button>
         <small>{page === "next" ? t("growth.recordHint") : t("growth.threeStepHint")}</small>

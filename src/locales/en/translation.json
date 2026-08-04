@@ -873,6 +873,8 @@
   "growth.arrivalProgress": "Growth has reached LV.{{level}}",
   "growth.rewardsReceived": "Your new rewards have arrived",
   "growth.rewardsReceivedHint": "{{count}} new abilities and collectibles added to your journey",
+  "growth.rewardSequence": "Revealing reward {{current}} of {{count}}",
+  "growth.revealingRewards": "Rewards arriving",
   "growth.nextLevelPreview": "The next wave is in sight",
   "growth.nextLevelScore": "Unlock at {{score}} total growth points",
   "growth.maxLevelReached": "You have reached the summit",
