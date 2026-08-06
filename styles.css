@@ -16364,6 +16364,30 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-reward-tags b { padding: 3px 6px; color: #7d4d08; border: 1px solid rgba(200, 135, 25, .28); border-radius: 99px; background: #fef3c7; font-size: .5rem; letter-spacing: .04em; }
 .growth-reveal-card > small { position: absolute; top: 10px; right: 10px; z-index: 2; color: #77827c; font-size: .54rem; }
 
+.growth-reward-preview-shell {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.growth-reward-preview-shell > .growth-reward-real-preview { grid-column: auto; }
+.growth-reward-rarity-label {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 8;
+  padding: 4px 8px;
+  color: var(--reward-color);
+  border: 1px solid color-mix(in srgb, var(--reward-color) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 88%, var(--reward-soft));
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--reward-color) 12%, transparent);
+  font-size: .54rem;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
 .growth-reward-real-preview {
   position: relative;
   z-index: 1;
@@ -16442,7 +16466,7 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-reward-real-preview.reward-symbol.category-capability { background: radial-gradient(circle at 70% 25%, rgba(255,255,255,.8), transparent 22%), linear-gradient(145deg, var(--reward-soft), #fff); }
 .growth-reward-real-preview.reward-symbol.category-identity { background: repeating-linear-gradient(120deg, transparent 0 18px, color-mix(in srgb, var(--reward-color) 8%, transparent) 19px 20px), linear-gradient(145deg, #fff, var(--reward-soft)); }
 
-.growth-reveal-card:has(.growth-reward-real-preview) { min-height: 244px; align-content: start; }
+.growth-reveal-card:has(.growth-reward-preview-shell) { min-height: 244px; align-content: start; }
 .growth-reveal-card.is-active-reward {
   width: min(650px, 100%);
   min-height: 0;
@@ -16538,8 +16562,16 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 
 .growth-next-rewards { display: grid; gap: 9px; max-width: 820px; }
 .growth-reveal-card.is-compact { min-height: 76px; grid-template-columns: 96px minmax(0, 1fr) auto; padding: 10px 14px; border-radius: 13px; animation-delay: calc(100ms + var(--reward-index) * 70ms); }
-.growth-reveal-card.is-compact:has(.growth-reward-real-preview) { min-height: 86px; align-content: center; }
-.growth-reveal-card.is-compact .growth-reward-real-preview { grid-column: auto; width: 96px; aspect-ratio: 16 / 9; border-radius: 9px; }
+.growth-reveal-card.is-compact:has(.growth-reward-preview-shell) { min-height: 86px; align-content: center; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell { grid-column: auto; width: 96px; }
+.growth-reveal-card.is-compact .growth-reward-real-preview { width: 96px; aspect-ratio: 16 / 9; border-radius: 9px; }
+.growth-reveal-card.is-compact .growth-reward-rarity-label { top: 5px; left: 5px; padding: 3px 6px; font-size: .48rem; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview { height: 58px; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .growth-reward-track-background,
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .growth-reward-track-bubble { width: 96px; height: 58px; display: block; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .chat-background-choice > span,
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .personalization-option > i { width: 96px; height: 58px; display: block; border-radius: 9px; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .personalization-option { width: 96px; height: 58px; display: block; padding: 0; border: 0; background: transparent; }
 .growth-reveal-card.is-compact .growth-reward-avatar { width: 42px; height: 42px; }
 .growth-reveal-card.is-compact .growth-reward-real-preview.reward-bubble > .personalization-entry-preview > i > span { min-width: 38px; min-height: 19px; }
 .growth-reveal-card.is-compact > .growth-reward-tags { grid-column: auto; align-self: center; }

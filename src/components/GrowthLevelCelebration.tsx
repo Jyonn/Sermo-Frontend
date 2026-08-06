@@ -75,12 +75,16 @@ function RewardThumbnail({ reward }: { reward: GrowthRewardDTO }) {
 
 function RewardCard({ reward, index, compact = false, spotlight = false, active = false }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean; active?: boolean }) {
   const { t } = useI18n();
+  const useCatalogPreview = compact && (reward.category === "background" || reward.category === "bubble");
   return (
     <article
       className={`growth-reveal-card category-${reward.category} rarity-${reward.rarity}${compact ? " is-compact" : ""}${spotlight ? " is-spotlight" : ""}${active ? " is-active-reward" : ""}`}
       style={{ "--reward-index": index } as CSSProperties}
     >
-      <RewardVisual reward={reward} />
+      <div className={`growth-reward-preview-shell${useCatalogPreview ? " is-catalog-preview" : ""}`}>
+        <span className="growth-reward-rarity-label">{t(`growth.rarity.${reward.rarity}` as TranslationKey)}</span>
+        {useCatalogPreview ? <RewardThumbnail reward={reward} /> : <RewardVisual reward={reward} />}
+      </div>
       <div className="growth-reveal-card-copy">
         <span>{t(`growth.rewardCategory.${reward.category}` as TranslationKey)}</span>
         <strong>{reward.title}</strong>
