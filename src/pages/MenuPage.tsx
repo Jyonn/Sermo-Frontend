@@ -121,6 +121,56 @@ function visibleBubbleStyle(style?: string) {
 }
 
 type NotificationMessageKind = "direct" | "group" | "online";
+type PersonalizationGroupMode = "level" | "rarity";
+type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
+type PersonalizationCatalogItem = readonly [string, TranslationKey];
+type PersonalizationCatalogSection = { key: string; label: string; items: PersonalizationCatalogItem[] };
+
+function PersonalizationCatalogControls({
+  groupMode,
+  onGroupModeChange,
+  onOwnershipChange,
+  ownership,
+}: {
+  groupMode: PersonalizationGroupMode;
+  onGroupModeChange: (mode: PersonalizationGroupMode) => void;
+  onOwnershipChange: (filter: PersonalizationOwnershipFilter) => void;
+  ownership: PersonalizationOwnershipFilter;
+}) {
+  const { t } = useI18n();
+  const filterRef = useRef<HTMLDetailsElement | null>(null);
+  const filters: PersonalizationOwnershipFilter[] = ["all", "owned", "unowned"];
+  const filterLabel = (filter: PersonalizationOwnershipFilter) => t(`menu.personalizationFilter.${filter}` as TranslationKey);
+  return (
+    <div className="personalization-catalog-controls">
+      <div aria-label={t("menu.personalizationGroupBy")} className="personalization-group-switch" role="group">
+        <button aria-pressed={groupMode === "level"} onClick={() => onGroupModeChange("level")} type="button">{t("menu.personalizationGroupLevel")}</button>
+        <button aria-pressed={groupMode === "rarity"} onClick={() => onGroupModeChange("rarity")} type="button">{t("menu.personalizationGroupRarity")}</button>
+      </div>
+      <details className="personalization-filter-menu" ref={filterRef}>
+        <summary><span>{filterLabel(ownership)}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></summary>
+        <div role="listbox">
+          {filters.map((filter) => (
+            <button
+              aria-selected={ownership === filter}
+              key={filter}
+              onClick={() => {
+                onOwnershipChange(filter);
+                filterRef.current?.removeAttribute("open");
+              }}
+              role="option"
+              type="button"
+            >
+              <span>{filterLabel(filter)}</span>
+              {ownership === filter ? <span aria-hidden="true">✓</span> : null}
+            </button>
+          ))}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 type PreferenceEditor =
   | { type: "threshold"; channel: NotificationChannel }
   | { type: "message"; channel: NotificationChannel; kind: NotificationMessageKind; field: "title" | "content" };
@@ -267,6 +317,8 @@ export default function MenuPage() {
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [chatBackgroundDraft, setChatBackgroundDraft] = useState<ChatBackgroundTheme>("default");
+  const [personalizationGroupMode, setPersonalizationGroupMode] = useState<PersonalizationGroupMode>("level");
+  const [personalizationOwnershipFilter, setPersonalizationOwnershipFilter] = useState<PersonalizationOwnershipFilter>("all");
   const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
     chat_bubble_style: "default",
     avatar_frame_style: "none",
@@ -342,6 +394,31 @@ export default function MenuPage() {
     (frame === "vip" && permanentVip)
     || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
     || (frame !== "vip" && growthLevel >= rewardLevel("frame", frame));
+  const buildPersonalizationSections = (
+    items: readonly PersonalizationCatalogItem[],
+    category: "background" | "bubble" | "frame",
+    isOwned: (assetKey: string) => boolean,
+  ): PersonalizationCatalogSection[] => {
+    const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"] as const;
+    const filtered = items.filter(([assetKey]) => {
+      const owned = isOwned(assetKey);
+      return personalizationOwnershipFilter === "all" || (personalizationOwnershipFilter === "owned" ? owned : !owned);
+    });
+    const groups = new Map<string, PersonalizationCatalogItem[]>();
+    filtered.forEach((item) => {
+      const [assetKey] = item;
+      const key = personalizationGroupMode === "level" ? String(rewardLevel(category, assetKey)) : rewardRarity(category, assetKey);
+      groups.set(key, [...(groups.get(key) ?? []), item]);
+    });
+    const keys = [...groups.keys()].sort((left, right) => personalizationGroupMode === "level"
+      ? Number(left) - Number(right)
+      : rarityOrder.indexOf(left as typeof rarityOrder[number]) - rarityOrder.indexOf(right as typeof rarityOrder[number]));
+    return keys.map((key) => ({
+      key,
+      label: personalizationGroupMode === "level" ? t("menu.personalizationLevelGroup", { level: key }) : t(`growth.rarity.${key}` as TranslationKey),
+      items: groups.get(key) ?? [],
+    }));
+  };
   const canCustomizeNotificationMessage =
     Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip)
     || hasGrowthCapability("custom_notification_message", 10);
@@ -1963,9 +2040,15 @@ export default function MenuPage() {
             <span className="chat-background-preview-bubble other">{t("menu.backgroundPreviewOther")}</span>
             <span className="chat-background-preview-bubble self">{t("menu.backgroundPreviewSelf")}</span>
           </div>
-          {chatBackgroundSections.map((section) => (
+          <PersonalizationCatalogControls
+            groupMode={personalizationGroupMode}
+            onGroupModeChange={setPersonalizationGroupMode}
+            onOwnershipChange={setPersonalizationOwnershipFilter}
+            ownership={personalizationOwnershipFilter}
+          />
+          {buildPersonalizationSections(chatBackgroundSections.flatMap((section) => section.items), "background", (theme) => growthLevel >= rewardLevel("background", theme)).map((section) => (
             <section className="personalization-library-section chat-background-section" key={section.label}>
-              <header><h3>{t(section.label)}</h3><span>{section.items.length}</span></header>
+              <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
               <div className="chat-background-grid">
                 {section.items.map(([theme, label]) => (
                   <button
@@ -1973,7 +2056,7 @@ export default function MenuPage() {
                     className={`chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${growthLevel < rewardLevel("background", theme) ? " is-locked" : ""}`}
                     disabled={chatBackgroundSaving}
                     key={theme}
-                    onClick={() => setChatBackgroundDraft(theme)}
+                    onClick={() => setChatBackgroundDraft(theme as ChatBackgroundTheme)}
                     type="button"
                   >
                     <span />
@@ -2028,23 +2111,29 @@ export default function MenuPage() {
             }} />
           </div>
           <div className="personalization-library">
-            {chatBubbleSections.map((section) => (
+            <PersonalizationCatalogControls
+              groupMode={personalizationGroupMode}
+              onGroupModeChange={setPersonalizationGroupMode}
+              onOwnershipChange={setPersonalizationOwnershipFilter}
+              ownership={personalizationOwnershipFilter}
+            />
+            {buildPersonalizationSections(personalizationOptions.chat_bubble_style, "bubble", (style) => canUseBubbleStyle(style as ChatBubbleStyle)).map((section) => (
               <section className="personalization-library-section" key={section.label}>
-                <header><h3>{t(section.label)}</h3><span>{section.items.length}</span></header>
+                <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
                 <div className="personalization-option-grid field-chat_bubble_style">
                   {section.items.map(([value, label]) => (
                     <button
                       aria-pressed={personalizationDraft.chat_bubble_style === value}
-                      className={`personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!canUseBubbleStyle(value) ? " is-locked" : ""}`}
+                      className={`personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!canUseBubbleStyle(value as ChatBubbleStyle) ? " is-locked" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
-                      onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: value }))}
+                      onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: value as ChatBubbleStyle }))}
                       type="button"
                     >
                       <i aria-hidden="true"><span /></i>
                       <strong>{t(label)}</strong>
-                      {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value) ? (
-                        <small>{vipOrLevelBubbleStyles.has(value) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
+                      {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value as ChatBubbleStyle) ? (
+                        <small>{vipOrLevelBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
                       ) : null}
                     </button>
                   ))}
@@ -2078,30 +2167,36 @@ export default function MenuPage() {
             <span>{t("menu.avatarFramePreviewHint")}</span>
           </div>
           <div className="personalization-library">
-            {avatarFrameSections.map((section) => (
+            <PersonalizationCatalogControls
+              groupMode={personalizationGroupMode}
+              onGroupModeChange={setPersonalizationGroupMode}
+              onOwnershipChange={setPersonalizationOwnershipFilter}
+              ownership={personalizationOwnershipFilter}
+            />
+            {buildPersonalizationSections(personalizationOptions.avatar_frame_style, "frame", (frame) => canUseAvatarFrame(frame as PersonalizationDTO["avatar_frame_style"])).map((section) => (
               <section className="personalization-library-section" key={section.label}>
-                <header><h3>{t(section.label)}</h3><span>{section.items.length}</span></header>
+                <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
                 <div className="personalization-option-grid field-avatar_frame_style">
                   {section.items.map(([value, label]) => (
                     <button
                       aria-pressed={personalizationDraft.avatar_frame_style === value}
-                      className={`personalization-option preview-${value} rarity-${rewardRarity("frame", value)}${personalizationDraft.avatar_frame_style === value ? " is-selected" : ""}${!canUseAvatarFrame(value) ? " is-locked" : ""}`}
+                      className={`personalization-option preview-${value} rarity-${rewardRarity("frame", value)}${personalizationDraft.avatar_frame_style === value ? " is-selected" : ""}${!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? " is-locked" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
-                      onClick={() => setPersonalizationDraft((current) => ({ ...current, avatar_frame_style: value }))}
+                      onClick={() => setPersonalizationDraft((current) => ({ ...current, avatar_frame_style: value as PersonalizationDTO["avatar_frame_style"] }))}
                       type="button"
                     >
                       <i aria-hidden="true">
                         <UserAvatar
                           className="mini-avatar personalization-option-avatar"
-                          frame={value}
+                          frame={value as PersonalizationDTO["avatar_frame_style"]}
                           name={session?.user.name ?? t("brand.user")}
                           uri={me?.avatar_uri ?? session?.user.avatar_uri}
                         />
                       </i>
                       <strong>{t(label)}</strong>
-                      {!canUseAvatarFrame(value) ? (
-                        <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
+                      {!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? (
+                        <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value as PersonalizationDTO["avatar_frame_style"]) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
                     </button>
                   ))}

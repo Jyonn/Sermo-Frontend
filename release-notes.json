@@ -1,25 +1,25 @@
 {
-  "id": "2026.08.07.1",
+  "id": "2026.08.07.2",
   "publishedAt": "2026-08-07",
   "locales": {
     "zh-CN": {
-      "title": "成长奖励展示更清晰",
+      "title": "个性化收藏更好找",
       "items": [
+        "背景、气泡与头像框支持按解锁等级或品质分组",
+        "新增全部、已拥有、未拥有筛选，快速定位可用装扮",
+        "装扮名称直接使用品质色，不再重复标注品质名称",
         "奖励品质集中展示在预览左上角，奖励信息更易识别",
-        "下一等级的背景与气泡改用个性化列表同款预览",
-        "新增 Xiaobai 奔赴气泡与迎接头像框，支持完整动画预览",
-        "认领永久 VIP 可一次性获得 500 成长值，已有永久 VIP 自动补发",
-        "18 级奖励品质按新版方案重新校准，突出关键能力与典藏节点"
+        "下一等级的背景与气泡改用个性化列表同款预览"
       ]
     },
     "en": {
-      "title": "Clearer growth rewards",
+      "title": "A better organized personalization library",
       "items": [
+        "Group backgrounds, bubbles, and avatar frames by unlock level or rarity",
+        "Filter the library by all, owned, or not owned items",
+        "Item names now carry their rarity color without redundant rarity labels",
         "Reward rarity now sits at the top-left of each preview for faster recognition",
-        "Next-level backgrounds and bubbles now use the same previews as Personalization",
-        "Meet the animated Xiaobai chat bubble and welcoming avatar frame",
-        "Permanent VIP now grants 500 Growth Points once, including existing VIP members",
-        "Reward rarity across all 18 levels now follows the revised progression plan"
+        "Next-level backgrounds and bubbles now use the same previews as Personalization"
       ]
     }
   }
