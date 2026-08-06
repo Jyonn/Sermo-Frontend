@@ -1,25 +1,25 @@
 {
-  "id": "2026.08.06.3",
+  "id": "2026.08.06.4",
   "publishedAt": "2026-08-06",
   "locales": {
     "zh-CN": {
       "title": "Xiaobai 奔赴言浪",
       "items": [
+        "成长品质改为纯视觉色彩表达，不再重复展示品质名称",
         "新增 Xiaobai 奔赴气泡与迎接头像框，支持完整动画预览",
         "认领永久 VIP 可一次性获得 500 成长值，已有永久 VIP 自动补发",
         "18 级奖励品质按新版方案重新校准，突出关键能力与典藏节点",
-        "成长值等级与安全条件上限分开展示",
-        "Niko、Fufu 等支持 VIP 提前使用的奖励增加明确标识"
+        "成长值等级与安全条件上限分开展示"
       ]
     },
     "en": {
       "title": "Xiaobai runs into Yanlang",
       "items": [
+        "Growth rarity is now expressed through color without repeated text labels",
         "Meet the animated Xiaobai chat bubble and welcoming avatar frame",
         "Permanent VIP now grants 500 Growth Points once, including existing VIP members",
         "Reward rarity across all 18 levels now follows the revised progression plan",
-        "Score level and security-gated effective level are now shown separately",
-        "Niko, Fufu, and other VIP early-access rewards now carry a clear label"
+        "Score level and security-gated effective level are now shown separately"
       ]
     }
   }

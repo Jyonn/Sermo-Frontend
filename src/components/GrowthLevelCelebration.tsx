@@ -86,7 +86,6 @@ function RewardCard({ reward, index, compact = false, spotlight = false, active 
         <strong>{reward.title}</strong>
       </div>
       <div className="growth-reward-tags">
-        <em>{t(`growth.rarity.${reward.rarity}` as TranslationKey)}</em>
         {reward.vip_access === "level_or_vip" ? <b>VIP · {t("growth.earlyAccess")}</b> : null}
       </div>
       {reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}

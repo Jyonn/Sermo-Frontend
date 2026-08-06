@@ -1355,14 +1355,6 @@ img {
   letter-spacing: 0.02em;
 }
 
-.menu-growth-level i {
-  margin-left: 5px;
-  font-size: 0.48rem;
-  font-style: normal;
-  letter-spacing: 0;
-  opacity: 0.78;
-}
-
 .menu-growth-entry.rarity-rare .menu-growth-level { color: #245fa9; background: #eaf3ff; }
 .menu-growth-entry.rarity-epic .menu-growth-level { color: #7040aa; background: #f0eaff; }
 .menu-growth-entry.rarity-legendary .menu-growth-level {
@@ -2030,51 +2022,46 @@ img {
   font-size: inherit;
 }
 
-.growth-level-detail-unlocks .growth-reward-row em {
-  margin-left: auto;
-  color: var(--rarity-color, #64748b);
-  font-size: 0.58rem;
-  font-style: normal;
-  font-weight: 820;
-}
-
 .growth-reward-row.is-uncommon { --rarity-color: #117f75; --rarity-soft: #e8f7f3; --rarity-line: #b7e5dc; }
 .growth-reward-row.is-rare { --rarity-color: #2869b7; --rarity-soft: #edf5ff; --rarity-line: #c6ddf8; }
 .growth-reward-row.is-epic { --rarity-color: #7546ae; --rarity-soft: #f3edff; --rarity-line: #d9c9f2; }
 .growth-reward-row.is-legendary { --rarity-color: #9b6310; --rarity-soft: linear-gradient(120deg, #fff9e8, #fff0c2); --rarity-line: #ead091; }
 
-.rarity-badge {
-  --rarity-color: #64748b;
-  --rarity-soft: #eef2f6;
-  --rarity-mark: "●";
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border: 1px solid color-mix(in srgb, var(--rarity-color) 24%, transparent);
-  border-radius: 999px;
-  color: var(--rarity-color);
-  background: var(--rarity-soft);
-  font-size: 0.5rem;
-  font-weight: 850;
-  line-height: 1.2;
-  letter-spacing: 0.04em;
+.personalization-option.rarity-uncommon,
+.chat-background-choice.rarity-uncommon,
+.personalization-background-entry.rarity-uncommon { --rarity-color: #159a8c; }
+.personalization-option.rarity-rare,
+.chat-background-choice.rarity-rare,
+.personalization-background-entry.rarity-rare { --rarity-color: #3478d4; }
+.personalization-option.rarity-epic,
+.chat-background-choice.rarity-epic,
+.personalization-background-entry.rarity-epic { --rarity-color: #8557c7; }
+.personalization-option.rarity-legendary,
+.chat-background-choice.rarity-legendary,
+.personalization-background-entry.rarity-legendary { --rarity-color: #c88719; }
+
+.personalization-option[class*="rarity-"],
+.chat-background-choice[class*="rarity-"] {
+  position: relative;
 }
 
-.rarity-badge::before { content: var(--rarity-mark); font-size: 0.46rem; }
-.rarity-badge.is-uncommon { --rarity-color: #117f75; --rarity-soft: #e8f7f3; --rarity-mark: "◆"; }
-.rarity-badge.is-rare { --rarity-color: #2869b7; --rarity-soft: #edf5ff; --rarity-mark: "◆◆"; }
-.rarity-badge.is-epic { --rarity-color: #7546ae; --rarity-soft: #f3edff; --rarity-mark: "✦"; }
-.rarity-badge.is-legendary { --rarity-color: #9b6310; --rarity-soft: linear-gradient(120deg, #fff9e8, #ffe8a3); --rarity-mark: "✦"; }
-
-.personalization-background-entry .rarity-badge {
-  margin-top: 2px;
+.personalization-option[class*="rarity-"]::before,
+.chat-background-choice[class*="rarity-"]::before {
+  position: absolute;
+  z-index: 3;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid color-mix(in srgb, var(--rarity-color, #64748b) 42%, white);
+  border-radius: 50%;
+  background: var(--rarity-color, #64748b);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rarity-color, #64748b) 13%, transparent);
+  content: "";
 }
 
-.personalization-option > .rarity-badge,
-.chat-background-choice > .rarity-badge {
-  justify-self: center;
+.personalization-background-entry[class*="rarity-"] {
+  border-color: color-mix(in srgb, var(--rarity-color, #64748b) 24%, var(--line, #e3e8e5));
 }
 
 .growth-level-detail-unlocks span small {
@@ -16199,13 +16186,9 @@ html[data-theme="dark"] body .growth-celebration-footer > small {
   color: var(--text-muted);
 }
 
-html[data-theme="dark"] body .rarity-badge.is-uncommon,
 html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks span).is-uncommon { --rarity-soft: rgba(17, 127, 117, 0.16); --rarity-line: rgba(77, 196, 181, 0.3); --rarity-color: #64d4c7; }
-html[data-theme="dark"] body .rarity-badge.is-rare,
 html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks span).is-rare { --rarity-soft: rgba(40, 105, 183, 0.18); --rarity-line: rgba(91, 157, 234, 0.32); --rarity-color: #79b5f7; }
-html[data-theme="dark"] body .rarity-badge.is-epic,
 html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks span).is-epic { --rarity-soft: rgba(117, 70, 174, 0.2); --rarity-line: rgba(170, 117, 226, 0.34); --rarity-color: #c29aef; }
-html[data-theme="dark"] body .rarity-badge.is-legendary,
 html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks span).is-legendary { --rarity-soft: linear-gradient(120deg, rgba(155, 99, 16, 0.23), rgba(91, 63, 17, 0.22)); --rarity-line: rgba(230, 185, 85, 0.4); --rarity-color: #f0c76b; }
 
 /* Three-act level-up ceremony */

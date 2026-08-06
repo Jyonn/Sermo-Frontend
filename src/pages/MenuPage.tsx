@@ -330,7 +330,6 @@ export default function MenuPage() {
     rewardFor(category, assetKey)?.level ?? 1;
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string) =>
     (assetKey === "vip" ? "epic" : rewardFor(category, assetKey)?.rarity ?? "common");
-  const rarityLabel = (rarity: string) => t(`growth.rarity.${rarity}` as TranslationKey);
   const currentLevelRarity = (() => {
     const rank = ["common", "uncommon", "rare", "epic", "legendary"];
     const rewards = me?.growth?.levels?.find((item) => item.level === growthLevel)?.rewards ?? [];
@@ -1467,7 +1466,7 @@ export default function MenuPage() {
               {space?.slug ? <span>@{space.slug}</span> : null}
             </div>
             <button className={`menu-growth-entry rarity-${currentLevelRarity}`} onClick={() => setGrowthDrawerOpen(true)} type="button">
-              <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}<i>{rarityLabel(currentLevelRarity)}</i></span>
+              <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}</span>
               <span className="menu-growth-identity">
                 <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? t("growth.firstLevel")}</strong>
               </span>
@@ -1778,7 +1777,6 @@ export default function MenuPage() {
                   <span className={`growth-reward-row is-${reward.rarity}`} key={reward.id}>
                     <i />
                     <b>{reward.title}</b>
-                    <em>{rarityLabel(reward.rarity)}</em>
                     {reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}
                   </span>
                 ))
@@ -1920,13 +1918,12 @@ export default function MenuPage() {
               <small>
                 {isDesktopViewport ? t("menu.chatBackgroundDesktopDefault") : t("menu.chatBackgroundHint")}
               </small>
-              <span className={`rarity-badge is-${rewardRarity("background", me?.chat_background_theme ?? "default")}`}>{rarityLabel(rewardRarity("background", me?.chat_background_theme ?? "default"))}</span>
             </span>
             {!isDesktopViewport ? <span className="material-symbols-outlined">chevron_right</span> : null}
           </button>
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("bubble", visibleBubbleStyle(me?.chat_bubble_style))}`} onClick={() => setChatBubbleDrawerOpen(true)} type="button">
             <span className={`personalization-entry-preview bubble-preview preview-${visibleBubbleStyle(me?.chat_bubble_style)}`}><i /></span>
-            <span><strong>{t("menu.chatBubble")}</strong><small>{t("menu.chatBubbleHint")}</small><span className={`rarity-badge is-${rewardRarity("bubble", visibleBubbleStyle(me?.chat_bubble_style))}`}>{rarityLabel(rewardRarity("bubble", visibleBubbleStyle(me?.chat_bubble_style)))}</span></span>
+            <span><strong>{t("menu.chatBubble")}</strong><small>{t("menu.chatBubbleHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("frame", me?.avatar_frame_style ?? "none")}`} onClick={() => setAvatarFrameDrawerOpen(true)} type="button">
@@ -1938,7 +1935,7 @@ export default function MenuPage() {
                 uri={me?.avatar_uri ?? session?.user.avatar_uri}
               />
             </span>
-            <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small><span className={`rarity-badge is-${rewardRarity("frame", me?.avatar_frame_style ?? "none")}`}>{rarityLabel(rewardRarity("frame", me?.avatar_frame_style ?? "none"))}</span></span>
+            <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
           <button className="personalization-background-entry personalization-feature-entry" onClick={() => setSquareCharacterDrawerOpen(true)} type="button">
@@ -1973,7 +1970,7 @@ export default function MenuPage() {
                 {section.items.map(([theme, label]) => (
                   <button
                     aria-pressed={chatBackgroundDraft === theme}
-                    className={`chat-background-choice theme-${theme}${chatBackgroundDraft === theme ? " is-selected" : ""}${growthLevel < rewardLevel("background", theme) ? " is-locked" : ""}`}
+                    className={`chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${growthLevel < rewardLevel("background", theme) ? " is-locked" : ""}`}
                     disabled={chatBackgroundSaving}
                     key={theme}
                     onClick={() => setChatBackgroundDraft(theme)}
@@ -1981,7 +1978,6 @@ export default function MenuPage() {
                   >
                     <span />
                     <strong>{t(label)}</strong>
-                    <span className={`rarity-badge is-${rewardRarity("background", theme)}`}>{rarityLabel(rewardRarity("background", theme))}</span>
                     {growthLevel < rewardLevel("background", theme) ? <small>{t("menu.levelUnlock", { level: rewardLevel("background", theme) })}</small> : null}
                   </button>
                 ))}
@@ -2039,7 +2035,7 @@ export default function MenuPage() {
                   {section.items.map(([value, label]) => (
                     <button
                       aria-pressed={personalizationDraft.chat_bubble_style === value}
-                      className={`personalization-option preview-${value}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!canUseBubbleStyle(value) ? " is-locked" : ""}`}
+                      className={`personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!canUseBubbleStyle(value) ? " is-locked" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
                       onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: value }))}
@@ -2047,7 +2043,6 @@ export default function MenuPage() {
                     >
                       <i aria-hidden="true"><span /></i>
                       <strong>{t(label)}</strong>
-                      <span className={`rarity-badge is-${rewardRarity("bubble", value)}`}>{rarityLabel(rewardRarity("bubble", value))}</span>
                       {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value) ? (
                         <small>{vipOrLevelBubbleStyles.has(value) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
                       ) : null}
@@ -2090,7 +2085,7 @@ export default function MenuPage() {
                   {section.items.map(([value, label]) => (
                     <button
                       aria-pressed={personalizationDraft.avatar_frame_style === value}
-                      className={`personalization-option preview-${value}${personalizationDraft.avatar_frame_style === value ? " is-selected" : ""}${!canUseAvatarFrame(value) ? " is-locked" : ""}`}
+                      className={`personalization-option preview-${value} rarity-${rewardRarity("frame", value)}${personalizationDraft.avatar_frame_style === value ? " is-selected" : ""}${!canUseAvatarFrame(value) ? " is-locked" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
                       onClick={() => setPersonalizationDraft((current) => ({ ...current, avatar_frame_style: value }))}
@@ -2105,7 +2100,6 @@ export default function MenuPage() {
                         />
                       </i>
                       <strong>{t(label)}</strong>
-                      <span className={`rarity-badge is-${rewardRarity("frame", value)}`}>{rarityLabel(rewardRarity("frame", value))}</span>
                       {!canUseAvatarFrame(value) ? (
                         <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
