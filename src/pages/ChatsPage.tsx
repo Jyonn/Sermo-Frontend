@@ -182,7 +182,7 @@ function avatarLabel(name: string) {
 function visibleBubbleStyle(style?: string) {
   return [
     "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic",
-    "typewriter", "newspaper", "receipt", "sticker", "toybrick", "niko", "fufu",
+    "typewriter", "newspaper", "receipt", "sticker", "toybrick", "niko", "fufu", "xiaobai",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
@@ -317,6 +317,10 @@ function FufuBubbleRunner() {
 
 function NikoBubbleRunner() {
   return <span aria-hidden="true" className="niko-bubble-runner" />;
+}
+
+function XiaobaiBubbleRunner() {
+  return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
 }
 
 function formatTime(value: number) {
@@ -1165,6 +1169,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
             );
           })}
           {isFirst ? <NikoBubbleRunner /> : null}
+          {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -1610,6 +1615,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
+          {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>

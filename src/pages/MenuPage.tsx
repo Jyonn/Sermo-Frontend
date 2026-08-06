@@ -61,7 +61,7 @@ const personalizationOptions = {
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
     ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
-    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"],
+    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"], ["xiaobai", "menu.styleXiaobai"],
     ["vip", "menu.styleVip"],
   ],
   avatar_frame_style: [
@@ -74,7 +74,7 @@ const personalizationOptions = {
     ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
     ["camera", "menu.frameCamera"],
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
-    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["vip", "menu.frameVip"],
+    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["xiaobai-run", "menu.frameXiaobaiRun"], ["vip", "menu.frameVip"],
   ],
   square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"], ["raincoat", "menu.outfitRaincoat"], ["hanfu", "menu.outfitHanfu"], ["utility", "menu.outfitUtility"], ["sailor", "menu.outfitSailor"]],
   square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"], ["camera", "menu.propCamera"], ["bouquet", "menu.propBouquet"], ["umbrella", "menu.propUmbrella"], ["skateboard", "menu.propSkateboard"]],
@@ -101,7 +101,7 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu", "xiaobai"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
 
@@ -110,11 +110,11 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
   { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["butterfly", "moon", "snowfall"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "vip"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "xiaobai-run", "vip"].includes(value)) },
 ];
 
-const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
-const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
+const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu", "xiaobai"]);
+const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave", "xiaobai-run"]);
 
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
