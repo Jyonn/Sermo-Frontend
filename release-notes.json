@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.04.13",
-  "publishedAt": "2026-08-04",
+  "id": "2026.08.06.1",
+  "publishedAt": "2026-08-06",
   "locales": {
     "zh-CN": {
-      "title": "宽屏奖励改用左侧纵向轨道",
+      "title": "成长与 VIP 奖励路线焕新",
       "items": [
-        "桌面宽屏下奖励列表移动到主预览左侧",
-        "奖励改为纵向滚动并自动垂直居中",
-        "手机端继续使用底部横向轨道"
+        "18 级奖励品质按新版方案重新校准，突出关键能力与典藏节点",
+        "成长值等级与安全条件上限分开展示",
+        "Niko、Fufu 等支持 VIP 提前使用的奖励增加明确标识"
       ]
     },
     "en": {
-      "title": "A vertical reward rail for wide screens",
+      "title": "A renewed Growth and VIP reward path",
       "items": [
-        "The reward list now sits to the left of the main preview on wide desktop screens",
-        "Rewards scroll vertically and center automatically",
-        "Mobile keeps the bottom horizontal rail"
+        "Reward rarity across all 18 levels now follows the revised progression plan",
+        "Score level and security-gated effective level are now shown separately",
+        "Niko, Fufu, and other VIP early-access rewards now carry a clear label"
       ]
     }
   }

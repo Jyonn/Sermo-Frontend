@@ -1666,7 +1666,7 @@ export default function MenuPage() {
             <div className="growth-progress-copy">
               <div>
                 <strong>{me?.growth?.level_cap_reason || (me?.growth?.next_score ? t("growth.toNextLevel", { level: (me.growth.level ?? 1) + 1 }) : t("growth.maxLevel"))}</strong>
-                <span>{me?.growth?.level_cap_reason ? t("growth.scoreAndCap", { score: me.growth.score, level: me.growth.level_cap }) : me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : t("growth.score", { score: me?.growth?.score ?? 0 })}</span>
+                <span>{me?.growth?.level_cap_reason ? t("growth.scoreLevelAndCap", { score: me.growth.score, scoreLevel: me.growth.score_level ?? me.growth.level, level: me.growth.level_cap }) : me?.growth?.next_score ? `${me.growth.score} / ${me.growth.next_score}` : t("growth.score", { score: me?.growth?.score ?? 0 })}</span>
               </div>
               <div className="growth-progress-track"><i style={{ transform: `scaleX(${me?.growth?.progress ?? 0})` }} /></div>
             </div>

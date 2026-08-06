@@ -59,6 +59,8 @@ export interface SpaceDTO {
 
 export interface UserGrowthDTO {
   score: number;
+  score_level?: number;
+  effective_level?: number;
   level: number;
   acknowledged_level?: number;
   pending_level?: number | null;
@@ -109,10 +111,16 @@ export interface GrowthRewardDTO {
   level: number;
   category: "capability" | "background" | "bubble" | "frame" | "identity";
   title: string;
+  title_key?: string;
+  description_key?: string;
   rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
   asset_key?: string | null;
   capability_key?: string | null;
-  implementation_status: "available" | "planned";
+  implementation_status: "live" | "partial" | "planned" | "available";
+  preview_kind?: "live" | "image" | "before_after" | "collection";
+  destination?: string;
+  vip_exclusive?: boolean;
+  vip_access?: "exclusive" | "early_preview" | "level_or_vip" | null;
 }
 
 export interface AccessPayload {
