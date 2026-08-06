@@ -72,7 +72,7 @@ export interface UserGrowthDTO {
   level_cap_reason?: string;
   recent_events?: Array<{
     key: string;
-    category: "daily" | "explore" | "social" | "security";
+    category: "daily" | "weekly" | "explore" | "social" | "security" | "achievement" | "vip";
     title: string;
     points: number;
     created_at: number;

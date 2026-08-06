@@ -1,18 +1,20 @@
 {
-  "id": "2026.08.06.1",
+  "id": "2026.08.06.2",
   "publishedAt": "2026-08-06",
   "locales": {
     "zh-CN": {
-      "title": "成长与 VIP 奖励路线焕新",
+      "title": "永久 VIP 成长奖励上线",
       "items": [
+        "认领永久 VIP 可一次性获得 500 成长值，已有永久 VIP 自动补发",
         "18 级奖励品质按新版方案重新校准，突出关键能力与典藏节点",
         "成长值等级与安全条件上限分开展示",
         "Niko、Fufu 等支持 VIP 提前使用的奖励增加明确标识"
       ]
     },
     "en": {
-      "title": "A renewed Growth and VIP reward path",
+      "title": "Permanent VIP Growth reward",
       "items": [
+        "Permanent VIP now grants 500 Growth Points once, including existing VIP members",
         "Reward rarity across all 18 levels now follows the revised progression plan",
         "Score level and security-gated effective level are now shown separately",
         "Niko, Fufu, and other VIP early-access rewards now carry a clear label"
