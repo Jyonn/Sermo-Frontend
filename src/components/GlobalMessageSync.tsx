@@ -12,7 +12,7 @@ import { loadMessagesAfterThrough } from "../lib/messageHistory";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
-import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncItemDTO, UserDTO } from "../types";
+import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
 const CURSOR_KEY_PREFIX = "sermo-sync-v2-cursor:";
@@ -30,6 +30,11 @@ interface PopupState {
   preview: string;
   count: number;
   avatarUri?: string;
+}
+
+interface NestedMessageEventPayload {
+  chat_id: number;
+  message: ChatMessageDTO;
 }
 
 function formatChatListTime(value: number) {
@@ -251,7 +256,7 @@ function normalizeSyncItems(
     .map((raw) => {
       if (!raw || typeof raw !== "object") return null;
 
-      const candidate = raw as Partial<ChatSyncItemDTO> & Partial<ChatMessageDTO> & { message?: unknown; chat_id?: number };
+      const candidate = raw as Partial<NestedMessageEventPayload> & Partial<ChatMessageDTO> & { message?: unknown; chat_id?: number };
       const messageSource = isChatMessageDTO(candidate.message) ? candidate.message : isChatMessageDTO(candidate) ? candidate : null;
       const chatId = typeof candidate.chat_id === "number" ? candidate.chat_id : fallbackChatId;
 

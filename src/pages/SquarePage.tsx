@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { ImageLightbox } from "../components/ImageLightbox";
 import { SideDrawer } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { UserAvatar } from "../components/UserAvatar";
@@ -9,7 +10,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
-import type { SquareStatementDTO, SquareStatementDraftMedia } from "../types";
+import type { SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia } from "../types";
 
 type SelectedPhoto = {
   id: string;
@@ -30,7 +31,12 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
-function StatementCard({ statement, language }: { statement: SquareStatementDTO; language: string }) {
+function StatementCard({ statement, language, onOpenComments, onOpenImage }: {
+  statement: SquareStatementDTO;
+  language: string;
+  onOpenComments: () => void;
+  onOpenImage: (index: number) => void;
+}) {
   const { t } = useI18n();
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -54,13 +60,13 @@ function StatementCard({ statement, language }: { statement: SquareStatementDTO;
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {images.length ? (
         <div className={`square-statement-images count-${Math.min(images.length, 9)}`}>
-          {images.map((image) => (
-            <figure key={image.media_id}>
+          {images.map((image, index) => (
+            <button key={image.media_id} onClick={() => onOpenImage(index)} type="button">
               <img alt="" loading="lazy" src={image.thumbnail_uri || image.uri} />
               {image.location ? (
-                <figcaption><span className="material-symbols-outlined">location_on</span>{image.location.address || t("square.photoLocation")}</figcaption>
+                <span className="square-photo-location"><span className="material-symbols-outlined">location_on</span>{image.location.address || t("square.photoLocation")}</span>
               ) : null}
-            </figure>
+            </button>
           ))}
         </div>
       ) : null}
@@ -77,6 +83,12 @@ function StatementCard({ statement, language }: { statement: SquareStatementDTO;
           <audio hidden onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
+      <footer className="square-statement-footer">
+        <button onClick={onOpenComments} type="button">
+          <span className="material-symbols-outlined">chat_bubble</span>
+          <span>{statement.comment_count ? t("square.commentsCount", { count: statement.comment_count }) : t("square.comment")}</span>
+        </button>
+      </footer>
     </article>
   );
 }
@@ -102,6 +114,13 @@ export default function SquarePage() {
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
+  const [gallery, setGallery] = useState<{ statementId: number; index: number } | null>(null);
+  const [commentStatementId, setCommentStatementId] = useState<number | null>(null);
+  const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsHasMore, setCommentsHasMore] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentSending, setCommentSending] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recorderStreamRef = useRef<MediaStream | null>(null);
@@ -109,6 +128,9 @@ export default function SquarePage() {
   const recordingStartedAtRef = useRef(0);
   const recordingTimerRef = useRef<number | null>(null);
   const canPublish = Boolean(session?.user.verified);
+  const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
+  const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
+  const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
 
   const remaining = MAX_TEXT_LENGTH - text.length;
   const publishable = useMemo(
@@ -148,6 +170,37 @@ export default function SquarePage() {
     recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
     if (recordingTimerRef.current !== null) window.clearInterval(recordingTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    if (commentStatementId === null) return;
+    const controller = new AbortController();
+    setCommentsLoading(true);
+    void api.getSquareStatementComments(commentStatementId, { limit: 30 }, controller.signal).then((rows) => {
+      setComments(rows);
+      setCommentsHasMore(rows.length === 30);
+    }).catch((cause) => {
+      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("square.commentsLoadFailed"));
+    }).finally(() => setCommentsLoading(false));
+    return () => controller.abort();
+  }, [commentStatementId, t]);
+
+  const sendComment = async () => {
+    const content = commentText.trim();
+    if (commentStatementId === null || !content || commentSending) return;
+    setCommentSending(true);
+    try {
+      const comment = await api.createSquareStatementComment(commentStatementId, content);
+      setComments((current) => [comment, ...current]);
+      setStatements((current) => current.map((statement) => statement.statement_id === commentStatementId
+        ? { ...statement, comment_count: (statement.comment_count || 0) + 1 }
+        : statement));
+      setCommentText("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("square.commentFailed"));
+    } finally {
+      setCommentSending(false);
+    }
+  };
 
   const choosePhotos = (files: FileList | null) => {
     if (!files) return;
@@ -263,7 +316,7 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome title={t("square.title")} shellClassName="desktop-tab-shell square-community-shell">
+    <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
       <main className="list-screen square-feed-screen">
         <TabPageHeader
           title={t("square.title")}
@@ -292,7 +345,7 @@ export default function SquarePage() {
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={t("square.empty")} description={t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.map((statement) => <StatementCard key={statement.statement_id} language={language} statement={statement} />)}
+            {statements.map((statement) => <StatementCard key={statement.statement_id} language={language} onOpenComments={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -350,6 +403,22 @@ export default function SquarePage() {
         <p>{recording ? t("square.tapToStop") : voiceFile ? t("square.voiceReady") : t("square.tapToRecord")}</p>
         {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
       </BottomSheet>
+      <SideDrawer historyKey="square-comments" onClose={() => setCommentStatementId(null)} open={commentStatementId !== null} title={t("square.comments")}>
+        <div className="square-comments-drawer">
+          {activeCommentStatement ? <div className="square-comments-context"><UserAvatar className="square-comment-avatar" frame={activeCommentStatement.user.avatar_frame_style} name={activeCommentStatement.user.name} uri={activeCommentStatement.user.avatar_uri} vip={Boolean(activeCommentStatement.user.is_permanent_vip)} /><div><strong>{activeCommentStatement.user.name}</strong><p>{activeCommentStatement.text || t("square.mediaStatement")}</p></div></div> : null}
+          {commentsLoading && !comments.length ? <FeedbackState title={t("common.loading")} /> : null}
+          {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
+          <div className="square-comment-list">{comments.map((comment) => <article key={comment.comment_id}><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} /><div><header><strong>{comment.user.name}</strong><span>{formatStatementTime(comment.created_at, language)}</span></header><p>{comment.text}</p></div></article>)}</div>
+          {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
+            const before = comments[comments.length - 1]?.comment_id;
+            if (!before || commentStatementId === null) return;
+            setCommentsLoading(true);
+            void api.getSquareStatementComments(commentStatementId, { before, limit: 30 }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
+          }} type="button">{t("square.loadMoreComments")}</button> : null}
+          {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" name={session?.user.name || ""} uri={session?.user.avatar_uri} /><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={t("square.writeComment")} value={commentText} /><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
+        </div>
+      </SideDrawer>
+      {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
     </AppChrome>
   );
 }

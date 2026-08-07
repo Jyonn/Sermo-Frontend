@@ -358,6 +358,15 @@ export interface SquareStatementDTO {
   text: string;
   visibility: "public" | "friends";
   media: SquareStatementMediaDTO[];
+  comment_count: number;
+  created_at: number;
+}
+
+export interface SquareStatementCommentDTO {
+  comment_id: number;
+  statement_id: number;
+  user: TinyUserDTO;
+  text: string;
   created_at: number;
 }
 
@@ -557,18 +566,6 @@ export interface QuotedMessageDTO {
   type: number;
   content: string;
   is_deleted: boolean;
-}
-
-export interface ChatSyncItemDTO {
-  chat_id: number;
-  message: ChatMessageDTO;
-}
-
-export interface ChatSyncResponseDTO {
-  after_message_id?: number;
-  next_after?: number;
-  items: ChatSyncItemDTO[];
-  has_more: boolean;
 }
 
 export interface MessageSyncEventDTO {

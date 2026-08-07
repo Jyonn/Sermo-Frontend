@@ -10,7 +10,6 @@ import type {
   MessageMediaKind,
   MessageSearchResponseDTO,
   MessageUploadDTO,
-  ChatSyncResponseDTO,
   MessageEventSyncResponseDTO,
   FriendshipRequestDTO,
   FriendInvitePreviewDTO,
@@ -48,6 +47,7 @@ import type {
   TravelMapComparisonDTO,
   TravelMapAccessOverviewDTO,
   SquareStatementDTO,
+  SquareStatementCommentDTO,
   SquareStatementDraftMedia,
 } from "../types";
 import type { FeatureCollection } from "geojson";
@@ -579,14 +579,6 @@ export const api = {
     });
   },
 
-  getMessagesSync(params: { after: number; limit: number }, signal?: AbortSignal) {
-    return request<ChatSyncResponseDTO>("/messages/sync", {
-      auth: true,
-      query: params,
-      signal,
-    });
-  },
-
   getMessageEventsSync(params: { after: number; limit: number }, signal?: AbortSignal) {
     return request<MessageEventSyncResponseDTO>("/messages/sync-v2", {
       auth: true,
@@ -620,6 +612,22 @@ export const api = {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  getSquareStatementComments(statementId: number, params: { before?: number; limit?: number }, signal?: AbortSignal) {
+    return request<SquareStatementCommentDTO[]>(`/square/statements/${statementId}/comments`, {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  createSquareStatementComment(statementId: number, text: string) {
+    return request<SquareStatementCommentDTO>(`/square/statements/${statementId}/comments`, {
+      method: "POST",
+      auth: true,
+      body: { text },
     });
   },
 
