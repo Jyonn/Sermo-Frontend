@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.07.5",
+  "id": "2026.08.07.6",
   "publishedAt": "2026-08-07",
   "locales": {
     "zh-CN": {
-      "title": "广场成为发言社区",
+      "title": "广场拥有全新的发布体验",
       "items": [
-        "认证用户可以发布最多 140 字的发言",
-        "支持九张照片、照片位置与最长 60 秒语音",
-        "发言可设为公开或仅好友可见，未认证用户仍可浏览"
+        "浏览与发布分离，信息流更加轻盈清晰",
+        "发言、可见范围、照片位置与录音拥有专属交互",
+        "照片和语音卡片重新设计，移动端与桌面端同步适配"
       ]
     },
     "en": {
-      "title": "The Square becomes a social feed",
+      "title": "A redesigned publishing experience for the Square",
       "items": [
-        "Verified users can publish statements of up to 140 characters",
-        "Add up to nine photos, photo locations, or a 60-second voice recording",
-        "Choose public or friends-only visibility while unverified users can still browse"
+        "Browsing and composing are separated for a cleaner feed",
+        "Statements, audience, photo location, and voice recording now have focused interactions",
+        "Photo and voice cards are redesigned across mobile and desktop"
       ]
     }
   }

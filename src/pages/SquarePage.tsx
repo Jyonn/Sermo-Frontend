@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppChrome } from "../components/AppChrome";
+import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { SideDrawer } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { UserAvatar } from "../components/UserAvatar";
 import { api } from "../lib/api";
@@ -30,6 +32,8 @@ function formatStatementTime(timestamp: number, language: string) {
 
 function StatementCard({ statement, language }: { statement: SquareStatementDTO; language: string }) {
   const { t } = useI18n();
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const images = statement.media.filter((item) => item.kind === "image");
   const audio = statement.media.find((item) => item.kind === "audio");
   return (
@@ -42,13 +46,10 @@ function StatementCard({ statement, language }: { statement: SquareStatementDTO;
           uri={statement.user.avatar_uri}
           vip={Boolean(statement.user.is_permanent_vip)}
         />
-        <div>
+        <div className="square-statement-author-copy">
           <strong>{statement.user.name}</strong>
-          <span>{formatStatementTime(statement.created_at, language)}</span>
+          <span>{formatStatementTime(statement.created_at, language)} · {statement.visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</span>
         </div>
-        {statement.visibility === "friends" ? (
-          <span className="square-visibility-badge"><span className="material-symbols-outlined">group</span>{t("square.friendsOnly")}</span>
-        ) : null}
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {images.length ? (
@@ -65,9 +66,15 @@ function StatementCard({ statement, language }: { statement: SquareStatementDTO;
       ) : null}
       {audio ? (
         <div className="square-statement-audio">
-          <span className="material-symbols-outlined">graphic_eq</span>
-          <audio controls preload="metadata" src={audio.uri} />
+          <button onClick={() => {
+            const player = audioRef.current;
+            if (!player) return;
+            if (player.paused) void player.play();
+            else player.pause();
+          }} type="button"><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span></button>
+          <div className="square-audio-wave" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
           <small>{audio.duration_seconds ? `${audio.duration_seconds}s` : t("square.voice")}</small>
+          <audio hidden onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
     </article>
@@ -91,6 +98,10 @@ export default function SquarePage() {
   const [recording, setRecording] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
+  const [locationSheetOpen, setLocationSheetOpen] = useState(false);
+  const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recorderStreamRef = useRef<MediaStream | null>(null);
@@ -242,6 +253,7 @@ export default function SquarePage() {
       setVoiceDuration(0);
       setPhotoLocation(null);
       setVisibility("public");
+      setComposerOpen(false);
     } catch (cause) {
       setError(toMessageUploadError(cause).message);
     } finally {
@@ -253,57 +265,23 @@ export default function SquarePage() {
   return (
     <AppChrome title={t("square.title")} shellClassName="desktop-tab-shell square-community-shell">
       <main className="list-screen square-feed-screen">
-        <TabPageHeader title={t("square.title")} />
+        <TabPageHeader
+          title={t("square.title")}
+          status={canPublish ? (
+            <button className="square-header-publish" onClick={() => setComposerOpen(true)} type="button">
+              <span className="material-symbols-outlined">edit_square</span>
+              <span>{t("square.publish")}</span>
+            </button>
+          ) : null}
+        />
         <div className="square-feed-column">
           {canPublish ? (
-            <section className="square-composer">
-              <div className="square-composer-main">
-                <UserAvatar className="square-composer-avatar" name={session?.user.name || ""} uri={session?.user.avatar_uri} />
-                <textarea
-                  aria-label={t("square.saySomething")}
-                  maxLength={MAX_TEXT_LENGTH}
-                  onChange={(event) => setText(event.target.value)}
-                  placeholder={t("square.saySomething")}
-                  value={text}
-                />
-              </div>
-              {photos.length ? (
-                <div className="square-composer-photos">
-                  {photos.map((photo) => (
-                    <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button">
-                      <img alt="" src={photo.preview} />
-                      <span className="material-symbols-outlined">close</span>
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-              {voiceFile || recording ? (
-                <div className={`square-composer-voice${recording ? " is-recording" : ""}`}>
-                  <span className="material-symbols-outlined">graphic_eq</span>
-                  <strong>{recording ? t("square.recording") : t("square.voiceReady")}</strong>
-                  <span>{Math.min(voiceDuration, MAX_AUDIO_SECONDS)}s</span>
-                  {!recording ? <button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button> : null}
-                </div>
-              ) : null}
-              {photoLocation && photos.length ? <p className="square-composer-location"><span className="material-symbols-outlined">location_on</span>{t("square.locationAdded")}</p> : null}
-              {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
-              <footer className="square-composer-actions">
-                <div>
-                  <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
-                  <button disabled={photos.length >= MAX_PHOTOS || publishing} onClick={() => photoInputRef.current?.click()} type="button"><span className="material-symbols-outlined">image</span>{t("square.photo")}</button>
-                  <button disabled={!photos.length || publishing} onClick={addPhotoLocation} type="button"><span className="material-symbols-outlined">location_on</span>{t("square.addLocation")}</button>
-                  <button disabled={publishing} onClick={() => void startRecording()} type="button"><span className="material-symbols-outlined">mic</span>{recording ? t("square.stop") : t("square.voice")}</button>
-                </div>
-                <div className="square-composer-publish">
-                  <button className="square-visibility-control" onClick={() => setVisibility((current) => current === "public" ? "friends" : "public")} type="button">
-                    <span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span>
-                    {visibility === "friends" ? t("square.friendsOnly") : t("square.public")}
-                  </button>
-                  <span className={remaining < 20 ? "is-near-limit" : ""}>{remaining}</span>
-                  <button className="primary-button" disabled={!publishable} onClick={() => void publish()} type="button">{publishing ? t("square.publishing") : t("square.publish")}</button>
-                </div>
-              </footer>
-            </section>
+            <button className="square-compose-launcher" onClick={() => setComposerOpen(true)} type="button">
+              <UserAvatar className="square-composer-avatar" frame={session?.user.avatar_frame_style} name={session?.user.name || ""} uri={session?.user.avatar_uri} vip={Boolean(session?.user.is_permanent_vip)} />
+              <span>{text.trim() || t("square.saySomething")}</span>
+              <i><span className="material-symbols-outlined">image</span></i>
+              <i><span className="material-symbols-outlined">mic</span></i>
+            </button>
           ) : (
             <section className="square-readonly-notice">
               <span className="material-symbols-outlined">visibility</span>
@@ -324,6 +302,54 @@ export default function SquarePage() {
           ) : null}
         </div>
       </main>
+      <SideDrawer
+        actionBusy={publishing}
+        actionDisabled={!publishable}
+        actionLabel={t("square.publish")}
+        historyKey="square-compose"
+        onAction={() => void publish()}
+        onClose={() => setComposerOpen(false)}
+        open={composerOpen}
+        title={t("square.composeTitle")}
+      >
+        <div className="square-compose-drawer">
+          {error ? <div className="square-inline-error">{error}</div> : null}
+          <div className="square-compose-editor">
+            <UserAvatar className="square-composer-avatar" frame={session?.user.avatar_frame_style} name={session?.user.name || ""} uri={session?.user.avatar_uri} vip={Boolean(session?.user.is_permanent_vip)} />
+            <div>
+              <strong>{session?.user.name}</strong>
+              <textarea autoFocus aria-label={t("square.saySomething")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setText(event.target.value)} placeholder={t("square.saySomething")} value={text} />
+            </div>
+          </div>
+          {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
+          {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><strong>{t("square.voiceReady")}</strong><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
+          {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
+          <div className="square-compose-settings">
+            <button onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
+            {photos.length ? <button onClick={() => setLocationSheetOpen(true)} type="button"><span className="material-symbols-outlined">location_on</span><div><strong>{t("square.addLocation")}</strong><small>{photoLocation ? t("square.locationAddedShort") : t("square.locationOptional")}</small></div><span className="material-symbols-outlined">chevron_right</span></button> : null}
+          </div>
+          <footer className="square-compose-dock">
+            <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
+            <button disabled={photos.length >= MAX_PHOTOS || publishing} onClick={() => photoInputRef.current?.click()} type="button"><span className="material-symbols-outlined">image</span><span>{t("square.photo")}</span></button>
+            <button disabled={publishing} onClick={() => setVoiceSheetOpen(true)} type="button"><span className="material-symbols-outlined">mic</span><span>{t("square.voice")}</span></button>
+            <span className={remaining < 20 ? "is-near-limit" : ""}>{remaining}</span>
+          </footer>
+        </div>
+      </SideDrawer>
+      <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
+        {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
+      </BottomSheet>
+      <BottomSheet bodyClassName="square-location-sheet" onClose={() => setLocationSheetOpen(false)} open={locationSheetOpen} title={t("square.addLocation")}>
+        <div className="square-location-orbit"><span className="material-symbols-outlined">location_on</span><i /><i /></div>
+        <p>{photoLocation ? t("square.locationAdded") : t("square.locationSheetHint")}</p>
+        <button className="primary-button" onClick={() => { if (photoLocation) setPhotoLocation(null); else addPhotoLocation(); setLocationSheetOpen(false); }} type="button">{photoLocation ? t("square.removeLocation") : t("square.useCurrentLocation")}</button>
+      </BottomSheet>
+      <BottomSheet bodyClassName="square-voice-sheet" onClose={() => { if (recording) stopRecording(); setVoiceSheetOpen(false); }} open={voiceSheetOpen} title={t("square.voice")}>
+        <div className={`square-voice-stage${recording ? " is-recording" : ""}`}><div className="square-voice-bars">{Array.from({ length: 25 }, (_, index) => <i key={index} />)}</div><strong>{Math.min(voiceDuration, MAX_AUDIO_SECONDS)}<small> / {MAX_AUDIO_SECONDS}s</small></strong></div>
+        <button className="square-record-button" onClick={() => void startRecording()} type="button"><span className="material-symbols-outlined">{recording ? "stop" : "mic"}</span></button>
+        <p>{recording ? t("square.tapToStop") : voiceFile ? t("square.voiceReady") : t("square.tapToRecord")}</p>
+        {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
+      </BottomSheet>
     </AppChrome>
   );
 }
