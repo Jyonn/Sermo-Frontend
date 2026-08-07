@@ -59,9 +59,14 @@ export function AppBottomNav() {
       .then((user) => {
         patchSessionUser({
           name: user.name,
+          official: user.official,
           avatar_type: user.avatar_type,
           avatar_uri: user.avatar_uri,
           verified: user.verified,
+          growth_level: user.growth_level,
+          is_permanent_vip: user.is_permanent_vip,
+          chat_bubble_style: user.chat_bubble_style,
+          avatar_frame_style: user.avatar_frame_style,
         });
       })
       .catch(() => {

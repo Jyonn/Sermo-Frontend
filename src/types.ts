@@ -128,6 +128,7 @@ export interface AccessPayload {
   verified?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
+  growth_level?: number;
   welcome_message?: string;
   email?: string | null;
   phone?: string | null;
@@ -340,7 +341,7 @@ export interface MessageUploadDTO {
 
 export interface SquareStatementMediaDTO {
   media_id: number;
-  kind: "image" | "audio";
+  kind: "image" | "audio" | "video";
   uri: string;
   thumbnail_uri?: string | null;
   mime_type?: string;
@@ -350,6 +351,8 @@ export interface SquareStatementMediaDTO {
     longitude: number;
     address?: string;
   } | null;
+  metadata_status?: number;
+  metadata?: ImageMetadataDTO | VideoMetadataDTO | null;
 }
 
 export interface SquareStatementDTO {
@@ -359,6 +362,9 @@ export interface SquareStatementDTO {
   visibility: "public" | "friends";
   media: SquareStatementMediaDTO[];
   comment_count: number;
+  like_count: number;
+  liked: boolean;
+  can_delete: boolean;
   created_at: number;
 }
 
@@ -367,11 +373,13 @@ export interface SquareStatementCommentDTO {
   statement_id: number;
   user: TinyUserDTO;
   text: string;
+  like_count: number;
+  liked: boolean;
   created_at: number;
 }
 
 export interface SquareStatementDraftMedia {
-  kind: "image" | "audio";
+  kind: "image" | "audio" | "video";
   key: string;
   mime_type?: string;
   duration_seconds?: number;

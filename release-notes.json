@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.07.7",
+  "id": "2026.08.07.8",
   "publishedAt": "2026-08-07",
   "locales": {
     "zh-CN": {
-      "title": "广场支持评论与全屏看图",
+      "title": "广场互动与媒体能力升级",
       "items": [
-        "发言支持评论，讨论集中在独立面板中",
-        "广场照片复用聊天同款全屏画廊，可左右切换",
-        "广场 Header 与其他核心 Tab 对齐，消息同步统一使用 sync-v2"
+        "发言与评论支持点赞，评论按热度和时间排列",
+        "LV6 解锁语音发言，LV8 解锁最长 60 秒视频",
+        "照片支持 EXIF 信息，发言本人和官方账号可以删除发言"
       ]
     },
     "en": {
-      "title": "Comments and full-screen photos arrive in the Square",
+      "title": "Richer interactions and media in the Square",
       "items": [
-        "Statements now support comments in a focused discussion panel",
-        "Square photos use the same swipeable full-screen gallery as chat",
-        "The Square header now matches core tabs and message sync uses sync-v2 only"
+        "Statements and comments support likes, with comments ranked by likes and time",
+        "Voice statements unlock at LV6 and 60-second videos at LV8",
+        "Photos include EXIF details, and authors or official accounts can delete statements"
       ]
     }
   }

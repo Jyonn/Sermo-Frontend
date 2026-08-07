@@ -631,7 +631,28 @@ export const api = {
     });
   },
 
-  createSquareUpload(kind: "image" | "audio", file_name: string, content_type?: string) {
+  setSquareStatementLike(statementId: number, liked: boolean) {
+    return request<{ liked: boolean; like_count: number }>(`/square/statements/${statementId}/like`, {
+      method: liked ? "POST" : "DELETE",
+      auth: true,
+    });
+  },
+
+  setSquareCommentLike(commentId: number, liked: boolean) {
+    return request<{ liked: boolean; like_count: number }>(`/square/comments/${commentId}/like`, {
+      method: liked ? "POST" : "DELETE",
+      auth: true,
+    });
+  },
+
+  deleteSquareStatement(statementId: number) {
+    return request<{ statement_id: number; deleted: boolean }>(`/square/statements/${statementId}`, {
+      method: "DELETE",
+      auth: true,
+    });
+  },
+
+  createSquareUpload(kind: "image" | "audio" | "video", file_name: string, content_type?: string) {
     return request<MessageUploadDTO>("/square/upload", {
       method: "POST",
       auth: true,

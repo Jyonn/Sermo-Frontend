@@ -10,17 +10,31 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
-import type { SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia } from "../types";
+import type { ImageMetadataDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 
 type SelectedPhoto = {
   id: string;
   file: File;
   preview: string;
 };
+type SelectedVideo = SelectedPhoto & { duration: number };
 
 const MAX_TEXT_LENGTH = 140;
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
+const MAX_VIDEO_SECONDS = 60;
+
+function SquareMediaMetadata({ metadata }: { metadata?: ImageMetadataDTO | VideoMetadataDTO | null }) {
+  const { t } = useI18n();
+  const rows = [
+    [t("media.takenAt"), metadata?.taken_at ? formatStatementTime(metadata.taken_at, "zh-CN") : null],
+    [t("media.device"), [metadata?.make, metadata?.model].filter(Boolean).join(" ")],
+    [t("media.lens"), metadata?.lens_model],
+    [t("media.location"), metadata?.address],
+  ].filter((row) => row[1]);
+  if (!rows.length) return null;
+  return <dl className="message-image-metadata-list square-image-metadata">{rows.map(([label, value]) => <div key={String(label)}><dt>{String(label)}</dt><dd>{String(value)}</dd></div>)}</dl>;
+}
 
 function formatStatementTime(timestamp: number, language: string) {
   return new Intl.DateTimeFormat(language === "zh-CN" ? "zh-CN" : "en", {
@@ -31,9 +45,12 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
-function StatementCard({ statement, language, onOpenComments, onOpenImage }: {
+function StatementCard({ statement, language, canInteract, onDelete, onLike, onOpenComments, onOpenImage }: {
   statement: SquareStatementDTO;
   language: string;
+  canInteract: boolean;
+  onDelete: () => void;
+  onLike: () => void;
   onOpenComments: () => void;
   onOpenImage: (index: number) => void;
 }) {
@@ -42,6 +59,7 @@ function StatementCard({ statement, language, onOpenComments, onOpenImage }: {
   const audioRef = useRef<HTMLAudioElement>(null);
   const images = statement.media.filter((item) => item.kind === "image");
   const audio = statement.media.find((item) => item.kind === "audio");
+  const video = statement.media.find((item) => item.kind === "video");
   return (
     <article className="square-statement-card">
       <header className="square-statement-author">
@@ -54,8 +72,9 @@ function StatementCard({ statement, language, onOpenComments, onOpenImage }: {
         />
         <div className="square-statement-author-copy">
           <strong>{statement.user.name}</strong>
-          <span>{formatStatementTime(statement.created_at, language)} · {statement.visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</span>
+          <span>{formatStatementTime(statement.created_at, language)}</span>
         </div>
+        {statement.can_delete ? <button aria-label={t("common.more")} className="square-statement-menu" onClick={onDelete} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {images.length ? (
@@ -83,7 +102,9 @@ function StatementCard({ statement, language, onOpenComments, onOpenImage }: {
           <audio hidden onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
+      {video ? <video className="square-statement-video" controls playsInline poster={video.thumbnail_uri || undefined} preload="metadata" src={video.uri} /> : null}
       <footer className="square-statement-footer">
+        <button className={statement.liked ? "is-liked" : ""} disabled={!canInteract} onClick={onLike} type="button"><span className="material-symbols-outlined">favorite</span><span>{statement.like_count || t("square.like")}</span></button>
         <button onClick={onOpenComments} type="button">
           <span className="material-symbols-outlined">chat_bubble</span>
           <span>{statement.comment_count ? t("square.commentsCount", { count: statement.comment_count }) : t("square.comment")}</span>
@@ -104,6 +125,7 @@ export default function SquarePage() {
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
+  const [video, setVideo] = useState<SelectedVideo | null>(null);
   const [photoLocation, setPhotoLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [voiceDuration, setVoiceDuration] = useState(0);
@@ -121,21 +143,27 @@ export default function SquarePage() {
   const [commentsHasMore, setCommentsHasMore] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentSending, setCommentSending] = useState(false);
+  const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recorderStreamRef = useRef<MediaStream | null>(null);
   const recorderChunksRef = useRef<Blob[]>([]);
   const recordingStartedAtRef = useRef(0);
   const recordingTimerRef = useRef<number | null>(null);
-  const canPublish = Boolean(session?.user.verified);
+  const currentUser = session?.user;
+  const canPublish = Boolean(currentUser?.verified);
+  const growthLevel = currentUser?.growth_level ?? 1;
+  const canSendVoice = Boolean(currentUser?.official) || growthLevel >= 6;
+  const canSendVideo = Boolean(currentUser?.official) || growthLevel >= 8;
   const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
 
   const remaining = MAX_TEXT_LENGTH - text.length;
   const publishable = useMemo(
-    () => Boolean(text.trim() || photos.length || voiceFile) && !publishing && text.length <= MAX_TEXT_LENGTH,
-    [photos.length, publishing, text, voiceFile],
+    () => Boolean(text.trim() || photos.length || voiceFile || video) && !publishing && text.length <= MAX_TEXT_LENGTH,
+    [photos.length, publishing, text, video, voiceFile],
   );
 
   const loadStatements = async (before?: number) => {
@@ -211,7 +239,29 @@ export default function SquarePage() {
       preview: URL.createObjectURL(file),
     }));
     setPhotos((current) => [...current, ...next]);
+    setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
     if (photoInputRef.current) photoInputRef.current.value = "";
+  };
+
+  const chooseVideo = (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file?.type.startsWith("video/")) return;
+    const preview = URL.createObjectURL(file);
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.src = preview;
+    probe.onloadedmetadata = () => {
+      const duration = Math.ceil(probe.duration || 0);
+      if (duration > MAX_VIDEO_SECONDS) {
+        URL.revokeObjectURL(preview);
+        setError(t("square.videoTooLong"));
+        return;
+      }
+      setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
+      setVoiceFile(null);
+      setVideo({ id: crypto.randomUUID(), file, preview, duration });
+    };
+    if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
   const removePhoto = (id: string) => {
@@ -275,7 +325,7 @@ export default function SquarePage() {
     if (!publishable) return;
     setPublishing(true);
     setError("");
-    const total = photos.length + (voiceFile ? 1 : 0);
+    const total = photos.length + (voiceFile ? 1 : 0) + (video ? 1 : 0);
     let completed = 0;
     try {
       const media: SquareStatementDraftMedia[] = [];
@@ -296,6 +346,13 @@ export default function SquarePage() {
           setUploadProgress((completed + progress) / Math.max(1, total));
         });
         media.push({ kind: "audio", key: upload.key, mime_type: voiceFile.type, duration_seconds: voiceDuration });
+        completed += 1;
+      }
+      if (video) {
+        const upload = await uploadMessageMediaWith(video.file, "video", (kind, fileName, contentType) => api.createSquareUpload(kind as "video", fileName, contentType), (progress) => {
+          setUploadProgress((completed + progress) / Math.max(1, total));
+        });
+        media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
       }
       const statement = await api.createSquareStatement({ text: text.trim(), visibility, media });
       setStatements((current) => [statement, ...current]);
@@ -306,12 +363,38 @@ export default function SquarePage() {
       setVoiceDuration(0);
       setPhotoLocation(null);
       setVisibility("public");
+      if (video) URL.revokeObjectURL(video.preview);
+      setVideo(null);
       setComposerOpen(false);
     } catch (cause) {
       setError(toMessageUploadError(cause).message);
     } finally {
       setPublishing(false);
       setUploadProgress(0);
+    }
+  };
+
+  const toggleStatementLike = async (statement: SquareStatementDTO) => {
+    if (!canPublish) return;
+    const liked = !statement.liked;
+    setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? { ...item, liked, like_count: Math.max(0, item.like_count + (liked ? 1 : -1)) } : item));
+    try {
+      const result = await api.setSquareStatementLike(statement.statement_id, liked);
+      setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? { ...item, ...result } : item));
+    } catch {
+      setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? statement : item));
+    }
+  };
+
+  const toggleCommentLike = async (comment: SquareStatementCommentDTO) => {
+    if (!canPublish) return;
+    const liked = !comment.liked;
+    setComments((current) => current.map((item) => item.comment_id === comment.comment_id ? { ...item, liked, like_count: Math.max(0, item.like_count + (liked ? 1 : -1)) } : item));
+    try {
+      const result = await api.setSquareCommentLike(comment.comment_id, liked);
+      setComments((current) => current.map((item) => item.comment_id === comment.comment_id ? { ...item, ...result } : item));
+    } catch {
+      setComments((current) => current.map((item) => item.comment_id === comment.comment_id ? comment : item));
     }
   };
 
@@ -330,7 +413,7 @@ export default function SquarePage() {
         <div className="square-feed-column">
           {canPublish ? (
             <button className="square-compose-launcher" onClick={() => setComposerOpen(true)} type="button">
-              <UserAvatar className="square-composer-avatar" frame={session?.user.avatar_frame_style} name={session?.user.name || ""} uri={session?.user.avatar_uri} vip={Boolean(session?.user.is_permanent_vip)} />
+              <UserAvatar className="square-composer-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />
               <span>{text.trim() || t("square.saySomething")}</span>
               <i><span className="material-symbols-outlined">image</span></i>
               <i><span className="material-symbols-outlined">mic</span></i>
@@ -345,7 +428,7 @@ export default function SquarePage() {
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={t("square.empty")} description={t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.map((statement) => <StatementCard key={statement.statement_id} language={language} onOpenComments={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} statement={statement} />)}
+            {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} language={language} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpenComments={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -368,13 +451,14 @@ export default function SquarePage() {
         <div className="square-compose-drawer">
           {error ? <div className="square-inline-error">{error}</div> : null}
           <div className="square-compose-editor">
-            <UserAvatar className="square-composer-avatar" frame={session?.user.avatar_frame_style} name={session?.user.name || ""} uri={session?.user.avatar_uri} vip={Boolean(session?.user.is_permanent_vip)} />
+            <UserAvatar className="square-composer-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />
             <div>
-              <strong>{session?.user.name}</strong>
+              <strong>{currentUser?.name}</strong>
               <textarea autoFocus aria-label={t("square.saySomething")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setText(event.target.value)} placeholder={t("square.saySomething")} value={text} />
             </div>
           </div>
           {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
+          {video ? <div className="square-composer-video"><video muted playsInline src={video.preview} /><button onClick={() => { URL.revokeObjectURL(video.preview); setVideo(null); }} type="button"><span className="material-symbols-outlined">close</span></button><span>{video.duration}s</span></div> : null}
           {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><strong>{t("square.voiceReady")}</strong><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
           {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
           <div className="square-compose-settings">
@@ -383,8 +467,10 @@ export default function SquarePage() {
           </div>
           <footer className="square-compose-dock">
             <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
-            <button disabled={photos.length >= MAX_PHOTOS || publishing} onClick={() => photoInputRef.current?.click()} type="button"><span className="material-symbols-outlined">image</span><span>{t("square.photo")}</span></button>
-            <button disabled={publishing} onClick={() => setVoiceSheetOpen(true)} type="button"><span className="material-symbols-outlined">mic</span><span>{t("square.voice")}</span></button>
+            <input accept="video/*" hidden onChange={(event) => chooseVideo(event.target.files)} ref={videoInputRef} type="file" />
+            <button disabled={Boolean(video) || photos.length >= MAX_PHOTOS || publishing} onClick={() => photoInputRef.current?.click()} type="button"><span className="material-symbols-outlined">image</span><span>{t("square.photo")}</span></button>
+            <button disabled={Boolean(video) || publishing || !canSendVoice} onClick={() => setVoiceSheetOpen(true)} title={!canSendVoice ? t("square.voiceUnlock") : undefined} type="button"><span className="material-symbols-outlined">mic</span><span>{t("square.voice")}</span></button>
+            <button disabled={Boolean(video || photos.length || voiceFile) || publishing || !canSendVideo} onClick={() => videoInputRef.current?.click()} title={!canSendVideo ? t("square.videoUnlock") : undefined} type="button"><span className="material-symbols-outlined">videocam</span><span>{t("square.video")}</span></button>
             <span className={remaining < 20 ? "is-near-limit" : ""}>{remaining}</span>
           </footer>
         </div>
@@ -408,17 +494,18 @@ export default function SquarePage() {
           {activeCommentStatement ? <div className="square-comments-context"><UserAvatar className="square-comment-avatar" frame={activeCommentStatement.user.avatar_frame_style} name={activeCommentStatement.user.name} uri={activeCommentStatement.user.avatar_uri} vip={Boolean(activeCommentStatement.user.is_permanent_vip)} /><div><strong>{activeCommentStatement.user.name}</strong><p>{activeCommentStatement.text || t("square.mediaStatement")}</p></div></div> : null}
           {commentsLoading && !comments.length ? <FeedbackState title={t("common.loading")} /> : null}
           {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
-          <div className="square-comment-list">{comments.map((comment) => <article key={comment.comment_id}><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} /><div><header><strong>{comment.user.name}</strong><span>{formatStatementTime(comment.created_at, language)}</span></header><p>{comment.text}</p></div></article>)}</div>
+          <div className="square-comment-list">{comments.map((comment) => <article key={comment.comment_id}><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} /><div><header><strong>{comment.user.name}</strong><span>{formatStatementTime(comment.created_at, language)}</span></header><p>{comment.text}</p><button className={comment.liked ? "is-liked" : ""} disabled={!canPublish} onClick={() => void toggleCommentLike(comment)} type="button"><span className="material-symbols-outlined">favorite</span>{comment.like_count || t("square.like")}</button></div></article>)}</div>
           {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
             const before = comments[comments.length - 1]?.comment_id;
             if (!before || commentStatementId === null) return;
             setCommentsLoading(true);
             void api.getSquareStatementComments(commentStatementId, { before, limit: 30 }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
           }} type="button">{t("square.loadMoreComments")}</button> : null}
-          {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" name={session?.user.name || ""} uri={session?.user.avatar_uri} /><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={t("square.writeComment")} value={commentText} /><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
+          {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={t("square.writeComment")} value={commentText} /><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
         </div>
       </SideDrawer>
-      {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
+      {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
+      <BottomSheet bodyClassName="square-delete-sheet" onClose={() => setDeleteStatementId(null)} open={deleteStatementId !== null} title={t("square.deleteStatement")}><p>{t("square.deleteStatementHint")}</p><button className="danger-button" onClick={() => { const id = deleteStatementId; if (id === null) return; void api.deleteSquareStatement(id).then(() => { setStatements((current) => current.filter((item) => item.statement_id !== id)); setDeleteStatementId(null); }); }} type="button">{t("common.delete")}</button></BottomSheet>
     </AppChrome>
   );
 }
