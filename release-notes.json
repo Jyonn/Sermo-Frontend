@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.07.4",
+  "id": "2026.08.07.5",
   "publishedAt": "2026-08-07",
   "locales": {
     "zh-CN": {
-      "title": "广场准备新的开始",
+      "title": "广场成为发言社区",
       "items": [
-        "原广场人物、漂浮互动与人物个性化已下线",
-        "广场暂时保留轻量入口，为新的社区形态腾出空间"
+        "认证用户可以发布最多 140 字的发言",
+        "支持九张照片、照片位置与最长 60 秒语音",
+        "发言可设为公开或仅好友可见，未认证用户仍可浏览"
       ]
     },
     "en": {
-      "title": "Making room for a new Square",
+      "title": "The Square becomes a social feed",
       "items": [
-        "Retired the old Square characters, floating interactions, and character customization",
-        "Kept a lightweight Square entry while the new community experience takes shape"
+        "Verified users can publish statements of up to 140 characters",
+        "Add up to nine photos, photo locations, or a 60-second voice recording",
+        "Choose public or friends-only visibility while unverified users can still browse"
       ]
     }
   }

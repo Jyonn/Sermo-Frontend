@@ -47,6 +47,8 @@ import type {
   TravelMapAccessDTO,
   TravelMapComparisonDTO,
   TravelMapAccessOverviewDTO,
+  SquareStatementDTO,
+  SquareStatementDraftMedia,
 } from "../types";
 import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
@@ -595,6 +597,34 @@ export const api = {
 
   createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string) {
     return request<MessageUploadDTO>("/messages/upload", {
+      method: "POST",
+      auth: true,
+      body: { kind, file_name, content_type },
+    });
+  },
+
+  getSquareStatements(params: { before?: number; limit?: number }, signal?: AbortSignal) {
+    return request<SquareStatementDTO[]>("/square/statements", {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  createSquareStatement(payload: {
+    text: string;
+    visibility: "public" | "friends";
+    media: SquareStatementDraftMedia[];
+  }) {
+    return request<SquareStatementDTO>("/square/statements", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  createSquareUpload(kind: "image" | "audio", file_name: string, content_type?: string) {
+    return request<MessageUploadDTO>("/square/upload", {
       method: "POST",
       auth: true,
       body: { kind, file_name, content_type },

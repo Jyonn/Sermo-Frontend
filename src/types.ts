@@ -338,6 +338,41 @@ export interface MessageUploadDTO {
   max_file_size: number;
 }
 
+export interface SquareStatementMediaDTO {
+  media_id: number;
+  kind: "image" | "audio";
+  uri: string;
+  thumbnail_uri?: string | null;
+  mime_type?: string;
+  duration_seconds?: number | null;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  } | null;
+}
+
+export interface SquareStatementDTO {
+  statement_id: number;
+  user: TinyUserDTO;
+  text: string;
+  visibility: "public" | "friends";
+  media: SquareStatementMediaDTO[];
+  created_at: number;
+}
+
+export interface SquareStatementDraftMedia {
+  kind: "image" | "audio";
+  key: string;
+  mime_type?: string;
+  duration_seconds?: number;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+}
+
 export interface LinkPreviewDTO {
   url?: string;
   status: LinkPreviewStatus;
