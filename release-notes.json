@@ -1,25 +1,19 @@
 {
-  "id": "2026.08.07.3",
+  "id": "2026.08.07.4",
   "publishedAt": "2026-08-07",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录搜索更稳定",
+      "title": "广场准备新的开始",
       "items": [
-        "修复搜索聊天记录 Drawer 打开后闪退的问题",
-        "搜索页现在按层级返回聊天详情，选择结果后直接定位消息",
-        "背景、气泡与头像框支持按解锁等级或品质分组",
-        "新增全部、已拥有、未拥有筛选，快速定位可用装扮",
-        "装扮名称直接使用品质色，不再重复标注品质名称"
+        "原广场人物、漂浮互动与人物个性化已下线",
+        "广场暂时保留轻量入口，为新的社区形态腾出空间"
       ]
     },
     "en": {
-      "title": "More reliable message search",
+      "title": "Making room for a new Square",
       "items": [
-        "Fixed the message search drawer closing immediately after opening",
-        "Search now returns through chat details and jumps directly to a selected message",
-        "Group backgrounds, bubbles, and avatar frames by unlock level or rarity",
-        "Filter the library by all, owned, or not owned items",
-        "Item names now carry their rarity color without redundant rarity labels"
+        "Retired the old Square characters, floating interactions, and character customization",
+        "Kept a lightweight Square entry while the new community experience takes shape"
       ]
     }
   }

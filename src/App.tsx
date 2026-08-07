@@ -27,8 +27,6 @@ import SquarePage from "./pages/SquarePage";
 import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 
-const CharacterRigLabPage = lazy(() => import("./pages/CharacterRigLabPage"));
-
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
   return detectedSlug ? <JoinSpacePage /> : <LandingPage />;
@@ -89,14 +87,6 @@ export default function App() {
         <Route path="/friend-invite" element={<FriendInvitePage />} />
         <Route path="/official-login" element={<OfficialLoginPage />} />
         <Route path="/account-switch" element={<AccountSwitchPage />} />
-        <Route
-          path="/labs/character-rigs"
-          element={
-            <Suspense fallback={<FeedbackState title="Loading motion lab" />}>
-              <CharacterRigLabPage />
-            </Suspense>
-          }
-        />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"

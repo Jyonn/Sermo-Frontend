@@ -226,10 +226,6 @@ export function GrowthLevelCelebration() {
         const payload: PersonalizationDTO = {
           chat_bubble_style: currentReward.category === "bubble" ? currentReward.asset_key as ChatBubbleStyle : session.user.chat_bubble_style ?? "default",
           avatar_frame_style: currentReward.category === "frame" ? currentReward.asset_key as AvatarFrameStyle : session.user.avatar_frame_style ?? "none",
-          square_outfit_style: session.user.square_outfit_style ?? "sunset",
-          square_prop_style: session.user.square_prop_style ?? "none",
-          square_motion_style: session.user.square_motion_style ?? "walk",
-          square_limb_style: session.user.square_limb_style ?? "line",
         };
         patchSessionUser(await api.setPersonalization(payload));
       }

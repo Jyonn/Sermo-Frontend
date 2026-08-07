@@ -13,7 +13,6 @@ import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
-import { SquareCharacterFigure } from "../components/SquareCharacterFigure";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
@@ -76,10 +75,6 @@ const personalizationOptions = {
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["xiaobai-run", "menu.frameXiaobaiRun"], ["vip", "menu.frameVip"],
   ],
-  square_outfit_style: [["sunset", "menu.outfitSunset"], ["varsity", "menu.outfitVarsity"], ["noir", "menu.outfitNoir"], ["cloud", "menu.outfitCloud"], ["raincoat", "menu.outfitRaincoat"], ["hanfu", "menu.outfitHanfu"], ["utility", "menu.outfitUtility"], ["sailor", "menu.outfitSailor"]],
-  square_prop_style: [["none", "menu.propNone"], ["star", "menu.propStar"], ["coffee", "menu.propCoffee"], ["flag", "menu.propFlag"], ["camera", "menu.propCamera"], ["bouquet", "menu.propBouquet"], ["umbrella", "menu.propUmbrella"], ["skateboard", "menu.propSkateboard"]],
-  square_motion_style: [["walk", "menu.motionWalk"], ["bounce", "menu.motionBounce"], ["float", "menu.motionFloat"], ["dash", "menu.motionDash"], ["wave", "menu.motionWave"], ["dance", "menu.motionDance"], ["skate", "menu.motionSkate"], ["tiptoe", "menu.motionTiptoe"]],
-  square_limb_style: [["line", "menu.limbLine"], ["chunky", "menu.limbChunky"], ["robot", "menu.limbRobot"], ["ribbon", "menu.limbRibbon"], ["hinged", "menu.limbHinged"], ["wooden", "menu.limbWooden"], ["spring", "menu.limbSpring"], ["ink", "menu.limbInk"]],
 } as const;
 
 const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclude<ChatBackgroundTheme, "custom">, TranslationKey]> }> = [
@@ -311,8 +306,6 @@ export default function MenuPage() {
   const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
   const [chatBubbleDrawerOpen, setChatBubbleDrawerOpen] = useState(false);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
-  const [squareCharacterDrawerOpen, setSquareCharacterDrawerOpen] = useState(false);
-  const [squareCharacterTab, setSquareCharacterTab] = useState<"outfit" | "limbs" | "prop" | "motion">("outfit");
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
@@ -322,10 +315,6 @@ export default function MenuPage() {
   const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
     chat_bubble_style: "default",
     avatar_frame_style: "none",
-    square_outfit_style: "sunset",
-    square_prop_style: "none",
-    square_motion_style: "walk",
-    square_limb_style: "line",
   });
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
@@ -513,25 +502,16 @@ export default function MenuPage() {
   }, [chatBackgroundDrawerOpen, me?.chat_background_theme]);
 
   useEffect(() => {
-    if (!(chatBubbleDrawerOpen || avatarFrameDrawerOpen || squareCharacterDrawerOpen) || !me) return;
+    if (!(chatBubbleDrawerOpen || avatarFrameDrawerOpen) || !me) return;
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
-      square_outfit_style: me.square_outfit_style ?? "sunset",
-      square_prop_style: me.square_prop_style ?? "none",
-      square_motion_style: me.square_motion_style ?? "walk",
-      square_limb_style: me.square_limb_style ?? "line",
     });
   }, [
     avatarFrameDrawerOpen,
     chatBubbleDrawerOpen,
     me?.avatar_frame_style,
     me?.chat_bubble_style,
-    me?.square_limb_style,
-    me?.square_motion_style,
-    me?.square_outfit_style,
-    me?.square_prop_style,
-    squareCharacterDrawerOpen,
   ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
@@ -2015,11 +1995,6 @@ export default function MenuPage() {
             <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
-          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setSquareCharacterDrawerOpen(true)} type="button">
-            <span className={`personalization-entry-preview square-character-preview outfit-${me?.square_outfit_style ?? "sunset"}`}><i /></span>
-            <span><strong>{t("menu.squareCharacter")}</strong><small>{t("menu.squareCharacterHint")}</small></span>
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
         </div>
       </SideDrawer>
 
@@ -2204,97 +2179,6 @@ export default function MenuPage() {
               </section>
             ))}
           </div>
-        </div>
-      </SideDrawer>
-
-      <SideDrawer
-        actionBusy={personalizationSaving}
-        actionDisabled={
-          personalizationDraft.square_outfit_style === (me?.square_outfit_style ?? "sunset")
-          && personalizationDraft.square_prop_style === (me?.square_prop_style ?? "none")
-          && personalizationDraft.square_motion_style === (me?.square_motion_style ?? "walk")
-          && personalizationDraft.square_limb_style === (me?.square_limb_style ?? "line")
-        }
-        actionLabel={t("common.save")}
-        onAction={() => void savePersonalization()}
-        open={squareCharacterDrawerOpen}
-        onClose={() => setSquareCharacterDrawerOpen(false)}
-        title={t("menu.squareCharacter")}
-      >
-        <div className="personalization-editor square-character-editor">
-          <div className="personalization-square-stage personalization-sticky-preview">
-            <div
-              className={`square-character personalization-square-character outfit-${personalizationDraft.square_outfit_style} prop-${personalizationDraft.square_prop_style} motion-${personalizationDraft.square_motion_style} limbs-${personalizationDraft.square_limb_style}`}
-            >
-              <SquareCharacterFigure
-                avatarFrame={me?.avatar_frame_style}
-                avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
-                isOnline
-                isVip={Boolean(me?.is_permanent_vip)}
-                limb={personalizationDraft.square_limb_style}
-                motion={personalizationDraft.square_motion_style}
-                name={session?.user.name ?? t("brand.user")}
-                outfit={personalizationDraft.square_outfit_style}
-                prop={personalizationDraft.square_prop_style}
-              />
-              <span className="square-character-name">{session?.user.name ?? t("brand.user")}</span>
-            </div>
-          </div>
-          <div className="personalization-tabs" role="tablist" aria-label={t("menu.squareCharacter")}>
-            {([
-              ["outfit", "menu.squareTabOutfit"],
-              ["limbs", "menu.squareTabLimbs"],
-              ["prop", "menu.squareTabProp"],
-              ["motion", "menu.squareTabMotion"],
-            ] as const).map(([value, label]) => (
-              <button
-                aria-selected={squareCharacterTab === value}
-                className={squareCharacterTab === value ? "is-active" : ""}
-                key={value}
-                onClick={() => setSquareCharacterTab(value)}
-                role="tab"
-                type="button"
-              >
-                {t(label)}
-              </button>
-            ))}
-          </div>
-          {squareCharacterTab === "outfit" ? (
-            <div className="personalization-option-grid field-square_outfit_style">
-              {personalizationOptions.square_outfit_style.map(([value, label]) => (
-                <button className={`personalization-option preview-${value}${personalizationDraft.square_outfit_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_outfit_style: value }))} type="button">
-                  <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {squareCharacterTab === "limbs" ? (
-            <div className="personalization-option-grid field-square_limb_style">
-              {personalizationOptions.square_limb_style.map(([value, label]) => (
-                <button className={`personalization-option preview-${value}${personalizationDraft.square_limb_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_limb_style: value }))} type="button">
-                  <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {squareCharacterTab === "prop" ? (
-            <div className="personalization-option-grid field-square_prop_style">
-              {personalizationOptions.square_prop_style.map(([value, label]) => (
-                <button className={`personalization-option preview-${value}${personalizationDraft.square_prop_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_prop_style: value }))} type="button">
-                  <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {squareCharacterTab === "motion" ? (
-            <div className="personalization-option-grid field-square_motion_style">
-              {personalizationOptions.square_motion_style.map(([value, label]) => (
-                <button className={`personalization-option preview-${value}${personalizationDraft.square_motion_style === value ? " is-selected" : ""}`} disabled={personalizationSaving} key={value} onClick={() => setPersonalizationDraft((current) => ({ ...current, square_motion_style: value }))} type="button">
-                  <i aria-hidden="true"><span /></i><strong>{t(label)}</strong>
-                </button>
-              ))}
-            </div>
-          ) : null}
         </div>
       </SideDrawer>
 
