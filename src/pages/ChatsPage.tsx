@@ -5522,6 +5522,7 @@ function LiveChatsPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey="chat-details"
         open={detailsSheetOpen}
         title={t("chat.details")}
         onClose={() => setDetailsSheetOpen(false)}
@@ -5580,7 +5581,8 @@ function LiveChatsPage() {
                   onClick={() => {
                     setMessageSearchKeyword("");
                     setMessageSearchType(null);
-                    setDetailsSheetOpen(false);
+                    setMessageSearchResults([]);
+                    setMessageSearchState("idle");
                     setMessageSearchOpen(true);
                   }}
                   type="button"
@@ -5652,12 +5654,10 @@ function LiveChatsPage() {
         ) : null}
       </SideDrawer>
       <SideDrawer
+        historyKey="message-search"
         open={messageSearchOpen}
         title={t("messageSearch.title")}
-        onClose={() => {
-          setMessageSearchOpen(false);
-          setDetailsSheetOpen(true);
-        }}
+        onClose={() => setMessageSearchOpen(false)}
       >
         <div className="message-search-panel">
           <div className="message-search-controls">
@@ -5718,9 +5718,13 @@ function LiveChatsPage() {
                   className="message-search-result"
                   key={message.message_id}
                   onClick={() => {
-                    setMessageSearchOpen(false);
-                    setDetailsSheetOpen(false);
-                    window.setTimeout(() => window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId: message.message_id } })), 180);
+                    const drawerStack = window.history.state?.sermoDrawerStack;
+                    if (Array.isArray(drawerStack) && drawerStack.length >= 2) window.history.go(-2);
+                    else {
+                      setMessageSearchOpen(false);
+                      setDetailsSheetOpen(false);
+                    }
+                    window.setTimeout(() => window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId: message.message_id } })), 240);
                   }}
                   type="button"
                 >
