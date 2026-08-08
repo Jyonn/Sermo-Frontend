@@ -211,6 +211,7 @@ export default function SquarePage() {
   const [error, setError] = useState("");
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
+  const [pinOnPublish, setPinOnPublish] = useState(false);
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [video, setVideo] = useState<SelectedVideo | null>(null);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
@@ -236,6 +237,7 @@ export default function SquarePage() {
   const [quotaOpen, setQuotaOpen] = useState(false);
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
+  const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
@@ -254,6 +256,7 @@ export default function SquarePage() {
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+  const actionStatement = statements.find((statement) => statement.statement_id === deleteStatementId) ?? (pinnedStatement?.statement_id === deleteStatementId ? pinnedStatement : null);
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
 
   const openQuota = () => {
@@ -326,6 +329,12 @@ export default function SquarePage() {
   useEffect(() => () => {
     recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
     if (recordingTimerRef.current !== null) window.clearInterval(recordingTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void api.getPinnedSquareStatement(controller.signal).then(setPinnedStatement).catch(() => undefined);
+    return () => controller.abort();
   }, []);
 
   useEffect(() => () => { if (voicePreview) URL.revokeObjectURL(voicePreview); }, [voicePreview]);
@@ -502,14 +511,16 @@ export default function SquarePage() {
         });
         media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
       }
-      const statement = await api.createSquareStatement({ text: text.trim(), visibility, media });
+      const statement = await api.createSquareStatement({ text: text.trim(), visibility, media, pin: pinOnPublish ? 1 : 0 });
       setStatements((current) => [statement, ...current]);
+      if (pinOnPublish) setPinnedStatement(statement);
       photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
       setText("");
       setPhotos([]);
       setVoiceFile(null);
       setVoiceDuration(0);
       setVisibility("public");
+      setPinOnPublish(false);
       if (video) URL.revokeObjectURL(video.preview);
       setVideo(null);
       setComposerOpen(false);
@@ -530,6 +541,23 @@ export default function SquarePage() {
       setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? { ...item, ...result } : item));
     } catch {
       setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? statement : item));
+    }
+  };
+
+  const toggleStatementPinned = async () => {
+    if (!actionStatement?.can_pin) return;
+    const nextPinned = !actionStatement.is_pinned;
+    try {
+      const updated = await api.setSquareStatementPinned(actionStatement.statement_id, nextPinned);
+      const normalized = { ...updated, is_pinned: nextPinned };
+      setPinnedStatement(nextPinned ? normalized : null);
+      setStatements((current) => current.map((item) => ({
+        ...item,
+        is_pinned: nextPinned && item.statement_id === normalized.statement_id,
+      })));
+      setDeleteStatementId(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("square.pinFailed"));
     }
   };
 
@@ -588,24 +616,25 @@ export default function SquarePage() {
               </span>
             ) : null}
           </div>
-          {canPublish ? (
-            <button className="square-compose-launcher" onClick={() => setComposerOpen(true)} type="button">
-              <UserAvatar className="square-composer-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />
-              <span>{text.trim() || t("square.saySomething")}</span>
-              <i><span className="material-symbols-outlined">image</span></i>
-              <i><span className="material-symbols-outlined">mic</span></i>
+          {feedMode === "all" && pinnedStatement ? (
+            <button className="square-pinned-banner" onClick={() => setCommentStatementId(pinnedStatement.statement_id)} type="button">
+              <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
+              <UserAvatar className="square-pinned-avatar" frame={pinnedStatement.user.avatar_frame_style} name={pinnedStatement.user.name} uri={pinnedStatement.user.avatar_uri} vip={Boolean(pinnedStatement.user.is_permanent_vip)} />
+              <span className="square-pinned-copy"><small>{t("square.pinnedStatement")}</small><strong>{pinnedStatement.text || t("square.mediaStatement")}</strong></span>
+              <span className="material-symbols-outlined">chevron_right</span>
             </button>
-          ) : (
+          ) : null}
+          {!canPublish ? (
             <section className="square-readonly-notice">
               <span className="material-symbols-outlined">visibility</span>
               <div><strong>{t("square.readOnlyTitle")}</strong><p>{t("square.readOnlyHint")}</p></div>
             </section>
-          )}
+          ) : null}
           {error ? <div className="square-inline-error">{error}</div> : null}
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : t("square.empty")} description={feedMode === "user" ? t("square.userFeedEmptyHint") : t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} statement={statement} />)}
+            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -667,6 +696,7 @@ export default function SquarePage() {
           {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
           <div className="square-compose-settings">
             <button onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
+            {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
           </div>
           <footer className="square-compose-dock">
             <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
@@ -726,7 +756,11 @@ export default function SquarePage() {
         ) : null}
       </SideDrawer>
       {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
-      <BottomSheet bodyClassName="square-delete-sheet" onClose={() => setDeleteStatementId(null)} open={deleteStatementId !== null} title={t("square.deleteStatement")}><p>{t("square.deleteStatementHint")}</p><button className="danger-button" onClick={() => { const id = deleteStatementId; if (id === null) return; void api.deleteSquareStatement(id).then(() => { setStatements((current) => current.filter((item) => item.statement_id !== id)); setDeleteStatementId(null); }); }} type="button">{t("common.delete")}</button></BottomSheet>
+      <BottomSheet bodyClassName="square-delete-sheet square-statement-actions-sheet" onClose={() => setDeleteStatementId(null)} open={deleteStatementId !== null} title={t("square.statementActions")}>
+        {actionStatement?.can_pin ? <button className="secondary-button square-pin-action" onClick={() => void toggleStatementPinned()} type="button"><span className="material-symbols-outlined">keep</span>{actionStatement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</button> : null}
+        <p>{t("square.deleteStatementHint")}</p>
+        <button className="danger-button" onClick={() => { const id = deleteStatementId; if (id === null) return; void api.deleteSquareStatement(id).then(() => { setStatements((current) => current.filter((item) => item.statement_id !== id)); if (pinnedStatement?.statement_id === id) setPinnedStatement(null); setDeleteStatementId(null); }); }} type="button">{t("common.delete")}</button>
+      </BottomSheet>
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} />
       </BottomSheet>

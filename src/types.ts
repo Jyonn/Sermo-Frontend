@@ -393,6 +393,8 @@ export interface SquareStatementDTO {
   like_count: number;
   liked: boolean;
   can_delete: boolean;
+  can_pin?: boolean;
+  is_pinned?: boolean;
   created_at: number;
 }
 

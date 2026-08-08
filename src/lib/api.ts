@@ -618,11 +618,24 @@ export const api = {
     text: string;
     visibility: "public" | "friends";
     media: SquareStatementDraftMedia[];
+    pin?: 0 | 1;
   }) {
     return request<SquareStatementDTO>("/square/statements", {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  getPinnedSquareStatement(signal?: AbortSignal) {
+    return request<SquareStatementDTO | null>("/square/statements/pinned", { auth: true, signal });
+  },
+
+  setSquareStatementPinned(statementId: number, pin: boolean) {
+    return request<SquareStatementDTO>(`/square/statements/${statementId}/pin`, {
+      method: "POST",
+      auth: true,
+      body: { pin: pin ? 1 : 0 },
     });
   },
 
