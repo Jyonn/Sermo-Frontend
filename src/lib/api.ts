@@ -595,12 +595,16 @@ export const api = {
     });
   },
 
-  getSquareStatements(params: { before?: number; limit?: number }, signal?: AbortSignal) {
+  getSquareStatements(params: { before?: number; limit?: number; friends_only?: number }, signal?: AbortSignal) {
     return request<SquareStatementDTO[]>("/square/statements", {
       auth: true,
       query: params,
       signal,
     });
+  },
+
+  getSquareStatement(statementId: number, signal?: AbortSignal) {
+    return request<SquareStatementDTO>(`/square/statements/${statementId}`, { auth: true, signal });
   },
 
   createSquareStatement(payload: {
@@ -615,7 +619,7 @@ export const api = {
     });
   },
 
-  getSquareStatementComments(statementId: number, params: { before?: number; limit?: number }, signal?: AbortSignal) {
+  getSquareStatementComments(statementId: number, params: { offset?: number; limit?: number }, signal?: AbortSignal) {
     return request<SquareStatementCommentDTO[]>(`/square/statements/${statementId}/comments`, {
       auth: true,
       query: params,
@@ -623,11 +627,11 @@ export const api = {
     });
   },
 
-  createSquareStatementComment(statementId: number, text: string) {
+  createSquareStatementComment(statementId: number, text: string, parentId?: number | null) {
     return request<SquareStatementCommentDTO>(`/square/statements/${statementId}/comments`, {
       method: "POST",
       auth: true,
-      body: { text },
+      body: { text, parent_id: parentId ?? null },
     });
   },
 

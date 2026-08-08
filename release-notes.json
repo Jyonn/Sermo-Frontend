@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.07.8",
-  "publishedAt": "2026-08-07",
+  "id": "2026.08.08.1",
+  "publishedAt": "2026-08-08",
   "locales": {
     "zh-CN": {
-      "title": "广场互动与媒体能力升级",
+      "title": "广场信息流与发言详情升级",
       "items": [
-        "发言与评论支持点赞，评论按热度和时间排列",
-        "LV6 解锁语音发言，LV8 解锁最长 60 秒视频",
-        "照片支持 EXIF 信息，发言本人和官方账号可以删除发言"
+        "发言卡片可进入完整详情，评论支持回复并按热度排列",
+        "广场支持缓存与只看好友，信息流严格按发布时间展示",
+        "照片、语音、视频采用互斥媒体槽，发表过程更清晰"
       ]
     },
     "en": {
-      "title": "Richer interactions and media in the Square",
+      "title": "A faster, richer Square feed",
       "items": [
-        "Statements and comments support likes, with comments ranked by likes and time",
-        "Voice statements unlock at LV6 and 60-second videos at LV8",
-        "Photos include EXIF details, and authors or official accounts can delete statements"
+        "Open a statement for its full thread, with replies ranked by engagement",
+        "The Square is cached, supports a friends-only feed, and stays chronological",
+        "Photos, voice, and video now share one clear, exclusive media slot"
       ]
     }
   }

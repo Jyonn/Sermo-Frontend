@@ -5,9 +5,10 @@ interface TabPageHeaderProps {
   title: ReactNode;
   syncing?: boolean;
   status?: ReactNode;
+  actions?: ReactNode;
 }
 
-export function TabPageHeader({ title, syncing = false, status }: TabPageHeaderProps) {
+export function TabPageHeader({ title, syncing = false, status, actions }: TabPageHeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export function TabPageHeader({ title, syncing = false, status }: TabPageHeaderP
           <HeaderSyncIndicator syncing={syncing} />
           {status}
         </div>
+        {actions ? <div className="page-toolbar-actions">{actions}</div> : null}
       </div>
     </div>
   );
