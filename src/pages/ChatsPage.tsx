@@ -1940,6 +1940,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     isOwner,
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
+    notificationsMuted: Boolean(chat.notifications_muted),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
       relation: chat.group ? (isOwner ? i18n.t("chat.ownerRelation") : i18n.t("chat.memberRelation")) : i18n.t("chat.directRelation"),
@@ -2062,7 +2063,7 @@ function LiveChatsPage() {
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
-  const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | null>(null);
+  const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
@@ -3247,7 +3248,7 @@ function LiveChatsPage() {
             const incoming = grouped.get(chat.id);
             if (!incoming?.length) return chat;
             const newest = incoming[incoming.length - 1].message;
-            const unreadIncrement = chat.id === selectedChat?.id ? 0 : incoming.filter((item) => item.message.from === "other").length;
+            const unreadIncrement = chat.id === selectedChat?.id || chat.notificationsMuted ? 0 : incoming.filter((item) => item.message.from === "other").length;
             return {
               ...chat,
               preview: previewFromMessage(newest),
@@ -3314,28 +3315,28 @@ function LiveChatsPage() {
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
   const chatMemberActionIds = chatMemberPickerMode === "remove" ? groupSelectedIds : chatMemberNewIds;
 
-  const updateSelectedChatPreference = async (kind: "pin" | "online", enabled: boolean) => {
+  const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
     if (kind === "online" && enabled && !requireComposerCapability("online_reminder", 7, t("chat.enableOnlineReminder"))) return;
     const chatIdToUpdate = selectedChat.id;
-    const field = kind === "pin" ? "pinned" : "onlineReminderEnabled";
+    const field = kind === "pin" ? "pinned" : kind === "online" ? "onlineReminderEnabled" : "notificationsMuted";
     setPreferenceSaving(kind);
-    setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: enabled } : chat))));
+    setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: enabled, ...(kind === "mute" && enabled ? { unread: 0 } : {}) } : chat))));
     try {
       const preference = await api.updateChatPreference(chatIdToUpdate, {
-        ...(kind === "pin" ? { pinned: enabled ? 1 : 0 } : { online_reminder_enabled: enabled ? 1 : 0 }),
+        ...(kind === "pin" ? { pinned: enabled ? 1 : 0 } : kind === "online" ? { online_reminder_enabled: enabled ? 1 : 0 } : { notifications_muted: enabled ? 1 : 0 }),
       });
       setChats((current) =>
         sortChats(
           current.map((chat) =>
             chat.id === chatIdToUpdate
-              ? { ...chat, pinned: preference.pinned, onlineReminderEnabled: preference.online_reminder_enabled }
+              ? { ...chat, pinned: preference.pinned, onlineReminderEnabled: preference.online_reminder_enabled, notificationsMuted: preference.notifications_muted, ...(preference.notifications_muted ? { unread: 0 } : {}) }
               : chat
           )
         )
       );
     } catch (apiError) {
-      setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: !enabled } : chat))));
+      setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: !enabled, ...(kind === "mute" && enabled ? { unread: selectedChat.unread } : {}) } : chat))));
       setPageError(apiError instanceof ApiError ? apiError.message : t("chat.settingsSaveFailed"));
     } finally {
       setPreferenceSaving(null);
@@ -5613,6 +5614,15 @@ function LiveChatsPage() {
                       {!canUseOnlineReminder ? <div className="row-subtle">{t("growth.unlockAtLevel", { level: 7 })}</div> : null}
                     </div>
                     <button aria-label={canUseOnlineReminder ? t("chat.toggleOnlineReminder") : t("chat.onlineReminderUnlockAtLevel", { level: 7 })} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null || !canUseOnlineReminder} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={canUseOnlineReminder ? t("chat.toggleOnlineReminder") : t("growth.unlockAtLevel", { level: 7 })} type="button" />
+                  </div>
+                ) : null}
+                {selectedChat.type === "group" ? (
+                  <div className="chat-detail-setting-row">
+                    <div className="row-main">
+                      <strong>{t("chat.muteNotifications")}</strong>
+                      <div className="row-subtle">{t("chat.muteNotificationsHint")}</div>
+                    </div>
+                    <button aria-label={t("chat.toggleMuteNotifications")} className={`switch ${selectedChat.notificationsMuted ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("mute", !selectedChat.notificationsMuted)} type="button" />
                   </div>
                 ) : null}
                 {selectedChat.type === "group" ? (

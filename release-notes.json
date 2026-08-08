@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.2",
+  "id": "2026.08.09.3",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "广场新增只看我",
+      "title": "群聊支持屏蔽消息提醒",
       "items": [
-        "广场支持在全部、只看好友和只看我之间快速切换",
-        "只看我的发言使用独立分页与缓存，历史内容也能完整加载"
+        "可在群聊详情中关闭该群的未读数字和消息通知",
+        "屏蔽提醒不会影响消息接收，打开群聊后仍可查看全部内容"
       ]
     },
     "en": {
-      "title": "A new Mine filter for Square",
+      "title": "Mute group chat notifications",
       "items": [
-        "Switch between All, Friends, and Mine directly in the Square feed",
-        "Your statements use dedicated pagination and caching for complete history"
+        "Mute unread badges and notification deliveries from any group chat",
+        "Muted chats continue receiving every message for normal reading"
       ]
     }
   }

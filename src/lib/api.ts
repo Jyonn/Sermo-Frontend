@@ -532,7 +532,7 @@ export const api = {
     });
   },
 
-  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1 }) {
+  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1; notifications_muted?: 0 | 1 }) {
     return request<ChatPreferenceDTO>("/chats/preference", {
       method: "POST",
       auth: true,

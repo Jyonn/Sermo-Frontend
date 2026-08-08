@@ -197,6 +197,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     isOwner,
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
+    notificationsMuted: Boolean(chat.notifications_muted),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
       relation: chat.group ? (isOwner ? i18n.t("chat.ownerRelation") : i18n.t("chat.memberRelation")) : i18n.t("chat.directRelation"),
@@ -374,7 +375,7 @@ export function GlobalMessageSync() {
           const incoming = grouped.get(chat.id);
           if (!incoming?.length) return chat;
           const newest = incoming[incoming.length - 1];
-          const unreadIncrement = chat.id === activeChatId ? 0 : incoming.filter((item) => item.from === "other").length;
+          const unreadIncrement = chat.id === activeChatId || chat.notificationsMuted ? 0 : incoming.filter((item) => item.from === "other").length;
           return {
             ...chat,
             preview: newest.text,

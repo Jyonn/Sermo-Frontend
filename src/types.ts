@@ -631,11 +631,13 @@ export interface ChatDTO {
   last_read_at?: number | null;
   pinned?: boolean;
   online_reminder_enabled?: boolean;
+  notifications_muted?: boolean;
 }
 
 export interface ChatPreferenceDTO {
   pinned: boolean;
   online_reminder_enabled: boolean;
+  notifications_muted: boolean;
 }
 
 export interface AuthSession {
@@ -696,6 +698,7 @@ export interface Chat {
   isOwner: boolean;
   pinned: boolean;
   onlineReminderEnabled: boolean;
+  notificationsMuted: boolean;
   detail: ChatDetail;
   messages: ChatMessage[];
 }
