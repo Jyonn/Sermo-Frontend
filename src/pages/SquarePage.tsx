@@ -115,7 +115,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   const audio = statement.media.find((item) => item.kind === "audio");
   const video = statement.media.find((item) => item.kind === "video");
   return (
-    <article className={`square-statement-card${detail ? " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
+    <article className={`square-statement-card statement-style-${statement.user.statement_card_style ?? "default"}${detail ? " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
       <header className="square-statement-author">
         <button className="square-statement-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(); }} type="button">
           <UserAvatar

@@ -32,7 +32,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
@@ -74,6 +74,14 @@ const personalizationOptions = {
     ["camera", "menu.frameCamera"],
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["xiaobai-run", "menu.frameXiaobaiRun"], ["vip", "menu.frameVip"],
+  ],
+  statement_card_style: [
+    ["default", "menu.statementStyleDefault"],
+    ["editorial", "menu.statementStyleEditorial"],
+    ["aurora", "menu.statementStyleAurora"],
+    ["pixel", "menu.statementStylePixel"],
+    ["lacquer", "menu.statementStyleLacquer"],
+    ["collage", "menu.statementStyleCollage"],
   ],
 } as const;
 
@@ -310,6 +318,7 @@ export default function MenuPage() {
   const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
   const [chatBubbleDrawerOpen, setChatBubbleDrawerOpen] = useState(false);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
+  const [statementCardDrawerOpen, setStatementCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
@@ -319,6 +328,7 @@ export default function MenuPage() {
   const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
     chat_bubble_style: "default",
     avatar_frame_style: "none",
+    statement_card_style: "default",
   });
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
@@ -506,16 +516,19 @@ export default function MenuPage() {
   }, [chatBackgroundDrawerOpen, me?.chat_background_theme]);
 
   useEffect(() => {
-    if (!(chatBubbleDrawerOpen || avatarFrameDrawerOpen) || !me) return;
+    if (!(chatBubbleDrawerOpen || avatarFrameDrawerOpen || statementCardDrawerOpen) || !me) return;
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
+      statement_card_style: me.statement_card_style ?? "default",
     });
   }, [
     avatarFrameDrawerOpen,
     chatBubbleDrawerOpen,
+    statementCardDrawerOpen,
     me?.avatar_frame_style,
     me?.chat_bubble_style,
+    me?.statement_card_style,
   ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
@@ -1234,7 +1247,7 @@ export default function MenuPage() {
     }
   };
 
-  const savePersonalization = async (drawer: "bubble" | "frame") => {
+  const savePersonalization = async (drawer: "bubble" | "frame" | "statement") => {
     if (!me || personalizationSaving) return;
     const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
     const avatarFrameChanged = personalizationDraft.avatar_frame_style !== (me.avatar_frame_style ?? "none");
@@ -1274,6 +1287,7 @@ export default function MenuPage() {
       showToast(t("personalization.updated"));
       if (drawer === "bubble") setChatBubbleDrawerOpen(false);
       if (drawer === "frame") setAvatarFrameDrawerOpen(false);
+      if (drawer === "statement") setStatementCardDrawerOpen(false);
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("personalization.updateFailed"), "error");
     } finally {
@@ -2055,6 +2069,11 @@ export default function MenuPage() {
             <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
+          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setStatementCardDrawerOpen(true)} type="button">
+            <span className={`personalization-entry-preview statement-card-entry-preview statement-style-${me?.statement_card_style ?? "default"}`}><i>言</i></span>
+            <span><strong>{t("menu.statementCard")}</strong><small>{t("menu.statementCardHint")}</small></span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
       </SideDrawer>
 
@@ -2238,6 +2257,60 @@ export default function MenuPage() {
                 </div>
               </section>
             ))}
+          </div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer
+        actionBusy={personalizationSaving}
+        actionDisabled={personalizationDraft.statement_card_style === (me?.statement_card_style ?? "default")}
+        actionLabel={t("common.save")}
+        onAction={() => void savePersonalization("statement")}
+        open={statementCardDrawerOpen}
+        onClose={() => setStatementCardDrawerOpen(false)}
+        title={t("menu.statementCard")}
+      >
+        <div className="personalization-editor statement-card-personalization">
+          <div className="statement-card-preview-stage personalization-sticky-preview">
+            <article className={`square-statement-card statement-style-${personalizationDraft.statement_card_style}`}>
+              <header className="square-statement-author">
+                <UserAvatar
+                  className="square-statement-avatar"
+                  frame={me?.avatar_frame_style}
+                  name={session?.user.name ?? t("brand.user")}
+                  uri={me?.avatar_uri ?? session?.user.avatar_uri}
+                  vip={Boolean(me?.is_permanent_vip)}
+                />
+                <div className="square-statement-author-copy">
+                  <div className="square-statement-author-name"><strong>{session?.user.name ?? t("brand.user")}</strong></div>
+                  <span>{t("menu.statementPreviewTime")}</span>
+                </div>
+              </header>
+              <p className="square-statement-text">{t("menu.statementPreviewText")}</p>
+              <footer className="square-statement-actions">
+                <span><b>♡</b> 12</span><span><b>◌</b> 3</span>
+              </footer>
+            </article>
+          </div>
+          <div className="personalization-library">
+            <section className="personalization-library-section">
+              <header><h3>{t("menu.statementFirstCollection")}</h3><span>{personalizationOptions.statement_card_style.length}</span></header>
+              <div className="statement-card-style-grid">
+                {personalizationOptions.statement_card_style.map(([value, label]) => (
+                  <button
+                    aria-pressed={personalizationDraft.statement_card_style === value}
+                    className={`statement-card-style-choice statement-style-${value}${personalizationDraft.statement_card_style === value ? " is-selected" : ""}`}
+                    disabled={personalizationSaving}
+                    key={value}
+                    onClick={() => setPersonalizationDraft((current) => ({ ...current, statement_card_style: value as StatementCardStyle }))}
+                    type="button"
+                  >
+                    <span className="statement-card-style-sample"><i>{t("menu.statementStyleSample")}</i></span>
+                    <strong>{t(label)}</strong>
+                  </button>
+                ))}
+              </div>
+            </section>
           </div>
         </div>
       </SideDrawer>

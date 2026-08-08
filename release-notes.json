@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.9",
+  "id": "2026.08.09.10",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "个性化保存更顺手",
+      "title": "发言也有自己的外观",
       "items": [
-        "聊天背景、气泡和头像框保存成功后会自动返回上一级",
-        "保存失败或权限不足时保留当前预览，方便继续调整"
+        "个性化新增发言卡片，首发晨刊、极光舷窗、像素电台、朱漆金缮与波普剪贴",
+        "选择页使用真实发言结构预览，保存后同步呈现在广场列表与发言详情"
       ]
     },
     "en": {
-      "title": "Smoother personalization saves",
+      "title": "A new look for every statement",
       "items": [
-        "Saving a chat background, bubble, or avatar frame now returns automatically",
-        "Failed or locked choices keep the current preview open for further changes"
+        "Statement cards join Personalization with five distinct debut themes",
+        "Live previews now match the Square feed and statement details after saving"
       ]
     }
   }
