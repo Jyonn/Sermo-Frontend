@@ -20979,6 +20979,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 @media(max-width:760px){.character-lab-page{padding:16px 12px 28px}.character-lab-header{align-items:center}.character-lab-header p{display:none}.character-lab-header h1{font-size:28px}.character-lab-workbench{grid-template-columns:1fr;border-radius:24px}.character-lab-stage{min-height:58dvh}.character-lab-panel{max-height:none;padding:26px 20px 30px}.character-motion-options{margin-top:26px;grid-template-columns:1fr 1fr}.character-rig-facts{margin-top:30px}}
 .square-feed-screen {
   min-height: 100%;
+  align-content: start;
   background:
     radial-gradient(circle at 85% 4%, color-mix(in srgb, var(--brand-primary) 9%, transparent), transparent 24rem),
     transparent;
@@ -20986,6 +20987,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 
 .square-feed-column {
   display: grid;
+  align-content: start;
+  grid-auto-rows: max-content;
   width: min(680px, 100%);
   margin: 0 auto;
   padding: 4px 18px 110px;

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.10",
+  "id": "2026.08.09.11",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "发言也有自己的外观",
+      "title": "广场浏览更自然",
       "items": [
-        "个性化新增发言卡片，首发晨刊、极光舷窗、像素电台、朱漆金缮与波普剪贴",
-        "选择页使用真实发言结构预览，保存后同步呈现在广场列表与发言详情"
+        "广场筛选调整为探索、好友圈与我的，入口含义更清晰",
+        "内容较少或暂时为空时保持贴顶排版，不再拉伸分散"
       ]
     },
     "en": {
-      "title": "A new look for every statement",
+      "title": "A more natural Square feed",
       "items": [
-        "Statement cards join Personalization with five distinct debut themes",
-        "Live previews now match the Square feed and statement details after saving"
+        "Square filters are now Explore, Friends, and My posts",
+        "Short and empty feeds stay aligned to the top instead of stretching vertically"
       ]
     }
   }
