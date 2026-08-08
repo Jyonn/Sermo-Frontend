@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.7",
+  "id": "2026.08.09.8",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "广场互动额度",
+      "title": "上线状态更准确",
       "items": [
-        "广场顶部新增额度入口，可查看发言、评论和点赞的实时使用情况",
-        "额度面板同步展示近24小时、近7天限制与当前媒体解锁能力"
+        "修复发送消息后可能误报好友刚刚上线的问题",
+        "上线提醒现在只依据当前会话内确认过的状态变化触发"
       ]
     },
     "en": {
-      "title": "Square activity allowance",
+      "title": "More accurate presence",
       "items": [
-        "A new Square header shortcut shows live statement, comment, and like usage",
-        "The allowance panel includes 24-hour, 7-day, and media unlock status"
+        "Fixed occasional false online alerts after sending a message",
+        "Online alerts now require a confirmed presence transition in the current session"
       ]
     }
   }

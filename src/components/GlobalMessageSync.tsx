@@ -280,6 +280,7 @@ export function GlobalMessageSync() {
   const cursorRef = useRef<number | null>(null);
   const syncInFlightRef = useRef(false);
   const presencePollCountRef = useRef(0);
+  const presenceBaselineRef = useRef<Map<number, boolean> | null>(null);
   const sessionUserId = session?.user.user_id ?? null;
   const sessionAccessToken = session?.accessToken ?? null;
   const scope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
@@ -297,6 +298,7 @@ export function GlobalMessageSync() {
     if (!scope || !session) {
       setAfterMessageId(null);
       cursorRef.current = null;
+      presenceBaselineRef.current = null;
       return;
     }
 
@@ -428,13 +430,13 @@ export function GlobalMessageSync() {
       try {
         presencePollCountRef.current += 1;
         if (presencePollCountRef.current % 5 === 0) {
-          const previousChats = chatCache.getChatList(scope)?.chats ?? [];
-          const previousById = new Map(previousChats.map((chat) => [chat.id, chat]));
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
+          const previousPresence = presenceBaselineRef.current;
           const newlyOnline = freshChats.find((chat) => {
-            const previous = previousById.get(chat.id);
-            return chat.type === "direct" && chat.online && previous?.online === false && chat.onlineReminderEnabled;
+            const previous = previousPresence?.get(chat.id);
+            return chat.type === "direct" && chat.online && previous === false && chat.onlineReminderEnabled;
           });
+          presenceBaselineRef.current = new Map(freshChats.map((chat) => [chat.id, chat.online]));
           chatCache.setChatList(scope, freshChats);
           void chatCache.persistChatList(scope, freshChats);
           if (newlyOnline && !isGestureAccessSuppressed(gestureScope)) {
