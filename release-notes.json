@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.08.1",
+  "id": "2026.08.08.2",
   "publishedAt": "2026-08-08",
   "locales": {
     "zh-CN": {
-      "title": "广场消息与通知设置升级",
+      "title": "广场等级权限判断修复",
       "items": [
-        "点赞、评论与回复会汇入广场消息，底部入口同步展示未读数量",
-        "通知与提醒支持按渠道或按类型管理，聊天提醒已合并私聊与群聊",
-        "广场互动可分别设置好友和其他成员，并独立控制网页、邮件与即时渠道"
+        "广场会读取最新成长等级，已达到 LV6 的成员可正常使用语音发言",
+        "更新序号现在按当日发布次数持续递增"
       ]
     },
     "en": {
-      "title": "Square activity and notification controls",
+      "title": "Square level access fix",
       "items": [
-        "Likes, comments, and replies now appear in Square activity with a synced unread badge",
-        "Manage notifications by channel or by type, with direct and group chats unified",
-        "Control friend and other-member Square activity across web, email, and instant channels"
+        "Square now reads the latest growth level so members at LV6 and above can post voice statements",
+        "Release sequence numbers now increase with every update published on the same day"
       ]
     }
   }

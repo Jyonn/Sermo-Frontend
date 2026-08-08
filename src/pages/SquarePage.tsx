@@ -172,6 +172,7 @@ export default function SquarePage() {
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
+  const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -181,7 +182,6 @@ export default function SquarePage() {
   const recordingTimerRef = useRef<number | null>(null);
   const currentUser = session?.user;
   const canPublish = Boolean(currentUser?.verified);
-  const growthLevel = currentUser?.growth_level ?? 1;
   const canSendVoice = Boolean(currentUser?.official) || growthLevel >= 6;
   const canSendVideo = Boolean(currentUser?.official) || growthLevel >= 8;
   const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
@@ -194,6 +194,16 @@ export default function SquarePage() {
     () => Boolean(text.trim() || photos.length || voiceFile || video) && !publishing && text.length <= MAX_TEXT_LENGTH,
     [photos.length, publishing, text, video, voiceFile],
   );
+
+  useEffect(() => {
+    setGrowthLevel(session?.user.growth_level ?? 1);
+    if (!session?.user.user_id) return;
+    const controller = new AbortController();
+    void api.getGrowth(controller.signal).then((growth) => {
+      setGrowthLevel(growth.effective_level ?? growth.level);
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [session?.user.growth_level, session?.user.user_id]);
 
   const loadStatements = async (before?: number) => {
     const controller = new AbortController();
