@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.4",
+  "id": "2026.08.09.5",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "从广场认识发言者",
+      "title": "发言详情排版优化",
       "items": [
-        "点击广场发言中的头像即可查看完整用户详情",
-        "从发言详情进入用户主页后，返回仍会停留在原发言"
+        "修正桌面端评论编辑栏超出发言详情边界的问题",
+        "评论编辑栏现在会始终与详情 Drawer 等宽对齐"
       ]
     },
     "en": {
-      "title": "Meet people from Square",
+      "title": "Statement detail layout polish",
       "items": [
-        "Tap an author's avatar in Square to open their full profile",
-        "Returning from a profile keeps the original statement detail open"
+        "Fixed the desktop comment composer overflowing the statement detail",
+        "The composer now stays aligned with the detail drawer at every width"
       ]
     }
   }

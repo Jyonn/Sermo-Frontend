@@ -10417,11 +10417,12 @@ html[data-theme="dark"] .message-link-preview-site {
 }
 
 .side-drawer {
+  --drawer-width: min(100vw, 440px);
   position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
-  width: min(100vw, 440px);
+  width: var(--drawer-width);
   height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -15000,7 +15001,8 @@ html[data-theme="dark"] .message-link-preview-site {
   }
 
   .side-drawer {
-    width: 100vw;
+    --drawer-width: 100vw;
+    width: var(--drawer-width);
     border-left: 0;
   }
 }
