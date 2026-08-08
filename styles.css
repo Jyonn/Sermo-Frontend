@@ -21094,7 +21094,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-statement-footer .material-symbols-outlined { font-size: 18px; }
 .square-load-more { justify-self: center; min-height: 40px; border: 0; padding: 0 20px; border-radius: 999px; color: var(--text-secondary); background: var(--bg-canvas); }
 
-.square-comments-drawer { min-height: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: max(76px, calc(62px + env(safe-area-inset-bottom))); }
+.square-comments-drawer { min-height: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); scroll-padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
 .square-comments-context { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 4px 2px 15px; border-bottom: 1px solid var(--line-soft); }
 .square-comments-context strong { font-size: 13px; }.square-comments-context p { display: -webkit-box; margin: 3px 0 0; overflow: hidden; color: var(--text-secondary); font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .square-comment-avatar { width: 38px; height: 38px; }

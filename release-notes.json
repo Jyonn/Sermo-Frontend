@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.08.3",
-  "publishedAt": "2026-08-08",
+  "id": "2026.08.09.1",
+  "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "广场发言信息优化",
+      "title": "发言详情评论区修复",
       "items": [
-        "发言时间改为与聊天列表一致的相对时间，并精确到分钟",
-        "只看好友时会保留自己的发言，作者昵称旁会展示成长等级"
+        "评论列表会为底部编辑栏和回复提示预留完整空间",
+        "手机安全区内的最后一条评论现在也能完整查看"
       ]
     },
     "en": {
-      "title": "Square statement details",
+      "title": "Statement comments layout fix",
       "items": [
-        "Statement timestamps now use the same minute-based relative format as the chat list",
-        "The friends feed now includes your own statements and shows each author's growth level"
+        "Comment lists now reserve enough room for the composer and reply context",
+        "The final comment remains fully visible above mobile safe areas"
       ]
     }
   }
