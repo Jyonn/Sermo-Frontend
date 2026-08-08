@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { ImageLightbox } from "../components/ImageLightbox";
+import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { UserAvatar } from "../components/UserAvatar";
+import { UserProfilePanel } from "../components/UserProfilePanel";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
@@ -48,7 +51,7 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
-function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage }: {
+function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   detail?: boolean;
@@ -56,6 +59,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   onLike: () => void;
   onOpen: () => void;
   onOpenImage: (index: number) => void;
+  onOpenProfile: () => void;
 }) {
   const { t } = useI18n();
   const [playing, setPlaying] = useState(false);
@@ -66,13 +70,15 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   return (
     <article className={`square-statement-card${detail ? " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
       <header className="square-statement-author">
-        <UserAvatar
-          className="square-statement-avatar"
-          frame={statement.user.avatar_frame_style}
-          name={statement.user.name}
-          uri={statement.user.avatar_uri}
-          vip={Boolean(statement.user.is_permanent_vip)}
-        />
+        <button className="square-statement-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(); }} type="button">
+          <UserAvatar
+            className="square-statement-avatar"
+            frame={statement.user.avatar_frame_style}
+            name={statement.user.name}
+            uri={statement.user.avatar_uri}
+            vip={Boolean(statement.user.is_permanent_vip)}
+          />
+        </button>
         <div className="square-statement-author-copy">
           <div className="square-statement-author-name">
             <strong>{statement.user.name}</strong>
@@ -142,6 +148,7 @@ function CommentThread({ comment, language, canInteract, onLike, onReply }: {
 
 export default function SquarePage() {
   const { t, language } = useI18n();
+  const navigate = useNavigate();
   const { session } = useAuth();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine">("all");
@@ -175,6 +182,8 @@ export default function SquarePage() {
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
+  const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
+  const [profileSyncing, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -190,6 +199,7 @@ export default function SquarePage() {
   const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
+  const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
 
   const remaining = MAX_TEXT_LENGTH - text.length;
@@ -513,7 +523,7 @@ export default function SquarePage() {
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={t("square.empty")} description={t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} statement={statement} />)}
+            {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -598,7 +608,7 @@ export default function SquarePage() {
       </BottomSheet>
       <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
-          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} statement={activeCommentStatement} /> : null}
+          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} statement={activeCommentStatement} /> : null}
           <div className="square-comments-heading"><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
           {commentsLoading && !comments.length ? <FeedbackState title={t("common.loading")} /> : null}
           {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
@@ -610,6 +620,28 @@ export default function SquarePage() {
           }} type="button">{t("square.loadMoreComments")}</button> : null}
           {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div>{replyTarget ? <button className="square-reply-target" onClick={() => setReplyTarget(null)} type="button">{t("square.replyingTo", { name: replyTarget.user.name })}<span className="material-symbols-outlined">close</span></button> : null}<input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.writeReply") : t("square.writeComment")} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
         </div>
+      </SideDrawer>
+      <SideDrawer
+        historyKey="square-user-profile"
+        onClose={() => setProfileDrawerUserId(null)}
+        open={profileDrawerUserId !== null}
+        title={t("profile.details")}
+        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
+      >
+        {profileDrawerUserId !== null ? (
+          <UserProfilePanel
+            initialUser={profileSeed}
+            key={profileDrawerUserId}
+            onOpenChat={(chatId) => {
+              window.history.replaceState({ ...window.history.state, sermoDrawerStack: [] }, "");
+              setProfileDrawerUserId(null);
+              setCommentStatementId(null);
+              navigate(`/app/chats/${chatId}`);
+            }}
+            onSyncingChange={setProfileSyncing}
+            userId={profileDrawerUserId}
+          />
+        ) : null}
       </SideDrawer>
       {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
       <BottomSheet bodyClassName="square-delete-sheet" onClose={() => setDeleteStatementId(null)} open={deleteStatementId !== null} title={t("square.deleteStatement")}><p>{t("square.deleteStatementHint")}</p><button className="danger-button" onClick={() => { const id = deleteStatementId; if (id === null) return; void api.deleteSquareStatement(id).then(() => { setStatements((current) => current.filter((item) => item.statement_id !== id)); setDeleteStatementId(null); }); }} type="button">{t("common.delete")}</button></BottomSheet>

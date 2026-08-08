@@ -21082,6 +21082,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-statement-feed { display: grid; gap: 14px; }
 .square-statement-card { padding: 17px; box-shadow: 0 14px 38px rgba(28, 50, 42, 0.045); }
 .square-statement-author { display: flex; align-items: center; gap: 11px; }
+.square-statement-avatar-button { flex: none; margin: 0; padding: 0; border: 0; border-radius: 28%; background: transparent; cursor: pointer; }
+.square-statement-avatar-button:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
 .square-statement-author-copy { display: grid; gap: 2px; min-width: 0; }
 .square-statement-author strong { overflow: hidden; color: var(--text-primary); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
 .square-statement-author div span { color: var(--text-secondary); font-size: 11px; }
