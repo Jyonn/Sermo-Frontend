@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
 import { FeedbackState } from "../components/FeedbackState";
@@ -196,9 +196,13 @@ function CommentThread({ comment, language, canInteract, onLike, onReply }: {
 export default function SquarePage() {
   const { t, language } = useI18n();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { session } = useAuth();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
-  const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine">("all");
+  const profileFeedUserIdValue = Number(searchParams.get("user_id"));
+  const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
+  const profileFeedUserName = searchParams.get("user_name")?.trim() || t("square.userFeedFallback");
+  const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(profileFeedUserId ? "user" : "all");
   const [statements, setStatements] = useState<SquareStatementDTO[]>(() => readTabCache<SquareStatementDTO[]>(cacheScope, "square:all")?.data ?? []);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -277,7 +281,7 @@ export default function SquarePage() {
   const loadStatements = async (before?: number) => {
     const controller = new AbortController();
     try {
-      const rows = await api.getSquareStatements({ before, limit: 20, scope: feedMode }, controller.signal);
+      const rows = await api.getSquareStatements({ before, limit: 20, scope: feedMode === "user" ? "all" : feedMode, user_id: feedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal);
       setStatements((current) => before ? [...current, ...rows] : rows);
       setHasMore(rows.length === 20);
       setError("");
@@ -291,13 +295,13 @@ export default function SquarePage() {
   };
 
   useEffect(() => {
-    const cacheKey = `square:${feedMode}`;
+    const cacheKey = feedMode === "user" ? `square:user:${profileFeedUserId}` : `square:${feedMode}`;
     const cached = readTabCache<SquareStatementDTO[]>(cacheScope, cacheKey)?.data;
     setStatements(cached ?? []);
     setLoading(!cached);
     setSyncing(true);
     const controller = new AbortController();
-    void api.getSquareStatements({ limit: 20, scope: feedMode }, controller.signal).then((rows) => {
+    void api.getSquareStatements({ limit: 20, scope: feedMode === "user" ? "all" : feedMode, user_id: feedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
       setStatements(rows);
       writeTabCache(cacheScope, cacheKey, rows);
       setHasMore(rows.length === 20);
@@ -306,11 +310,18 @@ export default function SquarePage() {
       if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("square.loadFailed"));
     }).finally(() => { setLoading(false); setSyncing(false); });
     return () => controller.abort();
-  }, [cacheScope, feedMode, t]);
+  }, [cacheScope, feedMode, profileFeedUserId, t]);
 
   useEffect(() => {
-    if (statements.length) writeTabCache(cacheScope, `square:${feedMode}`, statements);
-  }, [cacheScope, feedMode, statements]);
+    if (statements.length) writeTabCache(cacheScope, feedMode === "user" ? `square:user:${profileFeedUserId}` : `square:${feedMode}`, statements);
+  }, [cacheScope, feedMode, profileFeedUserId, statements]);
+
+  useEffect(() => {
+    if (profileFeedUserId) {
+      setFeedMode("user");
+      setProfileDrawerUserId(null);
+    }
+  }, [profileFeedUserId]);
 
   useEffect(() => () => {
     recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
@@ -564,6 +575,18 @@ export default function SquarePage() {
             <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button>
             <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}</button>
             <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
+            {profileFeedUserId ? (
+              <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}>
+                <button aria-selected={feedMode === "user"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button>
+                <button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => {
+                  const next = new URLSearchParams(searchParams);
+                  next.delete("user_id");
+                  next.delete("user_name");
+                  setSearchParams(next, { replace: true });
+                  setFeedMode("mine");
+                }} type="button"><span className="material-symbols-outlined">close</span></button>
+              </span>
+            ) : null}
           </div>
           {canPublish ? (
             <button className="square-compose-launcher" onClick={() => setComposerOpen(true)} type="button">
@@ -580,7 +603,7 @@ export default function SquarePage() {
           )}
           {error ? <div className="square-inline-error">{error}</div> : null}
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
-          {!loading && !statements.length && !error ? <FeedbackState title={t("square.empty")} description={t("square.emptyHint")} /> : null}
+          {!loading && !statements.length && !error ? <FeedbackState title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : t("square.empty")} description={feedMode === "user" ? t("square.userFeedEmptyHint") : t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
             {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} statement={statement} />)}
           </section>

@@ -150,6 +150,12 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     }
   };
 
+  const openStatements = () => {
+    if (!user) return;
+    const params = new URLSearchParams({ user_id: String(user.user_id), user_name: user.name });
+    navigate(`/app/square?${params.toString()}`);
+  };
+
   const openGroupPicker = async () => {
     if (!user) return;
     if (!canCreateGroup) {
@@ -288,6 +294,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
             {requestState === "sending" ? t("profile.sending") : requestState === "sent" ? t("profile.sent") : t("profile.addFriend")}
           </button>
         ) : null}
+        <button className="button secondary-button" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
       </div>
 
       <section className="user-profile-section">

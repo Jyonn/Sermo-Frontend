@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.11",
+  "id": "2026.08.09.12",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "广场浏览更自然",
+      "title": "从主页走进发言",
       "items": [
-        "广场筛选调整为探索、好友圈与我的，入口含义更清晰",
-        "内容较少或暂时为空时保持贴顶排版，不再拉伸分散"
+        "用户详情新增查看发言，可在广场打开带昵称的临时标签",
+        "临时标签支持关闭，再查看其他用户时会自动替换"
       ]
     },
     "en": {
-      "title": "A more natural Square feed",
+      "title": "From profiles to statements",
       "items": [
-        "Square filters are now Explore, Friends, and My posts",
-        "Short and empty feeds stay aligned to the top instead of stretching vertically"
+        "User profiles can now open a temporary named statement tab in the Square",
+        "Temporary tabs can be closed and are replaced when viewing another user"
       ]
     }
   }

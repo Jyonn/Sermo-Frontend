@@ -12121,10 +12121,12 @@ html[data-theme="dark"] .message-link-preview-site {
   color: var(--brand-primary);
 }
 
+.user-profile-primary-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 .user-profile-primary-actions .button {
   width: 100%;
   min-height: 50px;
 }
+.user-profile-primary-actions .button:only-child { grid-column: 1 / -1; }
 
 .user-profile-section {
   display: grid;
@@ -21216,6 +21218,16 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-feed-filter button{position:relative;align-self:stretch;padding:0 2px;border:0;color:var(--text-muted);font:inherit;font-size:13px;font-weight:750;background:transparent}
 .square-feed-filter button::after{position:absolute;right:0;bottom:-1px;left:0;height:2px;border-radius:99px;background:var(--brand-primary);content:"";opacity:0;transform:scaleX(.45);transition:opacity 160ms ease,transform 160ms ease}
 .square-feed-filter button.is-active{color:var(--text-primary)}.square-feed-filter button.is-active::after{opacity:1;transform:scaleX(1)}
+.square-feed-user-tab{position:relative;display:inline-flex;align-self:stretch;min-width:0;max-width:min(42vw,180px);align-items:center;padding-right:22px;color:var(--text-muted)}
+.square-feed-user-tab>button:first-child{display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.square-feed-user-tab.is-active{color:var(--text-primary)}
+.square-feed-user-tab::after{position:absolute;right:0;bottom:-1px;left:0;height:2px;border-radius:99px;background:var(--brand-primary);content:"";opacity:0;transform:scaleX(.45);transition:opacity 160ms ease,transform 160ms ease}
+.square-feed-user-tab.is-active::after{opacity:1;transform:scaleX(1)}
+.square-feed-filter .square-feed-user-close{position:absolute;z-index:1;top:50%;right:-4px;width:24px;height:24px;padding:0;display:grid;place-items:center;align-self:auto;border-radius:50%;transform:translateY(-50%)}
+.square-feed-filter .square-feed-user-close::after{display:none}
+.square-feed-filter .square-feed-user-close:hover{color:var(--text-primary);background:color-mix(in srgb,var(--text-primary) 7%,transparent)}
+.square-feed-filter .square-feed-user-close .material-symbols-outlined{font-size:15px}
+@media(max-width:420px){.square-feed-filter{gap:13px}.square-feed-user-tab{max-width:32vw}}
 .square-statement-card.is-clickable{cursor:pointer;transition:border-color 160ms ease,background 160ms ease,transform 160ms ease}
 .square-statement-card.is-clickable:hover{border-color:color-mix(in srgb,var(--brand-primary) 28%,var(--line-soft));background:color-mix(in srgb,var(--bg-elevated) 98%,var(--brand-primary) 2%)}
 .square-statement-card.is-clickable:focus-visible{outline:2px solid color-mix(in srgb,var(--brand-primary) 65%,transparent);outline-offset:2px}
