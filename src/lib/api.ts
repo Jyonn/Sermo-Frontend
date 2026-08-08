@@ -597,7 +597,7 @@ export const api = {
     });
   },
 
-  getSquareStatements(params: { before?: number; limit?: number; friends_only?: number }, signal?: AbortSignal) {
+  getSquareStatements(params: { before?: number; limit?: number; scope?: "all" | "friends" | "mine" }, signal?: AbortSignal) {
     return request<SquareStatementDTO[]>("/square/statements", {
       auth: true,
       query: params,

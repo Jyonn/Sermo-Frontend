@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.1",
+  "id": "2026.08.09.2",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "发言详情评论区修复",
+      "title": "广场新增只看我",
       "items": [
-        "评论列表会为底部编辑栏和回复提示预留完整空间",
-        "手机安全区内的最后一条评论现在也能完整查看"
+        "广场支持在全部、只看好友和只看我之间快速切换",
+        "只看我的发言使用独立分页与缓存，历史内容也能完整加载"
       ]
     },
     "en": {
-      "title": "Statement comments layout fix",
+      "title": "A new Mine filter for Square",
       "items": [
-        "Comment lists now reserve enough room for the composer and reply context",
-        "The final comment remains fully visible above mobile safe areas"
+        "Switch between All, Friends, and Mine directly in the Square feed",
+        "Your statements use dedicated pagination and caching for complete history"
       ]
     }
   }

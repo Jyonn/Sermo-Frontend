@@ -157,6 +157,7 @@
   "square.deleteStatementHint": "删除后，其他人将无法继续查看这条发言。",
   "square.feedAll": "全部",
   "square.feedFriends": "只看好友",
+  "square.feedMine": "只看我",
   "square.statementDetail": "发言",
   "square.reply": "回复",
   "square.writeReply": "写下回复",

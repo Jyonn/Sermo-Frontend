@@ -157,6 +157,7 @@
   "square.deleteStatementHint": "Other people will no longer be able to view this statement.",
   "square.feedAll": "All",
   "square.feedFriends": "Friends",
+  "square.feedMine": "Mine",
   "square.statementDetail": "Statement",
   "square.reply": "Reply",
   "square.writeReply": "Write a reply",

@@ -144,7 +144,7 @@ export default function SquarePage() {
   const { t, language } = useI18n();
   const { session } = useAuth();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
-  const [feedMode, setFeedMode] = useState<"all" | "friends">("all");
+  const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine">("all");
   const [statements, setStatements] = useState<SquareStatementDTO[]>(() => readTabCache<SquareStatementDTO[]>(cacheScope, "square:all")?.data ?? []);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -211,7 +211,7 @@ export default function SquarePage() {
   const loadStatements = async (before?: number) => {
     const controller = new AbortController();
     try {
-      const rows = await api.getSquareStatements({ before, limit: 20, friends_only: feedMode === "friends" ? 1 : 0 }, controller.signal);
+      const rows = await api.getSquareStatements({ before, limit: 20, scope: feedMode }, controller.signal);
       setStatements((current) => before ? [...current, ...rows] : rows);
       setHasMore(rows.length === 20);
       setError("");
@@ -231,7 +231,7 @@ export default function SquarePage() {
     setLoading(!cached);
     setSyncing(true);
     const controller = new AbortController();
-    void api.getSquareStatements({ limit: 20, friends_only: feedMode === "friends" ? 1 : 0 }, controller.signal).then((rows) => {
+    void api.getSquareStatements({ limit: 20, scope: feedMode }, controller.signal).then((rows) => {
       setStatements(rows);
       writeTabCache(cacheScope, cacheKey, rows);
       setHasMore(rows.length === 20);
@@ -494,6 +494,7 @@ export default function SquarePage() {
           <div className="square-feed-filter" role="tablist">
             <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button>
             <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}</button>
+            <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
           </div>
           {canPublish ? (
             <button className="square-compose-launcher" onClick={() => setComposerOpen(true)} type="button">
