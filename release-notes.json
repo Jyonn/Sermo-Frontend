@@ -3,19 +3,19 @@
   "publishedAt": "2026-08-08",
   "locales": {
     "zh-CN": {
-      "title": "广场信息流与发言详情升级",
+      "title": "广场消息与通知设置升级",
       "items": [
-        "发言卡片可进入完整详情，评论支持回复并按热度排列",
-        "广场支持缓存与只看好友，信息流严格按发布时间展示",
-        "照片、语音、视频采用互斥媒体槽，发表过程更清晰"
+        "点赞、评论与回复会汇入广场消息，底部入口同步展示未读数量",
+        "通知与提醒支持按渠道或按类型管理，聊天提醒已合并私聊与群聊",
+        "广场互动可分别设置好友和其他成员，并独立控制网页、邮件与即时渠道"
       ]
     },
     "en": {
-      "title": "A faster, richer Square feed",
+      "title": "Square activity and notification controls",
       "items": [
-        "Open a statement for its full thread, with replies ranked by engagement",
-        "The Square is cached, supports a friends-only feed, and stays chronological",
-        "Photos, voice, and video now share one clear, exclusive media slot"
+        "Likes, comments, and replies now appear in Square activity with a synced unread badge",
+        "Manage notifications by channel or by type, with direct and group chats unified",
+        "Control friend and other-member Square activity across web, email, and instant channels"
       ]
     }
   }

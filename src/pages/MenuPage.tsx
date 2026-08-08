@@ -32,7 +32,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
@@ -116,6 +116,7 @@ function visibleBubbleStyle(style?: string) {
 }
 
 type NotificationMessageKind = "direct" | "group" | "online";
+type NotificationSettingsMode = "channel" | "type";
 type PersonalizationGroupMode = "level" | "rarity";
 type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type PersonalizationCatalogItem = readonly [string, TranslationKey];
@@ -293,6 +294,9 @@ export default function MenuPage() {
   const [gestureSheetOpen, setGestureSheetOpen] = useState(false);
   const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
   const [channelsDrawerOpen, setChannelsDrawerOpen] = useState(false);
+  const [notificationSettingsMode, setNotificationSettingsMode] = useState<NotificationSettingsMode>("channel");
+  const [notificationTopics, setNotificationTopics] = useState<NotificationTopicPreferenceDTO[]>([]);
+  const [notificationTopicsSaving, setNotificationTopicsSaving] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
   const [webPushState, setWebPushState] = useState<WebPushState>("checking");
@@ -1043,8 +1047,8 @@ export default function MenuPage() {
       const value = prefEditorValue.trim();
       const key = `${prefEditor.kind}:${prefEditor.field}`;
       patch = {
-        ...(key === "direct:title" ? { hidden_direct_message_title: value } : {}),
-        ...(key === "direct:content" ? { hidden_direct_message_text: value } : {}),
+        ...(key === "direct:title" ? { hidden_direct_message_title: value, hidden_group_message_title: value } : {}),
+        ...(key === "direct:content" ? { hidden_direct_message_text: value, hidden_group_message_text: value } : {}),
         ...(key === "group:title" ? { hidden_group_message_title: value } : {}),
         ...(key === "group:content" ? { hidden_group_message_text: value } : {}),
         ...(key === "online:title" ? { friend_online_message_title: value } : {}),
@@ -1411,6 +1415,47 @@ export default function MenuPage() {
       return;
     }
     setChannelsDrawerOpen(true);
+    void api.getNotificationTopics().then(setNotificationTopics).catch(() => undefined);
+  };
+
+  const topicEnabled = (channel: number, topic: number, audience: number) => notificationTopics.find(
+    (item) => item.channel === channel && item.topic === topic && item.audience === audience,
+  )?.enabled ?? (channel !== 2 && topic !== 6);
+
+  const toggleNotificationTopic = async (channel: 0 | 1 | 2 | 3, topic: 1 | 2 | 3 | 4 | 5 | 6, audience: 0 | 1 | 2) => {
+    if (notificationTopicsSaving || channel === 2) return;
+    const enabled = !topicEnabled(channel, topic, audience);
+    const patch: NotificationTopicPreferenceDTO = { channel, topic, audience, enabled };
+    setNotificationTopicsSaving(true);
+    setNotificationTopics((current) => [...current.filter((item) => !(item.channel === channel && item.topic === topic && item.audience === audience)), patch]);
+    try {
+      const saved = await api.updateNotificationTopic(patch);
+      setNotificationTopics((current) => [...current.filter((item) => !(item.channel === saved.channel && item.topic === saved.topic && item.audience === saved.audience)), saved]);
+    } catch (cause) {
+      setNotificationTopics((current) => [...current.filter((item) => !(item.channel === channel && item.topic === topic && item.audience === audience)), { ...patch, enabled: !enabled }]);
+      setError(cause instanceof Error ? cause.message : t("notification.updateFailed"));
+    } finally {
+      setNotificationTopicsSaving(false);
+    }
+  };
+
+  const setNotificationTopicGroup = async (channel: 0 | 1 | 2 | 3, pairs: Array<[1 | 2 | 3 | 4 | 5 | 6, 0 | 1 | 2]>) => {
+    if (notificationTopicsSaving || channel === 2) return;
+    const enabled = !pairs.every(([topic, audience]) => topicEnabled(channel, topic, audience));
+    const patches = pairs.map(([topic, audience]): NotificationTopicPreferenceDTO => ({ channel, topic, audience, enabled }));
+    setNotificationTopicsSaving(true);
+    setNotificationTopics((current) => [
+      ...current.filter((item) => !patches.some((patch) => patch.channel === item.channel && patch.topic === item.topic && patch.audience === item.audience)),
+      ...patches,
+    ]);
+    try {
+      await Promise.all(patches.map((patch) => api.updateNotificationTopic(patch)));
+    } catch (cause) {
+      void api.getNotificationTopics().then(setNotificationTopics);
+      setError(cause instanceof Error ? cause.message : t("notification.updateFailed"));
+    } finally {
+      setNotificationTopicsSaving(false);
+    }
   };
 
   const openShowcaseBadge = (kind: "password" | NotificationChannel) => {
@@ -1490,6 +1535,17 @@ export default function MenuPage() {
       return;
     }
     setInviteDrawerOpen(true);
+  };
+
+  const renderChannelTopicControls = (channel: 0 | 1 | 2 | 3) => {
+    const groups: Array<{ label: string; pairs: Array<[1 | 2 | 3 | 4 | 5 | 6, 0 | 1 | 2]> }> = [
+      { label: t("notification.chatType"), pairs: [[1, 0]] },
+      { label: t("notification.squareType"), pairs: [[2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2]] },
+      { label: t("notification.onlineType"), pairs: [[6, 0]] },
+    ];
+    return <div className="menu-pref-list notification-channel-topics">
+      {groups.map((group) => <div className="menu-pref-row" key={group.label}><div className="row-main"><strong>{group.label}</strong></div><button aria-label={group.label} className={`switch ${group.pairs.every(([topic, audience]) => topicEnabled(channel, topic, audience)) ? "active" : ""}`} disabled={notificationTopicsSaving || channel === 2} onClick={() => void setNotificationTopicGroup(channel, group.pairs)} type="button" /></div>)}
+    </div>;
   };
 
   return (
@@ -2300,45 +2356,42 @@ export default function MenuPage() {
       </BottomSheet>
 
       <SideDrawer open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
-        <div className="detail-list">
-          <div className="simple-list">
-            <button className="simple-row menu-link-row" onClick={openWebReminderDrawer} type="button">
-              <div className="row-main menu-key-cell">
-                <strong>{t("channel.web")}</strong>
-              </div>
-              <div className="menu-detail-value menu-detail-text">
-                <span className="menu-channel-value">{webReminderSummary}</span>
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            {visibleChannelRows.map(([channel, _value, label]) => {
-              const verified = channelVerified(me, channel);
-              return (
-                <button
-                  key={channel}
-                  className="simple-row menu-link-row"
-                  onClick={() => verified ? openPrefDrawer(channel) : openAuthSheet(channel)}
-                  type="button"
-                >
-                  <div className="row-main menu-key-cell">
-                    <strong>{t(label)}</strong>
-                  </div>
-                  <div className="menu-detail-value menu-detail-text">
-                    {verified ? (
-                      <span className="menu-channel-value">{t("contact.boundState")}</span>
-                    ) : !hasPassword ? (
-                      <span className="menu-inline-action">{t("password.setupFirst")}</span>
-                    ) : channel === "bark" || channel === "sms" ? (
-                      <span className="menu-inline-action">{t("contact.bindNow")}</span>
-                    ) : (
-                      <span className="menu-inline-action">{t("contact.verifyNow")}</span>
-                    )}
-                  </div>
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
-              );
-            })}
+        <div className="notification-routing-drawer">
+          <div className="mode-switch notification-routing-mode" role="tablist">
+            <button className={`mode-pill ${notificationSettingsMode === "channel" ? "active" : ""}`} onClick={() => setNotificationSettingsMode("channel")} role="tab" type="button">{t("notification.byChannel")}</button>
+            <button className={`mode-pill ${notificationSettingsMode === "type" ? "active" : ""}`} onClick={() => setNotificationSettingsMode("type")} role="tab" type="button">{t("notification.byType")}</button>
           </div>
+          {notificationSettingsMode === "channel" ? (
+            <div className="notification-routing-grid">
+              <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">language</span><div><strong>{t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
+              {visibleChannelRows.map(([channel, _value, label]) => {
+                const verified = channelVerified(me, channel);
+                return <button className={`notification-channel-card is-${channel}`} key={channel} onClick={() => verified ? openPrefDrawer(channel) : openAuthSheet(channel)} type="button">
+                  <span className="material-symbols-outlined">{channel === "email" ? "mail" : channel === "sms" ? "sms" : "notifications_active"}</span>
+                  <div><strong>{t(label)}</strong><small>{channel === "sms" ? t("common.unsupported") : verified ? t("contact.boundState") : t("contact.bindNow")}</small></div>
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </button>;
+              })}
+            </div>
+          ) : (
+            <div className="notification-type-stack">
+              {([
+                { title: t("notification.chatType"), hint: t("notification.chatTypeHint"), topics: [[1, 0]] },
+                { title: t("notification.squareType"), hint: t("notification.squareTypeHint"), topics: [[2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2]] },
+                { title: t("notification.onlineType"), hint: t("notification.onlineTypeHint"), topics: [[6, 0]] },
+              ] as Array<{ title: string; hint: string; topics: Array<[number, number]> }>).map((section) => (
+                <section className="notification-type-card" key={section.title}>
+                  <header><strong>{section.title}</strong><small>{section.hint}</small></header>
+                  {section.topics.map(([topic, audience]) => {
+                    const labels: Record<number, string> = { 1: t("notification.chatType"), 2: t("notification.statementLikes"), 3: t("notification.statementComments"), 4: t("notification.commentLikes"), 5: t("notification.commentReplies"), 6: t("notification.onlineType") };
+                    return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : null}</div><div className="notification-topic-channels">
+                      {([0, 1, 2, ...(isAppleEnvironment ? [3] : [])] as Array<0 | 1 | 2 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || channel === 2} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? "language" : channel === 1 ? "mail" : channel === 2 ? "sms" : "notifications_active"}</span></button>)}
+                    </div></div>;
+                  })}
+                </section>
+              ))}
+            </div>
+          )}
         </div>
       </SideDrawer>
 
@@ -2385,6 +2438,7 @@ export default function MenuPage() {
               />
             </div>
           </div>
+          {renderChannelTopicControls(0)}
         </div>
       </SideDrawer>
 
@@ -2518,6 +2572,7 @@ export default function MenuPage() {
                 </>
               ) : null}
             </div>
+            {renderChannelTopicControls(channelCode(prefDrawerChannel) as 1 | 2 | 3)}
             <div className="menu-pref-list">
               <div className="menu-pref-row">
                 <div className="row-main">
@@ -2600,8 +2655,8 @@ export default function MenuPage() {
                 </div>
               </div>
             ) : null}
-            {(["direct", "group", "online"] as NotificationMessageKind[]).map((kind) => {
-              const label = kind === "direct" ? t("notification.directPrompt") : kind === "group" ? t("notification.groupPrompt") : t("notification.onlinePrompt");
+            {(["direct", "online"] as NotificationMessageKind[]).map((kind) => {
+              const label = kind === "direct" ? t("notification.chatType") : t("notification.onlinePrompt");
               const content = messagePreferenceValue(activePref, kind, "content");
               const title = messagePreferenceValue(activePref, kind, "title");
               return (

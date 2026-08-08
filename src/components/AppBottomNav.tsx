@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
+import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
@@ -41,6 +42,7 @@ export function AppBottomNav() {
   );
   const [totalUnread, setTotalUnread] = useState(0);
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
+  const [squareUnread, setSquareUnread] = useState(0);
   const [desktopCollapsed, setDesktopCollapsed] = useState(() => localStorage.getItem("sermo:desktop-nav-collapsed") === "1");
   const desktopNavigationActive = Boolean(session && effectivePathname.startsWith("/app/"));
 
@@ -156,6 +158,29 @@ export function AppBottomNav() {
     };
   }, [effectivePathname, sessionAccessToken, sessionUserId]);
 
+  useEffect(() => {
+    if (!session) {
+      setSquareUnread(0);
+      return;
+    }
+    let cancelled = false;
+    const sync = () => void api.getNotificationEvents("square").then((result) => {
+      if (!cancelled) setSquareUnread(result.unread_count);
+    }).catch(() => undefined);
+    sync();
+    const timer = window.setInterval(sync, 15_000);
+    const handleUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ unreadCount: number }>).detail;
+      if (detail && !cancelled) setSquareUnread(Math.max(0, detail.unreadCount));
+    };
+    window.addEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, handleUpdated as EventListener);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.removeEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, handleUpdated as EventListener);
+    };
+  }, [sessionAccessToken, sessionUserId]);
+
   if (!session || !effectivePathname.startsWith("/app/")) return null;
   const isChatDetail = Boolean(matchPath("/app/chats/:chatId", effectivePathname));
 
@@ -204,6 +229,9 @@ export function AppBottomNav() {
               <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
               {route.key === "chats" && totalUnread > 0 ? (
                 <span className="nav-unread-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
+              ) : null}
+              {route.key === "square" && squareUnread > 0 ? (
+                <span className="nav-unread-badge">{squareUnread > 99 ? "99+" : squareUnread}</span>
               ) : null}
               {route.key === "notifications" && incomingRequestCount > 0 ? (
                 <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>

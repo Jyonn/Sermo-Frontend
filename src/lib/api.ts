@@ -22,6 +22,8 @@ import type {
   VideoMetadataDTO,
   OfficialLoginTicketDTO,
   NotificationPreferenceDTO,
+  NotificationTopicPreferenceDTO,
+  NotificationEventListDTO,
   PinnedMessageDTO,
   SpaceAdminDashboardDTO,
   SpaceAdminBroadcastResultDTO,
@@ -878,6 +880,36 @@ export const api = {
     return request<NotificationPreferenceDTO[]>("/users/me/notification-prefs", {
       auth: true,
       signal,
+    });
+  },
+
+  getNotificationTopics(signal?: AbortSignal) {
+    return request<NotificationTopicPreferenceDTO[]>("/users/me/notification-topics", {
+      auth: true,
+      signal,
+    });
+  },
+
+  updateNotificationTopic(payload: NotificationTopicPreferenceDTO) {
+    return request<NotificationTopicPreferenceDTO>("/users/me/notification-topics", {
+      method: "POST",
+      auth: true,
+      body: { ...payload, enabled: payload.enabled ? 1 : 0 },
+    });
+  },
+
+  getNotificationEvents(category = "square", signal?: AbortSignal) {
+    return request<NotificationEventListDTO>("/users/me/notification-events", {
+      auth: true,
+      query: { category, limit: 30 },
+      signal,
+    });
+  },
+
+  markSquareNotificationsRead() {
+    return request<{ updated: number }>("/users/me/notification-events", {
+      method: "POST",
+      auth: true,
     });
   },
 

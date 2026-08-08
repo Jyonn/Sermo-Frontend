@@ -1412,5 +1412,26 @@
   "messageSearch.locations": "Locations",
   "messageSearch.travelMaps": "Footprints",
   "messageSearch.empty": "No matching messages",
-  "messageSearch.failed": "Search could not be completed"
+  "messageSearch.failed": "Search could not be completed",
+  "square.notifications": "Square activity",
+  "square.noNotifications": "No Square activity yet",
+  "square.someone": "Someone",
+  "square.notificationLikedStatement": "{{name}} liked your statement",
+  "square.notificationCommented": "{{name}} commented on your statement",
+  "square.notificationLikedComment": "{{name}} liked your comment",
+  "square.notificationReplied": "{{name}} replied to your comment"
+  ,"notification.byChannel": "By channel"
+  ,"notification.byType": "By type"
+  ,"notification.chatType": "Chat"
+  ,"notification.chatTypeHint": "Direct and group messages"
+  ,"notification.squareType": "Square"
+  ,"notification.squareTypeHint": "Statements and comment activity"
+  ,"notification.onlineType": "Online"
+  ,"notification.onlineTypeHint": "When friends become active"
+  ,"notification.statementLikes": "Statement likes"
+  ,"notification.statementComments": "Statement comments"
+  ,"notification.commentLikes": "Comment likes"
+  ,"notification.commentReplies": "Comment replies"
+  ,"notification.fromFriends": "Friends"
+  ,"notification.fromOthers": "Other members"
 }

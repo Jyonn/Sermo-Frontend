@@ -11,7 +11,8 @@ import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
-import type { ImageMetadataDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import { announceSquareUnread } from "../lib/squareNotifications";
+import type { ImageMetadataDTO, NotificationEventDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 
 type SelectedPhoto = {
   id: string;
@@ -168,6 +169,9 @@ export default function SquarePage() {
   const [replyTarget, setReplyTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [commentSending, setCommentSending] = useState(false);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
+  const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
+  const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
+  const [notificationUnread, setNotificationUnread] = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -235,6 +239,25 @@ export default function SquarePage() {
   }, []);
 
   useEffect(() => () => { if (voicePreview) URL.revokeObjectURL(voicePreview); }, [voicePreview]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void api.getNotificationEvents("square", controller.signal).then((result) => {
+      setNotificationEvents(result.events);
+      setNotificationUnread(result.unread_count);
+      announceSquareUnread(result.unread_count);
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, []);
+
+  const openNotificationDrawer = () => {
+    setNotificationDrawerOpen(true);
+    if (!notificationUnread) return;
+    setNotificationUnread(0);
+    setNotificationEvents((current) => current.map((event) => ({ ...event, is_read: true })));
+    announceSquareUnread(0);
+    void api.markSquareNotificationsRead();
+  };
 
   useEffect(() => {
     if (commentStatementId === null) return;
@@ -441,12 +464,18 @@ export default function SquarePage() {
         <TabPageHeader
           syncing={syncing}
           title={t("square.title")}
-          actions={canPublish ? (
-            <button className="square-header-publish" onClick={() => setComposerOpen(true)} type="button">
-              <span className="material-symbols-outlined">edit_square</span>
-              <span>{t("square.publish")}</span>
+          actions={<div className="square-header-actions">
+            <button aria-label={t("square.notifications")} className="square-header-notifications" onClick={openNotificationDrawer} type="button">
+              <span className="material-symbols-outlined">notifications</span>
+              {notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}
             </button>
-          ) : null}
+            {canPublish ? (
+              <button className="square-header-publish" onClick={() => setComposerOpen(true)} type="button">
+                <span className="material-symbols-outlined">edit_square</span>
+                <span>{t("square.publish")}</span>
+              </button>
+            ) : null}
+          </div>}
         />
         <div className="square-feed-column">
           <div className="square-feed-filter" role="tablist">
@@ -480,6 +509,33 @@ export default function SquarePage() {
           ) : null}
         </div>
       </main>
+      <SideDrawer historyKey="square-notifications" onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
+        <div className="square-notification-list">
+          {!notificationEvents.length ? <FeedbackState title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
+            const actor = event.actor?.name || t("square.someone");
+            const label = event.topic === 2 ? t("square.notificationLikedStatement", { name: actor })
+              : event.topic === 3 ? t("square.notificationCommented", { name: actor })
+                : event.topic === 4 ? t("square.notificationLikedComment", { name: actor })
+                  : t("square.notificationReplied", { name: actor });
+            return (
+              <button
+                className={`square-notification-row${event.is_read ? "" : " is-unread"}`}
+                key={event.notification_event_id}
+                onClick={() => {
+                  const statementId = event.payload.statement_id;
+                  setNotificationDrawerOpen(false);
+                  if (statementId) setCommentStatementId(statementId);
+                }}
+                type="button"
+              >
+                <UserAvatar className="square-notification-avatar" frame={event.actor?.avatar_frame_style} name={actor} uri={event.actor?.avatar_uri} vip={Boolean(event.actor?.is_permanent_vip)} />
+                <span><strong>{label}</strong><small>{formatStatementTime(event.created_at, language)}</small></span>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            );
+          })}
+        </div>
+      </SideDrawer>
       <SideDrawer
         actionBusy={publishing}
         actionDisabled={!publishable}

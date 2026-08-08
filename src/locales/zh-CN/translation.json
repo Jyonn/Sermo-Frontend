@@ -1412,5 +1412,26 @@
   "messageSearch.locations": "位置",
   "messageSearch.travelMaps": "足迹",
   "messageSearch.empty": "没有找到相关消息",
-  "messageSearch.failed": "搜索没有完成"
+  "messageSearch.failed": "搜索没有完成",
+  "square.notifications": "广场消息",
+  "square.noNotifications": "还没有广场消息",
+  "square.someone": "有人",
+  "square.notificationLikedStatement": "{{name}} 赞了你的发言",
+  "square.notificationCommented": "{{name}} 评论了你的发言",
+  "square.notificationLikedComment": "{{name}} 赞了你的评论",
+  "square.notificationReplied": "{{name}} 回复了你的评论"
+  ,"notification.byChannel": "按渠道"
+  ,"notification.byType": "按类型"
+  ,"notification.chatType": "聊天"
+  ,"notification.chatTypeHint": "私聊与群聊合并设置"
+  ,"notification.squareType": "广场"
+  ,"notification.squareTypeHint": "发言与评论互动"
+  ,"notification.onlineType": "上线"
+  ,"notification.onlineTypeHint": "好友重新活跃时提醒"
+  ,"notification.statementLikes": "发言获赞"
+  ,"notification.statementComments": "发言获评论"
+  ,"notification.commentLikes": "评论获赞"
+  ,"notification.commentReplies": "评论获回复"
+  ,"notification.fromFriends": "好友"
+  ,"notification.fromOthers": "其他成员"
 }

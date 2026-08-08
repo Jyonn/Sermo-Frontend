@@ -290,6 +290,29 @@ export interface NotificationPreferenceDTO {
   bark_icon_mode: 0 | 1 | 2;
 }
 
+export interface NotificationTopicPreferenceDTO {
+  channel: 0 | 1 | 2 | 3;
+  topic: 1 | 2 | 3 | 4 | 5 | 6;
+  audience: 0 | 1 | 2;
+  enabled: boolean;
+}
+
+export interface NotificationEventDTO {
+  notification_event_id: number;
+  event_type: number;
+  topic: number | null;
+  audience: number;
+  actor: TinyUserDTO | null;
+  payload: { statement_id?: number; comment_id?: number };
+  is_read: boolean;
+  created_at: number;
+}
+
+export interface NotificationEventListDTO {
+  events: NotificationEventDTO[];
+  unread_count: number;
+}
+
 export interface WebReminderPreferenceDTO {
   sound_enabled: boolean;
   title_enabled: boolean;
