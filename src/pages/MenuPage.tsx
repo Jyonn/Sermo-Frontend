@@ -1204,6 +1204,7 @@ export default function MenuPage() {
       const payload = await api.setChatBackground(chatBackgroundDraft);
       setMe(payload);
       showToast(t("background.updated"));
+      setChatBackgroundDrawerOpen(false);
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("background.updateFailed"), "error");
     } finally {
@@ -1220,6 +1221,7 @@ export default function MenuPage() {
       const payload = await uploadChatBackground(file);
       setMe(payload);
       showToast(t("background.updated"));
+      setChatBackgroundDrawerOpen(false);
     } catch (uploadError) {
       showToast(
         uploadError instanceof ChatBackgroundUploadError || uploadError instanceof ApiError
@@ -1232,7 +1234,7 @@ export default function MenuPage() {
     }
   };
 
-  const savePersonalization = async () => {
+  const savePersonalization = async (drawer: "bubble" | "frame") => {
     if (!me || personalizationSaving) return;
     const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
     const avatarFrameChanged = personalizationDraft.avatar_frame_style !== (me.avatar_frame_style ?? "none");
@@ -1270,6 +1272,8 @@ export default function MenuPage() {
       setMe(nextMe);
       patchSessionUser(nextMe);
       showToast(t("personalization.updated"));
+      if (drawer === "bubble") setChatBubbleDrawerOpen(false);
+      if (drawer === "frame") setAvatarFrameDrawerOpen(false);
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("personalization.updateFailed"), "error");
     } finally {
@@ -2128,7 +2132,7 @@ export default function MenuPage() {
         actionBusy={personalizationSaving}
         actionDisabled={personalizationDraft.chat_bubble_style === (me?.chat_bubble_style ?? "default")}
         actionLabel={t("common.save")}
-        onAction={() => void savePersonalization()}
+        onAction={() => void savePersonalization("bubble")}
         open={chatBubbleDrawerOpen}
         onClose={() => setChatBubbleDrawerOpen(false)}
         title={t("menu.chatBubble")}
@@ -2179,7 +2183,7 @@ export default function MenuPage() {
         actionBusy={personalizationSaving}
         actionDisabled={personalizationDraft.avatar_frame_style === (me?.avatar_frame_style ?? "none")}
         actionLabel={t("common.save")}
-        onAction={() => void savePersonalization()}
+        onAction={() => void savePersonalization("frame")}
         open={avatarFrameDrawerOpen}
         onClose={() => setAvatarFrameDrawerOpen(false)}
         title={t("menu.avatarFrame")}

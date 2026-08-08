@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.8",
+  "id": "2026.08.09.9",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "上线状态更准确",
+      "title": "个性化保存更顺手",
       "items": [
-        "修复发送消息后可能误报好友刚刚上线的问题",
-        "上线提醒现在只依据当前会话内确认过的状态变化触发"
+        "聊天背景、气泡和头像框保存成功后会自动返回上一级",
+        "保存失败或权限不足时保留当前预览，方便继续调整"
       ]
     },
     "en": {
-      "title": "More accurate presence",
+      "title": "Smoother personalization saves",
       "items": [
-        "Fixed occasional false online alerts after sending a message",
-        "Online alerts now require a confirmed presence transition in the current session"
+        "Saving a chat background, bubble, or avatar frame now returns automatically",
+        "Failed or locked choices keep the current preview open for further changes"
       ]
     }
   }
