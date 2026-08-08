@@ -16,7 +16,7 @@ import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUplo
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
-import type { ImageMetadataDTO, NotificationEventDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import type { ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 
 type SelectedPhoto = {
   id: string;
@@ -29,6 +29,53 @@ const MAX_TEXT_LENGTH = 140;
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
+
+function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQuotaDTO | null }) {
+  const { t } = useI18n();
+  if (loading && !quota) return <div className="square-quota-loading"><span className="material-symbols-outlined">progress_activity</span></div>;
+  if (!quota) return <FeedbackState title={t("square.quotaLoadFailed")} />;
+  const remaining = (used: number, limit: number | null) => limit === null ? null : Math.max(0, limit - used);
+  const statementRemaining = remaining(quota.statements.daily_used, quota.statements.daily_limit);
+  const commentRemaining = remaining(quota.comments.daily_used, quota.comments.daily_limit);
+  const quotaCards = [
+    { key: "statement", icon: "edit_square", label: t("square.quotaStatements"), used: quota.statements.daily_used, limit: quota.statements.daily_limit, weeklyUsed: quota.statements.weekly_used, weeklyLimit: quota.statements.weekly_limit, remaining: statementRemaining },
+    { key: "comment", icon: "forum", label: t("square.quotaComments"), used: quota.comments.daily_used, limit: quota.comments.daily_limit, weeklyUsed: quota.comments.weekly_used, weeklyLimit: quota.comments.weekly_limit, remaining: commentRemaining },
+  ];
+  const levels = [
+    { label: "LV1–5", daily: 1, weekly: 5 },
+    { label: "LV6–9", daily: 2, weekly: 10 },
+    { label: "LV10–13", daily: 2, weekly: 12 },
+    { label: "LV14–17", daily: 3, weekly: 18 },
+    { label: "LV18", daily: 3, weekly: 21 },
+  ];
+  return <div className="square-quota-panel">
+    <section className={`square-quota-hero${quota.verified ? "" : " is-locked"}`}>
+      <div><span>{quota.unlimited ? t("square.quotaOfficial") : `LV${quota.level}`}</span><strong>{!quota.verified ? t("square.quotaVerifyFirst") : quota.unlimited ? t("square.quotaUnlimited") : t("square.quotaHero", { count: statementRemaining ?? 0 })}</strong></div>
+      <span className="material-symbols-outlined">{quota.verified ? "data_usage" : "lock"}</span>
+    </section>
+    <div className="square-quota-cards">
+      {quotaCards.map((item) => {
+        const ratio = item.limit === null ? 0 : Math.min(1, item.used / Math.max(1, item.limit));
+        return <article className={item.remaining === 0 ? "is-exhausted" : ""} key={item.key}>
+          <header><span className="material-symbols-outlined">{item.icon}</span><strong>{item.label}</strong><b>{item.limit === null ? t("square.quotaUnlimitedShort") : t("square.quotaRemaining", { count: item.remaining ?? 0 })}</b></header>
+          <div className="square-quota-meter"><i style={{ transform: `scaleX(${ratio})` }} /></div>
+          <footer><span>{t("square.quota24Hours")} · {item.used}/{item.limit ?? "∞"}</span><span>{t("square.quota7Days")} · {item.weeklyUsed}/{item.weeklyLimit ?? "∞"}</span></footer>
+        </article>;
+      })}
+      <article className="square-quota-like-card"><header><span className="material-symbols-outlined">favorite</span><strong>{t("square.quotaLikes")}</strong><b>{t("square.quotaUnlimitedShort")}</b></header><p>{t("square.quotaLikesToday", { count: quota.likes.daily_used })}</p></article>
+    </div>
+    <section className="square-quota-capabilities">
+      <header><strong>{t("square.quotaMedia")}</strong><span>{t("square.quotaMediaHint")}</span></header>
+      <div>
+        <span className="is-active"><i className="material-symbols-outlined">notes</i>{t("square.text")}</span>
+        <span className="is-active"><i className="material-symbols-outlined">image</i>{t("square.photo")}</span>
+        <span className={quota.media.audio ? "is-active" : ""}><i className="material-symbols-outlined">mic</i>{quota.media.audio ? t("square.voice") : `LV${quota.media.audio_level}`}</span>
+        <span className={quota.media.video ? "is-active" : ""}><i className="material-symbols-outlined">videocam</i>{quota.media.video ? t("square.video") : `LV${quota.media.video_level}`}</span>
+      </div>
+    </section>
+    {!quota.unlimited ? <details className="square-quota-rules"><summary>{t("square.quotaLevelRules")}<span className="material-symbols-outlined">expand_more</span></summary><div>{levels.map((row) => <p className={quota.level >= Number(row.label.match(/\d+/)?.[0]) && quota.level <= Number(row.label.match(/\d+(?!.*\d)/)?.[0] ?? 18) ? "is-current" : ""} key={row.label}><strong>{row.label}</strong><span>{t("square.quotaRule", { daily: row.daily, weekly: row.weekly })}</span></p>)}</div></details> : null}
+  </div>;
+}
 
 function SquareMediaMetadata({ metadata }: { metadata?: ImageMetadataDTO | VideoMetadataDTO | null }) {
   const { t } = useI18n();
@@ -182,6 +229,9 @@ export default function SquarePage() {
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
+  const [quotaOpen, setQuotaOpen] = useState(false);
+  const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
+  const [quotaLoading, setQuotaLoading] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
@@ -201,6 +251,12 @@ export default function SquarePage() {
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
+
+  const openQuota = () => {
+    setQuotaOpen(true);
+    setQuotaLoading(true);
+    void api.getSquareQuota().then(setQuota).catch(() => setQuota(null)).finally(() => setQuotaLoading(false));
+  };
 
   const remaining = MAX_TEXT_LENGTH - text.length;
   const publishable = useMemo(
@@ -488,6 +544,9 @@ export default function SquarePage() {
           syncing={syncing}
           title={t("square.title")}
           actions={<div className="square-header-actions">
+            <button aria-label={t("square.quotaTitle")} className="square-header-quota" onClick={openQuota} type="button">
+              <span className="material-symbols-outlined">data_usage</span>
+            </button>
             <button aria-label={t("square.notifications")} className="square-header-notifications" onClick={openNotificationDrawer} type="button">
               <span className="material-symbols-outlined">notifications</span>
               {notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}
@@ -645,6 +704,9 @@ export default function SquarePage() {
       </SideDrawer>
       {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
       <BottomSheet bodyClassName="square-delete-sheet" onClose={() => setDeleteStatementId(null)} open={deleteStatementId !== null} title={t("square.deleteStatement")}><p>{t("square.deleteStatementHint")}</p><button className="danger-button" onClick={() => { const id = deleteStatementId; if (id === null) return; void api.deleteSquareStatement(id).then(() => { setStatements((current) => current.filter((item) => item.statement_id !== id)); setDeleteStatementId(null); }); }} type="button">{t("common.delete")}</button></BottomSheet>
+      <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
+        <SquareQuotaPanel loading={quotaLoading} quota={quota} />
+      </BottomSheet>
     </AppChrome>
   );
 }

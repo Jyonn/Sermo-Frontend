@@ -51,6 +51,7 @@ import type {
   SquareStatementDTO,
   SquareStatementCommentDTO,
   SquareStatementDraftMedia,
+  SquareQuotaDTO,
 } from "../types";
 import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
@@ -603,6 +604,10 @@ export const api = {
       query: params,
       signal,
     });
+  },
+
+  getSquareQuota(signal?: AbortSignal) {
+    return request<SquareQuotaDTO>("/square/quota", { auth: true, signal });
   },
 
   getSquareStatement(statementId: number, signal?: AbortSignal) {

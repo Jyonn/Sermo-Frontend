@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.6",
+  "id": "2026.08.09.7",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "链接消息气泡修复",
+      "title": "广场互动额度",
       "items": [
-        "文本与链接卡片同时出现时，文字部分现在会继承所选聊天气泡样式",
-        "组合消息同步支持气泡合并圆角与主题装饰"
+        "广场顶部新增额度入口，可查看发言、评论和点赞的实时使用情况",
+        "额度面板同步展示近24小时、近7天限制与当前媒体解锁能力"
       ]
     },
     "en": {
-      "title": "Link message bubble fix",
+      "title": "Square activity allowance",
       "items": [
-        "Text shown beside a link card now inherits the selected chat bubble style",
-        "Compound messages now preserve grouped corners and theme decorations"
+        "A new Square header shortcut shows live statement, comment, and like usage",
+        "The allowance panel includes 24-hour, 7-day, and media unlock status"
       ]
     }
   }

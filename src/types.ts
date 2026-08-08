@@ -417,6 +417,36 @@ export interface SquareStatementDraftMedia {
   };
 }
 
+export interface SquareQuotaDTO {
+  level: number;
+  verified: boolean;
+  unlimited: boolean;
+  statements: {
+    daily_used: number;
+    daily_limit: number | null;
+    weekly_used: number;
+    weekly_limit: number | null;
+  };
+  comments: {
+    daily_used: number;
+    daily_limit: number | null;
+    weekly_used: number;
+    weekly_limit: number | null;
+  };
+  likes: {
+    daily_used: number;
+    unlimited: boolean;
+  };
+  media: {
+    text: boolean;
+    image: boolean;
+    audio: boolean;
+    audio_level: number;
+    video: boolean;
+    video_level: number;
+  };
+}
+
 export interface LinkPreviewDTO {
   url?: string;
   status: LinkPreviewStatus;
