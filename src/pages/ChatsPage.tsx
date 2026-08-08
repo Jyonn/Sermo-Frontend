@@ -1431,7 +1431,7 @@ function renderMessageContent(
   return (
     <span className={`message-text-stack has-link-preview ${groupClassName}`.trim()}>
       {hasTextBesidePreview ? (
-        <span className={`message-text-chip ${message.from}`}>
+        <span className={`message-bubble message-text-chip ${groupClassName}`.trim()}>
           <LinkedMessageText hiddenUrl={previewUrl} text={text} />
         </span>
       ) : null}

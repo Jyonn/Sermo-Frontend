@@ -3908,6 +3908,17 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   word-break: break-word;
 }
 
+/* Compound link messages use a real bubble surface so every current and future
+   skin styles their text exactly like a standalone text message. */
+.message-text-chip.message-bubble {
+  margin-top: 0;
+}
+
+/* The compound message shell already owns the single VIP marker. */
+.message-group.bubble-style-vip .message-text-chip.message-bubble::before {
+  content: none;
+}
+
 .message-text-chip.other {
   color: var(--chat-other-text);
   background: var(--message-other-surface);

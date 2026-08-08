@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.5",
+  "id": "2026.08.09.6",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "发言详情排版优化",
+      "title": "链接消息气泡修复",
       "items": [
-        "修正桌面端评论编辑栏超出发言详情边界的问题",
-        "评论编辑栏现在会始终与详情 Drawer 等宽对齐"
+        "文本与链接卡片同时出现时，文字部分现在会继承所选聊天气泡样式",
+        "组合消息同步支持气泡合并圆角与主题装饰"
       ]
     },
     "en": {
-      "title": "Statement detail layout polish",
+      "title": "Link message bubble fix",
       "items": [
-        "Fixed the desktop comment composer overflowing the statement detail",
-        "The composer now stays aligned with the detail drawer at every width"
+        "Text shown beside a link card now inherits the selected chat bubble style",
+        "Compound messages now preserve grouped corners and theme decorations"
       ]
     }
   }
