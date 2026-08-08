@@ -10,6 +10,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
+import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
 import type { ImageMetadataDTO, NotificationEventDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
@@ -47,9 +48,8 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
-function StatementCard({ statement, language, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage }: {
+function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage }: {
   statement: SquareStatementDTO;
-  language: string;
   canInteract: boolean;
   detail?: boolean;
   onDelete: () => void;
@@ -74,8 +74,11 @@ function StatementCard({ statement, language, canInteract, detail = false, onDel
           vip={Boolean(statement.user.is_permanent_vip)}
         />
         <div className="square-statement-author-copy">
-          <strong>{statement.user.name}</strong>
-          <span>{formatStatementTime(statement.created_at, language)}</span>
+          <div className="square-statement-author-name">
+            <strong>{statement.user.name}</strong>
+            {!statement.user.official && statement.user.growth_level ? <b>LV{statement.user.growth_level}</b> : null}
+          </div>
+          <span>{formatRelativeTime(statement.created_at)}</span>
         </div>
         {statement.can_delete ? <button aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); onDelete(); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
@@ -509,7 +512,7 @@ export default function SquarePage() {
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={t("square.empty")} description={t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} language={language} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} statement={statement} />)}
+            {statements.map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -594,7 +597,7 @@ export default function SquarePage() {
       </BottomSheet>
       <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
-          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail language={language} onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} statement={activeCommentStatement} /> : null}
+          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} statement={activeCommentStatement} /> : null}
           <div className="square-comments-heading"><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
           {commentsLoading && !comments.length ? <FeedbackState title={t("common.loading")} /> : null}
           {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}

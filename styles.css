@@ -21085,6 +21085,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-statement-author-copy { display: grid; gap: 2px; min-width: 0; }
 .square-statement-author strong { overflow: hidden; color: var(--text-primary); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
 .square-statement-author div span { color: var(--text-secondary); font-size: 11px; }
+.square-statement-author-name { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.square-statement-author-name > b { flex: none; padding: 2px 6px; border: 1px solid color-mix(in srgb, var(--brand-primary) 30%, transparent); border-radius: 999px; color: var(--brand-primary-press); font-size: 9px; font-weight: 800; line-height: 1; letter-spacing: .03em; background: color-mix(in srgb, var(--brand-primary) 8%, transparent); }
 .square-statement-text { margin: 13px 0 0; color: var(--text-primary); font-size: 16px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 .square-statement-footer { display: flex; align-items: center; margin: 14px -4px -5px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent); }
 .square-statement-footer button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 9px; border: 0; border-radius: 10px; color: var(--text-secondary); font: inherit; font-size: 12px; background: transparent; }

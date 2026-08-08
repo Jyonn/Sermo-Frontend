@@ -21,6 +21,7 @@ export interface TinyUserDTO {
   is_permanent_vip?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
   avatar_frame_style?: AvatarFrameStyle;
+  growth_level?: number;
 }
 
 export interface UserDTO extends TinyUserDTO {

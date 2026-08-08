@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.08.2",
+  "id": "2026.08.08.3",
   "publishedAt": "2026-08-08",
   "locales": {
     "zh-CN": {
-      "title": "广场等级权限判断修复",
+      "title": "广场发言信息优化",
       "items": [
-        "广场会读取最新成长等级，已达到 LV6 的成员可正常使用语音发言",
-        "更新序号现在按当日发布次数持续递增"
+        "发言时间改为与聊天列表一致的相对时间，并精确到分钟",
+        "只看好友时会保留自己的发言，作者昵称旁会展示成长等级"
       ]
     },
     "en": {
-      "title": "Square level access fix",
+      "title": "Square statement details",
       "items": [
-        "Square now reads the latest growth level so members at LV6 and above can post voice statements",
-        "Release sequence numbers now increase with every update published on the same day"
+        "Statement timestamps now use the same minute-based relative format as the chat list",
+        "The friends feed now includes your own statements and shows each author's growth level"
       ]
     }
   }
