@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { buildAvatarPresetUri, parseAvatarPresetId } from "../lib/avatar";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
@@ -16,7 +16,14 @@ interface AvatarPresetDialogProps {
   customUploadHint?: string;
 }
 
-const presetIds = Array.from({ length: 15 }, (_, index) => index + 1);
+const presetIds = Array.from({ length: 36 }, (_, index) => index + 1);
+
+function spriteStyle(presetId: number) {
+  return {
+    "--avatar-sprite-column": (presetId - 1) % 6,
+    "--avatar-sprite-row": Math.floor((presetId - 1) / 6),
+  } as CSSProperties;
+}
 
 function UploadAvatarIcon() {
   return (
@@ -80,7 +87,7 @@ export function AvatarPresetDialog({
 
         <section className="avatar-preset-library">
           <h3>{t("avatar.presets")}</h3>
-          <div className="avatar-preset-grid">
+          <div className="avatar-preset-grid" aria-label={t("avatar.presets")}>
           {presetIds.map((presetId) => {
             const selected = presetId === selectedPresetId;
             return (
@@ -90,26 +97,30 @@ export function AvatarPresetDialog({
                 onClick={() => setSelectedPresetId(presetId)}
                 type="button"
               >
-                <img alt={`Preset ${presetId}`} loading="lazy" src={buildAvatarPresetUri(presetId)} />
+                <span aria-hidden="true" className="avatar-preset-sprite" style={spriteStyle(presetId)} />
                 {selected ? <span aria-hidden="true" className="avatar-preset-check">✓</span> : null}
               </button>
             );
           })}
+          </div>
 
           {onRequestCustomUpload ? (
             <button
               aria-label={customUploadEnabled ? t("avatar.uploadCustom") : effectiveCustomUploadHint}
-              className={`avatar-preset-tile avatar-preset-upload-tile${customUploadEnabled ? "" : " is-locked"}`}
+              className={`avatar-preset-upload-row${customUploadEnabled ? "" : " is-locked"}`}
               disabled={saving || !customUploadEnabled}
               onClick={onRequestCustomUpload}
               title={effectiveCustomUploadHint}
               type="button"
             >
               {customUploadEnabled ? <UploadAvatarIcon /> : <span className="material-symbols-outlined">lock</span>}
+              <span>
+                <strong>{t("avatar.uploadCustom")}</strong>
+                {!customUploadEnabled ? <small>{effectiveCustomUploadHint}</small> : null}
+              </span>
+              <span className="material-symbols-outlined">chevron_right</span>
             </button>
           ) : null}
-          </div>
-          {onRequestCustomUpload && !customUploadEnabled ? <p className="avatar-preset-upload-hint">{effectiveCustomUploadHint}</p> : null}
         </section>
       </div>
     </SideDrawer>
