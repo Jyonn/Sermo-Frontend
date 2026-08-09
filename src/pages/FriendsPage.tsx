@@ -3,8 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -238,7 +238,8 @@ export default function FriendsPage() {
         )}
 
         {!friends.length && tab === "accepted" && viewState === "ready" ? (
-          <FeedbackState
+          <QuietState
+            icon="person_add"
             title={t("friends.empty")}
             description={t("friends.emptyHint")}
             action={
@@ -250,7 +251,8 @@ export default function FriendsPage() {
         ) : null}
 
         {!activeRequests.length && tab !== "accepted" && viewState === "ready" ? (
-          <FeedbackState
+          <QuietState
+            icon="inbox"
             title={tab === "incoming" ? t("request.noIncoming") : t("request.noOutgoing")}
             description={tab === "incoming" ? t("request.noIncomingHint") : t("request.noOutgoingHint")}
             action={

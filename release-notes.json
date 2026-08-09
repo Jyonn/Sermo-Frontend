@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.09.20",
+  "id": "2026.08.09.21",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "成长图鉴细节调整",
+      "title": "边界状态体验升级",
       "items": [
-        "等级图鉴中的头像框预览现在完整收纳在奖励卡片内",
-        "成长足迹只保留最近成长值记录，不再重复罗列已解锁能力"
+        "无权访问的会话改为轻量提示并自动返回会话列表",
+        "账号查找、发言与评论加载采用更安静的动态骨架",
+        "广场、通讯和通知等空列表统一为轻量留白状态"
       ]
     },
     "en": {
-      "title": "Growth atlas refinements",
+      "title": "Refined boundary states",
       "items": [
-        "Avatar-frame previews now stay fully contained inside level reward cards",
-        "Growth journey now focuses on recent point history without repeating unlocked abilities"
+        "Unavailable conversations now show a lightweight notice and return to the chat list",
+        "Account, statement, and comment loading now use subtle animated skeletons",
+        "Empty Square, Contacts, and notification lists now share a quieter layout"
       ]
     }
   }

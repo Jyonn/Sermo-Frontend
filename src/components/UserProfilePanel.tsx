@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AsyncErrorDialog } from "./AsyncErrorDialog";
 import { BottomSheet } from "./BottomSheet";
+import { QuietState } from "./BoundaryState";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
@@ -352,7 +353,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
                 );
               })}
             </div>
-          ) : !groupCandidatesLoading ? <FeedbackState title={t("profile.noCandidates")} description="" /> : null}
+          ) : !groupCandidatesLoading ? <QuietState icon="group_add" title={t("profile.noCandidates")} /> : null}
           <button className="button user-profile-create-confirm" disabled={groupSelectedIds.length < 2 || groupCreating} onClick={() => void createGroupChat()} type="button">
             {groupCreating ? t("profile.creating") : t("profile.createGroup", { count: groupSelectedIds.length + 1 })}
           </button>

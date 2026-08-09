@@ -534,6 +534,8 @@
   "square.nearbyGreeting": "嗨，在这里遇见了",
   "square.empty": "现在还没有人在线",
   "square.emptyHint": "等有人上线后，这里会立刻热闹起来。",
+  "square.mineEmpty": "还没有发言",
+  "square.mineEmptyHint": "你的第一条发言会留在这里。",
   "admin.title": "管理空间",
   "admin.emailRequired": "请先输入可用邮箱。",
   "admin.slugRequired": "请先输入空间标识。",

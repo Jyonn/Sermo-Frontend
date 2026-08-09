@@ -534,6 +534,8 @@
   "square.nearbyGreeting": "Hey, fancy meeting you here",
   "square.empty": "No one is online yet",
   "square.emptyHint": "It will come alive as soon as someone joins.",
+  "square.mineEmpty": "No statements yet",
+  "square.mineEmptyHint": "Your first statement will stay here.",
   "admin.title": "Manage space",
   "admin.emailRequired": "Enter a valid email.",
   "admin.slugRequired": "Enter a space slug.",

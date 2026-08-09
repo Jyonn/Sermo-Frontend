@@ -7,8 +7,8 @@ import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { FeedbackState } from "../components/FeedbackState";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
@@ -2449,7 +2449,7 @@ export default function MenuPage() {
       >
         <div className="simple-list account-switch-list">
           {accountSwitcherLoading ? (
-            <FeedbackState title={t("account.finding")} description="" tone="loading" />
+            <ContentLoader label={t("account.finding")} rows={3} />
           ) : switchAccounts.length ? (
             switchAccounts.map((account) => (
               <button
@@ -2474,7 +2474,7 @@ export default function MenuPage() {
               </button>
             ))
           ) : (
-            <FeedbackState title={t("account.noSwitchable")} description={t("account.privateHidden")} />
+            <QuietState icon="switch_account" title={t("account.noSwitchable")} description={t("account.privateHidden")} />
           )}
         </div>
       </BottomSheet>

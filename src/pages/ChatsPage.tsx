@@ -15,6 +15,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -2340,6 +2341,12 @@ function LiveChatsPage() {
   const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
+
+  useEffect(() => {
+    if (!chatAccessNotice) return;
+    showToast(t("chat.unavailable"), "error");
+    navigate("/app/chats", { replace: true, state: null });
+  }, [chatAccessNotice, navigate]);
   const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
   const growthCapability = (key: string, fallbackLevel: number) => currentUserMe?.growth?.capabilities?.[key] ?? {
     available: (currentUserMe?.growth?.level ?? 1) >= fallbackLevel,
@@ -4832,27 +4839,12 @@ function LiveChatsPage() {
       <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
       <div className="chat-list-screen-body">
-        {chatAccessNotice ? (
-          <FeedbackState
-            title={t("chat.unavailable")}
-            description={chatAccessNotice}
-            action={
-              <div className="button-row">
-                <Link className="button" replace to="/app/chats">
-                  {t("chat.viewList")}
-                </Link>
-                <Link className="ghost-button" to="/app/notifications">
-                  {t("chat.goContacts")}
-                </Link>
-              </div>
-            }
-          />
-        ) : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
-        {!chatAccessNotice && !filteredChats.length && viewState === "ready" ? (
-          <FeedbackState
+        {!filteredChats.length && viewState === "ready" ? (
+          <QuietState
+            icon="chat_bubble"
             title={t("chat.empty")}
             description={groupSquareEnabled ? t("chat.emptyHint") : t("chat.emptyHintNoSquare")}
             action={

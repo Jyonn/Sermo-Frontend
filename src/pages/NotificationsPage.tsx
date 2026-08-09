@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { QuietState } from "../components/BoundaryState";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { FeedbackState } from "../components/FeedbackState";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -330,7 +330,7 @@ export default function NotificationsPage() {
         </section>
 
         {!filteredFriends.length && viewState === "ready" ? (
-          <FeedbackState title={t("contacts.noFriends")} description={t("contacts.noFriendsHint")} />
+          <QuietState icon="person_add" title={t("contacts.noFriends")} description={t("contacts.noFriendsHint")} />
         ) : null}
       </section>
 
@@ -374,7 +374,7 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-          ) : <FeedbackState title={t("request.noIncoming")} description="" /> : filteredOutgoing.length ? (
+          ) : <QuietState icon="inbox" title={t("request.noIncoming")} /> : filteredOutgoing.length ? (
             <div className="simple-list friend-request-list">
               {filteredOutgoing.map((request) => (
                 <div key={request.request_id} className="simple-row request-row friend-request-card">
@@ -395,7 +395,7 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-          ) : <FeedbackState title={t("request.noOutgoing")} description="" />}
+          ) : <QuietState icon="outbox" title={t("request.noOutgoing")} />}
         </div>
       </SideDrawer>
       <ConfirmDialog
@@ -461,7 +461,7 @@ export default function NotificationsPage() {
               })}
             </div>
           ) : (
-            <FeedbackState title={t("contacts.noGroups")} description={t("contacts.noGroupHint")} />
+            <QuietState icon="group_add" title={t("contacts.noGroups")} description={t("contacts.noGroupHint")} />
           )}
         </section>
       </SideDrawer>

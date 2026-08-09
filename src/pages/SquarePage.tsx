@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
+import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { ImageLightbox } from "../components/ImageLightbox";
@@ -697,8 +698,14 @@ export default function SquarePage() {
             </section>
           ) : null}
           {error ? <div className="square-inline-error">{error}</div> : null}
-          {loading ? <FeedbackState title={t("common.loading")} /> : null}
-          {!loading && !statements.length && !error ? <FeedbackState title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : t("square.empty")} description={feedMode === "user" ? t("square.userFeedEmptyHint") : t("square.emptyHint")} /> : null}
+          {loading ? <ContentLoader label={t("common.loading")} rows={2} /> : null}
+          {!loading && !statements.length && !error ? (
+            <QuietState
+              icon={feedMode === "mine" ? "edit_note" : "explore"}
+              title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : feedMode === "mine" ? t("square.mineEmpty") : t("square.empty")}
+              description={feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
+            />
+          ) : null}
           <section className="square-statement-feed">
             {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} statement={statement} />)}
           </section>
@@ -712,7 +719,7 @@ export default function SquarePage() {
       </main>
       <SideDrawer historyKey="square-notifications" onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">
-          {!notificationEvents.length ? <FeedbackState title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
+          {!notificationEvents.length ? <QuietState icon="notifications_none" title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
             const actor = event.actor?.name || t("square.someone");
             const removed = event.event_type === 9;
             const label = removed ? t("square.notificationStatementRemoved")
@@ -790,7 +797,7 @@ export default function SquarePage() {
         <div className="square-comments-drawer">
           {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} statement={activeCommentStatement} /> : null}
           <div className="square-comments-heading"><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
-          {commentsLoading && !comments.length ? <FeedbackState title={t("common.loading")} /> : null}
+          {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
           {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
           <div className="square-comment-list">{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} language={language} onLike={(target) => void toggleCommentLike(target)} onReply={(target) => { setReplyTarget(target); setCommentText(""); }} />)}</div>
           {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
