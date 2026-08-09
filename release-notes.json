@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.25",
+  "id": "2026.08.09.26",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "个性化收藏调整",
+      "title": "城市气泡卡片升级",
       "items": [
-        "城市系列气泡统一归入史诗收藏",
-        "Niko 与 Fufu 升级为典藏外观",
-        "Xiaobai 系列停止提供新启用"
+        "语音、文件与位置统一采用城市信息卡设计",
+        "四座城市的卡片完整继承主题材质与色彩",
+        "发送中效果改为沿气泡边框流动的环带"
       ]
     },
     "en": {
-      "title": "Personalization collection update",
+      "title": "Upgraded city bubble cards",
       "items": [
-        "City bubble themes are now classified as Epic",
-        "Niko and Fufu are now Collector editions",
-        "Xiaobai is no longer available for new activation"
+        "Audio, file, and location messages now share a city information-card design",
+        "Every card fully inherits its city's material and color language",
+        "Sending feedback now travels around the bubble border"
       ]
     }
   }
