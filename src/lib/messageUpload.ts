@@ -42,7 +42,7 @@ export function validateMessageMediaFile(file: File, kind: MessageMediaKind) {
   }
 }
 
-function uploadFormData(url: string, formData: FormData, onProgress?: (progress: number) => void) {
+export function uploadFormData(url: string, formData: FormData, onProgress?: (progress: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("POST", url);

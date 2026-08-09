@@ -2,7 +2,7 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "system";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -333,6 +333,22 @@ export interface EmojiUsageDTO {
   last_used_at: number;
 }
 
+export interface StickerDTO {
+  sticker_id: number;
+  sticker_asset_id: number;
+  content_hash: string;
+  uri: string;
+  mime_type: string;
+  file_size: number;
+  created_at: number;
+}
+
+export interface StickerPrepareDTO {
+  upload_required: boolean;
+  sticker?: StickerDTO;
+  upload?: MessageUploadDTO;
+}
+
 export interface WebPushSubscriptionDTO {
   endpoint: string;
   origin: string;
@@ -493,6 +509,9 @@ export interface ChatMessagePayloadDTO {
   statement_id?: number;
   url?: string;
   statement?: SquareStatementDTO | null;
+  sticker_asset_id?: number;
+  content_hash?: string;
+  unavailable?: boolean;
 }
 
 export interface TravelMapRegionDTO {

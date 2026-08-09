@@ -39,6 +39,8 @@ import type {
   UserMeDTO,
   WebReminderPreferenceDTO,
   EmojiUsageDTO,
+  StickerDTO,
+  StickerPrepareDTO,
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
   MyTravelMapDTO,
@@ -965,6 +967,26 @@ export const api = {
       auth: true,
       signal,
     });
+  },
+
+  getStickers(signal?: AbortSignal) {
+    return request<StickerDTO[]>("/stickers/", { auth: true, signal });
+  },
+
+  prepareSticker(payload: { content_hash: string; file_name: string; content_type?: string; file_size: number }) {
+    return request<StickerPrepareDTO>("/stickers/prepare", { method: "POST", auth: true, body: payload });
+  },
+
+  completeSticker(payload: { content_hash: string; key: string; content_type?: string; file_size: number }) {
+    return request<StickerDTO>("/stickers/complete", { method: "POST", auth: true, body: payload });
+  },
+
+  collectMessageSticker(message_id: number) {
+    return request<StickerDTO>("/stickers/", { method: "POST", auth: true, body: { message_id } });
+  },
+
+  deleteSticker(sticker_id: number) {
+    return request<Record<string, never>>("/stickers/", { method: "DELETE", auth: true, query: { sticker_id } });
   },
 
   updatePassword(payload: { new_password: string; old_password?: string }) {

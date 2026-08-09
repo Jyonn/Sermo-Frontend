@@ -34,13 +34,14 @@ import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
+import { addStickerFile } from "../lib/stickers";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { loadMessagesAfterThrough, loadMessagesBeforeThrough } from "../lib/messageHistory";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -55,6 +56,7 @@ const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
 const MESSAGE_TYPE_MAP_ACCESS = 7;
 const MESSAGE_TYPE_STATEMENT = 8;
+const MESSAGE_TYPE_STICKER = 9;
 const MESSAGE_SEARCH_TYPES = [
   { value: null, label: "messageSearch.all" },
   { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
@@ -65,6 +67,7 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_LOCATION, label: "messageSearch.locations" },
   { value: MESSAGE_TYPE_MAP_ACCESS, label: "messageSearch.travelMaps" },
   { value: MESSAGE_TYPE_STATEMENT, label: "messageSearch.statements" },
+  { value: MESSAGE_TYPE_STICKER, label: "sticker.tab" },
 ] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const EMOJI_PAGES = [
@@ -604,6 +607,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_LOCATION) return "location";
   if (type === MESSAGE_TYPE_MAP_ACCESS) return "map_access";
   if (type === MESSAGE_TYPE_STATEMENT) return "statement";
+  if (type === MESSAGE_TYPE_STICKER) return "sticker";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   return "text";
 }
@@ -706,6 +710,9 @@ function isOptimisticSelfMatch(source: ChatMessage, target: ChatMessage) {
   if (source.kind !== target.kind) return false;
   if (source.kind === "text") {
     return source.text === target.text && Math.abs(source.createdAt - target.createdAt) <= 30;
+  }
+  if (source.kind === "sticker") {
+    return Boolean(source.payload?.content_hash && source.payload.content_hash === target.payload?.content_hash);
   }
   return isMediaMessageKind(source.kind) && source.status === "pending" && Math.abs(source.createdAt - target.createdAt) <= 600;
 }
@@ -843,6 +850,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "location") return i18n.t("message.locationPlaceholder");
   if (kind === "map_access") return i18n.t("travelMap.action");
   if (kind === "statement") return i18n.t("message.statementPlaceholder");
+  if (kind === "sticker") return i18n.t("sticker.messagePlaceholder");
   return text || i18n.t("chat.noMessages");
 }
 
@@ -1313,6 +1321,14 @@ function renderMessageContent(
   onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined,
   groupClassName: string
 ) {
+  if (message.kind === "sticker") {
+    if (!message.payload?.uri || message.payload.unavailable) {
+      return <span className="message-sticker-unavailable">{i18n.t("sticker.unavailable")}</span>;
+    }
+    const uri = message.localPreviewUri ?? resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
+    return <img alt={i18n.t("sticker.messagePlaceholder")} className="message-sticker-image" draggable={false} loading="lazy" src={uri} />;
+  }
+
   if (message.kind === "image" && message.payload?.uri) {
     return <MessageMediaImage groupClassName={groupClassName} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
@@ -1559,7 +1575,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
       } : undefined}
     >
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
-      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}`}>
+      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`}>
         {showRetry ? (
           <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">refresh</span>
@@ -1575,6 +1591,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             message.kind === "location" ? "is-location" : "",
             message.kind === "map_access" ? "is-travel-map" : "",
             message.kind === "statement" ? "is-statement" : "",
+            message.kind === "sticker" ? "is-sticker" : "",
             message.payload?.link_preview && message.payload.link_preview.status !== "none" && message.payload.link_preview.status !== "failed" ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
@@ -2083,6 +2100,10 @@ function LiveChatsPage() {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [emojiPage, setEmojiPage] = useState(0);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
+  const [stickers, setStickers] = useState<StickerDTO[]>([]);
+  const [stickersLoading, setStickersLoading] = useState(false);
+  const [stickerManaging, setStickerManaging] = useState(false);
+  const [stickerSaving, setStickerSaving] = useState(false);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
   const [locationMessagePreview, setLocationMessagePreview] = useState<{
     location: { latitude: number; longitude: number; address?: string };
@@ -2154,6 +2175,7 @@ function LiveChatsPage() {
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const stickerInputRef = useRef<HTMLInputElement | null>(null);
   const clipboardPreviewUrlsRef = useRef(new Set<string>());
 
   useEffect(() => {
@@ -2271,7 +2293,9 @@ function LiveChatsPage() {
   const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
   const frequentEmojis = emojiUsage.slice(0, 5).map((item) => item.emoji);
   const visibleEmojis =
-    emojiPage === 0
+    emojiPage < 0
+      ? []
+      : emojiPage === 0
       ? [...frequentEmojis, ...EMOJI_PAGES[0].emojis.filter((emoji) => !frequentEmojis.includes(emoji))].slice(0, 48)
       : [...EMOJI_PAGES[emojiPage].emojis];
 
@@ -3114,7 +3138,21 @@ function LiveChatsPage() {
     setComposerMoreOpen(false);
     setEmojiPickerOpen(false);
     setEmojiPage(0);
+    setStickerManaging(false);
   }, [selectedChat?.id]);
+
+  useEffect(() => {
+    if (!emojiPickerOpen || emojiPage !== -1 || !currentUserId) return;
+    const controller = new AbortController();
+    setStickersLoading(true);
+    void api.getStickers(controller.signal)
+      .then(setStickers)
+      .catch(() => undefined)
+      .finally(() => {
+        if (!controller.signal.aborted) setStickersLoading(false);
+      });
+    return () => controller.abort();
+  }, [currentUserId, emojiPage, emojiPickerOpen]);
 
   useEffect(() => {
     setDraft(cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "");
@@ -3132,6 +3170,103 @@ function LiveChatsPage() {
       nextInput?.focus();
       nextInput?.setSelectionRange(nextCursor, nextCursor);
     });
+  };
+
+  const sendSticker = async (sticker: StickerDTO) => {
+    if (!selectedChat || stickerSaving) return;
+    const clientId = `temp:sticker:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const createdAt = Math.floor(Date.now() / 1000);
+    const reply = consumeReplyTarget();
+    const optimisticMessage: ChatMessage = {
+      id: clientId,
+      clientId,
+      userId: currentUserId,
+      from: "self",
+      type: MESSAGE_TYPE_STICKER,
+      kind: "sticker",
+      name: currentUserName,
+      ...pendingMessageAppearance,
+      time: formatTime(createdAt),
+      createdAt,
+      text: t("sticker.messagePlaceholder"),
+      payload: { kind: "sticker", uri: sticker.uri, sticker_asset_id: sticker.sticker_asset_id, content_hash: sticker.content_hash },
+      replyTo: reply,
+      status: "pending",
+    };
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), optimisticMessage]),
+    }));
+    setChats((current) => sortChats(current.map((chat) => chat.id === selectedChat.id
+      ? updateChatSummary(chat, t("sticker.messagePlaceholder"), createdAt)
+      : chat)));
+    triggerMessageEntrance(clientId);
+    stickToBottomRef.current = true;
+    updateSendTask(clientId, 0.2);
+    try {
+      const created = await api.sendMessage(
+        selectedChat.id,
+        MESSAGE_TYPE_STICKER,
+        JSON.stringify({ sticker_id: sticker.sticker_id }),
+        reply?.message_id,
+        clientId,
+      );
+      updateSendTask(clientId, 0.9);
+      const delivered = mapChatMessage(created, currentUserId);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, delivered),
+      }));
+    } catch {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
+      }));
+    } finally {
+      finishSendTask(clientId);
+    }
+  };
+
+  const addStickerFromFile = async (file: File) => {
+    if (stickerSaving) return;
+    setStickerSaving(true);
+    try {
+      const sticker = await addStickerFile(file);
+      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
+      showToast(t("sticker.added"));
+    } catch {
+      showToast(t("sticker.addFailed"), "error");
+    } finally {
+      setStickerSaving(false);
+      if (stickerInputRef.current) stickerInputRef.current.value = "";
+    }
+  };
+
+  const removeSticker = async (sticker: StickerDTO) => {
+    if (stickerSaving) return;
+    setStickerSaving(true);
+    try {
+      await api.deleteSticker(sticker.sticker_id);
+      setStickers((current) => current.filter((item) => item.sticker_id !== sticker.sticker_id));
+      showToast(t("sticker.removed"));
+    } catch {
+      showToast(t("sticker.removeFailed"), "error");
+    } finally {
+      setStickerSaving(false);
+    }
+  };
+
+  const collectImageAsSticker = async () => {
+    if (!messageMenu || messageMenu.message.kind !== "image" || typeof messageMenu.message.id !== "number") return;
+    const messageId = messageMenu.message.id;
+    setMessageMenu(null);
+    try {
+      const sticker = await api.collectMessageSticker(messageId);
+      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
+      showToast(t("sticker.added"));
+    } catch {
+      showToast(t("sticker.addFailed"), "error");
+    }
   };
 
   useEffect(() => {
@@ -5207,6 +5342,18 @@ function LiveChatsPage() {
                 {!voiceComposer.open && emojiPickerOpen ? (
                   <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
                     <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
+                      <button
+                        aria-label={t("sticker.tab")}
+                        aria-selected={emojiPage === -1}
+                        className={emojiPage === -1 ? "is-active" : ""}
+                        onClick={() => setEmojiPage(-1)}
+                        role="tab"
+                        title={t("sticker.tab")}
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined">photo_library</span>
+                        <small>{t("sticker.tab")}</small>
+                      </button>
                       {EMOJI_PAGES.map((page, index) => (
                         <button
                           aria-label={t(page.labelKey as TranslationKey)}
@@ -5223,19 +5370,51 @@ function LiveChatsPage() {
                         </button>
                       ))}
                     </div>
-                    <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
-                      {visibleEmojis.map((emoji, index) => (
-                        <button
-                          aria-label={t("emoji.insert", { emoji })}
-                          className={emojiPage === 0 && index < frequentEmojis.length ? "is-frequent" : ""}
-                          key={`${emoji}-${index}`}
-                          onClick={() => insertEmoji(emoji)}
-                          type="button"
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
+                    {emojiPage === -1 ? (
+                      <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.tab")}>
+                        <div className="composer-sticker-toolbar">
+                          <span>{stickers.length ? t("sticker.count", { count: stickers.length }) : t("sticker.empty")}</span>
+                          {stickers.length ? (
+                            <button className={stickerManaging ? "is-active" : ""} onClick={() => setStickerManaging((current) => !current)} type="button">
+                              {stickerManaging ? t("common.done") : t("common.manage")}
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="composer-sticker-grid">
+                          <button className="composer-sticker-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button">
+                            <span className="material-symbols-outlined">add_photo_alternate</span>
+                            <small>{t("sticker.add")}</small>
+                          </button>
+                          {stickers.map((sticker) => (
+                            <button
+                              className="composer-sticker-item"
+                              disabled={stickerSaving}
+                              key={sticker.sticker_id}
+                              onClick={() => stickerManaging ? void removeSticker(sticker) : void sendSticker(sticker)}
+                              type="button"
+                            >
+                              <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                              {stickerManaging ? <span className="composer-sticker-remove material-symbols-outlined">remove</span> : null}
+                            </button>
+                          ))}
+                          {stickersLoading ? <span className="composer-sticker-loading" aria-label={t("common.loading")} /> : null}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
+                        {visibleEmojis.map((emoji, index) => (
+                          <button
+                            aria-label={t("emoji.insert", { emoji })}
+                            className={emojiPage === 0 && index < frequentEmojis.length ? "is-frequent" : ""}
+                            key={`${emoji}-${index}`}
+                            onClick={() => insertEmoji(emoji)}
+                            type="button"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : null}
                 {!voiceComposer.open ? (
@@ -5948,6 +6127,16 @@ function LiveChatsPage() {
         onChange={(event) => void handleMediaSelection(event, "file")}
         type="file"
       />
+      <input
+        ref={stickerInputRef}
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        hidden
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          if (file) void addStickerFromFile(file);
+        }}
+        type="file"
+      />
       {imagePreview ? (
         <ImageLightbox
           details={imagePreview.metadata.map((metadata, index) => <ImageMetadataPanel key={`metadata:${imagePreview.uris[index]}`} metadata={metadata} />)}
@@ -6179,6 +6368,12 @@ function LiveChatsPage() {
                   <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">download</span>
                     {t("common.download")}
+                  </button>
+                ) : null}
+                {messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number" ? (
+                  <button className="message-context-button" onClick={() => void collectImageAsSticker()} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
+                    {t("sticker.collect")}
                   </button>
                 ) : null}
                 <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
