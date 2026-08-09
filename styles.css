@@ -18842,20 +18842,29 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   --bubble-skin-self-radius: 18px 6px 6px 18px;
 }
 
-.message-group[class*="bubble-style-city-"] .message-bubble,
 .message-group[class*="bubble-style-city-"] .message-bubble-shell.group-start,
 .personalization-bubble-stage[class*="bubble-style-city-"] .personalization-preview-bubble {
   position: relative;
   isolation: isolate;
 }
 
-.message-group[class*="bubble-style-city-"] .message-bubble.group-start,
+.message-group[class*="bubble-style-city-"] .message-bubble-shell.group-start {
+  width: fit-content;
+}
+
+.message-group.self[class*="bubble-style-city-"] .message-bubble-shell.group-start {
+  margin-left: auto;
+}
+
+.message-group.other[class*="bubble-style-city-"] .message-bubble-shell.group-start {
+  margin-right: auto;
+}
+
 .message-group[class*="bubble-style-city-"] .message-bubble-shell.group-start,
 .personalization-bubble-stage[class*="bubble-style-city-"] .personalization-preview-bubble {
   margin-top: 14px;
 }
 
-.message-group[class*="bubble-style-city-"] .message-bubble.group-start::before,
 .message-group[class*="bubble-style-city-"] .message-bubble-shell.group-start::before,
 .personalization-bubble-stage[class*="bubble-style-city-"] .personalization-preview-bubble::before {
   content: "";
@@ -18870,20 +18879,17 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   pointer-events: none;
 }
 
-.message-group[class*="bubble-style-city-"] .message-bubble.group-start::after,
 .message-group[class*="bubble-style-city-"] .message-bubble-shell.group-start::after,
 .personalization-bubble-stage[class*="bubble-style-city-"] .personalization-preview-bubble::after {
   content: none;
 }
 
-.message-group.self[class*="bubble-style-city-"] .message-bubble.group-start::before,
 .message-group.self[class*="bubble-style-city-"] .message-bubble-shell.group-start::before,
 .personalization-bubble-stage[class*="bubble-style-city-"] .personalization-preview-message.self .personalization-preview-bubble::before {
   left: 10px;
   transform: rotate(-3deg);
 }
 
-.message-group.other[class*="bubble-style-city-"] .message-bubble.group-start::before,
 .message-group.other[class*="bubble-style-city-"] .message-bubble-shell.group-start::before,
 .personalization-bubble-stage[class*="bubble-style-city-"] .personalization-preview-message.other .personalization-preview-bubble::before {
   right: 10px;

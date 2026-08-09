@@ -1559,7 +1559,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
       } : undefined}
     >
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
-      <div className={`message-bubble-shell ${from}`}>
+      <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}`}>
         {showRetry ? (
           <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
             <span className="material-symbols-outlined">refresh</span>

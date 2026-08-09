@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.41",
+  "id": "2026.08.09.42",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "城市气泡换上手绘底纹",
+      "title": "城市挂件展示更稳定",
       "items": [
-        "四座城市换上独立绘制的代表性纹理",
-        "真实气泡与个性化预览保持一致",
-        "底纹保持克制，消息内容依然清晰"
+        "足迹地图卡片完整露出城市冰箱贴",
+        "带链接的消息不再重复展示挂件",
+        "挂件在不同消息类型中保持统一位置"
       ]
     },
     "en": {
-      "title": "Hand-painted city bubble textures",
+      "title": "More reliable city bubble ornaments",
       "items": [
-        "Four cities receive individually illustrated signature textures",
-        "Live bubbles and personalization previews now match",
-        "Subtle pattern treatment keeps every message readable"
+        "Travel map cards no longer clip city magnets",
+        "Link messages no longer render duplicate ornaments",
+        "Magnets stay consistently aligned across message types"
       ]
     }
   }
