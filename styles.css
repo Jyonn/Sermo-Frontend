@@ -18846,14 +18846,11 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   position: absolute;
   z-index: 8;
   top: -17px;
-  width: 39px;
-  height: 26px;
-  border: 1px solid rgba(255, 255, 255, .92);
-  border-radius: 7px;
-  background: var(--city-magnet-image) var(--city-magnet-position) / cover no-repeat;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, .76) inset,
-    0 5px 11px rgba(31, 47, 40, .2);
+  width: 42px;
+  height: 28px;
+  border: 0;
+  background: var(--city-magnet-image) var(--city-magnet-position) / contain no-repeat;
+  filter: drop-shadow(0 4px 4px rgba(31, 47, 40, .2));
   pointer-events: none;
 }
 
