@@ -5,6 +5,7 @@ import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
 import { useTheme } from "../lib/theme";
+import { useSpaceFeatures } from "../lib/spaceFeatures";
 
 interface AppChromeProps {
   children: ReactNode;
@@ -45,8 +46,9 @@ export function AppChrome({
   const location = useLocation();
   const { t, language, setPreference: setLanguagePreference } = useI18n();
   const { resolvedTheme, setPreference: setThemePreference } = useTheme();
+  const features = useSpaceFeatures();
 
-  const brandTarget = session ? "/app/chats" : "/entry";
+  const brandTarget = session ? (!features.ready ? "/app" : features.chatEnabled ? "/app/chats" : "/app/square") : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
   const usePublicHeader = publicHeader || !session;
   const visibleSpaceBrand = guestSpaceBrand ?? (sessionSpace

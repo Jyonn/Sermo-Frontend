@@ -47,7 +47,7 @@ export default function OfficialLoginPage() {
       .then((payload) => {
         if (cancelled) return;
         loginFromJoin(payload);
-        navigate("/app/chats", { replace: true });
+        navigate("/app", { replace: true });
       })
       .catch((apiError) => {
         if (cancelled) return;

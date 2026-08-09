@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.18",
+  "id": "2026.08.09.19",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "成长，不再是一张说明书",
+      "title": "空间入口会理解功能开关",
       "items": [
-        "成长主页重构为五阶段成长护照，当前等级拥有完整的专属配色",
-        "任务、安全建议与成长记录改为渐进展开，重要信息一眼可见",
-        "等级图鉴现在直接预览真实背景、气泡和头像框，并支持吸附式横向浏览"
+        "关闭聊天的空间现在会直接从广场开始，不再短暂进入聊天页",
+        "聊天入口与后台消息同步会随功能开关一起停用",
+        "通讯录保持独立可用，好友列表、申请与管理不受聊天开关影响"
       ]
     },
     "en": {
-      "title": "Growth, redesigned",
+      "title": "Space entry now respects feature settings",
       "items": [
-        "The Growth home is now a five-stage passport with a distinct palette for every stage",
-        "Tasks, security suggestions, and history use progressive disclosure to keep focus clear",
-        "The level atlas now previews real backgrounds, bubbles, and avatar frames in a tactile carousel"
+        "Spaces with chat disabled now open directly on Square without flashing the chat screen",
+        "Chat navigation and background message sync stop together with the feature",
+        "Contacts remain independent, so friend lists, requests, and management continue to work"
       ]
     }
   }

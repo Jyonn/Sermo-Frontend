@@ -51,7 +51,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
   const token = useMemo(() => readInviteToken(), []);
 
   const closeOverlay = () => {
-    navigate("/app/chats", { replace: true });
+    navigate("/app", { replace: true });
   };
 
   useEffect(() => {

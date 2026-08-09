@@ -187,14 +187,14 @@ export function AppBottomNav() {
   const current = activeKey(effectivePathname);
   const visibleRoutes = mobileRoutes.filter((route) => {
     if (route.key === "square") return features.squareEnabled;
-    if (route.key === "chats") return features.chatEnabled;
+    if (route.key === "chats") return features.ready && features.chatEnabled;
     return true;
   });
 
   return (
     <nav aria-label={t("nav.main")} className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
-        <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to={features.chatEnabled ? "/app/chats" : "/app/square"}>
+        <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to={!features.ready ? "/app" : features.chatEnabled ? "/app/chats" : "/app/square"}>
           <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-512.png?v=3" />
           {space ? (
             <>

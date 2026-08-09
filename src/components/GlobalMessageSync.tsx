@@ -12,6 +12,7 @@ import { loadMessagesAfterThrough } from "../lib/messageHistory";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
+import { useSpaceFeatures } from "../lib/spaceFeatures";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
@@ -275,6 +276,7 @@ export function GlobalMessageSync() {
   const { session } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const features = useSpaceFeatures();
   const [afterMessageId, setAfterMessageId] = useState<number | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
   const cursorRef = useRef<number | null>(null);
@@ -295,7 +297,7 @@ export function GlobalMessageSync() {
   }, []);
 
   useEffect(() => {
-    if (!scope || !session) {
+    if (!scope || !session || !features.ready || !features.chatEnabled) {
       setAfterMessageId(null);
       cursorRef.current = null;
       presenceBaselineRef.current = null;
@@ -315,10 +317,10 @@ export function GlobalMessageSync() {
     cursorRef.current = 0;
     setAfterMessageId(0);
     persistCursor(scope, 0);
-  }, [scope, sessionAccessToken, sessionUserId]);
+  }, [features.chatEnabled, features.ready, scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
-    if (!scope || !session || afterMessageId === null) return;
+    if (!scope || !session || afterMessageId === null || !features.ready || !features.chatEnabled) return;
 
     let cancelled = false;
 
@@ -553,7 +555,7 @@ export function GlobalMessageSync() {
       syncInFlightRef.current = false;
       window.clearInterval(timer);
     };
-  }, [activeChatId, afterMessageId, gestureScope, scope, sessionAccessToken, sessionUserId]);
+  }, [activeChatId, afterMessageId, features.chatEnabled, features.ready, gestureScope, scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!popup) return;
@@ -566,7 +568,7 @@ export function GlobalMessageSync() {
     setPopup(null);
   }, [activeChatId, popup]);
 
-  if (!session || !popup) return null;
+  if (!session || !features.chatEnabled || !popup) return null;
 
   return (
     <button

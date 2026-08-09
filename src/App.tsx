@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
@@ -68,17 +68,28 @@ function LegacySettingsRedirect() {
 
 function AppHomeRedirect() {
   const features = useSpaceFeatures();
+  const { t } = useI18n();
+  if (!features.ready) return <FeedbackState title={t("common.loading")} tone="loading" />;
   return <Navigate replace to={features.chatEnabled ? "/app/chats" : "/app/square"} />;
+}
+
+function RequireChatFeature({ children }: { children: ReactNode }) {
+  const features = useSpaceFeatures();
+  const { t } = useI18n();
+  if (!features.ready) return <FeedbackState title={t("common.loading")} tone="loading" />;
+  if (!features.chatEnabled) return <Navigate replace to="/app/square" />;
+  return children;
 }
 
 export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
+  const features = useSpaceFeatures();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const routeLocation = showFriendInviteOverlay
     ? {
         ...location,
-        pathname: "/app/chats",
+        pathname: features.ready && !features.chatEnabled ? "/app/square" : "/app/chats",
         search: "",
         hash: "",
         key: `${location.key}-invite-background`,
@@ -112,7 +123,7 @@ export default function App() {
           path="/app/chats"
           element={
             <RequireAuth>
-              <ChatsPage />
+              <RequireChatFeature><ChatsPage /></RequireChatFeature>
             </RequireAuth>
           }
         />
@@ -120,7 +131,7 @@ export default function App() {
           path="/app/chats/:chatId"
           element={
             <RequireAuth>
-              <ChatsPage />
+              <RequireChatFeature><ChatsPage /></RequireChatFeature>
             </RequireAuth>
           }
         />

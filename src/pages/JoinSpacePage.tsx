@@ -65,7 +65,7 @@ export default function JoinSpacePage() {
       navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
       return;
     }
-    navigate("/app/chats", { replace: true });
+    navigate("/app", { replace: true });
   }, [navigate, session]);
 
   useEffect(() => {
@@ -223,7 +223,7 @@ export default function JoinSpacePage() {
         navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
       } else {
         clearPendingFriendInviteToken();
-        navigate("/app/chats", { replace: true });
+        navigate("/app", { replace: true });
       }
     } catch (error) {
       if (isPasswordRequiredJoinError(error)) {
