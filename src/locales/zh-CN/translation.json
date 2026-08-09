@@ -1023,7 +1023,7 @@
   "growth.securitySteps": "安全加固",
   "growth.securityStepsHint": "保护账号，也会获得成长值",
   "growth.journey": "成长足迹",
-  "growth.journeyHint": "已解锁能力与最近记录",
+  "growth.journeyHint": "最近获得的成长值",
   "growth.currentLevelLabel": "当前所在等级",
   "growth.reached": "已抵达",
   "growth.keepGrowing": "继续成长解锁",

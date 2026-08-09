@@ -1880,10 +1880,9 @@ export default function MenuPage() {
               ))}
             </div>
           </details>
-          {(me?.growth?.recent_events?.length || me?.growth?.privileges.length) ? (
+          {me?.growth?.recent_events?.length ? (
             <details className="growth-disclosure is-history">
               <summary><span><strong>{t("growth.journey")}</strong><small>{t("growth.journeyHint")}</small></span><span className="material-symbols-outlined">expand_more</span></summary>
-              {me?.growth?.privileges.length ? <div className="growth-privileges">{me.growth.privileges.map((item) => <span key={item}>{item}</span>)}</div> : null}
               {me?.growth?.recent_events?.length ? <div className="growth-event-list">{me.growth.recent_events.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}</div> : null}
             </details>
           ) : null}

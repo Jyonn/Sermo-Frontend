@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.09.19",
+  "id": "2026.08.09.20",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "空间入口会理解功能开关",
+      "title": "成长图鉴细节调整",
       "items": [
-        "关闭聊天的空间现在会直接从广场开始，不再短暂进入聊天页",
-        "聊天入口与后台消息同步会随功能开关一起停用",
-        "通讯录保持独立可用，好友列表、申请与管理不受聊天开关影响"
+        "等级图鉴中的头像框预览现在完整收纳在奖励卡片内",
+        "成长足迹只保留最近成长值记录，不再重复罗列已解锁能力"
       ]
     },
     "en": {
-      "title": "Space entry now respects feature settings",
+      "title": "Growth atlas refinements",
       "items": [
-        "Spaces with chat disabled now open directly on Square without flashing the chat screen",
-        "Chat navigation and background message sync stop together with the feature",
-        "Contacts remain independent, so friend lists, requests, and management continue to work"
+        "Avatar-frame previews now stay fully contained inside level reward cards",
+        "Growth journey now focuses on recent point history without repeating unlocked abilities"
       ]
     }
   }
