@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.27",
+  "id": "2026.08.09.28",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "足迹卡片适配城市气泡",
+      "title": "发言详情阅读体验调整",
       "items": [
-        "足迹地图卡片接入统一的城市信息卡设计",
-        "地图图标、信息层级与卡片尺寸更加紧凑",
-        "继续保持单层气泡边框和消息合并圆角"
+        "发言正文取消卡片包裹并铺满详情抽屉",
+        "正文与评论区改为连续的阅读流",
+        "评论区为底部输入框保留更充足的安全空间"
       ]
     },
     "en": {
-      "title": "City styling for travel-map cards",
+      "title": "Improved statement detail reading",
       "items": [
-        "Travel-map messages now join the unified city information-card system",
-        "Map art, hierarchy, and card sizing are now more compact",
-        "The single bubble border and grouped corners remain intact"
+        "Statement content now spans the detail drawer without a nested card",
+        "Statements and comments now form one continuous reading flow",
+        "The comment list now clears the bottom composer at every height"
       ]
     }
   }
