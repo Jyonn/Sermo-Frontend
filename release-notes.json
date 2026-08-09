@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.37",
+  "id": "2026.08.09.38",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "城市气泡本体重塑",
+      "title": "城市纪念冰箱贴重绘",
       "items": [
-        "四座城市拥有各自独立的气泡材质与轮廓",
-        "冰箱贴缩小并移至边缘，不再遮挡短消息",
-        "连续消息圆角和各类媒体卡片同步适配"
+        "四座城市换上独立设计的珐琅旅行纪念冰箱贴",
+        "实体金属质感替代旧城市背景的局部裁切",
+        "移除多余城市圆章，挂件与气泡边缘更协调"
       ]
     },
     "en": {
-      "title": "City bubble surfaces rebuilt",
+      "title": "City souvenir magnets redrawn",
       "items": [
-        "Each city now has a distinct surface and silhouette",
-        "Magnets are smaller and moved to the edge to keep text clear",
-        "Grouped messages and media cards follow the new treatment"
+        "Four cities now feature independently designed enamel travel magnets",
+        "Tactile metal souvenirs replace cropped fragments of old backgrounds",
+        "Extra city badges are removed for a cleaner bubble-edge composition"
       ]
     }
   }
