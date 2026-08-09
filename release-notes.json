@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.15",
+  "id": "2026.08.09.16",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "空间治理更清晰",
+      "title": "访问前也由你定义",
       "items": [
-        "管理员可分别开放聊天、广场与探索，并始终保留至少一种交流方式",
-        "未认证成员可按正常参与、只读或禁止入群三档管理"
+        "未登录页面顶部现在可以随时切换深浅外观",
+        "中文与英文可在进入空间前切换，并会记住本机选择"
       ]
     },
     "en": {
-      "title": "Clearer space governance",
+      "title": "Your preferences start earlier",
       "items": [
-        "Administrators can manage Chat, Square, and Explore while keeping at least one communication mode available",
-        "Unverified members can follow full, read-only, or no-group participation policies"
+        "Public headers now let you switch between light and dark appearance",
+        "Choose Chinese or English before entering a space and keep the choice on this device"
       ]
     }
   }

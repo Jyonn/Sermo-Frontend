@@ -1512,4 +1512,9 @@
   ,"square.quotaLevelRules": "查看等级额度"
   ,"square.quotaRule": "24小时 {{daily}} 言 · 7天 {{weekly}} 言"
   ,"square.text": "文字"
+  ,"guest.appearanceAndLanguage": "外观与语言"
+  ,"guest.useLightTheme": "切换浅色外观"
+  ,"guest.useDarkTheme": "切换深色外观"
+  ,"guest.switchToEnglish": "Switch to English"
+  ,"guest.switchToChinese": "切换为中文"
 }

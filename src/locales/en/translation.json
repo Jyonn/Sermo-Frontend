@@ -1512,4 +1512,9 @@
   ,"square.quotaLevelRules": "View level allowances"
   ,"square.quotaRule": "{{daily}} per 24h · {{weekly}} per 7d"
   ,"square.text": "Text"
+  ,"guest.appearanceAndLanguage": "Appearance and language"
+  ,"guest.useLightTheme": "Use light appearance"
+  ,"guest.useDarkTheme": "Use dark appearance"
+  ,"guest.switchToEnglish": "Switch to English"
+  ,"guest.switchToChinese": "切换为中文"
 }

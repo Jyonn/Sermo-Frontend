@@ -22,7 +22,14 @@ interface LanguageContextValue {
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
+const GUEST_LANGUAGE_STORAGE_KEY = "sermo:guest-language-preference";
 let activeLanguage: SupportedLanguage = getBrowserJoinLanguage();
+
+function readGuestLanguagePreference(): LanguagePreference {
+  if (typeof window === "undefined") return "system";
+  const stored = window.localStorage.getItem(GUEST_LANGUAGE_STORAGE_KEY);
+  return stored === "zh-CN" || stored === "en" || stored === "system" ? stored : "system";
+}
 
 export function getActiveLanguage() {
   return activeLanguage;
@@ -35,16 +42,17 @@ export function getActiveLocale() {
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const { session, patchSessionUser } = useAuth();
   const systemLanguage = getBrowserJoinLanguage();
-  const [preference, setPreferenceState] = useState<LanguagePreference>("system");
+  const [preference, setPreferenceState] = useState<LanguagePreference>(readGuestLanguagePreference);
   const [language, setLanguage] = useState<SupportedLanguage>(() =>
-    resolveJoinLanguage(session?.user.language ?? systemLanguage)
+    resolveJoinLanguage(session?.user.language ?? (readGuestLanguagePreference() === "system" ? systemLanguage : readGuestLanguagePreference()))
   );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!session) {
-      setPreferenceState("system");
-      setLanguage(systemLanguage);
+      const guestPreference = readGuestLanguagePreference();
+      setPreferenceState(guestPreference);
+      setLanguage(resolveJoinLanguage(guestPreference === "system" ? systemLanguage : guestPreference));
       return;
     }
 
@@ -79,12 +87,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     locale: language === "zh-CN" ? "zh-CN" : "en-US",
     saving,
     async setPreference(nextPreference) {
-      if (!session || saving || nextPreference === preference) return;
+      if (saving || nextPreference === preference) return;
       const previousPreference = preference;
       const previousLanguage = language;
       const nextLanguage = nextPreference === "system" ? systemLanguage : nextPreference;
       setPreferenceState(nextPreference);
       setLanguage(nextLanguage);
+      if (!session) {
+        window.localStorage.setItem(GUEST_LANGUAGE_STORAGE_KEY, nextPreference);
+        return;
+      }
       setSaving(true);
       try {
         const user = await api.setLanguagePreference(nextPreference, systemLanguage);

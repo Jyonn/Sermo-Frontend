@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
+import { useTheme } from "../lib/theme";
 
 interface AppChromeProps {
   children: ReactNode;
@@ -42,7 +43,8 @@ export function AppChrome({
   const { session } = useAuth();
   const sessionSpace = useSpaceBrand();
   const location = useLocation();
-  const { t } = useI18n();
+  const { t, language, setPreference: setLanguagePreference } = useI18n();
+  const { resolvedTheme, setPreference: setThemePreference } = useTheme();
 
   const brandTarget = session ? "/app/chats" : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
@@ -84,6 +86,28 @@ export function AppChrome({
 
           <div className="topbar-actions">
             {topbarAction}
+            {!session ? (
+              <div className="guest-appearance-actions" aria-label={t("guest.appearanceAndLanguage")}>
+                <button
+                  aria-label={resolvedTheme === "dark" ? t("guest.useLightTheme") : t("guest.useDarkTheme")}
+                  className="guest-topbar-tool"
+                  onClick={() => setThemePreference(resolvedTheme === "dark" ? "light" : "dark")}
+                  title={resolvedTheme === "dark" ? t("guest.useLightTheme") : t("guest.useDarkTheme")}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span>
+                </button>
+                <button
+                  aria-label={language === "zh-CN" ? t("guest.switchToEnglish") : t("guest.switchToChinese")}
+                  className="guest-topbar-tool guest-language-tool"
+                  onClick={() => void setLanguagePreference(language === "zh-CN" ? "en" : "zh-CN")}
+                  title={language === "zh-CN" ? t("guest.switchToEnglish") : t("guest.switchToChinese")}
+                  type="button"
+                >
+                  {language === "zh-CN" ? "EN" : "中"}
+                </button>
+              </div>
+            ) : null}
             {!hideGuestEntryLink && !session && location.pathname !== "/entry" && !location.pathname.startsWith("/space/") ? (
               <Link className="ghost-chip" to="/entry">
                 {t("nav.returnEntry")}
