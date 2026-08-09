@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AsyncErrorDialog } from "./AsyncErrorDialog";
+import { AvatarPreviewDrawer } from "./AvatarPreviewDrawer";
 import { BottomSheet } from "./BottomSheet";
 import { QuietState } from "./BoundaryState";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
-import { ImageLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -378,14 +378,16 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         }}
         onConfirm={() => void removeFriend()}
       />
-      {avatarPreviewOpen && user.avatar_uri ? (
-        <ImageLightbox
-          altPrefix={t("profile.avatarAlt", { name: user.name })}
-          fileNamePrefix="sermo-avatar"
-          index={0}
+      {user.avatar_uri ? (
+        <AvatarPreviewDrawer
+          frame={user.avatar_frame_style}
+          level={user.growth_level}
+          name={user.name}
           onClose={() => setAvatarPreviewOpen(false)}
-          onIndexChange={() => undefined}
-          uris={[user.avatar_uri]}
+          online={Boolean(user.is_alive)}
+          open={avatarPreviewOpen}
+          uri={user.avatar_uri}
+          vip={Boolean(user.is_permanent_vip)}
         />
       ) : null}
     </div>

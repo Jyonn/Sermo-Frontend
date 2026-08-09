@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.30",
+  "id": "2026.08.09.31",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "官方账号菜单恢复",
+      "title": "头像查看体验焕新",
       "items": [
-        "修复官方账号打开菜单时的异常",
-        "兼容尚未生成奖励列表的成长数据",
-        "增强缺失头像名称时的展示稳定性"
+        "头像大图改为逐级返回的侧滑页面",
+        "头像框、等级与在线状态完整呈现",
+        "新增更简洁的头像下载入口"
       ]
     },
     "en": {
-      "title": "Official account menu restored",
+      "title": "A renewed avatar viewing experience",
       "items": [
-        "Fixed a crash when official accounts open the menu",
-        "Growth data without reward lists is now supported",
-        "Avatar fallbacks are more resilient when names are missing"
+        "Avatar previews now open in a layered side drawer",
+        "Frames, level, VIP status, and presence remain visible",
+        "Added a cleaner avatar download action"
       ]
     }
   }
