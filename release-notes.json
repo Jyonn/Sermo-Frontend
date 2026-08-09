@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.31",
+  "id": "2026.08.09.32",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "头像查看体验焕新",
+      "title": "头像选择体验焕新",
       "items": [
-        "头像大图改为逐级返回的侧滑页面",
-        "头像框、等级与在线状态完整呈现",
-        "新增更简洁的头像下载入口"
+        "菜单头像选择改为逐级返回的侧滑页面",
+        "大头像预览在浏览预设时即时更新",
+        "上传入口与确认操作重新梳理"
       ]
     },
     "en": {
-      "title": "A renewed avatar viewing experience",
+      "title": "A renewed avatar selection experience",
       "items": [
-        "Avatar previews now open in a layered side drawer",
-        "Frames, level, VIP status, and presence remain visible",
-        "Added a cleaner avatar download action"
+        "Menu avatar selection now opens in a layered side drawer",
+        "The large preview updates instantly while browsing presets",
+        "Upload and confirmation actions have been reorganized"
       ]
     }
   }

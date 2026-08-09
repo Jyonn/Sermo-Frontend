@@ -396,6 +396,7 @@
   "document.unreadTitle": "[{{count}} new messages] {{title}}",
   "header.syncing": "Syncing",
   "avatar.choose": "Choose avatar",
+  "avatar.presets": "Preset avatars",
   "avatar.uploadCustom": "Upload custom avatar",
   "avatar.saving": "Saving...",
   "growth.defaultUnlock": "A new growth stage",

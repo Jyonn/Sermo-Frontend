@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { useBodyScrollLock } from "../lib/bodyLock";
 import { buildAvatarPresetUri, parseAvatarPresetId } from "../lib/avatar";
+import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
 
@@ -47,39 +46,41 @@ export function AvatarPresetDialog({
 }: AvatarPresetDialogProps) {
   const { t } = useI18n();
   const effectiveCustomUploadHint = customUploadHint ?? t("avatar.uploadCustom");
-  const currentPresetId = useMemo(() => parseAvatarPresetId(currentAvatarUri) ?? 1, [currentAvatarUri]);
+  const currentPresetId = useMemo(() => parseAvatarPresetId(currentAvatarUri) ?? (currentAvatarUri ? null : 1), [currentAvatarUri]);
   const [selectedPresetId, setSelectedPresetId] = useState(currentPresetId);
-
-  useBodyScrollLock(open);
 
   useEffect(() => {
     if (!open) return;
-    setSelectedPresetId(parseAvatarPresetId(currentAvatarUri) ?? 1);
+    setSelectedPresetId(parseAvatarPresetId(currentAvatarUri) ?? (currentAvatarUri ? null : 1));
   }, [currentAvatarUri, open]);
 
-  if (!open || typeof document === "undefined") return null;
+  return (
+    <SideDrawer
+      actionBusy={saving}
+      actionDisabled={selectedPresetId === null}
+      actionLabel={t("common.confirm")}
+      historyKey="avatar"
+      onAction={() => {
+        if (selectedPresetId !== null) void onSave(selectedPresetId);
+      }}
+      onClose={onClose}
+      open={open}
+      title={t("avatar.choose")}
+    >
+      <div className="avatar-preset-drawer">
+        <section className="avatar-preset-stage">
+          <span aria-hidden="true" className="avatar-preset-stage-ring" />
+          <UserAvatar
+            className="avatar-preset-current-avatar"
+            name={displayName}
+            uri={selectedPresetId === null ? currentAvatarUri : buildAvatarPresetUri(selectedPresetId)}
+          />
+          <strong>{displayName}</strong>
+        </section>
 
-  return createPortal(
-    <div className="dialog-backdrop" onClick={onClose} role="presentation">
-      <section aria-modal="true" className="avatar-preset-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
-        <div className="avatar-preset-dialog-head">
-          <div>
-            <p className="eyebrow">{t("profile.avatar")}</p>
-            <h2>{t("avatar.choose")}</h2>
-          </div>
-          <button className="icon-button" onClick={onClose} type="button">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
-        <div className="avatar-preset-current">
-          <UserAvatar className="avatar-large avatar-preset-current-avatar" name={displayName} uri={buildAvatarPresetUri(selectedPresetId)} />
-          <div className="row-main">
-            <strong>{displayName}</strong>
-          </div>
-        </div>
-
-        <div className="avatar-preset-grid">
+        <section className="avatar-preset-library">
+          <h3>{t("avatar.presets")}</h3>
+          <div className="avatar-preset-grid">
           {presetIds.map((presetId) => {
             const selected = presetId === selectedPresetId;
             return (
@@ -90,6 +91,7 @@ export function AvatarPresetDialog({
                 type="button"
               >
                 <img alt={`Preset ${presetId}`} loading="lazy" src={buildAvatarPresetUri(presetId)} />
+                {selected ? <span aria-hidden="true" className="avatar-preset-check">✓</span> : null}
               </button>
             );
           })}
@@ -106,18 +108,10 @@ export function AvatarPresetDialog({
               {customUploadEnabled ? <UploadAvatarIcon /> : <span className="material-symbols-outlined">lock</span>}
             </button>
           ) : null}
-        </div>
-
-        <div className="avatar-preset-actions">
-          <button className="ghost-button" onClick={onClose} type="button">
-            {t("common.cancel")}
-          </button>
-          <button className="button" disabled={saving} onClick={() => void onSave(selectedPresetId)} type="button">
-            {saving ? t("avatar.saving") : t("common.confirm")}
-          </button>
-        </div>
-      </section>
-    </div>,
-    document.body
+          </div>
+          {onRequestCustomUpload && !customUploadEnabled ? <p className="avatar-preset-upload-hint">{effectiveCustomUploadHint}</p> : null}
+        </section>
+      </div>
+    </SideDrawer>
   );
 }

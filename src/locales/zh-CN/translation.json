@@ -396,6 +396,7 @@
   "document.unreadTitle": "[{{count}}条新消息] {{title}}",
   "header.syncing": "正在同步",
   "avatar.choose": "选择头像",
+  "avatar.presets": "预设头像",
   "avatar.uploadCustom": "上传自定义头像",
   "avatar.saving": "保存中...",
   "growth.defaultUnlock": "新的成长阶段",
