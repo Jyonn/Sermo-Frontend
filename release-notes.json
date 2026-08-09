@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.36",
+  "id": "2026.08.09.37",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "城市气泡轻装焕新",
+      "title": "城市气泡本体重塑",
       "items": [
-        "城市风景改为轻巧的旅行冰箱贴挂件",
-        "气泡本体回归清爽现代的中性色",
-        "语音、文件、位置与足迹卡片统一新风格"
+        "四座城市拥有各自独立的气泡材质与轮廓",
+        "冰箱贴缩小并移至边缘，不再遮挡短消息",
+        "连续消息圆角和各类媒体卡片同步适配"
       ]
     },
     "en": {
-      "title": "A lighter city bubble collection",
+      "title": "City bubble surfaces rebuilt",
       "items": [
-        "City scenes are now compact travel magnet ornaments",
-        "Bubble surfaces use a cleaner contemporary palette",
-        "Audio, file, location, and travel cards share the new style"
+        "Each city now has a distinct surface and silhouette",
+        "Magnets are smaller and moved to the edge to keep text clear",
+        "Grouped messages and media cards follow the new treatment"
       ]
     }
   }
