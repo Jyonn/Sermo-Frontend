@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.35",
+  "id": "2026.08.09.36",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "新头像裁切修复",
+      "title": "城市气泡轻装焕新",
       "items": [
-        "修复预设头像切片混入相邻头像的问题",
-        "清理头像网格边缘的颜色串扰",
-        "恢复手机端头像缩略图的完整白色内边框"
+        "城市风景改为轻巧的旅行冰箱贴挂件",
+        "气泡本体回归清爽现代的中性色",
+        "语音、文件、位置与足迹卡片统一新风格"
       ]
     },
     "en": {
-      "title": "Fixed cropping for the new avatars",
+      "title": "A lighter city bubble collection",
       "items": [
-        "Fixed preset crops that included parts of adjacent avatars",
-        "Removed color bleed along avatar grid boundaries",
-        "Restored the complete white inset border on mobile thumbnails"
+        "City scenes are now compact travel magnet ornaments",
+        "Bubble surfaces use a cleaner contemporary palette",
+        "Audio, file, location, and travel cards share the new style"
       ]
     }
   }
