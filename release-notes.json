@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.24",
+  "id": "2026.08.09.25",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "城市气泡收藏上线",
+      "title": "个性化收藏调整",
       "items": [
-        "首发景德镇、上海、纽约与北京四套城市气泡",
-        "到对应地区完成足迹打卡即可永久解锁",
-        "文字与多媒体消息统一适配城市主题"
+        "城市系列气泡统一归入史诗收藏",
+        "Niko 与 Fufu 升级为典藏外观",
+        "Xiaobai 系列停止提供新启用"
       ]
     },
     "en": {
-      "title": "City bubble collection",
+      "title": "Personalization collection update",
       "items": [
-        "Jingdezhen, Shanghai, New York, and Beijing themes launch first",
-        "Check in to the matching region to keep each theme forever",
-        "City styling now spans text and every media message type"
+        "City bubble themes are now classified as Epic",
+        "Niko and Fufu are now Collector editions",
+        "Xiaobai is no longer available for new activation"
       ]
     }
   }

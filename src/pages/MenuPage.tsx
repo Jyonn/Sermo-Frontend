@@ -60,7 +60,7 @@ const personalizationOptions = {
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
     ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
-    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"], ["xiaobai", "menu.styleXiaobai"],
+    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"],
     ["city-jdz", "menu.styleCityJingdezhen"], ["city-shanghai", "menu.styleCityShanghai"], ["city-nyc", "menu.styleCityNewYork"], ["city-beijing", "menu.styleCityBeijing"],
     ["vip", "menu.styleVip"],
   ],
@@ -74,7 +74,7 @@ const personalizationOptions = {
     ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
     ["camera", "menu.frameCamera"],
     ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
-    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["xiaobai-run", "menu.frameXiaobaiRun"], ["vip", "menu.frameVip"],
+    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["vip", "menu.frameVip"],
   ],
   statement_card_style: [
     ["default", "menu.statementStyleDefault"],
@@ -105,7 +105,7 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu", "xiaobai"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu"].includes(value)) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
 
@@ -114,10 +114,10 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
   { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["butterfly", "moon", "snowfall"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "xiaobai-run", "vip"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "vip"].includes(value)) },
 ];
 
-const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu", "xiaobai"]);
+const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
 const cityBubbleStyles = new Set<ChatBubbleStyle>(["city-jdz", "city-shanghai", "city-nyc", "city-beijing"]);
 const cityBubbleRequirements: Partial<Record<ChatBubbleStyle, TranslationKey>> = {
   "city-jdz": "menu.cityRegionJiangxi",
@@ -125,7 +125,7 @@ const cityBubbleRequirements: Partial<Record<ChatBubbleStyle, TranslationKey>> =
   "city-nyc": "menu.cityRegionNewYork",
   "city-beijing": "menu.cityRegionBeijing",
 };
-const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave", "xiaobai-run"]);
+const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
 
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
@@ -440,7 +440,9 @@ export default function MenuPage() {
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
     rewardFor(category, assetKey)?.level ?? 1;
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string) =>
-    (assetKey === "vip" ? "epic" : rewardFor(category, assetKey)?.rarity ?? "common");
+    (category === "bubble" && cityBubbleStyles.has(assetKey as ChatBubbleStyle))
+      ? "epic"
+      : (assetKey === "vip" ? "epic" : rewardFor(category, assetKey)?.rarity ?? "common");
   const currentLevelRarity = (() => {
     const rank = ["common", "uncommon", "rare", "epic", "legendary"];
     const rewards = me?.growth?.levels?.find((item) => item.level === growthLevel)?.rewards ?? [];
@@ -2250,7 +2252,7 @@ export default function MenuPage() {
                       return (
                         <button
                           aria-pressed={personalizationDraft.chat_bubble_style === value}
-                          className={`personalization-option preview-${value} is-city-collectible${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!owned ? " is-locked" : ""}`}
+                          className={`personalization-option preview-${value} rarity-epic is-city-collectible${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!owned ? " is-locked" : ""}`}
                           disabled={personalizationSaving}
                           key={value}
                           onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: style }))}
