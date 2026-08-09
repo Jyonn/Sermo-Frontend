@@ -795,16 +795,23 @@ export default function SquarePage() {
       </BottomSheet>
       <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); if (routedStatementId) navigate("/app/square"); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
-          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} statement={activeCommentStatement} /> : null}
-          <div className="square-comments-heading"><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
-          {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
-          {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
-          <div className="square-comment-list">{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} language={language} onLike={(target) => void toggleCommentLike(target)} onReply={(target) => { setReplyTarget(target); setCommentText(""); }} />)}</div>
-          {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
-            if (commentStatementId === null) return;
-            setCommentsLoading(true);
-            void api.getSquareStatementComments(commentStatementId, { offset: comments.length, limit: 30 }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
-          }} type="button">{t("square.loadMoreComments")}</button> : null}
+          <div className="square-statement-detail-stage">
+            {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+          </div>
+          <section className="square-discussion-section">
+            <div className="square-comments-heading">
+              <div><small>DISCUSSION</small><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
+              {comments.length ? <span className="square-comments-order"><span className="material-symbols-outlined">sort</span>{t("square.commentsOrder")}</span> : null}
+            </div>
+            {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
+            {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
+            <div className="square-comment-list">{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} language={language} onLike={(target) => void toggleCommentLike(target)} onReply={(target) => { setReplyTarget(target); setCommentText(""); }} />)}</div>
+            {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
+              if (commentStatementId === null) return;
+              setCommentsLoading(true);
+              void api.getSquareStatementComments(commentStatementId, { offset: comments.length, limit: 30 }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
+            }} type="button">{t("square.loadMoreComments")}</button> : null}
+          </section>
           {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div>{replyTarget ? <button className="square-reply-target" onClick={() => setReplyTarget(null)} type="button">{t("square.replyingTo", { name: replyTarget.user.name })}<span className="material-symbols-outlined">close</span></button> : null}<input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.writeReply") : t("square.writeComment")} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
         </div>
       </SideDrawer>

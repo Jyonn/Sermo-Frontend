@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.09.22",
+  "id": "2026.08.09.23",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "桌面广场布局调整",
+      "title": "发言详情重新设计",
       "items": [
-        "广场内容现在会在桌面工作区内准确居中",
-        "探索、好友圈和我的在桌面端改为 Sticky 纵向导航"
+        "发言正文升级为独立阅读主视觉并保留个性化外观",
+        "评论区重新梳理作者、热度、回复层级与留白",
+        "评论输入改为适配手机和桌面的悬浮编辑坞"
       ]
     },
     "en": {
-      "title": "Desktop Square layout",
+      "title": "Redesigned statement detail",
       "items": [
-        "Square content is now centered correctly within the desktop workspace",
-        "Explore, Friends, and Mine now use a sticky vertical desktop navigation"
+        "Statements now use a dedicated reading surface while preserving personalization",
+        "Comments now have clearer author, ranking, reply hierarchy, and spacing",
+        "The comment composer is now a responsive floating dock"
       ]
     }
   }

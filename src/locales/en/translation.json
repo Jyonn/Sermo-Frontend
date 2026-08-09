@@ -152,6 +152,7 @@
   "square.tapToStop": "Tap to stop, up to 60 seconds",
   "square.comment": "Comment",
   "square.comments": "Comments",
+  "square.commentsOrder": "Top first",
   "square.commentsCount": "{{count}} comments",
   "square.writeComment": "Write a comment",
   "square.noComments": "No comments yet",
