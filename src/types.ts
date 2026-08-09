@@ -181,9 +181,10 @@ export interface UserMeDTO extends UserDTO {
   };
   chat_background_theme?: ChatBackgroundTheme;
   chat_background_uri?: string;
+  city_bubble_styles?: ChatBubbleStyle[];
 }
 
-export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick";
+export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "dusk" | "comic" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "tidepool" | "forest" | "desert" | "snowfield" | "sakura" | "sunrise" | "midnight" | "rain" | "galaxy" | "aurora-sky" | "linen" | "terrazzo" | "blueprint" | "newsprint" | "hologram" | "arcade" | "jazz" | "spaceport" | "candy" | "noir-film" | "custom";
 export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run" | "vip";
 export type StatementCardStyle = "default" | "editorial" | "aurora" | "pixel" | "lacquer" | "collage";

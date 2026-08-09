@@ -7249,6 +7249,79 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   --bubble-skin-border-width: 1px;
 }
 
+/* City Collection: each skin uses a distinct local material language, not a palette swap. */
+.personalization-bubble-stage.bubble-style-city-jdz,
+.message-group.bubble-style-city-jdz {
+  --bubble-skin-other-bg: linear-gradient(100deg, rgba(255,255,255,.98) 0 62%, rgba(247,250,248,.84)), url("./src/assets/city-bubbles/jingdezhen.png") right center / auto 118% no-repeat, #fbfaf4;
+  --bubble-skin-other-color: #153d67;
+  --bubble-skin-other-border: #1d5f91;
+  --bubble-skin-other-shadow: inset 0 0 0 1px rgba(82,134,172,.2), 0 7px 18px rgba(22,72,108,.12);
+  --bubble-skin-self-bg: linear-gradient(100deg, rgba(19,67,111,.97) 0 66%, rgba(19,67,111,.76)), url("./src/assets/city-bubbles/jingdezhen.png") right center / auto 125% no-repeat, #174b78;
+  --bubble-skin-self-color: #fffdf4;
+  --bubble-skin-self-border: #0e3d67;
+  --bubble-skin-self-shadow: inset 0 0 0 1px rgba(255,255,255,.24), 0 8px 18px rgba(15,63,99,.2);
+  --bubble-skin-other-radius: 18px;
+  --bubble-skin-self-radius: 18px;
+  --bubble-skin-border-width: 2px;
+  --bubble-theme-accent: #b54b3f;
+  --bubble-theme-muted-other: rgba(21,61,103,.62);
+  --bubble-theme-muted-self: rgba(255,253,244,.72);
+}
+
+.personalization-bubble-stage.bubble-style-city-shanghai,
+.message-group.bubble-style-city-shanghai {
+  --bubble-skin-other-bg: linear-gradient(96deg, rgba(14,31,52,.98) 0 58%, rgba(14,31,52,.66)), url("./src/assets/city-bubbles/shanghai.png") right center / auto 118% no-repeat, #10243a;
+  --bubble-skin-other-color: #f4f0df;
+  --bubble-skin-other-border: #e06452;
+  --bubble-skin-other-shadow: inset 0 -2px 0 rgba(246,193,85,.62), 0 9px 22px rgba(10,29,48,.24);
+  --bubble-skin-self-bg: linear-gradient(96deg, rgba(191,67,55,.97) 0 60%, rgba(191,67,55,.72)), url("./src/assets/city-bubbles/shanghai.png") right center / auto 122% no-repeat, #bd463b;
+  --bubble-skin-self-color: #fffaf0;
+  --bubble-skin-self-border: #742d2c;
+  --bubble-skin-self-shadow: inset 0 -2px 0 #f4bf55, 0 9px 22px rgba(101,34,34,.23);
+  --bubble-skin-other-radius: 8px 20px 20px 20px;
+  --bubble-skin-self-radius: 20px 8px 20px 20px;
+  --bubble-skin-border-width: 1px;
+  --bubble-theme-accent: #f2bd55;
+  --bubble-theme-muted-other: rgba(244,240,223,.66);
+  --bubble-theme-muted-self: rgba(255,250,240,.72);
+}
+
+.personalization-bubble-stage.bubble-style-city-nyc,
+.message-group.bubble-style-city-nyc {
+  --bubble-skin-other-bg: linear-gradient(98deg, rgba(246,241,224,.98) 0 64%, rgba(246,241,224,.78)), url("./src/assets/city-bubbles/new-york.png") right center / auto 125% no-repeat, #f3edda;
+  --bubble-skin-other-color: #163f3b;
+  --bubble-skin-other-border: #3d8a80;
+  --bubble-skin-other-shadow: inset 0 -3px 0 rgba(41,98,91,.16), 0 8px 18px rgba(40,72,68,.14);
+  --bubble-skin-self-bg: linear-gradient(98deg, rgba(43,110,102,.98) 0 65%, rgba(43,110,102,.7)), url("./src/assets/city-bubbles/new-york.png") right center / auto 125% no-repeat, #2e746c;
+  --bubble-skin-self-color: #fff8df;
+  --bubble-skin-self-border: #b99042;
+  --bubble-skin-self-shadow: inset 0 -3px 0 rgba(247,211,126,.38), 0 9px 20px rgba(34,85,79,.22);
+  --bubble-skin-other-radius: 6px 18px 18px 6px;
+  --bubble-skin-self-radius: 18px 6px 6px 18px;
+  --bubble-skin-border-width: 2px;
+  --bubble-theme-accent: #c59a47;
+  --bubble-theme-muted-other: rgba(22,63,59,.62);
+  --bubble-theme-muted-self: rgba(255,248,223,.72);
+}
+
+.personalization-bubble-stage.bubble-style-city-beijing,
+.message-group.bubble-style-city-beijing {
+  --bubble-skin-other-bg: linear-gradient(100deg, rgba(255,247,223,.98) 0 64%, rgba(255,247,223,.76)), url("./src/assets/city-bubbles/beijing.png") right center / auto 120% no-repeat, #fff1cf;
+  --bubble-skin-other-color: #53221d;
+  --bubble-skin-other-border: #ad342d;
+  --bubble-skin-other-shadow: inset 0 3px 0 #d9a739, 0 8px 18px rgba(116,45,35,.13);
+  --bubble-skin-self-bg: linear-gradient(100deg, rgba(148,34,31,.98) 0 64%, rgba(148,34,31,.72)), url("./src/assets/city-bubbles/beijing.png") right center / auto 125% no-repeat, #982622;
+  --bubble-skin-self-color: #fff5d7;
+  --bubble-skin-self-border: #6f1d1b;
+  --bubble-skin-self-shadow: inset 0 3px 0 #e3b44e, 0 9px 20px rgba(105,28,26,.23);
+  --bubble-skin-other-radius: 4px 16px 16px 16px;
+  --bubble-skin-self-radius: 16px 4px 16px 16px;
+  --bubble-skin-border-width: 2px;
+  --bubble-theme-accent: #d2a23e;
+  --bubble-theme-muted-other: rgba(83,34,29,.62);
+  --bubble-theme-muted-self: rgba(255,245,215,.74);
+}
+
 .personalization-bubble-stage.bubble-style-zen,
 .message-group.bubble-style-zen {
   --bubble-skin-other-bg:
@@ -18345,6 +18418,117 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-self-border);
   border-radius: inherit;
   box-shadow: var(--bubble-skin-self-shadow);
+}
+
+.message-group[class*="bubble-style-city-"] :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-travel-map-card,
+  .message-statement-card,
+  .message-link-preview-card
+) {
+  color: inherit;
+  background: transparent;
+}
+
+.message-group[class*="bubble-style-city-"] .message-bubble:not(.is-media),
+.message-group[class*="bubble-style-city-"] :is(.message-audio-card, .message-file-card, .message-location-card) {
+  background-clip: padding-box;
+}
+
+.message-group[class*="bubble-style-city-"] :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-travel-map-card,
+  .message-statement-card,
+  .message-link-preview-card
+) :is(small, .message-audio-meta, .message-file-open, .message-location-open, .message-travel-map-copy span, .message-link-preview-desc) {
+  color: var(--bubble-theme-muted-other);
+}
+
+.message-group.self[class*="bubble-style-city-"] :is(
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-travel-map-card,
+  .message-statement-card,
+  .message-link-preview-card
+) :is(small, .message-audio-meta, .message-file-open, .message-location-open, .message-travel-map-copy span, .message-link-preview-desc) {
+  color: var(--bubble-theme-muted-self);
+}
+
+.message-group[class*="bubble-style-city-"] :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  color: var(--bubble-theme-accent);
+  border-color: color-mix(in srgb, var(--bubble-theme-accent) 42%, transparent);
+  background: color-mix(in srgb, var(--bubble-theme-accent) 14%, transparent);
+}
+
+.city-bubble-collection {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line-soft));
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 92% 0, color-mix(in srgb, var(--accent) 10%, transparent), transparent 34%),
+    var(--bg-panel);
+}
+
+.city-bubble-collection > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.city-bubble-collection > header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .7rem;
+  font-weight: 550;
+}
+
+.field-chat_bubble_style .personalization-option[class*="preview-city-"] > i {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  background-color: transparent;
+}
+
+.field-chat_bubble_style .personalization-option[class*="preview-city-"] > i::before,
+.field-chat_bubble_style .personalization-option[class*="preview-city-"] > i::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  border: 1px solid;
+  box-shadow: 0 5px 12px rgba(23, 42, 35, .14);
+}
+
+.field-chat_bubble_style .preview-city-jdz > i {
+  background: url("./src/assets/city-bubbles/jingdezhen.png") center / cover;
+}
+.field-chat_bubble_style .preview-city-jdz > i::before { width: 45%; height: 27%; left: 10%; top: 18%; border-color: #1d5f91; border-radius: 11px; background: #fffdf5; }
+.field-chat_bubble_style .preview-city-jdz > i::after { width: 54%; height: 31%; right: 8%; bottom: 16%; border-color: #0e3d67; border-radius: 12px; background: #174b78; }
+
+.field-chat_bubble_style .preview-city-shanghai > i {
+  background: url("./src/assets/city-bubbles/shanghai.png") center / cover;
+}
+.field-chat_bubble_style .preview-city-shanghai > i::before { width: 42%; height: 26%; left: 9%; top: 17%; border-color: #e06452; border-radius: 5px 12px 12px 12px; background: #10243a; }
+.field-chat_bubble_style .preview-city-shanghai > i::after { width: 55%; height: 31%; right: 7%; bottom: 15%; border-color: #742d2c; border-radius: 12px 5px 12px 12px; background: #bd463b; box-shadow: inset 0 -2px #f2bd55, 0 5px 12px rgba(23,42,35,.14); }
+
+.field-chat_bubble_style .preview-city-nyc > i {
+  background: url("./src/assets/city-bubbles/new-york.png") center / cover;
+}
+.field-chat_bubble_style .preview-city-nyc > i::before { width: 43%; height: 27%; left: 9%; top: 18%; border: 2px solid #3d8a80; border-radius: 4px 11px 11px 4px; background: #f4efdd; }
+.field-chat_bubble_style .preview-city-nyc > i::after { width: 54%; height: 31%; right: 8%; bottom: 15%; border: 2px solid #b99042; border-radius: 11px 4px 4px 11px; background: #2e746c; }
+
+.field-chat_bubble_style .preview-city-beijing > i {
+  background: url("./src/assets/city-bubbles/beijing.png") center / cover;
+}
+.field-chat_bubble_style .preview-city-beijing > i::before { width: 43%; height: 26%; left: 9%; top: 18%; border: 2px solid #ad342d; border-radius: 3px 11px 11px 11px; background: #fff1cf; box-shadow: inset 0 3px #d9a739, 0 5px 12px rgba(23,42,35,.14); }
+.field-chat_bubble_style .preview-city-beijing > i::after { width: 55%; height: 31%; right: 7%; bottom: 15%; border: 2px solid #6f1d1b; border-radius: 11px 3px 11px 11px; background: #982622; box-shadow: inset 0 3px #e3b44e, 0 5px 12px rgba(23,42,35,.14); }
+
+.personalization-option.is-city-collectible > small {
+  color: var(--text-muted);
+  font-size: .64rem;
 }
 
 .message-group:not(.bubble-style-default) :is(
