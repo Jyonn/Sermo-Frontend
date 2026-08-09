@@ -18,6 +18,7 @@ import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUplo
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
+import { useSpaceFeatures } from "../lib/spaceFeatures";
 import type { ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 
 type SelectedPhoto = {
@@ -228,6 +229,7 @@ export default function SquarePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { session } = useAuth();
+  const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
@@ -247,6 +249,10 @@ export default function SquarePage() {
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [voiceDuration, setVoiceDuration] = useState(0);
   const [recording, setRecording] = useState(false);
+
+  useEffect(() => {
+    if (!features.squareExploreEnabled && feedMode === "all") setFeedMode("friends");
+  }, [features.squareExploreEnabled, feedMode]);
   const [publishing, setPublishing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -646,7 +652,7 @@ export default function SquarePage() {
         />
         <div className="square-feed-column">
           <div className="square-feed-filter" role="tablist">
-            <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button>
+            {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button> : null}
             <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}</button>
             <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
             {profileFeedUserId ? (

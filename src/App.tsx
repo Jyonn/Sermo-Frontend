@@ -26,6 +26,7 @@ import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
 import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
+import { useSpaceFeatures } from "./lib/spaceFeatures";
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -65,6 +66,11 @@ function LegacySettingsRedirect() {
   return <Navigate replace to={channel === "email" ? "/app/menu?sheet=email-verification" : "/app/menu"} />;
 }
 
+function AppHomeRedirect() {
+  const features = useSpaceFeatures();
+  return <Navigate replace to={features.chatEnabled ? "/app/chats" : "/app/square"} />;
+}
+
 export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
@@ -101,7 +107,7 @@ export default function App() {
         <Route path="/space/join" element={<LegacyJoinRedirect />} />
         <Route path="/space/:slug" element={<LegacySlugRedirect />} />
 
-        <Route path="/app" element={<Navigate replace to="/app/chats" />} />
+        <Route path="/app" element={<AppHomeRedirect />} />
         <Route
           path="/app/chats"
           element={

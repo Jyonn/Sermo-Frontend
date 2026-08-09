@@ -50,6 +50,9 @@ export interface SpaceDTO {
   email_verified_at: number | null;
   official_user?: TinyUserDTO | null;
   group_square_enabled?: boolean;
+  chat_enabled?: boolean;
+  square_explore_enabled?: boolean;
+  unverified_group_policy?: 0 | 1 | 2;
   member_limit?: number | null;
   level_names?: string[];
   created_at?: number;

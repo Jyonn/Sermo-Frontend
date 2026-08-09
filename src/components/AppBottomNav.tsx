@@ -5,7 +5,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache, CHAT_LIST_UPDATED_EVENT } from "../lib/chatCache";
 import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
-import { useGroupSquareEnabled } from "../lib/spaceFeatures";
+import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n, type TranslationKey } from "../lib/language";
@@ -29,7 +29,7 @@ export function AppBottomNav() {
   const location = useLocation();
   const { session, patchSessionUser } = useAuth();
   const space = useSpaceBrand();
-  const groupSquareEnabled = useGroupSquareEnabled();
+  const features = useSpaceFeatures();
   const { t } = useI18n();
   const loadedIdentityRef = useRef<string | null>(null);
   const sessionUserId = session?.user.user_id ?? null;
@@ -185,12 +185,16 @@ export function AppBottomNav() {
   const isChatDetail = Boolean(matchPath("/app/chats/:chatId", effectivePathname));
 
   const current = activeKey(effectivePathname);
-  const visibleRoutes = groupSquareEnabled ? mobileRoutes : mobileRoutes.filter((route) => route.key !== "square");
+  const visibleRoutes = mobileRoutes.filter((route) => {
+    if (route.key === "square") return features.squareEnabled;
+    if (route.key === "chats") return features.chatEnabled;
+    return true;
+  });
 
   return (
     <nav aria-label={t("nav.main")} className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
-        <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to="/app/chats">
+        <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to={features.chatEnabled ? "/app/chats" : "/app/square"}>
           <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-512.png?v=3" />
           {space ? (
             <>

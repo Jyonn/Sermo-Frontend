@@ -14474,6 +14474,182 @@ html[data-theme="dark"] .message-link-preview-site {
   background: transparent;
 }
 
+.admin-policy-summary {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--surface-elevated, rgba(255, 255, 255, 0.72));
+}
+
+.admin-policy-summary > button {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px;
+  text-align: left;
+}
+
+.admin-policy-summary > button + button {
+  border-top: 1px solid var(--line-soft);
+}
+
+.admin-policy-summary > button > span:nth-child(2) {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin-policy-summary small,
+.admin-toggle-row small,
+.admin-policy-options small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.admin-policy-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  color: var(--brand-accent);
+  background: color-mix(in srgb, var(--brand-primary) 11%, transparent);
+}
+
+.admin-policy-icon .material-symbols-outlined {
+  font-size: 19px;
+}
+
+.admin-policy-drawer {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.admin-policy-intro {
+  display: grid;
+  gap: 5px;
+  padding: 4px 2px;
+}
+
+.admin-policy-intro strong {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+}
+
+.admin-policy-intro p,
+.admin-policy-footnote {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.admin-policy-card,
+.admin-permission-matrix {
+  overflow: hidden;
+  padding: 4px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: var(--surface-elevated, rgba(255, 255, 255, 0.78));
+}
+
+.admin-policy-card .admin-toggle-row {
+  padding: 14px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.admin-policy-card .admin-toggle-row + .admin-toggle-row {
+  border-top: 1px solid var(--line-soft);
+}
+
+.admin-toggle-row > div {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-toggle-row.is-disabled {
+  opacity: 0.46;
+}
+
+.admin-policy-options {
+  display: grid;
+  gap: 9px;
+}
+
+.admin-policy-options > button {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  text-align: left;
+  background: var(--surface-elevated, rgba(255, 255, 255, 0.72));
+}
+
+.admin-policy-options > button > span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-policy-options > button.is-selected {
+  border-color: color-mix(in srgb, var(--brand-primary) 60%, var(--line-soft));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 22%, transparent);
+}
+
+.admin-policy-radio {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+.admin-policy-options .is-selected .admin-policy-radio {
+  border: 5px solid var(--brand-primary);
+}
+
+.admin-permission-matrix {
+  padding-block: 0;
+}
+
+.admin-permission-matrix header,
+.admin-permission-matrix > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+}
+
+.admin-permission-matrix header {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.admin-permission-matrix > div {
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.78rem;
+}
+
+.admin-permission-matrix strong {
+  color: var(--brand-accent);
+  font-size: 0.72rem;
+}
+
+.admin-permission-matrix strong.is-locked {
+  color: var(--text-muted);
+}
+
 .admin-broadcast-form,
 .admin-broadcast-result {
   display: grid;

@@ -5,14 +5,15 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { copyText } from "../lib/presentation";
-import { setCachedGroupSquareEnabled } from "../lib/spaceFeatures";
+import { setCachedSpaceFeatures } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
-import { getActiveLocale, i18n, useI18n } from "../lib/language";
+import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO } from "../types";
 
 type MemberFilter = "all" | "online";
@@ -104,6 +105,12 @@ export default function SpaceAdminDashboardPage() {
   const [copied, setCopied] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
+  const [settingsChatEnabled, setSettingsChatEnabled] = useState(true);
+  const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
+  const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
+  const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
+  const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
+  const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
   const [settingsMemberLimit, setSettingsMemberLimit] = useState("");
   const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(defaultLevelNames);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -171,6 +178,9 @@ export default function SpaceAdminDashboardPage() {
     if (!dashboard?.space) return;
     setSettingsName(dashboard.space.name);
     setSettingsSquareEnabled(Boolean(dashboard.space.group_square_enabled));
+    setSettingsChatEnabled(dashboard.space.chat_enabled !== false);
+    setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
+    setSettingsUnverifiedGroupPolicy(dashboard.space.unverified_group_policy ?? 2);
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
     setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : defaultLevelNames);
   }, [dashboard?.space, defaultLevelNames]);
@@ -223,10 +233,17 @@ export default function SpaceAdminDashboardPage() {
       const payload = await api.updateAdminSettings({
         name: settingsName.trim(),
         group_square_enabled: settingsSquareEnabled ? 1 : 0,
+        chat_enabled: settingsChatEnabled ? 1 : 0,
+        square_explore_enabled: settingsExploreEnabled ? 1 : 0,
+        unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
         level_names: settingsLevelNames.map((name) => name.trim()),
       });
-      setCachedGroupSquareEnabled(payload.space_id, payload.group_square_enabled !== false);
+      setCachedSpaceFeatures(payload.space_id, {
+        chatEnabled: payload.chat_enabled !== false,
+        squareEnabled: payload.group_square_enabled !== false,
+        squareExploreEnabled: payload.square_explore_enabled !== false,
+      });
       patchSpace(payload);
       setDashboard((current) =>
         current
@@ -236,6 +253,9 @@ export default function SpaceAdminDashboardPage() {
             }
           : current
       );
+      setBasicSettingsOpen(false);
+      setModuleSettingsOpen(false);
+      setAccessPolicyOpen(false);
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : t("admin.settingsSaveFailed"));
     } finally {
@@ -630,59 +650,64 @@ export default function SpaceAdminDashboardPage() {
             {currentSpace ? (
               <section className="panel admin-dashboard-section admin-settings-panel">
                 <div className="admin-section-title-row">
-                  <h2 className="panel-title">{t("admin.basicSettings")}</h2>
+                  <h2 className="panel-title">{t("admin.spaceGovernance")}</h2>
                   <span>{formatCreatedAt(currentSpace.created_at)}</span>
                 </div>
-                <div className="admin-settings-email">{currentSpace.email}</div>
-                <div className="field-stack">
-                  <div>
-                    <label className="field-label">{t("admin.spaceName")}</label>
-                    <input className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} />
-                  </div>
-                  <div>
-                    <label className="field-label">{t("admin.memberLimit")}</label>
-                    <input
-                      className="input mono"
-                      inputMode="numeric"
-                      placeholder={t("admin.unlimited")}
-                      value={settingsMemberLimit}
-                      onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))}
-                    />
-                  </div>
-                  <div>
-                    <label className="field-label">{t("admin.spaceLevels")}</label>
-                    <div className="admin-level-name-grid">
-                      {settingsLevelNames.map((levelName, index) => (
-                        <label key={index}>
-                          <span>Lv.{index + 1}</span>
-                          <input
-                            className="input"
-                            maxLength={8}
-                            value={levelName}
-                            onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))}
-                          />
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="admin-toggle-row">
-                    <div className="row-main"><strong>{t("admin.spaceSquare")}</strong></div>
-                    <button
-                      aria-label={t("admin.toggleSpaceSquare")}
-                      className={`switch ${settingsSquareEnabled ? "active" : ""}`}
-                      onClick={() => setSettingsSquareEnabled((current) => !current)}
-                      type="button"
-                    />
-                  </div>
+                <div className="admin-policy-summary">
+                  <button onClick={() => setModuleSettingsOpen(true)} type="button">
+                    <span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span>
+                    <span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                  <button onClick={() => setAccessPolicyOpen(true)} type="button">
+                    <span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span>
+                    <span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                  <button onClick={() => setBasicSettingsOpen(true)} type="button">
+                    <span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span>
+                    <span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
                 </div>
-                <button className="ghost-button" disabled={settingsSaving} onClick={() => void saveSettings()} type="button">
-                  {settingsSaving ? t("common.saving") : t("admin.saveSettings")}
-                </button>
               </section>
             ) : null}
           </aside>
         </div>
       </section>
+
+      <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-features" onAction={() => void saveSettings()} onClose={() => setModuleSettingsOpen(false)} open={moduleSettingsOpen} title={t("admin.featureAccess")}>
+        <div className="admin-policy-drawer">
+          <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
+          <section className="admin-policy-card">
+            <div className="admin-toggle-row"><div><strong>{t("nav.chats")}</strong><small>{t("admin.chatFeatureHint")}</small></div><button aria-label={t("nav.chats")} className={`switch ${settingsChatEnabled ? "active" : ""}`} onClick={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); }} type="button" /></div>
+            <div className="admin-toggle-row"><div><strong>{t("nav.square")}</strong><small>{t("admin.squareFeatureHint")}</small></div><button aria-label={t("nav.square")} className={`switch ${settingsSquareEnabled ? "active" : ""}`} onClick={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} type="button" /></div>
+            <div className={`admin-toggle-row${settingsSquareEnabled ? "" : " is-disabled"}`}><div><strong>{t("square.feedAll")}</strong><small>{t("admin.exploreFeatureHint")}</small></div><button aria-label={t("square.feedAll")} className={`switch ${settingsSquareEnabled && settingsExploreEnabled ? "active" : ""}`} disabled={!settingsSquareEnabled} onClick={() => setSettingsExploreEnabled((value) => !value)} type="button" /></div>
+          </section>
+          <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-unverified-policy" onAction={() => void saveSettings()} onClose={() => setAccessPolicyOpen(false)} open={accessPolicyOpen} title={t("admin.unverifiedAccess")}>
+        <div className="admin-policy-drawer">
+          <section className="admin-policy-intro"><strong>{t("admin.unverifiedAccessTitle")}</strong><p>{t("admin.unverifiedAccessHint")}</p></section>
+          <div className="admin-policy-options">
+            {([2, 1, 0] as const).map((policy) => <button aria-pressed={settingsUnverifiedGroupPolicy === policy} className={settingsUnverifiedGroupPolicy === policy ? "is-selected" : ""} key={policy} onClick={() => setSettingsUnverifiedGroupPolicy(policy)} type="button"><span className="admin-policy-radio" /><span><strong>{t(`admin.unverifiedPolicy${policy}` as TranslationKey)}</strong><small>{t(`admin.unverifiedPolicy${policy}Hint` as TranslationKey)}</small></span></button>)}
+          </div>
+          <section className="admin-permission-matrix">
+            <header><span>{t("admin.capability")}</span><span>{t("admin.currentResult")}</span></header>
+            <div><span>{t("admin.browseSquare")}</span><strong>{t("common.enabled")}</strong></div>
+            <div><span>{t("admin.publishAndInteract")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
+            <div><span>{t("admin.receiveGroupInvite")}</span><strong>{settingsUnverifiedGroupPolicy >= 1 ? t("common.enabled") : t("common.disabled")}</strong></div>
+            <div><span>{t("admin.sendGroupMessage")}</span><strong>{settingsUnverifiedGroupPolicy >= 2 ? t("common.enabled") : t("common.disabled")}</strong></div>
+            <div><span>{t("admin.createOrInviteGroup")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
+          </section>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-basic-settings" onAction={() => void saveSettings()} onClose={() => setBasicSettingsOpen(false)} open={basicSettingsOpen} title={t("admin.basicSettings")}>
+        <div className="admin-policy-drawer"><section className="admin-policy-card field-stack"><div><label className="field-label">{t("admin.spaceName")}</label><input className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div><div><label className="field-label">{t("admin.memberLimit")}</label><input className="input mono" inputMode="numeric" placeholder={t("admin.unlimited")} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /></div><div><label className="field-label">{t("admin.spaceLevels")}</label><div className="admin-level-name-grid">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div></div></section></div>
+      </SideDrawer>
 
       <BottomSheet
         open={broadcastOpen}
