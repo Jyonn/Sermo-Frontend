@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.17",
+  "id": "2026.08.09.18",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "把发言带进聊天",
+      "title": "成长，不再是一张说明书",
       "items": [
-        "每条广场发言现在都有可直接分享的独立链接",
-        "聊天会把站内发言展示为专属卡片，可直接预览图片、语音和视频",
-        "卡片同步展示点赞与评论，并可一键打开完整发言"
+        "成长主页重构为五阶段成长护照，当前等级拥有完整的专属配色",
+        "任务、安全建议与成长记录改为渐进展开，重要信息一眼可见",
+        "等级图鉴现在直接预览真实背景、气泡和头像框，并支持吸附式横向浏览"
       ]
     },
     "en": {
-      "title": "Share posts in chat",
+      "title": "Growth, redesigned",
       "items": [
-        "Every Square post now has a shareable direct link",
-        "Sermo post links become rich chat cards with image, audio, and video previews",
-        "Cards show live likes and comments and open the full post in one tap"
+        "The Growth home is now a five-stage passport with a distinct palette for every stage",
+        "Tasks, security suggestions, and history use progressive disclosure to keep focus clear",
+        "The level atlas now previews real backgrounds, bubbles, and avatar frames in a tactile carousel"
       ]
     }
   }

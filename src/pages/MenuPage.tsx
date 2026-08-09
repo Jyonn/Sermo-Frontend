@@ -32,7 +32,7 @@ import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
@@ -262,6 +262,54 @@ function BarkGuideIcon({ compact = false }: { compact?: boolean }) {
     <div className={`bark-guide-icon${compact ? " is-compact" : ""}`} aria-hidden="true">
       <img alt="" src={barkAppIconUrl} />
     </div>
+  );
+}
+
+function growthStage(level: number) {
+  if (level <= 2) return 1;
+  if (level <= 5) return 2;
+  if (level <= 9) return 3;
+  if (level <= 13) return 4;
+  return 5;
+}
+
+function growthRewardIcon(reward: GrowthRewardDTO) {
+  const value = `${reward.capability_key ?? ""} ${reward.id}`;
+  if (/image|photo/.test(value)) return "image";
+  if (/audio|voice/.test(value)) return "mic";
+  if (/video/.test(value)) return "videocam";
+  if (/location|map/.test(value)) return "location_on";
+  if (/group/.test(value)) return "group_add";
+  if (/download/.test(value)) return "download";
+  if (/nickname|edit|rename/.test(value)) return "edit";
+  if (/notification|online/.test(value)) return "notifications_active";
+  return "lock_open";
+}
+
+function GrowthRewardVisual({ reward, me, name, uri }: {
+  reward: GrowthRewardDTO;
+  me: UserMeDTO | null;
+  name: string;
+  uri?: string;
+}) {
+  const asset = reward.asset_key ?? "default";
+  if (reward.category === "background") {
+    return <span className={`growth-reward-visual is-background chat-background-choice theme-${asset}`}><span /></span>;
+  }
+  if (reward.category === "bubble") {
+    return <span className="growth-reward-visual is-bubble field-chat_bubble_style"><span className={`personalization-option preview-${asset}`}><i aria-hidden="true"><span /></i></span></span>;
+  }
+  if (reward.category === "frame") {
+    return (
+      <span className="growth-reward-visual is-frame">
+        <UserAvatar className="growth-reward-avatar" frame={asset as PersonalizationDTO["avatar_frame_style"]} name={name} uri={uri} vip={Boolean(me?.is_permanent_vip)} />
+      </span>
+    );
+  }
+  return (
+    <span className="growth-reward-visual is-capability">
+      <span className="material-symbols-outlined">{growthRewardIcon(reward)}</span>
+    </span>
   );
 }
 
@@ -1775,8 +1823,9 @@ export default function MenuPage() {
       <TravelMapDrawer open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
 
       <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
-        <div className={`growth-drawer is-level-${me?.growth?.level ?? 1}`}>
+        <div className={`growth-drawer is-level-${me?.growth?.level ?? 1} growth-stage-${growthStage(me?.growth?.level ?? 1)}`}>
           <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
+            <span className="growth-hero-stage" aria-hidden="true">{String(me?.growth?.level ?? 1).padStart(2, "0")}</span>
             <div className="growth-hero-heading">
               <div className="growth-level-seal">
                 <span>LEVEL</span>
@@ -1787,7 +1836,7 @@ export default function MenuPage() {
                 <strong>{me?.growth?.name ?? t("growth.firstLevel")}</strong>
               </div>
               <span className="growth-hero-guide">
-                {t("growth.guide")}
+                {t("growth.openAtlas")}
                 <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
                   <path d="M4 10h11M11.5 6.5 15 10l-3.5 3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
                 </svg>
@@ -1811,49 +1860,38 @@ export default function MenuPage() {
             </div>
             <b>{me?.growth?.daily?.earned ?? 0}<small>/{me?.growth?.daily?.limit ?? 40}</small></b>
           </section>
-          <section className="growth-drawer-section">
-            <h3>{t("growth.explore")}</h3>
+          <details className="growth-disclosure" open>
+            <summary><span><strong>{t("growth.nextSteps")}</strong><small>{t("growth.nextStepsHint")}</small></span><b>{(me?.growth?.milestones ?? []).filter((item) => !item.earned).length}</b><span className="material-symbols-outlined">expand_more</span></summary>
             <div className="growth-milestone-grid">
               {(me?.growth?.milestones ?? []).filter((item) => item.category !== "security").map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} disabled={!item.key.includes("install_webapp")} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
-                  <span>{item.earned ? "✓" : "+"}</span>
-                  <strong>{item.title}</strong>
-                  <small>+{item.points}</small>
+                  <span>{item.earned ? "✓" : "+"}</span><strong>{item.title}</strong><small>+{item.points}</small>
                 </button>
               ))}
             </div>
-          </section>
-          <section className="growth-drawer-section">
-            <h3>{t("growth.recommended")}</h3>
+          </details>
+          <details className="growth-disclosure">
+            <summary><span><strong>{t("growth.securitySteps")}</strong><small>{t("growth.securityStepsHint")}</small></span><b>{(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && !item.earned).length}</b><span className="material-symbols-outlined">expand_more</span></summary>
             <div className="growth-milestone-grid">
               {(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && (item.key !== "security:bark" || isAppleEnvironment)).map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
-                  <span>{item.earned ? "✓" : "+"}</span>
-                  <strong>{item.title}</strong>
-                  <small>+{item.points}</small>
+                  <span>{item.earned ? "✓" : "+"}</span><strong>{item.title}</strong><small>+{item.points}</small>
                 </button>
               ))}
             </div>
-          </section>
-          {me?.growth?.recent_events?.length ? (
-            <section className="growth-drawer-section">
-              <h3>{t("growth.recent")}</h3>
-              <div className="growth-event-list">
-                {me.growth.recent_events?.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}
-              </div>
-            </section>
-          ) : null}
-          {me?.growth?.privileges.length ? (
-            <section className="growth-drawer-section">
-              <h3>{t("growth.unlocked")}</h3>
-              <div className="growth-privileges">{me.growth.privileges.map((item) => <span key={item}>{item}</span>)}</div>
-            </section>
+          </details>
+          {(me?.growth?.recent_events?.length || me?.growth?.privileges.length) ? (
+            <details className="growth-disclosure is-history">
+              <summary><span><strong>{t("growth.journey")}</strong><small>{t("growth.journeyHint")}</small></span><span className="material-symbols-outlined">expand_more</span></summary>
+              {me?.growth?.privileges.length ? <div className="growth-privileges">{me.growth.privileges.map((item) => <span key={item}>{item}</span>)}</div> : null}
+              {me?.growth?.recent_events?.length ? <div className="growth-event-list">{me.growth.recent_events.map((event) => <div key={`${event.key}-${event.created_at}`}><span>{event.title}</span><strong>+{event.points}</strong></div>)}</div> : null}
+            </details>
           ) : null}
         </div>
       </SideDrawer>
 
       <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
-        <div className="growth-level-guide">
+        <div className={`growth-level-guide growth-stage-${growthStage(activeGrowthGuideLevel)}`}>
           <div className="growth-level-guide-summary">
             <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
             <strong>{growthLevels[activeGrowthGuideLevel - 1]?.name ?? `Lv.${activeGrowthGuideLevel}`}</strong>
@@ -1878,10 +1916,16 @@ export default function MenuPage() {
               const current = item.level === (me?.growth?.level ?? 1);
               const next = item.level === (me?.growth?.level ?? 1) + 1;
               return (
-                <article
-                  className={`growth-level-card${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
+                <button
+                  className={`growth-level-card growth-stage-${growthStage(item.level)}${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
                   data-growth-level={item.level}
                   key={item.level}
+                  onClick={(event) => {
+                    setActiveGrowthGuideLevel(item.level);
+                    event.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                    window.navigator.vibrate?.(8);
+                  }}
+                  type="button"
                 >
                   <div className="growth-level-card-stage">
                     <span>LEVEL</span>
@@ -1889,11 +1933,16 @@ export default function MenuPage() {
                   </div>
                   <div className="growth-level-card-copy">
                     <strong>{item.name}</strong>
+                    <div className="growth-level-card-rewards">
+                      {item.rewards.slice(0, 4).map((reward) => (
+                        <GrowthRewardVisual key={reward.id} me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                      ))}
+                    </div>
                   </div>
                   <div className="growth-level-card-state">
                     {current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}
                   </div>
-                </article>
+                </button>
               );
             })}
           </div>
@@ -1905,11 +1954,10 @@ export default function MenuPage() {
             <div className="growth-level-detail-unlocks">
               {(growthLevels[activeGrowthGuideLevel - 1]?.rewards ?? []).length ? (
                 growthLevels[activeGrowthGuideLevel - 1].rewards.map((reward) => (
-                  <span className={`growth-reward-row is-${reward.rarity}`} key={reward.id}>
-                    <i />
-                    <b>{reward.title}</b>
-                    {reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}
-                  </span>
+                  <article className={`growth-reward-card is-${reward.rarity}`} key={reward.id}>
+                    <GrowthRewardVisual me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                    <span><b>{reward.title}</b>{reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}</span>
+                  </article>
                 ))
               ) : (
                 <span><i />{t("growth.stage")}</span>
