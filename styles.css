@@ -6059,6 +6059,77 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   .message-send-state-overlay { animation: none; }
 }
 
+/* City travel cards keep the shared bubble as the only surface and border. */
+.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map {
+  width: min(76vw, 292px);
+  max-width: min(100%, 76vw, 292px);
+  min-height: 72px;
+  isolation: isolate;
+}
+
+.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map > .message-travel-map-card {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  overflow: hidden;
+  color: inherit;
+  background: transparent;
+  isolation: isolate;
+}
+
+.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map > .message-travel-map-card::after {
+  position: absolute;
+  z-index: -1;
+  right: -18px;
+  bottom: -24px;
+  width: 88px;
+  height: 60px;
+  border: 1px solid color-mix(in srgb, var(--bubble-theme-accent) 38%, transparent);
+  border-radius: 50%;
+  content: "";
+  opacity: .48;
+  transform: rotate(-14deg);
+}
+
+.message-group[class*="bubble-style-city-"] .message-travel-map-art {
+  width: 46px;
+  height: 46px;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--bubble-theme-accent) 44%, transparent);
+  border-radius: 13px;
+  color: var(--bubble-theme-accent);
+  background: color-mix(in srgb, var(--bubble-theme-accent) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 18%, transparent);
+}
+
+.message-group[class*="bubble-style-city-"] .message-travel-map-art svg {
+  width: 25px;
+  height: 25px;
+}
+
+.message-group[class*="bubble-style-city-"] .message-travel-map-fold {
+  background: color-mix(in srgb, var(--bubble-theme-accent) 28%, transparent);
+}
+
+.message-group[class*="bubble-style-city-"] .message-travel-map-copy {
+  gap: 4px;
+}
+
+.message-group[class*="bubble-style-city-"] .message-travel-map-copy strong {
+  font-size: .86rem;
+  line-height: 1.3;
+}
+
+.message-group[class*="bubble-style-city-"] .message-travel-map-arrow {
+  color: var(--bubble-theme-accent);
+  font-size: 1.08rem;
+}
+
 .message-media-frame.is-failed,
 .message-audio-card.is-failed,
 .message-file-card.is-failed {

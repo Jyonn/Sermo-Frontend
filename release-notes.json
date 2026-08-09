@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.26",
+  "id": "2026.08.09.27",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "城市气泡卡片升级",
+      "title": "足迹卡片适配城市气泡",
       "items": [
-        "语音、文件与位置统一采用城市信息卡设计",
-        "四座城市的卡片完整继承主题材质与色彩",
-        "发送中效果改为沿气泡边框流动的环带"
+        "足迹地图卡片接入统一的城市信息卡设计",
+        "地图图标、信息层级与卡片尺寸更加紧凑",
+        "继续保持单层气泡边框和消息合并圆角"
       ]
     },
     "en": {
-      "title": "Upgraded city bubble cards",
+      "title": "City styling for travel-map cards",
       "items": [
-        "Audio, file, and location messages now share a city information-card design",
-        "Every card fully inherits its city's material and color language",
-        "Sending feedback now travels around the bubble border"
+        "Travel-map messages now join the unified city information-card system",
+        "Map art, hierarchy, and card sizing are now more compact",
+        "The single bubble border and grouped corners remain intact"
       ]
     }
   }
