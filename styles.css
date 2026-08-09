@@ -18760,11 +18760,17 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   --city-magnet-position: center;
   --city-magnet-accent: #337bb0;
   --bubble-theme-accent: #337bb0;
-  --bubble-skin-other-bg: linear-gradient(155deg, #fff 0 72%, #edf5fb 73%);
+  --bubble-skin-other-bg:
+    radial-gradient(circle at 50% 112%, transparent 0 8px, rgba(41, 103, 153, .11) 8.5px 9.5px, transparent 10px) 0 0 / 25px 16px repeat,
+    linear-gradient(90deg, transparent 0 47%, rgba(51, 123, 176, .055) 48% 52%, transparent 53%) 0 0 / 30px 100% repeat,
+    linear-gradient(155deg, #fff 0 72%, #edf5fb 73%);
   --bubble-skin-other-color: #173b58;
   --bubble-skin-other-border: #8eb6d7;
   --bubble-skin-other-shadow: 3px 4px 0 #d5e7f4, 0 8px 16px rgba(47, 91, 126, .1);
-  --bubble-skin-self-bg: linear-gradient(145deg, #397ca9, #225c88);
+  --bubble-skin-self-bg:
+    radial-gradient(circle at 50% 112%, transparent 0 8px, rgba(236, 247, 255, .13) 8.5px 9.5px, transparent 10px) 0 0 / 25px 16px repeat,
+    linear-gradient(90deg, transparent 0 47%, rgba(225, 242, 255, .07) 48% 52%, transparent 53%) 0 0 / 30px 100% repeat,
+    linear-gradient(145deg, #397ca9, #225c88);
   --bubble-skin-self-color: #fff;
   --bubble-skin-self-border: #174d78;
   --bubble-skin-self-shadow: 3px 4px 0 #a9cee8, 0 8px 17px rgba(32, 82, 120, .18);
@@ -18778,11 +18784,17 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   --city-magnet-position: center;
   --city-magnet-accent: #ef6658;
   --bubble-theme-accent: #ef6658;
-  --bubble-skin-other-bg: linear-gradient(135deg, #f8f9f8 0 76%, #e9edef 77%);
+  --bubble-skin-other-bg:
+    linear-gradient(118deg, transparent 0 44%, rgba(239, 102, 88, .1) 44.5% 46%, transparent 46.5%) 0 0 / 42px 100% repeat,
+    repeating-linear-gradient(90deg, transparent 0 10px, rgba(36, 49, 58, .055) 10px 11px, transparent 11px 21px),
+    linear-gradient(135deg, #f8f9f8 0 76%, #e9edef 77%);
   --bubble-skin-other-color: #24313a;
   --bubble-skin-other-border: #c9d0d3;
   --bubble-skin-other-shadow: 0 4px 0 #ef6658, 0 9px 17px rgba(32, 43, 51, .12);
-  --bubble-skin-self-bg: linear-gradient(145deg, #303b48, #202a35);
+  --bubble-skin-self-bg:
+    linear-gradient(118deg, transparent 0 44%, rgba(255, 116, 100, .16) 44.5% 46%, transparent 46.5%) 0 0 / 42px 100% repeat,
+    repeating-linear-gradient(90deg, transparent 0 10px, rgba(233, 242, 245, .065) 10px 11px, transparent 11px 21px),
+    linear-gradient(145deg, #303b48, #202a35);
   --bubble-skin-self-color: #fffaf5;
   --bubble-skin-self-border: #18222c;
   --bubble-skin-self-shadow: 0 4px 0 #ef6658, 0 9px 18px rgba(24, 34, 44, .22);
@@ -18796,11 +18808,19 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   --city-magnet-position: center;
   --city-magnet-accent: #4a9c8f;
   --bubble-theme-accent: #4a9c8f;
-  --bubble-skin-other-bg: linear-gradient(155deg, #fffdf7 0 74%, #f4edda 75%);
+  --bubble-skin-other-bg:
+    radial-gradient(circle, rgba(240, 201, 81, .42) 0 1.7px, transparent 2.2px) 7px 7px / 31px 25px repeat,
+    linear-gradient(32deg, transparent 0 47%, rgba(39, 130, 119, .105) 48% 50%, transparent 51%) 0 0 / 46px 32px repeat,
+    linear-gradient(90deg, rgba(23, 102, 94, .06) 1px, transparent 1px) 0 0 / 23px 100% repeat,
+    linear-gradient(155deg, #fffdf7 0 74%, #f4edda 75%);
   --bubble-skin-other-color: #1d423d;
   --bubble-skin-other-border: #73a99f;
   --bubble-skin-other-shadow: 4px 4px 0 #f0c951, 0 8px 16px rgba(43, 83, 76, .11);
-  --bubble-skin-self-bg: linear-gradient(145deg, #278277, #17665e);
+  --bubble-skin-self-bg:
+    radial-gradient(circle, rgba(240, 201, 81, .68) 0 1.7px, transparent 2.2px) 7px 7px / 31px 25px repeat,
+    linear-gradient(32deg, transparent 0 47%, rgba(255, 253, 244, .12) 48% 50%, transparent 51%) 0 0 / 46px 32px repeat,
+    linear-gradient(90deg, rgba(255, 255, 255, .07) 1px, transparent 1px) 0 0 / 23px 100% repeat,
+    linear-gradient(145deg, #278277, #17665e);
   --bubble-skin-self-color: #fffdf4;
   --bubble-skin-self-border: #12584f;
   --bubble-skin-self-shadow: 4px 4px 0 #f0c951, 0 8px 17px rgba(21, 92, 83, .2);
@@ -18814,11 +18834,17 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
   --city-magnet-position: center;
   --city-magnet-accent: #e45245;
   --bubble-theme-accent: #e45245;
-  --bubble-skin-other-bg: linear-gradient(150deg, #fffdf8 0 72%, #f8eee4 73%);
+  --bubble-skin-other-bg:
+    radial-gradient(ellipse at 50% 100%, transparent 0 8px, rgba(184, 61, 54, .105) 8.5px 9.5px, transparent 10px) 0 0 / 25px 15px repeat,
+    linear-gradient(90deg, transparent 0 43%, rgba(168, 49, 45, .07) 44% 46%, transparent 47%) 0 0 / 20px 100% repeat,
+    linear-gradient(150deg, #fffdf8 0 72%, #f8eee4 73%);
   --bubble-skin-other-color: #4b2925;
   --bubble-skin-other-border: #dc8b81;
   --bubble-skin-other-shadow: 4px 4px 0 #f1b34f, 0 8px 16px rgba(99, 52, 45, .11);
-  --bubble-skin-self-bg: linear-gradient(145deg, #dc5b4d, #b83d36);
+  --bubble-skin-self-bg:
+    radial-gradient(ellipse at 50% 100%, transparent 0 8px, rgba(255, 222, 164, .15) 8.5px 9.5px, transparent 10px) 0 0 / 25px 15px repeat,
+    linear-gradient(90deg, transparent 0 43%, rgba(255, 246, 224, .08) 44% 46%, transparent 47%) 0 0 / 20px 100% repeat,
+    linear-gradient(145deg, #dc5b4d, #b83d36);
   --bubble-skin-self-color: #fffaf0;
   --bubble-skin-self-border: #a8312d;
   --bubble-skin-self-shadow: 4px 4px 0 #f1b34f, 0 8px 17px rgba(126, 43, 37, .2);
@@ -18919,26 +18945,26 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 .field-chat_bubble_style .preview-city-jdz > i {
   background: url("./src/assets/city-bubbles/magnets/jingdezhen-enamel-v2.png") 90% 15% / 48px 32px no-repeat, linear-gradient(145deg, #edf4f6, #f7f5ec);
 }
-.field-chat_bubble_style .preview-city-jdz > i::before { width: 45%; height: 27%; left: 10%; top: 21%; border-radius: 12px; background: #fff; }
-.field-chat_bubble_style .preview-city-jdz > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #174d78; border-radius: 13px 6px 6px 13px; background: linear-gradient(145deg, #397ca9, #225c88); box-shadow: 3px 3px 0 #a9cee8; }
+.field-chat_bubble_style .preview-city-jdz > i::before { width: 45%; height: 27%; left: 10%; top: 21%; border-radius: 12px; background: radial-gradient(circle at 50% 112%, transparent 0 5px, rgba(41,103,153,.16) 5.5px 6.5px, transparent 7px) 0 0 / 16px 11px repeat, #fff; }
+.field-chat_bubble_style .preview-city-jdz > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #174d78; border-radius: 13px 6px 6px 13px; background: radial-gradient(circle at 50% 112%, transparent 0 5px, rgba(236,247,255,.18) 5.5px 6.5px, transparent 7px) 0 0 / 16px 11px repeat, linear-gradient(145deg, #397ca9, #225c88); box-shadow: 3px 3px 0 #a9cee8; }
 
 .field-chat_bubble_style .preview-city-shanghai > i {
   background: url("./src/assets/city-bubbles/magnets/shanghai-enamel-v2.png") 90% 15% / 48px 32px no-repeat, linear-gradient(145deg, #f1f3f2, #f8f0eb);
 }
-.field-chat_bubble_style .preview-city-shanghai > i::before { width: 42%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: #fff; }
-.field-chat_bubble_style .preview-city-shanghai > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #18222c; border-radius: 13px 5px 5px 13px; background: linear-gradient(145deg, #303b48, #202a35); box-shadow: 0 3px 0 #ef6658; }
+.field-chat_bubble_style .preview-city-shanghai > i::before { width: 42%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: repeating-linear-gradient(90deg, transparent 0 7px, rgba(36,49,58,.1) 7px 8px, transparent 8px 14px), #fff; }
+.field-chat_bubble_style .preview-city-shanghai > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #18222c; border-radius: 13px 5px 5px 13px; background: linear-gradient(118deg, transparent 0 44%, rgba(255,116,100,.22) 45% 47%, transparent 48%) 0 0 / 26px 100% repeat, linear-gradient(145deg, #303b48, #202a35); box-shadow: 0 3px 0 #ef6658; }
 
 .field-chat_bubble_style .preview-city-nyc > i {
   background: url("./src/assets/city-bubbles/magnets/new-york-enamel-v2.png") 90% 15% / 48px 32px no-repeat, linear-gradient(145deg, #edf3f0, #f7f3e9);
 }
-.field-chat_bubble_style .preview-city-nyc > i::before { width: 43%; height: 27%; left: 9%; top: 21%; border-radius: 12px; background: #fff; }
-.field-chat_bubble_style .preview-city-nyc > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #12584f; border-radius: 14px 7px 7px 14px; background: linear-gradient(145deg, #278277, #17665e); box-shadow: 3px 3px 0 #f0c951; }
+.field-chat_bubble_style .preview-city-nyc > i::before { width: 43%; height: 27%; left: 9%; top: 21%; border-radius: 12px; background: radial-gradient(circle, rgba(240,201,81,.6) 0 1.3px, transparent 1.8px) 4px 4px / 18px 15px repeat, linear-gradient(32deg, transparent 0 47%, rgba(39,130,119,.14) 48% 50%, transparent 51%) 0 0 / 27px 19px repeat, #fffdf7; }
+.field-chat_bubble_style .preview-city-nyc > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #12584f; border-radius: 14px 7px 7px 14px; background: radial-gradient(circle, rgba(240,201,81,.8) 0 1.3px, transparent 1.8px) 4px 4px / 18px 15px repeat, linear-gradient(32deg, transparent 0 47%, rgba(255,255,255,.16) 48% 50%, transparent 51%) 0 0 / 27px 19px repeat, linear-gradient(145deg, #278277, #17665e); box-shadow: 3px 3px 0 #f0c951; }
 
 .field-chat_bubble_style .preview-city-beijing > i {
   background: url("./src/assets/city-bubbles/magnets/beijing-enamel-v2.png") 90% 15% / 48px 32px no-repeat, linear-gradient(145deg, #f1f3ef, #f8f0e9);
 }
-.field-chat_bubble_style .preview-city-beijing > i::before { width: 43%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: #fff; }
-.field-chat_bubble_style .preview-city-beijing > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #a8312d; border-radius: 13px 5px 5px 13px; background: linear-gradient(145deg, #dc5b4d, #b83d36); box-shadow: 3px 3px 0 #f1b34f; }
+.field-chat_bubble_style .preview-city-beijing > i::before { width: 43%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: radial-gradient(ellipse at 50% 100%, transparent 0 5px, rgba(184,61,54,.15) 5.5px 6.5px, transparent 7px) 0 0 / 16px 10px repeat, #fffdf8; }
+.field-chat_bubble_style .preview-city-beijing > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #a8312d; border-radius: 13px 5px 5px 13px; background: radial-gradient(ellipse at 50% 100%, transparent 0 5px, rgba(255,222,164,.2) 5.5px 6.5px, transparent 7px) 0 0 / 16px 10px repeat, linear-gradient(145deg, #dc5b4d, #b83d36); box-shadow: 3px 3px 0 #f1b34f; }
 
 .personalization-option.is-city-collectible > small {
   color: var(--text-muted);
