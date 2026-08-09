@@ -17,13 +17,13 @@ interface UserAvatarProps {
 }
 
 function avatarLabel(name: string) {
-  return name.slice(0, 2).toUpperCase();
+  return (name?.trim() || "Sermo").slice(0, 2).toUpperCase();
 }
 
 function normalizeGroupMembers(groupMembers?: GroupAvatarMember[] | null) {
   if (!groupMembers?.length) return [];
   return groupMembers
-    .filter((member) => member.name.trim().length > 0)
+    .filter((member) => member?.name?.trim().length > 0)
     .slice(0, 4);
 }
 
@@ -73,7 +73,7 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false, fr
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
-  const resolvedName = singleSource?.name ?? name;
+  const resolvedName = singleSource?.name?.trim() || name?.trim() || "Sermo";
   const sourceUri = singleSource?.uri ?? uri;
   const resolvedUri = retryWithFreshUri ? sourceUri ?? undefined : resolveStableResourceUri(sourceUri);
 

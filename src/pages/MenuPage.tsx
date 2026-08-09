@@ -1950,7 +1950,7 @@ export default function MenuPage() {
                   <div className="growth-level-card-copy">
                     <strong>{item.name}</strong>
                     <div className="growth-level-card-rewards">
-                      {item.rewards.slice(0, 4).map((reward) => (
+                      {(item.rewards ?? []).slice(0, 4).map((reward) => (
                         <GrowthRewardVisual key={reward.id} me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
                       ))}
                     </div>
@@ -1969,7 +1969,7 @@ export default function MenuPage() {
             </div>
             <div className="growth-level-detail-unlocks">
               {(growthLevels[activeGrowthGuideLevel - 1]?.rewards ?? []).length ? (
-                growthLevels[activeGrowthGuideLevel - 1].rewards.map((reward) => (
+                (growthLevels[activeGrowthGuideLevel - 1]?.rewards ?? []).map((reward) => (
                   <article className={`growth-reward-card is-${reward.rarity}`} key={reward.id}>
                     <GrowthRewardVisual me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
                     <span><b>{reward.title}</b>{reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}</span>
