@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.40",
+  "id": "2026.08.09.41",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "城市气泡底纹上线",
+      "title": "城市气泡换上手绘底纹",
       "items": [
-        "景德镇加入青花水波与瓷器回纹",
-        "上海、纽约、北京加入各自城市结构底纹",
-        "文字与媒体卡片统一使用低对比城市纹理"
+        "四座城市换上独立绘制的代表性纹理",
+        "真实气泡与个性化预览保持一致",
+        "底纹保持克制，消息内容依然清晰"
       ]
     },
     "en": {
-      "title": "Signature city bubble patterns",
+      "title": "Hand-painted city bubble textures",
       "items": [
-        "Jingdezhen gains porcelain waves and cobalt geometry",
-        "Shanghai, New York, and Beijing gain distinct structural motifs",
-        "Text and media cards share subtle, readable city patterns"
+        "Four cities receive individually illustrated signature textures",
+        "Live bubbles and personalization previews now match",
+        "Subtle pattern treatment keeps every message readable"
       ]
     }
   }
