@@ -133,6 +133,14 @@ export default function App() {
           }
         />
         <Route
+          path="/app/square/statements/:statementId"
+          element={
+            <RequireAuth>
+              <SquarePage />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/app/notifications"
           element={
             <RequireAuth>

@@ -24,6 +24,7 @@ import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/Trave
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
+import { StatementMessageCard } from "../components/StatementMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { ApiError, api } from "../lib/api";
@@ -52,6 +53,7 @@ const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
 const MESSAGE_TYPE_MAP_ACCESS = 7;
+const MESSAGE_TYPE_STATEMENT = 8;
 const MESSAGE_SEARCH_TYPES = [
   { value: null, label: "messageSearch.all" },
   { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
@@ -61,6 +63,7 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_FILE, label: "messageSearch.files" },
   { value: MESSAGE_TYPE_LOCATION, label: "messageSearch.locations" },
   { value: MESSAGE_TYPE_MAP_ACCESS, label: "messageSearch.travelMaps" },
+  { value: MESSAGE_TYPE_STATEMENT, label: "messageSearch.statements" },
 ] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const EMOJI_PAGES = [
@@ -161,6 +164,7 @@ function messageResultPreview(message: ChatMessageDTO) {
       : i18n.t("media.audio"),
     [MESSAGE_TYPE_LOCATION]: i18n.t("media.location"),
     [MESSAGE_TYPE_MAP_ACCESS]: i18n.t("travelMap.action"),
+    [MESSAGE_TYPE_STATEMENT]: i18n.t("message.statementPlaceholder"),
   }[message.type] ?? i18n.t("message.generic");
 }
 
@@ -597,6 +601,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_AUDIO) return "audio";
   if (type === MESSAGE_TYPE_LOCATION) return "location";
   if (type === MESSAGE_TYPE_MAP_ACCESS) return "map_access";
+  if (type === MESSAGE_TYPE_STATEMENT) return "statement";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   return "text";
 }
@@ -835,6 +840,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "file") return i18n.t("message.filePlaceholder");
   if (kind === "location") return i18n.t("message.locationPlaceholder");
   if (kind === "map_access") return i18n.t("travelMap.action");
+  if (kind === "statement") return i18n.t("message.statementPlaceholder");
   return text || i18n.t("chat.noMessages");
 }
 
@@ -1418,6 +1424,10 @@ function renderMessageContent(
     );
   }
 
+  if (message.kind === "statement") {
+    return <StatementMessageCard statement={message.payload?.statement} />;
+  }
+
   const linkPreview = message.payload?.link_preview;
   const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
   const text = message.payload?.text ?? message.text;
@@ -1562,6 +1572,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
             message.kind === "location" ? "is-location" : "",
             message.kind === "map_access" ? "is-travel-map" : "",
+            message.kind === "statement" ? "is-statement" : "",
             message.payload?.link_preview && message.payload.link_preview.status !== "none" && message.payload.link_preview.status !== "failed" ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
@@ -6249,6 +6260,7 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
   if (kind === "file") return { ...base, type: MESSAGE_TYPE_FILE, payload: { kind, uri: "data:text/plain,preview", file_name: i18n.t("menu.bubblePreviewFile"), file_size: 2516582 } };
   if (kind === "location") return { ...base, type: MESSAGE_TYPE_LOCATION, payload: { kind, latitude: 24.4798, longitude: 118.0894, address: i18n.t("menu.bubblePreviewLocation") } };
   if (kind === "map_access") return { ...base, type: MESSAGE_TYPE_MAP_ACCESS, payload: { kind, text: i18n.t("travelMap.messageJoin"), owner: { user_id: 2, name: config.avatarName }, access: { can_view_theirs: true, they_can_view_mine: true } } };
+  if (kind === "statement") return { ...base, type: MESSAGE_TYPE_STATEMENT, payload: { kind, statement_id: 1, statement: { statement_id: 1, user: { user_id: 2, name: config.avatarName, avatar_uri: config.avatarUri }, text: i18n.t("menu.bubblePreviewStatement"), visibility: "public", media: [{ media_id: 1, kind: "image", uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE }], comment_count: 8, like_count: 26, liked: false, can_delete: false, created_at: now } } };
   if (index === 14) {
     return {
       ...base,
@@ -6290,7 +6302,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       </section>
     );
   }
-  const kinds: MessageKind[] = ["text", "image", "audio", "video", "file", "location", "map_access", "text"];
+  const kinds: MessageKind[] = ["text", "image", "audio", "video", "file", "location", "map_access", "statement", "text"];
   const groups = kinds.flatMap((kind, kindIndex) => (["other", "self"] as const).map((from, sideIndex): MessageGroup => {
     const index = kindIndex * 2 + sideIndex;
     return {

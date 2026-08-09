@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
@@ -227,6 +227,7 @@ function CommentThread({ comment, language, canInteract, onLike, onReply }: {
 export default function SquarePage() {
   const { t, language } = useI18n();
   const navigate = useNavigate();
+  const { statementId: routeStatementId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { session } = useAuth();
   const features = useSpaceFeatures();
@@ -259,7 +260,9 @@ export default function SquarePage() {
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
   const [gallery, setGallery] = useState<{ statementId: number; index: number } | null>(null);
-  const [commentStatementId, setCommentStatementId] = useState<number | null>(null);
+  const parsedRouteStatementId = Number(routeStatementId);
+  const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
+  const [commentStatementId, setCommentStatementId] = useState<number | null>(routedStatementId);
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsHasMore, setCommentsHasMore] = useState(false);
@@ -402,7 +405,9 @@ export default function SquarePage() {
       api.getSquareStatement(commentStatementId, controller.signal),
       api.getSquareStatementComments(commentStatementId, { offset: 0, limit: 30 }, controller.signal),
     ]).then(([statement, rows]) => {
-      setStatements((current) => current.map((item) => item.statement_id === statement.statement_id ? statement : item));
+      setStatements((current) => current.some((item) => item.statement_id === statement.statement_id)
+        ? current.map((item) => item.statement_id === statement.statement_id ? statement : item)
+        : [statement, ...current]);
       setComments(rows);
       setCommentsHasMore(rows.length === 30);
     }).catch((cause) => {
@@ -410,6 +415,15 @@ export default function SquarePage() {
     }).finally(() => setCommentsLoading(false));
     return () => controller.abort();
   }, [commentStatementId, t]);
+
+  useEffect(() => {
+    setCommentStatementId(routedStatementId);
+  }, [routedStatementId]);
+
+  const openStatement = (statementId: number) => {
+    setCommentStatementId(statementId);
+    navigate(`/app/square/statements/${statementId}`);
+  };
 
   const sendComment = async () => {
     const content = commentText.trim();
@@ -669,7 +683,7 @@ export default function SquarePage() {
             ) : null}
           </div>
           {feedMode === "all" && pinnedStatement ? (
-            <button className="square-pinned-banner" onClick={() => setCommentStatementId(pinnedStatement.statement_id)} type="button">
+            <button className="square-pinned-banner" onClick={() => openStatement(pinnedStatement.statement_id)} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
               <UserAvatar className="square-pinned-avatar" frame={pinnedStatement.user.avatar_frame_style} name={pinnedStatement.user.name} uri={pinnedStatement.user.avatar_uri} vip={Boolean(pinnedStatement.user.is_permanent_vip)} />
               <span className="square-pinned-copy"><small>{t("square.pinnedStatement")}</small><strong>{pinnedStatement.text || t("square.mediaStatement")}</strong></span>
@@ -686,7 +700,7 @@ export default function SquarePage() {
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : t("square.empty")} description={feedMode === "user" ? t("square.userFeedEmptyHint") : t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} statement={statement} />)}
+            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -713,7 +727,7 @@ export default function SquarePage() {
                 onClick={() => {
                   const statementId = event.payload.statement_id;
                   setNotificationDrawerOpen(false);
-                  if (statementId && !removed) setCommentStatementId(statementId);
+                  if (statementId && !removed) openStatement(statementId);
                 }}
                 type="button"
               >
@@ -772,7 +786,7 @@ export default function SquarePage() {
         {voicePreview && !recording ? <audio className="square-voice-preview" controls preload="metadata" src={voicePreview} /> : null}
         {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
       </BottomSheet>
-      <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
+      <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); if (routedStatementId) navigate("/app/square"); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} statement={activeCommentStatement} /> : null}
           <div className="square-comments-heading"><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
