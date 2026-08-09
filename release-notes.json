@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.34",
+  "id": "2026.08.09.35",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "旧头像平滑升级",
+      "title": "新头像裁切修复",
       "items": [
-        "旧版SVG头像按原序号替换为新头像",
-        "序号超过36的头像按顺序循环映射",
-        "自定义上传头像不受本次升级影响"
+        "修复预设头像切片混入相邻头像的问题",
+        "清理头像网格边缘的颜色串扰",
+        "恢复手机端头像缩略图的完整白色内边框"
       ]
     },
     "en": {
-      "title": "A seamless upgrade for legacy avatars",
+      "title": "Fixed cropping for the new avatars",
       "items": [
-        "Legacy SVG avatars now map to the new collection by number",
-        "Avatar numbers above 36 wrap through the collection in order",
-        "Custom uploaded avatars are unaffected by this upgrade"
+        "Fixed preset crops that included parts of adjacent avatars",
+        "Removed color bleed along avatar grid boundaries",
+        "Restored the complete white inset border on mobile thumbnails"
       ]
     }
   }

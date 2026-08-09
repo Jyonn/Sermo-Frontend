@@ -14629,7 +14629,8 @@ html[data-theme="dark"] .message-link-preview-site {
 
 .avatar-preset-sprite {
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: 1;
   display: block;
   border-radius: 14px;
   background-image: url("/assets/avatars/v2/avatar-sheet-6x6.png");
@@ -16283,6 +16284,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   .avatar-preset-tile {
     padding: 5px;
     border-radius: 18px;
+    background: #fff;
+  }
+
+  .avatar-preset-sprite {
+    border-radius: 13px;
   }
 
   .avatar-preset-current-avatar {
