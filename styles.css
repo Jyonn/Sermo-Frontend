@@ -21974,7 +21974,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-delete-sheet{display:grid;gap:16px}.square-delete-sheet p{margin:0;color:var(--text-secondary);font-size:13px}.square-delete-sheet .danger-button{width:100%;min-height:48px;border:0;border-radius:14px;color:white;font:inherit;font-weight:800;background:var(--danger)}
 .square-image-metadata{width:min(100%,620px);margin:12px auto 0}
 @media(max-width:767px){.square-statement-card{margin-inline:10px;border:1px solid color-mix(in srgb,var(--line-soft) 88%,transparent);border-radius:18px;box-shadow:none}.square-readonly-notice{border-radius:16px}}
-@media(min-width:901px){.desktop-tab-shell>.square-feed-screen{width:min(100%,960px);height:calc(100dvh - 32px);min-height:0;padding:0 24px 28px;overflow-x:hidden;overflow-y:auto;border:1px solid rgba(215,220,231,.72);border-radius:20px;background:rgba(255,253,248,.74)}.desktop-tab-shell>.square-feed-screen>.tab-sticky-header{margin:0 -24px;padding:0 24px;border-radius:20px 20px 0 0}}
+@media(min-width:901px){.desktop-tab-shell>.square-feed-screen{width:min(100%,960px);height:calc(100dvh - 32px);min-height:0;margin-inline:auto;padding:0 24px 28px;overflow-x:hidden;overflow-y:auto;border:1px solid rgba(215,220,231,.72);border-radius:20px;background:rgba(255,253,248,.74)}.desktop-tab-shell>.square-feed-screen>.tab-sticky-header{margin:0 -24px;padding:0 24px;border-radius:20px 20px 0 0}}
 
 /* Square feed: chronological stream, focused composer, and threaded detail. */
 .page-toolbar-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
@@ -22002,6 +22002,17 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-feed-filter .square-feed-user-close:hover{color:var(--text-primary);background:color-mix(in srgb,var(--text-primary) 7%,transparent)}
 .square-feed-filter .square-feed-user-close .material-symbols-outlined{font-size:15px}
 @media(max-width:420px){.square-feed-filter{gap:13px}.square-feed-user-tab{max-width:32vw}}
+@media(min-width:901px){
+  .square-feed-column{grid-template-columns:112px minmax(0,680px);column-gap:24px;width:min(100%,816px);padding-inline:0}
+  .square-feed-column>*{grid-column:2}
+  .square-feed-column>.square-feed-filter{position:sticky;top:81px;z-index:3;grid-column:1;grid-row:1 / span 20;align-self:start;display:grid;align-items:stretch;gap:4px;min-height:0;padding:4px 12px 4px 0;border:0;border-right:1px solid color-mix(in srgb,var(--line-soft) 78%,transparent)}
+  .square-feed-filter>button,.square-feed-filter>.square-feed-user-tab{width:100%;min-height:42px;align-self:auto;padding:0 12px;border-radius:12px;text-align:left}
+  .square-feed-filter>button::after,.square-feed-filter>.square-feed-user-tab::after{top:10px;right:auto;bottom:10px;left:0;width:3px;height:auto;transform:scaleY(.45)}
+  .square-feed-filter>button.is-active,.square-feed-filter>.square-feed-user-tab.is-active{color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 10%,transparent)}
+  .square-feed-filter>button.is-active::after,.square-feed-filter>.square-feed-user-tab.is-active::after{transform:scaleY(1)}
+  .square-feed-user-tab{display:grid;grid-template-columns:minmax(0,1fr) 24px;max-width:none;padding-right:5px}
+  .square-feed-filter .square-feed-user-close{position:static;width:24px;height:24px;transform:none}
+}
 .square-statement-card.is-clickable{cursor:pointer;transition:border-color 160ms ease,background 160ms ease,transform 160ms ease}
 .square-statement-card.is-clickable:hover{border-color:color-mix(in srgb,var(--brand-primary) 28%,var(--line-soft));background:color-mix(in srgb,var(--bg-elevated) 98%,var(--brand-primary) 2%)}
 .square-statement-card.is-clickable:focus-visible{outline:2px solid color-mix(in srgb,var(--brand-primary) 65%,transparent);outline-offset:2px}
