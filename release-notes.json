@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.33",
+  "id": "2026.08.09.34",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "全新言浪头像集",
+      "title": "旧头像平滑升级",
       "items": [
-        "上线36款统一设计的新头像",
-        "头像选择改用轻量精灵图，打开更快",
-        "预设选择与自定义上传层级重新设计"
+        "旧版SVG头像按原序号替换为新头像",
+        "序号超过36的头像按顺序循环映射",
+        "自定义上传头像不受本次升级影响"
       ]
     },
     "en": {
-      "title": "The new Sermo avatar collection",
+      "title": "A seamless upgrade for legacy avatars",
       "items": [
-        "Introduced 36 newly designed, cohesive avatars",
-        "The avatar picker now uses a lightweight sprite sheet",
-        "Preset selection and custom uploads have clearer hierarchy"
+        "Legacy SVG avatars now map to the new collection by number",
+        "Avatar numbers above 36 wrap through the collection in order",
+        "Custom uploaded avatars are unaffected by this upgrade"
       ]
     }
   }

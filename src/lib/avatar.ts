@@ -1,4 +1,5 @@
 export const AVATAR_PRESET_TOTAL = 36;
+const LEGACY_AVATAR_PRESET_TOTAL = 80;
 export const AVATAR_PRESETS_PER_PAGE = 16;
 export const AVATAR_PRESET_PAGES = Math.ceil(AVATAR_PRESET_TOTAL / AVATAR_PRESETS_PER_PAGE);
 const AVATAR_PRESET_BASE_URI = "https://sermo.jyonn.space/assets/avatars/v2";
@@ -13,9 +14,12 @@ export function buildAvatarPresetUri(id: number) {
 
 export function parseAvatarPresetId(uri?: string | null) {
   if (!uri) return null;
-  const match = uri.match(/\/(\d{2})\.(?:svg|png)(?:\?.*)?$/);
+  const match = uri.match(/\/(\d{2})\.(svg|png)(?:\?.*)?$/);
   if (!match) return null;
   const parsed = Number(match[1]);
+  if (match[2] === "svg" && parsed >= 1 && parsed <= LEGACY_AVATAR_PRESET_TOTAL) {
+    return ((parsed - 1) % AVATAR_PRESET_TOTAL) + 1;
+  }
   return parsed >= 1 && parsed <= AVATAR_PRESET_TOTAL ? parsed : null;
 }
 
