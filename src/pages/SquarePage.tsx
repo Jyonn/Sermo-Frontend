@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { ImageLightbox } from "../components/ImageLightbox";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -98,7 +100,7 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
-function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile }: {
+function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile, onPin }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   detail?: boolean;
@@ -107,13 +109,34 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   onOpen: () => void;
   onOpenImage: (index: number) => void;
   onOpenProfile: () => void;
+  onPin: () => void;
 }) {
   const { t } = useI18n();
   const [playing, setPlaying] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const images = statement.media.filter((item) => item.kind === "image");
   const audio = statement.media.find((item) => item.kind === "audio");
   const video = statement.media.find((item) => item.kind === "video");
+  useEffect(() => {
+    if (!menuPosition) return;
+    const close = (event: PointerEvent) => {
+      if (menuRef.current?.contains(event.target as Node) || menuButtonRef.current?.contains(event.target as Node)) return;
+      setMenuPosition(null);
+    };
+    const closeWithKeyboard = (event: KeyboardEvent) => { if (event.key === "Escape") setMenuPosition(null); };
+    const closeOnResize = () => setMenuPosition(null);
+    window.addEventListener("pointerdown", close);
+    window.addEventListener("keydown", closeWithKeyboard);
+    window.addEventListener("resize", closeOnResize);
+    return () => {
+      window.removeEventListener("pointerdown", close);
+      window.removeEventListener("keydown", closeWithKeyboard);
+      window.removeEventListener("resize", closeOnResize);
+    };
+  }, [menuPosition]);
   return (
     <article className={`square-statement-card statement-style-${statement.user.statement_card_style ?? "default"}${detail ? " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
       <header className="square-statement-author">
@@ -133,7 +156,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
           </div>
           <span>{formatRelativeTime(statement.created_at)}</span>
         </div>
-        {statement.can_delete ? <button aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); onDelete(); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
+        {statement.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {images.length ? (
@@ -167,6 +190,13 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
           <span>{statement.comment_count ? t("square.commentsCount", { count: statement.comment_count }) : t("square.comment")}</span>
         </button>
       </footer>
+      {menuPosition && typeof document !== "undefined" ? createPortal(
+        <div className="square-statement-dropdown" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}>
+          {statement.can_pin ? <button onClick={() => { setMenuPosition(null); onPin(); }} type="button"><span className="material-symbols-outlined">keep</span><span>{statement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</span></button> : null}
+          <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button>
+        </div>,
+        document.body,
+      ) : null}
     </article>
   );
 }
@@ -231,6 +261,7 @@ export default function SquarePage() {
   const [replyTarget, setReplyTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [commentSending, setCommentSending] = useState(false);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
+  const [deletingStatement, setDeletingStatement] = useState(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
@@ -256,7 +287,6 @@ export default function SquarePage() {
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
-  const actionStatement = statements.find((statement) => statement.statement_id === deleteStatementId) ?? (pinnedStatement?.statement_id === deleteStatementId ? pinnedStatement : null);
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
 
   const openQuota = () => {
@@ -544,20 +574,36 @@ export default function SquarePage() {
     }
   };
 
-  const toggleStatementPinned = async () => {
-    if (!actionStatement?.can_pin) return;
-    const nextPinned = !actionStatement.is_pinned;
+  const toggleStatementPinned = async (statement: SquareStatementDTO) => {
+    if (!statement.can_pin) return;
+    const nextPinned = !statement.is_pinned;
     try {
-      const updated = await api.setSquareStatementPinned(actionStatement.statement_id, nextPinned);
+      const updated = await api.setSquareStatementPinned(statement.statement_id, nextPinned);
       const normalized = { ...updated, is_pinned: nextPinned };
       setPinnedStatement(nextPinned ? normalized : null);
       setStatements((current) => current.map((item) => ({
         ...item,
         is_pinned: nextPinned && item.statement_id === normalized.statement_id,
       })));
-      setDeleteStatementId(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("square.pinFailed"));
+    }
+  };
+
+  const confirmDeleteStatement = async () => {
+    if (deleteStatementId === null || deletingStatement) return;
+    const id = deleteStatementId;
+    setDeletingStatement(true);
+    try {
+      await api.deleteSquareStatement(id);
+      setStatements((current) => current.filter((item) => item.statement_id !== id));
+      if (pinnedStatement?.statement_id === id) setPinnedStatement(null);
+      if (commentStatementId === id) setCommentStatementId(null);
+      setDeleteStatementId(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("square.deleteFailed"));
+    } finally {
+      setDeletingStatement(false);
     }
   };
 
@@ -634,7 +680,7 @@ export default function SquarePage() {
           {loading ? <FeedbackState title={t("common.loading")} /> : null}
           {!loading && !statements.length && !error ? <FeedbackState title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : t("square.empty")} description={feedMode === "user" ? t("square.userFeedEmptyHint") : t("square.emptyHint")} /> : null}
           <section className="square-statement-feed">
-            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} statement={statement} />)}
+            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => setCommentStatementId(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -648,24 +694,26 @@ export default function SquarePage() {
         <div className="square-notification-list">
           {!notificationEvents.length ? <FeedbackState title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
             const actor = event.actor?.name || t("square.someone");
-            const label = event.topic === 2 ? t("square.notificationLikedStatement", { name: actor })
+            const removed = event.event_type === 9;
+            const label = removed ? t("square.notificationStatementRemoved")
+              : event.topic === 2 ? t("square.notificationLikedStatement", { name: actor })
               : event.topic === 3 ? t("square.notificationCommented", { name: actor })
                 : event.topic === 4 ? t("square.notificationLikedComment", { name: actor })
                   : t("square.notificationReplied", { name: actor });
             return (
               <button
-                className={`square-notification-row${event.is_read ? "" : " is-unread"}`}
+                className={`square-notification-row${event.is_read ? "" : " is-unread"}${removed ? " is-system" : ""}`}
                 key={event.notification_event_id}
                 onClick={() => {
                   const statementId = event.payload.statement_id;
                   setNotificationDrawerOpen(false);
-                  if (statementId) setCommentStatementId(statementId);
+                  if (statementId && !removed) setCommentStatementId(statementId);
                 }}
                 type="button"
               >
                 <UserAvatar className="square-notification-avatar" frame={event.actor?.avatar_frame_style} name={actor} uri={event.actor?.avatar_uri} vip={Boolean(event.actor?.is_permanent_vip)} />
-                <span><strong>{label}</strong><small>{formatStatementTime(event.created_at, language)}</small></span>
-                <span className="material-symbols-outlined">chevron_right</span>
+                <span><strong>{label}</strong>{removed && event.payload.statement_excerpt ? <small className="square-notification-excerpt">“{event.payload.statement_excerpt}”</small> : null}<small>{formatStatementTime(event.created_at, language)}</small></span>
+                <span className="material-symbols-outlined">{removed ? "info" : "chevron_right"}</span>
               </button>
             );
           })}
@@ -720,7 +768,7 @@ export default function SquarePage() {
       </BottomSheet>
       <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
-          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} statement={activeCommentStatement} /> : null}
+          {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} statement={activeCommentStatement} /> : null}
           <div className="square-comments-heading"><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
           {commentsLoading && !comments.length ? <FeedbackState title={t("common.loading")} /> : null}
           {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
@@ -756,11 +804,7 @@ export default function SquarePage() {
         ) : null}
       </SideDrawer>
       {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
-      <BottomSheet bodyClassName="square-delete-sheet square-statement-actions-sheet" onClose={() => setDeleteStatementId(null)} open={deleteStatementId !== null} title={t("square.statementActions")}>
-        {actionStatement?.can_pin ? <button className="secondary-button square-pin-action" onClick={() => void toggleStatementPinned()} type="button"><span className="material-symbols-outlined">keep</span>{actionStatement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</button> : null}
-        <p>{t("square.deleteStatementHint")}</p>
-        <button className="danger-button" onClick={() => { const id = deleteStatementId; if (id === null) return; void api.deleteSquareStatement(id).then(() => { setStatements((current) => current.filter((item) => item.statement_id !== id)); if (pinnedStatement?.statement_id === id) setPinnedStatement(null); setDeleteStatementId(null); }); }} type="button">{t("common.delete")}</button>
-      </BottomSheet>
+      <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} />
       </BottomSheet>

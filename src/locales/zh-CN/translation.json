@@ -174,6 +174,7 @@
   "square.pinStatement": "置顶这条发言",
   "square.unpinStatement": "取消置顶",
   "square.pinFailed": "置顶操作失败",
+  "square.deleteFailed": "删除发言失败",
   "square.feedAll": "探索",
   "square.feedFriends": "好友圈",
   "square.feedMine": "我的",
@@ -1448,6 +1449,7 @@
   "square.notificationCommented": "{{name}} 评论了你的发言",
   "square.notificationLikedComment": "{{name}} 赞了你的评论",
   "square.notificationReplied": "{{name}} 回复了你的评论"
+  ,"square.notificationStatementRemoved": "你的发言已被管理员删除"
   ,"notification.byChannel": "按渠道"
   ,"notification.byType": "按类型"
   ,"notification.chatType": "聊天"

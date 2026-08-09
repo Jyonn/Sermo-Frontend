@@ -308,7 +308,7 @@ export interface NotificationEventDTO {
   topic: number | null;
   audience: number;
   actor: TinyUserDTO | null;
-  payload: { statement_id?: number; comment_id?: number };
+  payload: { statement_id?: number; comment_id?: number; statement_excerpt?: string; removed_by_admin?: boolean };
   is_read: boolean;
   created_at: number;
 }

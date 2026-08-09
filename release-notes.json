@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.09.13",
+  "id": "2026.08.09.14",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "官方置顶发言上线",
+      "title": "发言操作更直接",
       "items": [
-        "官方账号可在发布时置顶发言，新的置顶会自动替换旧内容",
-        "探索顶部以紧凑横幅展示置顶发言，点击即可查看详情"
+        "发言操作改为紧贴三个点展开的下拉菜单，删除前会再次确认",
+        "管理员删除发言后，作者会在广场消息中收到记录"
       ]
     },
     "en": {
-      "title": "Official pinned statements",
+      "title": "More direct statement actions",
       "items": [
-        "Official accounts can pin a statement while publishing, replacing the previous pin",
-        "A compact pinned banner now sits above Explore and opens the full statement"
+        "Statement actions now open beside the menu button, with confirmation before deletion",
+        "Authors now receive a Square inbox record when an administrator removes a statement"
       ]
     }
   }
