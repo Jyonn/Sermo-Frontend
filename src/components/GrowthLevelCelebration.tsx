@@ -73,7 +73,7 @@ function RewardThumbnail({ reward }: { reward: GrowthRewardDTO }) {
   return <div className={`growth-reward-real-preview reward-symbol category-${reward.category}`}><RewardIcon category={reward.category} /></div>;
 }
 
-function RewardCard({ reward, index, compact = false, spotlight = false, active = false }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean; active?: boolean }) {
+function RewardCard({ reward, index, compact = false, spotlight = false, active = false, applying = false, onApply }: { reward: GrowthRewardDTO; index: number; compact?: boolean; spotlight?: boolean; active?: boolean; applying?: boolean; onApply?: () => void }) {
   const { t } = useI18n();
   const useCatalogPreview = compact && (reward.category === "background" || reward.category === "bubble");
   return (
@@ -92,6 +92,18 @@ function RewardCard({ reward, index, compact = false, spotlight = false, active 
       <div className="growth-reward-tags">
         {reward.vip_access === "level_or_vip" ? <b>VIP · {t("growth.earlyAccess")}</b> : null}
       </div>
+      {onApply ? (
+        <button
+          aria-label={applying ? t("growth.applyingReward") : t("growth.wearItNow")}
+          className="growth-reward-apply-icon"
+          disabled={applying}
+          onClick={onApply}
+          title={applying ? t("growth.applyingReward") : t("growth.wearItNow")}
+          type="button"
+        >
+          {applying ? <span aria-hidden="true" /> : <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><path d="M8 4h8l1.5 4L21 9.5l-2 4-2.5-.7V20h-9v-7.2l-2.5.7-2-4L6.5 8z" /><path d="M9.5 4c.2 1.5 1 2.3 2.5 2.3S14.3 5.5 14.5 4" /></svg>}
+        </button>
+      ) : null}
       {reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}
     </article>
   );
@@ -272,8 +284,7 @@ export function GrowthLevelCelebration() {
             <p>{t("growth.rewardCarousel", { current: rewardCursor + 1, count: level.rewards.length })}</p>
           </div>
           <div className={`growth-reward-theater${currentRewardIsSpotlight ? " is-spotlight" : ""}`}>
-            <RewardCard active index={rewardCursor} key={`${currentReward.id}-${rewardCursor}`} reward={currentReward} spotlight={currentRewardIsSpotlight} />
-            {canApplyReward ? <button className="growth-quick-apply" disabled={applyingReward} onClick={() => void applyCurrentReward()} type="button"><span>{applyingReward ? t("growth.applyingReward") : t("growth.wearItNow")}</span><i aria-hidden="true">↗</i></button> : null}
+            <RewardCard active applying={applyingReward} index={rewardCursor} key={`${currentReward.id}-${rewardCursor}`} onApply={canApplyReward ? () => void applyCurrentReward() : undefined} reward={currentReward} spotlight={currentRewardIsSpotlight} />
             <div className="growth-earned-strip">
               <small>{t("growth.rewardGallery")}</small>
               <div ref={rewardTrackRef}>{level.rewards.map((reward, index) => <span data-reward-index={index} key={reward.id}><RewardTrackItem active={index === rewardCursor} onClick={() => setRewardCursor(index)} reward={reward} /></span>)}</div>

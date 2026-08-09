@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.09.28",
+  "id": "2026.08.09.29",
   "publishedAt": "2026-08-09",
   "locales": {
     "zh-CN": {
-      "title": "发言详情阅读体验调整",
+      "title": "成长奖励展示细节优化",
       "items": [
-        "发言正文取消卡片包裹并铺满详情抽屉",
-        "正文与评论区改为连续的阅读流",
-        "评论区为底部输入框保留更充足的安全空间"
+        "下一浪的气泡预览恢复垂直居中",
+        "立即换装操作收纳进本级奖励卡片",
+        "换装按钮改为轻量的服饰图标"
       ]
     },
     "en": {
-      "title": "Improved statement detail reading",
+      "title": "Polished growth reward presentation",
       "items": [
-        "Statement content now spans the detail drawer without a nested card",
-        "Statements and comments now form one continuous reading flow",
-        "The comment list now clears the bottom composer at every height"
+        "Bubble previews on the next-level page are vertically centered",
+        "Equip actions now live inside the current reward card",
+        "The equip action is now a subtle apparel icon"
       ]
     }
   }

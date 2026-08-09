@@ -17394,6 +17394,13 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-reward-tags em { width: fit-content; color: var(--reward-color); font-size: .58rem; font-style: normal; font-weight: 850; letter-spacing: .08em; }
 .growth-reward-tags b { padding: 3px 6px; color: #7d4d08; border: 1px solid rgba(200, 135, 25, .28); border-radius: 99px; background: #fef3c7; font-size: .5rem; letter-spacing: .04em; }
 .growth-reveal-card > small { position: absolute; top: 10px; right: 10px; z-index: 2; color: #77827c; font-size: .54rem; }
+.growth-reward-apply-icon { position:absolute;right:16px;bottom:16px;z-index:4;display:grid;width:34px;height:34px;place-items:center;padding:0;color:#fff;border:0;border-radius:11px;background:var(--reward-color);box-shadow:0 7px 18px color-mix(in srgb,var(--reward-color) 28%,transparent);transition:transform 150ms ease,opacity 150ms ease }
+.growth-reward-apply-icon:hover{transform:translateY(-1px)}
+.growth-reward-apply-icon:active{transform:scale(.92)}
+.growth-reward-apply-icon:disabled{opacity:.58}
+.growth-reward-apply-icon svg{width:18px;height:18px;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.7}
+.growth-reward-apply-icon>span{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:message-audio-spin .7s linear infinite}
+.growth-reveal-card:has(.growth-reward-apply-icon) .growth-reward-tags{padding-right:42px}
 
 .growth-reward-preview-shell {
   position: relative;
@@ -17560,13 +17567,11 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   .growth-reward-theater {
     grid-template-columns: 142px minmax(0, 650px);
     grid-template-areas:
-      "rail preview"
-      "rail action";
+      "rail preview";
     justify-content: center;
     align-items: start;
   }
   .growth-reveal-card.is-active-reward { grid-area: preview; }
-  .growth-quick-apply { grid-area: action; }
   .growth-earned-strip {
     grid-area: rail;
     width: 142px;
@@ -17599,9 +17604,9 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .growth-reveal-card.is-compact .growth-reward-rarity-label { top: 5px; left: 5px; padding: 3px 6px; font-size: .48rem; }
 .growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview { height: 58px; }
 .growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .growth-reward-track-background,
-.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .growth-reward-track-bubble { width: 96px; height: 58px; display: block; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .growth-reward-track-bubble { width: 96px; height: 58px; display: grid; place-items: center; }
 .growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .chat-background-choice > span,
-.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .personalization-option > i { width: 96px; height: 58px; display: block; border-radius: 9px; }
+.growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .personalization-option > i { width: 96px; height: 58px; display: grid; place-items: center; border-radius: 9px; }
 .growth-reveal-card.is-compact .growth-reward-preview-shell.is-catalog-preview .personalization-option { width: 96px; height: 58px; display: block; padding: 0; border: 0; background: transparent; }
 .growth-reveal-card.is-compact .growth-reward-avatar { width: 42px; height: 42px; }
 .growth-reveal-card.is-compact .growth-reward-real-preview.reward-bubble > .personalization-entry-preview > i > span { min-width: 38px; min-height: 19px; }
