@@ -3154,15 +3154,27 @@ function LiveChatsPage() {
   }, [selectedChat?.id]);
 
   useEffect(() => {
-    if (!emojiPickerOpen || ![STICKER_MY_PAGE, STICKER_EXPLORE_PAGE].includes(emojiPage) || !currentUserId) return;
+    if (!currentUserId) {
+      setStickers([]);
+      return;
+    }
     const controller = new AbortController();
     setStickersLoading(true);
-    const request = emojiPage === STICKER_MY_PAGE ? api.getStickers(controller.signal) : api.exploreStickers(controller.signal);
-    void request
-      .then((rows) => {
-        if (emojiPage === STICKER_MY_PAGE) setStickers(rows as StickerDTO[]);
-        else setExploreStickers(rows as StickerAssetDTO[]);
-      })
+    void api.getStickers(controller.signal)
+      .then(setStickers)
+      .catch(() => undefined)
+      .finally(() => {
+        if (!controller.signal.aborted) setStickersLoading(false);
+      });
+    return () => controller.abort();
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (!emojiPickerOpen || emojiPage !== STICKER_EXPLORE_PAGE || !currentUserId) return;
+    const controller = new AbortController();
+    setStickersLoading(true);
+    void api.exploreStickers(controller.signal)
+      .then(setExploreStickers)
       .catch(() => undefined)
       .finally(() => {
         if (!controller.signal.aborted) setStickersLoading(false);
@@ -3280,6 +3292,33 @@ function LiveChatsPage() {
       const sticker = await api.collectStickerAsset(asset.sticker_asset_id);
       setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
       setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== asset.sticker_asset_id));
+      showToast(t("sticker.added"));
+    } catch {
+      showToast(t("sticker.addFailed"), "error");
+    } finally {
+      setStickerSaving(false);
+    }
+  };
+
+  const ownsStickerMessage = (message: ChatMessage) => {
+    const assetId = message.payload?.sticker_asset_id;
+    const contentHash = message.payload?.content_hash;
+    return stickers.some((sticker) => (
+      (assetId && sticker.sticker_asset_id === assetId)
+      || (contentHash && sticker.content_hash === contentHash)
+    ));
+  };
+
+  const collectStickerMessage = async () => {
+    if (!messageMenu || messageMenu.message.kind !== "sticker") return;
+    const assetId = messageMenu.message.payload?.sticker_asset_id;
+    if (!assetId || ownsStickerMessage(messageMenu.message) || stickerSaving) return;
+    setMessageMenu(null);
+    setStickerSaving(true);
+    try {
+      const sticker = await api.collectStickerAsset(assetId);
+      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
+      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== assetId));
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
@@ -6412,11 +6451,17 @@ function LiveChatsPage() {
             }}
           >
             <div className="message-context-actions">
+                {messageMenu.message.kind === "sticker" && !ownsStickerMessage(messageMenu.message) ? (
+                  <button className="message-context-button" disabled={stickerSaving} onClick={() => void collectStickerMessage()} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
+                    {t("sticker.addShort")}
+                  </button>
+                ) : null}
                 <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
                   <span className="material-symbols-outlined" aria-hidden="true">reply</span>
                   {t("message.reply")}
                 </button>
-                {typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
+                {messageMenu.message.kind !== "sticker" && typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
                   <button
                     className="message-context-button"
                     disabled={pinSavingMessageId === messageMenu.message.id}

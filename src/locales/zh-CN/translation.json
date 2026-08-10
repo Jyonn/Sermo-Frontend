@@ -1190,6 +1190,7 @@
   "sticker.exploreHint": "发现大家收藏的表情",
   "sticker.exploreEmpty": "暂时没有新表情",
   "sticker.add": "添加",
+  "sticker.addShort": "添加",
   "sticker.collect": "添加到表情包",
   "sticker.added": "已添加到表情包",
   "sticker.addFailed": "添加表情失败",

@@ -1190,6 +1190,7 @@
   "sticker.exploreHint": "Discover stickers saved by everyone",
   "sticker.exploreEmpty": "No new stickers yet",
   "sticker.add": "Add",
+  "sticker.addShort": "Add",
   "sticker.collect": "Add to stickers",
   "sticker.added": "Added to stickers",
   "sticker.addFailed": "Couldn't add sticker",

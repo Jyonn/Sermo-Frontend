@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.2",
+  "id": "2026.08.10.3",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "表情包探索与快捷输入",
+      "title": "表情包操作更清爽",
       "items": [
-        "表情面板新增“我的”与全站“探索”",
-        "打开表情面板后可一键切回键盘",
-        "聊天中的表情展示更加轻巧"
+        "未收藏的聊天表情可以直接添加",
+        "已收藏表情不再重复显示添加操作",
+        "精简表情包长按菜单的无关选项"
       ]
     },
     "en": {
-      "title": "Sticker discovery and quicker input",
+      "title": "Cleaner sticker actions",
       "items": [
-        "The emoji panel now separates Mine and site-wide Explore",
-        "Switch straight back to the keyboard from the open panel",
-        "Stickers now use a lighter, more compact chat presentation"
+        "Uncollected chat stickers can now be added directly",
+        "Owned stickers no longer show a duplicate add action",
+        "Sticker context menus now omit unrelated actions"
       ]
     }
   }
