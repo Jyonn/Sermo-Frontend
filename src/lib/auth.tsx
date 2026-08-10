@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { FeedbackState } from "../components/FeedbackState";
 import { GestureUnlockScreen } from "../components/GestureLock";
 import { ApiError, api, configureApiAuth, refreshAuthSession } from "./api";
 import {
   clearGestureUnlock,
+  cacheGestureLockPreference,
   getGestureLastActivity,
   getGestureLockAfterMs,
   getGestureLockScope,
@@ -14,6 +14,7 @@ import {
   listenGestureLockPreferenceUpdated,
   markGestureActivity,
   markGestureLocked,
+  readCachedGestureLockPreference,
 } from "./gestureLock";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
@@ -187,24 +188,29 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const { ready, session, logout } = useAuth();
   const location = useLocation();
   const gestureScope = getGestureLockScope(session);
+  const initialGestureCache = readCachedGestureLockPreference(gestureScope);
   const [gestureUnlocked, setGestureUnlocked] = useState(() => isGestureUnlocked(gestureScope));
-  const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(null);
-  const [gesturePreferenceReady, setGesturePreferenceReady] = useState(false);
+  const [gesturePreference, setGesturePreference] = useState<GestureLockPreferenceDTO | null>(initialGestureCache.preference);
+  const [gesturePreferenceReady, setGesturePreferenceReady] = useState(initialGestureCache.found || gestureUnlocked);
 
   useEffect(() => {
     setGestureUnlocked(isGestureUnlocked(gestureScope));
   }, [gestureScope, session?.accessToken]);
 
   useEffect(() => {
-    if (!ready || !session) {
+    if (!session) {
       setGesturePreference(null);
       setGesturePreferenceReady(true);
       return;
     }
 
     let cancelled = false;
+    const cached = readCachedGestureLockPreference(gestureScope);
+    setGesturePreference(cached.preference);
+    setGesturePreferenceReady(cached.found || isGestureUnlocked(gestureScope));
     const loadPreference = (nextPreference?: GestureLockPreferenceDTO) => {
       if (nextPreference) {
+        cacheGestureLockPreference(gestureScope, nextPreference);
         setGesturePreference(nextPreference);
         setGesturePreferenceReady(true);
         return;
@@ -214,11 +220,12 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
         .getGestureLockPrefs()
         .then((preference) => {
           if (cancelled) return;
+          cacheGestureLockPreference(gestureScope, preference);
           setGesturePreference(preference);
         })
         .catch(() => {
           if (cancelled) return;
-          setGesturePreference(null);
+          if (!cached.found) setGesturePreference(null);
         })
         .finally(() => {
           if (cancelled) return;
@@ -233,7 +240,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
       cancelled = true;
       cleanupPreferenceListener();
     };
-  }, [ready, session?.accessToken]);
+  }, [gestureScope, session?.accessToken]);
 
   useEffect(() => {
     if (!gestureScope || !gestureUnlocked || !isGestureLockPreferenceEnabled(gesturePreference)) return;
@@ -297,11 +304,13 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     markGestureLocked(gestureScope);
   }, [gesturePreference, gestureScope, gestureUnlocked]);
 
-  if (!ready || (session && !gesturePreferenceReady)) {
+  if (!ready && !session) {
     return (
-    <main className="auth-restore-screen">
-        <div className="auth-restore-orb" aria-hidden="true" />
-        <FeedbackState title={i18n.t("auth.restoring")} description={i18n.t("auth.verifyingSession")} tone="loading" />
+      <main className="auth-restore-screen">
+        <div className="auth-restore-inline" role="status">
+          <span className="auth-restore-spinner" aria-hidden="true" />
+          <span>{i18n.t("auth.restoring")}</span>
+        </div>
       </main>
     );
   }
@@ -309,6 +318,17 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   if (!session) {
     const detectedSlug = getDetectedSpaceSlug();
     return <Navigate replace state={{ from: location.pathname }} to={detectedSlug ? "/" : "/space"} />;
+  }
+
+  if (!gesturePreferenceReady) {
+    return (
+      <main className="auth-restore-screen">
+        <div className="auth-restore-inline" role="status">
+          <span className="auth-restore-spinner" aria-hidden="true" />
+          <span>{i18n.t("auth.restoring")}</span>
+        </div>
+      </main>
+    );
   }
 
   const activeGesturePreference = isGestureLockPreferenceEnabled(gesturePreference) ? gesturePreference : null;
@@ -327,5 +347,14 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
     );
   }
 
-  return children;
+  return (
+    <>
+      {children}
+      {!ready ? (
+        <div className="session-refresh-indicator" aria-label={i18n.t("auth.restoring")} role="status">
+          <span />
+        </div>
+      ) : null}
+    </>
+  );
 }

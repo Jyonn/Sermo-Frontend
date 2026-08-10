@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.8",
+  "id": "2026.08.10.9",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "邮件提醒更清晰",
+      "title": "刷新不再打断浏览",
       "items": [
-        "验证码邮件使用更醒目的专属验证码版式",
-        "未读消息按发送者归纳，并可一键返回对应会话",
-        "邮件自定义预览升级为接近真实收件效果的排版"
+        "刷新时优先保留已缓存的聊天与各 Tab 内容",
+        "后台同步改为顶部轻量进度提示",
+        "空间功能与安全偏好恢复更快"
       ]
     },
     "en": {
-      "title": "Clearer email reminders",
+      "title": "Refresh without interruption",
       "items": [
-        "Verification emails now use a dedicated, prominent code layout",
-        "Unread messages are grouped by sender with a direct return to the conversation",
-        "Custom email previews now mirror the actual inbox presentation"
+        "Cached chats and tab content now remain visible during refresh",
+        "Background sync now uses a subtle progress line",
+        "Space features and security preferences restore faster"
       ]
     }
   }

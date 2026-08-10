@@ -12,11 +12,40 @@ type SpaceFeaturesState = SpaceFeatures & { ready: boolean; spaceId: number | nu
 
 const featureCache = new Map<number, SpaceFeatures>();
 const featureRequests = new Map<number, Promise<SpaceFeatures>>();
+const FEATURE_CACHE_PREFIX = "sermo:space-features:v1";
 const GROUP_SQUARE_UPDATED_EVENT = "sermo:group-square-updated";
 const SPACE_FEATURES_UPDATED_EVENT = "sermo:space-features-updated";
 
 function defaultFeatures(): SpaceFeatures {
   return { chatEnabled: true, squareEnabled: true, squareExploreEnabled: true };
+}
+
+function readPersistedFeatures(spaceId: number) {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = window.localStorage.getItem(`${FEATURE_CACHE_PREFIX}:${spaceId}`);
+    return raw ? (JSON.parse(raw) as SpaceFeatures) : undefined;
+  } catch {
+    window.localStorage.removeItem(`${FEATURE_CACHE_PREFIX}:${spaceId}`);
+    return undefined;
+  }
+}
+
+function cacheFeatures(spaceId: number, features: SpaceFeatures) {
+  featureCache.set(spaceId, features);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(`${FEATURE_CACHE_PREFIX}:${spaceId}`, JSON.stringify(features));
+    } catch {
+      // Keep the in-memory cache when persistent storage is unavailable.
+    }
+  }
+}
+
+function getCachedFeatures(spaceId: number) {
+  const cached = featureCache.get(spaceId) ?? readPersistedFeatures(spaceId);
+  if (cached && !featureCache.has(spaceId)) featureCache.set(spaceId, cached);
+  return cached;
 }
 
 function loadSpaceFeatures(spaceId: number) {
@@ -28,7 +57,7 @@ function loadSpaceFeatures(spaceId: number) {
       squareEnabled: space.group_square_enabled !== false,
       squareExploreEnabled: space.square_explore_enabled !== false,
     };
-    featureCache.set(spaceId, features);
+    cacheFeatures(spaceId, features);
     window.dispatchEvent(new CustomEvent<{ spaceId: number; features: SpaceFeatures }>(SPACE_FEATURES_UPDATED_EVENT, {
       detail: { spaceId, features },
     }));
@@ -39,14 +68,14 @@ function loadSpaceFeatures(spaceId: number) {
 }
 
 export function setCachedGroupSquareEnabled(spaceId: number, enabled: boolean) {
-  const current = featureCache.get(spaceId) ?? defaultFeatures();
-  featureCache.set(spaceId, { ...current, squareEnabled: enabled });
+  const current = getCachedFeatures(spaceId) ?? defaultFeatures();
+  cacheFeatures(spaceId, { ...current, squareEnabled: enabled });
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent<{ spaceId: number; enabled: boolean }>(GROUP_SQUARE_UPDATED_EVENT, { detail: { spaceId, enabled } }));
 }
 
 export function setCachedSpaceFeatures(spaceId: number, features: SpaceFeatures) {
-  featureCache.set(spaceId, features);
+  cacheFeatures(spaceId, features);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent<{ spaceId: number; features: SpaceFeatures }>(SPACE_FEATURES_UPDATED_EVENT, {
       detail: { spaceId, features },
@@ -64,7 +93,7 @@ export function useSpaceFeatures() {
   const spaceId = session?.user.space_id ?? null;
   const [enabled, setEnabled] = useState<SpaceFeaturesState>(() => {
     if (!spaceId) return { ...defaultFeatures(), ready: true, spaceId: null };
-    const cached = featureCache.get(spaceId);
+    const cached = getCachedFeatures(spaceId);
     return { ...(cached ?? defaultFeatures()), ready: Boolean(cached), spaceId };
   });
 
@@ -74,7 +103,7 @@ export function useSpaceFeatures() {
       return;
     }
 
-    const cached = featureCache.get(spaceId);
+    const cached = getCachedFeatures(spaceId);
     if (cached !== undefined) setEnabled({ ...cached, ready: true, spaceId });
     else setEnabled({ ...defaultFeatures(), ready: false, spaceId });
 
@@ -109,7 +138,7 @@ export function useSpaceFeatures() {
   }, [spaceId]);
 
   if (enabled.spaceId === spaceId) return enabled;
-  const cached = spaceId ? featureCache.get(spaceId) : undefined;
+  const cached = spaceId ? getCachedFeatures(spaceId) : undefined;
   return {
     ...(cached ?? defaultFeatures()),
     ready: spaceId ? Boolean(cached) : true,

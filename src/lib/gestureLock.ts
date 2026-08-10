@@ -5,6 +5,7 @@ const UNLOCK_PREFIX = "sermo:gesture-unlocked:v1";
 const LOCKED_PREFIX = "sermo:gesture-locked:v1";
 const DECOY_PREFIX = "sermo:gesture-decoy:v1";
 const ACTIVITY_PREFIX = "sermo:gesture-activity:v1";
+const PREFERENCE_PREFIX = "sermo:gesture-preference:v1";
 const PREFERENCE_UPDATED_EVENT = "sermo:gesture-lock-preference-updated";
 export const DEFAULT_GESTURE_LOCK_AFTER_MINUTES = 1;
 export const MAX_GESTURE_LOCK_AFTER_MINUTES = 30;
@@ -23,6 +24,31 @@ function decoyKey(scope: string) {
 
 function activityKey(scope: string) {
   return `${ACTIVITY_PREFIX}:${scope}`;
+}
+
+function preferenceKey(scope: string) {
+  return `${PREFERENCE_PREFIX}:${scope}`;
+}
+
+export function readCachedGestureLockPreference(scope: string | null) {
+  if (!scope || typeof window === "undefined") return { found: false, preference: null };
+  const raw = window.localStorage.getItem(preferenceKey(scope));
+  if (raw === null) return { found: false, preference: null };
+  try {
+    return { found: true, preference: JSON.parse(raw) as GestureLockPreferenceDTO | null };
+  } catch {
+    window.localStorage.removeItem(preferenceKey(scope));
+    return { found: false, preference: null };
+  }
+}
+
+export function cacheGestureLockPreference(scope: string | null, preference: GestureLockPreferenceDTO | null) {
+  if (!scope || typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(preferenceKey(scope), JSON.stringify(preference));
+  } catch {
+    // Storage can be unavailable in private browsing; the API remains authoritative.
+  }
 }
 
 export function normalizeGestureLockAfterMinutes(value: unknown) {

@@ -2835,81 +2835,61 @@ html[data-theme="dark"] body .growth-level-detail {
   place-items: center;
   padding: calc(22px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
   overflow: hidden;
-  background:
-    linear-gradient(140deg, #f8fbf6 0%, #f5f9ff 47%, #f4f4f8 100%);
+  background: var(--page-background, linear-gradient(140deg, #f8fbf6, #f4f8f3));
 }
 
-.auth-restore-screen .feedback-state {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 392px);
-  padding: 18px 20px;
-  border-radius: 22px;
-  border-style: solid;
-  border-color: rgba(210, 223, 235, 0.8);
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 14px 34px rgba(29, 42, 58, 0.08);
-  backdrop-filter: blur(18px);
+.auth-restore-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.auth-restore-screen .feedback-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 15px;
-  color: #0f8bcc;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.72), transparent 32%),
-    linear-gradient(135deg, rgba(0, 166, 255, 0.18), rgba(0, 208, 132, 0.18));
-  box-shadow: 0 4px 14px rgba(16, 128, 199, 0.16);
+.auth-restore-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in srgb, var(--brand-primary, #0a8f68) 18%, transparent);
+  border-top-color: var(--brand-primary, #0a8f68);
+  border-radius: 50%;
+  animation: restore-spin .8s linear infinite;
 }
 
-.auth-restore-screen .feedback-icon .material-symbols-outlined {
-  animation: restore-spin 1.2s linear infinite;
-}
-
-.auth-restore-screen .feedback-copy strong {
-  font-size: 1.02rem;
-  color: var(--text-primary);
-}
-
-.auth-restore-screen .feedback-copy .detail-text {
-  max-width: 22ch;
-  font-size: 0.82rem;
-  white-space: nowrap;
+.session-refresh-indicator {
+  position: fixed;
+  z-index: 1200;
+  top: env(safe-area-inset-top);
+  left: 0;
+  right: 0;
+  height: 2px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
-.auth-restore-orb {
-  position: absolute;
-  width: min(66vw, 236px);
-  aspect-ratio: 1;
+.session-refresh-indicator span {
+  display: block;
+  width: 34%;
+  height: 100%;
   border-radius: 999px;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.65), transparent 28%),
-    linear-gradient(135deg, rgba(0, 166, 255, 0.16), rgba(0, 208, 132, 0.18));
-  filter: blur(6px);
-  opacity: 0.7;
-  transform: translate(36%, -42%);
-  animation: restore-orb 3.2s ease-in-out infinite;
-}
-
-@keyframes restore-orb {
-  0%,
-  100% {
-    transform: translate(36%, -42%);
-    opacity: 0.65;
-  }
-  50% {
-    transform: translate(30%, -50%);
-    opacity: 0.85;
-  }
+  background: linear-gradient(90deg, transparent, var(--brand-primary, #0a8f68), #35d7a3, transparent);
+  animation: session-refresh-scan 1.15s ease-in-out infinite;
 }
 
 @keyframes restore-spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes session-refresh-scan {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(395%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-restore-spinner { animation-duration: 1.8s; }
+  .session-refresh-indicator span { animation: none; width: 100%; opacity: .55; }
 }
 
 .app-layout {
