@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.6",
+  "id": "2026.08.11.7",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "探索也会留下成长",
+      "title": "评论区更清爽",
       "items": [
-        "首次体验聊天中的更多能力可获得成长值",
-        "发言、评论、回复和互动也会记录成长",
-        "所有探索奖励只结算一次，重复操作不会刷分"
+        "评论时间改为更自然的相对时间",
+        "支持在热门与最新评论之间切换",
+        "重新整理点赞、回复与讨论层级"
       ]
     },
     "en": {
-      "title": "Exploration now fuels growth",
+      "title": "A cleaner comment experience",
       "items": [
-        "Trying more chat features for the first time earns growth points",
-        "Statements, comments, replies, and interactions now count too",
-        "Each exploration reward is granted only once"
+        "Comment timestamps now use natural relative time",
+        "Switch between top and latest comments",
+        "Refined likes, replies, and discussion hierarchy"
       ]
     }
   }

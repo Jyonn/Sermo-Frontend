@@ -671,7 +671,7 @@ export const api = {
     });
   },
 
-  getSquareStatementComments(statementId: number, params: { offset?: number; limit?: number }, signal?: AbortSignal) {
+  getSquareStatementComments(statementId: number, params: { offset?: number; limit?: number; sort?: "hot" | "latest" }, signal?: AbortSignal) {
     return request<SquareStatementCommentDTO[]>(`/square/statements/${statementId}/comments`, {
       auth: true,
       query: params,

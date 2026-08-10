@@ -203,9 +203,8 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   );
 }
 
-function CommentThread({ comment, language, canInteract, onLike, onReply }: {
+function CommentThread({ comment, canInteract, onLike, onReply }: {
   comment: SquareStatementCommentDTO;
-  language: string;
   canInteract: boolean;
   onLike: (comment: SquareStatementCommentDTO) => void;
   onReply: (comment: SquareStatementCommentDTO) => void;
@@ -214,13 +213,13 @@ function CommentThread({ comment, language, canInteract, onLike, onReply }: {
   return <article className="square-comment-thread">
     <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
     <div>
-      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}</div><span>{formatStatementTime(comment.created_at, language)}</span></header>
+      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}<time>{formatRelativeTime(comment.created_at)}</time></div></header>
       <p>{comment.reply_to_user ? <span className="square-comment-reply-prefix">{t("square.replyingTo", { name: comment.reply_to_user.name })}</span> : null}{comment.text}</p>
       <div className="square-comment-actions">
-        <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={() => onLike(comment)} type="button"><span className="material-symbols-outlined">favorite</span>{comment.like_count || t("square.like")}</button>
-        {canInteract ? <button onClick={() => onReply(comment)} type="button">{t("square.reply")}</button> : null}
+        <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={() => onLike(comment)} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
+        {canInteract ? <button onClick={() => onReply(comment)} type="button"><span className="material-symbols-outlined">chat_bubble</span><span>{t("square.reply")}</span></button> : null}
       </div>
-      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} language={language} onLike={onLike} onReply={onReply} />)}</div> : null}
+      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onLike={onLike} onReply={onReply} />)}</div> : null}
     </div>
   </article>;
 }
@@ -267,6 +266,7 @@ export default function SquarePage() {
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsHasMore, setCommentsHasMore] = useState(false);
+  const [commentSort, setCommentSort] = useState<"hot" | "latest">("hot");
   const [commentText, setCommentText] = useState("");
   const [replyTarget, setReplyTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [commentSending, setCommentSending] = useState(false);
@@ -404,7 +404,7 @@ export default function SquarePage() {
     setCommentsLoading(true);
     void Promise.all([
       api.getSquareStatement(commentStatementId, controller.signal),
-      api.getSquareStatementComments(commentStatementId, { offset: 0, limit: 30 }, controller.signal),
+      api.getSquareStatementComments(commentStatementId, { offset: 0, limit: 30, sort: commentSort }, controller.signal),
     ]).then(([statement, rows]) => {
       setStatements((current) => current.some((item) => item.statement_id === statement.statement_id)
         ? current.map((item) => item.statement_id === statement.statement_id ? statement : item)
@@ -415,7 +415,7 @@ export default function SquarePage() {
       if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("square.commentsLoadFailed"));
     }).finally(() => setCommentsLoading(false));
     return () => controller.abort();
-  }, [commentStatementId, t]);
+  }, [commentSort, commentStatementId, t]);
 
   useEffect(() => {
     setCommentStatementId(routedStatementId);
@@ -801,16 +801,16 @@ export default function SquarePage() {
           </div>
           <section className="square-discussion-section">
             <div className="square-comments-heading">
-              <div><small>DISCUSSION</small><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
-              {comments.length ? <span className="square-comments-order"><span className="material-symbols-outlined">sort</span>{t("square.commentsOrder")}</span> : null}
+              <div><strong>{t("square.comments")}</strong><span>{activeCommentStatement?.comment_count ?? 0}</span></div>
+              {comments.length ? <div className="square-comments-sort" role="group" aria-label={t("square.commentSortLabel")}><button className={commentSort === "hot" ? "is-active" : ""} onClick={() => setCommentSort("hot")} type="button">{t("square.commentsHot")}</button><button className={commentSort === "latest" ? "is-active" : ""} onClick={() => setCommentSort("latest")} type="button">{t("square.commentsLatest")}</button></div> : null}
             </div>
             {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
             {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
-            <div className="square-comment-list">{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} language={language} onLike={(target) => void toggleCommentLike(target)} onReply={(target) => { setReplyTarget(target); setCommentText(""); }} />)}</div>
+            <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} onLike={(target) => void toggleCommentLike(target)} onReply={(target) => { setReplyTarget(target); setCommentText(""); }} />)}</div>
             {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
               if (commentStatementId === null) return;
               setCommentsLoading(true);
-              void api.getSquareStatementComments(commentStatementId, { offset: comments.length, limit: 30 }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
+              void api.getSquareStatementComments(commentStatementId, { offset: comments.length, limit: 30, sort: commentSort }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
             }} type="button">{t("square.loadMoreComments")}</button> : null}
           </section>
           {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div>{replyTarget ? <button className="square-reply-target" onClick={() => setReplyTarget(null)} type="button">{t("square.replyingTo", { name: replyTarget.user.name })}<span className="material-symbols-outlined">close</span></button> : null}<input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.writeReply") : t("square.writeComment")} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
