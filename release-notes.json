@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.10.13",
+  "id": "2026.08.10.14",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "图标加载更可靠",
+      "title": "链接卡片贴边更自然",
       "items": [
-        "图标字体改用稳定地址，不再受构建哈希影响",
-        "WebApp 会预加载并离线缓存完整图标字体",
-        "弱网加载失败时不再把图标名称显示成文字"
+        "修复无图片链接卡片与消息边界之间的大段空白",
+        "己方链接卡片稳定贴右，他方链接卡片稳定贴左"
       ]
     },
     "en": {
-      "title": "More reliable icon loading",
+      "title": "More natural link card alignment",
       "items": [
-        "The icon font now uses a stable URL independent of build hashes",
-        "The WebApp preloads and caches the complete icon font offline",
-        "Icon names no longer appear as text when loading fails on weak networks"
+        "Removed excessive empty space beside link cards without images",
+        "Outgoing cards now stay right-aligned and incoming cards stay left-aligned"
       ]
     }
   }

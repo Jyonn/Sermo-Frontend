@@ -20557,6 +20557,20 @@ html[data-theme="dark"] :is(
   width: min(100%, 330px);
 }
 
+/* Compact no-image previews still live in a full-width compound stack. Keep
+   their visible edge anchored to the sender side instead of the grid start. */
+.message-text-stack.self {
+  justify-items: end;
+}
+
+.message-text-stack.other {
+  justify-items: start;
+}
+
+.message-text-stack > * {
+  max-width: 100%;
+}
+
 .message-link-preview-card {
   width: 100%;
   max-width: 330px;
