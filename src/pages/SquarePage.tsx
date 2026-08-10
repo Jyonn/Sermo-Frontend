@@ -214,7 +214,7 @@ function CommentThread({ comment, language, canInteract, onLike, onReply }: {
   return <article className="square-comment-thread">
     <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
     <div>
-      <header><strong>{comment.user.name}</strong><span>{formatStatementTime(comment.created_at, language)}</span></header>
+      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}</div><span>{formatStatementTime(comment.created_at, language)}</span></header>
       <p>{comment.reply_to_user ? <span className="square-comment-reply-prefix">{t("square.replyingTo", { name: comment.reply_to_user.name })}</span> : null}{comment.text}</p>
       <div className="square-comment-actions">
         <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={() => onLike(comment)} type="button"><span className="material-symbols-outlined">favorite</span>{comment.like_count || t("square.like")}</button>

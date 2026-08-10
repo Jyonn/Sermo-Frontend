@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.3",
+  "id": "2026.08.11.4",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "评论回复更连贯",
+      "title": "评论身份更清晰",
       "items": [
-        "现在可以回复任意一条发言评论",
-        "所有回复统一收纳为两层，讨论更清晰",
-        "回复二级评论时会明确标出被回复的人"
+        "发言评论现在会展示用户成长等级",
+        "一级评论与二级回复保持一致",
+        "昵称、等级和时间排版更加清晰"
       ]
     },
     "en": {
-      "title": "More natural comment replies",
+      "title": "Clearer identities in comments",
       "items": [
-        "You can now reply to any statement comment",
-        "Replies stay in a clear two-level thread",
-        "Replies to nested comments show who is being addressed"
+        "Statement comments now show each user's growth level",
+        "Top-level comments and replies use the same treatment",
+        "Names, levels, and timestamps are easier to scan"
       ]
     }
   }
