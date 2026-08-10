@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import "material-symbols/outlined.css";
 import App from "./App";
 import "../styles.css";
 import { AuthProvider } from "./lib/auth";
@@ -16,6 +15,20 @@ restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
 initializeTheme();
 const routerBasename = getSpaceRouterBasename();
+
+function initializeMaterialSymbols(attempt = 0) {
+  void document.fonts.load('24px "Material Symbols Outlined"').then((faces) => {
+    if (faces.length) {
+      document.documentElement.classList.add("material-symbols-ready");
+      return;
+    }
+    if (attempt < 2) window.setTimeout(() => initializeMaterialSymbols(attempt + 1), 900 * (attempt + 1));
+  }).catch(() => {
+    if (attempt < 2) window.setTimeout(() => initializeMaterialSymbols(attempt + 1), 900 * (attempt + 1));
+  });
+}
+
+initializeMaterialSymbols();
 
 const zoomWindow = window as Window & { __sermoPageZoomController?: AbortController };
 zoomWindow.__sermoPageZoomController?.abort();

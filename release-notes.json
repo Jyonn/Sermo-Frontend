@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.12",
+  "id": "2026.08.10.13",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "账户入口更专注",
+      "title": "图标加载更可靠",
       "items": [
-        "启动页突出账户选择与进入主流程",
-        "自动登录紧跟当前账户，设置关系更清晰",
-        "其他空间登录收纳为按需展开的次级入口"
+        "图标字体改用稳定地址，不再受构建哈希影响",
+        "WebApp 会预加载并离线缓存完整图标字体",
+        "弱网加载失败时不再把图标名称显示成文字"
       ]
     },
     "en": {
-      "title": "A more focused account entry",
+      "title": "More reliable icon loading",
       "items": [
-        "The launcher now focuses on choosing and entering an account",
-        "Automatic sign-in is clearly tied to the selected account",
-        "Signing in to another space is now a secondary expandable action"
+        "The icon font now uses a stable URL independent of build hashes",
+        "The WebApp preloads and caches the complete icon font offline",
+        "Icon names no longer appear as text when loading fails on weak networks"
       ]
     }
   }

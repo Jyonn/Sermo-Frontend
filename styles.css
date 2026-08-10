@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url("/fonts/material-symbols-outlined.woff2?v=1") format("woff2");
+}
+
 .pwa-recommendation {
   position: fixed;
   left: 50%;
@@ -560,7 +568,10 @@ a:focus-visible {
   -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
   font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+  visibility: hidden;
 }
+
+html.material-symbols-ready .material-symbols-outlined { visibility: visible; }
 
 #root {
   width: 100%;

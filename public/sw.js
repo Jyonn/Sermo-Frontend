@@ -1,12 +1,12 @@
 importScripts("/sw-release.js");
 
-const CACHE_NAME = "sermo-shell-v7";
+const CACHE_NAME = "sermo-shell-v8";
 const MEDIA_CACHE_NAME = "sermo-media-v1";
 const MEDIA_DB_NAME = "sermo-media-metadata";
 const MEDIA_DB_STORE = "entries";
 const MEDIA_MAX_BYTES = 256 * 1024 * 1024;
 const MEDIA_MAX_ITEM_BYTES = 128 * 1024 * 1024;
-const SHELL = ["/", "/manifest.json", "/icons/sermo-192.png?v=4", "/icons/sermo-512.png?v=4"];
+const SHELL = ["/", "/manifest.json", "/icons/sermo-192.png?v=4", "/icons/sermo-512.png?v=4", "/fonts/material-symbols-outlined.woff2?v=1"];
 const blockedMediaSlugs = new Set();
 
 function mediaIdentity(value) {
