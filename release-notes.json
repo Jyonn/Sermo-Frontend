@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.3",
+  "id": "2026.08.10.4",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "表情包操作更清爽",
+      "title": "聊天输入栏细节调整",
       "items": [
-        "未收藏的聊天表情可以直接添加",
-        "已收藏表情不再重复显示添加操作",
-        "精简表情包长按菜单的无关选项"
+        "桌面端表情按钮恢复到输入框外侧",
+        "表情与更多操作保持一致的按钮节奏",
+        "手机端继续保留紧凑的输入框内布局"
       ]
     },
     "en": {
-      "title": "Cleaner sticker actions",
+      "title": "Composer layout refinements",
       "items": [
-        "Uncollected chat stickers can now be added directly",
-        "Owned stickers no longer show a duplicate add action",
-        "Sticker context menus now omit unrelated actions"
+        "The desktop emoji button is back outside the text field",
+        "Emoji and more actions now share a consistent button rhythm",
+        "Mobile keeps its compact in-field emoji control"
       ]
     }
   }

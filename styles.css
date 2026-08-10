@@ -16407,9 +16407,14 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
+  .composer-input-wrap {
+    margin-right: 54px;
+    padding-right: 16px;
+  }
+
   .composer-emoji-button {
     position: absolute;
-    right: 7px;
+    right: -54px;
     display: grid;
     place-items: center;
     width: 42px;
@@ -16417,7 +16422,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     padding: 0;
     border-radius: 999px;
     color: var(--text-muted);
-    background: rgba(242, 245, 250, 0.72);
+    background: rgba(242, 245, 250, 0.92);
     font-size: 1.25rem;
     line-height: 1;
     transition: transform 160ms ease, background 160ms ease;
