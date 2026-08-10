@@ -13845,10 +13845,6 @@ html[data-theme="dark"] .message-link-preview-site {
   object-fit: cover;
 }
 
-.notification-mail-preview-icon {
-  box-shadow: 0 3px 9px rgba(21, 119, 226, 0.18);
-}
-
 .notification-push-preview > div {
   min-width: 0;
 }
@@ -13858,6 +13854,98 @@ html[data-theme="dark"] .message-link-preview-site {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.notification-email-preview {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  border-radius: 16px;
+  color: var(--text-primary);
+  background:
+    linear-gradient(90deg, var(--brand-primary) 0 34%, #d5a441 34% 50%, #ef725d 50% 66%, var(--brand-primary) 66%) top / 100% 3px no-repeat,
+    color-mix(in srgb, var(--surface) 96%, #f4efe3);
+  box-shadow: 0 16px 34px rgba(31, 50, 43, .1);
+}
+
+.notification-email-preview header {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 5px 15px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.notification-email-preview header .material-symbols-outlined {
+  color: var(--brand-primary);
+  font-size: 20px;
+}
+
+.notification-email-preview header strong {
+  font-size: .75rem;
+  letter-spacing: .04em;
+}
+
+.notification-email-preview header small {
+  color: var(--text-muted);
+  font-size: .65rem;
+}
+
+.notification-email-preview-body {
+  display: grid;
+  gap: 9px;
+  padding: 18px 16px 16px;
+}
+
+.notification-email-preview-body > span {
+  color: var(--text-muted);
+  font-size: .7rem;
+}
+
+.notification-email-preview-body h3,
+.notification-email-preview-body p {
+  margin: 0;
+}
+
+.notification-email-preview-body h3 {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.notification-email-preview-body p {
+  min-height: 2.8em;
+  color: var(--text-secondary);
+  font-size: .78rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.notification-email-preview-body button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 38px;
+  margin-top: 3px;
+  padding: 0 13px;
+  border-radius: 10px;
+  color: color-mix(in srgb, var(--brand-primary) 88%, var(--text-primary));
+  background: color-mix(in srgb, var(--brand-primary) 11%, var(--surface));
+  font-size: .75rem;
+  font-weight: 780;
+  pointer-events: none;
+}
+
+.notification-email-preview-body button .material-symbols-outlined {
+  font-size: 17px;
+}
+
+.notification-email-preview footer {
+  padding: 10px 16px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface-muted) 72%, transparent);
+  font-size: .64rem;
 }
 
 .notification-push-preview strong {

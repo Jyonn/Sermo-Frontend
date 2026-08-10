@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.7",
+  "id": "2026.08.10.8",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "表情包管理焕新",
+      "title": "邮件提醒更清晰",
       "items": [
-        "我的表情改用独立管理页，选择与批量删除更清晰",
-        "表情资源会主动缓存在本地，并按容量自动清理",
-        "删除前增加确认，已移除资源同步退出本地缓存"
+        "验证码邮件使用更醒目的专属验证码版式",
+        "未读消息按发送者归纳，并可一键返回对应会话",
+        "邮件自定义预览升级为接近真实收件效果的排版"
       ]
     },
     "en": {
-      "title": "A better sticker manager",
+      "title": "Clearer email reminders",
       "items": [
-        "Mine now uses a dedicated manager with clear selection and batch deletion",
-        "Sticker assets are proactively cached locally with automatic capacity cleanup",
-        "Deletion now requires confirmation and removes discarded assets from local cache"
+        "Verification emails now use a dedicated, prominent code layout",
+        "Unread messages are grouped by sender with a direct return to the conversation",
+        "Custom email previews now mirror the actual inbox presentation"
       ]
     }
   }

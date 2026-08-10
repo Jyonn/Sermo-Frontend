@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import barkAppIconUrl from "../assets/bark-app-icon.jpg";
-import appleMailIconUrl from "../assets/apple-mail-icon.jpg";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -3209,23 +3208,40 @@ export default function MenuPage() {
                   />
                 )}
                 {editorPreview ? (
-                  <div className={`notification-push-preview is-${prefEditor.channel}`}>
-                    <img
-                      alt=""
-                      className={prefEditor.channel === "email" ? "notification-mail-preview-icon" : undefined}
-                      src={prefEditor.channel === "bark"
-                        ? prefs.bark.barkIconMode === 1
+                  prefEditor.channel === "email" ? (
+                    <div className="notification-email-preview">
+                      <header>
+                        <span className="material-symbols-outlined" aria-hidden="true">mail</span>
+                        <strong>SERMO 言浪</strong>
+                        <small>{t("email.preview")}</small>
+                      </header>
+                      <div className="notification-email-preview-body">
+                        <span>{t("email.previewGreeting", { name: me?.name ?? session?.user.name ?? t("email.previewRecipient") })}</span>
+                        <h3>{editorPreview.title}</h3>
+                        <p>{editorPreview.content}</p>
+                        <button tabIndex={-1} type="button">
+                          {t("email.previewAction")}
+                          <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                        </button>
+                      </div>
+                      <footer>{t("email.previewFooter")}</footer>
+                    </div>
+                  ) : (
+                    <div className="notification-push-preview is-bark">
+                      <img
+                        alt=""
+                        src={prefs.bark.barkIconMode === 1
                           ? space?.official_user?.avatar_uri || barkAppIconUrl
                           : prefs.bark.barkIconMode === 2
                             ? me?.avatar_uri ?? session?.user.avatar_uri ?? barkAppIconUrl
-                            : barkAppIconUrl
-                        : appleMailIconUrl}
-                    />
-                    <div>
-                      <strong>{prefEditor.channel === "bark" ? t("bark.previewTitle", { title: editorPreview.title }) : t("email.preview")}</strong>
-                      <p>{editorPreview.content}</p>
+                            : barkAppIconUrl}
+                      />
+                      <div>
+                        <strong>{t("bark.previewTitle", { title: editorPreview.title })}</strong>
+                        <p>{editorPreview.content}</p>
+                      </div>
                     </div>
-                  </div>
+                  )
                 ) : null}
               </>
             )}
