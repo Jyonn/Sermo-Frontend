@@ -8799,7 +8799,7 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   }
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other:where(:not(.is-media):not(.is-link-preview)) {
+.message-group:not(.bubble-style-default) .message-bubble.other:where(:not(.is-media):not(.is-link-preview):not(.is-sticker)) {
   color: var(--bubble-skin-other-color);
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-other-border);
   border-radius: var(--bubble-skin-other-radius);
@@ -8807,7 +8807,7 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   box-shadow: var(--bubble-skin-other-shadow);
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self:where(:not(.is-media):not(.is-link-preview)) {
+.message-group.self:not(.bubble-style-default) .message-bubble.self:where(:not(.is-media):not(.is-link-preview):not(.is-sticker)) {
   color: var(--bubble-skin-self-color);
   border: var(--bubble-skin-border-width, 1px) solid var(--bubble-skin-self-border);
   border-radius: var(--bubble-skin-self-radius);
@@ -8815,28 +8815,28 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   box-shadow: var(--bubble-skin-self-shadow);
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other.group-start:not(.group-end) {
+.message-group:not(.bubble-style-default) .message-bubble.other.group-start:not(.group-end):not(.is-sticker) {
   border-bottom-left-radius: 5px;
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other:not(.group-start).group-end {
+.message-group:not(.bubble-style-default) .message-bubble.other:not(.group-start).group-end:not(.is-sticker) {
   border-top-left-radius: 5px;
 }
 
-.message-group:not(.bubble-style-default) .message-bubble.other:not(.group-start):not(.group-end) {
+.message-group:not(.bubble-style-default) .message-bubble.other:not(.group-start):not(.group-end):not(.is-sticker) {
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self.group-start:not(.group-end) {
+.message-group.self:not(.bubble-style-default) .message-bubble.self.group-start:not(.group-end):not(.is-sticker) {
   border-bottom-right-radius: 5px;
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self:not(.group-start).group-end {
+.message-group.self:not(.bubble-style-default) .message-bubble.self:not(.group-start).group-end:not(.is-sticker) {
   border-top-right-radius: 5px;
 }
 
-.message-group.self:not(.bubble-style-default) .message-bubble.self:not(.group-start):not(.group-end) {
+.message-group.self:not(.bubble-style-default) .message-bubble.self:not(.group-start):not(.group-end):not(.is-sticker) {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
@@ -16933,6 +16933,14 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   color: inherit;
   background: transparent;
   box-shadow: none;
+}
+
+/* Sticker messages are standalone artwork and must never inherit bubble skins. */
+.message-group .message-bubble.is-sticker {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .message-sticker-image {
