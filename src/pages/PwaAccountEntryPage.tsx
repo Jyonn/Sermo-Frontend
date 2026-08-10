@@ -18,6 +18,7 @@ export default function PwaAccountEntryPage() {
   const [autoLogin, setAutoLogin] = useState(isPwaAutoLoginEnabled);
   const [spaceSlug, setSpaceSlug] = useState("");
   const [launching, setLaunching] = useState(false);
+  const [otherLoginOpen, setOtherLoginOpen] = useState(accounts.length === 0);
   const selectedAccount = accounts.find((account) => account.key === selectedKey) ?? null;
 
   const openAccount = (account: (typeof accounts)[number]) => {
@@ -58,11 +59,12 @@ export default function PwaAccountEntryPage() {
       <section className="pwa-account-entry-shell">
         <header className="pwa-account-entry-brand">
           <img alt="" aria-hidden="true" src="/icons/sermo-192.png?v=4" />
-          <div><span>SERMO</span><strong>{t("pwa.accountEntryTitle")}</strong></div>
+          <div><span>WEB APP</span><strong>{t("brand.fullName")}</strong></div>
         </header>
         <div className="pwa-account-entry-heading">
-          <p>{accounts.length ? t("pwa.accountEntryEyebrow") : t("pwa.accountEntryWelcome")}</p>
-          <h1>{accounts.length ? t("pwa.chooseAccount") : t("pwa.loginToContinue")}</h1>
+          <p>{t("pwa.accountEntryEyebrow")}</p>
+          <h1>{accounts.length ? t("pwa.accountEntryWelcome") : t("pwa.loginToContinue")}</h1>
+          <small>{accounts.length ? t("pwa.chooseAccount") : t("pwa.otherAccountHint")}</small>
         </div>
 
         {accounts.length ? (
@@ -82,24 +84,35 @@ export default function PwaAccountEntryPage() {
                 );
               })}
             </div>
+            <button className="pwa-account-primary" disabled={!selectedAccount || launching} onClick={() => selectedAccount && openAccount(selectedAccount)} type="button">
+              <span>{launching ? t("pwa.entering") : t("pwa.enterAccount")}</span><span className="material-symbols-outlined">arrow_forward</span>
+            </button>
             <button className={`pwa-auto-login-row${autoLogin ? " is-on" : ""}`} onClick={toggleAutoLogin} type="button">
               <span className="pwa-auto-login-mark"><span className="material-symbols-outlined">bolt</span></span>
               <span><strong>{t("pwa.autoLogin")}</strong><small>{t("pwa.autoLoginHint")}</small></span>
               <span className={`switch${autoLogin ? " active" : ""}`} aria-hidden="true" />
             </button>
-            <button className="pwa-account-primary" disabled={!selectedAccount || launching} onClick={() => selectedAccount && openAccount(selectedAccount)} type="button">
-              <span>{launching ? t("pwa.entering") : t("pwa.enterAccount")}</span><span className="material-symbols-outlined">arrow_forward</span>
-            </button>
           </>
         ) : null}
 
-        <div className={`pwa-other-login${accounts.length ? " has-accounts" : ""}`}>
-          <div><strong>{t("pwa.otherAccount")}</strong><small>{t("pwa.otherAccountHint")}</small></div>
-          <form onSubmit={(event) => { event.preventDefault(); openOtherSpace(); }}>
-            <span>@</span>
-            <input aria-label={t("pwa.spaceSlug")} autoCapitalize="none" autoCorrect="off" onChange={(event) => setSpaceSlug(event.target.value)} placeholder={t("pwa.spaceSlugPlaceholder")} value={spaceSlug} />
-            <button aria-label={t("pwa.continueLogin")} disabled={!spaceSlug.trim() || launching} type="submit"><span className="material-symbols-outlined">arrow_forward</span></button>
-          </form>
+        <div className={`pwa-other-login${accounts.length ? " has-accounts" : ""}${otherLoginOpen ? " is-open" : ""}`}>
+          {accounts.length ? (
+            <button className="pwa-other-login-trigger" aria-expanded={otherLoginOpen} onClick={() => setOtherLoginOpen((open) => !open)} type="button">
+              <span className="material-symbols-outlined">person_add</span>
+              <strong>{t("pwa.otherAccount")}</strong>
+              <span className="material-symbols-outlined">{otherLoginOpen ? "expand_less" : "chevron_right"}</span>
+            </button>
+          ) : null}
+          <div className="pwa-other-login-panel">
+            <div className="pwa-other-login-panel-inner">
+              <div><strong>{accounts.length ? t("pwa.spaceSlug") : t("pwa.otherAccount")}</strong><small>{t("pwa.otherAccountHint")}</small></div>
+              <form onSubmit={(event) => { event.preventDefault(); openOtherSpace(); }}>
+                <span>@</span>
+                <input aria-label={t("pwa.spaceSlug")} autoCapitalize="none" autoCorrect="off" onChange={(event) => setSpaceSlug(event.target.value)} placeholder={t("pwa.spaceSlugPlaceholder")} value={spaceSlug} />
+                <button aria-label={t("pwa.continueLogin")} disabled={!spaceSlug.trim() || launching} type="submit"><span className="material-symbols-outlined">arrow_forward</span></button>
+              </form>
+            </div>
+          </div>
         </div>
         <footer>{t("landing.slogan")}</footer>
       </section>

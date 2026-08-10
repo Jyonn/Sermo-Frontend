@@ -2939,9 +2939,10 @@ html[data-theme="dark"] body .growth-level-detail {
 .pwa-account-entry-brand div { display: grid; gap: 1px; }
 .pwa-account-entry-brand span { color: var(--entry-accent); font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .16em; }
 .pwa-account-entry-brand strong { font-size: 14px; letter-spacing: .03em; }
-.pwa-account-entry-heading { margin: clamp(42px, 8vh, 74px) 0 24px; }
-.pwa-account-entry-heading p { margin: 0 0 8px; color: var(--entry-accent); font: 600 12px/1.4 "JetBrains Mono", monospace; letter-spacing: .08em; }
-.pwa-account-entry-heading h1 { max-width: 12ch; margin: 0; font-size: clamp(30px, 8vw, 42px); line-height: 1.08; letter-spacing: -.045em; }
+.pwa-account-entry-heading { margin: clamp(30px, 5.5vh, 48px) 0 20px; }
+.pwa-account-entry-heading p { margin: 0 0 7px; color: var(--entry-accent); font: 700 10px/1.4 "JetBrains Mono", monospace; letter-spacing: .16em; }
+.pwa-account-entry-heading h1 { margin: 0; font-size: clamp(29px, 7vw, 38px); line-height: 1.08; letter-spacing: -.04em; }
+.pwa-account-entry-heading small { display: block; margin-top: 8px; color: var(--entry-muted); font-size: 13px; }
 
 .pwa-account-rail { display: grid; gap: 10px; }
 .pwa-account-card {
@@ -2981,12 +2982,12 @@ html[data-theme="dark"] body .growth-level-detail {
   grid-template-columns: 38px minmax(0, 1fr) auto;
   align-items: center;
   gap: 11px;
-  margin: 13px 0 18px;
-  padding: 6px 3px;
+  margin: 12px 0 0;
+  padding: 5px 3px;
   color: var(--entry-ink);
   text-align: left;
 }
-.pwa-auto-login-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; color: #917025; background: rgba(245, 198, 95, .22); }
+.pwa-auto-login-mark { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 11px; color: #917025; background: rgba(245, 198, 95, .19); }
 .pwa-auto-login-mark .material-symbols-outlined { font-size: 20px; }
 .pwa-auto-login-row > span:nth-child(2) { display: grid; gap: 2px; }
 .pwa-auto-login-row strong { font-size: 13px; }
@@ -2999,6 +3000,7 @@ html[data-theme="dark"] body .growth-level-detail {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 16px;
   padding: 0 19px 0 22px;
   border-radius: 18px;
   color: #f6fff9;
@@ -3010,18 +3012,26 @@ html[data-theme="dark"] body .growth-level-detail {
 .pwa-account-primary:disabled { opacity: .55; }
 .pwa-account-primary .material-symbols-outlined { font-size: 23px; }
 
-.pwa-other-login { margin-top: auto; padding-top: 34px; }
-.pwa-other-login.has-accounts { margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(36, 76, 63, .12); }
-.pwa-other-login > div { display: grid; gap: 3px; margin-bottom: 11px; }
-.pwa-other-login > div strong { font-size: 13px; }
-.pwa-other-login > div small { color: var(--entry-muted); font-size: 11px; }
+.pwa-other-login { margin-top: auto; }
+.pwa-other-login.has-accounts { margin-top: 24px; border-top: 1px solid rgba(36, 76, 63, .12); }
+.pwa-other-login-trigger { width: 100%; min-height: 52px; display: grid; grid-template-columns: 28px minmax(0, 1fr) 24px; align-items: center; gap: 9px; color: var(--entry-ink); text-align: left; }
+.pwa-other-login-trigger .material-symbols-outlined { color: var(--entry-muted); font-size: 20px; }
+.pwa-other-login-trigger strong { font-size: 13px; }
+.pwa-other-login-trigger .material-symbols-outlined:last-child { justify-self: end; font-size: 19px; }
+.pwa-other-login-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .28s cubic-bezier(.22, 1, .36, 1), opacity .2s; }
+.pwa-other-login-panel-inner { min-height: 0; overflow: hidden; }
+.pwa-other-login.is-open .pwa-other-login-panel { grid-template-rows: 1fr; opacity: 1; }
+.pwa-other-login-panel-inner > div { display: grid; gap: 3px; margin-bottom: 11px; }
+.pwa-other-login-panel-inner > div strong { font-size: 13px; }
+.pwa-other-login-panel-inner > div small { color: var(--entry-muted); font-size: 11px; }
+.pwa-other-login.has-accounts .pwa-other-login-panel form { margin-bottom: 4px; }
 .pwa-other-login form { display: grid; grid-template-columns: auto minmax(0, 1fr) 40px; align-items: center; min-height: 52px; padding: 5px 6px 5px 16px; border: 1px solid rgba(39, 81, 67, .15); border-radius: 17px; background: rgba(253, 252, 247, .72); }
 .pwa-other-login form > span { color: var(--entry-accent); font: 600 16px/1 "JetBrains Mono", monospace; }
 .pwa-other-login input { min-width: 0; border: 0; outline: 0; color: var(--entry-ink); background: transparent; font: 500 14px/1.2 "JetBrains Mono", monospace; }
 .pwa-other-login input::placeholder { color: #93a39d; }
 .pwa-other-login form button { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; color: #f5fff9; background: var(--entry-accent); }
 .pwa-other-login form button:disabled { color: #8ea29b; background: #dce5e0; }
-.pwa-account-entry footer { padding-top: 22px; color: #81938c; font: 500 10px/1.4 "JetBrains Mono", monospace; letter-spacing: .08em; text-align: center; }
+.pwa-account-entry footer { padding-top: 18px; color: #81938c; font: 500 10px/1.4 "JetBrains Mono", monospace; letter-spacing: .08em; text-align: center; }
 
 html[data-theme="dark"] .pwa-account-entry {
   --entry-ink: #e4f0e9;
@@ -3038,7 +3048,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 @media (min-width: 760px) {
   .pwa-account-entry { display: grid; place-items: center; padding: 34px; }
   .pwa-account-entry-shell { min-height: min(760px, calc(100dvh - 68px)); }
-  .pwa-account-entry-heading { margin-top: clamp(48px, 8vh, 76px); }
+  .pwa-account-entry-heading { margin-top: clamp(34px, 6vh, 54px); }
 }
 
 @media (prefers-reduced-motion: no-preference) {

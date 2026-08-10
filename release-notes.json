@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.11",
+  "id": "2026.08.10.12",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "连续刷新也不会掉登录",
+      "title": "账户入口更专注",
       "items": [
-        "跨页面协调登录凭证刷新，避免重复轮换",
-        "旧请求不会再清除刚更新的新会话",
-        "网络波动不再被误判为登录失效"
+        "启动页突出账户选择与进入主流程",
+        "自动登录紧跟当前账户，设置关系更清晰",
+        "其他空间登录收纳为按需展开的次级入口"
       ]
     },
     "en": {
-      "title": "Stay signed in through rapid refreshes",
+      "title": "A more focused account entry",
       "items": [
-        "Session refresh is coordinated across page reloads",
-        "Stale requests can no longer erase a newer session",
-        "Network interruptions are no longer treated as an expired login"
+        "The launcher now focuses on choosing and entering an account",
+        "Automatic sign-in is clearly tied to the selected account",
+        "Signing in to another space is now a secondary expandable action"
       ]
     }
   }
