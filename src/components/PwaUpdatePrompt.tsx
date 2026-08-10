@@ -6,6 +6,8 @@ import {
 } from "../lib/pwaUpdate";
 import { useI18n } from "../lib/language";
 
+const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
+
 export function PwaUpdatePrompt() {
   const { language, t } = useI18n();
   const [available, setAvailable] = useState(false);
@@ -14,7 +16,9 @@ export function PwaUpdatePrompt() {
 
   useEffect(() => {
     const show = (event: Event) => {
-      setRelease((event as CustomEvent<ReleaseNotes | null>).detail);
+      const nextRelease = (event as CustomEvent<ReleaseNotes | null>).detail;
+      if (nextRelease?.id && window.localStorage.getItem(DISMISSED_UPDATE_KEY) === nextRelease.id) return;
+      setRelease(nextRelease);
       setAvailable(true);
     };
     window.addEventListener(PWA_UPDATE_AVAILABLE_EVENT, show);
@@ -26,6 +30,10 @@ export function PwaUpdatePrompt() {
   const update = () => {
     setUpdating(true);
     if (!activatePwaUpdate()) setUpdating(false);
+  };
+  const dismiss = () => {
+    if (release?.id) window.localStorage.setItem(DISMISSED_UPDATE_KEY, release.id);
+    setAvailable(false);
   };
   const localizedRelease = release?.locales[language] ?? release?.locales.en;
 
@@ -47,9 +55,12 @@ export function PwaUpdatePrompt() {
           <span>{t("common.updateHint")}</span>
         )}
       </div>
-      <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
-        {updating ? t("common.updating") : t("common.updateNow")}
-      </button>
+      <div className="pwa-update-actions">
+        <button className="pwa-update-dismiss" disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
+        <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
+          {updating ? t("common.updating") : t("common.updateNow")}
+        </button>
+      </div>
     </aside>
   );
 }

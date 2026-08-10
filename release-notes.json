@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.4",
+  "id": "2026.08.11.5",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "评论身份更清晰",
+      "title": "更新提醒更从容",
       "items": [
-        "发言评论现在会展示用户成长等级",
-        "一级评论与二级回复保持一致",
-        "昵称、等级和时间排版更加清晰"
+        "发现新版本时可以立即更新",
+        "也可以选择知道了，稍后再更新",
+        "新版本到来时仍会再次提醒"
       ]
     },
     "en": {
-      "title": "Clearer identities in comments",
+      "title": "More flexible update prompts",
       "items": [
-        "Statement comments now show each user's growth level",
-        "Top-level comments and replies use the same treatment",
-        "Names, levels, and timestamps are easier to scan"
+        "Update immediately when a new version is available",
+        "Or dismiss the prompt and update later",
+        "You will still be notified when the next version arrives"
       ]
     }
   }

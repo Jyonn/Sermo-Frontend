@@ -213,9 +213,7 @@
   content: "";
 }
 
-.pwa-update-prompt .pwa-recommendation-action {
-  align-self: center;
-}
+.pwa-update-actions{display:flex;align-self:center;align-items:center;gap:8px}.pwa-update-dismiss{min-height:40px;padding:0 12px;border:0;border-radius:12px;color:var(--text-secondary);font:inherit;font-size:.78rem;font-weight:700;background:transparent}.pwa-update-dismiss:hover{color:var(--text-primary);background:var(--bg-canvas)}
 
 .pwa-install-guide {
   display: grid;
@@ -346,10 +344,12 @@
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .pwa-update-prompt .pwa-recommendation-action {
+  .pwa-update-actions {
     grid-column: 1 / -1;
     width: 100%;
   }
+
+  .pwa-update-actions .pwa-recommendation-action { flex: 1; }
 }
 
 @media (max-width: 480px) {
