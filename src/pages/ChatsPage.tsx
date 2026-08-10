@@ -2402,6 +2402,7 @@ function LiveChatsPage() {
   const canInviteGroupMember = growthCapability("invite_group_member", 4).available;
   const canRenameGroup = growthCapability("rename_group", 5).available;
   const canSendVideo = growthCapability("send_video", 5).available;
+  const canCreateSticker = growthCapability("create_sticker", 6).available;
   const canUseOnlineReminder = growthCapability("online_reminder", 7).available;
   const canDownloadAudio = growthCapability("download_audio", 8).available;
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
@@ -3200,7 +3201,7 @@ function LiveChatsPage() {
     });
   };
 
-  const sendSticker = async (sticker: StickerDTO) => {
+  const sendSticker = async (sticker: StickerAssetDTO | StickerDTO) => {
     if (!selectedChat || stickerSaving) return;
     const clientId = `temp:sticker:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     const createdAt = Math.floor(Date.now() / 1000);
@@ -3235,7 +3236,9 @@ function LiveChatsPage() {
       const created = await api.sendMessage(
         selectedChat.id,
         MESSAGE_TYPE_STICKER,
-        JSON.stringify({ sticker_id: sticker.sticker_id }),
+        JSON.stringify("sticker_id" in sticker
+          ? { sticker_id: sticker.sticker_id }
+          : { asset_id: sticker.sticker_asset_id }),
         reply?.message_id,
         clientId,
       );
@@ -3256,7 +3259,7 @@ function LiveChatsPage() {
   };
 
   const addStickerFromFile = async (file: File) => {
-    if (stickerSaving) return;
+    if (stickerSaving || !requireComposerCapability("create_sticker", 6, t("sticker.create"))) return;
     setStickerSaving(true);
     try {
       const sticker = await addStickerFile(file);
@@ -5464,55 +5467,63 @@ function LiveChatsPage() {
                     </div>
                     {emojiPage === STICKER_MY_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
-                        <div className="composer-sticker-toolbar">
-                          <span>{stickers.length ? t("sticker.count", { count: stickers.length }) : t("sticker.empty")}</span>
-                          {stickers.length ? (
+                        {stickers.length ? (
+                          <div className="composer-sticker-toolbar is-actions-only">
                             <button className={stickerManaging ? "is-active" : ""} onClick={() => setStickerManaging((current) => !current)} type="button">
                               {stickerManaging ? t("common.done") : t("common.manage")}
                             </button>
-                          ) : null}
-                        </div>
-                        <div className="composer-sticker-grid">
-                          <button className="composer-sticker-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button">
-                            <span className="material-symbols-outlined">add_photo_alternate</span>
-                            <small>{t("sticker.add")}</small>
-                          </button>
-                          {stickers.map((sticker) => (
-                            <button
-                              className="composer-sticker-item"
-                              disabled={stickerSaving}
-                              key={sticker.sticker_id}
-                              onClick={() => stickerManaging ? void removeSticker(sticker) : void sendSticker(sticker)}
-                              type="button"
-                            >
-                              <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
-                              {stickerManaging ? <span className="composer-sticker-remove material-symbols-outlined">remove</span> : null}
-                            </button>
-                          ))}
-                          {stickersLoading ? <span className="composer-sticker-loading" aria-label={t("common.loading")} /> : null}
-                        </div>
+                          </div>
+                        ) : null}
+                        {stickers.length ? (
+                          <div className="composer-sticker-grid">
+                            {canCreateSticker ? (
+                              <button className="composer-sticker-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button">
+                                <span className="material-symbols-outlined">add_photo_alternate</span>
+                                <small>{t("sticker.add")}</small>
+                              </button>
+                            ) : null}
+                            {stickers.map((sticker) => (
+                              <button
+                                className="composer-sticker-item"
+                                disabled={stickerSaving}
+                                key={sticker.sticker_id}
+                                onClick={() => stickerManaging ? void removeSticker(sticker) : void sendSticker(sticker)}
+                                type="button"
+                              >
+                                <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                                {stickerManaging ? <span className="composer-sticker-remove material-symbols-outlined">remove</span> : null}
+                              </button>
+                            ))}
+                          </div>
+                        ) : !stickersLoading ? (
+                          <div className="composer-sticker-empty">
+                            <span className="material-symbols-outlined">photo_library</span>
+                            <strong>{t("sticker.mineEmpty")}</strong>
+                            {canCreateSticker ? <button onClick={() => stickerInputRef.current?.click()} type="button">{t("sticker.addFirst")}</button> : null}
+                          </div>
+                        ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
                       </div>
                     ) : emojiPage === STICKER_EXPLORE_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
-                        <div className="composer-sticker-toolbar">
-                          <span>{exploreStickers.length ? t("sticker.exploreHint") : t("sticker.exploreEmpty")}</span>
-                        </div>
-                        <div className="composer-sticker-grid">
-                          {exploreStickers.map((sticker) => (
-                            <button
-                              aria-label={t("sticker.collect")}
-                              className="composer-sticker-item is-explore"
-                              disabled={stickerSaving}
-                              key={sticker.sticker_asset_id}
-                              onClick={() => void collectExploredSticker(sticker)}
-                              type="button"
-                            >
-                              <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
-                              <span className="composer-sticker-collect material-symbols-outlined">add</span>
-                            </button>
-                          ))}
-                          {stickersLoading ? <span className="composer-sticker-loading" aria-label={t("common.loading")} /> : null}
-                        </div>
+                        {exploreStickers.length ? (
+                          <div className="composer-sticker-grid">
+                            {exploreStickers.map((sticker) => (
+                              <div className="composer-sticker-explore-item" key={sticker.sticker_asset_id}>
+                                <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
+                                  <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                                </button>
+                                <button aria-label={t("sticker.collect")} className="composer-sticker-collect" disabled={stickerSaving} onClick={() => void collectExploredSticker(sticker)} type="button">
+                                  <span className="material-symbols-outlined">add</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : !stickersLoading ? (
+                          <div className="composer-sticker-empty">
+                            <span className="material-symbols-outlined">explore</span>
+                            <strong>{t("sticker.exploreEmpty")}</strong>
+                          </div>
+                        ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
                       </div>
                     ) : (
                       <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
@@ -6490,7 +6501,7 @@ function LiveChatsPage() {
                     {t("common.download")}
                   </button>
                 ) : null}
-                {messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number" ? (
+                {canCreateSticker && messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number" ? (
                   <button className="message-context-button" onClick={() => void collectImageAsSticker()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
                     {t("sticker.collect")}

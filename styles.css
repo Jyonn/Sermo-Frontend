@@ -16773,6 +16773,10 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
+.composer-sticker-toolbar.is-actions-only {
+  justify-content: flex-end;
+}
+
 .composer-sticker-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -16798,6 +16802,18 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.composer-sticker-explore-item {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 1;
+}
+
+.composer-sticker-explore-item > .composer-sticker-item {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
 }
 
 .composer-sticker-add {
@@ -16832,17 +16848,63 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
 .composer-sticker-collect {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
+  right: 6px;
+  bottom: 6px;
   display: grid;
-  width: 21px;
-  height: 21px;
+  width: 25px;
+  height: 25px;
+  padding: 0;
   place-items: center;
+  border: 2px solid color-mix(in srgb, var(--bg-panel) 94%, #fff);
   border-radius: 50%;
   color: #fff;
-  background: color-mix(in srgb, var(--accent) 88%, #08724d);
-  box-shadow: 0 3px 9px rgba(7, 82, 55, .2);
-  font-size: 15px;
+  background: #00a86b;
+  box-shadow: 0 4px 12px rgba(0, 117, 74, .34);
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.composer-sticker-collect:hover {
+  background: #008f5b;
+  transform: scale(1.08);
+}
+
+.composer-sticker-collect .material-symbols-outlined {
+  font-size: 17px;
+}
+
+.composer-sticker-empty {
+  display: grid;
+  min-height: 150px;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.composer-sticker-empty > .material-symbols-outlined {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--accent-ink, #08724d);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-size: 24px;
+}
+
+.composer-sticker-empty strong {
+  color: var(--text-main);
+  font-size: .82rem;
+}
+
+.composer-sticker-empty button {
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--accent-ink, #08724d);
+  font-size: .72rem;
+  font-weight: 750;
 }
 
 .composer-sticker-loading {
@@ -16854,6 +16916,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 700ms linear infinite;
+}
+
+.composer-sticker-loading.is-centered {
+  display: block;
+  margin: 58px auto;
 }
 
 .message-bubble.is-sticker,
@@ -16890,6 +16957,10 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 }
 
 @media (max-width: 900px) {
+  .composer-sticker-collect {
+    display: none;
+  }
+
   .composer-row-text {
     position: relative;
   }

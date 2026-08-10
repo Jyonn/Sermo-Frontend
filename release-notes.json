@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.4",
+  "id": "2026.08.10.5",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "聊天输入栏细节调整",
+      "title": "表情包探索体验升级",
       "items": [
-        "桌面端表情按钮恢复到输入框外侧",
-        "表情与更多操作保持一致的按钮节奏",
-        "手机端继续保留紧凑的输入框内布局"
+        "手机探索表情轻触即发，桌面端可分别发送或收藏",
+        "空收藏与空探索使用更友好的状态展示",
+        "LV6 解锁从图片制作个人表情"
       ]
     },
     "en": {
-      "title": "Composer layout refinements",
+      "title": "A better sticker discovery experience",
       "items": [
-        "The desktop emoji button is back outside the text field",
-        "Emoji and more actions now share a consistent button rhythm",
-        "Mobile keeps its compact in-field emoji control"
+        "Tap to send on mobile, or choose between send and save on desktop",
+        "Empty collections and discovery now have friendly states",
+        "Creating personal stickers from images unlocks at LV6"
       ]
     }
   }
