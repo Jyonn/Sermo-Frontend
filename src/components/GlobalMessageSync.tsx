@@ -13,7 +13,7 @@ import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
-import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, UserDTO } from "../types";
+import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
 const CURSOR_KEY_PREFIX = "sermo-sync-v2-cursor:";
@@ -324,7 +324,7 @@ export function GlobalMessageSync() {
 
     let cancelled = false;
 
-    const applyToCache = async (items: SyncedChatMessageItem[]) => {
+    const applyToCache = async (items: SyncedChatMessageItem[], chatStates: Map<number, ChatSyncStateDTO>) => {
       const grouped = new Map<number, ChatMessage[]>();
 
       items.forEach((item) => {
@@ -377,15 +377,19 @@ export function GlobalMessageSync() {
       const nextChats = sortChats(
         listRecord.chats.map((chat) => {
           const incoming = grouped.get(chat.id);
-          if (!incoming?.length) return chat;
-          const newest = incoming[incoming.length - 1];
-          const unreadIncrement = chat.id === activeChatId || chat.notificationsMuted ? 0 : incoming.filter((item) => item.from === "other").length;
+          const readState = chatStates.get(chat.id);
+          if (!incoming?.length && !readState) return chat;
+          const newest = incoming?.[incoming.length - 1];
           return {
             ...chat,
-            preview: newest.text,
-            time: formatChatListTime(newest.createdAt),
-            lastActivity: newest.createdAt,
-            unread: chat.id === activeChatId ? 0 : chat.unread + unreadIncrement,
+            ...(newest ? {
+              preview: previewFromMessage(newest),
+              time: formatChatListTime(newest.createdAt),
+              lastActivity: newest.createdAt,
+            } : {}),
+            unread: chat.id === activeChatId || chat.notificationsMuted
+              ? 0
+              : readState?.unread_count ?? chat.unread,
           };
         })
       );
@@ -458,6 +462,7 @@ export function GlobalMessageSync() {
         let loopCount = 0;
         const allItems: SyncedChatMessageItem[] = [];
         const allRemoved: Array<{ chatId: number; messageId: number }> = [];
+        const allChatStates = new Map<number, ChatSyncStateDTO>();
 
         while (hasMore && loopCount < 5) {
           if (DEBUG_SYNC) {
@@ -487,6 +492,7 @@ export function GlobalMessageSync() {
 
           allItems.push(...normalizedItems);
           allRemoved.push(...removed);
+          (response.chat_states ?? []).forEach((state) => allChatStates.set(state.chat_id, state));
 
           if (!response.events.length && !response.has_more) break;
         }
@@ -501,18 +507,23 @@ export function GlobalMessageSync() {
           persistCursor(scope, cursor);
         }
 
-        if (!allItems.length && !allRemoved.length) return;
+        if (!allItems.length && !allRemoved.length && !allChatStates.size) return;
 
-        if (allItems.length) await applyToCache(allItems);
+        if (allItems.length || allChatStates.size) await applyToCache(allItems, allChatStates);
         if (allRemoved.length) {
           await applyRemovalsToCache(allRemoved);
           const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
           chatCache.setChatList(scope, freshChats);
           void chatCache.persistChatList(scope, freshChats);
         }
-        emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved });
+        emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved, chatStates: [...allChatStates.values()] });
 
-        const otherChatItems = allItems.filter((item) => item.chatId !== activeChatId && item.message.from === "other");
+        const otherChatItems = allItems.filter((item) => {
+          if (item.chatId === activeChatId || item.message.from !== "other") return false;
+          const readState = allChatStates.get(item.chatId);
+          if (!readState || readState.unread_count <= 0) return false;
+          return readState.last_read_at === null || item.message.createdAt > readState.last_read_at;
+        });
         if (!otherChatItems.length) return;
         if (isGestureAccessSuppressed(gestureScope)) {
           setPopup(null);

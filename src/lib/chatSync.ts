@@ -1,4 +1,4 @@
-import type { ChatMessage } from "../types";
+import type { ChatMessage, ChatSyncStateDTO } from "../types";
 
 export const CHAT_SYNC_EVENT = "sermo:messages-sync";
 
@@ -11,6 +11,7 @@ export interface ChatSyncEventDetail {
   afterMessageId: number;
   items: SyncedChatMessageItem[];
   removed: Array<{ chatId: number; messageId: number }>;
+  chatStates: ChatSyncStateDTO[];
 }
 
 export function emitChatSync(detail: ChatSyncEventDetail) {

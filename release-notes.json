@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.1",
+  "id": "2026.08.11.2",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "好友邀请页焕新",
+      "title": "多设备未读状态更准确",
       "items": [
-        "重新梳理邀请人、空间和有效期的信息层级",
-        "修复按钮与内容区被页面高度异常拉伸的问题",
-        "邀请操作更紧凑，也更适合手机单手使用"
+        "自己发送的消息不再被标记为未读",
+        "其他设备补同步聊天记录时不再制造虚假红点",
+        "未读数统一以账户的服务端阅读进度为准"
       ]
     },
     "en": {
-      "title": "A refreshed friend invite",
+      "title": "Accurate unread state across devices",
       "items": [
-        "Reworked the hierarchy for inviter, space, and validity details",
-        "Fixed controls stretching vertically with the page height",
-        "Made the invite action more compact and mobile friendly"
+        "Messages you send no longer count as unread",
+        "Backfilled history on another device no longer creates false badges",
+        "Unread counts now follow the account's server-side read position"
       ]
     }
   }

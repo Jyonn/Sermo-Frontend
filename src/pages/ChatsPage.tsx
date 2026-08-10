@@ -3472,9 +3472,10 @@ function LiveChatsPage() {
   useEffect(() => {
     const handleSync = (event: Event) => {
       const detail = (event as CustomEvent<ChatSyncEventDetail>).detail;
-      if (!detail || (!detail.items.length && !detail.removed?.length)) return;
+      if (!detail || (!detail.items.length && !detail.removed?.length && !detail.chatStates?.length)) return;
 
       const grouped = new Map<number, ChatSyncEventDetail["items"]>();
+      const chatStates = new Map((detail.chatStates ?? []).map((state) => [state.chat_id, state]));
       detail.items.forEach((item) => {
         const bucket = grouped.get(item.chatId) ?? [];
         bucket.push(item);
@@ -3509,15 +3510,19 @@ function LiveChatsPage() {
         sortChats(
           currentChats.map((chat) => {
             const incoming = grouped.get(chat.id);
-            if (!incoming?.length) return chat;
-            const newest = incoming[incoming.length - 1].message;
-            const unreadIncrement = chat.id === selectedChat?.id || chat.notificationsMuted ? 0 : incoming.filter((item) => item.message.from === "other").length;
+            const readState = chatStates.get(chat.id);
+            if (!incoming?.length && !readState) return chat;
+            const newest = incoming?.[incoming.length - 1]?.message;
             return {
               ...chat,
-              preview: previewFromMessage(newest),
-              time: formatChatListTime(newest.createdAt),
-              lastActivity: newest.createdAt,
-              unread: chat.id === selectedChat?.id ? 0 : chat.unread + unreadIncrement,
+              ...(newest ? {
+                preview: previewFromMessage(newest),
+                time: formatChatListTime(newest.createdAt),
+                lastActivity: newest.createdAt,
+              } : {}),
+              unread: chat.id === selectedChat?.id || chat.notificationsMuted
+                ? 0
+                : readState?.unread_count ?? chat.unread,
             };
           })
         )

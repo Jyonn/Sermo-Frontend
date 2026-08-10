@@ -678,8 +678,15 @@ export interface MessageSyncEventDTO {
 
 export interface MessageEventSyncResponseDTO {
   events: MessageSyncEventDTO[];
+  chat_states?: ChatSyncStateDTO[];
   next_after: number;
   has_more: boolean;
+}
+
+export interface ChatSyncStateDTO {
+  chat_id: number;
+  unread_count: number;
+  last_read_at: number | null;
 }
 
 export interface ChatDTO {
