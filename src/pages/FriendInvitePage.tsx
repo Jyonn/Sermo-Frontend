@@ -107,10 +107,21 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
 
   const readyCard =
     previewState === "ready" && preview ? (
-      <section className={`panel friend-invite-card${overlay ? " is-overlay" : ""}`}>
-        <p className="eyebrow">{t("invite.eyebrow")}</p>
-        <div className="friend-invite-header">
-          <UserAvatar className="avatar-large" name={preview.inviter.name} uri={preview.inviter.avatar_uri} />
+      <section className={`friend-invite-card${overlay ? " is-overlay" : ""}`}>
+        <header className="friend-invite-topline">
+          <p className="eyebrow">{t("invite.eyebrow")}</p>
+          <div className="friend-invite-top-actions">
+            {inviteValidityLabel(preview) ? <span className="friend-invite-validity">{inviteValidityLabel(preview)}</span> : null}
+            {overlay ? (
+              <button aria-label={t("common.close")} className="friend-invite-close" onClick={closeOverlay} type="button">
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            ) : null}
+          </div>
+        </header>
+
+        <div className="friend-invite-identity">
+          <UserAvatar className="friend-invite-avatar" name={preview.inviter.name} uri={preview.inviter.avatar_uri} />
           <div className="friend-invite-copy">
             <h2>{preview.inviter.name}</h2>
             <p>
@@ -119,17 +130,10 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
           </div>
         </div>
 
-        <div className="friend-invite-body">
-          <div className="friend-invite-space-row">
-            <span>{t("invite.space")}</span>
-            <strong>{preview.space.name}</strong>
-          </div>
-          {inviteValidityLabel(preview) ? <div className="count-badge">{inviteValidityLabel(preview)}</div> : null}
-        </div>
-
         {!session ? (
           <div className="friend-invite-actions">
             <Link className="button" to="/">
+              <span className="material-symbols-outlined" aria-hidden="true">login</span>
               {t("invite.login")}
             </Link>
             <div className="detail-text">{t("invite.loginHint")}</div>
@@ -137,9 +141,11 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
         ) : (
           <div className="friend-invite-actions">
             <button className="button" disabled={redeemState === "loading" || redeemState === "success"} onClick={() => void redeemInvite()} type="button">
+              <span className={`material-symbols-outlined${redeemState === "loading" ? " friend-invite-spinner" : ""}`} aria-hidden="true">
+                {redeemState === "loading" ? "progress_activity" : redeemState === "success" ? "check" : "person_add"}
+              </span>
               {redeemState === "loading" ? t("invite.sending") : redeemState === "success" ? t("invite.sent") : t("invite.send")}
             </button>
-            <div className="detail-text">{t("invite.qrHint")}</div>
           </div>
         )}
       </section>

@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.10.14",
-  "publishedAt": "2026-08-10",
+  "id": "2026.08.11.1",
+  "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片贴边更自然",
+      "title": "好友邀请页焕新",
       "items": [
-        "修复无图片链接卡片与消息边界之间的大段空白",
-        "己方链接卡片稳定贴右，他方链接卡片稳定贴左"
+        "重新梳理邀请人、空间和有效期的信息层级",
+        "修复按钮与内容区被页面高度异常拉伸的问题",
+        "邀请操作更紧凑，也更适合手机单手使用"
       ]
     },
     "en": {
-      "title": "More natural link card alignment",
+      "title": "A refreshed friend invite",
       "items": [
-        "Removed excessive empty space beside link cards without images",
-        "Outgoing cards now stay right-aligned and incoming cards stay left-aligned"
+        "Reworked the hierarchy for inviter, space, and validity details",
+        "Fixed controls stretching vertically with the page height",
+        "Made the invite action more compact and mobile friendly"
       ]
     }
   }
