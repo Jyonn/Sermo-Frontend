@@ -127,6 +127,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch((error: unknown) => {
         if (cancelled) return;
         if (error instanceof ApiError && error.status === 401) {
+          const latestSession = authStorage.get();
+          if (latestSession?.refreshToken !== storedSession.refreshToken) {
+            setSessionState(latestSession);
+            return;
+          }
           authStorage.set(null);
           setSessionState(null);
           return;

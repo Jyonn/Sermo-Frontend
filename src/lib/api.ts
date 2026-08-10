@@ -164,13 +164,35 @@ async function refreshSession(currentSession: AuthSession) {
     refreshToken: body.refresh,
     user: body.data,
   };
+  const latestSession = authConfig.getSession();
+  if (!latestSession) {
+    throw new ApiError(i18n.t("auth.sessionExpired"), "UNAUTHORIZED", 401);
+  }
+  if (latestSession.refreshToken !== currentSession.refreshToken) {
+    return latestSession;
+  }
   authConfig.setSession(nextSession);
   return nextSession;
 }
 
+async function refreshSessionCoordinated(currentSession: AuthSession) {
+  const run = async () => {
+    const latestSession = authConfig.getSession();
+    if (!latestSession) throw new ApiError(i18n.t("auth.sessionExpired"), "UNAUTHORIZED", 401);
+    if (latestSession.refreshToken !== currentSession.refreshToken) return latestSession;
+    return refreshSession(currentSession);
+  };
+
+  if (typeof navigator !== "undefined" && navigator.locks) {
+    const lockName = `sermo:auth-refresh:${currentSession.user.space_id}:${currentSession.user.user_id}`;
+    return navigator.locks.request(lockName, run);
+  }
+  return run();
+}
+
 function refreshSessionSingleFlight(currentSession: AuthSession) {
   if (!refreshInFlight) {
-    refreshInFlight = refreshSession(currentSession).finally(() => {
+    refreshInFlight = refreshSessionCoordinated(currentSession).finally(() => {
       refreshInFlight = null;
     });
   }
@@ -232,7 +254,14 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
       });
       return parseEnvelope<T>(retryResponse);
     } catch (error) {
-      authConfig.setSession(null);
+      const latestSession = authConfig.getSession();
+      if (
+        error instanceof ApiError
+        && error.status === 401
+        && latestSession?.refreshToken === session.refreshToken
+      ) {
+        authConfig.setSession(null);
+      }
       throw error;
     }
   }

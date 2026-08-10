@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.10",
+  "id": "2026.08.10.11",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "WebApp 有了账户入口",
+      "title": "连续刷新也不会掉登录",
       "items": [
-        "桌面图标统一使用 Sermo 品牌标识",
-        "启动时可以从本机已登录账户中选择",
-        "可为默认账户明确开启自动登录"
+        "跨页面协调登录凭证刷新，避免重复轮换",
+        "旧请求不会再清除刚更新的新会话",
+        "网络波动不再被误判为登录失效"
       ]
     },
     "en": {
-      "title": "A new WebApp account entry",
+      "title": "Stay signed in through rapid refreshes",
       "items": [
-        "The home-screen icon now consistently uses the Sermo brand",
-        "Choose from accounts already signed in on this device",
-        "Explicitly enable automatic sign-in for your default account"
+        "Session refresh is coordinated across page reloads",
+        "Stale requests can no longer erase a newer session",
+        "Network interruptions are no longer treated as an expired login"
       ]
     }
   }

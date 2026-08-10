@@ -1440,6 +1440,7 @@
   "admin.sessionExpired": "管理登录已失效，请重新登录。",
   "auth.restoring": "正在恢复登录",
   "auth.verifyingSession": "会话核验中",
+  "auth.sessionExpired": "登录已失效，请重新登录。",
   "landing.myEntrancesEyebrow": "我的入口",
   "invite.eyebrow": "好友邀请",
   "gesture.eyebrow": "手势",

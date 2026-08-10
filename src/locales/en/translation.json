@@ -1440,6 +1440,7 @@
   "admin.sessionExpired": "Admin session expired. Log in again.",
   "auth.restoring": "Restoring your session",
   "auth.verifyingSession": "Verifying session",
+  "auth.sessionExpired": "Your session has expired. Please sign in again.",
   "landing.myEntrancesEyebrow": "My entrances",
   "invite.eyebrow": "Friend invite",
   "gesture.eyebrow": "Gesture",
