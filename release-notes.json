@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.6",
+  "id": "2026.08.10.7",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "表情包保持原生展示",
+      "title": "表情包管理焕新",
       "items": [
-        "表情包不再继承个性化气泡边框",
-        "合并消息圆角不会影响表情包外观",
-        "所有气泡主题下都保持透明无气泡展示"
+        "我的表情改用独立管理页，选择与批量删除更清晰",
+        "表情资源会主动缓存在本地，并按容量自动清理",
+        "删除前增加确认，已移除资源同步退出本地缓存"
       ]
     },
     "en": {
-      "title": "Native sticker presentation",
+      "title": "A better sticker manager",
       "items": [
-        "Stickers no longer inherit personalized bubble borders",
-        "Grouped-message radii no longer affect sticker artwork",
-        "Every bubble theme now keeps stickers transparent and bubble-free"
+        "Mine now uses a dedicated manager with clear selection and batch deletion",
+        "Sticker assets are proactively cached locally with automatic capacity cleanup",
+        "Deletion now requires confirmation and removes discarded assets from local cache"
       ]
     }
   }

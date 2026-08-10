@@ -16827,6 +16827,16 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   font-size: 1.35rem;
 }
 
+.composer-sticker-add.is-manager-entry {
+  border-style: solid;
+  color: var(--accent-ink, #08724d);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+}
+
+.composer-sticker-add.is-manager-entry .material-symbols-outlined {
+  font-size: 1.65rem;
+}
+
 .composer-sticker-add small {
   font-size: .64rem;
   font-weight: 700;
@@ -16921,6 +16931,138 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 .composer-sticker-loading.is-centered {
   display: block;
   margin: 58px auto;
+}
+
+.drawer-body:has(> .sticker-manager) {
+  padding: 0;
+  overflow: hidden;
+}
+
+.sticker-manager {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 4%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%),
+    var(--bg-page);
+}
+
+.sticker-manager-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sticker-manager-item,
+.sticker-manager-add {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  place-items: center;
+  overflow: hidden;
+  border: 5px solid #fff;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-panel) 82%, var(--accent) 3%);
+  box-shadow: 0 5px 15px rgba(28, 51, 44, .09), 0 0 0 1px color-mix(in srgb, var(--border) 74%, transparent);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.sticker-manager-item:active,
+.sticker-manager-add:active {
+  transform: scale(.96);
+}
+
+.sticker-manager-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sticker-manager-add {
+  color: var(--accent-ink, #08724d);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-panel));
+}
+
+.sticker-manager-add .material-symbols-outlined {
+  font-size: 1.85rem;
+}
+
+.sticker-manager.is-selecting .sticker-manager-add {
+  display: none;
+}
+
+.sticker-manager-item.is-selected {
+  box-shadow: 0 0 0 3px var(--accent), 0 7px 18px rgba(0, 133, 89, .18);
+}
+
+.sticker-manager-check {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(40, 54, 50, .38);
+  box-shadow: 0 2px 8px rgba(18, 33, 28, .18);
+  font-size: 16px;
+}
+
+.sticker-manager-item.is-selected .sticker-manager-check {
+  background: var(--accent-ink, #08724d);
+}
+
+.sticker-manager-footer {
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.sticker-manager-footer .danger-button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 15px;
+}
+
+.sticker-manager-empty {
+  position: absolute;
+  inset: 35% 18px auto;
+  display: grid;
+  place-items: center;
+  gap: 9px;
+  color: var(--text-muted);
+  text-align: center;
+  pointer-events: none;
+}
+
+.sticker-manager-empty .material-symbols-outlined {
+  font-size: 2rem;
+}
+
+@media (max-width: 359px) {
+  .sticker-manager-grid {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .sticker-manager-item,
+  .sticker-manager-add {
+    border-width: 4px;
+    border-radius: 15px;
+  }
 }
 
 .message-bubble.is-sticker,

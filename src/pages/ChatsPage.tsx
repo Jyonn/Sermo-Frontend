@@ -35,7 +35,7 @@ import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { addStickerFile } from "../lib/stickers";
-import { purgeCachedMedia } from "../lib/mediaCache";
+import { cacheMediaLocally, purgeCachedMedia } from "../lib/mediaCache";
 import { loadMessagesAfterThrough, loadMessagesBeforeThrough } from "../lib/messageHistory";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
@@ -2114,8 +2114,11 @@ function LiveChatsPage() {
   const [stickers, setStickers] = useState<StickerDTO[]>([]);
   const [exploreStickers, setExploreStickers] = useState<StickerAssetDTO[]>([]);
   const [stickersLoading, setStickersLoading] = useState(false);
-  const [stickerManaging, setStickerManaging] = useState(false);
   const [stickerSaving, setStickerSaving] = useState(false);
+  const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
+  const [stickerManagerSelecting, setStickerManagerSelecting] = useState(false);
+  const [selectedStickerIds, setSelectedStickerIds] = useState<number[]>([]);
+  const [stickerDeleteConfirmOpen, setStickerDeleteConfirmOpen] = useState(false);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
   const [locationMessagePreview, setLocationMessagePreview] = useState<{
     location: { latitude: number; longitude: number; address?: string };
@@ -3151,7 +3154,9 @@ function LiveChatsPage() {
     setComposerMoreOpen(false);
     setEmojiPickerOpen(false);
     setEmojiPage(STICKER_MY_PAGE);
-    setStickerManaging(false);
+    setStickerManagerOpen(false);
+    setStickerManagerSelecting(false);
+    setSelectedStickerIds([]);
   }, [selectedChat?.id]);
 
   useEffect(() => {
@@ -3182,6 +3187,10 @@ function LiveChatsPage() {
       });
     return () => controller.abort();
   }, [currentUserId, emojiPage, emojiPickerOpen]);
+
+  useEffect(() => {
+    cacheMediaLocally([...stickers, ...exploreStickers].map((sticker) => resolveStableResourceUri(sticker.uri) ?? sticker.uri));
+  }, [exploreStickers, stickers]);
 
   useEffect(() => {
     setDraft(cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "");
@@ -3274,13 +3283,38 @@ function LiveChatsPage() {
     }
   };
 
-  const removeSticker = async (sticker: StickerDTO) => {
+  const toggleStickerSelection = (stickerId: number) => {
+    if (!stickerManagerSelecting || stickerSaving) return;
+    setSelectedStickerIds((current) => current.includes(stickerId)
+      ? current.filter((id) => id !== stickerId)
+      : [...current, stickerId]);
+  };
+
+  const closeStickerManager = () => {
     if (stickerSaving) return;
+    setStickerManagerOpen(false);
+    setStickerManagerSelecting(false);
+    setSelectedStickerIds([]);
+  };
+
+  const openStickerManager = () => {
+    setEmojiPickerOpen(false);
+    setStickerManagerOpen(true);
+  };
+
+  const deleteSelectedStickers = async () => {
+    if (stickerSaving || !selectedStickerIds.length) return;
+    const deletingIds = [...selectedStickerIds];
     setStickerSaving(true);
     try {
-      await api.deleteSticker(sticker.sticker_id);
-      setStickers((current) => current.filter((item) => item.sticker_id !== sticker.sticker_id));
-      showToast(t("sticker.removed"));
+      await Promise.all(deletingIds.map((stickerId) => api.deleteSticker(stickerId)));
+      const deleting = stickers.filter((sticker) => deletingIds.includes(sticker.sticker_id));
+      setStickers((current) => current.filter((item) => !deletingIds.includes(item.sticker_id)));
+      purgeCachedMedia(deleting.map((sticker) => sticker.uri));
+      setSelectedStickerIds([]);
+      setStickerManagerSelecting(false);
+      setStickerDeleteConfirmOpen(false);
+      showToast(t("sticker.removedCount", { count: deletingIds.length }));
     } catch {
       showToast(t("sticker.removeFailed"), "error");
     } finally {
@@ -5468,30 +5502,19 @@ function LiveChatsPage() {
                     {emojiPage === STICKER_MY_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
                         {stickers.length ? (
-                          <div className="composer-sticker-toolbar is-actions-only">
-                            <button className={stickerManaging ? "is-active" : ""} onClick={() => setStickerManaging((current) => !current)} type="button">
-                              {stickerManaging ? t("common.done") : t("common.manage")}
-                            </button>
-                          </div>
-                        ) : null}
-                        {stickers.length ? (
                           <div className="composer-sticker-grid">
-                            {canCreateSticker ? (
-                              <button className="composer-sticker-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button">
-                                <span className="material-symbols-outlined">add_photo_alternate</span>
-                                <small>{t("sticker.add")}</small>
-                              </button>
-                            ) : null}
+                            <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
+                              <span className="material-symbols-outlined">add</span>
+                            </button>
                             {stickers.map((sticker) => (
                               <button
                                 className="composer-sticker-item"
                                 disabled={stickerSaving}
                                 key={sticker.sticker_id}
-                                onClick={() => stickerManaging ? void removeSticker(sticker) : void sendSticker(sticker)}
+                                onClick={() => void sendSticker(sticker)}
                                 type="button"
                               >
                                 <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
-                                {stickerManaging ? <span className="composer-sticker-remove material-symbols-outlined">remove</span> : null}
                               </button>
                             ))}
                           </div>
@@ -5499,7 +5522,7 @@ function LiveChatsPage() {
                           <div className="composer-sticker-empty">
                             <span className="material-symbols-outlined">photo_library</span>
                             <strong>{t("sticker.mineEmpty")}</strong>
-                            {canCreateSticker ? <button onClick={() => stickerInputRef.current?.click()} type="button">{t("sticker.addFirst")}</button> : null}
+                            {canCreateSticker ? <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button> : null}
                           </div>
                         ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
                       </div>
@@ -6091,6 +6114,59 @@ function LiveChatsPage() {
           />
         ) : null}
       </SideDrawer>
+      <SideDrawer
+        open={stickerManagerOpen}
+        title={t("sticker.manageTitle")}
+        actionLabel={stickers.length ? (stickerManagerSelecting ? t("common.cancel") : t("common.manage")) : undefined}
+        onAction={() => {
+          setStickerManagerSelecting((current) => !current);
+          setSelectedStickerIds([]);
+        }}
+        onClose={closeStickerManager}
+        historyKey="stickers"
+      >
+        <div className={`sticker-manager ${stickerManagerSelecting ? "is-selecting" : ""}`}>
+          <div className="sticker-manager-grid">
+            {canCreateSticker ? (
+              <button className="sticker-manager-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button" aria-label={t("sticker.add")}>
+                <span className="material-symbols-outlined">add</span>
+              </button>
+            ) : null}
+            {stickers.map((sticker) => {
+              const selected = selectedStickerIds.includes(sticker.sticker_id);
+              return (
+                <button
+                  aria-pressed={stickerManagerSelecting ? selected : undefined}
+                  className={`sticker-manager-item ${selected ? "is-selected" : ""}`}
+                  disabled={stickerSaving}
+                  key={sticker.sticker_id}
+                  onClick={() => toggleStickerSelection(sticker.sticker_id)}
+                  type="button"
+                >
+                  <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                  {stickerManagerSelecting ? (
+                    <span className="sticker-manager-check material-symbols-outlined">{selected ? "check" : ""}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+          {!stickers.length ? (
+            <div className="sticker-manager-empty">
+              <span className="material-symbols-outlined">photo_library</span>
+              <strong>{t("sticker.mineEmpty")}</strong>
+            </div>
+          ) : null}
+          {stickerManagerSelecting ? (
+            <div className="sticker-manager-footer">
+              <button className="danger-button" disabled={!selectedStickerIds.length || stickerSaving} onClick={() => setStickerDeleteConfirmOpen(true)} type="button">
+                <span className="material-symbols-outlined">delete</span>
+                {selectedStickerIds.length ? t("sticker.deleteSelected", { count: selectedStickerIds.length }) : t("sticker.selectToDelete")}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </SideDrawer>
       <InputDialog
         open={groupRenameOpen}
         title={t("chat.editGroupName")}
@@ -6140,6 +6216,18 @@ function LiveChatsPage() {
           setBatchDeleteConfirmOpen(false);
         }}
         onConfirm={() => void deleteSelectedMessages()}
+      />
+      <ConfirmDialog
+        open={stickerDeleteConfirmOpen}
+        title={t("sticker.deleteConfirmTitle", { count: selectedStickerIds.length })}
+        description={t("sticker.deleteConfirmHint")}
+        confirmLabel={t("common.delete")}
+        busy={stickerSaving}
+        danger
+        onClose={() => {
+          if (!stickerSaving) setStickerDeleteConfirmOpen(false);
+        }}
+        onConfirm={() => void deleteSelectedStickers()}
       />
       <BottomSheet
         open={chatMemberPickerOpen}

@@ -11,11 +11,18 @@ const blockedMediaSlugs = new Set();
 
 function mediaIdentity(value) {
   const url = new URL(value, self.location.origin);
-  const match = url.pathname.match(/\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
-  if (!match) return null;
+  const messageMatch = url.pathname.match(/\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
+  if (messageMatch) {
+    return {
+      slug: messageMatch[1].toLowerCase(),
+      variant: messageMatch[2] ? "thumbnail" : "original",
+    };
+  }
+  const stickerMatch = url.pathname.match(/\/(?:api\/)?stickers\/assets\/(\d+)\/?$/i);
+  if (!stickerMatch) return null;
   return {
-    slug: match[1].toLowerCase(),
-    variant: match[2] ? "thumbnail" : "original",
+    slug: `sticker-${stickerMatch[1]}`,
+    variant: "display",
   };
 }
 
@@ -175,8 +182,24 @@ self.addEventListener("message", (event) => {
       event.data.slugs.flatMap((slug) => [
         deleteMediaEntry({ slug, variant: "original" }),
         deleteMediaEntry({ slug, variant: "thumbnail" }),
+        deleteMediaEntry({ slug, variant: "display" }),
       ])
     ));
+  }
+  if (event.data?.type === "CACHE_MEDIA" && Array.isArray(event.data.urls)) {
+    event.waitUntil(Promise.all(event.data.urls.map(async (url) => {
+      const identity = mediaIdentity(url);
+      if (!identity) return;
+      if (identity.variant === "display") blockedMediaSlugs.delete(identity.slug);
+      if (blockedMediaSlugs.has(identity.slug)) return;
+      const cache = await caches.open(MEDIA_CACHE_NAME);
+      if (await cache.match(mediaCacheRequest(identity))) {
+        const entry = await withMediaStore("readonly", (store) => store.get(mediaEntryKey(identity)));
+        await touchMediaEntry(identity, entry?.size || 0);
+        return;
+      }
+      await fetchFullMedia(new Request(url), identity);
+    })));
   }
 });
 
