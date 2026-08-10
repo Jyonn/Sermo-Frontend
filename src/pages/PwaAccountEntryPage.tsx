@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { UserAvatar } from "../components/UserAvatar";
 import { useI18n } from "../lib/language";
-import { activatePwaCachedAccount, getDefaultPwaAccountKey, isPwaAutoLoginEnabled, listPwaCachedAccounts, setDefaultPwaAccountKey, setPwaAutoLoginEnabled } from "../lib/pwaAccounts";
+import { getDefaultPwaAccountKey, isPwaAutoLoginEnabled, listPwaCachedAccounts, setDefaultPwaAccountKey, setPwaAutoLoginEnabled } from "../lib/pwaAccounts";
 import { buildSpaceHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
 
 function launchDestination(slug: string) {
@@ -23,7 +23,6 @@ export default function PwaAccountEntryPage() {
   const openAccount = (account: (typeof accounts)[number]) => {
     if (launching) return;
     setLaunching(true);
-    activatePwaCachedAccount(account);
     window.location.replace(launchDestination(account.slug));
   };
 
