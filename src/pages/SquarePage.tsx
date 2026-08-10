@@ -215,12 +215,12 @@ function CommentThread({ comment, language, canInteract, onLike, onReply }: {
     <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
     <div>
       <header><strong>{comment.user.name}</strong><span>{formatStatementTime(comment.created_at, language)}</span></header>
-      <p>{comment.text}</p>
+      <p>{comment.reply_to_user ? <span className="square-comment-reply-prefix">{t("square.replyingTo", { name: comment.reply_to_user.name })}</span> : null}{comment.text}</p>
       <div className="square-comment-actions">
         <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={() => onLike(comment)} type="button"><span className="material-symbols-outlined">favorite</span>{comment.like_count || t("square.like")}</button>
-        {!comment.parent_id && canInteract ? <button onClick={() => onReply(comment)} type="button">{t("square.reply")}</button> : null}
+        {canInteract ? <button onClick={() => onReply(comment)} type="button">{t("square.reply")}</button> : null}
       </div>
-      {comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} language={language} onLike={onLike} onReply={onReply} />)}</div> : null}
+      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} language={language} onLike={onLike} onReply={onReply} />)}</div> : null}
     </div>
   </article>;
 }
@@ -432,8 +432,9 @@ export default function SquarePage() {
     setCommentSending(true);
     try {
       const comment = await api.createSquareStatementComment(commentStatementId, content, replyTarget?.comment_id);
+      const rootId = comment.root_id ?? replyTarget?.root_id ?? replyTarget?.comment_id;
       setComments((current) => replyTarget
-        ? current.map((item) => item.comment_id === replyTarget.comment_id ? { ...item, reply_count: item.reply_count + 1, replies: [...(item.replies ?? []), comment] } : item)
+        ? current.map((item) => item.comment_id === rootId ? { ...item, reply_count: item.reply_count + 1, replies: [...(item.replies ?? []), comment] } : item)
         : [comment, ...current]);
       setStatements((current) => current.map((statement) => statement.statement_id === commentStatementId
         ? { ...statement, comment_count: (statement.comment_count || 0) + 1 }

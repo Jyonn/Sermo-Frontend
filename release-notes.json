@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.2",
+  "id": "2026.08.11.3",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "多设备未读状态更准确",
+      "title": "评论回复更连贯",
       "items": [
-        "自己发送的消息不再被标记为未读",
-        "其他设备补同步聊天记录时不再制造虚假红点",
-        "未读数统一以账户的服务端阅读进度为准"
+        "现在可以回复任意一条发言评论",
+        "所有回复统一收纳为两层，讨论更清晰",
+        "回复二级评论时会明确标出被回复的人"
       ]
     },
     "en": {
-      "title": "Accurate unread state across devices",
+      "title": "More natural comment replies",
       "items": [
-        "Messages you send no longer count as unread",
-        "Backfilled history on another device no longer creates false badges",
-        "Unread counts now follow the account's server-side read position"
+        "You can now reply to any statement comment",
+        "Replies stay in a clear two-level thread",
+        "Replies to nested comments show who is being addressed"
       ]
     }
   }

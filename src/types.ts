@@ -427,6 +427,8 @@ export interface SquareStatementCommentDTO {
   user: TinyUserDTO;
   text: string;
   parent_id?: number | null;
+  root_id?: number | null;
+  reply_to_user?: TinyUserDTO | null;
   like_count: number;
   reply_count: number;
   liked: boolean;
