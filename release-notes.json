@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.9",
+  "id": "2026.08.10.10",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "刷新不再打断浏览",
+      "title": "WebApp 有了账户入口",
       "items": [
-        "刷新时优先保留已缓存的聊天与各 Tab 内容",
-        "后台同步改为顶部轻量进度提示",
-        "空间功能与安全偏好恢复更快"
+        "桌面图标统一使用 Sermo 品牌标识",
+        "启动时可以从本机已登录账户中选择",
+        "可为默认账户明确开启自动登录"
       ]
     },
     "en": {
-      "title": "Refresh without interruption",
+      "title": "A new WebApp account entry",
       "items": [
-        "Cached chats and tab content now remain visible during refresh",
-        "Background sync now uses a subtle progress line",
-        "Space features and security preferences restore faster"
+        "The home-screen icon now consistently uses the Sermo brand",
+        "Choose from accounts already signed in on this device",
+        "Explicitly enable automatic sign-in for your default account"
       ]
     }
   }

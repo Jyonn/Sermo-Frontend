@@ -21,6 +21,7 @@ import MenuPage from "./pages/MenuPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import OfficialLoginPage from "./pages/OfficialLoginPage";
 import AccountSwitchPage from "./pages/AccountSwitchPage";
+import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
@@ -104,6 +105,7 @@ export default function App() {
         <Route path="/friend-invite" element={<FriendInvitePage />} />
         <Route path="/official-login" element={<OfficialLoginPage />} />
         <Route path="/account-switch" element={<AccountSwitchPage />} />
+        <Route path="/pwa" element={<PwaAccountEntryPage />} />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"

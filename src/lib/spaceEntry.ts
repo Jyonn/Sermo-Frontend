@@ -11,6 +11,7 @@ const ROOT_PATH_SEGMENTS = new Set([
   "friend-invite",
   "official-login",
   "account-switch",
+  "pwa",
   "api",
   "assets",
   "icons",

@@ -1,12 +1,12 @@
 importScripts("/sw-release.js");
 
-const CACHE_NAME = "sermo-shell-v6";
+const CACHE_NAME = "sermo-shell-v7";
 const MEDIA_CACHE_NAME = "sermo-media-v1";
 const MEDIA_DB_NAME = "sermo-media-metadata";
 const MEDIA_DB_STORE = "entries";
 const MEDIA_MAX_BYTES = 256 * 1024 * 1024;
 const MEDIA_MAX_ITEM_BYTES = 128 * 1024 * 1024;
-const SHELL = ["/", "/manifest.json", "/icons/sermo-192.png?v=3", "/icons/sermo-512.png?v=3"];
+const SHELL = ["/", "/manifest.json", "/icons/sermo-192.png?v=4", "/icons/sermo-512.png?v=4"];
 const blockedMediaSlugs = new Set();
 
 function mediaIdentity(value) {
@@ -257,8 +257,8 @@ self.addEventListener("push", (event) => {
   const url = payload.chat_id ? `${spacePrefix}/app/chats/${payload.chat_id}` : `${spacePrefix}/app/chats`;
   event.waitUntil(self.registration.showNotification(payload.title || "Sermo 言浪", {
     body: payload.body || "你收到了一条新消息",
-    icon: payload.icon || "/icons/sermo-192.png?v=3",
-    badge: "/icons/sermo-192.png?v=3",
+    icon: payload.icon || "/icons/sermo-192.png?v=4",
+    badge: "/icons/sermo-192.png?v=4",
     tag: payload.chat_id ? `chat-${payload.chat_id}` : undefined,
     data: { url },
   }));

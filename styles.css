@@ -2892,6 +2892,170 @@ html[data-theme="dark"] body .growth-level-detail {
   .session-refresh-indicator span { animation: none; width: 100%; opacity: .55; }
 }
 
+/* PWA account station: a calm threshold between the device and each space. */
+.pwa-account-entry {
+  --entry-ink: #16392f;
+  --entry-muted: #6e827b;
+  --entry-accent: #087b5a;
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden auto;
+  padding: calc(22px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+  color: var(--entry-ink);
+  background:
+    radial-gradient(circle at 90% 8%, rgba(244, 189, 91, .25), transparent 28%),
+    linear-gradient(148deg, #f6f1e5 0%, #eef5ed 52%, #daeae2 100%);
+}
+
+.pwa-account-entry-atmosphere,
+.pwa-account-entry-atmosphere i { position: fixed; pointer-events: none; }
+.pwa-account-entry-atmosphere { inset: 0; overflow: hidden; }
+.pwa-account-entry-atmosphere::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .34;
+  background-image: radial-gradient(circle, rgba(30, 74, 61, .22) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to bottom, #000, transparent 72%);
+}
+.pwa-account-entry-atmosphere i { border: 1px solid rgba(25, 102, 79, .14); border-radius: 50%; }
+.pwa-account-entry-atmosphere i:nth-child(1) { width: 48vw; height: 48vw; right: -22vw; top: 12vh; }
+.pwa-account-entry-atmosphere i:nth-child(2) { width: 76vw; height: 76vw; right: -36vw; top: 2vh; }
+.pwa-account-entry-atmosphere i:nth-child(3) { width: 104vw; height: 104vw; right: -48vw; top: -8vh; }
+
+.pwa-account-entry-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 460px);
+  min-height: calc(100dvh - 46px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pwa-account-entry-brand { display: flex; align-items: center; gap: 11px; }
+.pwa-account-entry-brand img { width: 44px; height: 44px; border-radius: 13px; box-shadow: 0 8px 22px rgba(31, 80, 64, .13); }
+.pwa-account-entry-brand div { display: grid; gap: 1px; }
+.pwa-account-entry-brand span { color: var(--entry-accent); font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .16em; }
+.pwa-account-entry-brand strong { font-size: 14px; letter-spacing: .03em; }
+.pwa-account-entry-heading { margin: clamp(42px, 8vh, 74px) 0 24px; }
+.pwa-account-entry-heading p { margin: 0 0 8px; color: var(--entry-accent); font: 600 12px/1.4 "JetBrains Mono", monospace; letter-spacing: .08em; }
+.pwa-account-entry-heading h1 { max-width: 12ch; margin: 0; font-size: clamp(30px, 8vw, 42px); line-height: 1.08; letter-spacing: -.045em; }
+
+.pwa-account-rail { display: grid; gap: 10px; }
+.pwa-account-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 15px 13px 13px;
+  border: 1px solid rgba(37, 79, 65, .11);
+  border-radius: 21px;
+  color: var(--entry-ink);
+  text-align: left;
+  background: rgba(253, 252, 246, .72);
+  box-shadow: 0 9px 26px rgba(37, 73, 62, .055);
+  backdrop-filter: blur(16px);
+  transition: transform .22s cubic-bezier(.22, 1, .36, 1), border-color .22s, background .22s;
+}
+.pwa-account-card:active { transform: scale(.985); }
+.pwa-account-card.is-selected { border-color: rgba(8, 123, 90, .52); background: rgba(250, 253, 245, .95); box-shadow: 0 12px 30px rgba(25, 103, 78, .11); }
+.pwa-account-avatar { width: 58px; height: 58px; border-radius: 18px; }
+.pwa-account-card-copy { min-width: 0; display: grid; gap: 5px; }
+.pwa-account-card-copy > strong { overflow: hidden; font-size: 17px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.pwa-account-card-copy small { min-width: 0; display: flex; gap: 6px; color: var(--entry-muted); font-size: 12px; }
+.pwa-account-card-copy small b { overflow: hidden; color: #49675e; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.pwa-account-card-copy small span { flex: none; font-family: "JetBrains Mono", monospace; }
+.pwa-account-check { width: 20px; height: 20px; display: grid; place-items: center; border: 1.5px solid #b9c7c0; border-radius: 50%; }
+.pwa-account-check i { width: 7px; height: 7px; border-radius: 50%; background: transparent; transform: scale(.4); transition: transform .2s, background .2s; }
+.pwa-account-card.is-selected .pwa-account-check { border-color: var(--entry-accent); }
+.pwa-account-card.is-selected .pwa-account-check i { background: var(--entry-accent); transform: scale(1); }
+
+.pwa-auto-login-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  margin: 13px 0 18px;
+  padding: 6px 3px;
+  color: var(--entry-ink);
+  text-align: left;
+}
+.pwa-auto-login-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; color: #917025; background: rgba(245, 198, 95, .22); }
+.pwa-auto-login-mark .material-symbols-outlined { font-size: 20px; }
+.pwa-auto-login-row > span:nth-child(2) { display: grid; gap: 2px; }
+.pwa-auto-login-row strong { font-size: 13px; }
+.pwa-auto-login-row small { color: var(--entry-muted); font-size: 11px; }
+.pwa-auto-login-row .switch { pointer-events: none; }
+
+.pwa-account-primary {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 19px 0 22px;
+  border-radius: 18px;
+  color: #f6fff9;
+  background: #0b7356;
+  box-shadow: 0 15px 30px rgba(10, 94, 69, .2);
+  font-size: 16px;
+  font-weight: 700;
+}
+.pwa-account-primary:disabled { opacity: .55; }
+.pwa-account-primary .material-symbols-outlined { font-size: 23px; }
+
+.pwa-other-login { margin-top: auto; padding-top: 34px; }
+.pwa-other-login.has-accounts { margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(36, 76, 63, .12); }
+.pwa-other-login > div { display: grid; gap: 3px; margin-bottom: 11px; }
+.pwa-other-login > div strong { font-size: 13px; }
+.pwa-other-login > div small { color: var(--entry-muted); font-size: 11px; }
+.pwa-other-login form { display: grid; grid-template-columns: auto minmax(0, 1fr) 40px; align-items: center; min-height: 52px; padding: 5px 6px 5px 16px; border: 1px solid rgba(39, 81, 67, .15); border-radius: 17px; background: rgba(253, 252, 247, .72); }
+.pwa-other-login form > span { color: var(--entry-accent); font: 600 16px/1 "JetBrains Mono", monospace; }
+.pwa-other-login input { min-width: 0; border: 0; outline: 0; color: var(--entry-ink); background: transparent; font: 500 14px/1.2 "JetBrains Mono", monospace; }
+.pwa-other-login input::placeholder { color: #93a39d; }
+.pwa-other-login form button { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; color: #f5fff9; background: var(--entry-accent); }
+.pwa-other-login form button:disabled { color: #8ea29b; background: #dce5e0; }
+.pwa-account-entry footer { padding-top: 22px; color: #81938c; font: 500 10px/1.4 "JetBrains Mono", monospace; letter-spacing: .08em; text-align: center; }
+
+html[data-theme="dark"] .pwa-account-entry {
+  --entry-ink: #e4f0e9;
+  --entry-muted: #91a69d;
+  --entry-accent: #65d8ac;
+  background: radial-gradient(circle at 88% 7%, rgba(185, 129, 43, .15), transparent 28%), linear-gradient(148deg, #101b17, #0c1814 58%, #10261e);
+}
+html[data-theme="dark"] .pwa-account-card,
+html[data-theme="dark"] .pwa-other-login form { border-color: rgba(164, 205, 187, .12); background: rgba(22, 41, 34, .78); }
+html[data-theme="dark"] .pwa-account-card.is-selected { border-color: rgba(101, 216, 172, .48); background: rgba(25, 50, 41, .96); }
+html[data-theme="dark"] .pwa-account-card-copy small b { color: #b6cbc1; }
+html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
+
+@media (min-width: 760px) {
+  .pwa-account-entry { display: grid; place-items: center; padding: 34px; }
+  .pwa-account-entry-shell { min-height: min(760px, calc(100dvh - 68px)); }
+  .pwa-account-entry-heading { margin-top: clamp(48px, 8vh, 76px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pwa-account-entry-brand,
+  .pwa-account-entry-heading,
+  .pwa-account-rail,
+  .pwa-auto-login-row,
+  .pwa-account-primary,
+  .pwa-other-login { animation: pwa-entry-rise .55s both cubic-bezier(.22, 1, .36, 1); }
+  .pwa-account-entry-heading { animation-delay: .05s; }
+  .pwa-account-rail { animation-delay: .1s; }
+  .pwa-auto-login-row { animation-delay: .14s; }
+  .pwa-account-primary { animation-delay: .18s; }
+  .pwa-other-login { animation-delay: .22s; }
+}
+@keyframes pwa-entry-rise { from { opacity: 0; transform: translateY(14px); } }
+
 .app-layout {
   display: grid;
   grid-template-columns: 280px minmax(420px, 1fr) 320px;

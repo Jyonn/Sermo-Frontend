@@ -3,7 +3,7 @@
   "short_name": "言浪",
   "description": "一方空间，尽兴开聊。",
   "id": "/?source=pwa",
-  "start_url": "/?source=pwa",
+  "start_url": "/pwa?source=pwa",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -14,12 +14,12 @@
   "prefer_related_applications": false,
   "launch_handler": { "client_mode": "navigate-existing" },
   "icons": [
-    { "src": "/icons/sermo-192.png?v=3", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/sermo-512.png?v=3", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "/icons/sermo-192.png?v=4", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/sermo-512.png?v=4", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "shortcuts": [
-    { "name": "聊天", "short_name": "聊天", "url": "/?source=pwa&shortcut=chats", "icons": [{ "src": "/icons/sermo-192.png?v=3", "sizes": "192x192" }] },
-    { "name": "通讯", "short_name": "通讯", "url": "/?source=pwa&shortcut=notifications", "icons": [{ "src": "/icons/sermo-192.png?v=3", "sizes": "192x192" }] },
-    { "name": "菜单", "short_name": "菜单", "url": "/?source=pwa&shortcut=menu", "icons": [{ "src": "/icons/sermo-192.png?v=3", "sizes": "192x192" }] }
+    { "name": "聊天", "short_name": "聊天", "url": "/pwa?source=pwa&shortcut=chats", "icons": [{ "src": "/icons/sermo-192.png?v=4", "sizes": "192x192" }] },
+    { "name": "通讯", "short_name": "通讯", "url": "/pwa?source=pwa&shortcut=notifications", "icons": [{ "src": "/icons/sermo-192.png?v=4", "sizes": "192x192" }] },
+    { "name": "菜单", "short_name": "菜单", "url": "/pwa?source=pwa&shortcut=menu", "icons": [{ "src": "/icons/sermo-192.png?v=4", "sizes": "192x192" }] }
   ]
 }
