@@ -8915,7 +8915,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   display: flex;
   align-items: center;
   min-height: 46px;
-  padding: 0 16px;
+  padding: 0 54px 0 16px;
   border-radius: 999px;
   border: 1px solid var(--chat-chrome-border, rgba(224, 230, 240, 0.88));
   background: var(--chat-input-surface, rgba(255, 255, 255, 0.82));
@@ -16404,10 +16404,12 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 
   .composer-row-text {
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .composer-emoji-button {
+    position: absolute;
+    right: 7px;
     display: grid;
     place-items: center;
     width: 42px;
@@ -16439,7 +16441,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
   .composer-emoji-tabs {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 5px;
     margin-bottom: 8px;
     padding-bottom: 8px;
@@ -16823,6 +16825,21 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   font-size: 15px;
 }
 
+.composer-sticker-collect {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: grid;
+  width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: color-mix(in srgb, var(--accent) 88%, #08724d);
+  box-shadow: 0 3px 9px rgba(7, 82, 55, .2);
+  font-size: 15px;
+}
+
 .composer-sticker-loading {
   align-self: center;
   justify-self: center;
@@ -16836,7 +16853,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
 .message-bubble.is-sticker,
 .message-group:not(.bubble-style-default) .message-bubble.is-sticker {
-  max-width: min(46vw, 176px);
+  max-width: min(40vw, 148px);
   padding: 0;
   overflow: visible;
   border: 0;
@@ -16851,7 +16868,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 176px;
+  max-height: 148px;
   object-fit: contain;
   filter: drop-shadow(0 7px 10px rgba(26, 40, 34, .13));
   -webkit-user-select: none;
@@ -16875,7 +16892,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   .composer-emoji-button {
     position: absolute;
     z-index: 2;
-    right: 52px;
+    right: 8px;
     display: grid;
     width: 38px;
     height: 38px;
@@ -16883,8 +16900,8 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     background: transparent;
   }
 
-  .composer-input-shell {
-    padding-right: 40px;
+  .composer-input-wrap {
+    padding-right: 52px;
   }
 
   .composer-emoji-panel {

@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.10.1",
+  "id": "2026.08.10.2",
   "publishedAt": "2026-08-10",
   "locales": {
     "zh-CN": {
-      "title": "聊天表情包上线",
+      "title": "表情包探索与快捷输入",
       "items": [
-        "表情面板新增个人表情包收藏",
-        "聊天图片可长按添加为表情",
-        "相同图片自动复用，无需重复上传"
+        "表情面板新增“我的”与全站“探索”",
+        "打开表情面板后可一键切回键盘",
+        "聊天中的表情展示更加轻巧"
       ]
     },
     "en": {
-      "title": "Personal chat stickers",
+      "title": "Sticker discovery and quicker input",
       "items": [
-        "The emoji panel now includes personal sticker collections",
-        "Chat images can be saved as stickers from the action menu",
-        "Matching image hashes are reused without another upload"
+        "The emoji panel now separates Mine and site-wide Explore",
+        "Switch straight back to the keyboard from the open panel",
+        "Stickers now use a lighter, more compact chat presentation"
       ]
     }
   }

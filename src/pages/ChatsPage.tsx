@@ -41,7 +41,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -123,6 +123,8 @@ const EMOJI_PAGES = [
   },
 ] as const;
 const EMOJI_SEQUENCE_RE = /(?:[\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?)*)/gu;
+const STICKER_MY_PAGE = -2;
+const STICKER_EXPLORE_PAGE = -1;
 const TEXT_URL_RE = /https?:\/\/[^\s<>"'，。！？、；：）】》]+/gi;
 const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
@@ -195,7 +197,7 @@ function visibleBubbleStyle(style?: string) {
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
-function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "pin" | "pin-off"; className?: string }) {
+function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
   if (kind === "emoji") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -203,6 +205,15 @@ function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "locati
         <circle cx="9" cy="10" r="1" fill="currentColor" />
         <circle cx="15" cy="10" r="1" fill="currentColor" />
         <path d="M8.5 14c.85 1.35 2 2.05 3.5 2.05s2.65-.7 3.5-2.05" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (kind === "keyboard") {
+    return (
+      <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+        <rect x="3.25" y="5.25" width="17.5" height="13.5" rx="3" stroke="currentColor" strokeWidth="1.7" />
+        <path d="M7 9h.01M10.35 9h.01M13.7 9h.01M17 9h.01M7 12.35h.01M10.35 12.35h.01M13.7 12.35h.01M17 12.35h.01M8.2 15.7h7.6" stroke="currentColor" strokeLinecap="round" strokeWidth="1.9" />
       </svg>
     );
   }
@@ -2098,9 +2109,10 @@ function LiveChatsPage() {
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const [emojiPage, setEmojiPage] = useState(0);
+  const [emojiPage, setEmojiPage] = useState(STICKER_MY_PAGE);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [stickers, setStickers] = useState<StickerDTO[]>([]);
+  const [exploreStickers, setExploreStickers] = useState<StickerAssetDTO[]>([]);
   const [stickersLoading, setStickersLoading] = useState(false);
   const [stickerManaging, setStickerManaging] = useState(false);
   const [stickerSaving, setStickerSaving] = useState(false);
@@ -3137,16 +3149,20 @@ function LiveChatsPage() {
     setMessageMenu(null);
     setComposerMoreOpen(false);
     setEmojiPickerOpen(false);
-    setEmojiPage(0);
+    setEmojiPage(STICKER_MY_PAGE);
     setStickerManaging(false);
   }, [selectedChat?.id]);
 
   useEffect(() => {
-    if (!emojiPickerOpen || emojiPage !== -1 || !currentUserId) return;
+    if (!emojiPickerOpen || ![STICKER_MY_PAGE, STICKER_EXPLORE_PAGE].includes(emojiPage) || !currentUserId) return;
     const controller = new AbortController();
     setStickersLoading(true);
-    void api.getStickers(controller.signal)
-      .then(setStickers)
+    const request = emojiPage === STICKER_MY_PAGE ? api.getStickers(controller.signal) : api.exploreStickers(controller.signal);
+    void request
+      .then((rows) => {
+        if (emojiPage === STICKER_MY_PAGE) setStickers(rows as StickerDTO[]);
+        else setExploreStickers(rows as StickerAssetDTO[]);
+      })
       .catch(() => undefined)
       .finally(() => {
         if (!controller.signal.aborted) setStickersLoading(false);
@@ -3233,6 +3249,7 @@ function LiveChatsPage() {
     try {
       const sticker = await addStickerFile(file);
       setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
+      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id));
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
@@ -3256,6 +3273,21 @@ function LiveChatsPage() {
     }
   };
 
+  const collectExploredSticker = async (asset: StickerAssetDTO) => {
+    if (stickerSaving) return;
+    setStickerSaving(true);
+    try {
+      const sticker = await api.collectStickerAsset(asset.sticker_asset_id);
+      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
+      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== asset.sticker_asset_id));
+      showToast(t("sticker.added"));
+    } catch {
+      showToast(t("sticker.addFailed"), "error");
+    } finally {
+      setStickerSaving(false);
+    }
+  };
+
   const collectImageAsSticker = async () => {
     if (!messageMenu || messageMenu.message.kind !== "image" || typeof messageMenu.message.id !== "number") return;
     const messageId = messageMenu.message.id;
@@ -3263,6 +3295,7 @@ function LiveChatsPage() {
     try {
       const sticker = await api.collectMessageSticker(messageId);
       setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
+      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id));
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
@@ -5145,6 +5178,9 @@ function LiveChatsPage() {
               <div
                 ref={messageScrollRef}
                 className="message-scroll"
+                onPointerDown={() => {
+                  if (emojiPickerOpen) setEmojiPickerOpen(false);
+                }}
                 onScroll={() => {
                   const element = messageScrollRef.current;
                   stickToBottomRef.current = isNearThreadBottom(element);
@@ -5252,20 +5288,25 @@ function LiveChatsPage() {
                           }
                         }}
                       />
+                      <button
+                        aria-expanded={emojiPickerOpen}
+                        aria-label={emojiPickerOpen ? t("emoji.keyboard") : t("emoji.choose")}
+                        className={`composer-emoji-button ${emojiPickerOpen ? "is-open" : ""}`}
+                        disabled={composerBusy}
+                        onClick={() => {
+                          setComposerMoreOpen(false);
+                          if (emojiPickerOpen) {
+                            setEmojiPickerOpen(false);
+                            window.requestAnimationFrame(() => textareaRef.current?.focus());
+                          } else {
+                            setEmojiPickerOpen(true);
+                          }
+                        }}
+                        type="button"
+                      >
+                        <ComposerSvgIcon className="composer-inline-svg" kind={emojiPickerOpen ? "keyboard" : "emoji"} />
+                      </button>
                     </div>
-                    <button
-                      aria-expanded={emojiPickerOpen}
-                      aria-label={emojiPickerOpen ? t("emoji.collapse") : t("emoji.choose")}
-                      className={`composer-emoji-button ${emojiPickerOpen ? "is-open" : ""}`}
-                      disabled={composerBusy}
-                      onClick={() => {
-                        setComposerMoreOpen(false);
-                        setEmojiPickerOpen((current) => !current);
-                      }}
-                      type="button"
-                    >
-                      <ComposerSvgIcon className="composer-inline-svg" kind="emoji" />
-                    </button>
                     <button
                       aria-expanded={composerMoreOpen}
                       aria-label={composerMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
@@ -5343,16 +5384,28 @@ function LiveChatsPage() {
                   <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
                     <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
                       <button
-                        aria-label={t("sticker.tab")}
-                        aria-selected={emojiPage === -1}
-                        className={emojiPage === -1 ? "is-active" : ""}
-                        onClick={() => setEmojiPage(-1)}
+                        aria-label={t("sticker.mine")}
+                        aria-selected={emojiPage === STICKER_MY_PAGE}
+                        className={emojiPage === STICKER_MY_PAGE ? "is-active" : ""}
+                        onClick={() => setEmojiPage(STICKER_MY_PAGE)}
                         role="tab"
-                        title={t("sticker.tab")}
+                        title={t("sticker.mine")}
                         type="button"
                       >
                         <span className="material-symbols-outlined">photo_library</span>
-                        <small>{t("sticker.tab")}</small>
+                        <small>{t("sticker.mine")}</small>
+                      </button>
+                      <button
+                        aria-label={t("sticker.explore")}
+                        aria-selected={emojiPage === STICKER_EXPLORE_PAGE}
+                        className={emojiPage === STICKER_EXPLORE_PAGE ? "is-active" : ""}
+                        onClick={() => setEmojiPage(STICKER_EXPLORE_PAGE)}
+                        role="tab"
+                        title={t("sticker.explore")}
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined">explore</span>
+                        <small>{t("sticker.explore")}</small>
                       </button>
                       {EMOJI_PAGES.map((page, index) => (
                         <button
@@ -5370,8 +5423,8 @@ function LiveChatsPage() {
                         </button>
                       ))}
                     </div>
-                    {emojiPage === -1 ? (
-                      <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.tab")}>
+                    {emojiPage === STICKER_MY_PAGE ? (
+                      <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
                         <div className="composer-sticker-toolbar">
                           <span>{stickers.length ? t("sticker.count", { count: stickers.length }) : t("sticker.empty")}</span>
                           {stickers.length ? (
@@ -5395,6 +5448,28 @@ function LiveChatsPage() {
                             >
                               <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                               {stickerManaging ? <span className="composer-sticker-remove material-symbols-outlined">remove</span> : null}
+                            </button>
+                          ))}
+                          {stickersLoading ? <span className="composer-sticker-loading" aria-label={t("common.loading")} /> : null}
+                        </div>
+                      </div>
+                    ) : emojiPage === STICKER_EXPLORE_PAGE ? (
+                      <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
+                        <div className="composer-sticker-toolbar">
+                          <span>{exploreStickers.length ? t("sticker.exploreHint") : t("sticker.exploreEmpty")}</span>
+                        </div>
+                        <div className="composer-sticker-grid">
+                          {exploreStickers.map((sticker) => (
+                            <button
+                              aria-label={t("sticker.collect")}
+                              className="composer-sticker-item is-explore"
+                              disabled={stickerSaving}
+                              key={sticker.sticker_asset_id}
+                              onClick={() => void collectExploredSticker(sticker)}
+                              type="button"
+                            >
+                              <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                              <span className="composer-sticker-collect material-symbols-outlined">add</span>
                             </button>
                           ))}
                           {stickersLoading ? <span className="composer-sticker-loading" aria-label={t("common.loading")} /> : null}

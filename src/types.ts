@@ -333,13 +333,16 @@ export interface EmojiUsageDTO {
   last_used_at: number;
 }
 
-export interface StickerDTO {
-  sticker_id: number;
+export interface StickerAssetDTO {
   sticker_asset_id: number;
   content_hash: string;
   uri: string;
   mime_type: string;
   file_size: number;
+}
+
+export interface StickerDTO extends StickerAssetDTO {
+  sticker_id: number;
   created_at: number;
 }
 

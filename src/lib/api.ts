@@ -39,6 +39,7 @@ import type {
   UserMeDTO,
   WebReminderPreferenceDTO,
   EmojiUsageDTO,
+  StickerAssetDTO,
   StickerDTO,
   StickerPrepareDTO,
   WebPushInfoDTO,
@@ -971,6 +972,14 @@ export const api = {
 
   getStickers(signal?: AbortSignal) {
     return request<StickerDTO[]>("/stickers/", { auth: true, signal });
+  },
+
+  exploreStickers(signal?: AbortSignal) {
+    return request<StickerAssetDTO[]>("/stickers/explore", { auth: true, signal });
+  },
+
+  collectStickerAsset(asset_id: number) {
+    return request<StickerDTO>("/stickers/collect", { method: "POST", auth: true, body: { asset_id } });
   },
 
   prepareSticker(payload: { content_hash: string; file_name: string; content_type?: string; file_size: number }) {
