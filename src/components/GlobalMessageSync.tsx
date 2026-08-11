@@ -199,6 +199,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     notificationsMuted: Boolean(chat.notifications_muted),
+    unreadBadgeMuted: Boolean(chat.unread_badge_muted),
+    hasUnreadMention: Boolean(chat.has_unread_mention),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
       relation: chat.group ? (isOwner ? i18n.t("chat.ownerRelation") : i18n.t("chat.memberRelation")) : i18n.t("chat.directRelation"),
@@ -387,9 +389,11 @@ export function GlobalMessageSync() {
               time: formatChatListTime(newest.createdAt),
               lastActivity: newest.createdAt,
             } : {}),
-            unread: chat.id === activeChatId || chat.notificationsMuted
+            unread: chat.id === activeChatId
               ? 0
               : readState?.unread_count ?? chat.unread,
+            unreadBadgeMuted: readState?.unread_badge_muted ?? chat.unreadBadgeMuted,
+            hasUnreadMention: chat.id === activeChatId ? false : readState?.has_unread_mention ?? chat.hasUnreadMention,
           };
         })
       );

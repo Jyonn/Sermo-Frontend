@@ -96,9 +96,9 @@ export function AppBottomNav() {
 
     let cancelled = false;
 
-    const applyUnread = (scope: string, chats: { unread: number }[]) => {
+    const applyUnread = (scope: string, chats: { unread: number; unreadBadgeMuted?: boolean }[]) => {
       if (scope !== cacheScope || cancelled) return;
-      setTotalUnread(chats.reduce((sum, chat) => sum + Math.max(0, chat.unread || 0), 0));
+      setTotalUnread(chats.reduce((sum, chat) => sum + (chat.unreadBadgeMuted ? 0 : Math.max(0, chat.unread || 0)), 0));
     };
 
     const inMemory = chatCache.getChatList(cacheScope);
@@ -112,7 +112,7 @@ export function AppBottomNav() {
     }
 
     const handleUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<{ scope: string; chats: { unread: number }[] }>).detail;
+      const detail = (event as CustomEvent<{ scope: string; chats: { unread: number; unreadBadgeMuted?: boolean }[] }>).detail;
       if (!detail) return;
       applyUnread(detail.scope, detail.chats);
     };

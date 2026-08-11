@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.8",
+  "id": "2026.08.11.9",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片重新贴边",
+      "title": "群聊提醒更懂轻重",
       "items": [
-        "修复宽屏下链接卡片偏离消息边缘的问题",
-        "无图卡片会按内容自然收缩",
-        "不同宽度的网页卡片保持同一侧对齐"
+        "消息通知与 WebAPP 未读状态不再互相影响",
+        "可将群聊未读数字弱化为小红点",
+        "群聊支持 @成员，并在会话列表保留被提及标识"
       ]
     },
     "en": {
-      "title": "Link cards stay aligned",
+      "title": "Smarter group chat attention",
       "items": [
-        "Fixed link cards drifting away from message edges on wide screens",
-        "Cards without images now size naturally to their content",
-        "Web previews of different widths remain anchored consistently"
+        "External notifications are now independent from WebAPP unread state",
+        "Group unread counts can be de-emphasized into a quiet dot",
+        "Mention group members and keep a clear mention marker in the chat list"
       ]
     }
   }

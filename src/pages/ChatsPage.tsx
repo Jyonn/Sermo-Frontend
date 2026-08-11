@@ -876,10 +876,11 @@ function previewFromDto(message: ChatMessageDTO | null) {
 }
 
 function clearChatUnread(chat: Chat) {
-  if (chat.unread === 0) return chat;
+  if (chat.unread === 0 && !chat.hasUnreadMention) return chat;
   return {
     ...chat,
     unread: 0,
+    hasUnreadMention: false,
   };
 }
 
@@ -1982,6 +1983,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     notificationsMuted: Boolean(chat.notifications_muted),
+    unreadBadgeMuted: Boolean(chat.unread_badge_muted),
+    hasUnreadMention: Boolean(chat.has_unread_mention),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
       relation: chat.group ? (isOwner ? i18n.t("chat.ownerRelation") : i18n.t("chat.memberRelation")) : i18n.t("chat.directRelation"),
@@ -2104,7 +2107,8 @@ function LiveChatsPage() {
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
-  const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | null>(null);
+  const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
+  const [mentionSearch, setMentionSearch] = useState<{ start: number; end: number; query: string } | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
@@ -2678,6 +2682,33 @@ function LiveChatsPage() {
     const member = selectedChat.detail.members.find((item) => !item.isSelf);
     return member ? { user_id: member.userId, name: member.name, avatar_uri: member.avatarUri } : null;
   }, [selectedChat]);
+  const mentionCandidates = useMemo(() => {
+    if (!selectedChat || selectedChat.type !== "group" || !mentionSearch) return [];
+    const query = mentionSearch.query.toLocaleLowerCase(getActiveLocale());
+    return selectedChat.detail.members
+      .filter((member) => !member.isSelf && (!query || member.name.toLocaleLowerCase(getActiveLocale()).includes(query)))
+      .slice(0, 6);
+  }, [mentionSearch, selectedChat]);
+  const mentionUserIdsForText = (text: string) => {
+    if (!selectedChat || selectedChat.type !== "group") return [];
+    return selectedChat.detail.members.filter((member) => {
+      if (member.isSelf) return false;
+      const escapedName = member.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp(`@${escapedName}(?=$|\\s|[，。！？、,.!?])`, "u").test(text);
+    }).map((member) => member.userId);
+  };
+  const selectMention = (member: Chat["detail"]["members"][number]) => {
+    if (!mentionSearch) return;
+    const insertion = `@${member.name} `;
+    const nextDraft = `${draft.slice(0, mentionSearch.start)}${insertion}${draft.slice(mentionSearch.end)}`;
+    const nextCursor = mentionSearch.start + insertion.length;
+    updateDraft(nextDraft);
+    setMentionSearch(null);
+    window.requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+      textareaRef.current?.setSelectionRange(nextCursor, nextCursor);
+    });
+  };
   const profileDrawerSeed = useMemo(() => {
     if (profileDrawerUserId === null) return null;
     for (const chat of chats) {
@@ -3194,6 +3225,7 @@ function LiveChatsPage() {
 
   useEffect(() => {
     setDraft(cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "");
+    setMentionSearch(null);
   }, [cacheScope, selectedChat?.id]);
 
   const insertEmoji = (emoji: string) => {
@@ -3520,9 +3552,11 @@ function LiveChatsPage() {
                 time: formatChatListTime(newest.createdAt),
                 lastActivity: newest.createdAt,
               } : {}),
-              unread: chat.id === selectedChat?.id || chat.notificationsMuted
+              unread: chat.id === selectedChat?.id
                 ? 0
                 : readState?.unread_count ?? chat.unread,
+              unreadBadgeMuted: readState?.unread_badge_muted ?? chat.unreadBadgeMuted,
+              hasUnreadMention: chat.id === selectedChat?.id ? false : readState?.has_unread_mention ?? chat.hasUnreadMention,
             };
           })
         )
@@ -3583,28 +3617,28 @@ function LiveChatsPage() {
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
   const chatMemberActionIds = chatMemberPickerMode === "remove" ? groupSelectedIds : chatMemberNewIds;
 
-  const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute", enabled: boolean) => {
+  const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute" | "badge", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
     if (kind === "online" && enabled && !requireComposerCapability("online_reminder", 7, t("chat.enableOnlineReminder"))) return;
     const chatIdToUpdate = selectedChat.id;
-    const field = kind === "pin" ? "pinned" : kind === "online" ? "onlineReminderEnabled" : "notificationsMuted";
+    const field = kind === "pin" ? "pinned" : kind === "online" ? "onlineReminderEnabled" : kind === "mute" ? "notificationsMuted" : "unreadBadgeMuted";
     setPreferenceSaving(kind);
-    setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: enabled, ...(kind === "mute" && enabled ? { unread: 0 } : {}) } : chat))));
+    setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: enabled, ...(kind === "mute" && !enabled ? { unreadBadgeMuted: false } : {}), ...(kind === "badge" && enabled ? { notificationsMuted: true } : {}) } : chat))));
     try {
       const preference = await api.updateChatPreference(chatIdToUpdate, {
-        ...(kind === "pin" ? { pinned: enabled ? 1 : 0 } : kind === "online" ? { online_reminder_enabled: enabled ? 1 : 0 } : { notifications_muted: enabled ? 1 : 0 }),
+        ...(kind === "pin" ? { pinned: enabled ? 1 : 0 } : kind === "online" ? { online_reminder_enabled: enabled ? 1 : 0 } : kind === "mute" ? { notifications_muted: enabled ? 1 : 0 } : { unread_badge_muted: enabled ? 1 : 0 }),
       });
       setChats((current) =>
         sortChats(
           current.map((chat) =>
             chat.id === chatIdToUpdate
-              ? { ...chat, pinned: preference.pinned, onlineReminderEnabled: preference.online_reminder_enabled, notificationsMuted: preference.notifications_muted, ...(preference.notifications_muted ? { unread: 0 } : {}) }
+              ? { ...chat, pinned: preference.pinned, onlineReminderEnabled: preference.online_reminder_enabled, notificationsMuted: preference.notifications_muted, unreadBadgeMuted: preference.unread_badge_muted }
               : chat
           )
         )
       );
     } catch (apiError) {
-      setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: !enabled, ...(kind === "mute" && enabled ? { unread: selectedChat.unread } : {}) } : chat))));
+      setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: !enabled, notificationsMuted: selectedChat.notificationsMuted, unreadBadgeMuted: selectedChat.unreadBadgeMuted } : chat))));
       setPageError(apiError instanceof ApiError ? apiError.message : t("chat.settingsSaveFailed"));
     } finally {
       setPreferenceSaving(null);
@@ -3845,7 +3879,7 @@ function LiveChatsPage() {
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
       recordOptimisticEmojiUsage(message);
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId);
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId, mentionUserIdsForText(message));
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {
@@ -3949,7 +3983,7 @@ function LiveChatsPage() {
         );
       } else {
         recordOptimisticEmojiUsage(retryMessage.text);
-        created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id, retryMessage.clientId);
+        created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, retryMessage.text, retryMessage.replyTo?.message_id, retryMessage.clientId, mentionUserIdsForText(retryMessage.text));
       }
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
@@ -5057,12 +5091,12 @@ function LiveChatsPage() {
           frame={chat.avatarFrameStyle}
         />
         {chat.unread ? (
-          <span className="small-badge chat-list-unread">{chat.unread > 99 ? "99+" : chat.unread}</span>
+          <span className={`small-badge chat-list-unread${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
         ) : null}
       </div>
       <div className="chat-copy">
         <p className="chat-name">{chat.title}</p>
-        <div className="chat-preview">{chat.preview}</div>
+        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.preview}</span></div>
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
@@ -5350,7 +5384,19 @@ function LiveChatsPage() {
                         placeholder={t("chat.inputPlaceholder")}
                         value={draft}
                         rows={1}
-                        onChange={(event) => updateDraft(event.target.value)}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          const caret = event.target.selectionStart;
+                          updateDraft(value);
+                          if (selectedChat?.type !== "group") {
+                            setMentionSearch(null);
+                            return;
+                          }
+                          const beforeCaret = value.slice(0, caret);
+                          const match = beforeCaret.match(/(?:^|[\s，。！？、,.!?])@([^\s@]{0,32})$/u);
+                          const at = match ? beforeCaret.lastIndexOf("@") : -1;
+                          setMentionSearch(match && at >= 0 ? { start: at, end: caret, query: match[1] } : null);
+                        }}
                         onCompositionStart={() => {
                           isComposingRef.current = true;
                         }}
@@ -5363,12 +5409,27 @@ function LiveChatsPage() {
                           if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.keyCode === 229) {
                             return;
                           }
+                          if (event.key === "Enter" && !event.shiftKey && mentionSearch && mentionCandidates.length) {
+                            event.preventDefault();
+                            selectMention(mentionCandidates[0]);
+                            return;
+                          }
                           if (event.key === "Enter" && !event.shiftKey) {
                             event.preventDefault();
                             event.currentTarget.form?.requestSubmit();
                           }
                         }}
                       />
+                      {mentionSearch && mentionCandidates.length ? (
+                        <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
+                          {mentionCandidates.map((member) => (
+                            <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMention(member)} role="option" type="button">
+                              <UserAvatar className="composer-mention-avatar" frame={member.avatarFrameStyle} name={member.name} uri={member.avatarUri} />
+                              <span>{member.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
                       <button
                         aria-expanded={emojiPickerOpen}
                         aria-label={emojiPickerOpen ? t("emoji.keyboard") : t("emoji.choose")}
@@ -5959,6 +6020,15 @@ function LiveChatsPage() {
                       <div className="row-subtle">{t("chat.muteNotificationsHint")}</div>
                     </div>
                     <button aria-label={t("chat.toggleMuteNotifications")} className={`switch ${selectedChat.notificationsMuted ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("mute", !selectedChat.notificationsMuted)} type="button" />
+                  </div>
+                ) : null}
+                {selectedChat.type === "group" && selectedChat.notificationsMuted ? (
+                  <div className="chat-detail-setting-row is-dependent">
+                    <div className="row-main">
+                      <strong>{t("chat.muteUnreadBadge")}</strong>
+                      <div className="row-subtle">{t("chat.muteUnreadBadgeHint")}</div>
+                    </div>
+                    <button aria-label={t("chat.toggleMuteUnreadBadge")} className={`switch ${selectedChat.unreadBadgeMuted ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("badge", !selectedChat.unreadBadgeMuted)} type="button" />
                   </div>
                 ) : null}
                 {selectedChat.type === "group" ? (

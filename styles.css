@@ -3396,6 +3396,33 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   box-shadow: 0 3px 8px rgba(255, 77, 109, 0.2);
 }
 
+.chat-list-unread.is-muted {
+  top: -2px;
+  right: -3px;
+  min-width: 9px;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-width: 2px;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.chat-mention-label {
+  flex: 0 0 auto;
+  margin-right: 5px;
+  color: #d54a5f;
+  font-size: .72rem;
+  font-weight: 850;
+}
+
+.chat-preview > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .title-row,
 .meta-row {
   display: flex;
@@ -3468,10 +3495,9 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 }
 
 .chat-preview {
-  display: -webkit-box;
+  display: flex;
+  align-items: center;
   overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
 }
 
 .user-note {
@@ -9087,6 +9113,68 @@ html[data-theme="dark"] .personalization-bubble-stage {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.composer-mention-picker {
+  position: absolute;
+  right: 4px;
+  bottom: calc(100% + 10px);
+  left: 4px;
+  z-index: 24;
+  display: grid;
+  gap: 2px;
+  max-height: 260px;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, var(--chat-chrome-border, var(--line-soft)) 78%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  box-shadow: 0 16px 42px rgba(20, 36, 30, .18);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  backdrop-filter: blur(22px) saturate(1.1);
+}
+
+.composer-mention-picker button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 13px;
+  color: var(--text-strong);
+  font-size: .86rem;
+  font-weight: 750;
+  text-align: left;
+  background: transparent;
+}
+
+.composer-mention-picker button:hover,
+.composer-mention-picker button:focus-visible {
+  background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+}
+
+.composer-mention-avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+}
+
+.chat-detail-setting-row.is-dependent {
+  position: relative;
+  margin-top: -1px;
+  padding-left: 30px;
+  background: color-mix(in srgb, var(--brand-primary) 4%, transparent);
+}
+
+.chat-detail-setting-row.is-dependent::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 17px;
+  width: 1px;
+  background: color-mix(in srgb, var(--brand-primary) 24%, transparent);
+  content: "";
 }
 
 .composer-input {

@@ -647,6 +647,7 @@ export interface ChatMessageDTO {
   payload?: ChatMessagePayloadDTO | null;
   reply_to?: QuotedMessageDTO | null;
   created_at: number;
+  mentioned_me?: boolean;
 }
 
 export interface PinnedMessageDTO {
@@ -689,6 +690,8 @@ export interface ChatSyncStateDTO {
   chat_id: number;
   unread_count: number;
   last_read_at: number | null;
+  unread_badge_muted?: boolean;
+  has_unread_mention?: boolean;
 }
 
 export interface ChatDTO {
@@ -706,12 +709,15 @@ export interface ChatDTO {
   pinned?: boolean;
   online_reminder_enabled?: boolean;
   notifications_muted?: boolean;
+  unread_badge_muted?: boolean;
+  has_unread_mention?: boolean;
 }
 
 export interface ChatPreferenceDTO {
   pinned: boolean;
   online_reminder_enabled: boolean;
   notifications_muted: boolean;
+  unread_badge_muted: boolean;
 }
 
 export interface AuthSession {
@@ -773,6 +779,8 @@ export interface Chat {
   pinned: boolean;
   onlineReminderEnabled: boolean;
   notificationsMuted: boolean;
+  unreadBadgeMuted: boolean;
+  hasUnreadMention: boolean;
   detail: ChatDetail;
   messages: ChatMessage[];
 }

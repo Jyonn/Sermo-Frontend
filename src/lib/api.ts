@@ -565,7 +565,7 @@ export const api = {
     });
   },
 
-  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1; notifications_muted?: 0 | 1 }) {
+  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1; notifications_muted?: 0 | 1; unread_badge_muted?: 0 | 1 }) {
     return request<ChatPreferenceDTO>("/chats/preference", {
       method: "POST",
       auth: true,
@@ -716,12 +716,12 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string) {
+  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = []) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
       query: { chat_id },
-      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null },
+      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids },
     });
   },
 
