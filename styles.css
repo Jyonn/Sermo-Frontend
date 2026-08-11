@@ -20814,21 +20814,35 @@ html[data-theme="dark"] :is(
 }
 
 /* Keep preview and live cards on one compact sizing and surface system. */
-.message-bubble.is-link-preview {
+.message-bubble.self.is-link-preview:not(.has-reply),
+.message-bubble.other.is-link-preview:not(.has-reply) {
   display: inline-flex;
   width: max-content;
   max-width: min(70vw, 330px);
 }
 
-.message-text-stack.has-link-preview {
+.message-bubble.is-link-preview > .message-text-stack.has-link-preview {
   width: max-content;
-  max-width: min(70vw, 330px);
+  max-width: 100%;
 }
 
 /* Link cards may shrink below their cap. Keep every ornament's containing
    block on that visible width instead of an invisible stretched message row. */
 .message-bubble.is-link-preview > .message-text-stack.has-link-preview {
   flex: 0 1 auto;
+}
+
+.message-bubble:is(.self, .other).is-link-preview:not(.has-reply):has(
+  > .message-text-stack > .message-link-preview-card.no-image:only-child
+) {
+  width: min(70vw, 286px);
+}
+
+.message-bubble:is(.self, .other).is-link-preview:not(.has-reply):has(
+  > .message-text-stack > .message-link-preview-card.no-image:only-child
+) > .message-text-stack,
+.message-bubble:is(.self, .other).is-link-preview:not(.has-reply) > .message-text-stack > .message-link-preview-card.no-image:only-child {
+  width: 100%;
 }
 
 /* Compact no-image previews still live in a full-width compound stack. Keep

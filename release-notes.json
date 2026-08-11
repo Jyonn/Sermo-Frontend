@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.15",
+  "id": "2026.08.11.16",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "链接气泡重新连成一体",
+      "title": "链接挂件真正归位",
       "items": [
-        "VIP 标签与主题挂件会紧贴链接卡片",
-        "不同宽度的无图链接不再留下透明间隙",
-        "群聊 @ 成员候选列表始终显示在聊天背景上方"
+        "链接气泡、内容栈与无图卡片统一宽度",
+        "VIP 标签与主题挂件不再脱离卡片",
+        "正文加链接仍会自然适配较宽内容"
       ]
     },
     "en": {
-      "title": "Link bubbles are whole again",
+      "title": "Link ornaments are finally anchored",
       "items": [
-        "VIP tags and themed ornaments now stay attached to link cards",
-        "Compact link previews no longer leave invisible layout gaps",
-        "The @ member picker stays above every chat background"
+        "Link bubbles, content stacks, and compact cards now share one width",
+        "VIP tags and themed ornaments no longer detach from cards",
+        "Messages with text and links still adapt to their widest content"
       ]
     }
   }
