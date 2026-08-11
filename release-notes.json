@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.7",
+  "id": "2026.08.11.8",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "评论区更清爽",
+      "title": "链接卡片重新贴边",
       "items": [
-        "评论时间改为更自然的相对时间",
-        "支持在热门与最新评论之间切换",
-        "重新整理点赞、回复与讨论层级"
+        "修复宽屏下链接卡片偏离消息边缘的问题",
+        "无图卡片会按内容自然收缩",
+        "不同宽度的网页卡片保持同一侧对齐"
       ]
     },
     "en": {
-      "title": "A cleaner comment experience",
+      "title": "Link cards stay aligned",
       "items": [
-        "Comment timestamps now use natural relative time",
-        "Switch between top and latest comments",
-        "Refined likes, replies, and discussion hierarchy"
+        "Fixed link cards drifting away from message edges on wide screens",
+        "Cards without images now size naturally to their content",
+        "Web previews of different widths remain anchored consistently"
       ]
     }
   }

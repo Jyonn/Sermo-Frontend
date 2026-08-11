@@ -20664,8 +20664,14 @@ html[data-theme="dark"] :is(
 }
 
 /* Keep preview and live cards on one compact sizing and surface system. */
+.message-bubble.is-link-preview {
+  width: fit-content;
+  max-width: min(70vw, 330px);
+}
+
 .message-text-stack.has-link-preview {
-  width: min(100%, 330px);
+  width: fit-content;
+  max-width: min(70vw, 330px);
 }
 
 /* Compact no-image previews still live in a full-width compound stack. Keep
@@ -20683,8 +20689,8 @@ html[data-theme="dark"] :is(
 }
 
 .message-link-preview-card {
-  width: 100%;
-  max-width: 330px;
+  width: min(70vw, 330px);
+  max-width: 100%;
   min-height: 88px;
   box-sizing: border-box;
 }
