@@ -9166,12 +9166,23 @@ html[data-theme="dark"] .personalization-bubble-stage {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
+.chat-detail-scene > .composer {
+  z-index: 30;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.composer-row,
+.composer-input-wrap {
+  overflow: visible;
+}
+
 .composer-mention-picker {
   position: absolute;
   right: 4px;
   bottom: calc(100% + 10px);
   left: 4px;
-  z-index: 24;
+  z-index: 40;
   display: grid;
   gap: 2px;
   max-height: 260px;
@@ -17239,7 +17250,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
   .chat-mobile-layout .chat-detail-scene > .composer {
     position: relative;
-    z-index: 1;
+    z-index: 30;
     margin: 0;
     border: 0;
     border-top: 1px solid rgba(232, 235, 242, 0.92);
