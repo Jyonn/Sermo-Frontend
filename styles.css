@@ -1782,6 +1782,52 @@ img {
   gap: 8px;
 }
 
+.growth-milestone-sections {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 12px;
+}
+
+.growth-milestone-section {
+  display: grid;
+  gap: 8px;
+}
+
+.growth-milestone-section > header {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 3px;
+}
+
+.growth-milestone-section > header > span {
+  color: color-mix(in srgb, var(--growth-accent) 58%, var(--text-muted));
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.growth-milestone-section > header > strong {
+  color: var(--growth-deep);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.growth-milestone-section > header > small {
+  min-width: 20px;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-weight: 750;
+  text-align: right;
+}
+
+.growth-milestone-section + .growth-milestone-section {
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--growth-accent) 10%, var(--line-soft));
+}
+
 .growth-milestone {
   min-width: 0;
   min-height: 58px;
@@ -2436,8 +2482,13 @@ img {
 .growth-disclosure[open] > summary > .material-symbols-outlined { transform: rotate(180deg); }
 .growth-disclosure > :not(summary) { animation: growth-disclosure-in 260ms cubic-bezier(.16, 1, .3, 1) both; }
 .growth-disclosure .growth-milestone-grid,
+.growth-disclosure .growth-milestone-sections,
 .growth-disclosure .growth-privileges,
 .growth-disclosure .growth-event-list { margin-bottom: 12px; }
+
+.growth-disclosure .growth-milestone-sections .growth-milestone-grid {
+  margin-bottom: 0;
+}
 
 @keyframes growth-disclosure-in {
   from { opacity: 0; transform: translateY(-5px); }

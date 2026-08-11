@@ -49,6 +49,21 @@ const emptyPrefs: NotificationPreferences = {
 };
 
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
+const menuGrowthMilestones = new Set([
+  "explore:avatar",
+  "explore:install_webapp",
+  "explore:first_personalization",
+  "explore:welcome",
+  "explore:online_reminder",
+  "explore:custom_background",
+]);
+
+function growthMilestoneArea(key: string): "chat" | "square" | "menu" {
+  if (key.startsWith("explore:square")) return "square";
+  if (menuGrowthMilestones.has(key)) return "menu";
+  return "chat";
+}
+
 const personalizationOptions = {
   chat_bubble_style: [
     ["default", "menu.styleDefault"],
@@ -1592,6 +1607,21 @@ export default function MenuPage() {
       : t("invite.sevenDays");
 
   const canUseFriendInvite = Boolean(me?.verified ?? session?.user?.verified);
+  const growthExplorationGroups = ([
+    ["chat", "growth.exploreChat"],
+    ["square", "growth.exploreSquare"],
+    ["menu", "growth.exploreMenu"],
+  ] as const).map(([area, label]) => ({
+    area,
+    label: t(label),
+    items: (me?.growth?.milestones ?? []).filter(
+      (item) => item.category !== "security" && growthMilestoneArea(item.key) === area
+    ),
+  }));
+  const pendingExplorationCount = growthExplorationGroups.reduce(
+    (total, group) => total + group.items.filter((item) => !item.earned).length,
+    0
+  );
 
   const activePref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
   const editorMessageDefaults = (kind: NotificationMessageKind) => {
@@ -1877,12 +1907,23 @@ export default function MenuPage() {
             <b>{me?.growth?.daily?.earned ?? 0}<small>/{me?.growth?.daily?.limit ?? 40}</small></b>
           </section>
           <details className="growth-disclosure" open>
-            <summary><span><strong>{t("growth.nextSteps")}</strong><small>{t("growth.nextStepsHint")}</small></span><b>{(me?.growth?.milestones ?? []).filter((item) => !item.earned).length}</b><span className="material-symbols-outlined">expand_more</span></summary>
-            <div className="growth-milestone-grid">
-              {(me?.growth?.milestones ?? []).filter((item) => item.category !== "security").map((item) => (
-                <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} disabled={!item.key.includes("install_webapp")} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
-                  <span>{item.earned ? "✓" : "+"}</span><strong>{item.title}</strong><small>+{item.points}</small>
-                </button>
+            <summary><span><strong>{t("growth.nextSteps")}</strong><small>{t("growth.nextStepsHint")}</small></span><b>{pendingExplorationCount}</b><span className="material-symbols-outlined">expand_more</span></summary>
+            <div className="growth-milestone-sections">
+              {growthExplorationGroups.map((group, index) => (
+                <section className={`growth-milestone-section is-${group.area}`} key={group.area}>
+                  <header>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <strong>{group.label}</strong>
+                    <small>{group.items.filter((item) => !item.earned).length}</small>
+                  </header>
+                  <div className="growth-milestone-grid">
+                    {group.items.map((item) => (
+                      <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} disabled={!item.key.includes("install_webapp")} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
+                        <span>{item.earned ? "✓" : "+"}</span><strong>{item.title}</strong><small>+{item.points}</small>
+                      </button>
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
           </details>
