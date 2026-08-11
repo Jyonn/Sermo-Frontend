@@ -8,6 +8,7 @@ const activeDrawerIds = new Set<string>();
 interface SideDrawerProps {
   open: boolean;
   title: string;
+  className?: string;
   titleAccessory?: ReactNode;
   headerAction?: ReactNode;
   actionLabel?: string;
@@ -22,6 +23,7 @@ interface SideDrawerProps {
 export function SideDrawer({
   open,
   title,
+  className = "",
   titleAccessory,
   headerAction,
   actionLabel,
@@ -144,7 +146,7 @@ export function SideDrawer({
 
   return createPortal(
     <div className="drawer-backdrop" onClick={requestClose} role="presentation">
-      <aside aria-modal="true" className="side-drawer" onClick={(event) => event.stopPropagation()} role="dialog">
+      <aside aria-modal="true" className={`side-drawer${className ? ` ${className}` : ""}`} onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="drawer-topbar">
           <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
             <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label={t("common.back")}>

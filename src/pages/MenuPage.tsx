@@ -94,10 +94,13 @@ const personalizationOptions = {
   statement_card_style: [
     ["default", "menu.statementStyleDefault"],
     ["editorial", "menu.statementStyleEditorial"],
-    ["aurora", "menu.statementStyleAurora"],
-    ["pixel", "menu.statementStylePixel"],
-    ["lacquer", "menu.statementStyleLacquer"],
-    ["collage", "menu.statementStyleCollage"],
+    ["mosaic", "menu.statementStyleMosaic"],
+    ["hero", "menu.statementStyleHero"],
+    ["comic", "menu.statementStyleComic"],
+    ["receipt", "menu.statementStyleReceipt"],
+    ["vip", "menu.statementStyleVip"],
+    ["niko", "menu.statementStyleNiko"],
+    ["fufu", "menu.statementStyleFufu"],
   ],
 } as const;
 
@@ -141,6 +144,7 @@ const cityBubbleRequirements: Partial<Record<ChatBubbleStyle, TranslationKey>> =
   "city-beijing": "menu.cityRegionBeijing",
 };
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
+const vipOrLevelStatementStyles = new Set<StatementCardStyle>(["niko", "fufu"]);
 
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
@@ -477,6 +481,10 @@ export default function MenuPage() {
     (frame === "vip" && permanentVip)
     || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
     || (frame !== "vip" && growthLevel >= rewardLevel("frame", frame));
+  const canUseStatementStyle = (style: StatementCardStyle) =>
+    (style === "vip" && permanentVip)
+    || (vipOrLevelStatementStyles.has(style) && (permanentVip || growthLevel >= 16))
+    || (style !== "vip" && !vipOrLevelStatementStyles.has(style));
   const buildPersonalizationSections = (
     items: readonly PersonalizationCatalogItem[],
     category: "background" | "bubble" | "frame",
@@ -1331,6 +1339,7 @@ export default function MenuPage() {
     if (!me || personalizationSaving) return;
     const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
     const avatarFrameChanged = personalizationDraft.avatar_frame_style !== (me.avatar_frame_style ?? "none");
+    const statementChanged = personalizationDraft.statement_card_style !== (me.statement_card_style ?? "default");
     if (bubbleChanged && personalizationDraft.chat_bubble_style === "vip" && !me.is_permanent_vip) {
       showToast(t("menu.vipBubbleOnly"), "error");
       return;
@@ -1360,6 +1369,15 @@ export default function MenuPage() {
         vipOrLevelAvatarFrames.has(personalizationDraft.avatar_frame_style)
           ? t("menu.levelOrVipUnlock", { level })
           : t("menu.levelUnlock", { level }),
+        "error"
+      );
+      return;
+    }
+    if (statementChanged && !canUseStatementStyle(personalizationDraft.statement_card_style)) {
+      showToast(
+        personalizationDraft.statement_card_style === "vip"
+          ? t("menu.vipBubbleOnly")
+          : t("menu.levelOrVipUnlock", { level: 16 }),
         "error"
       );
       return;
@@ -2442,7 +2460,7 @@ export default function MenuPage() {
                 {personalizationOptions.statement_card_style.map(([value, label]) => (
                   <button
                     aria-pressed={personalizationDraft.statement_card_style === value}
-                    className={`statement-card-style-choice statement-style-${value}${personalizationDraft.statement_card_style === value ? " is-selected" : ""}`}
+                    className={`statement-card-style-choice statement-style-${value}${personalizationDraft.statement_card_style === value ? " is-selected" : ""}${!canUseStatementStyle(value as StatementCardStyle) ? " is-locked" : ""}`}
                     disabled={personalizationSaving}
                     key={value}
                     onClick={() => setPersonalizationDraft((current) => ({ ...current, statement_card_style: value as StatementCardStyle }))}
@@ -2450,6 +2468,7 @@ export default function MenuPage() {
                   >
                     <span className="statement-card-style-sample"><i>{t("menu.statementStyleSample")}</i></span>
                     <strong>{t(label)}</strong>
+                    {!canUseStatementStyle(value as StatementCardStyle) ? <small>{value === "vip" ? "VIP" : t("menu.levelOrVipUnlock", { level: 16 })}</small> : null}
                   </button>
                 ))}
               </div>

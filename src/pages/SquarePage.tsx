@@ -913,8 +913,8 @@ export default function SquarePage() {
         {voicePreview && !recording ? <audio className="square-voice-preview" controls preload="metadata" src={voicePreview} /> : null}
         {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
       </BottomSheet>
-      <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); if (routedStatementId) navigate("/app/square"); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
-        <div className="square-comments-drawer">
+      <SideDrawer className={`statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`} historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); if (routedStatementId) navigate("/app/square"); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
+        <div className={`square-comments-drawer statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`}>
           <div className="square-statement-detail-stage">
             {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
           </div>

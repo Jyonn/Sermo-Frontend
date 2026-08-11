@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.12.3",
+  "id": "2026.08.12.4",
   "publishedAt": "2026-08-12",
   "locales": {
     "zh-CN": {
-      "title": "新能力会主动来找你",
+      "title": "发言外观成为完整场景",
       "items": [
-        "未解锁的操作会保持隐藏，界面更轻更干净",
-        "新解锁能力会在真实入口显示一次小红点",
-        "语音、图片、位置等重要能力支持聚焦式首次引导"
+        "发言详情与评论区会延续作者选择的主题外观",
+        "新增漫画、小票、VIP、Niko 与 Fufu 等发言主题",
+        "单张照片在发言流中以更克制的尺寸展示"
       ]
     },
     "en": {
-      "title": "New abilities find you",
+      "title": "Statement styles become full scenes",
       "items": [
-        "Locked actions stay hidden to keep the interface focused",
-        "Newly unlocked abilities show a one-time dot at their real entry point",
-        "Key features such as voice, photos, and location now include focused first-use guidance"
+        "Statement details and discussions now inherit the author's selected theme",
+        "New Comic, Receipt, VIP, Niko, and Fufu statement themes",
+        "Single photos use a more restrained size in the statement feed"
       ]
     }
   }
