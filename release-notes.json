@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.9",
+  "id": "2026.08.11.10",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "群聊提醒更懂轻重",
+      "title": "评论互动更顺手",
       "items": [
-        "消息通知与 WebAPP 未读状态不再互相影响",
-        "可将群聊未读数字弱化为小红点",
-        "群聊支持 @成员，并在会话列表保留被提及标识"
+        "点击评论即可快速回复并自动唤起输入框",
+        "评论作者与内容管理者可安全删除评论",
+        "删除一级评论时会同步清理其回复线程"
       ]
     },
     "en": {
-      "title": "Smarter group chat attention",
+      "title": "Smoother comment conversations",
       "items": [
-        "External notifications are now independent from WebAPP unread state",
-        "Group unread counts can be de-emphasized into a quiet dot",
-        "Mention group members and keep a clear mention marker in the chat list"
+        "Tap any comment to reply with the composer focused",
+        "Comment authors and content moderators can safely remove comments",
+        "Removing a top-level comment also cleans up its reply thread"
       ]
     }
   }

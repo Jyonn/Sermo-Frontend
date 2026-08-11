@@ -701,6 +701,13 @@ export const api = {
     });
   },
 
+  deleteSquareComment(commentId: number) {
+    return request<{ comment_id: number; statement_id: number; deleted_count: number; root_deleted: boolean }>(`/square/comments/${commentId}`, {
+      method: "DELETE",
+      auth: true,
+    });
+  },
+
   deleteSquareStatement(statementId: number) {
     return request<{ statement_id: number; deleted: boolean }>(`/square/statements/${statementId}`, {
       method: "DELETE",

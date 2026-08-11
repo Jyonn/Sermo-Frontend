@@ -432,6 +432,7 @@ export interface SquareStatementCommentDTO {
   like_count: number;
   reply_count: number;
   liked: boolean;
+  can_delete: boolean;
   replies?: SquareStatementCommentDTO[];
   created_at: number;
 }

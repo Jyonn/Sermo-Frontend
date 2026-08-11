@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -203,23 +203,38 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   );
 }
 
-function CommentThread({ comment, canInteract, onLike, onReply }: {
+function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
   comment: SquareStatementCommentDTO;
   canInteract: boolean;
+  onDelete: (comment: SquareStatementCommentDTO) => void;
   onLike: (comment: SquareStatementCommentDTO) => void;
   onReply: (comment: SquareStatementCommentDTO) => void;
 }) {
   const { t } = useI18n();
-  return <article className="square-comment-thread">
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    };
+    window.addEventListener("pointerdown", close);
+    return () => window.removeEventListener("pointerdown", close);
+  }, [menuOpen]);
+  const beginReply = (event: ReactMouseEvent) => {
+    event.stopPropagation();
+    if (canInteract) onReply(comment);
+  };
+  return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}`} onClick={beginReply}>
     <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
     <div>
-      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}<time>{formatRelativeTime(comment.created_at)}</time></div></header>
+      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}<time>{formatRelativeTime(comment.created_at)}</time></div>{comment.can_delete ? <div className="square-comment-more-wrap" ref={menuRef}><button aria-expanded={menuOpen} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); setMenuOpen((current) => !current); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button>{menuOpen ? <div className="square-comment-menu"><button onClick={(event) => { event.stopPropagation(); setMenuOpen(false); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span>{t("common.delete")}</button></div> : null}</div> : null}</header>
       <p>{comment.reply_to_user ? <span className="square-comment-reply-prefix">{t("square.replyingTo", { name: comment.reply_to_user.name })}</span> : null}{comment.text}</p>
       <div className="square-comment-actions">
-        <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={() => onLike(comment)} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
-        {canInteract ? <button onClick={() => onReply(comment)} type="button"><span className="material-symbols-outlined">chat_bubble</span><span>{t("square.reply")}</span></button> : null}
+        <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
+        {canInteract ? <button onClick={beginReply} type="button"><span className="material-symbols-outlined">chat_bubble</span><span>{t("square.reply")}</span></button> : null}
       </div>
-      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onLike={onLike} onReply={onReply} />)}</div> : null}
+      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} />)}</div> : null}
     </div>
   </article>;
 }
@@ -272,6 +287,8 @@ export default function SquarePage() {
   const [commentSending, setCommentSending] = useState(false);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
   const [deletingStatement, setDeletingStatement] = useState(false);
+  const [deleteCommentTarget, setDeleteCommentTarget] = useState<SquareStatementCommentDTO | null>(null);
+  const [deletingComment, setDeletingComment] = useState(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
@@ -285,6 +302,7 @@ export default function SquarePage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const commentInputRef = useRef<HTMLInputElement>(null);
   const recorderStreamRef = useRef<MediaStream | null>(null);
   const recorderChunksRef = useRef<Blob[]>([]);
   const recordingStartedAtRef = useRef(0);
@@ -446,6 +464,11 @@ export default function SquarePage() {
     } finally {
       setCommentSending(false);
     }
+  };
+
+  const beginCommentReply = (comment: SquareStatementCommentDTO) => {
+    setReplyTarget(comment);
+    window.requestAnimationFrame(() => commentInputRef.current?.focus({ preventScroll: true }));
   };
 
   const choosePhotos = (files: FileList | null) => {
@@ -644,6 +667,35 @@ export default function SquarePage() {
     }
   };
 
+  const confirmDeleteComment = async () => {
+    if (!deleteCommentTarget || deletingComment) return;
+    const target = deleteCommentTarget;
+    setDeletingComment(true);
+    try {
+      const result = await api.deleteSquareComment(target.comment_id);
+      setComments((current) => result.root_deleted
+        ? current.filter((comment) => comment.comment_id !== target.comment_id)
+        : current.map((comment) => ({
+          ...comment,
+          reply_count: comment.replies?.some((reply) => reply.comment_id === target.comment_id)
+            ? Math.max(0, comment.reply_count - 1)
+            : comment.reply_count,
+          replies: comment.replies?.filter((reply) => reply.comment_id !== target.comment_id),
+        })));
+      setStatements((current) => current.map((statement) => statement.statement_id === result.statement_id
+        ? { ...statement, comment_count: Math.max(0, statement.comment_count - result.deleted_count) }
+        : statement));
+      if (replyTarget?.comment_id === target.comment_id || result.root_deleted && replyTarget?.root_id === target.comment_id) {
+        setReplyTarget(null);
+      }
+      setDeleteCommentTarget(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("square.deleteCommentFailed"));
+    } finally {
+      setDeletingComment(false);
+    }
+  };
+
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
       <main className="list-screen square-feed-screen">
@@ -806,14 +858,14 @@ export default function SquarePage() {
             </div>
             {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
             {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
-            <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} onLike={(target) => void toggleCommentLike(target)} onReply={(target) => { setReplyTarget(target); setCommentText(""); }} />)}</div>
+            <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onReply={beginCommentReply} />)}</div>
             {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
               if (commentStatementId === null) return;
               setCommentsLoading(true);
               void api.getSquareStatementComments(commentStatementId, { offset: comments.length, limit: 30, sort: commentSort }).then((rows) => { setComments((current) => [...current, ...rows]); setCommentsHasMore(rows.length === 30); }).finally(() => setCommentsLoading(false));
             }} type="button">{t("square.loadMoreComments")}</button> : null}
           </section>
-          {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div>{replyTarget ? <button className="square-reply-target" onClick={() => setReplyTarget(null)} type="button">{t("square.replyingTo", { name: replyTarget.user.name })}<span className="material-symbols-outlined">close</span></button> : null}<input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.writeReply") : t("square.writeComment")} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
+          {canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div>{replyTarget ? <button className="square-reply-target" onClick={() => { setReplyTarget(null); window.requestAnimationFrame(() => commentInputRef.current?.focus()); }} type="button">{t("square.replyingTo", { name: replyTarget.user.name })}<span className="material-symbols-outlined">close</span></button> : null}<input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.writeReply") : t("square.writeComment")} ref={commentInputRef} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null}
         </div>
       </SideDrawer>
       <SideDrawer
@@ -840,6 +892,7 @@ export default function SquarePage() {
       </SideDrawer>
       {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
+      <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} />
       </BottomSheet>
