@@ -432,6 +432,7 @@
   "avatar.uploadCustom": "上传自定义头像",
   "avatar.saving": "保存中...",
   "growth.defaultUnlock": "新的成长阶段",
+  "growth.pointsAwarded": "成长值 +{{points}}",
   "growth.confirmFailed": "确认失败，请检查网络后重试",
   "growth.badge": "言浪成长授章",
   "growth.newWave": "新的浪潮已经抵达",

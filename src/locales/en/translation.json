@@ -432,6 +432,7 @@
   "avatar.uploadCustom": "Upload custom avatar",
   "avatar.saving": "Saving...",
   "growth.defaultUnlock": "A new growth stage",
+  "growth.pointsAwarded": "Growth +{{points}}",
   "growth.confirmFailed": "Could not confirm. Check your connection and try again.",
   "growth.badge": "Yanlang growth award",
   "growth.newWave": "A new wave has arrived",

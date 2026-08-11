@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.11",
+  "id": "2026.08.11.12",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "发言可以分享给聊天了",
+      "title": "每一点成长都有回应",
       "items": [
-        "从发言菜单直接分享到私聊或群聊",
-        "置顶聊天优先展示，其余按最近消息排序",
-        "分享成功后会在聊天中生成完整的发言卡片"
+        "获得成长值时立即显示轻量提示",
+        "同一次操作的多项奖励会合并展示",
+        "重复任务或达到上限时不再打扰"
       ]
     },
     "en": {
-      "title": "Share statements into chats",
+      "title": "Every growth point gets noticed",
       "items": [
-        "Share a statement to direct or group chats from its menu",
-        "Pinned chats come first, followed by recent activity",
-        "Shared statements appear as rich cards inside the conversation"
+        "A lightweight toast now appears when growth points are earned",
+        "Multiple rewards from one action are combined into one update",
+        "Repeated or capped tasks stay quietly out of the way"
       ]
     }
   }

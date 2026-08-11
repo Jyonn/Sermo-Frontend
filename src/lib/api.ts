@@ -58,6 +58,7 @@ import type {
 } from "../types";
 import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
+import { showToast } from "./toast";
 
 const API_BASE_URL = import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space";
 
@@ -123,12 +124,20 @@ function withQuery(path: string, query?: RequestOptions["query"]) {
   return suffix ? `${path}?${suffix}` : path;
 }
 
+function showGrowthAward(response: Response) {
+  const points = Number.parseInt(response.headers.get("X-Sermo-Growth-Award") ?? "", 10);
+  if (Number.isFinite(points) && points > 0) {
+    showToast(i18n.t("growth.pointsAwarded", { points }));
+  }
+}
+
 async function parseEnvelope<T>(response: Response): Promise<T> {
   const text = await response.text();
   if (!text) {
     if (!response.ok) {
       throw new ApiError(`HTTP ${response.status}`, "HTTP_ERROR", response.status);
     }
+    showGrowthAward(response);
     return null as T;
   }
 
@@ -139,6 +148,7 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
     if (!response.ok) {
       throw new ApiError(`HTTP ${response.status}`, "HTTP_ERROR", response.status);
     }
+    showGrowthAward(response);
     return text as T;
   }
 
@@ -146,6 +156,7 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
     throw new ApiError(payload.user_message || payload.message || "Request failed", payload.identifier, response.status);
   }
 
+  showGrowthAward(response);
   return payload.body;
 }
 
