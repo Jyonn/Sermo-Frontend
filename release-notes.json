@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.16",
-  "publishedAt": "2026-08-11",
+  "id": "2026.08.12.1",
+  "publishedAt": "2026-08-12",
   "locales": {
     "zh-CN": {
-      "title": "链接挂件真正归位",
+      "title": "群聊提及更清晰",
       "items": [
-        "链接气泡、内容栈与无图卡片统一宽度",
-        "VIP 标签与主题挂件不再脱离卡片",
-        "正文加链接仍会自然适配较宽内容"
+        "群聊消息中的 @成员 现在会明确高亮",
+        "发送中的消息与正式消息保持相同效果",
+        "链接、邮箱和普通 @文字不会被误标记"
       ]
     },
     "en": {
-      "title": "Link ornaments are finally anchored",
+      "title": "Clearer group mentions",
       "items": [
-        "Link bubbles, content stacks, and compact cards now share one width",
-        "VIP tags and themed ornaments no longer detach from cards",
-        "Messages with text and links still adapt to their widest content"
+        "Mentioned members are now highlighted in group messages",
+        "Pending and delivered messages share the same mention styling",
+        "Links, emails, and ordinary @ text are not highlighted by mistake"
       ]
     }
   }

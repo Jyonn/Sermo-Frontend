@@ -647,6 +647,7 @@ export interface ChatMessageDTO {
   content: string;
   payload?: ChatMessagePayloadDTO | null;
   reply_to?: QuotedMessageDTO | null;
+  mentions?: TinyUserDTO[];
   created_at: number;
   mentioned_me?: boolean;
 }
@@ -745,6 +746,7 @@ export interface ChatMessage {
   payload?: ChatMessagePayloadDTO | null;
   localPreviewUri?: string;
   replyTo?: QuotedMessageDTO | null;
+  mentions?: TinyUserDTO[];
   status: "sent" | "pending" | "failed";
 }
 

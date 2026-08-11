@@ -96,6 +96,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     text: message.content,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     replyTo: message.reply_to ?? null,
+    mentions: message.mentions ?? [],
     status: "sent",
   };
 }

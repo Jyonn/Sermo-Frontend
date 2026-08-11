@@ -9,6 +9,7 @@ import {
   type ClipboardEvent as ReactClipboardEvent,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from "react";
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -702,6 +703,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     text: message.content,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     replyTo: message.reply_to ?? null,
+    mentions: message.mentions ?? [],
     status: "sent",
   };
 }
@@ -793,6 +795,7 @@ function createPendingMessage(
   name: string,
   userId: number,
   appearance: PendingMessageAppearance,
+  mentions: TinyUserDTO[] = [],
   replyTo?: QuotedMessageDTO | null,
 ): ChatMessage {
   const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -812,6 +815,7 @@ function createPendingMessage(
     text,
     payload: { kind: "text", text, link_preview: linkUrl ? { url: linkUrl, status: "pending" } : null },
     replyTo,
+    mentions,
     status: "pending",
   };
 }
@@ -1205,7 +1209,24 @@ const MessageImageGallery = memo(function MessageImageGallery({
   );
 });
 
-function LinkedMessageText({ hiddenUrl, text }: { hiddenUrl?: string; text: string }) {
+function MentionedMessageText({ mentions, text }: { mentions: TinyUserDTO[]; text: string }) {
+  const names = [...new Set(mentions.map((user) => user.name).filter(Boolean))].sort((left, right) => right.length - left.length);
+  if (!names.length) return <>{text}</>;
+
+  const mentionPattern = new RegExp(`@(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(?=$|\\s|[，。！？、,.!?])`, "gu");
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  Array.from(text.matchAll(mentionPattern)).forEach((match, index) => {
+    const start = match.index ?? 0;
+    if (start > lastIndex) nodes.push(text.slice(lastIndex, start));
+    nodes.push(<span className="message-mention" key={`${match[0]}:${start}:${index}`}>{match[0]}</span>);
+    lastIndex = start + match[0].length;
+  });
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return <>{nodes}</>;
+}
+
+function LinkedMessageText({ hiddenUrl, mentions = [], text }: { hiddenUrl?: string; mentions?: TinyUserDTO[]; text: string }) {
   const parts: Array<{ key: string; text: string; href?: string }> = [];
   let lastIndex = 0;
   const normalizedHiddenUrl = hiddenUrl ? normalizeMessageUrl(hiddenUrl) : null;
@@ -1230,7 +1251,7 @@ function LinkedMessageText({ hiddenUrl, text }: { hiddenUrl?: string; text: stri
     parts.push({ key: `text:end:${lastIndex}`, text: text.slice(lastIndex) });
   }
 
-  if (parts.length === 0) return <span className="message-text">{text}</span>;
+  if (parts.length === 0) return <span className="message-text"><MentionedMessageText mentions={mentions} text={text} /></span>;
 
   return (
     <span className="message-text">
@@ -1247,7 +1268,7 @@ function LinkedMessageText({ hiddenUrl, text }: { hiddenUrl?: string; text: stri
             {part.text}
           </a>
         ) : (
-          <span key={part.key}>{part.text}</span>
+          <span key={part.key}><MentionedMessageText mentions={mentions} text={part.text} /></span>
         )
       )}
     </span>
@@ -1462,7 +1483,7 @@ function renderMessageContent(
   const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
   const text = message.payload?.text ?? message.text;
   if (!hasLinkPreview) {
-    return <LinkedMessageText text={text} />;
+    return <LinkedMessageText mentions={message.mentions} text={text} />;
   }
 
   const previewUrl = linkPreview?.url ?? extractFirstMessageUrl(text) ?? undefined;
@@ -1472,7 +1493,7 @@ function renderMessageContent(
     <span className={`message-text-stack has-link-preview ${groupClassName}`.trim()}>
       {hasTextBesidePreview ? (
         <span className={`message-bubble message-text-chip ${groupClassName}`.trim()}>
-          <LinkedMessageText hiddenUrl={previewUrl} text={text} />
+          <LinkedMessageText hiddenUrl={previewUrl} mentions={message.mentions} text={text} />
         </span>
       ) : null}
       <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} />
@@ -3843,7 +3864,17 @@ function LiveChatsPage() {
     if (!message) return;
 
     const reply = consumeReplyTarget();
-    const optimisticMessage = createPendingMessage(message, currentUserName, currentUserId, pendingMessageAppearance, reply);
+    const mentionUserIds = mentionUserIdsForText(message);
+    const optimisticMentions = selectedChat.detail.members
+      .filter((member) => mentionUserIds.includes(member.userId))
+      .map((member) => ({
+        user_id: member.userId,
+        name: member.name,
+        avatar_type: member.avatarUri ? "custom" as const : "preset" as const,
+        avatar_uri: member.avatarUri ?? "",
+        official: false,
+      }));
+    const optimisticMessage = createPendingMessage(message, currentUserName, currentUserId, pendingMessageAppearance, optimisticMentions, reply);
 
     try {
       setSendState("sending");
@@ -3879,7 +3910,7 @@ function LiveChatsPage() {
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
       recordOptimisticEmojiUsage(message);
-      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId, mentionUserIdsForText(message));
+      const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId, mentionUserIds);
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
       if (DEBUG_CHAT_SEND) {

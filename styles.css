@@ -4517,6 +4517,21 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   overflow-wrap: anywhere;
 }
 
+.message-mention {
+  display: inline;
+  color: color-mix(in srgb, currentColor 70%, var(--accent, #00a86b) 30%);
+  font-weight: 750;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 26%, transparent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.message-bubble.self .message-mention {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, currentColor 38%, transparent);
+}
+
 .message-text-stack {
   display: grid;
   gap: 6px;
