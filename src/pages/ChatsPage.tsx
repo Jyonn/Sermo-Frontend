@@ -5185,6 +5185,11 @@ function LiveChatsPage() {
       } as CSSProperties)
     : undefined;
   const chatBackgroundTheme = currentUserMe?.chat_background_theme ?? "default";
+  const otherChatsUnreadCount = displayedChat
+    ? chats.reduce((total, chat) => (
+        chat.id === displayedChat.id || chat.unreadBadgeMuted ? total : total + Math.max(0, chat.unread)
+      ), 0)
+    : 0;
 
   return (
     <AppChrome
@@ -5198,8 +5203,16 @@ function LiveChatsPage() {
       topbarLeading={
         displayedChat ? (
           <div className="chat-conversation-topbar">
-            <button className="chat-back-button" onClick={closeChatView} type="button">
+            <button
+              aria-label={otherChatsUnreadCount ? t("chat.backWithUnread", { count: otherChatsUnreadCount }) : t("common.back")}
+              className="chat-back-button"
+              onClick={closeChatView}
+              type="button"
+            >
               <span className="material-symbols-outlined">arrow_back</span>
+              {otherChatsUnreadCount ? (
+                <span className="chat-back-unread" aria-hidden="true">{otherChatsUnreadCount > 99 ? "99+" : otherChatsUnreadCount}</span>
+              ) : null}
             </button>
             <div className="avatar-wrap">
               <UserAvatar

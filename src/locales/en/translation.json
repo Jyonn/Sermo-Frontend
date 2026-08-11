@@ -1419,6 +1419,7 @@
   "chat.muteUnreadBadge": "De-emphasize unread messages",
   "chat.muteUnreadBadgeHint": "Exclude from navigation totals and show only a dot",
   "chat.toggleMuteUnreadBadge": "Toggle muted unread badge",
+  "chat.backWithUnread": "Back, {{count}} unread messages in other chats",
   "chat.mentioned": "[Mentioned]",
   "chat.mentionMembers": "Mention group members",
   "chat.onlineReminder": "Online reminder",

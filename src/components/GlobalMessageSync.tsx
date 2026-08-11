@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -282,7 +282,11 @@ export function GlobalMessageSync() {
   const features = useSpaceFeatures();
   const [afterMessageId, setAfterMessageId] = useState<number | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
+  const [popupDragOffset, setPopupDragOffset] = useState(0);
+  const [popupDragging, setPopupDragging] = useState(false);
   const cursorRef = useRef<number | null>(null);
+  const popupPointerRef = useRef<{ pointerId: number; startY: number } | null>(null);
+  const suppressPopupClickRef = useRef(false);
   const syncInFlightRef = useRef(false);
   const presencePollCountRef = useRef(0);
   const presenceBaselineRef = useRef<Map<number, boolean> | null>(null);
@@ -575,6 +579,8 @@ export function GlobalMessageSync() {
 
   useEffect(() => {
     if (!popup) return;
+    setPopupDragOffset(0);
+    setPopupDragging(false);
     const timer = window.setTimeout(() => setPopup(null), 4200);
     return () => window.clearTimeout(timer);
   }, [popup]);
@@ -586,13 +592,52 @@ export function GlobalMessageSync() {
 
   if (!session || !features.chatEnabled || !popup) return null;
 
+  const handlePopupPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === "mouse") return;
+    popupPointerRef.current = { pointerId: event.pointerId, startY: event.clientY };
+    suppressPopupClickRef.current = false;
+    setPopupDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePopupPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const pointer = popupPointerRef.current;
+    if (!pointer || pointer.pointerId !== event.pointerId) return;
+    const offset = Math.min(0, event.clientY - pointer.startY);
+    if (offset < -6) suppressPopupClickRef.current = true;
+    setPopupDragOffset(offset);
+  };
+
+  const finishPopupGesture = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const pointer = popupPointerRef.current;
+    if (!pointer || pointer.pointerId !== event.pointerId) return;
+    const finalOffset = Math.min(0, event.clientY - pointer.startY);
+    popupPointerRef.current = null;
+    setPopupDragging(false);
+    if (finalOffset <= -34) {
+      suppressPopupClickRef.current = true;
+      setPopup(null);
+      return;
+    }
+    setPopupDragOffset(0);
+  };
+
   return (
     <button
-      className="chat-sync-popup"
+      className={`chat-sync-popup${popupDragging ? " is-dragging" : ""}`}
       onClick={() => {
+        if (suppressPopupClickRef.current) {
+          suppressPopupClickRef.current = false;
+          return;
+        }
         setPopup(null);
         navigate(popup.chatId ? `/app/chats/${popup.chatId}` : "/app/chats");
       }}
+      onPointerCancel={finishPopupGesture}
+      onPointerDown={handlePopupPointerDown}
+      onPointerMove={handlePopupPointerMove}
+      onPointerUp={finishPopupGesture}
+      style={{ "--popup-drag-y": `${popupDragOffset}px` } as CSSProperties}
       type="button"
     >
       <UserAvatar className="chat-sync-popup-avatar" name={popup.title} uri={popup.avatarUri} />

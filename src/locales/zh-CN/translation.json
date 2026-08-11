@@ -1419,6 +1419,7 @@
   "chat.muteUnreadBadge": "弱化未读展示",
   "chat.muteUnreadBadgeHint": "不计入导航总数，群聊只显示小红点",
   "chat.toggleMuteUnreadBadge": "切换弱化未读展示",
+  "chat.backWithUnread": "返回，其他会话有 {{count}} 条未读消息",
   "chat.mentioned": "[被@]",
   "chat.mentionMembers": "提及群成员",
   "chat.onlineReminder": "上线提醒",

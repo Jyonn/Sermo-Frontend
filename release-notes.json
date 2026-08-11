@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.12.1",
+  "id": "2026.08.12.2",
   "publishedAt": "2026-08-12",
   "locales": {
     "zh-CN": {
-      "title": "群聊提及更清晰",
+      "title": "跨会话提醒更顺手",
       "items": [
-        "群聊消息中的 @成员 现在会明确高亮",
-        "发送中的消息与正式消息保持相同效果",
-        "链接、邮箱和普通 @文字不会被误标记"
+        "聊天中也会收到其他会话的新消息横幅",
+        "返回按钮会展示其他会话的未读总数",
+        "新消息横幅支持上滑快速关闭"
       ]
     },
     "en": {
-      "title": "Clearer group mentions",
+      "title": "Smoother cross-chat alerts",
       "items": [
-        "Mentioned members are now highlighted in group messages",
-        "Pending and delivered messages share the same mention styling",
-        "Links, emails, and ordinary @ text are not highlighted by mistake"
+        "New messages from other chats appear while a conversation is open",
+        "The back button shows unread messages from other chats",
+        "Swipe up to dismiss an in-app message alert"
       ]
     }
   }
