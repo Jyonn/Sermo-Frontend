@@ -20815,13 +20815,20 @@ html[data-theme="dark"] :is(
 
 /* Keep preview and live cards on one compact sizing and surface system. */
 .message-bubble.is-link-preview {
-  width: fit-content;
+  display: inline-flex;
+  width: max-content;
   max-width: min(70vw, 330px);
 }
 
 .message-text-stack.has-link-preview {
-  width: fit-content;
+  width: max-content;
   max-width: min(70vw, 330px);
+}
+
+/* Link cards may shrink below their cap. Keep every ornament's containing
+   block on that visible width instead of an invisible stretched message row. */
+.message-bubble.is-link-preview > .message-text-stack.has-link-preview {
+  flex: 0 1 auto;
 }
 
 /* Compact no-image previews still live in a full-width compound stack. Keep

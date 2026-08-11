@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.14",
+  "id": "2026.08.11.15",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "群聊提及不再躲起来",
+      "title": "链接气泡重新连成一体",
       "items": [
-        "输入 @ 时成员候选列表始终显示在聊天背景上方",
-        "手机与桌面端统一修复输入区层级",
-        "成长下一步按聊天、广场和菜单分区"
+        "VIP 标签与主题挂件会紧贴链接卡片",
+        "不同宽度的无图链接不再留下透明间隙",
+        "群聊 @ 成员候选列表始终显示在聊天背景上方"
       ]
     },
     "en": {
-      "title": "Group mentions stay in view",
+      "title": "Link bubbles are whole again",
       "items": [
-        "The @ member picker now stays above every chat background",
-        "Composer layering is fixed consistently on mobile and desktop",
-        "Growth next steps are grouped into chats, Square, and menu"
+        "VIP tags and themed ornaments now stay attached to link cards",
+        "Compact link previews no longer leave invisible layout gaps",
+        "The @ member picker stays above every chat background"
       ]
     }
   }
