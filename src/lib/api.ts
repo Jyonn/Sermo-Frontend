@@ -34,6 +34,7 @@ import type {
   SpaceAuthDTO,
   UserDTO,
   UserGrowthDTO,
+  FeatureDiscoveryStatusDTO,
   PermanentVipCampaignDTO,
   PersonalizationDTO,
   UserMeDTO,
@@ -1000,6 +1001,21 @@ export const api = {
       method: "POST",
       auth: true,
       body: { level },
+    }).then((growth) => {
+      window.dispatchEvent(new CustomEvent("sermo:feature-discoveries-refresh"));
+      return growth;
+    });
+  },
+
+  getFeatureDiscoveries(signal?: AbortSignal) {
+    return request<FeatureDiscoveryStatusDTO>("/users/me/feature-discoveries", { auth: true, signal });
+  },
+
+  discoverFeature(reward_id: string) {
+    return request<FeatureDiscoveryStatusDTO>("/users/me/feature-discoveries", {
+      method: "POST",
+      auth: true,
+      body: { reward_id },
     });
   },
 

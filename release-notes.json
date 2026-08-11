@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.12.2",
+  "id": "2026.08.12.3",
   "publishedAt": "2026-08-12",
   "locales": {
     "zh-CN": {
-      "title": "跨会话提醒更顺手",
+      "title": "新能力会主动来找你",
       "items": [
-        "聊天中也会收到其他会话的新消息横幅",
-        "返回按钮会展示其他会话的未读总数",
-        "新消息横幅支持上滑快速关闭"
+        "未解锁的操作会保持隐藏，界面更轻更干净",
+        "新解锁能力会在真实入口显示一次小红点",
+        "语音、图片、位置等重要能力支持聚焦式首次引导"
       ]
     },
     "en": {
-      "title": "Smoother cross-chat alerts",
+      "title": "New abilities find you",
       "items": [
-        "New messages from other chats appear while a conversation is open",
-        "The back button shows unread messages from other chats",
-        "Swipe up to dismiss an in-app message alert"
+        "Locked actions stay hidden to keep the interface focused",
+        "Newly unlocked abilities show a one-time dot at their real entry point",
+        "Key features such as voice, photos, and location now include focused first-use guidance"
       ]
     }
   }

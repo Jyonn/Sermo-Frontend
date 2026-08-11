@@ -107,6 +107,20 @@ export interface UserGrowthDTO {
   }>;
 }
 
+export interface FeatureDiscoveryDTO {
+  reward_id: string;
+  capability_key: string;
+  required_level: number;
+  title: string;
+  destination: string;
+  is_new: boolean;
+}
+
+export interface FeatureDiscoveryStatusDTO {
+  features: FeatureDiscoveryDTO[];
+  pending_count: number;
+}
+
 export interface GrowthRewardDTO {
   id: string;
   level: number;

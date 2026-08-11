@@ -21,6 +21,7 @@ import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
+import { FeatureDiscoveryMarker, useFeatureDiscovery } from "../lib/featureDiscovery";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -342,6 +343,7 @@ export default function MenuPage() {
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
   const { setSession: setAdminSession } = useAdminAuth();
+  const { discover: discoverFeature, feature: discoveryFeature } = useFeatureDiscovery();
   const currentUserId = session?.user.user_id;
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [isDesktopViewport, setIsDesktopViewport] = useState(() =>
@@ -447,6 +449,10 @@ export default function MenuPage() {
   const canRenameNickname = hasGrowthCapability("rename_nickname", 5);
   const canEditWelcome = hasGrowthCapability("welcome_message", 6);
   const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
+  const discoverThen = (rewardId: string, action: () => void) => {
+    if (discoveryFeature(rewardId)?.is_new) void discoverFeature(rewardId);
+    action();
+  };
   const growthLevel = me?.growth?.level ?? 1;
   const permanentVip = Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const rewardFor = (category: "background" | "bubble" | "frame", assetKey: string) =>
@@ -2042,19 +2048,19 @@ export default function MenuPage() {
       <SideDrawer open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
         <div className="detail-list">
           <div className="simple-list">
-            <button className="simple-row menu-link-row" onClick={() => setAvatarDialogOpen(true)} type="button">
+            <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.avatar", () => setAvatarDialogOpen(true))} type="button">
               <div className="row-main menu-key-cell">
                 <strong>{t("profile.avatar")}</strong>
               </div>
               <div className="menu-detail-value">
                 <UserAvatar className="mini-avatar" name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
               </div>
-              <span className="material-symbols-outlined">chevron_right</span>
+              <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.avatar" /><span className="material-symbols-outlined">chevron_right</span></span>
             </button>
-            <button className={`simple-row menu-link-row${canRenameNickname ? "" : " is-locked"}`} disabled={!canRenameNickname} onClick={() => openBasicEditDialog("name")} type="button">
+            {canRenameNickname ? <button className="simple-row menu-link-row" onClick={() => discoverThen(growthLevel >= 12 ? "capability.nickname_7" : growthLevel >= 8 ? "capability.nickname_30" : "capability.nickname_365", () => openBasicEditDialog("name"))} type="button">
               <div className="row-main menu-key-cell">
                 <strong>{t("profile.nickname")}</strong>
-                {canRenameNickname && me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now() ? (
+                {me?.nickname_change?.available_at && me.nickname_change.available_at * 1000 > Date.now() ? (
                   <div className="row-subtle">
                     {t("profile.nextChange", { date: new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale(), {
                       year: "numeric",
@@ -2065,22 +2071,22 @@ export default function MenuPage() {
                 ) : null}
               </div>
               <div className="menu-detail-value menu-detail-text">
-                {canRenameNickname ? session?.user.name ?? t("brand.user") : t("growth.unlockAtLevel", { level: 5 })}
+                {session?.user.name ?? t("brand.user")}
               </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            <button className={`simple-row menu-link-row${canEditWelcome ? "" : " is-locked"}`} disabled={!canEditWelcome} onClick={() => openBasicEditDialog("welcome")} type="button">
+              <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId={growthLevel >= 12 ? "capability.nickname_7" : growthLevel >= 8 ? "capability.nickname_30" : "capability.nickname_365"} /><span className="material-symbols-outlined">chevron_right</span></span>
+            </button> : null}
+            {canEditWelcome ? <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.welcome", () => openBasicEditDialog("welcome"))} type="button">
               <div className="row-main menu-key-cell">
                 <strong>{t("profile.welcome")}</strong>
               </div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditWelcome ? welcomeSummary : t("growth.unlockAtLevel", { level: 6 })}</div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            <button className={`simple-row menu-link-row${canEditPlazaGreeting ? "" : " is-locked"}`} disabled={!canEditPlazaGreeting} onClick={() => openBasicEditDialog("plaza")} type="button">
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
+              <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
+            </button> : null}
+            {canEditPlazaGreeting ? <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.welcome", () => openBasicEditDialog("plaza"))} type="button">
               <div className="row-main menu-key-cell"><strong>{t("profile.plazaGreeting")}</strong></div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{canEditPlazaGreeting ? me?.plaza_greeting || t("profile.defaultPlazaGreeting") : t("growth.unlockAtLevel", { level: 6 })}</div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
+              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{me?.plaza_greeting || t("profile.defaultPlazaGreeting")}</div>
+              <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
+            </button> : null}
           </div>
         </div>
       </SideDrawer>
@@ -2144,7 +2150,7 @@ export default function MenuPage() {
           </section>
           <button
             className={`personalization-background-entry rarity-${rewardRarity("background", me?.chat_background_theme ?? "default")}`}
-            onClick={() => setChatBackgroundDrawerOpen(true)}
+            onClick={() => discoverThen("capability.custom_background", () => setChatBackgroundDrawerOpen(true))}
             type="button"
           >
             <span className={`personalization-background-swatch theme-${me?.chat_background_theme ?? "default"}`} />
@@ -2154,7 +2160,7 @@ export default function MenuPage() {
                 {isDesktopViewport ? t("menu.chatBackgroundDesktopDefault") : t("menu.chatBackgroundHint")}
               </small>
             </span>
-            {!isDesktopViewport ? <span className="material-symbols-outlined">chevron_right</span> : null}
+            {!isDesktopViewport ? <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.custom_background" /><span className="material-symbols-outlined">chevron_right</span></span> : null}
           </button>
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("bubble", visibleBubbleStyle(me?.chat_bubble_style))}`} onClick={() => setChatBubbleDrawerOpen(true)} type="button">
             <span className={`personalization-entry-preview bubble-preview preview-${visibleBubbleStyle(me?.chat_bubble_style)}`}><i /></span>
@@ -2768,7 +2774,7 @@ export default function MenuPage() {
                           showToast(t("notification.levelOrVipRequired", { level: 10 }), "error");
                           return;
                         }
-                        setPrefCustomDrawerOpen(true);
+                        discoverThen("capability.notification", () => setPrefCustomDrawerOpen(true));
                       }}
                       type="button"
                     >
@@ -2777,6 +2783,7 @@ export default function MenuPage() {
                       </div>
                       <div className="menu-pref-row-value">
                         {!canCustomizeNotificationMessage ? <span>{t("growth.unlockAtLevelOrVip", { level: 10 })}</span> : null}
+                        <FeatureDiscoveryMarker rewardId="capability.notification" />
                         <span className="material-symbols-outlined">
                           {canCustomizeNotificationMessage ? "chevron_right" : "lock"}
                         </span>

@@ -10,6 +10,7 @@ import { watchPwaUpdates } from "./lib/pwaUpdate";
 import { LanguageProvider } from "./lib/language";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
+import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
@@ -52,7 +53,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <AuthProvider>
           <ThemeProvider>
             <LanguageProvider>
-              <App />
+              <FeatureDiscoveryProvider><App /></FeatureDiscoveryProvider>
             </LanguageProvider>
           </ThemeProvider>
         </AuthProvider>

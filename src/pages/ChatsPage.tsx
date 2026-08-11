@@ -42,6 +42,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
+import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
@@ -2108,6 +2109,7 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
 
 function LiveChatsPage() {
   const { t } = useI18n();
+  const { discover: discoverFeature } = useFeatureDiscovery();
   const navigate = useNavigate();
   const location = useLocation();
   const { chatId } = useParams();
@@ -5415,11 +5417,23 @@ function LiveChatsPage() {
                 ) : null}
                 {!voiceComposer.open ? (
                   <div className="composer-row composer-row-text">
-                    <div className="composer-leading-actions">
-                      <button aria-label={canSendAudio ? t("audio.record") : t("audio.unlockAtLevel", { level: 3 })} className={`composer-action-button${canSendAudio ? "" : " is-locked"}`} disabled={composerBusy || !canSendAudio} onClick={() => void startVoiceRecording()} title={canSendAudio ? t("audio.record") : t("audio.unlockAtLevel", { level: 3 })} type="button">
-                        {canSendAudio ? <ComposerSvgIcon className="composer-inline-svg" kind="mic" /> : <span className="material-symbols-outlined">lock</span>}
-                      </button>
-                    </div>
+                    {canSendAudio ? (
+                      <div className="composer-leading-actions">
+                        <FeatureDiscoveryTarget
+                          rewardId="capability.audio"
+                          guide={{
+                            title: t("featureDiscovery.audio.title"),
+                            description: t("featureDiscovery.audio.description"),
+                            actionLabel: t("featureDiscovery.audio.action"),
+                            onAction: () => startVoiceRecording(),
+                          }}
+                        >
+                          <button aria-label={t("audio.record")} className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} title={t("audio.record")} type="button">
+                            <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
+                          </button>
+                        </FeatureDiscoveryTarget>
+                      </div>
+                    ) : null}
                     <div className="composer-input-wrap">
                       <textarea
                         ref={textareaRef}
@@ -5613,9 +5627,13 @@ function LiveChatsPage() {
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
                         {stickers.length ? (
                           <div className="composer-sticker-grid">
-                            <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
-                              <span className="material-symbols-outlined">add</span>
-                            </button>
+                            {canCreateSticker ? (
+                              <FeatureDiscoveryTarget className="is-sticker-entry" rewardId="capability.sticker">
+                                <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
+                                  <span className="material-symbols-outlined">add</span>
+                                </button>
+                              </FeatureDiscoveryTarget>
+                            ) : null}
                             {stickers.map((sticker) => (
                               <button
                                 className="composer-sticker-item"
@@ -5632,7 +5650,11 @@ function LiveChatsPage() {
                           <div className="composer-sticker-empty">
                             <span className="material-symbols-outlined">photo_library</span>
                             <strong>{t("sticker.mineEmpty")}</strong>
-                            {canCreateSticker ? <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button> : null}
+                            {canCreateSticker ? (
+                              <FeatureDiscoveryTarget rewardId="capability.sticker">
+                                <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button>
+                              </FeatureDiscoveryTarget>
+                            ) : null}
                           </div>
                         ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
                       </div>
@@ -5678,18 +5700,42 @@ function LiveChatsPage() {
                 {!voiceComposer.open ? (
                   <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
                     <div className="composer-actions-grid">
-                      <button className={`composer-action-tile${canSendImage ? "" : " is-locked"}`} disabled={composerBusy || !canSendImage} onClick={openGalleryPicker} title={canSendImage ? t("media.gallery") : t("image.unlockAtLevel", { level: 2 })} type="button">
-                        <span className="composer-action-tile-icon">{canSendImage ? <ComposerSvgIcon kind="album" /> : <span className="material-symbols-outlined">lock</span>}</span>
-                        <span>{canSendImage ? t("media.gallery") : t("image.levelLabel", { level: 2 })}</span>
-                      </button>
+                      {canSendImage ? (
+                        <FeatureDiscoveryTarget
+                          rewardId="capability.video"
+                          guide={{ title: t("featureDiscovery.video.title"), description: t("featureDiscovery.video.description"), actionLabel: t("featureDiscovery.video.action"), onAction: openGalleryPicker }}
+                        >
+                          <FeatureDiscoveryTarget
+                            rewardId="capability.image"
+                            guide={{ title: t("featureDiscovery.image.title"), description: t("featureDiscovery.image.description"), actionLabel: t("featureDiscovery.image.action"), onAction: openGalleryPicker }}
+                          >
+                            <button className="composer-action-tile" disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button">
+                              <span className="composer-action-tile-icon"><ComposerSvgIcon kind="album" /></span>
+                              <span>{t("media.gallery")}</span>
+                            </button>
+                          </FeatureDiscoveryTarget>
+                        </FeatureDiscoveryTarget>
+                      ) : null}
                       <button className="composer-action-tile" disabled={composerBusy} onClick={openFilePicker} type="button">
                         <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
                         <span>{t("media.file")}</span>
                       </button>
-                      <button className={`composer-action-tile${canSendLocation ? "" : " is-locked"}`} disabled={composerBusy || !canSendLocation} onClick={openLocationPicker} title={canSendLocation ? t("media.location") : t("location.unlockAtLevel", { level: 3 })} type="button">
-                        <span className="composer-action-tile-icon">{canSendLocation ? <ComposerSvgIcon kind="location" /> : <span className="material-symbols-outlined">lock</span>}</span>
-                        <span>{canSendLocation ? t("media.location") : t("location.levelLabel", { level: 3 })}</span>
-                      </button>
+                      {canSendLocation ? (
+                        <FeatureDiscoveryTarget
+                          rewardId="capability.location"
+                          guide={{
+                            title: t("featureDiscovery.location.title"),
+                            description: t("featureDiscovery.location.description"),
+                            actionLabel: t("featureDiscovery.location.action"),
+                            onAction: openLocationPicker,
+                          }}
+                        >
+                          <button className="composer-action-tile" disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button">
+                            <span className="composer-action-tile-icon"><ComposerSvgIcon kind="location" /></span>
+                            <span>{t("media.location")}</span>
+                          </button>
+                        </FeatureDiscoveryTarget>
+                      ) : null}
                       {selectedChat ? (
                         <button className="composer-action-tile" disabled={composerBusy || travelMapSaving} onClick={() => void openChatTravelMap()} type="button">
                           <span className="composer-action-tile-icon"><ComposerSvgIcon kind="map" /></span>
@@ -5991,12 +6037,18 @@ function LiveChatsPage() {
                     </span>
                   </button>
                 ))}
-                <button className={`chat-detail-member-item chat-detail-member-add${selectedChat.type === "group" && !canInviteGroupMember ? " is-locked" : ""}`} disabled={selectedChat.type === "group" ? !canInviteGroupMember : !canCreateGroup} onClick={openChatMemberAdder} type="button">
-                  <span className="chat-detail-member-avatar chat-detail-member-avatar-add">
-                    <span className="material-symbols-outlined">{(selectedChat.type === "group" ? canInviteGroupMember : canCreateGroup) ? "add" : "lock"}</span>
-                  </span>
-                  <span className="chat-detail-member-name">{t("common.add")}</span>
-                </button>
+                {(selectedChat.type === "group" ? canInviteGroupMember : canCreateGroup) ? (
+                  <FeatureDiscoveryTarget
+                    className="is-member-action"
+                    rewardId="capability.group"
+                    guide={{ title: t("featureDiscovery.group.title"), description: t("featureDiscovery.group.description"), actionLabel: t("featureDiscovery.group.action"), onAction: openChatMemberAdder }}
+                  >
+                    <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberAdder} type="button">
+                      <span className="chat-detail-member-avatar chat-detail-member-avatar-add"><span className="material-symbols-outlined">add</span></span>
+                      <span className="chat-detail-member-name">{t("common.add")}</span>
+                    </button>
+                  </FeatureDiscoveryTarget>
+                ) : null}
                 {selectedChat.type === "group" && selectedChat.isOwner ? (
                   <button className="chat-detail-member-item chat-detail-member-add" onClick={openChatMemberRemover} type="button">
                     <span className="chat-detail-member-avatar chat-detail-member-avatar-add chat-detail-member-avatar-remove">
@@ -6048,14 +6100,19 @@ function LiveChatsPage() {
                   </div>
                   <button aria-label={t("chat.togglePin")} className={`switch ${selectedChat.pinned ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("pin", !selectedChat.pinned)} type="button" />
                 </div>
-                {selectedChat.type === "direct" ? (
+                {selectedChat.type === "direct" && canUseOnlineReminder ? (
+                  <FeatureDiscoveryTarget
+                    className="is-setting-row"
+                    rewardId="capability.online"
+                    guide={{ title: t("featureDiscovery.online.title"), description: t("featureDiscovery.online.description"), actionLabel: t("featureDiscovery.online.action"), onAction: () => updateSelectedChatPreference("online", true) }}
+                  >
                   <div className="chat-detail-setting-row">
                     <div className="row-main">
                       <strong>{t("chat.onlineReminder")}</strong>
-                      {!canUseOnlineReminder ? <div className="row-subtle">{t("growth.unlockAtLevel", { level: 7 })}</div> : null}
                     </div>
-                    <button aria-label={canUseOnlineReminder ? t("chat.toggleOnlineReminder") : t("chat.onlineReminderUnlockAtLevel", { level: 7 })} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null || !canUseOnlineReminder} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={canUseOnlineReminder ? t("chat.toggleOnlineReminder") : t("growth.unlockAtLevel", { level: 7 })} type="button" />
+                    <button aria-label={t("chat.toggleOnlineReminder")} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={t("chat.toggleOnlineReminder")} type="button" />
                   </div>
+                  </FeatureDiscoveryTarget>
                 ) : null}
                 {selectedChat.type === "group" ? (
                   <div className="chat-detail-setting-row">
@@ -6075,12 +6132,12 @@ function LiveChatsPage() {
                     <button aria-label={t("chat.toggleMuteUnreadBadge")} className={`switch ${selectedChat.unreadBadgeMuted ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("badge", !selectedChat.unreadBadgeMuted)} type="button" />
                   </div>
                 ) : null}
-                {selectedChat.type === "group" ? (
+                {selectedChat.type === "group" && canRenameGroup ? (
+                  <FeatureDiscoveryTarget className="is-setting-row" rewardId="capability.group_name">
                   <div className="chat-detail-setting-row">
                     <div className="row-main chat-detail-title-main"><strong>{t("chat.groupName")}</strong><div className="row-subtle">{selectedChat.title}</div></div>
                     <button
                       className="chat-detail-row-icon"
-                      disabled={!canRenameGroup}
                       onClick={() => {
                         setGroupRenameValue(selectedChat.title);
                         setGroupRenameOpen(true);
@@ -6091,6 +6148,7 @@ function LiveChatsPage() {
                       <span className="material-symbols-outlined">edit</span>
                     </button>
                   </div>
+                  </FeatureDiscoveryTarget>
                 ) : null}
               </div>
             </section>
@@ -6247,9 +6305,11 @@ function LiveChatsPage() {
         <div className={`sticker-manager ${stickerManagerSelecting ? "is-selecting" : ""}`}>
           <div className="sticker-manager-grid">
             {canCreateSticker ? (
-              <button className="sticker-manager-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button" aria-label={t("sticker.add")}>
-                <span className="material-symbols-outlined">add</span>
-              </button>
+              <FeatureDiscoveryTarget className="is-sticker-manager-entry" rewardId="capability.sticker">
+                <button className="sticker-manager-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button" aria-label={t("sticker.add")}>
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+              </FeatureDiscoveryTarget>
             ) : null}
             {stickers.map((sticker) => {
               const selected = selectedStickerIds.includes(sticker.sticker_id);
@@ -6703,9 +6763,17 @@ function LiveChatsPage() {
                   </button>
                 ) : null}
                 {(["image", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
-                  <button className="message-context-button" onClick={() => void downloadMessageAttachment()} type="button">
+                  <button
+                    className="message-context-button"
+                    onClick={() => {
+                      if (messageMenu.message.kind === "audio") void discoverFeature("capability.audio_download");
+                      void downloadMessageAttachment();
+                    }}
+                    type="button"
+                  >
                     <span className="material-symbols-outlined" aria-hidden="true">download</span>
                     {t("common.download")}
+                    {messageMenu.message.kind === "audio" ? <FeatureDiscoveryMarker rewardId="capability.audio_download" /> : null}
                   </button>
                 ) : null}
                 {canCreateSticker && messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number" ? (
