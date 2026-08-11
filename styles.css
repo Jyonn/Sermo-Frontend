@@ -23773,6 +23773,13 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-comment-menu button{display:flex;align-items:center;gap:8px;width:100%;min-height:36px;padding:0 10px;border:0;border-radius:8px;color:var(--danger,#bc4051);font:inherit;font-size:12px;font-weight:700;background:transparent}
 .square-comment-menu button:hover{background:color-mix(in srgb,var(--danger,#bc4051) 9%,transparent)}
 .square-comment-menu .material-symbols-outlined{font-size:17px}
+.square-share-sheet{padding-top:2px}
+.square-share-chat-list{display:grid;gap:2px}
+.square-share-chat-list>button{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:11px;width:100%;min-height:66px;padding:8px 6px;border:0;border-bottom:1px solid color-mix(in srgb,var(--line-soft) 64%,transparent);color:var(--text-primary);font:inherit;text-align:left;background:transparent;transition:background 140ms ease,opacity 140ms ease}
+.square-share-chat-list>button:last-child{border-bottom:0}.square-share-chat-list>button:not(:disabled):hover{border-radius:13px;background:color-mix(in srgb,var(--brand-primary) 7%,transparent)}.square-share-chat-list>button:disabled{opacity:.58}
+.square-share-chat-avatar{width:46px;height:46px;border-radius:14px}.square-share-chat-avatar .avatar-frame-clip,.square-share-chat-avatar .avatar-image,.square-share-chat-avatar .avatar-label{border-radius:14px}
+.square-share-chat-copy{display:block;min-width:0}.square-share-chat-copy strong,.square-share-chat-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.square-share-chat-copy strong{font-size:14px}.square-share-chat-copy small{margin-top:4px;color:var(--text-muted);font-size:11px}
+.square-share-chat-meta{display:grid;grid-template-columns:auto auto;align-items:center;justify-items:end;gap:4px;min-width:52px;color:var(--text-muted)}.square-share-chat-meta time{grid-column:1/-1;font-size:9px;white-space:nowrap}.square-share-chat-meta .material-symbols-outlined{font-size:16px}.square-share-chat-meta .material-symbols-outlined:first-child{color:var(--brand-primary-press);font-size:14px}.square-share-chat-meta .is-loading{animation:spin 900ms linear infinite}
 .square-comment-actions{display:flex;align-items:center;gap:5px;margin-top:7px}
 .square-comment-actions button{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 9px;border:0;border-radius:999px;color:var(--text-muted);font-size:11px;font-weight:700;background:transparent;transition:color 140ms ease,background 140ms ease,transform 140ms ease}
 .square-comment-actions button .material-symbols-outlined{font-size:15px}

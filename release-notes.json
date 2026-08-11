@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.11.10",
+  "id": "2026.08.11.11",
   "publishedAt": "2026-08-11",
   "locales": {
     "zh-CN": {
-      "title": "评论互动更顺手",
+      "title": "发言可以分享给聊天了",
       "items": [
-        "点击评论即可快速回复并自动唤起输入框",
-        "评论作者与内容管理者可安全删除评论",
-        "删除一级评论时会同步清理其回复线程"
+        "从发言菜单直接分享到私聊或群聊",
+        "置顶聊天优先展示，其余按最近消息排序",
+        "分享成功后会在聊天中生成完整的发言卡片"
       ]
     },
     "en": {
-      "title": "Smoother comment conversations",
+      "title": "Share statements into chats",
       "items": [
-        "Tap any comment to reply with the composer focused",
-        "Comment authors and content moderators can safely remove comments",
-        "Removing a top-level comment also cleans up its reply thread"
+        "Share a statement to direct or group chats from its menu",
+        "Pinned chats come first, followed by recent activity",
+        "Shared statements appear as rich cards inside the conversation"
       ]
     }
   }

@@ -20,7 +20,9 @@ import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
-import type { ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
+import { showToast } from "../lib/toast";
+import type { ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 
 type SelectedPhoto = {
   id: string;
@@ -33,6 +35,7 @@ const MAX_TEXT_LENGTH = 140;
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
+const MESSAGE_TYPE_STATEMENT = 8;
 
 function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQuotaDTO | null }) {
   const { t } = useI18n();
@@ -102,7 +105,15 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
-function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile, onPin }: {
+function shareChatPeer(chat: ChatDTO, currentUserId?: number) {
+  return chat.members.find((member) => member.user_id !== currentUserId) ?? chat.members[0] ?? null;
+}
+
+function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
+  return chat.title || shareChatPeer(chat, currentUserId)?.name || "Sermo";
+}
+
+function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile, onPin, onShare }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   detail?: boolean;
@@ -112,6 +123,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   onOpenImage: (index: number) => void;
   onOpenProfile: () => void;
   onPin: () => void;
+  onShare: () => void;
 }) {
   const { t } = useI18n();
   const [playing, setPlaying] = useState(false);
@@ -158,7 +170,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
           </div>
           <span>{formatRelativeTime(statement.created_at)}</span>
         </div>
-        {statement.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
+        <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button>
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {images.length ? (
@@ -194,8 +206,9 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
       </footer>
       {menuPosition && typeof document !== "undefined" ? createPortal(
         <div className="square-statement-dropdown" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}>
+          <button onClick={() => { setMenuPosition(null); onShare(); }} type="button"><span className="material-symbols-outlined">send</span><span>{t("square.share")}</span></button>
           {statement.can_pin ? <button onClick={() => { setMenuPosition(null); onPin(); }} type="button"><span className="material-symbols-outlined">keep</span><span>{statement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</span></button> : null}
-          <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button>
+          {statement.can_delete ? <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button> : null}
         </div>,
         document.body,
       ) : null}
@@ -289,6 +302,10 @@ export default function SquarePage() {
   const [deletingStatement, setDeletingStatement] = useState(false);
   const [deleteCommentTarget, setDeleteCommentTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [deletingComment, setDeletingComment] = useState(false);
+  const [shareStatement, setShareStatement] = useState<SquareStatementDTO | null>(null);
+  const [shareChats, setShareChats] = useState<ChatDTO[]>([]);
+  const [shareChatsLoading, setShareChatsLoading] = useState(false);
+  const [sharingChatId, setSharingChatId] = useState<number | null>(null);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
@@ -315,12 +332,48 @@ export default function SquarePage() {
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+  const sortedShareChats = useMemo(() => [...shareChats].sort((left, right) => (
+    Number(Boolean(right.pinned)) - Number(Boolean(left.pinned))
+    || (right.last_message?.created_at ?? right.last_chat_at) - (left.last_message?.created_at ?? left.last_chat_at)
+  )), [shareChats]);
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
 
   const openQuota = () => {
     setQuotaOpen(true);
     setQuotaLoading(true);
     void api.getSquareQuota().then(setQuota).catch(() => setQuota(null)).finally(() => setQuotaLoading(false));
+  };
+
+  const openStatementShare = (statement: SquareStatementDTO) => {
+    setShareStatement(statement);
+    setShareChatsLoading(true);
+    void api.getChats().then(setShareChats).catch((cause) => {
+      showToast(cause instanceof Error ? cause.message : t("square.shareLoadFailed"), "error");
+      setShareChats([]);
+    }).finally(() => setShareChatsLoading(false));
+  };
+
+  const sendStatementToChat = async (chat: ChatDTO) => {
+    if (!shareStatement || sharingChatId !== null) return;
+    setSharingChatId(chat.chat_id);
+    const slug = getDetectedSpaceSlug();
+    const pathname = `/app/square/statements/${shareStatement.statement_id}`;
+    const url = slug ? buildSpaceHrefForCurrentHost(slug, pathname) : new URL(pathname, window.location.origin).toString();
+    try {
+      await api.sendMessage(
+        chat.chat_id,
+        MESSAGE_TYPE_STATEMENT,
+        JSON.stringify({ kind: "statement", statement_id: shareStatement.statement_id, url, text: shareStatement.text.slice(0, 100) }),
+        undefined,
+        crypto.randomUUID(),
+      );
+      showToast(t("square.sharedTo", { chat: shareChatTitle(chat, currentUser?.user_id) }));
+      setShareStatement(null);
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("square.shareFailed"), "error");
+    } finally {
+      setSharingChatId(null);
+    }
   };
 
   const remaining = MAX_TEXT_LENGTH - text.length;
@@ -760,7 +813,7 @@ export default function SquarePage() {
             />
           ) : null}
           <section className="square-statement-feed">
-            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} statement={statement} />)}
+            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -839,6 +892,20 @@ export default function SquarePage() {
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
       </BottomSheet>
+      <BottomSheet bodyClassName="square-share-sheet" onClose={() => { if (sharingChatId === null) setShareStatement(null); }} open={shareStatement !== null} title={t("square.shareToChat")}>
+        {shareChatsLoading && !shareChats.length ? <ContentLoader label={t("square.loadingChats")} rows={4} /> : null}
+        {!shareChatsLoading && !sortedShareChats.length ? <QuietState icon="forum" title={t("square.noChatsToShare")} /> : null}
+        {sortedShareChats.length ? <div className="square-share-chat-list">{sortedShareChats.map((chat) => {
+          const peer = chat.group ? null : shareChatPeer(chat, currentUser?.user_id);
+          const title = shareChatTitle(chat, currentUser?.user_id);
+          const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;
+          return <button disabled={sharingChatId !== null} key={chat.chat_id} onClick={() => void sendStatementToChat(chat)} type="button">
+            <UserAvatar className="square-share-chat-avatar" groupMembers={chat.group ? chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri })) : undefined} name={title} uri={peer?.avatar_uri} />
+            <span className="square-share-chat-copy"><strong>{title}</strong><small>{chat.last_message?.content || (chat.group ? t("chat.group") : t("square.directChat"))}</small></span>
+            <span className="square-share-chat-meta">{chat.pinned ? <i className="material-symbols-outlined">keep</i> : null}<time>{formatRelativeTime(lastActivity)}</time>{sharingChatId === chat.chat_id ? <i className="material-symbols-outlined is-loading">progress_activity</i> : <i className="material-symbols-outlined">chevron_right</i>}</span>
+          </button>;
+        })}</div> : null}
+      </BottomSheet>
       <BottomSheet bodyClassName="square-voice-sheet" onClose={() => { if (recording) stopRecording(); setVoiceSheetOpen(false); }} open={voiceSheetOpen} title={t("square.voice")}>
         <div className={`square-voice-stage${recording ? " is-recording" : ""}`}><div className="square-voice-bars">{Array.from({ length: 25 }, (_, index) => <i key={index} />)}</div><strong>{Math.min(voiceDuration, MAX_AUDIO_SECONDS)}<small> / {MAX_AUDIO_SECONDS}s</small></strong></div>
         <button className="square-record-button" onClick={() => void startRecording()} type="button"><span className="material-symbols-outlined">{recording ? "stop" : "mic"}</span></button>
@@ -849,7 +916,7 @@ export default function SquarePage() {
       <SideDrawer historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); if (routedStatementId) navigate("/app/square"); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           <div className="square-statement-detail-stage">
-            {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+            {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
           </div>
           <section className="square-discussion-section">
             <div className="square-comments-heading">
