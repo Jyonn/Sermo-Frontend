@@ -354,6 +354,23 @@ export default function SquarePage() {
     void api.getSquareQuota().then(setQuota).catch(() => setQuota(null)).finally(() => setQuotaLoading(false));
   };
 
+  const refreshStatementMedia = (statementId: number) => {
+    void api.getSquareStatement(statementId).then((fresh) => {
+      setStatements((current) => current.map((statement) => statement.statement_id === statementId ? fresh : statement));
+      setPinnedStatement((current) => current?.statement_id === statementId ? fresh : current);
+    }).catch(() => undefined);
+  };
+
+  const openStatementImages = (statementId: number, index: number) => {
+    setGallery({ statementId, index });
+    refreshStatementMedia(statementId);
+  };
+
+  const openStatementVideo = (statementId: number) => {
+    setVideoGalleryStatementId(statementId);
+    refreshStatementMedia(statementId);
+  };
+
   const openStatementShare = (statement: SquareStatementDTO) => {
     setShareStatement(statement);
     setShareChatsLoading(true);
@@ -823,7 +840,7 @@ export default function SquarePage() {
             />
           ) : null}
           <section className="square-statement-feed">
-            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => setVideoGalleryStatementId(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />)}
+            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -927,7 +944,7 @@ export default function SquarePage() {
         <div className={`square-comments-drawer statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`}>
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => setVideoGalleryStatementId(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             <section className="square-discussion-section">
               <div className="square-comments-heading">

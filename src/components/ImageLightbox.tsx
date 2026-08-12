@@ -82,6 +82,10 @@ export function MediaLightbox({
 
   if (!items.length) return null;
   const activeItem = items[index] ?? items[0];
+  const close = () => {
+    if (document.fullscreenElement) void document.exitFullscreen().finally(onClose);
+    else onClose();
+  };
 
   return createPortal(
     <div className="dialog-backdrop message-image-preview-backdrop" onClick={() => {
@@ -89,7 +93,7 @@ export function MediaLightbox({
         gestureRef.current = null;
         return;
       }
-      onClose();
+      close();
     }} onPointerDown={(event) => { gestureRef.current = { moved: false, x: event.clientX }; }} onPointerMove={(event) => {
       const gesture = gestureRef.current;
       if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
@@ -102,19 +106,19 @@ export function MediaLightbox({
         }} ref={trackRef}>
           {items.map((item, itemIndex) => <div className="message-image-preview-slide" key={`${item.uri}:${itemIndex}`}>
             <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
-              <div className={`message-image-preview-frame${item.kind === "video" ? " message-video-preview-frame" : ""}`} onClick={(event) => event.stopPropagation()}>
+              <div className={`message-image-preview-frame${item.kind === "video" ? " message-video-preview-frame" : ""}`}>
                 {item.kind === "video"
-                  ? <video className="message-video-preview" controls playsInline poster={item.posterUri || undefined} preload="metadata" src={item.uri} />
+                  ? <video className="message-video-preview" controls onClick={(event) => event.stopPropagation()} playsInline poster={item.posterUri || undefined} preload="metadata" src={item.uri} />
                   : <img alt={`${resolvedAltPrefix} ${itemIndex + 1}`} className="message-image-preview" draggable={false} src={item.uri} />}
               </div>
-              <div onClick={(event) => event.stopPropagation()}>{item.detail ?? null}</div>
+              <div>{item.detail ?? null}</div>
             </article>
           </div>)}
         </div>
         <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
           {items.length > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(items.length).padStart(2, "0")}</span> : null}
           <button aria-label={t("common.fullscreen")} onClick={() => modalRef.current && void enterMediaFullscreen(modalRef.current, activeItem)} type="button">
-            <span className="material-symbols-outlined">fullscreen</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg>
           </button>
           <button aria-label={activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} onClick={() => void downloadMedia(activeItem.uri, fileNamePrefix)} type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>
