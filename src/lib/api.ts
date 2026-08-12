@@ -56,6 +56,11 @@ import type {
   SquareStatementCommentDTO,
   SquareStatementDraftMedia,
   SquareQuotaDTO,
+  PlatformAdminSession,
+  PlatformAdminSpaceDTO,
+  PlatformAdminMemberDTO,
+  PlatformDashboardDTO,
+  PlatformAuditDTO,
 } from "../types";
 import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
@@ -73,12 +78,18 @@ type AdminAuthConfig = {
   setSession: (session: SpaceAdminSession | null) => void;
 };
 
+type PlatformAdminAuthConfig = {
+  getSession: () => PlatformAdminSession | null;
+  setSession: (session: PlatformAdminSession | null) => void;
+};
+
 type RequestOptions = {
   method?: "GET" | "POST" | "DELETE";
   body?: unknown;
   query?: Record<string, string | number | boolean | null | undefined>;
   auth?: boolean;
   adminAuth?: boolean;
+  platformAdminAuth?: boolean;
   retryOn401?: boolean;
   signal?: AbortSignal;
 };
@@ -103,6 +114,10 @@ let adminAuthConfig: AdminAuthConfig = {
   getSession: () => null,
   setSession: () => undefined,
 };
+let platformAdminAuthConfig: PlatformAdminAuthConfig = {
+  getSession: () => null,
+  setSession: () => undefined,
+};
 let refreshInFlight: Promise<AuthSession> | null = null;
 const getRequestsInFlight = new Map<string, Promise<unknown>>();
 
@@ -112,6 +127,10 @@ export function configureApiAuth(config: AuthConfig) {
 
 export function configureAdminApiAuth(config: AdminAuthConfig) {
   adminAuthConfig = config;
+}
+
+export function configurePlatformAdminApiAuth(config: PlatformAdminAuthConfig) {
+  platformAdminAuthConfig = config;
 }
 
 function withQuery(path: string, query?: RequestOptions["query"]) {
@@ -217,9 +236,10 @@ export function refreshAuthSession(currentSession: AuthSession) {
 }
 
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, auth = false, adminAuth = false, retryOn401 = true, signal } = options;
+  const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal } = options;
   const session = auth ? authConfig.getSession() : null;
   const adminSession = adminAuth ? adminAuthConfig.getSession() : null;
+  const platformAdminSession = platformAdminAuth ? platformAdminAuthConfig.getSession() : null;
   const headers = new Headers();
   headers.set("Accept", "application/json");
   headers.set(
@@ -236,6 +256,9 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   if (adminAuth && adminSession?.accessToken) {
     headers.set("Authorization", `Bearer ${adminSession.accessToken}`);
   }
+  if (platformAdminAuth && platformAdminSession?.accessToken) {
+    headers.set("Authorization", `Bearer ${platformAdminSession.accessToken}`);
+  }
 
   const response = await fetch(`${API_BASE_URL}${withQuery(path, query)}`, {
     method,
@@ -247,6 +270,10 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   if (response.status === 401 && adminAuth) {
     adminAuthConfig.setSession(null);
     throw new ApiError(i18n.t("admin.sessionExpired"), "UNAUTHORIZED", response.status);
+  }
+  if (response.status === 401 && platformAdminAuth) {
+    platformAdminAuthConfig.setSession(null);
+    throw new ApiError("超级管理员会话已过期", "UNAUTHORIZED", response.status);
   }
 
   if (response.status === 401 && auth && retryOn401 && session?.refreshToken) {
@@ -302,7 +329,7 @@ function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Prom
 }
 
 function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", auth = false, adminAuth = false, query, signal } = options;
+  const { method = "GET", auth = false, adminAuth = false, platformAdminAuth = false, query, signal } = options;
   if (method !== "GET") {
     return requestCore<T>(path, options).then((result) => {
       if (auth && path !== "/users/me/growth") {
@@ -314,7 +341,8 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 
   const sessionKey = auth ? authConfig.getSession()?.accessToken ?? "anonymous" : "";
   const adminSessionKey = adminAuth ? adminAuthConfig.getSession()?.accessToken ?? "anonymous" : "";
-  const requestKey = `${withQuery(path, query)}|auth:${sessionKey}|admin:${adminSessionKey}`;
+  const platformSessionKey = platformAdminAuth ? platformAdminAuthConfig.getSession()?.accessToken ?? "anonymous" : "";
+  const requestKey = `${withQuery(path, query)}|auth:${sessionKey}|admin:${adminSessionKey}|platform:${platformSessionKey}`;
   let shared = getRequestsInFlight.get(requestKey) as Promise<T> | undefined;
 
   if (!shared) {
@@ -1331,5 +1359,53 @@ export const api = {
       auth: true,
       body: { language_preference, system_language },
     });
+  },
+
+  sendPlatformAdminCode(email: string) {
+    return request<{ expires_in: number; masked_email: string }>("/platform-admin/email-code", {
+      method: "POST", body: { email },
+    });
+  },
+  loginPlatformAdmin(payload: { email: string; code: string; mfa_code?: string }) {
+    return request<{ auth: string; data: Record<string, unknown>; mfa_enabled: boolean }>("/platform-admin/login", {
+      method: "POST", body: payload,
+    });
+  },
+  getPlatformDashboard(signal?: AbortSignal) {
+    return request<PlatformDashboardDTO>("/platform-admin/dashboard", { platformAdminAuth: true, signal });
+  },
+  getPlatformSpaces(query = "", signal?: AbortSignal) {
+    return request<PlatformAdminSpaceDTO[]>("/platform-admin/spaces", { platformAdminAuth: true, query: { q: query }, signal });
+  },
+  getPlatformMembers(spaceId: number, signal?: AbortSignal) {
+    return request<PlatformAdminMemberDTO[]>(`/platform-admin/spaces/${spaceId}/members`, { platformAdminAuth: true, signal });
+  },
+  getPlatformMemberChats(userId: number, signal?: AbortSignal) {
+    return request<ChatDTO[]>(`/platform-admin/members/${userId}/chats`, { platformAdminAuth: true, signal });
+  },
+  getPlatformChatMessages(chatId: number, reason: string, before?: number, signal?: AbortSignal) {
+    return request<{ chat: ChatDTO; messages: ChatMessageDTO[] }>(`/platform-admin/chats/${chatId}/messages`, {
+      platformAdminAuth: true, query: { reason, before, limit: 50 }, signal,
+    });
+  },
+  getPlatformIdentityDocument(spaceId: number) {
+    return request<{ uri: string }>(`/platform-admin/identity/${spaceId}/document`, { platformAdminAuth: true });
+  },
+  reviewPlatformIdentity(spaceId: number, approved: boolean, note: string) {
+    return request<PlatformAdminSpaceDTO>(`/platform-admin/identity/${spaceId}/review`, {
+      method: "POST", platformAdminAuth: true, body: { approved, note },
+    });
+  },
+  getPlatformAudit(signal?: AbortSignal) {
+    return request<PlatformAuditDTO[]>("/platform-admin/audit", { platformAdminAuth: true, signal });
+  },
+  beginPlatformMfa() {
+    return request<{ secret: string; otpauth_uri: string }>("/platform-admin/mfa/setup", { method: "POST", platformAdminAuth: true });
+  },
+  verifyPlatformMfa(code: string) {
+    return request<{ recovery_codes: string[] }>("/platform-admin/mfa/verify", { method: "POST", platformAdminAuth: true, body: { code } });
+  },
+  disablePlatformMfa(code: string) {
+    return request<Record<string, never>>("/platform-admin/mfa/disable", { method: "POST", platformAdminAuth: true, body: { code } });
   },
 };

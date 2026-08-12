@@ -28,6 +28,7 @@ import SquarePage from "./pages/SquarePage";
 import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
+import PlatformAdminPage from "./pages/PlatformAdminPage";
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -87,6 +88,7 @@ export default function App() {
   const { ready, session } = useAuth();
   const features = useSpaceFeatures();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
+  const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
   const routeLocation = showFriendInviteOverlay
     ? {
         ...location,
@@ -106,6 +108,7 @@ export default function App() {
         <Route path="/official-login" element={<OfficialLoginPage />} />
         <Route path="/account-switch" element={<AccountSwitchPage />} />
         <Route path="/pwa" element={<PwaAccountEntryPage />} />
+        <Route path="/admin" element={<PlatformAdminPage />} />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"
@@ -240,12 +243,12 @@ export default function App() {
           <Route path="/friend-invite" element={<FriendInvitePage overlay />} />
         </Routes>
       ) : null}
-      {ready ? <DocumentTitle /> : null}
-      {ready ? <GlobalMessageSync /> : null}
-      {ready ? <GrowthLevelCelebration /> : null}
-      {ready ? <AppBottomNav /> : null}
-      {ready ? <PwaRecommendation /> : null}
-      <PwaUpdatePrompt />
+      {ready && !isPlatformAdmin ? <DocumentTitle /> : null}
+      {ready && !isPlatformAdmin ? <GlobalMessageSync /> : null}
+      {ready && !isPlatformAdmin ? <GrowthLevelCelebration /> : null}
+      {ready && !isPlatformAdmin ? <AppBottomNav /> : null}
+      {ready && !isPlatformAdmin ? <PwaRecommendation /> : null}
+      {!isPlatformAdmin ? <PwaUpdatePrompt /> : null}
       <AppToast />
     </>
   );

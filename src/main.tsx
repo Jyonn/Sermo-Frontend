@@ -11,6 +11,7 @@ import { LanguageProvider } from "./lib/language";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
+import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
@@ -50,13 +51,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename={routerBasename}>
       <AdminAuthProvider>
-        <AuthProvider>
+        <PlatformAdminAuthProvider><AuthProvider>
           <ThemeProvider>
             <LanguageProvider>
               <FeatureDiscoveryProvider><App /></FeatureDiscoveryProvider>
             </LanguageProvider>
           </ThemeProvider>
-        </AuthProvider>
+        </AuthProvider></PlatformAdminAuthProvider>
       </AdminAuthProvider>
     </BrowserRouter>
   </React.StrictMode>

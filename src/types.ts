@@ -268,6 +268,55 @@ export interface SpaceAdminSession {
   space: SpaceDTO;
 }
 
+export interface PlatformAdminSession {
+  accessToken: string;
+  email: string;
+  mfaEnabled: boolean;
+}
+
+export interface PlatformAdminSpaceDTO {
+  space_id: number;
+  name: string;
+  slug: string;
+  email: string;
+  official_user: TinyUserDTO | null;
+  verification_tier: "email" | "phone" | "identity";
+  member_limit: number;
+  member_count: number;
+  chat_enabled: boolean;
+  square_enabled: boolean;
+  identity_submitted_at: number | null;
+  identity_verified_at: number | null;
+  created_at: number;
+}
+
+export interface PlatformAdminMemberDTO extends UserDTO {
+  friend_count: number;
+  chat_count: number;
+  statement_count: number;
+  contacts: { email: boolean; phone: boolean; bark: boolean };
+  notifications_enabled: number;
+}
+
+export interface PlatformAuditDTO {
+  audit_id: number;
+  action: string;
+  target_type: string;
+  target_id: number | null;
+  summary: string;
+  metadata: Record<string, unknown>;
+  ip_address: string | null;
+  created_at: number;
+}
+
+export interface PlatformDashboardDTO {
+  spaces: number;
+  members: number;
+  pending_identity_reviews: number;
+  mfa_enabled: boolean;
+  recent_audit: PlatformAuditDTO[];
+}
+
 export interface SpaceAdminDashboardDTO {
   space: SpaceDTO;
   stats: {
