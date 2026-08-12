@@ -224,16 +224,16 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
   onReply: (comment: SquareStatementCommentDTO) => void;
 }) {
   const { t } = useI18n();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuPosition) return;
     const close = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+      if (!menuRef.current?.contains(event.target as Node)) setMenuPosition(null);
     };
     window.addEventListener("pointerdown", close);
     return () => window.removeEventListener("pointerdown", close);
-  }, [menuOpen]);
+  }, [menuPosition]);
   const beginReply = (event: ReactMouseEvent) => {
     event.stopPropagation();
     if (canInteract) onReply(comment);
@@ -241,7 +241,7 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}`} onClick={beginReply}>
     <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
     <div>
-      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}<time>{formatRelativeTime(comment.created_at)}</time></div>{comment.can_delete ? <div className="square-comment-more-wrap" ref={menuRef}><button aria-expanded={menuOpen} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); setMenuOpen((current) => !current); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button>{menuOpen ? <div className="square-comment-menu"><button onClick={(event) => { event.stopPropagation(); setMenuOpen(false); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span>{t("common.delete")}</button></div> : null}</div> : null}</header>
+      <header><div className="square-comment-author-name"><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}<time>{formatRelativeTime(comment.created_at)}</time></div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
       <p>{comment.reply_to_user ? <span className="square-comment-reply-prefix">{t("square.replyingTo", { name: comment.reply_to_user.name })}</span> : null}{comment.text}</p>
       <div className="square-comment-actions">
         <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
@@ -249,6 +249,7 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
       </div>
       {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} />)}</div> : null}
     </div>
+    {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
   </article>;
 }
 
