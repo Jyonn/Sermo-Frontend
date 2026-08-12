@@ -4130,29 +4130,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   gap: 10px;
 }
 
-.personalization-group-switch {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 11px;
-  background: color-mix(in srgb, var(--text-muted) 9%, transparent);
-}
-
-.personalization-group-switch button {
-  min-height: 32px;
-  padding: 0 11px;
+.personalization-quality-label {
   color: var(--text-muted);
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  font-size: .66rem;
-  font-weight: 760;
-}
-
-.personalization-group-switch button[aria-pressed="true"] {
-  color: var(--text-primary);
-  background: var(--bg-panel);
-  box-shadow: 0 2px 8px rgba(25, 38, 31, .08);
+  font-size: .68rem;
+  font-weight: 780;
+  letter-spacing: .04em;
 }
 
 .personalization-filter-menu { position: relative; }
@@ -4206,9 +4188,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .personalization-filter-menu > div button[aria-selected="true"] { color: var(--brand-primary); background: var(--brand-soft); }
 
 @media (max-width: 390px) {
-  .personalization-catalog-controls { align-items: stretch; }
-  .personalization-group-switch { flex: 1; }
-  .personalization-group-switch button { flex: 1; padding-inline: 7px; }
+  .personalization-catalog-controls { align-items: center; }
   .personalization-filter-menu > summary { min-width: 82px; }
 }
 
@@ -24130,6 +24110,12 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .statement-card-style-choice { display: grid; min-width: 0; gap: 9px; padding: 9px; border: 1px solid var(--line-soft); border-radius: 18px; color: var(--text-primary); text-align: left; background: var(--bg-elevated); }
 .statement-card-style-choice.is-selected { border-color: var(--brand-primary); box-shadow: 0 0 0 2px color-mix(in srgb,var(--brand-primary) 18%,transparent); }
 .statement-card-style-choice > strong { padding: 0 3px 3px; font-size: 12px; }
+.statement-card-style-choice.rarity-common { --rarity-color: #66736d; }
+.statement-card-style-choice.rarity-uncommon { --rarity-color: #159a8c; }
+.statement-card-style-choice.rarity-rare { --rarity-color: #3478d4; }
+.statement-card-style-choice.rarity-epic { --rarity-color: #8557c7; }
+.statement-card-style-choice.rarity-legendary { --rarity-color: #c88719; }
+.statement-card-style-choice[class*="rarity-"] > strong { color: var(--rarity-color); }
 .statement-card-style-sample { position: relative; display: grid; min-height: 78px; overflow: hidden; place-items: center; border-radius: 12px; }
 .statement-card-style-sample i { position: relative; z-index: 2; padding: 8px 13px; font-size: 11px; font-style: normal; font-weight: 850; }
 .statement-card-style-choice.statement-style-default .statement-card-style-sample { border: 1px solid var(--line-soft); background: var(--bg-elevated); }

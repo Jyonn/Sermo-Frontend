@@ -146,6 +146,17 @@ const cityBubbleRequirements: Partial<Record<ChatBubbleStyle, TranslationKey>> =
 };
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
 const vipOrLevelStatementStyles = new Set<StatementCardStyle>(["niko", "fufu"]);
+const statementStyleRarity: Record<StatementCardStyle, GrowthRewardDTO["rarity"]> = {
+  default: "common",
+  editorial: "uncommon",
+  mosaic: "uncommon",
+  comic: "rare",
+  receipt: "rare",
+  hero: "epic",
+  vip: "legendary",
+  niko: "legendary",
+  fufu: "legendary",
+};
 
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
@@ -153,19 +164,14 @@ function visibleBubbleStyle(style?: string) {
 
 type NotificationMessageKind = "direct" | "group" | "online";
 type NotificationSettingsMode = "channel" | "type";
-type PersonalizationGroupMode = "level" | "rarity";
 type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type PersonalizationCatalogItem = readonly [string, TranslationKey];
 type PersonalizationCatalogSection = { key: string; label: string; items: PersonalizationCatalogItem[] };
 
 function PersonalizationCatalogControls({
-  groupMode,
-  onGroupModeChange,
   onOwnershipChange,
   ownership,
 }: {
-  groupMode: PersonalizationGroupMode;
-  onGroupModeChange: (mode: PersonalizationGroupMode) => void;
   onOwnershipChange: (filter: PersonalizationOwnershipFilter) => void;
   ownership: PersonalizationOwnershipFilter;
 }) {
@@ -175,10 +181,7 @@ function PersonalizationCatalogControls({
   const filterLabel = (filter: PersonalizationOwnershipFilter) => t(`menu.personalizationFilter.${filter}` as TranslationKey);
   return (
     <div className="personalization-catalog-controls">
-      <div aria-label={t("menu.personalizationGroupBy")} className="personalization-group-switch" role="group">
-        <button aria-pressed={groupMode === "level"} onClick={() => onGroupModeChange("level")} type="button">{t("menu.personalizationGroupLevel")}</button>
-        <button aria-pressed={groupMode === "rarity"} onClick={() => onGroupModeChange("rarity")} type="button">{t("menu.personalizationGroupRarity")}</button>
-      </div>
+      <strong className="personalization-quality-label">{t("menu.personalizationGroupRarity")}</strong>
       <details className="personalization-filter-menu" ref={filterRef}>
         <summary><span>{filterLabel(ownership)}</span><span aria-hidden="true" className="material-symbols-outlined">expand_more</span></summary>
         <div role="listbox">
@@ -401,7 +404,6 @@ export default function MenuPage() {
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [chatBackgroundDraft, setChatBackgroundDraft] = useState<ChatBackgroundTheme>("default");
-  const [personalizationGroupMode, setPersonalizationGroupMode] = useState<PersonalizationGroupMode>("level");
   const [personalizationOwnershipFilter, setPersonalizationOwnershipFilter] = useState<PersonalizationOwnershipFilter>("all");
   const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
     chat_bubble_style: "default",
@@ -500,18 +502,28 @@ export default function MenuPage() {
     const groups = new Map<string, PersonalizationCatalogItem[]>();
     filtered.forEach((item) => {
       const [assetKey] = item;
-      const key = personalizationGroupMode === "level" ? String(rewardLevel(category, assetKey)) : rewardRarity(category, assetKey);
+      const key = rewardRarity(category, assetKey);
       groups.set(key, [...(groups.get(key) ?? []), item]);
     });
-    const keys = [...groups.keys()].sort((left, right) => personalizationGroupMode === "level"
-      ? Number(left) - Number(right)
-      : rarityOrder.indexOf(left as typeof rarityOrder[number]) - rarityOrder.indexOf(right as typeof rarityOrder[number]));
+    const keys = [...groups.keys()].sort((left, right) => rarityOrder.indexOf(left as typeof rarityOrder[number]) - rarityOrder.indexOf(right as typeof rarityOrder[number]));
     return keys.map((key) => ({
       key,
-      label: personalizationGroupMode === "level" ? t("menu.personalizationLevelGroup", { level: key }) : t(`growth.rarity.${key}` as TranslationKey),
+      label: t(`growth.rarity.${key}` as TranslationKey),
       items: groups.get(key) ?? [],
     }));
   };
+  const statementStyleSections = (() => {
+    const rarityOrder: GrowthRewardDTO["rarity"][] = ["common", "uncommon", "rare", "epic", "legendary"];
+    const filtered = personalizationOptions.statement_card_style.filter(([value]) => {
+      const owned = canUseStatementStyle(value as StatementCardStyle);
+      return personalizationOwnershipFilter === "all" || (personalizationOwnershipFilter === "owned" ? owned : !owned);
+    });
+    return rarityOrder.map((rarity) => ({
+      key: rarity,
+      label: t(`growth.rarity.${rarity}` as TranslationKey),
+      items: filtered.filter(([value]) => statementStyleRarity[value as StatementCardStyle] === rarity),
+    })).filter((section) => section.items.length);
+  })();
   const canCustomizeNotificationMessage =
     Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip)
     || hasGrowthCapability("custom_notification_message", 10);
@@ -2225,8 +2237,6 @@ export default function MenuPage() {
             <span className="chat-background-preview-bubble self">{t("menu.backgroundPreviewSelf")}</span>
           </div>
           <PersonalizationCatalogControls
-            groupMode={personalizationGroupMode}
-            onGroupModeChange={setPersonalizationGroupMode}
             onOwnershipChange={setPersonalizationOwnershipFilter}
             ownership={personalizationOwnershipFilter}
           />
@@ -2296,8 +2306,6 @@ export default function MenuPage() {
           </div>
           <div className="personalization-library">
             <PersonalizationCatalogControls
-              groupMode={personalizationGroupMode}
-              onGroupModeChange={setPersonalizationGroupMode}
               onOwnershipChange={setPersonalizationOwnershipFilter}
               ownership={personalizationOwnershipFilter}
             />
@@ -2385,8 +2393,6 @@ export default function MenuPage() {
           </div>
           <div className="personalization-library">
             <PersonalizationCatalogControls
-              groupMode={personalizationGroupMode}
-              onGroupModeChange={setPersonalizationGroupMode}
               onOwnershipChange={setPersonalizationOwnershipFilter}
               ownership={personalizationOwnershipFilter}
             />
@@ -2456,25 +2462,31 @@ export default function MenuPage() {
             </article>
           </div>
           <div className="personalization-library">
-            <section className="personalization-library-section">
-              <header><h3>{t("menu.statementFirstCollection")}</h3><span>{personalizationOptions.statement_card_style.length}</span></header>
-              <div className="statement-card-style-grid">
-                {personalizationOptions.statement_card_style.map(([value, label]) => (
-                  <button
-                    aria-pressed={personalizationDraft.statement_card_style === value}
-                    className={`statement-card-style-choice statement-style-${value}${personalizationDraft.statement_card_style === value ? " is-selected" : ""}${!canUseStatementStyle(value as StatementCardStyle) ? " is-locked" : ""}`}
-                    disabled={personalizationSaving}
-                    key={value}
-                    onClick={() => setPersonalizationDraft((current) => ({ ...current, statement_card_style: value as StatementCardStyle }))}
-                    type="button"
-                  >
-                    <span className="statement-card-style-sample"><i>{t("menu.statementStyleSample")}</i></span>
-                    <strong>{t(label)}</strong>
-                    {!canUseStatementStyle(value as StatementCardStyle) ? <small>{value === "vip" ? "VIP" : t("menu.levelOrVipUnlock", { level: 16 })}</small> : null}
-                  </button>
-                ))}
-              </div>
-            </section>
+            <PersonalizationCatalogControls
+              onOwnershipChange={setPersonalizationOwnershipFilter}
+              ownership={personalizationOwnershipFilter}
+            />
+            {statementStyleSections.map((section) => (
+              <section className="personalization-library-section" key={section.key}>
+                <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
+                <div className="statement-card-style-grid">
+                  {section.items.map(([value, label]) => (
+                    <button
+                      aria-pressed={personalizationDraft.statement_card_style === value}
+                      className={`statement-card-style-choice statement-style-${value} rarity-${statementStyleRarity[value as StatementCardStyle]}${personalizationDraft.statement_card_style === value ? " is-selected" : ""}${!canUseStatementStyle(value as StatementCardStyle) ? " is-locked" : ""}`}
+                      disabled={personalizationSaving}
+                      key={value}
+                      onClick={() => setPersonalizationDraft((current) => ({ ...current, statement_card_style: value as StatementCardStyle }))}
+                      type="button"
+                    >
+                      <span className="statement-card-style-sample"><i>{t("menu.statementStyleSample")}</i></span>
+                      <strong>{t(label)}</strong>
+                      {!canUseStatementStyle(value as StatementCardStyle) ? <small>{value === "vip" ? "VIP" : t("menu.levelOrVipUnlock", { level: 16 })}</small> : null}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
         </div>
       </SideDrawer>
