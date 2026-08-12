@@ -6,7 +6,7 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
-import { ImageLightbox } from "../components/ImageLightbox";
+import { MediaLightbox } from "../components/ImageLightbox";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
@@ -105,6 +105,12 @@ function formatStatementTime(timestamp: number, language: string) {
   }).format(new Date(timestamp * 1000));
 }
 
+function formatImageFileSize(fileSize?: number | null) {
+  if (fileSize == null) return "";
+  if (fileSize >= 1024 * 1024) return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(fileSize / 1024))} KB`;
+}
+
 function shareChatPeer(chat: ChatDTO, currentUserId?: number) {
   return chat.members.find((member) => member.user_id !== currentUserId) ?? chat.members[0] ?? null;
 }
@@ -113,7 +119,7 @@ function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
   return chat.title || shareChatPeer(chat, currentUserId)?.name || "Sermo";
 }
 
-function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile, onPin, onShare }: {
+function StatementCard({ statement, canInteract, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile, onOpenVideo, onPin, onShare }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   detail?: boolean;
@@ -122,6 +128,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
   onOpen: () => void;
   onOpenImage: (index: number) => void;
   onOpenProfile: () => void;
+  onOpenVideo: () => void;
   onPin: () => void;
   onShare: () => void;
 }) {
@@ -196,7 +203,7 @@ function StatementCard({ statement, canInteract, detail = false, onDelete, onLik
           <audio hidden onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
-      {video ? <video className="square-statement-video" controls onClick={(event) => event.stopPropagation()} playsInline poster={video.thumbnail_uri || undefined} preload="metadata" src={video.uri} /> : null}
+      {video ? <button className="square-statement-video-button" onClick={(event) => { event.stopPropagation(); onOpenVideo(); }} type="button"><video className="square-statement-video" muted playsInline poster={video.thumbnail_uri || undefined} preload="metadata" src={video.uri} /><span className="material-symbols-outlined">play_arrow</span></button> : null}
       <footer className="square-statement-footer">
         <button className={statement.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{statement.like_count || t("square.like")}</span></button>
         <button onClick={(event) => { event.stopPropagation(); onOpen(); }} type="button">
@@ -289,6 +296,7 @@ export default function SquarePage() {
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
   const [gallery, setGallery] = useState<{ statementId: number; index: number } | null>(null);
+  const [videoGalleryStatementId, setVideoGalleryStatementId] = useState<number | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const [commentStatementId, setCommentStatementId] = useState<number | null>(routedStatementId);
@@ -332,6 +340,7 @@ export default function SquarePage() {
   const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
+  const galleryVideo = statements.find((item) => item.statement_id === videoGalleryStatementId)?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
   const sortedShareChats = useMemo(() => [...shareChats].sort((left, right) => (
     Number(Boolean(right.pinned)) - Number(Boolean(left.pinned))
@@ -814,7 +823,7 @@ export default function SquarePage() {
             />
           ) : null}
           <section className="square-statement-feed">
-            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />)}
+            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => <StatementCard canInteract={canPublish} key={statement.statement_id} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => openStatement(statement.statement_id)} onOpenImage={(index) => setGallery({ statementId: statement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => setVideoGalleryStatementId(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />)}
           </section>
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
@@ -918,7 +927,7 @@ export default function SquarePage() {
         <div className={`square-comments-drawer statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`}>
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => setGallery({ statementId: activeCommentStatement.statement_id, index })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => setVideoGalleryStatementId(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             <section className="square-discussion-section">
               <div className="square-comments-heading">
@@ -960,7 +969,8 @@ export default function SquarePage() {
           />
         ) : null}
       </SideDrawer>
-      {gallery && galleryImages.length ? <ImageLightbox altPrefix={t("square.photo")} details={galleryImages.map((image) => <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />)} index={gallery.index} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} uris={galleryImages.map((image) => image.uri)} /> : null}
+      {gallery && galleryImages.length ? <MediaLightbox altPrefix={t("square.photo")} index={gallery.index} items={galleryImages.map((image) => ({ uri: image.uri, kind: "image", width: image.metadata?.pixel_width, height: image.metadata?.pixel_height, detail: <SquareMediaMetadata key={image.media_id} metadata={image.metadata} />, downloadLabel: formatImageFileSize(image.metadata?.file_size) }))} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} /> : null}
+      {galleryVideo ? <MediaLightbox index={0} items={[{ uri: galleryVideo.uri, kind: "video", posterUri: galleryVideo.thumbnail_uri, width: galleryVideo.metadata?.pixel_width, height: galleryVideo.metadata?.pixel_height, detail: <SquareMediaMetadata metadata={galleryVideo.metadata} />, downloadLabel: formatImageFileSize(galleryVideo.metadata?.file_size) }]} onClose={() => setVideoGalleryStatementId(null)} onIndexChange={() => undefined} /> : null}
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>

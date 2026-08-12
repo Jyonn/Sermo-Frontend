@@ -20,7 +20,7 @@ import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
-import { ImageLightbox } from "../components/ImageLightbox";
+import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -4788,24 +4788,6 @@ function LiveChatsPage() {
     }
   };
 
-  const downloadPreviewVideo = async () => {
-    if (!videoPreview?.uri) return;
-    try {
-      const response = await fetch(videoPreview.uri);
-      if (!response.ok) throw new Error("download_failed");
-      const blob = await response.blob();
-      const extension = blob.type.split("/")[1]?.replace("quicktime", "mov").replace(/[^a-zA-Z0-9]/g, "") || "mp4";
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = `sermo-video-${Date.now()}.${extension}`;
-      anchor.click();
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    } catch {
-      window.open(videoPreview.uri, "_blank", "noopener,noreferrer");
-    }
-  };
-
   const deleteMessage = async (scope: "me" | "everyone") => {
     if (!selectedChat || !messageMenu) return;
 
@@ -6540,36 +6522,19 @@ function LiveChatsPage() {
         />
       ) : null}
       {videoPreview ? (
-        <div
-          className="dialog-backdrop message-image-preview-backdrop message-video-preview-backdrop"
-          onClick={() => setVideoPreview(null)}
-          role="presentation"
-        >
-          <section aria-modal="true" className="message-video-preview-modal" role="dialog">
-            <article className="message-image-preview-plate message-video-preview-plate">
-              <div className="message-image-preview-frame message-video-preview-frame" onClick={(event) => event.stopPropagation()}>
-                <video autoPlay className="message-video-preview" controls playsInline src={videoPreview.uri} />
-              </div>
-              <div onClick={(event) => event.stopPropagation()}>
-                <VideoMetadataPanel metadata={videoPreview.metadata} />
-              </div>
-            </article>
-            <div className="message-image-preview-toolbar message-video-preview-toolbar" onClick={(event) => event.stopPropagation()}>
-              <button
-                aria-label={formatImageFileSize(videoPreview.metadata?.file_size)
-                  ? t("video.downloadWithSize", { size: formatImageFileSize(videoPreview.metadata?.file_size) })
-                  : t("video.download")}
-                onClick={() => void downloadPreviewVideo()}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" />
-                </svg>
-                {formatImageFileSize(videoPreview.metadata?.file_size) ? <span>{formatImageFileSize(videoPreview.metadata?.file_size)}</span> : null}
-              </button>
-            </div>
-          </section>
-        </div>
+        <MediaLightbox
+          index={0}
+          items={[{
+            uri: videoPreview.uri,
+            kind: "video",
+            width: videoPreview.metadata?.pixel_width,
+            height: videoPreview.metadata?.pixel_height,
+            detail: <VideoMetadataPanel metadata={videoPreview.metadata} />,
+            downloadLabel: formatImageFileSize(videoPreview.metadata?.file_size),
+          }]}
+          onClose={() => setVideoPreview(null)}
+          onIndexChange={() => undefined}
+        />
       ) : null}
       {locationDraft ? (
         <div
