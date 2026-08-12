@@ -14,9 +14,11 @@ import { copyText } from "../lib/presentation";
 import { setCachedSpaceFeatures } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
-import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO } from "../types";
+import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareStatementDTO } from "../types";
+import { showToast } from "../lib/toast";
 
 type MemberFilter = "all" | "online";
+type AdminTab = "members" | "square" | "menu";
 
 function formatCreatedAt(value?: number) {
   if (!value) return i18n.t("admin.justCreated");
@@ -102,6 +104,10 @@ export default function SpaceAdminDashboardPage() {
   const [members, setMembers] = useState<AdminMemberDTO[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<MemberFilter>("all");
+  const [activeTab, setActiveTab] = useState<AdminTab>("members");
+  const [selectedMember, setSelectedMember] = useState<AdminMemberDTO | null>(null);
+  const [squareStatements, setSquareStatements] = useState<SquareStatementDTO[]>([]);
+  const [squareState, setSquareState] = useState<AppViewState>("idle");
   const [copied, setCopied] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
@@ -147,6 +153,19 @@ export default function SpaceAdminDashboardPage() {
 
   const currentSpace = dashboard?.space ?? session?.space ?? null;
   const entryHref = useMemo(() => (currentSpace ? buildJoinHrefForCurrentHost(currentSpace.slug) : ""), [currentSpace]);
+  const adminTabs: Array<{ key: AdminTab; icon: string; label: string }> = [
+    { key: "members", icon: "group", label: t("admin.members") },
+    ...(settingsSquareEnabled ? [{ key: "square" as const, icon: "explore", label: t("nav.square") }] : []),
+    { key: "menu", icon: "menu", label: t("nav.menu") },
+  ];
+  const formatRelativeTime = (value: number) => {
+    const minutes = Math.max(0, Math.floor((Date.now() / 1000 - value) / 60));
+    if (minutes < 1) return t("time.justNow");
+    if (minutes < 60) return t("time.minutesAgo", { count: minutes });
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return t("time.hoursAgo", { count: hours });
+    return new Date(value * 1000).toLocaleDateString(getActiveLocale(), { month: "short", day: "numeric" });
+  };
 
   useEffect(() => {
     if (!copied) return;
@@ -220,12 +239,28 @@ export default function SpaceAdminDashboardPage() {
     return () => controller.abort();
   }, [deferredQuery, filter, refreshTick]);
 
+  useEffect(() => {
+    if (activeTab !== "square" || !settingsSquareEnabled || squareState === "ready") return;
+    const controller = new AbortController();
+    setSquareState("loading");
+    api.getAdminSquareStatements({ limit: 30 }, controller.signal).then((rows) => {
+      setSquareStatements(rows);
+      setSquareState("ready");
+    }).catch((apiError) => {
+      if (controller.signal.aborted) return;
+      setSquareState("error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("admin.dashboardLoadFailed"), "error");
+    });
+    return () => controller.abort();
+  }, [activeTab, settingsSquareEnabled, squareState, t]);
+
   const copyEntryLink = async () => {
     if (!entryHref) return;
     try {
       const copied = await copyText(entryHref);
       if (!copied) throw new Error("copy_failed");
       setCopied(true);
+      showToast(t("admin.entryCopied"), "success");
     } catch {
       setError(t("admin.copyEntryFailed"));
     }
@@ -262,6 +297,7 @@ export default function SpaceAdminDashboardPage() {
       setBasicSettingsOpen(false);
       setModuleSettingsOpen(false);
       setAccessPolicyOpen(false);
+      showToast(t("admin.settingsSaved"), "success");
     } catch (apiError) {
       setError(apiError instanceof ApiError ? apiError.message : t("admin.settingsSaveFailed"));
     } finally {
@@ -589,162 +625,76 @@ export default function SpaceAdminDashboardPage() {
         </button>
       }
     >
-      <section className="page-stack admin-dashboard-page">
-        {currentSpace ? (
-          <section className="admin-dashboard-hero">
-            <div className="admin-dashboard-copy">
-              <div className="admin-dashboard-title-row">
-                <h1>{currentSpace.name}</h1>
-                <HeaderSyncIndicator syncing={dashboardState === "loading"} />
-              </div>
-              <div className="admin-dashboard-domain">sermo.jyonn.space/{currentSpace.slug}</div>
+      <section className="admin-app-shell">
+        <nav className="admin-app-nav" aria-label={t("admin.dashboardTitle")}>
+          <div className="admin-nav-brand">
+            <UserAvatar className="admin-nav-space-avatar" name={currentSpace?.name ?? "Sermo"} uri={currentSpace?.official_user?.avatar_uri} />
+            <span><strong>{currentSpace?.name}</strong><small>@{currentSpace?.slug}</small></span>
+          </div>
+          <div className="admin-nav-items">
+            {adminTabs.map((item) => <button aria-current={activeTab === item.key ? "page" : undefined} className={activeTab === item.key ? "is-active" : ""} key={item.key} onClick={() => setActiveTab(item.key)} type="button"><span className="material-symbols-outlined">{item.icon}</span><span>{item.label}</span></button>)}
+          </div>
+          <button className="admin-nav-logout" onClick={() => logout()} type="button"><span className="material-symbols-outlined">logout</span><span>{t("auth.logout")}</span></button>
+        </nav>
+
+        <div className="admin-app-content">
+          <header className="admin-app-header">
+            <div><h1>{adminTabs.find((item) => item.key === activeTab)?.label}</h1><span>{currentSpace?.name}</span></div>
+            <HeaderSyncIndicator syncing={dashboardState === "loading" || memberState === "loading" || squareState === "loading"} />
+          </header>
+
+          {activeTab === "members" ? <section className="admin-tab-page admin-members-tab">
+            <div className="admin-members-overview">
+              <span><strong>{dashboard?.stats.members_count ?? 0}</strong>{t("admin.members")}</span>
+              <span><strong>{dashboard?.stats.online_count ?? 0}</strong>{t("presence.online")}</span>
+              <button onClick={openBroadcast} type="button"><span className="material-symbols-outlined">campaign</span>{t("admin.broadcast")}</button>
             </div>
-
-            <div className="admin-stat-grid">
-              <div className="admin-stat-card">
-                <strong>{dashboard?.stats.members_count ?? 0}</strong>
-                <span>{t("admin.members")}</span>
-              </div>
-              <div className="admin-stat-card">
-                <strong>{dashboard?.stats.online_count ?? 0}</strong>
-                <span>{t("presence.online")}</span>
-              </div>
+            <div className="admin-list-tools">
+              <label className="admin-member-search"><span className="material-symbols-outlined">search</span><input placeholder={t("admin.searchMembers")} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+              <div className="admin-filter-tabs"><button className={filter === "all" ? "is-active" : ""} onClick={() => setFilter("all")} type="button">{t("common.all")}</button><button className={filter === "online" ? "is-active" : ""} onClick={() => setFilter("online")} type="button">{t("presence.online")}</button></div>
             </div>
-
-            <div className="admin-dashboard-actions">
-              <button className="ghost-button" onClick={() => void copyEntryLink()} type="button">
-                {copied ? t("admin.entryCopied") : t("admin.copyMemberEntry")}
-              </button>
-              <a className="ghost-button" href={entryHref}>
-                {t("admin.openMemberEntry")}
-              </a>
+            <div className="admin-member-list">
+              {members.map((user) => <button className="admin-member-row" key={user.user_id} onClick={() => setSelectedMember(user)} type="button">
+                <span className="admin-member-avatar-wrap"><UserAvatar className="admin-member-avatar" name={user.name} uri={user.avatar_uri} />{user.is_alive && !user.is_deleted ? <i /> : null}</span>
+                <span className="admin-member-main"><span><strong>{user.name}</strong><b>LV.{user.growth_level ?? 1}</b>{user.verified ? <em>{t("admin.verified")}</em> : null}</span><small>{user.is_deleted ? t("admin.historicalResidual") : `${user.friend_count ?? 0} ${t("admin.friends")} · ${user.statement_count ?? 0} ${t("admin.statements")}`}</small></span>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>)}
+              {!members.length && memberState === "ready" ? <FeedbackState title={t("admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : ""} /> : null}
             </div>
-          </section>
-        ) : null}
+          </section> : null}
 
-        <div className="admin-dashboard-workspace">
-          <section className="panel admin-dashboard-section admin-members-panel">
-            <div className="admin-section-head">
-              <div className="admin-section-title-row">
-                <h2 className="panel-title">{t("admin.members")}</h2>
-                <HeaderSyncIndicator syncing={memberState === "loading"} />
-              </div>
-              <div className="list-segment segmented-switch">
-                <button className={`tab-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")} type="button">{t("common.all")}</button>
-                <button className={`tab-chip ${filter === "online" ? "active" : ""}`} onClick={() => setFilter("online")} type="button">{t("presence.online")}</button>
-              </div>
+          {activeTab === "square" ? <section className="admin-tab-page admin-square-tab">
+            <div className="admin-square-intro"><span><strong>{t("admin.squareManagement")}</strong><small>{t("admin.squareManagementHint")}</small></span><button onClick={() => setSquareState("idle")} type="button"><span className="material-symbols-outlined">refresh</span></button></div>
+            <div className="admin-square-feed">
+              {squareStatements.map((statement) => <article className="admin-statement" key={statement.statement_id}>
+                <header><UserAvatar className="admin-statement-avatar" name={statement.user.name} uri={statement.user.avatar_uri} /><span><strong>{statement.user.name}</strong><small>{formatRelativeTime(statement.created_at)}</small></span><b>{statement.visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</b></header>
+                {statement.text ? <p>{statement.text}</p> : null}
+                {statement.media.length ? <div className="admin-statement-media">{statement.media.slice(0, 3).map((media) => media.kind === "image" ? <img alt="" key={media.media_id} src={media.thumbnail_uri || media.uri} /> : <span key={media.media_id}><span className="material-symbols-outlined">{media.kind === "video" ? "videocam" : "mic"}</span>{media.kind === "video" ? t("media.video") : t("media.audio")}</span>)}</div> : null}
+                <footer><span>{statement.like_count} {t("square.like")}</span><span>{statement.comment_count} {t("square.comments")}</span></footer>
+              </article>)}
+              {!squareStatements.length && squareState === "ready" ? <FeedbackState title={t("square.empty")} /> : null}
             </div>
+          </section> : null}
 
-            <label className="search-box page-search admin-member-search">
-              <span className="material-symbols-outlined">search</span>
-              <input
-                className="input"
-                style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-                placeholder={t("admin.searchMembers")}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-
-            {members.length ? (
-              <div className="admin-member-table-scroll">
-                <table className="admin-member-table">
-                  <thead>
-                    <tr>
-                      <th>{t("admin.members")}</th>
-                      <th>{t("growth.level")}</th>
-                      <th>{t("admin.verified")}</th>
-                      <th>{t("channel.email")}</th>
-                      <th>{t("channel.sms")}</th>
-                      <th>{t("channel.instant")}</th>
-                      <th aria-label={t("common.actions")} />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((user) => (
-                      <tr key={user.user_id}>
-                        <td>
-                          <div className="admin-member-identity">
-                            <UserAvatar className={`mini-avatar ${user.is_alive ? "status-online" : ""}`} name={user.name} uri={user.avatar_uri} />
-                            <div>
-                              <strong>{user.name}</strong>
-                              <span>{user.is_deleted ? t("admin.historicalResidual") : user.is_alive ? t("presence.online") : t("presence.offline")}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td><span className="admin-growth-level">Lv.{user.growth_level ?? 1} {user.growth_level_name ?? settingsLevelNames[(user.growth_level ?? 1) - 1]}</span></td>
-                        <td><span className={`admin-verified-state ${user.verified ? "is-verified" : ""}`}>{user.verified ? t("common.yes") : t("common.no")}</span></td>
-                        <td>{notificationCell(user, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</td>
-                        <td>{notificationCell(user, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</td>
-                        <td>{notificationCell(user, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</td>
-                        <td>
-                          <button className="admin-member-remove" onClick={() => setRemoveUser(user)} type="button">
-                            {user.is_deleted ? t("common.clean") : t("admin.remove")}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : memberState === "ready" ? (
-              <FeedbackState title={t("admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : filter === "online" ? t("admin.noOnlineMembers") : ""} />
-            ) : null}
-          </section>
-
-          <aside className="admin-dashboard-aside">
-            {currentSpace?.official_user ? (
-              <section className="panel admin-dashboard-section admin-official-panel">
-                <h2 className="panel-title">{t("admin.officialAccount")}</h2>
-                <div className="admin-official-profile">
-                  <UserAvatar className="avatar" name={currentSpace.official_user.name} uri={currentSpace.official_user.avatar_uri} />
-                  <div>
-                    <strong>{currentSpace.official_user.name}</strong>
-                    <span>@{currentSpace.slug}</span>
-                  </div>
-                </div>
-                <div className="admin-official-actions">
-                  <button className="button" disabled={!dashboard?.stats.members_count} onClick={openBroadcast} type="button">{t("admin.broadcast")}</button>
-                  <button className="ghost-button" disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button">
-                    {officialLoginBusy ? t("admin.enteringAccount") : t("admin.enterAccount")}
-                  </button>
-                </div>
-              </section>
-            ) : null}
-
-            {currentSpace ? (
-              <section className="panel admin-dashboard-section admin-settings-panel">
-                <div className="admin-section-title-row">
-                  <h2 className="panel-title">{t("admin.spaceGovernance")}</h2>
-                  <span>{formatCreatedAt(currentSpace.created_at)}</span>
-                </div>
-                <div className="admin-policy-summary">
-                  <button onClick={() => setModuleSettingsOpen(true)} type="button">
-                    <span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span>
-                    <span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                  <button onClick={() => setAccessPolicyOpen(true)} type="button">
-                    <span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span>
-                    <span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                  <button onClick={() => setBasicSettingsOpen(true)} type="button">
-                    <span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span>
-                    <span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                  <button onClick={() => setVerificationOpen(true)} type="button">
-                    <span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span>
-                    <span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)} · {currentSpace.tier_member_limit ?? 5} {t("admin.people")}</small></span>
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                </div>
-              </section>
-            ) : null}
-          </aside>
+          {activeTab === "menu" && currentSpace ? <section className="admin-tab-page admin-menu-tab">
+            <section className="admin-menu-profile"><UserAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>sermo.jyonn.space/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
+            <section className="admin-menu-section"><h2>{t("admin.spaceGovernance")}</h2><div className="admin-menu-list">
+              <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+            </div></section>
+            <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
+            <section className="admin-menu-section"><h2>{t("admin.spaceEntry")}</h2><div className="admin-menu-list"><button onClick={() => void copyEntryLink()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">link</span></span><span><strong>{t("admin.copyMemberEntry")}</strong></span><span className="material-symbols-outlined">content_copy</span></button><a href={entryHref}><span className="admin-policy-icon"><span className="material-symbols-outlined">open_in_new</span></span><span><strong>{t("admin.openMemberEntry")}</strong></span><span className="material-symbols-outlined">chevron_right</span></a></div></section>
+          </section> : null}
         </div>
+
+        <nav className="admin-mobile-nav">{adminTabs.map((item) => <button aria-current={activeTab === item.key ? "page" : undefined} className={activeTab === item.key ? "is-active" : ""} key={item.key} onClick={() => setActiveTab(item.key)} type="button"><span className="material-symbols-outlined">{item.icon}</span><span>{item.label}</span></button>)}</nav>
       </section>
+
+      <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
+        {selectedMember ? <div className="admin-member-drawer"><section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section><section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section><section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section><button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button></div> : null}
+      </SideDrawer>
 
       <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-features" onAction={() => void saveSettings()} onClose={() => setModuleSettingsOpen(false)} open={moduleSettingsOpen} title={t("admin.featureAccess")}>
         <div className="admin-policy-drawer">

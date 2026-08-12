@@ -464,6 +464,14 @@ export const api = {
     });
   },
 
+  getAdminSquareStatements(params: { before?: number; limit?: number }, signal?: AbortSignal) {
+    return request<SquareStatementDTO[]>("/square/admin/statements", {
+      adminAuth: true,
+      query: params,
+      signal,
+    });
+  },
+
   broadcastAdminMessage(payload: { content: string; type: number; broadcast_id: string }) {
     return request<SpaceAdminBroadcastResultDTO>("/spaces/admin/broadcast", {
       method: "POST",

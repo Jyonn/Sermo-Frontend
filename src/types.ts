@@ -56,6 +56,7 @@ export interface SpaceDTO {
   member_limit?: number | null;
   verification_tier?: "email" | "phone" | "identity";
   tier_member_limit?: number;
+  effective_member_limit?: number;
   admin_phone?: string;
   admin_phone_verified_at?: number | null;
   identity_submitted_at?: number | null;
@@ -281,6 +282,8 @@ export interface AdminMemberContactDTO {
 }
 
 export interface AdminMemberDTO extends UserDTO {
+  friend_count: number;
+  statement_count: number;
   contacts: {
     email: AdminMemberContactDTO;
     sms: AdminMemberContactDTO;
