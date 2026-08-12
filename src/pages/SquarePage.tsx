@@ -51,13 +51,13 @@ function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQ
   const levels = [
     { label: "LV1–5", daily: 1, weekly: 5 },
     { label: "LV6–9", daily: 2, weekly: 10 },
-    { label: "LV10–13", daily: 2, weekly: 12 },
-    { label: "LV14–17", daily: 3, weekly: 18 },
-    { label: "LV18", daily: 3, weekly: 21 },
+    { label: "LV10–13", daily: 3, weekly: 15 },
+    { label: "LV14–17", daily: 4, weekly: 20 },
+    { label: "LV18 / VIP", daily: 5, weekly: 35 },
   ];
   return <div className="square-quota-panel">
     <section className={`square-quota-hero${quota.verified ? "" : " is-locked"}`}>
-      <div><span>{quota.unlimited ? t("square.quotaOfficial") : `LV${quota.level}`}</span><strong>{!quota.verified ? t("square.quotaVerifyFirst") : quota.unlimited ? t("square.quotaUnlimited") : t("square.quotaHero", { count: statementRemaining ?? 0 })}</strong></div>
+      <div><span>{quota.unlimited ? t("square.quotaOfficial") : quota.vip ? "VIP" : `LV${quota.level}`}</span><strong>{!quota.verified ? t("square.quotaVerifyFirst") : quota.unlimited ? t("square.quotaUnlimited") : t("square.quotaHero", { count: statementRemaining ?? 0 })}</strong></div>
       <span className="material-symbols-outlined">{quota.verified ? "data_usage" : "lock"}</span>
     </section>
     <div className="square-quota-cards">
@@ -80,7 +80,7 @@ function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQ
         <span className={quota.media.video ? "is-active" : ""}><i className="material-symbols-outlined">videocam</i>{quota.media.video ? t("square.video") : `LV${quota.media.video_level}`}</span>
       </div>
     </section>
-    {!quota.unlimited ? <details className="square-quota-rules"><summary>{t("square.quotaLevelRules")}<span className="material-symbols-outlined">expand_more</span></summary><div>{levels.map((row) => <p className={quota.level >= Number(row.label.match(/\d+/)?.[0]) && quota.level <= Number(row.label.match(/\d+(?!.*\d)/)?.[0] ?? 18) ? "is-current" : ""} key={row.label}><strong>{row.label}</strong><span>{t("square.quotaRule", { daily: row.daily, weekly: row.weekly })}</span></p>)}</div></details> : null}
+    {!quota.unlimited ? <details className="square-quota-rules"><summary>{t("square.quotaLevelRules")}<span className="material-symbols-outlined">expand_more</span></summary><div>{levels.map((row, index) => <p className={quota.vip ? index === levels.length - 1 ? "is-current" : "" : quota.level >= Number(row.label.match(/\d+/)?.[0]) && quota.level <= Number(row.label.match(/\d+(?!.*\d)/)?.[0] ?? 18) ? "is-current" : ""} key={row.label}><strong>{row.label}</strong><span>{t("square.quotaRule", { daily: row.daily, weekly: row.weekly })}</span></p>)}</div></details> : null}
   </div>;
 }
 

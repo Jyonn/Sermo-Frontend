@@ -531,6 +531,7 @@ export interface SquareStatementDraftMedia {
 
 export interface SquareQuotaDTO {
   level: number;
+  vip: boolean;
   verified: boolean;
   unlimited: boolean;
   statements: {
