@@ -54,6 +54,12 @@ export interface SpaceDTO {
   square_explore_enabled?: boolean;
   unverified_group_policy?: 0 | 1 | 2;
   member_limit?: number | null;
+  verification_tier?: "email" | "phone" | "identity";
+  tier_member_limit?: number;
+  admin_phone?: string;
+  admin_phone_verified_at?: number | null;
+  identity_submitted_at?: number | null;
+  identity_verified_at?: number | null;
   level_names?: string[];
   created_at?: number;
 }
@@ -400,6 +406,14 @@ export interface MessageUploadDTO {
   upload_url: string;
   key: string;
   resource_uri: string;
+  expires_in: number;
+  max_file_size: number;
+}
+
+export interface SpaceIdentityUploadDTO {
+  upload_token: string;
+  upload_url: string;
+  key: string;
   expires_in: number;
   max_file_size: number;
 }

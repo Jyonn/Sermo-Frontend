@@ -31,6 +31,7 @@ import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
+import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage from "./ChatsPage";
@@ -346,6 +347,7 @@ export default function MenuPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout, patchSessionUser } = useAuth();
+  const spaceFeatures = useSpaceFeatures();
   const { setSession: setAdminSession } = useAdminAuth();
   const { discover: discoverFeature, feature: discoveryFeature } = useFeatureDiscovery();
   const currentUserId = session?.user.user_id;
@@ -2197,11 +2199,11 @@ export default function MenuPage() {
             <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
-          <button className="personalization-background-entry personalization-feature-entry" onClick={() => setStatementCardDrawerOpen(true)} type="button">
+          {spaceFeatures.squareEnabled ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => setStatementCardDrawerOpen(true)} type="button">
             <span className={`personalization-entry-preview statement-card-entry-preview statement-style-${me?.statement_card_style ?? "default"}`}><i>言</i></span>
             <span><strong>{t("menu.statementCard")}</strong><small>{t("menu.statementCardHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
-          </button>
+          </button> : null}
         </div>
       </SideDrawer>
 

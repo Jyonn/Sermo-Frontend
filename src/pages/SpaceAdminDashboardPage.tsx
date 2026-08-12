@@ -9,7 +9,7 @@ import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
-import { resolveMediaKind, toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
+import { resolveMediaKind, toMessageUploadError, uploadFormData, uploadMessageMediaWith } from "../lib/messageUpload";
 import { copyText } from "../lib/presentation";
 import { setCachedSpaceFeatures } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
@@ -111,6 +111,12 @@ export default function SpaceAdminDashboardPage() {
   const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
   const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
+  const [verificationOpen, setVerificationOpen] = useState(false);
+  const [adminPhone, setAdminPhone] = useState("");
+  const [adminPhoneCode, setAdminPhoneCode] = useState("");
+  const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const [verificationBusy, setVerificationBusy] = useState(false);
+  const identityInputRef = useRef<HTMLInputElement | null>(null);
   const [settingsMemberLimit, setSettingsMemberLimit] = useState("");
   const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(defaultLevelNames);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -260,6 +266,65 @@ export default function SpaceAdminDashboardPage() {
       setError(apiError instanceof ApiError ? apiError.message : t("admin.settingsSaveFailed"));
     } finally {
       setSettingsSaving(false);
+    }
+  };
+
+  const patchDashboardSpace = (space: SpaceAdminDashboardDTO["space"]) => {
+    patchSpace(space);
+    setDashboard((current) => current ? { ...current, space } : current);
+  };
+
+  const sendPhoneCode = async () => {
+    if (!adminPhone.trim()) return;
+    setVerificationBusy(true);
+    setError(null);
+    try {
+      await api.sendAdminPhoneCode(adminPhone.trim());
+      setPhoneCodeSent(true);
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.phoneCodeFailed"));
+    } finally {
+      setVerificationBusy(false);
+    }
+  };
+
+  const verifyPhone = async () => {
+    if (!adminPhone.trim() || !adminPhoneCode.trim()) return;
+    setVerificationBusy(true);
+    setError(null);
+    try {
+      patchDashboardSpace(await api.verifyAdminPhone(adminPhone.trim(), adminPhoneCode.trim()));
+      setPhoneCodeSent(false);
+      setAdminPhoneCode("");
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.phoneVerifyFailed"));
+    } finally {
+      setVerificationBusy(false);
+    }
+  };
+
+  const submitIdentity = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {
+      setError(t("admin.identityFileInvalid"));
+      return;
+    }
+    setVerificationBusy(true);
+    setError(null);
+    try {
+      const upload = await api.createSpaceIdentityUpload(file.name, file.type);
+      const data = new FormData();
+      data.set("token", upload.upload_token);
+      data.set("key", upload.key);
+      data.set("file", file);
+      await uploadFormData(upload.upload_url, data);
+      patchDashboardSpace(await api.submitSpaceIdentity(upload.key));
+    } catch (apiError) {
+      setError(apiError instanceof ApiError ? apiError.message : t("admin.identitySubmitFailed"));
+    } finally {
+      setVerificationBusy(false);
     }
   };
 
@@ -669,6 +734,11 @@ export default function SpaceAdminDashboardPage() {
                     <span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span>
                     <span className="material-symbols-outlined">chevron_right</span>
                   </button>
+                  <button onClick={() => setVerificationOpen(true)} type="button">
+                    <span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span>
+                    <span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)} · {currentSpace.tier_member_limit ?? 5} {t("admin.people")}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
                 </div>
               </section>
             ) : null}
@@ -681,7 +751,7 @@ export default function SpaceAdminDashboardPage() {
           <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
           <section className="admin-policy-card">
             <div className="admin-toggle-row"><div><strong>{t("nav.chats")}</strong><small>{t("admin.chatFeatureHint")}</small></div><button aria-label={t("nav.chats")} className={`switch ${settingsChatEnabled ? "active" : ""}`} onClick={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); }} type="button" /></div>
-            <div className="admin-toggle-row"><div><strong>{t("nav.square")}</strong><small>{t("admin.squareFeatureHint")}</small></div><button aria-label={t("nav.square")} className={`switch ${settingsSquareEnabled ? "active" : ""}`} onClick={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} type="button" /></div>
+            <div className={`admin-toggle-row${currentSpace?.verification_tier === "email" ? " is-disabled" : ""}`}><div><strong>{t("nav.square")}</strong><small>{currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")}</small></div><button aria-label={t("nav.square")} className={`switch ${settingsSquareEnabled ? "active" : ""}`} disabled={currentSpace?.verification_tier === "email"} onClick={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} type="button" /></div>
             <div className={`admin-toggle-row${settingsSquareEnabled ? "" : " is-disabled"}`}><div><strong>{t("square.feedAll")}</strong><small>{t("admin.exploreFeatureHint")}</small></div><button aria-label={t("square.feedAll")} className={`switch ${settingsSquareEnabled && settingsExploreEnabled ? "active" : ""}`} disabled={!settingsSquareEnabled} onClick={() => setSettingsExploreEnabled((value) => !value)} type="button" /></div>
           </section>
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
@@ -706,7 +776,27 @@ export default function SpaceAdminDashboardPage() {
       </SideDrawer>
 
       <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-basic-settings" onAction={() => void saveSettings()} onClose={() => setBasicSettingsOpen(false)} open={basicSettingsOpen} title={t("admin.basicSettings")}>
-        <div className="admin-policy-drawer"><section className="admin-policy-card field-stack"><div><label className="field-label">{t("admin.spaceName")}</label><input className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div><div><label className="field-label">{t("admin.memberLimit")}</label><input className="input mono" inputMode="numeric" placeholder={t("admin.unlimited")} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /></div><div><label className="field-label">{t("admin.spaceLevels")}</label><div className="admin-level-name-grid">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div></div></section></div>
+        <div className="admin-policy-drawer"><section className="admin-policy-card field-stack"><div><label className="field-label">{t("admin.spaceName")}</label><input className="input" value={settingsName} onChange={(event) => setSettingsName(event.target.value)} /></div><div><label className="field-label">{t("admin.memberLimit")}</label><input className="input mono" inputMode="numeric" max={currentSpace?.tier_member_limit ?? 5} placeholder={String(currentSpace?.tier_member_limit ?? 5)} value={settingsMemberLimit} onChange={(event) => setSettingsMemberLimit(event.target.value.replace(/[^\d]/g, ""))} /><small>{t("admin.memberTierLimit", { count: currentSpace?.tier_member_limit ?? 5 })}</small></div><div><label className="field-label">{t("admin.spaceLevels")}</label><div className="admin-level-name-grid">{settingsLevelNames.map((levelName, index) => <label key={index}><span>Lv.{index + 1}</span><input className="input" maxLength={8} value={levelName} onChange={(event) => setSettingsLevelNames((current) => current.map((name, levelIndex) => levelIndex === index ? event.target.value : name))} /></label>)}</div></div></section></div>
+      </SideDrawer>
+
+      <SideDrawer historyKey="admin-verification" onClose={() => setVerificationOpen(false)} open={verificationOpen} title={t("admin.spaceVerification")}>
+        <div className="admin-policy-drawer admin-verification-drawer">
+          <section className="admin-verification-tier">
+            <span>{t(`admin.tier.${currentSpace?.verification_tier ?? "email"}` as TranslationKey)}</span>
+            <strong>{currentSpace?.tier_member_limit ?? 5}</strong>
+            <small>{t("admin.memberCapacity")}</small>
+          </section>
+          {currentSpace?.verification_tier === "email" ? <section className="admin-policy-card field-stack">
+            <div><strong>{t("admin.verifyPhoneTitle")}</strong><small>{t("admin.verifyPhoneHint")}</small></div>
+            <input className="input" inputMode="tel" placeholder={t("admin.phonePlaceholder")} value={adminPhone} onChange={(event) => setAdminPhone(event.target.value)} />
+            {phoneCodeSent ? <input className="input mono" inputMode="numeric" maxLength={6} placeholder={t("admin.phoneCodePlaceholder")} value={adminPhoneCode} onChange={(event) => setAdminPhoneCode(event.target.value.replace(/\D/g, ""))} /> : null}
+            <button className="button" disabled={verificationBusy || !adminPhone.trim() || (phoneCodeSent && adminPhoneCode.length !== 6)} onClick={() => void (phoneCodeSent ? verifyPhone() : sendPhoneCode())} type="button">{phoneCodeSent ? t("admin.completePhoneVerification") : t("admin.sendPhoneCode")}</button>
+          </section> : <section className="admin-policy-card field-stack">
+            <div><strong>{t("admin.phoneVerified")}</strong><small>{currentSpace?.admin_phone}</small></div>
+            {currentSpace?.identity_verified_at ? <div><strong>{t("admin.identityVerified")}</strong><small>{t("admin.identityCapacityHint")}</small></div> : currentSpace?.identity_submitted_at ? <div><strong>{t("admin.identityPending")}</strong><small>{t("admin.identityPendingHint")}</small></div> : <><div><strong>{t("admin.identityTitle")}</strong><small>{t("admin.identityHint")}</small></div><button className="ghost-button" disabled={verificationBusy} onClick={() => identityInputRef.current?.click()} type="button">{t("admin.uploadIdentity")}</button></>}
+          </section>}
+          <input ref={identityInputRef} accept="application/pdf,.pdf" hidden onChange={(event) => void submitIdentity(event)} type="file" />
+        </div>
       </SideDrawer>
 
       <BottomSheet

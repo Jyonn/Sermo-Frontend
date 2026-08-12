@@ -24228,3 +24228,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 @keyframes statement-fufu-moonwalk { 50% { transform:scaleX(-1) translateY(-1px); } }
 @media(max-width:520px){.square-statement-card:not(.is-detail) .square-statement-images.count-1{width:min(82vw,310px)}}
 @media(prefers-reduced-motion:reduce){.square-statement-card.statement-style-niko::after,.square-statement-card.statement-style-fufu::after,.square-statement-card.statement-style-mosaic::after{animation:none}}
+.admin-verification-drawer { display: grid; gap: 14px; }
+.admin-verification-tier { display: grid; grid-template-columns: 1fr auto; align-items: end; padding: 22px; border: 1px solid rgba(16, 113, 84, .18); border-radius: 22px; background: linear-gradient(135deg, rgba(219, 247, 235, .96), rgba(255, 249, 226, .92)); }
+.admin-verification-tier span { color: var(--color-text-muted); font-weight: 700; }
+.admin-verification-tier strong { grid-row: span 2; font: 700 clamp(42px, 9vw, 72px)/.85 var(--font-display); color: var(--color-primary); }
+.admin-verification-tier small { color: var(--color-text-muted); }

@@ -417,6 +417,30 @@ export const api = {
     });
   },
 
+  sendAdminPhoneCode(phone: string) {
+    return request<{ expires_in: number }>("/spaces/admin/phone/code", {
+      method: "POST", adminAuth: true, body: { phone },
+    });
+  },
+
+  verifyAdminPhone(phone: string, code: string) {
+    return request<SpaceDTO>("/spaces/admin/phone/verify", {
+      method: "POST", adminAuth: true, body: { phone, code },
+    });
+  },
+
+  createSpaceIdentityUpload(file_name: string, content_type: string) {
+    return request<import("../types").SpaceIdentityUploadDTO>("/spaces/admin/identity/upload", {
+      method: "POST", adminAuth: true, body: { file_name, content_type },
+    });
+  },
+
+  submitSpaceIdentity(key: string) {
+    return request<SpaceDTO>("/spaces/admin/identity/submit", {
+      method: "POST", adminAuth: true, body: { key },
+    });
+  },
+
   claimGrowthEvent(event: "install_webapp" | "plaza_friend") {
     return request<{ awarded: number; growth: UserGrowthDTO }>("/users/me/growth-events", {
       method: "POST",

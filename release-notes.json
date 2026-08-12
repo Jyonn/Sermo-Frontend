@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.12.4",
+  "id": "2026.08.12.5",
   "publishedAt": "2026-08-12",
   "locales": {
     "zh-CN": {
-      "title": "发言外观成为完整场景",
+      "title": "空间认证与容量分级",
       "items": [
-        "发言详情与评论区会延续作者选择的主题外观",
-        "新增漫画、小票、VIP、Niko 与 Fufu 等发言主题",
-        "单张照片在发言流中以更克制的尺寸展示"
+        "空间后台新增管理员手机认证与实名认证申请",
+        "认证档位会清晰展示 5、100 或 500 人容量",
+        "未认证空间的广场与受限媒体入口会自动收起"
       ]
     },
     "en": {
-      "title": "Statement styles become full scenes",
+      "title": "Tiered space verification and capacity",
       "items": [
-        "Statement details and discussions now inherit the author's selected theme",
-        "New Comic, Receipt, VIP, Niko, and Fufu statement themes",
-        "Single photos use a more restrained size in the statement feed"
+        "Space administration now supports phone verification and identity review submissions",
+        "Verification tiers clearly show capacity for 5, 100, or 500 members",
+        "Square and restricted media entries are automatically hidden for unverified spaces"
       ]
     }
   }
