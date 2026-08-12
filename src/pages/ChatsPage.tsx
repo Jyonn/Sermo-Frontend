@@ -21,6 +21,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
+import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -1839,114 +1840,6 @@ function formatImageFileSize(fileSize?: number | null) {
   if (fileSize == null) return "";
   if (fileSize >= 1024 * 1024) return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
   return `${Math.max(1, Math.round(fileSize / 1024))} KB`;
-}
-
-function ImageMetadataPanel({ metadata }: { metadata: ImageMetadataDTO | null }) {
-  if (!metadata || metadata.status !== 1) {
-    return (
-      <div className="message-image-archive is-empty">
-        <span>{i18n.t("media.imageRecord")}</span>
-        <p>{i18n.t("media.metadataMissing")}</p>
-      </div>
-    );
-  }
-  const device = [metadata.make, metadata.model].filter(Boolean).join(" ");
-  const coordinate = metadata.latitude != null && metadata.longitude != null
-    ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
-    : "";
-  const takenAt = metadata.taken_at
-    ? new Date(metadata.taken_at * 1000).toLocaleString(getActiveLocale(), {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "";
-  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? i18n.t("location.resolving") : coordinate);
-  const rows = [
-    [i18n.t("media.device"), device],
-    [i18n.t("media.lens"), metadata.lens_model],
-  ].filter((row) => row[1]);
-  const provider = metadata.geocoding_provider === "nominatim"
-    ? { href: "https://www.openstreetmap.org/copyright", label: "OpenStreetMap" }
-    : metadata.geocoding_provider === "amap"
-      ? { href: "https://www.amap.com/", label: i18n.t("map.amap") }
-      : metadata.geocoding_provider === "opencage"
-        ? { href: "https://opencagedata.com/", label: "OpenCage" }
-        : null;
-  return (
-    <div className="message-image-archive">
-      <div className={`message-image-location ${location ? "" : "is-empty"}`}>
-        <span className="message-image-archive-label">{i18n.t("media.locationLabel")}</span>
-        <strong>{location || i18n.t("location.notRecorded")}</strong>
-        {coordinate ? <small>{coordinate}</small> : null}
-        {provider && metadata.address ? (
-          <a href={provider.href} rel="noreferrer" target="_blank">GEOCODED BY {provider.label}</a>
-        ) : null}
-      </div>
-      <div className="message-image-record">
-        <div className="message-image-record-heading">
-          <span className="message-image-archive-label">{i18n.t("media.imageRecord")}</span>
-          <strong>{takenAt || i18n.t("media.timeNotRecorded")}</strong>
-        </div>
-        {rows.length ? (
-          <dl className="message-image-metadata-list">
-            {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-          </dl>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function VideoMetadataPanel({ metadata }: { metadata: VideoMetadataDTO | null }) {
-  if (!metadata || metadata.status !== 1) {
-    return (
-      <div className="message-image-archive is-empty">
-        <span>{i18n.t("media.videoRecord")}</span>
-        <p>{i18n.t("media.metadataLoading")}</p>
-      </div>
-    );
-  }
-  const device = [metadata.make, metadata.model].filter(Boolean).join(" ");
-  const coordinate = metadata.latitude != null && metadata.longitude != null
-    ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
-    : "";
-  const takenAt = metadata.taken_at
-    ? new Date(metadata.taken_at * 1000).toLocaleString(getActiveLocale(), {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "";
-  const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? i18n.t("location.resolving") : coordinate);
-  const rows = [
-    [i18n.t("media.device"), device],
-    [i18n.t("media.lens"), metadata.lens_model],
-  ].filter((row) => row[1]);
-  return (
-    <div className="message-image-archive message-video-archive">
-      <div className={`message-image-location ${location ? "" : "is-empty"}`}>
-        <span className="message-image-archive-label">{i18n.t("media.locationLabel")}</span>
-        <strong>{location || i18n.t("location.notRecorded")}</strong>
-        {coordinate ? <small>{coordinate}</small> : null}
-      </div>
-      <div className="message-image-record">
-        <div className="message-image-record-heading">
-          <span className="message-image-archive-label">{i18n.t("media.videoRecord")}</span>
-          <strong>{takenAt || i18n.t("media.timeNotRecorded")}</strong>
-        </div>
-        {rows.length ? (
-          <dl className="message-image-metadata-list">
-            {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-          </dl>
-        ) : null}
-      </div>
-    </div>
-  );
 }
 
 type VoiceComposerPhase = "idle" | "requesting" | "recording" | "stopping" | "recorded" | "sending";
@@ -6513,7 +6406,7 @@ function LiveChatsPage() {
       />
       {imagePreview ? (
         <ImageLightbox
-          details={imagePreview.metadata.map((metadata, index) => <ImageMetadataPanel key={`metadata:${imagePreview.uris[index]}`} metadata={metadata} />)}
+          details={imagePreview.metadata.map((metadata, index) => <MediaMetadataPanel key={`metadata:${imagePreview.uris[index]}`} kind="image" metadata={metadata} />)}
           downloadLabels={imagePreview.metadata.map((metadata) => formatImageFileSize(metadata?.file_size))}
           index={imagePreview.index}
           onClose={() => setImagePreview(null)}
@@ -6529,7 +6422,7 @@ function LiveChatsPage() {
             kind: "video",
             width: videoPreview.metadata?.pixel_width,
             height: videoPreview.metadata?.pixel_height,
-            detail: <VideoMetadataPanel metadata={videoPreview.metadata} />,
+            detail: <MediaMetadataPanel kind="video" metadata={videoPreview.metadata} />,
             downloadLabel: formatImageFileSize(videoPreview.metadata?.file_size),
           }]}
           onClose={() => setVideoPreview(null)}
