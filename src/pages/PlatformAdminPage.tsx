@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
@@ -86,10 +86,26 @@ function MemberPanel({ member, onChat }: { member: PlatformAdminMemberDTO; onCha
   return <div className="platform-drawer-stack"><section className="platform-profile"><UserAvatar className="platform-profile-avatar" frame={member.avatar_frame_style} name={member.name} uri={member.avatar_uri} vip={member.is_permanent_vip} /><div><h2>{member.name}</h2><p>LV{member.growth_level ?? 1} · {member.verified ? "已认证" : "未认证"}</p></div></section><section className="platform-data-grid"><span>好友<strong>{member.friend_count}</strong></span><span>会话<strong>{member.chat_count}</strong></span><span>发言<strong>{member.statement_count}</strong></span><span>提醒渠道<strong>{member.notifications_enabled}</strong></span></section><section className="platform-panel"><h3>认证与绑定</h3><div className="platform-contact-strip">{Object.entries(member.contacts).map(([key, bound]) => <span className={bound ? "is-on" : ""} key={key}>{key === "phone" ? "手机" : key === "email" ? "邮箱" : "即时"}<i>{bound ? "已绑定" : "未绑定"}</i></span>)}</div></section><section className="platform-panel"><h3>会话列表</h3>{chats === null ? <div className="platform-inline-loading"><i />正在读取摘要</div> : chats.length ? chats.map((chat) => <button className="platform-chat-row" key={chat.chat_id} onClick={() => onChat(chat)} type="button"><UserAvatar className="platform-chat-avatar" groupMembers={chat.group ? chat.members.map((item) => ({ name: item.name, uri: item.avatar_uri })) : undefined} name={chat.title || chat.members[0]?.name || "会话"} /><div><strong>{chat.title || chat.members.map((item) => item.name).join("、")}</strong><small>{chat.last_message?.content || "暂无消息"}</small></div><time>{time(chat.last_chat_at)}</time></button>) : <div className="platform-empty">暂无会话</div>}</section></div>;
 }
 
-function AuditConversation({ chat, messages }: { chat: ChatDTO; messages: ChatMessageDTO[] }) {
+function AuditConversation({ chat, hasMore, loading, messages, onLoadOlder }: { chat: ChatDTO; hasMore: boolean; loading: boolean; messages: ChatMessageDTO[]; onLoadOlder: () => Promise<void> }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef(false);
   const ordered = [...messages].reverse();
   const firstUser = chat.members[0]?.user_id;
-  return <div className="platform-conversation"><div className="platform-conversation-notice"><span className="material-symbols-outlined">visibility</span>只读审计视图</div>{ordered.map((message, index) => { const self = message.user.user_id === firstUser; const previous = ordered[index - 1]; const showTime = !previous || message.created_at - previous.created_at > 300; return <div key={message.message_id}>{showTime ? <div className="platform-message-time">{new Date(message.created_at * 1000).toLocaleString()}</div> : null}<div className={`platform-message-row ${self ? "self" : "other"}`}><UserAvatar className="platform-message-avatar" name={message.user.name} uri={message.user.avatar_uri} /><div><small>{message.user.name}</small><div className={`platform-message-bubble is-type-${message.type}`}>{message.type === 1 && message.payload?.uri ? <img alt="审计图片" src={message.payload.thumbnail_uri || message.payload.uri} /> : message.type === 4 ? <span>语音 · {message.payload?.duration_seconds ?? 0} 秒</span> : message.type === 5 ? <span>视频 · {message.payload?.duration_seconds ?? 0} 秒</span> : message.type === 2 ? <span>文件 · {message.payload?.file_name || message.content}</span> : <span>{message.payload?.address || message.content || "[多媒体消息]"}</span>}</div></div></div></div>; })}</div>;
+  useEffect(() => { const node = scrollRef.current; if (node) node.scrollTop = node.scrollHeight; }, [chat.chat_id]);
+  const loadOlder = async () => {
+    const node = scrollRef.current;
+    if (!node || !hasMore || loadingRef.current) return;
+    loadingRef.current = true;
+    const previousHeight = node.scrollHeight;
+    const previousTop = node.scrollTop;
+    try {
+      await onLoadOlder();
+      requestAnimationFrame(() => { node.scrollTop = previousTop + node.scrollHeight - previousHeight; });
+    } finally {
+      loadingRef.current = false;
+    }
+  };
+  return <div className="platform-conversation" onScroll={(event) => { if (event.currentTarget.scrollTop < 96) void loadOlder(); }} ref={scrollRef}><div className="platform-conversation-notice"><span className="material-symbols-outlined">visibility</span>只读审计视图</div>{loading ? <div className="platform-history-loading"><i />读取更早记录</div> : !hasMore ? <div className="platform-history-boundary">已到达会话起点</div> : null}{ordered.map((message, index) => { const self = message.user.user_id === firstUser; const previous = ordered[index - 1]; const showTime = !previous || message.created_at - previous.created_at > 300; return <div key={message.message_id}>{showTime ? <div className="platform-message-time">{new Date(message.created_at * 1000).toLocaleString()}</div> : null}<div className={`platform-message-row ${self ? "self" : "other"}${message.is_deleted ? " is-deleted" : ""}`}><UserAvatar className="platform-message-avatar" name={message.user.name} uri={message.user.avatar_uri} /><div><small>{message.user.name}{message.is_deleted ? <em><span className="material-symbols-outlined">delete</span>已删除</em> : null}</small><div className={`platform-message-bubble is-type-${message.type}`}>{message.type === 1 && message.payload?.uri ? <img alt="审计图片" src={message.payload.thumbnail_uri || message.payload.uri} /> : message.type === 4 ? <span>语音 · {message.payload?.duration_seconds ?? 0} 秒</span> : message.type === 5 ? <span>视频 · {message.payload?.duration_seconds ?? 0} 秒</span> : message.type === 2 ? <span>文件 · {message.payload?.file_name || message.content}</span> : <span>{message.payload?.address || message.content || "[多媒体消息]"}</span>}</div></div></div></div>; })}</div>;
 }
 
 function PlatformAdminConsole() {
@@ -105,6 +121,10 @@ function PlatformAdminConsole() {
   const [chatReason, setChatReason] = useState("");
   const [openChat, setOpenChat] = useState<ChatDTO | null>(null);
   const [messages, setMessages] = useState<ChatMessageDTO[]>([]);
+  const [auditReason, setAuditReason] = useState("");
+  const [messageCursor, setMessageCursor] = useState<number | null>(null);
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [query, setQuery] = useState("");
   const [mfaQr, setMfaQr] = useState("");
   const [mfaSecret, setMfaSecret] = useState("");
@@ -122,7 +142,8 @@ function PlatformAdminConsole() {
   const visibleSpaces = useMemo(() => { const keyword = query.trim().toLowerCase(); return keyword ? spaces.filter((item) => `${item.name} ${item.slug} ${item.email}`.toLowerCase().includes(keyword)) : spaces; }, [query, spaces]);
 
   const selectSpace = async (space: PlatformAdminSpaceDTO) => { setSelectedSpace(space); setMembers([]); try { setMembers(await api.getPlatformMembers(space.space_id)); } catch (cause) { showToast(cause instanceof Error ? cause.message : "成员读取失败", "error"); } };
-  const confirmChat = async () => { if (!pendingChat || !chatReason.trim()) return; try { const result = await api.getPlatformChatMessages(pendingChat.chat_id, chatReason.trim()); setOpenChat(result.chat); setMessages(result.messages); setPendingChat(null); setChatReason(""); } catch (cause) { showToast(cause instanceof Error ? cause.message : "会话读取失败", "error"); } };
+  const confirmChat = async () => { if (!pendingChat || !chatReason.trim()) return; try { const reason = chatReason.trim(); const result = await api.getPlatformChatMessages(pendingChat.chat_id, reason); setOpenChat(result.chat); setMessages(result.messages); setAuditReason(reason); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); setPendingChat(null); setChatReason(""); } catch (cause) { showToast(cause instanceof Error ? cause.message : "会话读取失败", "error"); } };
+  const loadOlderMessages = async () => { if (!openChat || !auditReason || !messageCursor || !hasOlderMessages || loadingOlderMessages) return; setLoadingOlderMessages(true); try { const result = await api.getPlatformChatMessages(openChat.chat_id, auditReason, messageCursor); setMessages((current) => [...current, ...result.messages.filter((item) => !current.some((existing) => existing.message_id === item.message_id))]); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更早记录读取失败", "error"); } finally { setLoadingOlderMessages(false); } };
   const review = async () => { if (!reviewTarget || (!reviewTarget.approved && !reviewNote.trim())) return; try { await api.reviewPlatformIdentity(reviewTarget.space.space_id, reviewTarget.approved, reviewNote.trim()); showToast(reviewTarget.approved ? "实名认证已通过" : "申请已驳回"); setReviewTarget(null); setReviewNote(""); void load(); } catch (cause) { showToast(cause instanceof Error ? cause.message : "审核失败", "error"); } };
   const setupMfa = async () => { try { const result = await api.beginPlatformMfa(); setMfaSecret(result.secret); setMfaQr(await QRCode.toDataURL(result.otpauth_uri, { width: 320, margin: 1 })); } catch (cause) { showToast(cause instanceof Error ? cause.message : "MFA 配置失败", "error"); } };
   const verifyMfa = async () => { try { const result = await api.verifyPlatformMfa(mfaCode); setRecoveryCodes(result.recovery_codes); setSession(session ? { ...session, mfaEnabled: true } : null); setDashboard((value) => value ? { ...value, mfa_enabled: true } : value); } catch (cause) { showToast(cause instanceof Error ? cause.message : "动态口令无效", "error"); } };
@@ -138,7 +159,7 @@ function PlatformAdminConsole() {
   <SideDrawer historyKey="platform-member" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title="成员档案">{selectedMember ? <MemberPanel member={selectedMember} onChat={(chat) => setPendingChat(chat)} /> : null}</SideDrawer>
   <InputDialog confirmLabel="记录理由并查看" onChange={setChatReason} onClose={() => { setPendingChat(null); setChatReason(""); }} onConfirm={() => void confirmChat()} open={Boolean(pendingChat)} placeholder="例如：处理用户举报 #20260812" title="为什么需要查看这段会话？" value={chatReason} />
   <InputDialog confirmLabel={reviewTarget?.approved ? "确认通过" : "确认驳回"} onChange={setReviewNote} onClose={() => { setReviewTarget(null); setReviewNote(""); }} onConfirm={() => void review()} open={Boolean(reviewTarget)} placeholder={reviewTarget?.approved ? "审核备注（可选）" : "请填写明确的驳回原因"} title={reviewTarget?.approved ? `通过 ${reviewTarget.space.name} 的实名认证？` : `驳回 ${reviewTarget?.space.name ?? ""} 的申请？`} value={reviewNote} />
-  <SideDrawer className="platform-chat-drawer" historyKey="platform-chat" onClose={() => { setOpenChat(null); setMessages([]); }} open={Boolean(openChat)} title={openChat?.title || "会话审计"}>{openChat ? <AuditConversation chat={openChat} messages={messages} /> : null}</SideDrawer>
+  <SideDrawer className="platform-chat-drawer" historyKey="platform-chat" onClose={() => { setOpenChat(null); setMessages([]); setAuditReason(""); setMessageCursor(null); setHasOlderMessages(false); }} open={Boolean(openChat)} title={openChat?.title || "会话审计"}>{openChat ? <AuditConversation chat={openChat} hasMore={hasOlderMessages} loading={loadingOlderMessages} messages={messages} onLoadOlder={loadOlderMessages} /> : null}</SideDrawer>
   <SideDrawer actionDisabled={mfaCode.length !== 6} actionLabel="验证并启用" historyKey="platform-mfa" onAction={() => void verifyMfa()} onClose={() => { setMfaQr(""); setMfaSecret(""); setMfaCode(""); }} open={Boolean(mfaQr)} title="连接验证器"><div className="platform-mfa"><p>使用任意验证器扫描二维码，然后输入 6 位动态口令。</p><img alt="MFA QR code" src={mfaQr} /><code>{mfaSecret}</code><input className="platform-field is-code" inputMode="numeric" maxLength={6} onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, ""))} placeholder="000000" value={mfaCode} /></div></SideDrawer>
   <SideDrawer historyKey="platform-recovery" onClose={() => setRecoveryCodes([])} open={recoveryCodes.length > 0} title="保存恢复码"><div className="platform-recovery"><span className="material-symbols-outlined">key</span><h2>仅展示这一次</h2><p>每个恢复码只能使用一次。请离线保存，不要截图上传云端。</p><div>{recoveryCodes.map((code) => <code key={code}>{code}</code>)}</div><button className="platform-primary" onClick={() => setRecoveryCodes([])} type="button">我已安全保存</button></div></SideDrawer></div>;
 }

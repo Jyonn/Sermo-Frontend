@@ -1384,7 +1384,7 @@ export const api = {
     return request<ChatDTO[]>(`/platform-admin/members/${userId}/chats`, { platformAdminAuth: true, signal });
   },
   getPlatformChatMessages(chatId: number, reason: string, before?: number, signal?: AbortSignal) {
-    return request<{ chat: ChatDTO; messages: ChatMessageDTO[] }>(`/platform-admin/chats/${chatId}/messages`, {
+    return request<{ chat: ChatDTO; messages: ChatMessageDTO[]; has_more: boolean; next_before: number | null }>(`/platform-admin/chats/${chatId}/messages`, {
       platformAdminAuth: true, query: { reason, before, limit: 50 }, signal,
     });
   },

@@ -730,6 +730,7 @@ export interface ChatMessageDTO {
   mentions?: TinyUserDTO[];
   created_at: number;
   mentioned_me?: boolean;
+  is_deleted?: boolean;
 }
 
 export interface PinnedMessageDTO {
