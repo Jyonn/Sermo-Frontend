@@ -6172,6 +6172,7 @@ function LiveChatsPage() {
         ) : null}
       </SideDrawer>
       <SideDrawer
+        className="message-search-drawer"
         historyKey="message-search"
         open={messageSearchOpen}
         title={t("messageSearch.title")}
@@ -6216,7 +6217,14 @@ function LiveChatsPage() {
               <div className="message-search-loading"><HeaderSyncIndicator syncing /></div>
             ) : null}
             {messageSearchState !== "loading" && !messageSearchResults.length ? (
-              <FeedbackState title={messageSearchState === "error" ? t("messageSearch.failed") : t("messageSearch.empty")} />
+              <div className={`message-search-empty${messageSearchState === "error" ? " is-error" : ""}`} role="status">
+                <div className="message-search-empty-mark" aria-hidden="true">
+                  <span className="message-search-empty-bubble is-back" />
+                  <span className="message-search-empty-bubble is-front"><i /><i /><i /></span>
+                </div>
+                <strong>{messageSearchState === "error" ? t("messageSearch.failed") : t("messageSearch.empty")}</strong>
+                <p>{messageSearchState === "error" ? t("messageSearch.failedHint") : t("messageSearch.emptyHint")}</p>
+              </div>
             ) : null}
             {messageSearchResults.map((message) => {
               const mediaUri = [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(message.type)

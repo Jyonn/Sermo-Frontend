@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.10",
+  "id": "2026.08.13.11",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "表情面板适配不同屏幕",
+      "title": "聊天记录搜索更清爽",
       "items": [
-        "表情包在不同尺寸手机上保持整齐的四列布局",
-        "展开表情面板不再撑宽聊天页面"
+        "搜索结果为空时提供更自然的提示和下一步建议",
+        "移除搜索页面突兀的白色内容底板"
       ]
     },
     "en": {
-      "title": "Emoji panel now fits every screen",
+      "title": "A cleaner chat history search",
       "items": [
-        "Stickers now stay in a consistent four-column layout across phone sizes",
-        "Opening the emoji panel no longer widens the chat page"
+        "Empty searches now offer a calmer visual and a helpful next step",
+        "Removed the distracting white content panel from search"
       ]
     }
   }
