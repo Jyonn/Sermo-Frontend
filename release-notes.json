@@ -1,21 +1,21 @@
 {
-  "id": "2026.08.12.5",
-  "publishedAt": "2026-08-12",
+  "id": "2026.08.13.1",
+  "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "空间认证与容量分级",
+      "title": "更沉浸的影像浏览",
       "items": [
-        "空间后台新增管理员手机认证与实名认证申请",
-        "认证档位会清晰展示 5、100 或 500 人容量",
-        "未认证空间的广场与受限媒体入口会自动收起"
+        "聊天与广场现已使用同一套图片和视频详情页",
+        "新增适配手机的黑色沉浸预览，点击任意位置即可退出",
+        "影像记录支持横向浏览更多拍摄与视频参数"
       ]
     },
     "en": {
-      "title": "Tiered space verification and capacity",
+      "title": "A more immersive media viewer",
       "items": [
-        "Space administration now supports phone verification and identity review submissions",
-        "Verification tiers clearly show capacity for 5, 100, or 500 members",
-        "Square and restricted media entries are automatically hidden for unverified spaces"
+        "Chat and Square now share one image and video detail experience",
+        "A mobile-friendly dark immersive view now closes with a tap anywhere",
+        "Media records can be swiped horizontally for more capture and video details"
       ]
     }
   }

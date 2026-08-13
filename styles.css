@@ -5589,31 +5589,36 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-image-record {
   display: grid;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 2fr);
-  gap: clamp(28px, 7vw, 96px);
+  gap: 8px;
+  min-width: 0;
   padding-top: clamp(12px, 1.8vh, 20px);
   border-top: 1px solid #dfe2dc;
 }
 
-.message-image-record-heading strong {
-  display: block;
-  color: #3c423b;
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  font-weight: 500;
-  line-height: 1.7;
+.message-image-metadata-list {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
 }
 
-.message-image-metadata-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-  gap: 14px clamp(20px, 4vw, 52px);
-}
+.message-image-metadata-list::-webkit-scrollbar { display: none; }
 
 .message-image-metadata-list > div {
+  flex: 0 0 calc(100% / 3);
   min-width: 0;
+  padding: 0 clamp(10px, 2vw, 22px);
+  border-left: 1px solid #e3e5e0;
+  scroll-snap-align: start;
 }
+
+.message-image-metadata-list > div:first-child { padding-left: 0; border-left: 0; }
 
 .message-image-metadata-list dt {
   margin-bottom: 3px;
@@ -5628,6 +5633,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+
+.message-image-record-empty { margin: 0; color: #969c95; font-size: .76rem; }
 
 .message-image-archive.is-empty {
   padding-top: 18px;
@@ -5668,14 +5675,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   }
 
   .message-image-record {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    gap: 16px;
+    gap: 7px;
   }
 
-  .message-image-metadata-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 16px;
-  }
+  .message-image-metadata-list > div { padding-inline: 10px; }
 }
 
 .message-audio-card {
