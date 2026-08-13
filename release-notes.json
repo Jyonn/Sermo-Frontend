@@ -7,7 +7,7 @@
       "items": [
         "打开应用或回到前台时立即更新在线状态",
         "应用正在前台时不再重复弹出系统通知",
-        "自动清理当前设备已经失效的系统通知订阅"
+        "自动清理当前设备已经失效或属于旧三级域名的系统通知订阅"
       ]
     },
     "en": {
@@ -15,7 +15,7 @@
       "items": [
         "Online status now refreshes immediately when the app opens or returns to the foreground",
         "System notifications no longer duplicate in-app alerts while the app is visible",
-        "Expired notification subscriptions on this device are now cleaned up automatically"
+        "Expired subscriptions and subscriptions from legacy space subdomains are now cleaned up automatically"
       ]
     }
   }
