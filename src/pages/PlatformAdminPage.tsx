@@ -39,8 +39,12 @@ function PlatformAdminLogin() {
       if (step === "email") {
         const result = await api.sendPlatformAdminCode(email);
         setMasked(result.masked_email);
-        setStep("code");
-        showToast("验证码已发送");
+        if (result.mfa_required) {
+          setStep("mfa");
+        } else {
+          setStep("code");
+          showToast("验证码已发送");
+        }
       } else {
         const result = await api.loginPlatformAdmin({ email, code, mfa_code: mfa || undefined });
         setSession({ accessToken: result.auth, email, mfaEnabled: result.mfa_enabled });
@@ -59,7 +63,7 @@ function PlatformAdminLogin() {
   return <main className="platform-login">
     <section className="platform-login-card">
       <div className="platform-brand"><span className="platform-brand-mark">S</span><div><small>SERMO CONTROL</small><strong>平台审计台</strong></div></div>
-      <div className="platform-login-copy"><span>受保护入口</span><h1>先确认是你</h1><p>{step === "email" ? "使用平台管理员邮箱继续。" : step === "code" ? `验证码已发送至 ${masked}` : "输入验证器中的动态口令。"}</p></div>
+      <div className="platform-login-copy"><span>受保护入口</span><h1>先确认是你</h1><p>{step === "email" ? "使用平台管理员邮箱继续。" : step === "code" ? `验证码已发送至 ${masked}` : `输入 ${masked} 绑定的验证器动态口令。`}</p></div>
       {step === "email" ? <input autoComplete="email" className="platform-field" onChange={(event) => setEmail(event.target.value)} placeholder="管理员邮箱" type="email" value={email} /> : null}
       {step === "code" ? <VerificationCodeInput ariaLabel="邮箱验证码" autoFocus value={code} onChange={setCode} /> : null}
       {step === "mfa" ? <div className="platform-mfa-login-field">

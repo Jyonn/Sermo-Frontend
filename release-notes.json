@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.6",
+  "id": "2026.08.14.7",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "验证码输入焕新",
+      "title": "管理员登录更直接",
       "items": [
-        "邮箱、手机和管理员验证统一采用清晰的六位输入格",
-        "支持整段粘贴、系统验证码自动填充和移动端数字键盘"
+        "超级管理员启用 MFA 后，确认邮箱即可直接输入动态口令",
+        "不再重复发送和输入邮箱验证码"
       ]
     },
     "en": {
-      "title": "A clearer verification code experience",
+      "title": "A faster administrator sign-in",
       "items": [
-        "Email, phone, and admin verification now share a clear six-cell code input",
-        "Paste, system autofill, and mobile numeric keyboards are fully supported"
+        "Super administrators with MFA can enter their authenticator code immediately after confirming their email",
+        "The redundant email verification code step is now skipped"
       ]
     }
   }

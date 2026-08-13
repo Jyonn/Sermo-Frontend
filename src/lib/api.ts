@@ -1371,7 +1371,7 @@ export const api = {
   },
 
   sendPlatformAdminCode(email: string) {
-    return request<{ expires_in: number; masked_email: string }>("/platform-admin/email-code", {
+    return request<{ expires_in?: number; masked_email: string; mfa_required: boolean }>("/platform-admin/email-code", {
       method: "POST", body: { email },
     });
   },
