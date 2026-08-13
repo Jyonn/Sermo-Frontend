@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.13.1",
+  "id": "2026.08.13.2",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "更沉浸的影像浏览",
+      "title": "聊天返回更顺滑",
       "items": [
-        "聊天与广场现已使用同一套图片和视频详情页",
-        "新增适配手机的黑色沉浸预览，点击任意位置即可退出",
-        "影像记录支持横向浏览更多拍摄与视频参数"
+        "返回聊天列表时，置顶消息栏会与会话内容同步退场",
+        "修复置顶栏在动画结束时突然消失的问题"
       ]
     },
     "en": {
-      "title": "A more immersive media viewer",
+      "title": "Smoother chat navigation",
       "items": [
-        "Chat and Square now share one image and video detail experience",
-        "A mobile-friendly dark immersive view now closes with a tap anywhere",
-        "Media records can be swiped horizontally for more capture and video details"
+        "Pinned messages now leave together with the conversation when returning to the chat list",
+        "Fixed the pinned bar disappearing abruptly at the end of the transition"
       ]
     }
   }

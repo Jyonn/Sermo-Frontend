@@ -5169,7 +5169,7 @@ function LiveChatsPage() {
                 ) : null}
               </header>
               {pinnedMessages.length ? (
-                <div className="chat-pinned-bar">
+                <div className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
                   <button
                     className="chat-pinned-main"
                     onClick={() => revealPinnedMessage(pinnedMessages[0].message.message_id)}
