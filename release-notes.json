@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.5",
+  "id": "2026.08.13.6",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "多选消息更整齐",
+      "title": "聊天记录由你掌控",
       "items": [
-        "进入多选后，头像、昵称和消息会整体让出选择区域",
-        "双方消息的勾选框现在保持在同一条左侧轨道"
+        "聊天详情新增清空聊天记录",
+        "清空仅影响自己的账号，不会删除对方保存的消息"
       ]
     },
     "en": {
-      "title": "Cleaner message selection",
+      "title": "Your chat history, your choice",
       "items": [
-        "Avatars, names, and messages now shift together in selection mode",
-        "Selection controls for both sides stay aligned in one left-side rail"
+        "Chat details now includes an option to clear chat history",
+        "Clearing affects only your account and keeps other participants' copies intact"
       ]
     }
   }

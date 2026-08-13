@@ -2103,6 +2103,8 @@ function LiveChatsPage() {
   const [messageSelectionMode, setMessageSelectionMode] = useState(false);
   const [selectedMessageClientIds, setSelectedMessageClientIds] = useState<string[]>([]);
   const [batchDeleteConfirmOpen, setBatchDeleteConfirmOpen] = useState(false);
+  const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
+  const [clearHistorySaving, setClearHistorySaving] = useState(false);
   const [closingChatSnapshot, setClosingChatSnapshot] = useState<Chat | null>(null);
   const [isClosingChatView, setIsClosingChatView] = useState(false);
   const [groupTitle, setGroupTitle] = useState("");
@@ -4842,6 +4844,36 @@ function LiveChatsPage() {
     }
   };
 
+  const clearChatHistory = async () => {
+    if (!selectedChat || clearHistorySaving) return;
+    const chatId = selectedChat.id;
+    const clearingMessages = selectedMessages;
+    try {
+      setClearHistorySaving(true);
+      await api.clearChatMessages(chatId);
+      clearingMessages.forEach((message) => {
+        purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]);
+        if (message.localPreviewUri) {
+          URL.revokeObjectURL(message.localPreviewUri);
+          localObjectUrlsRef.current.delete(message.localPreviewUri);
+        }
+      });
+      setMessages((current) => ({ ...current, [chatId]: [] }));
+      setPinnedMessages([]);
+      setHasOlderMessages(false);
+      setReplyTarget(null);
+      setClearHistoryConfirmOpen(false);
+      setDetailsSheetOpen(false);
+      if (cacheScope) await chatCache.clearThread(cacheScope, chatId);
+      await refreshChats();
+      showToast(t("chat.clearHistoryDone"));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("chat.clearHistoryFailed"), "error");
+    } finally {
+      setClearHistorySaving(false);
+    }
+  };
+
   const toggleGroupCandidate = (userId: number) => {
     if (chatMemberLockedIds.includes(userId)) return;
     setGroupSelectedIds((current) => (current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId]));
@@ -6074,6 +6106,17 @@ function LiveChatsPage() {
               <div className="chat-detail-settings-list">
                 <button
                   className="chat-detail-setting-row danger-row"
+                  onClick={() => setClearHistoryConfirmOpen(true)}
+                  type="button"
+                >
+                  <div className="row-main">
+                    <strong>{t("chat.clearHistory")}</strong>
+                    <div className="row-subtle">{t("chat.clearHistoryHint")}</div>
+                  </div>
+                  <span className="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
+                </button>
+                <button
+                  className="chat-detail-setting-row danger-row"
                   onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : setFriendDangerConfirmOpen(true))}
                   type="button"
                 >
@@ -6272,6 +6315,18 @@ function LiveChatsPage() {
         onChange={setGroupRenameValue}
         onClose={() => setGroupRenameOpen(false)}
         onConfirm={() => void renameGroup()}
+      />
+      <ConfirmDialog
+        open={clearHistoryConfirmOpen}
+        title={t("chat.clearHistoryConfirmTitle")}
+        description={t("chat.clearHistoryConfirmHint")}
+        confirmLabel={t("chat.clearHistory")}
+        busy={clearHistorySaving}
+        danger
+        onClose={() => {
+          if (!clearHistorySaving) setClearHistoryConfirmOpen(false);
+        }}
+        onConfirm={() => void clearChatHistory()}
       />
       <ConfirmDialog
         open={groupDangerConfirmOpen}

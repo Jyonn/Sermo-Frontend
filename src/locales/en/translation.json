@@ -1687,4 +1687,10 @@
   ,"guest.switchToChinese": "切换为中文"
   ,"message.system.placeholder": "System message"
   ,"message.system.groupRenamed": "{{actor}} renamed the group to “{{title}}”"
+  ,"chat.clearHistory": "Clear chat history"
+  ,"chat.clearHistoryHint": "Remove only from your account"
+  ,"chat.clearHistoryConfirmTitle": "Clear this chat history?"
+  ,"chat.clearHistoryConfirmHint": "All previous messages will be removed only from your account. Other participants can still see them. This cannot be undone."
+  ,"chat.clearHistoryDone": "Chat history cleared"
+  ,"chat.clearHistoryFailed": "Could not clear chat history"
 }

@@ -1687,4 +1687,10 @@
   ,"guest.switchToChinese": "切换为中文"
   ,"message.system.placeholder": "系统消息"
   ,"message.system.groupRenamed": "{{actor}} 将群名修改为“{{title}}”"
+  ,"chat.clearHistory": "清空聊天记录"
+  ,"chat.clearHistoryHint": "仅从你这里清除"
+  ,"chat.clearHistoryConfirmTitle": "清空这段聊天记录？"
+  ,"chat.clearHistoryConfirmHint": "所有历史消息将只从你的账号中清除，对方仍可查看。此操作无法撤销。"
+  ,"chat.clearHistoryDone": "聊天记录已清空"
+  ,"chat.clearHistoryFailed": "暂时无法清空聊天记录"
 }

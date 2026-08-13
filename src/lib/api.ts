@@ -923,6 +923,14 @@ export const api = {
     });
   },
 
+  clearChatMessages(chat_id: number) {
+    return request<{ deleted_count: number }>("/messages/clear", {
+      method: "DELETE",
+      auth: true,
+      body: { chat_id },
+    });
+  },
+
   reconcileMessages(chat_id: number, message_ids: number[]) {
     return request<{ deleted_message_ids: number[] }>("/messages/reconcile", {
       method: "POST",

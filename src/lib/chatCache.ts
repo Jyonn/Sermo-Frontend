@@ -74,6 +74,18 @@ function runRequest<T>(request: IDBRequest<T>) {
   });
 }
 
+function deleteRecord(storeName: string, key: string) {
+  return openDatabase().then(async (database) => {
+    if (!database) return;
+    try {
+      const transaction = database.transaction(storeName, "readwrite");
+      await runRequest(transaction.objectStore(storeName).delete(key));
+    } catch {
+      // Persistent cache is best-effort.
+    }
+  });
+}
+
 function emitChatListUpdated(scope: string, chats: Chat[]) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
@@ -232,5 +244,11 @@ export const chatCache = {
       hasOlderMessages: snapshot.hasOlderMessages || persistedTrimmed.trimmed,
     };
     await writeRecord(THREAD_STORE, persistedRecord);
+  },
+
+  async clearThread(scope: string, chatId: number) {
+    const key = threadKey(scope, chatId);
+    memoryThreads.delete(key);
+    await deleteRecord(THREAD_STORE, key);
   },
 };
