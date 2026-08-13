@@ -574,6 +574,10 @@ export interface LinkPreviewDTO {
 
 export interface ChatMessagePayloadDTO {
   kind: MessageKind;
+  event?: string;
+  actor_name?: string;
+  old_title?: string;
+  new_title?: string;
   text?: string;
   uri?: string;
   thumbnail_uri?: string;

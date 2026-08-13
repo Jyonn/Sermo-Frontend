@@ -1685,4 +1685,6 @@
   ,"guest.useDarkTheme": "Use dark appearance"
   ,"guest.switchToEnglish": "Switch to English"
   ,"guest.switchToChinese": "切换为中文"
+  ,"message.system.placeholder": "System message"
+  ,"message.system.groupRenamed": "{{actor}} renamed the group to “{{title}}”"
 }

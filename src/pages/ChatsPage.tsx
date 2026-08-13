@@ -688,6 +688,12 @@ function formatPresence(user: UserDTO | null) {
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
+  const text = kind === "system" && message.payload?.event === "group_renamed"
+    ? i18n.t("message.system.groupRenamed", {
+        actor: message.payload.actor_name || message.user.name,
+        title: message.payload.new_title || "",
+      })
+    : message.payload?.text || message.content;
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
@@ -702,7 +708,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     avatarFrameStyle: message.user.avatar_frame_style,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
-    text: message.content,
+    text,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     replyTo: message.reply_to ?? null,
     mentions: message.mentions ?? [],
@@ -868,6 +874,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "map_access") return i18n.t("travelMap.action");
   if (kind === "statement") return i18n.t("message.statementPlaceholder");
   if (kind === "sticker") return i18n.t("sticker.messagePlaceholder");
+  if (kind === "system") return text || i18n.t("message.system.placeholder");
   return text || i18n.t("chat.noMessages");
 }
 
@@ -878,7 +885,13 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text">) {
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  return previewFromKind(kind, message.content);
+  const text = kind === "system" && message.payload?.event === "group_renamed"
+    ? i18n.t("message.system.groupRenamed", {
+        actor: message.payload.actor_name || message.user.name,
+        title: message.payload.new_title || "",
+      })
+    : message.payload?.text || message.content;
+  return previewFromKind(kind, text);
 }
 
 function clearChatUnread(chat: Chat) {
@@ -892,6 +905,7 @@ function clearChatUnread(chat: Chat) {
 
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
+  if (current.kind === "system" || neighbor.kind === "system") return false;
   if (current.from !== neighbor.from || Math.abs(current.createdAt - neighbor.createdAt) >= 5 * 60) return false;
   if (visibleBubbleStyle(current.chatBubbleStyle) !== visibleBubbleStyle(neighbor.chatBubbleStyle)) return false;
   if (current.from === "self") return true;
@@ -1708,6 +1722,17 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   selectionMode,
   showAuthor,
 }: MessageGroupBlockProps) {
+  const systemMessage = group.messages.length === 1 && group.messages[0].kind === "system" ? group.messages[0] : null;
+  if (systemMessage) {
+    return (
+      <div>
+        {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
+        <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
+          <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>
+        </div>
+      </div>
+    );
+  }
   const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
@@ -2481,7 +2506,7 @@ function LiveChatsPage() {
   };
 
   const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
-    if (messageSelectionMode) return;
+    if (messageSelectionMode || message.kind === "system") return;
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
     setMessageMenu({
@@ -2501,7 +2526,7 @@ function LiveChatsPage() {
   };
 
   const toggleMessageSelection = (message: ChatMessage) => {
-    if (messageDeleteState === "deleting") return;
+    if (messageDeleteState === "deleting" || message.kind === "system") return;
     setSelectedMessageClientIds((current) => {
       if (current.includes(message.clientId)) return current.filter((item) => item !== message.clientId);
       if (current.length >= 50) {
@@ -2513,6 +2538,7 @@ function LiveChatsPage() {
   };
 
   const startMessageSelection = (message: ChatMessage) => {
+    if (message.kind === "system") return;
     setMessageMenu(null);
     setReplyTarget(null);
     setComposerMoreOpen(false);

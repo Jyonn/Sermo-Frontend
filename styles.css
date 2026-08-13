@@ -3681,6 +3681,32 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   letter-spacing: 0.02em;
 }
 
+.message-system-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 3px 44px;
+  box-sizing: border-box;
+  pointer-events: none;
+  user-select: none;
+}
+
+.message-system-row > span {
+  display: inline-block;
+  max-width: min(100%, 420px);
+  padding: 5px 11px;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 13%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel-strong) 72%, transparent);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  overflow-wrap: anywhere;
+}
+
 .message-history-actions {
   display: flex;
   justify-content: center;

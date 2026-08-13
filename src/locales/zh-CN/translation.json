@@ -1685,4 +1685,6 @@
   ,"guest.useDarkTheme": "切换深色外观"
   ,"guest.switchToEnglish": "Switch to English"
   ,"guest.switchToChinese": "切换为中文"
+  ,"message.system.placeholder": "系统消息"
+  ,"message.system.groupRenamed": "{{actor}} 将群名修改为“{{title}}”"
 }

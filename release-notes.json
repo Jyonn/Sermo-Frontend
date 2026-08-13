@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.3",
+  "id": "2026.08.13.4",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "表情包展示更稳定",
+      "title": "群聊变化有迹可循",
       "items": [
-        "表情包会记录真实宽高，在加载前提前保留正确空间",
-        "减少表情包出现时的尺寸跳动"
+        "修改群名后，聊天中会出现简洁的系统记录",
+        "系统记录不会混入普通气泡，也无法被操作或删除"
       ]
     },
     "en": {
-      "title": "More stable sticker rendering",
+      "title": "Group changes stay visible",
       "items": [
-        "Stickers now preserve their real dimensions before loading",
-        "Reduced layout shifts when sticker messages appear"
+        "Group name changes now leave a concise system record in chat",
+        "System records stay separate from regular bubbles and cannot be managed"
       ]
     }
   }
