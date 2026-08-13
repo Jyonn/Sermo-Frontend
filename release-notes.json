@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.6",
+  "id": "2026.08.13.7",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录由你掌控",
+      "title": "群聊变化清晰可见",
       "items": [
-        "聊天详情新增清空聊天记录",
-        "清空仅影响自己的账号，不会删除对方保存的消息"
+        "创建群聊、邀请成员、移出成员和主动退出都会留下简洁记录",
+        "批量成员变更会合并展示，减少无意义的信息刷屏"
       ]
     },
     "en": {
-      "title": "Your chat history, your choice",
+      "title": "Clear group activity records",
       "items": [
-        "Chat details now includes an option to clear chat history",
-        "Clearing affects only your account and keeps other participants' copies intact"
+        "Group creation, invites, removals, and departures now leave concise records",
+        "Batch member changes are combined to keep the conversation readable"
       ]
     }
   }

@@ -578,6 +578,8 @@ export interface ChatMessagePayloadDTO {
   actor_name?: string;
   old_title?: string;
   new_title?: string;
+  member_names?: string[];
+  member_count?: number;
   text?: string;
   uri?: string;
   thumbnail_uri?: string;

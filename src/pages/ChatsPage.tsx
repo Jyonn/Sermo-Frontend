@@ -686,14 +686,32 @@ function formatPresence(user: UserDTO | null) {
   return i18n.t("presence.offline");
 }
 
+function systemMessageText(message: ChatMessageDTO) {
+  const payload = message.payload;
+  if (payload?.kind !== "system") return payload?.text || message.content;
+  const actor = payload.actor_name || message.user.name;
+  const names = payload.member_names?.filter(Boolean).join(i18n.t("message.system.nameSeparator")) || "";
+  switch (payload.event) {
+    case "group_created":
+      return payload.member_count
+        ? i18n.t("message.system.groupCreatedWithMembers", { actor, names })
+        : i18n.t("message.system.groupCreated", { actor });
+    case "members_invited":
+      return i18n.t("message.system.membersInvited", { actor, names });
+    case "members_removed":
+      return i18n.t("message.system.membersRemoved", { actor, names });
+    case "member_left":
+      return i18n.t("message.system.memberLeft", { actor });
+    case "group_renamed":
+      return i18n.t("message.system.groupRenamed", { actor, title: payload.new_title || "" });
+    default:
+      return payload.text || i18n.t("message.system.placeholder");
+  }
+}
+
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const text = kind === "system" && message.payload?.event === "group_renamed"
-    ? i18n.t("message.system.groupRenamed", {
-        actor: message.payload.actor_name || message.user.name,
-        title: message.payload.new_title || "",
-      })
-    : message.payload?.text || message.content;
+  const text = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
@@ -885,12 +903,7 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text">) {
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const text = kind === "system" && message.payload?.event === "group_renamed"
-    ? i18n.t("message.system.groupRenamed", {
-        actor: message.payload.actor_name || message.user.name,
-        title: message.payload.new_title || "",
-      })
-    : message.payload?.text || message.content;
+  const text = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
   return previewFromKind(kind, text);
 }
 
