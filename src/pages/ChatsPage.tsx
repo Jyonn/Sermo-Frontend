@@ -5657,6 +5657,21 @@ function LiveChatsPage() {
                                 <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
                                   <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                                 </button>
+                                <span className={`composer-sticker-source is-${sticker.source_scope ?? "external"}`}>
+                                  {sticker.source_scope === "local" && sticker.source_user ? (
+                                    <>
+                                      <UserAvatar className="composer-sticker-source-avatar" name={sticker.source_user.name} uri={sticker.source_user.avatar_uri} />
+                                      <span className={`composer-sticker-source-name${sticker.source_user.name.length > 8 ? " is-scrolling" : ""}`}>
+                                        <span>{sticker.source_user.name}</span>
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="material-symbols-outlined" aria-hidden="true">public</span>
+                                      <span>{t("sticker.externalSource")}</span>
+                                    </>
+                                  )}
+                                </span>
                                 <button aria-label={t("sticker.collect")} className="composer-sticker-collect" disabled={stickerSaving} onClick={() => void collectExploredSticker(sticker)} type="button">
                                   <span className="material-symbols-outlined">add</span>
                                 </button>

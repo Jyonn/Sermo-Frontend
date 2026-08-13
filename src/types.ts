@@ -457,6 +457,11 @@ export interface StickerAssetDTO {
   file_size: number;
   pixel_width?: number | null;
   pixel_height?: number | null;
+  source_scope?: "local" | "external";
+  source_user?: {
+    name: string;
+    avatar_uri?: string | null;
+  };
 }
 
 export interface StickerDTO extends StickerAssetDTO {

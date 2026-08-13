@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.11",
+  "id": "2026.08.14.12",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "足迹气泡重新排版",
+      "title": "探索表情更有温度",
       "items": [
-        "足迹地图消息改为与文件消息一致的紧凑信息卡片",
-        "所有气泡主题统一了地图图标、文字层级与跳转提示"
+        "桌面端探索表情现在会标注同空间提供者",
+        "跨空间来源保持匿名，不展示空间或用户身份"
       ]
     },
     "en": {
-      "title": "Travel-map bubbles, refined",
+      "title": "More context in sticker discovery",
       "items": [
-        "Travel-map messages now use the same compact information-card layout as file messages",
-        "Map icons, text hierarchy, and navigation cues are now consistent across every bubble theme"
+        "Sticker discovery now credits contributors from your space on desktop",
+        "Cross-space sources remain anonymous and never expose space or user identity"
       ]
     }
   }

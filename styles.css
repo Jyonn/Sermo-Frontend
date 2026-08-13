@@ -18004,6 +18004,79 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   aspect-ratio: auto;
 }
 
+.composer-sticker-source {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  left: 5px;
+  z-index: 2;
+  display: none;
+  min-width: 0;
+  height: 23px;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 28px 2px 4px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--bg-panel) 72%, transparent);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-panel) 84%, transparent);
+  box-shadow: 0 3px 10px rgba(22, 45, 37, .1);
+  font-size: .58rem;
+  font-weight: 700;
+  line-height: 1;
+  backdrop-filter: blur(10px) saturate(1.08);
+}
+
+.composer-sticker-source-avatar {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  border-radius: 6px;
+}
+
+.composer-sticker-source > .material-symbols-outlined {
+  flex: 0 0 auto;
+  font-size: 14px;
+}
+
+.composer-sticker-source-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.composer-sticker-source-name > span {
+  display: inline-block;
+}
+
+.composer-sticker-source-name.is-scrolling > span {
+  padding-right: 12px;
+  animation: sticker-source-name-pan 6s ease-in-out infinite alternate;
+}
+
+@keyframes sticker-source-name-pan {
+  0%, 18% { transform: translateX(0); }
+  82%, 100% { transform: translateX(calc(-100% + 58px)); }
+}
+
+@media (min-width: 901px) {
+  .composer-sticker-pane[aria-label] .composer-sticker-explore-item {
+    aspect-ratio: .92;
+  }
+
+  .composer-sticker-source {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-sticker-source-name.is-scrolling > span {
+    animation: none;
+    text-overflow: ellipsis;
+  }
+}
+
 .composer-sticker-add {
   align-content: center;
   gap: 2px;
