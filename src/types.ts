@@ -411,6 +411,8 @@ export interface StickerAssetDTO {
   uri: string;
   mime_type: string;
   file_size: number;
+  pixel_width?: number | null;
+  pixel_height?: number | null;
 }
 
 export interface StickerDTO extends StickerAssetDTO {
@@ -598,6 +600,8 @@ export interface ChatMessagePayloadDTO {
   statement?: SquareStatementDTO | null;
   sticker_asset_id?: number;
   content_hash?: string;
+  pixel_width?: number | null;
+  pixel_height?: number | null;
   unavailable?: boolean;
 }
 

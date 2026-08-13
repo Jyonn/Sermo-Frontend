@@ -1361,7 +1361,15 @@ function renderMessageContent(
       return <span className="message-sticker-unavailable">{i18n.t("sticker.unavailable")}</span>;
     }
     const uri = message.localPreviewUri ?? resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
-    return <img alt={i18n.t("sticker.messagePlaceholder")} className="message-sticker-image" draggable={false} loading="lazy" src={uri} />;
+    return <img
+      alt={i18n.t("sticker.messagePlaceholder")}
+      className="message-sticker-image"
+      draggable={false}
+      height={message.payload.pixel_height || undefined}
+      loading="lazy"
+      src={uri}
+      width={message.payload.pixel_width || undefined}
+    />;
   }
 
   if (message.kind === "image" && message.payload?.uri) {
@@ -3175,7 +3183,14 @@ function LiveChatsPage() {
       time: formatTime(createdAt),
       createdAt,
       text: t("sticker.messagePlaceholder"),
-      payload: { kind: "sticker", uri: sticker.uri, sticker_asset_id: sticker.sticker_asset_id, content_hash: sticker.content_hash },
+      payload: {
+        kind: "sticker",
+        uri: sticker.uri,
+        sticker_asset_id: sticker.sticker_asset_id,
+        content_hash: sticker.content_hash,
+        pixel_width: sticker.pixel_width,
+        pixel_height: sticker.pixel_height,
+      },
       replyTo: reply,
       status: "pending",
     };

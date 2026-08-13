@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.2",
+  "id": "2026.08.13.3",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "聊天返回更顺滑",
+      "title": "表情包展示更稳定",
       "items": [
-        "返回聊天列表时，置顶消息栏会与会话内容同步退场",
-        "修复置顶栏在动画结束时突然消失的问题"
+        "表情包会记录真实宽高，在加载前提前保留正确空间",
+        "减少表情包出现时的尺寸跳动"
       ]
     },
     "en": {
-      "title": "Smoother chat navigation",
+      "title": "More stable sticker rendering",
       "items": [
-        "Pinned messages now leave together with the conversation when returning to the chat list",
-        "Fixed the pinned bar disappearing abruptly at the end of the transition"
+        "Stickers now preserve their real dimensions before loading",
+        "Reduced layout shifts when sticker messages appear"
       ]
     }
   }
