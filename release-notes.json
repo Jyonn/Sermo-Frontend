@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.8",
+  "id": "2026.08.13.9",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "系统记录更安静",
+      "title": "打开聊天直达最新消息",
       "items": [
-        "置顶与取消置顶现在会在会话中留下简洁记录",
-        "系统记录不再触发消息提醒、未读数或占用聊天列表摘要"
+        "进入聊天时会在缓存恢复和消息同步完成后稳定定位到最下方",
+        "图片、视频等内容加载时不再把最新消息推离视野"
       ]
     },
     "en": {
-      "title": "Quieter system activity",
+      "title": "Open chats at the latest message",
       "items": [
-        "Pinning and unpinning now leave a concise activity record",
-        "System activity no longer triggers alerts, unread counts, or chat-list previews"
+        "Chats now stay anchored to the bottom while cached and latest messages are restored",
+        "Media layout no longer pushes the newest message out of view during entry"
       ]
     }
   }

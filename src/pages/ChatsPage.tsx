@@ -2209,6 +2209,7 @@ function LiveChatsPage() {
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
+  const initialBottomAnchorRef = useRef<number | null>(null);
   const stickToBottomRef = useRef(true);
   const pendingRevealRef = useRef<{ chatId: number; previousHeight: number; previousScrollTop: number } | null>(null);
   const cancelScrollAnimationRef = useRef<(() => void) | null>(null);
@@ -2990,13 +2991,23 @@ function LiveChatsPage() {
     setOlderState("idle");
     setHasOlderMessages(false);
 
-    const restoreScroll = () => {
-      requestAnimationFrame(() => {
+    const restoreScroll = (releaseAnchor = false) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
         const element = messageScrollRef.current;
         if (!element) return;
         element.scrollTop = element.scrollHeight;
-      });
+        stickToBottomRef.current = true;
+        if (releaseAnchor) {
+          window.setTimeout(() => {
+            if (initialBottomAnchorRef.current === selectedChat.id) {
+              initialBottomAnchorRef.current = null;
+            }
+          }, 180);
+        }
+      }));
     };
+
+    initialBottomAnchorRef.current = selectedChat.id;
 
     let restoredThread = chatCache.getThread(cacheScope, selectedChat.id);
     if (restoredThread?.messages.length) {
@@ -3005,6 +3016,7 @@ function LiveChatsPage() {
         [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(restoredThread?.messages ?? [])),
       }));
       setHasOlderMessages(restoredThread.hasOlderMessages);
+      restoreScroll();
     }
 
     const loadLatestMessages = async () => {
@@ -3018,6 +3030,7 @@ function LiveChatsPage() {
               [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(restoredThread?.messages ?? [])),
             }));
             setHasOlderMessages(restoredThread.hasOlderMessages);
+            restoreScroll();
           }
         }
 
@@ -3097,11 +3110,14 @@ function LiveChatsPage() {
           scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
-        if (!restoredThread?.messages.length) restoreScroll();
+        restoreScroll(true);
         void api.markChatRead(selectedChat.id).then(() => {
           setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
         });
       } catch (apiError) {
+        if (initialBottomAnchorRef.current === selectedChat.id) {
+          initialBottomAnchorRef.current = null;
+        }
         if (!controller.signal.aborted) recordChatHealth(cacheScope, false);
         if (isChatAccessBoundaryError(apiError)) {
           redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
@@ -3122,12 +3138,16 @@ function LiveChatsPage() {
       const element = messageScrollRef.current;
       chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
       controller.abort();
+      if (initialBottomAnchorRef.current === selectedChat.id) {
+        initialBottomAnchorRef.current = null;
+      }
     };
   }, [cacheScope, currentUserId, selectedChat]);
 
   useEffect(() => {
     if (!selectedChat) {
       initialScrollDoneRef.current = null;
+      initialBottomAnchorRef.current = null;
       stickToBottomRef.current = true;
       return;
     }
@@ -5309,6 +5329,10 @@ function LiveChatsPage() {
                 }}
                 onScroll={() => {
                   const element = messageScrollRef.current;
+                  if (selectedChat && initialBottomAnchorRef.current === selectedChat.id) {
+                    stickToBottomRef.current = true;
+                    return;
+                  }
                   stickToBottomRef.current = isNearThreadBottom(element);
                   if (element && element.scrollTop <= 24 && hasOlderMessages && olderState === "idle") {
                     void loadOlderMessages();
