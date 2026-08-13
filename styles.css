@@ -23996,6 +23996,91 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   overflow:visible;
 }
 
+/* Travel-map messages use the same compact information hierarchy as file cards. */
+.message-bubble.is-travel-map {
+  --travel-card-width: 264px;
+  --travel-card-min-height: 72px;
+  --travel-card-icon-size: 42px;
+  --travel-card-icon-radius: 13px;
+  width: min(68vw, var(--travel-card-width));
+  max-width: 100%;
+}
+
+.message-travel-map-card,
+.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map > .message-travel-map-card {
+  width: 100%;
+  min-height: var(--travel-card-min-height);
+  grid-template-columns: var(--travel-card-icon-size) minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 12px 13px;
+  align-items: center;
+}
+
+.message-travel-map-art,
+.message-group[class*="bubble-style-city-"] .message-travel-map-art {
+  width: var(--travel-card-icon-size);
+  height: var(--travel-card-icon-size);
+  box-sizing: border-box;
+  border-radius: var(--travel-card-icon-radius);
+  box-shadow: none;
+}
+
+.message-travel-map-art svg,
+.message-group[class*="bubble-style-city-"] .message-travel-map-art svg {
+  width: 22px;
+  height: 22px;
+}
+
+.message-travel-map-copy {
+  gap: 5px;
+}
+
+.message-travel-map-copy strong {
+  overflow: hidden;
+  font-family: inherit;
+  font-size: .88rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-travel-map-copy span {
+  font-size: .72rem;
+}
+
+.message-travel-map-arrow {
+  font-size: 1rem;
+}
+
+.message-group.bubble-style-comic .message-bubble.is-travel-map {
+  --travel-card-min-height: 64px;
+  --travel-card-icon-size: 40px;
+}
+
+.message-group.bubble-style-receipt .message-bubble.is-travel-map {
+  --travel-card-min-height: 52px;
+  --travel-card-icon-size: 34px;
+  --travel-card-icon-radius: 8px;
+}
+
+.message-group.bubble-style-receipt .message-travel-map-card {
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map {
+  --travel-card-width: 292px;
+  --travel-card-icon-size: 40px;
+  --travel-card-icon-radius: 12px;
+  width: min(76vw, var(--travel-card-width));
+  max-width: 100%;
+}
+
+.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map > .message-travel-map-card {
+  gap: 11px;
+  padding: 11px 12px;
+}
+
 @keyframes xiaobai-arrive-left {
   0%,100% { opacity:0;transform:translate(-13px,-50%) scale(.66); }
   12% { opacity:1; }

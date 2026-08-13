@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.10",
+  "id": "2026.08.14.11",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "高级聊天背景焕新",
+      "title": "足迹气泡重新排版",
       "items": [
-        "极光天空、全息、街机、太空港与黑色电影加入克制的动态氛围",
-        "黑色电影升级为典藏背景，并强化胶片光影与颗粒质感"
+        "足迹地图消息改为与文件消息一致的紧凑信息卡片",
+        "所有气泡主题统一了地图图标、文字层级与跳转提示"
       ]
     },
     "en": {
-      "title": "Premium chat backgrounds, reimagined",
+      "title": "Travel-map bubbles, refined",
       "items": [
-        "Aurora Sky, Hologram, Arcade, Spaceport, and Noir Film now feature subtle ambient motion",
-        "Noir Film is now a legendary background with richer projector light and film grain"
+        "Travel-map messages now use the same compact information-card layout as file messages",
+        "Map icons, text hierarchy, and navigation cues are now consistent across every bubble theme"
       ]
     }
   }

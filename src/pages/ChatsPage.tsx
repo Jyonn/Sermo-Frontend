@@ -1482,15 +1482,13 @@ function renderMessageContent(
         type="button"
       >
         <span className="message-travel-map-art" aria-hidden="true">
-          <span className="message-travel-map-fold fold-one" />
-          <span className="message-travel-map-fold fold-two" />
           <ComposerSvgIcon kind="map" />
         </span>
         <span className="message-travel-map-copy">
           <strong>{message.payload?.text || i18n.t("travelMap.messageJoin")}</strong>
           <span>{connected ? i18n.t("travelMap.openMap") : i18n.t("travelMap.tapToAuthorize")}</span>
         </span>
-        <span className="message-travel-map-arrow" aria-hidden="true">→</span>
+        <span className="message-travel-map-arrow" aria-hidden="true">↗</span>
       </button>
     );
   }
