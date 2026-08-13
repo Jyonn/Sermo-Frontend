@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
@@ -27,6 +28,7 @@ function PlatformAdminLogin() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [mfa, setMfa] = useState("");
+  const [useRecoveryCode, setUseRecoveryCode] = useState(false);
   const [step, setStep] = useState<"email" | "code" | "mfa">("email");
   const [masked, setMasked] = useState("");
   const [busy, setBusy] = useState(false);
@@ -59,10 +61,15 @@ function PlatformAdminLogin() {
       <div className="platform-brand"><span className="platform-brand-mark">S</span><div><small>SERMO CONTROL</small><strong>平台审计台</strong></div></div>
       <div className="platform-login-copy"><span>受保护入口</span><h1>先确认是你</h1><p>{step === "email" ? "使用平台管理员邮箱继续。" : step === "code" ? `验证码已发送至 ${masked}` : "输入验证器中的动态口令。"}</p></div>
       {step === "email" ? <input autoComplete="email" className="platform-field" onChange={(event) => setEmail(event.target.value)} placeholder="管理员邮箱" type="email" value={email} /> : null}
-      {step === "code" ? <input autoComplete="one-time-code" className="platform-field is-code" inputMode="numeric" maxLength={6} onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))} placeholder="000000" value={code} /> : null}
-      {step === "mfa" ? <input autoComplete="one-time-code" className="platform-field is-code" onChange={(event) => setMfa(event.target.value)} placeholder="动态口令或恢复码" value={mfa} /> : null}
-      <button className="platform-primary" disabled={busy || (step === "email" ? !email : step === "code" ? code.length !== 6 : !mfa)} onClick={() => void submit()} type="button">{busy ? "正在验证" : step === "email" ? "发送验证码" : "进入审计台"}<span className="material-symbols-outlined">arrow_forward</span></button>
-      {step !== "email" ? <button className="platform-text-button" onClick={() => { setStep("email"); setCode(""); setMfa(""); }} type="button">更换邮箱</button> : null}
+      {step === "code" ? <VerificationCodeInput ariaLabel="邮箱验证码" autoFocus value={code} onChange={setCode} /> : null}
+      {step === "mfa" ? <div className="platform-mfa-login-field">
+        {useRecoveryCode
+          ? <input autoComplete="off" className="platform-field is-code" onChange={(event) => setMfa(event.target.value)} placeholder="输入恢复码" value={mfa} />
+          : <VerificationCodeInput ariaLabel="动态口令" autoFocus value={mfa} onChange={setMfa} />}
+        <button className="platform-text-button" onClick={() => { setUseRecoveryCode((current) => !current); setMfa(""); }} type="button">{useRecoveryCode ? "使用动态口令" : "使用恢复码"}</button>
+      </div> : null}
+      <button className="platform-primary" disabled={busy || (step === "email" ? !email : step === "code" ? code.length !== 6 : useRecoveryCode ? !mfa.trim() : mfa.length !== 6)} onClick={() => void submit()} type="button">{busy ? "正在验证" : step === "email" ? "发送验证码" : "进入审计台"}<span className="material-symbols-outlined">arrow_forward</span></button>
+      {step !== "email" ? <button className="platform-text-button" onClick={() => { setStep("email"); setCode(""); setMfa(""); setUseRecoveryCode(false); }} type="button">更换邮箱</button> : null}
       <footer><span className="material-symbols-outlined">lock</span>所有敏感访问均记录审计日志</footer>
     </section>
   </main>;
@@ -179,7 +186,7 @@ function PlatformAdminConsole() {
   <InputDialog confirmLabel={reviewTarget?.approved ? "确认通过" : "确认驳回"} onChange={setReviewNote} onClose={() => { setReviewTarget(null); setReviewNote(""); }} onConfirm={() => void review()} open={Boolean(reviewTarget)} placeholder={reviewTarget?.approved ? "审核备注（可选）" : "请填写明确的驳回原因"} title={reviewTarget?.approved ? `通过 ${reviewTarget.space.name} 的实名认证？` : `驳回 ${reviewTarget?.space.name ?? ""} 的申请？`} value={reviewNote} />
   <SideDrawer className="platform-chat-drawer" historyKey="platform-chat" onClose={() => { setOpenChat(null); setMessages([]); setAuditReason(""); setMessageCursor(null); setHasOlderMessages(false); }} open={Boolean(openChat)} title={openChat?.title || "会话审计"}>{openChat ? <AuditConversation chat={openChat} hasMore={hasOlderMessages} loading={loadingOlderMessages} messages={messages} onLoadOlder={loadOlderMessages} onMessage={(message) => void inspectDelivery(message)} /> : null}</SideDrawer>
   <SideDrawer className="platform-delivery-drawer" historyKey="platform-message-delivery" onClose={() => { setDeliveryMessage(null); setDeliveryAudit(null); }} open={Boolean(deliveryMessage)} title="消息推送链路"><DeliveryAudit value={deliveryAudit} /></SideDrawer>
-  <SideDrawer actionDisabled={mfaCode.length !== 6} actionLabel="验证并启用" historyKey="platform-mfa" onAction={() => void verifyMfa()} onClose={() => { setMfaQr(""); setMfaSecret(""); setMfaCode(""); }} open={Boolean(mfaQr)} title="连接验证器"><div className="platform-mfa"><p>使用任意验证器扫描二维码，然后输入 6 位动态口令。</p><img alt="MFA QR code" src={mfaQr} /><code>{mfaSecret}</code><input className="platform-field is-code" inputMode="numeric" maxLength={6} onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, ""))} placeholder="000000" value={mfaCode} /></div></SideDrawer>
+  <SideDrawer actionDisabled={mfaCode.length !== 6} actionLabel="验证并启用" historyKey="platform-mfa" onAction={() => void verifyMfa()} onClose={() => { setMfaQr(""); setMfaSecret(""); setMfaCode(""); }} open={Boolean(mfaQr)} title="连接验证器"><div className="platform-mfa"><p>使用任意验证器扫描二维码，然后输入 6 位动态口令。</p><img alt="MFA QR code" src={mfaQr} /><code>{mfaSecret}</code><VerificationCodeInput ariaLabel="动态口令" value={mfaCode} onChange={setMfaCode} /></div></SideDrawer>
   <SideDrawer historyKey="platform-recovery" onClose={() => setRecoveryCodes([])} open={recoveryCodes.length > 0} title="保存恢复码"><div className="platform-recovery"><span className="material-symbols-outlined">key</span><h2>仅展示这一次</h2><p>每个恢复码只能使用一次。请离线保存，不要截图上传云端。</p><div>{recoveryCodes.map((code) => <code key={code}>{code}</code>)}</div><button className="platform-primary" onClick={() => setRecoveryCodes([])} type="button">我已安全保存</button></div></SideDrawer></div>;
 }
 

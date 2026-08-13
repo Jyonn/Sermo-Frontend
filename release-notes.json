@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.5",
+  "id": "2026.08.14.6",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "抽屉布局更加稳定",
+      "title": "验证码输入焕新",
       "items": [
-        "没有评论时，发言详情的评论栏仍会稳定贴近底部",
-        "聊天记录搜索结果较少时不再被异常拉高"
+        "邮箱、手机和管理员验证统一采用清晰的六位输入格",
+        "支持整段粘贴、系统验证码自动填充和移动端数字键盘"
       ]
     },
     "en": {
-      "title": "More stable drawer layouts",
+      "title": "A clearer verification code experience",
       "items": [
-        "The comment composer now stays at the bottom even when a statement has no comments",
-        "Short chat search result lists no longer stretch individual rows"
+        "Email, phone, and admin verification now share a clear six-cell code input",
+        "Paste, system autofill, and mobile numeric keyboards are fully supported"
       ]
     }
   }

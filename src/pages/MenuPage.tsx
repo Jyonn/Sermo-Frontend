@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
+import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import barkAppIconUrl from "../assets/bark-app-icon.jpg";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
@@ -2969,10 +2970,10 @@ export default function MenuPage() {
                       <label className="field-label">{t("recovery.code")}</label>
                       {authPending && authExpiresIn > 0 ? <span className="field-countdown">{t("auth.validFor", { seconds: authExpiresIn })}</span> : null}
                     </div>
-                    <input className="input" value={authCode} onChange={(event) => setAuthCode(event.target.value)} />
+                    <VerificationCodeInput ariaLabel={t("recovery.code")} value={authCode} onChange={setAuthCode} />
                     <button
                       className="button contact-flow-primary"
-                      disabled={authActionState === "binding" || !authCode.trim()}
+                      disabled={authActionState === "binding" || authCode.length !== 6}
                       onClick={() => void bindAuthChannel()}
                       type="button"
                     >
@@ -3025,18 +3026,11 @@ export default function MenuPage() {
             </div>
             <div ref={authVerifyRef} className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
               <label className="field-label">{t("recovery.code")}</label>
-              <input
-                autoComplete="one-time-code"
-                className="input"
-                inputMode="numeric"
-                placeholder={t("admin.codePlaceholder")}
-                value={authCode}
-                onChange={(event) => setAuthCode(event.target.value)}
-              />
+              <VerificationCodeInput ariaLabel={t("recovery.code")} value={authCode} onChange={setAuthCode} />
               <div className="contact-flow-actions">
                 <button
                   className="button contact-flow-primary"
-                  disabled={authActionState === "binding" || !authCode.trim()}
+                  disabled={authActionState === "binding" || authCode.length !== 6}
                   onClick={() => void bindAuthChannel()}
                   type="button"
                 >
@@ -3073,10 +3067,10 @@ export default function MenuPage() {
               {unbindState === "sending" ? t("common.sending") : unbindCooldown > 0 ? t("auth.retryIn", { seconds: unbindCooldown }) : t("auth.sendCode")}
             </button>
             <label className="field-label">{t("recovery.code")}</label>
-            <input className="input" inputMode="numeric" value={unbindCode} onChange={(event) => setUnbindCode(event.target.value)} />
+            <VerificationCodeInput ariaLabel={t("recovery.code")} value={unbindCode} onChange={setUnbindCode} />
             <button
               className="danger-button contact-flow-primary"
-              disabled={unbindState !== "idle" || !unbindCode.trim()}
+              disabled={unbindState !== "idle" || unbindCode.length !== 6}
               onClick={() => void submitUnbind()}
               type="button"
             >

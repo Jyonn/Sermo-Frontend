@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
+import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
 import { useAuth } from "../lib/auth";
@@ -227,10 +228,10 @@ export default function AdminSpacePage() {
 
             <div>
               <label className="field-label">{t("admin.code")}</label>
-              <input className="input mono" inputMode="numeric" placeholder={t("admin.codePlaceholder")} value={code} onChange={(event) => setCode(event.target.value)} />
+              <VerificationCodeInput ariaLabel={t("admin.code")} value={code} onChange={setCode} />
             </div>
 
-            <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">
+            <button className="button auth-submit" disabled={submitState === "submitting" || code.length !== 6} type="submit">
               {submitState === "submitting" ? t("common.processing") : mode === "create" ? t("admin.createTab") : t("admin.enter")}
             </button>
           </form>

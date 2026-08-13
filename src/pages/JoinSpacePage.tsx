@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { UserAvatar } from "../components/UserAvatar";
@@ -418,7 +419,7 @@ export default function JoinSpacePage() {
             <div className="simple-form">
               <div className="password-recovery-target">{t("recovery.codeSentTo")} <strong>{recoveryTarget}</strong></div>
               <label className="field-label">{t("recovery.code")}</label>
-              <input autoFocus className="input password-recovery-code" inputMode="numeric" maxLength={6} value={recoveryCode} onChange={(event) => setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))} />
+              <VerificationCodeInput ariaLabel={t("recovery.code")} autoFocus value={recoveryCode} onChange={setRecoveryCode} />
               <button className="button" disabled={recoveryBusy || recoveryCode.length !== 6} onClick={() => void verifyRecoveryCode()} type="button">
                 {recoveryBusy ? t("recovery.verifying") : t("common.continue")}
               </button>

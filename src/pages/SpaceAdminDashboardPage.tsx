@@ -6,6 +6,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer } from "../components/SideDrawer";
+import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
@@ -740,7 +741,7 @@ export default function SpaceAdminDashboardPage() {
           {currentSpace?.verification_tier === "email" ? <section className="admin-policy-card field-stack">
             <div><strong>{t("admin.verifyPhoneTitle")}</strong><small>{t("admin.verifyPhoneHint")}</small></div>
             <input className="input" inputMode="tel" placeholder={t("admin.phonePlaceholder")} value={adminPhone} onChange={(event) => setAdminPhone(event.target.value)} />
-            {phoneCodeSent ? <input className="input mono" inputMode="numeric" maxLength={6} placeholder={t("admin.phoneCodePlaceholder")} value={adminPhoneCode} onChange={(event) => setAdminPhoneCode(event.target.value.replace(/\D/g, ""))} /> : null}
+            {phoneCodeSent ? <VerificationCodeInput ariaLabel={t("admin.phoneCodePlaceholder")} value={adminPhoneCode} onChange={setAdminPhoneCode} /> : null}
             <button className="button" disabled={verificationBusy || !adminPhone.trim() || (phoneCodeSent && adminPhoneCode.length !== 6)} onClick={() => void (phoneCodeSent ? verifyPhone() : sendPhoneCode())} type="button">{phoneCodeSent ? t("admin.completePhoneVerification") : t("admin.sendPhoneCode")}</button>
           </section> : <section className="admin-policy-card field-stack">
             <div><strong>{t("admin.phoneVerified")}</strong><small>{currentSpace?.admin_phone}</small></div>
