@@ -386,7 +386,8 @@ export function GlobalMessageSync() {
           const incoming = grouped.get(chat.id);
           const readState = chatStates.get(chat.id);
           if (!incoming?.length && !readState) return chat;
-          const newest = incoming?.[incoming.length - 1];
+          const ordinaryIncoming = incoming?.filter((message) => message.kind !== "system") ?? [];
+          const newest = ordinaryIncoming[ordinaryIncoming.length - 1];
           return {
             ...chat,
             ...(newest ? {
@@ -528,7 +529,7 @@ export function GlobalMessageSync() {
         emitChatSync({ afterMessageId: cursor, items: allItems, removed: allRemoved, chatStates: [...allChatStates.values()] });
 
         const otherChatItems = allItems.filter((item) => {
-          if (item.chatId === activeChatId || item.message.from !== "other") return false;
+          if (item.chatId === activeChatId || item.message.from !== "other" || item.message.kind === "system") return false;
           const readState = allChatStates.get(item.chatId);
           if (!readState || readState.unread_count <= 0) return false;
           return readState.last_read_at === null || item.message.createdAt > readState.last_read_at;

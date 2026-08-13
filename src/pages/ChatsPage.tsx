@@ -704,6 +704,10 @@ function systemMessageText(message: ChatMessageDTO) {
       return i18n.t("message.system.memberLeft", { actor });
     case "group_renamed":
       return i18n.t("message.system.groupRenamed", { actor, title: payload.new_title || "" });
+    case "message_pinned":
+      return i18n.t("message.system.messagePinned", { actor });
+    case "message_unpinned":
+      return i18n.t("message.system.messageUnpinned", { actor });
     default:
       return payload.text || i18n.t("message.system.placeholder");
   }

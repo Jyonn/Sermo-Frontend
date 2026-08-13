@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.7",
+  "id": "2026.08.13.8",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "群聊变化清晰可见",
+      "title": "系统记录更安静",
       "items": [
-        "创建群聊、邀请成员、移出成员和主动退出都会留下简洁记录",
-        "批量成员变更会合并展示，减少无意义的信息刷屏"
+        "置顶与取消置顶现在会在会话中留下简洁记录",
+        "系统记录不再触发消息提醒、未读数或占用聊天列表摘要"
       ]
     },
     "en": {
-      "title": "Clear group activity records",
+      "title": "Quieter system activity",
       "items": [
-        "Group creation, invites, removals, and departures now leave concise records",
-        "Batch member changes are combined to keep the conversation readable"
+        "Pinning and unpinning now leave a concise activity record",
+        "System activity no longer triggers alerts, unread counts, or chat-list previews"
       ]
     }
   }
