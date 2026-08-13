@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.8",
+  "id": "2026.08.14.9",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "输入切换更顺手",
+      "title": "聊天操作栏更整齐",
       "items": [
-        "聊天输入框获得焦点时会立即收起表情面板",
-        "键盘与表情面板切换不再互相遮挡"
+        "修复更多操作中相册图标偏离中心的问题",
+        "多层功能引导下的操作按钮现在也能保持统一对齐"
       ]
     },
     "en": {
-      "title": "Smoother composer switching",
+      "title": "Cleaner chat actions",
       "items": [
-        "The emoji panel now closes as soon as the message field receives focus",
-        "Switching between the keyboard and emoji panel no longer leaves overlapping surfaces"
+        "Fixed the off-center gallery icon in the expanded chat actions",
+        "Action tiles now remain aligned even when wrapped in multiple feature guides"
       ]
     }
   }

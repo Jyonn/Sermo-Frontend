@@ -14905,7 +14905,8 @@ html[data-theme="dark"] .message-link-preview-site {
   display: flex;
 }
 
-.composer-actions-grid > .feature-discovery-target > .composer-action-tile {
+.composer-actions-grid .feature-discovery-target,
+.composer-actions-grid .composer-action-tile {
   width: 100%;
 }
 
