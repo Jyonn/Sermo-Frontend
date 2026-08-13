@@ -59,6 +59,7 @@ import type {
   PlatformAdminSession,
   PlatformAdminSpaceDTO,
   PlatformAdminMemberDTO,
+  PlatformMessageDeliveryAuditDTO,
   PlatformDashboardDTO,
   PlatformAuditDTO,
 } from "../types";
@@ -1394,6 +1395,11 @@ export const api = {
   getPlatformChatMessages(chatId: number, reason: string, before?: number, signal?: AbortSignal) {
     return request<{ chat: ChatDTO; messages: ChatMessageDTO[]; has_more: boolean; next_before: number | null }>(`/platform-admin/chats/${chatId}/messages`, {
       platformAdminAuth: true, query: { reason, before, limit: 50 }, signal,
+    });
+  },
+  getPlatformMessageDeliveries(messageId: number, reason: string, signal?: AbortSignal) {
+    return request<PlatformMessageDeliveryAuditDTO>(`/platform-admin/messages/${messageId}/deliveries`, {
+      platformAdminAuth: true, query: { reason }, signal,
     });
   },
   getPlatformIdentityDocument(spaceId: number) {

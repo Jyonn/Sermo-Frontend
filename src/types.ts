@@ -317,6 +317,47 @@ export interface PlatformDashboardDTO {
   recent_audit: PlatformAuditDTO[];
 }
 
+export interface PlatformMessageDeliveryDTO {
+  delivery_id: number;
+  channel: "web" | "email" | "sms" | "bark" | "unknown";
+  status: "pending" | "sent" | "failed" | "skipped" | "unknown";
+  detail: string;
+  created_at: number;
+  attempted_at: number | null;
+  subscription?: {
+    digest: string;
+    origin: string;
+    user_agent: string;
+    enabled: boolean;
+    last_seen_at: number;
+  };
+}
+
+export interface PlatformMessageDeliveryAuditDTO {
+  message: {
+    message_id: number;
+    chat_id: number;
+    sender: TinyUserDTO;
+    created_at: number;
+    type: number;
+    preview: string;
+  };
+  recipients: Array<{
+    event_id: number;
+    user: TinyUserDTO;
+    event_created_at: number;
+    deliveries: PlatformMessageDeliveryDTO[];
+  }>;
+  totals: {
+    recipients: number;
+    deliveries: number;
+    sent: number;
+    pending: number;
+    failed: number;
+    skipped: number;
+  };
+}
+
 export interface SpaceAdminDashboardDTO {
   space: SpaceDTO;
   stats: {
