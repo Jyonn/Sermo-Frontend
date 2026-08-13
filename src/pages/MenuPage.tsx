@@ -11,6 +11,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
+import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
@@ -167,75 +168,6 @@ type NotificationSettingsMode = "channel" | "type";
 type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type PersonalizationCatalogItem = readonly [string, TranslationKey];
 type PersonalizationCatalogSection = { key: string; label: string; items: PersonalizationCatalogItem[] };
-
-function CompactPreferenceMenu<T extends string>({
-  disabled = false,
-  label,
-  onChange,
-  options,
-  value,
-}: {
-  disabled?: boolean;
-  label: string;
-  onChange: (value: T) => void | Promise<void>;
-  options: Array<{ label: string; value: T }>;
-  value: T;
-}) {
-  const menuRef = useRef<HTMLDetailsElement | null>(null);
-  const selected = options.find((option) => option.value === value) ?? options[0];
-
-  useEffect(() => {
-    const closeOnOutsidePress = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) menuRef.current?.removeAttribute("open");
-    };
-    document.addEventListener("pointerdown", closeOnOutsidePress);
-    return () => document.removeEventListener("pointerdown", closeOnOutsidePress);
-  }, []);
-
-  return (
-    <div className="personalization-preference-row">
-      <strong>{label}</strong>
-      <details
-        className={`personalization-preference-menu${disabled ? " is-disabled" : ""}`}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            menuRef.current?.removeAttribute("open");
-            menuRef.current?.querySelector<HTMLElement>("summary")?.focus();
-          }
-        }}
-        ref={menuRef}
-      >
-        <summary
-          aria-disabled={disabled}
-          aria-label={`${label}: ${selected.label}`}
-          onClick={(event) => {
-            if (disabled) event.preventDefault();
-          }}
-        >
-          <span>{selected.label}</span>
-          <span aria-hidden="true" className="material-symbols-outlined">expand_more</span>
-        </summary>
-        <div aria-label={label} className="personalization-preference-options" role="listbox">
-          {options.map((option) => (
-            <button
-              aria-selected={option.value === value}
-              key={option.value}
-              onClick={() => {
-                menuRef.current?.removeAttribute("open");
-                if (option.value !== value) void onChange(option.value);
-              }}
-              role="option"
-              type="button"
-            >
-              <span>{option.label}</span>
-              <i aria-hidden="true">{option.value === value ? "✓" : ""}</i>
-            </button>
-          ))}
-        </div>
-      </details>
-    </div>
-  );
-}
 
 function PersonalizationCatalogControls({
   onOwnershipChange,
@@ -2212,8 +2144,8 @@ export default function MenuPage() {
 
       <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
-          <section className="personalization-preference-list">
-            <CompactPreferenceMenu<ThemePreference>
+          <SettingGroup>
+            <SettingSelect<ThemePreference>
               label={t("menu.appearance")}
               onChange={setThemePreference}
               options={[
@@ -2223,7 +2155,7 @@ export default function MenuPage() {
               ]}
               value={themePreference}
             />
-            <CompactPreferenceMenu<LanguagePreference>
+            <SettingSelect<LanguagePreference>
               disabled={languageSaving}
               label={t("menu.language")}
               onChange={saveLanguagePreference}
@@ -2234,21 +2166,17 @@ export default function MenuPage() {
               ]}
               value={languagePreference}
             />
-            <div className="personalization-preference-row">
-              <span className="personalization-preference-copy">
-                <strong>{t("menu.showSelfAvatar")}</strong>
-                <small>{t("menu.showSelfAvatarHint")}</small>
-              </span>
-              <button
-                aria-label={t("menu.showSelfAvatar")}
-                aria-pressed={Boolean(me?.show_self_avatar)}
-                className={`switch ${me?.show_self_avatar ? "active" : ""}`}
+            <SettingRow
+              description={t("menu.showSelfAvatarHint")}
+              title={t("menu.showSelfAvatar")}
+              trailing={<SettingSwitch
+                checked={Boolean(me?.show_self_avatar)}
                 disabled={personalizationSaving}
-                onClick={() => void saveSelfAvatarPreference()}
-                type="button"
-              />
-            </div>
-          </section>
+                label={t("menu.showSelfAvatar")}
+                onChange={() => void saveSelfAvatarPreference()}
+              />}
+            />
+          </SettingGroup>
           <button
             className={`personalization-background-entry rarity-${rewardRarity("background", me?.chat_background_theme ?? "default")}`}
             onClick={() => discoverThen("capability.custom_background", () => setChatBackgroundDrawerOpen(true))}
@@ -2571,69 +2499,38 @@ export default function MenuPage() {
         title={t("menu.accountSecurity")}
       >
         <div className="detail-list">
-          <div className="simple-list">
-            <button
-              className="simple-row menu-link-row"
-              onClick={() => setPasswordSheetOpen(true)}
-              type="button"
-            >
-              <div className="row-main">
-                <strong>{hasPassword ? t("password.change") : t("password.setup")}</strong>
-                {!hasPassword ? <div className="row-subtle">{t("password.securityHint")}</div> : null}
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            <button
-              className="simple-row menu-link-row"
-              onClick={() => setGestureSheetOpen(true)}
-              type="button"
-            >
-              <div className="row-main">
-                <strong>{t("gesture.title")}</strong>
-                <div className="row-subtle">
-                  {gestureEnabled
+          <SettingGroup>
+            <SettingRow description={!hasPassword ? t("password.securityHint") : undefined} onClick={() => setPasswordSheetOpen(true)} title={hasPassword ? t("password.change") : t("password.setup")} />
+            <SettingRow
+              description={
+                  gestureEnabled
                     ? t("gesture.lockAfter", { count: gestureLockAfterMinutes })
                     : emailVerified
                       ? t("common.notEnabled")
-                      : t("gesture.verifyEmailToEnable")}
-                </div>
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            <div className="simple-row menu-link-row menu-toggle-row">
-                <div className="row-main">
-                  <strong>{t("account.private")}</strong>
-                  <div className="row-subtle">
-                    {phoneVerified
+                      : t("gesture.verifyEmailToEnable")
+              }
+              onClick={() => setGestureSheetOpen(true)}
+              title={t("gesture.title")}
+            />
+            <SettingRow
+              description={phoneVerified
                       ? me?.is_private_account
                         ? t("account.privateHint")
                         : t("account.discoverableHint")
                       : t("account.bindPhoneFirst")}
-                  </div>
-                </div>
-                <button
-                  aria-label={t("account.togglePrivate")}
-                  className={`switch ${me?.is_private_account ? "active" : ""}`}
-                  disabled={privateAccountSaving || !phoneVerified}
-                  onClick={() => void togglePrivateAccount()}
-                  type="button"
-                />
-              </div>
-            <button
-              className="simple-row menu-link-row danger-row account-delete-row"
+              title={t("account.private")}
+              trailing={<SettingSwitch checked={Boolean(me?.is_private_account)} disabled={privateAccountSaving || !phoneVerified} label={t("account.togglePrivate")} onChange={() => void togglePrivateAccount()} />}
+            />
+            <SettingRow
+              description={t("account.deleteHint")}
               onClick={() => {
                 setAccountDeleteInput("");
                 setAccountDeleteStep("intro");
               }}
-              type="button"
-            >
-              <div className="row-main">
-                <strong>{t("account.delete")}</strong>
-                <div className="row-subtle">{t("account.deleteHint")}</div>
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
+              title={t("account.delete")}
+              tone="danger"
+            />
+          </SettingGroup>
         </div>
       </SideDrawer>
 

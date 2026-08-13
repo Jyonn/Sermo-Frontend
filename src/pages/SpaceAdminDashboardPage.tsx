@@ -6,6 +6,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer } from "../components/SideDrawer";
+import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
@@ -699,11 +700,11 @@ export default function SpaceAdminDashboardPage() {
       <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-features" onAction={() => void saveSettings()} onClose={() => setModuleSettingsOpen(false)} open={moduleSettingsOpen} title={t("admin.featureAccess")}>
         <div className="admin-policy-drawer">
           <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
-          <section className="admin-policy-card">
-            <div className="admin-toggle-row"><div><strong>{t("nav.chats")}</strong><small>{t("admin.chatFeatureHint")}</small></div><button aria-label={t("nav.chats")} className={`switch ${settingsChatEnabled ? "active" : ""}`} onClick={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); }} type="button" /></div>
-            <div className={`admin-toggle-row${currentSpace?.verification_tier === "email" ? " is-disabled" : ""}`}><div><strong>{t("nav.square")}</strong><small>{currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")}</small></div><button aria-label={t("nav.square")} className={`switch ${settingsSquareEnabled ? "active" : ""}`} disabled={currentSpace?.verification_tier === "email"} onClick={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} type="button" /></div>
-            <div className={`admin-toggle-row${settingsSquareEnabled ? "" : " is-disabled"}`}><div><strong>{t("square.feedAll")}</strong><small>{t("admin.exploreFeatureHint")}</small></div><button aria-label={t("square.feedAll")} className={`switch ${settingsSquareEnabled && settingsExploreEnabled ? "active" : ""}`} disabled={!settingsSquareEnabled} onClick={() => setSettingsExploreEnabled((value) => !value)} type="button" /></div>
-          </section>
+          <SettingGroup>
+            <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); }} />} />
+            <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} />} />
+            <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
+          </SettingGroup>
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
         </div>
       </SideDrawer>

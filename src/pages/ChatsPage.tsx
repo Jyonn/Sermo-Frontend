@@ -26,6 +26,7 @@ import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
+import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -6079,9 +6080,9 @@ function LiveChatsPage() {
 
             <section className="chat-detail-settings-section">
               <div className="section-label">{t("messageSearch.section")}</div>
-              <div className="chat-detail-settings-list">
-                <button
-                  className="chat-detail-setting-row"
+              <SettingGroup>
+                <SettingRow
+                  icon={<span className="material-symbols-outlined" aria-hidden="true">search</span>}
                   onClick={() => {
                     setMessageSearchKeyword("");
                     setMessageSearchType(null);
@@ -6089,58 +6090,30 @@ function LiveChatsPage() {
                     setMessageSearchState("idle");
                     setMessageSearchOpen(true);
                   }}
-                  type="button"
-                >
-                  <span className="chat-detail-search-mark material-symbols-outlined" aria-hidden="true">search</span>
-                  <div className="row-main">
-                    <strong>{t("messageSearch.action")}</strong>
-                    <div className="row-subtle">{t("messageSearch.hint")}</div>
-                  </div>
-                  <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-                </button>
-              </div>
+                  description={t("messageSearch.hint")}
+                  title={t("messageSearch.action")}
+                />
+              </SettingGroup>
             </section>
 
             <section className="chat-detail-settings-section">
               <div className="section-label">{t("chat.settings")}</div>
-              <div className="chat-detail-settings-list">
-                <div className="chat-detail-setting-row">
-                  <div className="row-main">
-                    <strong>{t("chat.pinConversation")}</strong>
-                  </div>
-                  <button aria-label={t("chat.togglePin")} className={`switch ${selectedChat.pinned ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("pin", !selectedChat.pinned)} type="button" />
-                </div>
+              <SettingGroup>
+                <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
                 {selectedChat.type === "direct" && canUseOnlineReminder ? (
                   <FeatureDiscoveryTarget
                     className="is-setting-row"
                     rewardId="capability.online"
                     guide={{ title: t("featureDiscovery.online.title"), description: t("featureDiscovery.online.description"), actionLabel: t("featureDiscovery.online.action"), onAction: () => updateSelectedChatPreference("online", true) }}
                   >
-                  <div className="chat-detail-setting-row">
-                    <div className="row-main">
-                      <strong>{t("chat.onlineReminder")}</strong>
-                    </div>
-                    <button aria-label={t("chat.toggleOnlineReminder")} className={`switch ${selectedChat.onlineReminderEnabled ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("online", !selectedChat.onlineReminderEnabled)} title={t("chat.toggleOnlineReminder")} type="button" />
-                  </div>
+                  <SettingRow title={t("chat.onlineReminder")} trailing={<SettingSwitch checked={selectedChat.onlineReminderEnabled} disabled={preferenceSaving !== null} label={t("chat.toggleOnlineReminder")} onChange={(next) => void updateSelectedChatPreference("online", next)} />} />
                   </FeatureDiscoveryTarget>
                 ) : null}
                 {selectedChat.type === "group" ? (
-                  <div className="chat-detail-setting-row">
-                    <div className="row-main">
-                      <strong>{t("chat.muteNotifications")}</strong>
-                      <div className="row-subtle">{t("chat.muteNotificationsHint")}</div>
-                    </div>
-                    <button aria-label={t("chat.toggleMuteNotifications")} className={`switch ${selectedChat.notificationsMuted ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("mute", !selectedChat.notificationsMuted)} type="button" />
-                  </div>
+                  <SettingRow description={t("chat.muteNotificationsHint")} title={t("chat.muteNotifications")} trailing={<SettingSwitch checked={selectedChat.notificationsMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteNotifications")} onChange={(next) => void updateSelectedChatPreference("mute", next)} />} />
                 ) : null}
                 {selectedChat.type === "group" && selectedChat.notificationsMuted ? (
-                  <div className="chat-detail-setting-row is-dependent">
-                    <div className="row-main">
-                      <strong>{t("chat.muteUnreadBadge")}</strong>
-                      <div className="row-subtle">{t("chat.muteUnreadBadgeHint")}</div>
-                    </div>
-                    <button aria-label={t("chat.toggleMuteUnreadBadge")} className={`switch ${selectedChat.unreadBadgeMuted ? "active" : ""}`} disabled={preferenceSaving !== null} onClick={() => void updateSelectedChatPreference("badge", !selectedChat.unreadBadgeMuted)} type="button" />
-                  </div>
+                  <SettingRow className="is-dependent" description={t("chat.muteUnreadBadgeHint")} title={t("chat.muteUnreadBadge")} trailing={<SettingSwitch checked={selectedChat.unreadBadgeMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteUnreadBadge")} onChange={(next) => void updateSelectedChatPreference("badge", next)} />} />
                 ) : null}
                 {selectedChat.type === "group" && canRenameGroup ? (
                   <FeatureDiscoveryTarget className="is-setting-row" rewardId="capability.group_name">
@@ -6160,7 +6133,7 @@ function LiveChatsPage() {
                   </div>
                   </FeatureDiscoveryTarget>
                 ) : null}
-              </div>
+              </SettingGroup>
             </section>
 
             <section className="chat-detail-danger-section">

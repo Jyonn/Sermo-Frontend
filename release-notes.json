@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.14.2",
+  "id": "2026.08.14.3",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "聊天头像展示可以自定义",
+      "title": "设置操作更加统一",
       "items": [
-        "可在语言与个性化中选择是否展示自己发送消息旁的头像",
-        "偏好会随账号同步到不同设备"
+        "菜单、聊天详情和管理面板采用统一的设置行与分组结构",
+        "开关、下级入口、当前值和锁定状态现在拥有一致的排版",
+        "可在语言与个性化中选择是否展示自己发送消息旁的头像"
       ]
     },
     "en": {
-      "title": "Customize your chat avatar display",
+      "title": "A more consistent settings experience",
       "items": [
-        "Choose whether your avatar appears beside messages you send",
-        "The preference now follows your account across devices"
+        "Menu, chat details, and admin settings now share one row and group structure",
+        "Toggles, navigation, values, and locked states now follow consistent layout rules",
+        "Choose whether your avatar appears beside messages you send"
       ]
     }
   }
