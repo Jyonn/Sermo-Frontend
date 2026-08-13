@@ -689,29 +689,7 @@ function formatPresence(user: UserDTO | null) {
 
 function systemMessageText(message: ChatMessageDTO) {
   const payload = message.payload;
-  if (payload?.kind !== "system") return payload?.text || message.content;
-  const actor = payload.actor_name || message.user.name;
-  const names = payload.member_names?.filter(Boolean).join(i18n.t("message.system.nameSeparator")) || "";
-  switch (payload.event) {
-    case "group_created":
-      return payload.member_count
-        ? i18n.t("message.system.groupCreatedWithMembers", { actor, names })
-        : i18n.t("message.system.groupCreated", { actor });
-    case "members_invited":
-      return i18n.t("message.system.membersInvited", { actor, names });
-    case "members_removed":
-      return i18n.t("message.system.membersRemoved", { actor, names });
-    case "member_left":
-      return i18n.t("message.system.memberLeft", { actor });
-    case "group_renamed":
-      return i18n.t("message.system.groupRenamed", { actor, title: payload.new_title || "" });
-    case "message_pinned":
-      return i18n.t("message.system.messagePinned", { actor });
-    case "message_unpinned":
-      return i18n.t("message.system.messageUnpinned", { actor });
-    default:
-      return payload.text || i18n.t("message.system.placeholder");
-  }
+  return payload?.text || message.content || i18n.t("message.system.placeholder");
 }
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {

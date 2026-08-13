@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.14.3",
+  "id": "2026.08.14.4",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "设置操作更加统一",
+      "title": "聊天动态更清晰",
       "items": [
-        "菜单、聊天详情和管理面板采用统一的设置行与分组结构",
-        "开关、下级入口、当前值和锁定状态现在拥有一致的排版",
-        "可在语言与个性化中选择是否展示自己发送消息旁的头像"
+        "系统动态不再占用聊天列表的最新消息预览",
+        "群聊变更会在进入页面前转换为清晰、自然的提示文案"
       ]
     },
     "en": {
-      "title": "A more consistent settings experience",
+      "title": "Clearer chat activity",
       "items": [
-        "Menu, chat details, and admin settings now share one row and group structure",
-        "Toggles, navigation, values, and locked states now follow consistent layout rules",
-        "Choose whether your avatar appears beside messages you send"
+        "System activity no longer replaces the latest message in chat previews",
+        "Group activity is converted into clear, readable copy before it reaches the page"
       ]
     }
   }
