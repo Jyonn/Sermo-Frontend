@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.11",
+  "id": "2026.08.13.12",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录搜索更清爽",
+      "title": "表情包五列整齐展示",
       "items": [
-        "搜索结果为空时提供更自然的提示和下一步建议",
-        "移除搜索页面突兀的白色内容底板"
+        "手机端一排展示五个表情包，并根据屏幕宽度自动缩放",
+        "修复表情图片和探索操作相互挤压的问题"
       ]
     },
     "en": {
-      "title": "A cleaner chat history search",
+      "title": "A tidy five-column sticker grid",
       "items": [
-        "Empty searches now offer a calmer visual and a helpful next step",
-        "Removed the distracting white content panel from search"
+        "Phones now show five stickers per row with responsive sizing",
+        "Fixed sticker artwork and explore actions overlapping each other"
       ]
     }
   }

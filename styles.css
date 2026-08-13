@@ -17718,8 +17718,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
 .composer-sticker-explore-item {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   aspect-ratio: 1;
+  overflow: hidden;
 }
 
 .composer-sticker-explore-item > .composer-sticker-item {
@@ -18105,8 +18108,14 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 
   .composer-sticker-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: start;
+    gap: clamp(4px, 1.4vw, 7px);
+  }
+
+  .composer-sticker-item,
+  .composer-sticker-add {
+    border-radius: clamp(8px, 2.5vw, 12px);
   }
 
   .composer-emoji-grid > button {
