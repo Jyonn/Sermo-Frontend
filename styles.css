@@ -7264,6 +7264,26 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.9rem;
 }
 
+.personalization-preference-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.personalization-preference-copy strong {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.personalization-preference-copy small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.personalization-preference-row > .switch {
+  flex: 0 0 52px;
+}
+
 .personalization-preference-menu {
   position: relative;
   min-width: 112px;

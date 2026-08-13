@@ -1738,6 +1738,11 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   selectedClientIds,
   selectionMode,
   showAuthor,
+  showSelfAvatar = false,
+  selfAvatarFrame,
+  selfAvatarName,
+  selfAvatarUri,
+  selfIsPermanentVip,
 }: MessageGroupBlockProps) {
   const systemMessage = group.messages.length === 1 && group.messages[0].kind === "system" ? group.messages[0] : null;
   if (systemMessage) {
@@ -1780,6 +1785,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
       <div className={`message-group ${group.from}${selectionMode ? " is-selection-mode" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
         {group.from === "other" ? <UserAvatar className="avatar message-avatar" frame={group.avatarFrameStyle} name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
+        {group.from === "self" && showSelfAvatar ? <UserAvatar className="avatar message-avatar" frame={selfAvatarFrame} name={selfAvatarName ?? ""} uri={selfAvatarUri} vip={selfIsPermanentVip} /> : null}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
           {rows.map((row) => row.kind === "gallery" ? (
@@ -1820,6 +1826,11 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   );
 }, (prev, next) => (
   prev.showAuthor === next.showAuthor
+  && prev.showSelfAvatar === next.showSelfAvatar
+  && prev.selfAvatarFrame === next.selfAvatarFrame
+  && prev.selfAvatarName === next.selfAvatarName
+  && prev.selfAvatarUri === next.selfAvatarUri
+  && prev.selfIsPermanentVip === next.selfIsPermanentVip
   && prev.selectionMode === next.selectionMode
   && prev.selectedClientIds.join("|") === next.selectedClientIds.join("|")
   && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds)
@@ -1863,6 +1874,11 @@ interface MessageGroupBlockProps {
   selectedClientIds: string[];
   selectionMode: boolean;
   showAuthor: boolean;
+  showSelfAvatar?: boolean;
+  selfAvatarFrame?: ChatMessage["avatarFrameStyle"];
+  selfAvatarName?: string;
+  selfAvatarUri?: string;
+  selfIsPermanentVip?: boolean;
 }
 
 interface MessageMenuState {
@@ -5368,6 +5384,11 @@ function LiveChatsPage() {
                     selectedClientIds={selectedMessageClientIds}
                     selectionMode={messageSelectionMode}
                     showAuthor={Boolean(selectedChat?.type === "group")}
+                    showSelfAvatar={Boolean(currentUserMe?.show_self_avatar)}
+                    selfAvatarFrame={currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style}
+                    selfAvatarName={currentUserName}
+                    selfAvatarUri={currentUserMe?.avatar_uri ?? session?.user.avatar_uri}
+                    selfIsPermanentVip={currentUserIsPermanentVip}
                   />
                 ))}
               </div>

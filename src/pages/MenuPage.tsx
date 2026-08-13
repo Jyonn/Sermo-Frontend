@@ -478,6 +478,7 @@ export default function MenuPage() {
     chat_bubble_style: "default",
     avatar_frame_style: "none",
     statement_card_style: "default",
+    show_self_avatar: false,
   });
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
@@ -691,6 +692,7 @@ export default function MenuPage() {
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
       statement_card_style: me.statement_card_style ?? "default",
+      show_self_avatar: Boolean(me.show_self_avatar),
     });
   }, [
     avatarFrameDrawerOpen,
@@ -699,6 +701,7 @@ export default function MenuPage() {
     me?.avatar_frame_style,
     me?.chat_bubble_style,
     me?.statement_card_style,
+    me?.show_self_avatar,
   ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
@@ -1489,6 +1492,30 @@ export default function MenuPage() {
     }
   };
 
+  const saveSelfAvatarPreference = async () => {
+    if (!me || personalizationSaving) return;
+    const previous = Boolean(me.show_self_avatar);
+    const next = !previous;
+    setMe((current) => current ? { ...current, show_self_avatar: next } : current);
+    setPersonalizationSaving(true);
+    try {
+      const nextMe = await api.setPersonalization({
+        chat_bubble_style: me.chat_bubble_style ?? "default",
+        avatar_frame_style: me.avatar_frame_style ?? "none",
+        statement_card_style: me.statement_card_style ?? "default",
+        show_self_avatar: next,
+      });
+      setMe(nextMe);
+      patchSessionUser(nextMe);
+      showToast(t("personalization.updated"));
+    } catch (apiError) {
+      setMe((current) => current ? { ...current, show_self_avatar: previous } : current);
+      showToast(apiError instanceof ApiError ? apiError.message : t("personalization.updateFailed"), "error");
+    } finally {
+      setPersonalizationSaving(false);
+    }
+  };
+
   const handleCustomAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -2207,6 +2234,20 @@ export default function MenuPage() {
               ]}
               value={languagePreference}
             />
+            <div className="personalization-preference-row">
+              <span className="personalization-preference-copy">
+                <strong>{t("menu.showSelfAvatar")}</strong>
+                <small>{t("menu.showSelfAvatarHint")}</small>
+              </span>
+              <button
+                aria-label={t("menu.showSelfAvatar")}
+                aria-pressed={Boolean(me?.show_self_avatar)}
+                className={`switch ${me?.show_self_avatar ? "active" : ""}`}
+                disabled={personalizationSaving}
+                onClick={() => void saveSelfAvatarPreference()}
+                type="button"
+              />
+            </div>
           </section>
           <button
             className={`personalization-background-entry rarity-${rewardRarity("background", me?.chat_background_theme ?? "default")}`}

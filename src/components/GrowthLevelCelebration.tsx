@@ -239,6 +239,7 @@ export function GrowthLevelCelebration() {
           chat_bubble_style: currentReward.category === "bubble" ? currentReward.asset_key as ChatBubbleStyle : session.user.chat_bubble_style ?? "default",
           avatar_frame_style: currentReward.category === "frame" ? currentReward.asset_key as AvatarFrameStyle : session.user.avatar_frame_style ?? "none",
           statement_card_style: session.user.statement_card_style ?? "default",
+          show_self_avatar: Boolean(session.user.show_self_avatar),
         };
         patchSessionUser(await api.setPersonalization(payload));
       }

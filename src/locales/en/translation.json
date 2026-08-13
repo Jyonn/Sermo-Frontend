@@ -94,6 +94,8 @@
   "menu.languageUpdateFailed": "Could not update language",
   "menu.appearance": "Appearance",
   "menu.appearanceHint": "Follows your device by default",
+  "menu.showSelfAvatar": "Show my avatar",
+  "menu.showSelfAvatarHint": "Show it beside messages you send",
   "menu.themeLight": "Light",
   "menu.themeDark": "Dark",
   "menu.chatBackground": "Chat background",

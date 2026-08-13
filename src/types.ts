@@ -19,6 +19,7 @@ export interface TinyUserDTO {
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
   is_permanent_vip?: boolean;
+  show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
   avatar_frame_style?: AvatarFrameStyle;
   statement_card_style?: StatementCardStyle;
@@ -168,6 +169,7 @@ export interface AccessPayload {
   bark_unbound_at?: number | null;
   is_private_account?: boolean;
   is_permanent_vip?: boolean;
+  show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
   avatar_frame_style?: AvatarFrameStyle;
   statement_card_style?: StatementCardStyle;
@@ -213,6 +215,7 @@ export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;
   avatar_frame_style: AvatarFrameStyle;
   statement_card_style: StatementCardStyle;
+  show_self_avatar: boolean;
 }
 
 export interface PermanentVipCampaignDTO {

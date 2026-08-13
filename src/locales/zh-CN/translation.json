@@ -94,6 +94,8 @@
   "menu.languageUpdateFailed": "语言更新失败",
   "menu.appearance": "外观",
   "menu.appearanceHint": "默认跟随设备主题",
+  "menu.showSelfAvatar": "显示我的头像",
+  "menu.showSelfAvatarHint": "在自己发送的消息旁展示",
   "menu.themeLight": "浅色",
   "menu.themeDark": "深色",
   "menu.chatBackground": "聊天背景",
