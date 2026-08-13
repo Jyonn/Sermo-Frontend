@@ -21843,7 +21843,7 @@ html[data-theme="dark"] :is(
   padding:18px 18px calc(18px + env(safe-area-inset-bottom));
   background:transparent;
 }
-.message-search-panel { width:100%;min-height:100%; }
+.message-search-panel { display:flex;width:100%;min-height:100%;flex-direction:column; }
 .message-search-controls {
   position:sticky;
   z-index:3;
@@ -21878,7 +21878,7 @@ html[data-theme="dark"] :is(
 .message-search-filters::-webkit-scrollbar { display:none; }
 .message-search-filters button { min-height:32px;padding:0 13px;border:1px solid color-mix(in srgb,var(--line,#dfe7e2) 85%,transparent);border-radius:999px;color:var(--text-muted);background:color-mix(in srgb,var(--surface,#fff) 94%,transparent);font-size:.76rem;font-weight:700;white-space:nowrap;transition:all 150ms ease; }
 .message-search-filters button.active { color:#075c42;border-color:rgba(0,168,107,.25);background:rgba(0,168,107,.11);box-shadow:inset 0 0 0 1px rgba(0,168,107,.04); }
-.message-search-results { position:relative;display:grid;min-height:180px; }
+.message-search-results { position:relative;display:flex;min-height:180px;align-items:stretch;flex-direction:column; }
 .message-search-loading { display:grid;min-height:140px;place-items:center; }
 .message-search-empty {
   position:relative;
@@ -21915,6 +21915,7 @@ html[data-theme="dark"] :is(
 .message-search-empty.is-error .message-search-empty-bubble.is-front { background:linear-gradient(135deg,#dd9b61,#c86256);box-shadow:0 12px 28px rgba(200,98,86,.14); }
 .message-search-result {
   display:grid;
+  flex:0 0 auto;
   grid-template-columns:42px minmax(0,1fr) 22px;
   align-items:center;
   min-width:0;
@@ -24511,8 +24512,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 @media(min-width:901px){.desktop-tab-shell>.square-feed-screen>.tab-sticky-header{height:65px;min-height:65px}.desktop-tab-shell>.square-feed-screen>.tab-sticky-header .page-toolbar{height:100%}}
 
 /* Statement detail is a reading surface, not a second feed card. */
-.drawer-body:has(> .square-comments-drawer){padding:0;overflow:hidden}
-.square-comments-drawer{height:100%;min-height:0;gap:0;padding:0;overflow:hidden;background:var(--bg-canvas)}
+.drawer-body:has(> .square-comments-drawer){display:flex;min-height:0;align-items:stretch;padding:0;overflow:hidden}
+.square-comments-drawer{display:flex;height:auto;min-height:0;flex:1 1 auto;flex-direction:column;gap:0;padding:0;overflow:hidden;background:var(--bg-canvas)}
 .square-comments-scroll{flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scroll-padding-bottom:24px}
 .square-statement-detail-stage{position:relative;width:100%;padding:0;isolation:isolate}
 .square-statement-detail-stage::before{content:none}

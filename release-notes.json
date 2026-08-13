@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.4",
+  "id": "2026.08.14.5",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "聊天动态更清晰",
+      "title": "抽屉布局更加稳定",
       "items": [
-        "系统动态不再占用聊天列表的最新消息预览",
-        "群聊变更会在进入页面前转换为清晰、自然的提示文案"
+        "没有评论时，发言详情的评论栏仍会稳定贴近底部",
+        "聊天记录搜索结果较少时不再被异常拉高"
       ]
     },
     "en": {
-      "title": "Clearer chat activity",
+      "title": "More stable drawer layouts",
       "items": [
-        "System activity no longer replaces the latest message in chat previews",
-        "Group activity is converted into clear, readable copy before it reaches the page"
+        "The comment composer now stays at the bottom even when a statement has no comments",
+        "Short chat search result lists no longer stretch individual rows"
       ]
     }
   }
