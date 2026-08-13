@@ -6544,6 +6544,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .composer {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
   margin: 14px 18px 18px;
   padding: 12px;
   border: 1px solid transparent;
@@ -6689,6 +6692,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .composer-row {
   display: grid;
+  min-width: 0;
   gap: 12px;
   align-items: center;
 }
@@ -17326,7 +17330,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 
   .composer-emoji-panel {
+    box-sizing: border-box;
     display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     margin-top: 10px;
     padding: 10px;
     overflow: hidden;
@@ -17640,7 +17648,9 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
 /* Stickers share the emoji surface, but remain image assets rather than text glyphs. */
 .composer-sticker-pane {
+  min-width: 0;
   min-height: 132px;
+  overflow: hidden;
 }
 
 .composer-sticker-toolbar {
@@ -17674,8 +17684,12 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 7px;
+  width: 100%;
+  min-width: 0;
   max-height: 224px;
+  padding: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
@@ -17685,6 +17699,8 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   display: grid;
   place-items: center;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: 12px;
@@ -17692,8 +17708,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 }
 
 .composer-sticker-item img {
+  display: block;
   width: 100%;
+  max-width: 100%;
   height: 100%;
+  min-width: 0;
   object-fit: contain;
 }
 
@@ -18041,6 +18060,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     padding: 0 0 8px;
     margin-bottom: 8px;
     overflow-x: auto;
+    overflow-y: hidden;
     scrollbar-width: none;
     border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 70%, transparent);
   }
@@ -18081,6 +18101,12 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     gap: 3px;
     max-height: 220px;
     overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .composer-sticker-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
   }
 
   .composer-emoji-grid > button {

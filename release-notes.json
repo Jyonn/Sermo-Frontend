@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.9",
+  "id": "2026.08.13.10",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "打开聊天直达最新消息",
+      "title": "表情面板适配不同屏幕",
       "items": [
-        "进入聊天时会在缓存恢复和消息同步完成后稳定定位到最下方",
-        "图片、视频等内容加载时不再把最新消息推离视野"
+        "表情包在不同尺寸手机上保持整齐的四列布局",
+        "展开表情面板不再撑宽聊天页面"
       ]
     },
     "en": {
-      "title": "Open chats at the latest message",
+      "title": "Emoji panel now fits every screen",
       "items": [
-        "Chats now stay anchored to the bottom while cached and latest messages are restored",
-        "Media layout no longer pushes the newest message out of view during entry"
+        "Stickers now stay in a consistent four-column layout across phone sizes",
+        "Opening the emoji panel no longer widens the chat page"
       ]
     }
   }
