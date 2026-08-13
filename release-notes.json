@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.7",
+  "id": "2026.08.14.8",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "管理员登录更直接",
+      "title": "输入切换更顺手",
       "items": [
-        "超级管理员启用 MFA 后，确认邮箱即可直接输入动态口令",
-        "不再重复发送和输入邮箱验证码"
+        "聊天输入框获得焦点时会立即收起表情面板",
+        "键盘与表情面板切换不再互相遮挡"
       ]
     },
     "en": {
-      "title": "A faster administrator sign-in",
+      "title": "Smoother composer switching",
       "items": [
-        "Super administrators with MFA can enter their authenticator code immediately after confirming their email",
-        "The redundant email verification code step is now skipped"
+        "The emoji panel now closes as soon as the message field receives focus",
+        "Switching between the keyboard and emoji panel no longer leaves overlapping surfaces"
       ]
     }
   }

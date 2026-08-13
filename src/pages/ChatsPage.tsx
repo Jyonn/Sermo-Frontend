@@ -5450,6 +5450,9 @@ function LiveChatsPage() {
                         onCompositionEnd={() => {
                           isComposingRef.current = false;
                         }}
+                        onFocus={() => {
+                          setEmojiPickerOpen(false);
+                        }}
                         onPaste={handleComposerPaste}
                         onKeyDown={(event) => {
                           const nativeEvent = event.nativeEvent as KeyboardEvent & { isComposing?: boolean; keyCode?: number };
