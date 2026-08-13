@@ -5,14 +5,14 @@
     "zh-CN": {
       "title": "语言与外观设置更简洁",
       "items": [
-        "外观和语言改为紧凑的单行下拉选择",
+        "外观和语言改为紧凑的单行自绘选择菜单",
         "基础信息不再展示广场招呼设置"
       ]
     },
     "en": {
       "title": "Cleaner language and appearance settings",
       "items": [
-        "Appearance and language now use compact single-row selectors",
+        "Appearance and language now use compact custom single-row menus",
         "Plaza greeting is no longer shown in basic information"
       ]
     }

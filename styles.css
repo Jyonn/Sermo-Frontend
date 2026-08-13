@@ -7240,13 +7240,13 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .personalization-preference-list {
-  overflow: hidden;
   border: 1px solid var(--line-soft);
   border-radius: 14px;
   background: var(--bg-panel-strong);
 }
 
 .personalization-preference-row {
+  position: relative;
   min-height: 54px;
   display: flex;
   align-items: center;
@@ -7264,39 +7264,115 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.9rem;
 }
 
-.personalization-select-shell {
+.personalization-preference-menu {
   position: relative;
   min-width: 112px;
-  display: flex;
-  align-items: center;
+  z-index: 1;
 }
 
-.personalization-select-shell select {
-  width: 100%;
+.personalization-preference-menu[open] {
+  z-index: 8;
+}
+
+.personalization-preference-menu > summary {
   min-height: 38px;
-  appearance: none;
-  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  list-style: none;
+  border: 1px solid transparent;
   border-radius: 10px;
-  padding: 7px 34px 7px 12px;
+  padding: 7px 9px 7px 12px;
   background: var(--bg-panel);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+.personalization-preference-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.personalization-preference-menu > summary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 35%, transparent);
+}
+
+.personalization-preference-menu > summary > .material-symbols-outlined {
+  color: var(--text-muted);
+  font-size: 18px;
+  transition: transform 160ms ease;
+}
+
+.personalization-preference-menu[open] > summary {
+  border-color: color-mix(in srgb, var(--brand-primary) 28%, var(--line-soft));
+  background: color-mix(in srgb, var(--brand-primary) 8%, var(--bg-panel-strong));
+  color: var(--text-primary);
+}
+
+.personalization-preference-menu[open] > summary > .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+.personalization-preference-menu.is-disabled {
+  opacity: 0.56;
+  pointer-events: none;
+}
+
+.personalization-preference-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 150px;
+  display: grid;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 86%, transparent);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--bg-panel-strong) 96%, transparent);
+  box-shadow: 0 16px 38px rgba(17, 29, 24, 0.16);
+  backdrop-filter: blur(18px);
+  animation: surface-enter 130ms ease-out;
+}
+
+.personalization-preference-options button {
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 9px 7px 11px;
+  background: transparent;
   color: var(--text-secondary);
   font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
-  text-align: right;
+  text-align: left;
+}
+
+.personalization-preference-options button:hover,
+.personalization-preference-options button:focus-visible {
   outline: none;
+  background: var(--bg-panel);
+  color: var(--text-primary);
 }
 
-.personalization-select-shell select:focus-visible {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 35%, transparent);
+.personalization-preference-options button[aria-selected="true"] {
+  background: color-mix(in srgb, var(--brand-primary) 9%, transparent);
+  color: color-mix(in srgb, var(--brand-primary) 76%, var(--text-primary));
 }
 
-.personalization-select-shell > .material-symbols-outlined {
-  position: absolute;
-  right: 9px;
-  pointer-events: none;
-  color: var(--text-muted);
-  font-size: 18px;
+.personalization-preference-options button i {
+  color: var(--brand-primary);
+  font-style: normal;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .personalization-language-options {

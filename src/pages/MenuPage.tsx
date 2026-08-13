@@ -168,6 +168,75 @@ type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type PersonalizationCatalogItem = readonly [string, TranslationKey];
 type PersonalizationCatalogSection = { key: string; label: string; items: PersonalizationCatalogItem[] };
 
+function CompactPreferenceMenu<T extends string>({
+  disabled = false,
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  disabled?: boolean;
+  label: string;
+  onChange: (value: T) => void | Promise<void>;
+  options: Array<{ label: string; value: T }>;
+  value: T;
+}) {
+  const menuRef = useRef<HTMLDetailsElement | null>(null);
+  const selected = options.find((option) => option.value === value) ?? options[0];
+
+  useEffect(() => {
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) menuRef.current?.removeAttribute("open");
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePress);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePress);
+  }, []);
+
+  return (
+    <div className="personalization-preference-row">
+      <strong>{label}</strong>
+      <details
+        className={`personalization-preference-menu${disabled ? " is-disabled" : ""}`}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            menuRef.current?.removeAttribute("open");
+            menuRef.current?.querySelector<HTMLElement>("summary")?.focus();
+          }
+        }}
+        ref={menuRef}
+      >
+        <summary
+          aria-disabled={disabled}
+          aria-label={`${label}: ${selected.label}`}
+          onClick={(event) => {
+            if (disabled) event.preventDefault();
+          }}
+        >
+          <span>{selected.label}</span>
+          <span aria-hidden="true" className="material-symbols-outlined">expand_more</span>
+        </summary>
+        <div aria-label={label} className="personalization-preference-options" role="listbox">
+          {options.map((option) => (
+            <button
+              aria-selected={option.value === value}
+              key={option.value}
+              onClick={() => {
+                menuRef.current?.removeAttribute("open");
+                if (option.value !== value) void onChange(option.value);
+              }}
+              role="option"
+              type="button"
+            >
+              <span>{option.label}</span>
+              <i aria-hidden="true">{option.value === value ? "✓" : ""}</i>
+            </button>
+          ))}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function PersonalizationCatalogControls({
   onOwnershipChange,
   ownership,
@@ -2117,37 +2186,27 @@ export default function MenuPage() {
       <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <section className="personalization-preference-list">
-            <label className="personalization-preference-row">
-              <strong>{t("menu.appearance")}</strong>
-              <span className="personalization-select-shell">
-                <select
-                  aria-label={t("menu.appearance")}
-                  onChange={(event) => setThemePreference(event.target.value as ThemePreference)}
-                  value={themePreference}
-                >
-                  <option value="system">{t("common.system")}</option>
-                  <option value="light">{t("menu.themeLight")}</option>
-                  <option value="dark">{t("menu.themeDark")}</option>
-                </select>
-                <span className="material-symbols-outlined" aria-hidden="true">expand_more</span>
-              </span>
-            </label>
-            <label className="personalization-preference-row">
-              <strong>{t("menu.language")}</strong>
-              <span className="personalization-select-shell">
-                <select
-                  aria-label={t("menu.language")}
-                  disabled={languageSaving}
-                  onChange={(event) => void saveLanguagePreference(event.target.value as LanguagePreference)}
-                  value={languagePreference}
-                >
-                  <option value="system">{t("common.system")}</option>
-                  <option value="zh-CN">{t("common.chinese")}</option>
-                  <option value="en">{t("common.english")}</option>
-                </select>
-                <span className="material-symbols-outlined" aria-hidden="true">expand_more</span>
-              </span>
-            </label>
+            <CompactPreferenceMenu<ThemePreference>
+              label={t("menu.appearance")}
+              onChange={setThemePreference}
+              options={[
+                { value: "system", label: t("common.system") },
+                { value: "light", label: t("menu.themeLight") },
+                { value: "dark", label: t("menu.themeDark") },
+              ]}
+              value={themePreference}
+            />
+            <CompactPreferenceMenu<LanguagePreference>
+              disabled={languageSaving}
+              label={t("menu.language")}
+              onChange={saveLanguagePreference}
+              options={[
+                { value: "system", label: t("common.system") },
+                { value: "zh-CN", label: t("common.chinese") },
+                { value: "en", label: t("common.english") },
+              ]}
+              value={languagePreference}
+            />
           </section>
           <button
             className={`personalization-background-entry rarity-${rewardRarity("background", me?.chat_background_theme ?? "default")}`}
