@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.13.4",
+  "id": "2026.08.13.5",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "群聊变化有迹可循",
+      "title": "多选消息更整齐",
       "items": [
-        "修改群名后，聊天中会出现简洁的系统记录",
-        "系统记录不会混入普通气泡，也无法被操作或删除"
+        "进入多选后，头像、昵称和消息会整体让出选择区域",
+        "双方消息的勾选框现在保持在同一条左侧轨道"
       ]
     },
     "en": {
-      "title": "Group changes stay visible",
+      "title": "Cleaner message selection",
       "items": [
-        "Group name changes now leave a concise system record in chat",
-        "System records stay separate from regular bubbles and cannot be managed"
+        "Avatars, names, and messages now shift together in selection mode",
+        "Selection controls for both sides stay aligned in one left-side rail"
       ]
     }
   }

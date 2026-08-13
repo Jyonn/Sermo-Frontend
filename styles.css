@@ -5013,17 +5013,23 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   transition: opacity 150ms ease, transform 150ms ease;
 }
 
+.message-group.is-selection-mode {
+  width: calc(100% - 34px);
+  max-width: calc(100% - 34px);
+  margin-left: 34px;
+  box-sizing: border-box;
+  transition: width 180ms ease, max-width 180ms ease, margin-left 180ms ease;
+}
+
 .message-bubble-wrap.self.is-selection-mode {
   width: 100%;
   min-height: 34px;
   box-sizing: border-box;
   justify-content: center;
-  padding-left: 34px;
 }
 
 .message-group.self.is-selection-mode {
-  width: 100%;
-  max-width: 100%;
+  margin-left: auto;
 }
 
 .message-group.self.is-selection-mode > .message-bubbles {
@@ -5038,7 +5044,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-bubble-wrap.self.is-selection-mode > .message-selection-check {
   position: absolute;
   top: 50%;
-  left: 0;
+  left: -34px;
+  transform: translateY(-50%);
+}
+
+.message-group.other.is-selection-mode .message-bubble-wrap.is-selection-mode > .message-selection-check {
+  position: absolute;
+  top: 50%;
+  left: -72px;
   transform: translateY(-50%);
 }
 
