@@ -21,6 +21,7 @@ import { rememberRecentSpace } from "./recentSpaces";
 import { authStorage } from "./storage";
 import type { AuthSession, GestureLockPreferenceDTO, JoinResponseDTO } from "../types";
 import { i18n } from "./i18n";
+import { reconcileWebPushSubscription } from "./webPush";
 
 interface AuthContextValue {
   ready: boolean;
@@ -150,7 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready || !session) return;
-    const timer = window.setInterval(() => {
+    const sendHeartbeat = () => {
+      if (document.visibilityState !== "visible") return;
       if (heartbeatInFlightRef.current) return;
       heartbeatInFlightRef.current = true;
       api
@@ -159,9 +161,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .finally(() => {
           heartbeatInFlightRef.current = false;
         });
-    }, 60_000);
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      sendHeartbeat();
+      void reconcileWebPushSubscription().catch(() => undefined);
+    };
+
+    sendHeartbeat();
+    void reconcileWebPushSubscription().catch(() => undefined);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const timer = window.setInterval(sendHeartbeat, 30_000);
     return () => {
       heartbeatInFlightRef.current = false;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.clearInterval(timer);
     };
   }, [ready, session?.accessToken]);

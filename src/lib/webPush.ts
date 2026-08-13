@@ -3,6 +3,8 @@ import { i18n } from "./language";
 
 export type WebPushState = "checking" | "unsupported" | "needs-install" | "denied" | "off" | "on";
 
+const WEB_PUSH_ENDPOINT_KEY = "sermo.web-push.endpoint";
+
 function isIos() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
@@ -56,14 +58,40 @@ export async function enableWebPush() {
     auth: serialized.keys.auth,
     origin: window.location.origin,
   });
+  window.localStorage.setItem(WEB_PUSH_ENDPOINT_KEY, serialized.endpoint);
 }
 
 export async function disableWebPush() {
   if (!canUseWebPush()) return;
   const registration = await navigator.serviceWorker.getRegistration();
-  if (!registration) return;
-  const subscription = await registration.pushManager.getSubscription();
-  if (!subscription) return;
-  await api.deleteWebPush(subscription.endpoint);
-  await subscription.unsubscribe();
+  const subscription = registration ? await registration.pushManager.getSubscription() : null;
+  const endpoint = subscription?.endpoint || window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY);
+  if (endpoint) await api.deleteWebPush(endpoint);
+  if (subscription) await subscription.unsubscribe();
+  window.localStorage.removeItem(WEB_PUSH_ENDPOINT_KEY);
+}
+
+export async function reconcileWebPushSubscription() {
+  if (!canUseWebPush()) return;
+  const storedEndpoint = window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY);
+  const registration = await navigator.serviceWorker.getRegistration();
+  const subscription = registration ? await registration.pushManager.getSubscription() : null;
+
+  if (Notification.permission !== "granted" || !subscription) {
+    if (storedEndpoint) {
+      await api.deleteWebPush(storedEndpoint);
+      window.localStorage.removeItem(WEB_PUSH_ENDPOINT_KEY);
+    }
+    return;
+  }
+
+  const serialized = subscription.toJSON();
+  if (!serialized.endpoint || !serialized.keys?.p256dh || !serialized.keys.auth) return;
+  await api.registerWebPush({
+    endpoint: serialized.endpoint,
+    p256dh: serialized.keys.p256dh,
+    auth: serialized.keys.auth,
+    origin: window.location.origin,
+  });
+  window.localStorage.setItem(WEB_PUSH_ENDPOINT_KEY, serialized.endpoint);
 }

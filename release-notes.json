@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.13.12",
+  "id": "2026.08.13.13",
   "publishedAt": "2026-08-13",
   "locales": {
     "zh-CN": {
-      "title": "表情包五列整齐展示",
+      "title": "在线时不再误触发离线提醒",
       "items": [
-        "手机端一排展示五个表情包，并根据屏幕宽度自动缩放",
-        "修复表情图片和探索操作相互挤压的问题"
+        "打开应用或回到前台时立即更新在线状态",
+        "应用正在前台时不再重复弹出系统通知",
+        "自动清理当前设备已经失效的系统通知订阅"
       ]
     },
     "en": {
-      "title": "A tidy five-column sticker grid",
+      "title": "More accurate online notification routing",
       "items": [
-        "Phones now show five stickers per row with responsive sizing",
-        "Fixed sticker artwork and explore actions overlapping each other"
+        "Online status now refreshes immediately when the app opens or returns to the foreground",
+        "System notifications no longer duplicate in-app alerts while the app is visible",
+        "Expired notification subscriptions on this device are now cleaned up automatically"
       ]
     }
   }
