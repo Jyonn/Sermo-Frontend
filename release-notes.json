@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.9",
+  "id": "2026.08.14.10",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "聊天操作栏更整齐",
+      "title": "高级聊天背景焕新",
       "items": [
-        "修复更多操作中相册图标偏离中心的问题",
-        "多层功能引导下的操作按钮现在也能保持统一对齐"
+        "极光天空、全息、街机、太空港与黑色电影加入克制的动态氛围",
+        "黑色电影升级为典藏背景，并强化胶片光影与颗粒质感"
       ]
     },
     "en": {
-      "title": "Cleaner chat actions",
+      "title": "Premium chat backgrounds, reimagined",
       "items": [
-        "Fixed the off-center gallery icon in the expanded chat actions",
-        "Action tiles now remain aligned even when wrapped in multiple feature guides"
+        "Aurora Sky, Hologram, Arcade, Spaceport, and Noir Film now feature subtle ambient motion",
+        "Noir Film is now a legendary background with richer projector light and film grain"
       ]
     }
   }
