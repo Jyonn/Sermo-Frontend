@@ -425,7 +425,7 @@ export default function MenuPage() {
   const [prefEditorValue, setPrefEditorValue] = useState("");
   const [prefEditorSaving, setPrefEditorSaving] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
-  const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | "plaza" | null>(null);
+  const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
   const [basicEditValue, setBasicEditValue] = useState("");
   const [authTarget, setAuthTarget] = useState("");
   const [authCode, setAuthCode] = useState("");
@@ -456,7 +456,6 @@ export default function MenuPage() {
   const canUploadCustomAvatar = hasGrowthCapability("custom_avatar", 4);
   const canRenameNickname = hasGrowthCapability("rename_nickname", 5);
   const canEditWelcome = hasGrowthCapability("welcome_message", 6);
-  const canEditPlazaGreeting = hasGrowthCapability("plaza_greeting", 6);
   const discoverThen = (rewardId: string, action: () => void) => {
     if (discoveryFeature(rewardId)?.is_new) void discoverFeature(rewardId);
     action();
@@ -1448,12 +1447,12 @@ export default function MenuPage() {
     }
   };
 
-  const openBasicEditDialog = (field: "name" | "welcome" | "plaza") => {
+  const openBasicEditDialog = (field: "name" | "welcome") => {
     if (!hasPassword) {
-      showPasswordReminder(field === "name" ? t("profile.nicknamePasswordRequired") : field === "welcome" ? t("profile.welcomePasswordRequired") : t("profile.greetingPasswordRequired"));
+      showPasswordReminder(field === "name" ? t("profile.nicknamePasswordRequired") : t("profile.welcomePasswordRequired"));
       return;
     }
-    const capability = field === "name" ? "rename_nickname" : field === "welcome" ? "welcome_message" : "plaza_greeting";
+    const capability = field === "name" ? "rename_nickname" : "welcome_message";
     const requiredLevel = me?.growth?.capabilities?.[capability]?.required_level ?? (field === "name" ? 5 : 6);
     if (!me?.growth?.capabilities?.[capability]?.available) {
       showToast(t("growth.levelRequired", { level: requiredLevel }), "error");
@@ -1464,7 +1463,7 @@ export default function MenuPage() {
       return;
     }
     setBasicEditField(field);
-    setBasicEditValue(field === "name" ? session?.user.name ?? "" : field === "welcome" ? me?.welcome_message ?? session?.user?.welcome_message ?? "" : me?.plaza_greeting ?? "");
+    setBasicEditValue(field === "name" ? session?.user.name ?? "" : me?.welcome_message ?? session?.user?.welcome_message ?? "");
   };
 
   const confirmAccountDeleteInput = () => {
@@ -1511,12 +1510,9 @@ export default function MenuPage() {
         patchSessionUser({
           welcome_message: nextMessage,
         });
-      } else {
-        const payload = await api.updatePlazaGreeting(basicEditValue.trim());
-        setMe((current) => current ? { ...current, plaza_greeting: payload.plaza_greeting } : current);
       }
       setBasicEditField(null);
-      showToast(editingField === "name" ? t("profile.nicknameUpdated") : editingField === "welcome" ? t("profile.welcomeUpdated") : t("profile.greetingUpdated"));
+      showToast(editingField === "name" ? t("profile.nicknameUpdated") : t("profile.welcomeUpdated"));
     } catch (apiError) {
       showToast(
         apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? t("profile.nicknameUpdateFailed") : t("profile.welcomeUpdateFailed"),
@@ -2114,71 +2110,44 @@ export default function MenuPage() {
               <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
               <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
             </button> : null}
-            {canEditPlazaGreeting ? <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.welcome", () => openBasicEditDialog("plaza"))} type="button">
-              <div className="row-main menu-key-cell"><strong>{t("profile.plazaGreeting")}</strong></div>
-              <div className="menu-detail-value menu-detail-text menu-summary-clamp">{me?.plaza_greeting || t("profile.defaultPlazaGreeting")}</div>
-              <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
-            </button> : null}
           </div>
         </div>
       </SideDrawer>
 
       <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
-          <section className="personalization-section personalization-language-section">
-            <header><strong>{t("menu.appearance")}</strong><span>{t("menu.appearanceHint")}</span></header>
-            <div className="personalization-language-options" role="radiogroup" aria-label={t("menu.appearance")}>
-              {([
-                ["system", "common.system"],
-                ["light", "menu.themeLight"],
-                ["dark", "menu.themeDark"],
-              ] as Array<[ThemePreference, TranslationKey]>).map(([value, labelKey]) => (
-                <button
-                  aria-checked={themePreference === value}
-                  className={`personalization-language-option${themePreference === value ? " is-selected" : ""}`}
-                  key={value}
-                  onClick={() => setThemePreference(value)}
-                  role="radio"
-                  type="button"
+          <section className="personalization-preference-list">
+            <label className="personalization-preference-row">
+              <strong>{t("menu.appearance")}</strong>
+              <span className="personalization-select-shell">
+                <select
+                  aria-label={t("menu.appearance")}
+                  onChange={(event) => setThemePreference(event.target.value as ThemePreference)}
+                  value={themePreference}
                 >
-                  <span>{t(labelKey)}</span>
-                  <span className="language-choice-indicator" aria-hidden="true">
-                    <svg viewBox="0 0 20 20">
-                      <circle cx="10" cy="10" r="7.5" />
-                      {themePreference === value ? <path d="m6.5 10.2 2.15 2.2 4.85-5" /> : null}
-                    </svg>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-          <section className="personalization-section personalization-language-section">
-            <header><strong>{t("menu.language")}</strong><span>{t("menu.languageHint")}</span></header>
-            <div className="personalization-language-options" role="radiogroup" aria-label={t("menu.language")}>
-              {([
-                ["system", "common.system"],
-                ["zh-CN", "common.chinese"],
-                ["en", "common.english"],
-              ] as const).map(([value, labelKey]) => (
-                <button
-                  aria-checked={languagePreference === value}
-                  className={`personalization-language-option${languagePreference === value ? " is-selected" : ""}`}
+                  <option value="system">{t("common.system")}</option>
+                  <option value="light">{t("menu.themeLight")}</option>
+                  <option value="dark">{t("menu.themeDark")}</option>
+                </select>
+                <span className="material-symbols-outlined" aria-hidden="true">expand_more</span>
+              </span>
+            </label>
+            <label className="personalization-preference-row">
+              <strong>{t("menu.language")}</strong>
+              <span className="personalization-select-shell">
+                <select
+                  aria-label={t("menu.language")}
                   disabled={languageSaving}
-                  key={value}
-                  onClick={() => void saveLanguagePreference(value)}
-                  role="radio"
-                  type="button"
+                  onChange={(event) => void saveLanguagePreference(event.target.value as LanguagePreference)}
+                  value={languagePreference}
                 >
-                  <span>{t(labelKey)}</span>
-                  <span className="language-choice-indicator" aria-hidden="true">
-                    <svg viewBox="0 0 20 20">
-                      <circle cx="10" cy="10" r="7.5" />
-                      {languagePreference === value ? <path d="m6.5 10.2 2.15 2.2 4.85-5" /> : null}
-                    </svg>
-                  </span>
-                </button>
-              ))}
-            </div>
+                  <option value="system">{t("common.system")}</option>
+                  <option value="zh-CN">{t("common.chinese")}</option>
+                  <option value="en">{t("common.english")}</option>
+                </select>
+                <span className="material-symbols-outlined" aria-hidden="true">expand_more</span>
+              </span>
+            </label>
           </section>
           <button
             className={`personalization-background-entry rarity-${rewardRarity("background", me?.chat_background_theme ?? "default")}`}
@@ -3185,13 +3154,13 @@ export default function MenuPage() {
       />
       <InputDialog
         busy={basicEditSaving}
-        confirmLabel={basicEditField === "name" ? t("profile.saveNickname") : basicEditField === "welcome" ? t("profile.saveWelcome") : t("profile.saveGreeting")}
+        confirmLabel={basicEditField === "name" ? t("profile.saveNickname") : t("profile.saveWelcome")}
         onChange={setBasicEditValue}
         onClose={() => setBasicEditField(null)}
         onConfirm={() => void confirmBasicEdit()}
         open={Boolean(basicEditField)}
-        placeholder={basicEditField === "name" ? t("profile.nicknamePlaceholder") : basicEditField === "welcome" ? t("profile.welcomePlaceholder") : t("profile.greetingPlaceholder")}
-        title={basicEditField === "name" ? t("profile.editNickname") : basicEditField === "welcome" ? t("profile.editWelcome") : t("profile.plazaGreeting")}
+        placeholder={basicEditField === "name" ? t("profile.nicknamePlaceholder") : t("profile.welcomePlaceholder")}
+        title={basicEditField === "name" ? t("profile.editNickname") : t("profile.editWelcome")}
         value={basicEditValue}
       />
       <ConfirmDialog

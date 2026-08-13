@@ -7239,6 +7239,66 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   padding-inline: 2px;
 }
 
+.personalization-preference-list {
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--bg-panel-strong);
+}
+
+.personalization-preference-row {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 12px 8px 15px;
+}
+
+.personalization-preference-row + .personalization-preference-row {
+  border-top: 1px solid var(--line-soft);
+}
+
+.personalization-preference-row > strong {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.personalization-select-shell {
+  position: relative;
+  min-width: 112px;
+  display: flex;
+  align-items: center;
+}
+
+.personalization-select-shell select {
+  width: 100%;
+  min-height: 38px;
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 7px 34px 7px 12px;
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: right;
+  outline: none;
+}
+
+.personalization-select-shell select:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 35%, transparent);
+}
+
+.personalization-select-shell > .material-symbols-outlined {
+  position: absolute;
+  right: 9px;
+  pointer-events: none;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
 .personalization-language-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

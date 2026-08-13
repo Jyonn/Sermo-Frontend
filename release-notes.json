@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.13.13",
-  "publishedAt": "2026-08-13",
+  "id": "2026.08.14.1",
+  "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "在线时不再误触发离线提醒",
+      "title": "语言与外观设置更简洁",
       "items": [
-        "打开应用或回到前台时立即更新在线状态",
-        "应用正在前台时不再重复弹出系统通知",
-        "自动清理当前设备已经失效或属于旧三级域名的系统通知订阅"
+        "外观和语言改为紧凑的单行下拉选择",
+        "基础信息不再展示广场招呼设置"
       ]
     },
     "en": {
-      "title": "More accurate online notification routing",
+      "title": "Cleaner language and appearance settings",
       "items": [
-        "Online status now refreshes immediately when the app opens or returns to the foreground",
-        "System notifications no longer duplicate in-app alerts while the app is visible",
-        "Expired subscriptions and subscriptions from legacy space subdomains are now cleaned up automatically"
+        "Appearance and language now use compact single-row selectors",
+        "Plaza greeting is no longer shown in basic information"
       ]
     }
   }
