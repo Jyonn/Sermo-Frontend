@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.15",
+  "id": "2026.08.14.16",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "头像切换更稳定",
+      "title": "广场未读更准确",
       "items": [
-        "常用头像会保留在本机缓存，切换页面不再反复闪烁",
-        "头像更新后会在完成加载时平滑替换"
+        "打开一条发言后，与它相关的点赞、评论和回复会统一标记为已读",
+        "广场入口、通知列表与底部红点会即时同步"
       ]
     },
     "en": {
-      "title": "Smoother avatar loading",
+      "title": "More accurate Square unread counts",
       "items": [
-        "Frequently used avatars stay cached when switching pages",
-        "Updated avatars now replace the previous image only after loading"
+        "Opening a statement now reads all of its likes, comments, and replies",
+        "Square badges stay in sync across the header, inbox, and navigation"
       ]
     }
   }

@@ -1044,10 +1044,11 @@ export const api = {
     });
   },
 
-  markSquareNotificationsRead() {
-    return request<{ updated: number }>("/users/me/notification-events", {
+  markSquareNotificationsRead(statement_id?: number) {
+    return request<{ updated: number; unread_count: number }>("/users/me/notification-events", {
       method: "POST",
       auth: true,
+      body: statement_id === undefined ? {} : { statement_id },
     });
   },
 

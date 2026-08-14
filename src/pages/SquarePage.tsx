@@ -318,6 +318,9 @@ export default function SquarePage() {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const commentInputRef = useRef<HTMLInputElement>(null);
+  const lastReadStatementRef = useRef<number | null>(null);
+  const notificationMutationVersionRef = useRef(0);
+  const notificationUnreadRef = useRef(0);
   const recorderStreamRef = useRef<MediaStream | null>(null);
   const recorderChunksRef = useRef<Blob[]>([]);
   const recordingStartedAtRef = useRef(0);
@@ -468,17 +471,54 @@ export default function SquarePage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const mutationVersion = notificationMutationVersionRef.current;
     void api.getNotificationEvents("square", controller.signal).then((result) => {
-      setNotificationEvents(result.events);
-      setNotificationUnread(result.unread_count);
-      announceSquareUnread(result.unread_count);
+      const readStatementId = lastReadStatementRef.current;
+      setNotificationEvents(result.events.map((event) => (
+        readStatementId && event.payload.statement_id === readStatementId ? { ...event, is_read: true } : event
+      )));
+      if (mutationVersion === notificationMutationVersionRef.current) {
+        notificationUnreadRef.current = result.unread_count;
+        setNotificationUnread(result.unread_count);
+        announceSquareUnread(result.unread_count);
+      }
     }).catch(() => undefined);
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    if (commentStatementId === null) {
+      lastReadStatementRef.current = null;
+      return;
+    }
+    if (lastReadStatementRef.current === commentStatementId) return;
+    lastReadStatementRef.current = commentStatementId;
+    notificationMutationVersionRef.current += 1;
+
+    setNotificationEvents((current) => current.map((event) => (
+      event.payload.statement_id === commentStatementId ? { ...event, is_read: true } : event
+    )));
+    const relatedUnread = notificationEvents.filter((event) => (
+      !event.is_read && event.payload.statement_id === commentStatementId
+    )).length;
+    const optimisticUnread = Math.max(0, notificationUnreadRef.current - relatedUnread);
+    notificationUnreadRef.current = optimisticUnread;
+    setNotificationUnread(optimisticUnread);
+    announceSquareUnread(optimisticUnread);
+
+    void api.markSquareNotificationsRead(commentStatementId)
+      .then((result) => {
+        notificationUnreadRef.current = result.unread_count;
+        setNotificationUnread(result.unread_count);
+        announceSquareUnread(result.unread_count);
+      })
+      .catch(() => undefined);
+  }, [commentStatementId, notificationEvents]);
+
   const openNotificationDrawer = () => {
     setNotificationDrawerOpen(true);
     if (!notificationUnread) return;
+    notificationUnreadRef.current = 0;
     setNotificationUnread(0);
     setNotificationEvents((current) => current.map((event) => ({ ...event, is_read: true })));
     announceSquareUnread(0);
