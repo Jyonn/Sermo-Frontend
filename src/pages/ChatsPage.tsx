@@ -1328,10 +1328,11 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   }, [isPollable, messageId]);
 
   if (currentPreview?.status === "pending") {
+    const pendingHostname = hostnameFromUrl(previewUrl);
     return (
       <div className="message-link-preview-card is-loading" aria-label={i18n.t("link.generatingPreview")}>
         <div className="message-link-preview-text">
-          <span className="message-link-preview-site">{hostnameFromUrl(previewUrl) || i18n.t("link.preview")}</span>
+          <span className="message-link-preview-site">{pendingHostname ? pendingHostname.toUpperCase() : i18n.t("link.preview")}</span>
           <span className="message-link-preview-title shimmer-line" />
           <span className="message-link-preview-desc shimmer-line short" />
         </div>
@@ -1342,6 +1343,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   const unavailable = !currentPreview || currentPreview.status === "none" || currentPreview.status === "failed";
   if (unavailable) {
+    const unavailableHostname = hostnameFromUrl(previewUrl);
     return (
       <a
         className="message-link-preview-card no-image is-unavailable"
@@ -1351,14 +1353,18 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
         target="_blank"
       >
         <div className="message-link-preview-text">
-          <strong className="message-link-preview-title">{hostnameFromUrl(previewUrl) || i18n.t("link.preview")}</strong>
+          <strong className="message-link-preview-title">{unavailableHostname ? unavailableHostname.toUpperCase() : i18n.t("link.preview")}</strong>
         </div>
         <span className="message-link-preview-placeholder" aria-hidden="true">↗</span>
       </a>
     );
   }
 
-  const title = currentPreview.title || hostnameFromUrl(currentPreview.url || "") || currentPreview.url || i18n.t("link.title");
+  const hostname = hostnameFromUrl(currentPreview.url || "");
+  const rawTitle = currentPreview.title || hostname || currentPreview.url || i18n.t("link.title");
+  const title = hostname && rawTitle.trim().toLowerCase() === hostname.toLowerCase()
+    ? hostname.toUpperCase()
+    : rawTitle;
 
   return (
     <a

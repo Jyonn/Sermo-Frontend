@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.23",
+  "id": "2026.08.14.24",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片图片更完整",
+      "title": "链接卡片排版更利落",
       "items": [
-        "网页没有分享图片时，链接卡片会尝试选用清晰的网站图标"
+        "链接标题固定在左上方，网站图片缩小并收纳至右下角"
       ]
     },
     "en": {
-      "title": "Better link preview images",
+      "title": "Cleaner link card layout",
       "items": [
-        "When a page has no sharing image, its clearest site icon can now be used as the link preview image"
+        "Link titles now stay at the top left, with a smaller site image anchored at the bottom right"
       ]
     }
   }

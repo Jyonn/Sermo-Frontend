@@ -4656,8 +4656,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-link-preview-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 58px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: stretch;
   gap: 9px;
   width: min(70vw, 312px);
   height: 80px;
@@ -4673,7 +4673,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-link-preview-card.no-image {
-  grid-template-columns: minmax(0, 1fr) 58px;
+  grid-template-columns: minmax(0, 1fr) 42px;
 }
 
 .message-bubble.self .message-link-preview-card {
@@ -4684,6 +4684,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-link-preview-text {
   display: grid;
   align-content: start;
+  align-self: start;
   gap: 4px;
   min-width: 0;
 }
@@ -4722,8 +4723,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-link-preview-image {
-  width: 58px;
-  height: 58px;
+  align-self: end;
+  justify-self: end;
+  width: 42px;
+  height: 42px;
   object-fit: cover;
   border-radius: 12px;
   background:
@@ -4733,8 +4736,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-link-preview-placeholder {
   display: grid;
-  width: 58px;
-  height: 58px;
+  align-self: end;
+  justify-self: end;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border-radius: 12px;
   color: color-mix(in srgb, var(--brand-deep) 70%, transparent);
@@ -12907,7 +12912,7 @@ html[data-theme="dark"] .message-link-preview-site {
 /* Every URL uses the same fixed inner card geometry. The outer link bubble is
    transparent; this inner card remains the single owner of the bubble skin. */
 .message-group .message-bubble.is-link-preview > .message-text-stack > .message-link-preview-card {
-  grid-template-columns: minmax(0, 1fr) 58px !important;
+  grid-template-columns: minmax(0, 1fr) 42px !important;
   width: min(70vw, 312px) !important;
   height: 80px !important;
   min-height: 80px !important;
@@ -12916,8 +12921,8 @@ html[data-theme="dark"] .message-link-preview-site {
 }
 
 .message-group .message-bubble.is-link-preview > .message-text-stack > .message-link-preview-card :is(.message-link-preview-image, .message-link-preview-placeholder) {
-  width: 58px !important;
-  height: 58px !important;
+  width: 42px !important;
+  height: 42px !important;
 }
 
 @media (min-width: 901px) and (max-width: 1180px) {
