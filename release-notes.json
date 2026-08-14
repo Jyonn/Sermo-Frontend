@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.22",
+  "id": "2026.08.14.23",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片解析更完整",
+      "title": "链接卡片图片更完整",
       "items": [
-        "链接解析现在以浏览器方式访问网页，更多网站可以正确展示标题、简介和图标"
+        "网页没有分享图片时，链接卡片会尝试选用清晰的网站图标"
       ]
     },
     "en": {
-      "title": "Richer link previews",
+      "title": "Better link preview images",
       "items": [
-        "Link previews now visit pages like a browser, improving title, description, and icon detection"
+        "When a page has no sharing image, its clearest site icon can now be used as the link preview image"
       ]
     }
   }
