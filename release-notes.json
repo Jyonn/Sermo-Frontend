@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.25",
+  "id": "2026.08.14.26",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "离线消息提醒更准确",
+      "title": "成员内容清理更完整",
       "items": [
-        "离线消息会合并提醒，已读、撤回和已屏蔽群聊不再重复推送"
+        "成员被空间移除后，其广场发言和评论会同步停止展示"
       ]
     },
     "en": {
-      "title": "More accurate offline alerts",
+      "title": "More complete member cleanup",
       "items": [
-        "Offline messages are now grouped, while read, recalled, and muted-group messages are skipped"
+        "Square posts and comments are now hidden when their author is removed from a space"
       ]
     }
   }
