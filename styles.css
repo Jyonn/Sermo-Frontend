@@ -5057,19 +5057,41 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   transition: width 180ms ease, max-width 180ms ease, margin-left 180ms ease;
 }
 
-.message-bubble-wrap.self.is-selection-mode {
+.message-group.is-selection-mode > .message-bubbles {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.message-avatar-selection-trigger {
+  display: block;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0 0 1px;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.message-avatar-selection-trigger .message-avatar {
+  margin: 0;
+}
+
+.message-bubble-wrap.is-selection-mode {
   width: 100%;
   min-height: 34px;
   box-sizing: border-box;
+}
+
+.message-bubble-wrap.self.is-selection-mode {
   justify-content: center;
 }
 
 .message-group.self.is-selection-mode {
   margin-left: auto;
-}
-
-.message-group.self.is-selection-mode > .message-bubbles {
-  width: 100%;
 }
 
 .message-bubble-wrap.self.is-selection-mode > .message-bubble-shell {
@@ -5091,20 +5113,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   transform: translateY(-50%);
 }
 
-.message-group.other .message-bubble-wrap.is-selection-mode,
-.message-bubble-wrap.self.is-selection-mode:not(.is-selected) {
+.message-bubble-wrap.is-selection-mode:not(.is-selected) {
   opacity: 0.48;
-}
-
-.message-bubble-wrap.self.is-selection-mode.is-selected {
-  transform: translateX(-2px);
-}
-
-.message-bubble-wrap.self.is-selection-mode.is-selected .message-bubble,
-.message-bubble-wrap.self.is-selection-mode.is-selected .message-media-frame,
-.message-image-gallery-item.is-selection-mode.is-selected {
-  outline: 2px solid var(--brand-primary);
-  outline-offset: 2px;
 }
 
 .message-image-gallery-item.is-selection-mode {

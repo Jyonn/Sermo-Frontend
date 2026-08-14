@@ -1711,6 +1711,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   onOpenVideo,
   onOpenActions,
   onRetry,
+  onToggleGroupSelection,
   onToggleSelection,
   selectedClientIds,
   selectionMode,
@@ -1757,12 +1758,34 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
     index = cursor;
   }
 
+  const showGroupAvatar = group.from === "other" || showSelfAvatar || selectionMode;
+  const groupAvatar = showGroupAvatar ? (
+    <UserAvatar
+      className="avatar message-avatar"
+      frame={group.from === "self" ? selfAvatarFrame : group.avatarFrameStyle}
+      name={group.from === "self" ? selfAvatarName ?? "" : group.name}
+      uri={group.from === "self" ? selfAvatarUri : group.avatarUri}
+      vip={group.from === "self" ? selfIsPermanentVip : group.isPermanentVip}
+    />
+  ) : null;
+  const selectableGroupMessages = group.messages.filter((message) => message.kind !== "system");
+  const groupSelected = selectableGroupMessages.length > 0 && selectableGroupMessages.every((message) => selectedClientIds.includes(message.clientId));
+
   return (
     <div>
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
       <div className={`message-group ${group.from}${selectionMode ? " is-selection-mode" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
-        {group.from === "other" ? <UserAvatar className="avatar message-avatar" frame={group.avatarFrameStyle} name={group.name} uri={group.avatarUri} vip={group.isPermanentVip} /> : null}
-        {group.from === "self" && showSelfAvatar ? <UserAvatar className="avatar message-avatar" frame={selfAvatarFrame} name={selfAvatarName ?? ""} uri={selfAvatarUri} vip={selfIsPermanentVip} /> : null}
+        {selectionMode && groupAvatar ? (
+          <button
+            aria-label={i18n.t("message.selectMergedGroup", { name: group.from === "self" ? selfAvatarName ?? group.name : group.name })}
+            aria-pressed={groupSelected}
+            className="message-avatar-selection-trigger"
+            onClick={() => onToggleGroupSelection(selectableGroupMessages)}
+            type="button"
+          >
+            {groupAvatar}
+          </button>
+        ) : groupAvatar}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
           {rows.map((row) => row.kind === "gallery" ? (
@@ -1847,6 +1870,7 @@ interface MessageGroupBlockProps {
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onRetry: (message: ChatMessage) => void;
+  onToggleGroupSelection: (messages: ChatMessage[]) => void;
   onToggleSelection: (message: ChatMessage) => void;
   selectedClientIds: string[];
   selectionMode: boolean;
@@ -2547,6 +2571,23 @@ function LiveChatsPage() {
         return current;
       }
       return [...current, message.clientId];
+    });
+  };
+
+  const toggleMessageGroupSelection = (groupMessages: ChatMessage[]) => {
+    const selectableIds = groupMessages.filter((message) => message.kind !== "system").map((message) => message.clientId);
+    if (!selectableIds.length) return;
+    setSelectedMessageClientIds((current) => {
+      const selected = new Set(current);
+      if (selectableIds.every((clientId) => selected.has(clientId))) {
+        return current.filter((clientId) => !selectableIds.includes(clientId));
+      }
+      const additions = selectableIds.filter((clientId) => !selected.has(clientId));
+      if (current.length + additions.length > 50) {
+        showToast(t("message.selectionLimit", { count: 50 }), "error");
+        return current;
+      }
+      return [...current, ...additions];
     });
   };
 
@@ -5357,6 +5398,7 @@ function LiveChatsPage() {
                     onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                     onOpenActions={openMessageMenu}
                     onRetry={retryFailedMessage}
+                    onToggleGroupSelection={toggleMessageGroupSelection}
                     onToggleSelection={toggleMessageSelection}
                     selectedClientIds={selectedMessageClientIds}
                     selectionMode={messageSelectionMode}
@@ -6881,7 +6923,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       <section aria-label={t("menu.chatBubble")} className="chat-conversation-panel chat-conversation-preview is-single-message" onContextMenu={(event) => event.preventDefault()}>
         <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`}>
           <div className="message-scroll">
-            <MessageGroupBlock enteringMessageIds={[]} group={group} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />
+            <MessageGroupBlock enteringMessageIds={[]} group={group} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />
           </div>
         </div>
       </section>
@@ -6922,6 +6964,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
               onOpenImage={noop}
               onOpenVideo={noop}
               onRetry={noop}
+              onToggleGroupSelection={noop}
               onToggleSelection={noop}
               selectedClientIds={[]}
               selectionMode={false}

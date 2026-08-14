@@ -1379,6 +1379,7 @@
   "message.batchDeleted": "Deleted {{count}} messages",
   "message.batchDeleteFailed": "Could not delete selected messages",
   "message.selectionLimit": "Select up to {{count}} messages at a time",
+  "message.selectMergedGroup": "Select this message group from {{name}}",
   "chat.verifyToCreateGroup": "Complete verification before creating a group chat.",
   "chat.selectOneMember": "Select at least one member.",
   "chat.groupCreated": "Group chat created",

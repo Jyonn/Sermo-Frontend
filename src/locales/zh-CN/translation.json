@@ -1379,6 +1379,7 @@
   "message.batchDeleted": "已删除 {{count}} 条消息",
   "message.batchDeleteFailed": "批量删除失败",
   "message.selectionLimit": "一次最多选择 {{count}} 条消息",
+  "message.selectMergedGroup": "选择 {{name}} 的这一组消息",
   "chat.verifyToCreateGroup": "完成认证后才可以创建群聊。",
   "chat.selectOneMember": "请至少选择一位成员。",
   "chat.groupCreated": "群聊已创建",

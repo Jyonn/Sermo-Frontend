@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.13",
+  "id": "2026.08.14.14",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "广场返回更顺滑",
+      "title": "批量整理聊天记录",
       "items": [
-        "从发言详情侧滑返回时不再重复切换路由",
-        "广场返回过程减少卡顿与短暂白屏"
+        "多选模式支持点击任意非系统消息的整行进行选择",
+        "点击头像可一次选择当前连续消息组"
       ]
     },
     "en": {
-      "title": "Smoother square navigation",
+      "title": "Faster message selection",
       "items": [
-        "Swipe-back from statement details no longer performs duplicate navigation",
-        "Returning to the square now avoids unnecessary stalls and blank frames"
+        "Tap anywhere on a non-system message row while selecting",
+        "Tap an avatar to select its current merged message group"
       ]
     }
   }
