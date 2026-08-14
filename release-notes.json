@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.24",
+  "id": "2026.08.14.25",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片排版更利落",
+      "title": "离线消息提醒更准确",
       "items": [
-        "链接标题固定在左上方，网站图片缩小并收纳至右下角"
+        "离线消息会合并提醒，已读、撤回和已屏蔽群聊不再重复推送"
       ]
     },
     "en": {
-      "title": "Cleaner link card layout",
+      "title": "More accurate offline alerts",
       "items": [
-        "Link titles now stay at the top left, with a smaller site image anchored at the bottom right"
+        "Offline messages are now grouped, while read, recalled, and muted-group messages are skipped"
       ]
     }
   }
