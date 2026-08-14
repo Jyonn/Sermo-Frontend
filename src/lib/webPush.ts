@@ -5,6 +5,7 @@ export type WebPushState = "checking" | "unsupported" | "needs-install" | "denie
 
 const WEB_PUSH_ENDPOINT_KEY = "sermo.web-push.endpoint";
 const CANONICAL_WEB_HOST = "sermo.jyonn.space";
+let reconciliation: Promise<void> | null = null;
 
 function isLegacySpaceHost() {
   const hostname = window.location.hostname.toLowerCase();
@@ -34,9 +35,14 @@ export async function getWebPushState(): Promise<WebPushState> {
   if (!canUseWebPush()) return "unsupported";
   if (isIos() && !isStandalone()) return "needs-install";
   if (Notification.permission === "denied") return "denied";
-  const registration = await navigator.serviceWorker.getRegistration();
-  if (!registration) return "off";
-  return (await registration.pushManager.getSubscription()) ? "on" : "off";
+  let registration = await navigator.serviceWorker.getRegistration();
+  let subscription = registration ? await registration.pushManager.getSubscription() : null;
+  if (!subscription && Notification.permission === "granted" && window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY)) {
+    await reconcileWebPushSubscription();
+    registration = await navigator.serviceWorker.getRegistration();
+    subscription = registration ? await registration.pushManager.getSubscription() : null;
+  }
+  return subscription ? "on" : "off";
 }
 
 export async function enableWebPush() {
@@ -47,7 +53,7 @@ export async function enableWebPush() {
 
   const info = await api.getWebPushInfo();
   if (!info.public_key) throw new Error(i18n.t("webPush.notConfigured"));
-  await navigator.serviceWorker.register("/sw.js");
+  await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
   const registration = await navigator.serviceWorker.ready;
   const existing = await registration.pushManager.getSubscription();
   const subscription = existing ?? await registration.pushManager.subscribe({
@@ -78,10 +84,18 @@ export async function disableWebPush() {
 }
 
 export async function reconcileWebPushSubscription() {
+  if (reconciliation) return reconciliation;
+  reconciliation = reconcileWebPushSubscriptionOnce().finally(() => {
+    reconciliation = null;
+  });
+  return reconciliation;
+}
+
+async function reconcileWebPushSubscriptionOnce() {
   if (!canUseWebPush()) return;
   const storedEndpoint = window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY);
-  const registration = await navigator.serviceWorker.getRegistration();
-  const subscription = registration ? await registration.pushManager.getSubscription() : null;
+  let registration = await navigator.serviceWorker.getRegistration();
+  let subscription = registration ? await registration.pushManager.getSubscription() : null;
 
   if (isLegacySpaceHost()) {
     const endpoint = subscription?.endpoint || storedEndpoint;
@@ -91,13 +105,43 @@ export async function reconcileWebPushSubscription() {
     return;
   }
 
-  if (Notification.permission !== "granted" || !subscription) {
+  if (Notification.permission === "denied") {
     if (storedEndpoint) {
       await api.deleteWebPush(storedEndpoint);
       window.localStorage.removeItem(WEB_PUSH_ENDPOINT_KEY);
     }
     return;
   }
+
+  // `getRegistration()` can briefly return nothing while iOS restores or
+  // replaces the service worker. A transient lifecycle state must never be
+  // interpreted as the user disabling notifications.
+  if (Notification.permission !== "granted") return;
+  if (!registration) {
+    try {
+      registration = await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
+      subscription = await registration.pushManager.getSubscription();
+    } catch {
+      return;
+    }
+  }
+
+  // A stored endpoint is our durable record of explicit opt-in. Browsers may
+  // rotate or discard the actual subscription after an OS/WebApp update, so
+  // restore it while permission remains granted instead of switching it off.
+  if (!subscription && storedEndpoint) {
+    try {
+      const info = await api.getWebPushInfo();
+      if (!info.public_key) return;
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: decodeApplicationServerKey(info.public_key),
+      });
+    } catch {
+      return;
+    }
+  }
+  if (!subscription) return;
 
   const serialized = subscription.toJSON();
   if (!serialized.endpoint || !serialized.keys?.p256dh || !serialized.keys.auth) return;
@@ -107,5 +151,8 @@ export async function reconcileWebPushSubscription() {
     auth: serialized.keys.auth,
     origin: window.location.origin,
   });
+  if (storedEndpoint && storedEndpoint !== serialized.endpoint) {
+    await api.deleteWebPush(storedEndpoint).catch(() => undefined);
+  }
   window.localStorage.setItem(WEB_PUSH_ENDPOINT_KEY, serialized.endpoint);
 }

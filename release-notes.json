@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.35",
-  "publishedAt": "2026-08-14",
+  "id": "2026.08.15.1",
+  "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "桌面广场升级为三栏工作台",
+      "title": "系统通知更加稳定",
       "items": [
-        "桌面端可在发言流右侧直接阅读发言详情与评论，不再打断浏览上下文"
+        "修复系统通知在 WebApp 更新或切换账号后意外关闭的问题"
       ]
     },
     "en": {
-      "title": "Three-column square workspace on desktop",
+      "title": "More reliable system notifications",
       "items": [
-        "Desktop users can now read statement details and comments beside the feed without losing their browsing context"
+        "Fixed system notifications unexpectedly turning off after WebApp updates or account switching"
       ]
     }
   }
