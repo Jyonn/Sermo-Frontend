@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { avatarResourceKey, loadAvatarSource, peekAvatarSource } from "../lib/avatarCache";
 import { forgetStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import type { AvatarFrameStyle } from "../types";
 
 interface GroupAvatarMember {
   name: string;
   uri?: string | null;
+  cacheKey?: string | null;
 }
 
 interface UserAvatarProps {
   name: string;
   uri?: string | null;
+  cacheKey?: string | null;
   className: string;
   groupMembers?: GroupAvatarMember[] | null;
   vip?: boolean;
@@ -22,42 +25,51 @@ function avatarLabel(name: string) {
 
 function normalizeGroupMembers(groupMembers?: GroupAvatarMember[] | null) {
   if (!groupMembers?.length) return [];
-  return groupMembers
-    .filter((member) => member?.name?.trim().length > 0)
-    .slice(0, 4);
+  return groupMembers.filter((member) => member?.name?.trim().length > 0).slice(0, 4);
 }
 
-function AvatarTile({ name, uri }: GroupAvatarMember) {
+function useCachedAvatar(uri?: string | null, cacheKey?: string | null) {
+  const identity = avatarResourceKey(uri, cacheKey);
+  const [source, setSource] = useState(() => peekAvatarSource(uri, cacheKey) ?? resolveStableResourceUri(uri));
   const [failed, setFailed] = useState(false);
-  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
-  const resolvedUri = retryWithFreshUri ? uri ?? undefined : resolveStableResourceUri(uri);
+  const sourceIdentityRef = useRef(identity);
 
   useEffect(() => {
+    let active = true;
     setFailed(false);
-    setRetryWithFreshUri(false);
-  }, [uri]);
+    const immediate = peekAvatarSource(uri, cacheKey);
+    if (sourceIdentityRef.current !== identity) {
+      sourceIdentityRef.current = identity;
+      setSource(immediate ?? resolveStableResourceUri(uri));
+    } else if (immediate) {
+      setSource(immediate);
+    } else if (!source) {
+      setSource(resolveStableResourceUri(uri));
+    }
 
-  const canShowImage = Boolean(resolvedUri) && !failed;
+    void loadAvatarSource(uri, cacheKey)
+      .then((nextSource) => {
+        if (active && nextSource) {
+          setFailed(false);
+          setSource(nextSource);
+        }
+      })
+      .catch(() => {
+        if (active && !source) setFailed(true);
+      });
+    return () => { active = false; };
+    // Keep the previous decoded frame visible until the replacement is ready.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [identity]);
 
-  if (canShowImage) {
-    return (
-      <img
-        alt=""
-        className="avatar-group-image"
-        loading="lazy"
-        src={resolvedUri ?? ""}
-        onError={() => {
-          if (!retryWithFreshUri && uri) {
-            forgetStableResourceUri(uri);
-            setRetryWithFreshUri(true);
-            return;
-          }
-          setFailed(true);
-        }}
-      />
-    );
+  return { source, failed, setFailed };
+}
+
+function AvatarTile({ name, uri, cacheKey }: GroupAvatarMember) {
+  const { source, failed, setFailed } = useCachedAvatar(uri, cacheKey);
+  if (source && !failed) {
+    return <img alt="" className="avatar-group-image" decoding="async" loading="eager" src={source} onError={() => setFailed(true)} />;
   }
-
   return <span className="avatar-group-label">{avatarLabel(name)}</span>;
 }
 
@@ -67,22 +79,15 @@ function groupLayoutClass(count: number) {
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ name, uri, className, groupMembers, vip = false, frame = "none" }: UserAvatarProps) {
-  const [failed, setFailed] = useState(false);
-  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+export function UserAvatar({ name, uri, cacheKey, className, groupMembers, vip = false, frame = "none" }: UserAvatarProps) {
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
   const resolvedName = singleSource?.name?.trim() || name?.trim() || "Sermo";
   const sourceUri = singleSource?.uri ?? uri;
-  const resolvedUri = retryWithFreshUri ? sourceUri ?? undefined : resolveStableResourceUri(sourceUri);
-
-  useEffect(() => {
-    setFailed(false);
-    setRetryWithFreshUri(false);
-  }, [sourceUri]);
-
-  const canShowImage = Boolean(resolvedUri) && !failed;
+  const sourceCacheKey = singleSource?.cacheKey ?? cacheKey;
+  const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);
+  const canShowImage = Boolean(source) && !failed;
   const hasFrame = frame !== "none";
 
   return (
@@ -91,8 +96,8 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false, fr
         {canShowGroup ? (
           <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
             {normalizedGroupMembers.map((member, index) => (
-              <span key={`${member.name}:${member.uri ?? "fallback"}:${index}`} className={`avatar-group-tile avatar-group-tile-${index + 1}`}>
-                <AvatarTile name={member.name} uri={member.uri} />
+              <span key={`${avatarResourceKey(member.uri, member.cacheKey) || member.name}:${index}`} className={`avatar-group-tile avatar-group-tile-${index + 1}`}>
+                <AvatarTile {...member} />
               </span>
             ))}
           </span>
@@ -100,25 +105,18 @@ export function UserAvatar({ name, uri, className, groupMembers, vip = false, fr
           <img
             alt={`${resolvedName} avatar`}
             className="avatar-image"
-            loading="lazy"
-            src={resolvedUri ?? ""}
+            decoding="async"
+            loading="eager"
+            src={source ?? ""}
             onError={() => {
-              if (!retryWithFreshUri && sourceUri) {
-                forgetStableResourceUri(sourceUri);
-                setRetryWithFreshUri(true);
-                return;
-              }
+              forgetStableResourceUri(sourceUri);
               setFailed(true);
             }}
           />
         ) : (
           <span className="avatar-label">{avatarLabel(resolvedName)}</span>
         )}
-        {hasFrame ? (
-          <span aria-hidden="true" className="avatar-frame-ornament">
-            <i /><i /><i /><i />
-          </span>
-        ) : null}
+        {hasFrame ? <span aria-hidden="true" className="avatar-frame-ornament"><i /><i /><i /><i /></span> : null}
       </span>
     </div>
   );

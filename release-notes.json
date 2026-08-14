@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.14",
+  "id": "2026.08.14.15",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "批量整理聊天记录",
+      "title": "头像切换更稳定",
       "items": [
-        "多选模式支持点击任意非系统消息的整行进行选择",
-        "点击头像可一次选择当前连续消息组"
+        "常用头像会保留在本机缓存，切换页面不再反复闪烁",
+        "头像更新后会在完成加载时平滑替换"
       ]
     },
     "en": {
-      "title": "Faster message selection",
+      "title": "Smoother avatar loading",
       "items": [
-        "Tap anywhere on a non-system message row while selecting",
-        "Tap an avatar to select its current merged message group"
+        "Frequently used avatars stay cached when switching pages",
+        "Updated avatars now replace the previous image only after loading"
       ]
     }
   }

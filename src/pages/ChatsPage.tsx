@@ -704,6 +704,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     kind,
     name: message.user.name,
     avatarUri: message.user.avatar_uri,
+    avatarCacheKey: message.user.avatar_cache_key,
     isPermanentVip: message.user.is_permanent_vip,
     chatBubbleStyle: message.user.chat_bubble_style,
     avatarFrameStyle: message.user.avatar_frame_style,
@@ -1765,6 +1766,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       frame={group.from === "self" ? selfAvatarFrame : group.avatarFrameStyle}
       name={group.from === "self" ? selfAvatarName ?? "" : group.name}
       uri={group.from === "self" ? selfAvatarUri : group.avatarUri}
+      cacheKey={group.from === "self" ? undefined : group.avatarCacheKey}
       vip={group.from === "self" ? selfIsPermanentVip : group.isPermanentVip}
     />
   ) : null;
@@ -1841,6 +1843,7 @@ interface MessageGroup {
   from: "self" | "other";
   name: string;
   avatarUri?: string;
+  avatarCacheKey?: string;
   isPermanentVip?: boolean;
   chatBubbleStyle?: ChatMessage["chatBubbleStyle"];
   avatarFrameStyle?: ChatMessage["avatarFrameStyle"];
@@ -1929,6 +1932,7 @@ function sortChatDetailMembers(
     userId: number;
     name: string;
     avatarUri?: string;
+    avatarCacheKey?: string;
     isSelf: boolean;
     isOwner: boolean;
   }>
@@ -1951,6 +1955,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     id: chat.chat_id,
     title,
     avatarUri: peer?.avatar_uri,
+    avatarCacheKey: peer?.avatar_cache_key,
     avatarFrameStyle: peer?.avatar_frame_style,
     subtitle: chat.group ? i18n.t("chat.memberCount", { count: chat.members.length }) : presence,
     preview: previewFromDto(chat.last_message),
@@ -1976,6 +1981,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
           userId: member.user_id,
           name: member.name,
           avatarUri: member.avatar_uri,
+          avatarCacheKey: member.avatar_cache_key,
           avatarFrameStyle: member.avatar_frame_style,
           isSelf: member.user_id === currentUserId,
           isOwner: Boolean(chat.owner?.user_id === member.user_id),
@@ -2988,6 +2994,7 @@ function LiveChatsPage() {
         from: message.from,
         name: message.name,
         avatarUri: message.avatarUri,
+        avatarCacheKey: message.avatarCacheKey,
         isPermanentVip: message.isPermanentVip,
         chatBubbleStyle: message.chatBubbleStyle,
         avatarFrameStyle: message.avatarFrameStyle,
@@ -5136,10 +5143,11 @@ function LiveChatsPage() {
         <UserAvatar
           className={`avatar ${chat.online ? "status-online" : ""}`}
           groupMembers={
-            chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri })) : undefined
+            chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
           }
           name={chat.title}
           uri={chat.avatarUri}
+          cacheKey={chat.avatarCacheKey}
           frame={chat.avatarFrameStyle}
         />
         {chat.unread ? (

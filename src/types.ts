@@ -18,6 +18,7 @@ export interface TinyUserDTO {
   official?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
+  avatar_cache_key?: string;
   is_permanent_vip?: boolean;
   show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
@@ -878,6 +879,7 @@ export interface ChatMessage {
   kind: MessageKind;
   name: string;
   avatarUri?: string;
+  avatarCacheKey?: string;
   isPermanentVip?: boolean;
   chatBubbleStyle?: ChatBubbleStyle;
   avatarFrameStyle?: AvatarFrameStyle;
@@ -899,6 +901,7 @@ export interface ChatDetail {
     userId: number;
     name: string;
     avatarUri?: string;
+    avatarCacheKey?: string;
     avatarFrameStyle?: AvatarFrameStyle;
     isSelf: boolean;
     isOwner: boolean;
@@ -909,6 +912,7 @@ export interface Chat {
   id: number;
   title: string;
   avatarUri?: string;
+  avatarCacheKey?: string;
   avatarFrameStyle?: AvatarFrameStyle;
   subtitle: string;
   preview: string;
