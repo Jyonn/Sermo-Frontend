@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.33",
+  "id": "2026.08.14.34",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "媒体预览层级修复",
+      "title": "发言详情支持浏览器返回",
       "items": [
-        "从广场发言打开图片或视频时，预览现在会稳定显示在最上层"
+        "广场发言详情现在拥有独立 URL，可通过浏览器返回手势自然回到广场"
       ]
     },
     "en": {
-      "title": "Media preview layering fix",
+      "title": "Browser back for statement details",
       "items": [
-        "Image and video previews opened from focused statements now reliably stay above every surface"
+        "Focused square statements now have their own URL and return naturally to the feed with browser navigation"
       ]
     }
   }

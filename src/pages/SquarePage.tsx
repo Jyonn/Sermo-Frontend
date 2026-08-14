@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
@@ -252,6 +252,7 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
 
 export default function SquarePage() {
   const { t, language } = useI18n();
+  const location = useLocation();
   const navigate = useNavigate();
   const { statementId: routeStatementId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -289,6 +290,8 @@ export default function SquarePage() {
   const [videoGalleryStatementId, setVideoGalleryStatementId] = useState<number | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
+  const routeState = location.state as { squareInlineFocus?: boolean } | null;
+  const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
   const [inlineStatementId, setInlineStatementId] = useState<number | null>(null);
   const [inlineStatementExpanded, setInlineStatementExpanded] = useState(false);
   const statementCardRefs = useRef(new Map<number, HTMLElement>());
@@ -556,10 +559,15 @@ export default function SquarePage() {
     setInlineStatementId(null);
     setReplyTarget(null);
     setCommentText("");
+    if (inlineRouteActive) {
+      if (window.history.length > 1) navigate(-1);
+      else navigate("/app/square", { replace: true });
+    }
   };
 
   const openStatement = (statementId: number) => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
+    navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
     setInlineStatementExpanded(false);
     setInlineStatementId(statementId);
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
@@ -581,6 +589,22 @@ export default function SquarePage() {
   useEffect(() => () => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    if (inlineRouteActive && routedStatementId !== inlineStatementId) {
+      setInlineStatementId(routedStatementId);
+      setInlineStatementExpanded(true);
+      return;
+    }
+    if (!inlineRouteActive && inlineStatementId !== null) {
+      if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
+      inlineExpandTimerRef.current = null;
+      setInlineStatementExpanded(false);
+      setInlineStatementId(null);
+      setReplyTarget(null);
+      setCommentText("");
+    }
+  }, [inlineRouteActive, inlineStatementId, routedStatementId]);
 
   useEffect(() => {
     if (!inlineStatementExpanded) return;
@@ -1036,7 +1060,7 @@ export default function SquarePage() {
         {voicePreview && !recording ? <audio className="square-voice-preview" controls preload="metadata" src={voicePreview} /> : null}
         {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
       </BottomSheet>
-      <SideDrawer historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null} title={t("square.statementDetail")}>
+      <SideDrawer historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
