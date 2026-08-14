@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.15.1",
+  "id": "2026.08.15.2",
   "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "系统通知更加稳定",
+      "title": "桌面广场选中状态更清晰",
       "items": [
-        "修复系统通知在 WebApp 更新或切换账号后意外关闭的问题"
+        "选中发言的背景与强调线现在完整贴合发言流两侧"
       ]
     },
     "en": {
-      "title": "More reliable system notifications",
+      "title": "Clearer selection in the desktop square",
       "items": [
-        "Fixed system notifications unexpectedly turning off after WebApp updates or account switching"
+        "Selected statements now extend their highlight and accent line to the feed edges"
       ]
     }
   }

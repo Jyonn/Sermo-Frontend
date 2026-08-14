@@ -2732,6 +2732,10 @@ html[data-theme="dark"] body .growth-level-detail {
 
   .square-desktop-workspace .square-statement-feed > .square-inline-statement.is-focused {
     z-index: auto;
+    box-sizing: border-box;
+    width: calc(100% + 36px);
+    margin-inline: -18px;
+    padding-inline: 18px;
     background: color-mix(in srgb, var(--brand-primary) 5%, transparent);
     box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand-primary) 72%, transparent);
   }
