@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.26",
+  "id": "2026.08.14.27",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "成员内容清理更完整",
+      "title": "离线提醒按会话整理",
       "items": [
-        "成员被空间移除后，其广场发言和评论会同步停止展示"
+        "合并通知优先展示置顶和私聊会话，阅读多条消息更清楚"
       ]
     },
     "en": {
-      "title": "More complete member cleanup",
+      "title": "Offline alerts grouped by chat",
       "items": [
-        "Square posts and comments are now hidden when their author is removed from a space"
+        "Grouped alerts now prioritize pinned and direct chats for easier scanning"
       ]
     }
   }
