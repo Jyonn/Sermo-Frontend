@@ -207,6 +207,8 @@
   "square.userFeedEmpty": "{{name}} has not posted yet",
   "square.userFeedEmptyHint": "New statements will appear here.",
   "square.statementDetail": "Statement",
+  "square.desktopSelectStatement": "Select a statement",
+  "square.desktopSelectStatementHint": "Browse the feed on the left. Details and comments stay here.",
   "square.reply": "Reply",
   "square.writeReply": "Write a reply",
   "square.replyingTo": "Replying to {{name}}",

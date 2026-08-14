@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.34",
+  "id": "2026.08.14.35",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "发言详情支持浏览器返回",
+      "title": "桌面广场升级为三栏工作台",
       "items": [
-        "广场发言详情现在拥有独立 URL，可通过浏览器返回手势自然回到广场"
+        "桌面端可在发言流右侧直接阅读发言详情与评论，不再打断浏览上下文"
       ]
     },
     "en": {
-      "title": "Browser back for statement details",
+      "title": "Three-column square workspace on desktop",
       "items": [
-        "Focused square statements now have their own URL and return naturally to the feed with browser navigation"
+        "Desktop users can now read statement details and comments beside the feed without losing their browsing context"
       ]
     }
   }

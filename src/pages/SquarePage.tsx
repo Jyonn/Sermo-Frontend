@@ -292,6 +292,7 @@ export default function SquarePage() {
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const routeState = location.state as { squareInlineFocus?: boolean } | null;
   const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
+  const [desktopWorkspace, setDesktopWorkspace] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches);
   const [inlineStatementId, setInlineStatementId] = useState<number | null>(null);
   const [inlineStatementExpanded, setInlineStatementExpanded] = useState(false);
   const statementCardRefs = useRef(new Map<number, HTMLElement>());
@@ -568,8 +569,12 @@ export default function SquarePage() {
   const openStatement = (statementId: number) => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
     navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
-    setInlineStatementExpanded(false);
     setInlineStatementId(statementId);
+    if (desktopWorkspace) {
+      setInlineStatementExpanded(true);
+      return;
+    }
+    setInlineStatementExpanded(false);
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const card = statementCardRefs.current.get(statementId);
       if (!card) return;
@@ -591,6 +596,14 @@ export default function SquarePage() {
   }, []);
 
   useEffect(() => {
+    const query = window.matchMedia("(min-width: 901px)");
+    const update = () => setDesktopWorkspace(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
     if (inlineRouteActive && routedStatementId !== inlineStatementId) {
       setInlineStatementId(routedStatementId);
       setInlineStatementExpanded(true);
@@ -607,10 +620,10 @@ export default function SquarePage() {
   }, [inlineRouteActive, inlineStatementId, routedStatementId]);
 
   useEffect(() => {
-    if (!inlineStatementExpanded) return;
+    if (!inlineStatementExpanded || desktopWorkspace) return;
     document.documentElement.classList.add("square-inline-focus-open");
     return () => document.documentElement.classList.remove("square-inline-focus-open");
-  }, [inlineStatementExpanded]);
+  }, [desktopWorkspace, inlineStatementExpanded]);
 
   const sendComment = async () => {
     const content = commentText.trim();
@@ -885,6 +898,7 @@ export default function SquarePage() {
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
+      <div className={`square-desktop-workspace${inlineRouteActive ? " has-selection" : ""}`}>
       <main className="list-screen square-feed-screen">
         <TabPageHeader
           syncing={syncing}
@@ -949,14 +963,14 @@ export default function SquarePage() {
           <section className="square-statement-feed">
             {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => {
               const focused = inlineStatementId === statement.statement_id;
-              return <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded ? " is-expanded" : ""}`} key={statement.statement_id}>
-                {focused && inlineStatementExpanded ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
+              return <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? " is-expanded" : ""}`} key={statement.statement_id}>
+                {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
                   <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
                   <strong>{t("square.statementDetail")}</strong>
                   <span aria-hidden="true" />
                 </header> : null}
                 <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
-                {focused && inlineStatementExpanded ? <div className="square-inline-discussion">{discussionContent}</div> : null}
+                {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
               </div>;
             })}
           </section>
@@ -968,8 +982,24 @@ export default function SquarePage() {
           ) : null}
         </div>
       </main>
-      {inlineStatementExpanded && typeof document !== "undefined" ? createPortal(<button aria-label={t("common.close")} className="square-inline-focus-mask" onClick={closeInlineStatement} type="button" />, document.body) : null}
-      {inlineStatementExpanded ? <div className="square-inline-comment-dock">{commentComposer}</div> : null}
+      <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
+        {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
+          <div className="square-desktop-detail-scroll">
+            <div className="square-statement-detail-stage">
+              <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
+            </div>
+            {discussionContent}
+          </div>
+          {commentComposer}
+        </section> : <section className="square-desktop-detail-empty">
+          <span className="material-symbols-outlined">forum</span>
+          <strong>{t("square.desktopSelectStatement")}</strong>
+          <p>{t("square.desktopSelectStatementHint")}</p>
+        </section>}
+      </aside>
+      </div>
+      {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<button aria-label={t("common.close")} className="square-inline-focus-mask" onClick={closeInlineStatement} type="button" />, document.body) : null}
+      {inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-comment-dock">{commentComposer}</div> : null}
       <SideDrawer historyKey="square-notifications" onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">
           {!notificationEvents.length ? <QuietState icon="notifications_none" title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
