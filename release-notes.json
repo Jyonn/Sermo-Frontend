@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.28",
+  "id": "2026.08.14.29",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "系统通知更容易辨认",
+      "title": "发言卡片更整齐",
       "items": [
-        "私聊突出好友昵称，群聊展示群名，多媒体消息改用自然文案"
+        "聊天中的发言卡片统一宽度，失效提示也更加紧凑"
       ]
     },
     "en": {
-      "title": "Clearer system notifications",
+      "title": "Tidier statement cards",
       "items": [
-        "Push alerts now highlight friend or group names and describe media naturally"
+        "Statement cards now use a consistent width and a more compact unavailable state"
       ]
     }
   }
