@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.30",
+  "id": "2026.08.14.31",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "广场讨论更沉浸",
+      "title": "广场讨论全屏展开",
       "items": [
-        "点击广场发言后会原位聚焦并展开评论，浏览和回复不再反复切换页面"
+        "发言评论加入顺滑展开动画、返回栏与手机端全屏阅读体验"
       ]
     },
     "en": {
-      "title": "A more focused square discussion",
+      "title": "Full-screen square discussions",
       "items": [
-        "Square statements now expand comments in place for smoother reading and replies"
+        "Statement discussions now add a fluid reveal, a back header, and a full-screen mobile layout"
       ]
     }
   }

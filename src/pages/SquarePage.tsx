@@ -569,6 +569,7 @@ export default function SquarePage() {
       inlineExpandTimerRef.current = window.setTimeout(() => {
         setInlineStatementExpanded(true);
         inlineExpandTimerRef.current = null;
+        window.requestAnimationFrame(() => card.parentElement?.scrollIntoView({ behavior: "smooth", block: "start" }));
       }, 280);
     }));
   };
@@ -919,6 +920,11 @@ export default function SquarePage() {
             {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => {
               const focused = inlineStatementId === statement.statement_id;
               return <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded ? " is-expanded" : ""}`} key={statement.statement_id}>
+                {focused && inlineStatementExpanded ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
+                  <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
+                  <strong>{t("square.statementDetail")}</strong>
+                  <span aria-hidden="true" />
+                </header> : null}
                 <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
                 {focused && inlineStatementExpanded ? <div className="square-inline-discussion">{discussionContent}</div> : null}
               </div>;
