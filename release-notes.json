@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.29",
+  "id": "2026.08.14.30",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "发言卡片更整齐",
+      "title": "广场讨论更沉浸",
       "items": [
-        "聊天中的发言卡片统一宽度，失效提示也更加紧凑"
+        "点击广场发言后会原位聚焦并展开评论，浏览和回复不再反复切换页面"
       ]
     },
     "en": {
-      "title": "Tidier statement cards",
+      "title": "A more focused square discussion",
       "items": [
-        "Statement cards now use a consistent width and a more compact unavailable state"
+        "Square statements now expand comments in place for smoother reading and replies"
       ]
     }
   }

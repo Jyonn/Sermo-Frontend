@@ -25113,11 +25113,105 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
   box-shadow: none;
 }
 
+.square-statement-feed > .square-inline-statement {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+}
+
+.square-statement-feed > .square-inline-statement > .square-statement-card {
+  width: 100%;
+  margin: 0;
+  padding: 20px 4px 22px;
+  scroll-margin-top: 66px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 62%, transparent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.square-statement-feed > .square-inline-statement.is-focused {
+  z-index: 72;
+  background: var(--bg-canvas);
+  box-shadow: 0 22px 70px rgba(12, 27, 22, .22);
+}
+
+.square-statement-feed > .square-inline-statement.is-focused > .square-statement-card {
+  cursor: default;
+  border-bottom-color: color-mix(in srgb, var(--line-soft) 76%, transparent);
+  background: var(--bg-canvas);
+}
+
+.square-inline-focus-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(12, 20, 18, .46);
+  backdrop-filter: blur(3px) saturate(.75);
+  animation: square-focus-mask-in 180ms ease both;
+}
+
+.square-inline-discussion {
+  min-width: 0;
+  padding-bottom: 94px;
+  background: var(--bg-canvas);
+  animation: square-discussion-reveal 240ms cubic-bezier(.2,.78,.2,1) both;
+  transform-origin: top center;
+}
+
+.square-inline-discussion .square-discussion-section {
+  min-height: 180px;
+  padding-inline: 4px;
+}
+
+.square-inline-comment-dock {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 73;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.square-inline-comment-dock .square-comment-composer {
+  width: min(calc(100% - 28px), 680px);
+  margin: 10px 14px max(12px, env(safe-area-inset-bottom));
+  pointer-events: auto;
+  animation: square-comment-dock-in 220ms cubic-bezier(.2,.78,.2,1) both;
+}
+
+@media (min-width: 901px) {
+  html[data-desktop-nav] .square-inline-comment-dock { left: 220px; }
+  html[data-desktop-nav="collapsed"] .square-inline-comment-dock { left: 108px; }
+}
+
+@keyframes square-focus-mask-in { from { opacity: 0; } }
+@keyframes square-discussion-reveal { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes square-comment-dock-in { from { opacity: 0; transform: translateY(18px); } }
+
 .square-statement-feed > .square-statement-card.is-clickable {
   transition: background-color 150ms ease;
 }
 
+.square-statement-feed > .square-inline-statement > .square-statement-card.is-clickable {
+  transition: background-color 150ms ease;
+}
+
 .square-statement-feed > .square-statement-card.is-clickable:hover {
+  border-color: color-mix(in srgb, var(--line-soft) 62%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 2.5%, transparent);
+  transform: none;
+}
+
+.square-statement-feed > .square-inline-statement:not(.is-focused) > .square-statement-card.is-clickable:hover {
   border-color: color-mix(in srgb, var(--line-soft) 62%, transparent);
   background: color-mix(in srgb, var(--brand-primary) 2.5%, transparent);
   transform: none;
@@ -25147,6 +25241,32 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
     border-left: 0;
     border-radius: 0;
   }
+
+
+  .square-statement-feed > .square-inline-statement > .square-statement-card {
+    margin: 0;
+    padding: 18px 16px 20px;
+    scroll-margin-top: 65px;
+    border-right: 0;
+    border-bottom-color: color-mix(in srgb, var(--line-soft) 54%, transparent);
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .square-inline-discussion .square-discussion-section {
+    padding-inline: 16px;
+  }
+
+  .square-inline-comment-dock .square-comment-composer {
+    width: calc(100% - 20px);
+    margin-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .square-inline-focus-mask,
+  .square-inline-discussion,
+  .square-inline-comment-dock .square-comment-composer { animation: none; }
 }
 .admin-verification-drawer { display: grid; gap: 14px; }
 .admin-verification-tier { display: grid; grid-template-columns: 1fr auto; align-items: end; padding: 22px; border: 1px solid rgba(16, 113, 84, .18); border-radius: 22px; background: linear-gradient(135deg, rgba(219, 247, 235, .96), rgba(255, 249, 226, .92)); }
