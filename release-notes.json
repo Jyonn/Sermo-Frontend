@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.17",
+  "id": "2026.08.14.18",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "视频消息加载更稳",
+      "title": "链接与发言卡片更稳定",
       "items": [
-        "视频消息会提前按真实比例预留空间，不再加载后突然改变高度",
-        "已有视频预览图会更早展示，减少等待时的黑色空块"
+        "所有链接都会以统一尺寸的卡片展示，解析中或解析失败也不会造成页面跳动",
+        "聊天中的发言会按文字、语音、视频和图片数量提前预留稳定空间"
       ]
     },
     "en": {
-      "title": "More stable video messages",
+      "title": "Stable link and post cards",
       "items": [
-        "Video messages now reserve their real aspect ratio before loading",
-        "Available video posters appear earlier instead of showing a blank frame"
+        "Every link now uses a consistently sized card, including pending and failed previews",
+        "Shared posts now reserve stable space based on text, audio, video, and image count"
       ]
     }
   }

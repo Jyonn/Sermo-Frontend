@@ -1291,9 +1291,9 @@ function LinkedMessageText({ hiddenUrl, mentions = [], text }: { hiddenUrl?: str
   );
 }
 
-const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId, preview }: { messageId: number | string; preview?: LinkPreviewDTO | null }) {
+const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId, preview, url }: { messageId: number | string; preview?: LinkPreviewDTO | null; url: string }) {
   const [currentPreview, setCurrentPreview] = useState<LinkPreviewDTO | null>(preview ?? null);
-  const previewUrl = currentPreview?.url || preview?.url || "";
+  const previewUrl = currentPreview?.url || preview?.url || url;
   const isPollable = typeof messageId === "number" && (currentPreview?.status ?? preview?.status) === "pending";
 
   useEffect(() => {
@@ -1327,10 +1327,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
     };
   }, [isPollable, messageId]);
 
-  if (!currentPreview || currentPreview.status === "none") return null;
-  if (currentPreview.status === "failed") return null;
-
-  if (currentPreview.status === "pending") {
+  if (currentPreview?.status === "pending") {
     return (
       <div className="message-link-preview-card is-loading" aria-label={i18n.t("link.generatingPreview")}>
         <div className="message-link-preview-text">
@@ -1340,6 +1337,27 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
         </div>
         <div className="message-link-preview-image shimmer-block" />
       </div>
+    );
+  }
+
+  const unavailable = !currentPreview || currentPreview.status === "none" || currentPreview.status === "failed";
+  if (unavailable) {
+    const failed = currentPreview?.status === "failed";
+    return (
+      <a
+        className="message-link-preview-card no-image is-unavailable"
+        href={previewUrl}
+        onClick={(event) => event.stopPropagation()}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <div className="message-link-preview-text">
+          <span className="message-link-preview-site">{hostnameFromUrl(previewUrl) || i18n.t("link.preview")}</span>
+          <strong className="message-link-preview-title">{failed ? i18n.t("link.parseFailed") : i18n.t("link.unavailable")}</strong>
+          <span className="message-link-preview-desc">{i18n.t("link.openDirectly")}</span>
+        </div>
+        <span className="message-link-preview-placeholder" aria-hidden="true">↗</span>
+      </a>
     );
   }
 
@@ -1359,7 +1377,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
         <strong className="message-link-preview-title">{title}</strong>
         {currentPreview.description ? <span className="message-link-preview-desc">{currentPreview.description}</span> : null}
       </div>
-      {currentPreview.image_url ? <img alt="" className="message-link-preview-image" loading="lazy" src={currentPreview.image_url} /> : null}
+      {currentPreview.image_url ? <img alt="" className="message-link-preview-image" loading="lazy" src={currentPreview.image_url} /> : <span className="message-link-preview-placeholder" aria-hidden="true">↗</span>}
     </a>
   );
 });
@@ -1501,14 +1519,13 @@ function renderMessageContent(
     return <StatementMessageCard statement={message.payload?.statement} />;
   }
 
-  const linkPreview = message.payload?.link_preview;
-  const hasLinkPreview = Boolean(linkPreview && linkPreview.status !== "none" && linkPreview.status !== "failed");
   const text = message.payload?.text ?? message.text;
-  if (!hasLinkPreview) {
+  const linkPreview = message.payload?.link_preview;
+  const previewUrl = linkPreview?.url ?? extractFirstMessageUrl(text) ?? undefined;
+  if (!previewUrl) {
     return <LinkedMessageText mentions={message.mentions} text={text} />;
   }
 
-  const previewUrl = linkPreview?.url ?? extractFirstMessageUrl(text) ?? undefined;
   const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, previewUrl);
 
   return (
@@ -1518,7 +1535,7 @@ function renderMessageContent(
           <LinkedMessageText hiddenUrl={previewUrl} mentions={message.mentions} text={text} />
         </span>
       ) : null}
-      <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} />
+      <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} url={previewUrl} />
     </span>
   );
 }

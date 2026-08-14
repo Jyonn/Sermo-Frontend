@@ -4659,7 +4659,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   grid-template-columns: minmax(0, 1fr) 82px;
   gap: 10px;
   width: min(70vw, 330px);
-  min-height: 96px;
+  height: 104px;
   padding: 10px;
   border-radius: var(--radius-bubble);
   color: #121821;
@@ -4672,7 +4672,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-link-preview-card.no-image {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 82px;
 }
 
 .message-bubble.self .message-link-preview-card {
@@ -4728,6 +4728,24 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background:
     radial-gradient(circle at 30% 20%, rgba(12, 214, 160, 0.24), transparent 36%),
     linear-gradient(135deg, rgba(232, 238, 247, 0.94), rgba(244, 248, 252, 0.98));
+}
+
+.message-link-preview-placeholder {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  border-radius: 12px;
+  color: color-mix(in srgb, var(--brand-deep) 70%, transparent);
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.88), transparent 28%),
+    linear-gradient(145deg, rgba(221, 241, 234, 0.94), rgba(237, 241, 248, 0.96));
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.message-link-preview-card.is-unavailable {
+  opacity: 0.88;
 }
 
 .message-link-preview-card.is-loading {
@@ -4789,11 +4807,27 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-statement-card {
   display: grid;
+  grid-template-rows: 48px minmax(0, 1fr) 36px;
   width: 100%;
+  height: 154px;
   min-width: 0;
   overflow: hidden;
   border-radius: inherit;
   color: inherit;
+}
+
+.message-statement-card.layout-audio {
+  height: 190px;
+}
+
+.message-statement-card.layout-video,
+.message-statement-card.layout-image-one {
+  height: 278px;
+}
+
+.message-statement-card.layout-images-two,
+.message-statement-card.layout-images-many {
+  height: 230px;
 }
 
 .message-statement-head,
@@ -4842,37 +4876,50 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   opacity: .58;
 }
 
+.message-statement-content {
+  display: flex;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.message-statement-card.layout-text .message-statement-content {
+  justify-content: center;
+}
+
 .message-statement-text {
-  padding: 2px 11px 10px;
+  display: -webkit-box;
+  align-self: start;
+  max-height: 48px;
+  padding: 2px 11px 8px;
+  overflow: hidden;
   font-size: .9rem;
   font-weight: 720;
   line-height: 1.42;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .message-statement-images {
   display: grid;
+  flex: 1 1 auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  min-height: 0;
   background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
 .message-statement-images.count-1 {
   grid-template-columns: 1fr;
-  aspect-ratio: 16 / 9;
 }
 
-.message-statement-images.count-2,
-.message-statement-images.count-4 {
+.message-statement-images.count-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  aspect-ratio: 2 / 1;
-}
-
-.message-statement-images.count-4 {
-  aspect-ratio: 1;
 }
 
 .message-statement-images button,
@@ -4885,6 +4932,19 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-statement-images button {
   overflow: hidden;
+  position: relative;
+}
+
+.message-statement-more {
+  display: grid;
+  position: absolute;
+  inset: 0;
+  place-items: center;
+  color: #fff;
+  background: rgba(8, 22, 19, 0.54);
+  backdrop-filter: blur(2px);
+  font-size: .78rem;
+  font-weight: 850;
 }
 
 .message-statement-images img {
@@ -4893,20 +4953,24 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-statement-audio {
+  flex: 0 0 38px;
   width: calc(100% - 20px);
   height: 38px;
   margin: 2px 10px 9px;
 }
 
 .message-statement-video {
+  flex: 1 1 auto;
   display: block;
   width: 100%;
-  max-height: 220px;
+  height: 100%;
+  min-height: 0;
   object-fit: cover;
   background: #111;
 }
 
 .message-statement-stats {
+  grid-row: 3;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -4934,10 +4998,13 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-statement-card.is-unavailable {
+  grid-template-rows: 1fr;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 9px;
-  min-width: 210px;
+  width: 100%;
+  height: 104px;
+  min-width: 0;
   padding: 12px;
 }
 
@@ -21656,21 +21723,7 @@ html[data-theme="dark"] :is(
   flex: 0 1 auto;
 }
 
-.message-bubble:is(.self, .other).is-link-preview:not(.has-reply):has(
-  > .message-text-stack > .message-link-preview-card.no-image:only-child
-) {
-  width: min(70vw, 286px);
-}
-
-.message-bubble:is(.self, .other).is-link-preview:not(.has-reply):has(
-  > .message-text-stack > .message-link-preview-card.no-image:only-child
-) > .message-text-stack,
-.message-bubble:is(.self, .other).is-link-preview:not(.has-reply) > .message-text-stack > .message-link-preview-card.no-image:only-child {
-  width: 100%;
-}
-
-/* Compact no-image previews still live in a full-width compound stack. Keep
-   their visible edge anchored to the sender side instead of the grid start. */
+/* Compound previews stay anchored to the sender side at every viewport width. */
 .message-text-stack.self {
   justify-items: end;
 }
@@ -21686,26 +21739,27 @@ html[data-theme="dark"] :is(
 .message-link-preview-card {
   width: min(70vw, 330px);
   max-width: 100%;
-  min-height: 88px;
+  height: 104px;
+  min-height: 104px;
+  max-height: 104px;
   box-sizing: border-box;
 }
 
 .message-link-preview-card.no-image {
-  width: fit-content;
-  min-width: min(100%, 220px);
-  max-width: min(100%, 286px);
-  min-height: 0;
-  padding: 12px 14px;
+  width: min(70vw, 330px);
+  min-width: 0;
+  max-width: 100%;
+  padding: 10px;
 }
 
 .message-link-preview-card.no-image .message-link-preview-text {
-  width: fit-content;
+  width: auto;
   max-width: 100%;
 }
 
 .message-link-preview-card.no-image .message-link-preview-title,
 .message-link-preview-card.no-image .message-link-preview-desc {
-  width: fit-content;
+  width: auto;
   max-width: 100%;
 }
 
