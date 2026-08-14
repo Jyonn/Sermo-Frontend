@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.16",
+  "id": "2026.08.14.17",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "广场未读更准确",
+      "title": "视频消息加载更稳",
       "items": [
-        "打开一条发言后，与它相关的点赞、评论和回复会统一标记为已读",
-        "广场入口、通知列表与底部红点会即时同步"
+        "视频消息会提前按真实比例预留空间，不再加载后突然改变高度",
+        "已有视频预览图会更早展示，减少等待时的黑色空块"
       ]
     },
     "en": {
-      "title": "More accurate Square unread counts",
+      "title": "More stable video messages",
       "items": [
-        "Opening a statement now reads all of its likes, comments, and replies",
-        "Square badges stay in sync across the header, inbox, and navigation"
+        "Video messages now reserve their real aspect ratio before loading",
+        "Available video posters appear earlier instead of showing a blank frame"
       ]
     }
   }

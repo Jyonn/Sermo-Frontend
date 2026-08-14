@@ -1003,27 +1003,25 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const previewPosterOnly = uri === "preview://video";
-  const [loaded, setLoaded] = useState(previewPosterOnly);
+  const metadataAspectRatio = metadata?.pixel_width && metadata.pixel_height
+    && Number.isFinite(metadata.pixel_width) && Number.isFinite(metadata.pixel_height)
+    && metadata.pixel_width > 0 && metadata.pixel_height > 0
+    ? metadata.pixel_width / metadata.pixel_height
+    : null;
+  const hasPoster = Boolean(thumbnailUri);
+  const [loaded, setLoaded] = useState(previewPosterOnly || hasPoster);
   const [duration, setDuration] = useState(0);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(
-    previewPosterOnly && metadata?.pixel_width && metadata.pixel_height
-      ? metadata.pixel_width / metadata.pixel_height
-      : null
-  );
+  const [aspectRatio, setAspectRatio] = useState<number | null>(metadataAspectRatio);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
   const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
 
   useEffect(() => {
-    setLoaded(previewPosterOnly);
+    setLoaded(previewPosterOnly || hasPoster);
     setDuration(0);
-    setAspectRatio(
-      previewPosterOnly && metadata?.pixel_width && metadata.pixel_height
-        ? metadata.pixel_width / metadata.pixel_height
-        : null
-    );
+    setAspectRatio(metadataAspectRatio);
     setRetryWithFreshUri(false);
-  }, [metadata?.pixel_height, metadata?.pixel_width, previewPosterOnly, uri]);
+  }, [hasPoster, metadataAspectRatio, previewPosterOnly, uri]);
 
   return (
     <div
@@ -1056,7 +1054,12 @@ const MessageMediaVideo = memo(function MessageMediaVideo({
               const video = event.currentTarget;
               setLoaded(true);
               if (video.videoWidth > 0 && video.videoHeight > 0) {
-                setAspectRatio(video.videoWidth / video.videoHeight);
+                const measuredAspectRatio = video.videoWidth / video.videoHeight;
+                const metadataMismatch = metadataAspectRatio !== null
+                  && Math.abs(measuredAspectRatio - metadataAspectRatio) / metadataAspectRatio > 0.05;
+                if (metadataAspectRatio === null || metadataMismatch) {
+                  setAspectRatio(measuredAspectRatio);
+                }
               }
               if (Number.isFinite(video.duration)) setDuration(video.duration);
             }}
