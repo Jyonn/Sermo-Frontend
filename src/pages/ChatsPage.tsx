@@ -1659,7 +1659,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             message.kind === "map_access" ? "is-travel-map" : "",
             message.kind === "statement" ? "is-statement" : "",
             message.kind === "sticker" ? "is-sticker" : "",
-            message.payload?.link_preview && message.payload.link_preview.status !== "none" && message.payload.link_preview.status !== "failed" ? "is-link-preview" : "",
+            extractFirstMessageUrl(message.payload?.text ?? message.text) ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
             isFirst ? "group-start" : "",
             isLast ? "group-end" : "",

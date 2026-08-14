@@ -12904,8 +12904,8 @@ html[data-theme="dark"] .message-link-preview-site {
   }
 }
 
-/* Link bubbles own the skin once. The inner card is only a fixed layout slot,
-   preventing custom bubble borders and shadows from being rendered twice. */
+/* Every URL uses the same fixed inner card geometry. The outer link bubble is
+   transparent; this inner card remains the single owner of the bubble skin. */
 .message-group .message-bubble.is-link-preview > .message-text-stack > .message-link-preview-card {
   grid-template-columns: minmax(0, 1fr) 58px !important;
   width: min(70vw, 312px) !important;
@@ -12913,11 +12913,6 @@ html[data-theme="dark"] .message-link-preview-site {
   min-height: 80px !important;
   max-height: 80px !important;
   padding: 10px 11px !important;
-  border: 0 !important;
-  border-radius: inherit !important;
-  color: inherit;
-  background: transparent !important;
-  box-shadow: none !important;
 }
 
 .message-group .message-bubble.is-link-preview > .message-text-stack > .message-link-preview-card :is(.message-link-preview-image, .message-link-preview-placeholder) {

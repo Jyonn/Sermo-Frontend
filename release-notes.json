@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.20",
+  "id": "2026.08.14.21",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片更轻巧",
+      "title": "链接气泡恢复一致",
       "items": [
-        "链接卡片缩小了媒体区域和整体高度，浏览聊天记录更紧凑",
-        "解析失败时只展示域名，并修复自定义气泡下的双层边框"
+        "成功和失败的链接现在共用同一层气泡结构，不再缺失或重复边框",
+        "链接卡片继续保持紧凑尺寸，解析失败时仅展示域名"
       ]
     },
     "en": {
-      "title": "Lighter link cards",
+      "title": "Consistent link bubbles",
       "items": [
-        "Link cards now use a smaller media slot and a more compact height",
-        "Failed previews now show only the domain, with duplicate bubble borders removed"
+        "Successful and failed links now share the same single bubble layer",
+        "Link cards remain compact, while failed previews show only the domain"
       ]
     }
   }
