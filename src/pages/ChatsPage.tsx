@@ -1342,7 +1342,6 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   const unavailable = !currentPreview || currentPreview.status === "none" || currentPreview.status === "failed";
   if (unavailable) {
-    const failed = currentPreview?.status === "failed";
     return (
       <a
         className="message-link-preview-card no-image is-unavailable"
@@ -1352,9 +1351,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
         target="_blank"
       >
         <div className="message-link-preview-text">
-          <span className="message-link-preview-site">{hostnameFromUrl(previewUrl) || i18n.t("link.preview")}</span>
-          <strong className="message-link-preview-title">{failed ? i18n.t("link.parseFailed") : i18n.t("link.unavailable")}</strong>
-          <span className="message-link-preview-desc">{i18n.t("link.openDirectly")}</span>
+          <strong className="message-link-preview-title">{hostnameFromUrl(previewUrl) || i18n.t("link.preview")}</strong>
         </div>
         <span className="message-link-preview-placeholder" aria-hidden="true">↗</span>
       </a>
@@ -1362,7 +1359,6 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   }
 
   const title = currentPreview.title || hostnameFromUrl(currentPreview.url || "") || currentPreview.url || i18n.t("link.title");
-  const siteName = currentPreview.site_name || hostnameFromUrl(currentPreview.url || "");
 
   return (
     <a
@@ -1373,7 +1369,6 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
       target="_blank"
     >
       <div className="message-link-preview-text">
-        {siteName ? <span className="message-link-preview-site">{siteName}</span> : null}
         <strong className="message-link-preview-title">{title}</strong>
         {currentPreview.description ? <span className="message-link-preview-desc">{currentPreview.description}</span> : null}
       </div>

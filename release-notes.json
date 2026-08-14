@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.19",
+  "id": "2026.08.14.20",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "广场更清爽",
+      "title": "链接卡片更轻巧",
       "items": [
-        "发言改为简洁的信息流布局，使用轻分隔线替代层层卡片",
-        "广场统一使用清爽外观，不再受个性化发言样式影响"
+        "链接卡片缩小了媒体区域和整体高度，浏览聊天记录更紧凑",
+        "解析失败时只展示域名，并修复自定义气泡下的双层边框"
       ]
     },
     "en": {
-      "title": "A cleaner Square",
+      "title": "Lighter link cards",
       "items": [
-        "Posts now form a clean stream separated by subtle lines instead of cards",
-        "Square now uses one calm, consistent appearance without personalized post skins"
+        "Link cards now use a smaller media slot and a more compact height",
+        "Failed previews now show only the domain, with duplicate bubble borders removed"
       ]
     }
   }

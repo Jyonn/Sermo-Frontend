@@ -4656,11 +4656,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-link-preview-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 82px;
-  gap: 10px;
-  width: min(70vw, 330px);
-  height: 104px;
-  padding: 10px;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 9px;
+  width: min(70vw, 312px);
+  height: 80px;
+  padding: 10px 11px;
   border-radius: var(--radius-bubble);
   color: #121821;
   background:
@@ -4672,7 +4673,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-link-preview-card.no-image {
-  grid-template-columns: minmax(0, 1fr) 82px;
+  grid-template-columns: minmax(0, 1fr) 58px;
 }
 
 .message-bubble.self .message-link-preview-card {
@@ -4683,7 +4684,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-link-preview-text {
   display: grid;
   align-content: start;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -4702,18 +4703,18 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   display: -webkit-box;
   overflow: hidden;
   color: #121821;
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   font-weight: 900;
   line-height: 1.25;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .message-link-preview-desc {
   display: -webkit-box;
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.28;
   -webkit-box-orient: vertical;
@@ -4721,8 +4722,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-link-preview-image {
-  width: 82px;
-  height: 82px;
+  width: 58px;
+  height: 58px;
   object-fit: cover;
   border-radius: 12px;
   background:
@@ -4732,15 +4733,15 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-link-preview-placeholder {
   display: grid;
-  width: 82px;
-  height: 82px;
+  width: 58px;
+  height: 58px;
   place-items: center;
   border-radius: 12px;
   color: color-mix(in srgb, var(--brand-deep) 70%, transparent);
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.88), transparent 28%),
     linear-gradient(145deg, rgba(221, 241, 234, 0.94), rgba(237, 241, 248, 0.96));
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   font-weight: 800;
 }
 
@@ -12901,6 +12902,27 @@ html[data-theme="dark"] .message-link-preview-site {
     height: 29px;
     flex-basis: 29px;
   }
+}
+
+/* Link bubbles own the skin once. The inner card is only a fixed layout slot,
+   preventing custom bubble borders and shadows from being rendered twice. */
+.message-group .message-bubble.is-link-preview > .message-text-stack > .message-link-preview-card {
+  grid-template-columns: minmax(0, 1fr) 58px !important;
+  width: min(70vw, 312px) !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  max-height: 80px !important;
+  padding: 10px 11px !important;
+  border: 0 !important;
+  border-radius: inherit !important;
+  color: inherit;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.message-group .message-bubble.is-link-preview > .message-text-stack > .message-link-preview-card :is(.message-link-preview-image, .message-link-preview-placeholder) {
+  width: 58px !important;
+  height: 58px !important;
 }
 
 @media (min-width: 901px) and (max-width: 1180px) {
@@ -21709,7 +21731,7 @@ html[data-theme="dark"] :is(
 .message-bubble.other.is-link-preview:not(.has-reply) {
   display: inline-flex;
   width: max-content;
-  max-width: min(70vw, 330px);
+  max-width: min(70vw, 312px);
 }
 
 .message-bubble.is-link-preview > .message-text-stack.has-link-preview {
@@ -21737,19 +21759,19 @@ html[data-theme="dark"] :is(
 }
 
 .message-link-preview-card {
-  width: min(70vw, 330px);
+  width: min(70vw, 312px);
   max-width: 100%;
-  height: 104px;
-  min-height: 104px;
-  max-height: 104px;
+  height: 80px;
+  min-height: 80px;
+  max-height: 80px;
   box-sizing: border-box;
 }
 
 .message-link-preview-card.no-image {
-  width: min(70vw, 330px);
+  width: min(70vw, 312px);
   min-width: 0;
   max-width: 100%;
-  padding: 10px;
+  padding: 10px 11px;
 }
 
 .message-link-preview-card.no-image .message-link-preview-text {
