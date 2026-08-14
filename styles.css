@@ -25200,6 +25200,12 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
   animation: square-focus-mask-in 180ms ease both;
 }
 
+/* Media inspection is the topmost interactive surface. The compound selector
+   prevents the later generic .dialog-backdrop rule from lowering its layer. */
+.dialog-backdrop.message-image-preview-backdrop {
+  z-index: 5000;
+}
+
 .square-inline-discussion {
   display: grid;
   min-width: 0;

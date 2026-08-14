@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.32",
+  "id": "2026.08.14.33",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "广场全屏层级修复",
+      "title": "媒体预览层级修复",
       "items": [
-        "发言聚焦页改为独立滚动视窗，图片预览始终显示在最上层"
+        "从广场发言打开图片或视频时，预览现在会稳定显示在最上层"
       ]
     },
     "en": {
-      "title": "Square full-screen layering fixes",
+      "title": "Media preview layering fix",
       "items": [
-        "Focused statements now scroll in an isolated viewport while media previews always stay on top"
+        "Image and video previews opened from focused statements now reliably stay above every surface"
       ]
     }
   }
