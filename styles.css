@@ -5484,7 +5484,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-image-preview-backdrop {
-  z-index: 75;
+  z-index: 1200;
   display: block;
   padding: 0;
   background: #fbfbf8;
@@ -12884,6 +12884,12 @@ html[data-theme="dark"] .message-link-preview-site {
 }
 
 @media (max-width: 767px) {
+  html.square-inline-focus-open,
+  html.square-inline-focus-open body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   .guest-topbar .sermo-brand-mark {
     width: 32px;
     height: 32px;
@@ -25139,7 +25145,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 }
 
 .square-statement-feed > .square-inline-statement.is-expanded {
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(min-content, 1fr);
   min-height: 100dvh;
   align-content: start;
 }
@@ -25295,12 +25301,18 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
   }
 
   .square-statement-feed > .square-inline-statement.is-expanded {
-    left: 50%;
+    position: fixed;
+    inset: 0;
     width: 100vw;
-    min-height: 100dvh;
-    margin-left: -50vw;
+    height: 100dvh;
+    min-height: 0;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: none;
     background: var(--bg-canvas);
     box-shadow: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .square-statement-feed > .square-inline-statement.is-expanded > .square-statement-card {

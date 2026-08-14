@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.31",
+  "id": "2026.08.14.32",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "广场讨论全屏展开",
+      "title": "广场全屏层级修复",
       "items": [
-        "发言评论加入顺滑展开动画、返回栏与手机端全屏阅读体验"
+        "发言聚焦页改为独立滚动视窗，图片预览始终显示在最上层"
       ]
     },
     "en": {
-      "title": "Full-screen square discussions",
+      "title": "Square full-screen layering fixes",
       "items": [
-        "Statement discussions now add a fluid reveal, a back header, and a full-screen mobile layout"
+        "Focused statements now scroll in an isolated viewport while media previews always stay on top"
       ]
     }
   }

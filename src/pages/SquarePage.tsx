@@ -582,6 +582,12 @@ export default function SquarePage() {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
   }, []);
 
+  useEffect(() => {
+    if (!inlineStatementExpanded) return;
+    document.documentElement.classList.add("square-inline-focus-open");
+    return () => document.documentElement.classList.remove("square-inline-focus-open");
+  }, [inlineStatementExpanded]);
+
   const sendComment = async () => {
     const content = commentText.trim();
     if (commentStatementId === null || !content || commentSending) return;
