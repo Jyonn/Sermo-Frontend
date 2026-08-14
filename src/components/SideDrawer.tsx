@@ -18,6 +18,7 @@ interface SideDrawerProps {
   onClose: () => void;
   children: ReactNode;
   historyKey?: string;
+  historyMode?: "stack" | "route";
 }
 
 export function SideDrawer({
@@ -33,6 +34,7 @@ export function SideDrawer({
   onClose,
   children,
   historyKey,
+  historyMode = "stack",
 }: SideDrawerProps) {
   const { t } = useI18n();
   const drawerId = useId();
@@ -59,16 +61,21 @@ export function SideDrawer({
   };
 
   const requestClose = useCallback(() => {
+    if (historyMode === "route") {
+      onCloseRef.current();
+      return;
+    }
     const stack = getDrawerStack();
     if (registeredRef.current && stack[stack.length - 1] === drawerId) {
       window.history.back();
       return;
     }
     onCloseRef.current();
-  }, [drawerId]);
+  }, [drawerId, historyMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (historyMode === "route") return;
     if (open && !registeredRef.current) {
       const storedStack = getDrawerStack();
       const activeStack = storedStack.filter((item) => activeDrawerIds.has(item));
@@ -116,10 +123,10 @@ export function SideDrawer({
       activeDrawerIds.delete(drawerId);
       registeredRef.current = false;
     }
-  }, [drawerId, historyKey, open, title]);
+  }, [drawerId, historyKey, historyMode, open, title]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || historyMode === "route") return;
     const onPopState = () => {
       if (!getDrawerStack().includes(drawerId)) {
         activeDrawerIds.delete(drawerId);
@@ -129,7 +136,7 @@ export function SideDrawer({
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [drawerId, open]);
+  }, [drawerId, historyMode, open]);
 
   useEffect(() => {
     if (!open) return;

@@ -288,7 +288,7 @@ export default function SquarePage() {
   const [videoGalleryStatementId, setVideoGalleryStatementId] = useState<number | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
-  const [commentStatementId, setCommentStatementId] = useState<number | null>(routedStatementId);
+  const commentStatementId = routedStatementId;
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsHasMore, setCommentsHasMore] = useState(false);
@@ -504,13 +504,8 @@ export default function SquarePage() {
     return () => controller.abort();
   }, [commentSort, commentStatementId, t]);
 
-  useEffect(() => {
-    setCommentStatementId(routedStatementId);
-  }, [routedStatementId]);
-
   const openStatement = (statementId: number) => {
-    setCommentStatementId(statementId);
-    navigate(`/app/square/statements/${statementId}`);
+    navigate(`/app/square/statements/${statementId}`, { state: { squareStatementDrawer: true } });
   };
 
   const sendComment = async () => {
@@ -712,7 +707,7 @@ export default function SquarePage() {
       await api.deleteSquareStatement(id);
       setStatements((current) => current.filter((item) => item.statement_id !== id));
       if (pinnedStatement?.statement_id === id) setPinnedStatement(null);
-      if (commentStatementId === id) setCommentStatementId(null);
+      if (commentStatementId === id) navigate("/app/square", { replace: true });
       setDeleteStatementId(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("square.deleteFailed"));
@@ -929,7 +924,7 @@ export default function SquarePage() {
         {voicePreview && !recording ? <audio className="square-voice-preview" controls preload="metadata" src={voicePreview} /> : null}
         {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
       </BottomSheet>
-      <SideDrawer className={`statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`} historyKey="square-statement" onClose={() => { setCommentStatementId(null); setReplyTarget(null); if (routedStatementId) navigate("/app/square"); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
+      <SideDrawer className={`statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`} historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={commentStatementId !== null} title={t("square.statementDetail")}>
         <div className={`square-comments-drawer statement-detail-theme-${activeCommentStatement?.user.statement_card_style ?? "default"}`}>
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
@@ -967,7 +962,6 @@ export default function SquarePage() {
             onOpenChat={(chatId) => {
               window.history.replaceState({ ...window.history.state, sermoDrawerStack: [] }, "");
               setProfileDrawerUserId(null);
-              setCommentStatementId(null);
               navigate(`/app/chats/${chatId}`);
             }}
             onSyncingChange={setProfileSyncing}

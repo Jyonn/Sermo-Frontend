@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.12",
+  "id": "2026.08.14.13",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "探索表情更有温度",
+      "title": "广场返回更顺滑",
       "items": [
-        "桌面端探索表情现在会标注同空间提供者",
-        "跨空间来源保持匿名，不展示空间或用户身份"
+        "从发言详情侧滑返回时不再重复切换路由",
+        "广场返回过程减少卡顿与短暂白屏"
       ]
     },
     "en": {
-      "title": "More context in sticker discovery",
+      "title": "Smoother square navigation",
       "items": [
-        "Sticker discovery now credits contributors from your space on desktop",
-        "Cross-space sources remain anonymous and never expose space or user identity"
+        "Swipe-back from statement details no longer performs duplicate navigation",
+        "Returning to the square now avoids unnecessary stalls and blank frames"
       ]
     }
   }
