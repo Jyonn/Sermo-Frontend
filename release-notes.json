@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.14.18",
+  "id": "2026.08.14.19",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "链接与发言卡片更稳定",
+      "title": "广场更清爽",
       "items": [
-        "所有链接都会以统一尺寸的卡片展示，解析中或解析失败也不会造成页面跳动",
-        "聊天中的发言会按文字、语音、视频和图片数量提前预留稳定空间"
+        "发言改为简洁的信息流布局，使用轻分隔线替代层层卡片",
+        "广场统一使用清爽外观，不再受个性化发言样式影响"
       ]
     },
     "en": {
-      "title": "Stable link and post cards",
+      "title": "A cleaner Square",
       "items": [
-        "Every link now uses a consistently sized card, including pending and failed previews",
-        "Shared posts now reserve stable space based on text, audio, video, and image count"
+        "Posts now form a clean stream separated by subtle lines instead of cards",
+        "Square now uses one calm, consistent appearance without personalized post skins"
       ]
     }
   }

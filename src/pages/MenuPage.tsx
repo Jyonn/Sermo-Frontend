@@ -2209,11 +2209,6 @@ export default function MenuPage() {
             <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
-          {spaceFeatures.squareEnabled ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => setStatementCardDrawerOpen(true)} type="button">
-            <span className={`personalization-entry-preview statement-card-entry-preview statement-style-${me?.statement_card_style ?? "default"}`}><i>言</i></span>
-            <span><strong>{t("menu.statementCard")}</strong><small>{t("menu.statementCardHint")}</small></span>
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button> : null}
         </div>
       </SideDrawer>
 

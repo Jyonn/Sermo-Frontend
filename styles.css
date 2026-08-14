@@ -25057,6 +25057,60 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 @keyframes statement-fufu-moonwalk { 50% { transform:scaleX(-1) translateY(-1px); } }
 @media(max-width:520px){.square-statement-card:not(.is-detail) .square-statement-images.count-1{width:min(82vw,310px)}}
 @media(prefers-reduced-motion:reduce){.square-statement-card.statement-style-niko::after,.square-statement-card.statement-style-fufu::after,.square-statement-card.statement-style-mosaic::after{animation:none}}
+
+/* Square is a calm chronological stream. Statements use one shared visual
+   language and are separated by rhythm and hairlines instead of cards. */
+.square-statement-feed {
+  gap: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line-soft) 62%, transparent);
+}
+
+.square-statement-feed > .square-statement-card {
+  width: 100%;
+  margin: 0;
+  padding: 20px 4px 22px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 62%, transparent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.square-statement-feed > .square-statement-card.is-clickable {
+  transition: background-color 150ms ease;
+}
+
+.square-statement-feed > .square-statement-card.is-clickable:hover {
+  border-color: color-mix(in srgb, var(--line-soft) 62%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 2.5%, transparent);
+  transform: none;
+}
+
+.square-statement-feed .square-statement-footer {
+  margin: 12px -4px -5px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.square-statement-feed .square-statement-text {
+  margin-top: 11px;
+  line-height: 1.64;
+}
+
+@media (max-width: 767px) {
+  .square-statement-feed {
+    border-top-color: color-mix(in srgb, var(--line-soft) 54%, transparent);
+  }
+
+  .square-statement-feed > .square-statement-card {
+    margin: 0;
+    padding: 18px 16px 20px;
+    border-right: 0;
+    border-bottom-color: color-mix(in srgb, var(--line-soft) 54%, transparent);
+    border-left: 0;
+    border-radius: 0;
+  }
+}
 .admin-verification-drawer { display: grid; gap: 14px; }
 .admin-verification-tier { display: grid; grid-template-columns: 1fr auto; align-items: end; padding: 22px; border: 1px solid rgba(16, 113, 84, .18); border-radius: 22px; background: linear-gradient(135deg, rgba(219, 247, 235, .96), rgba(255, 249, 226, .92)); }
 .admin-verification-tier span { color: var(--color-text-muted); font-weight: 700; }
