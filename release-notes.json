@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.14.27",
+  "id": "2026.08.14.28",
   "publishedAt": "2026-08-14",
   "locales": {
     "zh-CN": {
-      "title": "离线提醒按会话整理",
+      "title": "系统通知更容易辨认",
       "items": [
-        "合并通知优先展示置顶和私聊会话，阅读多条消息更清楚"
+        "私聊突出好友昵称，群聊展示群名，多媒体消息改用自然文案"
       ]
     },
     "en": {
-      "title": "Offline alerts grouped by chat",
+      "title": "Clearer system notifications",
       "items": [
-        "Grouped alerts now prioritize pinned and direct chats for easier scanning"
+        "Push alerts now highlight friend or group names and describe media naturally"
       ]
     }
   }
