@@ -47,9 +47,9 @@ const channelRows: Array<[NotificationChannel, number, TranslationKey]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, hiddenDirectMessageTitle: "", hiddenDirectMessageText: "", hiddenGroupMessageTitle: "", hiddenGroupMessageText: "", friendOnlineMessageTitle: "", friendOnlineMessageText: "", openChatOnTap: true, barkIconMode: 1 },
+  email: { enabled: false, threshold: 30, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
+  sms: { enabled: false, threshold: 15, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
+  bark: { enabled: false, threshold: 5, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
 };
 
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
@@ -164,7 +164,6 @@ function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
 }
 
-type NotificationMessageKind = "direct" | "group" | "online";
 type NotificationSettingsMode = "channel" | "type";
 type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type PersonalizationCatalogItem = readonly [string, TranslationKey];
@@ -208,9 +207,7 @@ function PersonalizationCatalogControls({
   );
 }
 
-type PreferenceEditor =
-  | { type: "threshold"; channel: NotificationChannel }
-  | { type: "message"; channel: NotificationChannel; kind: NotificationMessageKind; field: "title" | "content" };
+type PreferenceEditor = { type: "threshold"; channel: NotificationChannel };
 
 interface MenuCacheSnapshot {
   space: SpaceDTO;
@@ -228,12 +225,6 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes,
       hideMessageContent: row.hide_message_content,
-      hiddenDirectMessageTitle: row.hidden_direct_message_title ?? "",
-      hiddenDirectMessageText: row.hidden_direct_message_text ?? "",
-      hiddenGroupMessageTitle: row.hidden_group_message_title ?? "",
-      hiddenGroupMessageText: row.hidden_group_message_text ?? "",
-      friendOnlineMessageTitle: row.friend_online_message_title ?? "",
-      friendOnlineMessageText: row.friend_online_message_text ?? "",
       openChatOnTap: row.open_chat_on_tap ?? true,
       barkIconMode: row.bark_icon_mode ?? 1,
     };
@@ -423,7 +414,6 @@ export default function MenuPage() {
   const [accountDeleteSaving, setAccountDeleteSaving] = useState(false);
   const [prefDrawerChannel, setPrefDrawerChannel] = useState<NotificationChannel | null>(null);
   const [prefSaving, setPrefSaving] = useState(false);
-  const [prefCustomDrawerOpen, setPrefCustomDrawerOpen] = useState(false);
   const [prefEditor, setPrefEditor] = useState<PreferenceEditor | null>(null);
   const [prefEditorValue, setPrefEditorValue] = useState("");
   const [prefEditorSaving, setPrefEditorSaving] = useState(false);
@@ -526,9 +516,6 @@ export default function MenuPage() {
       items: filtered.filter(([value]) => statementStyleRarity[value as StatementCardStyle] === rarity),
     })).filter((section) => section.items.length);
   })();
-  const canCustomizeNotificationMessage =
-    Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip)
-    || hasGrowthCapability("custom_notification_message", 10);
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -1091,25 +1078,17 @@ export default function MenuPage() {
   const closePrefDrawers = () => {
     setPrefDrawerChannel(null);
     setPrefSaving(false);
-    setPrefCustomDrawerOpen(false);
     setPrefEditor(null);
   };
 
   const openPrefDrawer = (channel: NotificationChannel) => {
     setPrefDrawerChannel(channel);
-    setPrefCustomDrawerOpen(false);
   };
 
   const preferenceFromResponse = (updated: NotificationPreferenceDTO): NotificationPreferences[NotificationChannel] => ({
     enabled: updated.enabled,
     threshold: updated.offline_threshold_minutes,
     hideMessageContent: updated.hide_message_content,
-    hiddenDirectMessageTitle: updated.hidden_direct_message_title ?? "",
-    hiddenDirectMessageText: updated.hidden_direct_message_text ?? "",
-    hiddenGroupMessageTitle: updated.hidden_group_message_title ?? "",
-    hiddenGroupMessageText: updated.hidden_group_message_text ?? "",
-    friendOnlineMessageTitle: updated.friend_online_message_title ?? "",
-    friendOnlineMessageText: updated.friend_online_message_text ?? "",
     openChatOnTap: updated.open_chat_on_tap ?? true,
     barkIconMode: updated.bark_icon_mode ?? 1,
   });
@@ -1132,48 +1111,15 @@ export default function MenuPage() {
     }
   };
 
-  const messagePreferenceValue = (
-    pref: NotificationPreferences[NotificationChannel],
-    kind: NotificationMessageKind,
-    field: "title" | "content"
-  ) => {
-    if (kind === "direct") return field === "title" ? pref.hiddenDirectMessageTitle : pref.hiddenDirectMessageText;
-    if (kind === "group") return field === "title" ? pref.hiddenGroupMessageTitle : pref.hiddenGroupMessageText;
-    return field === "title" ? pref.friendOnlineMessageTitle : pref.friendOnlineMessageText;
-  };
-
   const openThresholdEditor = (channel: NotificationChannel) => {
     setPrefEditor({ type: "threshold", channel });
     setPrefEditorValue(String(prefs[channel].threshold));
   };
 
-  const openMessageEditor = (channel: NotificationChannel, kind: NotificationMessageKind, field: "title" | "content") => {
-    if (!canCustomizeNotificationMessage) {
-      showToast(t("notification.levelOrVipRequired", { level: 10 }), "error");
-      return;
-    }
-    setPrefEditor({ type: "message", channel, kind, field });
-    setPrefEditorValue(messagePreferenceValue(prefs[channel], kind, field));
-  };
-
   const savePreferenceEditor = async () => {
     if (!prefEditor || prefEditorSaving) return;
     setPrefEditorSaving(true);
-    let patch: Omit<Parameters<typeof api.updateNotificationPref>[0], "channel">;
-    if (prefEditor.type === "threshold") {
-      patch = { offline_threshold_minutes: Math.min(60, Math.max(1, Number(prefEditorValue))) };
-    } else {
-      const value = prefEditorValue.trim();
-      const key = `${prefEditor.kind}:${prefEditor.field}`;
-      patch = {
-        ...(key === "direct:title" ? { hidden_direct_message_title: value, hidden_group_message_title: value } : {}),
-        ...(key === "direct:content" ? { hidden_direct_message_text: value, hidden_group_message_text: value } : {}),
-        ...(key === "group:title" ? { hidden_group_message_title: value } : {}),
-        ...(key === "group:content" ? { hidden_group_message_text: value } : {}),
-        ...(key === "online:title" ? { friend_online_message_title: value } : {}),
-        ...(key === "online:content" ? { friend_online_message_text: value } : {}),
-      };
-    }
+    const patch = { offline_threshold_minutes: Math.min(60, Math.max(1, Number(prefEditorValue))) };
     const saved = await savePreferencePatch(prefEditor.channel, patch);
     if (saved) setPrefEditor(null);
     setPrefEditorSaving(false);
@@ -1687,22 +1633,6 @@ export default function MenuPage() {
   );
 
   const activePref = prefDrawerChannel ? prefs[prefDrawerChannel] : null;
-  const editorMessageDefaults = (kind: NotificationMessageKind) => {
-    if (kind === "direct") return { title: t("notification.directTitle"), content: t("notification.directContent") };
-    if (kind === "group") return { title: t("notification.groupTitle"), content: t("notification.groupContent") };
-    return { title: t("notification.onlineTitle"), content: t("notification.onlineContent") };
-  };
-  const editorPreview = (() => {
-    if (!prefEditor || prefEditor.type !== "message") return null;
-    const pref = prefs[prefEditor.channel];
-    const defaults = editorMessageDefaults(prefEditor.kind);
-    const titleValue = prefEditor.field === "title" ? prefEditorValue : messagePreferenceValue(pref, prefEditor.kind, "title");
-    const contentValue = prefEditor.field === "content" ? prefEditorValue : messagePreferenceValue(pref, prefEditor.kind, "content");
-    return {
-      title: titleValue.trim() || defaults.title,
-      content: contentValue.trim() || defaults.content,
-    };
-  })();
 
   const openFriendInviteDrawer = () => {
     if (!canUseFriendInvite) {
@@ -2760,31 +2690,22 @@ export default function MenuPage() {
                       type="button"
                     />
                   </div>
-                  {activePref.hideMessageContent ? (
-                    <button
-                      className={`menu-pref-row menu-pref-row-button ${!canCustomizeNotificationMessage ? "is-disabled" : ""}`}
-                      disabled={!activePref.enabled}
-                      onClick={() => {
-                        if (!canCustomizeNotificationMessage) {
-                          showToast(t("notification.levelOrVipRequired", { level: 10 }), "error");
-                          return;
-                        }
-                        discoverThen("capability.notification", () => setPrefCustomDrawerOpen(true));
-                      }}
-                      type="button"
-                    >
-                      <div className="row-main">
-                        <strong>{t("notification.customMessages")}</strong>
-                      </div>
-                      <div className="menu-pref-row-value">
-                        {!canCustomizeNotificationMessage ? <span>{t("growth.unlockAtLevelOrVip", { level: 10 })}</span> : null}
-                        <FeatureDiscoveryMarker rewardId="capability.notification" />
-                        <span className="material-symbols-outlined">
-                          {canCustomizeNotificationMessage ? "chevron_right" : "lock"}
-                        </span>
-                      </div>
-                    </button>
-                  ) : null}
+                </>
+              ) : null}
+              {prefDrawerChannel === "bark" ? (
+                <>
+                  <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
+                    <div className="row-main"><strong>{t("notification.openChatOnTap")}</strong></div>
+                    <button aria-label={t("notification.toggleOpenChat")} className={`switch ${activePref.openChatOnTap ? "active" : ""}`} disabled={prefSaving || !activePref.enabled} onClick={() => void savePreferencePatch("bark", { open_chat_on_tap: activePref.openChatOnTap ? 0 : 1 })} type="button" />
+                  </div>
+                  <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
+                    <div className="row-main"><strong>{t("notification.useSpaceLogo")}</strong></div>
+                    <button aria-label={t("notification.toggleSpaceLogo")} className={`switch ${activePref.barkIconMode === 1 ? "active" : ""}`} disabled={prefSaving || !activePref.enabled} onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 1 ? 0 : 1 })} type="button" />
+                  </div>
+                  <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
+                    <div className="row-main"><strong>{t("notification.useUserAvatar")}</strong></div>
+                    <button aria-label={t("notification.toggleUserAvatar")} className={`switch ${activePref.barkIconMode === 2 ? "active" : ""}`} disabled={prefSaving || !activePref.enabled} onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 2 ? 0 : 2 })} type="button" />
+                  </div>
                 </>
               ) : null}
             </div>
@@ -2830,73 +2751,6 @@ export default function MenuPage() {
           </div>
         ) : null}
       </SideDrawer>
-      <SideDrawer
-        open={Boolean(prefDrawerChannel && prefCustomDrawerOpen && activePref?.hideMessageContent)}
-        onClose={() => setPrefCustomDrawerOpen(false)}
-        title={t("notification.customMessages")}
-      >
-        {prefDrawerChannel && activePref ? (
-          <div className="menu-pref-custom-drawer">
-            {prefDrawerChannel === "bark" ? (
-              <div className="menu-pref-list">
-                <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>{t("notification.openChatOnTap")}</strong></div>
-                  <button
-                    aria-label={t("notification.toggleOpenChat")}
-                    className={`switch ${activePref.openChatOnTap ? "active" : ""}`}
-                    disabled={prefSaving || !activePref.enabled}
-                    onClick={() => void savePreferencePatch("bark", { open_chat_on_tap: activePref.openChatOnTap ? 0 : 1 })}
-                    type="button"
-                  />
-                </div>
-                <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>{t("notification.useSpaceLogo")}</strong></div>
-                  <button
-                    aria-label={t("notification.toggleSpaceLogo")}
-                    className={`switch ${activePref.barkIconMode === 1 ? "active" : ""}`}
-                    disabled={prefSaving || !activePref.enabled}
-                    onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 1 ? 0 : 1 })}
-                    type="button"
-                  />
-                </div>
-                <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>
-                  <div className="row-main"><strong>{t("notification.useUserAvatar")}</strong></div>
-                  <button
-                    aria-label={t("notification.toggleUserAvatar")}
-                    className={`switch ${activePref.barkIconMode === 2 ? "active" : ""}`}
-                    disabled={prefSaving || !activePref.enabled}
-                    onClick={() => void savePreferencePatch("bark", { bark_icon_mode: activePref.barkIconMode === 2 ? 0 : 2 })}
-                    type="button"
-                  />
-                </div>
-              </div>
-            ) : null}
-            {(["direct", "online"] as NotificationMessageKind[]).map((kind) => {
-              const label = kind === "direct" ? t("notification.chatType") : t("notification.onlinePrompt");
-              const content = messagePreferenceValue(activePref, kind, "content");
-              const title = messagePreferenceValue(activePref, kind, "title");
-              return (
-                <section className="notification-template-block" key={kind}>
-                  <div className="section-label">{label}</div>
-                  <div className="simple-list">
-                    {prefDrawerChannel === "bark" ? (
-                      <button className="simple-row menu-link-row" onClick={() => openMessageEditor(prefDrawerChannel, kind, "title")} type="button">
-                        <div className="row-main"><strong>{t("notification.customTitle")}</strong><div className="row-subtle">{title || t("notification.defaultTitle")}</div></div>
-                        <span className="material-symbols-outlined">chevron_right</span>
-                      </button>
-                    ) : null}
-                    <button className="simple-row menu-link-row" onClick={() => openMessageEditor(prefDrawerChannel, kind, "content")} type="button">
-                      <div className="row-main"><strong>{t("notification.customContent")}</strong><div className="row-subtle">{content || t("notification.defaultContent")}</div></div>
-                      <span className="material-symbols-outlined">chevron_right</span>
-                    </button>
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        ) : null}
-      </SideDrawer>
-
       <SideDrawer
         open={barkGuideOpen}
         onClose={closeBarkGuide}
@@ -3201,86 +3055,18 @@ export default function MenuPage() {
           >
             <div className="notification-editor-heading">
               <div>
-                <h2>{prefEditor.type === "threshold" ? t("notification.offlineThreshold") : prefEditor.field === "title" ? t("notification.customTitle") : t("notification.customContent")}</h2>
-                <p>{prefEditor.type === "threshold" ? t("notification.thresholdHint") : t("notification.emptyUsesDefault")}</p>
+                <h2>{t("notification.offlineThreshold")}</h2>
+                <p>{t("notification.thresholdHint")}</p>
               </div>
               <button className="icon-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button" aria-label={t("common.close")}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            {prefEditor.type === "threshold" ? (
-              <div className="notification-threshold-editor">
-                <strong>{t("common.minutes", { count: Number(prefEditorValue) })}</strong>
-                <input
-                  aria-label={t("notification.offlineThreshold")}
-                  max={60}
-                  min={1}
-                  onChange={(event) => setPrefEditorValue(event.target.value)}
-                  type="range"
-                  value={prefEditorValue}
-                />
-                <div><span>{t("common.minutes", { count: 1 })}</span><span>{t("common.minutes", { count: 60 })}</span></div>
-              </div>
-            ) : (
-              <>
-                {prefEditor.field === "title" ? (
-                  <input
-                    autoFocus
-                    className="input"
-                    maxLength={80}
-                    onChange={(event) => setPrefEditorValue(event.target.value)}
-                    placeholder={editorMessageDefaults(prefEditor.kind).title}
-                    value={prefEditorValue}
-                  />
-                ) : (
-                  <textarea
-                    autoFocus
-                    className="textarea notification-editor-textarea"
-                    maxLength={255}
-                    onChange={(event) => setPrefEditorValue(event.target.value)}
-                    placeholder={editorMessageDefaults(prefEditor.kind).content}
-                    rows={3}
-                    value={prefEditorValue}
-                  />
-                )}
-                {editorPreview ? (
-                  prefEditor.channel === "email" ? (
-                    <div className="notification-email-preview">
-                      <header>
-                        <span className="material-symbols-outlined" aria-hidden="true">mail</span>
-                        <strong>SERMO 言浪</strong>
-                        <small>{t("email.preview")}</small>
-                      </header>
-                      <div className="notification-email-preview-body">
-                        <span>{t("email.previewGreeting", { name: me?.name ?? session?.user.name ?? t("email.previewRecipient") })}</span>
-                        <h3>{editorPreview.title}</h3>
-                        <p>{editorPreview.content}</p>
-                        <button tabIndex={-1} type="button">
-                          {t("email.previewAction")}
-                          <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-                        </button>
-                      </div>
-                      <footer>{t("email.previewFooter")}</footer>
-                    </div>
-                  ) : (
-                    <div className="notification-push-preview is-bark">
-                      <img
-                        alt=""
-                        src={prefs.bark.barkIconMode === 1
-                          ? space?.official_user?.avatar_uri || barkAppIconUrl
-                          : prefs.bark.barkIconMode === 2
-                            ? me?.avatar_uri ?? session?.user.avatar_uri ?? barkAppIconUrl
-                            : barkAppIconUrl}
-                      />
-                      <div>
-                        <strong>{t("bark.previewTitle", { title: editorPreview.title })}</strong>
-                        <p>{editorPreview.content}</p>
-                      </div>
-                    </div>
-                  )
-                ) : null}
-              </>
-            )}
+            <div className="notification-threshold-editor">
+              <strong>{t("common.minutes", { count: Number(prefEditorValue) })}</strong>
+              <input aria-label={t("notification.offlineThreshold")} max={60} min={1} onChange={(event) => setPrefEditorValue(event.target.value)} type="range" value={prefEditorValue} />
+              <div><span>{t("common.minutes", { count: 1 })}</span><span>{t("common.minutes", { count: 60 })}</span></div>
+            </div>
             <div className="notification-editor-actions">
               <button className="ghost-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button">{t("common.cancel")}</button>
               <button className="button" disabled={prefEditorSaving} onClick={() => void savePreferenceEditor()} type="button">

@@ -1144,12 +1144,6 @@ export const api = {
     enabled?: 0 | 1;
     offline_threshold_minutes?: number;
     hide_message_content?: 0 | 1;
-    hidden_direct_message_title?: string;
-    hidden_direct_message_text?: string;
-    hidden_group_message_title?: string;
-    hidden_group_message_text?: string;
-    friend_online_message_title?: string;
-    friend_online_message_text?: string;
     open_chat_on_tap?: 0 | 1;
     bark_icon_mode?: 0 | 1 | 2;
   }) {
