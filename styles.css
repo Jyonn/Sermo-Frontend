@@ -23995,6 +23995,190 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   .niko-bubble-runner { display:none!important; }
 }
 
+/* Baxian film collection: rice paper, aged copper, and jade accents frame the live-action characters. */
+.personalization-bubble-stage:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he),
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
+  --baxian-paper:
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.62) 0 1px,transparent 1.5px) 0 0/17px 19px,
+    linear-gradient(138deg,#fffdf6,#f2e6ca);
+  --bubble-skin-other-bg:var(--baxian-paper);
+  --bubble-skin-other-color:#302a23;
+  --bubble-skin-other-border:#9d7849;
+  --bubble-skin-other-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 7px 18px rgba(73,51,29,.12);
+  --bubble-skin-self-bg:linear-gradient(138deg,#315f57,#173f3b);
+  --bubble-skin-self-color:#fff9e9;
+  --bubble-skin-self-border:#b68a4b;
+  --bubble-skin-self-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 19px rgba(26,54,48,.18);
+  --bubble-skin-other-radius:18px 18px 18px 6px;
+  --bubble-skin-self-radius:18px 18px 6px 18px;
+  --bubble-skin-border-width:1px;
+  --bubble-theme-accent:#9c6638;
+  --bubble-theme-muted-other:rgba(48,42,35,.58);
+  --bubble-theme-muted-self:rgba(255,249,233,.68);
+  --bubble-theme-icon-other:#eee1c6;
+  --bubble-theme-icon-self:rgba(255,239,201,.13);
+}
+
+.personalization-bubble-stage.bubble-style-baxian-zhongli,
+.message-group.bubble-style-baxian-zhongli {
+  --bubble-skin-other-bg:radial-gradient(circle at 84% 18%,rgba(176,75,46,.08),transparent 35%),var(--baxian-paper);
+  --bubble-skin-other-border:#a95f42;
+  --bubble-skin-self-bg:linear-gradient(138deg,#8a4938,#5a2d2b);
+  --bubble-skin-self-border:#d39a63;
+  --bubble-theme-accent:#b34f39;
+}
+
+.personalization-bubble-stage.bubble-style-baxian-he,
+.message-group.bubble-style-baxian-he {
+  --bubble-skin-other-bg:radial-gradient(ellipse at 12% 100%,rgba(70,123,103,.11),transparent 46%),var(--baxian-paper);
+  --bubble-skin-other-border:#608f78;
+  --bubble-skin-self-bg:linear-gradient(138deg,#657d68,#304f47);
+  --bubble-skin-self-border:#d0aa73;
+  --bubble-theme-accent:#42785f;
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he).other {
+  --bubble-theme-surface:var(--bubble-skin-other-bg);
+  --bubble-theme-color:var(--bubble-skin-other-color);
+  --bubble-theme-muted:var(--bubble-theme-muted-other);
+  --bubble-theme-icon:var(--bubble-theme-icon-other);
+  --bubble-theme-shadow:var(--bubble-skin-other-shadow);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he).self {
+  --bubble-theme-surface:var(--bubble-skin-self-bg);
+  --bubble-theme-color:var(--bubble-skin-self-color);
+  --bubble-theme-muted:var(--bubble-theme-muted-self);
+  --bubble-theme-icon:var(--bubble-theme-icon-self);
+  --bubble-theme-shadow:var(--bubble-skin-self-shadow);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card,.message-travel-map-card) {
+  color:var(--bubble-theme-color);
+  background:var(--bubble-theme-surface);
+  box-shadow:var(--bubble-theme-shadow);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-bubble.has-reply {
+  --reply-preview-accent:var(--bubble-theme-accent);
+  --reply-preview-bg:var(--bubble-theme-icon);
+  --reply-preview-color:var(--bubble-theme-muted);
+  color:var(--bubble-theme-color);
+  background:var(--bubble-theme-surface);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-bubble.has-reply > :is(.message-audio-card,.message-file-card,.message-location-card,.message-link-preview-card) {
+  background:transparent;
+  box-shadow:none;
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) :is(.message-audio-meta,.message-audio-progress,.message-file-copy small,.message-file-open,.message-location-copy small,.message-location-open,.message-link-preview-site,.message-link-preview-desc,.message-travel-map-copy small,.message-travel-map-copy span,.message-travel-map-arrow) {
+  color:var(--bubble-theme-muted);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) :is(.message-file-icon,.message-location-mark,.message-travel-map-art,.message-audio-play) {
+  color:var(--bubble-theme-accent);
+  border:1px solid color-mix(in srgb,var(--bubble-theme-accent) 22%,transparent);
+  border-radius:10px;
+  background:var(--bubble-theme-icon);
+  box-shadow:none;
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) :is(.message-bubble,.message-image-gallery) { overflow:visible; }
+
+.baxian-bubble-runner {
+  position:absolute;
+  z-index:6;
+  display:none;
+  width:96px;
+  height:96px;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter:drop-shadow(0 3px 4px rgba(31,27,21,.22));
+  pointer-events:none;
+  will-change:transform,opacity;
+}
+
+.message-group.bubble-style-baxian-lv .group-start > .baxian-bubble-runner.is-lv {
+  right:-35px;
+  bottom:-28px;
+  display:block;
+  background-image:url("/assets/baxian/lv-dongbin.webp");
+  animation:baxian-lv-climb 2.5s cubic-bezier(.45,.05,.3,1) infinite;
+}
+
+.message-group.bubble-style-baxian-zhongli .group-start > .baxian-bubble-runner.is-zhongli {
+  top:-69px;
+  left:-35px;
+  display:block;
+  width:104px;
+  height:104px;
+  background-image:url("/assets/baxian/zhongli-quan.webp");
+  animation:baxian-zhongli-walk 3.2s linear infinite;
+}
+
+.message-group.bubble-style-baxian-he .group-start > .baxian-bubble-runner.is-he {
+  top:-68px;
+  left:-34px;
+  display:block;
+  background-image:url("/assets/baxian/he-xiangu.webp");
+  animation:baxian-he-flight 2.4s cubic-bezier(.42,0,.35,1) infinite;
+}
+
+@keyframes baxian-lv-climb {
+  0%,8% { opacity:0;transform:translate(10px,22px) rotate(4deg); }
+  14% { opacity:1; }
+  58% { transform:translate(5px,calc(-1 * var(--baxian-track-y))) rotate(-4deg); }
+  76% { opacity:1;transform:translate(-31px,calc(-1 * var(--baxian-track-y) - 15px)) rotate(-14deg); }
+  92%,100% { opacity:0;transform:translate(-48px,calc(-1 * var(--baxian-track-y) + 9px)) rotate(3deg); }
+}
+
+@keyframes baxian-zhongli-walk {
+  0%,7% { opacity:0;transform:translateX(-14px); }
+  13%,84% { opacity:1; }
+  92%,100% { opacity:0;transform:translateX(var(--baxian-track-x)); }
+}
+
+@keyframes baxian-he-flight {
+  0%,7% { opacity:0;transform:translate(-16px,24px) rotate(-8deg); }
+  14% { opacity:1;transform:translate(0,8px) rotate(-13deg); }
+  44% { transform:translate(var(--baxian-track-x-45),-14px) rotate(0); }
+  78% { opacity:1;transform:translate(var(--baxian-track-x-86),-8px) rotate(8deg); }
+  94%,100% { opacity:0;transform:translate(var(--baxian-track-x),22px) rotate(12deg); }
+}
+
+.field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) > i { overflow:visible; }
+.field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) i span {
+  border:1px solid #a17a4a;
+  border-radius:13px 13px 13px 5px;
+  background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.7) 0 1px,transparent 1.5px) 0 0/12px 13px,linear-gradient(138deg,#fffdf6,#ead9b7);
+  box-shadow:0 4px 10px rgba(72,49,27,.13);
+}
+.field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) > i::after {
+  position:absolute;
+  z-index:2;
+  width:52px;
+  height:52px;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  content:"";
+  pointer-events:none;
+}
+.field-chat_bubble_style .preview-baxian-lv > i::after { right:-20px;bottom:-16px;background-image:url("/assets/baxian/lv-dongbin.webp"); }
+.field-chat_bubble_style .preview-baxian-zhongli > i::after { top:-29px;left:-16px;background-image:url("/assets/baxian/zhongli-quan.webp"); }
+.field-chat_bubble_style .preview-baxian-he > i::after { top:-27px;left:-17px;background-image:url("/assets/baxian/he-xiangu.webp"); }
+
+html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
+  --bubble-skin-other-bg:linear-gradient(138deg,#e9dfcb,#d1bea0);
+  --bubble-skin-other-color:#29231d;
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .baxian-bubble-runner { display:none!important; }
+}
+
 /* Fufu IP: sand tabby stripes, charcoal ink, olive eyes, and a coral-pink spark. */
 .personalization-bubble-stage.bubble-style-fufu,
 .message-group.bubble-style-fufu {

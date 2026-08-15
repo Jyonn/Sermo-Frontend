@@ -79,6 +79,7 @@ const personalizationOptions = {
     ["mosaic", "menu.styleMosaic"],
     ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
     ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"],
+    ["baxian-lv", "menu.styleBaxianLv"], ["baxian-zhongli", "menu.styleBaxianZhongli"], ["baxian-he", "menu.styleBaxianHe"],
     ["city-jdz", "menu.styleCityJingdezhen"], ["city-shanghai", "menu.styleCityShanghai"], ["city-nyc", "menu.styleCityNewYork"], ["city-beijing", "menu.styleCityBeijing"],
     ["vip", "menu.styleVip"],
   ],
@@ -127,6 +128,7 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
   { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu"].includes(value)) },
+  { label: "menu.collectionBaxian", items: personalizationOptions.chat_bubble_style.filter(([value]) => value.startsWith("baxian-")) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
 

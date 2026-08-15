@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.15.7",
+  "id": "2026.08.15.8",
   "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "页面背景更加连贯",
+      "title": "八仙电影气泡登场",
       "items": [
-        "修复长页面滚动时渐变背景重复和出现明显分割的问题"
+        "新增吕洞宾、钟离权与何仙姑三款典藏动态聊天气泡"
       ]
     },
     "en": {
-      "title": "Smoother page backgrounds",
+      "title": "Eight Immortals bubbles arrive",
       "items": [
-        "Fixed repeated gradients and visible seams while scrolling long pages"
+        "Added three animated collectible bubbles featuring Lu Dongbin, Zhongli Quan, and He Xiangu"
       ]
     }
   }

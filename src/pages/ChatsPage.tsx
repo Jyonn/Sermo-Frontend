@@ -197,6 +197,7 @@ function visibleBubbleStyle(style?: string) {
   return [
     "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic",
     "typewriter", "newspaper", "receipt", "sticker", "toybrick", "niko", "fufu", "xiaobai",
+    "baxian-lv", "baxian-zhongli", "baxian-he",
     "city-jdz", "city-shanghai", "city-nyc", "city-beijing",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
@@ -345,6 +346,31 @@ function NikoBubbleRunner() {
 
 function XiaobaiBubbleRunner() {
   return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
+}
+
+function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
+  const runnerRef = useRef<HTMLSpanElement | null>(null);
+  const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
+
+  useEffect(() => {
+    const runner = runnerRef.current;
+    const track = runner?.parentElement;
+    if (!runner || !track || !character) return;
+    const updateTrack = () => {
+      const distance = Math.max(32, track.clientWidth - 54);
+      runner.style.setProperty("--baxian-track-x", `${distance}px`);
+      runner.style.setProperty("--baxian-track-x-45", `${distance * 0.45}px`);
+      runner.style.setProperty("--baxian-track-x-86", `${distance * 0.86}px`);
+      runner.style.setProperty("--baxian-track-y", `${Math.max(36, track.clientHeight + 24)}px`);
+    };
+    updateTrack();
+    const observer = new ResizeObserver(updateTrack);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [character]);
+
+  if (!character) return null;
+  return <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}`} />;
 }
 
 function formatTime(value: number) {
@@ -1218,6 +1244,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
           })}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
+          {isFirst ? <BaxianBubbleRunner style={messages[0]?.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -1719,6 +1746,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
+          {isFirst ? <BaxianBubbleRunner style={message.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>

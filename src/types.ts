@@ -208,7 +208,7 @@ export interface UserMeDTO extends UserDTO {
   city_bubble_styles?: ChatBubbleStyle[];
 }
 
-export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
+export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "dusk" | "comic" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "tidepool" | "forest" | "desert" | "snowfield" | "sakura" | "sunrise" | "midnight" | "rain" | "galaxy" | "aurora-sky" | "linen" | "terrazzo" | "blueprint" | "newsprint" | "hologram" | "arcade" | "jazz" | "spaceport" | "candy" | "noir-film" | "custom";
 export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "soundwave" | "portal" | "butterfly" | "moon" | "camera" | "comet" | "snowfall" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run" | "vip";
 export type StatementCardStyle = "default" | "editorial" | "mosaic" | "hero" | "comic" | "receipt" | "vip" | "niko" | "fufu";
