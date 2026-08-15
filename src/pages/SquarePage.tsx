@@ -568,22 +568,26 @@ export default function SquarePage() {
 
   const openStatement = (statementId: number) => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
-    navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
     setInlineStatementId(statementId);
-    if (desktopWorkspace) {
-      setInlineStatementExpanded(true);
-      return;
-    }
     setInlineStatementExpanded(false);
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const card = statementCardRefs.current.get(statementId);
-      if (!card) return;
+      if (!card) {
+        navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
+        setInlineStatementExpanded(true);
+        return;
+      }
       card.scrollIntoView({ behavior: "smooth", block: "start" });
       inlineExpandTimerRef.current = window.setTimeout(() => {
+        // Commit the route only after the feed has settled. The browser then
+        // stores the aligned feed position in history and restores it on back.
+        navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
         setInlineStatementExpanded(true);
         inlineExpandTimerRef.current = null;
-        window.requestAnimationFrame(() => card.parentElement?.scrollIntoView({ behavior: "smooth", block: "start" }));
-      }, 280);
+        if (!desktopWorkspace) {
+          window.requestAnimationFrame(() => card.parentElement?.scrollIntoView({ behavior: "auto", block: "start" }));
+        }
+      }, 320);
     }));
   };
 

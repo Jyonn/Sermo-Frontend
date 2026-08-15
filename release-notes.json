@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.15.2",
+  "id": "2026.08.15.3",
   "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "桌面广场选中状态更清晰",
+      "title": "发言返回位置更加自然",
       "items": [
-        "选中发言的背景与强调线现在完整贴合发言流两侧"
+        "打开发言时会先将内容贴顶再切换地址，返回广场后仍停留在对应位置"
       ]
     },
     "en": {
-      "title": "Clearer selection in the desktop square",
+      "title": "Natural position restoration in the square",
       "items": [
-        "Selected statements now extend their highlight and accent line to the feed edges"
+        "Statements now align before the URL changes, preserving their position when returning to the feed"
       ]
     }
   }
