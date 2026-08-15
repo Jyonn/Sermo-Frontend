@@ -10424,11 +10424,6 @@ html[data-theme="dark"] .personalization-bubble-stage {
   .setting-row-value { max-width: 34vw; }
 }
 
-.gesture-setup-panel {
-  display: grid;
-  gap: 18px;
-}
-
 .gesture-message {
   justify-self: center;
   color: var(--text-secondary);
@@ -10448,10 +10443,8 @@ html[data-theme="dark"] .personalization-bubble-stage {
 .gesture-range-row {
   display: grid;
   gap: 14px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  background: rgba(255, 255, 255, 0.74);
+  width: min(100%, 430px);
+  padding: 10px 2px;
 }
 
 .gesture-timeout-row {
@@ -10534,12 +10527,8 @@ html[data-theme="dark"] .personalization-bubble-stage {
   justify-self: center;
   display: block;
   padding: 0;
-  border-radius: 30px;
-  border: 1px solid rgba(226, 232, 240, 0.82);
-  background:
-    linear-gradient(135deg, rgba(255, 253, 248, 0.88), rgba(244, 255, 249, 0.74)),
-    rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 0;
+  background: transparent;
   touch-action: none;
   user-select: none;
 }
@@ -10619,38 +10608,109 @@ html[data-theme="dark"] .personalization-bubble-stage {
   inset: 0;
   z-index: 100;
   display: grid;
-  place-items: center;
-  padding: max(22px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
+  place-items: stretch;
+  overflow: hidden;
+  padding: max(18px, env(safe-area-inset-top)) clamp(20px, 6vw, 64px) max(18px, env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at 18% 12%, rgba(0, 208, 132, 0.18), transparent 28%),
     radial-gradient(circle at 88% 78%, rgba(44, 169, 255, 0.12), transparent 34%),
     linear-gradient(145deg, #fffdf8, #f3faf5);
 }
 
-.gesture-lock-card {
-  width: min(100%, 390px);
+html[data-theme="dark"] .gesture-lock-screen {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(0, 208, 132, 0.14), transparent 30%),
+    radial-gradient(circle at 88% 78%, rgba(44, 169, 255, 0.1), transparent 36%),
+    linear-gradient(145deg, #101713, #17231d);
+}
+
+.gesture-lock-stage {
+  width: min(100%, 520px);
+  min-height: 100%;
+  margin: 0 auto;
   display: grid;
-  justify-items: center;
-  gap: 14px;
-  padding: 24px 20px;
-  border-radius: 30px;
-  border: 1px solid rgba(226, 232, 240, 0.92);
-  background: rgba(255, 253, 248, 0.88);
-  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+  grid-template-rows: minmax(104px, 0.7fr) auto minmax(82px, 0.45fr);
+  align-items: center;
   text-align: center;
 }
 
-.gesture-lock-card h1 {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: clamp(1.8rem, 9vw, 2.7rem);
-  line-height: 1;
+.gesture-lock-heading {
+  align-self: end;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-bottom: clamp(14px, 3vh, 30px);
 }
 
-.gesture-lock-card p {
+.gesture-lock-heading h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.gesture-lock-heading p {
   margin: 0;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+.gesture-lock-content {
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.gesture-lock-content.is-managing {
+  align-self: center;
+}
+
+.gesture-lock-actions {
+  align-self: start;
+  width: min(100%, 430px);
+  min-height: 72px;
+  margin: 0 auto;
+  display: grid;
+  justify-items: stretch;
+  align-content: start;
+  gap: 12px;
+  padding-top: clamp(12px, 3vh, 26px);
+}
+
+.gesture-lock-actions:empty {
+  visibility: hidden;
+}
+
+.gesture-screen-close {
+  position: fixed;
+  z-index: 1;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-panel-strong) 72%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+}
+
+.gesture-screen-close .material-symbols-outlined {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.gesture-unavailable-state {
+  max-width: 320px;
+  color: var(--text-secondary);
+  font-weight: 750;
+  line-height: 1.6;
 }
 
 .gesture-lock-message {
@@ -10669,6 +10729,20 @@ html[data-theme="dark"] .personalization-bubble-stage {
 
 .gesture-lock-reset {
   width: 100%;
+}
+
+@media (max-height: 680px) {
+  .gesture-lock-stage {
+    grid-template-rows: minmax(82px, 0.45fr) auto minmax(62px, 0.3fr);
+  }
+
+  .gesture-grid {
+    width: min(74vh, 300px);
+  }
+
+  .gesture-lock-heading h1 {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
 }
 
 .stepper {
@@ -11931,7 +12005,6 @@ html[data-theme="dark"] :is(
   .personalization-background-entry,
   .personalization-language-option,
   .personalization-option,
-  .gesture-range-row,
   .stepper button,
   .friend-directory-index,
   .bark-guide-step.is-action,

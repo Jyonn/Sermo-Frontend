@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.15.5",
+  "id": "2026.08.15.6",
   "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "评论删除确认正常显示",
+      "title": "手势解锁体验焕新",
       "items": [
-        "修复手机端发言详情中删除评论时确认窗口被页面遮挡的问题"
+        "设置、验证与解锁统一为更清爽的全屏操作，关闭手势后将直接返回设置页"
       ]
     },
     "en": {
-      "title": "Comment deletion confirmation restored",
+      "title": "A refreshed gesture lock experience",
       "items": [
-        "Fixed the confirmation dialog being hidden when deleting comments from statement details on mobile"
+        "Setup, verification, and unlocking now share a cleaner full-screen flow, and disabling gesture lock returns directly to settings"
       ]
     }
   }

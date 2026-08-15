@@ -2959,21 +2959,15 @@ export default function MenuPage() {
           </button>
         </div>
       </BottomSheet>
-      <BottomSheet
-        bodyClassName="menu-security-sheet-body"
-        className="contact-bottom-sheet"
-        open={gestureSheetOpen}
-        title={t("gesture.title")}
-        description={t("gesture.design")}
-        onClose={() => setGestureSheetOpen(false)}
-      >
+      {gestureSheetOpen ? (
         <GestureSetupPanel
           scope={gestureScope}
           canEnable={emailVerified}
           preference={gesturePreference}
+          onClose={() => setGestureSheetOpen(false)}
           onChanged={setGesturePreference}
         />
-      </BottomSheet>
+      ) : null}
       <AvatarPresetDialog
         currentAvatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
         displayName={session?.user.name ?? t("brand.user")}

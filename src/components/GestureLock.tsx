@@ -175,6 +175,7 @@ interface GestureSetupPanelProps {
   canEnable: boolean;
   preference: GestureLockPreferenceDTO | null;
   onChanged: (preference: GestureLockPreferenceDTO) => void;
+  onClose: () => void;
 }
 
 function GestureRange({
@@ -214,7 +215,7 @@ function GestureRange({
   );
 }
 
-export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: GestureSetupPanelProps) {
+export function GestureSetupPanel({ scope, canEnable, preference, onChanged, onClose }: GestureSetupPanelProps) {
   const { t } = useI18n();
   const enabled = Boolean(preference?.enabled && preference.pattern_hash && preference.salt);
   const [firstPattern, setFirstPattern] = useState("");
@@ -233,6 +234,14 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
   useEffect(() => {
     setTimeoutMinutes(normalizeGestureLockAfterMinutes(preference?.lock_after_minutes));
   }, [preference?.lock_after_minutes]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const fail = (message: string) => {
     setStatus(message);
@@ -291,6 +300,7 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
       setTone("normal");
       setVerifyingDisable(false);
       onChanged(nextPreference);
+      onClose();
     } catch (error) {
       fail(apiErrorMessage(error, t("gesture.disableFailed")));
     } finally {
@@ -327,55 +337,71 @@ export function GestureSetupPanel({ scope, canEnable, preference, onChanged }: G
     await disable();
   };
 
+  const drawing = !enabled || verifyingDisable;
+  const prompt = verifyingDisable
+    ? tone === "error" ? status : t("gesture.confirm")
+    : firstPattern || tone !== "normal" ? status : t("gesture.draw");
+
   return (
-    <div className="gesture-setup-panel">
-      {enabled ? (
-        <>
-          {tone === "error" ? <div className="gesture-message gesture-message-error">{status}</div> : null}
-          {verifyingDisable ? (
-            <>
-              <div className="gesture-message">{t("gesture.confirm")}</div>
+    <main className="gesture-lock-screen gesture-settings-screen">
+      <button className="gesture-screen-close" aria-label={t("common.close")} onClick={onClose} type="button">
+        <span className="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+      <section className="gesture-lock-stage" aria-label={t("gesture.title")}>
+        <header className="gesture-lock-heading">
+          <h1>{verifyingDisable ? t("gesture.disable") : t("gesture.title")}</h1>
+          <p className={`gesture-lock-message gesture-lock-message-${tone}`}>{drawing ? prompt : t("gesture.enabled")}</p>
+        </header>
+
+        <div className={`gesture-lock-content${drawing ? " is-drawing" : " is-managing"}`}>
+          {enabled ? (
+            verifyingDisable ? (
               <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void verifyDisable(pattern)} />
-              <button className="ghost-button" disabled={saving} onClick={() => setVerifyingDisable(false)} type="button">
-                {t("common.cancel")}
-              </button>
-            </>
-          ) : (
-            <>
+            ) : (
               <GestureRange
                 saving={saving}
                 value={timeoutMinutes}
                 onChange={setTimeoutMinutes}
                 onCommit={(value) => void commitTimeout(value)}
               />
-              <button className="danger-button" disabled={saving} onClick={() => setVerifyingDisable(true)} type="button">
+            )
+          ) : !canEnable ? (
+            <div className="gesture-unavailable-state">{t("gesture.verifyEmailToEnable")}</div>
+          ) : (
+            <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void complete(pattern)} />
+          )}
+        </div>
+
+        <footer className="gesture-lock-actions">
+          {enabled ? (
+            verifyingDisable ? (
+              <button className="ghost-button" disabled={saving} onClick={() => {
+                setTone("normal");
+                setStatus(t("gesture.enabled"));
+                setVerifyingDisable(false);
+              }} type="button">
+                {t("common.cancel")}
+              </button>
+            ) : (
+              <button className="danger-button" disabled={saving} onClick={() => {
+                setTone("normal");
+                setVerifyingDisable(true);
+              }} type="button">
                 {t("gesture.disable")}
               </button>
-            </>
-          )}
-        </>
-      ) : !canEnable ? (
-        <div className="inline-note">{t("gesture.verifyEmailToEnable")}</div>
-      ) : (
-        <>
-          {firstPattern || tone !== "normal" ? <div className={`gesture-message gesture-message-${tone}`}>{status}</div> : null}
-          <PatternGrid disabled={!scope || saving} tone={tone} onComplete={(pattern) => void complete(pattern)} />
-          {firstPattern ? (
-            <button
-              className="ghost-button"
-              onClick={() => {
-                setFirstPattern("");
-                setTone("normal");
-                setStatus(t("gesture.redraw"));
-              }}
-              type="button"
-            >
+            )
+          ) : firstPattern ? (
+            <button className="ghost-button" onClick={() => {
+              setFirstPattern("");
+              setTone("normal");
+              setStatus(t("gesture.draw"));
+            }} type="button">
               {t("gesture.restart")}
             </button>
           ) : null}
-        </>
-      )}
-    </div>
+        </footer>
+      </section>
+    </main>
   );
 }
 
@@ -411,15 +437,20 @@ export function GestureUnlockScreen({ scope, preference, userName, onUnlocked, o
 
   return (
     <main className="gesture-lock-screen">
-      <section className="gesture-lock-card" aria-label={t("gesture.title")}>
-        <p className="eyebrow">{t("gesture.eyebrow")}</p>
-        <h1>{t("gesture.title")}</h1>
-        <p>{userName ? t("gesture.welcomeUser", { name: userName }) : t("gesture.welcome")}</p>
-        <PatternGrid disabled={checking} tone={tone} onComplete={(pattern) => void complete(pattern)} />
-        <div className={`gesture-lock-message gesture-lock-message-${tone}`}>{message}</div>
-        <button className="ghost-button gesture-lock-reset" onClick={onResetAndLogout} type="button">
-          {t("auth.logout")}
-        </button>
+      <section className="gesture-lock-stage" aria-label={t("gesture.title")}>
+        <header className="gesture-lock-heading">
+          <h1>{t("gesture.title")}</h1>
+          <p>{userName ? t("gesture.welcomeUser", { name: userName }) : t("gesture.welcome")}</p>
+        </header>
+        <div className="gesture-lock-content is-drawing">
+          <PatternGrid disabled={checking} tone={tone} onComplete={(pattern) => void complete(pattern)} />
+        </div>
+        <footer className="gesture-lock-actions">
+          <div className={`gesture-lock-message gesture-lock-message-${tone}`}>{message}</div>
+          <button className="ghost-button gesture-lock-reset" onClick={onResetAndLogout} type="button">
+            {t("auth.logout")}
+          </button>
+        </footer>
       </section>
     </main>
   );
