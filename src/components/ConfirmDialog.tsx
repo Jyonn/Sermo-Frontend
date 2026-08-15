@@ -48,7 +48,7 @@ export function ConfirmDialog({
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+    <div className="dialog-backdrop confirm-dialog-backdrop" onClick={onClose} role="presentation">
       <section aria-modal="true" className="confirm-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <div className="confirm-dialog-copy">
           <h2>{title}</h2>

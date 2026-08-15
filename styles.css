@@ -15118,6 +15118,11 @@ html[data-theme="dark"] .message-link-preview-site {
   touch-action: none;
 }
 
+/* Destructive confirmations must remain above focused pages and drawer stacks. */
+.dialog-backdrop.confirm-dialog-backdrop {
+  z-index: 240;
+}
+
 .location-share-modal {
   width: min(100%, 390px);
   overflow: hidden;

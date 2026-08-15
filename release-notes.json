@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.15.4",
+  "id": "2026.08.15.5",
   "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "通知隐私设置更简单",
+      "title": "评论删除确认正常显示",
       "items": [
-        "通知渠道取消自定义提示文案，隐藏内容后不再透露昵称、会话名称或消息正文",
-        "合并提醒仅展示涉及的会话数与消息总数"
+        "修复手机端发言详情中删除评论时确认窗口被页面遮挡的问题"
       ]
     },
     "en": {
-      "title": "Simpler notification privacy controls",
+      "title": "Comment deletion confirmation restored",
       "items": [
-        "Custom notification copy has been removed; hidden alerts no longer reveal names, conversations, or message content",
-        "Digest alerts now show only conversation and message totals"
+        "Fixed the confirmation dialog being hidden when deleting comments from statement details on mobile"
       ]
     }
   }
