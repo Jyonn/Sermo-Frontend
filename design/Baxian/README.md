@@ -7,6 +7,9 @@
 - `character/baxian-film-procession-v2.png`：电影版八位角色横向队列，透明背景，可置于气泡上边缘。
 - `chat-bubble/baxian-film-chat-bubble-mockup-v2.png`：角色元素应用于聊天界面的效果图。
 - `reference/official-character-posters/`：公开角色海报及生成用参考板。
+- `LvDongbin/`：吕洞宾攀墙、腾跃、舞剑与归鞘的 24 帧动画。
+- `ZhongliQuan/`：钟离权水平行走并把玩金元宝的 24 帧动画。
+- `HeXiangu/`：何仙姑起飞、巡航变化、减速和落地的 24 帧动画。
 
 ## 角色校验顺序
 
