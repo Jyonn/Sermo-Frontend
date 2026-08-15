@@ -357,7 +357,7 @@ function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
     const track = runner?.parentElement;
     if (!runner || !track || !character) return;
     const updateTrack = () => {
-      const distance = Math.max(32, track.clientWidth - 54);
+      const distance = Math.max(32, track.clientWidth - 28);
       runner.style.setProperty("--baxian-track-x", `${distance}px`);
       runner.style.setProperty("--baxian-track-x-45", `${distance * 0.45}px`);
       runner.style.setProperty("--baxian-track-x-86", `${distance * 0.86}px`);

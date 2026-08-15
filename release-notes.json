@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.15.8",
+  "id": "2026.08.15.9",
   "publishedAt": "2026-08-15",
   "locales": {
     "zh-CN": {
-      "title": "八仙电影气泡登场",
+      "title": "八仙气泡动作更轻盈",
       "items": [
-        "新增吕洞宾、钟离权与何仙姑三款典藏动态聊天气泡"
+        "缩小八仙人物并让动作沿气泡外边框贴边展示，不再遮挡消息"
       ]
     },
     "en": {
-      "title": "Eight Immortals bubbles arrive",
+      "title": "Lighter Eight Immortals animations",
       "items": [
-        "Added three animated collectible bubbles featuring Lu Dongbin, Zhongli Quan, and He Xiangu"
+        "Reduced character size and aligned animations outside bubble borders to keep messages clear"
       ]
     }
   }
