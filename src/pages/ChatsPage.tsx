@@ -402,7 +402,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
   return (
     <>
       <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}>
-        {playing ? <img alt="" src={`/assets/baxian/${character === "lv" ? "lv-dongbin" : character === "zhongli" ? "zhongli-quan" : "he-xiangu"}.webp`} /> : null}
+        {playing ? <img alt="" src={`/assets/baxian/${character === "lv" ? "lv-dongbin" : character === "zhongli" ? "zhongli-quan" : "he-xiangu"}-24.webp`} /> : null}
       </span>
       <button
         aria-label={i18n.t("message.replayCharacterEffect")}
