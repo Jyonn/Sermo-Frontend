@@ -1,24 +1,25 @@
 # 八仙克制型动态聊天气泡 · Codex 使用说明
 
-本版用于普通高频聊天。人物不是气泡边框的一部分，而是定位在气泡外侧的独立一次性动画层。默认优先使用更流畅的 `restrained-24/`；`restrained-12/` 作为低带宽兼容版本。早期全身/大动作24帧素材仍只用于用户点击后的扩展演出。
+本版用于普通高频聊天。人物不是气泡边框的一部分，而是定位在气泡外侧的独立一次性动画层。默认使用重新设计的 `restrained-48-v2/`：48帧、24fps、严格2秒。旧12/24帧版本只保留用于设计追溯。
 
 ## 素材选择
 
 | 人物 | 自动动画 | 锚点 | 推荐尺寸 | 时长 | 动作语义 |
 | --- | --- | --- | --- | --- | --- |
-| 吕洞宾 | `LvDongbin/restrained-24/animation-24.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 1.1s | 探边、短促剑礼、退回 |
-| 钟离权 | `ZhongliQuan/restrained-24/animation-24.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 1.27s | 升起、把玩元宝、耸肩沉下 |
-| 何仙姑 | `HeXiangu/restrained-24/animation-24.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 0.995s | 衣袖入场、短滑翔、手势、离场 |
+| 吕洞宾 | `LvDongbin/restrained-48-v2/animation-48.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 2s | 半身持剑致意、轻微沉浮、退回 |
+| 钟离权 | `ZhongliQuan/restrained-48-v2/animation-48.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 2s | 半身托元宝、松弛摇摆、沉回 |
+| 何仙姑 | `HeXiangu/restrained-48-v2/animation-48.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 2s | 半身双指致意、短滑移、退回 |
 
 每套还包括：
 
-- `restrained-24/spritesheet-24.png`：6 列 × 4 行，单帧 256 × 256。
-- `restrained-24/frames/frame-01.png` 至 `frame-24.png`：用于 Canvas、游戏引擎或精确逐帧控制。
-- `restrained-12/`：相同动作的12帧兼容版；总播放时长和锚点与24帧版保持一致。
+- `restrained-48-v2/spritesheet-48.png`：8 列 × 6 行，单帧 256 × 256。
+- `restrained-48-v2/frames/frame-01.png` 至 `frame-48.png`：用于 Canvas 或精确逐帧控制。
+- `restrained-48-v2/animation.json`：固定48帧、24fps、2000ms以及每帧41/42ms节拍。
+- `restrained-12/`、`restrained-24/`：已废弃的动作探索；Codex 不得接入新功能。
 - `animation.json`：帧时长、锚点、触发方式和低动态模式信息；接入时优先读取该文件，不要在组件里复制帧参数。
-- `preview-12.gif`：仅供设计审阅，不建议线上使用。
-- `source/contact-sheet-chroma.png`：ImageGen 原始洋红底生成稿，仅供再生成和追溯。
-- `source/contact-sheet.png`：去色键后的透明原始表。
+- `preview-48.gif`：严格2秒的设计审阅预览，不建议线上使用。
+- `source/keyposes-chroma.png`：ImageGen 原始洋红底候选姿态板，仅供再生成和追溯。
+- `source/keyposes.png`：去色键后的透明候选姿态板。
 
 ## Codex 必须遵守的接入规则
 
@@ -41,7 +42,7 @@
     <div className="message-bubble">消息正文</div>
     <img
       className="bubble-character bubble-character--top-right"
-      src="/design/Baxian/LvDongbin/restrained-24/animation-24.webp"
+      src="/design/Baxian/LvDongbin/restrained-48-v2/animation-48.webp"
       alt=""
       aria-hidden="true"
     />
