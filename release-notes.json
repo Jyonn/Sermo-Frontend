@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.1",
+  "id": "2026.08.17.2",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "广场导航更顺手",
+      "title": "VIP 身份更醒目",
       "items": [
-        "探索、好友圈与我的现已固定在广场顶部，切换与发言定位更稳定"
+        "永久 VIP 用户在广场发言与评论中的昵称现以金色展示"
       ]
     },
     "en": {
-      "title": "Smoother Square navigation",
+      "title": "VIP identity stands out",
       "items": [
-        "Explore, Friends, and Mine now stay in the Square header, with steadier switching and statement positioning"
+        "Permanent VIP names now appear in gold on Square statements and comments"
       ]
     }
   }
