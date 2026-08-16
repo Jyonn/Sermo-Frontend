@@ -1,0 +1,72 @@
+{
+  "id": "baxian-he-xiangu-bubble-edge-greeting",
+  "spriteVersionNumber": 2,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "frameCount": 12,
+  "sheetColumns": 4,
+  "sheetRows": 3,
+  "rowMajor": true,
+  "durationsMs": [
+    70,
+    70,
+    75,
+    75,
+    70,
+    70,
+    80,
+    95,
+    90,
+    80,
+    80,
+    140
+  ],
+  "durationMs": 995,
+  "playback": "once",
+  "autoplayTrigger": "new-message-visible",
+  "replayTrigger": "character-tap",
+  "hideAfterComplete": true,
+  "anchor": "top-left",
+  "recommendedDisplayPx": {
+    "mobile": 64,
+    "desktop": 72
+  },
+  "contentOverlapAllowed": false,
+  "spritesheet": "spritesheet-12.png",
+  "animatedWebP": "animation-12.webp",
+  "framesPath": "frames/frame-{01..12}.png",
+  "phases": [
+    {
+      "name": "sleeve-entry",
+      "frames": [
+        0,
+        2
+      ]
+    },
+    {
+      "name": "short-glide",
+      "frames": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "salute",
+      "frames": [
+        6,
+        8
+      ]
+    },
+    {
+      "name": "sleeve-exit",
+      "frames": [
+        9,
+        11
+      ]
+    }
+  ],
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 0
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "baxian-zhongli-quan-bubble-corner-greeting",
+  "spriteVersionNumber": 2,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "frameCount": 12,
+  "sheetColumns": 4,
+  "sheetRows": 3,
+  "rowMajor": true,
+  "durationsMs": [
+    100,
+    90,
+    90,
+    100,
+    90,
+    90,
+    100,
+    120,
+    100,
+    110,
+    110,
+    170
+  ],
+  "durationMs": 1270,
+  "playback": "once",
+  "autoplayTrigger": "new-message-visible",
+  "replayTrigger": "character-tap",
+  "hideAfterComplete": true,
+  "anchor": "bottom-left",
+  "recommendedDisplayPx": {
+    "mobile": 64,
+    "desktop": 72
+  },
+  "contentOverlapAllowed": false,
+  "spritesheet": "spritesheet-12.png",
+  "animatedWebP": "animation-12.webp",
+  "framesPath": "frames/frame-{01..12}.png",
+  "phases": [
+    {
+      "name": "rise",
+      "frames": [
+        0,
+        2
+      ]
+    },
+    {
+      "name": "swagger",
+      "frames": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "ingot-toss",
+      "frames": [
+        6,
+        8
+      ]
+    },
+    {
+      "name": "shrug-and-sink",
+      "frames": [
+        9,
+        11
+      ]
+    }
+  ],
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 0
+  }
+}
