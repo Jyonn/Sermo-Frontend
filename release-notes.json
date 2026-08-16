@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.16.2",
+  "id": "2026.08.16.3",
   "publishedAt": "2026-08-16",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡动效更顺滑",
+      "title": "八仙气泡升级 48 帧",
       "items": [
-        "吕洞宾、钟离权与何仙姑升级为 24 帧细腻动效，动作更连贯自然"
+        "吕洞宾、钟离权与何仙姑采用全新 48 帧动效，角色更稳定、动作更细腻"
       ]
     },
     "en": {
-      "title": "Smoother Eight Immortals effects",
+      "title": "48-frame Eight Immortals effects",
       "items": [
-        "Lu Dongbin, Zhongli Quan, and He Xiangu now use smoother 24-frame animations"
+        "Lu Dongbin, Zhongli Quan, and He Xiangu now use new, steadier 48-frame animations"
       ]
     }
   }

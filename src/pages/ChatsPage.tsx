@@ -365,7 +365,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
     let visible = false;
     let timer: number | null = null;
     let ownsPlayback = false;
-    const duration = character === "lv" ? 1100 : character === "zhongli" ? 1270 : 995;
+    const duration = 2000;
 
     const finish = () => {
       if (!ownsPlayback) return;
@@ -402,7 +402,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
   return (
     <>
       <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}>
-        {playing ? <img alt="" src={`/assets/baxian/${character === "lv" ? "lv-dongbin" : character === "zhongli" ? "zhongli-quan" : "he-xiangu"}-24.webp`} /> : null}
+        {playing ? <img alt="" src={`/assets/baxian/${character === "lv" ? "lv-dongbin" : character === "zhongli" ? "zhongli-quan" : "he-xiangu"}-48-v2.webp`} /> : null}
       </span>
       <button
         aria-label={i18n.t("message.replayCharacterEffect")}
