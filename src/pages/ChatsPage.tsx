@@ -6167,7 +6167,6 @@ function LiveChatsPage() {
         {selectedChat ? (
           <div className="chat-detail-panel">
             <section className="chat-detail-people-section">
-              <div className="section-label">{selectedChat.type === "group" ? t("chat.groupMembers") : t("chat.members")}</div>
               <div className="chat-detail-member-grid">
                 {visibleDetailMembers.map((member) => (
                   <button
@@ -6217,7 +6216,6 @@ function LiveChatsPage() {
             </section>
 
             <section className="chat-detail-settings-section">
-              <div className="section-label">{t("messageSearch.section")}</div>
               <SettingGroup>
                 <SettingRow
                   icon={<span className="material-symbols-outlined" aria-hidden="true">search</span>}
@@ -6235,7 +6233,6 @@ function LiveChatsPage() {
             </section>
 
             <section className="chat-detail-settings-section">
-              <div className="section-label">{t("chat.settings")}</div>
               <SettingGroup>
                 <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
                 {selectedChat.type === "direct" && canUseOnlineReminder ? (
@@ -6275,7 +6272,6 @@ function LiveChatsPage() {
             </section>
 
             <section className="chat-detail-danger-section">
-              <div className="section-label">{t("common.more")}</div>
               <div className="chat-detail-settings-list">
                 <button
                   className="chat-detail-setting-row danger-row"
@@ -6284,7 +6280,6 @@ function LiveChatsPage() {
                 >
                   <div className="row-main">
                     <strong>{t("chat.clearHistory")}</strong>
-                    <div className="row-subtle">{t("chat.clearHistoryHint")}</div>
                   </div>
                   <span className="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
                 </button>

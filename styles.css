@@ -13896,12 +13896,72 @@ html[data-theme="dark"] .message-link-preview-site {
   color: var(--brand-primary);
 }
 
+.user-profile-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.user-profile-facts span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--surface-soft) 88%, transparent);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.user-profile-facts .is-vip {
+  color: #7a4915;
+  background: linear-gradient(135deg, #fff7dc, #f0d18d);
+}
+
 .user-profile-primary-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 .user-profile-primary-actions .button {
   width: 100%;
   min-height: 50px;
 }
 .user-profile-primary-actions .button:only-child { grid-column: 1 / -1; }
+
+.user-profile-statements-action {
+  color: var(--brand-primary);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 24%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 7%, var(--bg-elevated));
+  box-shadow: none;
+}
+
+.user-profile-reminders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.user-profile-reminders button {
+  min-width: 0;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+  box-shadow: none;
+  text-align: left;
+}
+
+.user-profile-reminders button.is-active {
+  border-color: color-mix(in srgb, var(--brand-primary) 28%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 8%, var(--bg-elevated));
+}
+
+.user-profile-reminders .material-symbols-outlined { color: var(--brand-primary); font-size: 21px; }
+.user-profile-reminders button > span:last-child { min-width: 0; display: grid; gap: 3px; }
+.user-profile-reminders strong { font-size: 0.84rem; }
+.user-profile-reminders small { color: var(--text-muted); font-size: 0.7rem; }
 
 .user-profile-section {
   display: grid;
@@ -25074,7 +25134,8 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 }
 
 /* Square social feed refinements. */
-.square-statement-avatar .avatar-frame-clip,.square-comment-avatar .avatar-frame-clip,.square-composer-avatar .avatar-frame-clip,.square-statement-avatar .avatar-image,.square-comment-avatar .avatar-image,.square-composer-avatar .avatar-image{border-radius:28%}
+:is(.square-statement-avatar,.square-comment-avatar,.square-composer-avatar,.square-pinned-avatar,.square-notification-avatar){border-radius:28%}
+.square-statement-avatar .avatar-frame-clip,.square-comment-avatar .avatar-frame-clip,.square-composer-avatar .avatar-frame-clip,.square-statement-avatar .avatar-image,.square-comment-avatar .avatar-image,.square-composer-avatar .avatar-image{border-radius:inherit}
 .square-statement-menu{display:grid;place-items:center;width:34px;height:34px;margin-left:auto;border:0;border-radius:50%;color:var(--text-muted);background:transparent}.square-statement-menu:hover{background:var(--bg-canvas)}
 .square-statement-dropdown{position:fixed;z-index:120;display:grid;width:164px;padding:5px;border:1px solid color-mix(in srgb,var(--line-soft) 90%,transparent);border-radius:14px;background:color-mix(in srgb,var(--bg-elevated) 96%,transparent);box-shadow:0 18px 46px rgba(17,29,24,.18);backdrop-filter:blur(18px);animation:surface-enter 130ms ease-out}
 .square-statement-dropdown button{display:grid;grid-template-columns:25px minmax(0,1fr);align-items:center;gap:7px;width:100%;min-height:40px;padding:6px 9px;border:0;border-radius:10px;color:var(--text-primary);font:inherit;font-size:12px;font-weight:750;text-align:left;background:transparent}

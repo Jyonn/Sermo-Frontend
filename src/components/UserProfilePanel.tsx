@@ -43,6 +43,9 @@ interface UserProfileCacheSnapshot {
   groupChats: ChatDTO[];
   isFriend: boolean;
   respondedAt: number | null;
+  directChatId?: number | null;
+  onlineReminder?: boolean;
+  statementReminder?: boolean;
 }
 
 function friendshipAge(respondedAt?: number | null) {
@@ -79,6 +82,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [removingFriend, setRemovingFriend] = useState(false);
   const [currentUserMe, setCurrentUserMe] = useState<UserMeDTO | null>(null);
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
+  const [directChatId, setDirectChatId] = useState<number | null>(initialCached?.directChatId ?? null);
+  const [onlineReminder, setOnlineReminder] = useState(Boolean(initialCached?.onlineReminder));
+  const [statementReminder, setStatementReminder] = useState(Boolean(initialCached?.statementReminder));
+  const [reminderSaving, setReminderSaving] = useState<"online" | "statement" | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -104,13 +111,20 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         setIsFriend(status.is_friend);
         const nextRespondedAt = status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null;
         const nextGroupChats = chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId));
+        const directChat = chats.find((chat) => !chat.group && chat.members.some((member) => member.user_id === userId));
         setRespondedAt(nextRespondedAt);
         setGroupChats(nextGroupChats);
+        setDirectChatId(directChat?.chat_id ?? null);
+        setOnlineReminder(Boolean(directChat?.online_reminder_enabled));
+        setStatementReminder(Boolean(directChat?.statement_reminder_enabled));
         writeTabCache(cacheScope, `user-profile:${userId}`, {
           user: matchedUser,
           groupChats: nextGroupChats,
           isFriend: status.is_friend,
           respondedAt: nextRespondedAt,
+          directChatId: directChat?.chat_id ?? null,
+          onlineReminder: Boolean(directChat?.online_reminder_enabled),
+          statementReminder: Boolean(directChat?.statement_reminder_enabled),
         });
         setRequestState("idle");
         setViewState("ready");
@@ -238,6 +252,25 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     }
   };
 
+  const updateReminder = async (kind: "online" | "statement", enabled: boolean) => {
+    if (!user || reminderSaving) return;
+    setReminderSaving(kind);
+    try {
+      const chatId = directChatId ?? (await api.createDirectChat(user.user_id)).chat_id;
+      const preference = await api.updateChatPreference(chatId, kind === "online"
+        ? { online_reminder_enabled: enabled ? 1 : 0 }
+        : { statement_reminder_enabled: enabled ? 1 : 0 });
+      setDirectChatId(chatId);
+      setOnlineReminder(preference.online_reminder_enabled);
+      setStatementReminder(preference.statement_reminder_enabled);
+      showToast(t(enabled ? "profile.reminderEnabled" : "profile.reminderDisabled"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("profile.reminderFailed"), "error");
+    } finally {
+      setReminderSaving(null);
+    }
+  };
+
   if (!user && viewState === "loading") {
     return (
       <div className="user-profile-loading-shell" aria-hidden="true">
@@ -270,20 +303,15 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           />
         </button>
         <div className="user-profile-copy">
-          <div className="user-profile-kicker">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</div>
           <div className="user-profile-name-row">
             <h2>{user.name}</h2>
-            <div className="user-profile-status-badges">
-              {user.is_permanent_vip ? <span className="user-profile-vip-badge">{t("profile.permanentVip")}</span> : null}
-              {!user.official && user.growth_level ? (
-                <span className="user-profile-level-badge">
-                  <b>Lv.{user.growth_level}</b>
-                  {user.growth_level_name ? <span>{user.growth_level_name}</span> : null}
-                </span>
-              ) : null}
-            </div>
           </div>
           <p className={user.is_alive ? "is-online" : ""}>{presence}</p>
+          <div className="user-profile-facts">
+            <span>{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</span>
+            {!user.official && user.growth_level ? <span>LV{user.growth_level}</span> : null}
+            {user.is_permanent_vip ? <span className="is-vip">VIP</span> : null}
+          </div>
         </div>
       </section>
 
@@ -295,8 +323,21 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
             {requestState === "sending" ? t("profile.sending") : requestState === "sent" ? t("profile.sent") : t("profile.addFriend")}
           </button>
         ) : null}
-        <button className="button secondary-button" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
+        <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
       </div>
+
+      {isFriend === true ? (
+        <section className="user-profile-reminders" aria-label={t("profile.reminders")}>
+          <button className={onlineReminder ? "is-active" : ""} disabled={reminderSaving !== null} onClick={() => void updateReminder("online", !onlineReminder)} type="button">
+            <span className="material-symbols-outlined">notifications_active</span>
+            <span><strong>{t("profile.onlineReminder")}</strong><small>{t(onlineReminder ? "profile.enabled" : "profile.disabled")}</small></span>
+          </button>
+          <button className={statementReminder ? "is-active" : ""} disabled={reminderSaving !== null} onClick={() => void updateReminder("statement", !statementReminder)} type="button">
+            <span className="material-symbols-outlined">campaign</span>
+            <span><strong>{t("profile.statementReminder")}</strong><small>{t(statementReminder ? "profile.enabled" : "profile.disabled")}</small></span>
+          </button>
+        </section>
+      ) : null}
 
       <section className="user-profile-section">
         <div className="user-profile-section-head">

@@ -846,6 +846,7 @@ export interface ChatDTO {
   last_read_at?: number | null;
   pinned?: boolean;
   online_reminder_enabled?: boolean;
+  statement_reminder_enabled?: boolean;
   notifications_muted?: boolean;
   unread_badge_muted?: boolean;
   has_unread_mention?: boolean;
@@ -854,6 +855,7 @@ export interface ChatDTO {
 export interface ChatPreferenceDTO {
   pinned: boolean;
   online_reminder_enabled: boolean;
+  statement_reminder_enabled: boolean;
   notifications_muted: boolean;
   unread_badge_muted: boolean;
 }

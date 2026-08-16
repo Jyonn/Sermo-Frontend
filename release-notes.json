@@ -1,17 +1,21 @@
 {
-  "id": "2026.08.16.3",
+  "id": "2026.08.16.4",
   "publishedAt": "2026-08-16",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡升级 48 帧",
+      "title": "关系与视觉细节升级",
       "items": [
-        "吕洞宾、钟离权与何仙姑采用全新 48 帧动效，角色更稳定、动作更细腻"
+        "吕洞宾、钟离权与何仙姑采用全新 48 帧动效，角色更稳定、动作更细腻",
+        "修复广场头像框显示为方形的问题，头像与边框轮廓更加统一",
+        "用户详情重新排版，好友可分别开启上线提醒与发言提醒"
       ]
     },
     "en": {
-      "title": "48-frame Eight Immortals effects",
+      "title": "Refined profiles and visuals",
       "items": [
-        "Lu Dongbin, Zhongli Quan, and He Xiangu now use new, steadier 48-frame animations"
+        "Lu Dongbin, Zhongli Quan, and He Xiangu now use new, steadier 48-frame animations",
+        "Fixed square corners on framed avatars across the Square",
+        "Redesigned user profiles with separate online and post alerts for friends"
       ]
     }
   }
