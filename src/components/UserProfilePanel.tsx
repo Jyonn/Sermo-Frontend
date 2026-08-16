@@ -36,6 +36,7 @@ interface UserProfilePanelProps {
   initialIsFriend?: boolean;
   onSyncingChange?: (syncing: boolean) => void;
   onOpenChat?: (chatId: number) => void;
+  friendRequestSource?: "direct" | "square";
 }
 
 interface UserProfileCacheSnapshot {
@@ -54,7 +55,7 @@ function friendshipAge(respondedAt?: number | null) {
   return days < 30 ? i18n.t("profile.knownDays", { count: days }) : i18n.t("profile.knownMonths", { count: Math.floor(days / 30) });
 }
 
-export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat }: UserProfilePanelProps) {
+export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, friendRequestSource = "direct" }: UserProfilePanelProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -225,7 +226,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     if (!user || requestState !== "idle") return;
     setRequestState("sending");
     try {
-      await api.createFriendRequest(user.user_id);
+      await api.createFriendRequest(user.user_id, friendRequestSource);
       setRequestState("sent");
       showToast(t("profile.requestSent"));
     } catch (apiError) {

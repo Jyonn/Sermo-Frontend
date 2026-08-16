@@ -760,6 +760,7 @@ export interface FriendshipRequestDTO {
   created_at: number;
   updated_at: number;
   responded_at: number | null;
+  source: "direct" | "qr" | "square" | "search" | string;
 }
 
 export interface FriendshipStatusDTO {

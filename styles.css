@@ -14155,6 +14155,48 @@ html[data-theme="dark"] .message-link-preview-site {
   background: rgba(226, 231, 237, 0.56);
 }
 
+.tab-header-action {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-elevated) 68%, transparent);
+  box-shadow: none;
+}
+
+.tab-header-action .material-symbols-outlined { font-size: 21px; }
+
+.friend-search-panel { display: grid; gap: 22px; }
+.friend-search-form { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 9px; }
+.friend-search-form label {
+  min-width: 0;
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+}
+.friend-search-form label .material-symbols-outlined { color: var(--text-muted); font-size: 21px; }
+.friend-search-form input { width: 100%; padding: 0; border: 0; outline: 0; color: var(--text-primary); background: transparent; font: inherit; }
+.friend-search-form > button { display: grid; place-items: center; padding: 0; border: 0; border-radius: 16px; color: white; background: var(--brand-primary); box-shadow: none; }
+.friend-search-result { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 15px; border-block: 1px solid var(--line-soft); }
+.friend-search-avatar { width: 58px; height: 58px; border-radius: 18px; }
+.friend-search-result > div { min-width: 0; display: grid; gap: 4px; }
+.friend-search-result small { color: var(--text-muted); font-size: 0.76rem; }
+.friend-search-result .button { min-height: 38px; padding-inline: 14px; }
+.friend-search-state { color: var(--brand-primary); font-size: 0.76rem; font-weight: 800; }
+.friend-search-intro { min-height: 190px; display: grid; align-content: center; justify-items: center; gap: 8px; color: var(--text-secondary); text-align: center; }
+.friend-search-intro > .material-symbols-outlined { color: var(--brand-primary); font-size: 34px; }
+.friend-search-intro p { max-width: 260px; margin: 0; color: var(--text-muted); font-size: 0.8rem; line-height: 1.6; }
+
 .menu-install-title {
   display: flex;
   align-items: center;

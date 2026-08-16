@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { QuietState } from "../components/BoundaryState";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -41,6 +42,13 @@ function requestStatus(request: FriendshipRequestDTO, direction: "incoming" | "o
     return { label: i18n.t("request.closed"), tone: "closed" };
   }
   return { label: i18n.t("request.handled"), tone: "closed" };
+}
+
+function requestSourceLabel(source: string) {
+  if (source === "qr") return i18n.t("request.source.qr");
+  if (source === "square") return i18n.t("request.source.square");
+  if (source === "search") return i18n.t("request.source.search");
+  return i18n.t("request.source.direct");
 }
 
 type FriendSection = {
@@ -115,6 +123,7 @@ export default function NotificationsPage() {
   const friendSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [syncing, setSyncing] = useState(false);
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [friends, setFriends] = useState<UserDTO[]>([]);
   const [groupChats, setGroupChats] = useState<ChatDTO[]>([]);
@@ -247,7 +256,7 @@ export default function NotificationsPage() {
   return (
     <AppChrome title={t("contacts.title")} hideTopbar shellClassName="desktop-tab-shell">
       <section className="page-stack">
-        <TabPageHeader title={t("contacts.title")} syncing={syncing} />
+        <TabPageHeader title={t("contacts.title")} syncing={syncing} actions={<button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button>} />
         <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
         <section className="list-section">
@@ -355,7 +364,7 @@ export default function NotificationsPage() {
                   <UserAvatar className="mini-avatar" name={request.from_user.name} uri={request.from_user.avatar_uri} />
                   <div className="row-main">
                     <strong>{request.from_user.name}</strong>
-                    <div className="row-subtle">{formatRelativeTime(request.responded_at ?? request.updated_at)}</div>
+                    <div className="row-subtle">{t("request.source", { source: requestSourceLabel(request.source) })} · {formatRelativeTime(request.responded_at ?? request.updated_at)}</div>
                   </div>
                   {request.status === FRIEND_REQUEST_STATUS_PENDING ? (
                     <div className="row-actions">
@@ -381,7 +390,7 @@ export default function NotificationsPage() {
                   <UserAvatar className="mini-avatar" name={request.to_user.name} uri={request.to_user.avatar_uri} />
                   <div className="row-main">
                     <strong>{request.to_user.name}</strong>
-                    <div className="row-subtle">{formatRelativeTime(request.responded_at ?? request.updated_at)}</div>
+                    <div className="row-subtle">{t("request.source", { source: requestSourceLabel(request.source) })} · {formatRelativeTime(request.responded_at ?? request.updated_at)}</div>
                   </div>
                   {request.status === FRIEND_REQUEST_STATUS_PENDING ? (
                     <button className="ghost-button row-button" onClick={() => setRevokeRequest(request)} type="button">
@@ -489,6 +498,7 @@ export default function NotificationsPage() {
       </SideDrawer>
 
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
+      <AddFriendDrawer onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
     </AppChrome>
   );
 }

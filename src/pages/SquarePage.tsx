@@ -1114,6 +1114,7 @@ export default function SquarePage() {
       >
         {profileDrawerUserId !== null ? (
           <UserProfilePanel
+            friendRequestSource="square"
             initialUser={profileSeed}
             key={profileDrawerUserId}
             onOpenChat={(chatId) => {

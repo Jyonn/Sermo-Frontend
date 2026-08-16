@@ -14,6 +14,7 @@ import {
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { QuietState } from "../components/BoundaryState";
@@ -2178,6 +2179,7 @@ function LiveChatsPage() {
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [messageSearchOpen, setMessageSearchOpen] = useState(false);
   const [messageSearchKeyword, setMessageSearchKeyword] = useState("");
   const [messageSearchType, setMessageSearchType] = useState<number | null>(null);
@@ -5264,6 +5266,7 @@ function LiveChatsPage() {
       <TabPageHeader
         title={t("chat.title")}
         syncing={viewState === "loading"}
+        actions={<button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button>}
         status={
           <span
             aria-label={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
@@ -5274,6 +5277,7 @@ function LiveChatsPage() {
           </span>
         }
       />
+      <AddFriendDrawer onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
       <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
       <div className="chat-list-screen-body">

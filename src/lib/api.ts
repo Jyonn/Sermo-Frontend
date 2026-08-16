@@ -983,11 +983,18 @@ export const api = {
     });
   },
 
-  createFriendRequest(to_user_id: number) {
+  createFriendRequest(to_user_id: number, source: "direct" | "square" | "search" = "direct") {
     return request<FriendshipRequestDTO>("/friends/requests", {
       method: "POST",
       auth: true,
-      body: { to_user_id },
+      body: { to_user_id, source },
+    });
+  },
+
+  searchFriendExact(name: string) {
+    return request<{ user: UserDTO | null; relationship: "none" | "pending" | "friend" }>("/friends/search", {
+      auth: true,
+      query: { name },
     });
   },
 
