@@ -566,6 +566,31 @@ export default function SquarePage() {
     }
   };
 
+  const alignStatementBelowHeader = (element: HTMLElement, behavior: ScrollBehavior) => {
+    const screen = element.closest<HTMLElement>(".square-feed-screen");
+    const header = screen?.querySelector<HTMLElement>(".tab-sticky-header");
+    const headerHeight = header?.getBoundingClientRect().height ?? 0;
+    const screenStyle = screen ? window.getComputedStyle(screen) : null;
+    const screenScrolls = Boolean(screen && screen.scrollHeight > screen.clientHeight
+      && /(auto|scroll)/.test(screenStyle?.overflowY ?? ""));
+
+    if (screen && screenScrolls) {
+      const screenRect = screen.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      screen.scrollTo({
+        top: screen.scrollTop + elementRect.top - screenRect.top - headerHeight,
+        behavior,
+      });
+      return;
+    }
+
+    const elementRect = element.getBoundingClientRect();
+    window.scrollTo({
+      top: window.scrollY + elementRect.top - headerHeight,
+      behavior,
+    });
+  };
+
   const openStatement = (statementId: number) => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
     setInlineStatementId(statementId);
@@ -577,7 +602,7 @@ export default function SquarePage() {
         setInlineStatementExpanded(true);
         return;
       }
-      card.scrollIntoView({ behavior: "smooth", block: "start" });
+      alignStatementBelowHeader(card, "smooth");
       inlineExpandTimerRef.current = window.setTimeout(() => {
         // Commit the route only after the feed has settled. The browser then
         // stores the aligned feed position in history and restores it on back.
@@ -585,7 +610,9 @@ export default function SquarePage() {
         setInlineStatementExpanded(true);
         inlineExpandTimerRef.current = null;
         if (!desktopWorkspace) {
-          window.requestAnimationFrame(() => card.parentElement?.scrollIntoView({ behavior: "auto", block: "start" }));
+          window.requestAnimationFrame(() => {
+            if (card.parentElement) alignStatementBelowHeader(card.parentElement, "auto");
+          });
         }
       }, 320);
     }));
@@ -907,6 +934,23 @@ export default function SquarePage() {
         <TabPageHeader
           syncing={syncing}
           title={t("square.title")}
+          secondary={<div className="square-feed-filter" role="tablist">
+            {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button> : null}
+            <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}</button>
+            <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
+            {profileFeedUserId ? (
+              <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}>
+                <button aria-selected={feedMode === "user"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button>
+                <button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => {
+                  const next = new URLSearchParams(searchParams);
+                  next.delete("user_id");
+                  next.delete("user_name");
+                  setSearchParams(next, { replace: true });
+                  setFeedMode("mine");
+                }} type="button"><span className="material-symbols-outlined">close</span></button>
+              </span>
+            ) : null}
+          </div>}
           actions={<div className="square-header-actions">
             <button aria-label={t("square.quotaTitle")} className="square-header-quota" onClick={openQuota} type="button">
               <span className="material-symbols-outlined">data_usage</span>
@@ -924,23 +968,6 @@ export default function SquarePage() {
           </div>}
         />
         <div className="square-feed-column">
-          <div className="square-feed-filter" role="tablist">
-            {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button> : null}
-            <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}</button>
-            <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
-            {profileFeedUserId ? (
-              <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}>
-                <button aria-selected={feedMode === "user"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button>
-                <button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => {
-                  const next = new URLSearchParams(searchParams);
-                  next.delete("user_id");
-                  next.delete("user_name");
-                  setSearchParams(next, { replace: true });
-                  setFeedMode("mine");
-                }} type="button"><span className="material-symbols-outlined">close</span></button>
-              </span>
-            ) : null}
-          </div>
           {feedMode === "all" && pinnedStatement ? (
             <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>

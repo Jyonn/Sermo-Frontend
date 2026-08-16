@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.16.6",
-  "publishedAt": "2026-08-16",
+  "id": "2026.08.17.1",
+  "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "好友查找修复",
+      "title": "广场导航更顺手",
       "items": [
-        "认证用户现在可以正常精确查找本空间内尚未认证的用户"
+        "探索、好友圈与我的现已固定在广场顶部，切换与发言定位更稳定"
       ]
     },
     "en": {
-      "title": "Friend search fix",
+      "title": "Smoother Square navigation",
       "items": [
-        "Verified users can now find unverified members of the current space by exact nickname"
+        "Explore, Friends, and Mine now stay in the Square header, with steadier switching and statement positioning"
       ]
     }
   }
