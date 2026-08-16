@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.16.5",
+  "id": "2026.08.16.6",
   "publishedAt": "2026-08-16",
   "locales": {
     "zh-CN": {
-      "title": "添加好友更清晰",
+      "title": "好友查找修复",
       "items": [
-        "聊天与通讯页可直接精确查找本空间用户",
-        "好友申请会注明来自二维码、广场或精确查找"
+        "认证用户现在可以正常精确查找本空间内尚未认证的用户"
       ]
     },
     "en": {
-      "title": "Clearer friend discovery",
+      "title": "Friend search fix",
       "items": [
-        "Find exact users in the current space from Chats or Contacts",
-        "Friend requests now show whether they came from QR, Square, or exact search"
+        "Verified users can now find unverified members of the current space by exact nickname"
       ]
     }
   }
