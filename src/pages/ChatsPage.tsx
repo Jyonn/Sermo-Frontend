@@ -348,29 +348,74 @@ function XiaobaiBubbleRunner() {
   return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
 }
 
-function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
+const playedBaxianEffects = new Set<string>();
+let activeBaxianEffect: string | null = null;
+
+function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; effectKey: string; style?: ChatBubbleStyle }) {
   const runnerRef = useRef<HTMLSpanElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [replayRequest, setReplayRequest] = useState(0);
   const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
 
   useEffect(() => {
     const runner = runnerRef.current;
-    const track = runner?.parentElement;
-    if (!runner || !track || !character) return;
-    const updateTrack = () => {
-      const distance = Math.max(32, track.clientWidth - 28);
-      runner.style.setProperty("--baxian-track-x", `${distance}px`);
-      runner.style.setProperty("--baxian-track-x-45", `${distance * 0.45}px`);
-      runner.style.setProperty("--baxian-track-x-86", `${distance * 0.86}px`);
-      runner.style.setProperty("--baxian-track-y", `${Math.max(36, track.clientHeight + 24)}px`);
+    const bubble = runner?.parentElement;
+    const replaying = replayRequest > 0;
+    if ((!active && !replaying) || !runner || !bubble || !character || (!replaying && playedBaxianEffects.has(effectKey))) return;
+    let visible = false;
+    let timer: number | null = null;
+    let ownsPlayback = false;
+    const duration = character === "lv" ? 1100 : character === "zhongli" ? 1270 : 995;
+
+    const finish = () => {
+      if (!ownsPlayback) return;
+      ownsPlayback = false;
+      setPlaying(false);
+      if (activeBaxianEffect === effectKey) activeBaxianEffect = null;
+      window.dispatchEvent(new Event("sermo:baxian-effect-finished"));
     };
-    updateTrack();
-    const observer = new ResizeObserver(updateTrack);
-    observer.observe(track);
-    return () => observer.disconnect();
-  }, [character]);
+
+    const tryPlay = () => {
+      if (!visible || bubble.offsetWidth < 88 || activeBaxianEffect || (!replaying && playedBaxianEffects.has(effectKey))) return;
+      playedBaxianEffects.add(effectKey);
+      activeBaxianEffect = effectKey;
+      ownsPlayback = true;
+      setPlaying(true);
+      timer = window.setTimeout(finish, duration + 80);
+    };
+
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      tryPlay();
+    }, { threshold: 0.65 });
+    observer.observe(runner);
+    window.addEventListener("sermo:baxian-effect-finished", tryPlay);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("sermo:baxian-effect-finished", tryPlay);
+      if (timer !== null) window.clearTimeout(timer);
+      finish();
+    };
+  }, [active, character, effectKey, replayRequest]);
 
   if (!character) return null;
-  return <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}`} />;
+  return (
+    <>
+      <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}>
+        {playing ? <img alt="" src={`/assets/baxian/${character === "lv" ? "lv-dongbin" : character === "zhongli" ? "zhongli-quan" : "he-xiangu"}.webp`} /> : null}
+      </span>
+      <button
+        aria-label={i18n.t("message.replayCharacterEffect")}
+        className={`baxian-effect-replay is-${character}${playing ? " is-playing" : ""}`}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (!playing) setReplayRequest((value) => value + 1);
+        }}
+        type="button"
+      >八</button>
+    </>
+  );
 }
 
 function formatTime(value: number) {
@@ -1244,7 +1289,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
           })}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          {isFirst ? <BaxianBubbleRunner style={messages[0]?.chatBubbleStyle} /> : null}
+          {isLast ? <BaxianBubbleRunner active={isEntering} effectKey={`${messages[messages.length - 1]?.clientId}:${messages[0]?.chatBubbleStyle}:baxian`} style={messages[0]?.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -1746,7 +1791,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          {isFirst ? <BaxianBubbleRunner style={message.chatBubbleStyle} /> : null}
+          {isLast ? <BaxianBubbleRunner active={isEntering && message.kind !== "system" && message.status !== "failed"} effectKey={`${message.clientId}:${message.chatBubbleStyle}:baxian`} style={message.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -6980,7 +7025,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       <section aria-label={t("menu.chatBubble")} className="chat-conversation-panel chat-conversation-preview is-single-message" onContextMenu={(event) => event.preventDefault()}>
         <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`}>
           <div className="message-scroll">
-            <MessageGroupBlock enteringMessageIds={[]} group={group} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />
+            <MessageGroupBlock enteringMessageIds={[group.messages[0].clientId]} group={group} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />
           </div>
         </div>
       </section>
@@ -7012,9 +7057,9 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
     >
       <div className="chat-detail-scene chat-background-default">
         <div className="message-scroll">
-          {groups.map((group) => (
+          {groups.map((group, index) => (
             <MessageGroupBlock
-              enteringMessageIds={[]}
+              enteringMessageIds={index === 0 ? [group.messages[0].clientId] : []}
               group={group}
               key={group.key}
               onOpenActions={noop}

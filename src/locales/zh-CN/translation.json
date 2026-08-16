@@ -1332,6 +1332,7 @@
   "location.focusing": "正在前往这个位置",
   "location.openInAmap": "使用高德地图打开",
   "message.retrySend": "重试发送",
+  "message.replayCharacterEffect": "重播角色动效",
   "message.original": "原消息",
   "media.metadataMissing": "影像资料尚未写入",
   "media.takenAt": "时间",

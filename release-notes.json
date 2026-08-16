@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.15.9",
-  "publishedAt": "2026-08-15",
+  "id": "2026.08.16.1",
+  "publishedAt": "2026-08-16",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡动作更轻盈",
+      "title": "八仙气泡短动效焕新",
       "items": [
-        "缩小八仙人物并让动作沿气泡外边框贴边展示，不再遮挡消息"
+        "吕洞宾、钟离权与何仙姑改为克制的角落短动效，新消息出现时仅播放一次"
       ]
     },
     "en": {
-      "title": "Lighter Eight Immortals animations",
+      "title": "Refined Eight Immortals effects",
       "items": [
-        "Reduced character size and aligned animations outside bubble borders to keep messages clear"
+        "Lu Dongbin, Zhongli Quan, and He Xiangu now use restrained corner animations that play once for new messages"
       ]
     }
   }

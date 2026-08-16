@@ -24089,67 +24089,60 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 .baxian-bubble-runner {
   position:absolute;
   z-index:6;
-  display:none;
-  width:48px;
-  height:48px;
-  background-position:center;
-  background-repeat:no-repeat;
-  background-size:contain;
+  display:block;
+  width:clamp(64px,5vw,72px);
+  height:clamp(64px,5vw,72px);
   filter:drop-shadow(0 3px 4px rgba(31,27,21,.22));
+  opacity:0;
   pointer-events:none;
-  will-change:transform,opacity;
+  user-select:none;
 }
 
-.message-group.bubble-style-baxian-lv .group-start > .baxian-bubble-runner.is-lv {
-  right:auto;
-  bottom:-2px;
-  left:calc(100% - 2px);
-  display:block;
-  background-image:url("/assets/baxian/lv-dongbin.webp");
-  animation:baxian-lv-climb 2.5s cubic-bezier(.45,.05,.3,1) infinite;
-}
+.baxian-bubble-runner.is-playing { opacity:1; }
+.baxian-bubble-runner > img { display:block;width:100%;height:100%;object-fit:contain; }
 
-.message-group.bubble-style-baxian-zhongli .group-start > .baxian-bubble-runner.is-zhongli {
-  top:auto;
-  bottom:calc(100% - 3px);
-  left:-17px;
-  display:block;
-  width:52px;
-  height:52px;
-  background-image:url("/assets/baxian/zhongli-quan.webp");
-  animation:baxian-zhongli-walk 3.2s linear infinite;
+.baxian-effect-replay {
+  position:absolute;
+  z-index:5;
+  display:grid;
+  width:19px;
+  height:19px;
+  padding:0;
+  place-items:center;
+  border:1px solid color-mix(in srgb,var(--bubble-theme-accent,#9c6638) 58%,#fff);
+  border-radius:50%;
+  color:var(--bubble-theme-accent,#7b512f);
+  background:color-mix(in srgb,var(--bubble-theme-icon,#f1e5cd) 88%,#fff);
+  box-shadow:0 2px 5px rgba(57,39,24,.14);
+  font:700 10px/1 "Noto Serif SC",serif;
+  opacity:.76;
+  transition:opacity .16s ease,transform .16s ease;
 }
+.baxian-effect-replay:hover { opacity:1;transform:scale(1.06); }
+.baxian-effect-replay.is-playing { opacity:0;pointer-events:none; }
+.baxian-effect-replay.is-lv { top:-7px;right:-7px; }
+.baxian-effect-replay.is-zhongli { bottom:-7px;left:-7px; }
+.baxian-effect-replay.is-he { top:-7px;left:-7px; }
+.message-group.self .baxian-effect-replay.is-lv { right:-2px; }
+.message-group.other :is(.baxian-effect-replay.is-zhongli,.baxian-effect-replay.is-he) { left:-2px; }
 
-.message-group.bubble-style-baxian-he .group-start > .baxian-bubble-runner.is-he {
-  top:auto;
-  bottom:calc(100% - 3px);
-  left:-17px;
-  display:block;
-  background-image:url("/assets/baxian/he-xiangu.webp");
-  animation:baxian-he-flight 2.4s cubic-bezier(.42,0,.35,1) infinite;
+.message-group.bubble-style-baxian-lv .group-end > .baxian-bubble-runner.is-lv {
+  top:-42px;
+  right:-28px;
 }
+.message-group.self.bubble-style-baxian-lv .group-end > .baxian-bubble-runner.is-lv { right:-12px; }
 
-@keyframes baxian-lv-climb {
-  0%,8% { opacity:0;transform:translate(0,14px) rotate(4deg); }
-  14% { opacity:1; }
-  58% { transform:translate(0,calc(-1 * var(--baxian-track-y))) rotate(-4deg); }
-  76% { opacity:1;transform:translate(2px,calc(-1 * var(--baxian-track-y) - 8px)) rotate(-9deg); }
-  92%,100% { opacity:0;transform:translate(5px,calc(-1 * var(--baxian-track-y) + 5px)) rotate(3deg); }
+.message-group.bubble-style-baxian-zhongli .group-end > .baxian-bubble-runner.is-zhongli {
+  bottom:-42px;
+  left:-28px;
 }
+.message-group.other.bubble-style-baxian-zhongli .group-end > .baxian-bubble-runner.is-zhongli { left:-12px; }
 
-@keyframes baxian-zhongli-walk {
-  0%,7% { opacity:0;transform:translateX(-14px); }
-  13%,84% { opacity:1; }
-  92%,100% { opacity:0;transform:translateX(var(--baxian-track-x)); }
+.message-group.bubble-style-baxian-he .group-end > .baxian-bubble-runner.is-he {
+  top:-42px;
+  left:-28px;
 }
-
-@keyframes baxian-he-flight {
-  0%,7% { opacity:0;transform:translate(-16px,24px) rotate(-8deg); }
-  14% { opacity:1;transform:translate(0,8px) rotate(-13deg); }
-  44% { transform:translate(var(--baxian-track-x-45),-14px) rotate(0); }
-  78% { opacity:1;transform:translate(var(--baxian-track-x-86),-8px) rotate(8deg); }
-  94%,100% { opacity:0;transform:translate(var(--baxian-track-x),22px) rotate(12deg); }
-}
+.message-group.other.bubble-style-baxian-he .group-end > .baxian-bubble-runner.is-he { left:-12px; }
 
 .field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) > i { overflow:visible; }
 .field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) i span {
@@ -24161,17 +24154,17 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 .field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) > i::after {
   position:absolute;
   z-index:2;
-  width:26px;
-  height:26px;
+  width:36px;
+  height:36px;
   background-position:center;
   background-repeat:no-repeat;
   background-size:contain;
   content:"";
   pointer-events:none;
 }
-.field-chat_bubble_style .preview-baxian-lv > i::after { right:-13px;bottom:1px;background-image:url("/assets/baxian/lv-dongbin.webp"); }
-.field-chat_bubble_style .preview-baxian-zhongli > i::after { top:-24px;left:2px;background-image:url("/assets/baxian/zhongli-quan.webp"); }
-.field-chat_bubble_style .preview-baxian-he > i::after { top:-24px;left:2px;background-image:url("/assets/baxian/he-xiangu.webp"); }
+.field-chat_bubble_style .preview-baxian-lv > i::after { top:-25px;right:-15px;background-image:url("/assets/baxian/lv-dongbin-preview.png"); }
+.field-chat_bubble_style .preview-baxian-zhongli > i::after { bottom:-25px;left:-15px;background-image:url("/assets/baxian/zhongli-quan-preview.png"); }
+.field-chat_bubble_style .preview-baxian-he > i::after { top:-25px;left:-15px;background-image:url("/assets/baxian/he-xiangu-preview.png"); }
 
 html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
   --bubble-skin-other-bg:linear-gradient(138deg,#e9dfcb,#d1bea0);
@@ -24179,7 +24172,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bu
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .baxian-bubble-runner { display:none!important; }
+  :is(.baxian-bubble-runner,.baxian-effect-replay) { display:none!important; }
 }
 
 /* Fufu IP: sand tabby stripes, charcoal ink, olive eyes, and a coral-pink spark. */
