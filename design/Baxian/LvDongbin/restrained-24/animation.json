@@ -1,0 +1,59 @@
+{
+  "id": "baxian-lv-dongbin-bubble-corner-greeting-24",
+  "spriteVersionNumber": 2,
+  "derivedFrom": "../restrained-12/animation.json",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "frameCount": 24,
+  "sheetColumns": 6,
+  "sheetRows": 4,
+  "rowMajor": true,
+  "durationsMs": [
+    45,
+    45,
+    40,
+    40,
+    40,
+    40,
+    43,
+    42,
+    40,
+    40,
+    38,
+    37,
+    35,
+    35,
+    45,
+    45,
+    50,
+    50,
+    45,
+    45,
+    50,
+    50,
+    80,
+    80
+  ],
+  "durationMs": 1100,
+  "playback": "once",
+  "autoplayTrigger": "new-message-visible",
+  "replayTrigger": "character-tap",
+  "hideAfterComplete": true,
+  "anchor": "top-right",
+  "recommendedDisplayPx": {
+    "mobile": 64,
+    "desktop": 72
+  },
+  "contentOverlapAllowed": false,
+  "spritesheet": "spritesheet-24.png",
+  "animatedWebP": "animation-24.webp",
+  "framesPath": "frames/frame-{01..24}.png",
+  "frameProvenance": {
+    "oddFrames": "restrained-12 keyframes",
+    "evenFrames": "ImageGen in-betweens"
+  },
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 0
+  }
+}

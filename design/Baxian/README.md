@@ -11,6 +11,7 @@
 - `ZhongliQuan/`：钟离权水平行走并把玩金元宝的 24 帧动画。
 - `HeXiangu/`：何仙姑起飞、巡航变化、减速和落地的 24 帧动画。
 - `*/restrained-12/`：三位角色用于普通聊天的新12帧克制型角落动效，默认只播放一次。
+- `*/restrained-24/`：在12帧关键姿态之间加入 ImageGen 中间帧的流畅版本；动作时长、半身构图和锚点保持不变，普通聊天优先使用。
 - `restrained-chat-bubble-usage.md`：Codex/前端接入、触发、定位和低动态模式规则。
 - `imagegen-prompts-restrained-12.md`：本轮内置 ImageGen 提示词与共同约束。
 

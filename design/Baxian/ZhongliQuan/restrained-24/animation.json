@@ -1,0 +1,59 @@
+{
+  "id": "baxian-zhongli-quan-bubble-corner-greeting-24",
+  "spriteVersionNumber": 2,
+  "derivedFrom": "../restrained-12/animation.json",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "frameCount": 24,
+  "sheetColumns": 6,
+  "sheetRows": 4,
+  "rowMajor": true,
+  "durationsMs": [
+    50,
+    50,
+    45,
+    45,
+    45,
+    45,
+    50,
+    50,
+    45,
+    45,
+    45,
+    45,
+    50,
+    50,
+    60,
+    60,
+    50,
+    50,
+    55,
+    55,
+    55,
+    55,
+    85,
+    85
+  ],
+  "durationMs": 1270,
+  "playback": "once",
+  "autoplayTrigger": "new-message-visible",
+  "replayTrigger": "character-tap",
+  "hideAfterComplete": true,
+  "anchor": "bottom-left",
+  "recommendedDisplayPx": {
+    "mobile": 64,
+    "desktop": 72
+  },
+  "contentOverlapAllowed": false,
+  "spritesheet": "spritesheet-24.png",
+  "animatedWebP": "animation-24.webp",
+  "framesPath": "frames/frame-{01..24}.png",
+  "frameProvenance": {
+    "oddFrames": "restrained-12 keyframes",
+    "evenFrames": "ImageGen in-betweens"
+  },
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 0
+  }
+}

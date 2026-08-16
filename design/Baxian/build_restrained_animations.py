@@ -115,6 +115,77 @@ def build(name, config):
     (folder / "animation.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 
 
+def build_24(name, config):
+    source_folder = ROOT / name / "restrained-12"
+    folder = ROOT / name / "restrained-24"
+    folder.mkdir(exist_ok=True)
+
+    keyframes = [
+        Image.open(source_folder / f"frames/frame-{index:02d}.png").convert("RGBA")
+        for index in range(1, 13)
+    ]
+    inbetween_sheet = Image.open(folder / "source/inbetweens.png").convert("RGBA")
+    inbetweens = normalize(crop_cells(inbetween_sheet))
+
+    frames = []
+    durations = []
+    for keyframe, inbetween, key_duration in zip(keyframes, inbetweens, config["durations"]):
+        first_half = (key_duration + 1) // 2
+        second_half = key_duration - first_half
+        frames.extend((keyframe, inbetween))
+        durations.extend((first_half, max(1, second_half)))
+
+    frame_folder = folder / "frames"
+    frame_folder.mkdir(exist_ok=True)
+    for index, frame in enumerate(frames, start=1):
+        frame.save(frame_folder / f"frame-{index:02d}.png")
+
+    columns, rows = 6, 4
+    sprite = Image.new("RGBA", (CELL[0] * columns, CELL[1] * rows))
+    for index, frame in enumerate(frames):
+        sprite.alpha_composite(frame, ((index % columns) * CELL[0], (index // columns) * CELL[1]))
+    sprite.save(folder / "spritesheet-24.png")
+
+    frames[0].save(
+        folder / "animation-24.webp", save_all=True, append_images=frames[1:],
+        duration=durations, loop=1, lossless=True, method=6,
+    )
+    frames[0].save(
+        folder / "preview-24.gif", save_all=True, append_images=frames[1:],
+        duration=durations, loop=0, disposal=2,
+    )
+
+    manifest = {
+        "id": config["id"].replace("greeting", "greeting-24"),
+        "spriteVersionNumber": 2,
+        "derivedFrom": "../restrained-12/animation.json",
+        "frameWidth": CELL[0],
+        "frameHeight": CELL[1],
+        "frameCount": 24,
+        "sheetColumns": columns,
+        "sheetRows": rows,
+        "rowMajor": True,
+        "durationsMs": durations,
+        "durationMs": sum(durations),
+        "playback": "once",
+        "autoplayTrigger": "new-message-visible",
+        "replayTrigger": "character-tap",
+        "hideAfterComplete": True,
+        "anchor": config["anchor"],
+        "recommendedDisplayPx": {"mobile": 64, "desktop": 72},
+        "contentOverlapAllowed": False,
+        "spritesheet": "spritesheet-24.png",
+        "animatedWebP": "animation-24.webp",
+        "framesPath": "frames/frame-{01..24}.png",
+        "frameProvenance": {"oddFrames": "restrained-12 keyframes", "evenFrames": "ImageGen in-betweens"},
+        "reducedMotion": {"autoplay": False, "fallbackFrame": 0},
+    }
+    (folder / "animation.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+
+
 if __name__ == "__main__":
     for character, character_config in CHARACTERS.items():
         build(character, character_config)
+        inbetween_source = ROOT / character / "restrained-24/source/inbetweens.png"
+        if inbetween_source.exists():
+            build_24(character, character_config)

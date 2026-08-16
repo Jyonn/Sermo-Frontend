@@ -1,19 +1,20 @@
 # 八仙克制型动态聊天气泡 · Codex 使用说明
 
-本版用于普通高频聊天。人物不是气泡边框的一部分，而是定位在气泡外侧的独立一次性动画层。旧版 24 帧素材保留为用户点击人物后的扩展演出；默认自动播放只使用 `restrained-12/`。
+本版用于普通高频聊天。人物不是气泡边框的一部分，而是定位在气泡外侧的独立一次性动画层。默认优先使用更流畅的 `restrained-24/`；`restrained-12/` 作为低带宽兼容版本。早期全身/大动作24帧素材仍只用于用户点击后的扩展演出。
 
 ## 素材选择
 
 | 人物 | 自动动画 | 锚点 | 推荐尺寸 | 时长 | 动作语义 |
 | --- | --- | --- | --- | --- | --- |
-| 吕洞宾 | `LvDongbin/restrained-12/animation-12.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 1.1s | 探边、短促剑礼、退回 |
-| 钟离权 | `ZhongliQuan/restrained-12/animation-12.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 1.27s | 升起、把玩元宝、耸肩沉下 |
-| 何仙姑 | `HeXiangu/restrained-12/animation-12.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 0.995s | 衣袖入场、短滑翔、手势、离场 |
+| 吕洞宾 | `LvDongbin/restrained-24/animation-24.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 1.1s | 探边、短促剑礼、退回 |
+| 钟离权 | `ZhongliQuan/restrained-24/animation-24.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 1.27s | 升起、把玩元宝、耸肩沉下 |
+| 何仙姑 | `HeXiangu/restrained-24/animation-24.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 0.995s | 衣袖入场、短滑翔、手势、离场 |
 
 每套还包括：
 
-- `spritesheet-12.png`：4 列 × 3 行，单帧 256 × 256。
-- `frames/frame-01.png` 至 `frame-12.png`：用于 Canvas、游戏引擎或精确逐帧控制。
+- `restrained-24/spritesheet-24.png`：6 列 × 4 行，单帧 256 × 256。
+- `restrained-24/frames/frame-01.png` 至 `frame-24.png`：用于 Canvas、游戏引擎或精确逐帧控制。
+- `restrained-12/`：相同动作的12帧兼容版；总播放时长和锚点与24帧版保持一致。
 - `animation.json`：帧时长、锚点、触发方式和低动态模式信息；接入时优先读取该文件，不要在组件里复制帧参数。
 - `preview-12.gif`：仅供设计审阅，不建议线上使用。
 - `source/contact-sheet-chroma.png`：ImageGen 原始洋红底生成稿，仅供再生成和追溯。
@@ -40,7 +41,7 @@
     <div className="message-bubble">消息正文</div>
     <img
       className="bubble-character bubble-character--top-right"
-      src="/design/Baxian/LvDongbin/restrained-12/animation-12.webp"
+      src="/design/Baxian/LvDongbin/restrained-24/animation-24.webp"
       alt=""
       aria-hidden="true"
     />
