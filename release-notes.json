@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.3",
+  "id": "2026.08.17.4",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "广场导航更清晰",
+      "title": "广场布局修复",
       "items": [
-        "桌面端广场导航现拥有更舒适的高度、留白与毛玻璃效果"
+        "修复桌面端首条发言与广场导航重叠的问题"
       ]
     },
     "en": {
-      "title": "Clearer Square navigation",
+      "title": "Square layout fix",
       "items": [
-        "Square navigation on desktop now has improved height, spacing, and glass styling"
+        "Fixed the first Square statement overlapping desktop navigation"
       ]
     }
   }
