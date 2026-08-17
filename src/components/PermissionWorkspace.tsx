@@ -9,6 +9,7 @@ import "../styles/permission-workspace.css";
 type Scope = "platform" | "space";
 type Draft = Pick<CapabilityPolicyDTO, "requirement" | "denial" | "limits">;
 type Atom = Extract<PolicyExpression, { field: string }>;
+type CapabilityEntry = CapabilityNodeDTO & { depth: number };
 
 const EMPTY_DRAFT: Draft = { requirement: {}, denial: {}, limits: {} };
 const FIELD_META: Record<string, { label: string; kind: "number" | "boolean"; min?: number; max?: number }> = {
@@ -26,6 +27,7 @@ const FIELD_META: Record<string, { label: string; kind: "number" | "boolean"; mi
   space_phone_verified: { label: "permission.field.spacePhoneVerified", kind: "boolean" },
   space_identity_verified: { label: "permission.field.spaceIdentityVerified", kind: "boolean" },
   unverified_group_policy: { label: "permission.field.unverifiedGroupPolicy", kind: "number", min: 0, max: 2 },
+  qr_invite: { label: "permission.field.qrInvite", kind: "boolean" },
 };
 
 function isAtom(value: PolicyExpression): value is Atom {
@@ -61,6 +63,36 @@ function rowsExpression(mode: "all" | "any", rows: Array<{ atom: Atom; negated: 
   return values.length === 1 ? values[0] : { [mode]: values } as PolicyExpression;
 }
 
+function hasExpression(expression: PolicyExpression | undefined) {
+  return Boolean(expression && Object.keys(expression).length);
+}
+
+function formatExpression(expression: PolicyExpression, t: TFunction): string {
+  if (!hasExpression(expression)) return t("permission.noCondition");
+  if ("all" in expression) return expression.all.map((item) => formatExpression(item, t)).join(` ${t("permission.logic.and")} `);
+  if ("any" in expression) return expression.any.map((item) => formatExpression(item, t)).join(` ${t("permission.logic.or")} `);
+  if ("not" in expression) return `${t("permission.logic.not")} (${formatExpression(expression.not, t)})`;
+  if (!isAtom(expression)) return t("permission.noCondition");
+  const meta = FIELD_META[expression.field];
+  const label = meta ? t(meta.label as "permission.field.growthLevel") : expression.field;
+  const operator = ({ eq: "=", neq: "≠", gte: "≥", gt: ">", lte: "≤", lt: "<", in: "∈", not_in: "∉", exists: "∃" } as Record<string, string>)[expression.op] ?? expression.op;
+  const value = typeof expression.value === "boolean"
+    ? t(expression.value ? "common.yes" : "common.no")
+    : Array.isArray(expression.value) ? expression.value.join(", ") : String(expression.value);
+  return `${label} ${operator} ${value}`;
+}
+
+function capabilityChain(entries: CapabilityEntry[], selected: CapabilityEntry) {
+  const byKey = new Map(entries.map((entry) => [entry.key, entry]));
+  const result: CapabilityEntry[] = [];
+  let current: CapabilityEntry | undefined = selected;
+  while (current) {
+    result.unshift(current);
+    current = current.parent ? byKey.get(current.parent) : undefined;
+  }
+  return result;
+}
+
 function RuleEditor({ value, onChange, t }: { value: PolicyExpression; onChange: (value: PolicyExpression) => void; t: TFunction }) {
   const model = expressionRows(value);
   const updateRows = (rows: typeof model.rows, mode = model.mode) => onChange(rowsExpression(mode, rows));
@@ -91,6 +123,22 @@ function RuleEditor({ value, onChange, t }: { value: PolicyExpression; onChange:
 
 function flatten(nodes: CapabilityNodeDTO[], depth = 0): Array<CapabilityNodeDTO & { depth: number }> {
   return nodes.flatMap((node) => [{ ...node, depth }, ...flatten(node.children, depth + 1)]);
+}
+
+function InheritedPolicySummary({ entries, language, scope, selected, t }: { entries: CapabilityEntry[]; language: string; scope: Scope; selected: CapabilityEntry; t: TFunction }) {
+  const chain = capabilityChain(entries, selected);
+  const rows: Array<{ key: string; source: "platform" | "space"; title: string; type: "allow" | "deny"; expression: PolicyExpression }> = [];
+  chain.forEach((entry) => {
+    const title = language === "en" ? entry.title_en : entry.title;
+    if ((scope === "space" || entry.key !== selected.key) && entry.platform_policy && hasExpression(entry.platform_policy.requirement)) rows.push({ key: `${entry.key}:platform:allow`, source: "platform", title, type: "allow", expression: entry.platform_policy.requirement });
+    if ((scope === "space" || entry.key !== selected.key) && entry.platform_policy && hasExpression(entry.platform_policy.denial)) rows.push({ key: `${entry.key}:platform:deny`, source: "platform", title, type: "deny", expression: entry.platform_policy.denial });
+    if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.requirement)) rows.push({ key: `${entry.key}:space:allow`, source: "space", title, type: "allow", expression: entry.space_policy.requirement });
+    if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.denial)) rows.push({ key: `${entry.key}:space:deny`, source: "space", title, type: "deny", expression: entry.space_policy.denial });
+  });
+  return <section className="permission-inherited-summary">
+    <header><span className="material-symbols-outlined">schema</span><span><strong>{t("permission.inheritedRules")}</strong><small>{t("permission.inheritedRulesHint")}</small></span></header>
+    {rows.length ? <div>{rows.map((row) => <article className={row.type === "deny" ? "is-denial" : ""} key={row.key}><span>{t(row.source === "platform" ? "permission.source.platform" : "permission.source.space")}</span><p><strong>{row.title}</strong><small>{row.type === "deny" ? t("permission.denyIf") : t("permission.allowIf")} · {formatExpression(row.expression, t)}</small></p></article>)}</div> : <p className="permission-no-inherited"><span className="material-symbols-outlined">check_circle</span>{t("permission.noInheritedRules")}</p>}
+  </section>;
 }
 
 function policyFor(node: CapabilityNodeDTO, scope: Scope) {
@@ -144,7 +192,7 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
       if (scope === "platform") await api.resetPlatformPermission(selected.key);
       else await api.resetSpacePermission(selected.key);
       await load();
-      showToast(t("permission.resetDone"), "success");
+      showToast(t(scope === "platform" ? "permission.removeDone" : "permission.resetDone"), "success");
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("permission.resetFailed"), "error");
     } finally { setBusy(false); }
@@ -169,8 +217,9 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
       })}</div>
     </aside>
     <main className="permission-editor-panel">{selected ? <>
-      <header className="permission-editor-header"><span className="permission-editor-icon material-symbols-outlined">{selected.icon}</span><span><small>{selected.key}</small><h2>{language === "en" ? selected.title_en : selected.title}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t("permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>
+      <header className="permission-editor-header"><span className="permission-editor-icon material-symbols-outlined">{selected.icon}</span><span><small>{selected.key}</small><h2>{language === "en" ? selected.title_en : selected.title}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>
       <section className="permission-inheritance"><span className="material-symbols-outlined">account_tree</span><span><strong>{t(scope === "platform" ? "permission.platformBaseline" : "permission.spaceRestriction")}</strong><small>{t(scope === "platform" ? "permission.platformBaselineHint" : "permission.spaceRestrictionHint")}</small></span></section>
+      <InheritedPolicySummary entries={entries} language={language} scope={scope} selected={selected} t={t} />
       <section className="permission-editor-section"><div><h3>{t("permission.allowWhen")}</h3><p>{t("permission.allowWhenHint")}</p></div><RuleEditor onChange={(requirement) => setDraft((current) => ({ ...current, requirement }))} t={t} value={draft.requirement} /></section>
       <section className="permission-editor-section is-denial"><div><h3>{t("permission.denyWhen")}</h3><p>{t("permission.denyWhenHint")}</p></div><RuleEditor onChange={(denial) => setDraft((current) => ({ ...current, denial }))} t={t} value={draft.denial} /></section>
       <section className="permission-editor-section"><div><h3>{t("permission.usageLimits")}</h3><p>{t("permission.usageLimitsHint")}</p></div><div className="permission-limit-editor">
