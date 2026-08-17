@@ -25649,6 +25649,13 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
   min-width: 0;
 }
 
+.square-inline-statement-placeholder {
+  width: 100%;
+  min-height: 1px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .square-statement-feed > .square-inline-statement > .square-statement-card {
   width: 100%;
   margin: 0;
@@ -25863,6 +25870,11 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     animation: square-inline-surface-in 440ms cubic-bezier(.16,.82,.22,1) both;
   }
 
+  .square-statement-feed > .square-inline-statement.is-expanded.is-preparing {
+    background: transparent;
+    box-shadow: none;
+  }
+
   .square-statement-feed > .square-inline-statement.is-expanded.is-closing {
     animation: square-inline-surface-in 380ms cubic-bezier(.55,.08,.68,.53) reverse both;
     pointer-events: none;
@@ -25879,6 +25891,13 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     animation: square-inline-card-expand 440ms cubic-bezier(.16,.82,.22,1) both;
   }
 
+  .square-statement-feed > .square-inline-statement.is-expanded.is-preparing > .square-statement-card {
+    width: var(--square-inline-origin-width, calc(100vw - 32px));
+    margin-left: var(--square-inline-origin-left, 16px);
+    border-radius: 18px;
+    transform: translateY(calc(var(--square-inline-origin-top, 110px) - 58px - env(safe-area-inset-top)));
+  }
+
   .square-statement-feed > .square-inline-statement.is-expanded.is-closing > .square-statement-card {
     transform-origin: top left;
     animation: square-inline-card-expand 380ms cubic-bezier(.55,.08,.68,.53) reverse both;
@@ -25889,6 +25908,10 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     animation-duration: 300ms;
     animation-fill-mode: both;
   }
+
+  .square-inline-statement.is-preparing > .square-inline-detail-header,
+  .square-inline-statement.is-preparing > .square-inline-discussion,
+  .square-inline-comment-dock.is-preparing .square-comment-composer { opacity: 0; }
 
   .square-inline-statement.is-closing > .square-inline-detail-header {
     animation: square-detail-header-in 250ms ease-in reverse both;
@@ -25923,7 +25946,12 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
 
   .square-inline-comment-dock.is-opening .square-comment-composer { animation-delay: 210ms; animation-fill-mode: both; }
   .square-inline-comment-dock.is-closing .square-comment-composer { animation: square-comment-dock-in 220ms ease-in reverse both; }
-  .square-inline-focus-mask.is-closing { animation: square-focus-mask-in 300ms ease-in reverse both; }
+  .square-inline-focus-mask.is-closing { animation: square-focus-mask-out 380ms ease-in both; }
+}
+
+@keyframes square-focus-mask-out {
+  0%, 58% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.6",
+  "id": "2026.08.17.7",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "发言转场焕新",
+      "title": "发言转场更连贯",
       "items": [
-        "打开和返回发言详情时，卡片、标题、评论与输入栏现以连贯动画自然衔接"
+        "修复打开发言时宽度与位置突变，以及返回时发言流短暂错序的问题"
       ]
     },
     "en": {
-      "title": "New statement transitions",
+      "title": "More seamless statement transitions",
       "items": [
-        "Statement cards, headers, comments, and the composer now transition smoothly into and out of details"
+        "Fixed abrupt statement geometry changes on open and temporary feed reordering on return"
       ]
     }
   }

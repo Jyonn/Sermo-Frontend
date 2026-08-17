@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -33,8 +33,8 @@ type SelectedPhoto = {
 type SelectedVideo = SelectedPhoto & { duration: number };
 
 const MAX_TEXT_LENGTH = 140;
-type InlineTransitionPhase = "idle" | "opening" | "open" | "closing";
-type InlineStatementOrigin = { left: number; top: number; width: number };
+type InlineTransitionPhase = "idle" | "preparing" | "opening" | "open" | "closing";
+type InlineStatementOrigin = { left: number; top: number; width: number; height: number };
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
@@ -629,14 +629,17 @@ export default function SquarePage() {
       alignStatementBelowHeader(card, "smooth");
       inlineExpandTimerRef.current = window.setTimeout(() => {
         const rect = card.getBoundingClientRect();
-        setInlineStatementOrigin({ left: rect.left, top: rect.top, width: rect.width });
-        setInlineTransitionPhase("opening");
+        setInlineStatementOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+        setInlineTransitionPhase("preparing");
         navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
         setInlineStatementExpanded(true);
         inlineExpandTimerRef.current = window.setTimeout(() => {
-          setInlineTransitionPhase("open");
-          inlineExpandTimerRef.current = null;
-        }, 440);
+          setInlineTransitionPhase("opening");
+          inlineExpandTimerRef.current = window.setTimeout(() => {
+            setInlineTransitionPhase("open");
+            inlineExpandTimerRef.current = null;
+          }, 440);
+        }, 34);
       }, 320);
     }));
   };
@@ -1028,7 +1031,10 @@ export default function SquarePage() {
                 "--square-inline-origin-top": `${inlineStatementOrigin.top}px`,
                 "--square-inline-origin-width": `${inlineStatementOrigin.width}px`,
               } as CSSProperties : undefined;
-              return <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`} key={statement.statement_id} style={transitionStyle}>
+              const showInlinePlaceholder = focused && inlineStatementExpanded && !desktopWorkspace && inlineStatementOrigin;
+              return <Fragment key={statement.statement_id}>
+                {showInlinePlaceholder ? <div aria-hidden="true" className="square-inline-statement-placeholder" style={{ height: inlineStatementOrigin.height }} /> : null}
+                <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`} style={transitionStyle}>
                 {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
                   <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
                   <strong>{t("square.statementDetail")}</strong>
@@ -1036,7 +1042,8 @@ export default function SquarePage() {
                 </header> : null}
                 <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
                 {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
-              </div>;
+                </div>
+              </Fragment>;
             })}
           </section>
           {hasMore && statements.length ? (
