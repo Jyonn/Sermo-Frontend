@@ -354,6 +354,7 @@ let activeBaxianEffect: string | null = null;
 
 function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; effectKey: string; style?: ChatBubbleStyle }) {
   const runnerRef = useRef<HTMLSpanElement | null>(null);
+  const frameRef = useRef<HTMLSpanElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [replayRequest, setReplayRequest] = useState(0);
   const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
@@ -365,12 +366,24 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
     if ((!active && !replaying) || !runner || !bubble || !character || (!replaying && playedBaxianEffects.has(effectKey))) return;
     let visible = false;
     let timer: number | null = null;
+    let animationFrame: number | null = null;
     let ownsPlayback = false;
     const duration = 2000;
+    const frameCount = 48;
+
+    const paintFrame = (frame: number) => {
+      const frameElement = frameRef.current;
+      if (!frameElement) return;
+      const column = frame % 8;
+      const row = Math.floor(frame / 8);
+      frameElement.style.backgroundPosition = `${(column / 7) * 100}% ${(row / 5) * 100}%`;
+    };
 
     const finish = () => {
       if (!ownsPlayback) return;
       ownsPlayback = false;
+      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
+      animationFrame = null;
       setPlaying(false);
       if (activeBaxianEffect === effectKey) activeBaxianEffect = null;
       window.dispatchEvent(new Event("sermo:baxian-effect-finished"));
@@ -381,7 +394,17 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
       playedBaxianEffects.add(effectKey);
       activeBaxianEffect = effectKey;
       ownsPlayback = true;
+      paintFrame(0);
       setPlaying(true);
+      let startedAt: number | null = null;
+      const advanceFrame = (timestamp: number) => {
+        if (!ownsPlayback) return;
+        if (startedAt === null) startedAt = timestamp;
+        const elapsed = Math.min(duration - 1, timestamp - startedAt);
+        paintFrame(Math.min(frameCount - 1, Math.floor((elapsed / duration) * frameCount)));
+        if (elapsed < duration - 1) animationFrame = window.requestAnimationFrame(advanceFrame);
+      };
+      animationFrame = window.requestAnimationFrame(advanceFrame);
       timer = window.setTimeout(finish, duration + 80);
     };
 
@@ -395,6 +418,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
       observer.disconnect();
       window.removeEventListener("sermo:baxian-effect-finished", tryPlay);
       if (timer !== null) window.clearTimeout(timer);
+      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
       finish();
     };
   }, [active, character, effectKey, replayRequest]);
@@ -403,7 +427,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
   return (
     <>
       <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}>
-        {playing ? <img alt="" src={`/assets/baxian/${character === "lv" ? "lv-dongbin" : character === "zhongli" ? "zhongli-quan" : "he-xiangu"}-48-v2.webp`} /> : null}
+        <span ref={frameRef} className="baxian-bubble-frame" />
       </span>
       <button
         aria-label={i18n.t("message.replayCharacterEffect")}

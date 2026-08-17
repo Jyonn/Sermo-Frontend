@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.8",
+  "id": "2026.08.17.9",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "永久 VIP 阶梯门槛上线",
+      "title": "八仙气泡动起来了",
       "items": [
-        "永久 VIP 前 20 位降至 LV4，21–50 位为 LV5，51–100 位为 LV6"
+        "修复八仙主题人物只显示单帧的问题，48 帧动作现在可以流畅播放和重播"
       ]
     },
     "en": {
-      "title": "Tiered Permanent VIP requirements",
+      "title": "Baxian bubbles are moving again",
       "items": [
-        "Permanent VIP now requires LV4 for the first 20 claims, LV5 for claims 21–50, and LV6 for claims 51–100"
+        "Fixed Baxian characters appearing as a single static frame so all 48 frames now play and replay smoothly"
       ]
     }
   }

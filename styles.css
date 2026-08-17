@@ -24203,7 +24203,17 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 }
 
 .baxian-bubble-runner.is-playing { opacity:1; }
-.baxian-bubble-runner > img { display:block;width:100%;height:100%;object-fit:contain; }
+.baxian-bubble-frame {
+  display:block;
+  width:100%;
+  height:100%;
+  background-position:0 0;
+  background-repeat:no-repeat;
+  background-size:800% 600%;
+}
+.baxian-bubble-runner.is-lv .baxian-bubble-frame { background-image:url("/assets/baxian/lv-dongbin-48-v2-sheet.webp"); }
+.baxian-bubble-runner.is-zhongli .baxian-bubble-frame { background-image:url("/assets/baxian/zhongli-quan-48-v2-sheet.webp"); }
+.baxian-bubble-runner.is-he .baxian-bubble-frame { background-image:url("/assets/baxian/he-xiangu-48-v2-sheet.webp"); }
 
 .baxian-effect-replay {
   position:absolute;
