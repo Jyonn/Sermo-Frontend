@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.12",
-  "publishedAt": "2026-08-17",
+  "id": "2026.08.18.1",
+  "publishedAt": "2026-08-18",
   "locales": {
     "zh-CN": {
-      "title": "空间权限可以精细配置",
+      "title": "八仙气泡人物动起来了",
       "items": [
-        "空间管理员现在可以按聊天、广场、通讯和个性化功能，结合等级、认证与 VIP 状态设置更细的使用门槛"
+        "吕洞宾、钟离权与何仙姑气泡现在会稳定播放完整的 48 帧人物动画"
       ]
     },
     "en": {
-      "title": "More precise space permissions",
+      "title": "Eight Immortals bubbles come alive",
       "items": [
-        "Space admins can now refine access to chat, Square, contacts, and personalization by level, verification, and VIP status"
+        "The Lu Dongbin, Zhongli Quan, and He Xiangu bubbles now reliably play their complete 48-frame character animations"
       ]
     }
   }

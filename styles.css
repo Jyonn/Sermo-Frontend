@@ -24309,9 +24309,9 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   content:"";
   pointer-events:none;
 }
-.field-chat_bubble_style .preview-baxian-lv > i::after { top:-25px;right:-15px;background-image:url("/assets/baxian/lv-dongbin-preview.png"); }
-.field-chat_bubble_style .preview-baxian-zhongli > i::after { bottom:-25px;left:-15px;background-image:url("/assets/baxian/zhongli-quan-preview.png"); }
-.field-chat_bubble_style .preview-baxian-he > i::after { top:-25px;left:-15px;background-image:url("/assets/baxian/he-xiangu-preview.png"); }
+.field-chat_bubble_style .preview-baxian-lv > i::after { top:-25px;right:-15px;background-image:url("/assets/baxian/lv-dongbin-48-v2.webp"); }
+.field-chat_bubble_style .preview-baxian-zhongli > i::after { bottom:-25px;left:-15px;background-image:url("/assets/baxian/zhongli-quan-48-v2.webp"); }
+.field-chat_bubble_style .preview-baxian-he > i::after { top:-25px;left:-15px;background-image:url("/assets/baxian/he-xiangu-48-v2.webp"); }
 
 html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
   --bubble-skin-other-bg:linear-gradient(138deg,#e9dfcb,#d1bea0);

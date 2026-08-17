@@ -355,21 +355,29 @@ let activeBaxianEffect: string | null = null;
 function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; effectKey: string; style?: ChatBubbleStyle }) {
   const runnerRef = useRef<HTMLSpanElement | null>(null);
   const frameRef = useRef<HTMLSpanElement | null>(null);
+  const autoQueuedEffectRef = useRef<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [replayRequest, setReplayRequest] = useState(0);
+  const [playRequest, setPlayRequest] = useState(0);
   const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
+
+  useEffect(() => {
+    if (!active || !character || autoQueuedEffectRef.current === effectKey || playedBaxianEffects.has(effectKey)) return;
+    autoQueuedEffectRef.current = effectKey;
+    setPlayRequest((value) => value + 1);
+  }, [active, character, effectKey]);
 
   useEffect(() => {
     const runner = runnerRef.current;
     const bubble = runner?.parentElement;
-    const replaying = replayRequest > 0;
-    if ((!active && !replaying) || !runner || !bubble || !character || (!replaying && playedBaxianEffects.has(effectKey))) return;
+    if (!playRequest || !runner || !bubble || !character) return;
     let visible = false;
     let timer: number | null = null;
     let animationFrame: number | null = null;
     let ownsPlayback = false;
+    let completed = false;
     const duration = 2000;
     const frameCount = 48;
+    const playbackId = `${effectKey}:${playRequest}`;
 
     const paintFrame = (frame: number) => {
       const frameElement = frameRef.current;
@@ -380,19 +388,20 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
     };
 
     const finish = () => {
-      if (!ownsPlayback) return;
+      if (!ownsPlayback || completed) return;
       ownsPlayback = false;
+      completed = true;
       if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
       animationFrame = null;
       setPlaying(false);
-      if (activeBaxianEffect === effectKey) activeBaxianEffect = null;
+      if (activeBaxianEffect === playbackId) activeBaxianEffect = null;
       window.dispatchEvent(new Event("sermo:baxian-effect-finished"));
     };
 
     const tryPlay = () => {
-      if (!visible || bubble.offsetWidth < 88 || activeBaxianEffect || (!replaying && playedBaxianEffects.has(effectKey))) return;
+      if (!visible || completed || ownsPlayback || activeBaxianEffect) return;
       playedBaxianEffects.add(effectKey);
-      activeBaxianEffect = effectKey;
+      activeBaxianEffect = playbackId;
       ownsPlayback = true;
       paintFrame(0);
       setPlaying(true);
@@ -411,8 +420,8 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       tryPlay();
-    }, { threshold: 0.65 });
-    observer.observe(runner);
+    }, { threshold: 0.2 });
+    observer.observe(bubble);
     window.addEventListener("sermo:baxian-effect-finished", tryPlay);
     return () => {
       observer.disconnect();
@@ -421,7 +430,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
       if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
       finish();
     };
-  }, [active, character, effectKey, replayRequest]);
+  }, [character, effectKey, playRequest]);
 
   if (!character) return null;
   return (
@@ -435,7 +444,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          if (!playing) setReplayRequest((value) => value + 1);
+          if (!playing) setPlayRequest((value) => value + 1);
         }}
         type="button"
       >八</button>
