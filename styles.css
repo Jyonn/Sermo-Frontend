@@ -2690,11 +2690,19 @@ html[data-theme="dark"] body .growth-level-detail {
   .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .tab-sticky-header {
     min-height: 65px;
     margin: 0;
-    padding: 0 20px 8px;
+    padding: 0 20px 14px;
     border-radius: 20px 20px 0 0;
+    background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.3);
+    backdrop-filter: blur(22px) saturate(1.3);
+    box-shadow: 0 9px 24px rgba(17, 29, 24, .055);
   }
 
   .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .tab-sticky-header .page-toolbar { height: 65px; }
+  .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .tab-sticky-header-secondary .square-feed-filter {
+    min-height: 44px;
+    padding-inline: 2px;
+  }
 
   .square-desktop-workspace .square-feed-column {
     grid-template-columns: minmax(0, 1fr);

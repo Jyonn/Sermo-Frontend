@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.2",
+  "id": "2026.08.17.3",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "VIP 身份更醒目",
+      "title": "广场导航更清晰",
       "items": [
-        "永久 VIP 用户在广场发言与评论中的昵称现以金色展示"
+        "桌面端广场导航现拥有更舒适的高度、留白与毛玻璃效果"
       ]
     },
     "en": {
-      "title": "VIP identity stands out",
+      "title": "Clearer Square navigation",
       "items": [
-        "Permanent VIP names now appear in gold on Square statements and comments"
+        "Square navigation on desktop now has improved height, spacing, and glass styling"
       ]
     }
   }
