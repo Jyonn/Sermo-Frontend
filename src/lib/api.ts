@@ -1436,9 +1436,9 @@ export const api = {
   resetPlatformPermission(capabilityKey: string) {
     return request<Record<string, never>>(`/platform-admin/permissions/${capabilityKey}`, { method: "DELETE", platformAdminAuth: true });
   },
-  simulatePlatformPermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+  simulatePlatformPermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">, spaceVerification: "email" | "phone" | "identity") {
     return request<import("../types").CapabilitySimulationDTO>("/platform-admin/permissions/simulate", {
-      method: "POST", platformAdminAuth: true, body: { capability_key: capabilityKey, policy },
+      method: "POST", platformAdminAuth: true, body: { capability_key: capabilityKey, policy, space_verification: spaceVerification },
     });
   },
   getSpacePermissions(signal?: AbortSignal) {

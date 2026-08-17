@@ -369,6 +369,7 @@ export interface CapabilitySimulationRowDTO {
 
 export interface CapabilitySimulationDTO {
   capability_key: string;
+  space_verification: "email" | "phone" | "identity";
   rows: CapabilitySimulationRowDTO[];
 }
 
