@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.5",
+  "id": "2026.08.17.6",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "广场间距优化",
+      "title": "发言转场焕新",
       "items": [
-        "移除广场导航与发言流之间多余的空隙"
+        "打开和返回发言详情时，卡片、标题、评论与输入栏现以连贯动画自然衔接"
       ]
     },
     "en": {
-      "title": "Square spacing polish",
+      "title": "New statement transitions",
       "items": [
-        "Removed unnecessary spacing between Square navigation and the feed"
+        "Statement cards, headers, comments, and the composer now transition smoothly into and out of details"
       ]
     }
   }

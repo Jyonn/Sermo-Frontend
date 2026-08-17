@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -33,6 +33,8 @@ type SelectedPhoto = {
 type SelectedVideo = SelectedPhoto & { duration: number };
 
 const MAX_TEXT_LENGTH = 140;
+type InlineTransitionPhase = "idle" | "opening" | "open" | "closing";
+type InlineStatementOrigin = { left: number; top: number; width: number };
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
@@ -295,6 +297,8 @@ export default function SquarePage() {
   const [desktopWorkspace, setDesktopWorkspace] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches);
   const [inlineStatementId, setInlineStatementId] = useState<number | null>(null);
   const [inlineStatementExpanded, setInlineStatementExpanded] = useState(false);
+  const [inlineTransitionPhase, setInlineTransitionPhase] = useState<InlineTransitionPhase>("idle");
+  const [inlineStatementOrigin, setInlineStatementOrigin] = useState<InlineStatementOrigin | null>(null);
   const statementCardRefs = useRef(new Map<number, HTMLElement>());
   const inlineExpandTimerRef = useRef<number | null>(null);
   const commentStatementId = routedStatementId ?? inlineStatementId;
@@ -553,19 +557,6 @@ export default function SquarePage() {
     return () => controller.abort();
   }, [commentSort, commentStatementId, t]);
 
-  const closeInlineStatement = () => {
-    if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
-    inlineExpandTimerRef.current = null;
-    setInlineStatementExpanded(false);
-    setInlineStatementId(null);
-    setReplyTarget(null);
-    setCommentText("");
-    if (inlineRouteActive) {
-      if (window.history.length > 1) navigate(-1);
-      else navigate("/app/square", { replace: true });
-    }
-  };
-
   const alignStatementBelowHeader = (element: HTMLElement, behavior: ScrollBehavior) => {
     const screen = element.closest<HTMLElement>(".square-feed-screen");
     const header = screen?.querySelector<HTMLElement>(".tab-sticky-header");
@@ -591,6 +582,38 @@ export default function SquarePage() {
     });
   };
 
+  const finishInlineStatementClose = (navigateAfter: boolean) => {
+    const statementId = inlineStatementId;
+    setInlineStatementExpanded(false);
+    setInlineTransitionPhase("idle");
+    setReplyTarget(null);
+    setCommentText("");
+
+    if (navigateAfter && inlineRouteActive) {
+      if (window.history.length > 1) navigate(-1);
+      else navigate("/app/square", { replace: true });
+    }
+
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const card = statementId === null ? null : statementCardRefs.current.get(statementId);
+      if (card) alignStatementBelowHeader(card, "auto");
+      setInlineStatementId(null);
+      setInlineStatementOrigin(null);
+    }));
+  };
+
+  const startInlineStatementClose = (navigateAfter: boolean) => {
+    if (!inlineStatementExpanded || inlineTransitionPhase === "closing") return;
+    if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
+    setInlineTransitionPhase("closing");
+    inlineExpandTimerRef.current = window.setTimeout(() => {
+      inlineExpandTimerRef.current = null;
+      finishInlineStatementClose(navigateAfter);
+    }, 380);
+  };
+
+  const closeInlineStatement = () => startInlineStatementClose(true);
+
   const openStatement = (statementId: number) => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
     setInlineStatementId(statementId);
@@ -600,20 +623,20 @@ export default function SquarePage() {
       if (!card) {
         navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
         setInlineStatementExpanded(true);
+        setInlineTransitionPhase("open");
         return;
       }
       alignStatementBelowHeader(card, "smooth");
       inlineExpandTimerRef.current = window.setTimeout(() => {
-        // Commit the route only after the feed has settled. The browser then
-        // stores the aligned feed position in history and restores it on back.
+        const rect = card.getBoundingClientRect();
+        setInlineStatementOrigin({ left: rect.left, top: rect.top, width: rect.width });
+        setInlineTransitionPhase("opening");
         navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
         setInlineStatementExpanded(true);
-        inlineExpandTimerRef.current = null;
-        if (!desktopWorkspace) {
-          window.requestAnimationFrame(() => {
-            if (card.parentElement) alignStatementBelowHeader(card.parentElement, "auto");
-          });
-        }
+        inlineExpandTimerRef.current = window.setTimeout(() => {
+          setInlineTransitionPhase("open");
+          inlineExpandTimerRef.current = null;
+        }, 440);
       }, 320);
     }));
   };
@@ -638,17 +661,23 @@ export default function SquarePage() {
     if (inlineRouteActive && routedStatementId !== inlineStatementId) {
       setInlineStatementId(routedStatementId);
       setInlineStatementExpanded(true);
+      setInlineTransitionPhase("open");
       return;
     }
     if (!inlineRouteActive && inlineStatementId !== null) {
+      if (inlineStatementExpanded) {
+        startInlineStatementClose(false);
+        return;
+      }
       if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
       inlineExpandTimerRef.current = null;
-      setInlineStatementExpanded(false);
       setInlineStatementId(null);
+      setInlineStatementOrigin(null);
+      setInlineTransitionPhase("idle");
       setReplyTarget(null);
       setCommentText("");
     }
-  }, [inlineRouteActive, inlineStatementId, routedStatementId]);
+  }, [inlineRouteActive, inlineStatementExpanded, inlineStatementId, inlineTransitionPhase, routedStatementId]);
 
   useEffect(() => {
     if (!inlineStatementExpanded || desktopWorkspace) return;
@@ -994,7 +1023,12 @@ export default function SquarePage() {
           <section className="square-statement-feed">
             {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => {
               const focused = inlineStatementId === statement.statement_id;
-              return <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? " is-expanded" : ""}`} key={statement.statement_id}>
+              const transitionStyle = focused && inlineStatementOrigin ? {
+                "--square-inline-origin-left": `${inlineStatementOrigin.left}px`,
+                "--square-inline-origin-top": `${inlineStatementOrigin.top}px`,
+                "--square-inline-origin-width": `${inlineStatementOrigin.width}px`,
+              } as CSSProperties : undefined;
+              return <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`} key={statement.statement_id} style={transitionStyle}>
                 {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
                   <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
                   <strong>{t("square.statementDetail")}</strong>
@@ -1029,8 +1063,8 @@ export default function SquarePage() {
         </section>}
       </aside>
       </div>
-      {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<button aria-label={t("common.close")} className="square-inline-focus-mask" onClick={closeInlineStatement} type="button" />, document.body) : null}
-      {inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-comment-dock">{commentComposer}</div> : null}
+      {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />, document.body) : null}
+      {inlineStatementExpanded && !desktopWorkspace ? <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`}>{commentComposer}</div> : null}
       <SideDrawer historyKey="square-notifications" onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">
           {!notificationEvents.length ? <QuietState icon="notifications_none" title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
