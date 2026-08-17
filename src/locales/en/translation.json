@@ -1074,6 +1074,7 @@
   "vip.remaining": "{{count}} spots left",
   "vip.title": "Permanent VIP for the earliest arrivals",
   "vip.rewards": "Exclusive styles plus a one-time 500 Growth Points reward",
+  "vip.levelTiers": "First 20: LV4 · 21–50: LV5 · 51–100: LV6",
   "contact.verifyEmail": "Verify email",
   "common.completed": "Completed",
   "contact.verifyNow": "Verify now",

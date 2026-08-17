@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.7",
+  "id": "2026.08.17.8",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "发言转场更连贯",
+      "title": "永久 VIP 阶梯门槛上线",
       "items": [
-        "修复打开发言时宽度与位置突变，以及返回时发言流短暂错序的问题"
+        "永久 VIP 前 20 位降至 LV4，21–50 位为 LV5，51–100 位为 LV6"
       ]
     },
     "en": {
-      "title": "More seamless statement transitions",
+      "title": "Tiered Permanent VIP requirements",
       "items": [
-        "Fixed abrupt statement geometry changes on open and temporary feed reordering on return"
+        "Permanent VIP now requires LV4 for the first 20 claims, LV5 for claims 21–50, and LV6 for claims 51–100"
       ]
     }
   }

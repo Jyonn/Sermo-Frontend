@@ -225,6 +225,10 @@ export interface PermanentVipCampaignDTO {
   remaining: number;
   eligible: boolean;
   required_level: number;
+  level_thresholds?: Array<{
+    last_slot: number;
+    required_level: number;
+  }>;
   claimed_by_user: boolean;
   slot: number | null;
   active: boolean;

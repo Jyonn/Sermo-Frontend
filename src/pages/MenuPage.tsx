@@ -1713,6 +1713,7 @@ export default function MenuPage() {
             <div className="menu-vip-campaign-copy">
               <strong>{t("vip.title")}</strong>
               <p>{t("vip.rewards")}</p>
+              <small>{t("vip.levelTiers")}</small>
             </div>
             <div className="menu-vip-requirements">
               {[
@@ -1732,7 +1733,7 @@ export default function MenuPage() {
                 },
                 {
                   key: "level",
-                  label: t("vip.reachLevel", { level: 6 }),
+                  label: t("vip.reachLevel", { level: vipCampaign.required_level }),
                   complete: vipCampaign.requirements.level,
                   detail: vipCampaign.requirements.level ? t("common.completed") : t("growth.currentLevel", { level: me?.growth?.level ?? 1 }),
                   action: () => setGrowthDrawerOpen(true),

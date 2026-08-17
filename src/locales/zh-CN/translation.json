@@ -1074,6 +1074,7 @@
   "vip.remaining": "余 {{count}} 席",
   "vip.title": "永久 VIP，留给最早抵达的人",
   "vip.rewards": "专属外观，并一次性获得 500 成长值",
+  "vip.levelTiers": "前 20 位 LV4 · 21–50 位 LV5 · 51–100 位 LV6",
   "contact.verifyEmail": "认证邮箱",
   "common.completed": "已完成",
   "contact.verifyNow": "去认证",
