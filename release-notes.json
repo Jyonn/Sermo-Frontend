@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.4",
+  "id": "2026.08.17.5",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "广场布局修复",
+      "title": "广场间距优化",
       "items": [
-        "修复桌面端首条发言与广场导航重叠的问题"
+        "移除广场导航与发言流之间多余的空隙"
       ]
     },
     "en": {
-      "title": "Square layout fix",
+      "title": "Square spacing polish",
       "items": [
-        "Fixed the first Square statement overlapping desktop navigation"
+        "Removed unnecessary spacing between Square navigation and the feed"
       ]
     }
   }
