@@ -2673,15 +2673,17 @@ html[data-theme="dark"] body .growth-level-detail {
 @media (min-width: 901px) {
   .desktop-tab-shell > .square-desktop-workspace {
     display: grid;
-    grid-template-columns: minmax(390px, .88fr) minmax(480px, 1.12fr);
-    gap: 16px;
+    grid-template-columns: minmax(240px, .9fr) minmax(280px, 1.1fr);
+    gap: clamp(10px, 1.2vw, 16px);
     width: min(100%, 1320px);
+    min-width: 0;
     height: calc(100dvh - 32px);
     min-height: 0;
     margin-inline: auto;
   }
 
   .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen {
+    min-width: 0;
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -12966,8 +12968,9 @@ html[data-theme="dark"] .message-link-preview-site {
   }
 
   .chat-mobile-layout {
-    grid-template-columns: minmax(288px, 350px) minmax(420px, 1fr);
+    grid-template-columns: clamp(220px, 26vw, 350px) minmax(0, 1fr);
     gap: 14px;
+    min-width: 0;
     height: 100%;
     min-height: 0;
   }
@@ -13009,6 +13012,7 @@ html[data-theme="dark"] .message-link-preview-site {
 
   .chat-mobile-layout .chat-main-pane,
   .chat-mobile-layout > .panel.desktop-pane {
+    min-width: 0;
     height: 100%;
     min-height: 0;
     overflow: hidden;
@@ -13188,7 +13192,34 @@ html[data-theme="dark"] .message-link-preview-site {
 
 @media (min-width: 901px) and (max-width: 1180px) {
   .chat-mobile-layout {
-    grid-template-columns: minmax(288px, 340px) minmax(420px, 1fr);
+    grid-template-columns: clamp(220px, 26vw, 300px) minmax(0, 1fr);
+  }
+
+  .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .tab-sticky-header {
+    padding-inline: 12px;
+  }
+
+  .square-desktop-workspace .square-feed-column {
+    padding-inline: 12px;
+  }
+
+  .square-desktop-workspace .square-statement-feed > .square-inline-statement.is-focused {
+    width: calc(100% + 24px);
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+
+  .square-desktop-workspace .square-header-publish {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    margin-left: 0;
+    padding: 0;
+    place-items: center;
+  }
+
+  .square-desktop-workspace .square-header-publish > span:last-child {
+    display: none;
   }
 }
 

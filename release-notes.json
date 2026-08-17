@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.9",
+  "id": "2026.08.17.10",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡动起来了",
+      "title": "窄桌面布局更完整",
       "items": [
-        "修复八仙主题人物只显示单帧的问题，48 帧动作现在可以流畅播放和重播"
+        "优化聊天与广场的桌面分栏，缩窄窗口时右侧消息和发言详情不再被裁切"
       ]
     },
     "en": {
-      "title": "Baxian bubbles are moving again",
+      "title": "Better layouts on narrow desktops",
       "items": [
-        "Fixed Baxian characters appearing as a single static frame so all 48 frames now play and replay smoothly"
+        "Improved desktop chat and Square columns so message and statement details stay visible in narrower windows"
       ]
     }
   }
