@@ -1424,4 +1424,37 @@ export const api = {
   disablePlatformMfa(code: string) {
     return request<Record<string, never>>("/platform-admin/mfa/disable", { method: "POST", platformAdminAuth: true, body: { code } });
   },
+
+  getPlatformPermissions(signal?: AbortSignal) {
+    return request<import("../types").CapabilityCatalogDTO>("/platform-admin/permissions", { platformAdminAuth: true, signal });
+  },
+  savePlatformPermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+    return request<import("../types").CapabilityPolicyDTO>(`/platform-admin/permissions/${capabilityKey}`, {
+      method: "POST", platformAdminAuth: true, body: policy,
+    });
+  },
+  resetPlatformPermission(capabilityKey: string) {
+    return request<Record<string, never>>(`/platform-admin/permissions/${capabilityKey}`, { method: "DELETE", platformAdminAuth: true });
+  },
+  simulatePlatformPermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+    return request<import("../types").CapabilitySimulationDTO>("/platform-admin/permissions/simulate", {
+      method: "POST", platformAdminAuth: true, body: { capability_key: capabilityKey, policy },
+    });
+  },
+  getSpacePermissions(signal?: AbortSignal) {
+    return request<import("../types").CapabilityCatalogDTO>("/spaces/admin/permissions", { adminAuth: true, signal });
+  },
+  saveSpacePermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+    return request<import("../types").CapabilityPolicyDTO>(`/spaces/admin/permissions/${capabilityKey}`, {
+      method: "POST", adminAuth: true, body: policy,
+    });
+  },
+  resetSpacePermission(capabilityKey: string) {
+    return request<Record<string, never>>(`/spaces/admin/permissions/${capabilityKey}`, { method: "DELETE", adminAuth: true });
+  },
+  simulateSpacePermission(capabilityKey: string, policy: Pick<import("../types").CapabilityPolicyDTO, "requirement" | "denial" | "limits">) {
+    return request<import("../types").CapabilitySimulationDTO>("/spaces/admin/permissions/simulate", {
+      method: "POST", adminAuth: true, body: { capability_key: capabilityKey, policy },
+    });
+  },
 };

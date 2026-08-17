@@ -325,6 +325,53 @@ export interface PlatformDashboardDTO {
   recent_audit: PlatformAuditDTO[];
 }
 
+export type PolicyExpression =
+  | Record<string, never>
+  | { all: PolicyExpression[] }
+  | { any: PolicyExpression[] }
+  | { not: PolicyExpression }
+  | { field: string; op: string; value: boolean | number | string | Array<boolean | number | string> };
+
+export interface CapabilityPolicyDTO {
+  requirement: PolicyExpression;
+  denial: PolicyExpression;
+  limits: Record<string, number>;
+  version: number;
+  updated_at: number;
+}
+
+export interface CapabilityNodeDTO {
+  key: string;
+  title: string;
+  title_en: string;
+  parent: string | null;
+  icon: string;
+  requirement: PolicyExpression;
+  space_configurable: boolean;
+  kind: "gate" | "limit";
+  asset_key: string | null;
+  platform_policy: CapabilityPolicyDTO | null;
+  space_policy: CapabilityPolicyDTO | null;
+  children: CapabilityNodeDTO[];
+}
+
+export interface CapabilityCatalogDTO {
+  catalog: CapabilityNodeDTO[];
+  fields?: string[];
+}
+
+export interface CapabilitySimulationRowDTO {
+  growth_level: number;
+  verification: "none" | "email" | "phone" | "dual";
+  permanent_vip: boolean;
+  allowed: boolean;
+}
+
+export interface CapabilitySimulationDTO {
+  capability_key: string;
+  rows: CapabilitySimulationRowDTO[];
+}
+
 export interface PlatformMessageDeliveryDTO {
   delivery_id: number;
   channel: "web" | "email" | "sms" | "bark" | "unknown";

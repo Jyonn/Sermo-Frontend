@@ -8,6 +8,7 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer } from "../components/SideDrawer";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
+import { PermissionWorkspace } from "../components/PermissionWorkspace";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
@@ -119,6 +120,7 @@ export default function SpaceAdminDashboardPage() {
   const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
   const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
+  const [permissionWorkspaceOpen, setPermissionWorkspaceOpen] = useState(false);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [adminPhone, setAdminPhone] = useState("");
   const [adminPhoneCode, setAdminPhoneCode] = useState("");
@@ -684,6 +686,7 @@ export default function SpaceAdminDashboardPage() {
               <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setPermissionWorkspaceOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">account_tree</span></span><span><strong>{t("admin.permissionMatrix")}</strong><small>{t("admin.permissionMatrixHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
             </div></section>
             <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
@@ -725,6 +728,10 @@ export default function SpaceAdminDashboardPage() {
             <div><span>{t("admin.createOrInviteGroup")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
           </section>
         </div>
+      </SideDrawer>
+
+      <SideDrawer className="admin-permission-workspace-drawer" historyKey="admin-permission-workspace" onClose={() => setPermissionWorkspaceOpen(false)} open={permissionWorkspaceOpen} title={t("admin.permissionMatrix")}>
+        <PermissionWorkspace scope="space" />
       </SideDrawer>
 
       <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-basic-settings" onAction={() => void saveSettings()} onClose={() => setBasicSettingsOpen(false)} open={basicSettingsOpen} title={t("admin.basicSettings")}>
