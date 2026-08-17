@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.17.10",
+  "id": "2026.08.17.11",
   "publishedAt": "2026-08-17",
   "locales": {
     "zh-CN": {
-      "title": "窄桌面布局更完整",
+      "title": "广场适配更多手机尺寸",
       "items": [
-        "优化聊天与广场的桌面分栏，缩窄窗口时右侧消息和发言详情不再被裁切"
+        "修复 768–900px 宽度下的广场样式断层，发言列表与详情完整沿用手机端交互"
       ]
     },
     "en": {
-      "title": "Better layouts on narrow desktops",
+      "title": "Square now fits more mobile sizes",
       "items": [
-        "Improved desktop chat and Square columns so message and statement details stay visible in narrower windows"
+        "Fixed the Square layout gap between 768px and 900px so the feed and statement details consistently use the mobile experience"
       ]
     }
   }
