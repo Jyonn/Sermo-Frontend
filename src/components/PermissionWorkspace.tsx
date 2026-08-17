@@ -155,6 +155,7 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
   const [simulation, setSimulation] = useState<CapabilitySimulationRowDTO[]>([]);
   const [vipPreview, setVipPreview] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(() => new Set());
 
   const load = async () => {
     const result = scope === "platform" ? await api.getPlatformPermissions() : await api.getSpacePermissions();
@@ -171,7 +172,65 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
     setDraft(policy ? { requirement: policy.requirement, denial: policy.denial, limits: policy.limits } : EMPTY_DRAFT);
     setSimulation([]);
   }, [scope, selectedKey, catalog]);
-  const visibleEntries = entries.filter((entry) => (scope === "platform" || entry.space_configurable) && (!query.trim() || `${entry.title} ${entry.title_en} ${entry.key}`.toLowerCase().includes(query.trim().toLowerCase())));
+  const availableEntries = useMemo(
+    () => entries.filter((entry) => scope === "platform" || entry.space_configurable),
+    [entries, scope],
+  );
+  const availableKeys = useMemo(() => new Set(availableEntries.map((entry) => entry.key)), [availableEntries]);
+  const queryValue = query.trim().toLowerCase();
+  const visibleEntries = useMemo(() => {
+    const includedKeys = new Set<string>();
+    if (queryValue) {
+      const byKey = new Map(entries.map((entry) => [entry.key, entry]));
+      availableEntries.forEach((entry) => {
+        if (!`${entry.title} ${entry.title_en} ${entry.key}`.toLowerCase().includes(queryValue)) return;
+        let current: CapabilityEntry | undefined = entry;
+        while (current) {
+          if (availableKeys.has(current.key)) includedKeys.add(current.key);
+          current = current.parent ? byKey.get(current.parent) : undefined;
+        }
+      });
+    } else {
+      availableEntries.forEach((entry) => includedKeys.add(entry.key));
+    }
+    const byKey = new Map(entries.map((entry) => [entry.key, entry]));
+    return availableEntries.filter((entry) => {
+      if (!includedKeys.has(entry.key)) return false;
+      if (queryValue) return true;
+      let parentKey = entry.parent;
+      while (parentKey) {
+        if (collapsedKeys.has(parentKey)) return false;
+        parentKey = byKey.get(parentKey)?.parent ?? null;
+      }
+      return true;
+    });
+  }, [availableEntries, availableKeys, collapsedKeys, entries, queryValue]);
+  const branchKeys = useMemo(() => {
+    const values = new Set<string>();
+    availableEntries.forEach((entry) => {
+      if (entry.parent && availableKeys.has(entry.parent)) values.add(entry.parent);
+    });
+    return values;
+  }, [availableEntries, availableKeys]);
+
+  const toggleBranch = (entry: CapabilityEntry) => {
+    const collapsing = !collapsedKeys.has(entry.key);
+    setCollapsedKeys((current) => {
+      const next = new Set(current);
+      if (next.has(entry.key)) next.delete(entry.key);
+      else next.add(entry.key);
+      return next;
+    });
+    if (!collapsing || selectedKey === entry.key) return;
+    let current = entries.find((item) => item.key === selectedKey);
+    while (current?.parent) {
+      if (current.parent === entry.key) {
+        setSelectedKey(entry.key);
+        break;
+      }
+      current = entries.find((item) => item.key === current?.parent);
+    }
+  };
 
   const save = async () => {
     if (!selected) return;
@@ -213,8 +272,14 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
       <label className="permission-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder={t("permission.search")} value={query} /></label>
       <div className="permission-tree">{visibleEntries.map((entry) => {
         const hasOverride = Boolean(policyFor(entry, scope));
-        return <button className={`${selectedKey === entry.key ? "is-selected" : ""} ${hasOverride ? "has-override" : ""}`} key={entry.key} onClick={() => setSelectedKey(entry.key)} style={{ "--permission-depth": entry.depth } as CSSProperties} type="button"><span className="material-symbols-outlined">{entry.icon}</span><span><strong>{language === "en" ? entry.title_en : entry.title}</strong><small>{entry.key}</small></span>{hasOverride ? <i /> : null}</button>;
-      })}</div>
+        const hasChildren = branchKeys.has(entry.key);
+        const collapsed = !queryValue && collapsedKeys.has(entry.key);
+        const title = language === "en" ? entry.title_en : entry.title;
+        return <div className={`permission-tree-row ${selectedKey === entry.key ? "is-selected" : ""} ${hasOverride ? "has-override" : ""}`} key={entry.key} style={{ "--permission-depth": entry.depth } as CSSProperties}>
+          {hasChildren ? <button aria-expanded={!collapsed} aria-label={t(collapsed ? "permission.expandBranch" : "permission.collapseBranch", { name: title })} className={`permission-tree-toggle ${collapsed ? "" : "is-expanded"}`} onClick={() => toggleBranch(entry)} type="button"><span className="material-symbols-outlined">chevron_right</span></button> : <span className="permission-tree-spacer" />}
+          <button className="permission-tree-select" onClick={() => setSelectedKey(entry.key)} type="button"><span className="material-symbols-outlined">{entry.icon}</span><span><strong>{title}</strong><small>{entry.key}</small></span>{hasOverride ? <i /> : null}</button>
+        </div>;
+      })}{!visibleEntries.length ? <div className="permission-tree-empty"><span className="material-symbols-outlined">search_off</span><small>{t("permission.noSearchResults")}</small></div> : null}</div>
     </aside>
     <main className="permission-editor-panel">{selected ? <>
       <header className="permission-editor-header"><span className="permission-editor-icon material-symbols-outlined">{selected.icon}</span><span><small>{selected.key}</small><h2>{language === "en" ? selected.title_en : selected.title}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>

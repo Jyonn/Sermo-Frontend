@@ -26024,3 +26024,60 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
 /* Platform message delivery audit */
 .platform-message-bubble:is(button){display:block;width:auto;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer;transition:transform .16s ease,filter .16s ease}.platform-message-bubble:is(button):hover{filter:brightness(.97);transform:translateY(-1px)}.platform-message-bubble:is(button):focus-visible{outline:3px solid rgba(219,100,58,.25);outline-offset:2px}.platform-delivery-drawer .drawer-body{padding:0;background:#edf0ec}.platform-delivery-audit{min-height:100%;padding:20px}.platform-delivery-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;padding:24px;border-radius:22px;background:#17211f;color:#f6f2e9}.platform-delivery-hero>div:first-child{min-width:0}.platform-delivery-hero>div:first-child>span{color:#e88a64;font-size:10px;font-weight:800;letter-spacing:.14em}.platform-delivery-hero h2{overflow:hidden;margin:9px 0 5px;font-size:22px;text-overflow:ellipsis;white-space:nowrap}.platform-delivery-hero p{margin:0;color:#9caaa3;font-size:11px}.platform-delivery-hero>div:last-child{display:flex;min-width:104px;align-items:flex-end;justify-content:center;flex-direction:column;border-left:1px solid #34413b}.platform-delivery-hero>div:last-child strong{font-size:30px}.platform-delivery-hero>div:last-child span{color:#95a49c;font-size:10px}.platform-delivery-hero>div.has-failure strong{color:#ff9874}.platform-delivery-summary{display:grid;grid-template-columns:repeat(4,1fr);margin:12px 0 20px;overflow:hidden;border:1px solid #d7ddd8;border-radius:16px;background:#f8f8f4}.platform-delivery-summary span{display:flex;align-items:baseline;justify-content:center;gap:5px;padding:14px;border-left:1px solid #dfe3df;color:#77817c;font-size:10px}.platform-delivery-summary span:first-child{border-left:0}.platform-delivery-summary strong{color:#1d2925;font-size:18px}.platform-recipient-list{display:grid;gap:12px}.platform-recipient{overflow:hidden;border:1px solid #d7ddd8;border-radius:19px;background:#fbfbf8}.platform-recipient>header{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid #e3e6e2}.platform-delivery-avatar{width:39px;height:39px;border-radius:12px}.platform-recipient>header div{display:flex;min-width:0;flex-direction:column}.platform-recipient>header strong{font-size:14px}.platform-recipient>header span{margin-top:2px;color:#8a938e;font-size:9px}.platform-delivery-lanes{padding:3px 16px 10px}.platform-delivery-lane{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) 10px;gap:10px;align-items:start;padding:13px 0;border-top:1px solid #e6e8e5}.platform-delivery-lane:first-child{border-top:0}.platform-delivery-lane>.material-symbols-outlined{display:grid;width:34px;height:34px;place-items:center;border-radius:10px;background:#e9eeea;color:#53635b;font-size:18px}.platform-delivery-lane>div{min-width:0}.platform-delivery-lane strong{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}.platform-delivery-lane em{color:#75807a;font-size:9px;font-style:normal;font-weight:700}.platform-delivery-lane p{margin:4px 0 0;color:#88918c;font-size:10px}.platform-delivery-lane code,.platform-delivery-lane small{display:block;overflow:hidden;margin-top:7px;color:#7c5c51;font-size:9px;line-height:1.45;text-overflow:ellipsis;white-space:nowrap}.platform-delivery-lane small{color:#84908a}.platform-delivery-lane>i{width:8px;height:8px;margin-top:13px;border-radius:50%;background:#9ba39f}.platform-delivery-lane.is-sent>i{background:#21b67c}.platform-delivery-lane.is-sent>.material-symbols-outlined{background:#ddf5e9;color:#14865d}.platform-delivery-lane.is-failed>i{background:#e7674e}.platform-delivery-lane.is-failed>.material-symbols-outlined{background:#fbe4dd;color:#bd4f39}.platform-delivery-lane.is-pending>i{background:#d49a39}.platform-delivery-lane.is-skipped{opacity:.68}.platform-delivery-empty{padding:18px;color:#8a938e;font-size:11px;text-align:center}.platform-delivery-zero,.platform-delivery-loading{display:flex;min-height:52vh;align-items:center;justify-content:center;flex-direction:column;text-align:center}.platform-delivery-zero>.material-symbols-outlined{font-size:40px;color:#9eaaa3}.platform-delivery-zero strong,.platform-delivery-loading strong{margin-top:12px;font-size:17px}.platform-delivery-zero p,.platform-delivery-loading span{max-width:300px;margin:7px 0;color:#7f8984;font-size:11px;line-height:1.6}.platform-delivery-loading i{width:24px;height:24px;border:3px solid #cbd3ce;border-top-color:#db643a;border-radius:50%;animation:platform-spin .8s linear infinite}
 @media(max-width:760px){.platform-delivery-audit{padding:12px}.platform-delivery-hero{gap:14px;padding:19px}.platform-delivery-hero h2{font-size:18px}.platform-delivery-hero>div:last-child{min-width:82px}.platform-delivery-hero>div:last-child strong{font-size:24px}.platform-delivery-summary span{flex-direction:column;gap:0;padding:11px 4px}.platform-delivery-lanes{padding-right:13px;padding-left:13px}.platform-delivery-lane strong{align-items:flex-start;flex-direction:column;gap:2px}}
+
+/* Permission workspaces keep navigation and policy actions in view while only
+   the detailed rule editor scrolls. */
+.platform-main.is-permissions{
+  height:100dvh;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  overflow:hidden;
+  padding-bottom:34px;
+}
+.platform-main.is-permissions .permission-workspace{
+  height:100%;
+  min-height:0;
+}
+@media(min-width:761px){
+  .platform-header{
+    position:sticky;
+    top:0;
+    z-index:16;
+    padding-block:12px;
+    background:color-mix(in srgb,#eceee9 88%,transparent);
+    backdrop-filter:blur(18px) saturate(1.15);
+  }
+}
+.admin-app-content.is-permissions{
+  height:calc(100dvh - var(--topbar-height,64px));
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  overflow:hidden;
+  padding-bottom:18px;
+}
+.admin-permissions-tab{
+  min-height:0;
+  height:100%;
+  padding-top:18px;
+  overflow:hidden;
+}
+.admin-permissions-tab .permission-workspace{
+  height:100%;
+  min-height:0;
+}
+
+@media(max-width:900px){
+  .admin-mobile-nav{grid-template-columns:repeat(auto-fit,minmax(64px,1fr))}
+  .admin-app-content.is-permissions{height:calc(100dvh - var(--topbar-height,64px) - 64px - env(safe-area-inset-bottom));padding-bottom:0}
+  .admin-permissions-tab{padding-top:12px}
+  .admin-permissions-tab .permission-editor-panel{flex:1;min-height:0}
+}
+
+@media(max-width:760px){
+  .platform-main.is-permissions{height:100dvh;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .platform-main.is-permissions .platform-header{position:relative;top:auto}
+  .platform-main.is-permissions .permission-editor-panel{flex:1;min-height:0}
+  .platform-mobile-nav{grid-template-columns:repeat(6,minmax(0,1fr))}
+}

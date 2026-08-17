@@ -21,7 +21,7 @@ import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcas
 import { showToast } from "../lib/toast";
 
 type MemberFilter = "all" | "online";
-type AdminTab = "members" | "square" | "menu";
+type AdminTab = "members" | "square" | "permissions" | "menu";
 
 function formatCreatedAt(value?: number) {
   if (!value) return i18n.t("admin.justCreated");
@@ -120,7 +120,6 @@ export default function SpaceAdminDashboardPage() {
   const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
   const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
-  const [permissionWorkspaceOpen, setPermissionWorkspaceOpen] = useState(false);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [adminPhone, setAdminPhone] = useState("");
   const [adminPhoneCode, setAdminPhoneCode] = useState("");
@@ -160,6 +159,7 @@ export default function SpaceAdminDashboardPage() {
   const adminTabs: Array<{ key: AdminTab; icon: string; label: string }> = [
     { key: "members", icon: "group", label: t("admin.members") },
     ...(settingsSquareEnabled ? [{ key: "square" as const, icon: "explore", label: t("nav.square") }] : []),
+    { key: "permissions", icon: "account_tree", label: t("admin.permissionMatrix") },
     { key: "menu", icon: "menu", label: t("nav.menu") },
   ];
   const formatRelativeTime = (value: number) => {
@@ -641,7 +641,7 @@ export default function SpaceAdminDashboardPage() {
           <button className="admin-nav-logout" onClick={() => logout()} type="button"><span className="material-symbols-outlined">logout</span><span>{t("auth.logout")}</span></button>
         </nav>
 
-        <div className="admin-app-content">
+        <div className={`admin-app-content ${activeTab === "permissions" ? "is-permissions" : ""}`}>
           <header className="admin-app-header">
             <div><h1>{adminTabs.find((item) => item.key === activeTab)?.label}</h1><span>{currentSpace?.name}</span></div>
             <HeaderSyncIndicator syncing={dashboardState === "loading" || memberState === "loading" || squareState === "loading"} />
@@ -680,13 +680,16 @@ export default function SpaceAdminDashboardPage() {
             </div>
           </section> : null}
 
+          {activeTab === "permissions" ? <section className="admin-tab-page admin-permissions-tab">
+            <PermissionWorkspace scope="space" />
+          </section> : null}
+
           {activeTab === "menu" && currentSpace ? <section className="admin-tab-page admin-menu-tab">
             <section className="admin-menu-profile"><UserAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>sermo.jyonn.space/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
             <section className="admin-menu-section"><h2>{t("admin.spaceGovernance")}</h2><div className="admin-menu-list">
               <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-              <button onClick={() => setPermissionWorkspaceOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">account_tree</span></span><span><strong>{t("admin.permissionMatrix")}</strong><small>{t("admin.permissionMatrixHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
             </div></section>
             <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
@@ -728,10 +731,6 @@ export default function SpaceAdminDashboardPage() {
             <div><span>{t("admin.createOrInviteGroup")}</span><strong className="is-locked">{t("admin.verificationRequired")}</strong></div>
           </section>
         </div>
-      </SideDrawer>
-
-      <SideDrawer className="admin-permission-workspace-drawer" historyKey="admin-permission-workspace" onClose={() => setPermissionWorkspaceOpen(false)} open={permissionWorkspaceOpen} title={t("admin.permissionMatrix")}>
-        <PermissionWorkspace scope="space" />
       </SideDrawer>
 
       <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-basic-settings" onAction={() => void saveSettings()} onClose={() => setBasicSettingsOpen(false)} open={basicSettingsOpen} title={t("admin.basicSettings")}>

@@ -4,3 +4,38 @@
 .side-drawer.admin-permission-workspace-drawer{width:min(100%,1080px)}.admin-permission-workspace-drawer .drawer-body{padding:14px}.admin-permission-workspace-drawer .permission-workspace{min-height:calc(100dvh - 96px)}
 .permission-limit-editor{display:flex;flex-direction:column;gap:10px}.permission-limit-presets{display:flex;flex-wrap:wrap;gap:8px}.permission-limit-presets button{display:flex;align-items:center;gap:4px;height:34px;padding:0 11px;border:1px solid rgba(65,92,82,.16);border-radius:10px;background:#fff;color:#35634f;font-weight:700}.permission-limit-presets button:disabled{opacity:.38}.permission-limit-presets span{font-size:17px}.permission-limit-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.permission-limit-list label{display:grid;grid-template-columns:minmax(0,1fr) 70px 30px;align-items:center;gap:6px;padding:8px 9px;border:1px solid rgba(65,92,82,.13);border-radius:12px;background:rgba(255,255,255,.7);font-size:12px;font-weight:700}.permission-limit-list input{width:100%;height:32px;border:1px solid rgba(65,92,82,.15);border-radius:8px;background:#f7faf8;text-align:center}.permission-limit-list button{display:grid;place-items:center;width:30px;height:30px;border:0;background:transparent;color:#8e9a94}.permission-limit-list button span{font-size:16px}@media(max-width:900px){.permission-limit-list{grid-template-columns:1fr}}@media(prefers-color-scheme:dark){.permission-limit-presets button,.permission-limit-list label{background:rgba(26,43,36,.88);color:#d6e7df}.permission-limit-list input{border-color:rgba(168,197,185,.14);background:#14271f;color:#e5f0eb}}
 .permission-inherited-summary{margin:0 0 18px;padding:15px;border:1px solid rgba(71,99,89,.13);border-radius:18px;background:rgba(255,255,255,.52)}.permission-inherited-summary>header{display:flex;align-items:center;gap:10px}.permission-inherited-summary>header>.material-symbols-outlined{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#e4f3eb;color:#35745d}.permission-inherited-summary>header>span:last-child{display:flex;flex-direction:column}.permission-inherited-summary>header small{margin-top:2px;color:#7d8c85;font-size:11px}.permission-inherited-summary>div{display:flex;flex-direction:column;gap:7px;margin-top:12px}.permission-inherited-summary article{display:grid;grid-template-columns:70px minmax(0,1fr);align-items:center;gap:10px;padding:9px 11px;border-radius:12px;background:#f3f7f4}.permission-inherited-summary article>span{display:grid;place-items:center;min-height:25px;border-radius:8px;background:#dcefe6;color:#287056;font-size:10px;font-weight:800}.permission-inherited-summary article.is-denial>span{background:#f7e3df;color:#a64c43}.permission-inherited-summary article p{display:flex;min-width:0;flex-direction:column;margin:0}.permission-inherited-summary article strong{font-size:12px}.permission-inherited-summary article small{margin-top:2px;color:#697a72;font-size:11px;line-height:1.4}.permission-no-inherited{display:flex;align-items:center;gap:7px;margin:12px 0 0;color:#74847d;font-size:12px}.permission-no-inherited .material-symbols-outlined{font-size:17px;color:#36a879}@media(prefers-color-scheme:dark){.permission-inherited-summary{background:rgba(26,43,36,.7);border-color:rgba(168,197,185,.14)}.permission-inherited-summary article{background:#14271f}.permission-inherited-summary article>span{background:#214637;color:#8ad9bb}.permission-inherited-summary article small,.permission-inherited-summary>header small{color:#9eafa7}}
+
+/* The capability tree and editor are independent work surfaces. Keeping their
+   scroll positions separate prevents the primary policy actions from drifting
+   away while an administrator reviews a long rule set. */
+.permission-workspace{min-height:0}
+.permission-tree-panel{min-height:0}
+.permission-tree-row{--indent:calc(var(--permission-depth)*13px);display:grid;grid-template-columns:26px minmax(0,1fr);align-items:center;min-height:48px;margin-left:var(--indent);border-radius:13px;color:#63716b;transition:background .18s ease,color .18s ease,box-shadow .18s ease}
+.permission-tree-row:hover{background:rgba(255,255,255,.55)}
+.permission-tree-row.is-selected{background:#fff;color:#0c7254;box-shadow:0 8px 24px rgba(39,77,63,.08)}
+.permission-tree-toggle{display:grid;width:26px;height:100%;place-items:center;border:0;background:transparent;color:currentColor;cursor:pointer}
+.permission-tree-toggle .material-symbols-outlined{font-size:18px;line-height:1;transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.permission-tree-toggle.is-expanded .material-symbols-outlined{transform:rotate(90deg)}
+.permission-tree-spacer{width:26px}
+.permission-tree-select{display:grid;grid-template-columns:30px minmax(0,1fr) 8px;align-items:center;gap:8px;min-width:0;min-height:48px;padding:7px 10px 7px 2px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.permission-tree-select>.material-symbols-outlined{font-size:20px;line-height:1}
+.permission-tree-select>span:nth-child(2){display:flex;min-width:0;flex-direction:column}
+.permission-tree-empty{display:grid;min-height:132px;place-items:center;align-content:center;gap:8px;color:#84928c;text-align:center}
+.permission-tree-empty>.material-symbols-outlined{font-size:26px}
+.permission-editor-panel{min-height:0;padding:0 24px 24px;overscroll-behavior:contain}
+.permission-editor-header{position:sticky;top:0;z-index:6;padding:24px 0 20px;background:linear-gradient(180deg,rgba(247,249,246,.98) 0 82%,rgba(247,249,246,.92));backdrop-filter:blur(18px) saturate(1.15)}
+.permission-editor-icon{box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;text-align:center}
+
+@media(max-width:900px){
+  .permission-workspace{min-height:0}
+  .permission-tree-row{min-height:44px}
+  .permission-tree-select{min-height:44px}
+  .permission-editor-panel{padding:0 14px 18px}
+  .permission-editor-header{padding:18px 0 15px}
+}
+
+@media(prefers-color-scheme:dark){
+  .permission-tree-row:hover{background:rgba(41,68,58,.6)}
+  .permission-tree-row.is-selected{background:rgba(26,43,36,.88);color:#6be2b6}
+  .permission-editor-header{background:linear-gradient(180deg,rgba(16,29,24,.98) 0 82%,rgba(16,29,24,.92))}
+}
