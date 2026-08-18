@@ -1,21 +1,21 @@
 # 八仙克制型动态聊天气泡 · Codex 使用说明
 
-本版用于普通高频聊天。人物不是气泡边框的一部分，而是定位在气泡外侧的独立一次性动画层。默认使用重新设计的 `restrained-48-v2/`：48帧、24fps、严格2秒。旧12/24帧版本只保留用于设计追溯。
+本版用于普通高频聊天。人物不是气泡边框的一部分，而是定位在气泡外侧的独立一次性动画层。默认使用带真实肢体动作的 `restrained-48-v3/`：48帧、24fps、严格2秒。旧版本只保留用于设计追溯。
 
 ## 素材选择
 
 | 人物 | 自动动画 | 锚点 | 推荐尺寸 | 时长 | 动作语义 |
 | --- | --- | --- | --- | --- | --- |
-| 吕洞宾 | `LvDongbin/restrained-48-v2/animation-48.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 2s | 半身持剑致意、轻微沉浮、退回 |
-| 钟离权 | `ZhongliQuan/restrained-48-v2/animation-48.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 2s | 半身托元宝、松弛摇摆、沉回 |
-| 何仙姑 | `HeXiangu/restrained-48-v2/animation-48.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 2s | 半身双指致意、短滑移、退回 |
+| 吕洞宾 | `LvDongbin/restrained-48-v3/animation-48.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 2s | 探身、拔剑致意、收剑点头、退回 |
+| 钟离权 | `ZhongliQuan/restrained-48-v3/animation-48.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 2s | 升起、抛接元宝、耸肩、沉回 |
+| 何仙姑 | `HeXiangu/restrained-48-v3/animation-48.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 2s | 衣袖入场、短滑翔、双指致意、转肩退出 |
 
 每套还包括：
 
-- `restrained-48-v2/spritesheet-48.png`：8 列 × 6 行，单帧 256 × 256。
-- `restrained-48-v2/frames/frame-01.png` 至 `frame-48.png`：用于 Canvas 或精确逐帧控制。
-- `restrained-48-v2/animation.json`：固定48帧、24fps、2000ms以及每帧41/42ms节拍。
-- `restrained-12/`、`restrained-24/`：已废弃的动作探索；Codex 不得接入新功能。
+- `restrained-48-v3/spritesheet-48.png`：8 列 × 6 行，单帧 256 × 256。
+- `restrained-48-v3/frames/frame-01.png` 至 `frame-48.png`：用于 Canvas 或精确逐帧控制。
+- `restrained-48-v3/animation.json`：固定48帧、24fps、2000ms、动作阶段及每帧41/42ms节拍。
+- `restrained-12/`、`restrained-24/`、`restrained-48-v2/`：已废弃的探索；Codex 不得接入新功能。
 - `animation.json`：帧时长、锚点、触发方式和低动态模式信息；接入时优先读取该文件，不要在组件里复制帧参数。
 - `preview-48.gif`：严格2秒的设计审阅预览，不建议线上使用。
 - `source/keyposes-chroma.png`：ImageGen 原始洋红底候选姿态板，仅供再生成和追溯。
@@ -42,7 +42,7 @@
     <div className="message-bubble">消息正文</div>
     <img
       className="bubble-character bubble-character--top-right"
-      src="/design/Baxian/LvDongbin/restrained-48-v2/animation-48.webp"
+      src="/design/Baxian/LvDongbin/restrained-48-v3/animation-48.webp"
       alt=""
       aria-hidden="true"
     />

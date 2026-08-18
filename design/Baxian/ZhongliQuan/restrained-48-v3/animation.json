@@ -1,0 +1,120 @@
+{
+  "id": "baxian-zhongli-quan-articulated-48-v3",
+  "spriteVersionNumber": 4,
+  "motionDesign": "eight-articulated-keyposes-with-bidirectional-dense-optical-flow",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "frameCount": 48,
+  "fps": 24,
+  "durationMs": 2000,
+  "durationsMs": [
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41,
+    42,
+    42,
+    41
+  ],
+  "keyframes": [
+    0,
+    7,
+    14,
+    21,
+    28,
+    35,
+    42,
+    47
+  ],
+  "sheetColumns": 8,
+  "sheetRows": 6,
+  "rowMajor": true,
+  "playback": "once",
+  "autoplayTrigger": "new-message-visible",
+  "replayTrigger": "character-tap",
+  "hideAfterComplete": true,
+  "anchor": "bottom-left",
+  "recommendedDisplayPx": {
+    "mobile": 64,
+    "desktop": 72
+  },
+  "contentOverlapAllowed": false,
+  "spritesheet": "spritesheet-48.png",
+  "animatedWebP": "animation-48.webp",
+  "framesPath": "frames/frame-{01..48}.png",
+  "phases": [
+    {
+      "name": "rise",
+      "frames": [
+        0,
+        13
+      ]
+    },
+    {
+      "name": "prepare-ingot",
+      "frames": [
+        14,
+        21
+      ]
+    },
+    {
+      "name": "toss-catch-and-shrug",
+      "frames": [
+        22,
+        35
+      ]
+    },
+    {
+      "name": "sink",
+      "frames": [
+        36,
+        47
+      ]
+    }
+  ],
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 21
+  }
+}
