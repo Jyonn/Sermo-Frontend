@@ -7,7 +7,7 @@
 | 人物 | 自动动画 | 锚点 | 推荐尺寸 | 时长 | 动作语义 |
 | --- | --- | --- | --- | --- | --- |
 | 吕洞宾 | `LvDongbin/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 4s | 探身、拔剑、舞剑致意、收剑退回 |
-| 钟离权 | `ZhongliQuan/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 4.5s | 费力升起、把玩抛接元宝、耸肩退回 |
+| 钟离权 | `ZhongliQuan/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 4.5s | 松垮探身、把玩抛接圆形金色信物、痞气致意、退回 |
 | 何仙姑 | `HeXiangu/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 3.75s | 起飞、制动、侠礼、落回边缘 |
 
 每套还包括：
@@ -33,6 +33,7 @@
 8. 线上优先使用动画 WebP；需要精确结束回调或 Safari 兼容控制时使用 spritesheet/frames，并根据 `durationsMs` 播放。
 9. 不对素材做横向镜像。剑、元宝、发髻和衣襟具有方向性；需要另一侧锚点时重新生成对应方向版本。
 10. 角色的视觉盒不得参与气泡测量、列表高度计算或虚拟列表估高。
+11. 钟离权必须使用电影版高挑长发、短髭、橙蓝敞袍的青年形象；红袍丰硕人物是曹国舅。
 
 ## 推荐 DOM 结构
 

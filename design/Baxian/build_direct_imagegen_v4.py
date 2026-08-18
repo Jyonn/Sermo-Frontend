@@ -17,7 +17,7 @@ CHARACTERS = {
     "ZhongliQuan": {
         "duration": 4500,
         "anchor": "avatar-edge",
-        "phases": [["heavy-rise", 0, 11], ["inspect-and-prepare", 12, 23], ["toss-and-catch", 24, 38], ["shrug-and-retreat", 39, 47]],
+        "phases": [["rakish-rise-and-swagger", 0, 11], ["token-play-and-prepare", 12, 23], ["token-toss-and-catch", 24, 38], ["chin-salute-and-retreat", 39, 47]],
     },
     "HeXiangu": {
         "duration": 3750,

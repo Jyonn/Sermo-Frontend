@@ -67,28 +67,28 @@
   },
   "phases": [
     {
-      "name": "heavy-rise",
+      "name": "rakish-rise-and-swagger",
       "frames": [
         0,
         11
       ]
     },
     {
-      "name": "inspect-and-prepare",
+      "name": "token-play-and-prepare",
       "frames": [
         12,
         23
       ]
     },
     {
-      "name": "toss-and-catch",
+      "name": "token-toss-and-catch",
       "frames": [
         24,
         38
       ]
     },
     {
-      "name": "shrug-and-retreat",
+      "name": "chin-salute-and-retreat",
       "frames": [
         39,
         47
