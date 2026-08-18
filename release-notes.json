@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.18.1",
+  "id": "2026.08.18.2",
   "publishedAt": "2026-08-18",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡人物动起来了",
+      "title": "八仙气泡迎来全新演出",
       "items": [
-        "吕洞宾、钟离权与何仙姑气泡现在会稳定播放完整的 48 帧人物动画"
+        "吕洞宾、钟离权与何仙姑已换用重新绘制的 48 帧人物动画，并拥有各自更自然的动作节奏"
       ]
     },
     "en": {
-      "title": "Eight Immortals bubbles come alive",
+      "title": "A new performance for Eight Immortals bubbles",
       "items": [
-        "The Lu Dongbin, Zhongli Quan, and He Xiangu bubbles now reliably play their complete 48-frame character animations"
+        "Lu Dongbin, Zhongli Quan, and He Xiangu now use newly illustrated 48-frame animations with distinct, more natural timing"
       ]
     }
   }

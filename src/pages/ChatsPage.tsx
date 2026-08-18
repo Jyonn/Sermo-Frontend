@@ -49,6 +49,9 @@ import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } f
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
+import heXianguAnimation from "../../design/Baxian/HeXiangu/direct-imagegen-v4/animation.json";
+import lvDongbinAnimation from "../../design/Baxian/LvDongbin/direct-imagegen-v4/animation.json";
+import zhongliQuanAnimation from "../../design/Baxian/ZhongliQuan/direct-imagegen-v4/animation.json";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -62,6 +65,11 @@ const MESSAGE_TYPE_LOCATION = 6;
 const MESSAGE_TYPE_MAP_ACCESS = 7;
 const MESSAGE_TYPE_STATEMENT = 8;
 const MESSAGE_TYPE_STICKER = 9;
+const BAXIAN_ANIMATIONS = {
+  he: heXianguAnimation,
+  lv: lvDongbinAnimation,
+  zhongli: zhongliQuanAnimation,
+} as const;
 const MESSAGE_SEARCH_TYPES = [
   { value: null, label: "messageSearch.all" },
   { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
@@ -359,24 +367,26 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
   const [playing, setPlaying] = useState(false);
   const [playRequest, setPlayRequest] = useState(0);
   const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
+  const animation = character ? BAXIAN_ANIMATIONS[character] : null;
 
   useEffect(() => {
-    if (!active || !character || autoQueuedEffectRef.current === effectKey || playedBaxianEffects.has(effectKey)) return;
+    if (!active || !animation || autoQueuedEffectRef.current === effectKey || playedBaxianEffects.has(effectKey)) return;
     autoQueuedEffectRef.current = effectKey;
     setPlayRequest((value) => value + 1);
-  }, [active, character, effectKey]);
+  }, [active, animation, effectKey]);
 
   useEffect(() => {
     const runner = runnerRef.current;
     const bubble = runner?.parentElement;
-    if (!playRequest || !runner || !bubble || !character) return;
+    if (!playRequest || !runner || !bubble || !animation) return;
     let visible = false;
     let timer: number | null = null;
     let animationFrame: number | null = null;
     let ownsPlayback = false;
     let completed = false;
-    const duration = 2000;
-    const frameCount = 48;
+    const duration = animation.durationMs;
+    const frameCount = animation.frameCount;
+    const frameDurations = animation.durationsMs;
     const playbackId = `${effectKey}:${playRequest}`;
 
     const paintFrame = (frame: number) => {
@@ -410,7 +420,13 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
         if (!ownsPlayback) return;
         if (startedAt === null) startedAt = timestamp;
         const elapsed = Math.min(duration - 1, timestamp - startedAt);
-        paintFrame(Math.min(frameCount - 1, Math.floor((elapsed / duration) * frameCount)));
+        let frame = 0;
+        let frameStart = 0;
+        while (frame < frameCount - 1 && elapsed >= frameStart + frameDurations[frame]) {
+          frameStart += frameDurations[frame];
+          frame += 1;
+        }
+        paintFrame(frame);
         if (elapsed < duration - 1) animationFrame = window.requestAnimationFrame(advanceFrame);
       };
       animationFrame = window.requestAnimationFrame(advanceFrame);
@@ -430,7 +446,7 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
       if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
       finish();
     };
-  }, [character, effectKey, playRequest]);
+  }, [animation, effectKey, playRequest]);
 
   if (!character) return null;
   return (
