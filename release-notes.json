@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.18.4",
+  "id": "2026.08.18.5",
   "publishedAt": "2026-08-18",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡拥有专属色彩",
+      "title": "八仙人物站稳气泡边缘",
       "items": [
-        "吕洞宾换上清透蓝色调，何仙姑换上洋红色调，文字与多媒体消息都更具角色辨识度"
+        "三位八仙人物现在居中贴合气泡上沿演出，不再遮挡边框和聊天内容"
       ]
     },
     "en": {
-      "title": "Signature colors for Eight Immortals bubbles",
+      "title": "Eight Immortals settle onto the bubble edge",
       "items": [
-        "Lu Dongbin now uses a clear blue palette and He Xiangu a magenta palette across text and media messages"
+        "All three characters now perform centered along the top edge without covering the bubble or its border"
       ]
     }
   }
