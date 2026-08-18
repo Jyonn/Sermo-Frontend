@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.18.6",
+  "id": "2026.08.18.7",
   "publishedAt": "2026-08-18",
   "locales": {
     "zh-CN": {
-      "title": "八仙印章落在对话末尾",
+      "title": "八仙印章更加轻巧",
       "items": [
-        "连续气泡末尾新增角色专属印章，位于靠近页面中心的一侧，不遮挡消息内容"
+        "对话末尾的角色印章缩小一半，保留辨识度的同时进一步减少视觉干扰"
       ]
     },
     "en": {
-      "title": "Character seals complete Eight Immortals conversations",
+      "title": "Lighter Eight Immortals seals",
       "items": [
-        "A character-specific seal now completes each grouped conversation on the center-facing edge without covering the message"
+        "Character seals at the end of conversations are now half the size for a quieter, less intrusive finish"
       ]
     }
   }

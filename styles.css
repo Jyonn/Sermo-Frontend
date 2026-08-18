@@ -24292,7 +24292,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   z-index:5;
   top:50%;
   display:block;
-  width:30px;
+  width:15px;
   aspect-ratio:2/3;
   background-position:center;
   background-repeat:no-repeat;
@@ -24362,7 +24362,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 
 @media (min-width:900px) {
   .baxian-bubble-runner { --baxian-character-size:40px; }
-  .baxian-bubble-seal { width:35px; }
+  .baxian-bubble-seal { width:17.5px; }
 }
 
 html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
