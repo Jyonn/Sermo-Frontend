@@ -24132,7 +24132,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   .niko-bubble-runner { display:none!important; }
 }
 
-/* Baxian film collection: rice paper, aged copper, and jade accents frame the live-action characters. */
+/* Baxian film collection: each character keeps the paper texture while carrying a distinct cinematic palette. */
 .personalization-bubble-stage:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he),
 .message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
   --baxian-paper:
@@ -24165,13 +24165,44 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   --bubble-theme-accent:#b34f39;
 }
 
+.personalization-bubble-stage.bubble-style-baxian-lv,
+.message-group.bubble-style-baxian-lv {
+  --bubble-skin-other-bg:
+    radial-gradient(circle at 84% 18%,rgba(70,139,196,.16),transparent 38%),
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.72) 0 1px,transparent 1.5px) 0 0/17px 19px,
+    linear-gradient(138deg,#f5faff,#dbeaf8);
+  --bubble-skin-other-color:#172f47;
+  --bubble-skin-other-border:#6c94bc;
+  --bubble-skin-other-shadow:inset 0 0 0 1px rgba(255,255,255,.72),0 7px 18px rgba(48,91,130,.14);
+  --bubble-skin-self-bg:linear-gradient(138deg,#407fb5,#214d79);
+  --bubble-skin-self-color:#f7fbff;
+  --bubble-skin-self-border:#83b9df;
+  --bubble-skin-self-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 8px 19px rgba(30,70,108,.22);
+  --bubble-theme-accent:#2f78ad;
+  --bubble-theme-muted-other:rgba(23,47,71,.61);
+  --bubble-theme-muted-self:rgba(247,251,255,.72);
+  --bubble-theme-icon-other:#d9ebfa;
+  --bubble-theme-icon-self:rgba(218,239,255,.15);
+}
+
 .personalization-bubble-stage.bubble-style-baxian-he,
 .message-group.bubble-style-baxian-he {
-  --bubble-skin-other-bg:radial-gradient(ellipse at 12% 100%,rgba(70,123,103,.11),transparent 46%),var(--baxian-paper);
-  --bubble-skin-other-border:#608f78;
-  --bubble-skin-self-bg:linear-gradient(138deg,#657d68,#304f47);
-  --bubble-skin-self-border:#d0aa73;
-  --bubble-theme-accent:#42785f;
+  --bubble-skin-other-bg:
+    radial-gradient(ellipse at 12% 100%,rgba(187,55,126,.17),transparent 46%),
+    radial-gradient(circle at 18% 22%,rgba(255,255,255,.72) 0 1px,transparent 1.5px) 0 0/17px 19px,
+    linear-gradient(138deg,#fff7fc,#f2d9e8);
+  --bubble-skin-other-color:#46243a;
+  --bubble-skin-other-border:#bd719b;
+  --bubble-skin-other-shadow:inset 0 0 0 1px rgba(255,255,255,.72),0 7px 18px rgba(126,44,88,.14);
+  --bubble-skin-self-bg:linear-gradient(138deg,#b44380,#72234f);
+  --bubble-skin-self-color:#fff7fb;
+  --bubble-skin-self-border:#e2a0c3;
+  --bubble-skin-self-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 8px 19px rgba(101,30,69,.22);
+  --bubble-theme-accent:#ad3e78;
+  --bubble-theme-muted-other:rgba(70,36,58,.6);
+  --bubble-theme-muted-self:rgba(255,247,251,.72);
+  --bubble-theme-icon-other:#f5dbea;
+  --bubble-theme-icon-self:rgba(255,222,240,.15);
 }
 
 .message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he).other {
@@ -24274,6 +24305,18 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.7) 0 1px,transparent 1.5px) 0 0/12px 13px,linear-gradient(138deg,#fffdf6,#ead9b7);
   box-shadow:0 4px 10px rgba(72,49,27,.13);
 }
+.field-chat_bubble_style .preview-baxian-lv i span {
+  border-color:#6c94bc;
+  color:#f7fbff;
+  background:linear-gradient(138deg,#407fb5,#214d79);
+  box-shadow:0 4px 10px rgba(30,70,108,.2);
+}
+.field-chat_bubble_style .preview-baxian-he i span {
+  border-color:#bd719b;
+  color:#fff7fb;
+  background:linear-gradient(138deg,#b44380,#72234f);
+  box-shadow:0 4px 10px rgba(101,30,69,.2);
+}
 .field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) > i::after {
   position:absolute;
   z-index:2;
@@ -24296,6 +24339,16 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
   --bubble-skin-other-bg:linear-gradient(138deg,#e9dfcb,#d1bea0);
   --bubble-skin-other-color:#29231d;
+}
+
+html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group).bubble-style-baxian-lv {
+  --bubble-skin-other-bg:linear-gradient(138deg,#dceaf7,#bfd6ea);
+  --bubble-skin-other-color:#172f47;
+}
+
+html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group).bubble-style-baxian-he {
+  --bubble-skin-other-bg:linear-gradient(138deg,#f3dce9,#ddb8cf);
+  --bubble-skin-other-color:#46243a;
 }
 
 @media (prefers-reduced-motion:reduce) {
