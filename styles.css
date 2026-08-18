@@ -24287,6 +24287,40 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   transform:translateX(-50%);
 }
 
+.baxian-bubble-seal {
+  position:absolute;
+  z-index:5;
+  top:50%;
+  display:block;
+  width:30px;
+  aspect-ratio:2/3;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter:drop-shadow(0 3px 5px rgba(42,29,19,.22));
+  pointer-events:none;
+  transform:translateY(-50%);
+  transform-origin:center;
+  animation:baxian-seal-arrive .16s ease-out both;
+}
+
+.baxian-bubble-seal.is-lv { background-image:url("/assets/baxian/lv-dongbin-blue-seal.png"); }
+.baxian-bubble-seal.is-zhongli { background-image:url("/assets/baxian/zhongli-quan-red-seal.png"); }
+.baxian-bubble-seal.is-he { background-image:url("/assets/baxian/he-xiangu-pink-seal.png"); }
+
+.message-group.self:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .group-end > .baxian-bubble-seal {
+  right:calc(100% + 4px);
+}
+
+.message-group.other:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .group-end > .baxian-bubble-seal {
+  left:calc(100% + 4px);
+}
+
+@keyframes baxian-seal-arrive {
+  from { opacity:0;transform:translateY(-50%) scale(.94); }
+  to { opacity:1;transform:translateY(-50%) scale(1); }
+}
+
 .field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) > i { overflow:visible; }
 .field-chat_bubble_style :is(.preview-baxian-lv,.preview-baxian-zhongli,.preview-baxian-he) i span {
   border:1px solid #a17a4a;
@@ -24328,6 +24362,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 
 @media (min-width:900px) {
   .baxian-bubble-runner { --baxian-character-size:40px; }
+  .baxian-bubble-seal { width:35px; }
 }
 
 html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group):is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
@@ -24347,6 +24382,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group).bubble
 
 @media (prefers-reduced-motion:reduce) {
   .baxian-bubble-runner { display:none!important; }
+  .baxian-bubble-seal { animation:none; }
 }
 
 /* Fufu IP: sand tabby stripes, charcoal ink, olive eyes, and a coral-pink spark. */

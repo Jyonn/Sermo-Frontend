@@ -357,11 +357,18 @@ function XiaobaiBubbleRunner() {
   return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
 }
 
+function baxianCharacterForStyle(style?: ChatBubbleStyle) {
+  if (style === "baxian-lv") return "lv";
+  if (style === "baxian-zhongli") return "zhongli";
+  if (style === "baxian-he") return "he";
+  return null;
+}
+
 function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
   const runnerRef = useRef<HTMLSpanElement | null>(null);
   const frameRef = useRef<HTMLSpanElement | null>(null);
   const [playing, setPlaying] = useState(false);
-  const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
+  const character = baxianCharacterForStyle(style);
   const animation = character ? BAXIAN_ANIMATIONS[character] : null;
 
   useEffect(() => {
@@ -418,6 +425,12 @@ function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
 
   if (!character) return null;
   return <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}><span ref={frameRef} className="baxian-bubble-frame" /></span>;
+}
+
+function BaxianBubbleSeal({ style }: { style?: ChatBubbleStyle }) {
+  const character = baxianCharacterForStyle(style);
+  if (!character) return null;
+  return <span aria-hidden="true" className={`baxian-bubble-seal is-${character}`} />;
 }
 
 function formatTime(value: number) {
@@ -1293,6 +1306,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
           {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isFirst ? <BaxianBubbleRunner style={messages[0]?.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
+          {isLast ? <BaxianBubbleSeal style={messages[0]?.chatBubbleStyle} /> : null}
         </div>
       </div>
     </div>
@@ -1795,6 +1809,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isFirst ? <BaxianBubbleRunner style={message.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
+          {isLast ? <BaxianBubbleSeal style={message.chatBubbleStyle} /> : null}
         </div>
       </div>
     </div>

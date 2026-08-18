@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.18.5",
+  "id": "2026.08.18.6",
   "publishedAt": "2026-08-18",
   "locales": {
     "zh-CN": {
-      "title": "八仙人物站稳气泡边缘",
+      "title": "八仙印章落在对话末尾",
       "items": [
-        "三位八仙人物现在居中贴合气泡上沿演出，不再遮挡边框和聊天内容"
+        "连续气泡末尾新增角色专属印章，位于靠近页面中心的一侧，不遮挡消息内容"
       ]
     },
     "en": {
-      "title": "Eight Immortals settle onto the bubble edge",
+      "title": "Character seals complete Eight Immortals conversations",
       "items": [
-        "All three characters now perform centered along the top edge without covering the bubble or its border"
+        "A character-specific seal now completes each grouped conversation on the center-facing edge without covering the message"
       ]
     }
   }
