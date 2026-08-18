@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.18.7",
-  "publishedAt": "2026-08-18",
+  "id": "2026.08.19.1",
+  "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "八仙印章更加轻巧",
+      "title": "群聊艾特更顺手",
       "items": [
-        "对话末尾的角色印章缩小一半，保留辨识度的同时进一步减少视觉干扰"
+        "艾特昵称现在会整体选中和删除，消息中的艾特也会随气泡主题显示为清晰胶囊",
+        "在群聊中长按成员头像，即可从当前光标位置快速艾特对方"
       ]
     },
     "en": {
-      "title": "Lighter Eight Immortals seals",
+      "title": "Smoother group mentions",
       "items": [
-        "Character seals at the end of conversations are now half the size for a quieter, less intrusive finish"
+        "Mentions can now be selected and deleted as one unit, with themed mention pills inside messages",
+        "Press and hold a member avatar to mention them at the current cursor position"
       ]
     }
   }

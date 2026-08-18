@@ -1521,6 +1521,7 @@
   "featureDiscovery.online.action": "Turn it on",
   "chat.mentioned": "[Mentioned]",
   "chat.mentionMembers": "Mention group members",
+  "chat.mentionUser": "Press and hold to mention {{name}}",
   "chat.onlineReminder": "Online reminder",
   "chat.toggleOnlineReminder": "Toggle online reminder",
   "chat.onlineReminderUnlockAtLevel": "Online reminders unlock at Lv.{{level}}",

@@ -1521,6 +1521,7 @@
   "featureDiscovery.online.action": "立即开启",
   "chat.mentioned": "[被@]",
   "chat.mentionMembers": "提及群成员",
+  "chat.mentionUser": "长按提及{{name}}",
   "chat.onlineReminder": "上线提醒",
   "chat.toggleOnlineReminder": "切换上线提醒",
   "chat.onlineReminderUnlockAtLevel": "Lv.{{level}} 解锁上线提醒",

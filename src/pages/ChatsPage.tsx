@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
   type ClipboardEvent as ReactClipboardEvent,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
@@ -209,6 +210,48 @@ function visibleBubbleStyle(style?: string) {
     "baxian-lv", "baxian-zhongli", "baxian-he",
     "city-jdz", "city-shanghai", "city-nyc", "city-beijing",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
+}
+
+const MENTION_BOUNDARY_RE = /[\s，。！？、,.!?]/u;
+const MENTION_SELECTION_ACCENTS: Record<ChatBubbleStyle, string> = {
+  default: "#00a86b",
+  comic: "#e49328",
+  vip: "#b67b22",
+  niko: "#916846",
+  fufu: "#747a28",
+  xiaobai: "#7657a8",
+  "baxian-lv": "#2f78ad",
+  "baxian-zhongli": "#b34f39",
+  "baxian-he": "#ad3e78",
+  zen: "#b84b3c",
+  hero: "#d9473f",
+  dragon: "#a82d26",
+  bauhaus: "#d84638",
+  mosaic: "#d8904e",
+  typewriter: "#9c3f35",
+  newspaper: "#a62f2f",
+  receipt: "#28775b",
+  sticker: "#e65f66",
+  toybrick: "#d84c43",
+  "city-jdz": "#b54b3f",
+  "city-shanghai": "#f2bd55",
+  "city-nyc": "#c59a47",
+  "city-beijing": "#d2a23e",
+};
+
+function mentionSelectionAccent(style?: string) {
+  return MENTION_SELECTION_ACCENTS[visibleBubbleStyle(style)];
+}
+
+function mentionRangeBeforeCaret(text: string, caret: number, memberNames: string[]) {
+  const names = [...new Set(memberNames.filter(Boolean))].sort((left, right) => right.length - left.length);
+  for (const name of names) {
+    const token = `@${name}`;
+    const start = caret - token.length;
+    if (start < 0 || text.slice(start, caret) !== token) continue;
+    if (start === 0 || MENTION_BOUNDARY_RE.test(text[start - 1])) return { start, end: caret };
+  }
+  return null;
 }
 
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
@@ -1816,12 +1859,71 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   );
 });
 
+function MessageAvatarMentionTarget({ children, name, onMention }: { children: ReactNode; name: string; onMention: () => void }) {
+  const timerRef = useRef<number | null>(null);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const suppressClickRef = useRef(false);
+
+  const clearLongPress = () => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+    pointerStartRef.current = null;
+  };
+
+  useEffect(() => clearLongPress, []);
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    clearLongPress();
+    suppressClickRef.current = false;
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+    timerRef.current = window.setTimeout(() => {
+      timerRef.current = null;
+      pointerStartRef.current = null;
+      suppressClickRef.current = true;
+      if ("vibrate" in navigator) navigator.vibrate(8);
+      onMention();
+    }, 420);
+  };
+
+  return (
+    <button
+      aria-label={i18n.t("chat.mentionUser", { name })}
+      className="message-avatar-mention-trigger"
+      onClick={(event) => {
+        if (event.detail === 0) {
+          onMention();
+          return;
+        }
+        if (!suppressClickRef.current) return;
+        suppressClickRef.current = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onContextMenu={(event) => event.preventDefault()}
+      onPointerCancel={clearLongPress}
+      onPointerDown={handlePointerDown}
+      onPointerLeave={clearLongPress}
+      onPointerMove={(event) => {
+        const start = pointerStartRef.current;
+        if (!start) return;
+        if (Math.abs(event.clientX - start.x) > 8 || Math.abs(event.clientY - start.y) > 8) clearLongPress();
+      }}
+      onPointerUp={clearLongPress}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
+
 const MessageGroupBlock = memo(function MessageGroupBlock({
   enteringMessageIds,
   group,
   onOpenImage,
   onOpenVideo,
   onOpenActions,
+  onMentionAuthor,
   onRetry,
   onToggleGroupSelection,
   onToggleSelection,
@@ -1898,6 +2000,10 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           >
             {groupAvatar}
           </button>
+        ) : group.from === "other" && groupAvatar && onMentionAuthor && typeof group.userId === "number" ? (
+          <MessageAvatarMentionTarget name={group.name} onMention={() => onMentionAuthor(group.userId!)}>
+            {groupAvatar}
+          </MessageAvatarMentionTarget>
         ) : groupAvatar}
         <div className="message-bubbles">
           {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
@@ -1951,6 +2057,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
 
 interface MessageGroup {
   key: string;
+  userId?: number;
   from: "self" | "other";
   name: string;
   avatarUri?: string;
@@ -1983,6 +2090,7 @@ interface MessageGroupBlockProps {
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
+  onMentionAuthor?: (userId: number) => void;
   onRetry: (message: ChatMessage) => void;
   onToggleGroupSelection: (messages: ChatMessage[]) => void;
   onToggleSelection: (message: ChatMessage) => void;
@@ -2210,6 +2318,7 @@ function LiveChatsPage() {
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
   const [mentionSearch, setMentionSearch] = useState<{ start: number; end: number; query: string } | null>(null);
+  const [mentionDeleteArmed, setMentionDeleteArmed] = useState(false);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
@@ -2292,6 +2401,9 @@ function LiveChatsPage() {
   const cancelledSendIdsRef = useRef(new Set<string>());
   const localObjectUrlsRef = useRef(new Set<string>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const mentionDeleteRangeRef = useRef<{ start: number; end: number } | null>(null);
+  const composerSelectionRef = useRef({ start: 0, end: 0 });
+  const composerSelectionTouchedRef = useRef(false);
   const messageMenuRef = useRef<HTMLDivElement | null>(null);
   const replyingToRef = useRef<QuotedMessageDTO | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
@@ -2811,6 +2923,10 @@ function LiveChatsPage() {
       .filter((member) => !member.isSelf && (!query || member.name.toLocaleLowerCase(getActiveLocale()).includes(query)))
       .slice(0, 6);
   }, [mentionSearch, selectedChat]);
+  const clearMentionDeleteSelection = () => {
+    mentionDeleteRangeRef.current = null;
+    setMentionDeleteArmed(false);
+  };
   const mentionUserIdsForText = (text: string) => {
     if (!selectedChat || selectedChat.type !== "group") return [];
     return selectedChat.detail.members.filter((member) => {
@@ -2819,17 +2935,88 @@ function LiveChatsPage() {
       return new RegExp(`@${escapedName}(?=$|\\s|[，。！？、,.!?])`, "u").test(text);
     }).map((member) => member.userId);
   };
-  const selectMention = (member: Chat["detail"]["members"][number]) => {
-    if (!mentionSearch) return;
-    const insertion = `@${member.name} `;
-    const nextDraft = `${draft.slice(0, mentionSearch.start)}${insertion}${draft.slice(mentionSearch.end)}`;
-    const nextCursor = mentionSearch.start + insertion.length;
+  const insertMention = (member: Chat["detail"]["members"][number], range: { start: number; end: number }) => {
+    const safeStart = Math.max(0, Math.min(range.start, draft.length));
+    const safeEnd = Math.max(safeStart, Math.min(range.end, draft.length));
+    const needsLeadingSpace = safeStart > 0 && !MENTION_BOUNDARY_RE.test(draft[safeStart - 1]);
+    const insertion = `${needsLeadingSpace ? " " : ""}@${member.name}`;
+    const nextDraft = `${draft.slice(0, safeStart)}${insertion}${draft.slice(safeEnd)}`;
+    const nextCursor = safeStart + insertion.length;
+    clearMentionDeleteSelection();
     updateDraft(nextDraft);
     setMentionSearch(null);
+    composerSelectionTouchedRef.current = true;
+    composerSelectionRef.current = { start: nextCursor, end: nextCursor };
     window.requestAnimationFrame(() => {
       textareaRef.current?.focus();
       textareaRef.current?.setSelectionRange(nextCursor, nextCursor);
     });
+  };
+  const selectMention = (member: Chat["detail"]["members"][number]) => {
+    if (!mentionSearch) return;
+    insertMention(member, mentionSearch);
+  };
+  const mentionGroupMember = (userId: number) => {
+    if (!selectedChat || selectedChat.type !== "group") return;
+    const member = selectedChat.detail.members.find((item) => item.userId === userId && !item.isSelf);
+    if (!member) return;
+    const range = composerSelectionTouchedRef.current
+      ? composerSelectionRef.current
+      : { start: draft.length, end: draft.length };
+    insertMention(member, range);
+  };
+  const handleComposerKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    const nativeEvent = event.nativeEvent as globalThis.KeyboardEvent & { isComposing?: boolean; keyCode?: number };
+    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.keyCode === 229) return;
+
+    const input = event.currentTarget;
+    const selectionStart = input.selectionStart;
+    const selectionEnd = input.selectionEnd;
+    const armedRange = mentionDeleteRangeRef.current;
+
+    if (event.key === "Backspace") {
+      if (armedRange && selectionStart === armedRange.start && selectionEnd === armedRange.end) {
+        event.preventDefault();
+        const nextDraft = `${draft.slice(0, armedRange.start)}${draft.slice(armedRange.end)}`;
+        const nextCursor = armedRange.start;
+        clearMentionDeleteSelection();
+        updateDraft(nextDraft);
+        setMentionSearch(null);
+        composerSelectionRef.current = { start: nextCursor, end: nextCursor };
+        window.requestAnimationFrame(() => input.setSelectionRange(nextCursor, nextCursor));
+        return;
+      }
+
+      if (armedRange) clearMentionDeleteSelection();
+      if (selectionStart === selectionEnd && selectedChat?.type === "group") {
+        const range = mentionRangeBeforeCaret(
+          draft,
+          selectionStart,
+          selectedChat.detail.members.filter((member) => !member.isSelf).map((member) => member.name)
+        );
+        if (range) {
+          event.preventDefault();
+          mentionDeleteRangeRef.current = range;
+          setMentionDeleteArmed(true);
+          setMentionSearch(null);
+          composerSelectionRef.current = range;
+          input.setSelectionRange(range.start, range.end);
+          return;
+        }
+      }
+    } else if (armedRange) {
+      clearMentionDeleteSelection();
+    }
+
+    if (event.key === "Enter" && !event.shiftKey && mentionSearch && mentionCandidates.length) {
+      event.preventDefault();
+      selectMention(mentionCandidates[0]);
+      return;
+    }
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
   };
   const profileDrawerSeed = useMemo(() => {
     if (profileDrawerUserId === null) return null;
@@ -3103,6 +3290,7 @@ function LiveChatsPage() {
 
       groups.push({
         key: message.clientId,
+        userId: message.userId,
         from: message.from,
         name: message.name,
         avatarUri: message.avatarUri,
@@ -3366,8 +3554,13 @@ function LiveChatsPage() {
   }, [exploreStickers, stickers]);
 
   useEffect(() => {
-    setDraft(cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "");
+    const nextDraft = cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "";
+    setDraft(nextDraft);
     setMentionSearch(null);
+    mentionDeleteRangeRef.current = null;
+    setMentionDeleteArmed(false);
+    composerSelectionRef.current = { start: nextDraft.length, end: nextDraft.length };
+    composerSelectionTouchedRef.current = false;
   }, [cacheScope, selectedChat?.id]);
 
   const insertEmoji = (emoji: string) => {
@@ -5519,6 +5712,7 @@ function LiveChatsPage() {
                     }}
                     onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                     onOpenActions={openMessageMenu}
+                    onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
                     onRetry={retryFailedMessage}
                     onToggleGroupSelection={toggleMessageGroupSelection}
                     onToggleSelection={toggleMessageSelection}
@@ -5554,7 +5748,12 @@ function LiveChatsPage() {
                   </button>
                 </div>
               ) : (
-              <form ref={composerRef} className={`composer ${voiceComposer.open ? "is-recording-mode" : ""}`} onSubmit={submit}>
+              <form
+                ref={composerRef}
+                className={`composer ${voiceComposer.open ? "is-recording-mode" : ""}`}
+                onSubmit={submit}
+                style={{ "--mention-selection-accent": mentionSelectionAccent(pendingMessageAppearance.chatBubbleStyle) } as CSSProperties}
+              >
                 {replyingTo && !voiceComposer.open ? (
                   <div className="composer-reply-preview">
                     <div>
@@ -5588,7 +5787,7 @@ function LiveChatsPage() {
                     <div className="composer-input-wrap">
                       <textarea
                         ref={textareaRef}
-                        className="textarea composer-input"
+                        className={`textarea composer-input${mentionDeleteArmed ? " is-mention-delete-armed" : ""}`}
                         enterKeyHint="send"
                         placeholder={t("chat.inputPlaceholder")}
                         value={draft}
@@ -5596,6 +5795,9 @@ function LiveChatsPage() {
                         onChange={(event) => {
                           const value = event.target.value;
                           const caret = event.target.selectionStart;
+                          clearMentionDeleteSelection();
+                          composerSelectionTouchedRef.current = true;
+                          composerSelectionRef.current = { start: caret, end: event.target.selectionEnd };
                           updateDraft(value);
                           if (selectedChat?.type !== "group") {
                             setMentionSearch(null);
@@ -5614,23 +5816,25 @@ function LiveChatsPage() {
                         }}
                         onFocus={() => {
                           setEmojiPickerOpen(false);
+                          const input = textareaRef.current;
+                          if (input) {
+                            composerSelectionTouchedRef.current = true;
+                            composerSelectionRef.current = { start: input.selectionStart, end: input.selectionEnd };
+                          }
                         }}
+                        onBlur={clearMentionDeleteSelection}
                         onPaste={handleComposerPaste}
-                        onKeyDown={(event) => {
-                          const nativeEvent = event.nativeEvent as KeyboardEvent & { isComposing?: boolean; keyCode?: number };
-                          if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.keyCode === 229) {
-                            return;
-                          }
-                          if (event.key === "Enter" && !event.shiftKey && mentionSearch && mentionCandidates.length) {
-                            event.preventDefault();
-                            selectMention(mentionCandidates[0]);
-                            return;
-                          }
-                          if (event.key === "Enter" && !event.shiftKey) {
-                            event.preventDefault();
-                            event.currentTarget.form?.requestSubmit();
+                        onPointerDown={clearMentionDeleteSelection}
+                        onSelect={(event) => {
+                          const input = event.currentTarget;
+                          composerSelectionTouchedRef.current = true;
+                          composerSelectionRef.current = { start: input.selectionStart, end: input.selectionEnd };
+                          const armedRange = mentionDeleteRangeRef.current;
+                          if (armedRange && (input.selectionStart !== armedRange.start || input.selectionEnd !== armedRange.end)) {
+                            clearMentionDeleteSelection();
                           }
                         }}
+                        onKeyDown={handleComposerKeyDown}
                       />
                       {mentionSearch && mentionCandidates.length ? (
                         <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
