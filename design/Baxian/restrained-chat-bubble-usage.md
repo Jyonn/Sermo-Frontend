@@ -1,20 +1,20 @@
 # 八仙克制型动态聊天气泡 · Codex 使用说明
 
-本文件记录旧实验素材的接入方式。经过动作质量复核，`restrained-12/`、`restrained-24/`、`restrained-48-v2/` 与 `restrained-48-v3/` 均不得作为最终聊天气泡角色动画上线。正式制作必须依据 `character-action-bible-v4.md` 完成分层绑定动画后，再更新本文件中的产物路径。
+生产接入使用 `direct-imagegen-v4/`。其 48 帧是 ImageGen 直接生成的连续角色动作，不依赖前端平移、光流或程序插帧；旧 `restrained-*` 均仅供回溯。
 
-## 实验素材索引（禁止生产接入）
+## 生产素材索引
 
 | 人物 | 自动动画 | 锚点 | 推荐尺寸 | 时长 | 动作语义 |
 | --- | --- | --- | --- | --- | --- |
-| 吕洞宾 | `LvDongbin/restrained-48-v3/animation-48.webp` | 气泡右上角 | 移动端 64px；桌面端 72px | 2s | 探身、拔剑致意、收剑点头、退回 |
-| 钟离权 | `ZhongliQuan/restrained-48-v3/animation-48.webp` | 气泡左下角 | 移动端 64px；桌面端 72px | 2s | 升起、抛接元宝、耸肩、沉回 |
-| 何仙姑 | `HeXiangu/restrained-48-v3/animation-48.webp` | 气泡左上角 | 移动端 64px；桌面端 72px | 2s | 衣袖入场、短滑翔、双指致意、转肩退出 |
+| 吕洞宾 | `LvDongbin/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 4s | 探身、拔剑、舞剑致意、收剑退回 |
+| 钟离权 | `ZhongliQuan/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 4.5s | 费力升起、把玩抛接元宝、耸肩退回 |
+| 何仙姑 | `HeXiangu/direct-imagegen-v4/animation-48.webp` | 头像框边缘 | 移动端 72px；桌面端 80px | 3.75s | 起飞、制动、侠礼、落回边缘 |
 
 每套还包括：
 
-- `restrained-48-v3/spritesheet-48.png`：8 列 × 6 行，单帧 256 × 256。
-- `restrained-48-v3/frames/frame-01.png` 至 `frame-48.png`：用于 Canvas 或精确逐帧控制。
-- `restrained-48-v3/animation.json`：固定48帧、24fps、2000ms、动作阶段及每帧41/42ms节拍。
+- `direct-imagegen-v4/spritesheet-48.png`：8 列 × 6 行，单帧 256 × 256。
+- `direct-imagegen-v4/frames/frame-01.png` 至 `frame-48.png`：用于 Canvas 或精确逐帧控制。
+- `direct-imagegen-v4/animation.json`：角色独立时长、逐帧节拍、动作阶段和接入元数据。
 - `restrained-12/`、`restrained-24/`、`restrained-48-v2/`：已废弃的探索；Codex 不得接入新功能。
 - `animation.json`：帧时长、锚点、触发方式和低动态模式信息；接入时优先读取该文件，不要在组件里复制帧参数。
 - `preview-48.gif`：严格2秒的设计审阅预览，不建议线上使用。
@@ -42,7 +42,7 @@
     <div className="message-bubble">消息正文</div>
     <img
       className="bubble-character bubble-character--top-right"
-      src="/design/Baxian/LvDongbin/restrained-48-v3/animation-48.webp"
+      src="/design/Baxian/LvDongbin/direct-imagegen-v4/animation-48.webp"
       alt=""
       aria-hidden="true"
     />
@@ -106,7 +106,7 @@ hidden
 源图更新后，在 `sermo-frontend` 上级目录执行：
 
 ```bash
-python sermo-frontend/design/Baxian/build_restrained_animations.py
+python sermo-frontend/design/Baxian/build_direct_imagegen_v4.py
 ```
 
-脚本会重新切分透明 contact sheet，并生成 PNG 帧、spritesheet、动画 WebP、GIF 预览和 `animation.json`。
+脚本只切分两张 ImageGen 原始 24 帧表、去除洋红底并编码产物；不会生成中间帧或改造人物动作。

@@ -1,0 +1,105 @@
+{
+  "id": "baxian-zhongliquan-direct-imagegen-v4",
+  "spriteVersionNumber": 4,
+  "frameCount": 48,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "sheetColumns": 8,
+  "sheetRows": 6,
+  "durationsMs": [
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    94,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93,
+    93
+  ],
+  "durationMs": 4500,
+  "playback": "once",
+  "animationSource": "48 directly generated chronological ImageGen drawings; no optical-flow or transform interpolation",
+  "pathMotion": "none; optional bubble-edge translation must be composed by the frontend",
+  "anchor": "avatar-edge",
+  "recommendedDisplayPx": {
+    "mobile": 72,
+    "desktop": 80
+  },
+  "phases": [
+    {
+      "name": "heavy-rise",
+      "frames": [
+        0,
+        11
+      ]
+    },
+    {
+      "name": "inspect-and-prepare",
+      "frames": [
+        12,
+        23
+      ]
+    },
+    {
+      "name": "toss-and-catch",
+      "frames": [
+        24,
+        38
+      ]
+    },
+    {
+      "name": "shrug-and-retreat",
+      "frames": [
+        39,
+        47
+      ]
+    }
+  ],
+  "spritesheet": "spritesheet-48.png",
+  "animatedWebP": "animation-48.webp",
+  "framesPath": "frames/frame-{01..48}.png",
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 11
+  }
+}

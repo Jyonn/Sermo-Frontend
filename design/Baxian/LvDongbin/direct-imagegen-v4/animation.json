@@ -1,0 +1,105 @@
+{
+  "id": "baxian-lvdongbin-direct-imagegen-v4",
+  "spriteVersionNumber": 4,
+  "frameCount": 48,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "sheetColumns": 8,
+  "sheetRows": 6,
+  "durationsMs": [
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    84,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83,
+    83
+  ],
+  "durationMs": 4000,
+  "playback": "once",
+  "animationSource": "48 directly generated chronological ImageGen drawings; no optical-flow or transform interpolation",
+  "pathMotion": "none; optional bubble-edge translation must be composed by the frontend",
+  "anchor": "avatar-edge",
+  "recommendedDisplayPx": {
+    "mobile": 72,
+    "desktop": 80
+  },
+  "phases": [
+    {
+      "name": "peek-and-rise",
+      "frames": [
+        0,
+        11
+      ]
+    },
+    {
+      "name": "draw-sword",
+      "frames": [
+        12,
+        23
+      ]
+    },
+    {
+      "name": "flourish-and-salute",
+      "frames": [
+        24,
+        40
+      ]
+    },
+    {
+      "name": "sheathe-and-retreat",
+      "frames": [
+        41,
+        47
+      ]
+    }
+  ],
+  "spritesheet": "spritesheet-48.png",
+  "animatedWebP": "animation-48.webp",
+  "framesPath": "frames/frame-{01..48}.png",
+  "reducedMotion": {
+    "autoplay": false,
+    "fallbackFrame": 11
+  }
+}
