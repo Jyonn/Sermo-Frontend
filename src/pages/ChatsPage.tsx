@@ -357,37 +357,23 @@ function XiaobaiBubbleRunner() {
   return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
 }
 
-const playedBaxianEffects = new Set<string>();
-let activeBaxianEffect: string | null = null;
-
-function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; effectKey: string; style?: ChatBubbleStyle }) {
+function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
   const runnerRef = useRef<HTMLSpanElement | null>(null);
   const frameRef = useRef<HTMLSpanElement | null>(null);
-  const autoQueuedEffectRef = useRef<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [playRequest, setPlayRequest] = useState(0);
   const character = style === "baxian-lv" ? "lv" : style === "baxian-zhongli" ? "zhongli" : style === "baxian-he" ? "he" : null;
   const animation = character ? BAXIAN_ANIMATIONS[character] : null;
 
   useEffect(() => {
-    if (!active || !animation || autoQueuedEffectRef.current === effectKey || playedBaxianEffects.has(effectKey)) return;
-    autoQueuedEffectRef.current = effectKey;
-    setPlayRequest((value) => value + 1);
-  }, [active, animation, effectKey]);
-
-  useEffect(() => {
     const runner = runnerRef.current;
     const bubble = runner?.parentElement;
-    if (!playRequest || !runner || !bubble || !animation) return;
-    let visible = false;
-    let timer: number | null = null;
+    if (!runner || !bubble || !animation) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let animationFrame: number | null = null;
-    let ownsPlayback = false;
-    let completed = false;
+    let startedAt: number | null = null;
     const duration = animation.durationMs;
     const frameCount = animation.frameCount;
     const frameDurations = animation.durationsMs;
-    const playbackId = `${effectKey}:${playRequest}`;
 
     const paintFrame = (frame: number) => {
       const frameElement = frameRef.current;
@@ -397,75 +383,41 @@ function BaxianBubbleRunner({ active, effectKey, style }: { active: boolean; eff
       frameElement.style.backgroundPosition = `${(column / 7) * 100}% ${(row / 5) * 100}%`;
     };
 
-    const finish = () => {
-      if (!ownsPlayback || completed) return;
-      ownsPlayback = false;
-      completed = true;
-      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
-      animationFrame = null;
-      setPlaying(false);
-      if (activeBaxianEffect === playbackId) activeBaxianEffect = null;
-      window.dispatchEvent(new Event("sermo:baxian-effect-finished"));
-    };
-
-    const tryPlay = () => {
-      if (!visible || completed || ownsPlayback || activeBaxianEffect) return;
-      playedBaxianEffects.add(effectKey);
-      activeBaxianEffect = playbackId;
-      ownsPlayback = true;
-      paintFrame(0);
-      setPlaying(true);
-      let startedAt: number | null = null;
-      const advanceFrame = (timestamp: number) => {
-        if (!ownsPlayback) return;
-        if (startedAt === null) startedAt = timestamp;
-        const elapsed = Math.min(duration - 1, timestamp - startedAt);
-        let frame = 0;
-        let frameStart = 0;
-        while (frame < frameCount - 1 && elapsed >= frameStart + frameDurations[frame]) {
-          frameStart += frameDurations[frame];
-          frame += 1;
-        }
-        paintFrame(frame);
-        if (elapsed < duration - 1) animationFrame = window.requestAnimationFrame(advanceFrame);
-      };
+    const advanceFrame = (timestamp: number) => {
+      if (startedAt === null) startedAt = timestamp;
+      const elapsed = (timestamp - startedAt) % duration;
+      let frame = 0;
+      let frameStart = 0;
+      while (frame < frameCount - 1 && elapsed >= frameStart + frameDurations[frame]) {
+        frameStart += frameDurations[frame];
+        frame += 1;
+      }
+      paintFrame(frame);
       animationFrame = window.requestAnimationFrame(advanceFrame);
-      timer = window.setTimeout(finish, duration + 80);
     };
 
     const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      tryPlay();
+      if (entry.isIntersecting) {
+        if (animationFrame !== null) return;
+        startedAt = null;
+        paintFrame(0);
+        setPlaying(true);
+        animationFrame = window.requestAnimationFrame(advanceFrame);
+        return;
+      }
+      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+      setPlaying(false);
     }, { threshold: 0.2 });
     observer.observe(bubble);
-    window.addEventListener("sermo:baxian-effect-finished", tryPlay);
     return () => {
       observer.disconnect();
-      window.removeEventListener("sermo:baxian-effect-finished", tryPlay);
-      if (timer !== null) window.clearTimeout(timer);
       if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
-      finish();
     };
-  }, [animation, effectKey, playRequest]);
+  }, [animation]);
 
   if (!character) return null;
-  return (
-    <>
-      <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}>
-        <span ref={frameRef} className="baxian-bubble-frame" />
-      </span>
-      <button
-        aria-label={i18n.t("message.replayCharacterEffect")}
-        className={`baxian-effect-replay is-${character}${playing ? " is-playing" : ""}`}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          if (!playing) setPlayRequest((value) => value + 1);
-        }}
-        type="button"
-      >八</button>
-    </>
-  );
+  return <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}><span ref={frameRef} className="baxian-bubble-frame" /></span>;
 }
 
 function formatTime(value: number) {
@@ -1339,7 +1291,7 @@ const MessageImageGallery = memo(function MessageImageGallery({
           })}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          {isLast ? <BaxianBubbleRunner active={isEntering} effectKey={`${messages[messages.length - 1]?.clientId}:${messages[0]?.chatBubbleStyle}:baxian`} style={messages[0]?.chatBubbleStyle} /> : null}
+          {isFirst ? <BaxianBubbleRunner style={messages[0]?.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -1841,7 +1793,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          {isLast ? <BaxianBubbleRunner active={isEntering && message.kind !== "system" && message.status !== "failed"} effectKey={`${message.clientId}:${message.chatBubbleStyle}:baxian`} style={message.chatBubbleStyle} /> : null}
+          {isFirst ? <BaxianBubbleRunner style={message.chatBubbleStyle} /> : null}
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>

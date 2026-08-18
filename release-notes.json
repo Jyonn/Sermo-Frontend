@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.18.2",
+  "id": "2026.08.18.3",
   "publishedAt": "2026-08-18",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡迎来全新演出",
+      "title": "八仙人物融入连续对话",
       "items": [
-        "吕洞宾、钟离权与何仙姑已换用重新绘制的 48 帧人物动画，并拥有各自更自然的动作节奏"
+        "八仙人物现在以更轻巧的尺寸在连续气泡开头循环演出，不再遮挡聊天内容"
       ]
     },
     "en": {
-      "title": "A new performance for Eight Immortals bubbles",
+      "title": "Eight Immortals join grouped conversations",
       "items": [
-        "Lu Dongbin, Zhongli Quan, and He Xiangu now use newly illustrated 48-frame animations with distinct, more natural timing"
+        "Eight Immortals characters now loop at a lighter size above the first bubble in each grouped conversation"
       ]
     }
   }
