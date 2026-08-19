@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.7",
+  "id": "2026.08.20.8",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "聊天背景焕新",
+      "title": "个性化目录更清晰",
       "items": [
-        "背景库精简为 13 款更有辨识度的主题",
-        "极光天幕、幻彩膜、太空港与黑色电影新增沉浸式动态效果"
+        "城市气泡现已并入史诗收藏，打卡解锁提示更加简洁",
+        "贴纸与积木气泡下架，个性化选择更加聚焦"
       ]
     },
     "en": {
-      "title": "Chat backgrounds, refined",
+      "title": "A clearer personalization library",
       "items": [
-        "The background library now focuses on 13 more distinctive themes",
-        "Aurora Sky, Holographic Film, Spaceport, and Film Noir now feature immersive motion"
+        "City bubbles now live in the Epic collection with simpler check-in labels",
+        "Sticker and Toy Brick bubbles have been retired for a more focused library"
       ]
     }
   }

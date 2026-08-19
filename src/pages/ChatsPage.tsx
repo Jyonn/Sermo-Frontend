@@ -206,7 +206,7 @@ function avatarLabel(name: string) {
 function visibleBubbleStyle(style?: string) {
   return [
     "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic",
-    "typewriter", "newspaper", "receipt", "sticker", "toybrick", "niko", "fufu", "xiaobai",
+    "typewriter", "newspaper", "receipt", "niko", "fufu", "xiaobai",
     "baxian-lv", "baxian-zhongli", "baxian-he",
     "city-jdz", "city-shanghai", "city-nyc", "city-beijing",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
@@ -231,8 +231,6 @@ const MENTION_SELECTION_ACCENTS: Record<ChatBubbleStyle, string> = {
   typewriter: "#9c3f35",
   newspaper: "#a62f2f",
   receipt: "#28775b",
-  sticker: "#e65f66",
-  toybrick: "#d84c43",
   "city-jdz": "#b54b3f",
   "city-shanghai": "#f2bd55",
   "city-nyc": "#c59a47",

@@ -79,7 +79,7 @@ const personalizationOptions = {
     ["bauhaus", "menu.styleBauhaus"],
     ["mosaic", "menu.styleMosaic"],
     ["typewriter", "menu.styleTypewriter"], ["newspaper", "menu.styleNewspaper"], ["receipt", "menu.styleReceipt"],
-    ["sticker", "menu.styleSticker"], ["toybrick", "menu.styleToybrick"], ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"],
+    ["niko", "menu.styleNiko"], ["fufu", "menu.styleFufu"],
     ["baxian-lv", "menu.styleBaxianLv"], ["baxian-zhongli", "menu.styleBaxianZhongli"], ["baxian-he", "menu.styleBaxianHe"],
     ["city-jdz", "menu.styleCityJingdezhen"], ["city-shanghai", "menu.styleCityShanghai"], ["city-nyc", "menu.styleCityNewYork"], ["city-beijing", "menu.styleCityBeijing"],
     ["vip", "menu.styleVip"],
@@ -127,7 +127,7 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
   { label: "menu.collectionClassic", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "default" || value === "comic") },
   { label: "menu.collectionCulture", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["zen", "hero", "dragon", "bauhaus", "mosaic"].includes(value)) },
   { label: "menu.collectionEditorial", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["typewriter", "newspaper", "receipt", "postcard", "blueprint"].includes(value)) },
-  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["sticker", "toybrick", "niko", "fufu"].includes(value)) },
+  { label: "menu.collectionPlayful", items: personalizationOptions.chat_bubble_style.filter(([value]) => ["niko", "fufu"].includes(value)) },
   { label: "menu.collectionBaxian", items: personalizationOptions.chat_bubble_style.filter(([value]) => value.startsWith("baxian-")) },
   { label: "menu.collectionIdentity", items: personalizationOptions.chat_bubble_style.filter(([value]) => value === "vip") },
 ];
@@ -142,12 +142,6 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
 const cityBubbleStyles = new Set<ChatBubbleStyle>(["city-jdz", "city-shanghai", "city-nyc", "city-beijing"]);
-const cityBubbleRequirements: Partial<Record<ChatBubbleStyle, TranslationKey>> = {
-  "city-jdz": "menu.cityRegionJiangxi",
-  "city-shanghai": "menu.cityRegionShanghai",
-  "city-nyc": "menu.cityRegionNewYork",
-  "city-beijing": "menu.cityRegionBeijing",
-};
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
 const statementStyleRarity: Record<StatementCardStyle, GrowthRewardDTO["rarity"]> = {
   default: "common",
@@ -1430,8 +1424,7 @@ export default function MenuPage() {
     }
     if (bubbleChanged && !canUseBubbleStyle(personalizationDraft.chat_bubble_style)) {
       if (cityBubbleStyles.has(personalizationDraft.chat_bubble_style)) {
-        const regionKey = cityBubbleRequirements[personalizationDraft.chat_bubble_style];
-        showToast(t("menu.cityBubbleUnlock", { region: regionKey ? t(regionKey) : "" }), "error");
+        showToast(t("menu.cityBubbleUnlock"), "error");
         return;
       }
       const level = rewardLevel("bubble", personalizationDraft.chat_bubble_style);
@@ -2353,40 +2346,7 @@ export default function MenuPage() {
               onOwnershipChange={setPersonalizationOwnershipFilter}
               ownership={personalizationOwnershipFilter}
             />
-            {(() => {
-              const items = personalizationOptions.chat_bubble_style.filter(([value]) => cityBubbleStyles.has(value as ChatBubbleStyle));
-              const visibleItems = items.filter(([value]) => {
-                const owned = canUseBubbleStyle(value as ChatBubbleStyle);
-                return personalizationOwnershipFilter === "all" || (personalizationOwnershipFilter === "owned" ? owned : !owned);
-              });
-              return visibleItems.length ? (
-                <section className="personalization-library-section city-bubble-collection rarity-epic">
-                  <header><div><h3>{t("menu.collectionCity")}</h3><p>{t("menu.collectionCityHint")}</p></div><span>{visibleItems.length}</span></header>
-                  <div className="personalization-option-grid field-chat_bubble_style">
-                    {visibleItems.map(([value, label]) => {
-                      const style = value as ChatBubbleStyle;
-                      const regionKey = cityBubbleRequirements[style];
-                      const owned = canUseBubbleStyle(style);
-                      return (
-                        <button
-                          aria-pressed={personalizationDraft.chat_bubble_style === value}
-                          className={`personalization-option preview-${value} rarity-epic is-city-collectible${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!owned ? " is-locked" : ""}`}
-                          disabled={personalizationSaving}
-                          key={value}
-                          onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: style }))}
-                          type="button"
-                        >
-                          <i aria-hidden="true"><span /></i>
-                          <div className="personalization-item-name"><RarityIcon rarity="epic" /><strong>{t(label)}</strong></div>
-                          <small>{owned ? t("menu.cityBubbleOwned") : t("menu.cityBubbleUnlock", { region: regionKey ? t(regionKey) : "" })}</small>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              ) : null;
-            })()}
-            {buildPersonalizationSections(personalizationOptions.chat_bubble_style.filter(([value]) => !cityBubbleStyles.has(value as ChatBubbleStyle)), "bubble", (style) => canUseBubbleStyle(style as ChatBubbleStyle)).map((section) => (
+            {buildPersonalizationSections(personalizationOptions.chat_bubble_style, "bubble", (style) => canUseBubbleStyle(style as ChatBubbleStyle)).map((section) => (
               <section className={`personalization-library-section rarity-${section.key}`} key={section.label}>
                 <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
                 <div className="personalization-option-grid field-chat_bubble_style">
@@ -2402,7 +2362,7 @@ export default function MenuPage() {
                       <i aria-hidden="true"><span /></i>
                       <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("bubble", value)} /><strong>{t(label)}</strong></div>
                       {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value as ChatBubbleStyle) ? (
-                        <small>{vipOrLevelBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
+                        <small>{cityBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.cityBubbleUnlock") : vipOrLevelBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
                       ) : null}
                     </button>
                   ))}
