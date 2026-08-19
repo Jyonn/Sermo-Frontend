@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.9",
+  "id": "2026.08.20.10",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "头像框收藏焕新",
+      "title": "成长阶段更有层次",
       "items": [
-        "头像框目录精简为更有辨识度的九款收藏",
-        "拍立得、机械环、剪纸、永久 VIP 等头像框已重新归类"
+        "18 级成长现划分为七个清晰阶段，从素朴一路抵达神话",
+        "等级铭牌、我的成长与等级图鉴现已使用一致的阶段主题"
       ]
     },
     "en": {
-      "title": "Avatar frame collection, refined",
+      "title": "A richer growth journey",
       "items": [
-        "The avatar frame library now focuses on nine distinctive designs",
-        "Polaroid, Mechanical Ring, Paper Cut, and Lifetime VIP frames have been regrouped"
+        "The 18 growth levels now form seven distinct stages, from Plain to Mythic",
+        "Level badges, My Growth, and the level atlas now share one consistent stage theme"
       ]
     }
   }

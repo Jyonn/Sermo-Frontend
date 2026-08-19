@@ -1358,11 +1358,6 @@ img {
   padding-bottom: 24px;
 }
 
-.growth-drawer:is(.is-level-3, .is-level-4, .is-level-5) { --growth-accent: #3a8f75; }
-.growth-drawer:is(.is-level-6, .is-level-7, .is-level-8, .is-level-9) { --growth-accent: #287a92; }
-.growth-drawer:is(.is-level-10, .is-level-11, .is-level-12, .is-level-13) { --growth-accent: #b36b23; }
-.growth-drawer:is(.is-level-14, .is-level-15, .is-level-16, .is-level-17, .is-level-18) { --growth-accent: #b84055; }
-
 .menu-growth-entry {
   width: fit-content;
   min-height: 30px;
@@ -1403,12 +1398,24 @@ img {
   letter-spacing: 0.02em;
 }
 
-.menu-growth-entry.rarity-rare .menu-growth-level { color: #245fa9; background: #eaf3ff; }
-.menu-growth-entry.rarity-epic .menu-growth-level { color: #7040aa; background: #f0eaff; }
-.menu-growth-entry.rarity-legendary .menu-growth-level {
+.menu-growth-entry.stage-plain .menu-growth-level {
+  color: #5f6965;
+  background: #fffef9;
+  box-shadow: inset 0 0 0 1px #d9dedb;
+}
+.menu-growth-entry.stage-basic .menu-growth-level { color: #505b56; background: #e9edeb; }
+.menu-growth-entry.stage-select .menu-growth-level { color: #087751; background: #e0f5ea; }
+.menu-growth-entry.stage-rare .menu-growth-level { color: #245fa9; background: #eaf3ff; }
+.menu-growth-entry.stage-epic .menu-growth-level { color: #7040aa; background: #f0eaff; }
+.menu-growth-entry.stage-legendary .menu-growth-level {
   color: #7b4b08;
   background: linear-gradient(120deg, #fff6d7, #f6d48a);
   box-shadow: inset 0 0 0 1px rgba(200, 135, 25, 0.22);
+}
+.menu-growth-entry.stage-mythic .menu-growth-level {
+  color: #fff5f1;
+  background: linear-gradient(125deg, #9f1f2f, #d5483d);
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 202, 0.34), 0 5px 14px rgba(159, 31, 47, 0.18);
 }
 
 .menu-growth-identity {
@@ -1416,6 +1423,12 @@ img {
   align-items: baseline;
   min-width: 0;
   gap: 5px;
+}
+
+.menu-growth-identity small::after {
+  margin-left: 5px;
+  color: color-mix(in srgb, currentColor 48%, transparent);
+  content: "·";
 }
 
 .menu-growth-identity strong {
@@ -2420,12 +2433,14 @@ img {
   font-weight: 700;
 }
 
-/* Growth passport: five unmistakable stages shared by the overview and atlas. */
-.growth-stage-1 { --growth-accent: #66736d; --growth-deep: #34423b; --growth-soft: #edf1ee; --growth-paper: #f8faf8; }
-.growth-stage-2 { --growth-accent: #168a73; --growth-deep: #075947; --growth-soft: #dff5ed; --growth-paper: #f5fbf8; }
-.growth-stage-3 { --growth-accent: #326fc4; --growth-deep: #173f83; --growth-soft: #e1ecfb; --growth-paper: #f6f9fe; }
-.growth-stage-4 { --growth-accent: #7f54bd; --growth-deep: #4e287f; --growth-soft: #eee5fb; --growth-paper: #faf7fe; }
-.growth-stage-5 { --growth-accent: #bd7b18; --growth-deep: #724307; --growth-soft: #faedca; --growth-paper: #fffbf0; }
+/* Seven growth stages shared by the menu badge, overview, atlas, and ceremony. */
+.growth-stage-plain { --growth-accent: #aeb6b2; --growth-deep: #4e5954; --growth-soft: #f0f2f0; --growth-paper: #fffef9; }
+.growth-stage-basic { --growth-accent: #66736d; --growth-deep: #34423b; --growth-soft: #e8ece9; --growth-paper: #f7f9f7; }
+.growth-stage-select { --growth-accent: #168a73; --growth-deep: #075947; --growth-soft: #dff5ed; --growth-paper: #f5fbf8; }
+.growth-stage-rare { --growth-accent: #326fc4; --growth-deep: #173f83; --growth-soft: #e1ecfb; --growth-paper: #f6f9fe; }
+.growth-stage-epic { --growth-accent: #7f54bd; --growth-deep: #4e287f; --growth-soft: #eee5fb; --growth-paper: #faf7fe; }
+.growth-stage-legendary { --growth-accent: #bd7b18; --growth-deep: #724307; --growth-soft: #faedca; --growth-paper: #fffbf0; }
+.growth-stage-mythic { --growth-accent: #c33142; --growth-deep: #761927; --growth-soft: #f8dfe0; --growth-paper: #fff7f4; }
 
 .growth-drawer {
   gap: 12px;
@@ -2556,6 +2571,18 @@ img {
 .growth-level-guide-summary span,
 .growth-level-detail-score strong { color: var(--growth-accent); }
 
+.growth-level-guide-summary em {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--growth-deep);
+  background: var(--growth-soft);
+  font-size: .62rem;
+  font-style: normal;
+  font-weight: 780;
+  letter-spacing: .08em;
+}
+
 .growth-level-list {
   gap: 14px;
   padding-block: 7px 18px;
@@ -2580,11 +2607,13 @@ img {
     0 16px 36px color-mix(in srgb, var(--level-card-accent) 10%, transparent);
 }
 
-.growth-level-card.growth-stage-1 { --level-card-accent: #66736d; --growth-deep: #34423b; --growth-soft: #edf1ee; --growth-paper: #f8faf8; }
-.growth-level-card.growth-stage-2 { --level-card-accent: #168a73; --growth-deep: #075947; --growth-soft: #dff5ed; --growth-paper: #f5fbf8; }
-.growth-level-card.growth-stage-3 { --level-card-accent: #326fc4; --growth-deep: #173f83; --growth-soft: #e1ecfb; --growth-paper: #f6f9fe; }
-.growth-level-card.growth-stage-4 { --level-card-accent: #7f54bd; --growth-deep: #4e287f; --growth-soft: #eee5fb; --growth-paper: #faf7fe; }
-.growth-level-card.growth-stage-5 { --level-card-accent: #bd7b18; --growth-deep: #724307; --growth-soft: #faedca; --growth-paper: #fffbf0; }
+.growth-level-card.growth-stage-plain { --level-card-accent: #aeb6b2; --growth-deep: #4e5954; --growth-soft: #f0f2f0; --growth-paper: #fffef9; }
+.growth-level-card.growth-stage-basic { --level-card-accent: #66736d; --growth-deep: #34423b; --growth-soft: #e8ece9; --growth-paper: #f7f9f7; }
+.growth-level-card.growth-stage-select { --level-card-accent: #168a73; --growth-deep: #075947; --growth-soft: #dff5ed; --growth-paper: #f5fbf8; }
+.growth-level-card.growth-stage-rare { --level-card-accent: #326fc4; --growth-deep: #173f83; --growth-soft: #e1ecfb; --growth-paper: #f6f9fe; }
+.growth-level-card.growth-stage-epic { --level-card-accent: #7f54bd; --growth-deep: #4e287f; --growth-soft: #eee5fb; --growth-paper: #faf7fe; }
+.growth-level-card.growth-stage-legendary { --level-card-accent: #bd7b18; --growth-deep: #724307; --growth-soft: #faedca; --growth-paper: #fffbf0; }
+.growth-level-card.growth-stage-mythic { --level-card-accent: #c33142; --growth-deep: #761927; --growth-soft: #f8dfe0; --growth-paper: #fff7f4; }
 
 .growth-level-card::before {
   position: absolute;
@@ -19748,10 +19777,13 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   isolation: isolate;
 }
 
-.growth-ceremony.stage-uncommon { --stage-color: #159a8c; --stage-deep: #0d645c; --stage-soft: #ccfbf1; --stage-glow: rgba(21, 154, 140, 0.23); }
+.growth-ceremony.stage-plain { --stage-color: #aeb6b2; --stage-deep: #4e5954; --stage-soft: #f0f2f0; --stage-glow: rgba(174, 182, 178, 0.2); }
+.growth-ceremony.stage-basic { --stage-color: #66736d; --stage-deep: #34423b; --stage-soft: #e8ece9; --stage-glow: rgba(102, 115, 109, 0.2); }
+.growth-ceremony.stage-select { --stage-color: #159a78; --stage-deep: #0d6450; --stage-soft: #d6f5e8; --stage-glow: rgba(21, 154, 120, 0.23); }
 .growth-ceremony.stage-rare { --stage-color: #3478d4; --stage-deep: #194f9b; --stage-soft: #dbeafe; --stage-glow: rgba(52, 120, 212, 0.25); }
 .growth-ceremony.stage-epic { --stage-color: #8557c7; --stage-deep: #593293; --stage-soft: #ede9fe; --stage-glow: rgba(133, 87, 199, 0.26); }
 .growth-ceremony.stage-legendary { --stage-color: #c88719; --stage-deep: #7d4d08; --stage-soft: #fef3c7; --stage-glow: rgba(200, 135, 25, 0.28); }
+.growth-ceremony.stage-mythic { --stage-color: #cf3347; --stage-deep: #7d1828; --stage-soft: #ffe0df; --stage-glow: rgba(207, 51, 71, 0.3); }
 
 .growth-ceremony::before {
   position: absolute;

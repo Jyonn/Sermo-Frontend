@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, GrowthRewardDTO, PersonalizationDTO, UserGrowthDTO } from "../types";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { showToast } from "../lib/toast";
+import { growthStageForLevel } from "../lib/growth-stage";
 import { UserAvatar } from "./UserAvatar";
 import ChatsPage from "../pages/ChatsPage";
 
@@ -11,16 +12,6 @@ const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
 
 type CelebrationPage = "arrival" | "rewards" | "next";
-type GrowthStage = "common" | "uncommon" | "rare" | "epic" | "legendary";
-
-function stageForLevel(level: number): GrowthStage {
-  if (level <= 3) return "common";
-  if (level <= 6) return "uncommon";
-  if (level <= 10) return "rare";
-  if (level <= 14) return "epic";
-  return "legendary";
-}
-
 function RewardIcon({ category }: { category: GrowthRewardDTO["category"] }) {
   const paths: Record<GrowthRewardDTO["category"], ReactNode> = {
     capability: <><path d="M7 12.5 10.2 16 17 8.5" /><path d="M12 2.8 14.4 6l4-.1-1.1 3.8 2.5 3.1-3.4 2.1.2 4-3.9-.8-2.1 3.3-2.8-2.8-3.8.7-.5-3.9-3.6-1.8 2.2-3.3L1.2 7.7l3.9-1.4L7.2 3z" /></>,
@@ -168,7 +159,7 @@ export function GrowthLevelCelebration() {
   const previousLevel = Math.max(0, (pendingLevel ?? 1) - 1);
   const previous = growth?.levels?.find((item) => item.level === previousLevel);
   const nextLevel = growth?.levels?.find((item) => item.level === (pendingLevel ?? 0) + 1);
-  const stage = stageForLevel(pendingLevel ?? 1);
+  const stage = growthStageForLevel(pendingLevel ?? 1);
 
   useEffect(() => {
     setPage("arrival");

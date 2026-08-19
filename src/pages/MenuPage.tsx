@@ -24,6 +24,7 @@ import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
+import { growthStageForLevel } from "../lib/growth-stage";
 import { FeatureDiscoveryMarker, useFeatureDiscovery } from "../lib/featureDiscovery";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, type WebReminderPreferences } from "../lib/webReminderPreferences";
 import { getGestureLockAfterMinutes, getGestureLockScope } from "../lib/gestureLock";
@@ -284,14 +285,6 @@ function BarkGuideIcon({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function growthStage(level: number) {
-  if (level <= 2) return 1;
-  if (level <= 5) return 2;
-  if (level <= 9) return 3;
-  if (level <= 13) return 4;
-  return 5;
-}
-
 function growthRewardIcon(reward: GrowthRewardDTO) {
   const value = `${reward.capability_key ?? ""} ${reward.id}`;
   if (/image|photo/.test(value)) return "image";
@@ -471,11 +464,7 @@ export default function MenuPage() {
     (category === "bubble" && cityBubbleStyles.has(assetKey as ChatBubbleStyle))
       ? "epic"
       : (assetKey === "vip" ? (category === "frame" ? "rare" : "epic") : rewardFor(category, assetKey)?.rarity ?? "common");
-  const currentLevelRarity = (() => {
-    const rank = ["common", "uncommon", "rare", "epic", "legendary"];
-    const rewards = me?.growth?.levels?.find((item) => item.level === growthLevel)?.rewards ?? [];
-    return rewards.reduce((best, reward) => rank.indexOf(reward.rarity) > rank.indexOf(best) ? reward.rarity : best, "common");
-  })();
+  const currentLevelStage = growthStageForLevel(growthLevel);
   const canCustomizeChatBackground = hasGrowthCapability("menu.personalization.background.use.custom", 8);
   const canUseBackgroundStyle = (theme: ChatBackgroundTheme) => ownsInventoryResource(
     "background",
@@ -1790,9 +1779,10 @@ export default function MenuPage() {
               <strong>{session?.user.name ?? t("brand.user")}</strong>
               {space?.slug ? <span>@{space.slug}</span> : null}
             </div>
-            <button className={`menu-growth-entry rarity-${currentLevelRarity}`} onClick={() => setGrowthDrawerOpen(true)} type="button">
+            <button className={`menu-growth-entry stage-${currentLevelStage}`} onClick={() => setGrowthDrawerOpen(true)} type="button">
               <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}</span>
               <span className="menu-growth-identity">
+                <small>{t(`growth.levelStage.${currentLevelStage}` as TranslationKey)}</small>
                 <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? t("growth.firstLevel")}</strong>
               </span>
               <span className="material-symbols-outlined">chevron_right</span>
@@ -1970,7 +1960,7 @@ export default function MenuPage() {
       <TravelMapDrawer open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
 
       <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
-        <div className={`growth-drawer is-level-${me?.growth?.level ?? 1} growth-stage-${growthStage(me?.growth?.level ?? 1)}`}>
+        <div className={`growth-drawer is-level-${me?.growth?.level ?? 1} growth-stage-${growthStageForLevel(me?.growth?.level ?? 1)}`}>
           <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
             <span className="growth-hero-stage" aria-hidden="true">{String(me?.growth?.level ?? 1).padStart(2, "0")}</span>
             <div className="growth-hero-heading">
@@ -1979,7 +1969,7 @@ export default function MenuPage() {
                 <strong>{String(me?.growth?.level ?? 1).padStart(2, "0")}</strong>
               </div>
               <div className="growth-hero-title">
-                <small>{t("growth.currentTitle")}</small>
+                <small>{t("growth.currentTitle")} · {t(`growth.levelStage.${growthStageForLevel(me?.growth?.level ?? 1)}` as TranslationKey)}</small>
                 <strong>{me?.growth?.name ?? t("growth.firstLevel")}</strong>
               </div>
               <span className="growth-hero-guide">
@@ -2048,10 +2038,11 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
-        <div className={`growth-level-guide growth-stage-${growthStage(activeGrowthGuideLevel)}`}>
+        <div className={`growth-level-guide growth-stage-${growthStageForLevel(activeGrowthGuideLevel)}`}>
           <div className="growth-level-guide-summary">
             <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
             <strong>{growthLevels[activeGrowthGuideLevel - 1]?.name ?? `Lv.${activeGrowthGuideLevel}`}</strong>
+            <em>{t(`growth.levelStage.${growthStageForLevel(activeGrowthGuideLevel)}` as TranslationKey)}</em>
             <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? t("growth.currentLevelLabel") : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? t("growth.reached") : t("growth.keepGrowing")}</small>
           </div>
           <div
@@ -2074,7 +2065,7 @@ export default function MenuPage() {
               const next = item.level === (me?.growth?.level ?? 1) + 1;
               return (
                 <button
-                  className={`growth-level-card growth-stage-${growthStage(item.level)}${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
+                  className={`growth-level-card growth-stage-${growthStageForLevel(item.level)}${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
                   data-growth-level={item.level}
                   key={item.level}
                   onClick={(event) => {
