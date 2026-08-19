@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.8",
+  "id": "2026.08.19.9",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "鹊桥夜航，限时启航",
+      "title": "七夕主题更贴合手机",
       "items": [
-        "8月19日至20日，全站换上七夕限定的月白与靛青主题",
-        "银汉页眉、羽纹选中态与喜鹊角饰会随深浅外观自然切换"
+        "修复七夕主题下部分页面可以横向滑动的问题",
+        "聊天、通讯与菜单现在能完整呈现七夕背景"
       ]
     },
     "en": {
-      "title": "A Qixi night voyage",
+      "title": "A better fitting Qixi theme on mobile",
       "items": [
-        "From August 19 to 20, Sermo wears a limited moonlight and indigo Qixi theme",
-        "Milky Way headers, feathered tabs, and magpie details adapt naturally to light and dark mode"
+        "Fixed horizontal page scrolling while the Qixi theme is active",
+        "Chats, Contacts, and Menu now reveal the full seasonal backdrop"
       ]
     }
   }

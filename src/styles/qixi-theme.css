@@ -195,6 +195,23 @@ html[data-site-theme="qixi-2026"] ::selection {
 }
 
 @media (max-width: 900px) {
+  html[data-site-theme="qixi-2026"],
+  html[data-site-theme="qixi-2026"] body,
+  html[data-site-theme="qixi-2026"] #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  html[data-site-theme="qixi-2026"] :is(
+    .desktop-tab-shell > .page-stack,
+    .chat-mobile-layout > .mobile-chat-list-screen,
+    .mobile-chat-list-screen.is-background,
+    .mobile-chat-list-screen.is-active
+  ) {
+    background-color: transparent;
+    background-image: none;
+  }
+
   html[data-site-theme="qixi-2026"] .shell-no-topbar .tab-sticky-header {
     background: transparent;
     -webkit-backdrop-filter: none;
@@ -207,8 +224,9 @@ html[data-site-theme="qixi-2026"] ::selection {
   }
 
   html[data-site-theme="qixi-2026"] :is(.topbar, .tab-sticky-header)::after {
-    right: -24%;
-    left: -24%;
+    right: 0;
+    left: 0;
+    max-width: 100%;
     opacity: .38;
   }
 
