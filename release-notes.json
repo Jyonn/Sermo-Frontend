@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.3",
+  "id": "2026.08.20.4",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "个性化品质展示进入设计选型",
+      "title": "个性化品质拥有专属图标",
       "items": [
-        "新增四套品质分组与物品名称排版方案，可直接对比真实皮肤效果",
-        "品质标识回归名称信息区，减少与选中状态混淆"
+        "五档品质使用逐级生长的晶核图标，缩略尺寸下也能快速区分",
+        "品质图标与物品名称并排展示，分组标题同步使用对应色彩"
       ]
     },
     "en": {
-      "title": "Personalization quality display enters design review",
+      "title": "Personalization qualities receive unique icons",
       "items": [
-        "Added four quality-group and item-label directions using real skin previews",
-        "Quality markers now sit with item names to avoid confusion with selection state"
+        "Five evolving crystal icons now distinguish quality tiers even at thumbnail size",
+        "Quality icons now sit beside item names while section headings share their tier color"
       ]
     }
   }

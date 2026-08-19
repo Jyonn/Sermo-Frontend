@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RarityIcon } from "../components/RarityIcon";
 import { useI18n } from "../lib/language";
 import type { TranslationKey } from "../lib/i18n";
 
@@ -72,7 +73,7 @@ export default function PersonalizationCatalogLabPage() {
                   <span className="statement-card-style-sample"><i>{item.style === "hero" ? "GO!" : t("menu.statementStyleSample")}</i></span>
                 </span>
                 <span className="catalog-lab-name-row">
-                  <i className="catalog-lab-rarity-mark" aria-hidden="true" />
+                  <RarityIcon rarity={item.rarity} />
                   <strong>{t(item.item)}</strong>
                 </span>
               </button>

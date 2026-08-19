@@ -14,6 +14,7 @@ import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
+import { RarityIcon } from "../components/RarityIcon";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
@@ -2181,7 +2182,7 @@ export default function MenuPage() {
             ownership={personalizationOwnershipFilter}
           />
           {buildPersonalizationSections(chatBackgroundSections.flatMap((section) => section.items), "background", (theme) => canUseBackgroundStyle(theme as ChatBackgroundTheme)).map((section) => (
-            <section className="personalization-library-section chat-background-section" key={section.label}>
+            <section className={`personalization-library-section chat-background-section rarity-${section.key}`} key={section.label}>
               <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
               <div className="chat-background-grid">
                 {section.items.map(([theme, label]) => (
@@ -2194,7 +2195,7 @@ export default function MenuPage() {
                     type="button"
                   >
                     <span />
-                    <strong>{t(label)}</strong>
+                    <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("background", theme)} /><strong>{t(label)}</strong></div>
                     {!canUseBackgroundStyle(theme as ChatBackgroundTheme) ? <small>{t("menu.levelUnlock", { level: rewardLevel("background", theme) })}</small> : null}
                   </button>
                 ))}
@@ -2256,7 +2257,7 @@ export default function MenuPage() {
                 return personalizationOwnershipFilter === "all" || (personalizationOwnershipFilter === "owned" ? owned : !owned);
               });
               return visibleItems.length ? (
-                <section className="personalization-library-section city-bubble-collection">
+                <section className="personalization-library-section city-bubble-collection rarity-epic">
                   <header><div><h3>{t("menu.collectionCity")}</h3><p>{t("menu.collectionCityHint")}</p></div><span>{visibleItems.length}</span></header>
                   <div className="personalization-option-grid field-chat_bubble_style">
                     {visibleItems.map(([value, label]) => {
@@ -2273,7 +2274,7 @@ export default function MenuPage() {
                           type="button"
                         >
                           <i aria-hidden="true"><span /></i>
-                          <strong>{t(label)}</strong>
+                          <div className="personalization-item-name"><RarityIcon rarity="epic" /><strong>{t(label)}</strong></div>
                           <small>{owned ? t("menu.cityBubbleOwned") : t("menu.cityBubbleUnlock", { region: regionKey ? t(regionKey) : "" })}</small>
                         </button>
                       );
@@ -2283,7 +2284,7 @@ export default function MenuPage() {
               ) : null;
             })()}
             {buildPersonalizationSections(personalizationOptions.chat_bubble_style.filter(([value]) => !cityBubbleStyles.has(value as ChatBubbleStyle)), "bubble", (style) => canUseBubbleStyle(style as ChatBubbleStyle)).map((section) => (
-              <section className="personalization-library-section" key={section.label}>
+              <section className={`personalization-library-section rarity-${section.key}`} key={section.label}>
                 <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
                 <div className="personalization-option-grid field-chat_bubble_style">
                   {section.items.map(([value, label]) => (
@@ -2296,7 +2297,7 @@ export default function MenuPage() {
                       type="button"
                     >
                       <i aria-hidden="true"><span /></i>
-                      <strong>{t(label)}</strong>
+                      <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("bubble", value)} /><strong>{t(label)}</strong></div>
                       {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value as ChatBubbleStyle) ? (
                         <small>{vipOrLevelBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
                       ) : null}
@@ -2337,7 +2338,7 @@ export default function MenuPage() {
               ownership={personalizationOwnershipFilter}
             />
             {buildPersonalizationSections(personalizationOptions.avatar_frame_style, "frame", (frame) => canUseAvatarFrame(frame as PersonalizationDTO["avatar_frame_style"])).map((section) => (
-              <section className="personalization-library-section" key={section.label}>
+              <section className={`personalization-library-section rarity-${section.key}`} key={section.label}>
                 <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
                 <div className="personalization-option-grid field-avatar_frame_style">
                   {section.items.map(([value, label]) => (
@@ -2357,7 +2358,7 @@ export default function MenuPage() {
                           uri={me?.avatar_uri ?? session?.user.avatar_uri}
                         />
                       </i>
-                      <strong>{t(label)}</strong>
+                      <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("frame", value)} /><strong>{t(label)}</strong></div>
                       {!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? (
                         <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value as PersonalizationDTO["avatar_frame_style"]) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
@@ -2407,7 +2408,7 @@ export default function MenuPage() {
               ownership={personalizationOwnershipFilter}
             />
             {statementStyleSections.map((section) => (
-              <section className="personalization-library-section" key={section.key}>
+              <section className={`personalization-library-section rarity-${section.key}`} key={section.key}>
                 <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
                 <div className="statement-card-style-grid">
                   {section.items.map(([value, label]) => (
@@ -2420,7 +2421,7 @@ export default function MenuPage() {
                       type="button"
                     >
                       <span className="statement-card-style-sample"><i>{t("menu.statementStyleSample")}</i></span>
-                      <strong>{t(label)}</strong>
+                      <div className="personalization-item-name"><RarityIcon rarity={statementStyleRarity[value as StatementCardStyle]} /><strong>{t(label)}</strong></div>
                       {!canUseStatementStyle(value as StatementCardStyle) ? <small>{value === "vip" ? "VIP" : t("menu.levelOrVipUnlock", { level: 16 })}</small> : null}
                     </button>
                   ))}
