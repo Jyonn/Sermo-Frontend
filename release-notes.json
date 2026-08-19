@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.5",
+  "id": "2026.08.20.6",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "个性化品质切换为光晕展示",
+      "title": "即时提醒支持更多接收方式",
       "items": [
-        "五档品质标题改用克制的彩色光晕，层级更加鲜明",
-        "晶核图标固定在物品名称左侧，浏览顺序更加统一"
+        "即时提醒现可同时连接 Bark、ntfy 和 Gotify",
+        "系统会按手机平台展示合适的接收端，并统一管理提醒偏好"
       ]
     },
     "en": {
-      "title": "Personalization qualities adopt halo styling",
+      "title": "More receivers for instant alerts",
       "items": [
-        "Quality headings now use restrained colored halos for clearer hierarchy",
-        "Crystal icons remain fixed to the left of item names for consistent scanning"
+        "Instant alerts can now connect to Bark, ntfy, and Gotify at the same time",
+        "Compatible receivers are shown for each mobile platform and share one alert preference"
       ]
     }
   }

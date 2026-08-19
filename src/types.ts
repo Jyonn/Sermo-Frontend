@@ -474,6 +474,17 @@ export interface NotificationPreferenceDTO {
   bark_icon_mode: 0 | 1 | 2;
 }
 
+export type InstantNotificationProvider = "bark" | "ntfy" | "gotify";
+
+export interface InstantNotificationEndpointDTO {
+  endpoint_id: number;
+  provider: InstantNotificationProvider;
+  target: string;
+  masked_target: string;
+  enabled: boolean;
+  verified_at: string;
+}
+
 export interface NotificationTopicPreferenceDTO {
   channel: 0 | 1 | 2 | 3;
   topic: 1 | 2 | 3 | 4 | 5 | 6;

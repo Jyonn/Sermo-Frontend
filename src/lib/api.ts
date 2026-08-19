@@ -1029,6 +1029,48 @@ export const api = {
     });
   },
 
+  getInstantNotificationEndpoints(signal?: AbortSignal) {
+    return request<import("../types").InstantNotificationEndpointDTO[]>("/users/me/instant-endpoints", {
+      auth: true,
+      signal,
+    });
+  },
+
+  sendInstantNotificationCode(payload: {
+    provider: import("../types").InstantNotificationProvider;
+    target: string;
+    secret?: string;
+  }) {
+    return request<{ verification_id: number; expires_in: number }>("/users/me/instant-endpoints/code", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  bindInstantNotificationEndpoint(payload: { verification_id: number; code: string }) {
+    return request<import("../types").InstantNotificationEndpointDTO>("/users/me/instant-endpoints", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  updateInstantNotificationEndpoint(endpointId: number, enabled: boolean) {
+    return request<import("../types").InstantNotificationEndpointDTO>(`/users/me/instant-endpoints/${endpointId}`, {
+      method: "POST",
+      auth: true,
+      body: { enabled: enabled ? 1 : 0 },
+    });
+  },
+
+  deleteInstantNotificationEndpoint(endpointId: number) {
+    return request<void>(`/users/me/instant-endpoints/${endpointId}`, {
+      method: "DELETE",
+      auth: true,
+    });
+  },
+
   getNotificationTopics(signal?: AbortSignal) {
     return request<NotificationTopicPreferenceDTO[]>("/users/me/notification-topics", {
       auth: true,

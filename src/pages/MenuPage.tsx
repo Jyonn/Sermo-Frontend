@@ -36,7 +36,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
@@ -263,16 +263,22 @@ function channelVerified(me: UserMeDTO | null, channel: NotificationChannel) {
   return Boolean(me.bark_verified_at);
 }
 
-function detectAppleEnvironment() {
-  if (typeof navigator === "undefined") return false;
+function detectDeviceFamily(): "ios" | "android" | "desktop" {
+  if (typeof navigator === "undefined") return "desktop";
   const userAgent = navigator.userAgent || "";
   const platform = navigator.platform || "";
   const userAgentDataPlatform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || "";
   const value = `${userAgent} ${platform} ${userAgentDataPlatform}`.toLowerCase();
-  const isIOS = /iphone|ipad|ipod/.test(value);
-  const isMac = /macintosh|mac os x|macintel|mac/.test(value);
-  return isIOS || isMac;
+  if (/iphone|ipad|ipod/.test(value) || (/macintel|macintosh/.test(value) && navigator.maxTouchPoints > 1)) return "ios";
+  if (/android/.test(value)) return "android";
+  return "desktop";
 }
+
+const instantProviderMeta: Record<InstantNotificationProvider, { icon: string; name: string; platforms: Array<"ios" | "android" | "desktop"> }> = {
+  bark: { icon: "notifications_active", name: "Bark", platforms: ["ios", "desktop"] },
+  ntfy: { icon: "campaign", name: "ntfy", platforms: ["ios", "android", "desktop"] },
+  gotify: { icon: "bolt", name: "Gotify", platforms: ["android", "desktop"] },
+};
 
 function QrCodeIcon() {
   return (
@@ -381,6 +387,13 @@ export default function MenuPage() {
   const [notificationSettingsMode, setNotificationSettingsMode] = useState<NotificationSettingsMode>("channel");
   const [notificationTopics, setNotificationTopics] = useState<NotificationTopicPreferenceDTO[]>([]);
   const [notificationTopicsSaving, setNotificationTopicsSaving] = useState(false);
+  const [instantEndpoints, setInstantEndpoints] = useState<InstantNotificationEndpointDTO[]>([]);
+  const [instantProviderDrawer, setInstantProviderDrawer] = useState<InstantNotificationProvider | null>(null);
+  const [instantTarget, setInstantTarget] = useState("");
+  const [instantSecret, setInstantSecret] = useState("");
+  const [instantVerificationId, setInstantVerificationId] = useState<number | null>(null);
+  const [instantCode, setInstantCode] = useState("");
+  const [instantSaving, setInstantSaving] = useState(false);
   const [webReminderDrawerOpen, setWebReminderDrawerOpen] = useState(false);
   const [webReminderPrefs, setWebReminderPrefs] = useState<WebReminderPreferences>(() => getWebReminderPreferences());
   const [webPushState, setWebPushState] = useState<WebPushState>("checking");
@@ -532,12 +545,15 @@ export default function MenuPage() {
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
-  const isAppleEnvironment = useMemo(() => detectAppleEnvironment(), []);
-  const visibleChannelRows = useMemo(
-    () => channelRows.filter(([channel]) => channel !== "bark" || isAppleEnvironment),
-    [isAppleEnvironment]
+  const deviceFamily = useMemo(() => detectDeviceFamily(), []);
+  const visibleInstantProviders = useMemo(
+    () => (Object.keys(instantProviderMeta) as InstantNotificationProvider[]).filter(
+      (provider) => instantProviderMeta[provider].platforms.includes(deviceFamily),
+    ),
+    [deviceFamily],
   );
-  const barkBound = channelVerified(me, "bark");
+  const visibleChannelRows = channelRows;
+  const barkBound = instantEndpoints.some((endpoint) => endpoint.provider === "bark");
   const standalonePwa = isStandalonePwa();
   const webReminderSummary = [
     webReminderPrefs.soundEnabled ? t("webReminder.soundOn") : t("webReminder.soundOff"),
@@ -887,11 +903,17 @@ export default function MenuPage() {
       api.getGestureLockPrefs(controller.signal).catch(() => null),
     ])
       .then(async ([spaceInfo, meInfo, webReminderInfo, gestureInfo]) => {
-        const prefRows = meInfo.has_password ? await api.getNotificationPrefs(controller.signal) : [];
+        const [prefRows, endpointRows] = meInfo.has_password
+          ? await Promise.all([
+              api.getNotificationPrefs(controller.signal),
+              api.getInstantNotificationEndpoints(controller.signal),
+            ])
+          : [[], []];
         const nextWebReminderPrefs = webReminderInfo ? mapWebReminderPreferences(webReminderInfo) : getWebReminderPreferences();
         setSpace(spaceInfo);
         setMe(meInfo);
         setPrefs(mapPrefs(prefRows));
+        setInstantEndpoints(endpointRows);
         setGesturePreference(gestureInfo);
         setWebReminderPrefs(nextWebReminderPrefs);
         setWebReminderPreferences(nextWebReminderPrefs);
@@ -1086,7 +1108,12 @@ export default function MenuPage() {
       showPasswordReminder();
       return;
     }
-    openAuthSheet("bark");
+    const current = instantEndpoints.find((item) => item.provider === "bark");
+    setInstantProviderDrawer("bark");
+    setInstantTarget(current?.target ?? "");
+    setInstantSecret("");
+    setInstantVerificationId(null);
+    setInstantCode("");
   };
 
   const closePrefDrawers = () => {
@@ -1097,6 +1124,83 @@ export default function MenuPage() {
 
   const openPrefDrawer = (channel: NotificationChannel) => {
     setPrefDrawerChannel(channel);
+  };
+
+  const openInstantProvider = (provider: InstantNotificationProvider) => {
+    if (!hasPassword) {
+      showPasswordReminder();
+      return;
+    }
+    const current = instantEndpoints.find((item) => item.provider === provider);
+    setInstantProviderDrawer(provider);
+    setInstantTarget(current?.target ?? "");
+    setInstantSecret("");
+    setInstantVerificationId(null);
+    setInstantCode("");
+  };
+
+  const sendInstantCode = async () => {
+    if (!instantProviderDrawer || !instantTarget.trim()) return;
+    setInstantSaving(true);
+    try {
+      const result = await api.sendInstantNotificationCode({
+        provider: instantProviderDrawer,
+        target: instantTarget.trim(),
+        secret: instantSecret.trim() || undefined,
+      });
+      setInstantVerificationId(result.verification_id);
+      setInstantCode("");
+      showToast(t("notification.instantCodeSent"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("notification.instantBindFailed"), "error");
+    } finally {
+      setInstantSaving(false);
+    }
+  };
+
+  const bindInstantEndpoint = async () => {
+    if (!instantVerificationId || instantCode.length !== 6) return;
+    setInstantSaving(true);
+    try {
+      const endpoint = await api.bindInstantNotificationEndpoint({
+        verification_id: instantVerificationId,
+        code: instantCode,
+      });
+      setInstantEndpoints((current) => [...current.filter((item) => item.provider !== endpoint.provider), endpoint]);
+      setPrefs((current) => ({ ...current, bark: { ...current.bark, enabled: true } }));
+      setInstantProviderDrawer(null);
+      showToast(t("notification.instantBound", { provider: instantProviderMeta[endpoint.provider].name }));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("notification.instantBindFailed"), "error");
+    } finally {
+      setInstantSaving(false);
+    }
+  };
+
+  const toggleInstantEndpoint = async (endpoint: InstantNotificationEndpointDTO) => {
+    setInstantSaving(true);
+    try {
+      const updated = await api.updateInstantNotificationEndpoint(endpoint.endpoint_id, !endpoint.enabled);
+      setInstantEndpoints((current) => current.map((item) => item.endpoint_id === updated.endpoint_id ? updated : item));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("notification.updateFailed"), "error");
+    } finally {
+      setInstantSaving(false);
+    }
+  };
+
+  const removeInstantEndpoint = async (endpoint: InstantNotificationEndpointDTO) => {
+    setInstantSaving(true);
+    try {
+      await api.deleteInstantNotificationEndpoint(endpoint.endpoint_id);
+      setInstantEndpoints((current) => current.filter((item) => item.endpoint_id !== endpoint.endpoint_id));
+      setInstantProviderDrawer(null);
+      showToast(t("notification.instantRemoved"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("contact.unbindFailed"), "error");
+    } finally {
+      setInstantSaving(false);
+    }
   };
 
   const preferenceFromResponse = (updated: NotificationPreferenceDTO): NotificationPreferences[NotificationChannel] => {
@@ -1941,7 +2045,7 @@ export default function MenuPage() {
           <details className="growth-disclosure">
             <summary><span><strong>{t("growth.securitySteps")}</strong><small>{t("growth.securityStepsHint")}</small></span><b>{(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && !item.earned).length}</b><span className="material-symbols-outlined">expand_more</span></summary>
             <div className="growth-milestone-grid">
-              {(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && (item.key !== "security:bark" || isAppleEnvironment)).map((item) => (
+              {(me?.growth?.milestones ?? []).filter((item) => item.category === "security" && (item.key !== "security:bark" || deviceFamily !== "android")).map((item) => (
                 <button className={`growth-milestone ${item.earned ? "is-earned" : ""}`} key={item.key} onClick={() => openGrowthMilestone(item.key)} type="button">
                   <span>{item.earned ? "✓" : "+"}</span><strong>{item.title}</strong><small>+{item.points}</small>
                 </button>
@@ -2528,10 +2632,10 @@ export default function MenuPage() {
             <div className="notification-routing-grid">
               <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">language</span><div><strong>{t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
               {visibleChannelRows.map(([channel, _value, label]) => {
-                const verified = channelVerified(me, channel);
-                return <button className={`notification-channel-card is-${channel}`} key={channel} onClick={() => verified ? openPrefDrawer(channel) : openAuthSheet(channel)} type="button">
+                const verified = channel === "bark" ? instantEndpoints.length > 0 : channelVerified(me, channel);
+                return <button className={`notification-channel-card is-${channel}`} key={channel} onClick={() => channel === "bark" || verified ? openPrefDrawer(channel) : openAuthSheet(channel)} type="button">
                   <span className="material-symbols-outlined">{channel === "email" ? "mail" : channel === "sms" ? "sms" : "notifications_active"}</span>
-                  <div><strong>{t(label)}</strong><small>{channel === "sms" ? t("common.unsupported") : verified ? t("contact.boundState") : t("contact.bindNow")}</small></div>
+                  <div><strong>{t(label)}</strong><small>{channel === "sms" ? t("common.unsupported") : channel === "bark" ? t("notification.instantEndpointCount", { count: instantEndpoints.filter((item) => item.enabled).length }) : verified ? t("contact.boundState") : t("contact.bindNow")}</small></div>
                   <span className="material-symbols-outlined">chevron_right</span>
                 </button>;
               })}
@@ -2548,7 +2652,7 @@ export default function MenuPage() {
                   {section.topics.map(([topic, audience]) => {
                     const labels: Record<number, string> = { 1: t("notification.chatType"), 2: t("notification.statementLikes"), 3: t("notification.statementComments"), 4: t("notification.commentLikes"), 5: t("notification.commentReplies"), 6: t("notification.onlineType") };
                     return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : null}</div><div className="notification-topic-channels">
-                      {([0, 1, 2, ...(isAppleEnvironment ? [3] : [])] as Array<0 | 1 | 2 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || channel === 2} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? "language" : channel === 1 ? "mail" : channel === 2 ? "sms" : "notifications_active"}</span></button>)}
+                      {([0, 1, 2, 3] as Array<0 | 1 | 2 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || channel === 2} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? "language" : channel === 1 ? "mail" : channel === 2 ? "sms" : "notifications_active"}</span></button>)}
                     </div></div>;
                   })}
                 </section>
@@ -2666,6 +2770,31 @@ export default function MenuPage() {
       >
         {prefDrawerChannel && activePref ? (
           <div className="menu-pref-settings-stack">
+            {prefDrawerChannel === "bark" ? (
+              <section className="instant-endpoint-section">
+                <header>
+                  <strong>{t("notification.instantReceivers")}</strong>
+                  <small>{t("notification.instantReceiversHint")}</small>
+                </header>
+                <div className="instant-endpoint-list">
+                  {visibleInstantProviders.map((provider) => {
+                    const meta = instantProviderMeta[provider];
+                    const endpoint = instantEndpoints.find((item) => item.provider === provider);
+                    return (
+                      <div className={`instant-endpoint-row${endpoint?.enabled ? " is-active" : ""}`} key={provider}>
+                        <button className="instant-endpoint-main" onClick={() => openInstantProvider(provider)} type="button">
+                          <span className="material-symbols-outlined">{meta.icon}</span>
+                          <span><strong>{meta.name}</strong><small>{endpoint?.masked_target ?? t("contact.bindNow")}</small></span>
+                        </button>
+                        {endpoint ? (
+                          <button aria-label={t("notification.toggleReceiver", { provider: meta.name })} className={`switch ${endpoint.enabled ? "active" : ""}`} disabled={instantSaving} onClick={() => void toggleInstantEndpoint(endpoint)} type="button" />
+                        ) : <span className="material-symbols-outlined">chevron_right</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
             <div className="menu-pref-list">
               <div className="menu-pref-row">
                 <div className="row-main">
@@ -2730,7 +2859,7 @@ export default function MenuPage() {
               ) : null}
             </div>
             {renderChannelTopicControls(channelCode(prefDrawerChannel) as 1 | 2 | 3)}
-            <div className="menu-pref-list">
+            {prefDrawerChannel !== "bark" ? <div className="menu-pref-list">
               <div className="menu-pref-row">
                 <div className="row-main">
                   <strong>{t("contact.lastUnbound")}</strong>
@@ -2758,18 +2887,56 @@ export default function MenuPage() {
                 <div className="row-main">
                   <strong>{t("contact.unbind")}</strong>
                   <div className="row-subtle">
-                    {prefDrawerChannel === "bark"
-                      ? t("contact.rebindAnytime")
-                      : prefDrawerChannel === "email"
+                    {prefDrawerChannel === "email"
                         ? t("contact.emailUnbindLimit")
                         : t("contact.phoneUnbindLimit")}
                   </div>
                 </div>
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
-            </div>
+            </div> : null}
           </div>
         ) : null}
+      </SideDrawer>
+      <SideDrawer
+        open={Boolean(instantProviderDrawer)}
+        onClose={() => !instantSaving && setInstantProviderDrawer(null)}
+        title={instantProviderDrawer ? instantProviderMeta[instantProviderDrawer].name : t("channel.instant")}
+      >
+        {instantProviderDrawer ? (() => {
+          const endpoint = instantEndpoints.find((item) => item.provider === instantProviderDrawer);
+          const providerName = instantProviderMeta[instantProviderDrawer].name;
+          return (
+            <div className="instant-provider-drawer">
+              <div className="instant-provider-intro">
+                <span className="material-symbols-outlined">{instantProviderMeta[instantProviderDrawer].icon}</span>
+                <div><strong>{t("notification.connectProvider", { provider: providerName })}</strong><small>{t(`notification.providerHint.${instantProviderDrawer}` as TranslationKey)}</small></div>
+              </div>
+              <div className="menu-pref-list instant-provider-form">
+                <label className="menu-pref-field">
+                  <span>{t(`notification.providerTarget.${instantProviderDrawer}` as TranslationKey)}</span>
+                  <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} inputMode="url" onChange={(event) => setInstantTarget(event.target.value)} placeholder={instantProviderDrawer === "bark" ? "https://api.day.app/..." : instantProviderDrawer === "ntfy" ? "https://ntfy.sh/topic" : "https://push.example.com"} value={instantTarget} />
+                </label>
+                {instantProviderDrawer !== "bark" ? (
+                  <label className="menu-pref-field">
+                    <span>{instantProviderDrawer === "gotify" ? t("notification.appToken") : t("notification.accessTokenOptional")}</span>
+                    <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} onChange={(event) => setInstantSecret(event.target.value)} type="password" value={instantSecret} />
+                  </label>
+                ) : null}
+                {instantVerificationId ? (
+                  <div className="instant-verification-step">
+                    <span>{t("notification.enterReceiverCode")}</span>
+                    <VerificationCodeInput ariaLabel={t("notification.enterReceiverCode")} disabled={instantSaving} onChange={setInstantCode} value={instantCode} />
+                    <button className="button" disabled={instantSaving || instantCode.length !== 6} onClick={() => void bindInstantEndpoint()} type="button">{t("common.done")}</button>
+                  </div>
+                ) : (
+                  <button className="button" disabled={instantSaving || !instantTarget.trim() || (instantProviderDrawer === "gotify" && !instantSecret.trim())} onClick={() => void sendInstantCode()} type="button">{endpoint ? t("notification.reconnect") : t("notification.sendTestCode")}</button>
+                )}
+              </div>
+              {endpoint ? <button className="instant-provider-remove" disabled={instantSaving} onClick={() => void removeInstantEndpoint(endpoint)} type="button">{t("contact.unbind")}</button> : null}
+            </div>
+          );
+        })() : null}
       </SideDrawer>
       <SideDrawer
         open={barkGuideOpen}
