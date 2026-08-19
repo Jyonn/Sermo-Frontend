@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.1",
+  "id": "2026.08.19.2",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "群聊艾特更顺手",
+      "title": "深色模式更舒适",
       "items": [
-        "艾特昵称现在会整体选中和删除，消息中的艾特也会随气泡主题显示为清晰胶囊",
-        "在群聊中长按成员头像，即可从当前光标位置快速艾特对方"
+        "优化聊天操作、记录搜索、互动额度与确认弹窗的深色对比度",
+        "通知设置和头像框预览在深色模式下更柔和、更易读"
       ]
     },
     "en": {
-      "title": "Smoother group mentions",
+      "title": "A more comfortable dark mode",
       "items": [
-        "Mentions can now be selected and deleted as one unit, with themed mention pills inside messages",
-        "Press and hold a member avatar to mention them at the current cursor position"
+        "Improved dark-mode contrast across message actions, chat search, activity allowances, and confirmations",
+        "Notification settings and avatar-frame previews are now softer and easier to read in dark mode"
       ]
     }
   }
