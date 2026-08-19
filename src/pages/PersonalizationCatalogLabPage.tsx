@@ -15,15 +15,15 @@ const rarities: Array<{ rarity: Rarity; item: TranslationKey; style: string }> =
 ];
 
 const directions: Array<{ key: Direction; name: TranslationKey; note: TranslationKey; recommended?: boolean }> = [
-  { key: "rail", name: "catalogLab.rail", note: "catalogLab.railNote", recommended: true },
+  { key: "rail", name: "catalogLab.rail", note: "catalogLab.railNote" },
   { key: "seal", name: "catalogLab.seal", note: "catalogLab.sealNote" },
   { key: "index", name: "catalogLab.index", note: "catalogLab.indexNote" },
-  { key: "halo", name: "catalogLab.halo", note: "catalogLab.haloNote" },
+  { key: "halo", name: "catalogLab.halo", note: "catalogLab.haloNote", recommended: true },
 ];
 
 export default function PersonalizationCatalogLabPage() {
   const { t } = useI18n();
-  const [active, setActive] = useState<Direction>("rail");
+  const [active, setActive] = useState<Direction>("halo");
   const direction = directions.find((item) => item.key === active) ?? directions[0];
 
   return (

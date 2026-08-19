@@ -2198,8 +2198,8 @@ img {
 .personalization-library-section.rarity-rare { --rarity-color: #3478d4; }
 .personalization-library-section.rarity-epic { --rarity-color: #8557c7; }
 .personalization-library-section.rarity-legendary { --rarity-color: #c88719; }
-.personalization-library-section[class*="rarity-"] > header h3 { display: flex; align-items: center; gap: 8px; color: var(--rarity-color); }
-.personalization-library-section[class*="rarity-"] > header h3::before { width: 4px; height: 17px; border-radius: 999px; background: var(--rarity-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rarity-color) 10%, transparent); content: ""; }
+.personalization-library-section[class*="rarity-"] > header h3 { position: relative; isolation: isolate; color: var(--rarity-color); text-shadow: 0 0 16px color-mix(in srgb, var(--rarity-color) 24%, transparent); }
+.personalization-library-section[class*="rarity-"] > header h3::before { position: absolute; z-index: -1; top: 50%; left: 50%; width: calc(100% + 24px); height: 30px; border-radius: 50%; background: color-mix(in srgb, var(--rarity-color) 17%, transparent); content: ""; filter: blur(10px); transform: translate(-50%, -50%); pointer-events: none; }
 
 .growth-level-detail-unlocks span small {
   margin-left: auto;
@@ -25777,13 +25777,11 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .direction-index .catalog-lab-tier-line { display: none; }
 .direction-index .catalog-lab-tier-heading small { margin-left: auto; }
 .direction-index .catalog-lab-name-row { justify-content: space-between; }
-.direction-index .catalog-lab-name-row .rarity-glyph { order: 2; }
 .direction-halo .catalog-lab-tier-heading { position: relative; justify-content: center; }
 .direction-halo .catalog-lab-tier-heading::before { position: absolute; width: 74px; height: 36px; border-radius: 50%; background: color-mix(in srgb, var(--rarity-color) 18%, transparent); content: ""; filter: blur(12px); }
 .direction-halo .catalog-lab-tier-heading h3 { position: relative; font-size: .9rem; text-shadow: 0 0 14px color-mix(in srgb, var(--rarity-color) 36%, transparent); }
 .direction-halo .catalog-lab-tier-line,.direction-halo .catalog-lab-tier-heading small { display: none; }
 .direction-halo .catalog-lab-name-row { justify-content: center; }
-.direction-halo .catalog-lab-name-row .rarity-glyph { order: 2; }
 .catalog-lab-footer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 20px; max-width: 760px; margin: 24px auto 0; padding: 20px 24px; border-left: 3px solid var(--brand-primary); color: var(--text-secondary); }
 .catalog-lab-footer strong { color: var(--text-primary); }
 .catalog-lab-footer p { margin: 0; font-size: .82rem; line-height: 1.65; }

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.4",
+  "id": "2026.08.20.5",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "个性化品质拥有专属图标",
+      "title": "个性化品质切换为光晕展示",
       "items": [
-        "五档品质使用逐级生长的晶核图标，缩略尺寸下也能快速区分",
-        "品质图标与物品名称并排展示，分组标题同步使用对应色彩"
+        "五档品质标题改用克制的彩色光晕，层级更加鲜明",
+        "晶核图标固定在物品名称左侧，浏览顺序更加统一"
       ]
     },
     "en": {
-      "title": "Personalization qualities receive unique icons",
+      "title": "Personalization qualities adopt halo styling",
       "items": [
-        "Five evolving crystal icons now distinguish quality tiers even at thumbnail size",
-        "Quality icons now sit beside item names while section headings share their tier color"
+        "Quality headings now use restrained colored halos for clearer hierarchy",
+        "Crystal icons remain fixed to the left of item names for consistent scanning"
       ]
     }
   }
