@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.3",
+  "id": "2026.08.19.4",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "深色入口更统一",
+      "title": "深色导航更自然",
       "items": [
-        "空间登录、管理员登录与创建空间页面现已完整适配深色模式",
-        "入口卡片、认证按钮和页面导航在夜间更柔和、更清晰"
+        "聊天、广场、通讯和菜单顶部导航现已适配深色毛玻璃效果",
+        "滚动后的标题、操作按钮和分类导航在夜间更加清晰柔和"
       ]
     },
     "en": {
-      "title": "Consistent dark-mode entry flows",
+      "title": "More natural dark navigation",
       "items": [
-        "Space sign-in, administrator sign-in, and space creation now fully support dark mode",
-        "Entry cards, verification actions, and guest navigation are now softer and clearer at night"
+        "Top navigation across Chats, Square, Contacts, and Menu now uses a dark glass treatment",
+        "Titles, actions, and category tabs remain clear and comfortable after scrolling at night"
       ]
     }
   }

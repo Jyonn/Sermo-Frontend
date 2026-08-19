@@ -26471,3 +26471,68 @@ html[data-theme="dark"] .landing-entry-panel {
     radial-gradient(circle at 88% 8%,rgba(53,213,154,.07),transparent 30%),
     linear-gradient(180deg,rgba(18,27,23,.98),rgba(22,32,27,.96));
 }
+
+/* Shared signed-in tab chrome: transparent at rest on mobile, dark glass once
+   elevated, and one consistent surface across all desktop tabs. */
+html[data-theme="dark"] .tab-sticky-header {
+  color:var(--text-primary);
+  border-bottom-color:rgba(126,151,139,.2);
+}
+
+html[data-theme="dark"] .tab-sticky-header .panel-title {
+  color:#edf6f1;
+}
+
+html[data-theme="dark"] .tab-sticky-header :is(.header-sync-indicator,.square-header-quota,.square-header-notifications) {
+  color:#9dafa5;
+}
+
+html[data-theme="dark"] .tab-sticky-header-secondary .square-feed-filter {
+  border-bottom-color:rgba(126,151,139,.22);
+}
+
+html[data-theme="dark"] .tab-sticky-header-secondary .square-feed-filter button {
+  color:#91a39a;
+}
+
+html[data-theme="dark"] .tab-sticky-header-secondary .square-feed-filter button.is-active,
+html[data-theme="dark"] .tab-sticky-header-secondary .square-feed-user-tab.is-active {
+  color:#dce9e3;
+}
+
+html[data-theme="dark"] .square-header-publish {
+  color:#9cedce;
+  background:rgba(53,213,154,.12);
+  box-shadow:inset 0 0 0 1px rgba(83,223,170,.1);
+}
+
+html[data-theme="dark"] .square-header-publish:hover {
+  color:#c6f8e5;
+  background:rgba(53,213,154,.18);
+}
+
+@media(max-width:900px) {
+  html[data-theme="dark"] .shell-no-topbar .tab-sticky-header {
+    color:var(--text-primary);
+    border-bottom-color:transparent;
+    background:transparent;
+    box-shadow:none;
+  }
+
+  html[data-theme="dark"] .shell-no-topbar .tab-sticky-header::before {
+    border-bottom-color:rgba(126,151,139,.2);
+    background:rgba(16,24,20,.86);
+    box-shadow:0 9px 24px rgba(0,0,0,.18);
+    -webkit-backdrop-filter:blur(20px) saturate(1.12);
+    backdrop-filter:blur(20px) saturate(1.12);
+  }
+}
+
+@media(min-width:901px) {
+  html[data-theme="dark"] .tab-sticky-header,
+  html[data-theme="dark"] .tab-sticky-header.is-scrolled {
+    border-bottom-color:rgba(126,151,139,.22);
+    background:linear-gradient(180deg,rgba(29,41,35,.97),rgba(20,30,25,.95));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 10px 28px rgba(0,0,0,.16);
+  }
+}
