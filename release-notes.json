@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.6",
+  "id": "2026.08.19.7",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "群聊艾特更顺手",
+      "title": "即时提醒不再等待",
       "items": [
-        "艾特胶囊现在与正文对齐，并会自动匹配双方气泡的文字颜色",
-        "长按头像艾特成员时会保留已有草稿并从当前光标插入"
+        "离线后收到的新消息会通过即时渠道逐条推送，不再等待离线阈值",
+        "即时提醒不再并入定时合并消息"
       ]
     },
     "en": {
-      "title": "Smoother group mentions",
+      "title": "Instant alerts without waiting",
       "items": [
-        "Mention pills now align with message text and match each bubble side's text color",
-        "Long-pressing an avatar now preserves the draft and inserts the mention at the current cursor"
+        "New messages now trigger individual instant alerts as soon as you are offline",
+        "Instant alerts are no longer included in scheduled notification digests"
       ]
     }
   }

@@ -605,7 +605,8 @@ export default function SpaceAdminDashboardPage() {
     return (
       <span className="admin-channel-state">
         <span className={`admin-table-dot ${preference?.enabled ? "is-on" : ""}`} />
-        {preference?.enabled ? t("common.enabled") : t("common.disabled")} · {t("common.minutes", { count: preference?.offline_threshold_minutes ?? 30 })}
+        {preference?.enabled ? t("common.enabled") : t("common.disabled")}
+        {key !== "bark" ? ` · ${t("common.minutes", { count: preference?.offline_threshold_minutes ?? 30 })}` : null}
       </span>
     );
   };

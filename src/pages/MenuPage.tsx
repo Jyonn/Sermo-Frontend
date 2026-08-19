@@ -225,7 +225,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
     const channel = row.channel === 1 ? "email" : row.channel === 2 ? "sms" : "bark";
     next[channel] = {
       enabled: row.enabled,
-      threshold: row.offline_threshold_minutes,
+      threshold: row.offline_threshold_minutes ?? emptyPrefs[channel].threshold,
       hideMessageContent: row.hide_message_content,
       openChatOnTap: row.open_chat_on_tap ?? true,
       barkIconMode: row.bark_icon_mode ?? 1,
@@ -1087,13 +1087,16 @@ export default function MenuPage() {
     setPrefDrawerChannel(channel);
   };
 
-  const preferenceFromResponse = (updated: NotificationPreferenceDTO): NotificationPreferences[NotificationChannel] => ({
-    enabled: updated.enabled,
-    threshold: updated.offline_threshold_minutes,
-    hideMessageContent: updated.hide_message_content,
-    openChatOnTap: updated.open_chat_on_tap ?? true,
-    barkIconMode: updated.bark_icon_mode ?? 1,
-  });
+  const preferenceFromResponse = (updated: NotificationPreferenceDTO): NotificationPreferences[NotificationChannel] => {
+    const channel = updated.channel === 1 ? "email" : updated.channel === 2 ? "sms" : "bark";
+    return {
+      enabled: updated.enabled,
+      threshold: updated.offline_threshold_minutes ?? emptyPrefs[channel].threshold,
+      hideMessageContent: updated.hide_message_content,
+      openChatOnTap: updated.open_chat_on_tap ?? true,
+      barkIconMode: updated.bark_icon_mode ?? 1,
+    };
+  };
 
   const savePreferencePatch = async (
     channel: NotificationChannel,
@@ -2665,20 +2668,22 @@ export default function MenuPage() {
                   type="button"
                 />
               </div>
-              <button
-                className="menu-pref-row menu-pref-row-button"
-                disabled={!activePref.enabled}
-                onClick={() => openThresholdEditor(prefDrawerChannel)}
-                type="button"
-              >
-                <div className="row-main">
-                  <strong>{t("notification.offlineThreshold")}</strong>
-                </div>
-                <div className="menu-pref-row-value">
-                  <span>{t("common.minutes", { count: activePref.threshold })}</span>
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </div>
-              </button>
+              {prefDrawerChannel !== "bark" ? (
+                <button
+                  className="menu-pref-row menu-pref-row-button"
+                  disabled={!activePref.enabled}
+                  onClick={() => openThresholdEditor(prefDrawerChannel)}
+                  type="button"
+                >
+                  <div className="row-main">
+                    <strong>{t("notification.offlineThreshold")}</strong>
+                  </div>
+                  <div className="menu-pref-row-value">
+                    <span>{t("common.minutes", { count: activePref.threshold })}</span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </div>
+                </button>
+              ) : null}
               {prefDrawerChannel === "email" || prefDrawerChannel === "bark" ? (
                 <>
                   <div className={`menu-pref-row ${!activePref.enabled ? "is-disabled" : ""}`}>

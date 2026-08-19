@@ -438,7 +438,7 @@ export interface AdminMemberDTO extends UserDTO {
   notification_preferences: Array<{
     channel: number;
     enabled: boolean;
-    offline_threshold_minutes: number;
+    offline_threshold_minutes: number | null;
   }>;
 }
 
@@ -456,7 +456,7 @@ export interface JoinResponseDTO {
 export interface NotificationPreferenceDTO {
   channel: number;
   enabled: boolean;
-  offline_threshold_minutes: number;
+  offline_threshold_minutes: number | null;
   hide_message_content: boolean;
   open_chat_on_tap: boolean;
   bark_icon_mode: 0 | 1 | 2;
