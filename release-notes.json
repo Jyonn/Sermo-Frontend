@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.2",
+  "id": "2026.08.19.3",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "深色模式更舒适",
+      "title": "深色入口更统一",
       "items": [
-        "优化聊天操作、记录搜索、互动额度与确认弹窗的深色对比度",
-        "通知设置和头像框预览在深色模式下更柔和、更易读"
+        "空间登录、管理员登录与创建空间页面现已完整适配深色模式",
+        "入口卡片、认证按钮和页面导航在夜间更柔和、更清晰"
       ]
     },
     "en": {
-      "title": "A more comfortable dark mode",
+      "title": "Consistent dark-mode entry flows",
       "items": [
-        "Improved dark-mode contrast across message actions, chat search, activity allowances, and confirmations",
-        "Notification settings and avatar-frame previews are now softer and easier to read in dark mode"
+        "Space sign-in, administrator sign-in, and space creation now fully support dark mode",
+        "Entry cards, verification actions, and guest navigation are now softer and clearer at night"
       ]
     }
   }
