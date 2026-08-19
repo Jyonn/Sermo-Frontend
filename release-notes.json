@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.20.11",
+  "id": "2026.08.20.12",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "八仙角色动画更干净",
+      "title": "即时提醒连接更清楚",
       "items": [
-        "清理八仙角色动画中残留的生成辅助线，人物边缘更自然"
+        "即时提醒新增 PushDeer，并为 Bark、ntfy、Gotify、PushDeer 提供分步安装与绑定引导"
       ]
     },
     "en": {
-      "title": "Cleaner Eight Immortals animations",
+      "title": "Clearer instant notification setup",
       "items": [
-        "Removed leftover generation guides from Eight Immortals character animations for cleaner edges"
+        "Added PushDeer and step-by-step installation and connection guides for Bark, ntfy, Gotify, and PushDeer"
       ]
     }
   }

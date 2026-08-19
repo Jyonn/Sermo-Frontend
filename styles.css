@@ -25268,6 +25268,19 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 
 .instant-provider-drawer { display: grid; gap: 16px; }
 .instant-provider-intro { display: flex; align-items: center; gap: 12px; padding: 4px; }
+.instant-provider-guide { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 18px; background: color-mix(in srgb, var(--surface) 88%, var(--brand-primary) 4%); }
+.instant-provider-guide > header { display: grid; gap: 3px; }
+.instant-provider-guide > header small { color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+.instant-provider-guide ol { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.instant-provider-guide li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 11px; }
+.instant-provider-guide li > span { display: grid; width: 26px; height: 26px; place-items: center; border: 1px solid color-mix(in srgb, var(--brand-primary) 28%, var(--border-subtle)); border-radius: 50%; color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 11%, var(--surface)); font-size: 12px; font-weight: 800; }
+.instant-provider-guide li > div { min-width: 0; padding-top: 2px; }
+.instant-provider-guide li strong { display: block; font-size: 14px; }
+.instant-provider-guide li p { margin: 4px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.55; }
+.instant-provider-install-links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.instant-provider-install-links a { display: inline-flex; min-height: 34px; align-items: center; gap: 5px; padding: 0 10px 0 12px; border: 1px solid color-mix(in srgb, var(--brand-primary) 24%, var(--border-subtle)); border-radius: 11px; color: var(--brand-primary-press); background: var(--surface); font-size: 12px; font-weight: 750; text-decoration: none; }
+.instant-provider-install-links .material-symbols-outlined { font-size: 15px; }
+.instant-provider-caution { margin: 0; padding: 10px 12px; border-radius: 12px; color: var(--text-secondary); background: color-mix(in srgb, var(--warning, #d59022) 10%, transparent); font-size: 11px; line-height: 1.5; }
 .instant-provider-form { display: grid; gap: 14px; padding: 16px; }
 .menu-pref-field { display: grid; gap: 7px; font-weight: 700; }
 .instant-verification-step { display: grid; gap: 12px; }

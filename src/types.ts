@@ -474,7 +474,7 @@ export interface NotificationPreferenceDTO {
   bark_icon_mode: 0 | 1 | 2;
 }
 
-export type InstantNotificationProvider = "bark" | "ntfy" | "gotify";
+export type InstantNotificationProvider = "bark" | "ntfy" | "gotify" | "pushdeer";
 
 export interface InstantNotificationEndpointDTO {
   endpoint_id: number;

@@ -262,10 +262,55 @@ function detectDeviceFamily(): "ios" | "android" | "desktop" {
   return "desktop";
 }
 
-const instantProviderMeta: Record<InstantNotificationProvider, { icon: string; name: string; platforms: Array<"ios" | "android" | "desktop"> }> = {
-  bark: { icon: "notifications_active", name: "Bark", platforms: ["ios", "desktop"] },
-  ntfy: { icon: "campaign", name: "ntfy", platforms: ["ios", "android", "desktop"] },
-  gotify: { icon: "bolt", name: "Gotify", platforms: ["android", "desktop"] },
+type InstantInstallLink = {
+  href: string;
+  labelKey: TranslationKey;
+  platforms: Array<"ios" | "android" | "desktop">;
+};
+
+type InstantProviderMeta = {
+  icon: string;
+  name: string;
+  platforms: Array<"ios" | "android" | "desktop">;
+  installLinks: InstantInstallLink[];
+};
+
+const instantProviderMeta: Record<InstantNotificationProvider, InstantProviderMeta> = {
+  bark: {
+    icon: "notifications_active",
+    name: "Bark",
+    platforms: ["ios", "desktop"],
+    installLinks: [{ href: barkAppStoreUrl, labelKey: "notification.installAppStore", platforms: ["ios", "desktop"] }],
+  },
+  ntfy: {
+    icon: "campaign",
+    name: "ntfy",
+    platforms: ["ios", "android", "desktop"],
+    installLinks: [
+      { href: "https://apps.apple.com/us/app/ntfy/id1625396347", labelKey: "notification.installAppStore", platforms: ["ios", "desktop"] },
+      { href: "https://play.google.com/store/apps/details?id=io.heckel.ntfy", labelKey: "notification.installGooglePlay", platforms: ["android", "desktop"] },
+      { href: "https://f-droid.org/packages/io.heckel.ntfy/", labelKey: "notification.installFDroid", platforms: ["android", "desktop"] },
+    ],
+  },
+  gotify: {
+    icon: "bolt",
+    name: "Gotify",
+    platforms: ["android", "desktop"],
+    installLinks: [
+      { href: "https://f-droid.org/packages/com.github.gotify/", labelKey: "notification.installFDroid", platforms: ["android", "desktop"] },
+      { href: "https://github.com/gotify/android/releases", labelKey: "notification.installGithub", platforms: ["android", "desktop"] },
+    ],
+  },
+  pushdeer: {
+    icon: "notifications_active",
+    name: "PushDeer",
+    platforms: ["ios", "android", "desktop"],
+    installLinks: [
+      { href: "https://apps.apple.com/cn/search?term=PushDeer", labelKey: "notification.installAppStore", platforms: ["ios", "desktop"] },
+      { href: "https://github.com/easychen/pushdeer/releases", labelKey: "notification.installGithub", platforms: ["android", "desktop"] },
+      { href: "https://github.com/easychen/pushdeer", labelKey: "notification.openSetupDocs", platforms: ["ios", "android", "desktop"] },
+    ],
+  },
 };
 
 function QrCodeIcon() {
@@ -2850,21 +2895,52 @@ export default function MenuPage() {
         {instantProviderDrawer ? (() => {
           const endpoint = instantEndpoints.find((item) => item.provider === instantProviderDrawer);
           const providerName = instantProviderMeta[instantProviderDrawer].name;
+          const providerInstallLinks = instantProviderMeta[instantProviderDrawer].installLinks.filter(
+            (item) => item.platforms.includes(deviceFamily),
+          );
           return (
             <div className="instant-provider-drawer">
               <div className="instant-provider-intro">
                 <span className="material-symbols-outlined">{instantProviderMeta[instantProviderDrawer].icon}</span>
                 <div><strong>{t("notification.connectProvider", { provider: providerName })}</strong><small>{t(`notification.providerHint.${instantProviderDrawer}` as TranslationKey)}</small></div>
               </div>
+              <section className="instant-provider-guide" aria-label={t("notification.setupGuide")}>
+                <header>
+                  <strong>{t("notification.setupGuide")}</strong>
+                  <small>{t("notification.setupGuideHint", { provider: providerName })}</small>
+                </header>
+                <ol>
+                  {[1, 2, 3].map((step) => (
+                    <li key={step}>
+                      <span>{step}</span>
+                      <div>
+                        <strong>{t(`notification.guide.${instantProviderDrawer}.${step}.title` as TranslationKey)}</strong>
+                        <p>{t(`notification.guide.${instantProviderDrawer}.${step}.body` as TranslationKey)}</p>
+                        {step === 1 && providerInstallLinks.length ? (
+                          <div className="instant-provider-install-links">
+                            {providerInstallLinks.map((link) => (
+                              <a href={link.href} key={link.href} rel="noreferrer" target="_blank">
+                                <span>{t(link.labelKey)}</span>
+                                <span className="material-symbols-outlined">open_in_new</span>
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                {instantProviderDrawer === "pushdeer" ? <p className="instant-provider-caution">{t("notification.pushdeerMaintenanceNote")}</p> : null}
+              </section>
               <div className="menu-pref-list instant-provider-form">
                 <label className="menu-pref-field">
                   <span>{t(`notification.providerTarget.${instantProviderDrawer}` as TranslationKey)}</span>
-                  <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} inputMode="url" onChange={(event) => setInstantTarget(event.target.value)} placeholder={instantProviderDrawer === "bark" ? "https://api.day.app/..." : instantProviderDrawer === "ntfy" ? "https://ntfy.sh/topic" : "https://push.example.com"} value={instantTarget} />
+                  <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} inputMode={instantProviderDrawer === "pushdeer" ? "text" : "url"} onChange={(event) => setInstantTarget(event.target.value)} placeholder={instantProviderDrawer === "bark" ? "https://api.day.app/..." : instantProviderDrawer === "ntfy" ? "https://ntfy.sh/topic" : instantProviderDrawer === "pushdeer" ? "PDU..." : "https://push.example.com"} value={instantTarget} />
                 </label>
                 {instantProviderDrawer !== "bark" ? (
                   <label className="menu-pref-field">
-                    <span>{instantProviderDrawer === "gotify" ? t("notification.appToken") : t("notification.accessTokenOptional")}</span>
-                    <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} onChange={(event) => setInstantSecret(event.target.value)} type="password" value={instantSecret} />
+                    <span>{instantProviderDrawer === "gotify" ? t("notification.appToken") : instantProviderDrawer === "pushdeer" ? t("notification.pushdeerServerOptional") : t("notification.accessTokenOptional")}</span>
+                    <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} inputMode={instantProviderDrawer === "pushdeer" ? "url" : "text"} onChange={(event) => setInstantSecret(event.target.value)} placeholder={instantProviderDrawer === "pushdeer" ? "https://push.example.com" : undefined} type={instantProviderDrawer === "pushdeer" ? "url" : "password"} value={instantSecret} />
                   </label>
                 ) : null}
                 {instantVerificationId ? (
