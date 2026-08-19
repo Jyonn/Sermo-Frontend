@@ -17,6 +17,7 @@ const ROOT_PATH_SEGMENTS = new Set([
   "assets",
   "icons",
   "labs",
+  "design",
 ]);
 
 export function normalizeSlug(value: string) {

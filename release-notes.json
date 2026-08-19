@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.20.10",
+  "id": "2026.08.20.11",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "成长阶段更有层次",
+      "title": "八仙角色动画更干净",
       "items": [
-        "18 级成长现划分为七个清晰阶段，从素朴一路抵达神话",
-        "等级铭牌、我的成长与等级图鉴现已使用一致的阶段主题"
+        "清理八仙角色动画中残留的生成辅助线，人物边缘更自然"
       ]
     },
     "en": {
-      "title": "A richer growth journey",
+      "title": "Cleaner Eight Immortals animations",
       "items": [
-        "The 18 growth levels now form seven distinct stages, from Plain to Mythic",
-        "Level badges, My Growth, and the level atlas now share one consistent stage theme"
+        "Removed leftover generation guides from Eight Immortals character animations for cleaner edges"
       ]
     }
   }

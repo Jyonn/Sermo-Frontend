@@ -42,6 +42,58 @@ def clear_generation_guides(image):
     pixels = image.load()
     width, height = image.size
 
+    def is_guide_color(color):
+        red, green, blue, alpha = color
+        if alpha == 0:
+            return False
+        magenta = red > 205 and blue > 205 and green < 190 and abs(red - blue) < 58
+        cyan = green > 205 and blue > 205 and red < 150 and abs(green - blue) < 48
+        return magenta or cyan
+
+    def clear_colored_guides(horizontal):
+        """Clear straight chroma-guide segments without touching curved costume edges."""
+        primary_size = height if horizontal else width
+        secondary_size = width if horizontal else height
+        minimum_run = 7
+        clear_points = set()
+        for primary in range(primary_size):
+            start = None
+            last_guide = None
+            for secondary in range(secondary_size + 1):
+                if secondary < secondary_size:
+                    x, y = (secondary, primary) if horizontal else (primary, secondary)
+                    guide = is_guide_color(pixels[x, y])
+                else:
+                    guide = False
+                if guide:
+                    if start is None:
+                        start = secondary
+                    last_guide = secondary
+                    continue
+                if start is not None and last_guide is not None and secondary - last_guide <= 2:
+                    continue
+                if start is not None and last_guide is not None and last_guide - start + 1 >= minimum_run:
+                    for position in range(start, last_guide + 1):
+                        x, y = (position, primary) if horizontal else (primary, position)
+                        if is_guide_color(pixels[x, y]):
+                            clear_points.add((x, y))
+                start = None
+                last_guide = None
+
+        # Include antialiasing immediately around a detected guide, but only when it
+        # retains the same chroma-key hue. This avoids clipping swords and sleeves.
+        expanded = set(clear_points)
+        for x, y in clear_points:
+            for next_x, next_y in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+                if 0 <= next_x < width and 0 <= next_y < height and is_guide_color(pixels[next_x, next_y]):
+                    expanded.add((next_x, next_y))
+        for x, y in expanded:
+            red, green, blue, _ = pixels[x, y]
+            pixels[x, y] = (red, green, blue, 0)
+
+    clear_colored_guides(horizontal=True)
+    clear_colored_guides(horizontal=False)
+
     def clear_long_runs(horizontal):
         primary_size = height if horizontal else width
         secondary_size = width if horizontal else height
