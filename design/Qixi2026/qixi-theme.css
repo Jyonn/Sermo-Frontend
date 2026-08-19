@@ -1,0 +1,136 @@
+/* Opt-in website theme. Apply to <html>, never to a chat/message subtree. */
+html[data-site-theme="qixi-2026"] {
+  --qixi-ink: #222541;
+  --qixi-ink-deep: #171a31;
+  --qixi-moon: #f3efe7;
+  --qixi-paper: #eae5dd;
+  --qixi-gold: #c9a45e;
+  --qixi-cinnabar: #a84558;
+  --qixi-plum: #6d405c;
+  --qixi-bg-image: url("./assets/qixi-background-light.webp");
+  --qixi-header-image: url("./assets/qixi-header-ribbon.webp");
+  --qixi-tab-image: url("./assets/qixi-tab-underline.webp");
+  --qixi-corner-image: url("./assets/qixi-corner-magpies.webp");
+  --qixi-medallion-image: url("./assets/qixi-moon-medallion.webp");
+
+  --bg-page: #f2eee7;
+  --bg-panel: color-mix(in srgb, #f7f3ec 93%, transparent);
+  --text-primary: #25243a;
+  --text-muted: #6f6879;
+  --line-soft: color-mix(in srgb, var(--qixi-ink) 14%, transparent);
+  --accent: var(--qixi-cinnabar);
+  --accent-strong: #8f334b;
+  background: var(--qixi-moon) var(--qixi-bg-image) repeat;
+  background-size: 768px 768px;
+}
+
+html[data-site-theme="qixi-2026"][data-theme="dark"] {
+  --qixi-bg-image: url("./assets/qixi-background-dark.webp");
+  --bg-page: #171a31;
+  --bg-panel: color-mix(in srgb, #202541 91%, transparent);
+  --text-primary: #f0ebe4;
+  --text-muted: #b9b2c1;
+  --line-soft: color-mix(in srgb, var(--qixi-moon) 13%, transparent);
+  --accent: #d3ad68;
+  --accent-strong: #e0bf7b;
+}
+
+html[data-site-theme="qixi-2026"] body {
+  background: transparent;
+}
+
+html[data-site-theme="qixi-2026"] .topbar {
+  isolation: isolate;
+  border-bottom-color: color-mix(in srgb, var(--qixi-gold) 32%, transparent);
+  background: color-mix(in srgb, var(--bg-page) 88%, transparent);
+}
+
+html[data-site-theme="qixi-2026"] .topbar::after {
+  position: absolute;
+  z-index: -1;
+  inset: auto 0 -22px;
+  height: 56px;
+  content: "";
+  pointer-events: none;
+  background: var(--qixi-header-image) center bottom / min(100%, 1600px) 100% no-repeat;
+  opacity: .72;
+}
+
+html[data-site-theme="qixi-2026"] :is(.panel, .detail-card, .side-drawer, .bottom-sheet) {
+  border-color: color-mix(in srgb, var(--qixi-gold) 20%, var(--line-soft));
+  background-color: var(--bg-panel);
+}
+
+html[data-site-theme="qixi-2026"] :is(.qixi-tab, [role="tab"]) {
+  position: relative;
+}
+
+html[data-site-theme="qixi-2026"] :is(.qixi-tab.is-active, [role="tab"][aria-selected="true"])::after {
+  position: absolute;
+  right: 8%;
+  bottom: -9px;
+  left: 8%;
+  height: 14px;
+  content: "";
+  pointer-events: none;
+  background: var(--qixi-tab-image) center / 100% 100% no-repeat;
+}
+
+html[data-site-theme="qixi-2026"] .qixi-corner-decorated {
+  position: relative;
+  isolation: isolate;
+}
+
+html[data-site-theme="qixi-2026"] .qixi-corner-decorated::after {
+  position: absolute;
+  z-index: -1;
+  top: -24px;
+  right: -18px;
+  width: clamp(96px, 16vw, 180px);
+  aspect-ratio: 4 / 3;
+  content: "";
+  pointer-events: none;
+  background: var(--qixi-corner-image) center / contain no-repeat;
+  opacity: .82;
+}
+
+html[data-site-theme="qixi-2026"] .qixi-festival-mark {
+  width: 36px;
+  aspect-ratio: 1;
+  border: 0;
+  background: var(--qixi-medallion-image) center / contain no-repeat;
+  filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--qixi-ink-deep) 24%, transparent));
+}
+
+html[data-site-theme="qixi-2026"] :focus-visible {
+  outline-color: var(--qixi-gold);
+}
+
+html[data-site-theme="qixi-2026"] ::selection {
+  color: var(--qixi-moon);
+  background: var(--qixi-plum);
+}
+
+@media (max-width: 640px) {
+  html[data-site-theme="qixi-2026"] .topbar::after {
+    right: -28%;
+    left: -28%;
+    opacity: .58;
+  }
+
+  html[data-site-theme="qixi-2026"] .qixi-corner-decorated::after {
+    width: 104px;
+    opacity: .62;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-site-theme="qixi-2026"] .qixi-festival-mark {
+    animation: qixi-moon-breathe 5.4s cubic-bezier(.37, 0, .63, 1) infinite alternate;
+  }
+}
+
+@keyframes qixi-moon-breathe {
+  from { transform: translateY(0); filter: drop-shadow(0 2px 5px rgb(23 26 49 / 18%)); }
+  to { transform: translateY(-1px); filter: drop-shadow(0 3px 8px rgb(201 164 94 / 24%)); }
+}
