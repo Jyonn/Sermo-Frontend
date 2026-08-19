@@ -151,19 +151,46 @@ html[data-site-theme="qixi-2026"] .tab-sticky-header .festival-theme-mark {
   flex-basis: 27px;
 }
 
+html[data-site-theme="qixi-2026"] .shell-authenticated .tab-sticky-header .page-toolbar {
+  position: relative;
+  isolation: isolate;
+}
+
+html[data-site-theme="qixi-2026"] .shell-authenticated .tab-sticky-header .page-toolbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-site-theme="qixi-2026"] .shell-authenticated .tab-sticky-header .page-toolbar::after {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: clamp(88px, 19%, 184px);
+  width: clamp(78px, 10vw, 108px);
+  aspect-ratio: 4 / 3;
+  content: "";
+  pointer-events: none;
+  background: var(--qixi-corner-image) center / contain no-repeat;
+  opacity: .82;
+  transform: translateY(-52%) rotate(-3deg);
+  filter: drop-shadow(0 5px 9px rgb(23 26 49 / 18%));
+}
+
 html[data-site-theme="qixi-2026"] :is(.page-tabs .active, .page-tabs [aria-selected="true"], .square-feed-filter .is-active) {
   position: relative;
 }
 
 html[data-site-theme="qixi-2026"] :is(.page-tabs .active, .page-tabs [aria-selected="true"], .square-feed-filter .is-active)::after {
   position: absolute;
-  right: 8%;
-  bottom: -9px;
-  left: 8%;
-  height: 12px;
+  right: -4%;
+  bottom: -12px;
+  left: -4%;
+  height: 18px;
   content: "";
   pointer-events: none;
   background: var(--qixi-tab-image) center / 100% 100% no-repeat;
+  opacity: .96;
+  filter: drop-shadow(0 2px 3px rgb(109 64 92 / 24%));
 }
 
 html[data-site-theme="qixi-2026"] :is(.empty-state, .feedback-state, .user-profile-empty) {
@@ -235,11 +262,21 @@ html[data-site-theme="qixi-2026"] ::selection {
     height: 26px;
     flex-basis: 26px;
   }
+
+  html[data-site-theme="qixi-2026"] .shell-authenticated .tab-sticky-header .page-toolbar::after {
+    right: clamp(76px, 20vw, 104px);
+    width: 76px;
+    opacity: .88;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   html[data-site-theme="qixi-2026"] .festival-theme-mark {
     animation: qixi-moon-breathe 5.4s cubic-bezier(.37, 0, .63, 1) infinite alternate;
+  }
+
+  html[data-site-theme="qixi-2026"] .shell-authenticated .tab-sticky-header .page-toolbar::after {
+    animation: qixi-magpies-hover 5.8s ease-in-out infinite alternate;
   }
 }
 
@@ -247,9 +284,17 @@ html[data-site-theme="qixi-2026"] ::selection {
   html[data-site-theme="qixi-2026"] .festival-theme-mark {
     animation: none;
   }
+  html[data-site-theme="qixi-2026"] .shell-authenticated .tab-sticky-header .page-toolbar::after {
+    animation: none;
+  }
 }
 
 @keyframes qixi-moon-breathe {
   from { transform: translateY(0); filter: drop-shadow(0 2px 5px rgb(23 26 49 / 16%)); }
   to { transform: translateY(-1px); filter: drop-shadow(0 4px 10px rgb(201 164 94 / 28%)); }
+}
+
+@keyframes qixi-magpies-hover {
+  from { transform: translateY(-50%) rotate(-4deg); }
+  to { transform: translateY(-57%) rotate(-1deg); }
 }

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.9",
+  "id": "2026.08.19.10",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "七夕主题更贴合手机",
+      "title": "七夕装饰更加鲜明",
       "items": [
-        "修复七夕主题下部分页面可以横向滑动的问题",
-        "聊天、通讯与菜单现在能完整呈现七夕背景"
+        "登录后的主页面现在会展示更醒目的鹊桥装饰",
+        "当前栏目增加更清晰的七夕羽毛选中轨迹"
       ]
     },
     "en": {
-      "title": "A better fitting Qixi theme on mobile",
+      "title": "More expressive Qixi details",
       "items": [
-        "Fixed horizontal page scrolling while the Qixi theme is active",
-        "Chats, Contacts, and Menu now reveal the full seasonal backdrop"
+        "Signed-in pages now feature a more visible magpie bridge accent",
+        "The active section now has a clearer Qixi feather marker"
       ]
     }
   }

@@ -125,7 +125,7 @@ export function AppChrome({
         </header>
       ) : null}
 
-      <main className={`shell page ${hideTopbar ? "shell-no-topbar" : ""} ${hideMobileNav ? "shell-no-mobile-nav" : ""} ${shellClassName ?? ""}`.trim()}>
+      <main className={`shell page ${session ? "shell-authenticated" : "shell-guest"} ${hideTopbar ? "shell-no-topbar" : ""} ${hideMobileNav ? "shell-no-mobile-nav" : ""} ${shellClassName ?? ""}`.trim()}>
         {children}
       </main>
     </>
