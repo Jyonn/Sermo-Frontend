@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.7",
+  "id": "2026.08.19.8",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "即时提醒不再等待",
+      "title": "鹊桥夜航，限时启航",
       "items": [
-        "离线后收到的新消息会通过即时渠道逐条推送，不再等待离线阈值",
-        "即时提醒不再并入定时合并消息"
+        "8月19日至20日，全站换上七夕限定的月白与靛青主题",
+        "银汉页眉、羽纹选中态与喜鹊角饰会随深浅外观自然切换"
       ]
     },
     "en": {
-      "title": "Instant alerts without waiting",
+      "title": "A Qixi night voyage",
       "items": [
-        "New messages now trigger individual instant alerts as soon as you are offline",
-        "Instant alerts are no longer included in scheduled notification digests"
+        "From August 19 to 20, Sermo wears a limited moonlight and indigo Qixi theme",
+        "Milky Way headers, feathered tabs, and magpie details adapt naturally to light and dark mode"
       ]
     }
   }

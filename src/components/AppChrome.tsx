@@ -76,6 +76,7 @@ export function AppChrome({
                 ) : null}
               </Link>
             )}
+            <span className="festival-theme-mark" aria-hidden="true" />
           </div>
 
           {!hidePageTitle ? (

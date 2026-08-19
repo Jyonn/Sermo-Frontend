@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "../styles.css";
+import "./styles/qixi-theme.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdentity";
@@ -12,10 +13,12 @@ import { initializeTheme, ThemeProvider } from "./lib/theme";
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
+import { initializeScheduledSiteTheme } from "./lib/siteTheme";
 
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
 initializeTheme();
+initializeScheduledSiteTheme();
 const routerBasename = getSpaceRouterBasename();
 
 function initializeMaterialSymbols(attempt = 0) {
