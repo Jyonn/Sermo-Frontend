@@ -149,7 +149,6 @@ const cityBubbleRequirements: Partial<Record<ChatBubbleStyle, TranslationKey>> =
   "city-beijing": "menu.cityRegionBeijing",
 };
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
-const vipOrLevelStatementStyles = new Set<StatementCardStyle>(["niko", "fufu"]);
 const statementStyleRarity: Record<StatementCardStyle, GrowthRewardDTO["rarity"]> = {
   default: "common",
   editorial: "uncommon",
@@ -448,9 +447,9 @@ export default function MenuPage() {
   const hasPassword = Boolean(me?.has_password ?? session?.user.has_password);
   const hasGrowthCapability = (key: string, fallbackLevel: number) =>
     me?.growth?.capabilities?.[key]?.available ?? (me?.growth?.level ?? 1) >= fallbackLevel;
-  const canUploadCustomAvatar = hasGrowthCapability("custom_avatar", 4);
-  const canRenameNickname = hasGrowthCapability("rename_nickname", 5);
-  const canEditWelcome = hasGrowthCapability("welcome_message", 6);
+  const canUploadCustomAvatar = hasGrowthCapability("menu.profile.avatar.custom", 4);
+  const canRenameNickname = hasGrowthCapability("menu.profile.nickname", 5);
+  const canEditWelcome = hasGrowthCapability("menu.profile.welcome", 6);
   const discoverThen = (rewardId: string, action: () => void) => {
     if (discoveryFeature(rewardId)?.is_new) void discoverFeature(rewardId);
     action();
@@ -460,10 +459,9 @@ export default function MenuPage() {
   const ownsInventoryResource = (
     resourceType: "background" | "bubble" | "frame" | "statement" | "vip",
     resourceKey: string,
-    legacyFallback: boolean,
-  ) => me?.resource_inventory
-    ? me.resource_inventory.some((item) => item.resource_type === resourceType && item.resource_key === resourceKey)
-    : legacyFallback;
+  ) => me?.resource_inventory?.some(
+    (item) => item.resource_type === resourceType && item.resource_key === resourceKey,
+  ) ?? false;
   const rewardFor = (category: "background" | "bubble" | "frame", assetKey: string) =>
     me?.growth?.levels?.flatMap((item) => item.rewards ?? []).find((reward) => reward.category === category && reward.asset_key === assetKey);
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
@@ -477,11 +475,10 @@ export default function MenuPage() {
     const rewards = me?.growth?.levels?.find((item) => item.level === growthLevel)?.rewards ?? [];
     return rewards.reduce((best, reward) => rank.indexOf(reward.rarity) > rank.indexOf(best) ? reward.rarity : best, "common");
   })();
-  const canCustomizeChatBackground = hasGrowthCapability("custom_chat_background", 8);
-  const canUseBackgroundStyle = (theme: ChatBackgroundTheme) => theme === "custom" || ownsInventoryResource(
+  const canCustomizeChatBackground = hasGrowthCapability("menu.personalization.background.use.custom", 8);
+  const canUseBackgroundStyle = (theme: ChatBackgroundTheme) => ownsInventoryResource(
     "background",
     theme,
-    growthLevel >= rewardLevel("background", theme),
   );
   const canUseBubbleStyle = (style: ChatBubbleStyle) =>
     cityBubbleStyles.has(style)
@@ -489,20 +486,13 @@ export default function MenuPage() {
       : ownsInventoryResource(
         "bubble",
         style,
-        (vipOrLevelBubbleStyles.has(style) && permanentVip) || growthLevel >= rewardLevel("bubble", style),
       );
   const canUseAvatarFrame = (frame: PersonalizationDTO["avatar_frame_style"]) =>
     ownsInventoryResource(
       "frame",
       frame,
-      (frame === "vip" && permanentVip)
-      || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
-      || (frame !== "vip" && growthLevel >= rewardLevel("frame", frame)),
     );
-  const canUseStatementStyle = (style: StatementCardStyle) => style === "vip"
-    ? ownsInventoryResource("statement", style, permanentVip)
-    : (vipOrLevelStatementStyles.has(style) && (permanentVip || growthLevel >= 16))
-      || !vipOrLevelStatementStyles.has(style);
+  const canUseStatementStyle = (style: StatementCardStyle) => ownsInventoryResource("statement", style);
   const buildPersonalizationSections = (
     items: readonly PersonalizationCatalogItem[],
     category: "background" | "bubble" | "frame",
@@ -1276,7 +1266,7 @@ export default function MenuPage() {
       showPasswordReminder(t("avatar.passwordRequired"));
       return;
     }
-    if (!me?.growth?.capabilities?.custom_avatar?.available) {
+    if (!me?.growth?.capabilities?.["menu.profile.avatar.custom"]?.available) {
       showToast(t("avatar.levelRequired", { level: 4 }), "error");
       return;
     }
@@ -1453,7 +1443,7 @@ export default function MenuPage() {
       showPasswordReminder(field === "name" ? t("profile.nicknamePasswordRequired") : t("profile.welcomePasswordRequired"));
       return;
     }
-    const capability = field === "name" ? "rename_nickname" : "welcome_message";
+    const capability = field === "name" ? "menu.profile.nickname" : "menu.profile.welcome";
     const requiredLevel = me?.growth?.capabilities?.[capability]?.required_level ?? (field === "name" ? 5 : 6);
     if (!me?.growth?.capabilities?.[capability]?.available) {
       showToast(t("growth.levelRequired", { level: requiredLevel }), "error");

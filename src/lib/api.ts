@@ -1177,16 +1177,8 @@ export const api = {
     });
   },
 
-  getImageMetadata(messageId: number, signal?: AbortSignal) {
-    return request<ImageMetadataDTO>("/messages/image-metadata", {
-      auth: true,
-      query: { message_id: messageId },
-      signal,
-    });
-  },
-
-  getVideoMetadata(messageId: number, signal?: AbortSignal) {
-    return request<VideoMetadataDTO>("/messages/video-metadata", {
+  getMediaMetadata<T extends ImageMetadataDTO | VideoMetadataDTO>(messageId: number, signal?: AbortSignal) {
+    return request<T>("/messages/media-metadata", {
       auth: true,
       query: { message_id: messageId },
       signal,
@@ -1299,14 +1291,6 @@ export const api = {
       method: "POST",
       auth: true,
       body: { welcome_message },
-    });
-  },
-
-  updatePlazaGreeting(plaza_greeting: string) {
-    return request<{ plaza_greeting: string }>("/users/me/plaza-greeting", {
-      method: "POST",
-      auth: true,
-      body: { plaza_greeting },
     });
   },
 

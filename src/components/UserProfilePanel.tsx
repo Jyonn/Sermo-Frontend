@@ -152,7 +152,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     if (!user) return "";
     return user.is_alive ? t("profile.onlineNow") : user.last_heartbeat ? t("profile.lastActive", { time: formatRelativeTime(user.last_heartbeat) }) : t("profile.offline");
   }, [user]);
-  const createGroupCapability = currentUserMe?.growth?.capabilities?.create_group;
+  const createGroupCapability = currentUserMe?.growth?.capabilities?.["chat.group.create"];
   const canCreateGroup = createGroupCapability?.available ?? false;
 
   const openChat = async () => {
@@ -197,7 +197,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     setGroupCreating(true);
     try {
       const me = await api.getUserMe();
-      const capability = me.growth?.capabilities?.create_group;
+      const capability = me.growth?.capabilities?.["chat.group.create"];
       if (capability && !capability.available) {
         showToast(t("profile.groupLevelRequired", { level: capability.required_level }), "error");
         return;

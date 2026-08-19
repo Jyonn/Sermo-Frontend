@@ -34,7 +34,7 @@ export function listPwaCachedAccounts(): PwaCachedAccount[] {
         lastVisitedAt: recent?.lastVisitedAt || 0,
       });
     } catch {
-      // Ignore malformed legacy sessions; the regular login flow can replace them.
+      // Ignore malformed cached sessions; the regular login flow can replace them.
     }
   }
   return accounts.sort((left, right) => right.lastVisitedAt - left.lastVisitedAt);

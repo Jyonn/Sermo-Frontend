@@ -2420,7 +2420,7 @@ function LiveChatsPage() {
     if (metadata?.status === 1 && metadata.geocoding_status !== 0) return;
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void api.getImageMetadata(messageId, controller.signal)
+      void api.getMediaMetadata<ImageMetadataDTO>(messageId, controller.signal)
         .then((nextMetadata) => {
           setImagePreview((current) => {
             if (!current || current.messageIds[current.index] !== messageId) return current;
@@ -2443,7 +2443,7 @@ function LiveChatsPage() {
     if (videoPreview.metadata?.status === 1 && videoPreview.metadata.geocoding_status !== 0) return;
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void api.getVideoMetadata(videoPreview.messageId as number, controller.signal)
+      void api.getMediaMetadata<VideoMetadataDTO>(videoPreview.messageId as number, controller.signal)
         .then((metadata) => setVideoPreview((current) => current ? { ...current, metadata } : current))
         .catch(() => undefined);
     }, 1200);
@@ -2618,16 +2618,16 @@ function LiveChatsPage() {
     showToast(t("growth.capabilityRequired", { level: capability.required_level, capability: label }), "error");
     return false;
   };
-  const canSendImage = growthCapability("send_image", 2).available;
-  const canSendAudio = growthCapability("send_audio", 3).available;
-  const canSendLocation = growthCapability("send_location", 3).available;
-  const canCreateGroup = growthCapability("create_group", 4).available;
-  const canInviteGroupMember = growthCapability("invite_group_member", 4).available;
-  const canRenameGroup = growthCapability("rename_group", 5).available;
-  const canSendVideo = growthCapability("send_video", 5).available;
-  const canCreateSticker = growthCapability("create_sticker", 6).available;
-  const canUseOnlineReminder = growthCapability("online_reminder", 7).available;
-  const canDownloadAudio = growthCapability("download_audio", 8).available;
+  const canSendImage = growthCapability("chat.message.send.image", 2).available;
+  const canSendAudio = growthCapability("chat.message.send.audio", 3).available;
+  const canSendLocation = growthCapability("chat.message.send.location", 3).available;
+  const canCreateGroup = growthCapability("chat.group.create", 4).available;
+  const canInviteGroupMember = growthCapability("chat.group.invite", 4).available;
+  const canRenameGroup = growthCapability("chat.group.rename", 5).available;
+  const canSendVideo = growthCapability("chat.message.send.video", 5).available;
+  const canCreateSticker = growthCapability("menu.sticker.create", 6).available;
+  const canUseOnlineReminder = growthCapability("chat.reminder.online", 7).available;
+  const canDownloadAudio = growthCapability("chat.message.download.audio", 8).available;
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const canRecallMessage = (message: ChatMessage) => {
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
@@ -3643,7 +3643,7 @@ function LiveChatsPage() {
   };
 
   const addStickerFromFile = async (file: File) => {
-    if (stickerSaving || !requireComposerCapability("create_sticker", 6, t("sticker.create"))) return;
+    if (stickerSaving || !requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) return;
     setStickerSaving(true);
     try {
       const sticker = await addStickerFile(file);
@@ -3962,7 +3962,7 @@ function LiveChatsPage() {
 
   const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute" | "badge", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
-    if (kind === "online" && enabled && !requireComposerCapability("online_reminder", 7, t("chat.enableOnlineReminder"))) return;
+    if (kind === "online" && enabled && !requireComposerCapability("chat.reminder.online", 7, t("chat.enableOnlineReminder"))) return;
     const chatIdToUpdate = selectedChat.id;
     const field = kind === "pin" ? "pinned" : kind === "online" ? "onlineReminderEnabled" : kind === "mute" ? "notificationsMuted" : "unreadBadgeMuted";
     setPreferenceSaving(kind);
@@ -3998,7 +3998,7 @@ function LiveChatsPage() {
 
   const openChatMemberAdder = async () => {
     if (!selectedChat) return;
-    const capabilityKey = selectedChat.type === "group" ? "invite_group_member" : "create_group";
+    const capabilityKey = selectedChat.type === "group" ? "chat.group.invite" : "chat.group.create";
     const label = selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup");
     if (!requireComposerCapability(capabilityKey, 4, label)) return;
     const verified = await ensureCurrentUserVerified();
@@ -4488,7 +4488,7 @@ function LiveChatsPage() {
 
   const openGalleryPicker = () => {
     if (composerBusy) return;
-    if (!requireComposerCapability("send_image", 2, t("message.sendImage"))) return;
+    if (!requireComposerCapability("chat.message.send.image", 2, t("message.sendImage"))) return;
     galleryInputRef.current?.click();
   };
 
@@ -4499,7 +4499,7 @@ function LiveChatsPage() {
 
   const openLocationPicker = () => {
     if (composerBusy) return;
-    if (!requireComposerCapability("send_location", 3, t("message.sendLocation"))) return;
+    if (!requireComposerCapability("chat.message.send.location", 3, t("message.sendLocation"))) return;
     setComposerMoreOpen(false);
     if (!navigator.geolocation) {
       setLocationDraft({ phase: "error", error: t("location.browserUnsupported") });
@@ -4796,8 +4796,8 @@ function LiveChatsPage() {
       files.map(async (file) => {
         try {
           const kind = source === "file" ? "file" : resolveMediaKind(file);
-          if (kind === "image" && !requireComposerCapability("send_image", 2, t("message.sendImage"))) return;
-          if (kind === "video" && !requireComposerCapability("send_video", 5, t("message.sendVideo"))) return;
+          if (kind === "image" && !requireComposerCapability("chat.message.send.image", 2, t("message.sendImage"))) return;
+          if (kind === "video" && !requireComposerCapability("chat.message.send.video", 5, t("message.sendVideo"))) return;
           await sendUploadedMediaMessage(kind, file, source === "file" ? { file_name: file.name, file_size: file.size } : {});
         } catch (error) {
           const uploadError = toMessageUploadError(error);
@@ -4852,7 +4852,7 @@ function LiveChatsPage() {
 
   const startVoiceRecording = async () => {
     if (composerBusy || voiceComposer.open) return;
-    if (!requireComposerCapability("send_audio", 3, t("message.sendAudio"))) return;
+    if (!requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) return;
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setPageError(t("audio.unsupported"));
       return;
@@ -5073,7 +5073,7 @@ function LiveChatsPage() {
   const downloadMessageAttachment = async () => {
     if (!messageMenu || !["image", "audio", "file"].includes(messageMenu.message.kind)) return;
     const message = messageMenu.message;
-    if (message.kind === "audio" && !requireComposerCapability("download_audio", 8, t("audio.download"))) return;
+    if (message.kind === "audio" && !requireComposerCapability("chat.message.download.audio", 8, t("audio.download"))) return;
     const rawUri = message.payload?.uri;
     if (!rawUri) return;
     const uri = resolveStableResourceUri(rawUri) ?? rawUri;
@@ -5264,7 +5264,7 @@ function LiveChatsPage() {
   };
 
   const createGroup = async () => {
-    if (!requireComposerCapability("create_group", 4, t("chat.createGroup"))) return;
+    if (!requireComposerCapability("chat.group.create", 4, t("chat.createGroup"))) return;
     if (!currentUserVerified) {
       setPageError(t("chat.verifyToCreateGroup"));
       return;
@@ -5298,7 +5298,7 @@ function LiveChatsPage() {
   };
 
   const renameGroup = async () => {
-    if (!requireComposerCapability("rename_group", 5, t("chat.renameGroup"))) return;
+    if (!requireComposerCapability("chat.group.rename", 5, t("chat.renameGroup"))) return;
     if (!selectedChat) return;
     try {
       setGroupManageState("saving");
@@ -5316,7 +5316,7 @@ function LiveChatsPage() {
   const submitChatMemberPicker = async () => {
     if (!selectedChat) return;
     if (!chatMemberActionIds.length) return;
-    if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "invite_group_member" : "create_group", 4, selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup"))) return;
+    if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "chat.group.invite" : "chat.group.create", 4, selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup"))) return;
 
     try {
       setGroupManageState("saving");

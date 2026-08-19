@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
-import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from "react-router-dom";
+import { lazy, Suspense, type ReactNode } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
 import { DocumentTitle } from "./components/DocumentTitle";
@@ -25,7 +25,7 @@ import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
 import SpaceUsersPage from "./pages/SpaceUsersPage";
 import SquarePage from "./pages/SquarePage";
-import { buildAdminPath, buildJoinHrefForCurrentHost, getDetectedSpaceSlug } from "./lib/spaceEntry";
+import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import PlatformAdminPage from "./pages/PlatformAdminPage";
@@ -33,39 +33,6 @@ import PlatformAdminPage from "./pages/PlatformAdminPage";
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
   return detectedSlug ? <JoinSpacePage /> : <LandingPage />;
-}
-
-function LegacyJoinRedirect() {
-  const [searchParams] = useSearchParams();
-  const slug = searchParams.get("slug");
-  return slug ? <LegacyJoinHostRedirect slug={slug} /> : <Navigate replace to="/space" />;
-}
-
-function LegacyAdminRedirect({ mode }: { mode: "create" | "login" }) {
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const slug = searchParams.get("slug");
-  return <Navigate replace to={`${buildAdminPath(slug, mode)}${location.hash}`} />;
-}
-
-function LegacyJoinHostRedirect({ slug }: { slug: string }) {
-  const { t } = useI18n();
-  useEffect(() => {
-    window.location.replace(buildJoinHrefForCurrentHost(slug));
-  }, [slug]);
-
-  return <FeedbackState title={t("app.enteringSpace")} />;
-}
-
-function LegacySlugRedirect() {
-  const { slug = "" } = useParams();
-  return <LegacyJoinHostRedirect slug={slug} />;
-}
-
-function LegacySettingsRedirect() {
-  const location = useLocation();
-  const channel = new URLSearchParams(location.search).get("channel");
-  return <Navigate replace to={channel === "email" ? "/app/menu?sheet=email-verification" : "/app/menu"} />;
 }
 
 function AppHomeRedirect() {
@@ -118,11 +85,6 @@ export default function App() {
             </RequireAdminAuth>
           }
         />
-        <Route path="/space/create" element={<LegacyAdminRedirect mode="create" />} />
-        <Route path="/space/login" element={<LegacyAdminRedirect mode="login" />} />
-        <Route path="/space/join" element={<LegacyJoinRedirect />} />
-        <Route path="/space/:slug" element={<LegacySlugRedirect />} />
-
         <Route path="/app" element={<AppHomeRedirect />} />
         <Route
           path="/app/chats"
@@ -209,30 +171,6 @@ export default function App() {
           element={
             <RequireAuth>
               <SpaceUsersPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/app/settings/account"
-          element={
-            <RequireAuth>
-              <LegacySettingsRedirect />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/app/settings/notifications"
-          element={
-            <RequireAuth>
-              <LegacySettingsRedirect />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/app/settings/contacts"
-          element={
-            <RequireAuth>
-              <LegacySettingsRedirect />
             </RequireAuth>
           }
         />

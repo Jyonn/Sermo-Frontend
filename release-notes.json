@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.1",
+  "id": "2026.08.20.2",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "成长奖励正式进入资源库",
+      "title": "旧入口与重复接口完成清理",
       "items": [
-        "升级获得的气泡、背景和头像框会自动永久收进资源库",
-        "永久 VIP 与专属外观现在统一记录，领取状态更可靠"
+        "聊天媒体信息改用统一接口，图片与视频状态更一致",
+        "权限判断统一使用正式能力规则，减少页面与服务端判断偏差"
       ]
     },
     "en": {
-      "title": "Growth rewards now live in your collection",
+      "title": "Legacy routes and duplicate APIs removed",
       "items": [
-        "Bubbles, backgrounds, and frames earned from leveling are now permanently added to your collection",
-        "Permanent VIP and its exclusive cosmetics now share one reliable ownership record"
+        "Chat media metadata now uses one consistent endpoint for images and videos",
+        "Permission checks now share canonical capability rules across the app and server"
       ]
     }
   }
