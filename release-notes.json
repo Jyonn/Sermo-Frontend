@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.6",
+  "id": "2026.08.20.7",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "即时提醒支持更多接收方式",
+      "title": "聊天背景焕新",
       "items": [
-        "即时提醒现可同时连接 Bark、ntfy 和 Gotify",
-        "系统会按手机平台展示合适的接收端，并统一管理提醒偏好"
+        "背景库精简为 13 款更有辨识度的主题",
+        "极光天幕、幻彩膜、太空港与黑色电影新增沉浸式动态效果"
       ]
     },
     "en": {
-      "title": "More receivers for instant alerts",
+      "title": "Chat backgrounds, refined",
       "items": [
-        "Instant alerts can now connect to Bark, ntfy, and Gotify at the same time",
-        "Compatible receivers are shown for each mobile platform and share one alert preference"
+        "The background library now focuses on 13 more distinctive themes",
+        "Aurora Sky, Holographic Film, Spaceport, and Film Noir now feature immersive motion"
       ]
     }
   }

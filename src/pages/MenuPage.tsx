@@ -112,16 +112,15 @@ const personalizationOptions = {
 const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclude<ChatBackgroundTheme, "custom">, TranslationKey]> }> = [
   {
     label: "menu.collectionEssential",
-    items: [["default", "menu.themeDefault"], ["paper", "menu.themePaper"], ["mint", "menu.themeMint"], ["dusk", "menu.themeDusk"]],
+    items: [["default", "menu.themeDefault"], ["paper", "menu.themePaper"], ["mint", "menu.themeMint"]],
   },
   {
     label: "menu.collectionCulture",
-    items: [["comic", "menu.themeComic"], ["zen", "menu.themeZen"], ["hero", "menu.themeHero"], ["dragon", "menu.themeDragon"], ["bauhaus", "menu.themeBauhaus"], ["mosaic", "menu.themeMosaic"]],
+    items: [["comic", "menu.themeComic"], ["bauhaus", "menu.themeBauhaus"], ["dragon", "menu.themeDragon"]],
   },
-  { label: "menu.collectionNature", items: [["tidepool", "menu.themeTidepool"], ["forest", "menu.themeForest"], ["desert", "menu.themeDesert"], ["snowfield", "menu.themeSnowfield"], ["sakura", "menu.themeSakura"]] },
-  { label: "menu.collectionAtmosphere", items: [["sunrise", "menu.themeSunrise"], ["midnight", "menu.themeMidnight"], ["rain", "menu.themeRain"], ["galaxy", "menu.themeGalaxy"], ["aurora-sky", "menu.themeAuroraSky"]] },
-  { label: "menu.collectionMaterial", items: [["linen", "menu.themeLinen"], ["terrazzo", "menu.themeTerrazzo"], ["blueprint", "menu.themeBlueprint"], ["newsprint", "menu.themeNewsprint"], ["hologram", "menu.themeHologram"]] },
-  { label: "menu.collectionFantasy", items: [["arcade", "menu.themeArcade"], ["jazz", "menu.themeJazz"], ["spaceport", "menu.themeSpaceport"], ["candy", "menu.themeCandy"], ["noir-film", "menu.themeNoirFilm"]] },
+  { label: "menu.collectionMaterial", items: [["zen", "menu.themeZen"], ["mosaic", "menu.themeMosaic"], ["newsprint", "menu.themeNewsprint"]] },
+  { label: "menu.collectionAtmosphere", items: [["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"], ["spaceport", "menu.themeSpaceport"]] },
+  { label: "menu.collectionFantasy", items: [["noir-film", "menu.themeNoirFilm"]] },
 ];
 
 const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.chat_bubble_style[number]> }> = [

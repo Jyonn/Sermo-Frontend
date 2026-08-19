@@ -2951,6 +2951,110 @@ html[data-theme="dark"] body .growth-level-detail {
   }
 }
 
+/* Premium background motion: shared by the live scene, sticky preview and catalog tile. */
+@property --spaceport-bearing {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 8deg;
+}
+
+@property --hologram-bearing {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 32deg;
+}
+
+:is(.chat-background-aurora-sky, .chat-background-hologram, .chat-background-spaceport, .chat-background-noir-film) {
+  --chat-chrome-surface: rgba(18, 29, 28, 0.76);
+  --chat-chrome-border: rgba(169, 211, 197, 0.24);
+  --chat-input-surface: rgba(22, 35, 33, 0.8);
+}
+
+:is(.chat-detail-scene.chat-background-aurora-sky::before, .chat-background-preview[data-theme="aurora-sky"], .chat-background-choice.theme-aurora-sky > span, .personalization-background-swatch.theme-aurora-sky) {
+  background:
+    linear-gradient(104deg, transparent 8%, rgba(100, 247, 184, 0.08) 18%, rgba(113, 242, 197, 0.62) 31%, rgba(119, 173, 255, 0.18) 43%, transparent 57%),
+    linear-gradient(128deg, transparent 20%, rgba(118, 150, 255, 0.52) 39%, rgba(226, 133, 238, 0.24) 52%, transparent 68%),
+    radial-gradient(circle at 15% 18%, rgba(238, 255, 249, 0.68) 0 0.7px, transparent 1.3px) 0 0 / 47px 43px,
+    radial-gradient(circle at 72% 32%, rgba(203, 230, 255, 0.62) 0 0.8px, transparent 1.4px) 0 0 / 73px 67px,
+    radial-gradient(ellipse at 50% 115%, rgba(47, 155, 135, 0.38), transparent 48%),
+    linear-gradient(168deg, #172c3c 0%, #0b1827 56%, #07121c 100%);
+  background-size: 190% 160%, 180% 180%, 47px 43px, 73px 67px, 130% 130%, auto;
+  animation: chat-background-aurora-living 24s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+}
+
+:is(.chat-detail-scene.chat-background-hologram::before, .chat-background-preview[data-theme="hologram"], .chat-background-choice.theme-hologram > span, .personalization-background-swatch.theme-hologram) {
+  background:
+    linear-gradient(108deg, transparent 18%, rgba(255, 255, 255, 0.58) 35%, rgba(255, 255, 255, 0.08) 46%, transparent 60%),
+    repeating-linear-gradient(122deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 13px),
+    conic-gradient(from var(--hologram-bearing) at 58% 42%, #c8f1df, #d8d5f7 21%, #f5d7db 39%, #f6e8b9 57%, #c8e8f4 76%, #c8f1df),
+    radial-gradient(circle at 24% 76%, rgba(255, 255, 255, 0.62), transparent 28%),
+    #dcebe4;
+  background-size: 230% 100%, 34px 34px, 145% 145%, 130% 130%, auto;
+  animation: chat-background-hologram-living 22s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+}
+
+:is(.chat-detail-scene.chat-background-spaceport::before, .chat-background-preview[data-theme="spaceport"], .chat-background-choice.theme-spaceport > span, .personalization-background-swatch.theme-spaceport) {
+  background:
+    radial-gradient(circle at 22% 24%, rgba(219, 255, 247, 0.9) 0 0.8px, transparent 1.5px) 0 0 / 83px 79px,
+    radial-gradient(circle at 74% 41%, rgba(143, 211, 255, 0.72) 0 0.8px, transparent 1.5px) 0 0 / 127px 119px,
+    radial-gradient(circle at 50% 112%, rgba(74, 230, 201, 0.24), transparent 22%),
+    repeating-conic-gradient(from var(--spaceport-bearing) at 50% 112%, rgba(126, 239, 220, 0.13) 0 1.6deg, transparent 1.6deg 12deg),
+    radial-gradient(ellipse at 50% 112%, transparent 0 21%, rgba(145, 242, 222, 0.38) 21.3% 21.8%, transparent 22.2% 29%, rgba(117, 189, 222, 0.18) 29.3% 29.8%, transparent 30.2%),
+    linear-gradient(160deg, #142d3a, #07121b 65%, #040a10);
+  background-size: 83px 79px, 127px 119px, 150% 150%, 165% 165%, 160% 160%, auto;
+  animation: chat-background-spaceport-orbit 38s linear infinite;
+}
+
+:is(.chat-detail-scene.chat-background-noir-film::before, .chat-background-preview[data-theme="noir-film"], .chat-background-choice.theme-noir-film > span, .personalization-background-swatch.theme-noir-film) {
+  background:
+    radial-gradient(ellipse at 8px 15px, rgba(225, 210, 174, 0.2) 0 4px, transparent 4.8px) 0 0 / 100% 34px,
+    radial-gradient(ellipse at calc(100% - 8px) 15px, rgba(225, 210, 174, 0.2) 0 4px, transparent 4.8px) 0 0 / 100% 34px,
+    repeating-linear-gradient(90deg, transparent 0 17%, rgba(245, 231, 194, 0.055) 17.1% 17.25%, transparent 17.4% 61%, rgba(245, 231, 194, 0.035) 61.1% 61.2%, transparent 61.35%),
+    radial-gradient(circle at 1px 1px, rgba(238, 222, 185, 0.16) 0 0.65px, transparent 0.95px) 0 0 / 7px 7px,
+    linear-gradient(105deg, transparent 20%, rgba(249, 231, 181, 0.02) 32%, rgba(249, 231, 181, 0.2) 47%, rgba(249, 231, 181, 0.045) 58%, transparent 72%),
+    radial-gradient(ellipse at 68% 12%, rgba(231, 218, 185, 0.44), transparent 20%),
+    radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.58) 100%),
+    linear-gradient(148deg, #292a27, #111310 58%, #070806);
+  background-size: 100% 34px, 100% 34px, 260% 100%, 7px 7px, 230% 100%, 145% 145%, 100% 100%, auto;
+  animation: chat-background-noir-screening 18s steps(1, end) infinite;
+}
+
+@keyframes chat-background-aurora-living {
+  0% { background-position: -20% 32%, 110% 54%, 0 0, 12px 8px, 42% 82%, 0 0; }
+  48% { background-position: 42% 46%, 54% 36%, 9px 5px, 0 11px, 58% 58%, 0 0; }
+  100% { background-position: 112% 58%, -24% 48%, 17px 11px, 19px 3px, 46% 38%, 0 0; }
+}
+
+@keyframes chat-background-hologram-living {
+  0% { --hologram-bearing: 18deg; background-position: 120% 0, 0 0, 36% 38%, 22% 74%, 0 0; }
+  52% { --hologram-bearing: 116deg; background-position: 18% 0, 11px 7px, 58% 52%, 54% 42%, 0 0; }
+  100% { --hologram-bearing: 208deg; background-position: -90% 0, 24px 15px, 72% 64%, 76% 26%, 0 0; }
+}
+
+@keyframes chat-background-spaceport-orbit {
+  from { --spaceport-bearing: 8deg; background-position: 0 0, 0 0, 50% 100%, 50% 100%, 50% 100%, 0 0; }
+  to { --spaceport-bearing: 368deg; background-position: 83px 39px, -63px 119px, 50% 100%, 50% 100%, 50% 100%, 0 0; }
+}
+
+@keyframes chat-background-noir-screening {
+  0%, 100% { background-position: 0 0, 0 0, -14% 0, 0 0, 116% 0, 68% 12%, center, 0 0; opacity: 1; }
+  19% { background-position: 0 1px, 0 1px, 12% 0, 2px -1px, 88% 0, 70% 14%, center, 0 0; opacity: .97; }
+  20% { background-position: 0 2px, 0 2px, 13% 0, -1px 2px, 86% 0, 70% 14%, center, 0 0; opacity: .91; }
+  21%, 54% { background-position: 0 2px, 0 2px, 14% 0, 1px 1px, 82% 0, 72% 13%, center, 0 0; opacity: 1; }
+  55% { background-position: 0 3px, 0 3px, 48% 0, -2px 0, 44% 0, 74% 11%, center, 0 0; opacity: .94; }
+  56%, 82% { background-position: 0 3px, 0 3px, 50% 0, 1px -2px, 42% 0, 75% 11%, center, 0 0; opacity: .99; }
+  83% { background-position: 0 0, 0 0, 82% 0, -1px 1px, -6% 0, 69% 15%, center, 0 0; opacity: .92; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.chat-detail-scene.chat-background-aurora-sky::before, .chat-background-preview[data-theme="aurora-sky"], .chat-background-choice.theme-aurora-sky > span, .personalization-background-swatch.theme-aurora-sky,
+    .chat-detail-scene.chat-background-hologram::before, .chat-background-preview[data-theme="hologram"], .chat-background-choice.theme-hologram > span, .personalization-background-swatch.theme-hologram,
+    .chat-detail-scene.chat-background-spaceport::before, .chat-background-preview[data-theme="spaceport"], .chat-background-choice.theme-spaceport > span, .personalization-background-swatch.theme-spaceport,
+    .chat-detail-scene.chat-background-noir-film::before, .chat-background-preview[data-theme="noir-film"], .chat-background-choice.theme-noir-film > span, .personalization-background-swatch.theme-noir-film) {
+    animation: none;
+  }
+}
+
 .success-note {
   color: #0d4c35;
   background: rgba(22, 196, 127, 0.12);
