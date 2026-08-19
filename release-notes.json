@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.4",
+  "id": "2026.08.19.5",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "深色导航更自然",
+      "title": "八仙动画更干净",
       "items": [
-        "聊天、广场、通讯和菜单顶部导航现已适配深色毛玻璃效果",
-        "滚动后的标题、操作按钮和分类导航在夜间更加清晰柔和"
+        "清理吕洞宾、钟离权与何仙姑逐帧动画中的残留边线",
+        "角色贴近气泡播放时不再闪现不规则方框"
       ]
     },
     "en": {
-      "title": "More natural dark navigation",
+      "title": "Cleaner Baxian animations",
       "items": [
-        "Top navigation across Chats, Square, Contacts, and Menu now uses a dark glass treatment",
-        "Titles, actions, and category tabs remain clear and comfortable after scrolling at night"
+        "Removed residual guide lines from the frame animations for Lü Dongbin, Zhongli Quan, and He Xiangu",
+        "Characters no longer flash irregular boxes while animating along chat bubbles"
       ]
     }
   }

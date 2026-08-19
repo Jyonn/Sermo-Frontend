@@ -10,26 +10,118 @@ GRID = (6, 4)
 
 CHARACTERS = {
     "LvDongbin": {
+        "asset": "lv-dongbin",
         "duration": 4000,
         "anchor": "avatar-edge",
         "phases": [["peek-and-rise", 0, 11], ["draw-sword", 12, 23], ["flourish-and-salute", 24, 40], ["sheathe-and-retreat", 41, 47]],
     },
     "ZhongliQuan": {
+        "asset": "zhongli-quan",
         "duration": 4500,
         "anchor": "avatar-edge",
         "phases": [["rakish-rise-and-swagger", 0, 11], ["token-play-and-prepare", 12, 23], ["token-toss-and-catch", 24, 38], ["chin-salute-and-retreat", 39, 47]],
     },
     "HeXiangu": {
+        "asset": "he-xiangu",
         "duration": 3750,
         "anchor": "avatar-edge",
         "phases": [["sleeve-entry-and-launch", 0, 15], ["flight-and-brake", 16, 31], ["warrior-salute", 32, 36], ["land-and-retreat", 37, 47]],
     },
 }
 
+PUBLIC_ASSET_ROOT = ROOT.parent.parent / "public" / "assets" / "baxian"
+
 
 def durations(total):
     base, extra = divmod(total, 48)
     return [base + (index < extra) for index in range(48)]
+
+
+def clear_generation_guides(image):
+    """Remove thin framing guides left by generated sprite source sheets."""
+    pixels = image.load()
+    width, height = image.size
+
+    def clear_long_runs(horizontal):
+        primary_size = height if horizontal else width
+        secondary_size = width if horizontal else height
+        minimum_run = round(secondary_size * 0.3)
+        runs = []
+        for primary in range(primary_size):
+            start = None
+            previous_color = None
+            for secondary in range(secondary_size + 1):
+                if secondary < secondary_size:
+                    x, y = (secondary, primary) if horizontal else (primary, secondary)
+                    color = pixels[x, y]
+                    visible = color[3] > 0
+                    color_delta = (
+                        sum(abs(channel - previous_channel) for channel, previous_channel in zip(color[:3], previous_color[:3]))
+                        if previous_color is not None
+                        else 0
+                    )
+                else:
+                    visible = False
+                    color = None
+                    color_delta = 0
+                continues_guide = visible and (start is None or color_delta < 12)
+                if continues_guide and start is None:
+                    start = secondary
+                elif not continues_guide and start is not None:
+                    if secondary - start >= minimum_run:
+                        runs.append((primary, start, secondary))
+                    start = secondary if visible else None
+                previous_color = color if visible else None
+
+        for primary, start, end in runs:
+            for secondary in range(start, end):
+                x, y = (secondary, primary) if horizontal else (primary, secondary)
+                red, green, blue, _ = pixels[x, y]
+                pixels[x, y] = (red, green, blue, 0)
+
+    clear_long_runs(horizontal=True)
+    clear_long_runs(horizontal=False)
+
+    alpha = image.getchannel("A")
+    visited = bytearray(width * height)
+    pixels_to_clear = []
+
+    for start_y in range(height):
+        for start_x in range(width):
+            start = start_y * width + start_x
+            if visited[start] or alpha.getpixel((start_x, start_y)) == 0:
+                continue
+
+            visited[start] = 1
+            stack = [(start_x, start_y)]
+            component = []
+            min_x = max_x = start_x
+            min_y = max_y = start_y
+            while stack:
+                x, y = stack.pop()
+                component.append((x, y))
+                min_x, max_x = min(min_x, x), max(max_x, x)
+                min_y, max_y = min(min_y, y), max(max_y, y)
+                for next_x, next_y in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+                    if not (0 <= next_x < width and 0 <= next_y < height):
+                        continue
+                    index = next_y * width + next_x
+                    if visited[index] or alpha.getpixel((next_x, next_y)) == 0:
+                        continue
+                    visited[index] = 1
+                    stack.append((next_x, next_y))
+
+            component_width = max_x - min_x + 1
+            component_height = max_y - min_y + 1
+            fill_ratio = len(component) / (component_width * component_height)
+            spans_frame = component_width >= width * 0.45 or component_height >= height * 0.45
+            if (spans_frame and fill_ratio < 0.09) or len(component) <= 4:
+                pixels_to_clear.extend(component)
+
+    for x, y in pixels_to_clear:
+        red, green, blue, _ = pixels[x, y]
+        pixels[x, y] = (red, green, blue, 0)
+    return image
 
 
 def transparent_slot(sheet, column, row):
@@ -47,6 +139,7 @@ def transparent_slot(sheet, column, row):
                 pixels[x, y] = (red, green, blue, 0)
             elif magenta_distance < 180 and red > green * 1.6 and blue > green * 1.6:
                 pixels[x, y] = (red, green, blue, round(alpha * (magenta_distance - 70) / 110))
+    slot = clear_generation_guides(slot)
     bbox = slot.getchannel("A").getbbox()
     if not bbox:
         return Image.new("RGBA", (CELL, CELL))
@@ -113,6 +206,18 @@ def build(name, config):
         "reducedMotion": {"autoplay": False, "fallbackFrame": 11},
     }
     (folder / "animation.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+
+    PUBLIC_ASSET_ROOT.mkdir(parents=True, exist_ok=True)
+    sprite.save(PUBLIC_ASSET_ROOT / f"{config['asset']}-48-v4-sheet.webp", quality=90, method=6)
+    frames[0].save(
+        PUBLIC_ASSET_ROOT / f"{config['asset']}-48-v4.webp",
+        save_all=True,
+        append_images=frames[1:],
+        duration=timing,
+        loop=1,
+        lossless=True,
+        method=6,
+    )
 
 
 if __name__ == "__main__":
