@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.8",
+  "id": "2026.08.20.9",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "个性化目录更清晰",
+      "title": "头像框收藏焕新",
       "items": [
-        "城市气泡现已并入史诗收藏，打卡解锁提示更加简洁",
-        "贴纸与积木气泡下架，个性化选择更加聚焦"
+        "头像框目录精简为更有辨识度的九款收藏",
+        "拍立得、机械环、剪纸、永久 VIP 等头像框已重新归类"
       ]
     },
     "en": {
-      "title": "A clearer personalization library",
+      "title": "Avatar frame collection, refined",
       "items": [
-        "City bubbles now live in the Epic collection with simpler check-in labels",
-        "Sticker and Toy Brick bubbles have been retired for a more focused library"
+        "The avatar frame library now focuses on nine distinctive designs",
+        "Polaroid, Mechanical Ring, Paper Cut, and Lifetime VIP frames have been regrouped"
       ]
     }
   }

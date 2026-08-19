@@ -89,11 +89,6 @@ const personalizationOptions = {
     ["orbit", "menu.frameOrbit"],
     ["aurora", "menu.frameAurora"],
     ["polaroid", "menu.framePolaroid"],
-    ["soundwave", "menu.frameSoundwave"],
-    ["portal", "menu.framePortal"],
-    ["butterfly", "menu.frameButterfly"], ["moon", "menu.frameMoon"],
-    ["camera", "menu.frameCamera"],
-    ["comet", "menu.frameComet"], ["snowfall", "menu.frameSnowfall"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["vip", "menu.frameVip"],
   ],
   statement_card_style: [
@@ -133,10 +128,9 @@ const chatBubbleSections: Array<{ label: TranslationKey; items: Array<typeof per
 ];
 
 const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof personalizationOptions.avatar_frame_style[number]> }> = [
-  { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "orbit", "polaroid"].includes(value)) },
-  { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["aurora", "soundwave", "portal", "comet"].includes(value)) },
-  { label: "menu.collectionNature", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["butterfly", "moon", "snowfall"].includes(value)) },
-  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["camera", "papercut", "mechanical"].includes(value)) },
+  { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "polaroid"].includes(value)) },
+  { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["orbit", "papercut", "mechanical"].includes(value)) },
+  { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => value === "aurora") },
   { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "vip"].includes(value)) },
 ];
 
@@ -476,7 +470,7 @@ export default function MenuPage() {
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string) =>
     (category === "bubble" && cityBubbleStyles.has(assetKey as ChatBubbleStyle))
       ? "epic"
-      : (assetKey === "vip" ? "epic" : rewardFor(category, assetKey)?.rarity ?? "common");
+      : (assetKey === "vip" ? (category === "frame" ? "rare" : "epic") : rewardFor(category, assetKey)?.rarity ?? "common");
   const currentLevelRarity = (() => {
     const rank = ["common", "uncommon", "rare", "epic", "legendary"];
     const rewards = me?.growth?.levels?.find((item) => item.level === growthLevel)?.rewards ?? [];
