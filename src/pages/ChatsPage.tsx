@@ -2935,12 +2935,12 @@ function LiveChatsPage() {
       return new RegExp(`@${escapedName}(?=$|\\s|[，。！？、,.!?])`, "u").test(text);
     }).map((member) => member.userId);
   };
-  const insertMention = (member: Chat["detail"]["members"][number], range: { start: number; end: number }) => {
-    const safeStart = Math.max(0, Math.min(range.start, draft.length));
-    const safeEnd = Math.max(safeStart, Math.min(range.end, draft.length));
-    const needsLeadingSpace = safeStart > 0 && !MENTION_BOUNDARY_RE.test(draft[safeStart - 1]);
+  const insertMention = (member: Chat["detail"]["members"][number], range: { start: number; end: number }, sourceDraft = textareaRef.current?.value ?? draft) => {
+    const safeStart = Math.max(0, Math.min(range.start, sourceDraft.length));
+    const safeEnd = Math.max(safeStart, Math.min(range.end, sourceDraft.length));
+    const needsLeadingSpace = safeStart > 0 && !MENTION_BOUNDARY_RE.test(sourceDraft[safeStart - 1]);
     const insertion = `${needsLeadingSpace ? " " : ""}@${member.name}`;
-    const nextDraft = `${draft.slice(0, safeStart)}${insertion}${draft.slice(safeEnd)}`;
+    const nextDraft = `${sourceDraft.slice(0, safeStart)}${insertion}${sourceDraft.slice(safeEnd)}`;
     const nextCursor = safeStart + insertion.length;
     clearMentionDeleteSelection();
     updateDraft(nextDraft);
@@ -2960,10 +2960,11 @@ function LiveChatsPage() {
     if (!selectedChat || selectedChat.type !== "group") return;
     const member = selectedChat.detail.members.find((item) => item.userId === userId && !item.isSelf);
     if (!member) return;
-    const range = composerSelectionTouchedRef.current
-      ? composerSelectionRef.current
-      : { start: draft.length, end: draft.length };
-    insertMention(member, range);
+    const input = textareaRef.current;
+    const sourceDraft = input?.value ?? draft;
+    const hasCollapsedSelection = input && input.selectionStart === input.selectionEnd;
+    const cursor = hasCollapsedSelection ? input.selectionStart : sourceDraft.length;
+    insertMention(member, { start: cursor, end: cursor }, sourceDraft);
   };
   const handleComposerKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     const nativeEvent = event.nativeEvent as globalThis.KeyboardEvent & { isComposing?: boolean; keyCode?: number };

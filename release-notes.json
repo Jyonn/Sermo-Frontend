@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.5",
+  "id": "2026.08.19.6",
   "publishedAt": "2026-08-19",
   "locales": {
     "zh-CN": {
-      "title": "八仙动画更干净",
+      "title": "群聊艾特更顺手",
       "items": [
-        "清理吕洞宾、钟离权与何仙姑逐帧动画中的残留边线",
-        "角色贴近气泡播放时不再闪现不规则方框"
+        "艾特胶囊现在与正文对齐，并会自动匹配双方气泡的文字颜色",
+        "长按头像艾特成员时会保留已有草稿并从当前光标插入"
       ]
     },
     "en": {
-      "title": "Cleaner Baxian animations",
+      "title": "Smoother group mentions",
       "items": [
-        "Removed residual guide lines from the frame animations for Lü Dongbin, Zhongli Quan, and He Xiangu",
-        "Characters no longer flash irregular boxes while animating along chat bubbles"
+        "Mention pills now align with message text and match each bubble side's text color",
+        "Long-pressing an avatar now preserves the draft and inserts the mention at the current cursor"
       ]
     }
   }
