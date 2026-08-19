@@ -29,6 +29,7 @@ import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import PlatformAdminPage from "./pages/PlatformAdminPage";
+import PersonalizationCatalogLabPage from "./pages/PersonalizationCatalogLabPage";
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -56,6 +57,7 @@ export default function App() {
   const features = useSpaceFeatures();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
+  const isDesignLab = location.pathname.startsWith("/design/");
   const routeLocation = showFriendInviteOverlay
     ? {
         ...location,
@@ -76,6 +78,7 @@ export default function App() {
         <Route path="/account-switch" element={<AccountSwitchPage />} />
         <Route path="/pwa" element={<PwaAccountEntryPage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
+        <Route path="/design/personalization-catalog" element={<PersonalizationCatalogLabPage />} />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"
@@ -181,12 +184,12 @@ export default function App() {
           <Route path="/friend-invite" element={<FriendInvitePage overlay />} />
         </Routes>
       ) : null}
-      {ready && !isPlatformAdmin ? <DocumentTitle /> : null}
-      {ready && !isPlatformAdmin ? <GlobalMessageSync /> : null}
-      {ready && !isPlatformAdmin ? <GrowthLevelCelebration /> : null}
-      {ready && !isPlatformAdmin ? <AppBottomNav /> : null}
-      {ready && !isPlatformAdmin ? <PwaRecommendation /> : null}
-      {!isPlatformAdmin ? <PwaUpdatePrompt /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab ? <DocumentTitle /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab ? <GlobalMessageSync /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab ? <AppBottomNav /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}
+      {!isPlatformAdmin && !isDesignLab ? <PwaUpdatePrompt /> : null}
       <AppToast />
     </>
   );

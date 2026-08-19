@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.20.2",
+  "id": "2026.08.20.3",
   "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "旧入口与重复接口完成清理",
+      "title": "个性化品质展示进入设计选型",
       "items": [
-        "聊天媒体信息改用统一接口，图片与视频状态更一致",
-        "权限判断统一使用正式能力规则，减少页面与服务端判断偏差"
+        "新增四套品质分组与物品名称排版方案，可直接对比真实皮肤效果",
+        "品质标识回归名称信息区，减少与选中状态混淆"
       ]
     },
     "en": {
-      "title": "Legacy routes and duplicate APIs removed",
+      "title": "Personalization quality display enters design review",
       "items": [
-        "Chat media metadata now uses one consistent endpoint for images and videos",
-        "Permission checks now share canonical capability rules across the app and server"
+        "Added four quality-group and item-label directions using real skin previews",
+        "Quality markers now sit with item names to avoid confusion with selection state"
       ]
     }
   }
