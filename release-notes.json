@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.19.10",
-  "publishedAt": "2026-08-19",
+  "id": "2026.08.20.1",
+  "publishedAt": "2026-08-20",
   "locales": {
     "zh-CN": {
-      "title": "七夕装饰更加鲜明",
+      "title": "成长奖励正式进入资源库",
       "items": [
-        "登录后的主页面现在会展示更醒目的鹊桥装饰",
-        "当前栏目增加更清晰的七夕羽毛选中轨迹"
+        "升级获得的气泡、背景和头像框会自动永久收进资源库",
+        "永久 VIP 与专属外观现在统一记录，领取状态更可靠"
       ]
     },
     "en": {
-      "title": "More expressive Qixi details",
+      "title": "Growth rewards now live in your collection",
       "items": [
-        "Signed-in pages now feature a more visible magpie bridge accent",
-        "The active section now has a clearer Qixi feather marker"
+        "Bubbles, backgrounds, and frames earned from leveling are now permanently added to your collection",
+        "Permanent VIP and its exclusive cosmetics now share one reliable ownership record"
       ]
     }
   }

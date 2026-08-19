@@ -196,6 +196,7 @@ export interface UserMeDTO extends UserDTO {
   is_private_account: boolean;
   is_permanent_vip?: boolean;
   permanent_vip_campaign?: PermanentVipCampaignDTO;
+  resource_inventory?: UserResourceInventoryDTO[];
   growth?: UserGrowthDTO;
   plaza_greeting?: string;
   name_changed_at?: number | null;
@@ -206,6 +207,16 @@ export interface UserMeDTO extends UserDTO {
   chat_background_theme?: ChatBackgroundTheme;
   chat_background_uri?: string;
   city_bubble_styles?: ChatBubbleStyle[];
+}
+
+export interface UserResourceInventoryDTO {
+  resource_type: "background" | "bubble" | "frame" | "statement" | "identity" | "vip";
+  reward_id: string;
+  resource_key: string;
+  source: "growth" | "vip_campaign" | "system";
+  source_reference: string;
+  metadata: Record<string, unknown>;
+  acquired_at: number;
 }
 
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "sticker" | "toybrick" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
@@ -232,6 +243,7 @@ export interface PermanentVipCampaignDTO {
   claimed_by_user: boolean;
   slot: number | null;
   active: boolean;
+  resource_inventory?: UserResourceInventoryDTO[];
   requirements: {
     email: boolean;
     phone: boolean;

@@ -457,6 +457,13 @@ export default function MenuPage() {
   };
   const growthLevel = me?.growth?.level ?? 1;
   const permanentVip = Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip);
+  const ownsInventoryResource = (
+    resourceType: "background" | "bubble" | "frame" | "statement" | "vip",
+    resourceKey: string,
+    legacyFallback: boolean,
+  ) => me?.resource_inventory
+    ? me.resource_inventory.some((item) => item.resource_type === resourceType && item.resource_key === resourceKey)
+    : legacyFallback;
   const rewardFor = (category: "background" | "bubble" | "frame", assetKey: string) =>
     me?.growth?.levels?.flatMap((item) => item.rewards ?? []).find((reward) => reward.category === category && reward.asset_key === assetKey);
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
@@ -471,18 +478,31 @@ export default function MenuPage() {
     return rewards.reduce((best, reward) => rank.indexOf(reward.rarity) > rank.indexOf(best) ? reward.rarity : best, "common");
   })();
   const canCustomizeChatBackground = hasGrowthCapability("custom_chat_background", 8);
+  const canUseBackgroundStyle = (theme: ChatBackgroundTheme) => theme === "custom" || ownsInventoryResource(
+    "background",
+    theme,
+    growthLevel >= rewardLevel("background", theme),
+  );
   const canUseBubbleStyle = (style: ChatBubbleStyle) =>
     cityBubbleStyles.has(style)
       ? Boolean(me?.city_bubble_styles?.includes(style))
-      : (vipOrLevelBubbleStyles.has(style) && permanentVip) || growthLevel >= rewardLevel("bubble", style);
+      : ownsInventoryResource(
+        "bubble",
+        style,
+        (vipOrLevelBubbleStyles.has(style) && permanentVip) || growthLevel >= rewardLevel("bubble", style),
+      );
   const canUseAvatarFrame = (frame: PersonalizationDTO["avatar_frame_style"]) =>
-    (frame === "vip" && permanentVip)
-    || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
-    || (frame !== "vip" && growthLevel >= rewardLevel("frame", frame));
-  const canUseStatementStyle = (style: StatementCardStyle) =>
-    (style === "vip" && permanentVip)
-    || (vipOrLevelStatementStyles.has(style) && (permanentVip || growthLevel >= 16))
-    || (style !== "vip" && !vipOrLevelStatementStyles.has(style));
+    ownsInventoryResource(
+      "frame",
+      frame,
+      (frame === "vip" && permanentVip)
+      || (vipOrLevelAvatarFrames.has(frame) && permanentVip)
+      || (frame !== "vip" && growthLevel >= rewardLevel("frame", frame)),
+    );
+  const canUseStatementStyle = (style: StatementCardStyle) => style === "vip"
+    ? ownsInventoryResource("statement", style, permanentVip)
+    : (vipOrLevelStatementStyles.has(style) && (permanentVip || growthLevel >= 16))
+      || !vipOrLevelStatementStyles.has(style);
   const buildPersonalizationSections = (
     items: readonly PersonalizationCatalogItem[],
     category: "background" | "bubble" | "frame",
@@ -554,6 +574,7 @@ export default function MenuPage() {
         ...current,
         is_permanent_vip: true,
         permanent_vip_campaign: campaign,
+        resource_inventory: campaign.resource_inventory ?? current.resource_inventory,
       } : current);
       patchSessionUser({ is_permanent_vip: true });
       showToast(t("vip.claimed", { slot: campaign.slot }), "success");
@@ -567,8 +588,8 @@ export default function MenuPage() {
   useEffect(() => {
     if (!standalonePwa || !me || pwaGrowthClaimedRef.current) return;
     pwaGrowthClaimedRef.current = true;
-    void api.claimGrowthEvent("install_webapp").then(({ growth }) => {
-      setMe((current) => current ? { ...current, growth } : current);
+    void api.claimGrowthEvent("install_webapp").then(({ growth, resource_inventory }) => {
+      setMe((current) => current ? { ...current, growth, resource_inventory } : current);
     }).catch(() => {
       pwaGrowthClaimedRef.current = false;
     });
@@ -1265,7 +1286,7 @@ export default function MenuPage() {
   const saveChatBackgroundTheme = async () => {
     if (chatBackgroundDraft === "custom") return;
     const requiredLevel = rewardLevel("background", chatBackgroundDraft);
-    if (growthLevel < requiredLevel) {
+    if (!canUseBackgroundStyle(chatBackgroundDraft)) {
       showToast(t("background.levelRequired", { level: requiredLevel }), "error");
       return;
     }
@@ -1858,8 +1879,8 @@ export default function MenuPage() {
       <PwaInstallSheet
         onClose={() => setPwaInstallSheetOpen(false)}
         onInstalled={() => {
-          void api.claimGrowthEvent("install_webapp").then(({ growth }) => {
-            setMe((current) => current ? { ...current, growth } : current);
+          void api.claimGrowthEvent("install_webapp").then(({ growth, resource_inventory }) => {
+            setMe((current) => current ? { ...current, growth, resource_inventory } : current);
           });
         }}
         open={pwaInstallSheetOpen}
@@ -2169,14 +2190,14 @@ export default function MenuPage() {
             onOwnershipChange={setPersonalizationOwnershipFilter}
             ownership={personalizationOwnershipFilter}
           />
-          {buildPersonalizationSections(chatBackgroundSections.flatMap((section) => section.items), "background", (theme) => growthLevel >= rewardLevel("background", theme)).map((section) => (
+          {buildPersonalizationSections(chatBackgroundSections.flatMap((section) => section.items), "background", (theme) => canUseBackgroundStyle(theme as ChatBackgroundTheme)).map((section) => (
             <section className="personalization-library-section chat-background-section" key={section.label}>
               <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
               <div className="chat-background-grid">
                 {section.items.map(([theme, label]) => (
                   <button
                     aria-pressed={chatBackgroundDraft === theme}
-                    className={`chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${growthLevel < rewardLevel("background", theme) ? " is-locked" : ""}`}
+                    className={`chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${!canUseBackgroundStyle(theme as ChatBackgroundTheme) ? " is-locked" : ""}`}
                     disabled={chatBackgroundSaving}
                     key={theme}
                     onClick={() => setChatBackgroundDraft(theme as ChatBackgroundTheme)}
@@ -2184,7 +2205,7 @@ export default function MenuPage() {
                   >
                     <span />
                     <strong>{t(label)}</strong>
-                    {growthLevel < rewardLevel("background", theme) ? <small>{t("menu.levelUnlock", { level: rewardLevel("background", theme) })}</small> : null}
+                    {!canUseBackgroundStyle(theme as ChatBackgroundTheme) ? <small>{t("menu.levelUnlock", { level: rewardLevel("background", theme) })}</small> : null}
                   </button>
                 ))}
               </div>

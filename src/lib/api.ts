@@ -34,6 +34,7 @@ import type {
   SpaceAuthDTO,
   UserDTO,
   UserGrowthDTO,
+  UserResourceInventoryDTO,
   FeatureDiscoveryStatusDTO,
   PermanentVipCampaignDTO,
   PersonalizationDTO,
@@ -471,7 +472,7 @@ export const api = {
   },
 
   claimGrowthEvent(event: "install_webapp" | "plaza_friend") {
-    return request<{ awarded: number; growth: UserGrowthDTO }>("/users/me/growth-events", {
+    return request<{ awarded: number; growth: UserGrowthDTO; resource_inventory: UserResourceInventoryDTO[] }>("/users/me/growth-events", {
       method: "POST",
       auth: true,
       body: { event },
