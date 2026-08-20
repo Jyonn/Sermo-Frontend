@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BaxianBubbleRunner } from "../components/BaxianBubbleRunner";
 
 type Character = "lv" | "zhongli" | "he";
 type Direction = "inset" | "watermark";
@@ -20,8 +21,8 @@ function Seal({ character }: { character: Character }) {
 }
 
 function Hero({ character }: { character: Character }) {
-  const asset = character === "lv" ? "lv-dongbin" : character === "he" ? "he-xiangu" : "zhongli-quan";
-  return <img alt="" aria-hidden="true" className="baxian-lab-hero-character" src={`/assets/baxian/${asset}-48-v4.webp`} />;
+  const style = character === "lv" ? "baxian-lv" : character === "he" ? "baxian-he" : "baxian-zhongli";
+  return <BaxianBubbleRunner style={style} />;
 }
 
 function Bubble({ character, direction, self, text, grouped }: { character: Character; direction: Direction; self?: boolean; text: string; grouped?: "start" | "middle" | "end" }) {

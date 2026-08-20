@@ -24286,11 +24286,10 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   height:100%;
   background-position:0 0;
   background-repeat:no-repeat;
-  background-size:800% 600%;
 }
-.baxian-bubble-runner.is-lv .baxian-bubble-frame { background-image:url("/assets/baxian/lv-dongbin-48-v4-sheet.webp"); }
-.baxian-bubble-runner.is-zhongli .baxian-bubble-frame { background-image:url("/assets/baxian/zhongli-quan-48-v4-sheet.webp"); }
-.baxian-bubble-runner.is-he .baxian-bubble-frame { background-image:url("/assets/baxian/he-xiangu-48-v4-sheet.webp"); }
+.baxian-bubble-runner.is-lv .baxian-bubble-frame { background-image:url("/assets/baxian/lv-dongbin-latest-sheet.webp"); }
+.baxian-bubble-runner.is-zhongli .baxian-bubble-frame { background-image:url("/assets/baxian/zhongli-quan-latest-sheet.webp"); }
+.baxian-bubble-runner.is-he .baxian-bubble-frame { background-image:url("/assets/baxian/he-xiangu-latest-sheet.webp"); }
 
 .message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .group-start > .baxian-bubble-runner {
   right:auto;
@@ -24368,9 +24367,9 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
   left:50%;
   transform:translateX(-50%);
 }
-.field-chat_bubble_style .preview-baxian-lv > i::after { background-image:url("/assets/baxian/lv-dongbin-48-v4.webp"); }
-.field-chat_bubble_style .preview-baxian-zhongli > i::after { background-image:url("/assets/baxian/zhongli-quan-48-v4.webp"); }
-.field-chat_bubble_style .preview-baxian-he > i::after { background-image:url("/assets/baxian/he-xiangu-48-v4.webp"); }
+.field-chat_bubble_style .preview-baxian-lv > i::after { background-image:url("/assets/baxian/lv-dongbin-latest-sheet.webp");background-position:57.1429% 100%;background-size:800% 500%; }
+.field-chat_bubble_style .preview-baxian-zhongli > i::after { background-image:url("/assets/baxian/zhongli-quan-latest-sheet.webp");background-position:100% 100%;background-size:800% 300%; }
+.field-chat_bubble_style .preview-baxian-he > i::after { background-image:url("/assets/baxian/he-xiangu-latest-sheet.webp");background-position:71.4286% 100%;background-size:800% 600%; }
 
 @media (min-width:900px) {
   .baxian-bubble-runner { --baxian-character-size:40px; }
@@ -25764,7 +25763,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .baxian-lab-bubble{--lab-radius:18px;position:relative;display:inline-flex;max-width:min(78%,390px);min-height:41px;align-items:center;padding:10px 15px;border:1px solid color-mix(in srgb,var(--baxian-lab-accent) 64%,transparent);border-radius:var(--lab-radius) var(--lab-radius) var(--lab-radius) 6px;color:var(--baxian-lab-deep);background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.62) 0 1px,transparent 1.5px) 0 0/17px 19px,linear-gradient(138deg,#fffdf8,var(--baxian-lab-pale));box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),0 6px 14px rgba(38,53,47,.1)}
 .baxian-lab-row.is-self .baxian-lab-bubble{border-color:color-mix(in srgb,var(--baxian-lab-accent) 75%,#fff);border-radius:var(--lab-radius) var(--lab-radius) 6px var(--lab-radius);color:#fff;background:linear-gradient(138deg,var(--baxian-lab-accent),var(--baxian-lab-deep));box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 7px 16px color-mix(in srgb,var(--baxian-lab-deep) 18%,transparent)}
 .baxian-lab-bubble.group-start:not(.group-end){border-bottom-left-radius:6px}.baxian-lab-row.is-self .baxian-lab-bubble.group-start:not(.group-end){border-bottom-right-radius:6px;border-bottom-left-radius:var(--lab-radius)}.baxian-lab-bubble.group-middle{border-top-left-radius:6px;border-bottom-left-radius:6px}.baxian-lab-row.is-self .baxian-lab-bubble.group-middle{border-radius:var(--lab-radius) 6px 6px var(--lab-radius)}.baxian-lab-bubble.group-end{border-top-left-radius:6px}.baxian-lab-row.is-self .baxian-lab-bubble.group-end{border-radius:var(--lab-radius) 6px 6px var(--lab-radius)}
-.baxian-lab-copy{min-width:0;font-size:.9rem;font-weight:700;line-height:1.58}.baxian-lab-hero-character{position:absolute;bottom:calc(100% - 1px);left:50%;z-index:2;width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(30,25,20,.16));transform:translateX(-50%);pointer-events:none}
+.baxian-lab-copy{min-width:0;font-size:.9rem;font-weight:700;line-height:1.58}.baxian-lab-bubble>.baxian-bubble-runner{--baxian-character-size:46px;right:auto;bottom:calc(100% - 1px);left:50%;transform:translateX(-50%)}
 .baxian-lab-seal{position:absolute;z-index:1;width:14px;height:auto;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(42,29,19,.18));pointer-events:none}
 .baxian-lab-bubble.direction-inset{padding-right:15px;padding-left:37px}.baxian-lab-bubble.direction-inset .baxian-lab-seal{bottom:11px;left:8px}
 .baxian-lab-row.is-self .direction-inset{padding-right:37px;padding-left:15px}.baxian-lab-row.is-self .direction-inset .baxian-lab-seal{right:8px;left:auto}
@@ -25773,7 +25772,6 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .baxian-lab-rationale{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:20px;overflow:hidden;border:1px solid var(--line-soft);border-radius:20px;background:var(--line-soft)}.baxian-lab-rationale article{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;padding:22px;background:var(--bg-elevated)}.baxian-lab-rationale span{grid-row:1/3;color:var(--baxian-lab-accent);font:800 .62rem/1.4 var(--font-mono)}.baxian-lab-rationale strong{font-size:.85rem}.baxian-lab-rationale p{margin:0;color:var(--text-secondary);font-size:.72rem;line-height:1.55}
 @media(max-width:760px){.baxian-lab-header{display:block}.baxian-lab-character-switcher{width:max-content;margin-top:22px}.baxian-lab-directions{grid-template-columns:repeat(2,1fr)}.baxian-lab-stage{grid-template-columns:1fr}.baxian-lab-stage-copy{padding:26px 24px 8px}.baxian-lab-phone{margin:18px 10px 10px}.baxian-lab-rationale{grid-template-columns:1fr}.baxian-lab-chat-flow{padding-inline:14px}.baxian-lab-bubble{max-width:84%}}
 @media(max-width:430px){.baxian-lab-page{padding-inline:10px}.baxian-lab-character-switcher{display:grid;width:100%;grid-template-columns:repeat(3,1fr)}.baxian-lab-directions button{padding:12px 10px}.baxian-lab-chat-head{padding-inline:14px}.baxian-lab-stage{border-radius:22px}.baxian-lab-phone{border-radius:18px}}
-@media(prefers-reduced-motion:reduce){.baxian-lab-hero-character{display:none}}
 @media(min-width:901px){.desktop-tab-shell>.square-feed-screen>.tab-sticky-header{height:65px;min-height:65px}.desktop-tab-shell>.square-feed-screen>.tab-sticky-header .page-toolbar{height:100%}}
 
 /* Statement detail is a reading surface, not a second feed card. */

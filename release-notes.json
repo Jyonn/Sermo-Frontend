@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.20.12",
-  "publishedAt": "2026-08-20",
+  "id": "2026.08.21.1",
+  "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "即时提醒连接更清楚",
+      "title": "八仙气泡动画更从容",
       "items": [
-        "即时提醒新增 PushDeer，并为 Bark、ntfy、Gotify、PushDeer 提供分步安装与绑定引导"
+        "八仙角色换用新版动画，完整登场后会在最后一帧停留片刻，再自然重复播放"
       ]
     },
     "en": {
-      "title": "Clearer instant notification setup",
+      "title": "More polished Baxian bubble animations",
       "items": [
-        "Added PushDeer and step-by-step installation and connection guides for Bark, ntfy, Gotify, and PushDeer"
+        "Updated Baxian characters with new animations that pause naturally on the final frame before replaying"
       ]
     }
   }

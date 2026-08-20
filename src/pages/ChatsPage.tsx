@@ -15,6 +15,7 @@ import {
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
+import { BaxianBubbleRunner, baxianCharacterForStyle } from "../components/BaxianBubbleRunner";
 import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
@@ -50,9 +51,6 @@ import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } f
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
-import heXianguAnimation from "../../design/Baxian/HeXiangu/direct-imagegen-v4/animation.json";
-import lvDongbinAnimation from "../../design/Baxian/LvDongbin/direct-imagegen-v4/animation.json";
-import zhongliQuanAnimation from "../../design/Baxian/ZhongliQuan/direct-imagegen-v4/animation.json";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -66,11 +64,6 @@ const MESSAGE_TYPE_LOCATION = 6;
 const MESSAGE_TYPE_MAP_ACCESS = 7;
 const MESSAGE_TYPE_STATEMENT = 8;
 const MESSAGE_TYPE_STICKER = 9;
-const BAXIAN_ANIMATIONS = {
-  he: heXianguAnimation,
-  lv: lvDongbinAnimation,
-  zhongli: zhongliQuanAnimation,
-} as const;
 const MESSAGE_SEARCH_TYPES = [
   { value: null, label: "messageSearch.all" },
   { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
@@ -396,76 +389,6 @@ function NikoBubbleRunner() {
 
 function XiaobaiBubbleRunner() {
   return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
-}
-
-function baxianCharacterForStyle(style?: ChatBubbleStyle) {
-  if (style === "baxian-lv") return "lv";
-  if (style === "baxian-zhongli") return "zhongli";
-  if (style === "baxian-he") return "he";
-  return null;
-}
-
-function BaxianBubbleRunner({ style }: { style?: ChatBubbleStyle }) {
-  const runnerRef = useRef<HTMLSpanElement | null>(null);
-  const frameRef = useRef<HTMLSpanElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const character = baxianCharacterForStyle(style);
-  const animation = character ? BAXIAN_ANIMATIONS[character] : null;
-
-  useEffect(() => {
-    const runner = runnerRef.current;
-    const bubble = runner?.parentElement;
-    if (!runner || !bubble || !animation) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let animationFrame: number | null = null;
-    let startedAt: number | null = null;
-    const duration = animation.durationMs;
-    const frameCount = animation.frameCount;
-    const frameDurations = animation.durationsMs;
-
-    const paintFrame = (frame: number) => {
-      const frameElement = frameRef.current;
-      if (!frameElement) return;
-      const column = frame % 8;
-      const row = Math.floor(frame / 8);
-      frameElement.style.backgroundPosition = `${(column / 7) * 100}% ${(row / 5) * 100}%`;
-    };
-
-    const advanceFrame = (timestamp: number) => {
-      if (startedAt === null) startedAt = timestamp;
-      const elapsed = (timestamp - startedAt) % duration;
-      let frame = 0;
-      let frameStart = 0;
-      while (frame < frameCount - 1 && elapsed >= frameStart + frameDurations[frame]) {
-        frameStart += frameDurations[frame];
-        frame += 1;
-      }
-      paintFrame(frame);
-      animationFrame = window.requestAnimationFrame(advanceFrame);
-    };
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (animationFrame !== null) return;
-        startedAt = null;
-        paintFrame(0);
-        setPlaying(true);
-        animationFrame = window.requestAnimationFrame(advanceFrame);
-        return;
-      }
-      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
-      animationFrame = null;
-      setPlaying(false);
-    }, { threshold: 0.2 });
-    observer.observe(bubble);
-    return () => {
-      observer.disconnect();
-      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
-    };
-  }, [animation]);
-
-  if (!character) return null;
-  return <span ref={runnerRef} aria-hidden="true" className={`baxian-bubble-runner is-${character}${playing ? " is-playing" : ""}`}><span ref={frameRef} className="baxian-bubble-frame" /></span>;
 }
 
 function BaxianBubbleSeal({ style }: { style?: ChatBubbleStyle }) {
