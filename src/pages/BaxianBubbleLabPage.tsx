@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 type Character = "lv" | "zhongli" | "he";
-type Direction = "inset" | "corner" | "inline" | "watermark";
+type Direction = "inset" | "watermark";
 
 const characters: Array<{ key: Character; name: string; style: string }> = [
   { key: "lv", name: "吕洞宾", style: "baxian-lv" },
@@ -9,11 +9,9 @@ const characters: Array<{ key: Character; name: string; style: string }> = [
   { key: "he", name: "何仙姑", style: "baxian-he" },
 ];
 
-const directions: Array<{ key: Direction; name: string; label: string; note: string; recommended?: boolean }> = [
-  { key: "inset", name: "内嵌题签", label: "最稳妥", note: "印章落在阅读末端的内边距中；单行不抬高，多行不压字，合并气泡只在末条收束。", recommended: true },
-  { key: "corner", name: "角落落款", label: "更含蓄", note: "印章贴住内容内角，像纸本落款。多行表现自然，短句会保留一小块呼吸空间。" },
-  { key: "inline", name: "行尾签章", label: "更灵动", note: "印章跟随最后一个字自然换行，最像真实盖章；长短句节奏鲜明，但行高变化更明显。" },
-  { key: "watermark", name: "暗纹水印", label: "更克制", note: "印章成为气泡内部的低对比暗纹，不额外占位，适合信息密度高的聊天场景。" },
+const directions: Array<{ key: Direction; number: "01" | "04"; name: string; label: string; note: string; recommended?: boolean }> = [
+  { key: "inset", number: "01", name: "内嵌题签", label: "清晰落款", note: "印章贴近气泡外侧内缘：他方在左、己方在右。文字区保持独立，单行与多行都不会压住落款。", recommended: true },
+  { key: "watermark", number: "04", name: "暗纹水印", label: "轻量留痕", note: "印章靠外侧边缘化为低对比水印，不额外抬高气泡；合并消息仅在最后一条完成收束。" },
 ];
 
 function Seal({ character }: { character: Character }) {
@@ -50,7 +48,7 @@ export default function BaxianBubbleLabPage() {
         <div>
           <span>BAXIAN / BUBBLE STUDY</span>
           <h1>把印章收进气泡里</h1>
-          <p>四套排版同时验证单行、多行、双方视角与连续消息；英雄动画只负责开场，印章负责收尾。</p>
+          <p>两套候选同时验证单行、多行、双方视角与连续消息；人物负责开场，贴边印章负责收尾。</p>
         </div>
         <div className="baxian-lab-character-switcher" aria-label="切换角色">
           {characters.map((item) => <button className={character === item.key ? "is-active" : ""} key={item.key} onClick={() => setCharacter(item.key)} type="button">{item.name}</button>)}
@@ -58,16 +56,16 @@ export default function BaxianBubbleLabPage() {
       </header>
 
       <nav className="baxian-lab-directions" aria-label="切换设计方案">
-        {directions.map((item, index) => (
+        {directions.map((item) => (
           <button className={direction === item.key ? "is-active" : ""} key={item.key} onClick={() => setDirection(item.key)} type="button">
-            <span>{String(index + 1).padStart(2, "0")}</span><strong>{item.name}</strong><small>{item.label}</small>
+            <span>{item.number}</span><strong>{item.name}</strong><small>{item.label}</small>
           </button>
         ))}
       </nav>
 
       <section className="baxian-lab-stage">
         <header className="baxian-lab-stage-copy">
-          <div><span>{String(directions.findIndex((item) => item.key === direction) + 1).padStart(2, "0")} / 04</span>{current.recommended ? <b>推荐</b> : null}</div>
+          <div><span>{current.number} / 04</span>{current.recommended ? <b>推荐</b> : null}</div>
           <h2>{current.name}</h2><p>{current.note}</p>
         </header>
         <div className="baxian-lab-phone">
@@ -91,7 +89,7 @@ export default function BaxianBubbleLabPage() {
 
       <section className="baxian-lab-rationale">
         <article><span>01</span><strong>单行</strong><p>印章不应把短句撑高，也不能与字面争抢视线。</p></article>
-        <article><span>02</span><strong>多行</strong><p>固定在内容内侧，文字换行后仍保留稳定的阅读边界。</p></article>
+        <article><span>02</span><strong>多行</strong><p>印章贴住外侧内缘，文字换行后仍保留稳定的阅读边界。</p></article>
         <article><span>03</span><strong>合并</strong><p>人物只在第一条登场，印章只在最后一条落款，形成完整叙事。</p></article>
       </section>
     </main>
