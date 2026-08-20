@@ -1,0 +1,32 @@
+{
+  "id": "lv-dongbin",
+  "name": "吕洞宾",
+  "motion": "clockwise sword flourish → indigo whirlwind → diagonal seal snap",
+  "frameCount": 16,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "sheetColumns": 4,
+  "sheetRows": 4,
+  "durationsMs": [
+    80,
+    60,
+    50,
+    45,
+    45,
+    45,
+    50,
+    50,
+    55,
+    55,
+    60,
+    65,
+    70,
+    80,
+    90,
+    150
+  ],
+  "totalDurationMs": 1050,
+  "recommendedIterations": 1,
+  "holdLastFrame": true,
+  "source": "ImageGen 4x4 transformation sheet"
+}

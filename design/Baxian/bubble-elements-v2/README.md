@@ -43,3 +43,21 @@
 ```
 
 最终位置应按左右消息方向镜像，并在窄气泡上通过容器查询隐藏配饰，只保留印章。
+
+## 宝物变印章动画
+
+`transitions/` 提供三条 16 帧变换动画：
+
+- `lv-dongbin/`：剑势顺时针旋转，靛蓝剑风收束，印章斜向落定；
+- `zhongli-quan/`：玉净瓶带重量摇摆，朱红旋云包裹，印章下压落定；
+- `he-xiangu/`：黑斗笠乘风旋起，莲粉风环内折，印章轻盈展开。
+
+每个角色目录包含：
+
+- `frames/frame-01.png` 至 `frame-16.png`：固定 `256×256` RGBA 帧；
+- `spritesheet.png`：`4×4`、`1024×1024` 透明精灵表；
+- `animation.webp`：透明循环审阅文件；
+- `animation.json`：逐帧时长、总时长和动作说明；
+- `source/imagegen-sheet.png`：ImageGen 原始透明动作表。
+
+推荐按 `animation.json` 的非均匀时长单次播放，总长约 `1.05s`，播完停在第 16 帧。`animation.webp` 用于快速审阅；产品代码应读取逐帧 PNG 或 spritesheet，以便可靠地只播放一次并保持最终印章状态。动画固定在气泡边缘锚点，不要再对序列添加水平位移。
