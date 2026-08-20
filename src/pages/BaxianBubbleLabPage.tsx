@@ -10,8 +10,8 @@ const characters: Array<{ key: Character; name: string; style: string }> = [
 ];
 
 const directions: Array<{ key: Direction; number: "01" | "04"; name: string; label: string; note: string; recommended?: boolean }> = [
-  { key: "inset", number: "01", name: "内嵌题签", label: "清晰落款", note: "印章贴近气泡外侧内缘：他方在左、己方在右。文字区保持独立，单行与多行都不会压住落款。", recommended: true },
-  { key: "watermark", number: "04", name: "暗纹水印", label: "轻量留痕", note: "印章靠外侧边缘化为低对比水印，不额外抬高气泡；合并消息仅在最后一条完成收束。" },
+  { key: "inset", number: "01", name: "内嵌题签", label: "清晰落款", note: "每个真实气泡都有印章：他方贴左内缘，己方贴右内缘；多行消息与最后一行文字对齐。", recommended: true },
+  { key: "watermark", number: "04", name: "暗纹水印", label: "轻量留痕", note: "每个真实气泡都留下低对比暗纹，并跟随最后一行文字；表情包等无气泡内容保持纯净。" },
 ];
 
 function Seal({ character }: { character: Character }) {
@@ -30,8 +30,16 @@ function Bubble({ character, direction, self, text, grouped }: { character: Char
       <div className={`baxian-lab-bubble direction-${direction} ${grouped ? `group-${grouped}` : "is-single"}`}>
         {grouped === "start" || !grouped ? <Hero character={character} /> : null}
         <span className="baxian-lab-copy">{text}</span>
-        {grouped === "end" || !grouped ? <Seal character={character} /> : null}
+        <Seal character={character} />
       </div>
+    </div>
+  );
+}
+
+function Sticker() {
+  return (
+    <div className="baxian-lab-row is-self baxian-lab-sticker-row" aria-label="无气泡表情包示例">
+      <img alt="挥手的小猫表情包" className="baxian-lab-sticker" src="/assets/niko/niko-greeting.webp" />
     </div>
   );
 }
@@ -48,7 +56,7 @@ export default function BaxianBubbleLabPage() {
         <div>
           <span>BAXIAN / BUBBLE STUDY</span>
           <h1>把印章收进气泡里</h1>
-          <p>两套候选同时验证单行、多行、双方视角与连续消息；人物负责开场，贴边印章负责收尾。</p>
+          <p>两套候选同时验证单行、多行、双方视角、连续消息与无气泡内容；每个真实气泡独立落款。</p>
         </div>
         <div className="baxian-lab-character-switcher" aria-label="切换角色">
           {characters.map((item) => <button className={character === item.key ? "is-active" : ""} key={item.key} onClick={() => setCharacter(item.key)} type="button">{item.name}</button>)}
@@ -83,14 +91,15 @@ export default function BaxianBubbleLabPage() {
               <Bubble character={character} direction={direction} grouped="start" self text="好。" />
               <Bubble character={character} direction={direction} grouped="end" self text="不见不散。" />
             </div>
+            <Sticker />
           </div>
         </div>
       </section>
 
       <section className="baxian-lab-rationale">
         <article><span>01</span><strong>单行</strong><p>印章不应把短句撑高，也不能与字面争抢视线。</p></article>
-        <article><span>02</span><strong>多行</strong><p>印章贴住外侧内缘，文字换行后仍保留稳定的阅读边界。</p></article>
-        <article><span>03</span><strong>合并</strong><p>人物只在第一条登场，印章只在最后一条落款，形成完整叙事。</p></article>
+        <article><span>02</span><strong>多行</strong><p>印章与最后一行对齐，文字换行后仍保留稳定的阅读边界。</p></article>
+        <article><span>03</span><strong>边界</strong><p>连续消息逐条落款；表情包等无气泡内容不展示印章。</p></article>
       </section>
     </main>
   );
