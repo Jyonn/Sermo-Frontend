@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.21.9",
+  "id": "2026.08.21.10",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "后台运行更加省电",
+      "title": "实时消息外观恢复正常",
       "items": [
-        "网页切到后台后会暂停心跳、新消息和提醒等定时同步",
-        "重新打开网页时会立即补齐最新消息和状态"
+        "好友实时发来的消息会立即使用对方设置的聊天气泡和头像框",
+        "同一位好友短时间内连续发送的消息会重新合并展示"
       ]
     },
     "en": {
-      "title": "More efficient background behavior",
+      "title": "Live message appearance restored",
       "items": [
-        "Heartbeat, message, and reminder polling now pauses while the page is in the background",
-        "Messages and status catch up immediately when you return"
+        "Incoming live messages now immediately use the sender's bubble and avatar frame",
+        "Consecutive messages from the same person are grouped correctly again"
       ]
     }
   }

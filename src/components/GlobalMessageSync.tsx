@@ -14,6 +14,7 @@ import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
+import { mapChatMessageSender } from "../lib/chatMessageSender";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
@@ -87,11 +88,9 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
-    from: message.user.user_id === currentUserId ? "self" : "other",
+    ...mapChatMessageSender(message, currentUserId),
     type: message.type,
     kind,
-    name: message.user.name,
-    avatarUri: message.user.avatar_uri,
     time: "",
     createdAt: message.created_at,
     text: message.content,

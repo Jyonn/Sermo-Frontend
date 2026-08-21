@@ -48,6 +48,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
+import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
@@ -745,16 +746,9 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
-    userId: message.user.user_id,
-    from: message.user.user_id === currentUserId ? "self" : "other",
+    ...mapChatMessageSender(message, currentUserId),
     type: message.type,
     kind,
-    name: message.user.name,
-    avatarUri: message.user.avatar_uri,
-    avatarCacheKey: message.user.avatar_cache_key,
-    isPermanentVip: message.user.is_permanent_vip,
-    chatBubbleStyle: message.user.chat_bubble_style,
-    avatarFrameStyle: message.user.avatar_frame_style,
     time: formatTime(message.created_at),
     createdAt: message.created_at,
     text,
