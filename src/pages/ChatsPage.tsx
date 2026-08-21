@@ -16,7 +16,7 @@ import {
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
-import { BaxianBubbleRunner } from "../components/BaxianBubbleRunner";
+import { BaxianBubbleTransition, BaxianCharacterRunner } from "../components/BaxianBubbleRunner";
 import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
@@ -1264,7 +1264,8 @@ const MessageImageGallery = memo(function MessageImageGallery({
           })}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          <BaxianBubbleRunner animate={!isLast} style={messages[0]?.chatBubbleStyle} />
+          {isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}
+          <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>
@@ -1766,7 +1767,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          <BaxianBubbleRunner animate={!isLast} style={message.chatBubbleStyle} />
+          {isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
+          <BaxianBubbleTransition animate={!isLast} style={message.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
         </div>
       </div>

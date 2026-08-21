@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.21.4",
+  "id": "2026.08.21.5",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "文件拖进聊天即可发送",
+      "title": "八仙气泡动效重归层次",
       "items": [
-        "桌面端可将文件直接拖入当前会话，并在确认清单后发送"
+        "合并消息首条重新展示角色动画，角落宝物与印章动效更加克制"
       ]
     },
     "en": {
-      "title": "Drag files straight into chat",
+      "title": "Refined Eight Immortals motion",
       "items": [
-        "On desktop, drag files into the current conversation and review them before sending"
+        "Grouped messages again feature the character animation on the first bubble, with subtler corner transitions"
       ]
     }
   }
