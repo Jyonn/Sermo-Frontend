@@ -49,7 +49,7 @@ import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResou
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { showToast } from "../lib/toast";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -2284,6 +2284,11 @@ function LiveChatsPage() {
   const [batchDeleteConfirmOpen, setBatchDeleteConfirmOpen] = useState(false);
   const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
   const [clearHistorySaving, setClearHistorySaving] = useState(false);
+  const [restoreHistoryConfirmOpen, setRestoreHistoryConfirmOpen] = useState(false);
+  const [restoreHistorySaving, setRestoreHistorySaving] = useState(false);
+  const [historyRecoveryStatus, setHistoryRecoveryStatus] = useState<ChatHistoryRecoveryStatusDTO | null>(null);
+  const [historyRecoveryLoading, setHistoryRecoveryLoading] = useState(false);
+  const [historyReloadVersion, setHistoryReloadVersion] = useState(0);
   const [closingChatSnapshot, setClosingChatSnapshot] = useState<Chat | null>(null);
   const [isClosingChatView, setIsClosingChatView] = useState(false);
   const [groupTitle, setGroupTitle] = useState("");
@@ -2992,7 +2997,7 @@ function LiveChatsPage() {
       window.clearInterval(interval);
       window.removeEventListener("focus", syncOnFocus);
     };
-  }, [selectedChat?.id]);
+  }, [historyReloadVersion, selectedChat?.id]);
 
   useEffect(() => {
     setReplyTarget(null);
@@ -3172,6 +3177,22 @@ function LiveChatsPage() {
     if (!detailsSheetOpen) return;
     setDetailMemberLimit(CHAT_DETAIL_MEMBER_PAGE_SIZE);
   }, [detailsSheetOpen, selectedChat?.id]);
+
+  useEffect(() => {
+    if (!detailsSheetOpen || !selectedChat) {
+      setHistoryRecoveryStatus(null);
+      return;
+    }
+    const controller = new AbortController();
+    setHistoryRecoveryLoading(true);
+    api.getChatHistoryRecoveryStatus(selectedChat.id, controller.signal)
+      .then(setHistoryRecoveryStatus)
+      .catch(() => setHistoryRecoveryStatus(null))
+      .finally(() => {
+        if (!controller.signal.aborted) setHistoryRecoveryLoading(false);
+      });
+    return () => controller.abort();
+  }, [detailsSheetOpen, historyReloadVersion, selectedChat?.id]);
 
   useEffect(() => {
     return;
@@ -3403,7 +3424,7 @@ function LiveChatsPage() {
         initialBottomAnchorRef.current = null;
       }
     };
-  }, [cacheScope, currentUserId, selectedChat]);
+  }, [cacheScope, currentUserId, historyReloadVersion, selectedChat]);
 
   useEffect(() => {
     if (!selectedChat) {
@@ -5231,6 +5252,30 @@ function LiveChatsPage() {
     }
   };
 
+  const restoreChatHistory = async () => {
+    if (!selectedChat || restoreHistorySaving) return;
+    const chatId = selectedChat.id;
+    try {
+      setRestoreHistorySaving(true);
+      const result = await api.restoreChatHistory(chatId);
+      setHistoryRecoveryStatus(result);
+      setMessages((current) => ({ ...current, [chatId]: [] }));
+      setPinnedMessages([]);
+      setHasOlderMessages(false);
+      setReplyTarget(null);
+      if (cacheScope) await chatCache.clearThread(cacheScope, chatId);
+      setRestoreHistoryConfirmOpen(false);
+      setDetailsSheetOpen(false);
+      setHistoryReloadVersion((current) => current + 1);
+      await refreshChats();
+      showToast(t("chat.restoreHistoryDone", { count: result.restored_count ?? 0 }));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("chat.restoreHistoryFailed"), "error");
+    } finally {
+      setRestoreHistorySaving(false);
+    }
+  };
+
   const toggleGroupCandidate = (userId: number) => {
     if (chatMemberLockedIds.includes(userId)) return;
     setGroupSelectedIds((current) => (current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId]));
@@ -6485,6 +6530,28 @@ function LiveChatsPage() {
               </SettingGroup>
             </section>
 
+            <section className="chat-detail-settings-section">
+              <SettingGroup>
+                <SettingRow
+                  disabled={historyRecoveryLoading || !historyRecoveryStatus?.can_restore}
+                  icon={<span className="material-symbols-outlined" aria-hidden="true">history</span>}
+                  onClick={() => setRestoreHistoryConfirmOpen(true)}
+                  description={historyRecoveryLoading
+                    ? t("common.loading")
+                    : !historyRecoveryStatus
+                      ? t("chat.restoreHistoryUnavailable")
+                      : !historyRecoveryStatus.eligible
+                        ? t("chat.restoreHistoryVerify")
+                        : historyRecoveryStatus.remaining <= 0
+                          ? t("chat.restoreHistoryExhausted")
+                          : historyRecoveryStatus.hidden_count <= 0
+                            ? t("chat.restoreHistoryEmpty")
+                            : t("chat.restoreHistorySummary", { count: historyRecoveryStatus.hidden_count, remaining: historyRecoveryStatus.remaining })}
+                  title={t("chat.restoreHistory")}
+                />
+              </SettingGroup>
+            </section>
+
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">
                 <button
@@ -6705,6 +6772,20 @@ function LiveChatsPage() {
         onChange={setGroupRenameValue}
         onClose={() => setGroupRenameOpen(false)}
         onConfirm={() => void renameGroup()}
+      />
+      <ConfirmDialog
+        open={restoreHistoryConfirmOpen}
+        title={t("chat.restoreHistoryConfirmTitle")}
+        description={t("chat.restoreHistoryConfirmHint", {
+          count: historyRecoveryStatus?.hidden_count ?? 0,
+          remaining: Math.max(0, (historyRecoveryStatus?.remaining ?? 0) - 1),
+        })}
+        confirmLabel={t("chat.restoreHistory")}
+        busy={restoreHistorySaving}
+        onClose={() => {
+          if (!restoreHistorySaving) setRestoreHistoryConfirmOpen(false);
+        }}
+        onConfirm={() => void restoreChatHistory()}
       />
       <ConfirmDialog
         open={clearHistoryConfirmOpen}

@@ -7,6 +7,7 @@ import type {
   ChatDTO,
   ChatPreferenceDTO,
   ChatMessageDTO,
+  ChatHistoryRecoveryStatusDTO,
   MessageMediaKind,
   MessageSearchResponseDTO,
   MessageUploadDTO,
@@ -928,6 +929,22 @@ export const api = {
   clearChatMessages(chat_id: number) {
     return request<{ deleted_count: number }>("/messages/clear", {
       method: "DELETE",
+      auth: true,
+      body: { chat_id },
+    });
+  },
+
+  getChatHistoryRecoveryStatus(chat_id: number, signal?: AbortSignal) {
+    return request<ChatHistoryRecoveryStatusDTO>("/messages/restore", {
+      auth: true,
+      query: { chat_id },
+      signal,
+    });
+  },
+
+  restoreChatHistory(chat_id: number) {
+    return request<ChatHistoryRecoveryStatusDTO>("/messages/restore", {
+      method: "POST",
       auth: true,
       body: { chat_id },
     });

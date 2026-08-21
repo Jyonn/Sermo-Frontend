@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.21.6",
+  "id": "2026.08.21.7",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "即时提醒连接更可靠",
+      "title": "误删的聊天记录可以找回了",
       "items": [
-        "仅绑定 ntfy、Gotify 或 PushDeer 时也能正确识别并接收即时提醒",
-        "接收端开关现在会与即时提醒总开关保持一致"
+        "认证账号可恢复 1 次仅从自己这里删除的聊天记录",
+        "永久 VIP 额外获得 5 次恢复机会"
       ]
     },
     "en": {
-      "title": "More reliable instant receivers",
+      "title": "Restore accidentally deleted chat history",
       "items": [
-        "Instant alerts now work correctly with ntfy, Gotify, or PushDeer alone",
-        "Receiver switches now stay aligned with the main instant-alert setting"
+        "Verified accounts can restore chat history deleted only from their own view once",
+        "Permanent VIP members receive 5 additional recoveries"
       ]
     }
   }

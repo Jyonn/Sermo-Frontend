@@ -871,6 +871,16 @@ export interface MessageSearchResponseDTO {
   next_before: number | null;
 }
 
+export interface ChatHistoryRecoveryStatusDTO {
+  eligible: boolean;
+  limit: number;
+  used: number;
+  remaining: number;
+  hidden_count: number;
+  can_restore: boolean;
+  restored_count?: number;
+}
+
 export interface QuotedMessageDTO {
   message_id: number;
   user: TinyUserDTO;
@@ -881,7 +891,7 @@ export interface QuotedMessageDTO {
 
 export interface MessageSyncEventDTO {
   event_id: number;
-  type: "message.created" | "message.hidden" | "message.recalled";
+  type: "message.created" | "message.hidden" | "message.recalled" | "message.restored";
   chat_id: number;
   message_id: number;
   message?: ChatMessageDTO;

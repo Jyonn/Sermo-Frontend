@@ -480,7 +480,7 @@ export function GlobalMessageSync() {
           }
           const response = await api.getMessageEventsSync({ after: cursor, limit: SYNC_LIMIT });
           const normalizedItems = normalizeSyncItems(
-            response.events.filter((event) => event.type === "message.created" && event.message).map((event) => ({ chat_id: event.chat_id, message: event.message })),
+            response.events.filter((event) => (event.type === "message.created" || event.type === "message.restored") && event.message).map((event) => ({ chat_id: event.chat_id, message: event.message })),
             session.user.user_id,
             activeChatId
           );
