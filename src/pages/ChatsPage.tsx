@@ -51,7 +51,7 @@ import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -67,6 +67,7 @@ const MESSAGE_TYPE_LOCATION = 6;
 const MESSAGE_TYPE_MAP_ACCESS = 7;
 const MESSAGE_TYPE_STATEMENT = 8;
 const MESSAGE_TYPE_STICKER = 9;
+const MESSAGE_TYPE_FORWARD_BUNDLE = 10;
 const MESSAGE_SEARCH_TYPES = [
   { value: null, label: "messageSearch.all" },
   { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
@@ -671,6 +672,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_MAP_ACCESS) return "map_access";
   if (type === MESSAGE_TYPE_STATEMENT) return "statement";
   if (type === MESSAGE_TYPE_STICKER) return "sticker";
+  if (type === MESSAGE_TYPE_FORWARD_BUNDLE) return "forward_bundle";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   return "text";
 }
@@ -917,6 +919,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "map_access") return i18n.t("travelMap.action");
   if (kind === "statement") return i18n.t("message.statementPlaceholder");
   if (kind === "sticker") return i18n.t("sticker.messagePlaceholder");
+  if (kind === "forward_bundle") return i18n.t("message.forwardBundlePlaceholder");
   if (kind === "system") return text || i18n.t("message.system.placeholder");
   return text || i18n.t("chat.noMessages");
 }
@@ -1427,6 +1430,39 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   );
 });
 
+function ForwardBundleViewerItem({ item }: { item: ForwardBundleItemDTO }) {
+  const kind = item.payload?.kind ?? messageKindFromType(item.type);
+  const uri = item.payload?.uri ? resolveStableResourceUri(item.payload.uri) ?? item.payload.uri : "";
+  const thumbnailUri = item.payload?.thumbnail_uri
+    ? resolveStableResourceUri(item.payload.thumbnail_uri) ?? item.payload.thumbnail_uri
+    : uri;
+  let content: ReactNode;
+  if (kind === "image" && uri) {
+    content = <a href={uri} rel="noreferrer" target="_blank"><img alt="" loading="lazy" src={thumbnailUri} /></a>;
+  } else if (kind === "video" && uri) {
+    content = <video controls playsInline poster={thumbnailUri || undefined} preload="metadata" src={uri} />;
+  } else if (kind === "audio" && uri) {
+    content = <AudioMessagePlayer durationSeconds={item.payload.duration_seconds} from="other" uri={uri} />;
+  } else if (kind === "file" && uri) {
+    content = <a className="forward-bundle-file" href={uri} rel="noreferrer" target="_blank"><ComposerSvgIcon kind="file" /><span><strong>{item.payload.file_name || i18n.t("media.file")}</strong><small>{formatFileSize(item.payload.file_size)}</small></span></a>;
+  } else if (kind === "location") {
+    content = <span className="forward-bundle-location"><ComposerSvgIcon kind="location" /><span>{item.payload.address || i18n.t("message.locationPlaceholder")}</span></span>;
+  } else if (kind === "sticker" && uri) {
+    content = <img className="forward-bundle-sticker" alt="" loading="lazy" src={uri} />;
+  } else {
+    content = <p>{item.payload?.text || item.content || previewFromKind(kind, item.content)}</p>;
+  }
+  return (
+    <article className={`forward-bundle-item is-${kind}`}>
+      <header>
+        <UserAvatar className="forward-bundle-avatar" name={item.author?.name || "?"} uri={item.author?.avatar_uri} frame={item.author?.avatar_frame_style} />
+        <span><strong>{item.author?.name || i18n.t("message.unknownSender")}</strong><time>{formatThreadDivider(item.sent_at)}</time></span>
+      </header>
+      <div className="forward-bundle-item-content">{content}</div>
+    </article>
+  );
+}
+
 function renderMessageContent(
   message: ChatMessage,
   onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined,
@@ -1562,6 +1598,40 @@ function renderMessageContent(
 
   if (message.kind === "statement") {
     return <StatementMessageCard statement={message.payload?.statement} />;
+  }
+
+  if (message.kind === "forward_bundle") {
+    const items = message.payload?.items ?? [];
+    return (
+      <button
+        className={`message-forward-bundle-card ${groupClassName}`.trim()}
+        onClick={(event) => {
+          event.stopPropagation();
+          window.dispatchEvent(new CustomEvent("sermo:forward-bundle", { detail: message.payload }));
+        }}
+        type="button"
+      >
+        <span className="message-forward-bundle-heading">
+          <span className="message-forward-bundle-icon material-symbols-outlined" aria-hidden="true">forum</span>
+          <span>
+            <strong>{message.payload?.title || i18n.t("message.forwardBundleTitle")}</strong>
+            {message.payload?.summary ? <small>{message.payload.summary}</small> : null}
+          </span>
+        </span>
+        <span className="message-forward-bundle-preview">
+          {items.slice(0, 3).map((item) => (
+            <span key={`${item.position}:${item.sent_at}`}>
+              <b>{item.author?.name || i18n.t("message.unknownSender")}</b>
+              <i>{previewFromKind(messageKindFromType(item.type), item.content)}</i>
+            </span>
+          ))}
+        </span>
+        <span className="message-forward-bundle-footer">
+          {i18n.t("message.forwardBundleCount", { count: message.payload?.item_count ?? items.length })}
+          <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </span>
+      </button>
+    );
   }
 
   const text = message.payload?.text ?? message.text;
@@ -1708,6 +1778,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             message.kind === "location" ? "is-location" : "",
             message.kind === "map_access" ? "is-travel-map" : "",
             message.kind === "statement" ? "is-statement" : "",
+            message.kind === "forward_bundle" ? "is-forward-bundle" : "",
             message.kind === "sticker" ? "is-sticker" : "",
             extractFirstMessageUrl(message.payload?.text ?? message.text) ? "is-link-preview" : "",
             message.status !== "sent" ? `is-${message.status}` : "",
@@ -2289,6 +2360,12 @@ function LiveChatsPage() {
   const [batchDeleteConfirmOpen, setBatchDeleteConfirmOpen] = useState(false);
   const [messageSelectionAction, setMessageSelectionAction] = useState<MessageSelectionAction | null>(null);
   const [messageSelectionActionPrompt, setMessageSelectionActionPrompt] = useState<MessageSelectionActionPrompt | null>(null);
+  const [forwardPickerOpen, setForwardPickerOpen] = useState(false);
+  const [forwardMode, setForwardMode] = useState<"individual" | "bundle">("bundle");
+  const [forwardSourceMessageIds, setForwardSourceMessageIds] = useState<number[]>([]);
+  const [forwardTargetChatIds, setForwardTargetChatIds] = useState<number[]>([]);
+  const [forwardSending, setForwardSending] = useState(false);
+  const [forwardBundlePreview, setForwardBundlePreview] = useState<ChatMessagePayloadDTO | null>(null);
   const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
   const [clearHistorySaving, setClearHistorySaving] = useState(false);
   const [restoreHistoryConfirmOpen, setRestoreHistoryConfirmOpen] = useState(false);
@@ -4655,6 +4732,14 @@ function LiveChatsPage() {
   }, []);
 
   useEffect(() => {
+    const openForwardBundle = (event: Event) => {
+      setForwardBundlePreview((event as CustomEvent<ChatMessagePayloadDTO>).detail);
+    };
+    window.addEventListener("sermo:forward-bundle", openForwardBundle);
+    return () => window.removeEventListener("sermo:forward-bundle", openForwardBundle);
+  }, []);
+
+  useEffect(() => {
     const handleMapMessage = (event: Event) => {
       const detail = (event as CustomEvent<{
         messageId: number | string;
@@ -5215,6 +5300,59 @@ function LiveChatsPage() {
       return;
     }
     void executeSelectionAction(action, eligible.map((message) => message.clientId));
+  };
+
+  const openForwardPicker = () => {
+    const eligibleIds = selectedActionMessages()
+      .filter((message) => typeof message.id === "number" && !["system", "map_access", "forward_bundle"].includes(message.kind))
+      .map((message) => message.id as number);
+    if (!eligibleIds.length) {
+      showToast(t("message.forwardUnavailable"), "error");
+      return;
+    }
+    if (eligibleIds.length !== selectedMessageClientIds.length) {
+      showToast(t("message.forwardPartial", { eligible: eligibleIds.length, total: selectedMessageClientIds.length }));
+    }
+    setForwardSourceMessageIds(eligibleIds);
+    setForwardTargetChatIds([]);
+    setForwardMode(eligibleIds.length > 1 ? "bundle" : "individual");
+    setForwardPickerOpen(true);
+  };
+
+  const toggleForwardTarget = (chatId: number) => {
+    setForwardTargetChatIds((current) => {
+      if (current.includes(chatId)) return current.filter((id) => id !== chatId);
+      if (current.length >= 10) {
+        showToast(t("message.forwardTargetLimit", { count: 10 }), "error");
+        return current;
+      }
+      return [...current, chatId];
+    });
+  };
+
+  const submitForwardMessages = async () => {
+    if (!forwardSourceMessageIds.length || !forwardTargetChatIds.length || forwardSending) return;
+    try {
+      setForwardSending(true);
+      const result = await api.forwardMessages(forwardSourceMessageIds, forwardTargetChatIds, forwardMode);
+      if (selectedChat && forwardTargetChatIds.includes(selectedChat.id)) {
+        const additions = result.messages
+          .filter((entry) => entry.chat_id === selectedChat.id)
+          .map((entry) => mapChatMessage(entry.message, currentUserId));
+        setMessages((current) => ({
+          ...current,
+          [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), ...additions]),
+        }));
+      }
+      setForwardPickerOpen(false);
+      finishMessageSelection();
+      await refreshChats();
+      showToast(t("message.forwarded", { chats: forwardTargetChatIds.length }));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("message.forwardFailed"), "error");
+    } finally {
+      setForwardSending(false);
+    }
   };
 
   const deleteMessage = async (scope: "me" | "everyone") => {
@@ -5890,7 +6028,7 @@ function LiveChatsPage() {
 
               {messageSelectionMode ? (
                 <div className="composer message-selection-toolbar">
-                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={() => showToast(t("message.forwardComingSoon"))} type="button">
+                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={openForwardPicker} type="button">
                     <span className="material-symbols-outlined">forward</span>
                     <span>{t("message.forward")}</span>
                   </button>
@@ -6505,6 +6643,86 @@ function LiveChatsPage() {
           </div>
         </div>
       </BottomSheet>
+
+      <BottomSheet
+        open={forwardPickerOpen}
+        title={t("message.forwardTitle")}
+        description={t("message.forwardSourceCount", { count: forwardSourceMessageIds.length })}
+        className="forward-picker-sheet"
+        bodyClassName="forward-picker-body"
+        onClose={() => {
+          if (!forwardSending) setForwardPickerOpen(false);
+        }}
+      >
+        {forwardSourceMessageIds.length > 1 ? (
+          <div className="forward-mode-switch" role="radiogroup" aria-label={t("message.forwardMode")}>
+            <button
+              className={forwardMode === "individual" ? "is-active" : ""}
+              onClick={() => setForwardMode("individual")}
+              role="radio"
+              aria-checked={forwardMode === "individual"}
+              type="button"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">view_agenda</span>
+              <span><strong>{t("message.forwardIndividual")}</strong><small>{t("message.forwardIndividualHint")}</small></span>
+            </button>
+            <button
+              className={forwardMode === "bundle" ? "is-active" : ""}
+              onClick={() => setForwardMode("bundle")}
+              role="radio"
+              aria-checked={forwardMode === "bundle"}
+              type="button"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">stacks</span>
+              <span><strong>{t("message.forwardBundle")}</strong><small>{t("message.forwardBundleHint")}</small></span>
+            </button>
+          </div>
+        ) : null}
+        <div className="forward-target-heading">
+          <strong>{t("message.chooseForwardChats")}</strong>
+          <span>{forwardTargetChatIds.length}/10</span>
+        </div>
+        <div className="forward-target-list">
+          {chats.map((chat) => {
+            const selected = forwardTargetChatIds.includes(chat.id);
+            return (
+              <button
+                className={`forward-target-row${selected ? " is-selected" : ""}`}
+                key={`forward-target-${chat.id}`}
+                onClick={() => toggleForwardTarget(chat.id)}
+                type="button"
+              >
+                <UserAvatar className="forward-target-avatar" name={chat.title} uri={chat.avatarUri} frame={chat.avatarFrameStyle} />
+                <span className="forward-target-copy"><strong>{chat.title}</strong><small>{chat.preview || chat.subtitle}</small></span>
+                <span className="forward-target-check material-symbols-outlined" aria-hidden="true">{selected ? "check_circle" : "radio_button_unchecked"}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="forward-picker-submit">
+          <button className="button" disabled={!forwardTargetChatIds.length || forwardSending} onClick={() => void submitForwardMessages()} type="button">
+            {forwardSending ? t("common.processing") : t("message.forwardToChats", { count: forwardTargetChatIds.length })}
+          </button>
+        </div>
+      </BottomSheet>
+
+      <SideDrawer
+        open={Boolean(forwardBundlePreview)}
+        title={forwardBundlePreview?.title || t("message.forwardBundleTitle")}
+        titleAccessory={<span className="drawer-title-count">{forwardBundlePreview?.item_count ?? forwardBundlePreview?.items?.length ?? 0}</span>}
+        historyKey="forward-bundle"
+        onClose={() => setForwardBundlePreview(null)}
+      >
+        <div className="forward-bundle-viewer">
+          <header className="forward-bundle-viewer-intro">
+            <span className="material-symbols-outlined" aria-hidden="true">forum</span>
+            <span><strong>{t("message.forwardBundleSnapshot")}</strong><small>{forwardBundlePreview?.summary || t("message.forwardBundleSnapshotHint")}</small></span>
+          </header>
+          <div className="forward-bundle-viewer-list">
+            {(forwardBundlePreview?.items ?? []).map((item) => <ForwardBundleViewerItem item={item} key={`${item.position}:${item.sent_at}`} />)}
+          </div>
+        </div>
+      </SideDrawer>
 
       <SideDrawer
         open={pinnedDrawerOpen}

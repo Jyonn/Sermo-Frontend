@@ -2,7 +2,7 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "forward_bundle";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -722,6 +722,24 @@ export interface ChatMessagePayloadDTO {
   pixel_width?: number | null;
   pixel_height?: number | null;
   unavailable?: boolean;
+  bundle_id?: number;
+  title?: string;
+  summary?: string;
+  item_count?: number;
+  items?: ForwardBundleItemDTO[];
+}
+
+export interface ForwardBundleItemDTO {
+  position: number;
+  type: number;
+  author: TinyUserDTO;
+  content: string;
+  payload: ChatMessagePayloadDTO;
+  sent_at: number;
+}
+
+export interface ForwardMessagesResultDTO {
+  messages: Array<{ chat_id: number; message: ChatMessageDTO }>;
 }
 
 export interface TravelMapRegionDTO {

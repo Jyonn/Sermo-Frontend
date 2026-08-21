@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.21.11",
-  "publishedAt": "2026-08-21",
+  "id": "2026.08.22.1",
+  "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "多选消息操作更完整",
+      "title": "多选消息现在可以转发",
       "items": [
-        "多选消息时可批量复制文本、保存多媒体、删除或撤回消息",
-        "部分消息不适用当前操作时，会先说明实际处理数量"
+        "可将多条消息逐条转发，或合并为一张聊天记录卡片",
+        "点击合并记录即可在独立页面中友好查看文字和多媒体内容"
       ]
     },
     "en": {
-      "title": "More complete multi-message actions",
+      "title": "Forward selected messages",
       "items": [
-        "Multi-select now supports copying text, saving media, deleting, and recalling messages",
-        "When an action only applies to some selections, Sermo confirms the exact number first"
+        "Forward selected messages separately or combine them into one chat history card",
+        "Open a combined card to browse its text and media in a dedicated viewer"
       ]
     }
   }

@@ -8,6 +8,7 @@ import type {
   ChatPreferenceDTO,
   ChatMessageDTO,
   ChatHistoryRecoveryStatusDTO,
+  ForwardMessagesResultDTO,
   MessageMediaKind,
   MessageSearchResponseDTO,
   MessageUploadDTO,
@@ -923,6 +924,14 @@ export const api = {
       method: "DELETE",
       auth: true,
       body: { message_ids },
+    });
+  },
+
+  forwardMessages(message_ids: number[], target_chat_ids: number[], mode: "individual" | "bundle") {
+    return request<ForwardMessagesResultDTO>("/messages/forward", {
+      method: "POST",
+      auth: true,
+      body: { message_ids, target_chat_ids, mode },
     });
   },
 
