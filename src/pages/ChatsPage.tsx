@@ -22,6 +22,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
@@ -2417,6 +2418,8 @@ function LiveChatsPage() {
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [fileSourceSheetOpen, setFileSourceSheetOpen] = useState(false);
+  const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const stickerInputRef = useRef<HTMLInputElement | null>(null);
   const clipboardPreviewUrlsRef = useRef(new Set<string>());
   const fileDropDepthRef = useRef(0);
@@ -4347,19 +4350,15 @@ function LiveChatsPage() {
         const mediaKind = retryMessage.kind as MessageMediaKind;
         const upload = await uploadMessageMedia(file, mediaKind, (progress) => {
           updateSendTask(retryMessage.clientId, 0.12 + progress * 0.76);
-        });
+        }, retryMessage.payload?.duration_seconds);
         created = await api.sendMessage(
           selectedChat.id,
           messageTypeFromKind(mediaKind),
-          JSON.stringify({
-            key: upload.key,
-            mime_type: mimeType,
-            duration_seconds: retryMessage.payload?.duration_seconds,
-            file_name: retryMessage.payload?.file_name,
-            file_size: retryMessage.payload?.file_size ?? file.size,
-          }),
+          "",
           retryMessage.replyTo?.message_id,
           retryMessage.clientId,
+          [],
+          upload.asset?.asset_id,
         );
       } else {
         recordOptimisticEmojiUsage(retryMessage.text);
@@ -4463,21 +4462,17 @@ function LiveChatsPage() {
     try {
       const upload = await uploadMessageMedia(file, kind, (progress) => {
         updateSendTask(pendingMessage.clientId, 0.05 + progress * 0.84);
-      });
+      }, extraPayload.duration_seconds);
       if (cancelledSendIdsRef.current.has(pendingMessage.clientId)) return false;
       updateSendTask(pendingMessage.clientId, 0.92);
       const created = await api.sendMessage(
         selectedChat.id,
         messageTypeFromKind(kind),
-        JSON.stringify({
-          key: upload.key,
-          mime_type: file.type || extraPayload.mime_type,
-          duration_seconds: extraPayload.duration_seconds,
-          file_name: extraPayload.file_name,
-          file_size: extraPayload.file_size,
-        }),
+        "",
         reply?.message_id,
-        pendingMessage.clientId
+        pendingMessage.clientId,
+        [],
+        upload.asset?.asset_id,
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({
@@ -4521,7 +4516,8 @@ function LiveChatsPage() {
 
   const openFilePicker = () => {
     if (composerBusy) return;
-    fileInputRef.current?.click();
+    setComposerMoreOpen(false);
+    setFileSourceSheetOpen(true);
   };
 
   const openLocationPicker = () => {
@@ -7354,6 +7350,17 @@ function LiveChatsPage() {
         onChange={(event) => void handleMediaSelection(event, "gallery")}
         type="file"
       />
+      <BottomSheet onClose={() => setFileSourceSheetOpen(false)} open={fileSourceSheetOpen} title={t("cloudResources.fileSourceTitle")}>
+        <div className="file-source-choice">
+          <button onClick={() => { setFileSourceSheetOpen(false); setCloudResourcesOpen(true); }} type="button">
+            <span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong>
+          </button>
+          <button onClick={() => { setFileSourceSheetOpen(false); fileInputRef.current?.click(); }} type="button">
+            <span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong>
+          </button>
+        </div>
+      </BottomSheet>
+      <CloudResourceDrawer currentChatId={selectedChat?.id} initialTab="file" onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
       <input
         ref={fileInputRef}
         hidden

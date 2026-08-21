@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "../styles.css";
 import "./styles/qixi-theme.css";
+import "./styles/cloud-resources.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdentity";

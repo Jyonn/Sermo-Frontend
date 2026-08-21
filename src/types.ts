@@ -575,6 +575,36 @@ export interface MessageUploadDTO {
   resource_uri: string;
   expires_in: number;
   max_file_size: number;
+  instant?: boolean;
+  asset?: CloudResourceDTO;
+  quota?: CloudResourceQuotaDTO;
+}
+
+export interface CloudResourceQuotaDTO {
+  limit: number;
+  used: number;
+  remaining: number;
+}
+
+export interface CloudResourceDTO {
+  asset_id: number;
+  kind: "image" | "video" | "audio" | "file";
+  uri: string;
+  thumbnail_uri?: string | null;
+  mime_type: string;
+  file_name: string;
+  file_size: number;
+  duration_seconds?: number | null;
+  pixel_width?: number | null;
+  pixel_height?: number | null;
+  reference_count: number;
+  status: number;
+  created_at: number;
+}
+
+export interface CloudResourceListDTO {
+  items: CloudResourceDTO[];
+  quota: CloudResourceQuotaDTO;
 }
 
 export interface SpaceIdentityUploadDTO {

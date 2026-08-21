@@ -5,7 +5,7 @@ import type { MessageMediaKind } from "../types";
 const IMAGE_MAX_SIZE = 10 * 1024 * 1024;
 const VIDEO_MAX_SIZE = 500 * 1024 * 1024;
 const AUDIO_MAX_SIZE = 20 * 1024 * 1024;
-const FILE_MAX_SIZE = 100 * 1024 * 1024;
+const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 export class MessageUploadError extends Error {
   constructor(message: string) {
@@ -72,8 +72,27 @@ export function uploadFormData(url: string, formData: FormData, onProgress?: (pr
   });
 }
 
-export async function uploadMessageMedia(file: File, kind: MessageMediaKind, onProgress?: (progress: number) => void) {
-  return uploadMessageMediaWith(file, kind, (mediaKind, fileName, contentType) => api.createMessageUpload(mediaKind, fileName, contentType), onProgress);
+export async function uploadMessageMedia(file: File, kind: MessageMediaKind, onProgress?: (progress: number) => void, durationSeconds?: number) {
+  validateMessageMediaFile(file, kind);
+  const contentHash = kind === "video" || kind === "file" ? await sha256File(file) : "";
+  onProgress?.(0.02);
+  const upload = await api.createMessageUpload(kind, file.name, file.type, file.size, contentHash);
+  if (upload.instant && upload.asset) {
+    onProgress?.(1);
+    return { ...upload, key: "", asset: upload.asset };
+  }
+  const formData = new FormData();
+  formData.set("token", upload.upload_token);
+  formData.set("key", upload.key);
+  formData.set("file", file);
+  await uploadFormData(upload.upload_url, formData, onProgress);
+  const finalized = await api.finalizeCloudResource(kind, upload.key, file.name, file.type, file.size, contentHash, durationSeconds);
+  return { ...upload, asset: finalized.asset };
+}
+
+async function sha256File(file: File) {
+  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 export async function uploadMessageMediaWith(

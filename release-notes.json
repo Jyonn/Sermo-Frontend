@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.22.1",
+  "id": "2026.08.22.2",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "多选消息现在可以转发",
+      "title": "云端资源上线",
       "items": [
-        "可将多条消息逐条转发，或合并为一张聊天记录卡片",
-        "点击合并记录即可在独立页面中友好查看文字和多媒体内容"
+        "菜单中可统一查看、下载和发送过去使用的图片、视频与文件",
+        "视频和文件支持秒传，并共享 1 GB 云端空间"
       ]
     },
     "en": {
-      "title": "Forward selected messages",
+      "title": "Cloud resources are here",
       "items": [
-        "Forward selected messages separately or combine them into one chat history card",
-        "Open a combined card to browse its text and media in a dedicated viewer"
+        "Browse, download, and resend previous images, videos, and files from the Menu tab",
+        "Videos and files support instant deduplication and share 1 GB of cloud storage"
       ]
     }
   }

@@ -12,6 +12,8 @@ import type {
   MessageMediaKind,
   MessageSearchResponseDTO,
   MessageUploadDTO,
+  CloudResourceDTO,
+  CloudResourceListDTO,
   MessageEventSyncResponseDTO,
   FriendshipRequestDTO,
   FriendInvitePreviewDTO,
@@ -698,11 +700,33 @@ export const api = {
     });
   },
 
-  createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string) {
+  createMessageUpload(kind: MessageMediaKind, file_name: string, content_type?: string, file_size?: number, content_hash?: string) {
     return request<MessageUploadDTO>("/messages/upload", {
       method: "POST",
       auth: true,
-      body: { kind, file_name, content_type },
+      body: { kind, file_name, content_type, file_size, content_hash },
+    });
+  },
+
+  getCloudResources(kind?: "image" | "video" | "file", signal?: AbortSignal) {
+    return request<CloudResourceListDTO>("/messages/resources", { auth: true, query: { kind }, signal });
+  },
+
+  createCloudResourceUpload(kind: "video" | "file", file_name: string, content_type: string, file_size: number, content_hash: string) {
+    return request<MessageUploadDTO>("/messages/resources", {
+      method: "POST", auth: true, body: { kind, file_name, content_type, file_size, content_hash },
+    });
+  },
+
+  finalizeCloudResource(kind: MessageMediaKind, key: string, file_name: string, content_type: string, file_size: number, content_hash: string, duration_seconds?: number) {
+    return request<{ asset: CloudResourceDTO; instant: boolean; quota: CloudResourceListDTO["quota"] }>("/messages/resources/finalize", {
+      method: "POST", auth: true, body: { kind, content: key, file_name, content_type, file_size, content_hash, duration_seconds },
+    });
+  },
+
+  deleteCloudResource(asset_id: number) {
+    return request<{ quota: CloudResourceListDTO["quota"] }>("/messages/resources", {
+      method: "DELETE", auth: true, query: { asset_id },
     });
   },
 
@@ -799,12 +823,12 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = []) {
+  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], asset_id?: number) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
       query: { chat_id },
-      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids },
+      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, asset_id: asset_id ?? null },
     });
   },
 

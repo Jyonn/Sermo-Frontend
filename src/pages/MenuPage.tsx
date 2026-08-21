@@ -9,6 +9,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer } from "../components/SideDrawer";
@@ -425,6 +426,7 @@ export default function MenuPage() {
   const [webPushSaving, setWebPushSaving] = useState(false);
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [travelMapOpen, setTravelMapOpen] = useState(false);
+  const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
   const [vipClaiming, setVipClaiming] = useState(false);
@@ -1955,6 +1957,12 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
+            <button className="simple-row menu-link-row" onClick={() => setCloudResourcesOpen(true)} type="button">
+              <div className="row-main">
+                <strong>{t("cloudResources.title")}</strong>
+              </div>
+              <span className="material-symbols-outlined">cloud</span>
+            </button>
           </div>
         </section>
 
@@ -1994,6 +2002,7 @@ export default function MenuPage() {
         open={pwaInstallSheetOpen}
         spaceName={space?.name ?? t("space.current")}
       />
+      <CloudResourceDrawer onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
       <TravelMapDrawer open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
 
       <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
