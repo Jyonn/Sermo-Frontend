@@ -30,7 +30,6 @@ import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import PlatformAdminPage from "./pages/PlatformAdminPage";
 import PersonalizationCatalogLabPage from "./pages/PersonalizationCatalogLabPage";
-import BaxianBubbleLabPage from "./pages/BaxianBubbleLabPage";
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -80,7 +79,6 @@ export default function App() {
         <Route path="/pwa" element={<PwaAccountEntryPage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
         <Route path="/design/personalization-catalog" element={<PersonalizationCatalogLabPage />} />
-        <Route path="/design/baxian-bubble" element={<BaxianBubbleLabPage />} />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
           path="/space/dashboard"

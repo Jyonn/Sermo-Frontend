@@ -15,7 +15,7 @@ import {
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
-import { BaxianBubbleRunner, baxianCharacterForStyle } from "../components/BaxianBubbleRunner";
+import { BaxianBubbleRunner } from "../components/BaxianBubbleRunner";
 import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
@@ -389,12 +389,6 @@ function NikoBubbleRunner() {
 
 function XiaobaiBubbleRunner() {
   return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
-}
-
-function BaxianBubbleSeal({ style }: { style?: ChatBubbleStyle }) {
-  const character = baxianCharacterForStyle(style);
-  if (!character) return null;
-  return <span aria-hidden="true" className={`baxian-bubble-seal is-${character}`} />;
 }
 
 function formatTime(value: number) {
@@ -1268,9 +1262,8 @@ const MessageImageGallery = memo(function MessageImageGallery({
           })}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          {isFirst ? <BaxianBubbleRunner style={messages[0]?.chatBubbleStyle} /> : null}
+          <BaxianBubbleRunner animate={!isLast} style={messages[0]?.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
-          {isLast ? <BaxianBubbleSeal style={messages[0]?.chatBubbleStyle} /> : null}
         </div>
       </div>
     </div>
@@ -1771,9 +1764,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
-          {isFirst ? <BaxianBubbleRunner style={message.chatBubbleStyle} /> : null}
+          <BaxianBubbleRunner animate={!isLast} style={message.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
-          {isLast ? <BaxianBubbleSeal style={message.chatBubbleStyle} /> : null}
         </div>
       </div>
     </div>

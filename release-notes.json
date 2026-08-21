@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.21.1",
+  "id": "2026.08.21.2",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡动画更从容",
+      "title": "八仙气泡换上最终动画",
       "items": [
-        "八仙角色换用新版动画，完整登场后会在最后一帧停留片刻，再自然重复播放"
+        "八仙元素现在悬挂在消息边缘，连续消息会播放一次宝物化印动画并停留在最终造型"
       ]
     },
     "en": {
-      "title": "More polished Baxian bubble animations",
+      "title": "Final Baxian bubble animations",
       "items": [
-        "Updated Baxian characters with new animations that pause naturally on the final frame before replaying"
+        "Baxian elements now hang from message edges, transforming once on grouped messages and remaining in their final seal form"
       ]
     }
   }
