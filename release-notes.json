@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.21.5",
+  "id": "2026.08.21.6",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡动效重归层次",
+      "title": "即时提醒连接更可靠",
       "items": [
-        "合并消息首条重新展示角色动画，角落宝物与印章动效更加克制"
+        "仅绑定 ntfy、Gotify 或 PushDeer 时也能正确识别并接收即时提醒",
+        "接收端开关现在会与即时提醒总开关保持一致"
       ]
     },
     "en": {
-      "title": "Refined Eight Immortals motion",
+      "title": "More reliable instant receivers",
       "items": [
-        "Grouped messages again feature the character animation on the first bubble, with subtler corner transitions"
+        "Instant alerts now work correctly with ntfy, Gotify, or PushDeer alone",
+        "Receiver switches now stay aligned with the main instant-alert setting"
       ]
     }
   }

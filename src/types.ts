@@ -41,7 +41,6 @@ export interface UserDTO extends TinyUserDTO {
   name_pinyin?: string | null;
   email_verified_at: number | null;
   phone_verified_at: number | null;
-  bark_verified_at: number | null;
 }
 
 export interface SpaceDTO {
@@ -160,14 +159,11 @@ export interface AccessPayload {
   welcome_message?: string;
   email?: string | null;
   phone?: string | null;
-  bark?: string | null;
   last_heartbeat?: number;
   email_verified_at?: number | null;
   phone_verified_at?: number | null;
-  bark_verified_at?: number | null;
   email_unbound_at?: number | null;
   phone_unbound_at?: number | null;
-  bark_unbound_at?: number | null;
   is_private_account?: boolean;
   is_permanent_vip?: boolean;
   show_self_avatar?: boolean;
@@ -189,10 +185,8 @@ export interface UserMeDTO extends UserDTO {
   welcome_message?: string;
   email?: string | null;
   phone?: string | null;
-  bark?: string | null;
   email_unbound_at?: number | null;
   phone_unbound_at?: number | null;
-  bark_unbound_at?: number | null;
   is_private_account: boolean;
   is_permanent_vip?: boolean;
   permanent_vip_campaign?: PermanentVipCampaignDTO;

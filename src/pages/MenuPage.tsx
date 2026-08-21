@@ -241,14 +241,14 @@ function channelTarget(me: UserMeDTO | null, channel: NotificationChannel) {
   if (!me) return "";
   if (channel === "email") return me.email ?? "";
   if (channel === "sms") return me.phone ?? "";
-  return me.bark ?? "";
+  return "";
 }
 
 function channelVerified(me: UserMeDTO | null, channel: NotificationChannel) {
   if (!me) return false;
   if (channel === "email") return Boolean(me.email_verified_at);
   if (channel === "sms") return Boolean(me.phone_verified_at);
-  return Boolean(me.bark_verified_at);
+  return false;
 }
 
 function detectDeviceFamily(): "ios" | "android" | "desktop" {
@@ -731,13 +731,13 @@ export default function MenuPage() {
   const contactValue = (channel: NotificationChannel) => {
     if (channel === "email") return me?.email ?? "";
     if (channel === "sms") return me?.phone ?? "";
-    return me?.bark ?? "";
+    return "";
   };
 
   const contactUnboundAt = (channel: NotificationChannel) => {
     if (channel === "email") return me?.email_unbound_at ?? null;
     if (channel === "sms") return me?.phone_unbound_at ?? null;
-    return me?.bark_unbound_at ?? null;
+    return null;
   };
 
   const contactUnbindAvailableAt = (channel: NotificationChannel) => {
@@ -763,13 +763,10 @@ export default function MenuPage() {
       verified: updated.verified,
       email: updated.email,
       phone: updated.phone,
-      bark: updated.bark,
       email_verified_at: updated.email_verified_at,
       phone_verified_at: updated.phone_verified_at,
-      bark_verified_at: updated.bark_verified_at,
       email_unbound_at: updated.email_unbound_at,
       phone_unbound_at: updated.phone_unbound_at,
-      bark_unbound_at: updated.bark_unbound_at,
       is_private_account: updated.is_private_account,
     });
     setPrefs((current) => ({ ...current, [channel]: { ...current[channel], enabled: false } }));
@@ -953,13 +950,10 @@ export default function MenuPage() {
           welcome_message: meInfo.welcome_message,
           email: meInfo.email,
           phone: meInfo.phone,
-          bark: meInfo.bark,
           email_verified_at: meInfo.email_verified_at,
           phone_verified_at: meInfo.phone_verified_at,
-          bark_verified_at: meInfo.bark_verified_at,
           email_unbound_at: meInfo.email_unbound_at,
           phone_unbound_at: meInfo.phone_unbound_at,
-          bark_unbound_at: meInfo.bark_unbound_at,
           is_private_account: meInfo.is_private_account,
           language: meInfo.language,
           last_heartbeat: meInfo.last_heartbeat,
@@ -1308,10 +1302,8 @@ export default function MenuPage() {
         welcome_message: nextMe.welcome_message,
         email: nextMe.email,
         phone: nextMe.phone,
-        bark: nextMe.bark,
         email_verified_at: nextMe.email_verified_at,
         phone_verified_at: nextMe.phone_verified_at,
-        bark_verified_at: nextMe.bark_verified_at,
         language: nextMe.language,
         last_heartbeat: nextMe.last_heartbeat,
       });
@@ -1710,7 +1702,7 @@ export default function MenuPage() {
       setSecurityDrawerOpen(true);
       return;
     }
-    if (channelVerified(me, kind)) {
+    if (kind === "bark" ? instantEndpoints.some((endpoint) => endpoint.enabled) : channelVerified(me, kind)) {
       openPrefDrawer(kind);
       return;
     }

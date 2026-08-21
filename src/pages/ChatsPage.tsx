@@ -4031,7 +4031,6 @@ function LiveChatsPage() {
                   verified: true,
                   email_verified_at: null,
                   phone_verified_at: null,
-                  bark_verified_at: null,
                 }) as UserDTO
             )
         : [];
