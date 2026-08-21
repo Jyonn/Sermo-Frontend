@@ -9989,6 +9989,68 @@ html[data-theme="dark"] .personalization-bubble-stage {
   position: relative;
 }
 
+.chat-file-drop-guide {
+  position: absolute;
+  inset: 14px;
+  z-index: 23;
+  display: grid;
+  place-items: center;
+  border: 2px dashed color-mix(in srgb, var(--brand-primary) 58%, transparent);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--surface-primary, #fffdf8) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.08);
+  backdrop-filter: blur(16px) saturate(1.08);
+  pointer-events: none;
+  animation: chat-file-drop-enter 180ms ease-out both;
+}
+
+.chat-file-drop-guide-card {
+  min-width: 220px;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 28px 34px;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 22%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface-primary, #fffdf8) 90%, transparent);
+  box-shadow: 0 20px 48px rgba(18, 72, 58, 0.14);
+}
+
+.chat-file-drop-guide-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 5px;
+  border-radius: 17px;
+  color: var(--brand-primary);
+  background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+}
+
+.chat-file-drop-guide-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.chat-file-drop-guide-card strong {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.chat-file-drop-guide-card > span:last-child {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@keyframes chat-file-drop-enter {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 899px) {
+  .chat-file-drop-guide { display: none; }
+}
+
 .chat-clipboard-backdrop {
   position: absolute;
   inset: 0;

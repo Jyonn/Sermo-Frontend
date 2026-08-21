@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
   type ClipboardEvent as ReactClipboardEvent,
   type CSSProperties,
+  type DragEvent as ReactDragEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
@@ -142,6 +143,7 @@ type ChatRouteState = {
 type ClipboardUploadCandidate = {
   files: File[];
   previewUris: Array<string | null>;
+  source: "clipboard" | "drop";
 };
 
 type LocationDraft = {
@@ -2261,6 +2263,7 @@ function LiveChatsPage() {
   const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
   const [chatTravelMapMenuOpen, setChatTravelMapMenuOpen] = useState(false);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
+  const [fileDropActive, setFileDropActive] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
   const [chatHealthSnapshot, setChatHealthSnapshot] = useState<ChatHealthSnapshot>({ lastFailureAt: null, lastSuccessAt: null });
   const [healthClock, setHealthClock] = useState(() => Date.now());
@@ -2324,6 +2327,7 @@ function LiveChatsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const stickerInputRef = useRef<HTMLInputElement | null>(null);
   const clipboardPreviewUrlsRef = useRef(new Set<string>());
+  const fileDropDepthRef = useRef(0);
 
   useEffect(() => {
     if (!imagePreview) return;
@@ -4726,6 +4730,18 @@ function LiveChatsPage() {
     setClipboardUpload(null);
   };
 
+  const openUploadCandidate = (files: File[], source: ClipboardUploadCandidate["source"]) => {
+    closeClipboardUpload();
+    const previewUris = files.map((file) => {
+      if (!file.type.startsWith("image/")) return null;
+      const uri = URL.createObjectURL(file);
+      clipboardPreviewUrlsRef.current.add(uri);
+      return uri;
+    });
+    setComposerMoreOpen(false);
+    setClipboardUpload({ files, previewUris, source });
+  };
+
   const handleComposerPaste = (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
     const itemFiles = Array.from(event.clipboardData.items)
       .filter((item) => item.kind === "file")
@@ -4735,16 +4751,57 @@ function LiveChatsPage() {
     if (!files.length) return;
 
     event.preventDefault();
-    closeClipboardUpload();
-    const previewUris = files.map((file) => {
-      if (!file.type.startsWith("image/")) return null;
-      const uri = URL.createObjectURL(file);
-      clipboardPreviewUrlsRef.current.add(uri);
-      return uri;
-    });
-    setComposerMoreOpen(false);
-    setClipboardUpload({ files, previewUris });
+    openUploadCandidate(files, "clipboard");
   };
+
+  const hasDraggedFiles = (event: ReactDragEvent<HTMLElement>) => Array.from(event.dataTransfer.types).includes("Files");
+
+  const canAcceptDesktopFileDrop = () => (
+    Boolean(displayedChat)
+    && !composerBusy
+    && typeof window !== "undefined"
+    && window.matchMedia("(min-width: 900px)").matches
+  );
+
+  const handleFileDragEnter = (event: ReactDragEvent<HTMLElement>) => {
+    if (!hasDraggedFiles(event) || !canAcceptDesktopFileDrop()) return;
+    event.preventDefault();
+    fileDropDepthRef.current += 1;
+    setFileDropActive(true);
+  };
+
+  const handleFileDragOver = (event: ReactDragEvent<HTMLElement>) => {
+    if (!hasDraggedFiles(event) || !canAcceptDesktopFileDrop()) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleFileDragLeave = (event: ReactDragEvent<HTMLElement>) => {
+    if (!fileDropActive) return;
+    event.preventDefault();
+    fileDropDepthRef.current = Math.max(0, fileDropDepthRef.current - 1);
+    if (fileDropDepthRef.current === 0) setFileDropActive(false);
+  };
+
+  const handleFileDrop = (event: ReactDragEvent<HTMLElement>) => {
+    if (!hasDraggedFiles(event) || !canAcceptDesktopFileDrop()) return;
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    fileDropDepthRef.current = 0;
+    setFileDropActive(false);
+    if (files.length) openUploadCandidate(files, "drop");
+  };
+
+  useEffect(() => {
+    if (!fileDropActive) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      fileDropDepthRef.current = 0;
+      setFileDropActive(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [fileDropActive]);
 
   const confirmClipboardUpload = async () => {
     if (!clipboardUpload) return;
@@ -4753,7 +4810,9 @@ function LiveChatsPage() {
     await Promise.all(
       files.map(async (file) => {
         try {
-          const kind: MessageMediaKind = file.type.startsWith("image/") ? "image" : "file";
+          const kind = resolveMediaKind(file);
+          if (kind === "image" && !requireComposerCapability("chat.message.send.image", 2, t("message.sendImage"))) return;
+          if (kind === "video" && !requireComposerCapability("chat.message.send.video", 5, t("message.sendVideo"))) return;
           await sendUploadedMediaMessage(kind, file, kind === "file" ? { file_name: file.name, file_size: file.size } : {});
         } catch (error) {
           const uploadError = toMessageUploadError(error);
@@ -5506,7 +5565,14 @@ function LiveChatsPage() {
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
-        <section ref={chatMainPaneRef} className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}>
+        <section
+          ref={chatMainPaneRef}
+          className={`message-pane chat-main-pane ${displayedChat ? "is-open" : "desktop-pane is-closed"}`}
+          onDragEnter={handleFileDragEnter}
+          onDragLeave={handleFileDragLeave}
+          onDragOver={handleFileDragOver}
+          onDrop={handleFileDrop}
+        >
           {displayedChat ? (
             <>
               <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}`}>
@@ -6049,6 +6115,15 @@ function LiveChatsPage() {
               <strong>{t("chat.selectConversation")}</strong>
             </div>
           )}
+          {fileDropActive ? (
+            <div className="chat-file-drop-guide" role="status">
+              <div className="chat-file-drop-guide-card">
+                <span className="chat-file-drop-guide-icon" aria-hidden="true"><ComposerSvgIcon kind="file" /></span>
+                <strong>{t("clipboard.dropToSend")}</strong>
+                <span>{t("clipboard.dropToReview")}</span>
+              </div>
+            </div>
+          ) : null}
           {clipboardUpload ? (
             <div className="chat-clipboard-backdrop" role="presentation">
               <section aria-modal="true" className="chat-clipboard-dialog" role="dialog">
@@ -6058,7 +6133,7 @@ function LiveChatsPage() {
                   </span>
                   <div>
                     <h3>{t("clipboard.sendThese")}</h3>
-                    <p>{t("clipboard.itemsRead", { count: clipboardUpload.files.length })}</p>
+                    <p>{t(clipboardUpload.source === "drop" ? "clipboard.itemsDropped" : "clipboard.itemsRead", { count: clipboardUpload.files.length })}</p>
                   </div>
                 </div>
                 <div className="chat-clipboard-items">

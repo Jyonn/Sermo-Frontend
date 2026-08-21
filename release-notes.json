@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.21.3",
+  "id": "2026.08.21.4",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "文件发送不再挑格式",
+      "title": "文件拖进聊天即可发送",
       "items": [
-        "聊天中的文件选择现已支持任意文件格式，图片、视频和语音规则保持不变"
+        "桌面端可将文件直接拖入当前会话，并在确认清单后发送"
       ]
     },
     "en": {
-      "title": "Send files in any format",
+      "title": "Drag files straight into chat",
       "items": [
-        "Chat file uploads now accept any file format, while image, video, and audio rules remain unchanged"
+        "On desktop, drag files into the current conversation and review them before sending"
       ]
     }
   }
