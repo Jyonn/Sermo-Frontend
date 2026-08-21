@@ -2025,6 +2025,14 @@ interface MessageMenuState {
   confirmDelete: boolean;
 }
 
+type MessageSelectionAction = "copy" | "save" | "recall";
+
+interface MessageSelectionActionPrompt {
+  action: MessageSelectionAction;
+  eligibleClientIds: string[];
+  total: number;
+}
+
 interface ImagePreviewState {
   index: number;
   uris: string[];
@@ -2279,6 +2287,8 @@ function LiveChatsPage() {
   const [messageSelectionMode, setMessageSelectionMode] = useState(false);
   const [selectedMessageClientIds, setSelectedMessageClientIds] = useState<string[]>([]);
   const [batchDeleteConfirmOpen, setBatchDeleteConfirmOpen] = useState(false);
+  const [messageSelectionAction, setMessageSelectionAction] = useState<MessageSelectionAction | null>(null);
+  const [messageSelectionActionPrompt, setMessageSelectionActionPrompt] = useState<MessageSelectionActionPrompt | null>(null);
   const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
   const [clearHistorySaving, setClearHistorySaving] = useState(false);
   const [restoreHistoryConfirmOpen, setRestoreHistoryConfirmOpen] = useState(false);
@@ -2708,10 +2718,11 @@ function LiveChatsPage() {
   };
 
   const cancelMessageSelection = () => {
-    if (messageDeleteState === "deleting") return;
+    if (messageDeleteState === "deleting" || messageSelectionAction) return;
     setMessageSelectionMode(false);
     setSelectedMessageClientIds([]);
     setBatchDeleteConfirmOpen(false);
+    setMessageSelectionActionPrompt(null);
   };
 
   const toggleMessageSelection = (message: ChatMessage) => {
@@ -5064,16 +5075,20 @@ function LiveChatsPage() {
     }
   };
 
-  const downloadMessageAttachment = async () => {
-    if (!messageMenu || !["image", "audio", "file"].includes(messageMenu.message.kind)) return;
-    const message = messageMenu.message;
-    if (message.kind === "audio" && !requireComposerCapability("chat.message.download.audio", 8, t("audio.download"))) return;
+  const downloadChatMessageAttachment = async (message: ChatMessage) => {
+    if (!["image", "video", "audio", "file"].includes(message.kind)) return false;
     const rawUri = message.payload?.uri;
-    if (!rawUri) return;
+    if (!rawUri) return false;
     const uri = resolveStableResourceUri(rawUri) ?? rawUri;
     const safeId = String(message.id).replace(/[^a-zA-Z0-9_-]/g, "") || String(Date.now());
     const suppliedName = message.payload?.file_name?.trim();
-    const fallbackName = message.kind === "audio" ? `sermo-audio-${safeId}` : message.kind === "file" ? `sermo-file-${safeId}` : `sermo-image-${safeId}`;
+    const fallbackName = message.kind === "audio"
+      ? `sermo-audio-${safeId}`
+      : message.kind === "video"
+        ? `sermo-video-${safeId}`
+        : message.kind === "file"
+          ? `sermo-file-${safeId}`
+          : `sermo-image-${safeId}`;
 
     try {
       const response = await fetch(uri);
@@ -5088,6 +5103,7 @@ function LiveChatsPage() {
       anchor.click();
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      return true;
     } catch {
       const anchor = document.createElement("a");
       anchor.href = uri;
@@ -5097,9 +5113,108 @@ function LiveChatsPage() {
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
-    } finally {
-      setMessageMenu(null);
+      return true;
     }
+  };
+
+  const downloadMessageAttachment = async () => {
+    if (!messageMenu || !["image", "video", "audio", "file"].includes(messageMenu.message.kind)) return;
+    if (messageMenu.message.kind === "audio" && !requireComposerCapability("chat.message.download.audio", 8, t("audio.download"))) return;
+    await downloadChatMessageAttachment(messageMenu.message);
+    setMessageMenu(null);
+  };
+
+  const selectedActionMessages = (clientIds = selectedMessageClientIds) => {
+    const selectedIds = new Set(clientIds);
+    return selectedMessages.filter((message) => selectedIds.has(message.clientId));
+  };
+
+  const eligibleSelectionMessages = (action: MessageSelectionAction) => selectedActionMessages().filter((message) => {
+    if (action === "copy") return message.kind === "text" && Boolean(message.text.trim());
+    if (action === "save") {
+      if (!["image", "video", "audio", "file"].includes(message.kind) || !message.payload?.uri) return false;
+      return message.kind !== "audio" || canDownloadAudio;
+    }
+    return canRecallMessage(message);
+  });
+
+  const finishMessageSelection = () => {
+    setMessageSelectionMode(false);
+    setSelectedMessageClientIds([]);
+    setMessageSelectionActionPrompt(null);
+  };
+
+  const executeSelectionAction = async (action: MessageSelectionAction, clientIds: string[]) => {
+    const targets = selectedActionMessages(clientIds);
+    if (!targets.length) {
+      setMessageSelectionActionPrompt(null);
+      return;
+    }
+    setMessageSelectionAction(action);
+    setMessageSelectionActionPrompt(null);
+    try {
+      if (action === "copy") {
+        const copyValue = targets.length === 1
+          ? targets[0].text.trim()
+          : targets.map((message) => `${message.name}: ${message.text.trim()}`).join("\n");
+        if (!await copyText(copyValue)) throw new Error(t("common.copyFailed"));
+        showToast(t("message.batchCopied", { count: targets.length }));
+        finishMessageSelection();
+        return;
+      }
+
+      if (action === "save") {
+        for (const message of targets) {
+          await downloadChatMessageAttachment(message);
+          // Give mobile browsers a frame to register each user-initiated download.
+          await new Promise((resolve) => window.setTimeout(resolve, 80));
+        }
+        showToast(t("message.batchSaved", { count: targets.length }));
+        finishMessageSelection();
+        return;
+      }
+
+      const recalledIds = targets
+        .map((message) => message.id)
+        .filter((messageId): messageId is number => typeof messageId === "number");
+      for (const messageId of recalledIds) await api.deleteMessage(messageId, "everyone");
+      targets.forEach((message) => purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]));
+      const recalledClientIds = new Set(targets.map((message) => message.clientId));
+      const nextThreadMessages = selectedMessages.filter((message) => !recalledClientIds.has(message.clientId));
+      setPinnedMessages((current) => current.filter((pin) => !recalledIds.includes(pin.message.message_id)));
+      setMessages((current) => ({ ...current, [selectedChat!.id]: nextThreadMessages }));
+      if (cacheScope && selectedChat) {
+        const nextSnapshot = {
+          messages: nextThreadMessages,
+          hasOlderMessages,
+          scrollTop: messageScrollRef.current?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        };
+        chatCache.setThread(cacheScope, selectedChat.id, nextSnapshot);
+        void chatCache.persistThread(cacheScope, selectedChat.id, nextSnapshot);
+      }
+      await refreshChats();
+      showToast(t("message.batchRecalled", { count: targets.length }));
+      finishMessageSelection();
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : apiError instanceof Error ? apiError.message : t("common.operationFailed"), "error");
+    } finally {
+      setMessageSelectionAction(null);
+    }
+  };
+
+  const requestSelectionAction = (action: MessageSelectionAction) => {
+    if (!selectedMessageClientIds.length || messageSelectionAction) return;
+    const eligible = eligibleSelectionMessages(action);
+    if (eligible.length !== selectedMessageClientIds.length) {
+      setMessageSelectionActionPrompt({
+        action,
+        eligibleClientIds: eligible.map((message) => message.clientId),
+        total: selectedMessageClientIds.length,
+      });
+      return;
+    }
+    void executeSelectionAction(action, eligible.map((message) => message.clientId));
   };
 
   const deleteMessage = async (scope: "me" | "everyone") => {
@@ -5562,7 +5677,14 @@ function LiveChatsPage() {
       topbarProgress={displayedChat ? sendProgress : null}
       topbarLeading={
         displayedChat ? (
-          <div className="chat-conversation-topbar">
+          messageSelectionMode ? (
+            <div className="message-selection-topbar">
+              <button aria-label={t("common.cancel")} className="chat-back-button" onClick={cancelMessageSelection} type="button">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <strong>{t("message.selectedCount", { count: selectedMessageClientIds.length })}</strong>
+            </div>
+          ) : <div className="chat-conversation-topbar">
             <button
               aria-label={otherChatsUnreadCount ? t("chat.backWithUnread", { count: otherChatsUnreadCount }) : t("common.back")}
               className="chat-back-button"
@@ -5604,7 +5726,7 @@ function LiveChatsPage() {
         ) : undefined
       }
       topbarAction={
-        displayedChat ? (
+        displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
             <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
               <span className="material-symbols-outlined">more_vert</span>
@@ -5627,7 +5749,14 @@ function LiveChatsPage() {
           {displayedChat ? (
             <>
               <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}`}>
-                <div className="chat-conversation-topbar">
+                {messageSelectionMode ? (
+                  <div className="message-selection-topbar">
+                    <button aria-label={t("common.cancel")} className="chat-back-button" onClick={cancelMessageSelection} type="button">
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                    <strong>{t("message.selectedCount", { count: selectedMessageClientIds.length })}</strong>
+                  </div>
+                ) : <div className="chat-conversation-topbar">
                   <div className="avatar-wrap">
                     <UserAvatar
                       className={`avatar ${displayedChat.online ? "status-online" : ""}`}
@@ -5648,10 +5777,10 @@ function LiveChatsPage() {
                     </strong>
                     <div className="chat-topbar-status">{displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
                   </div>
-                </div>
-                <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
+                </div>}
+                {!messageSelectionMode ? <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
                   <span className="material-symbols-outlined">more_vert</span>
-                </button>
+                </button> : null}
                 {sendProgress !== null ? (
                   <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />
@@ -5761,21 +5890,35 @@ function LiveChatsPage() {
 
               {messageSelectionMode ? (
                 <div className="composer message-selection-toolbar">
-                  <button className="message-selection-cancel" disabled={messageDeleteState === "deleting"} onClick={cancelMessageSelection} type="button">
-                    {t("common.cancel")}
+                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={() => showToast(t("message.forwardComingSoon"))} type="button">
+                    <span className="material-symbols-outlined">forward</span>
+                    <span>{t("message.forward")}</span>
                   </button>
-                  <div className="message-selection-count">
-                    <strong>{selectedMessageClientIds.length}</strong>
-                    <span>{t("message.selected")}</span>
-                  </div>
+                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={() => requestSelectionAction("copy")} type="button">
+                    <span className="material-symbols-outlined">content_copy</span>
+                    <span>{t("common.copy")}</span>
+                  </button>
+                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={() => requestSelectionAction("save")} type="button">
+                    <span className="material-symbols-outlined">download</span>
+                    <span>{t("common.save")}</span>
+                  </button>
                   <button
                     className="message-selection-delete"
-                    disabled={!selectedMessageClientIds.length || messageDeleteState === "deleting"}
+                    disabled={!selectedMessageClientIds.length || messageDeleteState === "deleting" || Boolean(messageSelectionAction)}
                     onClick={() => setBatchDeleteConfirmOpen(true)}
                     type="button"
                   >
                     <ComposerSvgIcon kind="delete" />
                     <span>{t("common.delete")}</span>
+                  </button>
+                  <button
+                    className="message-selection-recall"
+                    disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)}
+                    onClick={() => requestSelectionAction("recall")}
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined">undo</span>
+                    <span>{t("message.recallForEveryone")}</span>
                   </button>
                 </div>
               ) : (
@@ -6851,6 +6994,32 @@ function LiveChatsPage() {
           setBatchDeleteConfirmOpen(false);
         }}
         onConfirm={() => void deleteSelectedMessages()}
+      />
+      <ConfirmDialog
+        open={Boolean(messageSelectionActionPrompt)}
+        title={messageSelectionActionPrompt?.action === "copy"
+          ? t("message.partialCopyTitle")
+          : messageSelectionActionPrompt?.action === "save"
+            ? t("message.partialSaveTitle")
+            : t("message.partialRecallTitle")}
+        description={messageSelectionActionPrompt
+          ? t("message.partialActionHint", {
+              eligible: messageSelectionActionPrompt.eligibleClientIds.length,
+              total: messageSelectionActionPrompt.total,
+            })
+          : ""}
+        confirmLabel={messageSelectionActionPrompt?.eligibleClientIds.length ? t("common.continue") : t("common.gotIt")}
+        showCancelButton={Boolean(messageSelectionActionPrompt?.eligibleClientIds.length)}
+        busy={Boolean(messageSelectionAction)}
+        danger={messageSelectionActionPrompt?.action === "recall"}
+        onClose={() => setMessageSelectionActionPrompt(null)}
+        onConfirm={() => {
+          if (!messageSelectionActionPrompt?.eligibleClientIds.length) {
+            setMessageSelectionActionPrompt(null);
+            return;
+          }
+          void executeSelectionAction(messageSelectionActionPrompt.action, messageSelectionActionPrompt.eligibleClientIds);
+        }}
       />
       <ConfirmDialog
         open={stickerDeleteConfirmOpen}

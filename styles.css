@@ -7060,63 +7060,66 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-selection-toolbar {
-  min-height: 64px;
+  min-height: 70px;
   display: grid;
-  grid-template-columns: minmax(72px, 1fr) auto minmax(72px, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  gap: 12px;
+  gap: 4px;
+  padding: 8px 10px;
 }
 
 .message-selection-toolbar button {
-  min-height: 42px;
-  padding: 0 14px;
-  border-radius: 13px;
-  font-size: 0.78rem;
+  min-width: 0;
+  min-height: 54px;
+  padding: 5px 2px;
+  border-radius: 14px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: 0.68rem;
   font-weight: 760;
 }
 
-.message-selection-cancel {
-  justify-self: start;
-  color: var(--text-secondary);
-  background: rgba(112, 127, 120, 0.09);
+.message-selection-toolbar button:hover:not(:disabled) {
+  background: rgba(25, 115, 88, 0.09);
 }
 
-.message-selection-count {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  color: var(--text-muted);
-  white-space: nowrap;
+.message-selection-toolbar .material-symbols-outlined,
+.message-selection-toolbar svg {
+  width: 21px;
+  height: 21px;
+  font-size: 21px;
 }
 
-.message-selection-count strong {
-  color: var(--text-primary);
-  font-family: var(--font-heading);
-  font-size: 1.2rem;
-}
-
-.message-selection-count span {
-  font-size: 0.7rem;
-}
-
-.message-selection-delete {
-  justify-self: end;
-  display: inline-flex;
+.message-selection-topbar {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
-  gap: 6px;
-  color: #fff;
-  background: #c84250;
-  box-shadow: 0 7px 16px rgba(173, 47, 63, 0.2);
+  gap: 8px;
+  width: 100%;
 }
 
-.message-selection-delete svg {
-  width: 18px;
-  height: 18px;
+.message-selection-topbar strong {
+  grid-column: 2;
+  min-width: 0;
+  color: var(--text-primary);
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 0.98rem;
 }
 
-.message-selection-delete:disabled {
+.message-selection-delete,
+.message-selection-recall {
+  color: #c84250 !important;
+}
+
+.message-selection-toolbar button:disabled {
   opacity: 0.42;
-  box-shadow: none;
 }
 
 .composer:focus-within {

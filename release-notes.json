@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.21.10",
+  "id": "2026.08.21.11",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "实时消息外观恢复正常",
+      "title": "多选消息操作更完整",
       "items": [
-        "好友实时发来的消息会立即使用对方设置的聊天气泡和头像框",
-        "同一位好友短时间内连续发送的消息会重新合并展示"
+        "多选消息时可批量复制文本、保存多媒体、删除或撤回消息",
+        "部分消息不适用当前操作时，会先说明实际处理数量"
       ]
     },
     "en": {
-      "title": "Live message appearance restored",
+      "title": "More complete multi-message actions",
       "items": [
-        "Incoming live messages now immediately use the sender's bubble and avatar frame",
-        "Consecutive messages from the same person are grouped correctly again"
+        "Multi-select now supports copying text, saving media, deleting, and recalling messages",
+        "When an action only applies to some selections, Sermo confirms the exact number first"
       ]
     }
   }
