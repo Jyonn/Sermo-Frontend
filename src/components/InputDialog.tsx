@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
@@ -6,6 +6,7 @@ import { useI18n } from "../lib/language";
 interface InputDialogProps {
   open: boolean;
   title: string;
+  description?: ReactNode;
   value: string;
   placeholder?: string;
   type?: "text" | "password";
@@ -20,6 +21,7 @@ interface InputDialogProps {
 export function InputDialog({
   open,
   title,
+  description,
   value,
   placeholder,
   type = "text",
@@ -72,6 +74,7 @@ export function InputDialog({
       <section aria-modal="true" className="input-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <div className="input-dialog-copy">
           <h2>{title}</h2>
+          {description ? <p>{description}</p> : null}
         </div>
         <input
           ref={inputRef}

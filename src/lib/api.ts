@@ -942,11 +942,11 @@ export const api = {
     });
   },
 
-  restoreChatHistory(chat_id: number) {
+  restoreChatHistory(chat_id: number, password: string) {
     return request<ChatHistoryRecoveryStatusDTO>("/messages/restore", {
       method: "POST",
       auth: true,
-      body: { chat_id },
+      body: { chat_id, password },
     });
   },
 

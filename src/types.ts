@@ -873,6 +873,7 @@ export interface MessageSearchResponseDTO {
 
 export interface ChatHistoryRecoveryStatusDTO {
   eligible: boolean;
+  has_password: boolean;
   limit: number;
   used: number;
   remaining: number;

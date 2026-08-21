@@ -5,14 +5,14 @@
     "zh-CN": {
       "title": "误删的聊天记录可以找回了",
       "items": [
-        "认证账号可恢复 1 次仅从自己这里删除的聊天记录",
+        "认证账号输入密码确认后，可恢复 1 次仅从自己这里删除的聊天记录",
         "永久 VIP 额外获得 5 次恢复机会"
       ]
     },
     "en": {
       "title": "Restore accidentally deleted chat history",
       "items": [
-        "Verified accounts can restore chat history deleted only from their own view once",
+        "Verified accounts can restore chat history deleted only from their own view once after password confirmation",
         "Permanent VIP members receive 5 additional recoveries"
       ]
     }

@@ -1904,6 +1904,7 @@
   ,"chat.restoreHistory": "恢复聊天记录"
   ,"chat.restoreHistorySummary": "可恢复 {{count}} 条 · 剩余 {{remaining}} 次"
   ,"chat.restoreHistoryVerify": "认证账号后可使用 1 次"
+  ,"chat.restoreHistorySetPassword": "请先在账号与安全中设置密码"
   ,"chat.restoreHistoryExhausted": "恢复次数已用完"
   ,"chat.restoreHistoryEmpty": "当前没有可恢复的记录"
   ,"chat.restoreHistoryUnavailable": "暂时无法读取恢复额度"
@@ -1911,4 +1912,5 @@
   ,"chat.restoreHistoryConfirmHint": "将找回当前会话中仅从你这里删除的 {{count}} 条消息，并使用 1 次恢复机会。恢复后还剩 {{remaining}} 次。"
   ,"chat.restoreHistoryDone": "已恢复 {{count}} 条聊天记录"
   ,"chat.restoreHistoryFailed": "暂时无法恢复聊天记录"
+  ,"chat.restoreHistoryPasswordRequired": "请输入当前密码"
 }

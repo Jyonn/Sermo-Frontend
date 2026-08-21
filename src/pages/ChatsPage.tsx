@@ -2286,6 +2286,7 @@ function LiveChatsPage() {
   const [clearHistorySaving, setClearHistorySaving] = useState(false);
   const [restoreHistoryConfirmOpen, setRestoreHistoryConfirmOpen] = useState(false);
   const [restoreHistorySaving, setRestoreHistorySaving] = useState(false);
+  const [restoreHistoryPassword, setRestoreHistoryPassword] = useState("");
   const [historyRecoveryStatus, setHistoryRecoveryStatus] = useState<ChatHistoryRecoveryStatusDTO | null>(null);
   const [historyRecoveryLoading, setHistoryRecoveryLoading] = useState(false);
   const [historyReloadVersion, setHistoryReloadVersion] = useState(0);
@@ -5254,10 +5255,14 @@ function LiveChatsPage() {
 
   const restoreChatHistory = async () => {
     if (!selectedChat || restoreHistorySaving) return;
+    if (!restoreHistoryPassword) {
+      showToast(t("chat.restoreHistoryPasswordRequired"), "error");
+      return;
+    }
     const chatId = selectedChat.id;
     try {
       setRestoreHistorySaving(true);
-      const result = await api.restoreChatHistory(chatId);
+      const result = await api.restoreChatHistory(chatId, restoreHistoryPassword);
       setHistoryRecoveryStatus(result);
       setMessages((current) => ({ ...current, [chatId]: [] }));
       setPinnedMessages([]);
@@ -5265,6 +5270,7 @@ function LiveChatsPage() {
       setReplyTarget(null);
       if (cacheScope) await chatCache.clearThread(cacheScope, chatId);
       setRestoreHistoryConfirmOpen(false);
+      setRestoreHistoryPassword("");
       setDetailsSheetOpen(false);
       setHistoryReloadVersion((current) => current + 1);
       await refreshChats();
@@ -6542,7 +6548,9 @@ function LiveChatsPage() {
                       ? t("chat.restoreHistoryUnavailable")
                       : !historyRecoveryStatus.eligible
                         ? t("chat.restoreHistoryVerify")
-                        : historyRecoveryStatus.remaining <= 0
+                        : !historyRecoveryStatus.has_password
+                          ? t("chat.restoreHistorySetPassword")
+                          : historyRecoveryStatus.remaining <= 0
                           ? t("chat.restoreHistoryExhausted")
                           : historyRecoveryStatus.hidden_count <= 0
                             ? t("chat.restoreHistoryEmpty")
@@ -6773,7 +6781,7 @@ function LiveChatsPage() {
         onClose={() => setGroupRenameOpen(false)}
         onConfirm={() => void renameGroup()}
       />
-      <ConfirmDialog
+      <InputDialog
         open={restoreHistoryConfirmOpen}
         title={t("chat.restoreHistoryConfirmTitle")}
         description={t("chat.restoreHistoryConfirmHint", {
@@ -6782,8 +6790,15 @@ function LiveChatsPage() {
         })}
         confirmLabel={t("chat.restoreHistory")}
         busy={restoreHistorySaving}
+        type="password"
+        value={restoreHistoryPassword}
+        placeholder={t("password.currentPlaceholder")}
+        onChange={setRestoreHistoryPassword}
         onClose={() => {
-          if (!restoreHistorySaving) setRestoreHistoryConfirmOpen(false);
+          if (!restoreHistorySaving) {
+            setRestoreHistoryConfirmOpen(false);
+            setRestoreHistoryPassword("");
+          }
         }}
         onConfirm={() => void restoreChatHistory()}
       />

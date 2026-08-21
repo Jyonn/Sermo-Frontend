@@ -1904,6 +1904,7 @@
   ,"chat.restoreHistory": "Restore chat history"
   ,"chat.restoreHistorySummary": "{{count}} messages available · {{remaining}} restores left"
   ,"chat.restoreHistoryVerify": "Verify your account to receive 1 restore"
+  ,"chat.restoreHistorySetPassword": "Set a password in Account & Security first"
   ,"chat.restoreHistoryExhausted": "No restores remaining"
   ,"chat.restoreHistoryEmpty": "There is no history to restore"
   ,"chat.restoreHistoryUnavailable": "Recovery allowance is temporarily unavailable"
@@ -1911,4 +1912,5 @@
   ,"chat.restoreHistoryConfirmHint": "This restores {{count}} messages deleted only from your account and uses 1 recovery. {{remaining}} recoveries are currently available."
   ,"chat.restoreHistoryDone": "Restored {{count}} chat messages"
   ,"chat.restoreHistoryFailed": "Could not restore chat history"
+  ,"chat.restoreHistoryPasswordRequired": "Enter your current password"
 }

@@ -15892,6 +15892,13 @@ html[data-theme="dark"] .message-link-preview-site {
   font-size: 1.08rem;
 }
 
+.input-dialog-copy p {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .input-dialog-field {
   min-height: 52px;
 }
