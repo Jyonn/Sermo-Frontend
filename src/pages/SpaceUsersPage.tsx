@@ -11,6 +11,7 @@ import { useAuth } from "../lib/auth";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, UserDTO } from "../types";
 import { i18n, useI18n } from "../lib/language";
+import { usePageActive } from "../lib/pageActivity";
 
 function productizeFriendRequestError(error: unknown, fallback: string) {
   if (error instanceof ApiError && (
@@ -26,6 +27,7 @@ function productizeFriendRequestError(error: unknown, fallback: string) {
 
 export default function SpaceUsersPage() {
   const { t } = useI18n();
+  const pageActive = usePageActive();
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -78,10 +80,10 @@ export default function SpaceUsersPage() {
   }, [cacheScope, onlineOnly, query, refreshTick]);
 
   useEffect(() => {
-    if (!onlineOnly) return;
+    if (!onlineOnly || !pageActive) return;
     const timer = window.setInterval(() => setRefreshTick((value) => value + 1), 12_000);
     return () => window.clearInterval(timer);
-  }, [onlineOnly]);
+  }, [onlineOnly, pageActive]);
 
   const createDirectChat = async (userId: number) => {
     try {

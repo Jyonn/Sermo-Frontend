@@ -13,6 +13,7 @@ import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
+import { usePageActive } from "../lib/pageActivity";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
@@ -280,6 +281,7 @@ export function GlobalMessageSync() {
   const location = useLocation();
   const navigate = useNavigate();
   const features = useSpaceFeatures();
+  const pageActive = usePageActive();
   const [afterMessageId, setAfterMessageId] = useState<number | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
   const [popupDragOffset, setPopupDragOffset] = useState(0);
@@ -327,7 +329,7 @@ export function GlobalMessageSync() {
   }, [features.chatEnabled, features.ready, scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
-    if (!scope || !session || afterMessageId === null || !features.ready || !features.chatEnabled) return;
+    if (!pageActive || !scope || !session || afterMessageId === null || !features.ready || !features.chatEnabled) return;
 
     let cancelled = false;
 
@@ -576,7 +578,11 @@ export function GlobalMessageSync() {
       syncInFlightRef.current = false;
       window.clearInterval(timer);
     };
-  }, [activeChatId, afterMessageId, features.chatEnabled, features.ready, gestureScope, scope, sessionAccessToken, sessionUserId]);
+  }, [activeChatId, afterMessageId, features.chatEnabled, features.ready, gestureScope, pageActive, scope, sessionAccessToken, sessionUserId]);
+
+  useEffect(() => {
+    if (!pageActive) setPopup(null);
+  }, [pageActive]);
 
   useEffect(() => {
     if (!popup) return;

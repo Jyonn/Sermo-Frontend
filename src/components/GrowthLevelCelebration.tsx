@@ -7,6 +7,7 @@ import { showToast } from "../lib/toast";
 import { growthStageForLevel } from "../lib/growth-stage";
 import { UserAvatar } from "./UserAvatar";
 import ChatsPage from "../pages/ChatsPage";
+import { usePageActive } from "../lib/pageActivity";
 
 const GROWTH_REFRESH_EVENT = "sermo:growth-refresh";
 const GROWTH_POLL_INTERVAL = 30_000;
@@ -110,6 +111,7 @@ function RewardTrackItem({ active, onClick, reward }: { active: boolean; onClick
 }
 
 export function GrowthLevelCelebration() {
+  const pageActive = usePageActive();
   const { t } = useI18n();
   const { patchSessionUser, session } = useAuth();
   const [growth, setGrowth] = useState<UserGrowthDTO | null>(null);
@@ -127,6 +129,7 @@ export function GrowthLevelCelebration() {
       setGrowth(null);
       return;
     }
+    if (!pageActive) return;
     let cancelled = false;
     const refresh = () => {
       if (requestInFlightRef.current) return;
@@ -137,21 +140,16 @@ export function GrowthLevelCelebration() {
         requestInFlightRef.current = false;
       });
     };
-    const handleVisibility = () => document.visibilityState === "visible" && refresh();
     refresh();
     const timer = window.setInterval(refresh, GROWTH_POLL_INTERVAL);
     window.addEventListener(GROWTH_REFRESH_EVENT, refresh);
-    window.addEventListener("focus", refresh);
-    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       cancelled = true;
       requestInFlightRef.current = false;
       window.clearInterval(timer);
       window.removeEventListener(GROWTH_REFRESH_EVENT, refresh);
-      window.removeEventListener("focus", refresh);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [session?.accessToken]);
+  }, [pageActive, session?.accessToken]);
 
   const acknowledgedLevel = growth?.acknowledged_level ?? 0;
   const pendingLevel = growth?.pending_level ?? (growth && acknowledgedLevel < growth.level ? acknowledgedLevel + 1 : null);

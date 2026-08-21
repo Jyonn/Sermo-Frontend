@@ -47,6 +47,7 @@ import { loadMessagesAfterThrough, loadMessagesBeforeThrough } from "../lib/mess
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
+import { usePageActive } from "../lib/pageActivity";
 import { showToast } from "../lib/toast";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
@@ -1340,6 +1341,7 @@ function LinkedMessageText({ hiddenUrl, mentions = [], text }: { hiddenUrl?: str
 }
 
 const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId, preview, url }: { messageId: number | string; preview?: LinkPreviewDTO | null; url: string }) {
+  const pageActive = usePageActive();
   const [currentPreview, setCurrentPreview] = useState<LinkPreviewDTO | null>(preview ?? null);
   const previewUrl = currentPreview?.url || preview?.url || url;
   const isPollable = typeof messageId === "number" && (currentPreview?.status ?? preview?.status) === "pending";
@@ -1349,7 +1351,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   }, [preview?.url, preview?.status, preview?.title, preview?.description, preview?.image_url, preview?.site_name]);
 
   useEffect(() => {
-    if (!isPollable) return;
+    if (!isPollable || !pageActive) return;
 
     let cancelled = false;
     let attempts = 0;
@@ -1373,7 +1375,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
       cancelled = true;
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [isPollable, messageId]);
+  }, [isPollable, messageId, pageActive]);
 
   if (currentPreview?.status === "pending") {
     const pendingHostname = hostnameFromUrl(previewUrl);
@@ -2211,6 +2213,7 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
 
 function LiveChatsPage() {
   const { t } = useI18n();
+  const pageActive = usePageActive();
   const { discover: discoverFeature } = useFeatureDiscovery();
   const navigate = useNavigate();
   const location = useLocation();
@@ -2789,6 +2792,8 @@ function LiveChatsPage() {
       });
     }
 
+    if (!pageActive) return () => controller.abort();
+
     api
       .getChats(controller.signal)
       .then((rows) => {
@@ -2808,9 +2813,10 @@ function LiveChatsPage() {
       });
 
     return () => controller.abort();
-  }, [cacheScope, currentUserId]);
+  }, [cacheScope, currentUserId, pageActive]);
 
   useEffect(() => {
+    if (!pageActive) return;
     const controller = new AbortController();
     let syncing = false;
     const sync = () => {
@@ -2829,7 +2835,7 @@ function LiveChatsPage() {
       controller.abort();
       window.clearInterval(timer);
     };
-  }, [currentUserId]);
+  }, [currentUserId, pageActive]);
 
   const selectedChat = useMemo(() => {
     const numericChatId = Number(chatId);
@@ -2978,6 +2984,7 @@ function LiveChatsPage() {
       setPinnedMessages([]);
       return;
     }
+    if (!pageActive) return;
     const controller = new AbortController();
     let syncing = false;
     const sync = () => {
@@ -2990,16 +2997,13 @@ function LiveChatsPage() {
           syncing = false;
         });
     };
-    const syncOnFocus = () => sync();
     sync();
     const interval = window.setInterval(sync, 5000);
-    window.addEventListener("focus", syncOnFocus);
     return () => {
       controller.abort();
       window.clearInterval(interval);
-      window.removeEventListener("focus", syncOnFocus);
     };
-  }, [historyReloadVersion, selectedChat?.id]);
+  }, [historyReloadVersion, pageActive, selectedChat?.id]);
 
   useEffect(() => {
     setReplyTarget(null);

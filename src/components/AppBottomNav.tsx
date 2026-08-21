@@ -9,6 +9,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n, type TranslationKey } from "../lib/language";
+import { usePageActive } from "../lib/pageActivity";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", labelKey: "nav.chats" },
@@ -31,6 +32,7 @@ export function AppBottomNav() {
   const space = useSpaceBrand();
   const features = useSpaceFeatures();
   const { t } = useI18n();
+  const pageActive = usePageActive();
   const loadedIdentityRef = useRef<string | null>(null);
   const sessionUserId = session?.user.user_id ?? null;
   const sessionSpaceId = session?.user.space_id ?? null;
@@ -51,6 +53,7 @@ export function AppBottomNav() {
       loadedIdentityRef.current = null;
       return;
     }
+    if (!pageActive) return;
 
     const identityKey = `${session.user.space_id}:${session.user.user_id}`;
     if (loadedIdentityRef.current === identityKey) return;
@@ -74,7 +77,7 @@ export function AppBottomNav() {
       .catch(() => {
         if (loadedIdentityRef.current === identityKey) loadedIdentityRef.current = null;
       });
-  }, [patchSessionUser, sessionAccessToken, sessionSpaceId, sessionUserId]);
+  }, [pageActive, patchSessionUser, sessionAccessToken, sessionSpaceId, sessionUserId]);
 
   useLayoutEffect(() => {
     if (!desktopNavigationActive) {
@@ -129,6 +132,7 @@ export function AppBottomNav() {
       setIncomingRequestCount(0);
       return;
     }
+    if (!pageActive) return;
 
     let cancelled = false;
 
@@ -156,13 +160,14 @@ export function AppBottomNav() {
       cancelled = true;
       window.removeEventListener(FRIEND_REQUESTS_UPDATED_EVENT, handleUpdated as EventListener);
     };
-  }, [effectivePathname, sessionAccessToken, sessionUserId]);
+  }, [effectivePathname, pageActive, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!session) {
       setSquareUnread(0);
       return;
     }
+    if (!pageActive) return;
     let cancelled = false;
     const sync = () => void api.getNotificationEvents("square").then((result) => {
       if (!cancelled) setSquareUnread(result.unread_count);
@@ -179,7 +184,7 @@ export function AppBottomNav() {
       window.clearInterval(timer);
       window.removeEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, handleUpdated as EventListener);
     };
-  }, [sessionAccessToken, sessionUserId]);
+  }, [pageActive, sessionAccessToken, sessionUserId]);
 
   if (!session || !effectivePathname.startsWith("/app/")) return null;
   const isChatDetail = Boolean(matchPath("/app/chats/:chatId", effectivePathname));

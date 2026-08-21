@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.21.8",
+  "id": "2026.08.21.9",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "聊天页面更加稳定",
+      "title": "后台运行更加省电",
       "items": [
-        "修复聊天列表同步时会反复刷新当前会话并造成画面闪烁的问题",
-        "历史消息仍只会在主动滑到顶部时继续加载"
+        "网页切到后台后会暂停心跳、新消息和提醒等定时同步",
+        "重新打开网页时会立即补齐最新消息和状态"
       ]
     },
     "en": {
-      "title": "A steadier chat experience",
+      "title": "More efficient background behavior",
       "items": [
-        "Fixed repeated conversation refreshes and visual flicker during chat list synchronization",
-        "Older messages continue loading only after you intentionally scroll to the top"
+        "Heartbeat, message, and reminder polling now pauses while the page is in the background",
+        "Messages and status catch up immediately when you return"
       ]
     }
   }

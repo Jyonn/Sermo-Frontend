@@ -14,6 +14,7 @@ import { getSpaceRouterBasename } from "./lib/spaceEntry";
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 import { initializeScheduledSiteTheme } from "./lib/siteTheme";
+import { isPageActive } from "./lib/pageActivity";
 
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
@@ -71,10 +72,19 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then((registration) => {
       watchPwaUpdates(registration);
       const checkForUpdate = () => {
+        if (!isPageActive()) return;
         void registration.update().catch(() => undefined);
       };
       checkForUpdate();
-      window.setInterval(checkForUpdate, 3 * 60 * 1000);
+      const timer = window.setInterval(checkForUpdate, 3 * 60 * 1000);
+      const checkWhenVisible = () => {
+        if (isPageActive()) checkForUpdate();
+      };
+      document.addEventListener("visibilitychange", checkWhenVisible);
+      window.addEventListener("beforeunload", () => {
+        window.clearInterval(timer);
+        document.removeEventListener("visibilitychange", checkWhenVisible);
+      }, { once: true });
     });
   });
 
