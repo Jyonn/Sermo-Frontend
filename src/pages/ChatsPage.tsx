@@ -6798,7 +6798,6 @@ function LiveChatsPage() {
       />
       <input
         ref={fileInputRef}
-        accept=".pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.zip,.rar,.7z,.tar,.gz,.json"
         hidden
         multiple
         onChange={(event) => void handleMediaSelection(event, "file")}

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.21.2",
+  "id": "2026.08.21.3",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "八仙气泡换上最终动画",
+      "title": "文件发送不再挑格式",
       "items": [
-        "八仙元素现在悬挂在消息边缘，连续消息会播放一次宝物化印动画并停留在最终造型"
+        "聊天中的文件选择现已支持任意文件格式，图片、视频和语音规则保持不变"
       ]
     },
     "en": {
-      "title": "Final Baxian bubble animations",
+      "title": "Send files in any format",
       "items": [
-        "Baxian elements now hang from message edges, transforming once on grouped messages and remaining in their final seal form"
+        "Chat file uploads now accept any file format, while image, video, and audio rules remain unchanged"
       ]
     }
   }
