@@ -2836,6 +2836,7 @@ function LiveChatsPage() {
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
+  const selectedChatId = selectedChat?.id ?? null;
   const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
     if (!selectedChat || selectedChat.type !== "direct") return null;
     const member = selectedChat.detail.members.find((item) => !item.isSelf);
@@ -3269,7 +3270,7 @@ function LiveChatsPage() {
   };
 
   useEffect(() => {
-    if (!selectedChat || !cacheScope) return;
+    if (!selectedChatId || !cacheScope) return;
     const controller = new AbortController();
     setOlderState("idle");
     setHasOlderMessages(false);
@@ -3282,7 +3283,7 @@ function LiveChatsPage() {
         stickToBottomRef.current = true;
         if (releaseAnchor) {
           window.setTimeout(() => {
-            if (initialBottomAnchorRef.current === selectedChat.id) {
+            if (initialBottomAnchorRef.current === selectedChatId) {
               initialBottomAnchorRef.current = null;
             }
           }, 180);
@@ -3290,13 +3291,13 @@ function LiveChatsPage() {
       }));
     };
 
-    initialBottomAnchorRef.current = selectedChat.id;
+    initialBottomAnchorRef.current = selectedChatId;
 
-    let restoredThread = chatCache.getThread(cacheScope, selectedChat.id);
+    let restoredThread = chatCache.getThread(cacheScope, selectedChatId);
     if (restoredThread?.messages.length) {
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(restoredThread?.messages ?? [])),
+        [selectedChatId]: mergeMessages(current[selectedChatId] ?? [], sortMessages(restoredThread?.messages ?? [])),
       }));
       setHasOlderMessages(restoredThread.hasOlderMessages);
       restoreScroll();
@@ -3305,12 +3306,12 @@ function LiveChatsPage() {
     const loadLatestMessages = async () => {
       try {
         if (!restoredThread) {
-          restoredThread = await chatCache.hydrateThread(cacheScope, selectedChat.id);
+          restoredThread = await chatCache.hydrateThread(cacheScope, selectedChatId);
           if (controller.signal.aborted) return;
           if (restoredThread?.messages.length) {
             setMessages((current) => ({
               ...current,
-              [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], sortMessages(restoredThread?.messages ?? [])),
+              [selectedChatId]: mergeMessages(current[selectedChatId] ?? [], sortMessages(restoredThread?.messages ?? [])),
             }));
             setHasOlderMessages(restoredThread.hasOlderMessages);
             restoreScroll();
@@ -3319,7 +3320,7 @@ function LiveChatsPage() {
 
         const rows = await api.getMessages(
           {
-            chat_id: selectedChat.id,
+            chat_id: selectedChatId,
             limit: 30,
           },
           controller.signal
@@ -3330,7 +3331,7 @@ function LiveChatsPage() {
         const cachedIds = cachedMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
         const reconciledDeletedIds = new Set<number>();
         for (let index = 0; index < cachedIds.length; index += 50) {
-          const result = await api.reconcileMessages(selectedChat.id, cachedIds.slice(index, index + 50));
+          const result = await api.reconcileMessages(selectedChatId, cachedIds.slice(index, index + 50));
           result.deleted_message_ids.forEach((messageId) => reconciledDeletedIds.add(messageId));
         }
         if (reconciledDeletedIds.size) {
@@ -3344,14 +3345,14 @@ function LiveChatsPage() {
         const latestMaxId = latestIds.length ? Math.max(...latestIds) : null;
         const bridgeRows =
           cachedMaxId !== null && latestMaxId !== null && cachedMaxId < latestMaxId
-            ? await loadMessagesAfterThrough(selectedChat.id, cachedMaxId, latestMaxId, controller.signal)
+            ? await loadMessagesAfterThrough(selectedChatId, cachedMaxId, latestMaxId, controller.signal)
             : [];
         if (controller.signal.aborted) return;
         const bridged = bridgeRows.map((row) => mapChatMessage(row, currentUserId));
         let mergedMessages = mergeMessages(mergeMessages(cachedMessages, bridged), normalized);
         if (DEBUG_CHAT_SEND) {
           console.log("[chat] loadLatestMessages response", {
-            chatId: selectedChat.id,
+            chatId: selectedChatId,
             normalized: normalized.map((message) => ({
               id: message.id,
               clientId: message.clientId,
@@ -3363,51 +3364,51 @@ function LiveChatsPage() {
           });
         }
         setMessages((current) => {
-          const currentThreadMessages = (current[selectedChat.id] ?? []).filter(
+          const currentThreadMessages = (current[selectedChatId] ?? []).filter(
             (message) => typeof message.id !== "number" || !reconciledDeletedIds.has(message.id)
           );
           mergedMessages = mergeMessages(mergeMessages(currentThreadMessages, bridged), normalized);
           if (DEBUG_CHAT_SEND) {
             console.log("[chat] loadLatestMessages merge", {
-              chatId: selectedChat.id,
+              chatId: selectedChatId,
               currentCount: currentThreadMessages.length,
               mergedCount: mergedMessages.length,
             });
           }
           return {
             ...current,
-            [selectedChat.id]: mergedMessages,
+            [selectedChatId]: mergedMessages,
           };
         });
         const hasOlder = rows.length >= 30 || restoredThread?.hasOlderMessages || false;
         setHasOlderMessages(hasOlder);
-        chatCache.setThread(cacheScope, selectedChat.id, {
+        chatCache.setThread(cacheScope, selectedChatId, {
           messages: mergedMessages,
           hasOlderMessages: hasOlder,
           scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
-        void chatCache.persistThread(cacheScope, selectedChat.id, {
+        void chatCache.persistThread(cacheScope, selectedChatId, {
           messages: mergedMessages,
           hasOlderMessages: hasOlder,
           scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
         restoreScroll(true);
-        void api.markChatRead(selectedChat.id).then(() => {
-          setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChat.id ? clearChatUnread(chat) : chat)));
+        void api.markChatRead(selectedChatId).then(() => {
+          setChats((currentChats) => currentChats.map((chat) => (chat.id === selectedChatId ? clearChatUnread(chat) : chat)));
         });
       } catch (apiError) {
-        if (initialBottomAnchorRef.current === selectedChat.id) {
+        if (initialBottomAnchorRef.current === selectedChatId) {
           initialBottomAnchorRef.current = null;
         }
         if (!controller.signal.aborted) recordChatHealth(cacheScope, false);
         if (isChatAccessBoundaryError(apiError)) {
-          redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
+          redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChatId);
           return;
         }
         if (!controller.signal.aborted) {
-          const hasLocalMessages = Boolean((messages[selectedChat.id] ?? []).length || restoredThread?.messages.length);
+          const hasLocalMessages = Boolean((messages[selectedChatId] ?? []).length || restoredThread?.messages.length);
           if (!hasLocalMessages) {
             const message = apiError instanceof ApiError ? apiError.message : t("message.loadFailed");
             setPageError(message);
@@ -3419,13 +3420,13 @@ function LiveChatsPage() {
     void loadLatestMessages();
     return () => {
       const element = messageScrollRef.current;
-      chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
+      chatCache.updateThreadScroll(cacheScope, selectedChatId, element?.scrollTop ?? 0);
       controller.abort();
-      if (initialBottomAnchorRef.current === selectedChat.id) {
+      if (initialBottomAnchorRef.current === selectedChatId) {
         initialBottomAnchorRef.current = null;
       }
     };
-  }, [cacheScope, currentUserId, historyReloadVersion, selectedChat]);
+  }, [cacheScope, currentUserId, historyReloadVersion, selectedChatId]);
 
   useEffect(() => {
     if (!selectedChat) {

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.21.7",
+  "id": "2026.08.21.8",
   "publishedAt": "2026-08-21",
   "locales": {
     "zh-CN": {
-      "title": "误删的聊天记录可以找回了",
+      "title": "聊天页面更加稳定",
       "items": [
-        "认证账号输入密码确认后，可恢复 1 次仅从自己这里删除的聊天记录",
-        "永久 VIP 额外获得 5 次恢复机会"
+        "修复聊天列表同步时会反复刷新当前会话并造成画面闪烁的问题",
+        "历史消息仍只会在主动滑到顶部时继续加载"
       ]
     },
     "en": {
-      "title": "Restore accidentally deleted chat history",
+      "title": "A steadier chat experience",
       "items": [
-        "Verified accounts can restore chat history deleted only from their own view once after password confirmation",
-        "Permanent VIP members receive 5 additional recoveries"
+        "Fixed repeated conversation refreshes and visual flicker during chat list synchronization",
+        "Older messages continue loading only after you intentionally scroll to the top"
       ]
     }
   }
