@@ -708,8 +708,12 @@ export const api = {
     });
   },
 
-  getCloudResources(kind?: "image" | "video" | "file", signal?: AbortSignal) {
-    return request<CloudResourceListDTO>("/messages/resources", { auth: true, query: { kind }, signal });
+  getCloudResources(kind?: "image" | "video" | "file", pagination?: { offset?: number; limit?: number }, signal?: AbortSignal) {
+    return request<CloudResourceListDTO>("/messages/resources", {
+      auth: true,
+      query: { kind, offset: pagination?.offset, limit: pagination?.limit },
+      signal,
+    });
   },
 
   createCloudResourceUpload(kind: "video" | "file", file_name: string, content_type: string, file_size: number, content_hash: string) {

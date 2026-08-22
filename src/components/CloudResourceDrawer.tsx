@@ -33,24 +33,24 @@ function chatTitle(chat: ChatDTO) {
   return chat.title || chat.owner?.name || chat.members.map((member) => member.name).join("、") || "会话";
 }
 
-function groupResourcesByDay(items: CloudResourceDTO[], language: string) {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const dayKey = (value: Date) => `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`;
+function groupResourcesByPeriod(items: CloudResourceDTO[], language: string) {
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
   const groups = new Map<string, { label: string; items: CloudResourceDTO[] }>();
   items.forEach((item) => {
     const date = new Date(item.created_at * 1000);
-    const key = dayKey(date);
-    const label = key === dayKey(today)
-      ? (language === "en" ? "Today" : "今天")
-      : key === dayKey(yesterday)
-        ? (language === "en" ? "Yesterday" : "昨天")
-        : new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-CN", {
-          month: "long",
-          day: "numeric",
-          year: today.getFullYear() === date.getFullYear() ? undefined : "numeric",
-        }).format(date);
+    const isThisWeek = date >= weekStart;
+    const isThisMonth = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+    const key = isThisWeek ? "this-week" : isThisMonth ? "this-month" : `${date.getFullYear()}-${date.getMonth()}`;
+    const label = isThisWeek
+      ? (language === "en" ? "This week" : "本周")
+      : isThisMonth
+        ? (language === "en" ? "This month" : "这个月")
+        : language === "en"
+          ? new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(date)
+          : `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, "0")}月`;
     const group = groups.get(key) || { label, items: [] };
     group.items.push(item);
     groups.set(key, group);
@@ -63,21 +63,39 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   const [tab, setTab] = useState<ResourceTab>(initialTab);
   const [data, setData] = useState<CloudResourceListDTO | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [busyId, setBusyId] = useState<number | "upload" | null>(null);
   const [sendAsset, setSendAsset] = useState<CloudResourceDTO | null>(null);
   const [actionAsset, setActionAsset] = useState<CloudResourceDTO | null>(null);
   const [chats, setChats] = useState<ChatDTO[]>([]);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const requestSerialRef = useRef(0);
 
-  const load = async (nextTab = tab) => {
-    setLoading(true);
+  const load = async (nextTab = tab, append = false) => {
+    const requestSerial = ++requestSerialRef.current;
+    const offset = append ? (data?.next_offset || 0) : 0;
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     try {
-      setData(await api.getCloudResources(nextTab));
+      const response = await api.getCloudResources(nextTab, { offset, limit: 60 });
+      if (requestSerial !== requestSerialRef.current) return;
+      setData((current) => {
+        if (!append || !current) return response;
+        const knownIds = new Set(current.items.map((item) => item.resource_id));
+        return {
+          ...response,
+          items: [...current.items, ...response.items.filter((item) => !knownIds.has(item.resource_id))],
+        };
+      });
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("cloudResources.loadFailed"), "error");
     } finally {
-      setLoading(false);
+      if (requestSerial === requestSerialRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -89,9 +107,23 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
 
   const chooseTab = (nextTab: ResourceTab) => {
     setTab(nextTab);
+    setData(null);
     setActionAsset(null);
     void load(nextTab);
   };
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!open || !node || !data?.has_more || loading || loadingMore) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) void load(tab, true);
+    }, {
+      root: node.closest(".drawer-body"),
+      rootMargin: "240px 0px",
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [open, tab, data?.has_more, data?.next_offset, loading, loadingMore]);
 
   const removeUnavailableResource = (resourceId: number) => {
     setData((current) => current ? {
@@ -168,7 +200,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
 
   const quota = data?.quota;
   const mediaItems = (data?.items || []).filter((asset) => asset.kind === "image" || asset.kind === "video");
-  const resourceGroups = groupResourcesByDay(data?.items || [], language);
+  const resourceGroups = groupResourcesByPeriod(data?.items || [], language);
   const headerAction = tab !== "image" ? (
     <button
       aria-label={t("cloudResources.upload")}
@@ -272,6 +304,11 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
               </section>)}
             </div>
           ) : null}
+          {data?.has_more || loadingMore ? (
+            <div aria-hidden="true" className={`cloud-resource-load-more${loadingMore ? " is-loading" : ""}`} ref={loadMoreRef}>
+              <span className="material-symbols-outlined">progress_activity</span>
+            </div>
+          ) : <div aria-hidden="true" className="cloud-resource-load-more" ref={loadMoreRef} />}
         </div>
         <input hidden onChange={(event) => void upload(event)} ref={inputRef} type="file" />
       </SideDrawer>

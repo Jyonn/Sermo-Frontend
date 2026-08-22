@@ -39,6 +39,9 @@
 .cloud-resource-file strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 .cloud-resource-file > div span { color: var(--text-muted); font-size: 12px; }
 .cloud-resource-file > .cloud-resource-more { position: static; box-shadow: none; background: transparent; }
+.cloud-resource-load-more { display: grid; min-height: 1px; place-items: center; color: var(--brand-primary); }
+.cloud-resource-load-more.is-loading { min-height: 42px; }
+.cloud-resource-load-more.is-loading .material-symbols-outlined { animation: spin 900ms linear infinite; font-size: 21px; }
 .cloud-resource-action-list { display: grid; gap: 2px; }
 .cloud-resource-action-list button, .cloud-resource-action-list a { min-height: 54px; padding: 0 14px; border: 0; border-radius: 12px; background: transparent; color: var(--text-primary); display: flex; align-items: center; gap: 13px; text-decoration: none; font: inherit; font-weight: 700; }
 .cloud-resource-action-list button:hover, .cloud-resource-action-list a:hover { background: color-mix(in srgb, var(--text-primary) 5%, transparent); }

@@ -606,6 +606,8 @@ export interface CloudResourceDTO {
 export interface CloudResourceListDTO {
   items: CloudResourceDTO[];
   quota: CloudResourceQuotaDTO;
+  has_more: boolean;
+  next_offset: number;
 }
 
 export interface SpaceIdentityUploadDTO {

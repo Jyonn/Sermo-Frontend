@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.11",
+  "id": "2026.08.22.12",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源浏览更舒适",
+      "title": "云端资源查找更清晰",
       "items": [
-        "云端资源列表底部增加了舒适留白，并适配手机安全区域"
+        "云端资源按本周、这个月和历史月份整理，浏览到底部时会自动加载更多"
       ]
     },
     "en": {
-      "title": "More comfortable cloud browsing",
+      "title": "Clearer cloud resource browsing",
       "items": [
-        "The cloud resource list now has comfortable bottom spacing and respects mobile safe areas"
+        "Cloud resources are grouped by this week, this month, and earlier months, with more loaded automatically as you browse"
       ]
     }
   }
