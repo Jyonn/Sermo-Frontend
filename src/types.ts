@@ -597,6 +597,7 @@ export interface CloudResourceDTO {
   duration_seconds?: number | null;
   pixel_width?: number | null;
   pixel_height?: number | null;
+  metadata?: ImageMetadataDTO | VideoMetadataDTO | null;
   reference_count: number;
   status: number;
   created_at: number;

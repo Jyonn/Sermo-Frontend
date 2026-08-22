@@ -7,6 +7,7 @@ import type { ChatDTO, CloudResourceDTO, CloudResourceListDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { ContentLoader, QuietState } from "./BoundaryState";
 import { MediaLightbox } from "./ImageLightbox";
+import { MediaMetadataPanel } from "./MediaMetadataPanel";
 import { SideDrawer } from "./SideDrawer";
 
 type ResourceTab = "image" | "video" | "file";
@@ -297,6 +298,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
           posterUri: asset.thumbnail_uri,
           width: asset.pixel_width,
           height: asset.pixel_height,
+          detail: <MediaMetadataPanel kind={asset.kind as "image" | "video"} metadata={asset.metadata} />,
           downloadLabel: formatBytes(asset.file_size),
         }))}
         onClose={() => setPreviewIndex(null)}

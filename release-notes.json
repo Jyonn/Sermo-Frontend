@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.22.9",
+  "id": "2026.08.22.10",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源更好找",
+      "title": "云端影像信息补全",
       "items": [
-        "图片、视频和文件现在按首次上传日期整理",
-        "图片和视频可直接使用聊天页同款沉浸式预览"
+        "从云端资源预览图片和视频时，也会展示拍摄时间、设备、镜头和位置等信息"
       ]
     },
     "en": {
-      "title": "A more organized cloud library",
+      "title": "Complete cloud media details",
       "items": [
-        "Images, videos, and files are now grouped by their first upload date",
-        "Images and videos now open in the same immersive viewer used in chats"
+        "Cloud image and video previews now include capture time, device, lens, location, and other available details"
       ]
     }
   }
