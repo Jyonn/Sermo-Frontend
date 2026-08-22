@@ -25,6 +25,8 @@ import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/space
 import { showToast } from "../lib/toast";
 import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 import baxianActivityBanner from "../assets/activity/baxian-immortal-force-banner.jpg";
+import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
+import sermoLogo from "../assets/logo.svg";
 
 type SelectedPhoto = {
   id: string;
@@ -40,6 +42,12 @@ const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
 const MESSAGE_TYPE_STATEMENT = 8;
+
+function formatActivityDateRange(startsAt: number, endsAt: number, language: string) {
+  const locale = language === "zh-CN" ? "zh-CN" : "en-US";
+  const formatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
+  return `${formatter.format(new Date(startsAt * 1000))} - ${formatter.format(new Date(endsAt * 1000))}`;
+}
 
 function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQuotaDTO | null }) {
   const { t } = useI18n();
@@ -327,6 +335,8 @@ export default function SquarePage() {
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
   const [activities, setActivities] = useState<ActivityCampaignDTO[]>([]);
   const [activityContributing, setActivityContributing] = useState(false);
+  const [activityRulesOpen, setActivityRulesOpen] = useState(false);
+  const [activityPoolOpen, setActivityPoolOpen] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
@@ -1223,6 +1233,13 @@ export default function SquarePage() {
       </SideDrawer>
       <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")}>
         {activeActivity ? <div className="activity-detail">
+          <section className="activity-detail-masthead">
+            <div className="activity-detail-index">
+              <div><button onClick={() => setActivityRulesOpen(true)} type="button">{t("activity.rules")}</button><i aria-hidden="true" /><button onClick={() => setActivityPoolOpen(true)} type="button">{t("activity.prizePool")}</button></div>
+              <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language)}</time>
+            </div>
+            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><img alt="Sermo 言浪" src={sermoLogo} /><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
+          </section>
           <section className="activity-detail-hero"><img alt="" src={baxianActivityBanner} /><div><small>{t("activity.spaceCoop")}</small><strong>{language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title}</strong><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></div></section>
           <section className="activity-force-wallet"><div><small>{t("activity.myForce")}</small><strong>{activeActivity.available_points}</strong><span>{t("activity.force")}</span></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : t("activity.contribute")}</button></section>
           {!activeActivity.verified ? <p className="activity-verification-note"><span className="material-symbols-outlined">verified_user</span>{t("activity.verifyHint")}</p> : activeActivity.today_earned ? <p className="activity-verification-note is-earned"><span className="material-symbols-outlined">task_alt</span>{t("activity.todayEarned")}</p> : <p className="activity-verification-note"><span className="material-symbols-outlined">edit_square</span>{t("activity.publishHint")}</p>}
@@ -1230,6 +1247,29 @@ export default function SquarePage() {
           <section className="activity-milestones"><header><strong>{t("activity.collectiveRewards")}</strong><span>{t("activity.allMembers")}</span></header>{activeActivity.milestones.map((item, index) => <article className={item.unlocked ? "is-unlocked" : ""} key={item.threshold}><span>{String(index + 1).padStart(2, "0")}</span><div><small>{item.threshold} {t("activity.force")}</small><strong>{item.unlocked ? item.reward_label : t("activity.randomBaxian")}</strong></div><i className="material-symbols-outlined">{item.unlocked ? "lock_open" : "lock"}</i></article>)}</section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}
       </SideDrawer>
+      <BottomSheet bodyClassName="activity-rules-sheet" onClose={() => setActivityRulesOpen(false)} open={activityRulesOpen} title={t("activity.rules")}>
+        <div className="activity-rule-list">
+          <article><span>01</span><div><strong>{t("activity.ruleVerifiedTitle")}</strong><p>{t("activity.ruleVerifiedBody")}</p></div></article>
+          <article><span>02</span><div><strong>{t("activity.ruleEarnTitle")}</strong><p>{t("activity.ruleEarnBody")}</p></div></article>
+          <article><span>03</span><div><strong>{t("activity.ruleSharedTitle")}</strong><p>{t("activity.ruleSharedBody")}</p></div></article>
+        </div>
+      </BottomSheet>
+      <BottomSheet bodyClassName="activity-pool-sheet" onClose={() => setActivityPoolOpen(false)} open={activityPoolOpen} title={t("activity.prizePool")}>
+        <div className="activity-prize-intro"><strong>{t("activity.poolTitle")}</strong><p>{t("activity.poolBody")}</p></div>
+        <div className="activity-prize-grid field-chat_bubble_style">
+          {([
+            ["baxian-lv", "menu.styleBaxianLv"],
+            ["baxian-zhongli", "menu.styleBaxianZhongli"],
+            ["baxian-he", "menu.styleBaxianHe"],
+          ] as const).map(([style, label]) => {
+            const unlocked = activeActivity?.milestones.some((milestone) => milestone.unlocked && milestone.resource_key === style);
+            return <article className={unlocked ? "is-unlocked" : ""} key={style}>
+            <span className={`personalization-option preview-${style}`}><i aria-hidden="true"><span /></i></span>
+            <div><strong>{t(label)}</strong><small>{t("activity.limitedReward")}</small></div>
+            <span className="material-symbols-outlined">{unlocked ? "lock_open" : "lock"}</span>
+          </article>;})}
+        </div>
+      </BottomSheet>
       <SideDrawer
         historyKey="square-user-profile"
         onClose={() => setProfileDrawerUserId(null)}

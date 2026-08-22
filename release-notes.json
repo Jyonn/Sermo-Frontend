@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.23.2",
+  "id": "2026.08.23.3",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "全空间一起唤醒八仙气泡",
+      "title": "八仙聚力活动页焕新",
       "items": [
+        "活动页新增言浪 × 八仙联名标识，规则和奖池独立展开，三款限定气泡可以直接预览",
         "广场探索新增限时活动：认证成员每天发言可凝聚仙力，全空间共同解锁三款随机八仙气泡",
         "三款八仙气泡的人物动画尺寸更加克制，并调整为通过活动获取"
       ]
     },
     "en": {
-      "title": "Awaken Baxian bubbles together",
+      "title": "A refined Baxian event experience",
       "items": [
+        "The event now features Sermo × Baxian branding, focused rule and prize panels, and real previews of all three exclusive bubbles",
         "A limited-time Square event lets verified members earn daily Force and unlock three random Baxian bubbles for the whole space",
         "Character animations are now more restrained, and all three bubbles are unlocked through events"
       ]
