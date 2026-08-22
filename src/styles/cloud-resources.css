@@ -1,4 +1,4 @@
-.cloud-resource-layout { container-type: inline-size; display: grid; align-content: start; gap: 18px; min-height: 100%; padding: 18px; }
+.cloud-resource-layout { container-type: inline-size; display: grid; align-content: start; gap: 18px; min-height: 100%; padding: 18px 18px max(36px, calc(24px + env(safe-area-inset-bottom))); }
 .cloud-resource-tabs { position: sticky; z-index: 4; top: 0; display: flex; align-items: center; gap: 22px; min-height: 39px; border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent); background: color-mix(in srgb, var(--bg-page) 88%, transparent); backdrop-filter: blur(18px); }
 .cloud-resource-tabs button { position: relative; align-self: stretch; padding: 0 2px; border: 0; background: transparent; color: var(--text-muted); font: inherit; font-size: 13px; font-weight: 750; }
 .cloud-resource-tabs button::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; border-radius: 99px; background: var(--brand-primary); content: ""; opacity: 0; transform: scaleX(.45); transition: opacity 160ms ease, transform 160ms ease; }

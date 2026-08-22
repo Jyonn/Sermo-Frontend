@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.10",
+  "id": "2026.08.22.11",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端影像信息补全",
+      "title": "云端资源浏览更舒适",
       "items": [
-        "从云端资源预览图片和视频时，也会展示拍摄时间、设备、镜头和位置等信息"
+        "云端资源列表底部增加了舒适留白，并适配手机安全区域"
       ]
     },
     "en": {
-      "title": "Complete cloud media details",
+      "title": "More comfortable cloud browsing",
       "items": [
-        "Cloud image and video previews now include capture time, device, lens, location, and other available details"
+        "The cloud resource list now has comfortable bottom spacing and respects mobile safe areas"
       ]
     }
   }
