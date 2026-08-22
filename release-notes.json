@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.22.8",
+  "id": "2026.08.22.9",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源更干净",
+      "title": "云端资源更好找",
       "items": [
-        "已经失效或无法打开的资源不再出现在云端资源中",
-        "资源加载失败时会自动从当前列表移除"
+        "图片、视频和文件现在按首次上传日期整理",
+        "图片和视频可直接使用聊天页同款沉浸式预览"
       ]
     },
     "en": {
-      "title": "A cleaner cloud library",
+      "title": "A more organized cloud library",
       "items": [
-        "Expired or unavailable resources no longer appear in the cloud library",
-        "Resources that fail to load are removed from the current list automatically"
+        "Images, videos, and files are now grouped by their first upload date",
+        "Images and videos now open in the same immersive viewer used in chats"
       ]
     }
   }

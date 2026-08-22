@@ -1961,7 +1961,7 @@ export default function MenuPage() {
               <div className="row-main">
                 <strong>{t("cloudResources.title")}</strong>
               </div>
-              <span className="material-symbols-outlined">cloud</span>
+              <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
         </section>

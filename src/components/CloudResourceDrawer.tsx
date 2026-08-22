@@ -6,6 +6,7 @@ import { useI18n } from "../lib/language";
 import type { ChatDTO, CloudResourceDTO, CloudResourceListDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { ContentLoader, QuietState } from "./BoundaryState";
+import { MediaLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 
 type ResourceTab = "image" | "video" | "file";
@@ -31,8 +32,33 @@ function chatTitle(chat: ChatDTO) {
   return chat.title || chat.owner?.name || chat.members.map((member) => member.name).join("、") || "会话";
 }
 
+function groupResourcesByDay(items: CloudResourceDTO[], language: string) {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const dayKey = (value: Date) => `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`;
+  const groups = new Map<string, { label: string; items: CloudResourceDTO[] }>();
+  items.forEach((item) => {
+    const date = new Date(item.created_at * 1000);
+    const key = dayKey(date);
+    const label = key === dayKey(today)
+      ? (language === "en" ? "Today" : "今天")
+      : key === dayKey(yesterday)
+        ? (language === "en" ? "Yesterday" : "昨天")
+        : new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-CN", {
+          month: "long",
+          day: "numeric",
+          year: today.getFullYear() === date.getFullYear() ? undefined : "numeric",
+        }).format(date);
+    const group = groups.get(key) || { label, items: [] };
+    group.items.push(item);
+    groups.set(key, group);
+  });
+  return [...groups.values()];
+}
+
 export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [tab, setTab] = useState<ResourceTab>(initialTab);
   const [data, setData] = useState<CloudResourceListDTO | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,6 +66,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   const [sendAsset, setSendAsset] = useState<CloudResourceDTO | null>(null);
   const [actionAsset, setActionAsset] = useState<CloudResourceDTO | null>(null);
   const [chats, setChats] = useState<ChatDTO[]>([]);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const load = async (nextTab = tab) => {
@@ -139,6 +166,8 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   };
 
   const quota = data?.quota;
+  const mediaItems = (data?.items || []).filter((asset) => asset.kind === "image" || asset.kind === "video");
+  const resourceGroups = groupResourcesByDay(data?.items || [], language);
   const headerAction = tab !== "image" ? (
     <button
       aria-label={t("cloudResources.upload")}
@@ -172,13 +201,6 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
     <>
       <SideDrawer className="cloud-resource-drawer" headerAction={headerAction} historyKey="cloud-resources" onClose={onClose} open={open} title={t("cloudResources.title")}>
         <div className="cloud-resource-layout">
-          <div className="cloud-resource-tabs" role="tablist">
-            {(["image", "video", "file"] as ResourceTab[]).map((item) => (
-              <button aria-selected={tab === item} className={tab === item ? "is-active" : ""} key={item} onClick={() => chooseTab(item)} role="tab" type="button">
-                {t(`cloudResources.tab.${item}` as never)}
-              </button>
-            ))}
-          </div>
           {quota ? (
             <div className="cloud-resource-quota">
               <span><strong>{formatBytes(quota.used)}</strong><small> / {formatBytes(quota.limit)}</small></span>
@@ -187,44 +209,66 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
               <small>{t("cloudResources.quotaHint")}</small>
             </div>
           ) : null}
+          <div className="cloud-resource-tabs" role="tablist">
+            {(["image", "video", "file"] as ResourceTab[]).map((item) => (
+              <button aria-selected={tab === item} className={tab === item ? "is-active" : ""} key={item} onClick={() => chooseTab(item)} role="tab" type="button">
+                {t(`cloudResources.tab.${item}` as never)}
+              </button>
+            ))}
+          </div>
           {loading && !data ? <ContentLoader label={t("common.loading")} /> : null}
           {!loading && data?.items.length === 0 ? <QuietState title={t("cloudResources.empty")} /> : null}
           {tab === "image" ? (
-            <div className="cloud-resource-image-grid">
-              {data?.items.map((asset) => (
+            <div className="cloud-resource-sections">
+              {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
+                <h3>{group.label}</h3>
+                <div className="cloud-resource-image-grid">
+                {group.items.map((asset) => (
                 <article className="cloud-resource-image" key={asset.resource_id}>
-                  <a className="cloud-resource-image-link" href={asset.uri} rel="noreferrer" target="_blank">
+                  <button className="cloud-resource-image-link" onClick={() => setPreviewIndex(mediaItems.findIndex((item) => item.resource_id === asset.resource_id))} type="button">
                     <img alt={asset.file_name || ""} loading="lazy" onError={() => removeUnavailableResource(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
-                  </a>
+                  </button>
                   {moreButton(asset)}
                 </article>
-              ))}
+                ))}
+                </div>
+              </section>)}
             </div>
           ) : null}
           {tab === "video" ? (
-            <div className="cloud-resource-video-grid">
-              {data?.items.map((asset) => (
+            <div className="cloud-resource-sections">
+              {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
+                <h3>{group.label}</h3>
+                <div className="cloud-resource-video-grid">
+              {group.items.map((asset) => (
                 <article className="cloud-resource-video" key={asset.resource_id}>
-                  <a className="cloud-resource-video-preview" href={asset.uri} rel="noreferrer" target="_blank">
+                  <button className="cloud-resource-video-preview" onClick={() => setPreviewIndex(mediaItems.findIndex((item) => item.resource_id === asset.resource_id))} type="button">
                     <img alt="" loading="lazy" onError={() => removeUnavailableResource(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
                     <span className="cloud-resource-play material-symbols-outlined">play_arrow</span>
                     {asset.duration_seconds ? <small>{Math.floor(asset.duration_seconds / 60)}:{String(Math.round(asset.duration_seconds % 60)).padStart(2, "0")}</small> : null}
-                  </a>
+                  </button>
                   <div><strong>{asset.file_name || t("cloudResources.tab.video")}</strong><span>{formatBytes(asset.file_size)}</span></div>
                   {moreButton(asset)}
                 </article>
               ))}
+                </div>
+              </section>)}
             </div>
           ) : null}
           {tab === "file" ? (
-            <div className="cloud-resource-file-list">
-              {data?.items.map((asset) => (
+            <div className="cloud-resource-sections">
+              {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
+                <h3>{group.label}</h3>
+                <div className="cloud-resource-file-list">
+              {group.items.map((asset) => (
                 <article className="cloud-resource-file" key={asset.resource_id}>
                   <span className="cloud-resource-file-icon material-symbols-outlined">draft</span>
                   <div><strong>{asset.file_name || t("cloudResources.tab.file")}</strong><span>{formatBytes(asset.file_size)}</span></div>
                   {moreButton(asset)}
                 </article>
               ))}
+                </div>
+              </section>)}
             </div>
           ) : null}
         </div>
@@ -244,6 +288,20 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
           {chats.map((chat) => <button key={chat.chat_id} onClick={() => sendAsset && void sendToChat(sendAsset, chat.chat_id)} type="button"><strong>{chatTitle(chat)}</strong><span className="material-symbols-outlined">send</span></button>)}
         </div>
       </BottomSheet>
+      {previewIndex !== null && mediaItems.length ? <MediaLightbox
+        fileNamePrefix="sermo-cloud"
+        index={previewIndex}
+        items={mediaItems.map((asset) => ({
+          uri: asset.uri,
+          kind: asset.kind as "image" | "video",
+          posterUri: asset.thumbnail_uri,
+          width: asset.pixel_width,
+          height: asset.pixel_height,
+          downloadLabel: formatBytes(asset.file_size),
+        }))}
+        onClose={() => setPreviewIndex(null)}
+        onIndexChange={setPreviewIndex}
+      /> : null}
     </>
   );
 }
