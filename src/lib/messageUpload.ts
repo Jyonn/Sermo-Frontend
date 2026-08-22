@@ -31,7 +31,7 @@ function prettySize(limit: number) {
 export function resolveMediaKind(file: File): MessageMediaKind {
   if (file.type.startsWith("video/")) return "video";
   if (file.type.startsWith("image/")) return "image";
-  throw new MessageUploadError(i18n.t("upload.imagesVideosOnly"));
+  return "file";
 }
 
 export function validateMessageMediaFile(file: File, kind: MessageMediaKind) {

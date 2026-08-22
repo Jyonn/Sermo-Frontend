@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.15",
+  "id": "2026.08.22.16",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "群聊艾特更稳定",
+      "title": "桌面拖拽支持任意文件",
       "items": [
-        "输入框中的艾特现在以胶囊展示，可直接连续输入文字，并始终准确关联成员"
+        "将非图片、非视频内容拖入聊天窗口时，现在会自动作为文件发送"
       ]
     },
     "en": {
-      "title": "More reliable group mentions",
+      "title": "Drag and drop any file on desktop",
       "items": [
-        "Mentions now appear as chips in the composer, support continuous typing, and reliably identify members"
+        "Items that are not images or videos are now automatically sent as files when dropped into a chat"
       ]
     }
   }
