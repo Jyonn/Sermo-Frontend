@@ -64,9 +64,9 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   };
 
   const sendToChat = async (asset: CloudResourceDTO, chatId: number) => {
-    setBusyId(asset.asset_id);
+    setBusyId(asset.resource_id);
     try {
-      await api.sendMessage(chatId, messageType[asset.kind], "", undefined, undefined, [], asset.asset_id);
+      await api.sendMessage(chatId, messageType[asset.kind], "", undefined, undefined, [], asset.resource_id);
       showToast(t("cloudResources.sent"));
       setSendAsset(null);
       onSent?.();
@@ -99,9 +99,9 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
       showToast(t("cloudResources.inUse"), "error");
       return;
     }
-    setBusyId(asset.asset_id);
+    setBusyId(asset.resource_id);
     try {
-      await api.deleteCloudResource(asset.asset_id);
+      await api.deleteCloudResource(asset.resource_id);
       showToast(t("cloudResources.deleted"));
       await load();
     } catch (error) {
@@ -156,7 +156,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
           {!loading && data?.items.length === 0 ? <QuietState title={t("cloudResources.empty")} /> : null}
           <div className="cloud-resource-grid">
             {data?.items.map((asset) => (
-              <article className="cloud-resource-card" key={asset.asset_id}>
+              <article className="cloud-resource-card" key={asset.resource_id}>
                 <a className="cloud-resource-preview" href={asset.uri} rel="noreferrer" target="_blank">
                   {asset.kind === "image" ? <img alt="" src={asset.thumbnail_uri || asset.uri} /> : null}
                   {asset.kind === "video" ? <video muted playsInline poster={asset.thumbnail_uri || undefined} preload="metadata" src={asset.uri} /> : null}
@@ -167,9 +167,9 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
                   <span>{formatBytes(asset.file_size)}</span>
                 </div>
                 <div className="cloud-resource-actions">
-                  <button disabled={busyId === asset.asset_id} onClick={() => void requestSend(asset)} type="button">{t("cloudResources.send")}</button>
+                  <button disabled={busyId === asset.resource_id} onClick={() => void requestSend(asset)} type="button">{t("cloudResources.send")}</button>
                   <a download href={asset.uri}>{t("cloudResources.download")}</a>
-                  {asset.kind !== "image" ? <button className="is-danger" disabled={busyId === asset.asset_id} onClick={() => void deleteAsset(asset)} type="button">{t("common.delete")}</button> : null}
+                  {asset.kind !== "image" ? <button className="is-danger" disabled={busyId === asset.resource_id} onClick={() => void deleteAsset(asset)} type="button">{t("common.delete")}</button> : null}
                 </div>
               </article>
             ))}

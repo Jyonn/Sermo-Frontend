@@ -77,9 +77,9 @@ export async function uploadMessageMedia(file: File, kind: MessageMediaKind, onP
   const contentHash = kind === "video" || kind === "file" ? await sha256File(file) : "";
   onProgress?.(0.02);
   const upload = await api.createMessageUpload(kind, file.name, file.type, file.size, contentHash);
-  if (upload.instant && upload.asset) {
+  if (upload.instant && upload.resource) {
     onProgress?.(1);
-    return { ...upload, key: "", asset: upload.asset };
+    return { ...upload, key: "", resource: upload.resource };
   }
   const formData = new FormData();
   formData.set("token", upload.upload_token);
@@ -87,7 +87,7 @@ export async function uploadMessageMedia(file: File, kind: MessageMediaKind, onP
   formData.set("file", file);
   await uploadFormData(upload.upload_url, formData, onProgress);
   const finalized = await api.finalizeCloudResource(kind, upload.key, file.name, file.type, file.size, contentHash, durationSeconds);
-  return { ...upload, asset: finalized.asset };
+  return { ...upload, resource: finalized.resource };
 }
 
 async function sha256File(file: File) {

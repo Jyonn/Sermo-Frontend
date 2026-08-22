@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.22.2",
+  "id": "2026.08.22.3",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源上线",
+      "title": "云端资源更省空间",
       "items": [
-        "菜单中可统一查看、下载和发送过去使用的图片、视频与文件",
-        "视频和文件支持秒传，并共享 1 GB 云端空间"
+        "同一份视频或文件使用不同名称时，会完整保留每个名称",
+        "相同内容只占用一份云端空间，转发和秒传更加轻量"
       ]
     },
     "en": {
-      "title": "Cloud resources are here",
+      "title": "Smarter cloud storage",
       "items": [
-        "Browse, download, and resend previous images, videos, and files from the Menu tab",
-        "Videos and files support instant deduplication and share 1 GB of cloud storage"
+        "Different names for the same video or file are now preserved",
+        "Identical content uses one cloud copy for lighter forwarding and instant uploads"
       ]
     }
   }

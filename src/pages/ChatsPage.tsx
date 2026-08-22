@@ -4358,7 +4358,7 @@ function LiveChatsPage() {
           retryMessage.replyTo?.message_id,
           retryMessage.clientId,
           [],
-          upload.asset?.asset_id,
+          upload.resource?.resource_id,
         );
       } else {
         recordOptimisticEmojiUsage(retryMessage.text);
@@ -4472,7 +4472,7 @@ function LiveChatsPage() {
         reply?.message_id,
         pendingMessage.clientId,
         [],
-        upload.asset?.asset_id,
+        upload.resource?.resource_id,
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
       setMessages((current) => ({

@@ -576,7 +576,7 @@ export interface MessageUploadDTO {
   expires_in: number;
   max_file_size: number;
   instant?: boolean;
-  asset?: CloudResourceDTO;
+  resource?: CloudResourceDTO;
   quota?: CloudResourceQuotaDTO;
 }
 
@@ -587,7 +587,7 @@ export interface CloudResourceQuotaDTO {
 }
 
 export interface CloudResourceDTO {
-  asset_id: number;
+  resource_id: number;
   kind: "image" | "video" | "audio" | "file";
   uri: string;
   thumbnail_uri?: string | null;

@@ -719,14 +719,14 @@ export const api = {
   },
 
   finalizeCloudResource(kind: MessageMediaKind, key: string, file_name: string, content_type: string, file_size: number, content_hash: string, duration_seconds?: number) {
-    return request<{ asset: CloudResourceDTO; instant: boolean; quota: CloudResourceListDTO["quota"] }>("/messages/resources/finalize", {
+    return request<{ resource: CloudResourceDTO; instant: boolean; quota: CloudResourceListDTO["quota"] }>("/messages/resources/finalize", {
       method: "POST", auth: true, body: { kind, content: key, file_name, content_type, file_size, content_hash, duration_seconds },
     });
   },
 
-  deleteCloudResource(asset_id: number) {
+  deleteCloudResource(resource_id: number) {
     return request<{ quota: CloudResourceListDTO["quota"] }>("/messages/resources", {
-      method: "DELETE", auth: true, query: { asset_id },
+      method: "DELETE", auth: true, query: { resource_id },
     });
   },
 
@@ -823,12 +823,12 @@ export const api = {
     });
   },
 
-  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], asset_id?: number) {
+  sendMessage(chat_id: number, type: number, content: string, reply_to_message_id?: number, client_message_id?: string, mention_user_ids: number[] = [], resource_id?: number) {
     return request<ChatMessageDTO>("/messages/", {
       method: "POST",
       auth: true,
       query: { chat_id },
-      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, asset_id: asset_id ?? null },
+      body: { content, type, reply_to_message_id: reply_to_message_id ?? null, client_message_id: client_message_id ?? null, mention_user_ids, resource_id: resource_id ?? null },
     });
   },
 
