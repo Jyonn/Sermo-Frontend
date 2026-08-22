@@ -102,6 +102,7 @@
   "menu.chatBackgroundHint": "Set the mood for every conversation",
   "menu.chatBackgroundDesktopDefault": "Desktop uses the default background",
   "menu.levelUnlock": "Unlocks at LV{{level}}",
+  "menu.activityUnlock": "Event unlock",
   "menu.chatBubble": "Chat bubbles",
   "menu.chatBubbleHint": "Give every message its own shape",
   "menu.avatarFrame": "Avatar frame",

@@ -24569,7 +24569,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 .message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) :is(.message-bubble,.message-image-gallery) { overflow:visible; }
 
 .baxian-character-runner {
-  --baxian-character-size:36px;
+  --baxian-character-size:23.76px;
   position:absolute;
   z-index:6;
   bottom:100%;
@@ -24670,7 +24670,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 .field-chat_bubble_style .preview-baxian-he > i::after { background-image:url("/assets/baxian/he-xiangu-edge-frame.png"); }
 
 @media (min-width:900px) {
-  .baxian-character-runner { --baxian-character-size:40px; }
+  .baxian-character-runner { --baxian-character-size:26.4px; }
   .baxian-bubble-transition { --baxian-element-size:25px; }
 }
 

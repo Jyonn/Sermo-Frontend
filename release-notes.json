@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.16",
-  "publishedAt": "2026-08-22",
+  "id": "2026.08.23.1",
+  "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "桌面拖拽支持任意文件",
+      "title": "八仙气泡展示更精致",
       "items": [
-        "将非图片、非视频内容拖入聊天窗口时，现在会自动作为文件发送"
+        "三款八仙气泡的人物动画尺寸更加克制，并调整为通过活动获取"
       ]
     },
     "en": {
-      "title": "Drag and drop any file on desktop",
+      "title": "Refined Eight Immortals bubbles",
       "items": [
-        "Items that are not images or videos are now automatically sent as files when dropped into a chat"
+        "Character animations are now more restrained, and all three bubbles are unlocked through events"
       ]
     }
   }

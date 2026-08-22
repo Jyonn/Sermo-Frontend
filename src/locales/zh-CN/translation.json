@@ -102,6 +102,7 @@
   "menu.chatBackgroundHint": "让整个对话进入你的世界",
   "menu.chatBackgroundDesktopDefault": "桌面端使用默认背景",
   "menu.levelUnlock": "LV{{level}} 解锁",
+  "menu.activityUnlock": "活动解锁",
   "menu.chatBubble": "聊天气泡",
   "menu.chatBubbleHint": "让每一句话拥有自己的轮廓",
   "menu.avatarFrame": "头像框",

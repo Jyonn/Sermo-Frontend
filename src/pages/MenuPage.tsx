@@ -137,6 +137,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
 ];
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
+const activityBubbleStyles = new Set<ChatBubbleStyle>(["baxian-lv", "baxian-zhongli", "baxian-he"]);
 const cityBubbleStyles = new Set<ChatBubbleStyle>(["city-jdz", "city-shanghai", "city-nyc", "city-beijing"]);
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
 const statementStyleRarity: Record<StatementCardStyle, GrowthRewardDTO["rarity"]> = {
@@ -510,6 +511,8 @@ export default function MenuPage() {
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string) =>
     (category === "bubble" && cityBubbleStyles.has(assetKey as ChatBubbleStyle))
       ? "epic"
+      : (category === "bubble" && activityBubbleStyles.has(assetKey as ChatBubbleStyle))
+        ? "legendary"
       : (assetKey === "vip" ? (category === "frame" ? "rare" : "epic") : rewardFor(category, assetKey)?.rarity ?? "common");
   const currentLevelStage = growthStageForLevel(growthLevel);
   const canCustomizeChatBackground = hasGrowthCapability("menu.personalization.background.use.custom", 8);
@@ -2393,7 +2396,7 @@ export default function MenuPage() {
                       <i aria-hidden="true"><span /></i>
                       <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("bubble", value)} /><strong>{t(label)}</strong></div>
                       {value === "vip" ? <small>VIP</small> : !canUseBubbleStyle(value as ChatBubbleStyle) ? (
-                        <small>{cityBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.cityBubbleUnlock") : vipOrLevelBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
+                        <small>{activityBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.activityUnlock") : cityBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.cityBubbleUnlock") : vipOrLevelBubbleStyles.has(value as ChatBubbleStyle) ? t("menu.levelOrVipUnlock", { level: rewardLevel("bubble", value) }) : t("menu.levelUnlock", { level: rewardLevel("bubble", value) })}</small>
                       ) : null}
                     </button>
                   ))}
