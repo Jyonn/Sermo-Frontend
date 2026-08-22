@@ -11,9 +11,8 @@
 .cloud-resource-quota i { grid-column: 1 / -1; height: 4px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
 .cloud-resource-quota i span { display: block; height: 100%; border-radius: inherit; background: var(--brand-primary); }
 .cloud-resource-quota > small { grid-column: 1 / -1; font-size: 12px; }
-.cloud-resource-image-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; align-items: start; gap: 4px; min-width: 0; overflow: hidden; border-radius: 15px; }
-.cloud-resource-image { position: relative; display: block; width: 100%; min-width: 0; overflow: hidden; contain: layout paint; background: color-mix(in srgb, var(--brand-primary) 6%, var(--bg-elevated)); }
-.cloud-resource-image::before { content: ""; display: block; width: 100%; padding-top: 100%; }
+.cloud-resource-image-grid { display: flex; flex-wrap: wrap; align-self: start; align-content: flex-start; gap: 4px; width: 100%; height: auto; min-width: 0; overflow: hidden; border-radius: 15px; }
+.cloud-resource-image { position: relative; display: block; flex: 0 0 calc((100% - 8px) / 3); width: calc((100% - 8px) / 3); min-width: 0; aspect-ratio: 1 / 1; overflow: hidden; contain: layout paint; background: color-mix(in srgb, var(--brand-primary) 6%, var(--bg-elevated)); }
 .cloud-resource-image-link { position: absolute; inset: 0; display: block; }
 .cloud-resource-image img, .cloud-resource-video-preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .cloud-resource-more { position: absolute; z-index: 2; top: 7px; right: 7px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--bg-elevated) 78%, transparent); color: var(--text-primary); box-shadow: 0 3px 12px rgba(8, 24, 20, .12); backdrop-filter: blur(8px); display: grid; place-items: center; }
@@ -47,5 +46,5 @@
 .file-source-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .file-source-choice button { min-height: 112px; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--bg-elevated); color: var(--text-primary); display: grid; place-items: center; align-content: center; gap: 9px; font: inherit; }
 .file-source-choice .material-symbols-outlined { color: var(--brand-primary); font-size: 32px; }
-@container (min-width: 600px) { .cloud-resource-image-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .cloud-resource-video-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (min-width: 600px) { .cloud-resource-image-grid { gap: 6px; } .cloud-resource-image { flex-basis: calc((100% - 18px) / 4); width: calc((100% - 18px) / 4); } .cloud-resource-video-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { .cloud-resource-header-action .is-spinning { animation: none; } }
