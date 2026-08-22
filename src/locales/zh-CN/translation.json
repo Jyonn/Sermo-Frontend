@@ -1965,4 +1965,8 @@
   ,"cloudResources.fileSourceTitle": "添加文件"
   ,"cloudResources.chooseCloud": "从云端资源选择"
   ,"cloudResources.chooseLocal": "从本地上传"
+  ,"cloudResources.chooseFile": "选择云端文件"
+  ,"cloudResources.searchFiles": "搜索文件名"
+  ,"cloudResources.emptyFiles": "还没有云端文件"
+  ,"cloudResources.noMatchingFiles": "没有找到相关文件"
 }

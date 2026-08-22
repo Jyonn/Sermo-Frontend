@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useDeferredValue, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { api, ApiError } from "../lib/api";
+import { formatCloudResourceBytes, groupCloudResourcesByPeriod } from "../lib/cloudResources";
 import { uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
 import { useI18n } from "../lib/language";
 import type { ChatDTO, CloudResourceDTO, CloudResourceListDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
 import { ContentLoader, QuietState } from "./BoundaryState";
+import { CloudFileList } from "./CloudFileList";
 import { MediaLightbox } from "./ImageLightbox";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
 import { SideDrawer } from "./SideDrawer";
@@ -22,40 +24,8 @@ interface CloudResourceDrawerProps {
 
 const messageType = { image: 1, file: 2, video: 4, audio: 5 } as const;
 
-function formatBytes(bytes: number) {
-  if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
-  if (bytes >= 1024 ** 2) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
-  if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${bytes} B`;
-}
-
 function chatTitle(chat: ChatDTO) {
   return chat.title || chat.owner?.name || chat.members.map((member) => member.name).join("、") || "会话";
-}
-
-function groupResourcesByPeriod(items: CloudResourceDTO[], language: string) {
-  const now = new Date();
-  const weekStart = new Date(now);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
-  const groups = new Map<string, { label: string; items: CloudResourceDTO[] }>();
-  items.forEach((item) => {
-    const date = new Date(item.created_at * 1000);
-    const isThisWeek = date >= weekStart;
-    const isThisMonth = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
-    const key = isThisWeek ? "this-week" : isThisMonth ? "this-month" : `${date.getFullYear()}-${date.getMonth()}`;
-    const label = isThisWeek
-      ? (language === "en" ? "This week" : "本周")
-      : isThisMonth
-        ? (language === "en" ? "This month" : "这个月")
-        : language === "en"
-          ? new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(date)
-          : `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, "0")}月`;
-    const group = groups.get(key) || { label, items: [] };
-    group.items.push(item);
-    groups.set(key, group);
-  });
-  return [...groups.values()];
 }
 
 export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
@@ -64,6 +34,8 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   const [data, setData] = useState<CloudResourceListDTO | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [fileQuery, setFileQuery] = useState("");
+  const deferredFileQuery = useDeferredValue(fileQuery.trim());
   const [busyId, setBusyId] = useState<number | "upload" | null>(null);
   const [sendAsset, setSendAsset] = useState<CloudResourceDTO | null>(null);
   const [actionAsset, setActionAsset] = useState<CloudResourceDTO | null>(null);
@@ -79,7 +51,11 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
     if (append) setLoadingMore(true);
     else setLoading(true);
     try {
-      const response = await api.getCloudResources(nextTab, { offset, limit: 60 });
+      const response = await api.getCloudResources(nextTab, {
+        offset,
+        limit: 60,
+        keyword: nextTab === "file" ? deferredFileQuery || undefined : undefined,
+      });
       if (requestSerial !== requestSerialRef.current) return;
       setData((current) => {
         if (!append || !current) return response;
@@ -102,14 +78,20 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   useEffect(() => {
     if (!open) return;
     setTab(initialTab);
-    void load(initialTab);
+    if (initialTab !== "file") void load(initialTab);
   }, [open, initialTab]);
+
+  useEffect(() => {
+    if (!open || tab !== "file") return;
+    setData(null);
+    void load("file");
+  }, [open, tab, deferredFileQuery]);
 
   const chooseTab = (nextTab: ResourceTab) => {
     setTab(nextTab);
     setData(null);
     setActionAsset(null);
-    void load(nextTab);
+    if (nextTab !== "file") void load(nextTab);
   };
 
   useEffect(() => {
@@ -200,7 +182,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
 
   const quota = data?.quota;
   const mediaItems = (data?.items || []).filter((asset) => asset.kind === "image" || asset.kind === "video");
-  const resourceGroups = groupResourcesByPeriod(data?.items || [], language);
+  const resourceGroups = groupCloudResourcesByPeriod(data?.items || [], language);
   const headerAction = tab !== "image" ? (
     <button
       aria-label={t("cloudResources.upload")}
@@ -236,7 +218,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
         <div className="cloud-resource-layout">
           {quota ? (
             <div className="cloud-resource-quota">
-              <span><strong>{formatBytes(quota.used)}</strong><small> / {formatBytes(quota.limit)}</small></span>
+              <span><strong>{formatCloudResourceBytes(quota.used)}</strong><small> / {formatCloudResourceBytes(quota.limit)}</small></span>
               <em>{Math.round(quota.used / quota.limit * 100)}%</em>
               <i><span style={{ width: `${Math.min(100, quota.used / quota.limit * 100)}%` }} /></i>
               <small>{t("cloudResources.quotaHint")}</small>
@@ -250,7 +232,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
             ))}
           </div>
           {loading && !data ? <ContentLoader label={t("common.loading")} /> : null}
-          {!loading && data?.items.length === 0 ? <QuietState title={t("cloudResources.empty")} /> : null}
+          {tab !== "file" && !loading && data?.items.length === 0 ? <QuietState title={t("cloudResources.empty")} /> : null}
           {tab === "image" ? (
             <div className="cloud-resource-sections">
               {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
@@ -280,7 +262,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
                     <span className="cloud-resource-play material-symbols-outlined">play_arrow</span>
                     {asset.duration_seconds ? <small>{Math.floor(asset.duration_seconds / 60)}:{String(Math.round(asset.duration_seconds % 60)).padStart(2, "0")}</small> : null}
                   </button>
-                  <div><strong>{asset.file_name || t("cloudResources.tab.video")}</strong><span>{formatBytes(asset.file_size)}</span></div>
+                  <div><strong>{asset.file_name || t("cloudResources.tab.video")}</strong><span>{formatCloudResourceBytes(asset.file_size)}</span></div>
                   {moreButton(asset)}
                 </article>
               ))}
@@ -289,20 +271,12 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
             </div>
           ) : null}
           {tab === "file" ? (
-            <div className="cloud-resource-sections">
-              {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
-                <h3>{group.label}</h3>
-                <div className="cloud-resource-file-list">
-              {group.items.map((asset) => (
-                <article className="cloud-resource-file" key={asset.resource_id}>
-                  <span className="cloud-resource-file-icon material-symbols-outlined">draft</span>
-                  <div><strong>{asset.file_name || t("cloudResources.tab.file")}</strong><span>{formatBytes(asset.file_size)}</span></div>
-                  {moreButton(asset)}
-                </article>
-              ))}
-                </div>
-              </section>)}
-            </div>
+            <>
+              <CloudFileList items={data?.items || []} onQueryChange={setFileQuery} query={fileQuery} renderAction={moreButton} />
+              {!loading && data?.items.length === 0 ? (
+                <QuietState title={deferredFileQuery ? t("cloudResources.noMatchingFiles") : t("cloudResources.emptyFiles")} />
+              ) : null}
+            </>
           ) : null}
           {data?.has_more || loadingMore ? (
             <div aria-hidden="true" className={`cloud-resource-load-more${loadingMore ? " is-loading" : ""}`} ref={loadMoreRef}>
@@ -336,7 +310,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
           width: asset.pixel_width,
           height: asset.pixel_height,
           detail: <MediaMetadataPanel kind={asset.kind as "image" | "video"} metadata={asset.metadata} />,
-          downloadLabel: formatBytes(asset.file_size),
+          downloadLabel: formatCloudResourceBytes(asset.file_size),
         }))}
         onClose={() => setPreviewIndex(null)}
         onIndexChange={setPreviewIndex}

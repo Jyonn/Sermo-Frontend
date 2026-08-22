@@ -708,10 +708,10 @@ export const api = {
     });
   },
 
-  getCloudResources(kind?: "image" | "video" | "file", pagination?: { offset?: number; limit?: number }, signal?: AbortSignal) {
+  getCloudResources(kind?: "image" | "video" | "file", pagination?: { offset?: number; limit?: number; keyword?: string }, signal?: AbortSignal) {
     return request<CloudResourceListDTO>("/messages/resources", {
       auth: true,
-      query: { kind, offset: pagination?.offset, limit: pagination?.limit },
+      query: { kind, offset: pagination?.offset, limit: pagination?.limit, keyword: pagination?.keyword },
       signal,
     });
   },

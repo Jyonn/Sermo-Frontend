@@ -1965,4 +1965,8 @@
   ,"cloudResources.fileSourceTitle": "Add a file"
   ,"cloudResources.chooseCloud": "Choose from cloud"
   ,"cloudResources.chooseLocal": "Upload from device"
+  ,"cloudResources.chooseFile": "Choose a cloud file"
+  ,"cloudResources.searchFiles": "Search file names"
+  ,"cloudResources.emptyFiles": "No cloud files yet"
+  ,"cloudResources.noMatchingFiles": "No matching files"
 }

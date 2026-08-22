@@ -22,7 +22,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
+import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
@@ -52,7 +52,7 @@ import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -2419,7 +2419,7 @@ function LiveChatsPage() {
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [fileSourceSheetOpen, setFileSourceSheetOpen] = useState(false);
-  const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
+  const [cloudFilePickerOpen, setCloudFilePickerOpen] = useState(false);
   const stickerInputRef = useRef<HTMLInputElement | null>(null);
   const clipboardPreviewUrlsRef = useRef(new Set<string>());
   const fileDropDepthRef = useRef(0);
@@ -4505,6 +4505,74 @@ function LiveChatsPage() {
       } else {
         finishSendTask(pendingMessage.clientId);
       }
+    }
+  };
+
+  const sendCloudFileMessage = async (asset: CloudResourceDTO) => {
+    if (!selectedChat) return;
+    const reply = consumeReplyTarget();
+    const createdAt = Math.floor(Date.now() / 1000);
+    const clientId = `temp:cloud-file:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const pendingMessage: ChatMessage = {
+      id: clientId,
+      clientId,
+      userId: currentUserId,
+      from: "self",
+      type: MESSAGE_TYPE_FILE,
+      kind: "file",
+      name: currentUserName,
+      ...pendingMessageAppearance,
+      time: formatTime(createdAt),
+      createdAt,
+      text: previewFromKind("file", ""),
+      payload: {
+        kind: "file",
+        uri: asset.uri,
+        mime_type: asset.mime_type,
+        file_name: asset.file_name,
+        file_size: asset.file_size,
+      },
+      replyTo: reply,
+      status: "pending",
+    };
+
+    setMessages((current) => ({
+      ...current,
+      [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
+    }));
+    setChats((currentChats) => sortChats(currentChats.map((chat) => (
+      chat.id === selectedChat.id ? updateChatSummary(chat, previewFromMessage(pendingMessage), createdAt) : chat
+    ))));
+    stickToBottomRef.current = true;
+    triggerMessageEntrance(clientId);
+    updateSendTask(clientId, 0.4);
+
+    try {
+      const created = await api.sendMessage(
+        selectedChat.id,
+        MESSAGE_TYPE_FILE,
+        "",
+        reply?.message_id,
+        clientId,
+        [],
+        asset.resource_id,
+      );
+      updateSendTask(clientId, 0.9);
+      const deliveredMessage = mapChatMessage(created, currentUserId);
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, deliveredMessage),
+      }));
+      setChats((currentChats) => sortChats(currentChats.map((chat) => (
+        chat.id === selectedChat.id ? updateChatSummary(chat, previewFromMessage(deliveredMessage), deliveredMessage.createdAt) : chat
+      ))));
+    } catch {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
+      }));
+    } finally {
+      finishSendTask(clientId);
     }
   };
 
@@ -7367,7 +7435,7 @@ function LiveChatsPage() {
       />
       <BottomSheet onClose={() => setFileSourceSheetOpen(false)} open={fileSourceSheetOpen} title={t("cloudResources.fileSourceTitle")}>
         <div className="file-source-choice">
-          <button onClick={() => { setFileSourceSheetOpen(false); setCloudResourcesOpen(true); }} type="button">
+          <button onClick={() => { setFileSourceSheetOpen(false); setCloudFilePickerOpen(true); }} type="button">
             <span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong>
           </button>
           <button onClick={() => { setFileSourceSheetOpen(false); fileInputRef.current?.click(); }} type="button">
@@ -7375,7 +7443,7 @@ function LiveChatsPage() {
           </button>
         </div>
       </BottomSheet>
-      <CloudResourceDrawer currentChatId={selectedChat?.id} initialTab="file" onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
+      <CloudFilePickerSheet onClose={() => setCloudFilePickerOpen(false)} onSelect={sendCloudFileMessage} open={cloudFilePickerOpen} />
       <input
         ref={fileInputRef}
         hidden

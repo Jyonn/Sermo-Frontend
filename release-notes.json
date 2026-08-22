@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.13",
+  "id": "2026.08.22.14",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源浏览更连贯",
+      "title": "云端文件选择更轻快",
       "items": [
-        "优化云端资源分类栏的毛玻璃衔接，滚动时不再出现透明断层"
+        "聊天中可通过轻量文件面板选择云端文件，云端文件列表也支持按名称搜索"
       ]
     },
     "en": {
-      "title": "Smoother cloud resource browsing",
+      "title": "Faster cloud file selection",
       "items": [
-        "Improved the frosted transition around cloud resource tabs so content no longer shows through a gap while scrolling"
+        "Choose cloud files from a lightweight chat picker and search cloud file lists by name"
       ]
     }
   }
