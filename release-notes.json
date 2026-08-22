@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.12",
+  "id": "2026.08.22.13",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源查找更清晰",
+      "title": "云端资源浏览更连贯",
       "items": [
-        "云端资源按本周、这个月和历史月份整理，浏览到底部时会自动加载更多"
+        "优化云端资源分类栏的毛玻璃衔接，滚动时不再出现透明断层"
       ]
     },
     "en": {
-      "title": "Clearer cloud resource browsing",
+      "title": "Smoother cloud resource browsing",
       "items": [
-        "Cloud resources are grouped by this week, this month, and earlier months, with more loaded automatically as you browse"
+        "Improved the frosted transition around cloud resource tabs so content no longer shows through a gap while scrolling"
       ]
     }
   }
