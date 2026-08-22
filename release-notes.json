@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.22.5",
+  "id": "2026.08.22.6",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "多选操作更明确",
+      "title": "云端照片整齐归位",
       "items": [
-        "撤回消息前会再次确认，并使用更清晰的警示样式",
-        "无法处理当前所选消息的操作会自动禁用"
+        "修复照片较多时预览与操作按钮相互重叠的问题",
+        "不同屏幕宽度下，照片宫格都会保持稳定的正方形排列"
       ]
     },
     "en": {
-      "title": "Clearer multi-select actions",
+      "title": "Cloud photos stay neatly aligned",
       "items": [
-        "Recalling messages now asks for confirmation with a clearer warning style",
-        "Actions that cannot process any selected message are now disabled"
+        "Fixed overlapping previews and action buttons in larger photo libraries",
+        "The photo grid now keeps a stable square layout across screen sizes"
       ]
     }
   }
