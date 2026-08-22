@@ -1456,6 +1456,8 @@
   "message.partialCopyTitle": "部分消息无法复制",
   "message.partialSaveTitle": "部分消息无法保存",
   "message.partialRecallTitle": "部分消息无法撤回",
+  "message.recallSelectedConfirmTitle": "撤回选中的 {{count}} 条消息？",
+  "message.recallSelectedConfirmHint": "撤回后，聊天中的所有成员都无法再查看这些消息。",
   "message.partialActionHint": "已选择 {{total}} 条消息，本次可处理 {{eligible}} 条。",
   "message.batchCopied": "已复制 {{count}} 条文本消息",
   "message.batchSaved": "已保存 {{count}} 个多媒体文件",

@@ -1136,6 +1136,7 @@ img {
 .secondary-button,
 .ghost-button,
 .danger-button,
+.warning-button,
 .icon-button,
 .nav-button {
   display: inline-flex;
@@ -1154,6 +1155,7 @@ img {
 .secondary-button:active,
 .ghost-button:active,
 .danger-button:active,
+.warning-button:active,
 .icon-button:active {
   transform: scale(0.98);
 }
@@ -1162,6 +1164,7 @@ img {
 .secondary-button:disabled,
 .ghost-button:disabled,
 .danger-button:disabled,
+.warning-button:disabled,
 .icon-button:disabled {
   cursor: not-allowed;
   opacity: 0.56;
@@ -1172,7 +1175,8 @@ img {
 .button,
 .secondary-button,
 .ghost-button,
-.danger-button {
+.danger-button,
+.warning-button {
   min-height: 48px;
   padding: 0 18px;
   font-weight: 700;
@@ -7113,9 +7117,16 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.98rem;
 }
 
-.message-selection-delete,
-.message-selection-recall {
+.message-selection-delete {
   color: #c84250 !important;
+}
+
+.message-selection-recall {
+  color: #9a5c10 !important;
+}
+
+.message-selection-recall:hover:not(:disabled) {
+  background: rgba(231, 174, 75, 0.14) !important;
 }
 
 .message-selection-toolbar button:disabled {
@@ -16109,6 +16120,22 @@ html[data-theme="dark"] .message-link-preview-site {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.warning-button {
+  border-color: rgba(190, 127, 30, 0.3);
+  background: rgba(231, 174, 75, 0.16);
+  color: #8f550c;
+}
+
+.warning-button:hover:not(:disabled) {
+  background: rgba(231, 174, 75, 0.24);
+}
+
+html[data-theme="dark"] .warning-button {
+  border-color: rgba(232, 189, 120, 0.2);
+  background: rgba(115, 78, 31, 0.34);
+  color: #f0c67f;
 }
 
 .request-status-backdrop {

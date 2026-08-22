@@ -5219,6 +5219,18 @@ function LiveChatsPage() {
     return canRecallMessage(message);
   });
 
+  const eligibleForwardMessages = () => selectedActionMessages().filter(
+    (message) => typeof message.id === "number" && !["system", "map_access", "forward_bundle"].includes(message.kind)
+  );
+
+  const selectionActionAvailability = {
+    forward: eligibleForwardMessages().length > 0,
+    copy: eligibleSelectionMessages("copy").length > 0,
+    save: eligibleSelectionMessages("save").length > 0,
+    delete: selectedMessageClientIds.length > 0,
+    recall: eligibleSelectionMessages("recall").length > 0,
+  };
+
   const finishMessageSelection = () => {
     setMessageSelectionMode(false);
     setSelectedMessageClientIds([]);
@@ -5287,7 +5299,8 @@ function LiveChatsPage() {
   const requestSelectionAction = (action: MessageSelectionAction) => {
     if (!selectedMessageClientIds.length || messageSelectionAction) return;
     const eligible = eligibleSelectionMessages(action);
-    if (eligible.length !== selectedMessageClientIds.length) {
+    if (!eligible.length) return;
+    if (action === "recall" || eligible.length !== selectedMessageClientIds.length) {
       setMessageSelectionActionPrompt({
         action,
         eligibleClientIds: eligible.map((message) => message.clientId),
@@ -5299,9 +5312,7 @@ function LiveChatsPage() {
   };
 
   const openForwardPicker = () => {
-    const eligibleIds = selectedActionMessages()
-      .filter((message) => typeof message.id === "number" && !["system", "map_access", "forward_bundle"].includes(message.kind))
-      .map((message) => message.id as number);
+    const eligibleIds = eligibleForwardMessages().map((message) => message.id as number);
     if (!eligibleIds.length) {
       showToast(t("message.forwardUnavailable"), "error");
       return;
@@ -6024,21 +6035,21 @@ function LiveChatsPage() {
 
               {messageSelectionMode ? (
                 <div className="composer message-selection-toolbar">
-                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={openForwardPicker} type="button">
+                  <button disabled={!selectionActionAvailability.forward || Boolean(messageSelectionAction)} onClick={openForwardPicker} type="button">
                     <span className="material-symbols-outlined">forward</span>
                     <span>{t("message.forward")}</span>
                   </button>
-                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={() => requestSelectionAction("copy")} type="button">
+                  <button disabled={!selectionActionAvailability.copy || Boolean(messageSelectionAction)} onClick={() => requestSelectionAction("copy")} type="button">
                     <span className="material-symbols-outlined">content_copy</span>
                     <span>{t("common.copy")}</span>
                   </button>
-                  <button disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)} onClick={() => requestSelectionAction("save")} type="button">
+                  <button disabled={!selectionActionAvailability.save || Boolean(messageSelectionAction)} onClick={() => requestSelectionAction("save")} type="button">
                     <span className="material-symbols-outlined">download</span>
                     <span>{t("common.save")}</span>
                   </button>
                   <button
                     className="message-selection-delete"
-                    disabled={!selectedMessageClientIds.length || messageDeleteState === "deleting" || Boolean(messageSelectionAction)}
+                    disabled={!selectionActionAvailability.delete || messageDeleteState === "deleting" || Boolean(messageSelectionAction)}
                     onClick={() => setBatchDeleteConfirmOpen(true)}
                     type="button"
                   >
@@ -6047,7 +6058,7 @@ function LiveChatsPage() {
                   </button>
                   <button
                     className="message-selection-recall"
-                    disabled={!selectedMessageClientIds.length || Boolean(messageSelectionAction)}
+                    disabled={!selectionActionAvailability.recall || Boolean(messageSelectionAction)}
                     onClick={() => requestSelectionAction("recall")}
                     type="button"
                   >
@@ -7215,17 +7226,21 @@ function LiveChatsPage() {
           ? t("message.partialCopyTitle")
           : messageSelectionActionPrompt?.action === "save"
             ? t("message.partialSaveTitle")
-            : t("message.partialRecallTitle")}
+            : messageSelectionActionPrompt?.eligibleClientIds.length === messageSelectionActionPrompt?.total
+              ? t("message.recallSelectedConfirmTitle", { count: messageSelectionActionPrompt?.total ?? 0 })
+              : t("message.partialRecallTitle")}
         description={messageSelectionActionPrompt
-          ? t("message.partialActionHint", {
+          ? messageSelectionActionPrompt.action === "recall" && messageSelectionActionPrompt.eligibleClientIds.length === messageSelectionActionPrompt.total
+            ? t("message.recallSelectedConfirmHint")
+            : t("message.partialActionHint", {
               eligible: messageSelectionActionPrompt.eligibleClientIds.length,
               total: messageSelectionActionPrompt.total,
             })
           : ""}
-        confirmLabel={messageSelectionActionPrompt?.eligibleClientIds.length ? t("common.continue") : t("common.gotIt")}
+        confirmLabel={messageSelectionActionPrompt?.action === "recall" ? t("message.recallForEveryone") : t("common.continue")}
         showCancelButton={Boolean(messageSelectionActionPrompt?.eligibleClientIds.length)}
         busy={Boolean(messageSelectionAction)}
-        danger={messageSelectionActionPrompt?.action === "recall"}
+        warning={messageSelectionActionPrompt?.action === "recall"}
         onClose={() => setMessageSelectionActionPrompt(null)}
         onConfirm={() => {
           if (!messageSelectionActionPrompt?.eligibleClientIds.length) {

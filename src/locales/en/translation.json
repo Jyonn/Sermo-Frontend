@@ -1456,6 +1456,8 @@
   "message.partialCopyTitle": "Some messages cannot be copied",
   "message.partialSaveTitle": "Some messages cannot be saved",
   "message.partialRecallTitle": "Some messages cannot be recalled",
+  "message.recallSelectedConfirmTitle": "Recall {{count}} selected messages?",
+  "message.recallSelectedConfirmHint": "After recall, these messages will no longer be visible to anyone in the chat.",
   "message.partialActionHint": "{{eligible}} of {{total}} selected messages can be processed.",
   "message.batchCopied": "Copied {{count}} text messages",
   "message.batchSaved": "Saved {{count}} media files",

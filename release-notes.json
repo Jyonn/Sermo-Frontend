@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.22.4",
+  "id": "2026.08.22.5",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源更好找",
+      "title": "多选操作更明确",
       "items": [
-        "图片、视频和文件现在使用更适合各自内容的浏览方式",
-        "发送、下载和删除统一收进资源操作菜单"
+        "撤回消息前会再次确认，并使用更清晰的警示样式",
+        "无法处理当前所选消息的操作会自动禁用"
       ]
     },
     "en": {
-      "title": "A clearer cloud library",
+      "title": "Clearer multi-select actions",
       "items": [
-        "Photos, videos, and files now use layouts tailored to each format",
-        "Send, download, and delete actions now share one focused resource menu"
+        "Recalling messages now asks for confirmation with a clearer warning style",
+        "Actions that cannot process any selected message are now disabled"
       ]
     }
   }
