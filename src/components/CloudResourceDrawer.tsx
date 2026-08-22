@@ -38,6 +38,8 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<number | "upload" | null>(null);
   const [sendAsset, setSendAsset] = useState<CloudResourceDTO | null>(null);
+  const [actionAsset, setActionAsset] = useState<CloudResourceDTO | null>(null);
+  const [brokenPreviews, setBrokenPreviews] = useState<Set<number>>(new Set());
   const [chats, setChats] = useState<ChatDTO[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -60,7 +62,12 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
 
   const chooseTab = (nextTab: ResourceTab) => {
     setTab(nextTab);
+    setActionAsset(null);
     void load(nextTab);
+  };
+
+  const markPreviewBroken = (resourceId: number) => {
+    setBrokenPreviews((current) => new Set(current).add(resourceId));
   };
 
   const sendToChat = async (asset: CloudResourceDTO, chatId: number) => {
@@ -79,6 +86,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   };
 
   const requestSend = async (asset: CloudResourceDTO) => {
+    setActionAsset(null);
     if (currentChatId) {
       await sendToChat(asset, currentChatId);
       return;
@@ -103,6 +111,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
     try {
       await api.deleteCloudResource(asset.resource_id);
       showToast(t("cloudResources.deleted"));
+      setActionAsset(null);
       await load();
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("cloudResources.deleteFailed"), "error");
@@ -128,9 +137,38 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   };
 
   const quota = data?.quota;
+  const headerAction = tab !== "image" ? (
+    <button
+      aria-label={t("cloudResources.upload")}
+      className="cloud-resource-header-action"
+      disabled={busyId === "upload"}
+      onClick={() => inputRef.current?.click()}
+      type="button"
+    >
+      <span className={`material-symbols-outlined${busyId === "upload" ? " is-spinning" : ""}`}>
+        {busyId === "upload" ? "progress_activity" : "add"}
+      </span>
+    </button>
+  ) : null;
+
+  const moreButton = (asset: CloudResourceDTO) => (
+    <button
+      aria-label={t("common.actions")}
+      className="cloud-resource-more"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setActionAsset(asset);
+      }}
+      type="button"
+    >
+      <span className="material-symbols-outlined">more_horiz</span>
+    </button>
+  );
+
   return (
     <>
-      <SideDrawer className="cloud-resource-drawer" historyKey="cloud-resources" onClose={onClose} open={open} title={t("cloudResources.title")}>
+      <SideDrawer className="cloud-resource-drawer" headerAction={headerAction} historyKey="cloud-resources" onClose={onClose} open={open} title={t("cloudResources.title")}>
         <div className="cloud-resource-layout">
           <div className="cloud-resource-tabs" role="tablist">
             {(["image", "video", "file"] as ResourceTab[]).map((item) => (
@@ -141,42 +179,72 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
           </div>
           {quota ? (
             <div className="cloud-resource-quota">
-              <span><strong>{formatBytes(quota.used)}</strong> / {formatBytes(quota.limit)}</span>
+              <span><strong>{formatBytes(quota.used)}</strong><small> / {formatBytes(quota.limit)}</small></span>
+              <em>{Math.round(quota.used / quota.limit * 100)}%</em>
               <i><span style={{ width: `${Math.min(100, quota.used / quota.limit * 100)}%` }} /></i>
               <small>{t("cloudResources.quotaHint")}</small>
             </div>
           ) : null}
-          {tab !== "image" ? (
-            <button className="cloud-resource-upload" disabled={busyId === "upload"} onClick={() => inputRef.current?.click()} type="button">
-              <span className="material-symbols-outlined">cloud_upload</span>
-              <span>{busyId === "upload" ? t("common.loading") : t("cloudResources.upload")}</span>
-            </button>
-          ) : null}
           {loading && !data ? <ContentLoader label={t("common.loading")} /> : null}
           {!loading && data?.items.length === 0 ? <QuietState title={t("cloudResources.empty")} /> : null}
-          <div className="cloud-resource-grid">
-            {data?.items.map((asset) => (
-              <article className="cloud-resource-card" key={asset.resource_id}>
-                <a className="cloud-resource-preview" href={asset.uri} rel="noreferrer" target="_blank">
-                  {asset.kind === "image" ? <img alt="" src={asset.thumbnail_uri || asset.uri} /> : null}
-                  {asset.kind === "video" ? <video muted playsInline poster={asset.thumbnail_uri || undefined} preload="metadata" src={asset.uri} /> : null}
-                  {asset.kind === "file" ? <span className="material-symbols-outlined">draft</span> : null}
-                </a>
-                <div className="cloud-resource-meta">
-                  <strong title={asset.file_name}>{asset.file_name || t(`cloudResources.tab.${asset.kind}` as never)}</strong>
-                  <span>{formatBytes(asset.file_size)}</span>
-                </div>
-                <div className="cloud-resource-actions">
-                  <button disabled={busyId === asset.resource_id} onClick={() => void requestSend(asset)} type="button">{t("cloudResources.send")}</button>
-                  <a download href={asset.uri}>{t("cloudResources.download")}</a>
-                  {asset.kind !== "image" ? <button className="is-danger" disabled={busyId === asset.resource_id} onClick={() => void deleteAsset(asset)} type="button">{t("common.delete")}</button> : null}
-                </div>
-              </article>
-            ))}
-          </div>
+          {tab === "image" ? (
+            <div className="cloud-resource-image-grid">
+              {data?.items.map((asset) => (
+                <article className="cloud-resource-image" key={asset.resource_id}>
+                  <a className="cloud-resource-image-link" href={asset.uri} rel="noreferrer" target="_blank">
+                    {brokenPreviews.has(asset.resource_id) ? (
+                      <span className="cloud-resource-broken"><span className="material-symbols-outlined">image</span></span>
+                    ) : (
+                      <img alt={asset.file_name || ""} loading="lazy" onError={() => markPreviewBroken(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
+                    )}
+                  </a>
+                  {moreButton(asset)}
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {tab === "video" ? (
+            <div className="cloud-resource-video-grid">
+              {data?.items.map((asset) => (
+                <article className="cloud-resource-video" key={asset.resource_id}>
+                  <a className="cloud-resource-video-preview" href={asset.uri} rel="noreferrer" target="_blank">
+                    {brokenPreviews.has(asset.resource_id) ? (
+                      <span className="cloud-resource-broken"><span className="material-symbols-outlined">videocam</span></span>
+                    ) : (
+                      <img alt="" loading="lazy" onError={() => markPreviewBroken(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
+                    )}
+                    <span className="cloud-resource-play material-symbols-outlined">play_arrow</span>
+                    {asset.duration_seconds ? <small>{Math.floor(asset.duration_seconds / 60)}:{String(Math.round(asset.duration_seconds % 60)).padStart(2, "0")}</small> : null}
+                  </a>
+                  <div><strong>{asset.file_name || t("cloudResources.tab.video")}</strong><span>{formatBytes(asset.file_size)}</span></div>
+                  {moreButton(asset)}
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {tab === "file" ? (
+            <div className="cloud-resource-file-list">
+              {data?.items.map((asset) => (
+                <article className="cloud-resource-file" key={asset.resource_id}>
+                  <span className="cloud-resource-file-icon material-symbols-outlined">draft</span>
+                  <div><strong>{asset.file_name || t("cloudResources.tab.file")}</strong><span>{formatBytes(asset.file_size)}</span></div>
+                  {moreButton(asset)}
+                </article>
+              ))}
+            </div>
+          ) : null}
         </div>
         <input hidden onChange={(event) => void upload(event)} ref={inputRef} type="file" />
       </SideDrawer>
+      <BottomSheet className="cloud-resource-action-sheet" onClose={() => setActionAsset(null)} open={Boolean(actionAsset)} title={actionAsset?.file_name || t(`cloudResources.tab.${actionAsset?.kind || tab}` as never)}>
+        {actionAsset ? (
+          <div className="cloud-resource-action-list">
+            <button disabled={busyId === actionAsset.resource_id} onClick={() => void requestSend(actionAsset)} type="button"><span className="material-symbols-outlined">send</span><span>{t("cloudResources.send")}</span></button>
+            <a download href={actionAsset.uri} onClick={() => setActionAsset(null)}><span className="material-symbols-outlined">download</span><span>{t("cloudResources.download")}</span></a>
+            {actionAsset.kind !== "image" ? <button className="is-danger" disabled={busyId === actionAsset.resource_id} onClick={() => void deleteAsset(actionAsset)} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button> : null}
+          </div>
+        ) : null}
+      </BottomSheet>
       <BottomSheet onClose={() => setSendAsset(null)} open={Boolean(sendAsset)} title={t("cloudResources.chooseChat")}>
         <div className="cloud-resource-chat-list">
           {chats.map((chat) => <button key={chat.chat_id} onClick={() => sendAsset && void sendToChat(sendAsset, chat.chat_id)} type="button"><strong>{chatTitle(chat)}</strong><span className="material-symbols-outlined">send</span></button>)}

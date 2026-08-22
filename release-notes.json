@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.22.3",
+  "id": "2026.08.22.4",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端资源更省空间",
+      "title": "云端资源更好找",
       "items": [
-        "同一份视频或文件使用不同名称时，会完整保留每个名称",
-        "相同内容只占用一份云端空间，转发和秒传更加轻量"
+        "图片、视频和文件现在使用更适合各自内容的浏览方式",
+        "发送、下载和删除统一收进资源操作菜单"
       ]
     },
     "en": {
-      "title": "Smarter cloud storage",
+      "title": "A clearer cloud library",
       "items": [
-        "Different names for the same video or file are now preserved",
-        "Identical content uses one cloud copy for lighter forwarding and instant uploads"
+        "Photos, videos, and files now use layouts tailored to each format",
+        "Send, download, and delete actions now share one focused resource menu"
       ]
     }
   }
