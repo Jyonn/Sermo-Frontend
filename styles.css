@@ -10073,6 +10073,44 @@ html[data-theme="dark"] .personalization-bubble-stage {
   line-height: 1.35;
 }
 
+.composer-rich-input {
+  width: 100%;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  outline: 0;
+  cursor: text;
+}
+
+.composer-rich-input:empty::before {
+  color: var(--text-muted);
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.composer-mention-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.45em;
+  margin: -.08em .08em;
+  padding: 0 .42em;
+  border: 1px solid color-mix(in srgb, var(--mention-selection-accent, var(--brand-primary)) 28%, transparent);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--mention-selection-accent, var(--brand-primary)) 13%, transparent);
+  font-size: .88em;
+  font-weight: 760;
+  line-height: 1.25;
+  vertical-align: .02em;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.composer-mention-chip.is-delete-armed {
+  border-color: color-mix(in srgb, var(--mention-selection-accent, var(--brand-primary)) 64%, transparent);
+  background: color-mix(in srgb, var(--mention-selection-accent, var(--brand-primary)) 30%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mention-selection-accent, var(--brand-primary)) 12%, transparent);
+}
+
 .composer-input.is-mention-delete-armed::selection {
   color: var(--text-primary);
   background: color-mix(in srgb, var(--mention-selection-accent, var(--brand-primary)) 34%, transparent);

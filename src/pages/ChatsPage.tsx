@@ -9,7 +9,6 @@ import {
   type ClipboardEvent as ReactClipboardEvent,
   type CSSProperties,
   type DragEvent as ReactDragEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
@@ -27,6 +26,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
+import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -211,7 +211,6 @@ function visibleBubbleStyle(style?: string) {
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
 }
 
-const MENTION_BOUNDARY_RE = /[\s，。！？、,.!?]/u;
 const MENTION_SELECTION_ACCENTS: Record<ChatBubbleStyle, string> = {
   default: "#00a86b",
   comic: "#e49328",
@@ -240,15 +239,9 @@ function mentionSelectionAccent(style?: string) {
   return MENTION_SELECTION_ACCENTS[visibleBubbleStyle(style)];
 }
 
-function mentionRangeBeforeCaret(text: string, caret: number, memberNames: string[]) {
-  const names = [...new Set(memberNames.filter(Boolean))].sort((left, right) => right.length - left.length);
-  for (const name of names) {
-    const token = `@${name}`;
-    const start = caret - token.length;
-    if (start < 0 || text.slice(start, caret) !== token) continue;
-    if (start === 0 || MENTION_BOUNDARY_RE.test(text[start - 1])) return { start, end: caret };
-  }
-  return null;
+function readableMentionText(text: string, mentions: Array<{ user_id: number; name: string }>) {
+  const names = new Map(mentions.map((user) => [user.user_id, user.name]));
+  return text.replace(/<@(\d+)>/g, (_, userId: string) => `@${names.get(Number(userId)) || userId}`);
 }
 
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
@@ -1273,10 +1266,26 @@ const MessageImageGallery = memo(function MessageImageGallery({
 });
 
 function MentionedMessageText({ mentions, text }: { mentions: TinyUserDTO[]; text: string }) {
+  const tokenPattern = /<@(\d+)>/g;
+  if (tokenPattern.test(text)) {
+    tokenPattern.lastIndex = 0;
+    const mentionNames = new Map(mentions.map((user) => [user.user_id, user.name]));
+    const nodes: ReactNode[] = [];
+    let lastIndex = 0;
+    Array.from(text.matchAll(tokenPattern)).forEach((match, index) => {
+      const start = match.index ?? 0;
+      if (start > lastIndex) nodes.push(text.slice(lastIndex, start));
+      const label = `@${mentionNames.get(Number(match[1])) || match[1]}`;
+      nodes.push(<span className="message-mention" key={`${match[0]}:${start}:${index}`}>{label}</span>);
+      lastIndex = start + match[0].length;
+    });
+    if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+    return <>{nodes}</>;
+  }
   const names = [...new Set(mentions.map((user) => user.name).filter(Boolean))].sort((left, right) => right.length - left.length);
   if (!names.length) return <>{text}</>;
 
-  const mentionPattern = new RegExp(`@(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(?=$|\\s|[，。！？、,.!?])`, "gu");
+  const mentionPattern = new RegExp(`@(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gu");
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
   Array.from(text.matchAll(mentionPattern)).forEach((match, index) => {
@@ -2311,8 +2320,7 @@ function LiveChatsPage() {
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
-  const [mentionSearch, setMentionSearch] = useState<{ start: number; end: number; query: string } | null>(null);
-  const [mentionDeleteArmed, setMentionDeleteArmed] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
@@ -2409,10 +2417,7 @@ function LiveChatsPage() {
   const [sendTasks, setSendTasks] = useState<Record<string, number>>({});
   const cancelledSendIdsRef = useRef(new Set<string>());
   const localObjectUrlsRef = useRef(new Set<string>());
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const mentionDeleteRangeRef = useRef<{ start: number; end: number } | null>(null);
-  const composerSelectionRef = useRef({ start: 0, end: 0 });
-  const composerSelectionTouchedRef = useRef(false);
+  const mentionEditorRef = useRef<MentionComposerHandle | null>(null);
   const messageMenuRef = useRef<HTMLDivElement | null>(null);
   const replyingToRef = useRef<QuotedMessageDTO | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
@@ -2533,7 +2538,6 @@ function LiveChatsPage() {
   const recordingStopRequestedRef = useRef(false);
   const recordingAttemptRef = useRef(0);
   const recordingStartedAtRef = useRef(0);
-  const isComposingRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
@@ -2747,7 +2751,7 @@ function LiveChatsPage() {
     if (!reply) return;
     setReplyTarget(reply);
     setMessageMenu(null);
-    window.setTimeout(() => textareaRef.current?.focus(), 0);
+    window.setTimeout(() => mentionEditorRef.current?.focus(), 0);
   };
 
   const revealPinnedMessage = (messageId: number) => {
@@ -2934,107 +2938,23 @@ function LiveChatsPage() {
     return member ? { user_id: member.userId, name: member.name, avatar_uri: member.avatarUri } : null;
   }, [selectedChat]);
   const mentionCandidates = useMemo(() => {
-    if (!selectedChat || selectedChat.type !== "group" || !mentionSearch) return [];
-    const query = mentionSearch.query.toLocaleLowerCase(getActiveLocale());
+    if (!selectedChat || selectedChat.type !== "group" || mentionSearch === null) return [];
+    const query = mentionSearch.toLocaleLowerCase(getActiveLocale());
     return selectedChat.detail.members
       .filter((member) => !member.isSelf && (!query || member.name.toLocaleLowerCase(getActiveLocale()).includes(query)))
       .slice(0, 6);
   }, [mentionSearch, selectedChat]);
-  const clearMentionDeleteSelection = () => {
-    mentionDeleteRangeRef.current = null;
-    setMentionDeleteArmed(false);
-  };
   const mentionUserIdsForText = (text: string) => {
-    if (!selectedChat || selectedChat.type !== "group") return [];
-    return selectedChat.detail.members.filter((member) => {
-      if (member.isSelf) return false;
-      const escapedName = member.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      return new RegExp(`@${escapedName}(?=$|\\s|[，。！？、,.!?])`, "u").test(text);
-    }).map((member) => member.userId);
-  };
-  const insertMention = (member: Chat["detail"]["members"][number], range: { start: number; end: number }, sourceDraft = textareaRef.current?.value ?? draft) => {
-    const safeStart = Math.max(0, Math.min(range.start, sourceDraft.length));
-    const safeEnd = Math.max(safeStart, Math.min(range.end, sourceDraft.length));
-    const needsLeadingSpace = safeStart > 0 && !MENTION_BOUNDARY_RE.test(sourceDraft[safeStart - 1]);
-    const insertion = `${needsLeadingSpace ? " " : ""}@${member.name}`;
-    const nextDraft = `${sourceDraft.slice(0, safeStart)}${insertion}${sourceDraft.slice(safeEnd)}`;
-    const nextCursor = safeStart + insertion.length;
-    clearMentionDeleteSelection();
-    updateDraft(nextDraft);
-    setMentionSearch(null);
-    composerSelectionTouchedRef.current = true;
-    composerSelectionRef.current = { start: nextCursor, end: nextCursor };
-    window.requestAnimationFrame(() => {
-      textareaRef.current?.focus();
-      textareaRef.current?.setSelectionRange(nextCursor, nextCursor);
-    });
+    return Array.from(text.matchAll(/<@(\d+)>/g), (match) => Number(match[1]));
   };
   const selectMention = (member: Chat["detail"]["members"][number]) => {
-    if (!mentionSearch) return;
-    insertMention(member, mentionSearch);
+    mentionEditorRef.current?.insertMention(member);
   };
   const mentionGroupMember = (userId: number) => {
     if (!selectedChat || selectedChat.type !== "group") return;
     const member = selectedChat.detail.members.find((item) => item.userId === userId && !item.isSelf);
     if (!member) return;
-    const input = textareaRef.current;
-    const sourceDraft = input?.value ?? draft;
-    const hasCollapsedSelection = input && input.selectionStart === input.selectionEnd;
-    const cursor = hasCollapsedSelection ? input.selectionStart : sourceDraft.length;
-    insertMention(member, { start: cursor, end: cursor }, sourceDraft);
-  };
-  const handleComposerKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-    const nativeEvent = event.nativeEvent as globalThis.KeyboardEvent & { isComposing?: boolean; keyCode?: number };
-    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.keyCode === 229) return;
-
-    const input = event.currentTarget;
-    const selectionStart = input.selectionStart;
-    const selectionEnd = input.selectionEnd;
-    const armedRange = mentionDeleteRangeRef.current;
-
-    if (event.key === "Backspace") {
-      if (armedRange && selectionStart === armedRange.start && selectionEnd === armedRange.end) {
-        event.preventDefault();
-        const nextDraft = `${draft.slice(0, armedRange.start)}${draft.slice(armedRange.end)}`;
-        const nextCursor = armedRange.start;
-        clearMentionDeleteSelection();
-        updateDraft(nextDraft);
-        setMentionSearch(null);
-        composerSelectionRef.current = { start: nextCursor, end: nextCursor };
-        window.requestAnimationFrame(() => input.setSelectionRange(nextCursor, nextCursor));
-        return;
-      }
-
-      if (armedRange) clearMentionDeleteSelection();
-      if (selectionStart === selectionEnd && selectedChat?.type === "group") {
-        const range = mentionRangeBeforeCaret(
-          draft,
-          selectionStart,
-          selectedChat.detail.members.filter((member) => !member.isSelf).map((member) => member.name)
-        );
-        if (range) {
-          event.preventDefault();
-          mentionDeleteRangeRef.current = range;
-          setMentionDeleteArmed(true);
-          setMentionSearch(null);
-          composerSelectionRef.current = range;
-          input.setSelectionRange(range.start, range.end);
-          return;
-        }
-      }
-    } else if (armedRange) {
-      clearMentionDeleteSelection();
-    }
-
-    if (event.key === "Enter" && !event.shiftKey && mentionSearch && mentionCandidates.length) {
-      event.preventDefault();
-      selectMention(mentionCandidates[0]);
-      return;
-    }
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      event.currentTarget.form?.requestSubmit();
-    }
+    mentionEditorRef.current?.insertMention(member);
   };
   const profileDrawerSeed = useMemo(() => {
     if (profileDrawerUserId === null) return null;
@@ -3589,24 +3509,11 @@ function LiveChatsPage() {
     const nextDraft = cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "";
     setDraft(nextDraft);
     setMentionSearch(null);
-    mentionDeleteRangeRef.current = null;
-    setMentionDeleteArmed(false);
-    composerSelectionRef.current = { start: nextDraft.length, end: nextDraft.length };
-    composerSelectionTouchedRef.current = false;
+    window.requestAnimationFrame(() => mentionEditorRef.current?.moveCaretToEnd());
   }, [cacheScope, selectedChat?.id]);
 
   const insertEmoji = (emoji: string) => {
-    const input = textareaRef.current;
-    const start = input?.selectionStart ?? draft.length;
-    const end = input?.selectionEnd ?? start;
-    const nextDraft = `${draft.slice(0, start)}${emoji}${draft.slice(end)}`;
-    const nextCursor = start + emoji.length;
-    updateDraft(nextDraft);
-    window.requestAnimationFrame(() => {
-      const nextInput = textareaRef.current;
-      nextInput?.focus();
-      nextInput?.setSelectionRange(nextCursor, nextCursor);
-    });
+    mentionEditorRef.current?.insertText(emoji);
   };
 
   const sendSticker = async (sticker: StickerAssetDTO | StickerDTO) => {
@@ -4154,7 +4061,7 @@ function LiveChatsPage() {
   }, [chatMemberPickerMode, chatMemberPickerOpen, groupCreateOpen, groupFriendPool, groupQuery, selectedChat]);
 
   useEffect(() => {
-    const element = textareaRef.current;
+    const element = mentionEditorRef.current?.getElement();
     if (!element) return;
 
     const computedStyle = window.getComputedStyle(element);
@@ -4227,6 +4134,7 @@ function LiveChatsPage() {
         official: false,
       }));
     const optimisticMessage = createPendingMessage(message, currentUserName, currentUserId, pendingMessageAppearance, optimisticMentions, reply);
+    const readableMessage = readableMentionText(message, optimisticMentions);
 
     try {
       setSendState("sending");
@@ -4247,7 +4155,7 @@ function LiveChatsPage() {
         setChats((currentChats) =>
           sortChats(
             currentChats.map((chat) =>
-              chat.id === selectedChat.id ? updateChatSummary(chat, message, optimisticMessage.createdAt) : chat
+              chat.id === selectedChat.id ? updateChatSummary(chat, readableMessage, optimisticMessage.createdAt) : chat
             )
           )
         );
@@ -4261,7 +4169,7 @@ function LiveChatsPage() {
       }
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
-      recordOptimisticEmojiUsage(message);
+      recordOptimisticEmojiUsage(readableMessage);
       const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId, mentionUserIds);
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
@@ -4924,7 +4832,7 @@ function LiveChatsPage() {
     setClipboardUpload({ files, previewUris, source });
   };
 
-  const handleComposerPaste = (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
+  const handleComposerPaste = (event: ReactClipboardEvent<HTMLDivElement>) => {
     const itemFiles = Array.from(event.clipboardData.items)
       .filter((item) => item.kind === "file")
       .map((item) => item.getAsFile())
@@ -5012,7 +4920,7 @@ function LiveChatsPage() {
       return;
     }
 
-    textareaRef.current?.blur();
+    mentionEditorRef.current?.blur();
     setComposerMoreOpen(false);
     const attempt = recordingAttemptRef.current + 1;
     recordingAttemptRef.current = attempt;
@@ -6172,58 +6080,24 @@ function LiveChatsPage() {
                       </div>
                     ) : null}
                     <div className="composer-input-wrap">
-                      <textarea
-                        ref={textareaRef}
-                        className={`textarea composer-input${mentionDeleteArmed ? " is-mention-delete-armed" : ""}`}
-                        enterKeyHint="send"
+                      <MentionComposerInput
+                        ref={mentionEditorRef}
+                        className="textarea composer-input composer-rich-input"
+                        members={selectedChat?.type === "group" ? selectedChat.detail.members.filter((member) => !member.isSelf) : []}
+                        onChange={updateDraft}
+                        onFocus={() => setEmojiPickerOpen(false)}
+                        onMentionQueryChange={(query) => setMentionSearch(selectedChat?.type === "group" ? query : null)}
+                        onPaste={handleComposerPaste}
+                        onSelectFirstMention={() => {
+                          if (mentionSearch === null || !mentionCandidates.length) return false;
+                          selectMention(mentionCandidates[0]);
+                          return true;
+                        }}
+                        onSubmit={() => composerRef.current?.requestSubmit()}
                         placeholder={t("chat.inputPlaceholder")}
                         value={draft}
-                        rows={1}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          const caret = event.target.selectionStart;
-                          clearMentionDeleteSelection();
-                          composerSelectionTouchedRef.current = true;
-                          composerSelectionRef.current = { start: caret, end: event.target.selectionEnd };
-                          updateDraft(value);
-                          if (selectedChat?.type !== "group") {
-                            setMentionSearch(null);
-                            return;
-                          }
-                          const beforeCaret = value.slice(0, caret);
-                          const match = beforeCaret.match(/(?:^|[\s，。！？、,.!?])@([^\s@]{0,32})$/u);
-                          const at = match ? beforeCaret.lastIndexOf("@") : -1;
-                          setMentionSearch(match && at >= 0 ? { start: at, end: caret, query: match[1] } : null);
-                        }}
-                        onCompositionStart={() => {
-                          isComposingRef.current = true;
-                        }}
-                        onCompositionEnd={() => {
-                          isComposingRef.current = false;
-                        }}
-                        onFocus={() => {
-                          setEmojiPickerOpen(false);
-                          const input = textareaRef.current;
-                          if (input) {
-                            composerSelectionTouchedRef.current = true;
-                            composerSelectionRef.current = { start: input.selectionStart, end: input.selectionEnd };
-                          }
-                        }}
-                        onBlur={clearMentionDeleteSelection}
-                        onPaste={handleComposerPaste}
-                        onPointerDown={clearMentionDeleteSelection}
-                        onSelect={(event) => {
-                          const input = event.currentTarget;
-                          composerSelectionTouchedRef.current = true;
-                          composerSelectionRef.current = { start: input.selectionStart, end: input.selectionEnd };
-                          const armedRange = mentionDeleteRangeRef.current;
-                          if (armedRange && (input.selectionStart !== armedRange.start || input.selectionEnd !== armedRange.end)) {
-                            clearMentionDeleteSelection();
-                          }
-                        }}
-                        onKeyDown={handleComposerKeyDown}
                       />
-                      {mentionSearch && mentionCandidates.length ? (
+                      {mentionSearch !== null && mentionCandidates.length ? (
                         <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
                           {mentionCandidates.map((member) => (
                             <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMention(member)} role="option" type="button">
@@ -6242,7 +6116,7 @@ function LiveChatsPage() {
                           setComposerMoreOpen(false);
                           if (emojiPickerOpen) {
                             setEmojiPickerOpen(false);
-                            window.requestAnimationFrame(() => textareaRef.current?.focus());
+                            window.requestAnimationFrame(() => mentionEditorRef.current?.focus());
                           } else {
                             setEmojiPickerOpen(true);
                           }

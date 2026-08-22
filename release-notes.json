@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.22.14",
+  "id": "2026.08.22.15",
   "publishedAt": "2026-08-22",
   "locales": {
     "zh-CN": {
-      "title": "云端文件选择更轻快",
+      "title": "群聊艾特更稳定",
       "items": [
-        "聊天中可通过轻量文件面板选择云端文件，云端文件列表也支持按名称搜索"
+        "输入框中的艾特现在以胶囊展示，可直接连续输入文字，并始终准确关联成员"
       ]
     },
     "en": {
-      "title": "Faster cloud file selection",
+      "title": "More reliable group mentions",
       "items": [
-        "Choose cloud files from a lightweight chat picker and search cloud file lists by name"
+        "Mentions now appear as chips in the composer, support continuous typing, and reliably identify members"
       ]
     }
   }
