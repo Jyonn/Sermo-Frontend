@@ -39,7 +39,6 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   const [busyId, setBusyId] = useState<number | "upload" | null>(null);
   const [sendAsset, setSendAsset] = useState<CloudResourceDTO | null>(null);
   const [actionAsset, setActionAsset] = useState<CloudResourceDTO | null>(null);
-  const [brokenPreviews, setBrokenPreviews] = useState<Set<number>>(new Set());
   const [chats, setChats] = useState<ChatDTO[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -66,8 +65,11 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
     void load(nextTab);
   };
 
-  const markPreviewBroken = (resourceId: number) => {
-    setBrokenPreviews((current) => new Set(current).add(resourceId));
+  const removeUnavailableResource = (resourceId: number) => {
+    setData((current) => current ? {
+      ...current,
+      items: current.items.filter((item) => item.resource_id !== resourceId),
+    } : current);
   };
 
   const sendToChat = async (asset: CloudResourceDTO, chatId: number) => {
@@ -192,11 +194,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
               {data?.items.map((asset) => (
                 <article className="cloud-resource-image" key={asset.resource_id}>
                   <a className="cloud-resource-image-link" href={asset.uri} rel="noreferrer" target="_blank">
-                    {brokenPreviews.has(asset.resource_id) ? (
-                      <span className="cloud-resource-broken"><span className="material-symbols-outlined">image</span></span>
-                    ) : (
-                      <img alt={asset.file_name || ""} loading="lazy" onError={() => markPreviewBroken(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
-                    )}
+                    <img alt={asset.file_name || ""} loading="lazy" onError={() => removeUnavailableResource(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
                   </a>
                   {moreButton(asset)}
                 </article>
@@ -208,11 +206,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
               {data?.items.map((asset) => (
                 <article className="cloud-resource-video" key={asset.resource_id}>
                   <a className="cloud-resource-video-preview" href={asset.uri} rel="noreferrer" target="_blank">
-                    {brokenPreviews.has(asset.resource_id) ? (
-                      <span className="cloud-resource-broken"><span className="material-symbols-outlined">videocam</span></span>
-                    ) : (
-                      <img alt="" loading="lazy" onError={() => markPreviewBroken(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
-                    )}
+                    <img alt="" loading="lazy" onError={() => removeUnavailableResource(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
                     <span className="cloud-resource-play material-symbols-outlined">play_arrow</span>
                     {asset.duration_seconds ? <small>{Math.floor(asset.duration_seconds / 60)}:{String(Math.round(asset.duration_seconds % 60)).padStart(2, "0")}</small> : null}
                   </a>
