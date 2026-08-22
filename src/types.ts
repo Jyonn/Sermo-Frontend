@@ -708,6 +708,32 @@ export interface SquareQuotaDTO {
   };
 }
 
+export interface ActivityMilestoneDTO {
+  threshold: number;
+  unlocked: boolean;
+  resource_key: string;
+  reward_id: string;
+  reward_label: string;
+}
+
+export interface ActivityCampaignDTO {
+  key: string;
+  title: string;
+  title_en: string;
+  summary: string;
+  summary_en: string;
+  starts_at: number;
+  ends_at: number;
+  active: boolean;
+  verified: boolean;
+  today_earned: boolean;
+  available_points: number;
+  contributed_points: number;
+  space_total: number;
+  target: number;
+  milestones: ActivityMilestoneDTO[];
+}
+
 export interface LinkPreviewDTO {
   url?: string;
   status: LinkPreviewStatus;

@@ -61,6 +61,7 @@ import type {
   SquareStatementCommentDTO,
   SquareStatementDraftMedia,
   SquareQuotaDTO,
+  ActivityCampaignDTO,
   PlatformAdminSession,
   PlatformAdminSpaceDTO,
   PlatformAdminMemberDTO,
@@ -744,6 +745,18 @@ export const api = {
 
   getSquareQuota(signal?: AbortSignal) {
     return request<SquareQuotaDTO>("/square/quota", { auth: true, signal });
+  },
+
+  getActiveActivities(signal?: AbortSignal) {
+    return request<ActivityCampaignDTO[]>("/activities/active", { auth: true, signal });
+  },
+
+  getActivity(key: string, signal?: AbortSignal) {
+    return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
+  },
+
+  contributeActivity(key: string) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/contribute`, { method: "POST", auth: true });
   },
 
   getSquareStatement(statementId: number, signal?: AbortSignal) {

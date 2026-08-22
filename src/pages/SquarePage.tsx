@@ -23,7 +23,8 @@ import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import type { ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import baxianActivityBanner from "../assets/activity/baxian-immortal-force-banner.jpg";
 
 type SelectedPhoto = {
   id: string;
@@ -256,7 +257,7 @@ export default function SquarePage() {
   const { t, language } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { statementId: routeStatementId } = useParams();
+  const { statementId: routeStatementId, activityKey: routeActivityKey } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { session } = useAuth();
   const features = useSpaceFeatures();
@@ -324,6 +325,8 @@ export default function SquarePage() {
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
+  const [activities, setActivities] = useState<ActivityCampaignDTO[]>([]);
+  const [activityContributing, setActivityContributing] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
@@ -352,6 +355,37 @@ export default function SquarePage() {
     || (right.last_message?.created_at ?? right.last_chat_at) - (left.last_message?.created_at ?? left.last_chat_at)
   )), [shareChats]);
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
+  const activeActivity = activities.find((item) => item.key === routeActivityKey) ?? null;
+  const refreshActivities = () => api.getActiveActivities().then(setActivities).catch(() => undefined);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void api.getActiveActivities(controller.signal).then(setActivities).catch(() => undefined);
+    return () => controller.abort();
+  }, [session?.user.space_id, session?.user.user_id]);
+
+  useEffect(() => {
+    if (!routeActivityKey || activeActivity) return;
+    const controller = new AbortController();
+    void api.getActivity(routeActivityKey, controller.signal).then((activity) => {
+      setActivities((current) => [...current.filter((item) => item.key !== activity.key), activity]);
+    }).catch(() => navigate("/app/square", { replace: true }));
+    return () => controller.abort();
+  }, [activeActivity, navigate, routeActivityKey]);
+
+  const contributeActivity = async () => {
+    if (!activeActivity?.available_points || activityContributing) return;
+    setActivityContributing(true);
+    try {
+      const updated = await api.contributeActivity(activeActivity.key);
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      showToast(t("activity.contributed", { count: activeActivity.available_points }));
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.contributeFailed"), "error");
+    } finally {
+      setActivityContributing(false);
+    }
+  };
 
   const openQuota = () => {
     setQuotaOpen(true);
@@ -843,6 +877,7 @@ export default function SquarePage() {
       if (video) URL.revokeObjectURL(video.preview);
       setVideo(null);
       setComposerOpen(false);
+      void refreshActivities();
     } catch (cause) {
       setError(toMessageUploadError(cause).message);
     } finally {
@@ -1000,6 +1035,19 @@ export default function SquarePage() {
           </div>}
         />
         <div className="square-feed-column">
+          {feedMode === "all" && activities.length ? <section className="square-activity-rail" aria-label={t("activity.active")}>
+            {activities.map((activity) => {
+              const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
+              const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
+              return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
+                <img alt="" src={baxianActivityBanner} />
+                <span className="square-activity-banner-shade" />
+                <span className="square-activity-banner-copy"><small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small><strong>{title}</strong><span>{activity.space_total}/{activity.target} {t("activity.force")}</span></span>
+                <span className="square-activity-banner-progress"><i style={{ transform: `scaleX(${Math.min(1, activity.space_total / Math.max(1, activity.target))})` }} /></span>
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </button>;
+            })}
+          </section> : null}
           {feedMode === "all" && pinnedStatement ? (
             <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
@@ -1172,6 +1220,15 @@ export default function SquarePage() {
           </div>
           {commentComposer}
         </div>
+      </SideDrawer>
+      <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")}>
+        {activeActivity ? <div className="activity-detail">
+          <section className="activity-detail-hero"><img alt="" src={baxianActivityBanner} /><div><small>{t("activity.spaceCoop")}</small><strong>{language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title}</strong><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></div></section>
+          <section className="activity-force-wallet"><div><small>{t("activity.myForce")}</small><strong>{activeActivity.available_points}</strong><span>{t("activity.force")}</span></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : t("activity.contribute")}</button></section>
+          {!activeActivity.verified ? <p className="activity-verification-note"><span className="material-symbols-outlined">verified_user</span>{t("activity.verifyHint")}</p> : activeActivity.today_earned ? <p className="activity-verification-note is-earned"><span className="material-symbols-outlined">task_alt</span>{t("activity.todayEarned")}</p> : <p className="activity-verification-note"><span className="material-symbols-outlined">edit_square</span>{t("activity.publishHint")}</p>}
+          <section className="activity-space-progress"><header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span>/{activeActivity.target}</span></strong></div><span>{Math.round(activeActivity.space_total / Math.max(1, activeActivity.target) * 100)}%</span></header><div className="activity-progress-track"><i style={{ transform: `scaleX(${Math.min(1, activeActivity.space_total / Math.max(1, activeActivity.target))})` }} />{activeActivity.milestones.map((item) => <b className={item.unlocked ? "is-unlocked" : ""} key={item.threshold} style={{ left: `${item.threshold / Math.max(1, activeActivity.target) * 100}%` }} />)}</div></section>
+          <section className="activity-milestones"><header><strong>{t("activity.collectiveRewards")}</strong><span>{t("activity.allMembers")}</span></header>{activeActivity.milestones.map((item, index) => <article className={item.unlocked ? "is-unlocked" : ""} key={item.threshold}><span>{String(index + 1).padStart(2, "0")}</span><div><small>{item.threshold} {t("activity.force")}</small><strong>{item.unlocked ? item.reward_label : t("activity.randomBaxian")}</strong></div><i className="material-symbols-outlined">{item.unlocked ? "lock_open" : "lock"}</i></article>)}</section>
+        </div> : <ContentLoader label={t("common.loading")} rows={3} />}
       </SideDrawer>
       <SideDrawer
         historyKey="square-user-profile"
