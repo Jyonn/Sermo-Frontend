@@ -176,7 +176,7 @@ function sortEmojiUsage(rows: EmojiUsageDTO[]) {
 }
 
 function messageResultPreview(message: ChatMessageDTO) {
-  if (message.type === MESSAGE_TYPE_TEXT) return message.content;
+  if (message.type === MESSAGE_TYPE_TEXT) return readableMentionText(message.content, message.mentions ?? []);
   return {
     [MESSAGE_TYPE_IMAGE]: i18n.t("media.image"),
     [MESSAGE_TYPE_FILE]: message.payload?.file_name || i18n.t("media.file"),
@@ -924,14 +924,16 @@ function previewFromKind(kind: MessageKind, text: string) {
   return text || i18n.t("chat.noMessages");
 }
 
-function previewFromMessage(message: Pick<ChatMessage, "kind" | "text">) {
-  return previewFromKind(message.kind, message.text);
+function previewFromMessage(message: Pick<ChatMessage, "kind" | "text" | "mentions">) {
+  const text = message.kind === "text" ? readableMentionText(message.text, message.mentions ?? []) : message.text;
+  return previewFromKind(message.kind, text);
 }
 
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const text = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
+  const rawText = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
+  const text = kind === "text" ? readableMentionText(rawText, message.mentions ?? []) : rawText;
   return previewFromKind(kind, text);
 }
 

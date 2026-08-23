@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.25",
+  "id": "2026.08.23.26",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "单条消息可以直接转发",
+      "title": "聊天预览正确显示艾特昵称",
       "items": [
-        "长按消息后可直接选择转发，无需先进入多选模式"
+        "聊天列表、搜索与置顶预览不再显示艾特用户的内部编号"
       ]
     },
     "en": {
-      "title": "Forward individual messages directly",
+      "title": "Mentions display correctly in chat previews",
       "items": [
-        "Long-press a message to forward it without entering multi-select mode first"
+        "Chat lists, search results, and pinned previews now show mentioned users by name instead of internal IDs"
       ]
     }
   }
