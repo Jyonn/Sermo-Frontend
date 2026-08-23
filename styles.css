@@ -26919,6 +26919,7 @@ html[data-theme="dark"] .square-header-publish:hover {
 
 /* Baxian activity: a single scrolling campaign poster and awakening trail. */
 .activity-drawer .drawer-body,.activity-drawer .drawer-body:is(html[data-theme="dark"] *){padding:0;overflow-x:hidden;background-color:#151522;background-image:url("/assets/activity/event-baxian-juli-background.webp");background-position:top center;background-repeat:no-repeat;background-size:100% auto;background-attachment:scroll}
+html[data-theme="dark"] body .activity-drawer.side-drawer .drawer-body{background-color:#151522;background-image:url("/assets/activity/event-baxian-juli-background.webp");background-position:top center;background-repeat:no-repeat;background-size:100% auto;background-attachment:scroll}
 .activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:0;color:#f7efd8;background:linear-gradient(to bottom,transparent 0 100cqw,rgba(23,26,56,.76) 106cqw,#151522 118cqw)}
 .activity-detail-visual{position:relative;isolation:isolate;height:110cqw;margin-top:-76px;pointer-events:none}
 .activity-detail-visual :is(button,a){pointer-events:auto}

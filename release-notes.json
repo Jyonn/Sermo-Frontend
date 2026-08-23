@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.27",
+  "id": "2026.08.23.28",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "发送到会话更清晰",
+      "title": "八仙活动深色背景修复",
       "items": [
-        "转发消息、分享发言和发送云端资源现在使用统一的会话选择界面，群聊头像也会正确堆叠展示"
+        "深色模式下打开八仙聚力活动时，活动主题背景会正常显示"
       ]
     },
     "en": {
-      "title": "A clearer send-to-chat experience",
+      "title": "Baxian event background fixed in dark mode",
       "items": [
-        "Message forwarding, Square sharing, and cloud-resource sending now share one consistent chat picker with proper stacked group avatars"
+        "The Baxian Gathering event background now remains visible when dark mode is enabled"
       ]
     }
   }
