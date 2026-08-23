@@ -57,6 +57,11 @@ const BAXIAN_IMMORTALS = [
   ["何仙姑", "He Xiangu", heXiangu], ["蓝采和", "Lan Caihe", lanCaihe],
   ["韩湘子", "Han Xiangzi", hanXiangzi], ["曹国舅", "Cao Guojiu", caoGuojiu],
 ] as const;
+const BAXIAN_PRIZE_BUBBLES = [
+  { style: "baxian-lv", label: "menu.styleBaxianLv", dialogue: ["activity.previewLvOther1", "activity.previewLvSelf1", "activity.previewLvOther2", "activity.previewLvSelf2", "activity.previewLvOther3"] },
+  { style: "baxian-zhongli", label: "menu.styleBaxianZhongli", dialogue: ["activity.previewZhongliOther1", "activity.previewZhongliSelf1", "activity.previewZhongliOther2", "activity.previewZhongliSelf2", "activity.previewZhongliOther3"] },
+  { style: "baxian-he", label: "menu.styleBaxianHe", dialogue: ["activity.previewHeOther1", "activity.previewHeSelf1", "activity.previewHeOther2", "activity.previewHeSelf2", "activity.previewHeOther3"] },
+] as const;
 
 function formatActivityDateRange(startsAt: number, endsAt: number, language: string) {
   const locale = language === "zh-CN" ? "zh-CN" : "en-US";
@@ -352,6 +357,8 @@ export default function SquarePage() {
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
   const [activityPoolOpen, setActivityPoolOpen] = useState(false);
+  const [activityPoolSlide, setActivityPoolSlide] = useState(0);
+  const activityPoolTrackRef = useRef<HTMLDivElement>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
@@ -1277,23 +1284,32 @@ export default function SquarePage() {
         </div>
       </BottomSheet>
       <BottomSheet className="activity-info-sheet" bodyClassName="activity-pool-sheet" onClose={() => setActivityPoolOpen(false)} open={activityPoolOpen} title={t("activity.prizePool")}>
-        <div className="activity-prize-grid">
-          {([
-            ["baxian-lv", "menu.styleBaxianLv"],
-            ["baxian-zhongli", "menu.styleBaxianZhongli"],
-            ["baxian-he", "menu.styleBaxianHe"],
-          ] as const).map(([style, label]) => (
+        <div className="activity-prize-grid" onScroll={(event) => {
+          const track = event.currentTarget;
+          const slides = Array.from(track.children) as HTMLElement[];
+          const nearest = slides.reduce((best, slide, index) => Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft) < Math.abs(slides[best].offsetLeft - track.offsetLeft - track.scrollLeft) ? index : best, 0);
+          setActivityPoolSlide(nearest);
+        }} ref={activityPoolTrackRef}>
+          {BAXIAN_PRIZE_BUBBLES.map(({ style, label, dialogue }) => (
             <article key={style}>
               <ChatsPage preview={{
                 avatarName: currentUser?.name ?? t("brand.user"),
                 avatarUri: currentUser?.avatar_uri,
                 backgroundTheme: "default",
                 bubbleStyle: style,
+                dialogue: dialogue.map((key, index) => ({ from: index % 2 ? "self" : "other", text: t(key) })),
                 selfOnly: true,
               }} />
               <strong>{t(label)}</strong>
             </article>
           ))}
+        </div>
+        <div aria-label={t("activity.prizePool")} className="activity-prize-pagination">
+          {BAXIAN_PRIZE_BUBBLES.map(({ style }, index) => <button aria-current={activityPoolSlide === index ? "true" : undefined} aria-label={`${index + 1}`} className={activityPoolSlide === index ? "is-active" : ""} key={style} onClick={() => {
+            const track = activityPoolTrackRef.current;
+            const slide = track?.children[index] as HTMLElement | undefined;
+            if (track && slide) track.scrollTo({ behavior: "smooth", left: slide.offsetLeft - track.offsetLeft });
+          }} type="button" />)}
         </div>
       </BottomSheet>
       <SideDrawer

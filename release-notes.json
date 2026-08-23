@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.12",
+  "id": "2026.08.23.13",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙奖池预览焕新",
+      "title": "八仙奖池对话预览升级",
       "items": [
-        "三款活动气泡改用真实聊天场景横向预览，滑动即可直观比较效果"
+        "三款气泡新增八仙主题双方对话，并升级为一屏一卡的滑动预览"
       ]
     },
     "en": {
-      "title": "Baxian prize previews refreshed",
+      "title": "Baxian prize conversations upgraded",
       "items": [
-        "The three event bubbles now use real horizontally scrollable chat previews for easier comparison"
+        "Each event bubble now includes a themed two-person conversation in a full-width paged preview"
       ]
     }
   }

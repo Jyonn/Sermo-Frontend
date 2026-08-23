@@ -7615,6 +7615,7 @@ export interface ChatsPagePreviewConfig {
   avatarUri?: string;
   bubbleStyle: ChatBubbleStyle;
   backgroundTheme?: ChatBackgroundTheme;
+  dialogue?: Array<{ from: "self" | "other"; text: string }>;
   selfOnly?: boolean;
 }
 
@@ -7667,19 +7668,21 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
 function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig }) {
   const { t } = useI18n();
   if (config.selfOnly) {
-    const group: MessageGroup = {
-      key: "preview-self-text",
-      from: "self",
-      name: t("common.me"),
+    const dialogue = config.dialogue?.length ? config.dialogue : [{ from: "self" as const, text: t("menu.bubblePreviewSelf") }];
+    const groups = dialogue.map((item, index): MessageGroup => ({
+      key: `preview-dialogue-${index}`,
+      from: item.from,
+      name: item.from === "self" ? t("common.me") : config.avatarName,
+      avatarUri: item.from === "other" ? config.avatarUri : undefined,
       chatBubbleStyle: config.bubbleStyle,
-      messages: [previewMessage("text", "self", 1, config)],
-    };
+      messages: [{ ...previewMessage("text", item.from, index + 1, config), text: item.text }],
+    }));
     const noop = () => undefined;
     return (
-      <section aria-label={t("menu.chatBubble")} className="chat-conversation-panel chat-conversation-preview is-single-message" onContextMenu={(event) => event.preventDefault()}>
+      <section aria-label={t("menu.chatBubble")} className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`} onContextMenu={(event) => event.preventDefault()}>
         <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`}>
           <div className="message-scroll">
-            <MessageGroupBlock enteringMessageIds={[group.messages[0].clientId]} group={group} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />
+            {groups.map((group) => <MessageGroupBlock enteringMessageIds={[]} group={group} key={group.key} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />)}
           </div>
         </div>
       </section>
