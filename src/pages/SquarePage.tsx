@@ -1256,7 +1256,6 @@ export default function SquarePage() {
               <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language)}</time>
             </div>
             </div>
-            <section className="activity-detail-intro"><small>{t("activity.spaceCoop")}</small><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></section>
           </section>
           <section className="activity-awakening-stage">
             <section className={`activity-personal-quest${activeActivity.personal_reward ? " is-complete" : ""}`}>
