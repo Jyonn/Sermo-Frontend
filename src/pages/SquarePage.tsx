@@ -25,9 +25,11 @@ import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/space
 import { showToast } from "../lib/toast";
 import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 import ChatsPage from "./ChatsPage";
-import baxianActivityBanner from "../assets/activity/baxian-immortal-force-banner.jpg";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
+import baxianLvSword from "../assets/activity/decor/lv-dongbin-sword.png";
+import baxianZhongliVase from "../assets/activity/decor/zhongli-quan-jade-vase.png";
+import baxianHeDouli from "../assets/activity/decor/he-xiangu-douli.png";
 import tieguaiLi from "../assets/activity/immortals/tieguai-li.png";
 import zhongliQuan from "../assets/activity/immortals/zhongli-quan.png";
 import zhangGuolao from "../assets/activity/immortals/zhang-guolao.png";
@@ -1072,11 +1074,18 @@ export default function SquarePage() {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
               const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
-                <img alt="" src={baxianActivityBanner} />
-                <span className="square-activity-banner-shade" />
-                <span className="square-activity-banner-copy"><small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small><strong>{title}</strong><span>{activity.space_total}/{activity.target} {t("activity.force")}</span></span>
+                <span className="square-activity-banner-copy">
+                  <small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small>
+                  <img alt={title} src={baxianActivityTitle} />
+                  <span><b>{activity.space_total}</b><i>/</i>{activity.target} {t("activity.force")}</span>
+                </span>
+                <span aria-hidden="true" className="square-activity-banner-relics">
+                  <img className="is-sword" src={baxianLvSword} />
+                  <img className="is-vase" src={baxianZhongliVase} />
+                  <img className="is-douli" src={baxianHeDouli} />
+                </span>
+                <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
                 <span className="square-activity-banner-progress"><i style={{ transform: `scaleX(${Math.min(1, activity.space_total / Math.max(1, activity.target))})` }} /></span>
-                <span className="material-symbols-outlined">arrow_forward</span>
               </button>;
             })}
           </section> : null}
