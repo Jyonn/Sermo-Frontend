@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.23",
+  "id": "2026.08.23.24",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "个人历练奖励改为手动领取",
+      "title": "个人历练领取界面更简洁",
       "items": [
-        "完成八仙个人历练后可亲手领取随机气泡，并从活动页直接前往聊天气泡配置"
+        "完成个人历练后直接展示领取按钮，减少重复提示"
       ]
     },
     "en": {
-      "title": "Personal quest rewards are now claimed manually",
+      "title": "A cleaner personal quest reward screen",
       "items": [
-        "Complete the Baxian personal quest, claim your random bubble, and jump straight to bubble customization"
+        "Completed personal quests now present the claim action without repetitive helper text"
       ]
     }
   }
