@@ -26896,8 +26896,7 @@ html[data-theme="dark"] .square-header-publish:hover {
 /* Baxian activity: a single scrolling campaign poster and awakening trail. */
 .activity-drawer .drawer-body,.activity-drawer .drawer-body:is(html[data-theme="dark"] *){padding:0;background:#151522 none;overflow-x:hidden}
 .activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:0;color:#f7efd8;background:linear-gradient(180deg,#252035 0,#171724 42%,#11121b 100%)}
-.activity-detail-visual{position:relative;isolation:isolate}
-.activity-detail-background{display:block;width:100%;height:auto;min-height:520px;object-fit:cover;object-position:top center}
+.activity-detail-visual{position:relative;isolation:isolate;min-height:520px;background-position:top center;background-repeat:no-repeat;background-size:cover}
 .activity-detail-masthead{position:absolute;z-index:2;inset:18px 18px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .activity-brand-lockup{display:flex;align-items:center;gap:8px;color:#f6e5ad}
 .activity-brand-lockup>span{display:grid;place-items:center;width:40px;height:40px;padding:3px;border:2px solid rgba(255,255,255,.92);border-radius:12px;background:#171d1b;box-shadow:0 6px 18px rgba(7,5,14,.28)}
@@ -26938,4 +26937,4 @@ html[data-theme="dark"] .square-header-publish:hover {
 .activity-info-sheet .bottom-sheet-title{color:#f7d985}.activity-info-sheet .bottom-sheet-close{color:#f2d795;background:rgba(240,201,112,.1)}
 .activity-info-sheet :is(.activity-rule-list article,.activity-prize-grid article,.activity-prize-intro){border-color:rgba(237,197,105,.2);background:rgba(255,241,203,.055)}
 .activity-info-sheet :is(h3,strong){color:#fff0c2}.activity-info-sheet :is(p,small){color:#ac9f91}
-@media(max-width:520px){.activity-detail-masthead{inset:12px 12px auto}.activity-brand-lockup>span{width:34px;height:34px}.activity-brand-lockup>img{height:30px}.activity-detail-index>div{gap:6px;padding:5px 8px}.activity-detail-background{min-height:500px}.activity-detail-intro{right:12px;bottom:14px;left:12px}.activity-awakening-stage{padding-inline:12px}.activity-immortal-track{grid-auto-columns:calc((100% - 24px)/4);gap:8px}.activity-immortal-track article{grid-template-rows:104px auto 32px}.activity-immortal-figure{height:104px}.activity-immortal-figure img{width:100px;height:100px}}
+@media(max-width:520px){.activity-detail-masthead{inset:12px 12px auto}.activity-brand-lockup>span{width:34px;height:34px}.activity-brand-lockup>img{height:30px}.activity-detail-index>div{gap:6px;padding:5px 8px}.activity-detail-visual{min-height:500px}.activity-detail-intro{right:12px;bottom:14px;left:12px}.activity-awakening-stage{padding-inline:12px}.activity-immortal-track{grid-auto-columns:calc((100% - 24px)/4);gap:8px}.activity-immortal-track article{grid-template-rows:104px auto 32px}.activity-immortal-figure{height:104px}.activity-immortal-figure img{width:100px;height:100px}}

@@ -1,18 +1,18 @@
 {
-  "id": "2026.08.23.5",
+  "id": "2026.08.23.6",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙唤醒轨迹上线",
+      "title": "八仙活动主视觉优化",
       "items": [
-        "八仙聚力活动页改为连续滚动的电影画卷，并更新联名标识、规则与奖池视觉",
+        "八仙聚力活动页恢复沉浸式背景主视觉，并更新联名标识、规则与奖池视觉",
         "八位仙人按唤醒顺序展开，未解锁时呈现剪影，解锁后会展示彩色人物与唤醒成员头像"
       ]
     },
     "en": {
-      "title": "The Baxian awakening trail arrives",
+      "title": "A refined Baxian campaign visual",
       "items": [
-        "The Baxian event is now a continuous cinematic scroll with refreshed co-branding, rules, and prize visuals",
+        "The Baxian event restores its immersive background treatment with refreshed co-branding, rules, and prize visuals",
         "All eight immortals now form an awakening trail with silhouettes for locked stages and contributor portraits for unlocked stages"
       ]
     }

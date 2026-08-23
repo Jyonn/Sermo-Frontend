@@ -1248,8 +1248,7 @@ export default function SquarePage() {
       </SideDrawer>
       <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity ? <div className="activity-detail">
-          <section className="activity-detail-visual">
-            <img alt="" className="activity-detail-background" src={baxianActivityBackground} />
+          <section className="activity-detail-visual" style={{ backgroundImage: `url(${baxianActivityBackground})` }}>
             <div className="activity-detail-masthead">
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-192.png" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
             <div className="activity-detail-index">
