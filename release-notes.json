@@ -1,18 +1,20 @@
 {
-  "id": "2026.08.23.6",
+  "id": "2026.08.23.7",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙活动主视觉优化",
+      "title": "八仙活动细节优化",
       "items": [
-        "八仙聚力活动页恢复沉浸式背景主视觉，并更新联名标识、规则与奖池视觉",
+        "八仙聚力活动的唤醒轨迹加入轻盈毛玻璃承托，信息层次更清楚",
+        "言浪方形 Logo 现在会稳定显示在白边圆角容器内",
         "八位仙人按唤醒顺序展开，未解锁时呈现剪影，解锁后会展示彩色人物与唤醒成员头像"
       ]
     },
     "en": {
-      "title": "A refined Baxian campaign visual",
+      "title": "Refined Baxian event details",
       "items": [
-        "The Baxian event restores its immersive background treatment with refreshed co-branding, rules, and prize visuals",
+        "The Baxian awakening trail now rests on a subtle glass surface for clearer visual hierarchy",
+        "The square Sermo logo now stays correctly framed inside its rounded white-border container",
         "All eight immortals now form an awakening trail with silhouettes for locked stages and contributor portraits for unlocked stages"
       ]
     }
