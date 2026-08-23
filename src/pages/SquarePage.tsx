@@ -27,6 +27,7 @@ import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventD
 import baxianActivityBanner from "../assets/activity/baxian-immortal-force-banner.jpg";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import sermoLogo from "../assets/logo.svg";
+import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
 
 type SelectedPhoto = {
   id: string;
@@ -1231,7 +1232,7 @@ export default function SquarePage() {
           {commentComposer}
         </div>
       </SideDrawer>
-      <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")}>
+      <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity ? <div className="activity-detail">
           <section className="activity-detail-masthead">
             <div className="activity-detail-index">
@@ -1240,7 +1241,7 @@ export default function SquarePage() {
             </div>
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><img alt="Sermo 言浪" src={sermoLogo} /><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
           </section>
-          <section className="activity-detail-hero"><img alt="" src={baxianActivityBanner} /><div><small>{t("activity.spaceCoop")}</small><strong>{language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title}</strong><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></div></section>
+          <section className="activity-detail-intro"><small>{t("activity.spaceCoop")}</small><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></section>
           <section className="activity-force-wallet"><div><small>{t("activity.myForce")}</small><strong>{activeActivity.available_points}</strong><span>{t("activity.force")}</span></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : t("activity.contribute")}</button></section>
           {!activeActivity.verified ? <p className="activity-verification-note"><span className="material-symbols-outlined">verified_user</span>{t("activity.verifyHint")}</p> : activeActivity.today_earned ? <p className="activity-verification-note is-earned"><span className="material-symbols-outlined">task_alt</span>{t("activity.todayEarned")}</p> : <p className="activity-verification-note"><span className="material-symbols-outlined">edit_square</span>{t("activity.publishHint")}</p>}
           <section className="activity-space-progress"><header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span>/{activeActivity.target}</span></strong></div><span>{Math.round(activeActivity.space_total / Math.max(1, activeActivity.target) * 100)}%</span></header><div className="activity-progress-track"><i style={{ transform: `scaleX(${Math.min(1, activeActivity.space_total / Math.max(1, activeActivity.target))})` }} />{activeActivity.milestones.map((item) => <b className={item.unlocked ? "is-unlocked" : ""} key={item.threshold} style={{ left: `${item.threshold / Math.max(1, activeActivity.target) * 100}%` }} />)}</div></section>

@@ -1,18 +1,20 @@
 {
-  "id": "2026.08.23.3",
+  "id": "2026.08.23.4",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力活动页焕新",
+      "title": "八仙聚力主视觉上线",
       "items": [
+        "八仙聚力活动页换上专属标题字与电影感竖版背景，任务内容会在画面底部自然延展",
         "活动页新增言浪 × 八仙联名标识，规则和奖池独立展开，三款限定气泡可以直接预览",
         "广场探索新增限时活动：认证成员每天发言可凝聚仙力，全空间共同解锁三款随机八仙气泡",
         "三款八仙气泡的人物动画尺寸更加克制，并调整为通过活动获取"
       ]
     },
     "en": {
-      "title": "A refined Baxian event experience",
+      "title": "A cinematic Baxian event arrives",
       "items": [
+        "The Baxian event now features its bespoke title art and a cinematic portrait backdrop that flows naturally into the event content",
         "The event now features Sermo × Baxian branding, focused rule and prize panels, and real previews of all three exclusive bubbles",
         "A limited-time Square event lets verified members earn daily Force and unlock three random Baxian bubbles for the whole space",
         "Character animations are now more restrained, and all three bubbles are unlocked through events"
