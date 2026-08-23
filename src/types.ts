@@ -733,6 +733,7 @@ export interface ActivityCampaignDTO {
   personal_event_count: number;
   personal_event_target: number;
   personal_reward: null | { resource_key: string; reward_id: string };
+  official_user: null | { user_id: number; name: string; avatar_uri?: string; avatar_frame_style?: string };
   space_total: number;
   target: number;
   milestones: ActivityMilestoneDTO[];

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.23.17",
+  "id": "2026.08.23.18",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力领取与分享优化",
+      "title": "八仙聚力两轮唤醒更清晰",
       "items": [
-        "每日发言凝聚的仙力改为在活动页手动领取，获取过程更加明确",
-        "活动支持直接转发给会话，奖池预览也加入合并气泡与仙境位置卡片"
+        "全空间仙力新增带八仙印章的两阶段进度条，8 点与 16 点目标一目了然",
+        "八位仙人会先由剪影唤醒为灰度形态，第二轮注入后再逐位点亮彩色形态"
       ]
     },
     "en": {
-      "title": "Baxian Force claiming and sharing refined",
+      "title": "Two-stage Baxian awakening is now clearer",
       "items": [
-        "Force gathered from daily posts is now claimed manually on the event page for a clearer reward flow",
-        "Events can be forwarded to chats, while prize previews now include grouped bubbles and mythical location cards"
+        "A two-stage Force meter with rotating Baxian seals now highlights the 8- and 16-point goals",
+        "Each immortal first awakens from a silhouette into grayscale, then becomes fully colored during round two"
       ]
     }
   }

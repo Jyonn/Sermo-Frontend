@@ -36,6 +36,9 @@ import heXiangu from "../assets/activity/immortals/he-xiangu.png";
 import lanCaihe from "../assets/activity/immortals/lan-caihe.png";
 import hanXiangzi from "../assets/activity/immortals/han-xiangzi.png";
 import caoGuojiu from "../assets/activity/immortals/cao-guojiu.png";
+import heXianguSealSheet from "../assets/baxian/he-xiangu-edge-sheet.webp";
+import lvDongbinSealSheet from "../assets/baxian/lv-dongbin-edge-sheet.webp";
+import zhongliQuanSealSheet from "../assets/baxian/zhongli-quan-edge-sheet.webp";
 
 type SelectedPhoto = {
   id: string;
@@ -80,6 +83,20 @@ const BAXIAN_PRIZE_BUBBLES = [
     { from: "self", key: "activity.previewHeSelf3" }, { from: "self", key: "activity.previewHeSelf4" },
   ] },
 ] as const;
+const BAXIAN_SEAL_SHEETS = [lvDongbinSealSheet, zhongliQuanSealSheet, heXianguSealSheet] as const;
+
+function ActivityForceProgress({ total, target }: { total: number; target: number }) {
+  const progress = target > 0 ? Math.min(1, total / target) : 0;
+  return <div className="activity-force-progress" role="progressbar" aria-valuemax={target} aria-valuemin={0} aria-valuenow={Math.min(total, target)}>
+    <div className="activity-force-track"><i style={{ transform: `scaleX(${progress})` }} /></div>
+    {[8, 16].map((threshold) => <div className={`activity-force-milestone${total >= threshold ? " is-reached" : ""}`} key={threshold} style={{ left: `${Math.min(1, threshold / Math.max(1, target)) * 100}%` }}>
+      <span className="activity-force-seal-cycle" aria-hidden="true">
+        {BAXIAN_SEAL_SHEETS.map((sheet, index) => <i key={sheet} style={{ "--seal-image": `url(${sheet})`, animationDelay: `${index * 1.2}s` } as CSSProperties} />)}
+      </span>
+      <b>{threshold}</b>
+    </div>)}
+  </div>;
+}
 
 function formatActivityDateRange(startsAt: number, endsAt: number, language: string) {
   const locale = language === "zh-CN" ? "zh-CN" : "en-US";
@@ -1326,7 +1343,8 @@ export default function SquarePage() {
               {activeActivity.personal_reward ? <span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
             </section>
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
-            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const awakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const unlocked = Boolean(awakening); return <article className={unlocked ? "is-unlocked" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakening?.user ? <UserAvatar className="activity-awakener-avatar" name={awakening.user.name} uri={awakening.user.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
+            <ActivityForceProgress target={activeActivity.target} total={activeActivity.space_total} />
+            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const firstAwakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const secondAwakening = activeActivity.awakenings?.find((item) => item.step === index + 9); const awakener = secondAwakening?.user ?? firstAwakening?.user; return <article className={secondAwakening ? "is-unlocked" : firstAwakening ? "is-awakened" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakener ? <UserAvatar className="activity-awakener-avatar" name={awakener.name} uri={awakener.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
             <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.claimable_points ? t("activity.claimHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
           </section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}
@@ -1349,8 +1367,8 @@ export default function SquarePage() {
           {BAXIAN_PRIZE_BUBBLES.map(({ style, label, dialogue }) => (
             <article key={style}>
               <ChatsPage preview={{
-                avatarName: currentUser?.name ?? t("brand.user"),
-                avatarUri: currentUser?.avatar_uri,
+                avatarName: activeActivity?.official_user?.name ?? t("brand.user"),
+                avatarUri: activeActivity?.official_user?.avatar_uri,
                 backgroundTheme: "default",
                 bubbleStyle: style,
                 dialogue: dialogue.map((item) => ({ from: item.from, text: t(item.key), kind: "kind" in item ? item.kind : undefined, latitude: "latitude" in item ? item.latitude : undefined, longitude: "longitude" in item ? item.longitude : undefined })),
