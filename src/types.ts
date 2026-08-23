@@ -727,6 +727,7 @@ export interface ActivityCampaignDTO {
   active: boolean;
   verified: boolean;
   today_earned: boolean;
+  claimable_points: number;
   available_points: number;
   contributed_points: number;
   personal_event_count: number;

@@ -7615,7 +7615,13 @@ export interface ChatsPagePreviewConfig {
   avatarUri?: string;
   bubbleStyle: ChatBubbleStyle;
   backgroundTheme?: ChatBackgroundTheme;
-  dialogue?: Array<{ from: "self" | "other"; text: string }>;
+  dialogue?: Array<{
+    from: "self" | "other";
+    text: string;
+    kind?: "text" | "location";
+    latitude?: number;
+    longitude?: number;
+  }>;
   selfOnly?: boolean;
 }
 
@@ -7669,14 +7675,27 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
   const { t } = useI18n();
   if (config.selfOnly) {
     const dialogue = config.dialogue?.length ? config.dialogue : [{ from: "self" as const, text: t("menu.bubblePreviewSelf") }];
-    const groups = dialogue.map((item, index): MessageGroup => ({
-      key: `preview-dialogue-${index}`,
-      from: item.from,
-      name: item.from === "self" ? t("common.me") : config.avatarName,
-      avatarUri: item.from === "other" ? config.avatarUri : undefined,
-      chatBubbleStyle: config.bubbleStyle,
-      messages: [{ ...previewMessage("text", item.from, index + 1, config), text: item.text }],
-    }));
+    const groups = dialogue.reduce<MessageGroup[]>((result, item, index) => {
+      const kind = item.kind ?? "text";
+      const preview = previewMessage(kind, item.from, index + 1, config);
+      const message: ChatMessage = kind === "location"
+        ? { ...preview, payload: { ...preview.payload, kind: "location", latitude: item.latitude ?? 24.4798, longitude: item.longitude ?? 118.0894, address: item.text } }
+        : { ...preview, text: item.text };
+      const previous = result[result.length - 1];
+      if (previous?.from === item.from) {
+        previous.messages.push(message);
+        return result;
+      }
+      result.push({
+        key: `preview-dialogue-${index}`,
+        from: item.from,
+        name: item.from === "self" ? t("common.me") : config.avatarName,
+        avatarUri: item.from === "other" ? config.avatarUri : undefined,
+        chatBubbleStyle: config.bubbleStyle,
+        messages: [message],
+      });
+      return result;
+    }, []);
     const noop = () => undefined;
     return (
       <section aria-label={t("menu.chatBubble")} className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`} onContextMenu={(event) => event.preventDefault()}>

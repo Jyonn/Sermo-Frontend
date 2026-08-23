@@ -755,6 +755,10 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
   },
 
+  claimActivityForce(key: string) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/claim`, { method: "POST", auth: true });
+  },
+
   contributeActivity(key: string) {
     return request<ActivityCampaignDTO>(`/activities/${key}/contribute`, { method: "POST", auth: true });
   },

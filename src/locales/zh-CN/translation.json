@@ -325,16 +325,26 @@
   "activity.previewLvOther2": "先越云海，再访人间。",
   "activity.previewLvSelf2": "那便御剑出发。",
   "activity.previewLvOther3": "风起，站稳了。",
+  "activity.previewLvOther4": "蓬莱的雾正好散开。",
+  "activity.previewLvSelf3": "落地后去看海。",
+  "activity.locationPenglai": "蓬莱仙境 · 云海尽头",
   "activity.previewZhongliOther1": "莫急，先歇一会儿。",
   "activity.previewZhongliSelf1": "仙力还没集齐呢。",
   "activity.previewZhongliOther2": "扇子一摇，自有妙计。",
   "activity.previewZhongliSelf2": "这次又是什么妙计？",
   "activity.previewZhongliOther3": "边走边说，正好。",
+  "activity.previewZhongliOther4": "先去终南山借一阵清风。",
+  "activity.previewZhongliOther5": "回来再把仙力补齐。",
+  "activity.locationZhongnan": "终南山 · 云深问道处",
   "activity.previewHeOther1": "云路已开，要一起吗？",
   "activity.previewHeSelf1": "当然，追得上你。",
   "activity.previewHeOther2": "前面就是今晚的月色。",
   "activity.previewHeSelf2": "那就再飞快一点。",
   "activity.previewHeOther3": "抓紧，出发。",
+  "activity.previewHeOther4": "过了南天门就慢一点。",
+  "activity.previewHeSelf3": "我看见天河了。",
+  "activity.previewHeSelf4": "今晚就在云上等月亮。",
+  "activity.locationHeaven": "天庭 · 南天门外",
   "menu.styleBaxianZhongli": "钟离权·逍遥",
   "menu.styleBaxianHe": "何仙姑·凌风",
   "menu.styleFufu": "Fufu 追风",
@@ -1991,11 +2001,15 @@
   ,"activity.force": "仙力"
   ,"activity.myForce": "我的待提交仙力"
   ,"activity.contribute": "注入仙力"
+  ,"activity.claimForce": "领取仙力"
+  ,"activity.claimed": "已领取 {{count}} 点仙力"
+  ,"activity.claimFailed": "仙力暂时未能领取"
+  ,"activity.claimHint": "今日仙力已凝聚，领取后即可注入空间"
   ,"activity.contributed": "已为全空间注入 {{count}} 点仙力"
   ,"activity.contributeFailed": "仙力暂时未能注入"
   ,"activity.verifyHint": "认证后，每天首次发言可凝聚 1 点仙力"
-  ,"activity.todayEarned": "今天的仙力已经凝聚，记得注入空间"
-  ,"activity.publishHint": "今天首次发言后，可获得 1 点仙力"
+  ,"activity.todayEarned": "今天的仙力已领取，记得注入空间"
+  ,"activity.publishHint": "今天首次发言后，可在这里领取 1 点仙力"
   ,"activity.spaceForce": "全空间仙力"
   ,"activity.collectiveRewards": "共同唤醒"
   ,"activity.allMembers": "解锁后全员获得"
@@ -2014,7 +2028,7 @@
   ,"activity.rulePersonalTitle": "两次发言，个人得奖"
   ,"activity.rulePersonalBody": "活动期间累计发言两次，即可随机获得一款八仙聊天气泡，每人限一次。"
   ,"activity.ruleEarnTitle": "每日凝聚仙力"
-  ,"activity.ruleEarnBody": "活动期间每天首次发言可获得 1 点仙力，当日仅计一次。"
+  ,"activity.ruleEarnBody": "每天首次发言会凝聚 1 点仙力，需回到活动页手动领取，当日仅计一次。"
   ,"activity.ruleSharedTitle": "全空间共享奖励"
   ,"activity.ruleSharedBody": "提交仙力后计入空间进度；达到 8、16 点时，全体成员各随机获得一款尚未解锁的八仙气泡。"
   ,"activity.poolTitle": "个人一抽，全空间两轮"

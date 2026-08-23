@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.23.16",
+  "id": "2026.08.23.17",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力活动展示优化",
+      "title": "八仙聚力领取与分享优化",
       "items": [
-        "唤醒轨迹更自然地融入活动背景，未解锁人物也更加清晰",
-        "奖池聊天预览加高，并支持上下浏览完整对话"
+        "每日发言凝聚的仙力改为在活动页手动领取，获取过程更加明确",
+        "活动支持直接转发给会话，奖池预览也加入合并气泡与仙境位置卡片"
       ]
     },
     "en": {
-      "title": "Baxian event presentation refined",
+      "title": "Baxian Force claiming and sharing refined",
       "items": [
-        "The awakening path now blends into the event backdrop while locked characters remain easy to recognize",
-        "Prize-pool chat previews are taller and can now scroll through the full conversation"
+        "Force gathered from daily posts is now claimed manually on the event page for a clearer reward flow",
+        "Events can be forwarded to chats, while prize previews now include grouped bubbles and mythical location cards"
       ]
     }
   }

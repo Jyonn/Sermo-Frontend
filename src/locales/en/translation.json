@@ -325,16 +325,26 @@
   "activity.previewLvOther2": "Across the clouds, then back to the mortal world.",
   "activity.previewLvSelf2": "Then let us ride the sword.",
   "activity.previewLvOther3": "The wind is rising. Hold on.",
+  "activity.previewLvOther4": "The mist over Penglai is clearing.",
+  "activity.previewLvSelf3": "Let us see the sea after we land.",
+  "activity.locationPenglai": "Penglai · Beyond the cloud sea",
   "activity.previewZhongliOther1": "No rush. Let us rest first.",
   "activity.previewZhongliSelf1": "We still need more immortal force.",
   "activity.previewZhongliOther2": "One wave of my fan, and a plan appears.",
   "activity.previewZhongliSelf2": "What sort of plan this time?",
   "activity.previewZhongliOther3": "I will tell you on the way.",
+  "activity.previewZhongliOther4": "First, let us borrow a breeze from Zhongnan.",
+  "activity.previewZhongliOther5": "Then we can gather the remaining Force.",
+  "activity.locationZhongnan": "Mount Zhongnan · Among the deep clouds",
   "activity.previewHeOther1": "The cloud path is open. Coming?",
   "activity.previewHeSelf1": "Of course. I can keep up.",
   "activity.previewHeOther2": "Tonight's moonlight is just ahead.",
   "activity.previewHeSelf2": "Then let us fly a little faster.",
   "activity.previewHeOther3": "Hold tight. We are leaving.",
+  "activity.previewHeOther4": "We can slow down beyond the Southern Gate.",
+  "activity.previewHeSelf3": "I can see the Celestial River.",
+  "activity.previewHeSelf4": "Let us wait for the moon above the clouds.",
+  "activity.locationHeaven": "Heaven · Outside the Southern Gate",
   "menu.styleBaxianZhongli": "Zhongli Quan · Free Spirit",
   "menu.styleBaxianHe": "He Xiangu · Windborne",
   "menu.styleFufu": "Fufu Dash",
@@ -1991,11 +2001,15 @@
   ,"activity.force": "Force"
   ,"activity.myForce": "My uncommitted Force"
   ,"activity.contribute": "Contribute"
+  ,"activity.claimForce": "Claim Force"
+  ,"activity.claimed": "Claimed {{count}} Force"
+  ,"activity.claimFailed": "Could not claim Force"
+  ,"activity.claimHint": "Today's Force is ready. Claim it before contributing"
   ,"activity.contributed": "Added {{count}} Force to the space"
   ,"activity.contributeFailed": "Could not contribute Force"
   ,"activity.verifyHint": "Verify your account to earn 1 Force from your first daily post"
-  ,"activity.todayEarned": "Today's Force is ready. Contribute it to your space"
-  ,"activity.publishHint": "Your first post today earns 1 Force"
+  ,"activity.todayEarned": "Today's Force has been claimed. Remember to contribute it"
+  ,"activity.publishHint": "After your first post today, return here to claim 1 Force"
   ,"activity.spaceForce": "Space Force"
   ,"activity.collectiveRewards": "Awaken together"
   ,"activity.allMembers": "Unlocked for every member"
@@ -2014,7 +2028,7 @@
   ,"activity.rulePersonalTitle": "Two posts, one personal reward"
   ,"activity.rulePersonalBody": "Publish twice during the event to receive one random Baxian chat bubble, once per member."
   ,"activity.ruleEarnTitle": "Gather Force daily"
-  ,"activity.ruleEarnBody": "Your first post each day during the event earns 1 Force, once per day."
+  ,"activity.ruleEarnBody": "Your first daily post gathers 1 Force. Return to the event page to claim it, once per day."
   ,"activity.ruleSharedTitle": "Rewards for the whole space"
   ,"activity.ruleSharedBody": "Contributed Force advances the space. At 8 and 16 Force, every member receives one randomly selected, not-yet-unlocked Baxian bubble."
   ,"activity.poolTitle": "One personal draw, two space rounds"

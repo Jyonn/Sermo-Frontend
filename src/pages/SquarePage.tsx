@@ -50,6 +50,7 @@ type InlineStatementOrigin = { left: number; top: number; width: number; height:
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
+const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_STATEMENT = 8;
 const BAXIAN_IMMORTALS = [
   ["铁拐李", "Tieguai Li", tieguaiLi], ["钟离权", "Zhongli Quan", zhongliQuan],
@@ -58,9 +59,26 @@ const BAXIAN_IMMORTALS = [
   ["韩湘子", "Han Xiangzi", hanXiangzi], ["曹国舅", "Cao Guojiu", caoGuojiu],
 ] as const;
 const BAXIAN_PRIZE_BUBBLES = [
-  { style: "baxian-lv", label: "menu.styleBaxianLv", dialogue: ["activity.previewLvOther1", "activity.previewLvSelf1", "activity.previewLvOther2", "activity.previewLvSelf2", "activity.previewLvOther3"] },
-  { style: "baxian-zhongli", label: "menu.styleBaxianZhongli", dialogue: ["activity.previewZhongliOther1", "activity.previewZhongliSelf1", "activity.previewZhongliOther2", "activity.previewZhongliSelf2", "activity.previewZhongliOther3"] },
-  { style: "baxian-he", label: "menu.styleBaxianHe", dialogue: ["activity.previewHeOther1", "activity.previewHeSelf1", "activity.previewHeOther2", "activity.previewHeSelf2", "activity.previewHeOther3"] },
+  { style: "baxian-lv", label: "menu.styleBaxianLv", dialogue: [
+    { from: "other", key: "activity.previewLvOther1" }, { from: "other", key: "activity.previewLvOther2" },
+    { from: "self", key: "activity.previewLvSelf1" }, { from: "self", key: "activity.previewLvSelf2" },
+    { from: "other", key: "activity.previewLvOther3" }, { from: "other", key: "activity.previewLvOther4" },
+    { from: "other", key: "activity.locationPenglai", kind: "location", latitude: 37.8112, longitude: 120.7574 },
+    { from: "self", key: "activity.previewLvSelf3" },
+  ] },
+  { style: "baxian-zhongli", label: "menu.styleBaxianZhongli", dialogue: [
+    { from: "other", key: "activity.previewZhongliOther1" }, { from: "other", key: "activity.previewZhongliOther2" }, { from: "other", key: "activity.previewZhongliOther3" },
+    { from: "self", key: "activity.previewZhongliSelf1" }, { from: "self", key: "activity.previewZhongliSelf2" },
+    { from: "self", key: "activity.locationZhongnan", kind: "location", latitude: 33.9514, longitude: 108.8017 },
+    { from: "other", key: "activity.previewZhongliOther4" }, { from: "other", key: "activity.previewZhongliOther5" },
+  ] },
+  { style: "baxian-he", label: "menu.styleBaxianHe", dialogue: [
+    { from: "other", key: "activity.previewHeOther1" }, { from: "other", key: "activity.previewHeOther2" },
+    { from: "self", key: "activity.previewHeSelf1" }, { from: "self", key: "activity.previewHeSelf2" },
+    { from: "other", key: "activity.locationHeaven", kind: "location", latitude: 30.259, longitude: 120.138 },
+    { from: "other", key: "activity.previewHeOther3" }, { from: "other", key: "activity.previewHeOther4" },
+    { from: "self", key: "activity.previewHeSelf3" }, { from: "self", key: "activity.previewHeSelf4" },
+  ] },
 ] as const;
 
 function formatActivityDateRange(startsAt: number, endsAt: number, language: string) {
@@ -343,6 +361,7 @@ export default function SquarePage() {
   const [deleteCommentTarget, setDeleteCommentTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [deletingComment, setDeletingComment] = useState(false);
   const [shareStatement, setShareStatement] = useState<SquareStatementDTO | null>(null);
+  const [shareActivity, setShareActivity] = useState<ActivityCampaignDTO | null>(null);
   const [shareChats, setShareChats] = useState<ChatDTO[]>([]);
   const [shareChatsLoading, setShareChatsLoading] = useState(false);
   const [sharingChatId, setSharingChatId] = useState<number | null>(null);
@@ -354,6 +373,7 @@ export default function SquarePage() {
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
   const [activities, setActivities] = useState<ActivityCampaignDTO[]>([]);
+  const [activityClaiming, setActivityClaiming] = useState(false);
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
   const [activityPoolOpen, setActivityPoolOpen] = useState(false);
@@ -419,6 +439,21 @@ export default function SquarePage() {
     }
   };
 
+  const claimActivityForce = async () => {
+    if (!activeActivity?.claimable_points || activityClaiming) return;
+    setActivityClaiming(true);
+    try {
+      const claimable = activeActivity.claimable_points;
+      const updated = await api.claimActivityForce(activeActivity.key);
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      showToast(t("activity.claimed", { count: claimable }));
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.claimFailed"), "error");
+    } finally {
+      setActivityClaiming(false);
+    }
+  };
+
   const openQuota = () => {
     setQuotaOpen(true);
     setQuotaLoading(true);
@@ -443,6 +478,7 @@ export default function SquarePage() {
   };
 
   const openStatementShare = (statement: SquareStatementDTO) => {
+    setShareActivity(null);
     setShareStatement(statement);
     setShareChatsLoading(true);
     void api.getChats().then(setShareChats).catch((cause) => {
@@ -451,22 +487,40 @@ export default function SquarePage() {
     }).finally(() => setShareChatsLoading(false));
   };
 
+  const openActivityShare = (activity: ActivityCampaignDTO) => {
+    setShareStatement(null);
+    setShareActivity(activity);
+    setShareChatsLoading(true);
+    void api.getChats().then(setShareChats).catch((cause) => {
+      showToast(cause instanceof Error ? cause.message : t("square.shareLoadFailed"), "error");
+      setShareChats([]);
+    }).finally(() => setShareChatsLoading(false));
+  };
+
   const sendStatementToChat = async (chat: ChatDTO) => {
-    if (!shareStatement || sharingChatId !== null) return;
+    if ((!shareStatement && !shareActivity) || sharingChatId !== null) return;
     setSharingChatId(chat.chat_id);
     const slug = getDetectedSpaceSlug();
-    const pathname = `/app/square/statements/${shareStatement.statement_id}`;
+    const pathname = shareStatement
+      ? `/app/square/statements/${shareStatement.statement_id}`
+      : `/app/square/activities/${shareActivity!.key}`;
     const url = slug ? buildSpaceHrefForCurrentHost(slug, pathname) : new URL(pathname, window.location.origin).toString();
     try {
-      await api.sendMessage(
-        chat.chat_id,
-        MESSAGE_TYPE_STATEMENT,
-        JSON.stringify({ kind: "statement", statement_id: shareStatement.statement_id, url, text: shareStatement.text.slice(0, 100) }),
-        undefined,
-        crypto.randomUUID(),
-      );
+      if (shareStatement) {
+        await api.sendMessage(
+          chat.chat_id,
+          MESSAGE_TYPE_STATEMENT,
+          JSON.stringify({ kind: "statement", statement_id: shareStatement.statement_id, url, text: shareStatement.text.slice(0, 100) }),
+          undefined,
+          crypto.randomUUID(),
+        );
+      } else {
+        const title = language === "zh-CN" ? shareActivity!.title : shareActivity!.title_en || shareActivity!.title;
+        await api.sendMessage(chat.chat_id, MESSAGE_TYPE_TEXT, `${title}\n${url}`, undefined, crypto.randomUUID());
+      }
       showToast(t("square.sharedTo", { chat: shareChatTitle(chat, currentUser?.user_id) }));
       setShareStatement(null);
+      setShareActivity(null);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("square.shareFailed"), "error");
     } finally {
@@ -1223,7 +1277,7 @@ export default function SquarePage() {
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
       </BottomSheet>
-      <BottomSheet bodyClassName="square-share-sheet" onClose={() => { if (sharingChatId === null) setShareStatement(null); }} open={shareStatement !== null} title={t("square.shareToChat")}>
+      <BottomSheet bodyClassName="square-share-sheet" onClose={() => { if (sharingChatId === null) { setShareStatement(null); setShareActivity(null); } }} open={shareStatement !== null || shareActivity !== null} title={t("square.shareToChat")}>
         {shareChatsLoading && !shareChats.length ? <ContentLoader label={t("square.loadingChats")} rows={4} /> : null}
         {!shareChatsLoading && !sortedShareChats.length ? <QuietState icon="forum" title={t("square.noChatsToShare")} /> : null}
         {sortedShareChats.length ? <div className="square-share-chat-list">{sortedShareChats.map((chat) => {
@@ -1255,7 +1309,7 @@ export default function SquarePage() {
           {commentComposer}
         </div>
       </SideDrawer>
-      <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
+      <SideDrawer className="activity-drawer" headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity ? <div className="activity-detail">
           <section className="activity-detail-visual">
             <div className="activity-detail-masthead">
@@ -1271,9 +1325,9 @@ export default function SquarePage() {
               <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong><span>{activeActivity.personal_reward ? t("activity.personalRewardOwned") : t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span></div>
               {activeActivity.personal_reward ? <span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
             </section>
-            <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></header>
+            <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
             <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const awakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const unlocked = Boolean(awakening); return <article className={unlocked ? "is-unlocked" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakening?.user ? <UserAvatar className="activity-awakener-avatar" name={awakening.user.name} uri={awakening.user.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
-            <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
+            <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.claimable_points ? t("activity.claimHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
           </section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}
       </SideDrawer>
@@ -1299,7 +1353,7 @@ export default function SquarePage() {
                 avatarUri: currentUser?.avatar_uri,
                 backgroundTheme: "default",
                 bubbleStyle: style,
-                dialogue: dialogue.map((key, index) => ({ from: index % 2 ? "self" : "other", text: t(key) })),
+                dialogue: dialogue.map((item) => ({ from: item.from, text: t(item.key), kind: "kind" in item ? item.kind : undefined, latitude: "latitude" in item ? item.latitude : undefined, longitude: "longitude" in item ? item.longitude : undefined })),
                 selfOnly: true,
               }} />
               <strong>{t(label)}</strong>
