@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
+import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
@@ -429,6 +430,20 @@ export default function SquarePage() {
     Number(Boolean(right.pinned)) - Number(Boolean(left.pinned))
     || (right.last_message?.created_at ?? right.last_chat_at) - (left.last_message?.created_at ?? left.last_chat_at)
   )), [shareChats]);
+  const shareTargets = useMemo(() => sortedShareChats.map((chat) => {
+    const peer = chat.group ? null : shareChatPeer(chat, currentUser?.user_id);
+    return {
+      id: chat.chat_id,
+      title: shareChatTitle(chat, currentUser?.user_id),
+      preview: chat.last_message?.content || (chat.group ? t("chat.group") : t("square.directChat")),
+      time: formatRelativeTime(chat.last_message?.created_at ?? chat.last_chat_at),
+      pinned: Boolean(chat.pinned),
+      avatarUri: peer?.avatar_uri,
+      avatarCacheKey: peer?.avatar_cache_key,
+      avatarFrameStyle: peer?.avatar_frame_style,
+      groupMembers: chat.group ? chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key })) : undefined,
+    };
+  }), [currentUser?.user_id, sortedShareChats, t]);
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
   const activeActivity = activities.find((item) => item.key === routeActivityKey) ?? null;
   const refreshActivities = () => api.getActiveActivities().then(setActivities).catch(() => undefined);
@@ -1388,20 +1403,17 @@ export default function SquarePage() {
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
       </BottomSheet>
-      <BottomSheet bodyClassName="square-share-sheet" onClose={() => { if (sharingChatId === null) { setShareStatement(null); setShareActivity(null); } }} open={shareStatement !== null || shareActivity !== null} title={t("square.shareToChat")}>
-        {shareChatsLoading && !shareChats.length ? <ContentLoader label={t("square.loadingChats")} rows={4} /> : null}
-        {!shareChatsLoading && !sortedShareChats.length ? <QuietState icon="forum" title={t("square.noChatsToShare")} /> : null}
-        {sortedShareChats.length ? <div className="square-share-chat-list">{sortedShareChats.map((chat) => {
-          const peer = chat.group ? null : shareChatPeer(chat, currentUser?.user_id);
-          const title = shareChatTitle(chat, currentUser?.user_id);
-          const lastActivity = chat.last_message?.created_at ?? chat.last_chat_at;
-          return <button disabled={sharingChatId !== null} key={chat.chat_id} onClick={() => void sendStatementToChat(chat)} type="button">
-            <UserAvatar className="square-share-chat-avatar" groupMembers={chat.group ? chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri })) : undefined} name={title} uri={peer?.avatar_uri} />
-            <span className="square-share-chat-copy"><strong>{title}</strong><small>{chat.last_message?.content || (chat.group ? t("chat.group") : t("square.directChat"))}</small></span>
-            <span className="square-share-chat-meta">{chat.pinned ? <i className="material-symbols-outlined">keep</i> : null}<time>{formatRelativeTime(lastActivity)}</time>{sharingChatId === chat.chat_id ? <i className="material-symbols-outlined is-loading">progress_activity</i> : <i className="material-symbols-outlined">chevron_right</i>}</span>
-          </button>;
-        })}</div> : null}
-      </BottomSheet>
+      <ChatTargetPicker
+        busy={sharingChatId !== null}
+        busyTargetId={sharingChatId}
+        emptyTitle={t("square.noChatsToShare")}
+        loading={shareChatsLoading}
+        onClose={() => { if (sharingChatId === null) { setShareStatement(null); setShareActivity(null); } }}
+        onSubmit={(ids) => { const chat = sortedShareChats.find((item) => item.chat_id === ids[0]); if (chat) return sendStatementToChat(chat); }}
+        open={shareStatement !== null || shareActivity !== null}
+        targets={shareTargets}
+        title={t("square.shareToChat")}
+      />
       <BottomSheet bodyClassName="square-voice-sheet" onClose={() => { if (recording) stopRecording(); setVoiceSheetOpen(false); }} open={voiceSheetOpen} title={t("square.voice")}>
         <div className={`square-voice-stage${recording ? " is-recording" : ""}`}><div className="square-voice-bars">{Array.from({ length: 25 }, (_, index) => <i key={index} />)}</div><strong>{Math.min(voiceDuration, MAX_AUDIO_SECONDS)}<small> / {MAX_AUDIO_SECONDS}s</small></strong></div>
         <button className="square-record-button" onClick={() => void startRecording()} type="button"><span className="material-symbols-outlined">{recording ? "stop" : "mic"}</span></button>

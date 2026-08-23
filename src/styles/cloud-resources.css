@@ -59,8 +59,6 @@
 .cloud-resource-action-list button:hover, .cloud-resource-action-list a:hover { background: color-mix(in srgb, var(--text-primary) 5%, transparent); }
 .cloud-resource-action-list .material-symbols-outlined { color: var(--brand-primary); }
 .cloud-resource-action-list .is-danger, .cloud-resource-action-list .is-danger .material-symbols-outlined { color: var(--danger); }
-.cloud-resource-chat-list { display: grid; gap: 8px; }
-.cloud-resource-chat-list button { min-height: 54px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--bg-elevated); color: var(--text-primary); padding: 0 14px; display: flex; align-items: center; justify-content: space-between; font: inherit; }
 .cloud-file-picker-sheet { width: min(100%, 560px); }
 .cloud-file-picker-body { position: relative; min-height: min(58dvh, 520px); align-content: start; }
 .cloud-file-picker-body > .cloud-file-browser { min-height: 0; }

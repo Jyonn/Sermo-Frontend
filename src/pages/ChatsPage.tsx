@@ -19,6 +19,7 @@ import { BaxianBubbleTransition, BaxianCharacterRunner } from "../components/Bax
 import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
@@ -5326,17 +5327,6 @@ function LiveChatsPage() {
     setForwardPickerOpen(true);
   };
 
-  const toggleForwardTarget = (chatId: number) => {
-    setForwardTargetChatIds((current) => {
-      if (current.includes(chatId)) return current.filter((id) => id !== chatId);
-      if (current.length >= 10) {
-        showToast(t("message.forwardTargetLimit", { count: 10 }), "error");
-        return current;
-      }
-      return [...current, chatId];
-    });
-  };
-
   const submitForwardMessages = async () => {
     if (!forwardSourceMessageIds.length || !forwardTargetChatIds.length || forwardSending) return;
     try {
@@ -6617,17 +6607,34 @@ function LiveChatsPage() {
         </div>
       </BottomSheet>
 
-      <BottomSheet
+      <ChatTargetPicker
         open={forwardPickerOpen}
         title={t("message.forwardTitle")}
         description={t("message.forwardSourceCount", { count: forwardSourceMessageIds.length })}
-        className="forward-picker-sheet"
-        bodyClassName="forward-picker-body"
+        targets={chats.map((chat) => ({
+          id: chat.id,
+          title: chat.title,
+          preview: chat.preview || chat.subtitle,
+          time: chat.time,
+          pinned: chat.pinned,
+          avatarUri: chat.avatarUri,
+          avatarCacheKey: chat.avatarCacheKey,
+          avatarFrameStyle: chat.avatarFrameStyle,
+          groupMembers: chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined,
+        }))}
+        selectedIds={forwardTargetChatIds}
+        multiple
+        maxSelections={10}
+        busy={forwardSending}
+        emptyTitle={t("square.noChatsToShare")}
+        submitLabel={t("message.forwardToChats", { count: forwardTargetChatIds.length })}
+        onSelectionChange={setForwardTargetChatIds}
+        onLimitReached={() => showToast(t("message.forwardTargetLimit", { count: 10 }), "error")}
+        onSubmit={() => submitForwardMessages()}
         onClose={() => {
           if (!forwardSending) setForwardPickerOpen(false);
         }}
-      >
-        {forwardSourceMessageIds.length > 1 ? (
+        beforeList={forwardSourceMessageIds.length > 1 ? (
           <div className="forward-mode-switch" role="radiogroup" aria-label={t("message.forwardMode")}>
             <button
               className={forwardMode === "individual" ? "is-active" : ""}
@@ -6651,33 +6658,7 @@ function LiveChatsPage() {
             </button>
           </div>
         ) : null}
-        <div className="forward-target-heading">
-          <strong>{t("message.chooseForwardChats")}</strong>
-          <span>{forwardTargetChatIds.length}/10</span>
-        </div>
-        <div className="forward-target-list">
-          {chats.map((chat) => {
-            const selected = forwardTargetChatIds.includes(chat.id);
-            return (
-              <button
-                className={`forward-target-row${selected ? " is-selected" : ""}`}
-                key={`forward-target-${chat.id}`}
-                onClick={() => toggleForwardTarget(chat.id)}
-                type="button"
-              >
-                <UserAvatar className="forward-target-avatar" name={chat.title} uri={chat.avatarUri} frame={chat.avatarFrameStyle} />
-                <span className="forward-target-copy"><strong>{chat.title}</strong><small>{chat.preview || chat.subtitle}</small></span>
-                <span className="forward-target-check material-symbols-outlined" aria-hidden="true">{selected ? "check_circle" : "radio_button_unchecked"}</span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="forward-picker-submit">
-          <button className="button" disabled={!forwardTargetChatIds.length || forwardSending} onClick={() => void submitForwardMessages()} type="button">
-            {forwardSending ? t("common.processing") : t("message.forwardToChats", { count: forwardTargetChatIds.length })}
-          </button>
-        </div>
-      </BottomSheet>
+      />
 
       <SideDrawer
         open={Boolean(forwardBundlePreview)}

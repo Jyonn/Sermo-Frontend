@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.26",
+  "id": "2026.08.23.27",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "聊天预览正确显示艾特昵称",
+      "title": "发送到会话更清晰",
       "items": [
-        "聊天列表、搜索与置顶预览不再显示艾特用户的内部编号"
+        "转发消息、分享发言和发送云端资源现在使用统一的会话选择界面，群聊头像也会正确堆叠展示"
       ]
     },
     "en": {
-      "title": "Mentions display correctly in chat previews",
+      "title": "A clearer send-to-chat experience",
       "items": [
-        "Chat lists, search results, and pinned previews now show mentioned users by name instead of internal IDs"
+        "Message forwarding, Square sharing, and cloud-resource sending now share one consistent chat picker with proper stacked group avatars"
       ]
     }
   }

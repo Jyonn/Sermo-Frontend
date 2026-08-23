@@ -7171,7 +7171,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .forward-mode-switch small,
-.forward-target-copy small,
+.chat-target-picker-copy small,
 .forward-bundle-viewer-intro small {
   overflow: hidden;
   color: var(--text-muted);
@@ -7181,7 +7181,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   white-space: nowrap;
 }
 
-.forward-target-heading {
+.chat-target-picker-heading {
   margin: 18px 2px 8px;
   display: flex;
   align-items: center;
@@ -7189,18 +7189,18 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   color: var(--text-primary);
 }
 
-.forward-target-heading span {
+.chat-target-picker-heading span {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.forward-target-list {
+.chat-target-picker-list {
   max-height: min(46vh, 480px);
   overflow: auto;
   border-block: 1px solid var(--line-soft);
 }
 
-.forward-target-row {
+.chat-target-picker-list > button {
   box-sizing: border-box;
   width: 100%;
   min-height: 66px;
@@ -7210,20 +7210,33 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   align-items: center;
   gap: 11px;
   color: var(--text-primary);
+  border: 0;
   border-bottom: 1px solid var(--line-soft);
   background: transparent;
   text-align: left;
 }
 
-.forward-target-row:last-child { border-bottom: 0; }
-.forward-target-row.is-selected { background: color-mix(in srgb, var(--brand-primary) 7%, transparent); }
-.forward-target-avatar { width: 44px; height: 44px; }
-.forward-target-copy { min-width: 0; display: grid; gap: 3px; }
-.forward-target-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.forward-target-check { color: var(--text-muted); }
-.forward-target-row.is-selected .forward-target-check { color: var(--brand-primary); }
-.forward-picker-submit { position: sticky; bottom: 0; padding-top: 12px; background: var(--surface); }
-.forward-picker-submit .button { width: 100%; min-height: 50px; }
+.chat-target-picker-list > button:last-child { border-bottom: 0; }
+.chat-target-picker-list > button:not(:disabled):hover,
+.chat-target-picker-list > button.is-selected { border-radius: 13px; background: color-mix(in srgb, var(--brand-primary) 7%, transparent); }
+.chat-target-picker-list > button:disabled { opacity: .58; }
+.chat-target-picker-avatar { width: 44px; height: 44px; border-radius: 14px; }
+.chat-target-picker-avatar .avatar-frame-clip,
+.chat-target-picker-avatar .avatar-image,
+.chat-target-picker-avatar .avatar-label { border-radius: 14px; }
+.chat-target-picker-copy { min-width: 0; display: grid; gap: 3px; }
+.chat-target-picker-copy strong,
+.chat-target-picker-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-target-picker-copy strong { font-size: 14px; }
+.chat-target-picker-copy small { color: var(--text-muted); font-size: 11px; }
+.chat-target-picker-meta { display: grid; grid-template-columns: auto auto; align-items: center; justify-items: end; gap: 4px; min-width: 52px; color: var(--text-muted); }
+.chat-target-picker-meta time { grid-column: 1 / -1; font-size: 9px; white-space: nowrap; }
+.chat-target-picker-meta .material-symbols-outlined { font-size: 18px; }
+.chat-target-picker-meta .material-symbols-outlined:first-child:not(:last-child) { color: var(--brand-primary-press); font-size: 14px; }
+.chat-target-picker-list > button.is-selected .chat-target-picker-meta .material-symbols-outlined:last-child { color: var(--brand-primary); }
+.chat-target-picker-meta .is-loading { animation: spin 900ms linear infinite; }
+.chat-target-picker-submit { position: sticky; bottom: 0; padding-top: 12px; background: var(--surface); }
+.chat-target-picker-submit .button { width: 100%; min-height: 50px; }
 
 .message-forward-bundle-card {
   width: min(310px, 72vw);
@@ -26103,13 +26116,6 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-comment-menu button{display:flex;align-items:center;justify-content:flex-start;gap:7px;width:100%;min-height:36px;padding:0 9px;border:0;border-radius:8px;color:var(--danger,#bc4051);font:inherit;font-size:12px;font-weight:700;background:transparent;white-space:nowrap}
 .square-comment-menu button:hover{background:color-mix(in srgb,var(--danger,#bc4051) 9%,transparent)}
 .square-comment-menu .material-symbols-outlined{font-size:17px}
-.square-share-sheet{padding-top:2px}
-.square-share-chat-list{display:grid;gap:2px}
-.square-share-chat-list>button{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:11px;width:100%;min-height:66px;padding:8px 6px;border:0;border-bottom:1px solid color-mix(in srgb,var(--line-soft) 64%,transparent);color:var(--text-primary);font:inherit;text-align:left;background:transparent;transition:background 140ms ease,opacity 140ms ease}
-.square-share-chat-list>button:last-child{border-bottom:0}.square-share-chat-list>button:not(:disabled):hover{border-radius:13px;background:color-mix(in srgb,var(--brand-primary) 7%,transparent)}.square-share-chat-list>button:disabled{opacity:.58}
-.square-share-chat-avatar{width:46px;height:46px;border-radius:14px}.square-share-chat-avatar .avatar-frame-clip,.square-share-chat-avatar .avatar-image,.square-share-chat-avatar .avatar-label{border-radius:14px}
-.square-share-chat-copy{display:block;min-width:0}.square-share-chat-copy strong,.square-share-chat-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.square-share-chat-copy strong{font-size:14px}.square-share-chat-copy small{margin-top:4px;color:var(--text-muted);font-size:11px}
-.square-share-chat-meta{display:grid;grid-template-columns:auto auto;align-items:center;justify-items:end;gap:4px;min-width:52px;color:var(--text-muted)}.square-share-chat-meta time{grid-column:1/-1;font-size:9px;white-space:nowrap}.square-share-chat-meta .material-symbols-outlined{font-size:16px}.square-share-chat-meta .material-symbols-outlined:first-child{color:var(--brand-primary-press);font-size:14px}.square-share-chat-meta .is-loading{animation:spin 900ms linear infinite}
 .square-comment-actions{display:flex;align-items:center;gap:5px;margin-top:7px}
 .square-comment-actions button{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 9px;border:0;border-radius:999px;color:var(--text-muted);font-size:11px;font-weight:700;background:transparent;transition:color 140ms ease,background 140ms ease,transform 140ms ease}
 .square-comment-actions button .material-symbols-outlined{font-size:15px}

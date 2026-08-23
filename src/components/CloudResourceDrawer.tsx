@@ -4,8 +4,10 @@ import { formatCloudResourceBytes, groupCloudResourcesByPeriod } from "../lib/cl
 import { uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
 import { useI18n } from "../lib/language";
+import { useAuth } from "../lib/auth";
 import type { ChatDTO, CloudResourceDTO, CloudResourceListDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
+import { ChatTargetPicker } from "./ChatTargetPicker";
 import { ContentLoader, QuietState } from "./BoundaryState";
 import { CloudFileList } from "./CloudFileList";
 import { MediaLightbox } from "./ImageLightbox";
@@ -30,6 +32,7 @@ function chatTitle(chat: ChatDTO) {
 
 export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
   const { t, language } = useI18n();
+  const { session } = useAuth();
   const [tab, setTab] = useState<ResourceTab>(initialTab);
   const [data, setData] = useState<CloudResourceListDTO | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,8 +41,10 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
   const deferredFileQuery = useDeferredValue(fileQuery.trim());
   const [busyId, setBusyId] = useState<number | "upload" | null>(null);
   const [sendAsset, setSendAsset] = useState<CloudResourceDTO | null>(null);
+  const [sendingChatId, setSendingChatId] = useState<number | null>(null);
   const [actionAsset, setActionAsset] = useState<CloudResourceDTO | null>(null);
   const [chats, setChats] = useState<ChatDTO[]>([]);
+  const [chatsLoading, setChatsLoading] = useState(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -116,6 +121,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
 
   const sendToChat = async (asset: CloudResourceDTO, chatId: number) => {
     setBusyId(asset.resource_id);
+    setSendingChatId(chatId);
     try {
       await api.sendMessage(chatId, messageType[asset.kind], "", undefined, undefined, [], asset.resource_id);
       showToast(t("cloudResources.sent"));
@@ -126,6 +132,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
       showToast(error instanceof ApiError ? error.message : t("cloudResources.sendFailed"), "error");
     } finally {
       setBusyId(null);
+      setSendingChatId(null);
     }
   };
 
@@ -137,11 +144,14 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
     }
     setSendAsset(asset);
     if (!chats.length) {
+      setChatsLoading(true);
       try {
         const rows = await api.getChats();
         setChats([...rows].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || b.last_chat_at - a.last_chat_at));
       } catch (error) {
         showToast(error instanceof ApiError ? error.message : t("cloudResources.sendFailed"), "error");
+      } finally {
+        setChatsLoading(false);
       }
     }
   };
@@ -295,11 +305,29 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
           </div>
         ) : null}
       </BottomSheet>
-      <BottomSheet onClose={() => setSendAsset(null)} open={Boolean(sendAsset)} title={t("cloudResources.chooseChat")}>
-        <div className="cloud-resource-chat-list">
-          {chats.map((chat) => <button key={chat.chat_id} onClick={() => sendAsset && void sendToChat(sendAsset, chat.chat_id)} type="button"><strong>{chatTitle(chat)}</strong><span className="material-symbols-outlined">send</span></button>)}
-        </div>
-      </BottomSheet>
+      <ChatTargetPicker
+        busy={busyId !== null}
+        busyTargetId={sendingChatId}
+        emptyTitle={t("square.noChatsToShare")}
+        loading={chatsLoading}
+        onClose={() => { if (busyId === null) setSendAsset(null); }}
+        onSubmit={(ids) => sendAsset ? sendToChat(sendAsset, ids[0]) : undefined}
+        open={Boolean(sendAsset)}
+        targets={chats.map((chat) => {
+          const peer = chat.group ? null : chat.members.find((member) => member.user_id !== session?.user.user_id) ?? chat.members[0];
+          return {
+            id: chat.chat_id,
+            title: chat.title || peer?.name || chatTitle(chat),
+            preview: chat.last_message?.content || (chat.group ? t("chat.group") : t("square.directChat")),
+            pinned: Boolean(chat.pinned),
+            avatarUri: peer?.avatar_uri,
+            avatarCacheKey: peer?.avatar_cache_key,
+            avatarFrameStyle: peer?.avatar_frame_style,
+            groupMembers: chat.group ? chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key })) : undefined,
+          };
+        })}
+        title={t("cloudResources.chooseChat")}
+      />
       {previewIndex !== null && mediaItems.length ? <MediaLightbox
         fileNamePrefix="sermo-cloud"
         index={previewIndex}
