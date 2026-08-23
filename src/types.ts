@@ -2,7 +2,7 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "forward_bundle";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "forward_bundle" | "activity";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -786,6 +786,8 @@ export interface ChatMessagePayloadDTO {
   statement_id?: number;
   url?: string;
   statement?: SquareStatementDTO | null;
+  activity_key?: string;
+  activity?: ActivityCampaignDTO | null;
   sticker_asset_id?: number;
   content_hash?: string;
   pixel_width?: number | null;

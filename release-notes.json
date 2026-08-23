@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.23.20",
+  "id": "2026.08.23.21",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "广场活动聚合八仙与永久 VIP",
+      "title": "八仙活动可以作为专属卡片分享",
       "items": [
-        "广场活动栏按八仙、永久 VIP 的顺序自动轮播，也支持手动切换",
-        "已领取用户仍可查看自己的永久 VIP 席位，未领取用户可直接查看条件并认领"
+        "转发八仙聚力后，聊天中会展示清晰的活动横幅，不再混入普通链接卡片",
+        "点击活动消息即可进入对应活动页面，活动进度保持实时更新"
       ]
     },
     "en": {
-      "title": "Square brings Baxian and permanent VIP together",
+      "title": "Baxian events now share as dedicated cards",
       "items": [
-        "The campaign rail now auto-rotates from Baxian to permanent VIP, with manual navigation available",
-        "Claimed members can revisit their permanent VIP spot, while others can review requirements and claim directly"
+        "Shared Baxian events now appear as clear campaign banners instead of ordinary link previews",
+        "Tap an activity message to open its campaign page with live progress"
       ]
     }
   }

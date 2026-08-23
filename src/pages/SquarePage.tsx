@@ -53,8 +53,8 @@ type InlineStatementOrigin = { left: number; top: number; width: number; height:
 const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
-const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_STATEMENT = 8;
+const MESSAGE_TYPE_ACTIVITY = 11;
 const BAXIAN_IMMORTALS = [
   ["铁拐李", "Tieguai Li", tieguaiLi], ["钟离权", "Zhongli Quan", zhongliQuan],
   ["张果老", "Zhang Guolao", zhangGuolao], ["吕洞宾", "Lu Dongbin", lvDongbin],
@@ -571,7 +571,13 @@ export default function SquarePage() {
         );
       } else {
         const title = language === "zh-CN" ? shareActivity!.title : shareActivity!.title_en || shareActivity!.title;
-        await api.sendMessage(chat.chat_id, MESSAGE_TYPE_TEXT, `${title}\n${url}`, undefined, crypto.randomUUID());
+        await api.sendMessage(
+          chat.chat_id,
+          MESSAGE_TYPE_ACTIVITY,
+          JSON.stringify({ kind: "activity", activity_key: shareActivity!.key, title, url }),
+          undefined,
+          crypto.randomUUID(),
+        );
       }
       showToast(t("square.sharedTo", { chat: shareChatTitle(chat, currentUser?.user_id) }));
       setShareStatement(null);

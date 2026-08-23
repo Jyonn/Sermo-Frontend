@@ -237,6 +237,7 @@ function previewFromMessage(message: ChatMessage) {
   if (message.kind === "audio") return i18n.t("message.audioPlaceholder");
   if (message.kind === "file") return i18n.t("message.filePlaceholder");
   if (message.kind === "location") return i18n.t("message.locationPlaceholder");
+  if (message.kind === "activity") return i18n.t("message.activityPlaceholder");
   return message.text || i18n.t("message.new");
 }
 

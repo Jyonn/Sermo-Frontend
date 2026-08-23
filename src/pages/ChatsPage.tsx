@@ -34,6 +34,7 @@ import { SideDrawer } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
+import { ActivityMessageCard } from "../components/ActivityMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { ApiError, api } from "../lib/api";
@@ -69,6 +70,7 @@ const MESSAGE_TYPE_MAP_ACCESS = 7;
 const MESSAGE_TYPE_STATEMENT = 8;
 const MESSAGE_TYPE_STICKER = 9;
 const MESSAGE_TYPE_FORWARD_BUNDLE = 10;
+const MESSAGE_TYPE_ACTIVITY = 11;
 const MESSAGE_SEARCH_TYPES = [
   { value: null, label: "messageSearch.all" },
   { value: MESSAGE_TYPE_TEXT, label: "messageSearch.text" },
@@ -80,6 +82,7 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_MAP_ACCESS, label: "messageSearch.travelMaps" },
   { value: MESSAGE_TYPE_STATEMENT, label: "messageSearch.statements" },
   { value: MESSAGE_TYPE_STICKER, label: "sticker.tab" },
+  { value: MESSAGE_TYPE_ACTIVITY, label: "messageSearch.activities" },
 ] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
 const EMOJI_PAGES = [
@@ -184,6 +187,7 @@ function messageResultPreview(message: ChatMessageDTO) {
     [MESSAGE_TYPE_LOCATION]: i18n.t("media.location"),
     [MESSAGE_TYPE_MAP_ACCESS]: i18n.t("travelMap.action"),
     [MESSAGE_TYPE_STATEMENT]: i18n.t("message.statementPlaceholder"),
+    [MESSAGE_TYPE_ACTIVITY]: i18n.t("message.activityPlaceholder"),
   }[message.type] ?? i18n.t("message.generic");
 }
 
@@ -667,6 +671,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_STATEMENT) return "statement";
   if (type === MESSAGE_TYPE_STICKER) return "sticker";
   if (type === MESSAGE_TYPE_FORWARD_BUNDLE) return "forward_bundle";
+  if (type === MESSAGE_TYPE_ACTIVITY) return "activity";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   return "text";
 }
@@ -914,6 +919,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "statement") return i18n.t("message.statementPlaceholder");
   if (kind === "sticker") return i18n.t("sticker.messagePlaceholder");
   if (kind === "forward_bundle") return i18n.t("message.forwardBundlePlaceholder");
+  if (kind === "activity") return i18n.t("message.activityPlaceholder");
   if (kind === "system") return text || i18n.t("message.system.placeholder");
   return text || i18n.t("chat.noMessages");
 }
@@ -1610,6 +1616,10 @@ function renderMessageContent(
     return <StatementMessageCard statement={message.payload?.statement} />;
   }
 
+  if (message.kind === "activity") {
+    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} title={message.payload?.title} />;
+  }
+
   if (message.kind === "forward_bundle") {
     const items = message.payload?.items ?? [];
     return (
@@ -1788,6 +1798,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             message.kind === "location" ? "is-location" : "",
             message.kind === "map_access" ? "is-travel-map" : "",
             message.kind === "statement" ? "is-statement" : "",
+            message.kind === "activity" ? "is-activity" : "",
             message.kind === "forward_bundle" ? "is-forward-bundle" : "",
             message.kind === "sticker" ? "is-sticker" : "",
             extractFirstMessageUrl(message.payload?.text ?? message.text) ? "is-link-preview" : "",
