@@ -1626,6 +1626,10 @@ function renderMessageContent(
 
   if (message.kind === "forward_bundle") {
     const items = message.payload?.items ?? [];
+    const firstItem = items[0];
+    const firstItemPreview = firstItem
+      ? previewFromKind(messageKindFromType(firstItem.type), firstItem.content)
+      : i18n.t("message.forwardBundlePlaceholder");
     return (
       <button
         className={`message-forward-bundle-card ${groupClassName}`.trim()}
@@ -1638,17 +1642,15 @@ function renderMessageContent(
         <span className="message-forward-bundle-heading">
           <span className="message-forward-bundle-icon material-symbols-outlined" aria-hidden="true">forum</span>
           <span>
-            <strong>{message.payload?.title || i18n.t("message.forwardBundleTitle")}</strong>
+            <strong>{i18n.t("message.forwardBundleTitle")}</strong>
             {message.payload?.summary ? <small>{message.payload.summary}</small> : null}
           </span>
         </span>
         <span className="message-forward-bundle-preview">
-          {items.slice(0, 3).map((item) => (
-            <span key={`${item.position}:${item.sent_at}`}>
-              <b>{item.author?.name || i18n.t("message.unknownSender")}</b>
-              <i>{previewFromKind(messageKindFromType(item.type), item.content)}</i>
-            </span>
-          ))}
+          <span>
+            <b>{firstItem?.author?.name || i18n.t("message.unknownSender")}</b>
+            <i>{firstItemPreview}</i>
+          </span>
         </span>
         <span className="message-forward-bundle-footer">
           {i18n.t("message.forwardBundleCount", { count: message.payload?.item_count ?? items.length })}
@@ -6734,7 +6736,7 @@ function LiveChatsPage() {
 
       <SideDrawer
         open={Boolean(forwardBundlePreview)}
-        title={forwardBundlePreview?.title || t("message.forwardBundleTitle")}
+        title={t("message.forwardBundleTitle")}
         titleAccessory={<span className="drawer-title-count">{forwardBundlePreview?.item_count ?? forwardBundlePreview?.items?.length ?? 0}</span>}
         historyKey="forward-bundle"
         onClose={() => setForwardBundlePreview(null)}

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.29",
-  "publishedAt": "2026-08-23",
+  "id": "2026.08.24.1",
+  "publishedAt": "2026-08-24",
   "locales": {
     "zh-CN": {
-      "title": "长聊天记录更流畅",
+      "title": "合并转发卡片更清晰",
       "items": [
-        "聊天记录改为按视窗动态渲染，长会话滚动、翻页和消息定位更加流畅稳定"
+        "合并转发采用稳定尺寸，只展示第一条消息摘要，并会跟随当前语言显示标题"
       ]
     },
     "en": {
-      "title": "Smoother long conversations",
+      "title": "Cleaner combined-forward cards",
       "items": [
-        "Chat history now renders around the viewport for smoother scrolling, pagination, and message navigation in long conversations"
+        "Combined forwards now use a consistent card size, preview only the first message, and display a localized title"
       ]
     }
   }
