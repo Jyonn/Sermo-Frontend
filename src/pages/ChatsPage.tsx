@@ -38,6 +38,7 @@ import { StatementMessageCard } from "../components/StatementMessageCard";
 import { ActivityMessageCard } from "../components/ActivityMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VerificationBanner } from "../components/VerificationBanner";
+import { VirtualDynamicList, type VirtualDynamicListHandle } from "../components/VirtualDynamicList";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
@@ -2077,6 +2078,58 @@ interface MessageGroup {
   messages: ChatMessage[];
 }
 
+function estimateMessageRowHeight(message: ChatMessage) {
+  const replyHeight = message.replyTo ? 44 : 0;
+  if (message.kind === "system") return 34;
+  if (message.kind === "image") {
+    const width = Number(message.payload?.pixel_width || message.payload?.image_metadata?.pixel_width || 0);
+    const height = Number(message.payload?.pixel_height || message.payload?.image_metadata?.pixel_height || 0);
+    const ratio = width > 0 && height > 0 ? height / width : 0.78;
+    return Math.max(112, Math.min(310, Math.round(252 * ratio))) + replyHeight;
+  }
+  if (message.kind === "video") {
+    const width = Number(message.payload?.pixel_width || message.payload?.video_metadata?.pixel_width || 0);
+    const height = Number(message.payload?.pixel_height || message.payload?.video_metadata?.pixel_height || 0);
+    const ratio = width > 0 && height > 0 ? height / width : 9 / 16;
+    return Math.max(132, Math.min(310, Math.round(260 * ratio))) + replyHeight;
+  }
+  if (message.kind === "sticker") return 172;
+  if (message.kind === "audio") return 76 + replyHeight;
+  if (message.kind === "file") return 88 + replyHeight;
+  if (message.kind === "location" || message.kind === "map_access") return 112 + replyHeight;
+  if (message.kind === "statement") return 214 + replyHeight;
+  if (message.kind === "activity") return 148 + replyHeight;
+  if (message.kind === "forward_bundle") return 184 + replyHeight;
+
+  const text = message.payload?.text ?? message.text ?? "";
+  const hasLink = Boolean(extractFirstMessageUrl(text));
+  const estimatedLines = Math.max(1, Math.ceil(Array.from(text).length / 18));
+  return Math.min(180, 22 + estimatedLines * 23) + (hasLink ? 104 : 0) + replyHeight;
+}
+
+function estimateMessageGroupHeight(group: MessageGroup) {
+  let height = group.dividerLabel ? 52 : 0;
+  if (group.from === "other") height += 18;
+  for (let index = 0; index < group.messages.length;) {
+    const message = group.messages[index];
+    if (message.kind !== "image" || message.replyTo) {
+      height += estimateMessageRowHeight(message) + 3;
+      index += 1;
+      continue;
+    }
+    let imageCount = 1;
+    while (
+      index + imageCount < group.messages.length
+      && group.messages[index + imageCount].kind === "image"
+      && !group.messages[index + imageCount].replyTo
+    ) imageCount += 1;
+    if (imageCount === 1) height += estimateMessageRowHeight(message) + 3;
+    else height += Math.ceil(Math.min(imageCount, 18) / (imageCount === 2 || imageCount === 4 ? 2 : 3)) * 118 + 3;
+    index += imageCount;
+  }
+  return Math.max(38, height + 16);
+}
+
 interface MessageBubbleRowProps {
   from: "self" | "other";
   isEntering: boolean;
@@ -2484,6 +2537,8 @@ function LiveChatsPage() {
     };
   }, [videoPreview]);
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
+  const virtualMessageListRef = useRef<VirtualDynamicListHandle | null>(null);
+  const messageGroupIndexRef = useRef(new Map<number, number>());
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
@@ -3032,12 +3087,21 @@ function LiveChatsPage() {
   }, [selectedChat?.id]);
 
   useEffect(() => {
-    const revealElement = (messageId: number) => {
+    const revealMountedElement = (messageId: number) => {
       const element = messageScrollRef.current?.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`);
       if (!element) return false;
       element.scrollIntoView({ behavior: "smooth", block: "center" });
       element.classList.add("is-reply-target");
       window.setTimeout(() => element.classList.remove("is-reply-target"), 1200);
+      return true;
+    };
+
+    const revealElement = (messageId: number) => {
+      if (revealMountedElement(messageId)) return true;
+      const groupIndex = messageGroupIndexRef.current.get(messageId);
+      if (groupIndex === undefined) return false;
+      virtualMessageListRef.current?.scrollToIndex(groupIndex, "center", "auto");
+      window.requestAnimationFrame(() => window.requestAnimationFrame(() => revealMountedElement(messageId)));
       return true;
     };
 
@@ -3271,6 +3335,12 @@ function LiveChatsPage() {
 
     return groups;
   }, [selectedMessages]);
+
+  messageGroupIndexRef.current = new Map(
+    messageGroups.flatMap((group, groupIndex) => group.messages.flatMap((message) => (
+      typeof message.id === "number" ? [[message.id, groupIndex] as const] : []
+    )))
+  );
 
   const closeChatView = () => {
     if (!selectedChat) {
@@ -5663,7 +5733,6 @@ function LiveChatsPage() {
 
     const oldestMessage = selectedMessages[0];
     const scroller = messageScrollRef.current;
-    const previousHeight = scroller?.scrollHeight ?? 0;
 
     try {
       setOlderState("loading");
@@ -5693,12 +5762,6 @@ function LiveChatsPage() {
         updatedAt: Date.now(),
       });
 
-      requestAnimationFrame(() => {
-        const element = messageScrollRef.current;
-        if (!element) return;
-        const nextHeight = element.scrollHeight;
-        element.scrollTop = nextHeight - previousHeight + element.scrollTop;
-      });
     } catch (apiError) {
       if (isChatAccessBoundaryError(apiError)) {
         redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
@@ -5992,35 +6055,44 @@ function LiveChatsPage() {
                     </button>
                   </div>
                 ) : null}
-                {messageGroups.map((group) => (
-                  <MessageGroupBlock
-                    enteringMessageIds={enteringMessageIds}
-                    group={group}
-                    key={group.key}
-                    onOpenImage={(uris, index, metadata = [], messageIds = []) => {
-                      setImagePreview({
-                        uris,
-                        index,
-                        metadata: uris.map((_uri, itemIndex) => metadata[itemIndex] ?? null),
-                        messageIds: uris.map((_uri, itemIndex) => messageIds[itemIndex] ?? null),
-                      });
-                    }}
-                    onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
-                    onOpenActions={openMessageMenu}
-                    onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
-                    onRetry={retryFailedMessage}
-                    onToggleGroupSelection={toggleMessageGroupSelection}
-                    onToggleSelection={toggleMessageSelection}
-                    selectedClientIds={selectedMessageClientIds}
-                    selectionMode={messageSelectionMode}
-                    showAuthor={Boolean(selectedChat?.type === "group")}
-                    showSelfAvatar={Boolean(currentUserMe?.show_self_avatar)}
-                    selfAvatarFrame={currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style}
-                    selfAvatarName={currentUserName}
-                    selfAvatarUri={currentUserMe?.avatar_uri ?? session?.user.avatar_uri}
-                    selfIsPermanentVip={currentUserIsPermanentVip}
-                  />
-                ))}
+                <VirtualDynamicList
+                  estimateSize={estimateMessageGroupHeight}
+                  followEnd={() => stickToBottomRef.current}
+                  itemKey={(group) => group.key}
+                  items={messageGroups}
+                  overscan={840}
+                  ref={virtualMessageListRef}
+                  rowGap={18}
+                  scrollRef={messageScrollRef}
+                  renderItem={(group) => (
+                    <MessageGroupBlock
+                      enteringMessageIds={enteringMessageIds}
+                      group={group}
+                      onOpenImage={(uris, index, metadata = [], messageIds = []) => {
+                        setImagePreview({
+                          uris,
+                          index,
+                          metadata: uris.map((_uri, itemIndex) => metadata[itemIndex] ?? null),
+                          messageIds: uris.map((_uri, itemIndex) => messageIds[itemIndex] ?? null),
+                        });
+                      }}
+                      onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
+                      onOpenActions={openMessageMenu}
+                      onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
+                      onRetry={retryFailedMessage}
+                      onToggleGroupSelection={toggleMessageGroupSelection}
+                      onToggleSelection={toggleMessageSelection}
+                      selectedClientIds={selectedMessageClientIds}
+                      selectionMode={messageSelectionMode}
+                      showAuthor={Boolean(selectedChat?.type === "group")}
+                      showSelfAvatar={Boolean(currentUserMe?.show_self_avatar)}
+                      selfAvatarFrame={currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style}
+                      selfAvatarName={currentUserName}
+                      selfAvatarUri={currentUserMe?.avatar_uri ?? session?.user.avatar_uri}
+                      selfIsPermanentVip={currentUserIsPermanentVip}
+                    />
+                  )}
+                />
               </div>
 
               {messageSelectionMode ? (

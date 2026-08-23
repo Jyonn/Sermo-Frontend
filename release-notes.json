@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.28",
+  "id": "2026.08.23.29",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙活动深色背景修复",
+      "title": "长聊天记录更流畅",
       "items": [
-        "深色模式下打开八仙聚力活动时，活动主题背景会正常显示"
+        "聊天记录改为按视窗动态渲染，长会话滚动、翻页和消息定位更加流畅稳定"
       ]
     },
     "en": {
-      "title": "Baxian event background fixed in dark mode",
+      "title": "Smoother long conversations",
       "items": [
-        "The Baxian Gathering event background now remains visible when dark mode is enabled"
+        "Chat history now renders around the viewport for smoother scrolling, pagination, and message navigation in long conversations"
       ]
     }
   }
