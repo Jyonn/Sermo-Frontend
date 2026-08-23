@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.24",
+  "id": "2026.08.23.25",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "个人历练领取界面更简洁",
+      "title": "单条消息可以直接转发",
       "items": [
-        "完成个人历练后直接展示领取按钮，减少重复提示"
+        "长按消息后可直接选择转发，无需先进入多选模式"
       ]
     },
     "en": {
-      "title": "A cleaner personal quest reward screen",
+      "title": "Forward individual messages directly",
       "items": [
-        "Completed personal quests now present the claim action without repetitive helper text"
+        "Long-press a message to forward it without entering multi-select mode first"
       ]
     }
   }

@@ -5206,9 +5206,11 @@ function LiveChatsPage() {
     return canRecallMessage(message);
   });
 
-  const eligibleForwardMessages = () => selectedActionMessages().filter(
-    (message) => typeof message.id === "number" && !["system", "map_access", "forward_bundle"].includes(message.kind)
+  const canForwardMessage = (message: ChatMessage) => (
+    typeof message.id === "number" && !["system", "map_access", "forward_bundle"].includes(message.kind)
   );
+
+  const eligibleForwardMessages = () => selectedActionMessages().filter(canForwardMessage);
 
   const selectionActionAvailability = {
     forward: eligibleForwardMessages().length > 0,
@@ -5310,6 +5312,15 @@ function LiveChatsPage() {
     setForwardSourceMessageIds(eligibleIds);
     setForwardTargetChatIds([]);
     setForwardMode(eligibleIds.length > 1 ? "bundle" : "individual");
+    setForwardPickerOpen(true);
+  };
+
+  const openSingleMessageForwardPicker = (message: ChatMessage) => {
+    if (!canForwardMessage(message)) return;
+    setMessageMenu(null);
+    setForwardSourceMessageIds([message.id as number]);
+    setForwardTargetChatIds([]);
+    setForwardMode("individual");
     setForwardPickerOpen(true);
   };
 
@@ -7539,6 +7550,12 @@ function LiveChatsPage() {
                   <span className="material-symbols-outlined" aria-hidden="true">reply</span>
                   {t("message.reply")}
                 </button>
+                {canForwardMessage(messageMenu.message) ? (
+                  <button className="message-context-button" onClick={() => openSingleMessageForwardPicker(messageMenu.message)} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">forward</span>
+                    {t("message.forward")}
+                  </button>
+                ) : null}
                 {messageMenu.message.kind !== "sticker" && typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
                   <button
                     className="message-context-button"
