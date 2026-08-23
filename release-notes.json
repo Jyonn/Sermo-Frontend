@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.23.18",
+  "id": "2026.08.23.19",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力两轮唤醒更清晰",
+      "title": "八仙聚力活动信息随时可用",
       "items": [
-        "全空间仙力新增带八仙印章的两阶段进度条，8 点与 16 点目标一目了然",
-        "八位仙人会先由剪影唤醒为灰度形态，第二轮注入后再逐位点亮彩色形态"
+        "活动联名标识、规则、奖池和日期会在浏览活动时保持置顶",
+        "顶部信息去除多余容器装饰，浏览更轻盈直接"
       ]
     },
     "en": {
-      "title": "Two-stage Baxian awakening is now clearer",
+      "title": "Baxian event details stay within reach",
       "items": [
-        "A two-stage Force meter with rotating Baxian seals now highlights the 8- and 16-point goals",
-        "Each immortal first awakens from a silhouette into grayscale, then becomes fully colored during round two"
+        "Co-branding, rules, prize pool, and dates now remain pinned while browsing the event",
+        "The event header is lighter and clearer with unnecessary containers removed"
       ]
     }
   }

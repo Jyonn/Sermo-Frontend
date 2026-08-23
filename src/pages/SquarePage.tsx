@@ -1328,15 +1328,14 @@ export default function SquarePage() {
       </SideDrawer>
       <SideDrawer className="activity-drawer" headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity ? <div className="activity-detail">
-          <section className="activity-detail-visual">
-            <div className="activity-detail-masthead">
+          <div className="activity-detail-masthead">
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-192.png" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
             <div className="activity-detail-index">
               <div><button onClick={() => setActivityRulesOpen(true)} type="button">{t("activity.rules")}</button><i aria-hidden="true" /><button onClick={() => setActivityPoolOpen(true)} type="button">{t("activity.prizePool")}</button></div>
               <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language)}</time>
             </div>
-            </div>
-          </section>
+          </div>
+          <section className="activity-detail-visual" />
           <section className="activity-awakening-stage">
             <section className={`activity-personal-quest${activeActivity.personal_reward ? " is-complete" : ""}`}>
               <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong><span>{activeActivity.personal_reward ? t("activity.personalRewardOwned") : t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span></div>

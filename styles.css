@@ -26902,10 +26902,10 @@ html[data-theme="dark"] .square-header-publish:hover {
 
 /* Baxian activity: a single scrolling campaign poster and awakening trail. */
 .activity-drawer .drawer-body,.activity-drawer .drawer-body:is(html[data-theme="dark"] *){padding:0;overflow-x:hidden;background-color:#151522;background-image:url("/assets/activity/event-baxian-juli-background.webp");background-position:top center;background-repeat:no-repeat;background-size:100% auto;background-attachment:scroll}
-.activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:110cqw 0 0;color:#f7efd8;background:linear-gradient(to bottom,transparent 0 100cqw,rgba(23,26,56,.76) 106cqw,#151522 118cqw)}
-.activity-detail-visual{position:absolute;isolation:isolate;inset:0 0 auto;height:110cqw;pointer-events:none}
+.activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:0;color:#f7efd8;background:linear-gradient(to bottom,transparent 0 100cqw,rgba(23,26,56,.76) 106cqw,#151522 118cqw)}
+.activity-detail-visual{position:relative;isolation:isolate;height:110cqw;margin-top:-76px;pointer-events:none}
 .activity-detail-visual :is(button,a){pointer-events:auto}
-.activity-detail-masthead{position:absolute;z-index:2;inset:18px 18px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.activity-detail-masthead{position:sticky;top:0;z-index:5;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;min-height:76px;padding:18px}
 .activity-brand-lockup{display:flex;align-items:center;gap:8px;color:#f6e5ad}
 .activity-brand-lockup>span{display:grid;place-items:center;width:40px;height:40px;padding:3px;border:2px solid rgba(255,255,255,.92);border-radius:12px;background:#171d1b;box-shadow:0 6px 18px rgba(7,5,14,.28)}
 .activity-brand-lockup>span img{width:100%;height:100%;border-radius:8px;object-fit:cover}
@@ -26913,7 +26913,7 @@ html[data-theme="dark"] .square-header-publish:hover {
 .activity-brand-lockup>b{font:800 18px/1 Georgia,serif;color:#f4d98f}
 .activity-brand-lockup>img:last-child{width:auto;height:36px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.28))}
 .activity-detail-index{display:grid;justify-items:end;gap:7px;color:#f7e7b6;text-align:right}
-.activity-detail-index>div{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid rgba(235,199,118,.45);border-radius:999px;background:rgba(39,21,55,.62);box-shadow:inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.activity-detail-index>div{display:flex;align-items:center;gap:8px}
 .activity-detail-index button{padding:0;border:0;color:#ffe8a6;background:none;font-weight:800;cursor:pointer}
 .activity-detail-index i{width:1px;height:12px;background:rgba(255,232,166,.38)}
 .activity-detail-index time{font-size:11px;font-weight:700;letter-spacing:.04em;color:rgba(255,239,201,.82)}
@@ -26971,4 +26971,4 @@ html[data-theme="dark"] .square-header-publish:hover {
 .activity-prize-grid .chat-conversation-preview .message-scroll::-webkit-scrollbar{display:none}
 .activity-prize-grid>article>strong{overflow:hidden;color:#f7d985;font-size:13px;font-weight:850;line-height:1.2;text-align:center;text-overflow:ellipsis;white-space:nowrap}
 .activity-prize-pagination{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px}.activity-prize-pagination button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:rgba(239,212,151,.28);transition:width 180ms ease,background 180ms ease}.activity-prize-pagination button.is-active{width:22px;background:#efca79}
-@media(max-width:520px){.activity-detail-masthead{inset:12px 12px auto}.activity-brand-lockup>span{width:34px;height:34px}.activity-brand-lockup>img{height:30px}.activity-detail-index>div{gap:6px;padding:5px 8px}.activity-detail-visual{min-height:500px}.activity-detail-intro{right:12px;bottom:14px;left:12px}.activity-awakening-stage{padding-inline:12px}.activity-awakening-stage>header{display:grid;grid-template-columns:minmax(0,1fr)}.activity-force-actions{display:grid;width:100%;grid-auto-columns:minmax(0,1fr);grid-auto-flow:column}.activity-force-actions button{min-width:0;padding-inline:10px}.activity-immortal-track{grid-auto-columns:calc((100% - 24px)/4);gap:8px}.activity-immortal-track article{grid-template-rows:104px auto 32px}.activity-immortal-figure{height:104px}.activity-immortal-figure img{width:100px;height:100px}}
+@media(max-width:520px){.activity-detail-masthead{min-height:64px;padding:12px}.activity-brand-lockup>span{width:34px;height:34px}.activity-brand-lockup>img{height:30px}.activity-detail-index>div{gap:6px}.activity-detail-visual{min-height:500px;margin-top:-64px}.activity-detail-intro{right:12px;bottom:14px;left:12px}.activity-awakening-stage{padding-inline:12px}.activity-awakening-stage>header{display:grid;grid-template-columns:minmax(0,1fr)}.activity-force-actions{display:grid;width:100%;grid-auto-columns:minmax(0,1fr);grid-auto-flow:column}.activity-force-actions button{min-width:0;padding-inline:10px}.activity-immortal-track{grid-auto-columns:calc((100% - 24px)/4);gap:8px}.activity-immortal-track article{grid-template-rows:104px auto 32px}.activity-immortal-figure{height:104px}.activity-immortal-figure img{width:100px;height:100px}}
