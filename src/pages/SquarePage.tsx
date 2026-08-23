@@ -23,7 +23,7 @@ import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 import ChatsPage from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -322,7 +322,7 @@ export default function SquarePage() {
   const navigate = useNavigate();
   const { statementId: routeStatementId, activityKey: routeActivityKey } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { session } = useAuth();
+  const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
@@ -390,6 +390,11 @@ export default function SquarePage() {
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
   const [activities, setActivities] = useState<ActivityCampaignDTO[]>([]);
+  const [vipCampaign, setVipCampaign] = useState<PermanentVipCampaignDTO | null>(null);
+  const [vipCampaignOpen, setVipCampaignOpen] = useState(false);
+  const [vipClaiming, setVipClaiming] = useState(false);
+  const [activityBannerSlide, setActivityBannerSlide] = useState(0);
+  const activityBannerTrackRef = useRef<HTMLElement>(null);
   const [activityClaiming, setActivityClaiming] = useState(false);
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
@@ -430,8 +435,41 @@ export default function SquarePage() {
   useEffect(() => {
     const controller = new AbortController();
     void api.getActiveActivities(controller.signal).then(setActivities).catch(() => undefined);
+    void api.getUserMe(controller.signal).then((me) => setVipCampaign(me.permanent_vip_campaign ?? null)).catch(() => undefined);
     return () => controller.abort();
   }, [session?.user.space_id, session?.user.user_id]);
+
+  const showVipCampaign = Boolean(vipCampaign && (vipCampaign.active || vipCampaign.claimed_by_user));
+  const activityBannerCount = activities.length + (showVipCampaign ? 1 : 0);
+
+  useEffect(() => {
+    if (activityBannerCount < 2 || feedMode !== "all") return;
+    const timer = window.setInterval(() => {
+      if (document.hidden) return;
+      const track = activityBannerTrackRef.current;
+      if (!track) return;
+      const slides = Array.from(track.children) as HTMLElement[];
+      const next = (activityBannerSlide + 1) % slides.length;
+      track.scrollTo({ behavior: "smooth", left: slides[next].offsetLeft - track.offsetLeft });
+      setActivityBannerSlide(next);
+    }, 6000);
+    return () => window.clearInterval(timer);
+  }, [activityBannerCount, activityBannerSlide, feedMode]);
+
+  const claimPermanentVip = async () => {
+    if (!vipCampaign?.eligible || vipClaiming) return;
+    setVipClaiming(true);
+    try {
+      const campaign = await api.claimPermanentVip();
+      setVipCampaign(campaign);
+      patchSessionUser({ is_permanent_vip: true });
+      showToast(t("vip.claimed", { slot: campaign.slot }), "success");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("vip.claimFailed"), "error");
+    } finally {
+      setVipClaiming(false);
+    }
+  };
 
   useEffect(() => {
     if (!routeActivityKey || activeActivity) return;
@@ -1138,8 +1176,13 @@ export default function SquarePage() {
           </div>}
         />
         <div className="square-feed-column">
-          {feedMode === "all" && activities.length ? <section className="square-activity-rail" aria-label={t("activity.active")}>
-            {activities.map((activity) => {
+          {feedMode === "all" && activityBannerCount ? <div className="square-activity-carousel"><section className="square-activity-rail" aria-label={t("activity.active")} onScroll={(event) => {
+            const track = event.currentTarget;
+            const slides = Array.from(track.children) as HTMLElement[];
+            const nearest = slides.reduce((best, slide, index) => Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft) < Math.abs(slides[best].offsetLeft - track.offsetLeft - track.scrollLeft) ? index : best, 0);
+            setActivityBannerSlide(nearest);
+          }} ref={activityBannerTrackRef}>
+            {activities.slice(0, 1).map((activity) => {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
               const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
@@ -1152,7 +1195,33 @@ export default function SquarePage() {
                 <span className="square-activity-banner-progress"><i style={{ transform: `scaleX(${Math.min(1, activity.space_total / Math.max(1, activity.target))})` }} /></span>
               </button>;
             })}
-          </section> : null}
+            {showVipCampaign && vipCampaign ? <button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => setVipCampaignOpen(true)} type="button">
+              <span className="square-vip-banner-orbit" aria-hidden="true"><i /><i /><b>VIP</b></span>
+              <span className="square-vip-banner-copy">
+                <small>FOUNDING 100</small>
+                <strong>{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
+                <span>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ?? "-" }) : t("vip.remaining", { count: vipCampaign.remaining })}</span>
+              </span>
+              <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
+            </button> : null}
+            {activities.slice(1).map((activity) => {
+              const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
+              const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
+              return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
+                <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
+                <span className="square-activity-banner-copy">
+                  <small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small>
+                  <span><b>{activity.space_total}</b><i>/</i>{activity.target} {t("activity.force")}</span>
+                </span>
+                <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
+                <span className="square-activity-banner-progress"><i style={{ transform: `scaleX(${Math.min(1, activity.space_total / Math.max(1, activity.target))})` }} /></span>
+              </button>;
+            })}
+          </section>{activityBannerCount > 1 ? <div className="square-activity-pagination" aria-label={t("activity.active")}>{Array.from({ length: activityBannerCount }, (_, index) => <button aria-current={activityBannerSlide === index ? "true" : undefined} className={activityBannerSlide === index ? "is-active" : ""} key={index} onClick={() => {
+            const track = activityBannerTrackRef.current;
+            const slide = track?.children[index] as HTMLElement | undefined;
+            if (track && slide) track.scrollTo({ behavior: "smooth", left: slide.offsetLeft - track.offsetLeft });
+          }} type="button" />)}</div> : null}</div> : null}
           {feedMode === "all" && pinnedStatement ? (
             <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
@@ -1384,6 +1453,22 @@ export default function SquarePage() {
             if (track && slide) track.scrollTo({ behavior: "smooth", left: slide.offsetLeft - track.offsetLeft });
           }} type="button" />)}
         </div>
+      </BottomSheet>
+      <BottomSheet bodyClassName="vip-campaign-sheet" onClose={() => setVipCampaignOpen(false)} open={vipCampaignOpen} title={t("vip.campaignTitle")}>
+        {vipCampaign ? <div className={`vip-campaign-panel${vipCampaign.claimed_by_user ? " is-claimed" : ""}`}>
+          <section className="vip-campaign-hero">
+            <span>FOUNDING 100</span>
+            <strong>{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
+            <p>{t("vip.rewards")}</p>
+            <small>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ?? "-" }) : t("vip.remaining", { count: vipCampaign.remaining })}</small>
+          </section>
+          {!vipCampaign.claimed_by_user ? <div className="vip-campaign-requirements">{[
+            ["email", t("contact.verifyEmail"), vipCampaign.requirements.email],
+            ["phone", t("contact.bindPhone"), vipCampaign.requirements.phone],
+            ["level", t("vip.reachLevel", { level: vipCampaign.required_level }), vipCampaign.requirements.level],
+          ].map(([key, label, complete]) => <button className={complete ? "is-complete" : ""} disabled={Boolean(complete)} key={String(key)} onClick={() => { setVipCampaignOpen(false); navigate("/app/menu"); }} type="button"><i>{complete ? "✓" : ""}</i><strong>{label}</strong><span>{complete ? t("common.completed") : t("vip.goComplete")}</span></button>)}</div> : <div className="vip-campaign-owned"><b>VIP</b><span>{t("vip.permanentOwned")}</span></div>}
+          {!vipCampaign.claimed_by_user ? <button className="vip-campaign-claim" disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">{vipClaiming ? t("vip.reserving") : vipCampaign.eligible ? t("vip.claim") : t("vip.completeRequirements")}</button> : null}
+        </div> : null}
       </BottomSheet>
       <SideDrawer
         historyKey="square-user-profile"

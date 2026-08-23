@@ -430,7 +430,6 @@ export default function MenuPage() {
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
-  const [vipClaiming, setVipClaiming] = useState(false);
   const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
   const [chatBackgroundDrawerOpen, setChatBackgroundDrawerOpen] = useState(false);
   const [chatBubbleDrawerOpen, setChatBubbleDrawerOpen] = useState(false);
@@ -585,7 +584,6 @@ export default function MenuPage() {
     webReminderPrefs.soundEnabled ? t("webReminder.soundOn") : t("webReminder.soundOff"),
     webReminderPrefs.titleEnabled ? t("webReminder.titleOn") : t("webReminder.titleOff"),
   ].join(" · ");
-  const vipCampaign = me?.permanent_vip_campaign;
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 901px)");
@@ -597,26 +595,6 @@ export default function MenuPage() {
     media.addEventListener("change", handleChange);
     return () => media.removeEventListener("change", handleChange);
   }, []);
-
-  const claimPermanentVip = async () => {
-    if (!vipCampaign?.eligible || vipClaiming) return;
-    setVipClaiming(true);
-    try {
-      const campaign = await api.claimPermanentVip();
-      setMe((current) => current ? {
-        ...current,
-        is_permanent_vip: true,
-        permanent_vip_campaign: campaign,
-        resource_inventory: campaign.resource_inventory ?? current.resource_inventory,
-      } : current);
-      patchSessionUser({ is_permanent_vip: true });
-      showToast(t("vip.claimed", { slot: campaign.slot }), "success");
-    } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : t("vip.claimFailed"), "error");
-    } finally {
-      setVipClaiming(false);
-    }
-  };
 
   useEffect(() => {
     if (!standalonePwa || !me || pwaGrowthClaimedRef.current) return;
@@ -1840,61 +1818,6 @@ export default function MenuPage() {
             <QrCodeIcon />
           </button>
         </div>
-        {vipCampaign?.active && !vipCampaign.claimed_by_user ? (
-          <section className={`menu-vip-campaign${vipCampaign.eligible ? " is-eligible" : ""}`}>
-            <div className="menu-vip-campaign-orbit" aria-hidden="true"><i /><i /></div>
-            <div className="menu-vip-campaign-heading">
-              <span>FOUNDING 100</span>
-              <small>{t("vip.remaining", { count: vipCampaign.remaining })}</small>
-            </div>
-            <div className="menu-vip-campaign-copy">
-              <strong>{t("vip.title")}</strong>
-              <p>{t("vip.rewards")}</p>
-              <small>{t("vip.levelTiers")}</small>
-            </div>
-            <div className="menu-vip-requirements">
-              {[
-                {
-                  key: "email",
-                  label: t("contact.verifyEmail"),
-                  complete: vipCampaign.requirements.email,
-                  detail: vipCampaign.requirements.email ? t("common.completed") : t("contact.verifyNow"),
-                  action: () => openAuthSheet("email"),
-                },
-                {
-                  key: "phone",
-                  label: t("contact.bindPhone"),
-                  complete: vipCampaign.requirements.phone,
-                  detail: vipCampaign.requirements.phone ? t("common.completed") : t("contact.bindNow"),
-                  action: () => openAuthSheet("sms"),
-                },
-                {
-                  key: "level",
-                  label: t("vip.reachLevel", { level: vipCampaign.required_level }),
-                  complete: vipCampaign.requirements.level,
-                  detail: vipCampaign.requirements.level ? t("common.completed") : t("growth.currentLevel", { level: me?.growth?.level ?? 1 }),
-                  action: () => setGrowthDrawerOpen(true),
-                },
-              ].map((requirement) => (
-                <button
-                  className={requirement.complete ? "is-complete" : ""}
-                  disabled={requirement.complete}
-                  key={requirement.key}
-                  onClick={requirement.action}
-                  type="button"
-                >
-                  <i aria-hidden="true">{requirement.complete ? "✓" : ""}</i>
-                  <strong>{requirement.label}</strong>
-                  <span>{requirement.detail}</span>
-                  {!requirement.complete ? <ForwardArrowIcon /> : null}
-                </button>
-              ))}
-            </div>
-            <button disabled={!vipCampaign.eligible || vipClaiming} onClick={() => void claimPermanentVip()} type="button">
-              {vipClaiming ? t("vip.reserving") : vipCampaign.eligible ? t("vip.claim") : t("vip.completeRequirements")}
-            </button>
-          </section>
-        ) : null}
         <section className="list-section">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => setBasicDrawerOpen(true)} type="button">
