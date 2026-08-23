@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.23.21",
+  "id": "2026.08.23.22",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙活动可以作为专属卡片分享",
+      "title": "活动卡片打开更稳定",
       "items": [
-        "转发八仙聚力后，聊天中会展示清晰的活动横幅，不再混入普通链接卡片",
-        "点击活动消息即可进入对应活动页面，活动进度保持实时更新"
+        "修复从聊天中的活动卡片进入广场后，活动页面没有自动展开的问题"
       ]
     },
     "en": {
-      "title": "Baxian events now share as dedicated cards",
+      "title": "Activity cards now open reliably",
       "items": [
-        "Shared Baxian events now appear as clear campaign banners instead of ordinary link previews",
-        "Tap an activity message to open its campaign page with live progress"
+        "Fixed activity messages opening Square without automatically revealing the activity panel"
       ]
     }
   }

@@ -476,7 +476,11 @@ export default function SquarePage() {
     const controller = new AbortController();
     void api.getActivity(routeActivityKey, controller.signal).then((activity) => {
       setActivities((current) => [...current.filter((item) => item.key !== activity.key), activity]);
-    }).catch(() => navigate("/app/square", { replace: true }));
+    }).catch(() => {
+      // The active-campaign request may resolve first and cancel this duplicate
+      // detail request. Cancellation must not close the route-backed drawer.
+      if (!controller.signal.aborted) navigate("/app/square", { replace: true });
+    });
     return () => controller.abort();
   }, [activeActivity, navigate, routeActivityKey]);
 
