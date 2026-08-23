@@ -759,6 +759,10 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}/claim`, { method: "POST", auth: true });
   },
 
+  claimActivityPersonalReward(key: string) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/personal-reward/claim`, { method: "POST", auth: true });
+  },
+
   contributeActivity(key: string) {
     return request<ActivityCampaignDTO>(`/activities/${key}/contribute`, { method: "POST", auth: true });
   },

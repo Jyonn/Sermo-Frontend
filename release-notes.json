@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.23.22",
+  "id": "2026.08.23.23",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "活动卡片打开更稳定",
+      "title": "个人历练奖励改为手动领取",
       "items": [
-        "修复从聊天中的活动卡片进入广场后，活动页面没有自动展开的问题"
+        "完成八仙个人历练后可亲手领取随机气泡，并从活动页直接前往聊天气泡配置"
       ]
     },
     "en": {
-      "title": "Activity cards now open reliably",
+      "title": "Personal quest rewards are now claimed manually",
       "items": [
-        "Fixed activity messages opening Square without automatically revealing the activity panel"
+        "Complete the Baxian personal quest, claim your random bubble, and jump straight to bubble customization"
       ]
     }
   }

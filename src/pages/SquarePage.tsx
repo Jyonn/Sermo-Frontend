@@ -396,6 +396,7 @@ export default function SquarePage() {
   const [activityBannerSlide, setActivityBannerSlide] = useState(0);
   const activityBannerTrackRef = useRef<HTMLElement>(null);
   const [activityClaiming, setActivityClaiming] = useState(false);
+  const [personalRewardClaiming, setPersonalRewardClaiming] = useState(false);
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
   const [activityPoolOpen, setActivityPoolOpen] = useState(false);
@@ -510,6 +511,20 @@ export default function SquarePage() {
       showToast(cause instanceof Error ? cause.message : t("activity.claimFailed"), "error");
     } finally {
       setActivityClaiming(false);
+    }
+  };
+
+  const claimPersonalActivityReward = async () => {
+    if (!activeActivity?.personal_reward_claimable || personalRewardClaiming) return;
+    setPersonalRewardClaiming(true);
+    try {
+      const updated = await api.claimActivityPersonalReward(activeActivity.key);
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      showToast(t("activity.personalRewardClaimed"), "success");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
+    } finally {
+      setPersonalRewardClaiming(false);
     }
   };
 
@@ -1416,9 +1431,9 @@ export default function SquarePage() {
           </div>
           <section className="activity-detail-visual" />
           <section className="activity-awakening-stage">
-            <section className={`activity-personal-quest${activeActivity.personal_reward ? " is-complete" : ""}`}>
-              <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong><span>{activeActivity.personal_reward ? t("activity.personalRewardOwned") : t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span></div>
-              {activeActivity.personal_reward ? <span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
+            <section className={`activity-personal-quest${activeActivity.personal_reward || activeActivity.personal_reward_claimable ? " is-complete" : ""}`}>
+              <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward || activeActivity.personal_reward_claimable ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong><span>{activeActivity.personal_reward ? t("activity.personalRewardOwnedNamed", { name: t(BAXIAN_PRIZE_BUBBLES.find((item) => item.style === activeActivity.personal_reward?.resource_key)?.label ?? "menu.collectionBaxian") }) : activeActivity.personal_reward_claimable ? t("activity.personalRewardReady") : t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span></div>
+              {activeActivity.personal_reward ? <div className="activity-personal-reward"><span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span><button onClick={() => navigate("/app/menu?personalization=chat-bubble")} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button></div> : activeActivity.personal_reward_claimable ? <button className="activity-personal-claim" disabled={personalRewardClaiming} onClick={() => void claimPersonalActivityReward()} type="button">{personalRewardClaiming ? t("common.processing") : t("activity.claimPersonalReward")}</button> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
             </section>
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
             <ActivityForceProgress target={activeActivity.target} total={activeActivity.space_total} />

@@ -636,6 +636,12 @@ export default function MenuPage() {
   }, [location.pathname, location.search, navigate]);
 
   useEffect(() => {
+    if (new URLSearchParams(location.search).get("personalization") !== "chat-bubble") return;
+    setPersonalizationDrawerOpen(true);
+    setChatBubbleDrawerOpen(true);
+  }, [location.search]);
+
+  useEffect(() => {
     if (!chatBackgroundDrawerOpen || !me) return;
     setChatBackgroundDraft(me.chat_background_theme ?? "default");
   }, [chatBackgroundDrawerOpen, me?.chat_background_theme]);
