@@ -26894,9 +26894,10 @@ html[data-theme="dark"] .square-header-publish:hover {
 }
 
 /* Baxian activity: a single scrolling campaign poster and awakening trail. */
-.activity-drawer .drawer-body,.activity-drawer .drawer-body:is(html[data-theme="dark"] *){padding:0;background:#151522 none;overflow-x:hidden}
-.activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:0;color:#f7efd8;background:linear-gradient(180deg,#252035 0,#171724 42%,#11121b 100%)}
-.activity-detail-visual{position:relative;isolation:isolate;min-height:520px;background-position:top center;background-repeat:no-repeat;background-size:cover}
+.activity-drawer .drawer-body,.activity-drawer .drawer-body:is(html[data-theme="dark"] *){padding:0;overflow-x:hidden;background-color:#151522;background-image:url("/assets/activity/event-baxian-juli-background.webp");background-position:top center;background-repeat:no-repeat;background-size:100% auto;background-attachment:scroll}
+.activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:110cqw 0 0;color:#f7efd8;background:linear-gradient(to bottom,transparent 0 100cqw,rgba(23,26,56,.76) 106cqw,#151522 118cqw)}
+.activity-detail-visual{position:absolute;isolation:isolate;inset:0 0 auto;height:110cqw;pointer-events:none}
+.activity-detail-visual :is(button,a){pointer-events:auto}
 .activity-detail-masthead{position:absolute;z-index:2;inset:18px 18px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .activity-brand-lockup{display:flex;align-items:center;gap:8px;color:#f6e5ad}
 .activity-brand-lockup>span{display:grid;place-items:center;width:40px;height:40px;padding:3px;border:2px solid rgba(255,255,255,.92);border-radius:12px;background:#171d1b;box-shadow:0 6px 18px rgba(7,5,14,.28)}
