@@ -729,6 +729,9 @@ export interface ActivityCampaignDTO {
   today_earned: boolean;
   available_points: number;
   contributed_points: number;
+  personal_event_count: number;
+  personal_event_target: number;
+  personal_reward: null | { resource_key: string; reward_id: string };
   space_total: number;
   target: number;
   milestones: ActivityMilestoneDTO[];

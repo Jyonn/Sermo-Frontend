@@ -1,22 +1,22 @@
 {
-  "id": "2026.08.23.8",
+  "id": "2026.08.23.9",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙活动细节优化",
+      "title": "八仙聚力新增个人历练",
       "items": [
-        "活动规则与奖池改为八仙专属金紫色面板，不再出现突兀的白色背景",
-        "八仙聚力活动的唤醒轨迹加入轻盈毛玻璃承托，信息层次更清楚",
-        "言浪方形 Logo 现在会稳定显示在白边圆角容器内",
+        "认证成员累计发言两次，可随机获得一款个人八仙聊天气泡",
+        "全空间聚力调整为两轮，在 8 点和 16 点仙力时分别随机解锁一款气泡",
+        "活动规则、奖池和进度展示同步更新，个人奖励与全空间奖励更容易区分",
         "八位仙人按唤醒顺序展开，未解锁时呈现剪影，解锁后会展示彩色人物与唤醒成员头像"
       ]
     },
     "en": {
-      "title": "Refined Baxian event details",
+      "title": "A personal Baxian quest arrives",
       "items": [
-        "Event rules and prizes now use a dedicated gold-and-violet Baxian surface instead of a stark white panel",
-        "The Baxian awakening trail now rests on a subtle glass surface for clearer visual hierarchy",
-        "The square Sermo logo now stays correctly framed inside its rounded white-border container",
+        "Verified members can publish twice to receive one random personal Baxian chat bubble",
+        "The shared event now has two rounds, unlocking one random bubble at 8 and 16 Force",
+        "Rules, prizes, and progress have been refreshed to clearly separate personal and space-wide rewards",
         "All eight immortals now form an awakening trail with silhouettes for locked stages and contributor portraits for unlocked stages"
       ]
     }

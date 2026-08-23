@@ -1259,6 +1259,10 @@ export default function SquarePage() {
             <section className="activity-detail-intro"><small>{t("activity.spaceCoop")}</small><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></section>
           </section>
           <section className="activity-awakening-stage">
+            <section className={`activity-personal-quest${activeActivity.personal_reward ? " is-complete" : ""}`}>
+              <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong><span>{activeActivity.personal_reward ? t("activity.personalRewardOwned") : t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span></div>
+              {activeActivity.personal_reward ? <span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
+            </section>
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></header>
             <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const awakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const unlocked = Boolean(awakening); return <article className={unlocked ? "is-unlocked" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakening?.user ? <UserAvatar className="activity-awakener-avatar" name={awakening.user.name} uri={awakening.user.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
             <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
@@ -1268,8 +1272,9 @@ export default function SquarePage() {
       <BottomSheet className="activity-info-sheet" bodyClassName="activity-rules-sheet" onClose={() => setActivityRulesOpen(false)} open={activityRulesOpen} title={t("activity.rules")}>
         <div className="activity-rule-list">
           <article><span>01</span><div><strong>{t("activity.ruleVerifiedTitle")}</strong><p>{t("activity.ruleVerifiedBody")}</p></div></article>
-          <article><span>02</span><div><strong>{t("activity.ruleEarnTitle")}</strong><p>{t("activity.ruleEarnBody")}</p></div></article>
-          <article><span>03</span><div><strong>{t("activity.ruleSharedTitle")}</strong><p>{t("activity.ruleSharedBody")}</p></div></article>
+          <article><span>02</span><div><strong>{t("activity.rulePersonalTitle")}</strong><p>{t("activity.rulePersonalBody")}</p></div></article>
+          <article><span>03</span><div><strong>{t("activity.ruleEarnTitle")}</strong><p>{t("activity.ruleEarnBody")}</p></div></article>
+          <article><span>04</span><div><strong>{t("activity.ruleSharedTitle")}</strong><p>{t("activity.ruleSharedBody")}</p></div></article>
         </div>
       </BottomSheet>
       <BottomSheet className="activity-info-sheet" bodyClassName="activity-pool-sheet" onClose={() => setActivityPoolOpen(false)} open={activityPoolOpen} title={t("activity.prizePool")}>
@@ -1280,7 +1285,7 @@ export default function SquarePage() {
             ["baxian-zhongli", "menu.styleBaxianZhongli"],
             ["baxian-he", "menu.styleBaxianHe"],
           ] as const).map(([style, label]) => {
-            const unlocked = activeActivity?.milestones.some((milestone) => milestone.unlocked && milestone.resource_key === style);
+            const unlocked = activeActivity?.personal_reward?.resource_key === style || activeActivity?.milestones.some((milestone) => milestone.unlocked && milestone.resource_key === style);
             return <article className={unlocked ? "is-unlocked" : ""} key={style}>
             <span className={`personalization-option preview-${style}`}><i aria-hidden="true"><span /></i></span>
             <div><strong>{t(label)}</strong><small>{t("activity.limitedReward")}</small></div>
