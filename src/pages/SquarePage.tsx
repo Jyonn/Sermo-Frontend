@@ -26,8 +26,16 @@ import { showToast } from "../lib/toast";
 import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
 import baxianActivityBanner from "../assets/activity/baxian-immortal-force-banner.jpg";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
-import sermoLogo from "../assets/logo.svg";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
+import baxianActivityBackground from "../assets/activity/event-baxian-juli-background.webp";
+import tieguaiLi from "../assets/activity/immortals/tieguai-li.png";
+import zhongliQuan from "../assets/activity/immortals/zhongli-quan.png";
+import zhangGuolao from "../assets/activity/immortals/zhang-guolao.png";
+import lvDongbin from "../assets/activity/immortals/lv-dongbin.png";
+import heXiangu from "../assets/activity/immortals/he-xiangu.png";
+import lanCaihe from "../assets/activity/immortals/lan-caihe.png";
+import hanXiangzi from "../assets/activity/immortals/han-xiangzi.png";
+import caoGuojiu from "../assets/activity/immortals/cao-guojiu.png";
 
 type SelectedPhoto = {
   id: string;
@@ -43,6 +51,12 @@ const MAX_PHOTOS = 9;
 const MAX_AUDIO_SECONDS = 60;
 const MAX_VIDEO_SECONDS = 60;
 const MESSAGE_TYPE_STATEMENT = 8;
+const BAXIAN_IMMORTALS = [
+  ["铁拐李", "Tieguai Li", tieguaiLi], ["钟离权", "Zhongli Quan", zhongliQuan],
+  ["张果老", "Zhang Guolao", zhangGuolao], ["吕洞宾", "Lu Dongbin", lvDongbin],
+  ["何仙姑", "He Xiangu", heXiangu], ["蓝采和", "Lan Caihe", lanCaihe],
+  ["韩湘子", "Han Xiangzi", hanXiangzi], ["曹国舅", "Cao Guojiu", caoGuojiu],
+] as const;
 
 function formatActivityDateRange(startsAt: number, endsAt: number, language: string) {
   const locale = language === "zh-CN" ? "zh-CN" : "en-US";
@@ -1234,28 +1248,32 @@ export default function SquarePage() {
       </SideDrawer>
       <SideDrawer className="activity-drawer" historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity ? <div className="activity-detail">
-          <section className="activity-detail-masthead">
+          <section className="activity-detail-visual">
+            <img alt="" className="activity-detail-background" src={baxianActivityBackground} />
+            <div className="activity-detail-masthead">
+            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-192.png" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
             <div className="activity-detail-index">
               <div><button onClick={() => setActivityRulesOpen(true)} type="button">{t("activity.rules")}</button><i aria-hidden="true" /><button onClick={() => setActivityPoolOpen(true)} type="button">{t("activity.prizePool")}</button></div>
               <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language)}</time>
             </div>
-            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><img alt="Sermo 言浪" src={sermoLogo} /><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
+            </div>
+            <section className="activity-detail-intro"><small>{t("activity.spaceCoop")}</small><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></section>
           </section>
-          <section className="activity-detail-intro"><small>{t("activity.spaceCoop")}</small><p>{language === "zh-CN" ? activeActivity.summary : activeActivity.summary_en || activeActivity.summary}</p></section>
-          <section className="activity-force-wallet"><div><small>{t("activity.myForce")}</small><strong>{activeActivity.available_points}</strong><span>{t("activity.force")}</span></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : t("activity.contribute")}</button></section>
-          {!activeActivity.verified ? <p className="activity-verification-note"><span className="material-symbols-outlined">verified_user</span>{t("activity.verifyHint")}</p> : activeActivity.today_earned ? <p className="activity-verification-note is-earned"><span className="material-symbols-outlined">task_alt</span>{t("activity.todayEarned")}</p> : <p className="activity-verification-note"><span className="material-symbols-outlined">edit_square</span>{t("activity.publishHint")}</p>}
-          <section className="activity-space-progress"><header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span>/{activeActivity.target}</span></strong></div><span>{Math.round(activeActivity.space_total / Math.max(1, activeActivity.target) * 100)}%</span></header><div className="activity-progress-track"><i style={{ transform: `scaleX(${Math.min(1, activeActivity.space_total / Math.max(1, activeActivity.target))})` }} />{activeActivity.milestones.map((item) => <b className={item.unlocked ? "is-unlocked" : ""} key={item.threshold} style={{ left: `${item.threshold / Math.max(1, activeActivity.target) * 100}%` }} />)}</div></section>
-          <section className="activity-milestones"><header><strong>{t("activity.collectiveRewards")}</strong><span>{t("activity.allMembers")}</span></header>{activeActivity.milestones.map((item, index) => <article className={item.unlocked ? "is-unlocked" : ""} key={item.threshold}><span>{String(index + 1).padStart(2, "0")}</span><div><small>{item.threshold} {t("activity.force")}</small><strong>{item.unlocked ? item.reward_label : t("activity.randomBaxian")}</strong></div><i className="material-symbols-outlined">{item.unlocked ? "lock_open" : "lock"}</i></article>)}</section>
+          <section className="activity-awakening-stage">
+            <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></header>
+            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const awakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const unlocked = Boolean(awakening); return <article className={unlocked ? "is-unlocked" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakening?.user ? <UserAvatar className="activity-awakener-avatar" name={awakening.user.name} uri={awakening.user.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
+            <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
+          </section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}
       </SideDrawer>
-      <BottomSheet bodyClassName="activity-rules-sheet" onClose={() => setActivityRulesOpen(false)} open={activityRulesOpen} title={t("activity.rules")}>
+      <BottomSheet className="activity-info-sheet" bodyClassName="activity-rules-sheet" onClose={() => setActivityRulesOpen(false)} open={activityRulesOpen} title={t("activity.rules")}>
         <div className="activity-rule-list">
           <article><span>01</span><div><strong>{t("activity.ruleVerifiedTitle")}</strong><p>{t("activity.ruleVerifiedBody")}</p></div></article>
           <article><span>02</span><div><strong>{t("activity.ruleEarnTitle")}</strong><p>{t("activity.ruleEarnBody")}</p></div></article>
           <article><span>03</span><div><strong>{t("activity.ruleSharedTitle")}</strong><p>{t("activity.ruleSharedBody")}</p></div></article>
         </div>
       </BottomSheet>
-      <BottomSheet bodyClassName="activity-pool-sheet" onClose={() => setActivityPoolOpen(false)} open={activityPoolOpen} title={t("activity.prizePool")}>
+      <BottomSheet className="activity-info-sheet" bodyClassName="activity-pool-sheet" onClose={() => setActivityPoolOpen(false)} open={activityPoolOpen} title={t("activity.prizePool")}>
         <div className="activity-prize-intro"><strong>{t("activity.poolTitle")}</strong><p>{t("activity.poolBody")}</p></div>
         <div className="activity-prize-grid field-chat_bubble_style">
           {([

@@ -26892,3 +26892,50 @@ html[data-theme="dark"] .square-header-publish:hover {
     box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 10px 28px rgba(0,0,0,.16);
   }
 }
+
+/* Baxian activity: a single scrolling campaign poster and awakening trail. */
+.activity-drawer .drawer-body,.activity-drawer .drawer-body:is(html[data-theme="dark"] *){padding:0;background:#151522 none;overflow-x:hidden}
+.activity-drawer .activity-detail{position:relative;display:block;min-height:100%;padding:0;color:#f7efd8;background:linear-gradient(180deg,#252035 0,#171724 42%,#11121b 100%)}
+.activity-detail-visual{position:relative;isolation:isolate}
+.activity-detail-background{display:block;width:100%;height:auto;min-height:520px;object-fit:cover;object-position:top center}
+.activity-detail-masthead{position:absolute;z-index:2;inset:18px 18px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.activity-brand-lockup{display:flex;align-items:center;gap:8px;color:#f6e5ad}
+.activity-brand-lockup>span{display:grid;place-items:center;width:40px;height:40px;padding:3px;border:2px solid rgba(255,255,255,.92);border-radius:12px;background:#171d1b;box-shadow:0 6px 18px rgba(7,5,14,.28)}
+.activity-brand-lockup>span img{width:100%;height:100%;border-radius:8px;object-fit:cover}
+.activity-brand-lockup>span img:first-child{filter:none}
+.activity-brand-lockup>b{font:800 18px/1 Georgia,serif;color:#f4d98f}
+.activity-brand-lockup>img:last-child{width:auto;height:36px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.28))}
+.activity-detail-index{display:grid;justify-items:end;gap:7px;color:#f7e7b6;text-align:right}
+.activity-detail-index>div{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid rgba(235,199,118,.45);border-radius:999px;background:rgba(39,21,55,.62);box-shadow:inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.activity-detail-index button{padding:0;border:0;color:#ffe8a6;background:none;font-weight:800;cursor:pointer}
+.activity-detail-index i{width:1px;height:12px;background:rgba(255,232,166,.38)}
+.activity-detail-index time{font-size:11px;font-weight:700;letter-spacing:.04em;color:rgba(255,239,201,.82)}
+.activity-detail-intro{position:absolute;z-index:2;right:22px;bottom:22px;left:22px;padding:16px 18px;border:1px solid rgba(242,207,128,.28);border-radius:18px;background:linear-gradient(135deg,rgba(32,18,47,.7),rgba(73,35,69,.45));box-shadow:0 14px 36px rgba(7,5,15,.25);backdrop-filter:blur(14px)}
+.activity-detail-intro small{color:#f1ca72;font-weight:900;letter-spacing:.12em}
+.activity-detail-intro p{margin:5px 0 0;color:#fff4d8;line-height:1.55}
+.activity-awakening-stage{padding:24px 18px 34px;background:linear-gradient(180deg,rgba(28,25,42,.98),#11121b)}
+.activity-awakening-stage>header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.activity-awakening-stage>header div{display:grid;gap:2px}.activity-awakening-stage>header small{color:#b8a88e}.activity-awakening-stage>header strong{font-size:26px;color:#fff0bf}.activity-awakening-stage>header strong span{font-size:14px;color:#9d8e7b}
+.activity-awakening-stage>header button{min-height:42px;padding:0 16px;border:1px solid rgba(245,200,102,.42);border-radius:13px;color:#2c1b17;background:linear-gradient(135deg,#f6d783,#d99a4e);font-weight:900;box-shadow:0 9px 24px rgba(184,113,44,.2)}
+.activity-awakening-stage>header button:disabled{opacity:.42;box-shadow:none}
+.activity-immortal-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 30px)/4);gap:10px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 1px 10px}
+.activity-immortal-track::-webkit-scrollbar{display:none}
+.activity-immortal-track article{position:relative;display:grid;grid-template-rows:118px auto 34px;justify-items:center;min-width:0;scroll-snap-align:start;color:#70697a}
+.activity-immortal-figure{display:grid;place-items:end center;width:100%;height:118px;overflow:hidden}
+.activity-immortal-figure img{width:112px;height:112px;object-fit:contain;filter:brightness(0) saturate(0);opacity:.22;transform:translateY(3px);transition:filter .45s,opacity .45s,transform .45s}
+.activity-immortal-track article.is-unlocked .activity-immortal-figure img{filter:none;opacity:1;transform:none;filter:drop-shadow(0 9px 13px rgba(0,0,0,.3))}
+.activity-immortal-track article>strong{max-width:100%;overflow:hidden;color:inherit;font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.activity-immortal-track article.is-unlocked>strong{color:#f3d587}
+.activity-awakener-node{position:relative;z-index:1;display:grid;place-items:center;width:30px;height:30px;margin-top:5px;border:2px solid #554c61;border-radius:50%;color:#716779;background:#24212d;font-size:11px;font-weight:900}
+.activity-awakener-node::before,.activity-awakener-node::after{position:absolute;top:50%;width:calc((100vw - 66px)/8);height:2px;content:"";background:#413b49;transform:translateY(-50%);z-index:-1}
+.activity-awakener-node::before{right:100%}.activity-awakener-node::after{left:100%}
+.activity-immortal-track article:first-child .activity-awakener-node::before,.activity-immortal-track article:last-child .activity-awakener-node::after{display:none}
+.activity-immortal-track article.is-unlocked .activity-awakener-node{border-color:#f2c86c;background:#fff3cf;box-shadow:0 0 0 3px rgba(238,190,92,.12),0 4px 12px rgba(0,0,0,.25)}
+.activity-awakener-node .user-avatar{width:100%;height:100%;border-radius:50%}
+.activity-awakening-hint{margin:12px 0 0;color:#9f9485;font-size:12px;text-align:center}
+.activity-info-sheet .bottom-sheet-panel{color:#f7efd8;border-color:rgba(237,197,105,.26);background:linear-gradient(165deg,#302039,#171722 72%)}
+.activity-info-sheet .bottom-sheet-header{border-bottom-color:rgba(237,197,105,.18)}
+.activity-info-sheet .bottom-sheet-title{color:#f7d985}.activity-info-sheet .bottom-sheet-close{color:#f2d795;background:rgba(240,201,112,.1)}
+.activity-info-sheet :is(.activity-rule-list article,.activity-prize-grid article,.activity-prize-intro){border-color:rgba(237,197,105,.2);background:rgba(255,241,203,.055)}
+.activity-info-sheet :is(h3,strong){color:#fff0c2}.activity-info-sheet :is(p,small){color:#ac9f91}
+@media(max-width:520px){.activity-detail-masthead{inset:12px 12px auto}.activity-brand-lockup>span{width:34px;height:34px}.activity-brand-lockup>img{height:30px}.activity-detail-index>div{gap:6px;padding:5px 8px}.activity-detail-background{min-height:500px}.activity-detail-intro{right:12px;bottom:14px;left:12px}.activity-awakening-stage{padding-inline:12px}.activity-immortal-track{grid-auto-columns:calc((100% - 24px)/4);gap:8px}.activity-immortal-track article{grid-template-rows:104px auto 32px}.activity-immortal-figure{height:104px}.activity-immortal-figure img{width:100px;height:100px}}

@@ -1,23 +1,19 @@
 {
-  "id": "2026.08.23.4",
+  "id": "2026.08.23.5",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力主视觉上线",
+      "title": "八仙唤醒轨迹上线",
       "items": [
-        "八仙聚力活动页换上专属标题字与电影感竖版背景，任务内容会在画面底部自然延展",
-        "活动页新增言浪 × 八仙联名标识，规则和奖池独立展开，三款限定气泡可以直接预览",
-        "广场探索新增限时活动：认证成员每天发言可凝聚仙力，全空间共同解锁三款随机八仙气泡",
-        "三款八仙气泡的人物动画尺寸更加克制，并调整为通过活动获取"
+        "八仙聚力活动页改为连续滚动的电影画卷，并更新联名标识、规则与奖池视觉",
+        "八位仙人按唤醒顺序展开，未解锁时呈现剪影，解锁后会展示彩色人物与唤醒成员头像"
       ]
     },
     "en": {
-      "title": "A cinematic Baxian event arrives",
+      "title": "The Baxian awakening trail arrives",
       "items": [
-        "The Baxian event now features its bespoke title art and a cinematic portrait backdrop that flows naturally into the event content",
-        "The event now features Sermo × Baxian branding, focused rule and prize panels, and real previews of all three exclusive bubbles",
-        "A limited-time Square event lets verified members earn daily Force and unlock three random Baxian bubbles for the whole space",
-        "Character animations are now more restrained, and all three bubbles are unlocked through events"
+        "The Baxian event is now a continuous cinematic scroll with refreshed co-branding, rules, and prize visuals",
+        "All eight immortals now form an awakening trail with silhouettes for locked stages and contributor portraits for unlocked stages"
       ]
     }
   }

@@ -732,6 +732,11 @@ export interface ActivityCampaignDTO {
   space_total: number;
   target: number;
   milestones: ActivityMilestoneDTO[];
+  awakenings: Array<{
+    step: number;
+    threshold: number;
+    user: null | { user_id: number; name: string; avatar_uri?: string; avatar_frame_style?: string; is_permanent_vip?: boolean };
+  }>;
 }
 
 export interface LinkPreviewDTO {
