@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.23.15",
+  "id": "2026.08.23.16",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力横幅素材更新",
+      "title": "八仙聚力活动展示优化",
       "items": [
-        "广场活动入口换用新版八仙聚力完整横幅，法器与活动标题呈现更加统一"
+        "唤醒轨迹更自然地融入活动背景，未解锁人物也更加清晰",
+        "奖池聊天预览加高，并支持上下浏览完整对话"
       ]
     },
     "en": {
-      "title": "Baxian event banner artwork updated",
+      "title": "Baxian event presentation refined",
       "items": [
-        "The Square campaign entry now uses the new complete Baxian artwork for a more cohesive title and relic composition"
+        "The awakening path now blends into the event backdrop while locked characters remain easy to recognize",
+        "Prize-pool chat previews are taller and can now scroll through the full conversation"
       ]
     }
   }
