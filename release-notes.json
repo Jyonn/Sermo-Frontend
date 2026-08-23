@@ -1,10 +1,11 @@
 {
-  "id": "2026.08.23.7",
+  "id": "2026.08.23.8",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
       "title": "八仙活动细节优化",
       "items": [
+        "活动规则与奖池改为八仙专属金紫色面板，不再出现突兀的白色背景",
         "八仙聚力活动的唤醒轨迹加入轻盈毛玻璃承托，信息层次更清楚",
         "言浪方形 Logo 现在会稳定显示在白边圆角容器内",
         "八位仙人按唤醒顺序展开，未解锁时呈现剪影，解锁后会展示彩色人物与唤醒成员头像"
@@ -13,6 +14,7 @@
     "en": {
       "title": "Refined Baxian event details",
       "items": [
+        "Event rules and prizes now use a dedicated gold-and-violet Baxian surface instead of a stark white panel",
         "The Baxian awakening trail now rests on a subtle glass surface for clearer visual hierarchy",
         "The square Sermo logo now stays correctly framed inside its rounded white-border container",
         "All eight immortals now form an awakening trail with silhouettes for locked stages and contributor portraits for unlocked stages"
