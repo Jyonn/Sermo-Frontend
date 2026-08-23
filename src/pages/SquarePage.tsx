@@ -24,6 +24,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import ChatsPage from "./ChatsPage";
 import baxianActivityBanner from "../assets/activity/baxian-immortal-force-banner.jpg";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -1276,19 +1277,23 @@ export default function SquarePage() {
         </div>
       </BottomSheet>
       <BottomSheet className="activity-info-sheet" bodyClassName="activity-pool-sheet" onClose={() => setActivityPoolOpen(false)} open={activityPoolOpen} title={t("activity.prizePool")}>
-        <div className="activity-prize-intro"><strong>{t("activity.poolTitle")}</strong><p>{t("activity.poolBody")}</p></div>
-        <div className="activity-prize-grid field-chat_bubble_style">
+        <div className="activity-prize-grid">
           {([
             ["baxian-lv", "menu.styleBaxianLv"],
             ["baxian-zhongli", "menu.styleBaxianZhongli"],
             ["baxian-he", "menu.styleBaxianHe"],
-          ] as const).map(([style, label]) => {
-            const unlocked = activeActivity?.personal_reward?.resource_key === style || activeActivity?.milestones.some((milestone) => milestone.unlocked && milestone.resource_key === style);
-            return <article className={unlocked ? "is-unlocked" : ""} key={style}>
-            <span className={`personalization-option preview-${style}`}><i aria-hidden="true"><span /></i></span>
-            <div><strong>{t(label)}</strong><small>{t("activity.limitedReward")}</small></div>
-            <span className="material-symbols-outlined">{unlocked ? "lock_open" : "lock"}</span>
-          </article>;})}
+          ] as const).map(([style, label]) => (
+            <article key={style}>
+              <ChatsPage preview={{
+                avatarName: currentUser?.name ?? t("brand.user"),
+                avatarUri: currentUser?.avatar_uri,
+                backgroundTheme: "default",
+                bubbleStyle: style,
+                selfOnly: true,
+              }} />
+              <strong>{t(label)}</strong>
+            </article>
+          ))}
         </div>
       </BottomSheet>
       <SideDrawer

@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.23.11",
+  "id": "2026.08.23.12",
   "publishedAt": "2026-08-23",
   "locales": {
     "zh-CN": {
-      "title": "八仙聚力背景体验修复",
+      "title": "八仙奖池预览焕新",
       "items": [
-        "活动背景恢复为固定画布，浏览聚力进度时不再随内容一起滚走",
-        "活动主视觉移除重复的全空间协作说明，重要进度可以更快看到"
+        "三款活动气泡改用真实聊天场景横向预览，滑动即可直观比较效果"
       ]
     },
     "en": {
-      "title": "Baxian event background restored",
+      "title": "Baxian prize previews refreshed",
       "items": [
-        "The campaign artwork is fixed in place again while event progress scrolls above it",
-        "The repeated space collaboration panel has been removed so event progress is easier to reach"
+        "The three event bubbles now use real horizontally scrollable chat previews for easier comparison"
       ]
     }
   }
