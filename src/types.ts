@@ -20,6 +20,7 @@ export interface TinyUserDTO {
   avatar_uri?: string;
   avatar_cache_key?: string;
   is_permanent_vip?: boolean;
+  permanent_vip_slot?: number | null;
   show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
   avatar_frame_style?: AvatarFrameStyle;

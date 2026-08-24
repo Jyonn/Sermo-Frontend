@@ -596,6 +596,7 @@
   "profile.avatarLabel": "View {{name}}’s avatar",
   "profile.sameSpace": "Member of the same space",
   "profile.permanentVip": "Lifetime VIP",
+  "profile.permanentVipRank": "Lifetime VIP No. {{slot}}",
   "profile.sendMessage": "Message",
   "profile.sending": "Sending",
   "profile.sent": "Sent",

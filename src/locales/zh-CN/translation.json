@@ -596,6 +596,7 @@
   "profile.avatarLabel": "查看{{name}}的头像",
   "profile.sameSpace": "同一空间成员",
   "profile.permanentVip": "永久 VIP",
+  "profile.permanentVipRank": "全服第 {{slot}} 位永久 VIP",
   "profile.sendMessage": "发消息",
   "profile.sending": "发送中",
   "profile.sent": "已发送",

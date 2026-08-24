@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.1",
+  "id": "2026.08.25.2",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录展示更一致",
+      "title": "用户名片更有辨识度",
       "items": [
-        "合并转发与置顶记录现在沿用真实聊天气泡、头像和连续消息排版"
+        "用户详情采用社交名片布局，并展示永久 VIP 的全服编号"
       ]
     },
     "en": {
-      "title": "More consistent chat history",
+      "title": "A more distinctive profile card",
       "items": [
-        "Forwarded bundles and pinned messages now use the real chat bubbles, avatars, and message grouping"
+        "User profiles now use a social card layout and show each Lifetime VIP's global number"
       ]
     }
   }

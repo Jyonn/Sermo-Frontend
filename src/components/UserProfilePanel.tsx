@@ -25,6 +25,7 @@ export interface UserProfileSeed {
   is_alive?: boolean;
   last_heartbeat?: number;
   is_permanent_vip?: boolean;
+  permanent_vip_slot?: number | null;
   growth_level?: number;
   growth_level_name?: string;
   avatar_frame_style?: UserDTO["avatar_frame_style"];
@@ -287,32 +288,41 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   return (
     <div className="user-profile-panel">
-      <section className="user-profile-identity">
-        <button
-          aria-label={t("profile.avatarLabel", { name: user.name })}
-          className="user-profile-avatar-wrap"
-          disabled={!user.avatar_uri}
-          onClick={() => setAvatarPreviewOpen(true)}
-          type="button"
-        >
-          <UserAvatar
-            className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`}
-            frame={user.avatar_frame_style}
-            name={user.name}
-            uri={user.avatar_uri}
-            vip={Boolean(user.is_permanent_vip)}
-          />
-        </button>
-        <div className="user-profile-copy">
-          <div className="user-profile-name-row">
-            <h2>{user.name}</h2>
+      <section className="user-profile-social-card">
+        <div className="user-profile-cover" aria-hidden="true" />
+        <div className="user-profile-identity">
+          <button
+            aria-label={t("profile.avatarLabel", { name: user.name })}
+            className="user-profile-avatar-wrap"
+            disabled={!user.avatar_uri}
+            onClick={() => setAvatarPreviewOpen(true)}
+            type="button"
+          >
+            <UserAvatar
+              className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`}
+              frame={user.avatar_frame_style}
+              name={user.name}
+              uri={user.avatar_uri}
+              vip={Boolean(user.is_permanent_vip)}
+            />
+          </button>
+          <div className="user-profile-copy">
+            <div className="user-profile-name-row">
+              <h2>{user.name}</h2>
+            </div>
+            <p className={user.is_alive ? "is-online" : ""}>{presence}</p>
           </div>
-          <p className={user.is_alive ? "is-online" : ""}>{presence}</p>
-          <div className="user-profile-facts">
-            <span>{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</span>
-            {!user.official && user.growth_level ? <span>LV{user.growth_level}</span> : null}
-            {user.is_permanent_vip ? <span className="is-vip">VIP</span> : null}
-          </div>
+        </div>
+        <div className="user-profile-facts">
+          <span className="is-relationship">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</span>
+          {!user.official && user.growth_level ? <span className="is-level">LV{user.growth_level}</span> : null}
+          {user.is_permanent_vip ? (
+            <span className="is-vip">
+              {user.permanent_vip_slot
+                ? t("profile.permanentVipRank", { slot: user.permanent_vip_slot })
+                : t("profile.permanentVip")}
+            </span>
+          ) : null}
         </div>
       </section>
 
