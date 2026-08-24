@@ -21,7 +21,7 @@ CHARACTERS = {
     },
     "he-xiangu": {
         "name": "何仙姑",
-        "motion": "douli updraft → lotus wind ring → light seal unfold",
+        "motion": "black douli turn → pale bubble-pink silk ring → compact pink seal settle",
     },
 }
 FRAME_SIZE = 256
