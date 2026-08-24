@@ -2352,6 +2352,15 @@ export default function MenuPage() {
           </div>
           <div className={`chat-personalization-demo-shell${chatPreviewDemoOpen ? " is-visible" : ""}`}>
             <section aria-label={t("menu.previewScene")} className="chat-personalization-demo-panel">
+              <header className="chat-personalization-demo-heading">
+                <span>
+                  <small>{t("menu.previewScene")}</small>
+                  <strong>{t(chatPreviewDemoKinds.find((item) => item.kind === chatPreviewDemoKind)?.label ?? "menu.previewKindText")}</strong>
+                </span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  {chatPreviewDemoKinds.find((item) => item.kind === chatPreviewDemoKind)?.icon ?? "notes"}
+                </span>
+              </header>
               <div className="chat-personalization-demo-kinds" role="listbox">
                 {chatPreviewDemoKinds.map((item) => (
                   <button
@@ -2368,19 +2377,22 @@ export default function MenuPage() {
                 ))}
               </div>
               <div className="chat-personalization-demo-options">
-                <div className="chat-personalization-demo-sides" role="radiogroup" aria-label={t("menu.previewSender")}>
-                  {(["other", "both", "self"] as const).map((side) => (
-                    <button
-                      aria-checked={chatPreviewDemoSide === side}
-                      className={chatPreviewDemoSide === side ? "is-active" : ""}
-                      key={side}
-                      onClick={() => setChatPreviewDemoSide(side)}
-                      role="radio"
-                      type="button"
-                    >
-                      {t(`menu.previewSide.${side}` as TranslationKey)}
-                    </button>
-                  ))}
+                <div className="chat-personalization-demo-sender">
+                  <span>{t("menu.previewSender")}</span>
+                  <div className="chat-personalization-demo-sides" role="radiogroup" aria-label={t("menu.previewSender")}>
+                    {(["other", "both", "self"] as const).map((side) => (
+                      <button
+                        aria-checked={chatPreviewDemoSide === side}
+                        className={chatPreviewDemoSide === side ? "is-active" : ""}
+                        key={side}
+                        onClick={() => setChatPreviewDemoSide(side)}
+                        role="radio"
+                        type="button"
+                      >
+                        {t(`menu.previewSide.${side}` as TranslationKey)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <button
                   aria-pressed={chatPreviewDemoGrouped}
