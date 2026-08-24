@@ -799,6 +799,7 @@ export interface ChatMessagePayloadDTO {
   summary?: string;
   item_count?: number;
   items?: ForwardBundleItemDTO[];
+  first_person_user_id?: number | null;
 }
 
 export interface ForwardBundleItemDTO {

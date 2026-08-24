@@ -1496,9 +1496,9 @@ export const api = {
   getPlatformMemberChats(userId: number, signal?: AbortSignal) {
     return request<ChatDTO[]>(`/platform-admin/members/${userId}/chats`, { platformAdminAuth: true, signal });
   },
-  getPlatformChatMessages(chatId: number, reason: string, before?: number, signal?: AbortSignal) {
-    return request<{ chat: ChatDTO; messages: ChatMessageDTO[]; has_more: boolean; next_before: number | null }>(`/platform-admin/chats/${chatId}/messages`, {
-      platformAdminAuth: true, query: { reason, before, limit: 50 }, signal,
+  getPlatformChatMessages(chatId: number, reason: string, before?: number, perspectiveUserId?: number | null, signal?: AbortSignal) {
+    return request<{ chat: ChatDTO; messages: ChatMessageDTO[]; has_more: boolean; next_before: number | null; first_person_user_id: number | null }>(`/platform-admin/chats/${chatId}/messages`, {
+      platformAdminAuth: true, query: { reason, before, perspective_user_id: perspectiveUserId, limit: 50 }, signal,
     });
   },
   getPlatformMessageDeliveries(messageId: number, reason: string, signal?: AbortSignal) {

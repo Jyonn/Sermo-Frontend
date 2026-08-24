@@ -23639,6 +23639,23 @@ html[data-theme="dark"] .message-search-more {
   pointer-events: none;
 }
 
+.chat-preview-shared {
+  height: auto;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.chat-preview-shared .chat-detail-scene,
+.chat-preview-shared .message-scroll { overflow: visible; }
+.chat-preview-shared .message-scroll { padding: 14px 10px 20px; }
+.chat-preview-shared.platform-audit-chat-preview .message-scroll :is(button, a, audio, video) { pointer-events: auto; }
+.forward-bundle-chat-preview { margin-top: 12px; }
+.pinned-message-chat-preview { min-width: 0; }
+.pinned-message-chat-preview .message-scroll { padding: 3px 0; }
+.pinned-message-chat-preview .message-group { margin: 0; }
+
 html[data-theme="dark"] .chat-conversation-preview {
   border-color: rgba(210, 235, 222, .12);
   background: #10211c;

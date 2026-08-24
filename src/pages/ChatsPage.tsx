@@ -1450,37 +1450,15 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   );
 });
 
-function ForwardBundleViewerItem({ item }: { item: ForwardBundleItemDTO }) {
-  const kind = item.payload?.kind ?? messageKindFromType(item.type);
-  const uri = item.payload?.uri ? resolveStableResourceUri(item.payload.uri) ?? item.payload.uri : "";
-  const thumbnailUri = item.payload?.thumbnail_uri
-    ? resolveStableResourceUri(item.payload.thumbnail_uri) ?? item.payload.thumbnail_uri
-    : uri;
-  let content: ReactNode;
-  if (kind === "image" && uri) {
-    content = <a href={uri} rel="noreferrer" target="_blank"><img alt="" loading="lazy" src={thumbnailUri} /></a>;
-  } else if (kind === "video" && uri) {
-    content = <video controls playsInline poster={thumbnailUri || undefined} preload="metadata" src={uri} />;
-  } else if (kind === "audio" && uri) {
-    content = <AudioMessagePlayer durationSeconds={item.payload.duration_seconds} from="other" uri={uri} />;
-  } else if (kind === "file" && uri) {
-    content = <a className="forward-bundle-file" href={uri} rel="noreferrer" target="_blank"><ComposerSvgIcon kind="file" /><span><strong>{item.payload.file_name || i18n.t("media.file")}</strong><small>{formatFileSize(item.payload.file_size)}</small></span></a>;
-  } else if (kind === "location") {
-    content = <span className="forward-bundle-location"><ComposerSvgIcon kind="location" /><span>{item.payload.address || i18n.t("message.locationPlaceholder")}</span></span>;
-  } else if (kind === "sticker" && uri) {
-    content = <img className="forward-bundle-sticker" alt="" loading="lazy" src={uri} />;
-  } else {
-    content = <p>{item.payload?.text || item.content || previewFromKind(kind, item.content)}</p>;
-  }
-  return (
-    <article className={`forward-bundle-item is-${kind}`}>
-      <header>
-        <UserAvatar className="forward-bundle-avatar" name={item.author?.name || "?"} uri={item.author?.avatar_uri} frame={item.author?.avatar_frame_style} />
-        <span><strong>{item.author?.name || i18n.t("message.unknownSender")}</strong><time>{formatThreadDivider(item.sent_at)}</time></span>
-      </header>
-      <div className="forward-bundle-item-content">{content}</div>
-    </article>
-  );
+function forwardBundleItemsAsMessages(items: ForwardBundleItemDTO[]): ChatMessageDTO[] {
+  return items.map((item, index) => ({
+    message_id: -(index + 1),
+    user: item.author,
+    type: item.type,
+    content: item.content,
+    payload: item.payload,
+    created_at: item.sent_at,
+  }));
 }
 
 function renderMessageContent(
@@ -2078,6 +2056,33 @@ interface MessageGroup {
   avatarFrameStyle?: ChatMessage["avatarFrameStyle"];
   dividerLabel?: string;
   messages: ChatMessage[];
+}
+
+function buildMessageGroups(messages: ChatMessage[]): MessageGroup[] {
+  const groups: MessageGroup[] = [];
+  messages.forEach((message, index) => {
+    const previous = messages[index - 1];
+    const dividerLabel = shouldShowThreadDivider(message, previous) ? formatThreadDivider(message.createdAt) : undefined;
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup && !dividerLabel && shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1])) {
+      lastGroup.messages.push(message);
+      return;
+    }
+    groups.push({
+      key: message.clientId,
+      userId: message.userId,
+      from: message.from,
+      name: message.name,
+      avatarUri: message.avatarUri,
+      avatarCacheKey: message.avatarCacheKey,
+      isPermanentVip: message.isPermanentVip,
+      chatBubbleStyle: message.chatBubbleStyle,
+      avatarFrameStyle: message.avatarFrameStyle,
+      dividerLabel,
+      messages: [message],
+    });
+  });
+  return groups;
 }
 
 function estimateMessageRowHeight(message: ChatMessage) {
@@ -3303,40 +3308,7 @@ function LiveChatsPage() {
     });
   }, [selectedChat, selectedMessages]);
 
-  const messageGroups = useMemo<MessageGroup[]>(() => {
-    const groups: MessageGroup[] = [];
-
-    selectedMessages.forEach((message, index) => {
-      const previous = selectedMessages[index - 1];
-      const dividerLabel = shouldShowThreadDivider(message, previous) ? formatThreadDivider(message.createdAt) : undefined;
-      const lastGroup = groups[groups.length - 1];
-      const canJoinLastGroup =
-        lastGroup &&
-        !dividerLabel &&
-        shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1]);
-
-      if (canJoinLastGroup) {
-        lastGroup.messages.push(message);
-        return;
-      }
-
-      groups.push({
-        key: message.clientId,
-        userId: message.userId,
-        from: message.from,
-        name: message.name,
-        avatarUri: message.avatarUri,
-        avatarCacheKey: message.avatarCacheKey,
-        isPermanentVip: message.isPermanentVip,
-        chatBubbleStyle: message.chatBubbleStyle,
-        avatarFrameStyle: message.avatarFrameStyle,
-        dividerLabel,
-        messages: [message],
-      });
-    });
-
-    return groups;
-  }, [selectedMessages]);
+  const messageGroups = useMemo(() => buildMessageGroups(selectedMessages), [selectedMessages]);
 
   messageGroupIndexRef.current = new Map(
     messageGroups.flatMap((group, groupIndex) => group.messages.flatMap((message) => (
@@ -6746,9 +6718,11 @@ function LiveChatsPage() {
             <span className="material-symbols-outlined" aria-hidden="true">forum</span>
             <span><strong>{t("message.forwardBundleSnapshot")}</strong><small>{forwardBundlePreview?.summary || t("message.forwardBundleSnapshotHint")}</small></span>
           </header>
-          <div className="forward-bundle-viewer-list">
-            {(forwardBundlePreview?.items ?? []).map((item) => <ForwardBundleViewerItem item={item} key={`${item.position}:${item.sent_at}`} />)}
-          </div>
+          <ChatPreview
+            className="forward-bundle-chat-preview"
+            firstPersonUserId={forwardBundlePreview?.first_person_user_id}
+            messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
+          />
         </div>
       </SideDrawer>
 
@@ -6765,29 +6739,19 @@ function LiveChatsPage() {
             return (
             <article className={`pinned-message-card${pinnedByCurrentUser ? " is-mine" : " is-readonly"}`} key={pin.pin_id}>
               <span className="pinned-message-sequence">{String(index + 1).padStart(2, "0")}</span>
-              <button className="pinned-message-content" onClick={() => revealPinnedMessage(pin.message.message_id)} type="button">
-                <UserAvatar className="pinned-message-avatar" name={pin.message.user.name} uri={pin.message.user.avatar_uri} />
-                <span className="pinned-message-body">
-                  <span className="pinned-message-meta">
-                    <strong>{pin.message.user.name}</strong>
-                    <time>{formatRelativeTime(pin.message.created_at)}</time>
-                  </span>
-                  <span className="pinned-message-preview">{pinnedMessagePreview(pin)}</span>
-                  <small className="pinned-message-attribution" title={t("pin.by", { names: pinnedByLabel(pin) })}>
-                    <span>{t("pin.by", { names: pinnedByLabel(pin) })}</span>
-                    <i />
-                    <time>{formatRelativeTime(pin.pinned_at)}</time>
-                  </small>
-                </span>
-                {[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(pin.message.type) && (pin.message.payload?.thumbnail_uri || pin.message.payload?.uri) ? (
-                  <img
-                    alt=""
-                    aria-hidden="true"
-                    className="pinned-message-media"
-                    src={pin.message.payload.thumbnail_uri || pin.message.payload.uri}
-                  />
-                ) : null}
-              </button>
+              <div className="pinned-message-content" onClick={() => revealPinnedMessage(pin.message.message_id)}>
+                <ChatPreview
+                  className="pinned-message-chat-preview"
+                  firstPersonUserId={currentUserId}
+                  messages={[pin.message]}
+                  showAuthors={false}
+                />
+                <small className="pinned-message-attribution" title={t("pin.by", { names: pinnedByLabel(pin) })}>
+                  <span>{t("pin.by", { names: pinnedByLabel(pin) })}</span>
+                  <i />
+                  <time>{formatRelativeTime(pin.pinned_at)}</time>
+                </small>
+              </div>
               <span className="pinned-message-action-slot">
               {canUnpin ? (
                 <button
@@ -7951,6 +7915,67 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
               selectedClientIds={[]}
               selectionMode={false}
               showAuthor={false}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function ChatPreview({
+  className = "",
+  firstPersonUserId,
+  messages,
+  onMessageClick,
+  showAuthors = true,
+}: {
+  className?: string;
+  firstPersonUserId?: number | null;
+  messages: ChatMessageDTO[];
+  onMessageClick?: (message: ChatMessageDTO) => void;
+  showAuthors?: boolean;
+}) {
+  const dtoById = useMemo(() => new Map(messages.map((message) => [message.message_id, message])), [messages]);
+  const mappedMessages = useMemo(
+    () => sortMessages(messages.map((message) => mapChatMessage(message, firstPersonUserId ?? -1))),
+    [firstPersonUserId, messages],
+  );
+  const groups = useMemo(() => buildMessageGroups(mappedMessages), [mappedMessages]);
+  const noop = () => undefined;
+  const openMessage = (message: ChatMessage) => {
+    if (typeof message.id !== "number") return;
+    const source = dtoById.get(message.id);
+    if (source) onMessageClick?.(source);
+  };
+
+  return (
+    <section
+      className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
+      onClickCapture={onMessageClick ? (event) => {
+        const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
+        const messageId = Number(messageNode?.dataset.messageId);
+        const source = dtoById.get(messageId);
+        if (source) onMessageClick(source);
+      } : undefined}
+    >
+      <div className="chat-detail-scene chat-background-default">
+        <div className="message-scroll">
+          {groups.map((group) => (
+            <MessageGroupBlock
+              enteringMessageIds={[]}
+              group={group}
+              key={group.key}
+              onOpenActions={(message) => openMessage(message)}
+              onOpenImage={noop}
+              onOpenVideo={noop}
+              onRetry={noop}
+              onToggleGroupSelection={noop}
+              onToggleSelection={noop}
+              selectedClientIds={[]}
+              selectionMode={false}
+              showAuthor={showAuthors && group.from === "other"}
+              showSelfAvatar
             />
           ))}
         </div>

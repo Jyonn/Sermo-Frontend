@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.24.5",
-  "publishedAt": "2026-08-24",
+  "id": "2026.08.25.1",
+  "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "聊天外观预览更顺手",
+      "title": "聊天记录展示更一致",
       "items": [
-        "预览场景改为自适应网格，消息类型、发送方与连续气泡设置更清晰"
+        "合并转发与置顶记录现在沿用真实聊天气泡、头像和连续消息排版"
       ]
     },
     "en": {
-      "title": "A smoother chat appearance preview",
+      "title": "More consistent chat history",
       "items": [
-        "Preview scenes now use a responsive grid with clearer message type, sender, and grouped-bubble controls"
+        "Forwarded bundles and pinned messages now use the real chat bubbles, avatars, and message grouping"
       ]
     }
   }
