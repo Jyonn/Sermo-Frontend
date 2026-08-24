@@ -21,7 +21,7 @@
 - `source/keyposes-chroma.png`：ImageGen 原始洋红底候选姿态板，仅供再生成和追溯。
 - `source/keyposes.png`：去色键后的透明候选姿态板。
 
-何仙姑气泡印章使用 `bubble-elements-v2/he-xiangu-pink-baxian-seal-128.png`。该版本为低饱和藕荷粉不规则窄印，并在统一的 128px 透明画布内保留较大留白；不要通过 CSS 裁掉透明边距或再次放大印章主体。
+何仙姑气泡印章使用 `bubble-elements-v2/he-xiangu-pink-baxian-seal-128.png`。该版本使用与聊天气泡一致的浅粉色（约 `#E4CDDC`）、稍深粉边缘和柔和香槟金字，并在统一的 128px 透明画布内保留较大留白；不要通过 CSS 裁掉透明边距或再次放大印章主体。
 
 ## Codex 必须遵守的接入规则
 
