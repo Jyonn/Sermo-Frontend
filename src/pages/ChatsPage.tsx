@@ -7708,12 +7708,20 @@ export interface ChatsPagePreviewConfig {
     latitude?: number;
     longitude?: number;
   }>;
+  demo?: {
+    kind: ChatPreviewDemoKind;
+    side: ChatPreviewDemoSide;
+    grouped: boolean;
+  };
   selfOnly?: boolean;
 }
 
+export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "map_access" | "statement" | "forward_bundle" | "activity" | "link";
+export type ChatPreviewDemoSide = "other" | "both" | "self";
+
 const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
 
-function previewMessage(kind: MessageKind, from: "self" | "other", index: number, config: ChatsPagePreviewConfig): ChatMessage {
+function previewMessage(kind: MessageKind | "link", from: "self" | "other", index: number, config: ChatsPagePreviewConfig): ChatMessage {
   const now = 1785686400 + index;
   const base: ChatMessage = {
     id: `preview-${from}-${kind}-${index}`,
@@ -7721,7 +7729,7 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
     userId: from === "self" ? 1 : 2,
     from,
     type: MESSAGE_TYPE_TEXT,
-    kind,
+    kind: kind === "link" ? "text" : kind,
     name: from === "self" ? i18n.t("common.me") : config.avatarName,
     avatarUri: from === "other" ? config.avatarUri : undefined,
     chatBubbleStyle: config.bubbleStyle,
@@ -7737,9 +7745,53 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
   if (kind === "location") return { ...base, type: MESSAGE_TYPE_LOCATION, payload: { kind, latitude: 24.4798, longitude: 118.0894, address: i18n.t("menu.bubblePreviewLocation") } };
   if (kind === "map_access") return { ...base, type: MESSAGE_TYPE_MAP_ACCESS, payload: { kind, text: i18n.t("travelMap.messageJoin"), owner: { user_id: 2, name: config.avatarName }, access: { can_view_theirs: true, they_can_view_mine: true } } };
   if (kind === "statement") return { ...base, type: MESSAGE_TYPE_STATEMENT, payload: { kind, statement_id: 1, statement: { statement_id: 1, user: { user_id: 2, name: config.avatarName, avatar_uri: config.avatarUri }, text: i18n.t("menu.bubblePreviewStatement"), visibility: "public", media: [{ media_id: 1, kind: "image", uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE }], comment_count: 8, like_count: 26, liked: false, can_delete: false, created_at: now } } };
-  if (index === 14) {
+  if (kind === "forward_bundle") return {
+    ...base,
+    type: MESSAGE_TYPE_FORWARD_BUNDLE,
+    payload: {
+      kind,
+      item_count: 6,
+      summary: i18n.t("menu.previewForwardSummary"),
+      items: [{ position: 0, type: MESSAGE_TYPE_TEXT, author: { user_id: 2, name: config.avatarName, avatar_uri: config.avatarUri }, content: i18n.t("menu.bubblePreviewOther"), payload: { kind: "text", text: i18n.t("menu.bubblePreviewOther") }, sent_at: now }],
+    },
+  };
+  if (kind === "activity") return {
+    ...base,
+    type: MESSAGE_TYPE_ACTIVITY,
+    payload: {
+      kind,
+      activity_key: "baxian-juli-2026",
+      title: i18n.t("menu.previewActivityTitle"),
+      activity: {
+        key: "baxian-juli-2026",
+        title: i18n.t("menu.previewActivityTitle"),
+        title_en: "Eight Immortals Rally",
+        summary: "",
+        summary_en: "",
+        starts_at: now - 86400,
+        ends_at: now + 86400,
+        active: true,
+        verified: true,
+        today_earned: false,
+        claimable_points: 0,
+        available_points: 0,
+        contributed_points: 0,
+        personal_event_count: 1,
+        personal_event_target: 2,
+        personal_reward_claimable: false,
+        personal_reward: null,
+        official_user: null,
+        space_total: 8,
+        target: 16,
+        milestones: [],
+        awakenings: [],
+      },
+    },
+  };
+  if (kind === "link") {
     return {
       ...base,
+      kind: "text",
       payload: {
         kind: "text",
         text: "https://sermo.jyonn.space",
@@ -7757,11 +7809,66 @@ function previewMessage(kind: MessageKind, from: "self" | "other", index: number
   return base;
 }
 
+const CHAT_PREVIEW_ALL_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "image", "video", "gallery", "audio", "file", "location", "map_access", "statement", "forward_bundle", "activity", "link"];
+
+function previewMessagesForDemo(kind: ChatPreviewDemoKind, from: "self" | "other", startIndex: number, grouped: boolean, config: ChatsPagePreviewConfig) {
+  const kinds: Array<Exclude<ChatPreviewDemoKind, "all">> = kind === "all" ? CHAT_PREVIEW_ALL_KINDS : [kind];
+  const messages: ChatMessage[] = [];
+  let index = startIndex;
+  kinds.forEach((currentKind) => {
+    if (currentKind === "gallery") {
+      const galleryCount = grouped ? 4 : 3;
+      for (let offset = 0; offset < galleryCount; offset += 1) {
+        messages.push(previewMessage("image", from, index, config));
+        index += 1;
+      }
+      return;
+    }
+    const repeats = grouped && kind !== "all" ? 3 : 1;
+    for (let offset = 0; offset < repeats; offset += 1) {
+      const message = previewMessage(currentKind, from, index, config);
+      messages.push(currentKind === "text" && repeats > 1
+        ? { ...message, text: i18n.t(`menu.previewMergedText${offset + 1}` as TranslationKey) }
+        : message);
+      index += 1;
+    }
+  });
+  return messages;
+}
+
+function previewDemoGroups(config: ChatsPagePreviewConfig, t: ReturnType<typeof useI18n>["t"]): MessageGroup[] {
+  const demo = config.demo;
+  if (!demo) return [];
+  const sides: Array<"self" | "other"> = demo.side === "both" ? ["other", "self"] : [demo.side];
+  if (demo.kind === "all" && !demo.grouped) {
+    return CHAT_PREVIEW_ALL_KINDS.map((kind, index) => {
+      const from = sides[index % sides.length];
+      return {
+        key: `preview-demo-${kind}-${from}-${index}`,
+        from,
+        name: from === "self" ? t("common.me") : config.avatarName,
+        avatarUri: from === "other" ? config.avatarUri : undefined,
+        chatBubbleStyle: config.bubbleStyle,
+        messages: previewMessagesForDemo(kind, from, index * 10, false, config),
+      };
+    });
+  }
+  return sides.map((from, index) => ({
+    key: `preview-demo-${demo.kind}-${from}`,
+    from,
+    name: from === "self" ? t("common.me") : config.avatarName,
+    avatarUri: from === "other" ? config.avatarUri : undefined,
+    chatBubbleStyle: config.bubbleStyle,
+    messages: previewMessagesForDemo(demo.kind, from, index * 100, demo.grouped, config),
+  }));
+}
+
 function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig }) {
   const { t } = useI18n();
   if (config.selfOnly) {
+    const demoGroups = previewDemoGroups(config, t);
     const dialogue = config.dialogue?.length ? config.dialogue : [{ from: "self" as const, text: t("menu.bubblePreviewSelf") }];
-    const groups = dialogue.reduce<MessageGroup[]>((result, item, index) => {
+    const groups = demoGroups.length ? demoGroups : dialogue.reduce<MessageGroup[]>((result, item, index) => {
       const kind = item.kind ?? "text";
       const preview = previewMessage(kind, item.from, index + 1, config);
       const message: ChatMessage = kind === "location"
@@ -7787,7 +7894,15 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       ? ({ "--chat-background-image": `url("${config.backgroundUri.replace(/\"/g, "%22")}")` } as CSSProperties)
       : undefined;
     return (
-      <section aria-label={t("menu.chatBubble")} className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`} onContextMenu={(event) => event.preventDefault()}>
+      <section
+        aria-label={t("menu.chatBubble")}
+        className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`}
+        onClickCapture={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+        onContextMenu={(event) => event.preventDefault()}
+      >
         <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`} style={previewBackgroundStyle}>
           <div className="message-scroll">
             {groups.map((group) => <MessageGroupBlock enteringMessageIds={[]} group={group} key={group.key} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />)}

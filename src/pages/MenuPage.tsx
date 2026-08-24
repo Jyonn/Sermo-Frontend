@@ -39,7 +39,7 @@ import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
 import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
-import ChatsPage from "./ChatsPage";
+import ChatsPage, { type ChatPreviewDemoKind, type ChatPreviewDemoSide } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 
@@ -161,6 +161,22 @@ type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type ChatPersonalizationPanel = "background" | "bubble" | null;
 type PersonalizationCatalogItem = readonly [string, TranslationKey];
 type PersonalizationCatalogSection = { key: string; label: string; items: PersonalizationCatalogItem[] };
+
+const chatPreviewDemoKinds: Array<{ icon: string; kind: ChatPreviewDemoKind; label: TranslationKey }> = [
+  { kind: "all", icon: "dashboard", label: "menu.previewKindAll" },
+  { kind: "text", icon: "notes", label: "menu.previewKindText" },
+  { kind: "image", icon: "image", label: "menu.previewKindImage" },
+  { kind: "video", icon: "videocam", label: "menu.previewKindVideo" },
+  { kind: "gallery", icon: "photo_library", label: "menu.previewKindGallery" },
+  { kind: "audio", icon: "mic", label: "menu.previewKindAudio" },
+  { kind: "file", icon: "description", label: "menu.previewKindFile" },
+  { kind: "location", icon: "location_on", label: "menu.previewKindLocation" },
+  { kind: "map_access", icon: "map", label: "menu.previewKindTravelMap" },
+  { kind: "statement", icon: "speaker_notes", label: "menu.previewKindStatement" },
+  { kind: "forward_bundle", icon: "forum", label: "menu.previewKindForward" },
+  { kind: "activity", icon: "campaign", label: "menu.previewKindActivity" },
+  { kind: "link", icon: "link", label: "menu.previewKindLink" },
+];
 
 function PersonalizationOwnershipSelect({
   onOwnershipChange,
@@ -447,6 +463,10 @@ export default function MenuPage() {
   const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
   const [chatPageDrawerOpen, setChatPageDrawerOpen] = useState(false);
   const [chatPersonalizationPanel, setChatPersonalizationPanel] = useState<ChatPersonalizationPanel>(null);
+  const [chatPreviewDemoOpen, setChatPreviewDemoOpen] = useState(false);
+  const [chatPreviewDemoKind, setChatPreviewDemoKind] = useState<ChatPreviewDemoKind>("text");
+  const [chatPreviewDemoSide, setChatPreviewDemoSide] = useState<ChatPreviewDemoSide>("both");
+  const [chatPreviewDemoGrouped, setChatPreviewDemoGrouped] = useState(true);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [statementCardDrawerOpen, setStatementCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
@@ -2280,25 +2300,31 @@ export default function MenuPage() {
         onClose={() => {
           setChatPageDrawerOpen(false);
           setChatPersonalizationPanel(null);
+          setChatPreviewDemoOpen(false);
         }}
         title={t("menu.chatPage")}
       >
-        <div className={`chat-personalization-workspace${chatPersonalizationPanel ? " is-editing" : " is-overview"}`}>
+        <div className={`chat-personalization-workspace${chatPersonalizationPanel ? " is-editing" : " is-overview"}${chatPreviewDemoOpen ? " is-demo-open" : ""}`}>
           <div className="chat-personalization-preview-viewport">
+            <button
+              aria-expanded={chatPreviewDemoOpen}
+              className={`chat-personalization-demo-toggle${chatPreviewDemoOpen ? " is-active" : ""}`}
+              onClick={() => setChatPreviewDemoOpen((current) => !current)}
+              type="button"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">tune</span>
+              <span>{t("menu.previewScene")}</span>
+            </button>
             <div className="chat-personalization-preview-scale">
-            <ChatsPage preview={{
-              avatarName: space?.official_user?.name ?? t("brand.user"),
-              avatarUri: space?.official_user?.avatar_uri,
-              backgroundTheme: chatBackgroundDraft,
-              backgroundUri: chatBackgroundDraft === "custom" ? me?.chat_background_uri : undefined,
-              bubbleStyle: visibleBubbleStyle(personalizationDraft.chat_bubble_style),
-              dialogue: [
-                { from: "other", text: t("menu.backgroundPreviewOther") },
-                { from: "self", text: t("menu.backgroundPreviewSelf") },
-                { from: "other", text: t("menu.bubblePreviewOther") },
-              ],
-              selfOnly: true,
-            }} />
+              <ChatsPage preview={{
+                avatarName: space?.official_user?.name ?? t("brand.user"),
+                avatarUri: space?.official_user?.avatar_uri,
+                backgroundTheme: chatBackgroundDraft,
+                backgroundUri: chatBackgroundDraft === "custom" ? me?.chat_background_uri : undefined,
+                bubbleStyle: visibleBubbleStyle(personalizationDraft.chat_bubble_style),
+                demo: { kind: chatPreviewDemoKind, side: chatPreviewDemoSide, grouped: chatPreviewDemoGrouped },
+                selfOnly: true,
+              }} />
             </div>
           </div>
           <div className="chat-personalization-controls">
@@ -2324,6 +2350,50 @@ export default function MenuPage() {
               />
             ) : null}
           </div>
+          <div className={`chat-personalization-demo-shell${chatPreviewDemoOpen ? " is-visible" : ""}`}>
+            <section aria-label={t("menu.previewScene")} className="chat-personalization-demo-panel">
+              <div className="chat-personalization-demo-kinds" role="listbox">
+                {chatPreviewDemoKinds.map((item) => (
+                  <button
+                    aria-selected={chatPreviewDemoKind === item.kind}
+                    className={chatPreviewDemoKind === item.kind ? "is-active" : ""}
+                    key={item.kind}
+                    onClick={() => setChatPreviewDemoKind(item.kind)}
+                    role="option"
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span>
+                    <span>{t(item.label)}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="chat-personalization-demo-options">
+                <div className="chat-personalization-demo-sides" role="radiogroup" aria-label={t("menu.previewSender")}>
+                  {(["other", "both", "self"] as const).map((side) => (
+                    <button
+                      aria-checked={chatPreviewDemoSide === side}
+                      className={chatPreviewDemoSide === side ? "is-active" : ""}
+                      key={side}
+                      onClick={() => setChatPreviewDemoSide(side)}
+                      role="radio"
+                      type="button"
+                    >
+                      {t(`menu.previewSide.${side}` as TranslationKey)}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  aria-pressed={chatPreviewDemoGrouped}
+                  className={`chat-personalization-demo-group${chatPreviewDemoGrouped ? " is-active" : ""}`}
+                  onClick={() => setChatPreviewDemoGrouped((current) => !current)}
+                  type="button"
+                >
+                  <span>{t("menu.previewContinuous")}</span>
+                  <i aria-hidden="true"><span /></i>
+                </button>
+              </div>
+            </section>
+          </div>
           <div className={`chat-personalization-library-shell${chatPersonalizationPanel ? " is-visible" : ""}`}>
             <div className="chat-personalization-library">
               {chatPersonalizationPanel === "background" ? (
@@ -2335,7 +2405,7 @@ export default function MenuPage() {
                         {section.items.map(([theme, label]) => (
                           <button
                             aria-pressed={chatBackgroundDraft === theme}
-                            className={`chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${!canUseBackgroundStyle(theme as ChatBackgroundTheme) ? " is-locked" : ""}`}
+                            className={`chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${!canUseBackgroundStyle(theme as ChatBackgroundTheme) ? " is-preview-only" : ""}`}
                             disabled={chatBackgroundSaving}
                             key={theme}
                             onClick={() => setChatBackgroundDraft(theme as ChatBackgroundTheme)}
@@ -2373,7 +2443,7 @@ export default function MenuPage() {
                     {section.items.map(([value, label]) => (
                     <button
                       aria-pressed={personalizationDraft.chat_bubble_style === value}
-                      className={`personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!canUseBubbleStyle(value as ChatBubbleStyle) ? " is-locked" : ""}`}
+                      className={`personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!canUseBubbleStyle(value as ChatBubbleStyle) ? " is-preview-only" : ""}`}
                       disabled={personalizationSaving}
                       key={value}
                       onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: value as ChatBubbleStyle }))}

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.24.3",
+  "id": "2026.08.24.4",
   "publishedAt": "2026-08-24",
   "locales": {
     "zh-CN": {
-      "title": "何仙姑气泡动效焕新",
+      "title": "聊天外观预览更自由",
       "items": [
-        "何仙姑气泡的配饰转场换上莲粉薄纱与新印章，色彩和主题更加协调"
+        "未拥有的背景和气泡也能先预览，并可切换消息类型、发送方与连续气泡场景"
       ]
     },
     "en": {
-      "title": "Refreshed He Xiangu bubble motion",
+      "title": "More flexible chat appearance previews",
       "items": [
-        "He Xiangu's bubble transition now uses a softer lotus-pink silk motion and matching seal"
+        "Preview unowned backgrounds and bubbles, then switch message types, senders, and grouped-bubble scenes"
       ]
     }
   }
