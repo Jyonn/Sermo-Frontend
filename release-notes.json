@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.24.1",
+  "id": "2026.08.24.2",
   "publishedAt": "2026-08-24",
   "locales": {
     "zh-CN": {
-      "title": "合并转发卡片更清晰",
+      "title": "聊天外观集中预览",
       "items": [
-        "合并转发采用稳定尺寸，只展示第一条消息摘要，并会跟随当前语言显示标题"
+        "聊天背景与气泡现已合并到同一页面，可在真实对话预览中搭配并筛选已拥有的外观"
       ]
     },
     "en": {
-      "title": "Cleaner combined-forward cards",
+      "title": "Chat appearance in one place",
       "items": [
-        "Combined forwards now use a consistent card size, preview only the first message, and display a localized title"
+        "Chat backgrounds and bubbles now share one live conversation preview with ownership filters"
       ]
     }
   }

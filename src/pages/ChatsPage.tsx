@@ -7700,6 +7700,7 @@ export interface ChatsPagePreviewConfig {
   avatarUri?: string;
   bubbleStyle: ChatBubbleStyle;
   backgroundTheme?: ChatBackgroundTheme;
+  backgroundUri?: string;
   dialogue?: Array<{
     from: "self" | "other";
     text: string;
@@ -7782,9 +7783,12 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       return result;
     }, []);
     const noop = () => undefined;
+    const previewBackgroundStyle = config.backgroundTheme === "custom" && config.backgroundUri
+      ? ({ "--chat-background-image": `url("${config.backgroundUri.replace(/\"/g, "%22")}")` } as CSSProperties)
+      : undefined;
     return (
       <section aria-label={t("menu.chatBubble")} className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`} onContextMenu={(event) => event.preventDefault()}>
-        <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`}>
+        <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`} style={previewBackgroundStyle}>
           <div className="message-scroll">
             {groups.map((group) => <MessageGroupBlock enteringMessageIds={[]} group={group} key={group.key} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />)}
           </div>
