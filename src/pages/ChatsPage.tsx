@@ -6803,23 +6803,42 @@ function LiveChatsPage() {
       />
 
       <SideDrawer
+        className={`forward-bundle-drawer chat-background-${currentUserMe?.chat_background_theme ?? "default"}`}
         open={Boolean(forwardBundlePreview)}
-        title={t("message.forwardBundleTitle")}
+        title={t("message.forwardBundleSnapshot")}
+        titleLeading={(() => {
+          const authors = Array.from(new Map(
+            (forwardBundlePreview?.items ?? []).map((item) => [item.author.user_id, item.author]),
+          ).values());
+          const firstAuthor = authors[0];
+          return (
+            <UserAvatar
+              cacheKey={firstAuthor?.avatar_cache_key}
+              className="avatar forward-bundle-header-avatar"
+              frame={authors.length === 1 ? firstAuthor?.avatar_frame_style : "none"}
+              groupMembers={authors.length > 1 ? authors.map((author) => ({
+                name: author.name,
+                uri: author.avatar_uri,
+                cacheKey: author.avatar_cache_key,
+              })) : undefined}
+              name={firstAuthor?.name || t("message.forwardBundleSnapshot")}
+              uri={firstAuthor?.avatar_uri}
+            />
+          );
+        })()}
         titleAccessory={<span className="drawer-title-count">{forwardBundlePreview?.item_count ?? forwardBundlePreview?.items?.length ?? 0}</span>}
         historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}`}
         onClose={() => setForwardBundlePreview(null)}
       >
-        <div className="forward-bundle-viewer">
-          <header className="forward-bundle-viewer-intro">
-            <span className="material-symbols-outlined" aria-hidden="true">forum</span>
-            <span><strong>{t("message.forwardBundleSnapshot")}</strong><small>{forwardBundlePreview?.summary || t("message.forwardBundleSnapshotHint")}</small></span>
-          </header>
-          <ChatPreview
-            className="forward-bundle-chat-preview"
-            firstPersonUserId={forwardBundlePreview?.first_person_user_id}
-            messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
-          />
-        </div>
+        <ChatPreview
+          backgroundTheme={currentUserMe?.chat_background_theme ?? "default"}
+          backgroundUri={paintedChatBackgroundUri}
+          className="forward-bundle-chat-preview"
+          firstPersonUserId={forwardBundlePreview?.first_person_user_id}
+          messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
+          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
+          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
+        />
       </SideDrawer>
 
       <SideDrawer
@@ -7996,16 +8015,24 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
 }
 
 export function ChatPreview({
+  backgroundTheme = "default",
+  backgroundUri,
   className = "",
   firstPersonUserId,
   messages,
   onMessageClick,
+  onOpenImage,
+  onOpenVideo,
   showAuthors = true,
 }: {
+  backgroundTheme?: ChatBackgroundTheme;
+  backgroundUri?: string | null;
   className?: string;
   firstPersonUserId?: number | null;
   messages: ChatMessageDTO[];
   onMessageClick?: (message: ChatMessageDTO) => void;
+  onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
+  onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   showAuthors?: boolean;
 }) {
   const dtoById = useMemo(() => new Map(messages.map((message) => [message.message_id, message])), [messages]);
@@ -8015,6 +8042,9 @@ export function ChatPreview({
   );
   const groups = useMemo(() => buildMessageGroups(mappedMessages), [mappedMessages]);
   const noop = () => undefined;
+  const backgroundStyle = backgroundTheme === "custom" && backgroundUri
+    ? ({ "--chat-background-image": `url("${backgroundUri.replace(/"/g, "%22")}")` } as CSSProperties)
+    : undefined;
   const openMessage = (message: ChatMessage) => {
     if (typeof message.id !== "number") return;
     const source = dtoById.get(message.id);
@@ -8031,7 +8061,7 @@ export function ChatPreview({
         if (source) onMessageClick(source);
       } : undefined}
     >
-      <div className="chat-detail-scene chat-background-default">
+      <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
         <div className="message-scroll">
           {groups.map((group) => (
             <MessageGroupBlock
@@ -8039,8 +8069,8 @@ export function ChatPreview({
               group={group}
               key={group.key}
               onOpenActions={(message) => openMessage(message)}
-              onOpenImage={noop}
-              onOpenVideo={noop}
+              onOpenImage={onOpenImage ?? noop}
+              onOpenVideo={onOpenVideo ?? noop}
               onRetry={noop}
               onToggleGroupSelection={noop}
               onToggleSelection={noop}

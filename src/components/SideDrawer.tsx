@@ -10,6 +10,7 @@ interface SideDrawerProps {
   open: boolean;
   title: string;
   className?: string;
+  titleLeading?: ReactNode;
   titleAccessory?: ReactNode;
   headerAction?: ReactNode;
   actionLabel?: string;
@@ -45,6 +46,7 @@ export function SideDrawer({
   open,
   title,
   className = "",
+  titleLeading,
   titleAccessory,
   headerAction,
   actionLabel,
@@ -213,6 +215,7 @@ export function SideDrawer({
             <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label={t("common.back")}>
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
+            {titleLeading ? <div className="drawer-title-leading">{titleLeading}</div> : null}
             <div className="drawer-topbar-copy">
               <div className="drawer-topbar-meta">
                 <div className="drawer-title-row">

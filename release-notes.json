@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.15",
+  "id": "2026.08.25.16",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "置顶消息回归对话视图",
+      "title": "合并聊天记录更像真实会话",
       "items": [
-        "置顶消息现在按真实聊天气泡、头像和时间自然排列，点击即可回到原消息"
+        "打开合并聊天记录时会展示参与者头像、各自气泡和你的聊天背景，多媒体也可直接预览"
       ]
     },
     "en": {
-      "title": "Pinned messages now feel like chat",
+      "title": "Forwarded history now feels like a real chat",
       "items": [
-        "Pinned messages now use their real bubbles, avatars, and timeline, with a tap returning to the original message"
+        "Combined chat history now shows participant avatars, original bubbles, your chat background, and interactive media previews"
       ]
     }
   }
