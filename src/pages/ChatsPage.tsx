@@ -8040,6 +8040,12 @@ export function ChatPreview({
     () => sortMessages(messages.map((message) => mapChatMessage(message, firstPersonUserId ?? -1))),
     [firstPersonUserId, messages],
   );
+  const firstPersonAuthor = useMemo(
+    () => firstPersonUserId == null
+      ? null
+      : messages.find((message) => message.user.user_id === firstPersonUserId)?.user ?? null,
+    [firstPersonUserId, messages],
+  );
   const groups = useMemo(() => buildMessageGroups(mappedMessages), [mappedMessages]);
   const noop = () => undefined;
   const backgroundStyle = backgroundTheme === "custom" && backgroundUri
@@ -8078,6 +8084,10 @@ export function ChatPreview({
               selectionMode={false}
               showAuthor={showAuthors && group.from === "other"}
               showSelfAvatar
+              selfAvatarFrame={firstPersonAuthor?.avatar_frame_style}
+              selfAvatarName={firstPersonAuthor?.name}
+              selfAvatarUri={firstPersonAuthor?.avatar_uri}
+              selfIsPermanentVip={firstPersonAuthor?.is_permanent_vip}
             />
           ))}
         </div>

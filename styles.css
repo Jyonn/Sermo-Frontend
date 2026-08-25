@@ -24236,6 +24236,8 @@ html[data-theme="dark"] .message-search-more {
 .chat-preview-shared .message-scroll { padding: 14px 10px 20px; }
 .chat-preview-shared:is(.platform-audit-chat-preview, .forward-bundle-chat-preview) .message-scroll :is(button, a, audio, video) { pointer-events: auto; }
 .forward-bundle-drawer .drawer-body {
+  display: flex;
+  align-items: stretch;
   min-height: 0;
   padding: 0;
   overflow: hidden;
@@ -24249,12 +24251,22 @@ html[data-theme="dark"] .message-search-more {
   border-radius: 11px;
 }
 .forward-bundle-chat-preview {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 auto;
   height: 100%;
   min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .forward-bundle-chat-preview .chat-detail-scene {
+  width: 100%;
   height: 100%;
   min-height: 0;
+  border: 0;
+  border-radius: 0;
 }
 .chat-preview-shared.forward-bundle-chat-preview .message-scroll {
   height: 100%;

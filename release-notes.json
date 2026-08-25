@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.16",
+  "id": "2026.08.25.17",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "合并聊天记录更像真实会话",
+      "title": "合并聊天记录完善显示",
       "items": [
-        "打开合并聊天记录时会展示参与者头像、各自气泡和你的聊天背景，多媒体也可直接预览"
+        "合并聊天记录现在完整铺满页面，并正确展示我方与他方的真实头像"
       ]
     },
     "en": {
-      "title": "Forwarded history now feels like a real chat",
+      "title": "Improved combined chat history",
       "items": [
-        "Combined chat history now shows participant avatars, original bubbles, your chat background, and interactive media previews"
+        "Combined chat history now fills the page and correctly shows real avatars for both sides"
       ]
     }
   }
