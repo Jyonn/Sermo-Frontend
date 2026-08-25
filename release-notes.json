@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.13",
+  "id": "2026.08.25.14",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "八仙图片集焕新",
+      "title": "分享会话列表更清晰",
       "items": [
-        "八仙聊天气泡现在为连续图片提供专属边框、主题分隔与完整动态装饰，预览和真实聊天保持一致"
+        "分享和转发时的会话列表不再横向滚动，置顶会话改用清晰的文字标识"
       ]
     },
     "en": {
-      "title": "Refined Baxian photo collections",
+      "title": "Clearer chat sharing list",
       "items": [
-        "Baxian chat bubbles now give photo collections themed frames, separators, and complete animated ornaments consistently across previews and real chats"
+        "The chat picker used for sharing and forwarding no longer scrolls sideways and now marks pinned chats with a clear text label"
       ]
     }
   }

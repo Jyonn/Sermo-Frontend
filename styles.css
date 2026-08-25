@@ -7221,8 +7221,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .chat-target-picker-list {
+  width: 100%;
+  min-width: 0;
   max-height: min(46vh, 480px);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
   border-block: 1px solid var(--line-soft);
 }
 
@@ -7232,7 +7236,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   min-height: 66px;
   padding: 9px 4px;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) 28px;
+  grid-template-columns: 46px minmax(0, 1fr) minmax(68px, auto);
   align-items: center;
   gap: 11px;
   color: var(--text-primary);
@@ -7255,10 +7259,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .chat-target-picker-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-target-picker-copy strong { font-size: 14px; }
 .chat-target-picker-copy small { color: var(--text-muted); font-size: 11px; }
-.chat-target-picker-meta { display: grid; grid-template-columns: auto auto; align-items: center; justify-items: end; gap: 4px; min-width: 52px; color: var(--text-muted); }
-.chat-target-picker-meta time { grid-column: 1 / -1; font-size: 9px; white-space: nowrap; }
+.chat-target-picker-meta { display: grid; grid-template-columns: minmax(0, 1fr) 18px; grid-template-rows: minmax(14px, auto) minmax(14px, auto); align-items: center; justify-items: end; column-gap: 8px; min-width: 0; color: var(--text-muted); }
+.chat-target-picker-meta time { grid-column: 1; grid-row: 1; max-width: 100%; overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.chat-target-picker-pin { grid-column: 1; grid-row: 2; color: var(--brand-primary); font-size: 9px; font-weight: 800; line-height: 1; white-space: nowrap; }
 .chat-target-picker-meta .material-symbols-outlined { font-size: 18px; }
-.chat-target-picker-meta .material-symbols-outlined:first-child:not(:last-child) { color: var(--brand-primary-press); font-size: 14px; }
+.chat-target-picker-meta > .material-symbols-outlined { grid-column: 2; grid-row: 1 / -1; }
 .chat-target-picker-list > button.is-selected .chat-target-picker-meta .material-symbols-outlined:last-child { color: var(--brand-primary); }
 .chat-target-picker-meta .is-loading { animation: spin 900ms linear infinite; }
 .chat-target-picker-submit { position: sticky; bottom: 0; padding-top: 12px; background: var(--surface); }

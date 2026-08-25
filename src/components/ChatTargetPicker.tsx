@@ -93,8 +93,8 @@ export function ChatTargetPicker({
             <UserAvatar className="chat-target-picker-avatar" groupMembers={target.groupMembers} name={target.title} uri={target.avatarUri} cacheKey={target.avatarCacheKey} frame={target.avatarFrameStyle} />
             <span className="chat-target-picker-copy"><strong>{target.title}</strong><small>{target.preview}</small></span>
             <span className="chat-target-picker-meta">
-              {target.pinned ? <i className="material-symbols-outlined" aria-label={t("chat.pinned")}>keep</i> : null}
               {target.time ? <time>{target.time}</time> : null}
+              {target.pinned ? <span className="chat-target-picker-pin">{t("chat.pinned")}</span> : null}
               <i className={`material-symbols-outlined${targetBusy ? " is-loading" : ""}`} aria-hidden="true">
                 {targetBusy ? "progress_activity" : multiple ? selected ? "check_circle" : "radio_button_unchecked" : "chevron_right"}
               </i>
