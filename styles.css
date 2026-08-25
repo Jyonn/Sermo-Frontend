@@ -28453,3 +28453,342 @@ html[data-theme="dark"] body .drawer-body .user-profile-panel .user-profile-grou
   .user-profile-reminders { padding-block: 10px; }
   .user-profile-reminders::after { top: 10px; bottom: 10px; }
 }
+
+/* Profile card art directions: each premium theme owns a distinct visual system. */
+.user-profile-panel.profile-theme-level-12,
+.user-profile-panel.profile-theme-vip,
+.profile-card-preview.profile-theme-level-12,
+.profile-card-preview.profile-theme-vip {
+  isolation: isolate;
+}
+
+/* Tidal Blue: a calm tide observatory with contour lines and a floating beacon. */
+.user-profile-panel.profile-theme-level-12 {
+  --profile-page: #eef7f6;
+  --profile-card: #f8fcfb;
+  --profile-card-soft: #dcefed;
+  --profile-ink: #0a3040;
+  --profile-muted: #557986;
+  --profile-line: rgba(26, 103, 129, 0.18);
+  background:
+    radial-gradient(circle at 92% 16%, rgba(105, 218, 210, 0.16), transparent 24%),
+    linear-gradient(180deg, #edf8f6 0%, #f7f5ef 46%);
+}
+
+html[data-theme="dark"] .user-profile-panel.profile-theme-level-12 {
+  --profile-page: #071d27;
+  --profile-card: #0a2833;
+  --profile-card-soft: #103946;
+  --profile-ink: #e9fbfa;
+  --profile-muted: #88adb5;
+  --profile-line: rgba(119, 214, 211, 0.2);
+  background:
+    radial-gradient(circle at 92% 16%, rgba(71, 193, 191, 0.13), transparent 26%),
+    linear-gradient(180deg, #071d27, #081b1e 52%);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-cover,
+html:not([data-theme="dark"]) .user-profile-panel.profile-theme-level-12 .user-profile-cover {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-radial-gradient(ellipse at 10% 122%, transparent 0 23px, rgba(203, 250, 244, 0.25) 24px 25px, transparent 26px 43px),
+    linear-gradient(180deg, rgba(3, 35, 57, 0.72) 0 45%, rgba(77, 172, 180, 0.72) 46% 49%, rgba(146, 224, 215, 0.86) 50% 100%),
+    #0d5970;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-cover::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: clamp(20px, 7vw, 62px);
+  width: 9px;
+  height: calc(100% - 36px);
+  border-inline: 1px solid rgba(230, 255, 250, 0.44);
+  background: repeating-linear-gradient(180deg, rgba(237, 255, 251, 0.78) 0 2px, transparent 2px 13px);
+  opacity: 0.8;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-cover::after {
+  content: "";
+  position: absolute;
+  right: clamp(44px, 12vw, 108px);
+  bottom: -34px;
+  width: 112px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(222, 255, 249, 0.5);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(219, 255, 247, 0.54) 0 12%, rgba(132, 230, 218, 0.18) 13% 46%, transparent 47%);
+  box-shadow: 0 0 0 18px rgba(180, 246, 237, 0.07), 0 0 0 37px rgba(180, 246, 237, 0.05);
+  animation: profile-tidal-beacon 7s ease-in-out infinite;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-avatar-wrap {
+  border: 1px solid rgba(106, 210, 207, 0.62);
+  background: color-mix(in srgb, var(--profile-card) 88%, #7edbd5);
+  box-shadow: 0 16px 34px rgba(0, 62, 79, 0.18), 0 0 0 5px rgba(150, 231, 222, 0.14);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-avatar-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  z-index: -1;
+  border: 1px dashed rgba(79, 171, 177, 0.52);
+  border-radius: inherit;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-facts span {
+  border-color: rgba(48, 140, 157, 0.24);
+  background: rgba(60, 159, 169, 0.08);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-recent-statement {
+  border: 1px solid rgba(63, 146, 158, 0.2);
+  border-radius: 30px 12px 30px 12px;
+  background:
+    repeating-radial-gradient(ellipse at 100% 120%, transparent 0 18px, rgba(83, 165, 171, 0.08) 19px 20px, transparent 21px 34px),
+    color-mix(in srgb, var(--profile-card-soft) 82%, var(--profile-card));
+  box-shadow: 0 16px 34px rgba(22, 78, 89, 0.08);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-primary-actions .button:first-child {
+  background: linear-gradient(118deg, #0b7187, #2eb7af);
+  box-shadow: 0 16px 30px rgba(15, 123, 139, 0.22);
+}
+
+/* Gilded Hour: a collectible sun-dial card with engraved metal details. */
+.user-profile-panel.profile-theme-vip {
+  --profile-page: #fbf5e7;
+  --profile-card: #fffaf0;
+  --profile-card-soft: #f3e5c4;
+  --profile-ink: #38240d;
+  --profile-muted: #856d4e;
+  --profile-line: rgba(151, 103, 35, 0.2);
+  background:
+    radial-gradient(circle at 85% 10%, rgba(235, 185, 73, 0.18), transparent 25%),
+    linear-gradient(180deg, #fff9ea, #f7f2e7 54%);
+}
+
+html[data-theme="dark"] .user-profile-panel.profile-theme-vip {
+  --profile-page: #1d160d;
+  --profile-card: #271d10;
+  --profile-card-soft: #3a2b16;
+  --profile-ink: #fff6dd;
+  --profile-muted: #bda884;
+  --profile-line: rgba(235, 191, 105, 0.21);
+  background:
+    radial-gradient(circle at 85% 10%, rgba(225, 165, 53, 0.13), transparent 28%),
+    linear-gradient(180deg, #21180d, #17140f 56%);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-cover,
+html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profile-cover {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 226, 154, 0.46);
+  background:
+    repeating-conic-gradient(from 248deg at 88% 78%, rgba(255, 224, 146, 0.13) 0deg 1deg, transparent 1deg 9deg),
+    linear-gradient(104deg, #251a0f 0 38%, #5b3b17 70%, #b77b28 100%);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-cover::before {
+  content: "";
+  position: absolute;
+  right: clamp(22px, 6vw, 58px);
+  bottom: -68px;
+  width: 178px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 225, 147, 0.62);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #f8d886 0 3%, transparent 4% 35%, rgba(248, 209, 119, 0.18) 36% 37%, transparent 38% 100%);
+  box-shadow: inset 0 0 0 15px rgba(255, 222, 139, 0.04), 0 0 42px rgba(236, 174, 67, 0.16);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-cover::after {
+  content: "";
+  position: absolute;
+  left: -22%;
+  top: 0;
+  width: 24%;
+  height: 100%;
+  transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 236, 182, 0.23), transparent);
+  animation: profile-gilded-sweep 9s cubic-bezier(.16, 1, .3, 1) infinite;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap {
+  border: 1px solid #d8a54f;
+  background: linear-gradient(145deg, #fff7dc, #c99237 52%, #fff0bd);
+  box-shadow: 0 18px 40px rgba(75, 45, 8, 0.24), 0 0 0 4px rgba(231, 185, 91, 0.15);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  z-index: -1;
+  border: 1px solid rgba(185, 127, 36, 0.5);
+  border-radius: inherit;
+  clip-path: polygon(0 0, 38% 0, 42% 4%, 58% 4%, 62% 0, 100% 0, 100% 100%, 62% 100%, 58% 96%, 42% 96%, 38% 100%, 0 100%);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-copy h2 {
+  letter-spacing: -0.045em;
+  text-shadow: 0 1px 0 rgba(255, 241, 197, 0.36);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-facts span {
+  border-color: rgba(183, 126, 38, 0.26);
+  background: linear-gradient(110deg, rgba(241, 204, 124, 0.18), rgba(255, 250, 230, 0.04));
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-facts .is-vip {
+  color: #71430c;
+  border-color: #d7a64b;
+  background: linear-gradient(120deg, #fff2c8, #e9b95a);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.7), 0 5px 14px rgba(143, 92, 20, 0.12);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-recent-statement {
+  border: 1px solid rgba(181, 127, 42, 0.25);
+  border-radius: 8px 30px 8px 30px;
+  background:
+    linear-gradient(90deg, rgba(179, 123, 35, 0.1) 1px, transparent 1px) 0 0 / 18px 100%,
+    color-mix(in srgb, var(--profile-card-soft) 78%, var(--profile-card));
+  box-shadow: 0 18px 38px rgba(91, 56, 13, 0.09);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-primary-actions .button:first-child {
+  color: #291a08;
+  background: linear-gradient(115deg, #f7dc91, #c98b2c 58%, #f4ce74);
+  box-shadow: 0 16px 30px rgba(153, 96, 16, 0.22);
+}
+
+/* Theme previews reproduce the same visual grammar instead of generic gradients. */
+.profile-card-preview.profile-theme-level-12 {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(70, 184, 186, 0.12), transparent 25%),
+    var(--surface-panel);
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-cover {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-radial-gradient(ellipse at 10% 122%, transparent 0 22px, rgba(216, 255, 249, 0.23) 23px 24px, transparent 25px 40px),
+    linear-gradient(180deg, #092d45 0 45%, #4aa4ad 46% 49%, #91dcd4 50%);
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-cover::after {
+  content: "";
+  position: absolute;
+  right: 52px;
+  bottom: -35px;
+  width: 108px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(229, 255, 251, 0.55);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(202, 255, 248, 0.08), 0 0 0 36px rgba(202, 255, 248, 0.05);
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-avatar {
+  border: 1px solid #64bbb9;
+  box-shadow: 0 0 0 6px rgba(100, 187, 185, 0.14), 0 16px 30px rgba(9, 67, 82, 0.18);
+}
+
+.profile-card-preview.profile-theme-vip {
+  background:
+    radial-gradient(circle at 88% 15%, rgba(228, 169, 54, 0.14), transparent 26%),
+    var(--surface-panel);
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-cover {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-conic-gradient(from 248deg at 88% 78%, rgba(255, 225, 151, 0.14) 0deg 1deg, transparent 1deg 9deg),
+    linear-gradient(104deg, #251a0f 0 38%, #5b3b17 70%, #b77b28);
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-cover::after {
+  content: "";
+  position: absolute;
+  right: 45px;
+  bottom: -74px;
+  width: 176px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 224, 143, 0.6);
+  border-radius: 50%;
+  background: radial-gradient(circle, #f8d886 0 3%, transparent 4% 36%, rgba(248, 209, 119, 0.18) 37% 38%, transparent 39%);
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-avatar {
+  border: 1px solid #d8a54f;
+  box-shadow: 0 0 0 6px rgba(216, 165, 79, 0.14), 0 16px 30px rgba(75, 45, 8, 0.2);
+}
+
+/* Compact catalog marks remain legible at menu scale. */
+.profile-card-entry-swatch.theme-level-12,
+.profile-card-theme-option.theme-level-12 > span {
+  background:
+    repeating-radial-gradient(ellipse at 4% 118%, transparent 0 8px, rgba(220, 255, 250, 0.28) 9px 10px, transparent 11px 18px),
+    linear-gradient(180deg, #0a3650 0 46%, #4ca8b0 47% 51%, #8dd9d1 52%);
+}
+
+.profile-card-entry-swatch.theme-level-12::before,
+.profile-card-theme-option.theme-level-12 > span::before {
+  right: 12px;
+  left: auto;
+  width: 4px;
+  background: repeating-linear-gradient(180deg, rgba(239,255,252,.9) 0 1px, transparent 1px 6px);
+}
+
+.profile-card-entry-swatch.theme-vip,
+.profile-card-theme-option.theme-vip > span {
+  background:
+    repeating-conic-gradient(from 245deg at 82% 80%, rgba(255, 229, 161, 0.18) 0deg 2deg, transparent 2deg 13deg),
+    linear-gradient(110deg, #25190d 0 42%, #704717 72%, #c48a31);
+}
+
+.profile-card-entry-swatch.theme-vip::before,
+.profile-card-theme-option.theme-vip > span::before {
+  inset: auto -9% -68% auto;
+  width: 62%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 226, 151, 0.64);
+  border-radius: 50%;
+  background: radial-gradient(circle, #f5d47f 0 4%, transparent 5% 35%, rgba(247,211,126,.2) 36% 38%, transparent 39%);
+}
+
+.profile-card-entry-swatch.theme-level-12 :is(i, b),
+.profile-card-theme-option.theme-level-12 > span :is(i, b) {
+  border-radius: 2px 999px 999px 2px;
+  background: rgba(231, 255, 251, 0.84);
+}
+
+.profile-card-entry-swatch.theme-vip :is(i, b),
+.profile-card-theme-option.theme-vip > span :is(i, b) {
+  height: 7px;
+  border: 1px solid rgba(90, 53, 10, 0.28);
+  background: linear-gradient(90deg, #fff1be, #d69a37);
+}
+
+@keyframes profile-tidal-beacon {
+  0%, 100% { transform: translateY(0) scale(0.96); opacity: 0.72; }
+  50% { transform: translateY(-7px) scale(1.03); opacity: 1; }
+}
+
+@keyframes profile-gilded-sweep {
+  0%, 72% { transform: translateX(0) skewX(-18deg); opacity: 0; }
+  78% { opacity: 0.7; }
+  100% { transform: translateX(620%) skewX(-18deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-profile-panel.profile-theme-level-12 .user-profile-cover::after,
+  .user-profile-panel.profile-theme-vip .user-profile-cover::after {
+    animation: none;
+  }
+}

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.8",
+  "id": "2026.08.25.9",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "个人名片排版优化",
+      "title": "专属个人名片焕新",
       "items": [
-        "加高用户详情横幅，并为横幅与昵称留出更舒展的视觉间距"
+        "潮汐蓝与鎏金时刻升级为拥有专属构图、材质和动效的完整名片主题"
       ]
     },
     "en": {
-      "title": "Refined profile card layout",
+      "title": "Signature profile themes",
       "items": [
-        "Profile banners are taller, with clearer breathing room between the banner and display name"
+        "Tidal Blue and Gilded Hour now feature distinct compositions, materials, and motion"
       ]
     }
   }
