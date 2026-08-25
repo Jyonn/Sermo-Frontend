@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.10",
+  "id": "2026.08.26.11",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "置顶消息从最新处展开",
+      "title": "消息跳转更准确",
       "items": [
-        "打开置顶消息时会直接展示列表最下方的最新消息，向上即可继续查看更早内容"
+        "从置顶消息或引用内容跳转时，现在会准确定位到对应消息"
       ]
     },
     "en": {
-      "title": "Pinned messages open at the latest item",
+      "title": "More accurate message jumps",
       "items": [
-        "Pinned messages now open at the newest item at the bottom, with older messages available by scrolling up"
+        "Jumps from pinned messages and replies now land precisely on the referenced message"
       ]
     }
   }

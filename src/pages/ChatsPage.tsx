@@ -2620,6 +2620,7 @@ function LiveChatsPage() {
   const messageScrollRef = useRef<HTMLDivElement | null>(null);
   const virtualMessageListRef = useRef<VirtualDynamicListHandle | null>(null);
   const messageGroupIndexRef = useRef(new Map<number, number>());
+  const messageRevealRequestRef = useRef(0);
   const chatLayoutRef = useRef<HTMLElement | null>(null);
   const chatMainPaneRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef<number | null>(null);
@@ -3207,21 +3208,107 @@ function LiveChatsPage() {
   }, [selectedChat?.id]);
 
   useEffect(() => {
-    const revealMountedElement = (messageId: number) => {
-      const element = messageScrollRef.current?.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`);
-      if (!element) return false;
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
-      element.classList.add("is-reply-target");
-      window.setTimeout(() => element.classList.remove("is-reply-target"), 1200);
-      return true;
+    const scheduledFrames = new Set<number>();
+    const scheduledTimers = new Set<number>();
+    const highlightedElements = new Set<HTMLElement>();
+
+    const clearScheduledReveal = () => {
+      scheduledFrames.forEach((frame) => window.cancelAnimationFrame(frame));
+      scheduledFrames.clear();
+      scheduledTimers.forEach((timer) => window.clearTimeout(timer));
+      scheduledTimers.clear();
+      highlightedElements.forEach((element) => element.classList.remove("is-reply-target"));
+      highlightedElements.clear();
+    };
+
+    const findMessageElement = (messageId: number) => (
+      messageScrollRef.current?.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`) ?? null
+    );
+
+    const alignMountedMessage = (messageId: number) => {
+      const scroller = messageScrollRef.current;
+      const element = findMessageElement(messageId);
+      if (!scroller || !element) return null;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const viewportCenter = scrollerRect.top + scroller.clientTop + scroller.clientHeight / 2;
+      const elementCenter = elementRect.top + elementRect.height / 2;
+      const desiredScrollTop = Math.max(
+        0,
+        Math.min(
+          scroller.scrollTop + elementCenter - viewportCenter,
+          scroller.scrollHeight - scroller.clientHeight
+        )
+      );
+      const movement = desiredScrollTop - scroller.scrollTop;
+      if (Math.abs(movement) > 0.5) scroller.scrollTo({ top: desiredScrollTop, behavior: "auto" });
+      return { element, movement };
+    };
+
+    const scheduleExactReveal = (messageId: number) => {
+      clearScheduledReveal();
+      const requestId = messageRevealRequestRef.current + 1;
+      messageRevealRequestRef.current = requestId;
+      let attempts = 0;
+      let stableFrames = 0;
+
+      const scheduleFrame = (callback: () => void) => {
+        const frame = window.requestAnimationFrame(() => {
+          scheduledFrames.delete(frame);
+          callback();
+        });
+        scheduledFrames.add(frame);
+      };
+
+      const settle = () => {
+        if (messageRevealRequestRef.current !== requestId) return;
+        attempts += 1;
+
+        const groupIndex = messageGroupIndexRef.current.get(messageId);
+        const aligned = alignMountedMessage(messageId);
+        if (!aligned) {
+          if (groupIndex !== undefined && (attempts === 1 || attempts % 4 === 0)) {
+            virtualMessageListRef.current?.scrollToIndex(groupIndex, "center", "auto");
+          }
+          if (attempts < 48) scheduleFrame(settle);
+          return;
+        }
+
+        stableFrames = Math.abs(aligned.movement) <= 1 ? stableFrames + 1 : 0;
+        if (stableFrames < 4 && attempts < 48) {
+          scheduleFrame(settle);
+          return;
+        }
+
+        aligned.element.classList.add("is-reply-target");
+        highlightedElements.add(aligned.element);
+        const highlightTimer = window.setTimeout(() => {
+          scheduledTimers.delete(highlightTimer);
+          aligned.element.classList.remove("is-reply-target");
+          highlightedElements.delete(aligned.element);
+        }, 1200);
+        scheduledTimers.add(highlightTimer);
+
+        // Virtual rows can be remeasured after media or fonts settle. Recheck briefly
+        // so the requested message, rather than only its group, remains centered.
+        [160, 520].forEach((delay) => {
+          const timer = window.setTimeout(() => {
+            scheduledTimers.delete(timer);
+            if (messageRevealRequestRef.current === requestId) alignMountedMessage(messageId);
+          }, delay);
+          scheduledTimers.add(timer);
+        });
+      };
+
+      const groupIndex = messageGroupIndexRef.current.get(messageId);
+      if (groupIndex !== undefined) virtualMessageListRef.current?.scrollToIndex(groupIndex, "center", "auto");
+      scheduleFrame(settle);
     };
 
     const revealElement = (messageId: number) => {
-      if (revealMountedElement(messageId)) return true;
-      const groupIndex = messageGroupIndexRef.current.get(messageId);
-      if (groupIndex === undefined) return false;
-      virtualMessageListRef.current?.scrollToIndex(groupIndex, "center", "auto");
-      window.requestAnimationFrame(() => window.requestAnimationFrame(() => revealMountedElement(messageId)));
+      if (!findMessageElement(messageId) && messageGroupIndexRef.current.get(messageId) === undefined) return false;
+      scheduleExactReveal(messageId);
       return true;
     };
 
@@ -3250,14 +3337,18 @@ function LiveChatsPage() {
           hasNewerMessagesRef.current = newerRows.length > pageSize;
           setHasNewerMessages(newerRows.length > pageSize);
           stickToBottomRef.current = false;
-          window.requestAnimationFrame(() => window.requestAnimationFrame(() => revealElement(messageId)));
+          scheduleExactReveal(messageId);
         })
         .catch(() => setPageError(t("message.locateOriginalFailed")));
     };
 
     window.addEventListener("sermo:reveal-message", reveal);
-    return () => window.removeEventListener("sermo:reveal-message", reveal);
-  }, [currentUserId, selectedChat, selectedMessages]);
+    return () => {
+      messageRevealRequestRef.current += 1;
+      clearScheduledReveal();
+      window.removeEventListener("sermo:reveal-message", reveal);
+    };
+  }, [currentUserId, selectedChat?.id]);
 
   const redirectToChatListWithNotice = (message: string, blockedChatId?: number) => {
     setDetailsSheetOpen(false);
