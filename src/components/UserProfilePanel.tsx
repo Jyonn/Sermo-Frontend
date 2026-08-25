@@ -51,6 +51,8 @@ interface UserProfileCacheSnapshot {
   recentStatement?: SquareStatementDTO | null;
 }
 
+const RECENT_STATEMENT_WINDOW_SECONDS = 7 * 24 * 60 * 60;
+
 function friendshipAge(respondedAt?: number | null) {
   if (!respondedAt) return i18n.t("profile.friend");
   const days = Math.max(1, Math.floor((Date.now() / 1000 - respondedAt) / 86400));
@@ -107,7 +109,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       api.getChats(controller.signal),
       api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal),
       api.getFriendStatus(userId, controller.signal),
-      api.getSquareStatements({ limit: 1, scope: "all", user_id: userId }, controller.signal).catch(() => []),
+      api.getSquareStatements({ limit: 5, scope: "all", user_id: userId }, controller.signal).catch(() => []),
     ])
       .then(([friends, chats, users, status, statements]) => {
         const matchedFriend = friends.find((row) => row.user_id === userId) ?? null;
@@ -121,12 +123,15 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         const nextRespondedAt = status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null;
         const nextGroupChats = chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId));
         const directChat = chats.find((chat) => !chat.group && chat.members.some((member) => member.user_id === userId));
+        const recentStatement = statements.find(
+          (statement) => statement.created_at >= Date.now() / 1000 - RECENT_STATEMENT_WINDOW_SECONDS
+        ) ?? null;
         setRespondedAt(nextRespondedAt);
         setGroupChats(nextGroupChats);
         setDirectChatId(directChat?.chat_id ?? null);
         setOnlineReminder(Boolean(directChat?.online_reminder_enabled));
         setStatementReminder(Boolean(directChat?.statement_reminder_enabled));
-        setRecentStatement(statements[0] ?? null);
+        setRecentStatement(recentStatement);
         writeTabCache(cacheScope, `user-profile:${userId}`, {
           user: matchedUser,
           groupChats: nextGroupChats,
@@ -135,7 +140,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           directChatId: directChat?.chat_id ?? null,
           onlineReminder: Boolean(directChat?.online_reminder_enabled),
           statementReminder: Boolean(directChat?.statement_reminder_enabled),
-          recentStatement: statements[0] ?? null,
+          recentStatement,
         });
         setRequestState("idle");
         setViewState("ready");

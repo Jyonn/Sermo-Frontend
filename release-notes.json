@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.5",
+  "id": "2026.08.25.6",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
       "title": "用户详情焕新",
       "items": [
-        "用户详情升级为完整社交名片，并优化滚动、动态、提醒和共同群聊的展示细节"
+        "用户详情现在会展示最近七天内的最新发言，并优化滚动、提醒和共同群聊的展示细节"
       ]
     },
     "en": {
       "title": "A redesigned social profile",
       "items": [
-        "Profiles now use a polished social card with smoother scrolling and clearer activity, alerts, and shared groups"
+        "Profiles now show the latest post from the past seven days with smoother scrolling and clearer profile details"
       ]
     }
   }
