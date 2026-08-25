@@ -47,6 +47,7 @@ import type {
   EmojiUsageDTO,
   StickerAssetDTO,
   StickerDTO,
+  StickerListDTO,
   StickerPrepareDTO,
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
@@ -1228,12 +1229,20 @@ export const api = {
     });
   },
 
-  getStickers(signal?: AbortSignal) {
-    return request<StickerDTO[]>("/stickers/", { auth: true, signal });
+  getStickers(offset = 0, limit = 30, signal?: AbortSignal) {
+    return request<StickerListDTO>("/stickers/", {
+      auth: true,
+      query: { offset, limit },
+      signal,
+    });
   },
 
-  exploreStickers(signal?: AbortSignal) {
-    return request<StickerAssetDTO[]>("/stickers/explore", { auth: true, signal });
+  exploreStickers(offset = 0, limit = 30, signal?: AbortSignal) {
+    return request<StickerListDTO<StickerAssetDTO>>("/stickers/explore", {
+      auth: true,
+      query: { offset, limit },
+      signal,
+    });
   },
 
   collectStickerAsset(asset_id: number) {

@@ -11,6 +11,7 @@ import {
   type DragEvent as ReactDragEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type UIEvent as ReactUIEvent,
 } from "react";
 import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -61,6 +62,7 @@ import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
+const STICKER_PAGE_SIZE = 30;
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
@@ -2403,7 +2405,14 @@ function LiveChatsPage() {
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [stickers, setStickers] = useState<StickerDTO[]>([]);
   const [exploreStickers, setExploreStickers] = useState<StickerAssetDTO[]>([]);
-  const [stickersLoading, setStickersLoading] = useState(false);
+  const [mineStickersLoading, setMineStickersLoading] = useState(false);
+  const [exploreStickersLoading, setExploreStickersLoading] = useState(false);
+  const [mineStickersHasMore, setMineStickersHasMore] = useState(false);
+  const [exploreStickersHasMore, setExploreStickersHasMore] = useState(false);
+  const mineStickerOffsetRef = useRef(0);
+  const exploreStickerOffsetRef = useRef(0);
+  const mineStickerRequestRef = useRef(false);
+  const exploreStickerRequestRef = useRef(false);
   const [stickerSaving, setStickerSaving] = useState(false);
   const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
   const [stickerManagerSelecting, setStickerManagerSelecting] = useState(false);
@@ -3533,15 +3542,23 @@ function LiveChatsPage() {
   useEffect(() => {
     if (!currentUserId) {
       setStickers([]);
+      setMineStickersHasMore(false);
+      mineStickerOffsetRef.current = 0;
       return;
     }
     const controller = new AbortController();
-    setStickersLoading(true);
-    void api.getStickers(controller.signal)
-      .then(setStickers)
+    mineStickerRequestRef.current = true;
+    setMineStickersLoading(true);
+    void api.getStickers(0, STICKER_PAGE_SIZE, controller.signal)
+      .then((response) => {
+        setStickers(response.items);
+        setMineStickersHasMore(response.has_more);
+        mineStickerOffsetRef.current = response.next_offset;
+      })
       .catch(() => undefined)
       .finally(() => {
-        if (!controller.signal.aborted) setStickersLoading(false);
+        mineStickerRequestRef.current = false;
+        if (!controller.signal.aborted) setMineStickersLoading(false);
       });
     return () => controller.abort();
   }, [currentUserId]);
@@ -3549,15 +3566,71 @@ function LiveChatsPage() {
   useEffect(() => {
     if (!emojiPickerOpen || emojiPage !== STICKER_EXPLORE_PAGE || !currentUserId) return;
     const controller = new AbortController();
-    setStickersLoading(true);
-    void api.exploreStickers(controller.signal)
-      .then(setExploreStickers)
+    exploreStickerRequestRef.current = true;
+    setExploreStickersLoading(true);
+    void api.exploreStickers(0, STICKER_PAGE_SIZE, controller.signal)
+      .then((response) => {
+        setExploreStickers(response.items);
+        setExploreStickersHasMore(response.has_more);
+        exploreStickerOffsetRef.current = response.next_offset;
+      })
       .catch(() => undefined)
       .finally(() => {
-        if (!controller.signal.aborted) setStickersLoading(false);
+        exploreStickerRequestRef.current = false;
+        if (!controller.signal.aborted) setExploreStickersLoading(false);
       });
     return () => controller.abort();
   }, [currentUserId, emojiPage, emojiPickerOpen]);
+
+  const loadMoreMineStickers = async () => {
+    if (!currentUserId || !mineStickersHasMore || mineStickerRequestRef.current) return;
+    mineStickerRequestRef.current = true;
+    setMineStickersLoading(true);
+    try {
+      const response = await api.getStickers(mineStickerOffsetRef.current, STICKER_PAGE_SIZE);
+      setStickers((current) => {
+        const known = new Set(current.map((item) => item.sticker_id));
+        return [...current, ...response.items.filter((item) => !known.has(item.sticker_id))];
+      });
+      setMineStickersHasMore(response.has_more);
+      mineStickerOffsetRef.current = response.next_offset;
+    } catch {
+      // Keep the page available so a later scroll can retry transient failures.
+    } finally {
+      mineStickerRequestRef.current = false;
+      setMineStickersLoading(false);
+    }
+  };
+
+  const loadMoreExploreStickers = async () => {
+    if (!currentUserId || !exploreStickersHasMore || exploreStickerRequestRef.current) return;
+    exploreStickerRequestRef.current = true;
+    setExploreStickersLoading(true);
+    try {
+      const response = await api.exploreStickers(exploreStickerOffsetRef.current, STICKER_PAGE_SIZE);
+      setExploreStickers((current) => {
+        const known = new Set(current.map((item) => item.sticker_asset_id));
+        return [...current, ...response.items.filter((item) => !known.has(item.sticker_asset_id))];
+      });
+      setExploreStickersHasMore(response.has_more);
+      exploreStickerOffsetRef.current = response.next_offset;
+    } catch {
+      // Keep the page available so a later scroll can retry transient failures.
+    } finally {
+      exploreStickerRequestRef.current = false;
+      setExploreStickersLoading(false);
+    }
+  };
+
+  const handleStickerGridScroll = (
+    event: ReactUIEvent<HTMLDivElement>,
+    page: "mine" | "explore",
+  ) => {
+    const grid = event.currentTarget;
+    if (grid.scrollHeight - grid.scrollTop - grid.clientHeight > 96) return;
+    if (page === "mine") void loadMoreMineStickers();
+    else void loadMoreExploreStickers();
+  };
 
   useEffect(() => {
     cacheMediaLocally([...stickers, ...exploreStickers].map((sticker) => resolveStableResourceUri(sticker.uri) ?? sticker.uri));
@@ -6305,7 +6378,7 @@ function LiveChatsPage() {
                     {emojiPage === STICKER_MY_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
                         {stickers.length ? (
-                          <div className="composer-sticker-grid">
+                          <div className="composer-sticker-grid" onScroll={(event) => handleStickerGridScroll(event, "mine")}>
                             {canCreateSticker ? (
                               <FeatureDiscoveryTarget className="is-sticker-entry" rewardId="capability.sticker">
                                 <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
@@ -6324,8 +6397,11 @@ function LiveChatsPage() {
                                 <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                               </button>
                             ))}
+                            {mineStickersLoading ? (
+                              <span className="composer-sticker-page-loading" aria-label={t("common.loading")} />
+                            ) : null}
                           </div>
-                        ) : !stickersLoading ? (
+                        ) : !mineStickersLoading ? (
                           <div className="composer-sticker-empty">
                             <span className="material-symbols-outlined">photo_library</span>
                             <strong>{t("sticker.mineEmpty")}</strong>
@@ -6340,7 +6416,7 @@ function LiveChatsPage() {
                     ) : emojiPage === STICKER_EXPLORE_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
                         {exploreStickers.length ? (
-                          <div className="composer-sticker-grid">
+                          <div className="composer-sticker-grid" onScroll={(event) => handleStickerGridScroll(event, "explore")}>
                             {exploreStickers.map((sticker) => (
                               <div className="composer-sticker-explore-item" key={sticker.sticker_asset_id}>
                                 <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
@@ -6366,8 +6442,11 @@ function LiveChatsPage() {
                                 </button>
                               </div>
                             ))}
+                            {exploreStickersLoading ? (
+                              <span className="composer-sticker-page-loading" aria-label={t("common.loading")} />
+                            ) : null}
                           </div>
-                        ) : !stickersLoading ? (
+                        ) : !exploreStickersLoading ? (
                           <div className="composer-sticker-empty">
                             <span className="material-symbols-outlined">explore</span>
                             <strong>{t("sticker.exploreEmpty")}</strong>

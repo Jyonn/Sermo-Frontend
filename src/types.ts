@@ -537,6 +537,12 @@ export interface StickerDTO extends StickerAssetDTO {
   created_at: number;
 }
 
+export interface StickerListDTO<T extends StickerAssetDTO = StickerDTO> {
+  items: T[];
+  has_more: boolean;
+  next_offset: number;
+}
+
 export interface StickerPrepareDTO {
   upload_required: boolean;
   sticker?: StickerDTO;

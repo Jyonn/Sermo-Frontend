@@ -19709,6 +19709,18 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   overscroll-behavior: contain;
 }
 
+.composer-sticker-page-loading {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 18px;
+  height: 18px;
+  margin: 6px 0 2px;
+  border: 2px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-top-color: var(--accent, #00a86b);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
 .composer-sticker-item,
 .composer-sticker-add {
   position: relative;

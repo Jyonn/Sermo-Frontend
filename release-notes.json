@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.9",
+  "id": "2026.08.25.10",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "专属个人名片焕新",
+      "title": "表情包浏览更顺畅",
       "items": [
-        "潮汐蓝与鎏金时刻升级为拥有专属构图、材质和动效的完整名片主题"
+        "我的表情与探索表情现在会在下滑时自动加载更多内容"
       ]
     },
     "en": {
-      "title": "Signature profile themes",
+      "title": "Smoother sticker browsing",
       "items": [
-        "Tidal Blue and Gilded Hour now feature distinct compositions, materials, and motion"
+        "My Stickers and Explore now load more items automatically as you scroll"
       ]
     }
   }
