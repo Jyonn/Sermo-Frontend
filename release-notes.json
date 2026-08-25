@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.3",
+  "id": "2026.08.26.4",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "发言信息层次更清楚",
+      "title": "沉浸看图更自由",
       "items": [
-        "发言中的位置现在会紧随照片、语音或视频展示，阅读顺序更加自然"
+        "全屏看图支持双指缩放与拖动，轻触即可切换完整显示、铺满屏幕和实际大小"
       ]
     },
     "en": {
-      "title": "Clearer statement hierarchy",
+      "title": "A more flexible immersive viewer",
       "items": [
-        "Locations now follow photos, voice, or video in statements for a more natural reading order"
+        "Fullscreen images now support pinch-to-zoom and panning, with quick Fit, Fill, and Actual Size views"
       ]
     }
   }

@@ -5924,6 +5924,154 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   box-shadow: none;
 }
 
+.immersive-image-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.immersive-image-stage:active {
+  cursor: grabbing;
+}
+
+.immersive-image-canvas {
+  display: block;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  object-fit: fill;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform;
+  -webkit-user-drag: none;
+}
+
+.immersive-image-actionbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  min-height: calc(58px + env(safe-area-inset-top));
+  padding: calc(8px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 8px max(14px, env(safe-area-inset-left));
+  color: #f7f8f5;
+  background: linear-gradient(180deg, rgba(5, 7, 6, 0.9), rgba(5, 7, 6, 0.68) 72%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-12px);
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(.22, .8, .3, 1);
+  cursor: default;
+}
+
+.immersive-image-actionbar.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.immersive-image-view-modes {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-self: center;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+.immersive-image-view-modes button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.immersive-image-view-modes button.is-active {
+  color: #10231c;
+  background: rgba(229, 255, 245, 0.94);
+}
+
+.immersive-image-zoom {
+  min-width: 48px;
+  color: rgba(255, 255, 255, 0.58);
+  font: 700 0.72rem/1 var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.immersive-image-close {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.immersive-image-close svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+
+@media (max-width: 600px) {
+  .immersive-image-actionbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .immersive-image-view-modes {
+    justify-self: start;
+    max-width: 100%;
+  }
+
+  .immersive-image-view-modes button {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 0.7rem;
+  }
+
+  .immersive-image-zoom {
+    position: absolute;
+    top: calc(58px + env(safe-area-inset-top));
+    left: 50%;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.42);
+    opacity: 0.72;
+    transform: translateX(-50%);
+  }
+}
+
 .message-image-preview-track {
   display: flex;
   width: 100%;
