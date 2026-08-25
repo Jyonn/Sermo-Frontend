@@ -62,6 +62,7 @@ import type {
   SquareStatementCommentDTO,
   SquareStatementDraftMedia,
   SquareQuotaDTO,
+  SquareStatusDTO,
   ActivityCampaignDTO,
   PlatformAdminSession,
   PlatformAdminSpaceDTO,
@@ -748,6 +749,14 @@ export const api = {
     return request<SquareQuotaDTO>("/square/quota", { auth: true, signal });
   },
 
+  getSquareStatus(signal?: AbortSignal) {
+    return request<SquareStatusDTO>("/square/status", { auth: true, signal });
+  },
+
+  markSquareFeedRead(scope: "all" | "friends") {
+    return request<SquareStatusDTO>("/square/status", { method: "POST", auth: true, body: { scope } });
+  },
+
   getActiveActivities(signal?: AbortSignal) {
     return request<ActivityCampaignDTO[]>("/activities/active", { auth: true, signal });
   },
@@ -1162,10 +1171,10 @@ export const api = {
     });
   },
 
-  getNotificationEvents(category = "square", signal?: AbortSignal) {
+  getNotificationEvents(category = "square", signal?: AbortSignal, options?: { unreadOnly?: boolean; before?: number; limit?: number }) {
     return request<NotificationEventListDTO>("/users/me/notification-events", {
       auth: true,
-      query: { category, limit: 30 },
+      query: { category, limit: options?.limit ?? 30, unread_only: options?.unreadOnly ? 1 : undefined, before: options?.before },
       signal,
     });
   },

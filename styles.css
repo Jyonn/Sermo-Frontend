@@ -13147,6 +13147,24 @@ html[data-theme="dark"] .message-link-preview-site {
   box-shadow: 0 0 0 2px rgba(245, 244, 239, 0.94);
 }
 
+.nav-fresh-dot,
+.square-fresh-dot,
+.square-activity-claim-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: #ff5f6d;
+  box-shadow: 0 2px 8px rgba(213, 55, 72, 0.32);
+}
+
+.nav-fresh-dot { position: absolute; top: -5px; right: -8px; }
+.square-feed-filter button { position: relative; }
+.square-fresh-dot { position: absolute; top: 5px; right: 4px; width: 7px; height: 7px; border-width: 1px; }
+.square-activity-banner { position: relative; }
+.square-activity-claim-dot { position: absolute; z-index: 4; top: 12px; right: 12px; width: 11px; height: 11px; border-color: rgba(255,255,255,.88); }
+
 .nav-button-label {
   font-size: 0.68rem;
   letter-spacing: 0.02em;
@@ -26178,6 +26196,8 @@ html[data-theme="dark"] .square-quota-hero>.material-symbols-outlined {
 .square-quota-rules p.is-current strong { color:var(--brand-primary-press); }
 @media(max-width:420px){.square-quota-cards{grid-template-columns:1fr}.square-quota-cards .square-quota-like-card{grid-column:auto}.square-quota-hero{min-height:94px;padding:17px}.square-quota-hero strong{font-size:18px}}
 .square-notification-list { display: grid; gap: 8px; padding: 4px 0 24px; }
+.square-notification-history { min-height: 46px; margin-top: 4px; border: 1px solid var(--border-subtle); border-radius: 15px; color: var(--text-secondary); background: color-mix(in srgb,var(--surface) 82%,transparent); font: inherit; font-size: 12px; font-weight: 800; }
+.square-notification-history:disabled { opacity: .58; }
 .square-notification-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 11px; width: 100%; padding: 12px; border: 1px solid var(--border-subtle); border-radius: 16px; color: var(--text-primary); text-align: left; background: var(--surface); }
 .square-notification-row.is-unread { border-color: color-mix(in srgb, var(--brand-primary) 36%, var(--border-subtle)); background: color-mix(in srgb, var(--brand-primary) 7%, var(--surface)); }
 .square-notification-avatar { width: 42px; height: 42px; }

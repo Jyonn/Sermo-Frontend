@@ -45,6 +45,7 @@ export function AppBottomNav() {
   const [totalUnread, setTotalUnread] = useState(0);
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
   const [squareUnread, setSquareUnread] = useState(0);
+  const [squareHasFreshContent, setSquareHasFreshContent] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(() => localStorage.getItem("sermo:desktop-nav-collapsed") === "1");
   const desktopNavigationActive = Boolean(session && effectivePathname.startsWith("/app/"));
 
@@ -165,18 +166,25 @@ export function AppBottomNav() {
   useEffect(() => {
     if (!session) {
       setSquareUnread(0);
+      setSquareHasFreshContent(false);
       return;
     }
     if (!pageActive) return;
     let cancelled = false;
-    const sync = () => void api.getNotificationEvents("square").then((result) => {
-      if (!cancelled) setSquareUnread(result.unread_count);
+    const sync = () => void api.getSquareStatus().then((result) => {
+      if (!cancelled) {
+        setSquareUnread(result.notification_unread);
+        setSquareHasFreshContent(result.explore_unread || result.friends_unread || result.activity_claimable);
+      }
     }).catch(() => undefined);
     sync();
     const timer = window.setInterval(sync, 15_000);
     const handleUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<{ unreadCount: number }>).detail;
-      if (detail && !cancelled) setSquareUnread(Math.max(0, detail.unreadCount));
+      const detail = (event as CustomEvent<{ unreadCount: number; hasFreshContent?: boolean }>).detail;
+      if (detail && !cancelled) {
+        setSquareUnread(Math.max(0, detail.unreadCount));
+        if (detail.hasFreshContent !== undefined) setSquareHasFreshContent(detail.hasFreshContent);
+      }
     };
     window.addEventListener(SQUARE_NOTIFICATIONS_UPDATED_EVENT, handleUpdated as EventListener);
     return () => {
@@ -242,6 +250,7 @@ export function AppBottomNav() {
               {route.key === "square" && squareUnread > 0 ? (
                 <span className="nav-unread-badge">{squareUnread > 99 ? "99+" : squareUnread}</span>
               ) : null}
+              {route.key === "square" && squareUnread === 0 && squareHasFreshContent ? <span className="nav-fresh-dot" /> : null}
               {route.key === "notifications" && incomingRequestCount > 0 ? (
                 <span className="nav-unread-badge">{incomingRequestCount > 99 ? "99+" : incomingRequestCount}</span>
               ) : null}

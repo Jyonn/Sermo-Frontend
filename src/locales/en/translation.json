@@ -1817,6 +1817,7 @@
   "messageSearch.failedHint": "Try again later. Your chat history is safe",
   "square.notifications": "Square activity",
   "square.noNotifications": "No Square activity yet",
+  "square.showEarlierNotifications": "View earlier updates",
   "square.someone": "Someone",
   "square.notificationLikedStatement": "{{name}} liked your statement",
   "square.notificationCommented": "{{name}} commented on your statement",

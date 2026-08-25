@@ -1817,6 +1817,7 @@
   "messageSearch.failedHint": "稍后再试，聊天记录不会受到影响",
   "square.notifications": "广场消息",
   "square.noNotifications": "还没有广场消息",
+  "square.showEarlierNotifications": "查看更早消息",
   "square.someone": "有人",
   "square.notificationLikedStatement": "{{name}} 赞了你的发言",
   "square.notificationCommented": "{{name}} 评论了你的发言",

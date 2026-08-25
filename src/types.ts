@@ -504,6 +504,15 @@ export interface NotificationEventDTO {
 export interface NotificationEventListDTO {
   events: NotificationEventDTO[];
   unread_count: number;
+  has_more: boolean;
+}
+
+export interface SquareStatusDTO {
+  notification_unread: number;
+  explore_unread: boolean;
+  friends_unread: boolean;
+  activity_claimable: boolean;
+  claimable_activity_keys: string[];
 }
 
 export interface WebReminderPreferenceDTO {

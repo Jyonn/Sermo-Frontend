@@ -24,7 +24,7 @@ import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, VideoMetadataDTO } from "../types";
 import ChatsPage from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -386,6 +386,10 @@ export default function SquarePage() {
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [notificationEvents, setNotificationEvents] = useState<NotificationEventDTO[]>([]);
   const [notificationUnread, setNotificationUnread] = useState(0);
+  const [notificationHistoryAvailable, setNotificationHistoryAvailable] = useState(true);
+  const [notificationHistoryLoading, setNotificationHistoryLoading] = useState(false);
+  const [feedFresh, setFeedFresh] = useState({ all: false, friends: false });
+  const [claimableActivityKeys, setClaimableActivityKeys] = useState<string[]>([]);
   const [quotaOpen, setQuotaOpen] = useState(false);
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
@@ -455,12 +459,34 @@ export default function SquarePage() {
   const activeActivity = activities.find((item) => item.key === routeActivityKey) ?? null;
   const refreshActivities = () => api.getActiveActivities().then(setActivities).catch(() => undefined);
 
+  const applySquareStatus = (status: SquareStatusDTO) => {
+    notificationUnreadRef.current = status.notification_unread;
+    setNotificationUnread(status.notification_unread);
+    setFeedFresh({ all: status.explore_unread, friends: status.friends_unread });
+    setClaimableActivityKeys(status.claimable_activity_keys);
+    announceSquareUnread(status.notification_unread, {
+      hasFreshContent: status.explore_unread || status.friends_unread || status.activity_claimable,
+      claimableActivityKeys: status.claimable_activity_keys,
+    });
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     void api.getActiveActivities(controller.signal).then(setActivities).catch(() => undefined);
     void api.getUserMe(controller.signal).then((me) => setVipCampaign(me.permanent_vip_campaign ?? null)).catch(() => undefined);
     return () => controller.abort();
   }, [session?.user.space_id, session?.user.user_id]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void api.getSquareStatus(controller.signal).then(applySquareStatus).catch(() => undefined);
+    return () => controller.abort();
+  }, [session?.user.space_id, session?.user.user_id]);
+
+  useEffect(() => {
+    if (feedMode !== "all" && feedMode !== "friends") return;
+    void api.markSquareFeedRead(feedMode).then(applySquareStatus).catch(() => undefined);
+  }, [feedMode, session?.user.space_id, session?.user.user_id]);
 
   const showVipCampaign = Boolean(vipCampaign && (vipCampaign.active || vipCampaign.claimed_by_user));
   const activityBannerCount = activities.length + (showVipCampaign ? 1 : 0);
@@ -487,6 +513,7 @@ export default function SquarePage() {
       setVipCampaign(campaign);
       patchSessionUser({ is_permanent_vip: true });
       showToast(t("vip.claimed", { slot: campaign.slot }), "success");
+      void api.getSquareStatus().then(applySquareStatus).catch(() => undefined);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("vip.claimFailed"), "error");
     } finally {
@@ -529,6 +556,7 @@ export default function SquarePage() {
       const updated = await api.claimActivityForce(activeActivity.key);
       setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
       showToast(t("activity.claimed", { count: claimable }));
+      void api.getSquareStatus().then(applySquareStatus).catch(() => undefined);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("activity.claimFailed"), "error");
     } finally {
@@ -543,6 +571,7 @@ export default function SquarePage() {
       const updated = await api.claimActivityPersonalReward(activeActivity.key);
       setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
       showToast(t("activity.personalRewardClaimed"), "success");
+      void api.getSquareStatus().then(applySquareStatus).catch(() => undefined);
     } catch (cause) {
       showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
     } finally {
@@ -707,11 +736,12 @@ export default function SquarePage() {
   useEffect(() => {
     const controller = new AbortController();
     const mutationVersion = notificationMutationVersionRef.current;
-    void api.getNotificationEvents("square", controller.signal).then((result) => {
+    void api.getNotificationEvents("square", controller.signal, { unreadOnly: true }).then((result) => {
       const readStatementId = lastReadStatementRef.current;
       setNotificationEvents(result.events.map((event) => (
         readStatementId && event.payload.statement_id === readStatementId ? { ...event, is_read: true } : event
       )));
+      setNotificationHistoryAvailable(true);
       if (mutationVersion === notificationMutationVersionRef.current) {
         notificationUnreadRef.current = result.unread_count;
         setNotificationUnread(result.unread_count);
@@ -752,12 +782,31 @@ export default function SquarePage() {
 
   const openNotificationDrawer = () => {
     setNotificationDrawerOpen(true);
-    if (!notificationUnread) return;
-    notificationUnreadRef.current = 0;
-    setNotificationUnread(0);
-    setNotificationEvents((current) => current.map((event) => ({ ...event, is_read: true })));
-    announceSquareUnread(0);
-    void api.markSquareNotificationsRead();
+    void api.getNotificationEvents("square", undefined, { unreadOnly: true }).then((result) => {
+      setNotificationEvents(result.events);
+      setNotificationHistoryAvailable(true);
+      if (!result.unread_count) return;
+      notificationUnreadRef.current = 0;
+      setNotificationUnread(0);
+      announceSquareUnread(0, {
+        hasFreshContent: feedFresh.all || feedFresh.friends || claimableActivityKeys.length > 0,
+        claimableActivityKeys,
+      });
+      void api.markSquareNotificationsRead();
+    }).catch(() => undefined);
+  };
+
+  const loadEarlierNotifications = () => {
+    if (notificationHistoryLoading || !notificationHistoryAvailable) return;
+    setNotificationHistoryLoading(true);
+    const before = notificationEvents.length ? Math.min(...notificationEvents.map((event) => event.notification_event_id)) : undefined;
+    void api.getNotificationEvents("square", undefined, { before, limit: 30 }).then((result) => {
+      setNotificationEvents((current) => {
+        const known = new Set(current.map((event) => event.notification_event_id));
+        return [...current, ...result.events.filter((event) => !known.has(event.notification_event_id))];
+      });
+      setNotificationHistoryAvailable(result.has_more);
+    }).catch(() => undefined).finally(() => setNotificationHistoryLoading(false));
   };
 
   useEffect(() => {
@@ -1190,8 +1239,8 @@ export default function SquarePage() {
           syncing={syncing}
           title={t("square.title")}
           secondary={<div className="square-feed-filter" role="tablist">
-            {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}</button> : null}
-            <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}</button>
+            {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <i className="square-fresh-dot" /> : null}</button> : null}
+            <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && feedMode !== "friends" ? <i className="square-fresh-dot" /> : null}</button>
             <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
             {profileFeedUserId ? (
               <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}>
@@ -1233,6 +1282,7 @@ export default function SquarePage() {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
               const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
+                {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-activity-banner-copy">
                   <small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small>
@@ -1243,6 +1293,7 @@ export default function SquarePage() {
               </button>;
             })}
             {showVipCampaign && vipCampaign ? <button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => setVipCampaignOpen(true)} type="button">
+              {claimableActivityKeys.includes("vip:founding-100") ? <i className="square-activity-claim-dot" /> : null}
               <span className="square-vip-banner-orbit" aria-hidden="true"><i /><i /><b>VIP</b></span>
               <span className="square-vip-banner-copy">
                 <small>FOUNDING 100</small>
@@ -1255,6 +1306,7 @@ export default function SquarePage() {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
               const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
+                {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-activity-banner-copy">
                   <small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small>
@@ -1368,6 +1420,7 @@ export default function SquarePage() {
               </button>
             );
           })}
+          {notificationHistoryAvailable ? <button className="square-notification-history" disabled={notificationHistoryLoading} onClick={loadEarlierNotifications} type="button">{notificationHistoryLoading ? t("common.loading") : t("square.showEarlierNotifications")}</button> : null}
         </div>
       </SideDrawer>
       <SideDrawer
