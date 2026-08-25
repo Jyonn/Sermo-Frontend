@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.24",
+  "id": "2026.08.25.25",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "发言页回归安静画布",
+      "title": "发言操作更轻巧",
       "items": [
-        "重新梳理写作、媒体、位置与可见范围的层级，整栏发布按钮在各状态下保持清晰完整"
+        "添加媒体按钮改为紧凑宽度，让媒体与位置操作更清晰舒展"
       ]
     },
     "en": {
-      "title": "The calm composer is back",
+      "title": "Lighter statement controls",
       "items": [
-        "The statement composer now restores a focused writing hierarchy with clear media, location, visibility, and full-width publish controls"
+        "The media action now uses a compact width so media and location controls remain clear and balanced"
       ]
     }
   }

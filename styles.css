@@ -26455,7 +26455,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-compose-count.is-near-limit { color: #c75a43; }
 .square-compose-content-actions { display: flex; align-items: center; gap: 8px; margin: 8px 0 22px; }
 .square-compose-content-actions button { display: inline-flex; min-width: 0; min-height: 38px; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid var(--line-soft); border-radius: 999px; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 750; background: color-mix(in srgb, var(--bg-elevated) 82%, transparent); }
-.square-compose-content-actions button:first-child { flex: 1; justify-content: flex-start; }
+.square-compose-content-actions button:first-child { flex: 0 1 auto; width: fit-content; max-width: calc(100% - 74px); justify-content: flex-start; }
 .square-compose-content-actions button:last-child { flex: none; color: var(--brand-primary-press); }
 .square-compose-content-actions button .material-symbols-outlined { font-size: 18px; }
 .square-compose-content-actions button span:not(.material-symbols-outlined) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
