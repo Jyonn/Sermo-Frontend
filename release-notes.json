@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.7",
+  "id": "2026.08.25.8",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "个人名片主题上线",
+      "title": "个人名片排版优化",
       "items": [
-        "语言与个性化新增个人名片主题，LV12 与永久 VIP 可使用专属名片外观"
+        "加高用户详情横幅，并为横幅与昵称留出更舒展的视觉间距"
       ]
     },
     "en": {
-      "title": "Personal profile themes",
+      "title": "Refined profile card layout",
       "items": [
-        "Profile card themes are now available in personalization, with exclusive looks for LV12 and Permanent VIP members"
+        "Profile banners are taller, with clearer breathing room between the banner and display name"
       ]
     }
   }
