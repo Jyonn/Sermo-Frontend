@@ -5467,14 +5467,22 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-image-gallery {
   --message-gallery-columns: 3;
-  display: grid;
-  grid-template-columns: repeat(var(--message-gallery-columns), minmax(0, 1fr));
-  gap: 3px;
+  display: block;
   width: min(58vw, 228px);
   max-width: 100%;
   padding: 0;
   border: 0;
   background: rgba(255, 255, 255, 0.9);
+}
+
+.message-image-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--message-gallery-columns), minmax(0, 1fr));
+  gap: 3px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: inherit;
 }
 
 .message-image-gallery-item {
@@ -25384,6 +25392,28 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 
 .message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) :is(.message-bubble,.message-image-gallery) { overflow:visible; }
 
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-image-gallery {
+  padding:2px;
+  border:1px solid var(--bubble-skin-other-border);
+  background:var(--bubble-skin-other-bg);
+  box-shadow:var(--bubble-skin-other-shadow);
+}
+
+.message-group.self:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-image-gallery {
+  border-color:var(--bubble-skin-self-border);
+  background:var(--bubble-skin-self-bg);
+  box-shadow:var(--bubble-skin-self-shadow);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-image-gallery-grid {
+  gap:2px;
+  background:color-mix(in srgb,var(--bubble-theme-accent) 58%,transparent);
+}
+
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-image-gallery-item {
+  background:var(--bubble-theme-icon);
+}
+
 .baxian-character-runner {
   --baxian-character-size:23.76px;
   position:absolute;
@@ -25441,6 +25471,16 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.mes
 }
 
 .message-group.other:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-bubble > .baxian-bubble-transition {
+  right:0;
+  transform:translate(35%,-42%);
+}
+
+.message-group.self:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-image-gallery > .baxian-bubble-transition {
+  left:0;
+  transform:translate(-35%,-42%);
+}
+
+.message-group.other:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) .message-image-gallery > .baxian-bubble-transition {
   right:0;
   transform:translate(35%,-42%);
 }

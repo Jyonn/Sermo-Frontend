@@ -1202,70 +1202,72 @@ const MessageImageGallery = memo(function MessageImageGallery({
           className={`message-image-gallery message-media-frame ${groupClassName}`}
           style={{ "--message-gallery-columns": columns } as CSSProperties}
         >
-          {visibleMessages.map((message, index) => {
-            const uri = fullUris[index];
-            const thumbnailUri = message.localPreviewUri ? undefined : message.payload?.thumbnail_uri;
-            const displayUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri ?? uri;
-            const hasMore = index === 17 && messages.length > 18;
-            return (
-              <button
-                key={message.clientId}
-                data-message-id={typeof message.id === "number" ? message.id : undefined}
-                aria-label={i18n.t("image.viewNumber", { index: index + 1 })}
-                aria-pressed={selectionMode ? selectedClientIds.includes(message.clientId) : undefined}
-                className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}${selectionMode ? " is-selection-mode" : ""}${selectedClientIds.includes(message.clientId) ? " is-selected" : ""}`}
-                onClick={(event) => {
-                  if (selectionMode) {
+          <div className="message-image-gallery-grid">
+            {visibleMessages.map((message, index) => {
+              const uri = fullUris[index];
+              const thumbnailUri = message.localPreviewUri ? undefined : message.payload?.thumbnail_uri;
+              const displayUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri ?? uri;
+              const hasMore = index === 17 && messages.length > 18;
+              return (
+                <button
+                  key={message.clientId}
+                  data-message-id={typeof message.id === "number" ? message.id : undefined}
+                  aria-label={i18n.t("image.viewNumber", { index: index + 1 })}
+                  aria-pressed={selectionMode ? selectedClientIds.includes(message.clientId) : undefined}
+                  className={`message-image-gallery-item is-${message.status} ${hasMore ? "has-more" : ""}${selectionMode ? " is-selection-mode" : ""}${selectedClientIds.includes(message.clientId) ? " is-selected" : ""}`}
+                  onClick={(event) => {
+                    if (selectionMode) {
+                      event.preventDefault();
+                      onToggleSelection(message);
+                      return;
+                    }
+                    if (suppressClickRef.current === index) {
+                      suppressClickRef.current = null;
+                      event.preventDefault();
+                      return;
+                    }
+                    if (message.status === "failed") {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onRetry(message);
+                      return;
+                    }
+                    onOpenImage(fullUris, index, imageMetadata, imageMessageIds);
+                  }}
+                  onContextMenu={(event) => {
                     event.preventDefault();
-                    onToggleSelection(message);
-                    return;
-                  }
-                  if (suppressClickRef.current === index) {
-                    suppressClickRef.current = null;
-                    event.preventDefault();
-                    return;
-                  }
-                  if (message.status === "failed") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onRetry(message);
-                    return;
-                  }
-                  onOpenImage(fullUris, index, imageMetadata, imageMessageIds);
-                }}
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  if (selectionMode) return;
-                  clearLongPress();
-                  onOpenActions(message, event.currentTarget, event.clientX);
-                }}
-                onPointerCancel={clearLongPress}
-                onPointerDown={(event) => startLongPress(event, message, index)}
-                onPointerLeave={clearLongPress}
-                onPointerMove={(event) => {
-                  const start = pointerStartRef.current;
-                  if (!start || start.index !== index) return;
-                  if (Math.abs(event.clientX - start.x) > 8 || Math.abs(event.clientY - start.y) > 8) clearLongPress();
-                }}
-                onPointerUp={clearLongPress}
-                type="button"
-              >
-                <img alt="" loading="lazy" src={displayUri} />
-                {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
-                {hasMore ? (
-                  <span className="message-image-gallery-more">
-                    <span className="material-symbols-outlined" aria-hidden="true">photo_library</span>
-                    <strong>+{messages.length - 18}</strong>
-                  </span>
-                ) : null}
-                {message.status === "failed" ? (
-                  <span className="message-image-gallery-failed" aria-label={i18n.t("message.retrySend")} title={i18n.t("message.retrySend")}>
-                    <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
+                    if (selectionMode) return;
+                    clearLongPress();
+                    onOpenActions(message, event.currentTarget, event.clientX);
+                  }}
+                  onPointerCancel={clearLongPress}
+                  onPointerDown={(event) => startLongPress(event, message, index)}
+                  onPointerLeave={clearLongPress}
+                  onPointerMove={(event) => {
+                    const start = pointerStartRef.current;
+                    if (!start || start.index !== index) return;
+                    if (Math.abs(event.clientX - start.x) > 8 || Math.abs(event.clientY - start.y) > 8) clearLongPress();
+                  }}
+                  onPointerUp={clearLongPress}
+                  type="button"
+                >
+                  <img alt="" loading="lazy" src={displayUri} />
+                  {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
+                  {hasMore ? (
+                    <span className="message-image-gallery-more">
+                      <span className="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                      <strong>+{messages.length - 18}</strong>
+                    </span>
+                  ) : null}
+                  {message.status === "failed" ? (
+                    <span className="message-image-gallery-failed" aria-label={i18n.t("message.retrySend")} title={i18n.t("message.retrySend")}>
+                      <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}

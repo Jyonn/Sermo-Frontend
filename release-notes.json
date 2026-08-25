@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.12",
+  "id": "2026.08.25.13",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "个人名片焕新",
+      "title": "八仙图片集焕新",
       "items": [
-        "潮汐蓝与鎏金时刻升级为两套独立的名片视觉系统，加入专属艺术横幅、材质细节与深浅模式适配"
+        "八仙聊天气泡现在为连续图片提供专属边框、主题分隔与完整动态装饰，预览和真实聊天保持一致"
       ]
     },
     "en": {
-      "title": "Refined profile card themes",
+      "title": "Refined Baxian photo collections",
       "items": [
-        "Tidal Blue and Gilded Hour now feature distinct profile-card systems with bespoke cover art, material details, and polished light and dark modes"
+        "Baxian chat bubbles now give photo collections themed frames, separators, and complete animated ornaments consistently across previews and real chats"
       ]
     }
   }
