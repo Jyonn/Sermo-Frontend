@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import samplePhoto from "../assets/square/plaza-waterfront.jpg";
 
 type MediaMode = "none" | "images" | "audio" | "video";
-type LocationEntry = "sheet" | "separate" | "inline";
-type PublishPlacement = "header" | "bottom";
-type TextScale = "compact" | "balanced" | "expressive";
+type PublishStyle = "solid" | "floating" | "split" | "quiet";
 
 const mediaCopy: Record<Exclude<MediaMode, "none">, { label: string; icon: string; note: string }> = {
   images: { label: "照片", icon: "imagesmode", note: "最多 9 张" },
@@ -12,16 +10,11 @@ const mediaCopy: Record<Exclude<MediaMode, "none">, { label: string; icon: strin
   video: { label: "视频", icon: "videocam", note: "每条发言 1 个" },
 };
 
-const locationOptions: Array<{ key: LocationEntry; label: string; note: string }> = [
-  { key: "sheet", label: "收进内容 Sheet", note: "最克制，所有附加能力只有一个入口" },
-  { key: "separate", label: "独立位置胶囊", note: "位置更容易发现，但不会长期展示三种媒体" },
-  { key: "inline", label: "正文后智能提示", note: "输入后轻量出现，最贴近内容语境" },
-];
-
-const textOptions: Array<{ key: TextScale; label: string; size: string }> = [
-  { key: "compact", label: "紧凑", size: "18" },
-  { key: "balanced", label: "舒展", size: "22" },
-  { key: "expressive", label: "表达", size: "26" },
+const publishStyles: Array<{ key: PublishStyle; label: string; note: string }> = [
+  { key: "solid", label: "整栏主按钮", note: "稳定、明确，提交感最强" },
+  { key: "floating", label: "悬浮胶囊", note: "脱离工具栏，更轻盈" },
+  { key: "split", label: "分体动作", note: "文案与动作键形成节奏" },
+  { key: "quiet", label: "克制底栏", note: "弱化按钮，保持写作沉浸" },
 ];
 
 function ContentSheet({ active, includeLocation, located, onClose, onLocation, onSelect }: {
@@ -61,7 +54,7 @@ function Attachment({ mode, imageCount, recording, seconds, onAddImage, onRemove
   return <section className="composer-lab-attachment is-video"><img alt="视频封面" src={samplePhoto} /><span className="material-symbols-outlined">play_arrow</span><div><strong>视频已就绪</strong><small>00:28 · 竖屏</small></div></section>;
 }
 
-function ComposerPrototype({ locationEntry, publishPlacement, textScale }: { locationEntry: LocationEntry; publishPlacement: PublishPlacement; textScale: TextScale }) {
+function ComposerPrototype({ publishStyle }: { publishStyle: PublishStyle }) {
   const [mode, setMode] = useState<MediaMode>("none");
   const [text, setText] = useState("");
   const [imageCount, setImageCount] = useState(1);
@@ -79,19 +72,18 @@ function ComposerPrototype({ locationEntry, publishPlacement, textScale }: { loc
   const mediaLabel = mode === "none" ? "添加照片、语音或视频" : `已加入${mediaCopy[mode].label} · 点击更换`;
 
   return (
-    <div className={`composer-lab-phone variant-canvas text-${textScale} publish-${publishPlacement}`}>
-      <header className="composer-lab-drawer-header"><button aria-label="返回" type="button"><span className="material-symbols-outlined">arrow_back</span></button><strong>发表发言</strong>{publishPlacement === "header" ? <button className="composer-lab-publish" disabled={!canPublish} onClick={publish} type="button">发言</button> : <span />}</header>
+    <div className={`composer-lab-phone variant-canvas text-compact publish-bottom publish-style-${publishStyle}`}>
+      <header className="composer-lab-drawer-header"><button aria-label="返回" type="button"><span className="material-symbols-outlined">arrow_back</span></button><strong>发表发言</strong><span /></header>
       <div className="composer-lab-editor">
         <div className="composer-lab-author"><img alt="Fly" src="/assets/avatars/v2/01.png" /><span><strong>Fly</strong><small>在元梦之星发言</small></span></div>
         <div className="composer-lab-writing-zone"><textarea autoFocus maxLength={140} onChange={(event) => setText(event.target.value)} placeholder="分享此刻想说的" value={text} /><span className="composer-lab-count">{text.length}<i>/140</i></span></div>
         <Attachment imageCount={imageCount} mode={mode} onAddImage={() => setImageCount((count) => Math.min(9, count + 1))} onRemove={() => setImageCount((count) => Math.max(1, count - 1))} onToggleRecording={() => setRecording((value) => !value)} recording={recording} seconds={seconds} />
         {located ? <button className="composer-lab-location-tag is-active" onClick={() => setLocated(false)} type="button"><span className="material-symbols-outlined">location_on</span><span>福建省厦门市思明区</span><span className="material-symbols-outlined">close</span></button> : null}
-        {locationEntry === "inline" && text.trim() && !located ? <button className="composer-lab-location-suggestion" onClick={() => setLocated(true)} type="button"><span className="material-symbols-outlined">near_me</span><span>要标记此刻的位置吗？</span><b>添加</b></button> : null}
-        <div className="composer-lab-content-actions"><button className="composer-lab-add-content" onClick={() => setContentOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{mediaLabel}</span></button>{locationEntry === "separate" && !located ? <button className="composer-lab-location-chip" onClick={() => setLocated(true)} type="button"><span className="material-symbols-outlined">location_on</span><span>位置</span></button> : null}</div>
+        <div className="composer-lab-content-actions"><button className="composer-lab-add-content" onClick={() => setContentOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{mediaLabel}</span></button>{!located ? <button className="composer-lab-location-chip" onClick={() => setLocated(true)} type="button"><span className="material-symbols-outlined">location_on</span><span>位置</span></button> : null}</div>
         <button className="composer-lab-visibility" onClick={() => setVisibilityOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "public" ? "public" : "group"}</span><span><small>谁可以看</small><strong>{visibility === "public" ? "所有人" : "仅好友"}</strong></span><span className="material-symbols-outlined">chevron_right</span></button>
       </div>
-      {publishPlacement === "bottom" ? <footer className="composer-lab-publish-footer"><button disabled={!canPublish} onClick={publish} type="button">发布这条发言<span className="material-symbols-outlined">arrow_upward</span></button></footer> : null}
-      {contentOpen ? <ContentSheet active={mode} includeLocation={locationEntry === "sheet"} located={located} onClose={() => setContentOpen(false)} onLocation={() => setLocated((value) => !value)} onSelect={switchMode} /> : null}
+      <footer className="composer-lab-publish-footer"><button disabled={!canPublish} onClick={publish} type="button"><span className="composer-lab-publish-copy"><small>{publishStyle === "quiet" ? "准备好了吗" : "发布到广场"}</small><strong>{publishStyle === "split" ? "发言" : "发布这条发言"}</strong></span><span className="composer-lab-publish-icon material-symbols-outlined">{publishStyle === "quiet" ? "arrow_forward" : "arrow_upward"}</span></button></footer>
+      {contentOpen ? <ContentSheet active={mode} includeLocation={false} located={located} onClose={() => setContentOpen(false)} onLocation={() => setLocated((value) => !value)} onSelect={switchMode} /> : null}
       {visibilityOpen ? <VisibilitySheet onClose={() => setVisibilityOpen(false)} onSelect={setVisibility} value={visibility} /> : null}
       {published ? <div className="composer-lab-toast" onAnimationEnd={() => setPublished(false)}><span className="material-symbols-outlined">check_circle</span>发言已准备好</div> : null}
     </div>
@@ -99,8 +91,6 @@ function ComposerPrototype({ locationEntry, publishPlacement, textScale }: { loc
 }
 
 export default function SquareComposerLabPage() {
-  const [locationEntry, setLocationEntry] = useState<LocationEntry>("sheet");
-  const [publishPlacement, setPublishPlacement] = useState<PublishPlacement>("header");
-  const [textScale, setTextScale] = useState<TextScale>("balanced");
-  return <main className="composer-lab-page composer-lab-refinement"><header className="composer-lab-hero"><span>SQUARE / QUIET CANVAS</span><h1>安静画布，按需表达</h1><p>保留一个内容入口，并分别比较位置、发布动作与正文字号。下面的选择会即时作用于同一个 Drawer。</p></header><section className="composer-lab-stage"><aside className="composer-lab-controls"><section><small>01 / 位置入口</small><h2>位置应该在哪里出现？</h2><div className="composer-lab-option-list">{locationOptions.map((item) => <button className={locationEntry === item.key ? "is-active" : ""} key={item.key} onClick={() => setLocationEntry(item.key)} type="button"><span className="material-symbols-outlined">{item.key === "sheet" ? "layers" : item.key === "separate" ? "location_on" : "auto_awesome"}</span><span><strong>{item.label}</strong><small>{item.note}</small></span></button>)}</div></section><section><small>02 / 发布动作</small><h2>发布按钮放在哪里？</h2><div className="composer-lab-segmented"><button className={publishPlacement === "header" ? "is-active" : ""} onClick={() => setPublishPlacement("header")} type="button">右上角</button><button className={publishPlacement === "bottom" ? "is-active" : ""} onClick={() => setPublishPlacement("bottom")} type="button">底部主按钮</button></div></section><section><small>03 / 正文字号</small><h2>文字需要多大的表达感？</h2><div className="composer-lab-type-scale">{textOptions.map((item) => <button className={textScale === item.key ? "is-active" : ""} key={item.key} onClick={() => setTextScale(item.key)} type="button"><b>{item.size}</b><span>{item.label}</span></button>)}</div></section></aside><ComposerPrototype locationEntry={locationEntry} publishPlacement={publishPlacement} textScale={textScale} /></section></main>;
+  const [publishStyle, setPublishStyle] = useState<PublishStyle>("solid");
+  return <main className="composer-lab-page composer-lab-refinement"><header className="composer-lab-hero"><span>SQUARE / QUIET CANVAS</span><h1>最后，决定如何发布</h1><p>已固定 18px 正文与独立位置胶囊。现在只比较底部发布动作的视觉重量和触达方式。</p></header><section className="composer-lab-stage"><aside className="composer-lab-controls composer-lab-publish-studies"><section><small>发布按钮 / 4 个方向</small><h2>选择更适合安静画布的收尾动作</h2><div className="composer-lab-option-list">{publishStyles.map((item, index) => <button className={publishStyle === item.key ? "is-active" : ""} key={item.key} onClick={() => setPublishStyle(item.key)} type="button"><span className={`composer-lab-button-swatch style-${item.key}`}>{String(index + 1).padStart(2, "0")}</span><span><strong>{item.label}</strong><small>{item.note}</small></span></button>)}</div></section></aside><ComposerPrototype publishStyle={publishStyle} /></section></main>;
 }

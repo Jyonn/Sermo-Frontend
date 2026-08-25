@@ -24732,6 +24732,29 @@ html[data-theme="dark"] .personalization-avatar-stage > strong {
 .composer-lab-publish-footer button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 52px; padding: 0 13px 0 18px; color: #062b20; border: 0; border-radius: 17px; background: linear-gradient(100deg, #0ac78b, #3ddbb0); box-shadow: 0 12px 26px rgba(10,177,125,.2); cursor: pointer; font-size: 14px; font-weight: 800; }
 .composer-lab-publish-footer button:disabled { color: #83918c; background: #e0e6e2; box-shadow: none; cursor: default; }
 .composer-lab-publish-footer .material-symbols-outlined { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; background: rgba(255,255,255,.38); }
+.composer-lab-publish-copy { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.composer-lab-publish-copy small { margin-bottom: 3px; opacity: .62; font-size: 8px; font-weight: 700; letter-spacing: .04em; }
+.composer-lab-publish-copy strong { font-size: 14px; }
+.composer-lab-button-swatch { display: grid !important; place-items: center; width: 38px; height: 38px; margin: 0 !important; color: #087e5a !important; border-radius: 12px; background: #e1f5ec; font: 800 10px/1 "SFMono-Regular", monospace !important; }
+.composer-lab-button-swatch.style-floating { border-radius: 999px; background: #c9efe0; box-shadow: 0 5px 11px rgba(8,134,95,.13); }
+.composer-lab-button-swatch.style-split { color: #fff !important; background: linear-gradient(90deg, #dceae4 0 52%, #0ab980 52%); }
+.composer-lab-button-swatch.style-quiet { color: #667a72 !important; border: 1px solid #cbd8d2; background: transparent; }
+.composer-lab-publish-studies { padding-top: 54px; }
+
+.publish-style-solid .composer-lab-publish-footer button { background: #12c78d; box-shadow: 0 12px 26px rgba(10,177,125,.2); }
+.publish-style-floating .composer-lab-publish-footer { padding-top: 14px; border-top: 0; background: linear-gradient(180deg, transparent, rgba(250,248,242,.96) 34%); }
+.publish-style-floating .composer-lab-publish-footer button { width: 78%; min-height: 48px; margin: 0 auto; padding-left: 20px; border-radius: 999px; background: #103c30; color: #f2fff9; box-shadow: 0 15px 30px rgba(13,55,43,.22); }
+.publish-style-floating .composer-lab-publish-footer .composer-lab-publish-icon { border-radius: 50%; background: #25d6a1; color: #0b362a; }
+.publish-style-split .composer-lab-publish-footer button { min-height: 58px; padding: 5px 6px 5px 18px; color: #173b31; border: 1px solid #bfd9ce; background: #eef5f1; box-shadow: none; }
+.publish-style-split .composer-lab-publish-footer .composer-lab-publish-icon { width: 48px; height: 48px; color: #062b20; border-radius: 14px; background: #18cb91; box-shadow: 0 7px 16px rgba(10,177,125,.18); }
+.publish-style-quiet .composer-lab-publish-footer { padding-top: 5px; border-top: 0; background: rgba(250,248,242,.94); }
+.publish-style-quiet .composer-lab-publish-footer button { min-height: 48px; padding: 0 8px 0 4px; color: #16785a; border-top: 1px solid #cfdcd6; border-radius: 0; background: transparent; box-shadow: none; }
+.publish-style-quiet .composer-lab-publish-footer .composer-lab-publish-copy { flex-direction: row; align-items: baseline; gap: 8px; }
+.publish-style-quiet .composer-lab-publish-footer .composer-lab-publish-copy small { order: 2; }
+.publish-style-quiet .composer-lab-publish-footer .composer-lab-publish-icon { color: #15805f; background: transparent; }
+.publish-style-floating .composer-lab-publish-footer button:disabled,
+.publish-style-split .composer-lab-publish-footer button:disabled,
+.publish-style-quiet .composer-lab-publish-footer button:disabled { color: #83918c; background: #e0e6e2; box-shadow: none; }
 .publish-bottom .composer-lab-visibility { margin-top: auto; }
 
 @media (max-width: 760px) {
@@ -24756,6 +24779,12 @@ html[data-theme="dark"] .personalization-avatar-stage > strong {
   .composer-lab-location-tag { color: #90e5c5; border-color: #28664f; background: #153a2c; }
   .composer-lab-location-suggestion { color: #a9bdb4; border-color: #3a5147; background: #182923; }
   .composer-lab-publish-footer { border-color: #2b3e36; background: rgba(17,29,25,.92); }
+  .composer-lab-button-swatch { background: #1e4938; }
+  .composer-lab-button-swatch.style-quiet { border-color: #3d5249; background: transparent; }
+  .publish-style-floating .composer-lab-publish-footer { background: linear-gradient(180deg, transparent, rgba(17,29,25,.97) 34%); }
+  .publish-style-split .composer-lab-publish-footer button { color: #dcebe5; border-color: #375248; background: #1c3028; }
+  .publish-style-quiet .composer-lab-publish-footer { background: rgba(17,29,25,.95); }
+  .publish-style-quiet .composer-lab-publish-footer button { border-color: #34473f; background: transparent; }
 }
 
 /* Character rig comparison lab */
