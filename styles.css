@@ -24302,6 +24302,13 @@ html[data-theme="dark"] .chat-conversation-preview {
   box-shadow: 0 14px 34px rgba(0, 0, 0, .28);
 }
 
+html[data-theme="dark"] .chat-conversation-preview.pinned-message-chat-preview {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .message-group:is(
   .bubble-style-typewriter,
   .bubble-style-newspaper,

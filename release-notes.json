@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.25",
-  "publishedAt": "2026-08-25",
+  "id": "2026.08.26.1",
+  "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "发言操作更轻巧",
+      "title": "置顶消息浏览更清晰",
       "items": [
-        "添加媒体按钮改为紧凑宽度，让媒体与位置操作更清晰舒展"
+        "置顶消息现在按置顶时间从新到旧排列，深色模式下也能无边框沉浸浏览"
       ]
     },
     "en": {
-      "title": "Lighter statement controls",
+      "title": "Clearer pinned messages",
       "items": [
-        "The media action now uses a compact width so media and location controls remain clear and balanced"
+        "Pinned messages now appear newest first and use a seamless borderless view in dark mode"
       ]
     }
   }

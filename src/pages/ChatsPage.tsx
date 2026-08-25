@@ -3094,6 +3094,10 @@ function LiveChatsPage() {
     () => (displayedChat ? sortMessages(messages[displayedChat.id] ?? []) : []),
     [displayedChat, messages]
   );
+  const orderedPinnedMessages = useMemo(
+    () => [...pinnedMessages].sort((left, right) => right.pinned_at - left.pinned_at || right.pin_id - left.pin_id),
+    [pinnedMessages]
+  );
   const canManagePinnedMessages = Boolean(selectedChat && (selectedChat.type === "direct" || selectedChat.isOwner));
 
   useEffect(() => {
@@ -6101,11 +6105,11 @@ function LiveChatsPage() {
                   </div>
                 ) : null}
               </header>
-              {pinnedMessages.length ? (
+              {orderedPinnedMessages.length ? (
                 <div className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
                   <button
                     className="chat-pinned-main"
-                    onClick={() => revealPinnedMessage(pinnedMessages[0].message.message_id)}
+                    onClick={() => revealPinnedMessage(orderedPinnedMessages[0].message.message_id)}
                     type="button"
                   >
                     <span className="chat-pinned-marker">
@@ -6115,13 +6119,13 @@ function LiveChatsPage() {
                       <span className="chat-pinned-kicker">
                         <strong>{t("pin.label")}</strong>
                         <i />
-                        <span>{pinnedByLabel(pinnedMessages[0])}</span>
+                        <span>{pinnedByLabel(orderedPinnedMessages[0])}</span>
                       </span>
-                      <span className="chat-pinned-preview">{pinnedMessagePreview(pinnedMessages[0])}</span>
+                      <span className="chat-pinned-preview">{pinnedMessagePreview(orderedPinnedMessages[0])}</span>
                     </span>
                   </button>
-                  <button aria-label={t("pin.viewAll", { count: pinnedMessages.length })} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
-                    <span className="chat-pinned-count">{pinnedMessages.length}</span>
+                  <button aria-label={t("pin.viewAll", { count: orderedPinnedMessages.length })} className="chat-pinned-list-button" onClick={() => setPinnedDrawerOpen(true)} type="button">
+                    <span className="chat-pinned-count">{orderedPinnedMessages.length}</span>
                     <span className="material-symbols-outlined">chevron_right</span>
                   </button>
                 </div>
@@ -6914,7 +6918,7 @@ function LiveChatsPage() {
         onRouteOpen={() => setPinnedDrawerOpen(true)}
         open={pinnedDrawerOpen}
         title={t("pin.messages")}
-        titleAccessory={<span className="pinned-message-title-count">{pinnedMessages.length}</span>}
+        titleAccessory={<span className="pinned-message-title-count">{orderedPinnedMessages.length}</span>}
         onClose={() => setPinnedDrawerOpen(false)}
       >
         <ChatPreview
@@ -6922,7 +6926,7 @@ function LiveChatsPage() {
           backgroundUri={paintedChatBackgroundUri}
           className="pinned-message-chat-preview"
           firstPersonUserId={currentUserId}
-          messages={pinnedMessages.map((pin) => pin.message)}
+          messages={orderedPinnedMessages.map((pin) => pin.message)}
           onMessageClick={(message) => revealPinnedMessage(message.message_id)}
           showSelfAuthors
         />
