@@ -80,7 +80,7 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
 
   const scales = (() => {
     if (!naturalSize.width || !naturalSize.height || !viewportSize.width || !viewportSize.height) {
-      return { minimum: 1, fit: 1, fill: 1, actual: 1, maximum: 4 };
+      return { minimum: 1, fit: 1, fill: 1, actual: 1, maximum: 16 };
     }
     const widthScale = viewportSize.width / naturalSize.width;
     const heightScale = viewportSize.height / naturalSize.height;
@@ -92,14 +92,16 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
       fit,
       fill,
       actual: 1,
-      maximum: Math.max(4, fill, 1),
+      maximum: 16,
     };
   })();
+
+  const clampScale = (scale: number) => Math.max(scales.minimum, Math.min(scales.maximum, scale));
 
   const commitTransform = (next: ImageTransform) => {
     const stageWidth = viewportSize.width;
     const stageHeight = viewportSize.height;
-    const clampedScale = Math.max(scales.minimum, Math.min(scales.maximum, next.scale));
+    const clampedScale = clampScale(next.scale);
     const renderedWidth = naturalSize.width * clampedScale;
     const renderedHeight = naturalSize.height * clampedScale;
     const maxX = Math.max(0, (renderedWidth - stageWidth) / 2);
@@ -115,8 +117,32 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
 
   const applyMode = (nextMode: Exclude<ImageViewMode, "default" | "custom">) => {
     const nextScale = nextMode === "fit" ? scales.fit : nextMode === "fill" ? scales.fill : scales.actual;
+    const clampedScale = clampScale(nextScale);
+    const renderedWidth = naturalSize.width * clampedScale;
+    const renderedHeight = naturalSize.height * clampedScale;
     setMode(nextMode);
-    commitTransform({ x: 0, y: 0, scale: nextScale });
+    commitTransform({
+      x: nextMode === "fill" ? Math.max(0, (renderedWidth - viewportSize.width) / 2) : 0,
+      y: nextMode === "fill" ? Math.max(0, (renderedHeight - viewportSize.height) / 2) : 0,
+      scale: clampedScale,
+    });
+  };
+
+  const zoomBy = (factor: number, clientX?: number, clientY?: number) => {
+    const current = transformRef.current;
+    const nextScale = clampScale(current.scale * factor);
+    if (Math.abs(nextScale - current.scale) < 0.0001) return;
+    const stage = stageRef.current;
+    const rect = stage?.getBoundingClientRect();
+    const anchorX = clientX !== undefined && rect ? clientX - rect.left : viewportSize.width / 2;
+    const anchorY = clientY !== undefined && rect ? clientY - rect.top : viewportSize.height / 2;
+    const ratio = nextScale / current.scale;
+    setMode("custom");
+    commitTransform({
+      x: current.x + (anchorX - viewportSize.width / 2) * (1 - ratio),
+      y: current.y + (anchorY - viewportSize.height / 2) * (1 - ratio),
+      scale: nextScale,
+    });
   };
 
   useLayoutEffect(() => {
@@ -219,9 +245,16 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
     onPointerUp={endGesture}
     onWheel={(event) => {
       event.preventDefault();
-      const factor = Math.exp(-event.deltaY * 0.0015);
       setMode("custom");
-      commitTransform({ ...transformRef.current, scale: transformRef.current.scale * factor });
+      if (event.ctrlKey || event.metaKey) {
+        zoomBy(Math.exp(-event.deltaY * 0.008), event.clientX, event.clientY);
+        return;
+      }
+      commitTransform({
+        ...transformRef.current,
+        x: transformRef.current.x - event.deltaX,
+        y: transformRef.current.y - event.deltaY,
+      });
     }}
     ref={stageRef}
     role="presentation"
@@ -245,7 +278,21 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
         <button className={mode === "fill" ? "is-active" : ""} onClick={() => applyMode("fill")} type="button">{t("media.fillScreen")}</button>
         <button className={mode === "actual" ? "is-active" : ""} onClick={() => applyMode("actual")} type="button">{t("media.actualSize")}</button>
       </div>
-      <span className="immersive-image-zoom">{Math.round(transform.scale * 100)}%</span>
+      <div className="immersive-image-zoom-controls">
+        <button
+          aria-label={t("media.zoomOut")}
+          disabled={transform.scale <= scales.minimum + 0.0001}
+          onClick={() => zoomBy(0.8)}
+          type="button"
+        >−</button>
+        <span className="immersive-image-zoom">{Math.round(transform.scale * 100)}%</span>
+        <button
+          aria-label={t("media.zoomIn")}
+          disabled={transform.scale >= scales.maximum - 0.0001}
+          onClick={() => zoomBy(1.25)}
+          type="button"
+        >＋</button>
+      </div>
       <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
       </button>

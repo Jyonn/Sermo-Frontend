@@ -781,6 +781,8 @@
   "media.fitPage": "Fit",
   "media.fillScreen": "Fill",
   "media.actualSize": "Actual size",
+  "media.zoomIn": "Zoom in",
+  "media.zoomOut": "Zoom out",
   "media.downloadImage": "Download image",
   "media.downloadImageWithSize": "Download image, {{size}}",
   "recovery.enterNickname": "Enter the nickname you want to recover first.",

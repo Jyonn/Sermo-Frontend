@@ -781,6 +781,8 @@
   "media.fitPage": "完整显示",
   "media.fillScreen": "铺满屏幕",
   "media.actualSize": "实际大小",
+  "media.zoomIn": "放大图片",
+  "media.zoomOut": "缩小图片",
   "media.downloadImage": "下载图片",
   "media.downloadImageWithSize": "下载图片，{{size}}",
   "recovery.enterNickname": "先输入需要找回的昵称。",

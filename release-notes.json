@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.8",
+  "id": "2026.08.26.9",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "沉浸预览更可靠",
+      "title": "沉浸预览操作更自然",
       "items": [
-        "修复长图在沉浸预览中消失、宽图完整显示时偏离画面中心的问题"
+        "铺满图片时从左上方开始浏览，桌面滚轮可滚动图片，并新增最高 16 倍的缩放控制"
       ]
     },
     "en": {
-      "title": "More reliable immersive previews",
+      "title": "More natural immersive controls",
       "items": [
-        "Fixed tall images disappearing and wide images sitting off-center in immersive view"
+        "Fill view now starts at the top-left, desktop scrolling pans the image, and zoom controls support up to 16x"
       ]
     }
   }
