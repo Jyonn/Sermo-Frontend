@@ -14,7 +14,7 @@ import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { showToast } from "../lib/toast";
-import type { AppViewState, ChatDTO, UserDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatDTO, SquareStatementDTO, UserDTO, UserMeDTO } from "../types";
 import { i18n, useI18n } from "../lib/language";
 
 export interface UserProfileSeed {
@@ -48,6 +48,7 @@ interface UserProfileCacheSnapshot {
   directChatId?: number | null;
   onlineReminder?: boolean;
   statementReminder?: boolean;
+  recentStatement?: SquareStatementDTO | null;
 }
 
 function friendshipAge(respondedAt?: number | null) {
@@ -87,6 +88,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [directChatId, setDirectChatId] = useState<number | null>(initialCached?.directChatId ?? null);
   const [onlineReminder, setOnlineReminder] = useState(Boolean(initialCached?.onlineReminder));
   const [statementReminder, setStatementReminder] = useState(Boolean(initialCached?.statementReminder));
+  const [recentStatement, setRecentStatement] = useState<SquareStatementDTO | null>(initialCached?.recentStatement ?? null);
   const [reminderSaving, setReminderSaving] = useState<"online" | "statement" | null>(null);
 
   useEffect(() => {
@@ -96,6 +98,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     setGroupChats(cached?.groupChats ?? []);
     setIsFriend(cached?.isFriend ?? initialIsFriend ?? null);
     setRespondedAt(cached?.respondedAt ?? null);
+    setRecentStatement(cached?.recentStatement ?? null);
     setViewState(cached || initialUser ? "ready" : "loading");
     setError(null);
     syncingCallbackRef.current?.(true);
@@ -104,8 +107,9 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       api.getChats(controller.signal),
       api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal),
       api.getFriendStatus(userId, controller.signal),
+      api.getSquareStatements({ limit: 1, scope: "all", user_id: userId }, controller.signal).catch(() => []),
     ])
-      .then(([friends, chats, users, status]) => {
+      .then(([friends, chats, users, status, statements]) => {
         const matchedFriend = friends.find((row) => row.user_id === userId) ?? null;
         const matchedUser = matchedFriend ?? users.find((row) => row.user_id === userId) ?? null;
         if (!matchedUser) throw new Error(t("profile.userMissing"));
@@ -119,6 +123,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         setDirectChatId(directChat?.chat_id ?? null);
         setOnlineReminder(Boolean(directChat?.online_reminder_enabled));
         setStatementReminder(Boolean(directChat?.statement_reminder_enabled));
+        setRecentStatement(statements[0] ?? null);
         writeTabCache(cacheScope, `user-profile:${userId}`, {
           user: matchedUser,
           groupChats: nextGroupChats,
@@ -127,6 +132,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           directChatId: directChat?.chat_id ?? null,
           onlineReminder: Boolean(directChat?.online_reminder_enabled),
           statementReminder: Boolean(directChat?.statement_reminder_enabled),
+          recentStatement: statements[0] ?? null,
         });
         setRequestState("idle");
         setViewState("ready");
@@ -171,6 +177,11 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     if (!user) return;
     const params = new URLSearchParams({ user_id: String(user.user_id), user_name: user.name });
     navigate(`/app/square?${params.toString()}`);
+  };
+
+  const openRecentStatement = () => {
+    if (!recentStatement) return;
+    navigate(`/app/square/statements/${recentStatement.statement_id}`);
   };
 
   const openGroupPicker = async () => {
@@ -220,6 +231,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       <UserAvatar className="mini-avatar" groupMembers={chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri }))} name={chat.title ?? t("chat.group")} />
       <span><strong>{chat.title ?? t("chat.unnamedGroup")}</strong><small>{t("chat.memberCount", { count: chat.members.length })}</small></span>
       <span className="material-symbols-outlined">chevron_right</span>
+    </button>
+  );
+
+  const renderGroupTile = (chat: ChatDTO) => (
+    <button key={chat.chat_id} className="user-profile-group-tile" onClick={() => (onOpenChat ? onOpenChat(chat.chat_id) : navigate(`/app/chats/${chat.chat_id}`))} type="button">
+      <UserAvatar className="user-profile-group-tile-avatar" groupMembers={chat.members.map((member) => ({ name: member.name, uri: member.avatar_uri }))} name={chat.title ?? t("chat.group")} />
+      <strong>{chat.title ?? t("chat.unnamedGroup")}</strong>
     </button>
   );
 
@@ -314,8 +332,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           </div>
         </div>
         <div className="user-profile-facts">
-          <span className="is-relationship">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</span>
-          {!user.official && user.growth_level ? <span className="is-level">LV{user.growth_level}</span> : null}
+          {!user.official && user.growth_level ? <span className="is-level">LV {user.growth_level}</span> : null}
           {user.is_permanent_vip ? (
             <span className="is-vip">
               {user.permanent_vip_slot
@@ -323,6 +340,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
                 : t("profile.permanentVip")}
             </span>
           ) : null}
+          <span className="is-relationship">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</span>
         </div>
       </section>
 
@@ -336,6 +354,15 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         ) : null}
         <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
       </div>
+
+      {recentStatement ? (
+        <button className="user-profile-recent-statement" onClick={openRecentStatement} type="button">
+          <small>{t("profile.recentStatement")} · {formatRelativeTime(recentStatement.created_at)}</small>
+          <strong>{recentStatement.text || t("profile.mediaStatement")}</strong>
+          <span>{t("profile.enterStatement")} ›</span>
+          <i className="material-symbols-outlined" aria-hidden="true">campaign</i>
+        </button>
+      ) : null}
 
       {isFriend === true ? (
         <section className="user-profile-reminders" aria-label={t("profile.reminders")}>
@@ -357,13 +384,18 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         </div>
         <div className="user-profile-groups">
           {isFriend === true ? (
-            <button className={`user-profile-group-row user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
-              <span className="mini-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
-              <span><strong>{t("profile.newGroup")}</strong><small>{canCreateGroup ? t("profile.inviteFriends") : t("profile.levelUnlock", { level: createGroupCapability?.required_level ?? 4 })}</small></span>
-              <span className="material-symbols-outlined">chevron_right</span>
+            <button className={`user-profile-group-tile user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
+              <span className="user-profile-group-tile-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
+              <strong>{t("profile.newGroup")}</strong>
             </button>
           ) : null}
-          {groupChats.slice(0, 3).map(renderGroupRow)}
+          {groupChats.slice(0, 2).map(renderGroupTile)}
+          {groupChats.length > 0 ? (
+            <button className="user-profile-group-tile user-profile-all-groups-tile" onClick={() => setAllGroupsOpen(true)} type="button">
+              <span className="user-profile-group-tile-avatar material-symbols-outlined">more_horiz</span>
+              <strong>{t("profile.viewAll")}</strong>
+            </button>
+          ) : null}
         </div>
       </section>
 

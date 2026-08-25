@@ -19,11 +19,8 @@ export default function FriendProfilePage() {
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div className="friend-profile-page-title">
-          <div className="friend-profile-title-row">
-            <strong>{t("profile.details")}</strong>
-            <HeaderSyncIndicator syncing={syncing} />
-          </div>
-          <span>{t("profile.detailsHint")}</span>
+          <strong>{t("profile.details")}</strong>
+          <HeaderSyncIndicator syncing={syncing} />
         </div>
       </header>
       <main className="friend-profile-page">
