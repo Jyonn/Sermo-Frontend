@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.17",
+  "id": "2026.08.25.18",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "合并聊天记录完善显示",
+      "title": "聊天记录预览更加完整",
       "items": [
-        "合并聊天记录现在完整铺满页面，并正确展示我方与他方的真实头像"
+        "合并聊天记录会标明双方昵称；置顶消息支持聊天背景、全高浏览与顺畅滚动"
       ]
     },
     "en": {
-      "title": "Improved combined chat history",
+      "title": "More complete chat history previews",
       "items": [
-        "Combined chat history now fills the page and correctly shows real avatars for both sides"
+        "Combined history labels both participants, while pinned messages now use your background and scroll naturally"
       ]
     }
   }

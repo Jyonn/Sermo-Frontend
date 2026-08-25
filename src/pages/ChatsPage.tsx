@@ -1923,6 +1923,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   selectedClientIds,
   selectionMode,
   showAuthor,
+  showSelfAuthor = false,
   showSelfAvatar = false,
   selfAvatarFrame,
   selfAvatarName,
@@ -1999,7 +2000,9 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           </MessageAvatarMentionTarget>
         ) : groupAvatar}
         <div className="message-bubbles">
-          {group.from === "other" && showAuthor ? <div className="message-author-name">{group.name}</div> : null}
+          {(group.from === "other" && showAuthor) || (group.from === "self" && showSelfAuthor)
+            ? <div className="message-author-name">{group.from === "self" ? selfAvatarName ?? group.name : group.name}</div>
+            : null}
           {rows.map((row) => row.kind === "gallery" ? (
             <MessageImageGallery
               key={`gallery:${row.messages[0].clientId}`}
@@ -2038,6 +2041,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   );
 }, (prev, next) => (
   prev.showAuthor === next.showAuthor
+  && prev.showSelfAuthor === next.showSelfAuthor
   && prev.showSelfAvatar === next.showSelfAvatar
   && prev.selfAvatarFrame === next.selfAvatarFrame
   && prev.selfAvatarName === next.selfAvatarName
@@ -2169,6 +2173,7 @@ interface MessageGroupBlockProps {
   selectedClientIds: string[];
   selectionMode: boolean;
   showAuthor: boolean;
+  showSelfAuthor?: boolean;
   showSelfAvatar?: boolean;
   selfAvatarFrame?: ChatMessage["avatarFrameStyle"];
   selfAvatarName?: string;
@@ -6826,7 +6831,6 @@ function LiveChatsPage() {
             />
           );
         })()}
-        titleAccessory={<span className="drawer-title-count">{forwardBundlePreview?.item_count ?? forwardBundlePreview?.items?.length ?? 0}</span>}
         historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}`}
         onClose={() => setForwardBundlePreview(null)}
       >
@@ -6838,11 +6842,12 @@ function LiveChatsPage() {
           messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
           onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
           onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
+          showSelfAuthors
         />
       </SideDrawer>
 
       <SideDrawer
-        className="pinned-message-drawer"
+        className={`pinned-message-drawer chat-background-${currentUserMe?.chat_background_theme ?? "default"}`}
         historyKey="pinned-messages"
         onRouteOpen={() => setPinnedDrawerOpen(true)}
         open={pinnedDrawerOpen}
@@ -6851,10 +6856,13 @@ function LiveChatsPage() {
         onClose={() => setPinnedDrawerOpen(false)}
       >
         <ChatPreview
+          backgroundTheme={currentUserMe?.chat_background_theme ?? "default"}
+          backgroundUri={paintedChatBackgroundUri}
           className="pinned-message-chat-preview"
           firstPersonUserId={currentUserId}
           messages={pinnedMessages.map((pin) => pin.message)}
           onMessageClick={(message) => revealPinnedMessage(message.message_id)}
+          showSelfAuthors
         />
       </SideDrawer>
 
@@ -8024,6 +8032,7 @@ export function ChatPreview({
   onOpenImage,
   onOpenVideo,
   showAuthors = true,
+  showSelfAuthors = false,
 }: {
   backgroundTheme?: ChatBackgroundTheme;
   backgroundUri?: string | null;
@@ -8034,6 +8043,7 @@ export function ChatPreview({
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   showAuthors?: boolean;
+  showSelfAuthors?: boolean;
 }) {
   const dtoById = useMemo(() => new Map(messages.map((message) => [message.message_id, message])), [messages]);
   const mappedMessages = useMemo(
@@ -8083,6 +8093,7 @@ export function ChatPreview({
               selectedClientIds={[]}
               selectionMode={false}
               showAuthor={showAuthors && group.from === "other"}
+              showSelfAuthor={showSelfAuthors}
               showSelfAvatar
               selfAvatarFrame={firstPersonAuthor?.avatar_frame_style}
               selfAvatarName={firstPersonAuthor?.name}
