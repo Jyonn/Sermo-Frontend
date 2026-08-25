@@ -607,6 +607,7 @@
   "profile.recentStatement": "最近发言",
   "profile.enterStatement": "进入发言",
   "profile.mediaStatement": "分享了一条新发言",
+  "profile.noRecentStatement": "还没有公开发言",
   "profile.reminders": "好友提醒",
   "profile.onlineReminder": "上线提醒",
   "profile.statementReminder": "发言提醒",

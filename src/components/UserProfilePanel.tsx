@@ -111,7 +111,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     ])
       .then(([friends, chats, users, status, statements]) => {
         const matchedFriend = friends.find((row) => row.user_id === userId) ?? null;
-        const matchedUser = matchedFriend ?? users.find((row) => row.user_id === userId) ?? null;
+        const matchedSpaceUser = users.find((row) => row.user_id === userId) ?? null;
+        const matchedUser = matchedFriend && matchedSpaceUser
+          ? { ...matchedFriend, ...matchedSpaceUser }
+          : matchedFriend ?? matchedSpaceUser;
         if (!matchedUser) throw new Error(t("profile.userMissing"));
         setUser(matchedUser);
         setIsFriend(status.is_friend);
@@ -355,14 +358,15 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
       </div>
 
-      {recentStatement ? (
-        <button className="user-profile-recent-statement" onClick={openRecentStatement} type="button">
-          <small>{t("profile.recentStatement")} · {formatRelativeTime(recentStatement.created_at)}</small>
-          <strong>{recentStatement.text || t("profile.mediaStatement")}</strong>
-          <span>{t("profile.enterStatement")} ›</span>
-          <i className="material-symbols-outlined" aria-hidden="true">campaign</i>
-        </button>
-      ) : null}
+      <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} onClick={recentStatement ? openRecentStatement : openStatements} type="button">
+        <small>
+          {t("profile.recentStatement")}
+          {recentStatement ? ` · ${formatRelativeTime(recentStatement.created_at)}` : ""}
+        </small>
+        <strong>{recentStatement ? recentStatement.text || t("profile.mediaStatement") : t("profile.noRecentStatement")}</strong>
+        <span>{t(recentStatement ? "profile.enterStatement" : "profile.viewStatements")} ›</span>
+        <i className="material-symbols-outlined" aria-hidden="true">campaign</i>
+      </button>
 
       {isFriend === true ? (
         <section className="user-profile-reminders" aria-label={t("profile.reminders")}>

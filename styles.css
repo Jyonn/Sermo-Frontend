@@ -14950,6 +14950,257 @@ html:not([data-theme="dark"]) :is(.user-profile-create-group-icon, .user-profile
   .user-profile-reminders small { min-width: 68px; padding-inline: 10px; }
 }
 
+/* Social profile v2: a single, full-bleed identity card in both themes. */
+.shell-friend-profile {
+  width: min(780px, calc(100vw - 24px));
+  margin: 14px auto;
+  padding: 0;
+  overflow: visible;
+}
+
+.friend-profile-header {
+  width: 100%;
+  min-height: 86px;
+  padding: calc(12px + env(safe-area-inset-top)) 30px 12px;
+  border: 1px solid var(--profile-line, var(--line-soft));
+  border-bottom-color: var(--line-soft);
+  border-radius: 34px 34px 0 0;
+  background: color-mix(in srgb, var(--bg-page) 92%, transparent);
+}
+
+.friend-profile-header .chat-back-button {
+  left: 22px;
+}
+
+.friend-profile-page {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.user-profile-panel {
+  --profile-page: #f7f5ef;
+  --profile-card: #fffdf8;
+  --profile-card-soft: #dfece2;
+  --profile-ink: #111c18;
+  --profile-muted: #77847d;
+  --profile-line: rgba(63, 95, 82, 0.16);
+  --profile-deep: #123f32;
+  display: grid;
+  gap: 0;
+  min-height: calc(100dvh - 114px);
+  padding: 0 36px calc(38px + env(safe-area-inset-bottom));
+  overflow: hidden;
+  border: 1px solid var(--profile-line);
+  border-top: 0;
+  border-radius: 0 0 34px 34px;
+  color: var(--profile-ink);
+  background: var(--profile-page);
+}
+
+html[data-theme="dark"] .user-profile-panel {
+  --profile-page: #081b15;
+  --profile-card: #0a2119;
+  --profile-card-soft: #dce9df;
+  --profile-ink: #f4f7f3;
+  --profile-muted: #91a49a;
+  --profile-line: rgba(154, 198, 178, 0.2);
+  --profile-deep: #103b2f;
+}
+
+.user-profile-social-card {
+  margin: 0 -36px;
+  padding: 0 36px 30px;
+}
+
+.user-profile-cover {
+  height: 170px;
+  margin: 0 -36px;
+}
+
+.user-profile-identity {
+  grid-template-columns: 176px minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+  margin-top: -102px;
+}
+
+.user-profile-avatar-wrap {
+  width: 176px;
+  height: 176px;
+  border-radius: 44px;
+}
+
+.user-profile-social-card .user-profile-avatar-wrap {
+  padding: 7px;
+  background: var(--profile-card);
+  box-shadow: 0 18px 38px rgba(8, 29, 21, 0.2);
+}
+
+.user-profile-social-card .user-profile-avatar {
+  width: 162px;
+  height: 162px;
+  border-radius: 37px;
+}
+
+.user-profile-copy {
+  align-self: stretch;
+  display: grid;
+  align-content: end;
+  padding: 104px 0 11px;
+}
+
+.user-profile-copy h2 {
+  font-size: clamp(2rem, 6vw, 2.7rem);
+}
+
+.user-profile-copy p {
+  margin-top: 14px;
+  font-size: 0.9rem;
+}
+
+.user-profile-facts {
+  margin: 26px 0 0;
+}
+
+.user-profile-primary-actions {
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.user-profile-primary-actions .button {
+  min-height: 68px;
+  border-radius: 20px;
+  font-size: 1.04rem;
+}
+
+.user-profile-recent-statement {
+  min-height: 150px;
+  margin-top: 28px;
+  padding: 26px 34% 26px 30px;
+  border-radius: 28px;
+}
+
+.user-profile-recent-statement.is-empty {
+  min-height: 116px;
+}
+
+.user-profile-recent-statement strong {
+  font-size: 1.04rem;
+}
+
+.user-profile-reminders {
+  margin-top: 28px;
+  padding: 20px 0;
+}
+
+.user-profile-section {
+  margin-top: 30px;
+}
+
+.user-profile-section .section-label {
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.user-profile-groups {
+  gap: 28px;
+  padding-top: 6px;
+}
+
+.drawer-body .user-profile-panel .user-profile-groups {
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.user-profile-group-tile {
+  flex-basis: 84px;
+}
+
+.user-profile-group-tile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+}
+
+.user-profile-relationship-actions {
+  margin-top: 40px;
+}
+
+.user-profile-danger-action {
+  min-height: 64px;
+  border-radius: 22px;
+}
+
+@media (max-width: 560px) {
+  .shell-friend-profile {
+    width: calc(100vw - 16px);
+    margin: 8px auto;
+  }
+
+  .friend-profile-header {
+    min-height: 70px;
+    padding-inline: 22px;
+    border-radius: 26px 26px 0 0;
+  }
+
+  .friend-profile-header .chat-back-button { left: 12px; }
+
+  .user-profile-panel {
+    min-height: calc(100dvh - 86px);
+    padding: 0 20px calc(28px + env(safe-area-inset-bottom));
+    border-radius: 0 0 26px 26px;
+  }
+
+  .user-profile-social-card {
+    margin-inline: -20px;
+    padding: 0 20px 24px;
+  }
+
+  .user-profile-cover {
+    height: 126px;
+    margin-inline: -20px;
+  }
+
+  .user-profile-identity {
+    grid-template-columns: 124px minmax(0, 1fr);
+    gap: 18px;
+    margin-top: -70px;
+  }
+
+  .user-profile-avatar-wrap {
+    width: 124px;
+    height: 124px;
+    border-radius: 32px;
+  }
+
+  .user-profile-social-card .user-profile-avatar-wrap { padding: 6px; }
+  .user-profile-social-card .user-profile-avatar {
+    width: 112px;
+    height: 112px;
+    border-radius: 26px;
+  }
+
+  .user-profile-copy { padding: 74px 0 6px; }
+  .user-profile-copy h2 { font-size: clamp(1.65rem, 7.5vw, 2.05rem); }
+  .user-profile-copy p { margin-top: 9px; font-size: 0.78rem; }
+  .user-profile-facts { gap: 7px; margin-top: 20px; }
+  .user-profile-facts span { min-height: 30px; padding: 5px 10px; font-size: 0.68rem; }
+  .user-profile-primary-actions { gap: 10px; margin-top: 8px; }
+  .user-profile-primary-actions .button { min-height: 56px; border-radius: 17px; font-size: 0.9rem; }
+  .user-profile-recent-statement { min-height: 128px; margin-top: 22px; padding: 20px 31% 20px 20px; border-radius: 22px; }
+  .user-profile-reminders { margin-top: 22px; padding-block: 16px; }
+  .user-profile-reminders strong { font-size: 0.74rem; }
+  .user-profile-reminders small { min-width: 62px; padding: 7px 9px; }
+  .user-profile-section { margin-top: 24px; }
+  .user-profile-groups { gap: 18px; }
+  .user-profile-group-tile { flex-basis: 70px; }
+  .user-profile-group-tile-avatar { width: 60px; height: 60px; border-radius: 18px; }
+  .user-profile-relationship-actions { margin-top: 30px; }
+}
+
 .friend-request-drawer {
   display: grid;
   gap: 16px;

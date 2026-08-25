@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.3",
+  "id": "2026.08.25.4",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
       "title": "用户详情焕新",
       "items": [
-        "用户详情升级为完整社交名片，清晰呈现动态、提醒、共同群聊与永久 VIP 编号"
+        "用户详情升级为完整社交名片，清晰呈现等级、动态、提醒、共同群聊与永久 VIP 编号"
       ]
     },
     "en": {
       "title": "A redesigned social profile",
       "items": [
-        "Profiles now present activity, alerts, shared groups, and Lifetime VIP numbers in one polished social card"
+        "Profiles now present levels, activity, alerts, shared groups, and Lifetime VIP numbers in one polished social card"
       ]
     }
   }

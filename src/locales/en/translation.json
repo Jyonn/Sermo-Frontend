@@ -607,6 +607,7 @@
   "profile.recentStatement": "Latest post",
   "profile.enterStatement": "Open post",
   "profile.mediaStatement": "Shared a new post",
+  "profile.noRecentStatement": "No public posts yet",
   "profile.reminders": "Friend alerts",
   "profile.onlineReminder": "Online alerts",
   "profile.statementReminder": "Post alerts",
