@@ -1630,6 +1630,7 @@
   "pin.messages": "Pinned messages",
   "pin.by": "Pinned by {{names}}",
   "pin.remove": "Unpin",
+  "pin.jump": "Jump",
   "common.add": "Add",
   "chat.moreMembers": "More group members",
   "chat.settings": "Conversation settings",

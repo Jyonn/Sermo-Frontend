@@ -1630,6 +1630,7 @@
   "pin.messages": "置顶消息",
   "pin.by": "{{names}}置顶",
   "pin.remove": "取消置顶",
+  "pin.jump": "跳转",
   "common.add": "添加",
   "chat.moreMembers": "更多群成员",
   "chat.settings": "会话设置",

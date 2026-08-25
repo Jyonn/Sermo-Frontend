@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.1",
+  "id": "2026.08.26.2",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "置顶消息浏览更清晰",
+      "title": "置顶消息操作更完整",
       "items": [
-        "置顶消息现在按置顶时间从新到旧排列，深色模式下也能无边框沉浸浏览"
+        "置顶消息会展示每位置顶人，点击或长按气泡即可跳转上下文或取消自己的置顶"
       ]
     },
     "en": {
-      "title": "Clearer pinned messages",
+      "title": "More complete pinned message controls",
       "items": [
-        "Pinned messages now appear newest first and use a seamless borderless view in dark mode"
+        "Pinned messages now show everyone who pinned them, with contextual jump and unpin controls on each bubble"
       ]
     }
   }

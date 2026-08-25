@@ -1,5 +1,6 @@
 import {
   memo,
+  Fragment,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -1929,6 +1930,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   selfAvatarName,
   selfAvatarUri,
   selfIsPermanentVip,
+  renderMessageFooter,
 }: MessageGroupBlockProps) {
   const systemMessage = group.messages.length === 1 && group.messages[0].kind === "system" ? group.messages[0] : null;
   if (systemMessage) {
@@ -2004,36 +2006,40 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
             ? <div className="message-author-name">{group.from === "self" ? selfAvatarName ?? group.name : group.name}</div>
             : null}
           {rows.map((row) => row.kind === "gallery" ? (
-            <MessageImageGallery
-              key={`gallery:${row.messages[0].clientId}`}
-              from={group.from}
-              isEntering={row.messages.some((message) => enteringMessageIds.includes(message.clientId))}
-              isFirst={row.startIndex === 0}
-              isLast={row.startIndex + row.messages.length === group.messages.length}
-              messages={row.messages}
-              onOpenImage={onOpenImage}
-              onOpenActions={onOpenActions}
-              onRetry={onRetry}
-              onToggleSelection={onToggleSelection}
-              selectedClientIds={selectedClientIds}
-              selectionMode={selectionMode}
-            />
+            <Fragment key={`gallery:${row.messages[0].clientId}`}>
+              <MessageImageGallery
+                from={group.from}
+                isEntering={row.messages.some((message) => enteringMessageIds.includes(message.clientId))}
+                isFirst={row.startIndex === 0}
+                isLast={row.startIndex + row.messages.length === group.messages.length}
+                messages={row.messages}
+                onOpenImage={onOpenImage}
+                onOpenActions={onOpenActions}
+                onRetry={onRetry}
+                onToggleSelection={onToggleSelection}
+                selectedClientIds={selectedClientIds}
+                selectionMode={selectionMode}
+              />
+              {row.messages.map((message) => renderMessageFooter?.(message))}
+            </Fragment>
           ) : (
-            <MessageBubbleRow
-              key={row.message.clientId}
-              from={group.from}
-              isEntering={enteringMessageIds.includes(row.message.clientId)}
-              isFirst={row.startIndex === 0}
-              isLast={row.startIndex === group.messages.length - 1}
-              message={row.message}
-              onOpenImage={onOpenImage}
-              onOpenVideo={onOpenVideo}
-              onOpenActions={onOpenActions}
-              onRetry={onRetry}
-              onToggleSelection={onToggleSelection}
-              selected={selectedClientIds.includes(row.message.clientId)}
-              selectionMode={selectionMode}
-            />
+            <Fragment key={row.message.clientId}>
+              <MessageBubbleRow
+                from={group.from}
+                isEntering={enteringMessageIds.includes(row.message.clientId)}
+                isFirst={row.startIndex === 0}
+                isLast={row.startIndex === group.messages.length - 1}
+                message={row.message}
+                onOpenImage={onOpenImage}
+                onOpenVideo={onOpenVideo}
+                onOpenActions={onOpenActions}
+                onRetry={onRetry}
+                onToggleSelection={onToggleSelection}
+                selected={selectedClientIds.includes(row.message.clientId)}
+                selectionMode={selectionMode}
+              />
+              {renderMessageFooter?.(row.message)}
+            </Fragment>
           ))}
         </div>
       </div>
@@ -2047,6 +2053,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   && prev.selfAvatarName === next.selfAvatarName
   && prev.selfAvatarUri === next.selfAvatarUri
   && prev.selfIsPermanentVip === next.selfIsPermanentVip
+  && prev.renderMessageFooter === next.renderMessageFooter
   && prev.selectionMode === next.selectionMode
   && prev.selectedClientIds.join("|") === next.selectedClientIds.join("|")
   && groupRenderSignature(prev.group, prev.enteringMessageIds) === groupRenderSignature(next.group, next.enteringMessageIds)
@@ -2066,13 +2073,13 @@ interface MessageGroup {
   messages: ChatMessage[];
 }
 
-function buildMessageGroups(messages: ChatMessage[]): MessageGroup[] {
+function buildMessageGroups(messages: ChatMessage[], separateMessages = false): MessageGroup[] {
   const groups: MessageGroup[] = [];
   messages.forEach((message, index) => {
     const previous = messages[index - 1];
     const dividerLabel = shouldShowThreadDivider(message, previous) ? formatThreadDivider(message.createdAt) : undefined;
     const lastGroup = groups[groups.length - 1];
-    if (lastGroup && !dividerLabel && shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1])) {
+    if (!separateMessages && lastGroup && !dividerLabel && shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1])) {
       lastGroup.messages.push(message);
       return;
     }
@@ -2179,6 +2186,7 @@ interface MessageGroupBlockProps {
   selfAvatarName?: string;
   selfAvatarUri?: string;
   selfIsPermanentVip?: boolean;
+  renderMessageFooter?: (message: ChatMessage) => ReactNode;
 }
 
 interface MessageMenuState {
@@ -2187,6 +2195,13 @@ interface MessageMenuState {
   anchorY: number;
   placement: "top" | "bottom";
   confirmDelete: boolean;
+}
+
+interface PinnedMessageMenuState {
+  pin: PinnedMessageDTO;
+  anchorX: number;
+  anchorY: number;
+  placement: "top" | "bottom";
 }
 
 type MessageSelectionAction = "copy" | "save" | "recall";
@@ -2400,6 +2415,7 @@ function LiveChatsPage() {
   const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
+  const [pinnedMessageMenu, setPinnedMessageMenu] = useState<PinnedMessageMenuState | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
@@ -2865,8 +2881,41 @@ function LiveChatsPage() {
   };
 
   const revealPinnedMessage = (messageId: number) => {
+    setPinnedMessageMenu(null);
     setPinnedDrawerOpen(false);
     window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId } }));
+  };
+
+  const openPinnedMessageMenu = (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => {
+    const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
+    if (!pin) return;
+    const rect = element.getBoundingClientRect();
+    const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
+    setPinnedMessageMenu({
+      pin,
+      anchorX: pointerX ?? rect.left + rect.width / 2,
+      anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
+      placement,
+    });
+  };
+
+  const removeOwnPinnedMessage = async (pin: PinnedMessageDTO) => {
+    const pinnedByCurrentUser = pin.pinned_by_users.some((user) => user.user_id === currentUserId);
+    if (!pinnedByCurrentUser) return;
+    setPinnedMessageMenu(null);
+    setPinSavingMessageId(pin.message.message_id);
+    try {
+      await api.unpinMessage(pin.message.message_id);
+      const remainingUsers = pin.pinned_by_users.filter((user) => user.user_id !== currentUserId);
+      setPinnedMessages((current) => remainingUsers.length
+        ? current.map((item) => item.pin_id === pin.pin_id ? { ...item, pinned_by_users: remainingUsers } : item)
+        : current.filter((item) => item.pin_id !== pin.pin_id));
+      showToast(t("pin.removed"));
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("pin.failed"), "error");
+    } finally {
+      setPinSavingMessageId(null);
+    }
   };
 
   const togglePinnedMessage = async (message: ChatMessage) => {
@@ -2960,7 +3009,7 @@ function LiveChatsPage() {
 
   useLayoutEffect(() => {
     const menu = messageMenuRef.current;
-    if (!menu || !messageMenu) return;
+    if (!menu || (!messageMenu && !pinnedMessageMenu)) return;
     menu.style.setProperty("--message-menu-shift-x", "0px");
     const rect = menu.getBoundingClientRect();
     const safeInset = 12;
@@ -2970,7 +3019,7 @@ function LiveChatsPage() {
       shift -= rect.right + shift - (window.innerWidth - safeInset);
     }
     menu.style.setProperty("--message-menu-shift-x", `${Math.round(shift)}px`);
-  }, [messageMenu]);
+  }, [messageMenu, pinnedMessageMenu]);
 
   useEffect(() => {
     if (!cacheScope) return;
@@ -3860,9 +3909,12 @@ function LiveChatsPage() {
   };
 
   useEffect(() => {
-    if (!messageMenu) return;
+    if (!messageMenu && !pinnedMessageMenu) return;
 
-    const close = () => setMessageMenu(null);
+    const close = () => {
+      setMessageMenu(null);
+      setPinnedMessageMenu(null);
+    };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
     };
@@ -3876,7 +3928,7 @@ function LiveChatsPage() {
       window.removeEventListener("scroll", close, true);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [messageMenu]);
+  }, [messageMenu, pinnedMessageMenu]);
 
   useLayoutEffect(() => {
     if (!selectedChat) {
@@ -6927,7 +6979,22 @@ function LiveChatsPage() {
           className="pinned-message-chat-preview"
           firstPersonUserId={currentUserId}
           messages={orderedPinnedMessages.map((pin) => pin.message)}
-          onMessageClick={(message) => revealPinnedMessage(message.message_id)}
+          onMessageAction={openPinnedMessageMenu}
+          renderMessageFooter={(message) => {
+            const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
+            if (!pin?.pinned_by_users.length) return null;
+            return (
+              <div className="pinned-message-attribution" key={`pin-by:${message.message_id}`}>
+                {pin.pinned_by_users.map((user) => (
+                  <span className="pinned-message-attribution-person" key={`${message.message_id}:${user.user_id}`}>
+                    <UserAvatar className="pinned-message-attribution-avatar" name={user.name} uri={user.avatar_uri} cacheKey={user.avatar_cache_key} />
+                    <span>{t("pin.by", { names: user.name })}</span>
+                  </span>
+                ))}
+              </div>
+            );
+          }}
+          separateMessages
           showSelfAuthors
         />
       </SideDrawer>
@@ -7714,6 +7781,32 @@ function LiveChatsPage() {
         onClose={() => setTravelMapRevokeConfirmOpen(false)}
         onConfirm={() => void revokeTravelMapAccess()}
       />
+      {pinnedMessageMenu ? (
+        <div className="message-context-layer" onClick={() => setPinnedMessageMenu(null)} role="presentation">
+          <div
+            ref={messageMenuRef}
+            className={`message-context-menu ${pinnedMessageMenu.placement === "bottom" ? "below" : "above"}`}
+            onClick={(event) => event.stopPropagation()}
+            style={{ left: pinnedMessageMenu.anchorX, top: pinnedMessageMenu.anchorY }}
+          >
+            <div className="message-context-actions is-confirm pinned-message-context-actions">
+              <button className="message-context-button" onClick={() => revealPinnedMessage(pinnedMessageMenu.pin.message.message_id)} type="button">
+                <span className="material-symbols-outlined" aria-hidden="true">my_location</span>
+                {t("pin.jump")}
+              </button>
+              <button
+                className="message-context-button recall"
+                disabled={pinSavingMessageId === pinnedMessageMenu.pin.message.message_id || !pinnedMessageMenu.pin.pinned_by_users.some((user) => user.user_id === currentUserId)}
+                onClick={() => void removeOwnPinnedMessage(pinnedMessageMenu.pin)}
+                type="button"
+              >
+                <ComposerSvgIcon className="message-context-action-icon" kind="pin-off" />
+                {t("pin.remove")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {messageMenu && !messageMenu.confirmDelete ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
@@ -8096,10 +8189,13 @@ export function ChatPreview({
   firstPersonUserId,
   messages,
   onMessageClick,
+  onMessageAction,
   onOpenImage,
   onOpenVideo,
   showAuthors = true,
   showSelfAuthors = false,
+  separateMessages = false,
+  renderMessageFooter,
 }: {
   backgroundTheme?: ChatBackgroundTheme;
   backgroundUri?: string | null;
@@ -8107,10 +8203,13 @@ export function ChatPreview({
   firstPersonUserId?: number | null;
   messages: ChatMessageDTO[];
   onMessageClick?: (message: ChatMessageDTO) => void;
+  onMessageAction?: (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => void;
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   showAuthors?: boolean;
   showSelfAuthors?: boolean;
+  separateMessages?: boolean;
+  renderMessageFooter?: (message: ChatMessageDTO) => ReactNode;
 }) {
   const dtoById = useMemo(() => new Map(messages.map((message) => [message.message_id, message])), [messages]);
   const mappedMessages = useMemo(
@@ -8123,7 +8222,7 @@ export function ChatPreview({
       : messages.find((message) => message.user.user_id === firstPersonUserId)?.user ?? null,
     [firstPersonUserId, messages],
   );
-  const groups = useMemo(() => buildMessageGroups(mappedMessages), [mappedMessages]);
+  const groups = useMemo(() => buildMessageGroups(mappedMessages, separateMessages), [mappedMessages, separateMessages]);
   const noop = () => undefined;
   const backgroundStyle = backgroundTheme === "custom" && backgroundUri
     ? ({ "--chat-background-image": `url("${backgroundUri.replace(/"/g, "%22")}")` } as CSSProperties)
@@ -8133,11 +8232,25 @@ export function ChatPreview({
     const source = dtoById.get(message.id);
     if (source) onMessageClick?.(source);
   };
+  const openMessageAction = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
+    if (typeof message.id !== "number") return;
+    const source = dtoById.get(message.id);
+    if (source) onMessageAction?.(source, element, pointerX);
+    else openMessage(message);
+  };
 
   return (
     <section
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
-      onClickCapture={onMessageClick ? (event) => {
+      onClickCapture={onMessageAction ? (event) => {
+        const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
+        const messageId = Number(messageNode?.dataset.messageId);
+        const source = dtoById.get(messageId);
+        if (!source || !messageNode) return;
+        event.preventDefault();
+        event.stopPropagation();
+        onMessageAction(source, messageNode);
+      } : onMessageClick ? (event) => {
         const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
         const messageId = Number(messageNode?.dataset.messageId);
         const source = dtoById.get(messageId);
@@ -8151,7 +8264,7 @@ export function ChatPreview({
               enteringMessageIds={[]}
               group={group}
               key={group.key}
-              onOpenActions={(message) => openMessage(message)}
+              onOpenActions={onMessageAction ? openMessageAction : (message) => openMessage(message)}
               onOpenImage={onOpenImage ?? noop}
               onOpenVideo={onOpenVideo ?? noop}
               onRetry={noop}
@@ -8166,6 +8279,11 @@ export function ChatPreview({
               selfAvatarName={firstPersonAuthor?.name}
               selfAvatarUri={firstPersonAuthor?.avatar_uri}
               selfIsPermanentVip={firstPersonAuthor?.is_permanent_vip}
+              renderMessageFooter={renderMessageFooter ? (message) => {
+                if (typeof message.id !== "number") return null;
+                const source = dtoById.get(message.id);
+                return source ? renderMessageFooter(source) : null;
+              } : undefined}
             />
           ))}
         </div>
