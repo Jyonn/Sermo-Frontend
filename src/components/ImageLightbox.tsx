@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 
@@ -60,6 +60,7 @@ interface ImageTransform {
 function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClose: () => void }) {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const gestureRef = useRef({
     moved: false,
@@ -134,11 +135,15 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
     commitTransform({ x: 0, y: 0, scale: scales.minimum });
   }, [naturalSize.width, naturalSize.height, viewportSize.width, viewportSize.height]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setControlsVisible(false);
     setNaturalSize({ width: 0, height: 0 });
     transformRef.current = { x: 0, y: 0, scale: 1 };
     setTransform({ x: 0, y: 0, scale: 1 });
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth && image.naturalHeight) {
+      setNaturalSize({ width: image.naturalWidth, height: image.naturalHeight });
+    }
   }, [src]);
 
   const beginGesture = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -226,10 +231,11 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
       className="immersive-image-canvas"
       draggable={false}
       onLoad={(event) => setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+      ref={imageRef}
       src={src}
       style={{
         height: naturalSize.height ? `${naturalSize.height}px` : "auto",
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`,
+        transform: `translate3d(calc(-50% + ${transform.x}px), calc(-50% + ${transform.y}px), 0) scale(${transform.scale})`,
         width: naturalSize.width ? `${naturalSize.width}px` : "auto",
       }}
     />

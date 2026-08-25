@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.7",
+  "id": "2026.08.26.8",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "时间统一为北京时间",
+      "title": "沉浸预览更可靠",
       "items": [
-        "照片拍摄时间与八仙活动的每日领取状态现在统一按北京时间显示和刷新"
+        "修复长图在沉浸预览中消失、宽图完整显示时偏离画面中心的问题"
       ]
     },
     "en": {
-      "title": "Time now follows Beijing time",
+      "title": "More reliable immersive previews",
       "items": [
-        "Photo capture times and daily Baxian activity claims now display and reset consistently in Beijing time"
+        "Fixed tall images disappearing and wide images sitting off-center in immersive view"
       ]
     }
   }

@@ -5928,8 +5928,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: grid;
-  place-items: center;
+  display: block;
   overflow: hidden;
   background: #000;
   cursor: grab;
@@ -5943,6 +5942,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .immersive-image-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   display: block;
   max-width: none;
   max-height: none;
