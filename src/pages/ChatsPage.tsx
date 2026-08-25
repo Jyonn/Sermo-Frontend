@@ -6823,6 +6823,7 @@ function LiveChatsPage() {
       </SideDrawer>
 
       <SideDrawer
+        className="pinned-message-drawer"
         historyKey="pinned-messages"
         onRouteOpen={() => setPinnedDrawerOpen(true)}
         open={pinnedDrawerOpen}
@@ -6830,47 +6831,12 @@ function LiveChatsPage() {
         titleAccessory={<span className="pinned-message-title-count">{pinnedMessages.length}</span>}
         onClose={() => setPinnedDrawerOpen(false)}
       >
-        <div className="pinned-message-list">
-          {pinnedMessages.map((pin, index) => {
-            const pinnedByCurrentUser = pin.pinned_by_users.some((user) => user.user_id === currentUserId);
-            const canUnpin = canManagePinnedMessages && pinnedByCurrentUser;
-            return (
-            <article className={`pinned-message-card${pinnedByCurrentUser ? " is-mine" : " is-readonly"}`} key={pin.pin_id}>
-              <span className="pinned-message-sequence">{String(index + 1).padStart(2, "0")}</span>
-              <div className="pinned-message-content" onClick={() => revealPinnedMessage(pin.message.message_id)}>
-                <ChatPreview
-                  className="pinned-message-chat-preview"
-                  firstPersonUserId={currentUserId}
-                  messages={[pin.message]}
-                  showAuthors={false}
-                />
-                <small className="pinned-message-attribution" title={t("pin.by", { names: pinnedByLabel(pin) })}>
-                  <span>{t("pin.by", { names: pinnedByLabel(pin) })}</span>
-                  <i />
-                  <time>{formatRelativeTime(pin.pinned_at)}</time>
-                </small>
-              </div>
-              <span className="pinned-message-action-slot">
-              {canUnpin ? (
-                <button
-                  aria-label={t("pin.remove")}
-                  className="pinned-message-remove"
-                  disabled={pinSavingMessageId === pin.message.message_id}
-                  onClick={() => void togglePinnedMessage(mapChatMessage(pin.message, currentUserId))}
-                  type="button"
-                >
-                  <ComposerSvgIcon className="pinned-message-remove-icon" kind="pin-off" />
-                </button>
-              ) : (
-                <span aria-hidden="true" className="pinned-message-readonly">
-                  <ComposerSvgIcon className="pinned-message-readonly-icon" kind="pin" />
-                </span>
-              )}
-              </span>
-            </article>
-            );
-          })}
-        </div>
+        <ChatPreview
+          className="pinned-message-chat-preview"
+          firstPersonUserId={currentUserId}
+          messages={pinnedMessages.map((pin) => pin.message)}
+          onMessageClick={(message) => revealPinnedMessage(message.message_id)}
+        />
       </SideDrawer>
 
       <SideDrawer

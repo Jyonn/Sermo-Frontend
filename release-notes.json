@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.14",
+  "id": "2026.08.25.15",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "分享会话列表更清晰",
+      "title": "置顶消息回归对话视图",
       "items": [
-        "分享和转发时的会话列表不再横向滚动，置顶会话改用清晰的文字标识"
+        "置顶消息现在按真实聊天气泡、头像和时间自然排列，点击即可回到原消息"
       ]
     },
     "en": {
-      "title": "Clearer chat sharing list",
+      "title": "Pinned messages now feel like chat",
       "items": [
-        "The chat picker used for sharing and forwarding no longer scrolls sideways and now marks pinned chats with a clear text label"
+        "Pinned messages now use their real bubbles, avatars, and timeline, with a tap returning to the original message"
       ]
     }
   }
