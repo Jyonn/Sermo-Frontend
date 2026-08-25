@@ -1567,6 +1567,7 @@
   "pin.label": "置顶",
   "pin.viewAll": "查看全部 {{count}} 条置顶消息",
   "message.viewMore": "查看更多消息",
+  "message.viewNewer": "继续查看较新消息",
   "message.replyTo": "回复 {{name}}",
   "message.cancelReply": "取消引用",
   "audio.unlockAtLevel": "Lv.{{level}} 解锁语音",

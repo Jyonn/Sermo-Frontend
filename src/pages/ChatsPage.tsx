@@ -48,7 +48,7 @@ import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, 
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { addStickerFile } from "../lib/stickers";
 import { cacheMediaLocally, purgeCachedMedia } from "../lib/mediaCache";
-import { loadMessagesAfterThrough, loadMessagesBeforeThrough } from "../lib/messageHistory";
+import { loadMessagesAfterThrough } from "../lib/messageHistory";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
@@ -2457,7 +2457,10 @@ function LiveChatsPage() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [messages, setMessages] = useState<Record<number, ChatMessage[]>>({});
   const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [hasNewerMessages, setHasNewerMessages] = useState(false);
   const [olderState, setOlderState] = useState<"idle" | "loading">("idle");
+  const [newerState, setNewerState] = useState<"idle" | "loading">("idle");
+  const hasNewerMessagesRef = useRef(false);
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
   const [messageDeleteState, setMessageDeleteState] = useState<"idle" | "deleting">("idle");
@@ -3039,6 +3042,8 @@ function LiveChatsPage() {
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
   const selectedChatId = selectedChat?.id ?? null;
+  const selectedChatIdRef = useRef<number | null>(selectedChatId);
+  selectedChatIdRef.current = selectedChatId;
   const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
     if (!selectedChat || selectedChat.type !== "direct") return null;
     const member = selectedChat.detail.members.find((item) => !item.isSelf);
@@ -3147,27 +3152,27 @@ function LiveChatsPage() {
       const messageId = Number((event as CustomEvent<{ messageId?: number }>).detail?.messageId);
       if (!selectedChat || !Number.isInteger(messageId) || revealElement(messageId)) return;
 
-      const numericMessages = selectedMessages.filter((message): message is ChatMessage & { id: number } => typeof message.id === "number");
-      const oldestId = numericMessages[0]?.id;
-      const newestId = numericMessages[numericMessages.length - 1]?.id;
-      const request =
-        oldestId === undefined || newestId === undefined
-          ? api.getMessages({ chat_id: selectedChat.id, limit: 60, before: messageId + 1 })
-          : messageId < oldestId
-            ? loadMessagesBeforeThrough(selectedChat.id, oldestId, messageId)
-            : loadMessagesAfterThrough(
-                selectedChat.id,
-                Math.max(0, ...numericMessages.filter((message) => message.id < messageId).map((message) => message.id)),
-                messageId
-              );
-
-      void request
-        .then((rows) => {
-          const loaded = rows.map((row) => mapChatMessage(row, currentUserId));
-          setMessages((current) => ({
-            ...current,
-            [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], loaded),
-          }));
+      const chatId = selectedChat.id;
+      const pageSize = 30;
+      void Promise.all([
+        api.getMessages({ chat_id: chatId, limit: pageSize + 1, before: messageId + 1 }),
+        api.getMessages({ chat_id: chatId, limit: pageSize + 1, after: messageId }),
+      ])
+        .then(([olderRows, newerRows]) => {
+          if (selectedChatIdRef.current !== chatId) return;
+          const loaded = sortMessages(
+            [...olderRows.slice(0, pageSize), ...newerRows.slice(0, pageSize)]
+              .map((row) => mapChatMessage(row, currentUserId))
+          );
+          if (!loaded.some((message) => message.id === messageId)) {
+            setPageError(t("message.locateOriginalFailed"));
+            return;
+          }
+          setMessages((current) => ({ ...current, [chatId]: loaded }));
+          setHasOlderMessages(olderRows.length > pageSize);
+          hasNewerMessagesRef.current = newerRows.length > pageSize;
+          setHasNewerMessages(newerRows.length > pageSize);
+          stickToBottomRef.current = false;
           window.requestAnimationFrame(() => window.requestAnimationFrame(() => revealElement(messageId)));
         })
         .catch(() => setPageError(t("message.locateOriginalFailed")));
@@ -3183,7 +3188,10 @@ function LiveChatsPage() {
     setClosingChatSnapshot(null);
     setIsClosingChatView(false);
     setHasOlderMessages(false);
+    hasNewerMessagesRef.current = false;
+    setHasNewerMessages(false);
     setOlderState("idle");
+    setNewerState("idle");
     setPageError(null);
 
     if (blockedChatId) {
@@ -3371,7 +3379,10 @@ function LiveChatsPage() {
     if (!selectedChatId || !cacheScope) return;
     const controller = new AbortController();
     setOlderState("idle");
+    setNewerState("idle");
     setHasOlderMessages(false);
+    hasNewerMessagesRef.current = false;
+    setHasNewerMessages(false);
 
     const restoreScroll = (releaseAnchor = false) => {
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -3963,6 +3974,7 @@ function LiveChatsPage() {
           next[removed.chatId] = existing.filter((message) => message.id !== removed.messageId);
         }
         for (const [chatId, items] of grouped) {
+          if (chatId === selectedChat?.id && hasNewerMessagesRef.current) continue;
           next[chatId] = mergeMessages(next[chatId] ?? [], items.map((item) => item.message));
         }
         return next;
@@ -4024,7 +4036,7 @@ function LiveChatsPage() {
   }, [cacheScope, chats]);
 
   useEffect(() => {
-    if (!cacheScope || !selectedChat) return;
+    if (!cacheScope || !selectedChat || hasNewerMessages) return;
 
     const timer = window.setTimeout(() => {
       chatCache.setThread(cacheScope, selectedChat.id, {
@@ -4042,7 +4054,7 @@ function LiveChatsPage() {
     }, 180);
 
     return () => window.clearTimeout(timer);
-  }, [cacheScope, hasOlderMessages, selectedChat, selectedMessages]);
+  }, [cacheScope, hasNewerMessages, hasOlderMessages, selectedChat, selectedMessages]);
 
   const filteredChats = chats;
   const detailMembers = selectedChat?.detail.members ?? [];
@@ -5800,7 +5812,10 @@ function LiveChatsPage() {
   const loadOlderMessages = async () => {
     if (!selectedChat || !selectedMessages.length || olderState === "loading" || !cacheScope) return;
 
-    const oldestMessage = selectedMessages[0];
+    const oldestId = Math.min(
+      ...selectedMessages.flatMap((message) => typeof message.id === "number" ? [message.id] : [])
+    );
+    if (!Number.isFinite(oldestId)) return;
     const scroller = messageScrollRef.current;
 
     try {
@@ -5808,7 +5823,7 @@ function LiveChatsPage() {
       const rows = await api.getMessages({
         chat_id: selectedChat.id,
         limit: 30,
-        before: Number(oldestMessage.id),
+        before: oldestId,
       });
       const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
 
@@ -5818,18 +5833,20 @@ function LiveChatsPage() {
       }));
       const mergedMessages = mergeMessages(normalized, selectedMessages);
       setHasOlderMessages(rows.length >= 30);
-      chatCache.setThread(cacheScope, selectedChat.id, {
-        messages: mergedMessages,
-        hasOlderMessages: rows.length >= 30,
-        scrollTop: scroller?.scrollTop ?? 0,
-        updatedAt: Date.now(),
-      });
-      void chatCache.persistThread(cacheScope, selectedChat.id, {
-        messages: mergedMessages,
-        hasOlderMessages: rows.length >= 30,
-        scrollTop: scroller?.scrollTop ?? 0,
-        updatedAt: Date.now(),
-      });
+      if (!hasNewerMessagesRef.current) {
+        chatCache.setThread(cacheScope, selectedChat.id, {
+          messages: mergedMessages,
+          hasOlderMessages: rows.length >= 30,
+          scrollTop: scroller?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        });
+        void chatCache.persistThread(cacheScope, selectedChat.id, {
+          messages: mergedMessages,
+          hasOlderMessages: rows.length >= 30,
+          scrollTop: scroller?.scrollTop ?? 0,
+          updatedAt: Date.now(),
+        });
+      }
 
     } catch (apiError) {
       if (isChatAccessBoundaryError(apiError)) {
@@ -5840,6 +5857,36 @@ function LiveChatsPage() {
       setPageError(message);
     } finally {
       setOlderState("idle");
+    }
+  };
+
+  const loadNewerMessages = async () => {
+    if (!selectedChat || !selectedMessages.length || newerState === "loading" || !hasNewerMessagesRef.current) return;
+    const newestId = Math.max(
+      ...selectedMessages.flatMap((message) => typeof message.id === "number" ? [message.id] : [])
+    );
+    if (!Number.isFinite(newestId)) return;
+
+    try {
+      setNewerState("loading");
+      const pageSize = 30;
+      const rows = await api.getMessages({ chat_id: selectedChat.id, limit: pageSize + 1, after: newestId });
+      const normalized = sortMessages(rows.slice(0, pageSize).map((row) => mapChatMessage(row, currentUserId)));
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], normalized),
+      }));
+      const hasMore = rows.length > pageSize;
+      hasNewerMessagesRef.current = hasMore;
+      setHasNewerMessages(hasMore);
+    } catch (apiError) {
+      if (isChatAccessBoundaryError(apiError)) {
+        redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), selectedChat.id);
+        return;
+      }
+      setPageError(apiError instanceof ApiError ? apiError.message : t("message.historyLoadFailed"));
+    } finally {
+      setNewerState("idle");
     }
   };
 
@@ -6113,6 +6160,14 @@ function LiveChatsPage() {
                   if (element && element.scrollTop <= 24 && hasOlderMessages && olderState === "idle") {
                     void loadOlderMessages();
                   }
+                  if (
+                    element
+                    && element.scrollHeight - element.scrollTop - element.clientHeight <= 24
+                    && hasNewerMessages
+                    && newerState === "idle"
+                  ) {
+                    void loadNewerMessages();
+                  }
                   if (!cacheScope || !selectedChat) return;
                   chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
                 }}
@@ -6162,6 +6217,13 @@ function LiveChatsPage() {
                     />
                   )}
                 />
+                {hasNewerMessages ? (
+                  <div className="message-history-actions is-newer">
+                    <button className="ghost-button" disabled={newerState === "loading"} onClick={() => void loadNewerMessages()} type="button">
+                      {newerState === "loading" ? t("common.loading") : t("message.viewNewer")}
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
               {messageSelectionMode ? (

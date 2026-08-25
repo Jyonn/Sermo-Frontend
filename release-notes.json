@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.18",
+  "id": "2026.08.25.19",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录预览更加完整",
+      "title": "置顶消息定位更快",
       "items": [
-        "合并聊天记录会标明双方昵称；置顶消息支持聊天背景、全高浏览与顺畅滚动"
+        "打开很早以前的置顶消息时，将直接加载消息附近的记录，不再从最新消息逐页回溯"
       ]
     },
     "en": {
-      "title": "More complete chat history previews",
+      "title": "Faster pinned-message navigation",
       "items": [
-        "Combined history labels both participants, while pinned messages now use your background and scroll naturally"
+        "Opening an older pinned message now loads its nearby history directly instead of paging backward from the latest message"
       ]
     }
   }

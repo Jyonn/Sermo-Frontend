@@ -1567,6 +1567,7 @@
   "pin.label": "Pin",
   "pin.viewAll": "View all {{count}} pinned messages",
   "message.viewMore": "View more messages",
+  "message.viewNewer": "Continue to newer messages",
   "message.replyTo": "Reply to {{name}}",
   "message.cancelReply": "Cancel reply",
   "audio.unlockAtLevel": "Audio unlocks at Lv.{{level}}",
