@@ -198,6 +198,7 @@
   "square.voiceMediaHint": "录制一段最长 60 秒的语音",
   "square.videoMediaHint": "添加一段最长 60 秒的视频",
   "square.publishStatement": "发布这条发言",
+  "square.publishToSquare": "发布到广场",
   "square.removeLocation": "移除位置",
   "square.useCurrentLocation": "使用当前位置",
   "square.tapToRecord": "点击开始录音",

@@ -198,6 +198,7 @@
   "square.voiceMediaHint": "Record up to 60 seconds",
   "square.videoMediaHint": "Add a video up to 60 seconds",
   "square.publishStatement": "Publish statement",
+  "square.publishToSquare": "Publish to Square",
   "square.removeLocation": "Remove location",
   "square.useCurrentLocation": "Use current location",
   "square.tapToRecord": "Tap to start recording",
