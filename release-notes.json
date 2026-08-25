@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.9",
+  "id": "2026.08.26.10",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "沉浸预览操作更自然",
+      "title": "置顶消息从最新处展开",
       "items": [
-        "铺满图片时从左上方开始浏览，桌面滚轮可滚动图片，并新增最高 16 倍的缩放控制"
+        "打开置顶消息时会直接展示列表最下方的最新消息，向上即可继续查看更早内容"
       ]
     },
     "en": {
-      "title": "More natural immersive controls",
+      "title": "Pinned messages open at the latest item",
       "items": [
-        "Fill view now starts at the top-left, desktop scrolling pans the image, and zoom controls support up to 16x"
+        "Pinned messages now open at the newest item at the bottom, with older messages available by scrolling up"
       ]
     }
   }

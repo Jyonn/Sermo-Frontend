@@ -7094,6 +7094,7 @@ function LiveChatsPage() {
           backgroundUri={paintedChatBackgroundUri}
           className="pinned-message-chat-preview"
           firstPersonUserId={currentUserId}
+          initialScrollToEnd={pinnedDrawerOpen}
           messages={orderedPinnedMessages.map((pin) => pin.message)}
           onMessageAction={openPinnedMessageMenu}
           renderMessageFooter={(message) => {
@@ -8303,6 +8304,7 @@ export function ChatPreview({
   backgroundUri,
   className = "",
   firstPersonUserId,
+  initialScrollToEnd = false,
   messages,
   onMessageClick,
   onMessageAction,
@@ -8317,6 +8319,7 @@ export function ChatPreview({
   backgroundUri?: string | null;
   className?: string;
   firstPersonUserId?: number | null;
+  initialScrollToEnd?: boolean;
   messages: ChatMessageDTO[];
   onMessageClick?: (message: ChatMessageDTO) => void;
   onMessageAction?: (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => void;
@@ -8327,6 +8330,7 @@ export function ChatPreview({
   separateMessages?: boolean;
   renderMessageFooter?: (message: ChatMessageDTO) => ReactNode;
 }) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const dtoById = useMemo(() => new Map(messages.map((message) => [message.message_id, message])), [messages]);
   const mappedMessages = useMemo(
     () => sortMessages(messages.map((message) => mapChatMessage(message, firstPersonUserId ?? -1))),
@@ -8355,6 +8359,21 @@ export function ChatPreview({
     else openMessage(message);
   };
 
+  useLayoutEffect(() => {
+    if (!initialScrollToEnd) return;
+    const scroll = scrollRef.current;
+    if (!scroll) return;
+    const moveToEnd = () => {
+      scroll.scrollTop = scroll.scrollHeight;
+    };
+    moveToEnd();
+    const firstFrame = window.requestAnimationFrame(() => {
+      moveToEnd();
+      window.requestAnimationFrame(moveToEnd);
+    });
+    return () => window.cancelAnimationFrame(firstFrame);
+  }, [initialScrollToEnd, messages.length]);
+
   return (
     <section
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
@@ -8374,7 +8393,7 @@ export function ChatPreview({
       } : undefined}
     >
       <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
-        <div className="message-scroll">
+        <div className="message-scroll" ref={scrollRef}>
           {groups.map((group) => (
             <MessageGroupBlock
               enteringMessageIds={[]}
