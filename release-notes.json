@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.6",
+  "id": "2026.08.26.7",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "图片操作更简洁",
+      "title": "时间统一为北京时间",
       "items": [
-        "长按图片时，收藏为表情的操作简化为“添加”，操作栏更加紧凑"
+        "照片拍摄时间与八仙活动的每日领取状态现在统一按北京时间显示和刷新"
       ]
     },
     "en": {
-      "title": "A cleaner image action menu",
+      "title": "Time now follows Beijing time",
       "items": [
-        "The save-to-stickers action shown when holding an image is now shortened to Add"
+        "Photo capture times and daily Baxian activity claims now display and reset consistently in Beijing time"
       ]
     }
   }

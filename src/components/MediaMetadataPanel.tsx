@@ -26,7 +26,9 @@ export function MediaMetadataPanel({ kind, metadata }: { kind: "image" | "video"
     ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`
     : "";
   const takenAt = metadata.taken_at
-    ? new Date(metadata.taken_at * 1000).toLocaleString(locale, { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+    ? new Date(metadata.taken_at * 1000).toLocaleString(locale, {
+        year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Shanghai",
+      })
     : "";
   const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? t("location.resolving") : coordinate);
   const videoMetadata = kind === "video" ? metadata as VideoMetadataDTO : null;
