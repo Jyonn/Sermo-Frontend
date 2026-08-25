@@ -7991,7 +7991,7 @@ function LiveChatsPage() {
                 {canCreateSticker && messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number" ? (
                   <button className="message-context-button" onClick={() => void collectImageAsSticker()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
-                    {t("sticker.collect")}
+                    {t("sticker.addShort")}
                   </button>
                 ) : null}
                 <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">

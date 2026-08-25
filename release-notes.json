@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.5",
+  "id": "2026.08.26.6",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "表情翻页无需重来",
+      "title": "图片操作更简洁",
       "items": [
-        "“我的”和“探索”会记住已加载的表情与翻页位置，再次打开即可接着浏览"
+        "长按图片时，收藏为表情的操作简化为“添加”，操作栏更加紧凑"
       ]
     },
     "en": {
-      "title": "Sticker browsing picks up where you left off",
+      "title": "A cleaner image action menu",
       "items": [
-        "Mine and Explore now remember loaded stickers and pagination, so reopening the picker resumes instantly"
+        "The save-to-stickers action shown when holding an image is now shortened to Add"
       ]
     }
   }
