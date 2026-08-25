@@ -25,6 +25,7 @@ export interface TinyUserDTO {
   chat_bubble_style?: ChatBubbleStyle;
   avatar_frame_style?: AvatarFrameStyle;
   statement_card_style?: StatementCardStyle;
+  profile_card_theme?: ProfileCardTheme;
   growth_level?: number;
 }
 
@@ -218,11 +219,13 @@ export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "x
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "spaceport" | "noir-film" | "custom";
 export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run" | "vip";
 export type StatementCardStyle = "default" | "editorial" | "mosaic" | "hero" | "comic" | "receipt" | "vip" | "niko" | "fufu";
+export type ProfileCardTheme = "default" | "level-12" | "vip";
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;
   avatar_frame_style: AvatarFrameStyle;
   statement_card_style: StatementCardStyle;
   show_self_avatar: boolean;
+  profile_card_theme?: ProfileCardTheme;
 }
 
 export interface PermanentVipCampaignDTO {

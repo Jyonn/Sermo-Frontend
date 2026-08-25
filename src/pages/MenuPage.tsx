@@ -468,6 +468,7 @@ export default function MenuPage() {
   const [chatPreviewDemoSide, setChatPreviewDemoSide] = useState<ChatPreviewDemoSide>("both");
   const [chatPreviewDemoGrouped, setChatPreviewDemoGrouped] = useState(true);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
+  const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
   const [statementCardDrawerOpen, setStatementCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
@@ -479,6 +480,7 @@ export default function MenuPage() {
     avatar_frame_style: "none",
     statement_card_style: "default",
     show_self_avatar: false,
+    profile_card_theme: "default",
   });
   const [barkGuideOpen, setBarkGuideOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
@@ -683,19 +685,22 @@ export default function MenuPage() {
       avatar_frame_style: me.avatar_frame_style ?? "none",
       statement_card_style: me.statement_card_style ?? "default",
       show_self_avatar: Boolean(me.show_self_avatar),
+      profile_card_theme: me.profile_card_theme ?? "default",
     });
   }, [chatPageDrawerOpen, me?.chat_background_theme, me?.chat_bubble_style, me?.avatar_frame_style, me?.statement_card_style, me?.show_self_avatar]);
 
   useEffect(() => {
-    if (!(avatarFrameDrawerOpen || statementCardDrawerOpen) || !me) return;
+    if (!(avatarFrameDrawerOpen || statementCardDrawerOpen || profileCardDrawerOpen) || !me) return;
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
       statement_card_style: me.statement_card_style ?? "default",
       show_self_avatar: Boolean(me.show_self_avatar),
+      profile_card_theme: me.profile_card_theme ?? "default",
     });
   }, [
     avatarFrameDrawerOpen,
+    profileCardDrawerOpen,
     statementCardDrawerOpen,
     me?.avatar_frame_style,
     me?.chat_bubble_style,
@@ -1496,11 +1501,12 @@ export default function MenuPage() {
     }
   };
 
-  const savePersonalization = async (drawer: "frame" | "statement") => {
+  const savePersonalization = async (drawer: "frame" | "statement" | "profile-card") => {
     if (!me || personalizationSaving) return;
     const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
     const avatarFrameChanged = personalizationDraft.avatar_frame_style !== (me.avatar_frame_style ?? "none");
     const statementChanged = personalizationDraft.statement_card_style !== (me.statement_card_style ?? "default");
+    const profileCardChanged = personalizationDraft.profile_card_theme !== (me.profile_card_theme ?? "default");
     if (bubbleChanged && personalizationDraft.chat_bubble_style === "vip" && !me.is_permanent_vip) {
       showToast(t("menu.vipBubbleOnly"), "error");
       return;
@@ -1542,6 +1548,14 @@ export default function MenuPage() {
       );
       return;
     }
+    if (profileCardChanged && personalizationDraft.profile_card_theme === "level-12" && growthLevel < 12) {
+      showToast(t("menu.levelUnlock", { level: 12 }), "error");
+      return;
+    }
+    if (profileCardChanged && personalizationDraft.profile_card_theme === "vip" && !permanentVip) {
+      showToast(t("menu.permanentVipOnly"), "error");
+      return;
+    }
     setPersonalizationSaving(true);
     try {
       const nextMe = await api.setPersonalization(personalizationDraft);
@@ -1550,6 +1564,7 @@ export default function MenuPage() {
       showToast(t("personalization.updated"));
       if (drawer === "frame") setAvatarFrameDrawerOpen(false);
       if (drawer === "statement") setStatementCardDrawerOpen(false);
+      if (drawer === "profile-card") setProfileCardDrawerOpen(false);
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("personalization.updateFailed"), "error");
     } finally {
@@ -1578,6 +1593,7 @@ export default function MenuPage() {
         avatar_frame_style: me.avatar_frame_style ?? "none",
         statement_card_style: me.statement_card_style ?? "default",
         show_self_avatar: next,
+        profile_card_theme: me.profile_card_theme ?? "default",
       });
       setMe(nextMe);
       patchSessionUser(nextMe);
@@ -2284,6 +2300,44 @@ export default function MenuPage() {
             <span><strong>{t("menu.avatarFrame")}</strong><small>{t("menu.avatarFrameHint")}</small></span>
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
+          <button className="personalization-background-entry personalization-feature-entry profile-card-entry" onClick={() => setProfileCardDrawerOpen(true)} type="button">
+            <span className={`profile-card-entry-swatch theme-${me?.profile_card_theme ?? "default"}`}><i /><b /></span>
+            <span><strong>{t("menu.profileCard")}</strong><small>{t("menu.profileCardHint")}</small></span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer
+        actionBusy={personalizationSaving}
+        actionDisabled={personalizationDraft.profile_card_theme === (me?.profile_card_theme ?? "default")}
+        actionLabel={t("common.save")}
+        onAction={() => void savePersonalization("profile-card")}
+        open={profileCardDrawerOpen}
+        onClose={() => setProfileCardDrawerOpen(false)}
+        title={t("menu.profileCard")}
+      >
+        <div className="profile-card-personalization">
+          <div className="profile-card-preview-viewport">
+            <div className={`profile-card-preview profile-theme-${personalizationDraft.profile_card_theme}`}>
+              <div className="profile-card-preview-cover" />
+              <div className="profile-card-preview-person">
+                <UserAvatar className="profile-card-preview-avatar" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={permanentVip} />
+                <span><strong>{session?.user.name ?? t("brand.user")}</strong><small>{t("profile.onlineNow")}</small></span>
+              </div>
+              <div className="profile-card-preview-facts"><i>LV {growthLevel}</i>{permanentVip ? <i>VIP</i> : null}<i>{t("profile.knownDays", { count: 28 })}</i></div>
+            </div>
+          </div>
+          <div className="profile-card-theme-list">
+            {(["default", "level-12", "vip"] as const).map((theme) => {
+              const locked = theme === "level-12" ? growthLevel < 12 : theme === "vip" ? !permanentVip : false;
+              return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${locked ? " is-locked" : ""}`} key={theme} onClick={() => setPersonalizationDraft((current) => ({ ...current, profile_card_theme: theme }))} type="button">
+                <span><i /><b /></span>
+                <strong>{t(`menu.profileCardTheme.${theme}` as TranslationKey)}</strong>
+                <small>{locked ? t(theme === "vip" ? "menu.permanentVipOnly" : "menu.levelUnlock", theme === "vip" ? undefined : { level: 12 }) : t(theme === "level-12" ? "growth.rarity.rare" : theme === "vip" ? "growth.rarity.epic" : "growth.rarity.common")}</small>
+              </button>;
+            })}
+          </div>
         </div>
       </SideDrawer>
 

@@ -10003,6 +10003,149 @@ html[data-theme="dark"] .personalization-bubble-stage {
   }
 }
 
+/* Profile-card themes share one structure; only their visual tokens change. */
+.user-profile-panel {
+  --profile-theme-accent: #20c995;
+  --profile-theme-ink: #0d2b22;
+  --profile-theme-soft: rgba(32, 201, 149, .12);
+  --profile-theme-cover-a: #3dbd87;
+  --profile-theme-cover-b: #8ab986;
+  --profile-theme-cover-c: #dc9451;
+}
+
+.user-profile-panel.profile-theme-level-12 {
+  --profile-theme-accent: #3f83e7;
+  --profile-theme-ink: #102c55;
+  --profile-theme-soft: rgba(63, 131, 231, .14);
+  --profile-theme-cover-a: #174f87;
+  --profile-theme-cover-b: #3d8fc7;
+  --profile-theme-cover-c: #a5d9d4;
+}
+
+.user-profile-panel.profile-theme-vip {
+  --profile-theme-accent: #b87a20;
+  --profile-theme-ink: #4b2c09;
+  --profile-theme-soft: rgba(222, 170, 73, .16);
+  --profile-theme-cover-a: #4a2d13;
+  --profile-theme-cover-b: #a46c26;
+  --profile-theme-cover-c: #f0d99d;
+}
+
+.user-profile-panel .user-profile-cover,
+html:not([data-theme="dark"]) .user-profile-panel .user-profile-cover {
+  background:
+    repeating-linear-gradient(105deg, transparent 0 22px, rgba(255, 255, 255, .18) 23px 26px),
+    linear-gradient(108deg, var(--profile-theme-cover-a), var(--profile-theme-cover-b) 58%, var(--profile-theme-cover-c));
+}
+
+.user-profile-panel .user-profile-copy {
+  padding-left: 10px;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-recent-statement,
+.user-profile-panel.profile-theme-vip .user-profile-recent-statement {
+  background: color-mix(in srgb, var(--profile-theme-soft) 78%, var(--surface-panel));
+}
+
+.user-profile-panel.profile-theme-level-12 :is(.user-profile-statements-action, .user-profile-section-more),
+.user-profile-panel.profile-theme-vip :is(.user-profile-statements-action, .user-profile-section-more) {
+  color: var(--profile-theme-accent);
+  border-color: color-mix(in srgb, var(--profile-theme-accent) 42%, transparent);
+}
+
+.profile-card-entry-swatch,
+.profile-card-theme-option > span {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(115deg, #37b984, #8eb988 60%, #d59653);
+}
+
+.profile-card-entry-swatch { width: 72px; height: 54px; }
+.profile-card-entry-swatch.theme-level-12,
+.profile-card-theme-option.theme-level-12 > span { background: linear-gradient(115deg, #174f87, #3d8fc7 58%, #a5d9d4); }
+.profile-card-entry-swatch.theme-vip,
+.profile-card-theme-option.theme-vip > span { background: linear-gradient(115deg, #4a2d13, #a46c26 58%, #f0d99d); }
+.profile-card-entry-swatch::before,
+.profile-card-theme-option > span::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(105deg, transparent 0 15px, rgba(255,255,255,.2) 16px 18px);
+}
+.profile-card-entry-swatch i,
+.profile-card-entry-swatch b,
+.profile-card-theme-option > span i,
+.profile-card-theme-option > span b {
+  position: absolute;
+  bottom: 7px;
+  width: 23px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.84);
+}
+.profile-card-entry-swatch i,
+.profile-card-theme-option > span i { left: 8px; }
+.profile-card-entry-swatch b,
+.profile-card-theme-option > span b { right: 8px; opacity: .55; }
+
+.profile-card-personalization { display: grid; gap: 24px; padding: 18px; }
+.profile-card-preview-viewport {
+  overflow: hidden;
+  min-height: 306px;
+  border-radius: 24px;
+  background: var(--surface-subtle);
+}
+.profile-card-preview {
+  --preview-a: #3dbd87;
+  --preview-b: #8ab986;
+  --preview-c: #dc9451;
+  position: relative;
+  width: 125%;
+  min-height: 378px;
+  padding: 28px;
+  transform: scale(.8);
+  transform-origin: top left;
+  color: var(--text-primary);
+  background: var(--surface-panel);
+}
+.profile-card-preview.profile-theme-level-12 { --preview-a: #174f87; --preview-b: #3d8fc7; --preview-c: #a5d9d4; }
+.profile-card-preview.profile-theme-vip { --preview-a: #4a2d13; --preview-b: #a46c26; --preview-c: #f0d99d; }
+.profile-card-preview-cover {
+  height: 140px;
+  border-radius: 30px 30px 0 0;
+  background: repeating-linear-gradient(105deg, transparent 0 24px, rgba(255,255,255,.18) 25px 28px), linear-gradient(110deg, var(--preview-a), var(--preview-b) 58%, var(--preview-c));
+}
+.profile-card-preview-person { display: flex; align-items: end; gap: 24px; margin: -58px 24px 0; }
+.profile-card-preview-avatar { width: 126px; height: 126px; border-radius: 30px; }
+.profile-card-preview-person > span { display: grid; gap: 10px; padding-bottom: 14px; }
+.profile-card-preview-person strong { font-size: 2rem; }
+.profile-card-preview-person small { color: var(--text-muted); font-weight: 750; }
+.profile-card-preview-facts { display: flex; gap: 10px; margin: 26px 24px 0 174px; }
+.profile-card-preview-facts i { padding: 8px 13px; border: 1px solid var(--line-soft); border-radius: 999px; font-style: normal; font-weight: 800; }
+.profile-card-theme-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.profile-card-theme-option { display: grid; gap: 8px; min-width: 0; padding: 10px; border: 1px solid var(--line-soft); border-radius: 18px; color: var(--text-primary); background: var(--surface-panel); text-align: left; }
+.profile-card-theme-option > span { aspect-ratio: 1.7; }
+.profile-card-theme-option strong { overflow: hidden; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.profile-card-theme-option small { color: var(--text-muted); font-size: .65rem; }
+.profile-card-theme-option.is-selected { border-color: var(--brand-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 18%, transparent); }
+.profile-card-theme-option.is-locked { opacity: .62; }
+
+@media (max-width: 560px) {
+  .user-profile-panel .user-profile-copy { padding-left: 8px; }
+  .profile-card-personalization { padding: 12px; }
+  .profile-card-preview-viewport { min-height: 272px; }
+  .profile-card-preview { min-height: 338px; padding: 20px; }
+  .profile-card-preview-cover { height: 116px; }
+  .profile-card-preview-avatar { width: 106px; height: 106px; }
+  .profile-card-preview-person { gap: 18px; margin: -48px 18px 0; }
+  .profile-card-preview-person strong { font-size: 1.6rem; }
+  .profile-card-preview-facts { margin: 22px 18px 0 142px; }
+  .profile-card-theme-list { gap: 8px; }
+  .profile-card-theme-option { padding: 7px; border-radius: 14px; }
+}
+
 @media (hover: none), (pointer: coarse) {
   .pinned-message-remove {
     opacity: 0.88;

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.6",
+  "id": "2026.08.25.7",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "用户详情焕新",
+      "title": "个人名片主题上线",
       "items": [
-        "用户详情现在会展示最近七天内的最新发言，并优化滚动、提醒和共同群聊的展示细节"
+        "语言与个性化新增个人名片主题，LV12 与永久 VIP 可使用专属名片外观"
       ]
     },
     "en": {
-      "title": "A redesigned social profile",
+      "title": "Personal profile themes",
       "items": [
-        "Profiles now show the latest post from the past seven days with smoother scrolling and clearer profile details"
+        "Profile card themes are now available in personalization, with exclusive looks for LV12 and Permanent VIP members"
       ]
     }
   }

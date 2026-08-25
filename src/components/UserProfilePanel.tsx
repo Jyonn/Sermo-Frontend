@@ -29,6 +29,7 @@ export interface UserProfileSeed {
   growth_level?: number;
   growth_level_name?: string;
   avatar_frame_style?: UserDTO["avatar_frame_style"];
+  profile_card_theme?: UserDTO["profile_card_theme"];
 }
 
 interface UserProfilePanelProps {
@@ -313,7 +314,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   if (!user || viewState === "error") return <FeedbackState title={t("profile.unavailable")} description={error ?? t("profile.tryLater")} />;
 
   return (
-    <div className="user-profile-panel">
+    <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}`}>
       <section className="user-profile-social-card">
         <div className="user-profile-cover" aria-hidden="true" />
         <div className="user-profile-identity">
