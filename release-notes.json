@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.4",
+  "id": "2026.08.26.5",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "沉浸看图更自由",
+      "title": "表情翻页无需重来",
       "items": [
-        "全屏看图支持双指缩放与拖动，轻触即可切换完整显示、铺满屏幕和实际大小"
+        "“我的”和“探索”会记住已加载的表情与翻页位置，再次打开即可接着浏览"
       ]
     },
     "en": {
-      "title": "A more flexible immersive viewer",
+      "title": "Sticker browsing picks up where you left off",
       "items": [
-        "Fullscreen images now support pinch-to-zoom and panning, with quick Fit, Fill, and Actual Size views"
+        "Mine and Explore now remember loaded stickers and pagination, so reopening the picker resumes instantly"
       ]
     }
   }

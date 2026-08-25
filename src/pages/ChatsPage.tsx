@@ -56,6 +56,7 @@ import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
+import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
@@ -64,6 +65,9 @@ import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 const STICKER_PAGE_SIZE = 30;
+const STICKER_CACHE_MAX_AGE = 5 * 60 * 1000;
+const STICKER_MINE_CACHE_KEY = "stickers:mine";
+const STICKER_EXPLORE_CACHE_KEY = "stickers:explore";
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
@@ -90,6 +94,17 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_ACTIVITY, label: "messageSearch.activities" },
 ] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
+
+interface StickerPageCache<T> {
+  items: T[];
+  hasMore: boolean;
+  nextOffset: number;
+}
+
+function mergeStickerPage<T>(fresh: T[], cached: T[], identify: (item: T) => number) {
+  const known = new Set(fresh.map(identify));
+  return [...fresh, ...cached.filter((item) => !known.has(identify(item)))];
+}
 const EMOJI_PAGES = [
   {
     labelKey: "emoji.frequent",
@@ -2400,6 +2415,15 @@ function LiveChatsPage() {
   const location = useLocation();
   const { chatId } = useParams();
   const { session } = useAuth();
+  const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
+  const initialMineStickerCache = useMemo(
+    () => readTabCache<StickerPageCache<StickerDTO>>(stickerCacheScope, STICKER_MINE_CACHE_KEY),
+    [stickerCacheScope],
+  );
+  const initialExploreStickerCache = useMemo(
+    () => readTabCache<StickerPageCache<StickerAssetDTO>>(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY),
+    [stickerCacheScope],
+  );
   const groupSquareEnabled = useGroupSquareEnabled();
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
@@ -2426,14 +2450,14 @@ function LiveChatsPage() {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [emojiPage, setEmojiPage] = useState(STICKER_MY_PAGE);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
-  const [stickers, setStickers] = useState<StickerDTO[]>([]);
-  const [exploreStickers, setExploreStickers] = useState<StickerAssetDTO[]>([]);
+  const [stickers, setStickers] = useState<StickerDTO[]>(() => initialMineStickerCache?.data.items ?? []);
+  const [exploreStickers, setExploreStickers] = useState<StickerAssetDTO[]>(() => initialExploreStickerCache?.data.items ?? []);
   const [mineStickersLoading, setMineStickersLoading] = useState(false);
   const [exploreStickersLoading, setExploreStickersLoading] = useState(false);
-  const [mineStickersHasMore, setMineStickersHasMore] = useState(false);
-  const [exploreStickersHasMore, setExploreStickersHasMore] = useState(false);
-  const mineStickerOffsetRef = useRef(0);
-  const exploreStickerOffsetRef = useRef(0);
+  const [mineStickersHasMore, setMineStickersHasMore] = useState(() => initialMineStickerCache?.data.hasMore ?? false);
+  const [exploreStickersHasMore, setExploreStickersHasMore] = useState(() => initialExploreStickerCache?.data.hasMore ?? false);
+  const mineStickerOffsetRef = useRef(initialMineStickerCache?.data.nextOffset ?? 0);
+  const exploreStickerOffsetRef = useRef(initialExploreStickerCache?.data.nextOffset ?? 0);
   const mineStickerRequestRef = useRef(false);
   const exploreStickerRequestRef = useRef(false);
   const [stickerSaving, setStickerSaving] = useState(false);
@@ -3626,20 +3650,39 @@ function LiveChatsPage() {
   }, [selectedChat?.id]);
 
   useEffect(() => {
-    if (!currentUserId) {
+    const mineCache = readTabCache<StickerPageCache<StickerDTO>>(stickerCacheScope, STICKER_MINE_CACHE_KEY);
+    const exploreCache = readTabCache<StickerPageCache<StickerAssetDTO>>(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY);
+    setStickers(mineCache?.data.items ?? []);
+    setMineStickersHasMore(mineCache?.data.hasMore ?? false);
+    mineStickerOffsetRef.current = mineCache?.data.nextOffset ?? 0;
+    setExploreStickers(exploreCache?.data.items ?? []);
+    setExploreStickersHasMore(exploreCache?.data.hasMore ?? false);
+    exploreStickerOffsetRef.current = exploreCache?.data.nextOffset ?? 0;
+  }, [stickerCacheScope]);
+
+  useEffect(() => {
+    if (!currentUserId || !stickerCacheScope) {
       setStickers([]);
       setMineStickersHasMore(false);
       mineStickerOffsetRef.current = 0;
       return;
     }
+    const cached = readTabCache<StickerPageCache<StickerDTO>>(stickerCacheScope, STICKER_MINE_CACHE_KEY);
     const controller = new AbortController();
     mineStickerRequestRef.current = true;
-    setMineStickersLoading(true);
+    setMineStickersLoading(!cached?.data.items.length);
     void api.getStickers(0, STICKER_PAGE_SIZE, controller.signal)
       .then((response) => {
-        setStickers(response.items);
-        setMineStickersHasMore(response.has_more);
-        mineStickerOffsetRef.current = response.next_offset;
+        const preserveCachedPages = Boolean(cached?.data.items.length && cached.data.nextOffset > response.next_offset);
+        const items = preserveCachedPages
+          ? mergeStickerPage(response.items, cached!.data.items, (item) => item.sticker_id)
+          : response.items;
+        const hasMore = preserveCachedPages ? cached!.data.hasMore : response.has_more;
+        const nextOffset = preserveCachedPages ? cached!.data.nextOffset : response.next_offset;
+        setStickers(items);
+        setMineStickersHasMore(hasMore);
+        mineStickerOffsetRef.current = nextOffset;
+        writeTabCache(stickerCacheScope, STICKER_MINE_CACHE_KEY, { items, hasMore, nextOffset });
       })
       .catch(() => undefined)
       .finally(() => {
@@ -3647,18 +3690,27 @@ function LiveChatsPage() {
         if (!controller.signal.aborted) setMineStickersLoading(false);
       });
     return () => controller.abort();
-  }, [currentUserId]);
+  }, [currentUserId, stickerCacheScope]);
 
   useEffect(() => {
-    if (!emojiPickerOpen || emojiPage !== STICKER_EXPLORE_PAGE || !currentUserId) return;
+    if (!emojiPickerOpen || emojiPage !== STICKER_EXPLORE_PAGE || !currentUserId || !stickerCacheScope) return;
+    const cached = readTabCache<StickerPageCache<StickerAssetDTO>>(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY);
+    if (cached && Date.now() - cached.updatedAt < STICKER_CACHE_MAX_AGE) return;
     const controller = new AbortController();
     exploreStickerRequestRef.current = true;
-    setExploreStickersLoading(true);
+    setExploreStickersLoading(!cached?.data.items.length);
     void api.exploreStickers(0, STICKER_PAGE_SIZE, controller.signal)
       .then((response) => {
-        setExploreStickers(response.items);
-        setExploreStickersHasMore(response.has_more);
-        exploreStickerOffsetRef.current = response.next_offset;
+        const preserveCachedPages = Boolean(cached?.data.items.length && cached.data.nextOffset > response.next_offset);
+        const items = preserveCachedPages
+          ? mergeStickerPage(response.items, cached!.data.items, (item) => item.sticker_asset_id)
+          : response.items;
+        const hasMore = preserveCachedPages ? cached!.data.hasMore : response.has_more;
+        const nextOffset = preserveCachedPages ? cached!.data.nextOffset : response.next_offset;
+        setExploreStickers(items);
+        setExploreStickersHasMore(hasMore);
+        exploreStickerOffsetRef.current = nextOffset;
+        writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, { items, hasMore, nextOffset });
       })
       .catch(() => undefined)
       .finally(() => {
@@ -3666,7 +3718,7 @@ function LiveChatsPage() {
         if (!controller.signal.aborted) setExploreStickersLoading(false);
       });
     return () => controller.abort();
-  }, [currentUserId, emojiPage, emojiPickerOpen]);
+  }, [currentUserId, emojiPage, emojiPickerOpen, stickerCacheScope]);
 
   const loadMoreMineStickers = async () => {
     if (!currentUserId || !mineStickersHasMore || mineStickerRequestRef.current) return;
@@ -3676,7 +3728,13 @@ function LiveChatsPage() {
       const response = await api.getStickers(mineStickerOffsetRef.current, STICKER_PAGE_SIZE);
       setStickers((current) => {
         const known = new Set(current.map((item) => item.sticker_id));
-        return [...current, ...response.items.filter((item) => !known.has(item.sticker_id))];
+        const items = [...current, ...response.items.filter((item) => !known.has(item.sticker_id))];
+        writeTabCache(stickerCacheScope, STICKER_MINE_CACHE_KEY, {
+          items,
+          hasMore: response.has_more,
+          nextOffset: response.next_offset,
+        });
+        return items;
       });
       setMineStickersHasMore(response.has_more);
       mineStickerOffsetRef.current = response.next_offset;
@@ -3696,7 +3754,13 @@ function LiveChatsPage() {
       const response = await api.exploreStickers(exploreStickerOffsetRef.current, STICKER_PAGE_SIZE);
       setExploreStickers((current) => {
         const known = new Set(current.map((item) => item.sticker_asset_id));
-        return [...current, ...response.items.filter((item) => !known.has(item.sticker_asset_id))];
+        const items = [...current, ...response.items.filter((item) => !known.has(item.sticker_asset_id))];
+        writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, {
+          items,
+          hasMore: response.has_more,
+          nextOffset: response.next_offset,
+        });
+        return items;
       });
       setExploreStickersHasMore(response.has_more);
       exploreStickerOffsetRef.current = response.next_offset;
@@ -3716,6 +3780,22 @@ function LiveChatsPage() {
     if (grid.scrollHeight - grid.scrollTop - grid.clientHeight > 96) return;
     if (page === "mine") void loadMoreMineStickers();
     else void loadMoreExploreStickers();
+  };
+
+  const persistMineStickerCache = (items: StickerDTO[]) => {
+    writeTabCache(stickerCacheScope, STICKER_MINE_CACHE_KEY, {
+      items,
+      hasMore: mineStickersHasMore,
+      nextOffset: mineStickerOffsetRef.current,
+    });
+  };
+
+  const persistExploreStickerCache = (items: StickerAssetDTO[]) => {
+    writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, {
+      items,
+      hasMore: exploreStickersHasMore,
+      nextOffset: exploreStickerOffsetRef.current,
+    });
   };
 
   useEffect(() => {
@@ -3802,8 +3882,16 @@ function LiveChatsPage() {
     setStickerSaving(true);
     try {
       const sticker = await addStickerFile(file);
-      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
-      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id));
+      setStickers((current) => {
+        const items = [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)];
+        persistMineStickerCache(items);
+        return items;
+      });
+      setExploreStickers((current) => {
+        const items = current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id);
+        persistExploreStickerCache(items);
+        return items;
+      });
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
@@ -3839,7 +3927,11 @@ function LiveChatsPage() {
     try {
       await Promise.all(deletingIds.map((stickerId) => api.deleteSticker(stickerId)));
       const deleting = stickers.filter((sticker) => deletingIds.includes(sticker.sticker_id));
-      setStickers((current) => current.filter((item) => !deletingIds.includes(item.sticker_id)));
+      setStickers((current) => {
+        const items = current.filter((item) => !deletingIds.includes(item.sticker_id));
+        persistMineStickerCache(items);
+        return items;
+      });
       purgeCachedMedia(deleting.map((sticker) => sticker.uri));
       setSelectedStickerIds([]);
       setStickerManagerSelecting(false);
@@ -3857,8 +3949,16 @@ function LiveChatsPage() {
     setStickerSaving(true);
     try {
       const sticker = await api.collectStickerAsset(asset.sticker_asset_id);
-      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
-      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== asset.sticker_asset_id));
+      setStickers((current) => {
+        const items = [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)];
+        persistMineStickerCache(items);
+        return items;
+      });
+      setExploreStickers((current) => {
+        const items = current.filter((item) => item.sticker_asset_id !== asset.sticker_asset_id);
+        persistExploreStickerCache(items);
+        return items;
+      });
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
@@ -3884,8 +3984,16 @@ function LiveChatsPage() {
     setStickerSaving(true);
     try {
       const sticker = await api.collectStickerAsset(assetId);
-      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
-      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== assetId));
+      setStickers((current) => {
+        const items = [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)];
+        persistMineStickerCache(items);
+        return items;
+      });
+      setExploreStickers((current) => {
+        const items = current.filter((item) => item.sticker_asset_id !== assetId);
+        persistExploreStickerCache(items);
+        return items;
+      });
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
@@ -3900,8 +4008,16 @@ function LiveChatsPage() {
     setMessageMenu(null);
     try {
       const sticker = await api.collectMessageSticker(messageId);
-      setStickers((current) => [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)]);
-      setExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id));
+      setStickers((current) => {
+        const items = [sticker, ...current.filter((item) => item.sticker_id !== sticker.sticker_id)];
+        persistMineStickerCache(items);
+        return items;
+      });
+      setExploreStickers((current) => {
+        const items = current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id);
+        persistExploreStickerCache(items);
+        return items;
+      });
       showToast(t("sticker.added"));
     } catch {
       showToast(t("sticker.addFailed"), "error");
