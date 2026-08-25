@@ -7905,6 +7905,7 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
         personal_event_target: 2,
         personal_reward_claimable: false,
         personal_reward: null,
+        space_reward_claimable: null,
         official_user: null,
         space_total: 8,
         target: 16,

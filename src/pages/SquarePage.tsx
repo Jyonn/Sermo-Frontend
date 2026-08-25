@@ -402,6 +402,7 @@ export default function SquarePage() {
   const activityBannerTrackRef = useRef<HTMLElement>(null);
   const [activityClaiming, setActivityClaiming] = useState(false);
   const [personalRewardClaiming, setPersonalRewardClaiming] = useState(false);
+  const [spaceRewardClaiming, setSpaceRewardClaiming] = useState(false);
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
   const [activityPoolOpen, setActivityPoolOpen] = useState(false);
@@ -576,6 +577,21 @@ export default function SquarePage() {
       showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
     } finally {
       setPersonalRewardClaiming(false);
+    }
+  };
+
+  const claimSpaceActivityReward = async () => {
+    if (!activeActivity?.space_reward_claimable || spaceRewardClaiming) return;
+    setSpaceRewardClaiming(true);
+    try {
+      const updated = await api.claimActivitySpaceReward(activeActivity.key);
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      showToast(t("activity.spaceRewardClaimed"), "success");
+      void api.getSquareStatus().then(applySquareStatus).catch(() => undefined);
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.spaceRewardClaimFailed"), "error");
+    } finally {
+      setSpaceRewardClaiming(false);
     }
   };
 
@@ -1505,12 +1521,13 @@ export default function SquarePage() {
           <section className="activity-detail-visual" />
           <section className="activity-awakening-stage">
             <section className={`activity-personal-quest${activeActivity.personal_reward || activeActivity.personal_reward_claimable ? " is-complete" : ""}`}>
-              <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward || activeActivity.personal_reward_claimable ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong>{activeActivity.personal_reward ? <span>{t("activity.personalRewardOwnedNamed", { name: t(BAXIAN_PRIZE_BUBBLES.find((item) => item.style === activeActivity.personal_reward?.resource_key)?.label ?? "menu.collectionBaxian") })}</span> : !activeActivity.personal_reward_claimable ? <span>{t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span> : null}</div>
-              {activeActivity.personal_reward ? <div className="activity-personal-reward"><span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span><button onClick={() => navigate("/app/menu?panel=personalization/chat-page&section=bubbles")} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button></div> : activeActivity.personal_reward_claimable ? <button className="activity-personal-claim" disabled={personalRewardClaiming} onClick={() => void claimPersonalActivityReward()} type="button">{personalRewardClaiming ? t("common.processing") : t("activity.claimPersonalReward")}</button> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
+              <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward ? t("activity.personalRewardOwnedNamed", { name: t(BAXIAN_PRIZE_BUBBLES.find((item) => item.style === activeActivity.personal_reward?.resource_key)?.label ?? "menu.collectionBaxian") }) : activeActivity.personal_reward_claimable ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong>{!activeActivity.personal_reward && !activeActivity.personal_reward_claimable ? <span>{t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span> : null}</div>
+              {activeActivity.personal_reward ? <div className="activity-personal-reward"><button onClick={() => navigate("/app/menu?panel=personalization/chat-page&section=bubbles")} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button></div> : activeActivity.personal_reward_claimable ? <button className="activity-personal-claim" disabled={personalRewardClaiming} onClick={() => void claimPersonalActivityReward()} type="button">{personalRewardClaiming ? t("common.processing") : t("activity.claimPersonalReward")}</button> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
             </section>
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
             <ActivityForceProgress target={activeActivity.target} total={activeActivity.space_total} />
-            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const firstAwakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const secondAwakening = activeActivity.awakenings?.find((item) => item.step === index + 9); const awakener = secondAwakening?.user ?? firstAwakening?.user; return <article className={secondAwakening ? "is-unlocked" : firstAwakening ? "is-awakened" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakener ? <UserAvatar className="activity-awakener-avatar" name={awakener.name} uri={awakener.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
+            {activeActivity.space_reward_claimable ? <section className="activity-space-reward-ready"><div><small>{t("activity.spaceReward")}</small><strong>{t("activity.spaceRewardReady", { force: activeActivity.space_reward_claimable.threshold })}</strong></div><button disabled={spaceRewardClaiming} onClick={() => void claimSpaceActivityReward()} type="button">{spaceRewardClaiming ? t("common.processing") : t("activity.claimSpaceReward")}</button></section> : null}
+            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const firstAwakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const secondAwakening = activeActivity.awakenings?.find((item) => item.step === index + 9); const awakener = secondAwakening?.user; return <article className={secondAwakening ? "is-unlocked" : firstAwakening ? "is-awakened" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakener ? <UserAvatar className="activity-awakener-avatar" name={awakener.name} uri={awakener.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
             <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.claimable_points ? t("activity.claimHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
           </section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}

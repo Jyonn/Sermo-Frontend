@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.20",
+  "id": "2026.08.25.21",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "广场更新不再错过",
+      "title": "八仙奖励由你亲手领取",
       "items": [
-        "探索、好友圈出现新发言，或活动奖励可以领取时，广场入口会用红点温和提醒；广场消息仍优先显示未读数量"
+        "个人历练与全空间聚力奖励均改为达标后手动领取，两轮唤醒轨迹也会分别保留编号与贡献头像"
       ]
     },
     "en": {
-      "title": "Never miss a Square update",
+      "title": "Claim Baxian rewards yourself",
       "items": [
-        "Square now shows a subtle dot for new Explore or Friends posts and claimable activity rewards, while unread interactions keep priority as a count"
+        "Personal and space-wide Baxian rewards are now claimed manually, with both awakening rounds clearly preserving numbers and contributor avatars"
       ]
     }
   }

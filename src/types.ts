@@ -730,6 +730,7 @@ export interface SquareQuotaDTO {
 export interface ActivityMilestoneDTO {
   threshold: number;
   unlocked: boolean;
+  claimable: boolean;
   resource_key: string;
   reward_id: string;
   reward_label: string;
@@ -753,6 +754,7 @@ export interface ActivityCampaignDTO {
   personal_event_target: number;
   personal_reward_claimable: boolean;
   personal_reward: null | { resource_key: string; reward_id: string };
+  space_reward_claimable: null | { threshold: number; reward_label: string };
   official_user: null | { user_id: number; name: string; avatar_uri?: string; avatar_frame_style?: string };
   space_total: number;
   target: number;
