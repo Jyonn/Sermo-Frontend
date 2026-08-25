@@ -237,7 +237,6 @@ function StatementCard({ statement, canInteract, cardRef, detail = false, onDele
         <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button>
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
-      {statement.location ? <div className="square-statement-location"><span className="material-symbols-outlined">location_on</span><span>{statement.location.address || `${statement.location.latitude.toFixed(4)}, ${statement.location.longitude.toFixed(4)}`}</span></div> : null}
       {images.length ? (
         <div className={`square-statement-images count-${Math.min(images.length, 9)}`}>
           {images.map((image, index) => (
@@ -262,6 +261,7 @@ function StatementCard({ statement, canInteract, cardRef, detail = false, onDele
         </div>
       ) : null}
       {video ? <button className="square-statement-video-button" onClick={(event) => { event.stopPropagation(); onOpenVideo(); }} type="button"><video className="square-statement-video" muted playsInline poster={video.thumbnail_uri || undefined} preload="metadata" src={video.uri} /><span className="material-symbols-outlined">play_arrow</span></button> : null}
+      {statement.location ? <div className="square-statement-location"><span className="material-symbols-outlined">location_on</span><span>{statement.location.address || `${statement.location.latitude.toFixed(4)}, ${statement.location.longitude.toFixed(4)}`}</span></div> : null}
       <footer className="square-statement-footer">
         <button className={statement.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{statement.like_count || t("square.like")}</span></button>
         <button onClick={(event) => { event.stopPropagation(); onOpen(); }} type="button">

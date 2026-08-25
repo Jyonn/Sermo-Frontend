@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.2",
+  "id": "2026.08.26.3",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "置顶消息操作更完整",
+      "title": "发言信息层次更清楚",
       "items": [
-        "置顶消息会展示每位置顶人，点击或长按气泡即可跳转上下文或取消自己的置顶"
+        "发言中的位置现在会紧随照片、语音或视频展示，阅读顺序更加自然"
       ]
     },
     "en": {
-      "title": "More complete pinned message controls",
+      "title": "Clearer statement hierarchy",
       "items": [
-        "Pinned messages now show everyone who pinned them, with contextual jump and unpin controls on each bubble"
+        "Locations now follow photos, voice, or video in statements for a more natural reading order"
       ]
     }
   }
