@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { QuietState } from "../components/BoundaryState";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { SideDrawer } from "../components/SideDrawer";
+import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { ApiError, api } from "../lib/api";
@@ -118,6 +118,7 @@ function notificationChatAvatar(chat: ChatDTO) {
 export default function NotificationsPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const location = useLocation();
   const { session } = useAuth();
   const friendDirectoryRef = useRef<HTMLDivElement | null>(null);
   const friendSectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -140,6 +141,13 @@ export default function NotificationsPage() {
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
   const [friendIndexNeeded, setFriendIndexNeeded] = useState(false);
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
+
+  useEffect(() => {
+    const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
+    if (!profileSegment) return;
+    const userId = Number(profileSegment.replace("user-profile-", ""));
+    if (Number.isFinite(userId) && userId > 0) setProfileDrawerUserId(userId);
+  }, [location.search]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -344,6 +352,8 @@ export default function NotificationsPage() {
       </section>
 
       <SideDrawer
+        historyKey="friend-requests"
+        onRouteOpen={() => setRequestSheetOpen(true)}
         open={requestSheetOpen}
         title={t("contacts.requests")}
         onClose={() => setRequestSheetOpen(false)}
@@ -439,6 +449,8 @@ export default function NotificationsPage() {
       />
 
       <SideDrawer
+        historyKey="groups"
+        onRouteOpen={() => setGroupSheetOpen(true)}
         open={groupSheetOpen}
         title={t("contacts.groups")}
         onClose={() => setGroupSheetOpen(false)}
@@ -476,6 +488,7 @@ export default function NotificationsPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}
         title={t("contacts.userDetails")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
@@ -498,7 +511,7 @@ export default function NotificationsPage() {
       </SideDrawer>
 
       <AsyncErrorDialog message={error ?? ""} onClose={() => setError(null)} open={Boolean(error)} />
-      <AddFriendDrawer onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
+      <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
     </AppChrome>
   );
 }

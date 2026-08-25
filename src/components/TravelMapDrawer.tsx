@@ -22,6 +22,8 @@ countries.registerLocale(zhCountries);
 interface TravelMapDrawerProps {
   open: boolean;
   onClose: () => void;
+  historyKey?: string;
+  onRouteOpen?: () => void;
   chatId?: number | null;
   chatTitle?: string;
   chatType?: "direct" | "group";
@@ -258,7 +260,7 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
   ).values()];
 }
 
-export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
+export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRouteOpen, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
   const [mode, setMode] = useState<"world" | "china">("china");
@@ -731,6 +733,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
 
   return (
     <SideDrawer
+      historyKey={historyKey}
+      onRouteOpen={onRouteOpen}
       open={open}
       onClose={onClose}
       title={title}
@@ -951,6 +955,8 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         </div>
       </BottomSheet>
       <SideDrawer
+        historyKey="travel-map-access"
+        onRouteOpen={() => setAccessOverviewOpen(true)}
         open={accessOverviewOpen}
         title={t("travelMap.accessManagement")}
         onClose={() => setAccessOverviewOpen(false)}
@@ -999,6 +1005,7 @@ export function TravelMapDrawer({ open, onClose, chatId, chatTitle, chatType, ot
         </div>
       </SideDrawer>
       <SideDrawer
+        historyKey="travel-map-members"
         open={Boolean(accessDetail)}
         title={accessDetail?.title ?? t("travelMap.authorizedMembers")}
         onClose={() => setAccessDetail(null)}

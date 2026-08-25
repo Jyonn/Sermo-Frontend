@@ -10,6 +10,7 @@ interface AvatarPresetDialogProps {
   displayName: string;
   saving?: boolean;
   onClose: () => void;
+  onRouteOpen?: () => void;
   onSave: (presetId: number) => void | Promise<void>;
   onRequestCustomUpload?: () => void;
   customUploadEnabled?: boolean;
@@ -46,6 +47,7 @@ export function AvatarPresetDialog({
   displayName,
   saving = false,
   onClose,
+  onRouteOpen,
   onSave,
   onRequestCustomUpload,
   customUploadEnabled = true,
@@ -67,6 +69,7 @@ export function AvatarPresetDialog({
       actionDisabled={selectedPresetId === null}
       actionLabel={t("common.confirm")}
       historyKey="avatar"
+      onRouteOpen={onRouteOpen}
       onAction={() => {
         if (selectedPresetId !== null) void onSave(selectedPresetId);
       }}

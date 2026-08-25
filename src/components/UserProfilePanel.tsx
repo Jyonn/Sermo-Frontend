@@ -454,7 +454,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         </div>
       </BottomSheet>
 
-      <SideDrawer open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title={t("contacts.groups")}>
+      <SideDrawer historyKey="mutual-groups" onRouteOpen={() => setAllGroupsOpen(true)} open={allGroupsOpen} onClose={() => setAllGroupsOpen(false)} title={t("contacts.groups")}>
         <div className="user-profile-groups user-profile-all-groups">{groupChats.map(renderGroupRow)}</div>
       </SideDrawer>
 

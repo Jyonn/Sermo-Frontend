@@ -12,7 +12,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { InputDialog } from "../components/InputDialog";
-import { SideDrawer } from "../components/SideDrawer";
+import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { RarityIcon } from "../components/RarityIcon";
@@ -671,11 +671,15 @@ export default function MenuPage() {
   }, [location.pathname, location.search, navigate]);
 
   useEffect(() => {
-    if (new URLSearchParams(location.search).get("personalization") !== "chat-bubble") return;
-    setPersonalizationDrawerOpen(true);
-    setChatPageDrawerOpen(true);
-    setChatPersonalizationPanel("bubble");
-  }, [location.search]);
+    const params = new URLSearchParams(location.search);
+    if (params.get("personalization") === "chat-bubble") {
+      navigate(`${location.pathname}?panel=personalization/chat-page&section=bubbles`, { replace: true });
+      return;
+    }
+    if (params.get("section") === "bubbles" && drawerPathFromSearch(location.search).includes("chat-page")) {
+      setChatPersonalizationPanel("bubble");
+    }
+  }, [location.pathname, location.search, navigate]);
 
   useEffect(() => {
     if (!chatPageDrawerOpen || !me) return;
@@ -1016,8 +1020,18 @@ export default function MenuPage() {
   useEffect(() => {
     const drawer = new URLSearchParams(location.search).get("drawer");
     if (drawer === "security") {
-      setSecurityDrawerOpen(true);
+      navigate(`${location.pathname}?panel=account-security`, { replace: true });
     }
+  }, [location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    const path = drawerPathFromSearch(location.search);
+    const channelSegment = path.find((item) => item.startsWith("notification-channel-"));
+    const providerSegment = path.find((item) => item.startsWith("instant-provider-"));
+    const channel = channelSegment?.replace("notification-channel-", "") as NotificationChannel | undefined;
+    const provider = providerSegment?.replace("instant-provider-", "") as InstantNotificationProvider | undefined;
+    if (channel && channelRows.some(([value]) => value === channel)) setPrefDrawerChannel(channel);
+    if (provider && Object.prototype.hasOwnProperty.call(instantProviderMeta, provider)) setInstantProviderDrawer(provider);
   }, [location.search]);
 
   useEffect(() => {
@@ -2023,10 +2037,10 @@ export default function MenuPage() {
         open={pwaInstallSheetOpen}
         spaceName={space?.name ?? t("space.current")}
       />
-      <CloudResourceDrawer onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
-      <TravelMapDrawer open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
+      <CloudResourceDrawer onRouteOpen={() => setCloudResourcesOpen(true)} onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
+      <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
 
-      <SideDrawer open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
+      <SideDrawer historyKey="growth" onRouteOpen={() => setGrowthDrawerOpen(true)} open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
         <div className={`growth-drawer is-level-${me?.growth?.level ?? 1} growth-stage-${growthStageForLevel(me?.growth?.level ?? 1)}`}>
           <button className="growth-hero" onClick={() => setGrowthLevelsOpen(true)} type="button">
             <span className="growth-hero-stage" aria-hidden="true">{String(me?.growth?.level ?? 1).padStart(2, "0")}</span>
@@ -2104,7 +2118,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
+      <SideDrawer historyKey="growth-levels" onRouteOpen={() => setGrowthLevelsOpen(true)} open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
         <div className={`growth-level-guide growth-stage-${growthStageForLevel(activeGrowthGuideLevel)}`}>
           <div className="growth-level-guide-summary">
             <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
@@ -2198,7 +2212,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
+      <SideDrawer historyKey="basic-info" onRouteOpen={() => setBasicDrawerOpen(true)} open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
         <div className="detail-list">
           <div className="simple-list">
             <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.avatar", () => setAvatarDialogOpen(true))} type="button">
@@ -2239,7 +2253,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
+      <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>
         <div className="personalization-drawer">
           <SettingGroup>
             <SettingSelect<ThemePreference>
@@ -2313,6 +2327,8 @@ export default function MenuPage() {
         actionDisabled={personalizationDraft.profile_card_theme === (me?.profile_card_theme ?? "default")}
         actionLabel={t("common.save")}
         onAction={() => void savePersonalization("profile-card")}
+        historyKey="profile-card"
+        onRouteOpen={() => setProfileCardDrawerOpen(true)}
         open={profileCardDrawerOpen}
         onClose={() => setProfileCardDrawerOpen(false)}
         title={t("menu.profileCard")}
@@ -2349,6 +2365,8 @@ export default function MenuPage() {
         }
         actionLabel={t("common.save")}
         className="chat-personalization-drawer"
+        historyKey="chat-page"
+        onRouteOpen={() => setChatPageDrawerOpen(true)}
         onAction={() => void saveChatPagePersonalization()}
         open={chatPageDrawerOpen}
         onClose={() => {
@@ -2536,6 +2554,8 @@ export default function MenuPage() {
         actionDisabled={personalizationDraft.avatar_frame_style === (me?.avatar_frame_style ?? "none")}
         actionLabel={t("common.save")}
         onAction={() => void savePersonalization("frame")}
+        historyKey="avatar-frames"
+        onRouteOpen={() => setAvatarFrameDrawerOpen(true)}
         open={avatarFrameDrawerOpen}
         onClose={() => setAvatarFrameDrawerOpen(false)}
         title={t("menu.avatarFrame")}
@@ -2597,6 +2617,8 @@ export default function MenuPage() {
         actionDisabled={personalizationDraft.statement_card_style === (me?.statement_card_style ?? "default")}
         actionLabel={t("common.save")}
         onAction={() => void savePersonalization("statement")}
+        historyKey="statement-style"
+        onRouteOpen={() => setStatementCardDrawerOpen(true)}
         open={statementCardDrawerOpen}
         onClose={() => setStatementCardDrawerOpen(false)}
         title={t("menu.statementCard")}
@@ -2654,6 +2676,8 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey="account-security"
+        onRouteOpen={() => setSecurityDrawerOpen(true)}
         open={securityDrawerOpen}
         onClose={() => {
           setSecurityDrawerOpen(false);
@@ -2739,7 +2763,7 @@ export default function MenuPage() {
         </div>
       </BottomSheet>
 
-      <SideDrawer open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
+      <SideDrawer historyKey="notifications" onRouteOpen={() => setChannelsDrawerOpen(true)} open={channelsDrawerOpen} onClose={() => setChannelsDrawerOpen(false)} title={t("menu.notifications")}>
         <div className="notification-routing-drawer">
           <div className="mode-switch notification-routing-mode" role="tablist">
             <button className={`mode-pill ${notificationSettingsMode === "channel" ? "active" : ""}`} onClick={() => setNotificationSettingsMode("channel")} role="tab" type="button">{t("notification.byChannel")}</button>
@@ -2780,6 +2804,8 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey="web-notifications"
+        onRouteOpen={() => setWebReminderDrawerOpen(true)}
         open={webReminderDrawerOpen}
         onClose={() => setWebReminderDrawerOpen(false)}
         title={t("webReminder.title")}
@@ -2827,6 +2853,8 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey="friend-qr"
+        onRouteOpen={() => setInviteDrawerOpen(true)}
         open={inviteDrawerOpen}
         onClose={() => setInviteDrawerOpen(false)}
         title={t("invite.friendQr")}
@@ -2881,6 +2909,7 @@ export default function MenuPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey={`notification-channel-${prefDrawerChannel ?? "settings"}`}
         open={Boolean(prefDrawerChannel)}
         onClose={closePrefDrawers}
         title={prefDrawerChannel ? t("notification.channelSettings", { channel: channelLabel(prefDrawerChannel) }) : t("notification.settings")}
@@ -3016,6 +3045,7 @@ export default function MenuPage() {
         ) : null}
       </SideDrawer>
       <SideDrawer
+        historyKey={`instant-provider-${instantProviderDrawer ?? "settings"}`}
         open={Boolean(instantProviderDrawer)}
         onClose={() => !instantSaving && setInstantProviderDrawer(null)}
         title={instantProviderDrawer ? instantProviderMeta[instantProviderDrawer].name : t("channel.instant")}
@@ -3087,6 +3117,8 @@ export default function MenuPage() {
         })() : null}
       </SideDrawer>
       <SideDrawer
+        historyKey="bark-guide"
+        onRouteOpen={() => setBarkGuideOpen(true)}
         open={barkGuideOpen}
         onClose={closeBarkGuide}
         title={t("bark.bind")}
@@ -3307,6 +3339,7 @@ export default function MenuPage() {
         currentAvatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
         displayName={session?.user.name ?? t("brand.user")}
         onClose={() => setAvatarDialogOpen(false)}
+        onRouteOpen={() => setAvatarDialogOpen(true)}
         customUploadEnabled={canUploadCustomAvatar && hasPassword}
         customUploadHint={!canUploadCustomAvatar ? t("avatar.unlockAtLevel", { level: 4 }) : t("avatar.setPasswordToUpload")}
         onRequestCustomUpload={requestCustomAvatarUpload}

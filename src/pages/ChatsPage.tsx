@@ -32,7 +32,7 @@ import { MentionComposerInput, type MentionComposerHandle } from "../components/
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
-import { SideDrawer } from "../components/SideDrawer";
+import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
@@ -2417,6 +2417,13 @@ function LiveChatsPage() {
   const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
   const [stickerManagerSelecting, setStickerManagerSelecting] = useState(false);
   const [selectedStickerIds, setSelectedStickerIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
+    if (!profileSegment) return;
+    const userId = Number(profileSegment.replace("user-profile-", ""));
+    if (Number.isFinite(userId) && userId > 0) setProfileDrawerUserId(userId);
+  }, [location.search]);
   const [stickerDeleteConfirmOpen, setStickerDeleteConfirmOpen] = useState(false);
   const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
   const [locationMessagePreview, setLocationMessagePreview] = useState<{
@@ -2458,6 +2465,14 @@ function LiveChatsPage() {
   const [forwardTargetChatIds, setForwardTargetChatIds] = useState<number[]>([]);
   const [forwardSending, setForwardSending] = useState(false);
   const [forwardBundlePreview, setForwardBundlePreview] = useState<ChatMessagePayloadDTO | null>(null);
+
+  useEffect(() => {
+    const bundleSegment = drawerPathFromSearch(location.search).find((item) => /^forward-bundle-\d+$/.test(item));
+    if (!bundleSegment) return;
+    const bundleId = Number(bundleSegment.replace("forward-bundle-", ""));
+    const message = Object.values(messages).flat().find((item) => item.payload?.bundle_id === bundleId);
+    if (message?.payload) setForwardBundlePreview(message.payload);
+  }, [location.search, messages]);
   const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
   const [clearHistorySaving, setClearHistorySaving] = useState(false);
   const [restoreHistoryConfirmOpen, setRestoreHistoryConfirmOpen] = useState(false);
@@ -5870,7 +5885,7 @@ function LiveChatsPage() {
           </span>
         }
       />
-      <AddFriendDrawer onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
+      <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
       <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
 
       <div className="chat-list-screen-body">
@@ -6789,7 +6804,7 @@ function LiveChatsPage() {
         open={Boolean(forwardBundlePreview)}
         title={t("message.forwardBundleTitle")}
         titleAccessory={<span className="drawer-title-count">{forwardBundlePreview?.item_count ?? forwardBundlePreview?.items?.length ?? 0}</span>}
-        historyKey="forward-bundle"
+        historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}`}
         onClose={() => setForwardBundlePreview(null)}
       >
         <div className="forward-bundle-viewer">
@@ -6806,6 +6821,8 @@ function LiveChatsPage() {
       </SideDrawer>
 
       <SideDrawer
+        historyKey="pinned-messages"
+        onRouteOpen={() => setPinnedDrawerOpen(true)}
         open={pinnedDrawerOpen}
         title={t("pin.messages")}
         titleAccessory={<span className="pinned-message-title-count">{pinnedMessages.length}</span>}
@@ -6856,6 +6873,7 @@ function LiveChatsPage() {
 
       <SideDrawer
         historyKey="chat-details"
+        onRouteOpen={() => setDetailsSheetOpen(true)}
         open={detailsSheetOpen}
         title={t("chat.details")}
         onClose={() => setDetailsSheetOpen(false)}
@@ -7021,6 +7039,7 @@ function LiveChatsPage() {
       <SideDrawer
         className="message-search-drawer"
         historyKey="message-search"
+        onRouteOpen={() => setMessageSearchOpen(true)}
         open={messageSearchOpen}
         title={t("messageSearch.title")}
         onClose={() => setMessageSearchOpen(false)}
@@ -7126,6 +7145,7 @@ function LiveChatsPage() {
         </div>
       </SideDrawer>
       <SideDrawer
+        historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}
         title={t("profile.details")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
@@ -7546,6 +7566,8 @@ function LiveChatsPage() {
         </div>
       ) : null}
       <TravelMapDrawer
+        historyKey="user-travel-map"
+        onRouteOpen={() => setTravelMapOpen(true)}
         open={travelMapOpen}
         otherUser={travelMapOtherUser}
         onClose={() => setTravelMapOpen(false)}
@@ -7554,12 +7576,15 @@ function LiveChatsPage() {
         chatId={selectedChat?.id}
         chatTitle={selectedChat?.title}
         chatType={selectedChat?.type}
+        historyKey="chat-travel-map"
+        onRouteOpen={() => setChatTravelMapOpen(true)}
         open={chatTravelMapOpen}
         onClose={() => setChatTravelMapOpen(false)}
       />
       <TravelMapDrawer
         focusLocation={locationMessagePreview?.location}
         focusOwner={locationMessagePreview?.owner}
+        historyKey="shared-location"
         open={Boolean(locationMessagePreview)}
         onClose={() => setLocationMessagePreview(null)}
       />

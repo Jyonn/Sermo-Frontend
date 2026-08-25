@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useId, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 
@@ -19,6 +20,25 @@ interface SideDrawerProps {
   children: ReactNode;
   historyKey?: string;
   historyMode?: "stack" | "route";
+  onRouteOpen?: () => void;
+}
+
+const DRAWER_QUERY_KEY = "panel";
+const LEGACY_DRAWER_QUERY_KEY = "_drawer";
+
+export function drawerPathFromSearch(search: string) {
+  const params = new URLSearchParams(search);
+  const value = params.get(DRAWER_QUERY_KEY) || params.get(LEGACY_DRAWER_QUERY_KEY) || "";
+  return value.split("/").map((item) => item.trim()).filter(Boolean);
+}
+
+function normalizeDrawerKey(value: string | undefined) {
+  const normalized = (value || "drawer")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return normalized || "drawer";
 }
 
 export function SideDrawer({
@@ -35,13 +55,22 @@ export function SideDrawer({
   children,
   historyKey,
   historyMode = "stack",
+  onRouteOpen,
 }: SideDrawerProps) {
   const { t } = useI18n();
+  const location = useLocation();
   const drawerId = useId();
+  const routeKey = useMemo(() => normalizeDrawerKey(historyKey), [historyKey]);
+  const routePath = useMemo(() => drawerPathFromSearch(location.search), [location.search]);
+  const routeIndex = routePath.findIndex((item) => item === routeKey || item === title);
+  const routeRequested = historyMode === "stack" && routeIndex >= 0;
+  const visible = open || routeRequested;
   const registeredRef = useRef(false);
   const onCloseRef = useRef(onClose);
+  const onRouteOpenRef = useRef(onRouteOpen);
   onCloseRef.current = onClose;
-  useBodyScrollLock(open);
+  onRouteOpenRef.current = onRouteOpen;
+  useBodyScrollLock(visible);
 
   const getDrawerStack = () => {
     const value = window.history.state?.sermoDrawerStack;
@@ -55,13 +84,25 @@ export function SideDrawer({
 
   const urlForDrawerPath = (path: string[]) => {
     const url = new URL(window.location.href);
-    if (path.length) url.searchParams.set("_drawer", path.join("/"));
-    else url.searchParams.delete("_drawer");
+    if (path.length) url.searchParams.set(DRAWER_QUERY_KEY, path.join("/"));
+    else url.searchParams.delete(DRAWER_QUERY_KEY);
+    url.searchParams.delete(LEGACY_DRAWER_QUERY_KEY);
     return `${url.pathname}${url.search}${url.hash}`;
   };
 
   const requestClose = useCallback(() => {
     if (historyMode === "route") {
+      onCloseRef.current();
+      return;
+    }
+    if (routeRequested && !registeredRef.current) {
+      const nextPath = routePath.slice(0, routeIndex);
+      window.history.replaceState(
+        { ...window.history.state, sermoDrawerStack: [], sermoDrawerPath: nextPath },
+        "",
+        urlForDrawerPath(nextPath)
+      );
+      window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
       onCloseRef.current();
       return;
     }
@@ -71,12 +112,25 @@ export function SideDrawer({
       return;
     }
     onCloseRef.current();
-  }, [drawerId, historyMode]);
+  }, [drawerId, historyMode, routeIndex, routePath, routeRequested]);
+
+  useEffect(() => {
+    if (!routeRequested) return;
+    onRouteOpenRef.current?.();
+    if (routePath[routeIndex] === routeKey && !new URLSearchParams(location.search).has(LEGACY_DRAWER_QUERY_KEY)) return;
+    const canonicalPath = [...routePath];
+    canonicalPath[routeIndex] = routeKey;
+    window.history.replaceState(
+      { ...window.history.state, sermoDrawerPath: canonicalPath },
+      "",
+      urlForDrawerPath(canonicalPath)
+    );
+  }, [location.search, routeIndex, routeKey, routePath, routeRequested]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (historyMode === "route") return;
-    if (open && !registeredRef.current) {
+    if (open && !routeRequested && !registeredRef.current) {
       const storedStack = getDrawerStack();
       const activeStack = storedStack.filter((item) => activeDrawerIds.has(item));
       const storedPath = getDrawerPath();
@@ -89,7 +143,7 @@ export function SideDrawer({
         );
       }
       const nextStack = [...activeStack, drawerId];
-      const nextPath = [...activePath, historyKey?.trim() || title];
+      const nextPath = [...activePath, routeKey];
       window.history.pushState(
         { ...window.history.state, sermoDrawerStack: nextStack, sermoDrawerPath: nextPath },
         "",
@@ -123,10 +177,10 @@ export function SideDrawer({
       activeDrawerIds.delete(drawerId);
       registeredRef.current = false;
     }
-  }, [drawerId, historyKey, historyMode, open, title]);
+  }, [drawerId, historyMode, open, routeKey, routeRequested]);
 
   useEffect(() => {
-    if (!open || historyMode === "route") return;
+    if (!visible || historyMode === "route") return;
     const onPopState = () => {
       if (!getDrawerStack().includes(drawerId)) {
         activeDrawerIds.delete(drawerId);
@@ -136,10 +190,10 @@ export function SideDrawer({
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [drawerId, historyMode, open]);
+  }, [drawerId, historyMode, visible]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!visible) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") requestClose();
@@ -147,9 +201,9 @@ export function SideDrawer({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, requestClose]);
+  }, [requestClose, visible]);
 
-  if (!open || typeof document === "undefined") return null;
+  if (!visible || typeof document === "undefined") return null;
 
   return createPortal(
     <div className="drawer-backdrop" onClick={requestClose} role="presentation">

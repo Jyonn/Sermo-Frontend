@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.10",
+  "id": "2026.08.25.11",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "表情包浏览更顺畅",
+      "title": "侧边页面可直接打开",
       "items": [
-        "我的表情与探索表情现在会在下滑时自动加载更多内容"
+        "菜单设置、聊天详情与用户资料等侧边页面现在支持通过英文链接直接打开，刷新和手势返回也能保持正确层级"
       ]
     },
     "en": {
-      "title": "Smoother sticker browsing",
+      "title": "Drawer pages are now linkable",
       "items": [
-        "My Stickers and Explore now load more items automatically as you scroll"
+        "Menu settings, chat details, user profiles, and other drawer pages now open directly from stable English links and preserve their navigation stack across refreshes and swipe-back gestures"
       ]
     }
   }

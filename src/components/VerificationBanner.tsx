@@ -52,7 +52,7 @@ export function VerificationBanner({ verified, mode = "tab", onAction, hasPasswo
         onClose={() => setPasswordReminderOpen(false)}
         onConfirm={() => {
           setPasswordReminderOpen(false);
-          navigate("/app/menu?drawer=security");
+          navigate("/app/menu?panel=account-security");
         }}
       />
     </>

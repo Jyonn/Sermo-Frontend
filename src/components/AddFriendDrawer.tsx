@@ -8,7 +8,7 @@ import { QuietState } from "./BoundaryState";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 
-export function AddFriendDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean; onClose: () => void; onRouteOpen?: () => void }) {
   const { t } = useI18n();
   const { session } = useAuth();
   const [name, setName] = useState("");
@@ -43,7 +43,7 @@ export function AddFriendDrawer({ open, onClose }: { open: boolean; onClose: () 
   };
 
   return (
-    <SideDrawer historyKey="add-friend" onClose={onClose} open={open} title={t("friendSearch.title")}>
+    <SideDrawer historyKey="add-friend" onRouteOpen={onRouteOpen} onClose={onClose} open={open} title={t("friendSearch.title")}>
       <div className="friend-search-panel">
         {!session?.user.verified ? (
           <QuietState icon="verified_user" title={t("friendSearch.verifyFirst")} description={t("friendSearch.verifyHint")} />

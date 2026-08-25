@@ -10,7 +10,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { MediaLightbox } from "../components/ImageLightbox";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
-import { SideDrawer } from "../components/SideDrawer";
+import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -426,6 +426,13 @@ export default function SquarePage() {
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
   const galleryVideo = statements.find((item) => item.statement_id === videoGalleryStatementId)?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+
+  useEffect(() => {
+    const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
+    if (!profileSegment) return;
+    const userId = Number(profileSegment.replace("user-profile-", ""));
+    if (Number.isFinite(userId) && userId > 0) setProfileDrawerUserId(userId);
+  }, [location.search]);
   const sortedShareChats = useMemo(() => [...shareChats].sort((left, right) => (
     Number(Boolean(right.pinned)) - Number(Boolean(left.pinned))
     || (right.last_message?.created_at ?? right.last_chat_at) - (left.last_message?.created_at ?? left.last_chat_at)
@@ -1334,7 +1341,7 @@ export default function SquarePage() {
       </div>
       {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />, document.body) : null}
       {inlineStatementExpanded && !desktopWorkspace ? <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`}>{commentComposer}</div> : null}
-      <SideDrawer historyKey="square-notifications" onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
+      <SideDrawer historyKey="square-notifications" onRouteOpen={() => setNotificationDrawerOpen(true)} onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">
           {!notificationEvents.length ? <QuietState icon="notifications_none" title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
             const actor = event.actor?.name || t("square.someone");
@@ -1368,6 +1375,7 @@ export default function SquarePage() {
         actionDisabled={!publishable}
         actionLabel={t("square.publish")}
         historyKey="square-compose"
+        onRouteOpen={() => setComposerOpen(true)}
         onAction={() => void publish()}
         onClose={() => setComposerOpen(false)}
         open={composerOpen}
@@ -1445,7 +1453,7 @@ export default function SquarePage() {
           <section className="activity-awakening-stage">
             <section className={`activity-personal-quest${activeActivity.personal_reward || activeActivity.personal_reward_claimable ? " is-complete" : ""}`}>
               <div><small>{t("activity.personalQuest")}</small><strong>{activeActivity.personal_reward || activeActivity.personal_reward_claimable ? t("activity.personalComplete") : t("activity.personalPostTwice")}</strong>{activeActivity.personal_reward ? <span>{t("activity.personalRewardOwnedNamed", { name: t(BAXIAN_PRIZE_BUBBLES.find((item) => item.style === activeActivity.personal_reward?.resource_key)?.label ?? "menu.collectionBaxian") })}</span> : !activeActivity.personal_reward_claimable ? <span>{t("activity.personalProgress", { current: Math.min(activeActivity.personal_event_count, activeActivity.personal_event_target), target: activeActivity.personal_event_target })}</span> : null}</div>
-              {activeActivity.personal_reward ? <div className="activity-personal-reward"><span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span><button onClick={() => navigate("/app/menu?personalization=chat-bubble")} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button></div> : activeActivity.personal_reward_claimable ? <button className="activity-personal-claim" disabled={personalRewardClaiming} onClick={() => void claimPersonalActivityReward()} type="button">{personalRewardClaiming ? t("common.processing") : t("activity.claimPersonalReward")}</button> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
+              {activeActivity.personal_reward ? <div className="activity-personal-reward"><span className={`personalization-option preview-${activeActivity.personal_reward.resource_key}`}><i aria-hidden="true"><span /></i></span><button onClick={() => navigate("/app/menu?panel=personalization/chat-page&section=bubbles")} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button></div> : activeActivity.personal_reward_claimable ? <button className="activity-personal-claim" disabled={personalRewardClaiming} onClick={() => void claimPersonalActivityReward()} type="button">{personalRewardClaiming ? t("common.processing") : t("activity.claimPersonalReward")}</button> : <div className="activity-personal-stamps">{Array.from({ length: activeActivity.personal_event_target }, (_, index) => <i className={index < activeActivity.personal_event_count ? "is-earned" : ""} key={index}><span className="material-symbols-outlined">edit</span></i>)}</div>}
             </section>
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
             <ActivityForceProgress target={activeActivity.target} total={activeActivity.space_total} />
@@ -1508,7 +1516,7 @@ export default function SquarePage() {
         </div> : null}
       </BottomSheet>
       <SideDrawer
-        historyKey="square-user-profile"
+        historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         onClose={() => setProfileDrawerUserId(null)}
         open={profileDrawerUserId !== null}
         title={t("profile.details")}

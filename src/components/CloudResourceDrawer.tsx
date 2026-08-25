@@ -19,6 +19,7 @@ type ResourceTab = "image" | "video" | "file";
 interface CloudResourceDrawerProps {
   open: boolean;
   onClose: () => void;
+  onRouteOpen?: () => void;
   currentChatId?: number;
   initialTab?: ResourceTab;
   onSent?: () => void;
@@ -30,7 +31,7 @@ function chatTitle(chat: ChatDTO) {
   return chat.title || chat.owner?.name || chat.members.map((member) => member.name).join("、") || "会话";
 }
 
-export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
+export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
   const { t, language } = useI18n();
   const { session } = useAuth();
   const [tab, setTab] = useState<ResourceTab>(initialTab);
@@ -224,7 +225,7 @@ export function CloudResourceDrawer({ open, onClose, currentChatId, initialTab =
 
   return (
     <>
-      <SideDrawer className="cloud-resource-drawer" headerAction={headerAction} historyKey="cloud-resources" onClose={onClose} open={open} title={t("cloudResources.title")}>
+      <SideDrawer className="cloud-resource-drawer" headerAction={headerAction} historyKey="cloud-resources" onRouteOpen={onRouteOpen} onClose={onClose} open={open} title={t("cloudResources.title")}>
         <div className="cloud-resource-layout">
           {quota ? (
             <div className="cloud-resource-quota">
