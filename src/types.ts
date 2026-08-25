@@ -658,6 +658,12 @@ export interface SquareStatementDTO {
   user: TinyUserDTO;
   text: string;
   visibility: "public" | "friends";
+  location?: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    geocoding_provider?: string;
+  } | null;
   media: SquareStatementMediaDTO[];
   comment_count: number;
   like_count: number;
@@ -694,6 +700,13 @@ export interface SquareStatementDraftMedia {
     longitude: number;
     address?: string;
   };
+}
+
+export interface SquareStatementLocationDTO {
+  latitude: number;
+  longitude: number;
+  address: string;
+  geocoding_provider?: string;
 }
 
 export interface SquareQuotaDTO {

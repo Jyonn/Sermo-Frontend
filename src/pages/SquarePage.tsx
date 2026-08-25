@@ -237,6 +237,7 @@ function StatementCard({ statement, canInteract, cardRef, detail = false, onDele
         <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button>
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
+      {statement.location ? <div className="square-statement-location"><span className="material-symbols-outlined">location_on</span><span>{statement.location.address || `${statement.location.latitude.toFixed(4)}, ${statement.location.longitude.toFixed(4)}`}</span></div> : null}
       {images.length ? (
         <div className={`square-statement-images count-${Math.min(images.length, 9)}`}>
           {images.map((image, index) => (
@@ -344,6 +345,9 @@ export default function SquarePage() {
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
   const [voiceDuration, setVoiceDuration] = useState(0);
   const [recording, setRecording] = useState(false);
+  const [contentSheetOpen, setContentSheetOpen] = useState(false);
+  const [statementLocation, setStatementLocation] = useState<SquareStatementDTO["location"]>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   useEffect(() => {
     if (!features.squareExploreEnabled && feedMode === "all") setFeedMode("friends");
@@ -1117,7 +1121,7 @@ export default function SquarePage() {
         });
         media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
       }
-      const statement = await api.createSquareStatement({ text: text.trim(), visibility, media, pin: pinOnPublish ? 1 : 0 });
+      const statement = await api.createSquareStatement({ text: text.trim(), visibility, media, location: statementLocation, pin: pinOnPublish ? 1 : 0 });
       setStatements((current) => [statement, ...current]);
       if (pinOnPublish) setPinnedStatement(statement);
       photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
@@ -1126,6 +1130,7 @@ export default function SquarePage() {
       setVoiceFile(null);
       setVoiceDuration(0);
       setVisibility("public");
+      setStatementLocation(null);
       setPinOnPublish(false);
       if (video) URL.revokeObjectURL(video.preview);
       setVideo(null);
@@ -1137,6 +1142,28 @@ export default function SquarePage() {
       setPublishing(false);
       setUploadProgress(0);
     }
+  };
+
+  const locateStatement = () => {
+    if (!navigator.geolocation) {
+      setError(t("square.locationUnsupported"));
+      return;
+    }
+    setLocationLoading(true);
+    setError("");
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        void api.resolveSquareLocation(coords.latitude, coords.longitude)
+          .then(setStatementLocation)
+          .catch(() => setStatementLocation({ latitude: coords.latitude, longitude: coords.longitude, address: "" }))
+          .finally(() => setLocationLoading(false));
+      },
+      () => {
+        setLocationLoading(false);
+        setError(t("square.locationFailed"));
+      },
+      { enableHighAccuracy: true, maximumAge: 60_000, timeout: 12_000 },
+    );
   };
 
   const toggleStatementLike = async (statement: SquareStatementDTO) => {
@@ -1440,12 +1467,8 @@ export default function SquarePage() {
         </div>
       </SideDrawer>
       <SideDrawer
-        actionBusy={publishing}
-        actionDisabled={!publishable}
-        actionLabel={t("square.publish")}
         historyKey="square-compose"
         onRouteOpen={() => setComposerOpen(true)}
-        onAction={() => void publish()}
         onClose={() => setComposerOpen(false)}
         open={composerOpen}
         title={t("square.composeTitle")}
@@ -1462,21 +1485,29 @@ export default function SquarePage() {
           {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
           {video ? <div className="square-composer-video"><video muted playsInline src={video.preview} /><button onClick={() => { URL.revokeObjectURL(video.preview); setVideo(null); }} type="button"><span className="material-symbols-outlined">close</span></button><span>{video.duration}s</span></div> : null}
           {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><div><strong>{t("square.voiceReady")}</strong>{voicePreview ? <audio controls preload="metadata" src={voicePreview} /> : null}</div><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
+          {statementLocation ? <button className="square-compose-location-pill is-active" onClick={() => setStatementLocation(null)} type="button"><span className="material-symbols-outlined">location_on</span><span>{statementLocation.address || t("square.locationAddedShort")}</span><span className="material-symbols-outlined">close</span></button> : null}
           {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
+          <div className="square-compose-content-actions">
+            <button onClick={() => setContentSheetOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{photos.length ? t("square.photosAdded", { count: photos.length }) : voiceFile ? t("square.voiceReady") : video ? t("square.videoReady") : t("square.addMedia")}</span></button>
+            {!statementLocation ? <button disabled={locationLoading} onClick={locateStatement} type="button"><span className={`material-symbols-outlined${locationLoading ? " is-spinning" : ""}`}>{locationLoading ? "progress_activity" : "location_on"}</span><span>{locationLoading ? t("square.locating") : t("square.location")}</span></button> : null}
+          </div>
           <div className="square-compose-settings">
             <button onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
             {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
           </div>
-          <footer className="square-compose-dock">
-            <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
-            <input accept="video/*" hidden onChange={(event) => chooseVideo(event.target.files)} ref={videoInputRef} type="file" />
-            <button className={photos.length ? "is-active" : ""} disabled={photos.length >= MAX_PHOTOS || publishing} onClick={() => photoInputRef.current?.click()} type="button"><span className="material-symbols-outlined">image</span><span>{t("square.photo")}</span></button>
-            <button className={voiceFile ? "is-active" : ""} disabled={publishing || !canSendVoice} onClick={() => setVoiceSheetOpen(true)} title={!canSendVoice ? t("square.voiceUnlock") : undefined} type="button"><span className="material-symbols-outlined">mic</span><span>{t("square.voice")}</span></button>
-            <button className={video ? "is-active" : ""} disabled={publishing || !canSendVideo} onClick={() => videoInputRef.current?.click()} title={!canSendVideo ? t("square.videoUnlock") : undefined} type="button"><span className="material-symbols-outlined">videocam</span><span>{t("square.video")}</span></button>
-            <span className={remaining < 20 ? "is-near-limit" : ""}>{remaining}</span>
+          <footer className="square-compose-publish-footer">
+            <span className={remaining < 20 ? "is-near-limit" : ""}>{remaining} / {MAX_TEXT_LENGTH}</span>
+            <button disabled={!publishable || publishing} onClick={() => void publish()} type="button"><span>{publishing ? t("square.publishing") : t("square.publishStatement")}</span><span className="material-symbols-outlined">arrow_upward</span></button>
           </footer>
+          <input accept="image/*" hidden multiple onChange={(event) => choosePhotos(event.target.files)} ref={photoInputRef} type="file" />
+          <input accept="video/*" hidden onChange={(event) => chooseVideo(event.target.files)} ref={videoInputRef} type="file" />
         </div>
       </SideDrawer>
+      <BottomSheet bodyClassName="square-content-sheet" onClose={() => setContentSheetOpen(false)} open={contentSheetOpen} title={t("square.addToStatement")}>
+        <button disabled={publishing || photos.length >= MAX_PHOTOS} onClick={() => { setContentSheetOpen(false); photoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">image</span><span><strong>{t("square.photo")}</strong><small>{t("square.photoMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+        <button disabled={publishing || !canSendVoice} onClick={() => { setContentSheetOpen(false); setVoiceSheetOpen(true); }} type="button"><span className="material-symbols-outlined">mic</span><span><strong>{t("square.voice")}</strong><small>{canSendVoice ? t("square.voiceMediaHint") : t("square.voiceUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+        <button disabled={publishing || !canSendVideo} onClick={() => { setContentSheetOpen(false); videoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">videocam</span><span><strong>{t("square.video")}</strong><small>{canSendVideo ? t("square.videoMediaHint") : t("square.videoUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+      </BottomSheet>
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
       </BottomSheet>

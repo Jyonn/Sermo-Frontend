@@ -789,12 +789,21 @@ export const api = {
     text: string;
     visibility: "public" | "friends";
     media: SquareStatementDraftMedia[];
+    location?: { latitude: number; longitude: number; address?: string; geocoding_provider?: string } | null;
     pin?: 0 | 1;
   }) {
     return request<SquareStatementDTO>("/square/statements", {
       method: "POST",
       auth: true,
       body: payload,
+    });
+  },
+
+  resolveSquareLocation(latitude: number, longitude: number) {
+    return request<{ latitude: number; longitude: number; address: string; geocoding_provider?: string }>("/square/location", {
+      method: "POST",
+      auth: true,
+      body: { location: { latitude, longitude } },
     });
   },
 
