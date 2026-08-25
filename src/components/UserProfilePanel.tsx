@@ -345,7 +345,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           {user.is_permanent_vip ? (
             <span className="is-vip">
               {user.permanent_vip_slot
-                ? t("profile.permanentVipRank", { slot: user.permanent_vip_slot })
+                ? t("profile.permanentVipRank", { slot: String(user.permanent_vip_slot).padStart(3, "0") })
                 : t("profile.permanentVip")}
             </span>
           ) : null}

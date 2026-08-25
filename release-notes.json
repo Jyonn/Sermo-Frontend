@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.21",
+  "id": "2026.08.25.22",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "八仙奖励由你亲手领取",
+      "title": "永久 VIP 名片更简洁",
       "items": [
-        "个人历练与全空间聚力奖励均改为达标后手动领取，两轮唤醒轨迹也会分别保留编号与贡献头像"
+        "用户详情中的永久 VIP 标识改为专属三位编号，身份信息更简洁清晰"
       ]
     },
     "en": {
-      "title": "Claim Baxian rewards yourself",
+      "title": "Cleaner Lifetime VIP profiles",
       "items": [
-        "Personal and space-wide Baxian rewards are now claimed manually, with both awakening rounds clearly preserving numbers and contributor avatars"
+        "Lifetime VIP badges on user profiles now use a concise, dedicated three-digit member number"
       ]
     }
   }
