@@ -28804,3 +28804,452 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
     animation: none;
   }
 }
+
+/* Profile card collection v2: generated cover art plus theme-specific furniture. */
+.user-profile-panel.profile-theme-level-12,
+.user-profile-panel.profile-theme-vip {
+  --profile-art-radius: 0;
+  position: relative;
+}
+
+.user-profile-panel.profile-theme-level-12::before,
+.user-profile-panel.profile-theme-vip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.user-profile-panel.profile-theme-level-12 > *,
+.user-profile-panel.profile-theme-vip > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Tidal Blue is an oceanographic field record: cool glass, depth lines, tide marks. */
+.user-profile-panel.profile-theme-level-12 {
+  --profile-page: #e9f2f1;
+  --profile-card: #f4faf9;
+  --profile-card-soft: #d8ebe9;
+  --profile-ink: #092d3b;
+  --profile-muted: #537580;
+  --profile-line: rgba(37, 113, 130, 0.18);
+  --profile-deep: #0b5265;
+  background: #e9f2f1;
+}
+
+.user-profile-panel.profile-theme-level-12::before {
+  background:
+    linear-gradient(90deg, rgba(31, 112, 130, 0.045) 1px, transparent 1px) 0 0 / 42px 100%,
+    radial-gradient(circle at 104% 24%, rgba(76, 189, 190, 0.16), transparent 32%),
+    linear-gradient(180deg, transparent 0 44%, rgba(255, 255, 255, 0.44));
+  opacity: 0.9;
+}
+
+html[data-theme="dark"] .user-profile-panel.profile-theme-level-12 {
+  --profile-page: #061820;
+  --profile-card: #09242d;
+  --profile-card-soft: #0d3440;
+  --profile-ink: #edfafa;
+  --profile-muted: #82a9b2;
+  --profile-line: rgba(102, 208, 209, 0.18);
+  --profile-deep: #54cbc8;
+  background: #061820;
+}
+
+html[data-theme="dark"] .user-profile-panel.profile-theme-level-12::before {
+  background:
+    linear-gradient(90deg, rgba(106, 216, 216, 0.035) 1px, transparent 1px) 0 0 / 42px 100%,
+    radial-gradient(circle at 104% 24%, rgba(37, 145, 156, 0.17), transparent 34%);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-cover,
+html:not([data-theme="dark"]) .user-profile-panel.profile-theme-level-12 .user-profile-cover {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(152, 230, 225, 0.4);
+  background-image:
+    linear-gradient(90deg, rgba(2, 28, 45, 0.2), transparent 58%),
+    url("/assets/profile-card-themes/tidal-blue.webp");
+  background-position: center 46%;
+  background-size: cover;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-cover::before {
+  top: 18px;
+  right: 24px;
+  bottom: 18px;
+  width: 7px;
+  height: auto;
+  border: 0;
+  border-inline: 1px solid rgba(223, 255, 252, 0.46);
+  border-radius: 0;
+  background: repeating-linear-gradient(180deg, rgba(233, 255, 252, 0.9) 0 2px, transparent 2px 11px);
+  box-shadow: 20px 0 0 -19px rgba(225, 255, 252, 0.32);
+  opacity: 0.88;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-cover::after {
+  right: clamp(58px, 13vw, 126px);
+  bottom: -44px;
+  width: 126px;
+  border: 1px solid rgba(222, 255, 250, 0.48);
+  background: radial-gradient(circle, rgba(225, 255, 250, 0.72) 0 4%, rgba(111, 225, 216, 0.14) 5% 42%, transparent 43%);
+  box-shadow: 0 0 0 20px rgba(189, 250, 242, 0.075), 0 0 0 42px rgba(189, 250, 242, 0.04);
+  animation: profile-tidal-beacon 8s cubic-bezier(.37, 0, .63, 1) infinite;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-social-card {
+  border-bottom: 1px solid rgba(45, 117, 131, 0.12);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-avatar-wrap {
+  border: 1px solid rgba(103, 210, 210, 0.74);
+  background: linear-gradient(145deg, rgba(240, 255, 253, 0.98), rgba(113, 200, 204, 0.82));
+  box-shadow: 0 20px 38px rgba(4, 47, 63, 0.22), 0 0 0 5px rgba(158, 232, 227, 0.13);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-avatar-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(65, 155, 169, 0.38);
+  border-radius: inherit;
+  clip-path: polygon(0 0, 32% 0, 36% 5%, 64% 5%, 68% 0, 100% 0, 100% 100%, 68% 100%, 64% 95%, 36% 95%, 32% 100%, 0 100%);
+  pointer-events: none;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-facts span {
+  border-color: rgba(43, 134, 151, 0.24);
+  border-radius: 6px 999px 999px 6px;
+  background: linear-gradient(90deg, rgba(65, 162, 174, 0.14), rgba(244, 255, 253, 0.26));
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-primary-actions .button:first-child {
+  border-radius: 8px 22px 22px 8px;
+  background: linear-gradient(112deg, #0b526d, #1e969e 58%, #52c7bd);
+  box-shadow: 0 15px 30px rgba(8, 95, 112, 0.2);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-statements-action {
+  border-radius: 22px 8px 8px 22px;
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-recent-statement {
+  border: 1px solid rgba(43, 132, 148, 0.2);
+  border-radius: 32px 8px 32px 8px;
+  background:
+    repeating-radial-gradient(ellipse at 102% 124%, transparent 0 18px, rgba(65, 154, 166, 0.085) 19px 20px, transparent 21px 36px),
+    linear-gradient(112deg, color-mix(in srgb, var(--profile-card-soft) 82%, var(--profile-card)), var(--profile-card));
+  box-shadow: 0 18px 36px rgba(10, 71, 83, 0.08);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-reminders,
+.user-profile-panel.profile-theme-level-12 .user-profile-section {
+  border-color: rgba(56, 135, 148, 0.16);
+}
+
+.user-profile-panel.profile-theme-level-12 .user-profile-group-tile-avatar {
+  border-radius: 8px 20px 20px 8px;
+}
+
+/* Gilded Hour is a private collector credential: lacquer, brass, guilloche, serial geometry. */
+.user-profile-panel.profile-theme-vip {
+  --profile-page: #f2eadb;
+  --profile-card: #fff9ec;
+  --profile-card-soft: #ead7ae;
+  --profile-ink: #2c1d0d;
+  --profile-muted: #7c684d;
+  --profile-line: rgba(136, 91, 29, 0.2);
+  --profile-deep: #6d4211;
+  background: #f2eadb;
+}
+
+.user-profile-panel.profile-theme-vip::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(119, 78, 23, 0.03) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 88% 14%, rgba(205, 151, 61, 0.2), transparent 25%),
+    linear-gradient(135deg, rgba(255, 253, 244, 0.68), transparent 58%);
+}
+
+html[data-theme="dark"] .user-profile-panel.profile-theme-vip {
+  --profile-page: #17110a;
+  --profile-card: #21180e;
+  --profile-card-soft: #352714;
+  --profile-ink: #fff4d8;
+  --profile-muted: #b9a17d;
+  --profile-line: rgba(227, 183, 101, 0.2);
+  --profile-deep: #e1b45e;
+  background: #17110a;
+}
+
+html[data-theme="dark"] .user-profile-panel.profile-theme-vip::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(239, 196, 112, 0.025) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 88% 14%, rgba(210, 151, 51, 0.14), transparent 28%);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-cover,
+html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profile-cover {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(241, 205, 130, 0.5);
+  background-image:
+    linear-gradient(90deg, rgba(18, 12, 7, 0.16), transparent 60%),
+    url("/assets/profile-card-themes/gilded-hour.webp");
+  background-position: center 47%;
+  background-size: cover;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-cover::before {
+  top: auto;
+  right: clamp(20px, 5vw, 48px);
+  bottom: -82px;
+  width: 196px;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 224, 150, 0.62);
+  background: radial-gradient(circle, rgba(248, 215, 138, 0.9) 0 2%, transparent 3% 32%, rgba(248, 209, 119, 0.15) 33% 34%, transparent 35%);
+  box-shadow: inset 0 0 0 14px rgba(255, 226, 155, 0.035);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-cover::after {
+  left: -28%;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  width: 24%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 236, 186, 0.2), transparent);
+  box-shadow: none;
+  transform: skewX(-17deg);
+  animation: profile-gilded-sweep 10s cubic-bezier(.16, 1, .3, 1) infinite;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-social-card {
+  border-bottom: 1px solid rgba(145, 98, 32, 0.14);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap {
+  border: 1px solid #c08a35;
+  border-radius: 34px 34px 12px 34px;
+  background: linear-gradient(145deg, #fff7dc 0 22%, #b77927 48%, #f3d58c 72%, #7a4a13);
+  box-shadow: 0 22px 42px rgba(67, 40, 7, 0.28), 0 0 0 5px rgba(222, 174, 84, 0.14);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap::before,
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: 21px;
+  height: 21px;
+  border-color: #f0ce7d;
+  pointer-events: none;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap::before {
+  top: -5px;
+  left: -5px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar-wrap::after {
+  right: -5px;
+  bottom: -5px;
+  border-right: 2px solid;
+  border-bottom: 2px solid;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-avatar {
+  border-radius: 27px 27px 8px 27px;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-facts {
+  gap: 0;
+  padding: 4px;
+  border: 1px solid rgba(164, 111, 32, 0.22);
+  border-radius: 8px;
+  background: rgba(146, 97, 26, 0.05);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-facts span {
+  border: 0;
+  border-right: 1px solid rgba(154, 103, 31, 0.2);
+  border-radius: 0;
+  background: transparent;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-facts span:last-child {
+  border-right: 0;
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-facts .is-vip {
+  color: #68400e;
+  background: linear-gradient(120deg, #fff1bf, #dba443 62%, #f2d180);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-primary-actions .button:first-child {
+  border-radius: 6px;
+  color: #241706;
+  background: linear-gradient(115deg, #f7df9a, #bd7b24 54%, #edc76c);
+  box-shadow: 0 16px 32px rgba(131, 78, 11, 0.22);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-statements-action {
+  border-radius: 6px;
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-recent-statement {
+  border: 1px solid rgba(154, 103, 31, 0.24);
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, rgba(166, 112, 32, 0.1) 1px, transparent 1px) 0 0 / 18px 100%,
+    linear-gradient(125deg, color-mix(in srgb, var(--profile-card-soft) 78%, var(--profile-card)), var(--profile-card));
+  box-shadow: 8px 8px 0 rgba(137, 89, 22, 0.07), 0 18px 36px rgba(78, 48, 10, 0.08);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-reminders {
+  border-block: 1px double rgba(164, 113, 39, 0.22);
+}
+
+.user-profile-panel.profile-theme-vip .user-profile-group-tile-avatar {
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(190, 137, 54, 0.36), 0 0 0 5px rgba(190, 137, 54, 0.07);
+}
+
+/* The picker preview uses the same generated art and shape language. */
+.profile-card-preview.profile-theme-level-12,
+.profile-card-preview.profile-theme-vip {
+  overflow: hidden;
+}
+
+.profile-card-preview.profile-theme-level-12 {
+  background:
+    linear-gradient(90deg, rgba(31, 112, 130, 0.04) 1px, transparent 1px) 0 0 / 42px 100%,
+    #e9f2f1;
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-cover {
+  border-bottom: 1px solid rgba(152, 230, 225, 0.42);
+  background-image: linear-gradient(90deg, rgba(2, 28, 45, 0.16), transparent 58%), url("/assets/profile-card-themes/tidal-blue.webp");
+  background-position: center 46%;
+  background-size: cover;
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-cover::after {
+  right: 58px;
+  bottom: -42px;
+  border-color: rgba(224, 255, 251, 0.55);
+  background: radial-gradient(circle, rgba(225, 255, 250, 0.74) 0 4%, rgba(111, 225, 216, 0.13) 5% 42%, transparent 43%);
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-avatar {
+  border: 1px solid rgba(103, 210, 210, 0.74);
+  box-shadow: 0 0 0 7px rgba(158, 232, 227, 0.14), 0 18px 34px rgba(4, 47, 63, 0.2);
+}
+
+.profile-card-preview.profile-theme-level-12 .profile-card-preview-facts i {
+  border-radius: 4px 999px 999px 4px;
+  border-color: rgba(43, 134, 151, 0.24);
+  background: rgba(65, 162, 174, 0.1);
+}
+
+.profile-card-preview.profile-theme-vip {
+  background:
+    repeating-linear-gradient(0deg, rgba(119, 78, 23, 0.028) 0 1px, transparent 1px 5px),
+    #f2eadb;
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-cover {
+  border-bottom: 1px solid rgba(241, 205, 130, 0.5);
+  background-image: linear-gradient(90deg, rgba(18, 12, 7, 0.13), transparent 60%), url("/assets/profile-card-themes/gilded-hour.webp");
+  background-position: center 47%;
+  background-size: cover;
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-cover::after {
+  right: 34px;
+  bottom: -82px;
+  border-color: rgba(255, 224, 150, 0.62);
+  background: radial-gradient(circle, rgba(248, 215, 138, 0.92) 0 2%, transparent 3% 32%, rgba(248, 209, 119, 0.15) 33% 34%, transparent 35%);
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-avatar {
+  border: 1px solid #c08a35;
+  border-radius: 26px 26px 8px 26px;
+  box-shadow: 0 0 0 7px rgba(222, 174, 84, 0.14), 0 18px 34px rgba(67, 40, 7, 0.22);
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-facts {
+  gap: 0;
+  padding: 4px;
+  border: 1px solid rgba(164, 111, 32, 0.22);
+  border-radius: 7px;
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-facts i {
+  border: 0;
+  border-right: 1px solid rgba(154, 103, 31, 0.2);
+  border-radius: 0;
+}
+
+.profile-card-preview.profile-theme-vip .profile-card-preview-facts i:last-child {
+  border-right: 0;
+}
+
+.profile-card-entry-swatch.theme-level-12,
+.profile-card-theme-option.theme-level-12 > span {
+  background-image: linear-gradient(90deg, rgba(2, 28, 45, 0.12), transparent 58%), url("/assets/profile-card-themes/tidal-blue.webp");
+  background-position: center;
+  background-size: cover;
+}
+
+.profile-card-entry-swatch.theme-vip,
+.profile-card-theme-option.theme-vip > span {
+  background-image: linear-gradient(90deg, rgba(18, 12, 7, 0.12), transparent 60%), url("/assets/profile-card-themes/gilded-hour.webp");
+  background-position: center;
+  background-size: cover;
+}
+
+html[data-theme="dark"] .profile-card-preview.profile-theme-level-12 {
+  color: #edfafa;
+  background-color: #061820;
+}
+
+html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
+  color: #fff4d8;
+  background-color: #17110a;
+}
+
+@media (max-width: 560px) {
+  .user-profile-panel.profile-theme-level-12 .user-profile-cover,
+  .user-profile-panel.profile-theme-vip .user-profile-cover {
+    background-position: center;
+  }
+
+  .user-profile-panel.profile-theme-level-12 .user-profile-cover::after {
+    right: 52px;
+    width: 102px;
+  }
+
+  .user-profile-panel.profile-theme-vip .user-profile-cover::before {
+    right: 18px;
+    width: 156px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-profile-panel.profile-theme-level-12 .user-profile-cover::after,
+  .user-profile-panel.profile-theme-vip .user-profile-cover::after {
+    animation: none;
+  }
+}

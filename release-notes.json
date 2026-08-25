@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.25.11",
+  "id": "2026.08.25.12",
   "publishedAt": "2026-08-25",
   "locales": {
     "zh-CN": {
-      "title": "侧边页面可直接打开",
+      "title": "个人名片焕新",
       "items": [
-        "菜单设置、聊天详情与用户资料等侧边页面现在支持通过英文链接直接打开，刷新和手势返回也能保持正确层级"
+        "潮汐蓝与鎏金时刻升级为两套独立的名片视觉系统，加入专属艺术横幅、材质细节与深浅模式适配"
       ]
     },
     "en": {
-      "title": "Drawer pages are now linkable",
+      "title": "Refined profile card themes",
       "items": [
-        "Menu settings, chat details, user profiles, and other drawer pages now open directly from stable English links and preserve their navigation stack across refreshes and swipe-back gestures"
+        "Tidal Blue and Gilded Hour now feature distinct profile-card systems with bespoke cover art, material details, and polished light and dark modes"
       ]
     }
   }
