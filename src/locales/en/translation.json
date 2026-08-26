@@ -826,6 +826,7 @@
   "request.noIncomingHint": "New friend requests will appear here.",
   "request.noOutgoingHint": "Browse members when you want to connect with someone.",
   "common.more": "More",
+  "common.collapse": "Collapse",
   "request.ignore": "Ignore",
   "request.withdrawRequest": "Withdraw request",
   "request.ignoreConfirmTitle": "Ignore this friend request?",

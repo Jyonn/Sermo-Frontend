@@ -6616,7 +6616,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   --message-menu-shift-x: 0px;
   position: fixed;
   width: auto;
-  max-width: min(360px, calc(100vw - 24px));
+  max-width: min(430px, calc(100vw - 24px));
   padding: 8px;
   border: 1px solid rgba(222, 226, 235, 0.92);
   border-radius: 18px;
@@ -6665,9 +6665,57 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-context-actions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 5px;
-  width: min(320px, calc(100vw - 42px));
+  width: min(390px, calc(100vw - 42px));
+}
+
+.message-context-sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-context-menu.above .message-context-sections {
+  flex-direction: column-reverse;
+}
+
+.message-context-more {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: grid-template-rows 180ms ease, opacity 140ms ease, transform 180ms ease, visibility 0s 180ms;
+}
+
+.message-context-menu.above .message-context-more {
+  transform: translateY(4px);
+}
+
+.message-context-more > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.message-context-more.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+.message-context-actions.is-secondary {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(222, 226, 235, 0.76);
+}
+
+.message-context-menu.above .message-context-actions.is-secondary {
+  margin: 0 0 6px;
+  padding: 0 0 6px;
+  border-top: 0;
+  border-bottom: 1px solid rgba(222, 226, 235, 0.76);
 }
 
 .message-context-actions.is-confirm {
@@ -6698,6 +6746,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-context-button .material-symbols-outlined {
   font-size: 1.2rem;
+}
+
+.message-context-button.is-more .material-symbols-outlined {
+  transition: transform 180ms ease;
+}
+
+.message-context-button.is-more.is-open .material-symbols-outlined {
+  transform: rotate(90deg);
 }
 
 .message-context-action-icon {
@@ -12647,6 +12703,10 @@ html[data-theme="dark"] .detail-card::after {
 
 html[data-theme="dark"] .message-context-menu::after {
   background: var(--bg-panel-strong);
+}
+
+html[data-theme="dark"] .message-context-actions.is-secondary {
+  border-color: rgba(184, 197, 190, 0.12);
 }
 
 html[data-theme="dark"] .message-context-button {

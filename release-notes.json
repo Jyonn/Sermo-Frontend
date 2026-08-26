@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.12",
+  "id": "2026.08.26.13",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "置顶消息操作更自然",
+      "title": "消息操作更清爽",
       "items": [
-        "置顶消息现在可直接打开内容，长按或右键可使用引用、转发、下载、多选、撤回、删除和跳转等完整操作"
+        "消息长按操作会优先展示常用功能，更多操作可在原位置展开；置顶消息仍可快速跳转到上下文"
       ]
     },
     "en": {
-      "title": "More natural pinned-message actions",
+      "title": "Cleaner message actions",
       "items": [
-        "Pinned messages now open content directly, while long-press and right-click expose reply, forward, download, select, recall, delete, and jump actions"
+        "Long-press now prioritizes common actions and reveals the rest in place, while pinned messages retain quick context jumping"
       ]
     }
   }

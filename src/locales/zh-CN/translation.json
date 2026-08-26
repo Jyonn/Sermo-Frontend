@@ -826,6 +826,7 @@
   "request.noIncomingHint": "有新的好友申请时，这里会直接出现。",
   "request.noOutgoingHint": "想主动建立关系时，先去成员页。",
   "common.more": "更多",
+  "common.collapse": "收起",
   "request.ignore": "忽略",
   "request.withdrawRequest": "撤回申请",
   "request.ignoreConfirmTitle": "确认忽略好友申请？",

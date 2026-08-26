@@ -2210,6 +2210,7 @@ interface MessageMenuState {
   anchorY: number;
   placement: "top" | "bottom";
   confirmDelete: boolean;
+  expanded: boolean;
   origin: "chat" | "pinned";
 }
 
@@ -2938,13 +2939,16 @@ function LiveChatsPage() {
   const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number, origin: MessageMenuState["origin"] = "chat") => {
     if (messageSelectionMode || message.kind === "system") return;
     const rect = element.getBoundingClientRect();
-    const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
+    const spaceAbove = rect.top - 12;
+    const spaceBelow = window.innerHeight - rect.bottom - 12;
+    const placement: "top" | "bottom" = spaceAbove >= 190 || spaceAbove > spaceBelow ? "top" : "bottom";
     setMessageMenu({
       message,
       anchorX: pointerX ?? rect.left + rect.width / 2,
       anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
       placement,
       confirmDelete: false,
+      expanded: false,
       origin,
     });
   };
@@ -7976,54 +7980,56 @@ function LiveChatsPage() {
               top: messageMenu.anchorY,
             }}
           >
-            <div className="message-context-actions">
-                {messageMenu.origin === "pinned" && typeof messageMenu.message.id === "number" ? (
-                  <button className="message-context-button" onClick={() => revealPinnedMessage(messageMenu.message.id as number)} type="button">
+            {(() => {
+              const primaryActions: ReactNode[] = [];
+              const secondaryActions: ReactNode[] = [];
+              const isPinnedByCurrentUser = pinnedMessages.some((pin) =>
+                pin.message.message_id === messageMenu.message.id
+                && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
+              );
+
+              if (messageMenu.origin === "pinned" && typeof messageMenu.message.id === "number") {
+                primaryActions.push(
+                  <button key="jump" className="message-context-button" onClick={() => revealPinnedMessage(messageMenu.message.id as number)} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">my_location</span>
                     {t("pin.jump")}
                   </button>
-                ) : null}
-                {messageMenu.message.kind === "sticker" && !ownsStickerMessage(messageMenu.message) ? (
-                  <button className="message-context-button" disabled={stickerSaving} onClick={() => void collectStickerMessage()} type="button">
+                );
+              }
+              if (messageMenu.message.kind === "sticker" && !ownsStickerMessage(messageMenu.message)) {
+                primaryActions.push(
+                  <button key="collect-sticker" className="message-context-button" disabled={stickerSaving} onClick={() => void collectStickerMessage()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
                     {t("sticker.addShort")}
                   </button>
-                ) : null}
-                <button className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
+                );
+              }
+              primaryActions.push(
+                <button key="reply" className="message-context-button" onClick={() => startReply(messageMenu.message)} type="button">
                   <span className="material-symbols-outlined" aria-hidden="true">reply</span>
                   {t("message.reply")}
                 </button>
-                {canForwardMessage(messageMenu.message) ? (
-                  <button className="message-context-button" onClick={() => openSingleMessageForwardPicker(messageMenu.message)} type="button">
+              );
+              if (canForwardMessage(messageMenu.message)) {
+                primaryActions.push(
+                  <button key="forward" className="message-context-button" onClick={() => openSingleMessageForwardPicker(messageMenu.message)} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">forward</span>
                     {t("message.forward")}
                   </button>
-                ) : null}
-                {messageMenu.message.kind !== "sticker" && typeof messageMenu.message.id === "number" && canManagePinnedMessages ? (
-                  <button
-                    className="message-context-button"
-                    disabled={pinSavingMessageId === messageMenu.message.id}
-                    onClick={() => void togglePinnedMessage(messageMenu.message)}
-                    type="button"
-                  >
-                    <ComposerSvgIcon className="message-context-action-icon" kind={pinnedMessages.some((pin) =>
-                      pin.message.message_id === messageMenu.message.id
-                      && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
-                    ) ? "pin-off" : "pin"} />
-                    {pinnedMessages.some((pin) =>
-                      pin.message.message_id === messageMenu.message.id
-                      && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
-                    ) ? t("pin.remove") : t("pin.label")}
-                  </button>
-                ) : null}
-                {messageMenu.message.kind === "text" ? (
-                  <button className="message-context-button" onClick={() => void copyMessageText()} type="button">
+                );
+              }
+              if (messageMenu.message.kind === "text") {
+                primaryActions.push(
+                  <button key="copy" className="message-context-button" onClick={() => void copyMessageText()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">content_copy</span>
                     {t("common.copy")}
                   </button>
-                ) : null}
-                {(["image", "video", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
+                );
+              }
+              if (["image", "video", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) {
+                primaryActions.push(
                   <button
+                    key="download"
                     className="message-context-button"
                     onClick={() => {
                       if (messageMenu.message.kind === "audio") void discoverFeature("capability.audio_download");
@@ -8035,25 +8041,49 @@ function LiveChatsPage() {
                     {t("common.download")}
                     {messageMenu.message.kind === "audio" ? <FeatureDiscoveryMarker rewardId="capability.audio_download" /> : null}
                   </button>
-                ) : null}
-                {canCreateSticker && messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number" ? (
-                  <button className="message-context-button" onClick={() => void collectImageAsSticker()} type="button">
+                );
+              }
+              if (canCreateSticker && messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number") {
+                primaryActions.push(
+                  <button key="collect-image" className="message-context-button" onClick={() => void collectImageAsSticker()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
                     {t("sticker.addShort")}
                   </button>
-                ) : null}
-                <button className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
+                );
+              }
+
+              if (messageMenu.message.kind !== "sticker" && typeof messageMenu.message.id === "number" && canManagePinnedMessages) {
+                secondaryActions.push(
+                  <button
+                    key="pin"
+                    className="message-context-button"
+                    disabled={pinSavingMessageId === messageMenu.message.id}
+                    onClick={() => void togglePinnedMessage(messageMenu.message)}
+                    type="button"
+                  >
+                    <ComposerSvgIcon className="message-context-action-icon" kind={isPinnedByCurrentUser ? "pin-off" : "pin"} />
+                    {isPinnedByCurrentUser ? t("pin.remove") : t("pin.label")}
+                  </button>
+                );
+              }
+              secondaryActions.push(
+                <button key="multi-select" className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
                   <span className="material-symbols-outlined" aria-hidden="true">checklist</span>
                   {t("message.multiSelect")}
                 </button>
-                {canRecallMessage(messageMenu.message) ? (
-                  <button className="message-context-button recall" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
+              );
+              if (canRecallMessage(messageMenu.message)) {
+                secondaryActions.push(
+                  <button key="recall" className="message-context-button recall" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">undo</span>
                     {t("message.recallForEveryone")}
                   </button>
-                ) : null}
-                {(typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image")) ? (
+                );
+              }
+              if (typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image")) {
+                secondaryActions.push(
                   <button
+                    key="delete"
                     className="message-context-button danger"
                     onClick={() => setMessageMenu((current) => (current ? { ...current, confirmDelete: true } : current))}
                     type="button"
@@ -8061,8 +8091,41 @@ function LiveChatsPage() {
                     <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                     {t("common.delete")}
                   </button>
-                ) : null}
-            </div>
+                );
+              }
+
+              if (primaryActions.length + secondaryActions.length <= 5) {
+                primaryActions.push(...secondaryActions.splice(0));
+              } else if (primaryActions.length > 4) {
+                secondaryActions.unshift(...primaryActions.splice(4));
+              }
+
+              return (
+                <div className="message-context-sections">
+                  <div className="message-context-actions is-primary">
+                    {primaryActions}
+                    {secondaryActions.length ? (
+                      <button
+                        aria-expanded={messageMenu.expanded}
+                        className={`message-context-button is-more${messageMenu.expanded ? " is-open" : ""}`}
+                        onClick={() => setMessageMenu((current) => (current ? { ...current, expanded: !current.expanded } : current))}
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined" aria-hidden="true">more_horiz</span>
+                        {messageMenu.expanded ? t("common.collapse") : t("common.more")}
+                      </button>
+                    ) : null}
+                  </div>
+                  {secondaryActions.length ? (
+                    <div className={`message-context-more${messageMenu.expanded ? " is-open" : ""}`} aria-hidden={!messageMenu.expanded}>
+                      <div>
+                        <div className="message-context-actions is-secondary">{secondaryActions}</div>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })()}
           </div>
         </div>
       ) : null}
