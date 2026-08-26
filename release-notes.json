@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.11",
+  "id": "2026.08.26.12",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "消息跳转更准确",
+      "title": "置顶消息操作更自然",
       "items": [
-        "从置顶消息或引用内容跳转时，现在会准确定位到对应消息"
+        "置顶消息现在可直接打开内容，长按或右键可使用引用、转发、下载、多选、撤回、删除和跳转等完整操作"
       ]
     },
     "en": {
-      "title": "More accurate message jumps",
+      "title": "More natural pinned-message actions",
       "items": [
-        "Jumps from pinned messages and replies now land precisely on the referenced message"
+        "Pinned messages now open content directly, while long-press and right-click expose reply, forward, download, select, recall, delete, and jump actions"
       ]
     }
   }

@@ -2210,13 +2210,7 @@ interface MessageMenuState {
   anchorY: number;
   placement: "top" | "bottom";
   confirmDelete: boolean;
-}
-
-interface PinnedMessageMenuState {
-  pin: PinnedMessageDTO;
-  anchorX: number;
-  anchorY: number;
-  placement: "top" | "bottom";
+  origin: "chat" | "pinned";
 }
 
 type MessageSelectionAction = "copy" | "save" | "recall";
@@ -2439,7 +2433,6 @@ function LiveChatsPage() {
   const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
-  const [pinnedMessageMenu, setPinnedMessageMenu] = useState<PinnedMessageMenuState | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [profileSyncing, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
@@ -2900,47 +2893,17 @@ function LiveChatsPage() {
   const startReply = (message: ChatMessage) => {
     const reply = quoteFromMessage(message);
     if (!reply) return;
+    const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setReplyTarget(reply);
     setMessageMenu(null);
-    window.setTimeout(() => mentionEditorRef.current?.focus(), 0);
+    if (fromPinnedDrawer) setPinnedDrawerOpen(false);
+    window.setTimeout(() => mentionEditorRef.current?.focus(), fromPinnedDrawer ? 240 : 0);
   };
 
   const revealPinnedMessage = (messageId: number) => {
-    setPinnedMessageMenu(null);
+    setMessageMenu(null);
     setPinnedDrawerOpen(false);
     window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId } }));
-  };
-
-  const openPinnedMessageMenu = (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => {
-    const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
-    if (!pin) return;
-    const rect = element.getBoundingClientRect();
-    const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
-    setPinnedMessageMenu({
-      pin,
-      anchorX: pointerX ?? rect.left + rect.width / 2,
-      anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
-      placement,
-    });
-  };
-
-  const removeOwnPinnedMessage = async (pin: PinnedMessageDTO) => {
-    const pinnedByCurrentUser = pin.pinned_by_users.some((user) => user.user_id === currentUserId);
-    if (!pinnedByCurrentUser) return;
-    setPinnedMessageMenu(null);
-    setPinSavingMessageId(pin.message.message_id);
-    try {
-      await api.unpinMessage(pin.message.message_id);
-      const remainingUsers = pin.pinned_by_users.filter((user) => user.user_id !== currentUserId);
-      setPinnedMessages((current) => remainingUsers.length
-        ? current.map((item) => item.pin_id === pin.pin_id ? { ...item, pinned_by_users: remainingUsers } : item)
-        : current.filter((item) => item.pin_id !== pin.pin_id));
-      showToast(t("pin.removed"));
-    } catch (error) {
-      showToast(error instanceof ApiError ? error.message : t("pin.failed"), "error");
-    } finally {
-      setPinSavingMessageId(null);
-    }
   };
 
   const togglePinnedMessage = async (message: ChatMessage) => {
@@ -2972,7 +2935,7 @@ function LiveChatsPage() {
     }
   };
 
-  const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number) => {
+  const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number, origin: MessageMenuState["origin"] = "chat") => {
     if (messageSelectionMode || message.kind === "system") return;
     const rect = element.getBoundingClientRect();
     const placement: "top" | "bottom" = rect.top > 96 ? "top" : "bottom";
@@ -2982,7 +2945,12 @@ function LiveChatsPage() {
       anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
       placement,
       confirmDelete: false,
+      origin,
     });
+  };
+
+  const openPinnedMessageMenu = (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => {
+    openMessageMenu(mapChatMessage(message, currentUserId), element, pointerX, "pinned");
   };
 
   const cancelMessageSelection = () => {
@@ -3024,17 +2992,22 @@ function LiveChatsPage() {
 
   const startMessageSelection = (message: ChatMessage) => {
     if (message.kind === "system") return;
+    const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setMessageMenu(null);
     setReplyTarget(null);
     setComposerMoreOpen(false);
     setEmojiPickerOpen(false);
     setMessageSelectionMode(true);
     setSelectedMessageClientIds([message.clientId]);
+    if (fromPinnedDrawer && typeof message.id === "number") {
+      setPinnedDrawerOpen(false);
+      window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId: message.id } }));
+    }
   };
 
   useLayoutEffect(() => {
     const menu = messageMenuRef.current;
-    if (!menu || (!messageMenu && !pinnedMessageMenu)) return;
+    if (!menu || !messageMenu) return;
     menu.style.setProperty("--message-menu-shift-x", "0px");
     const rect = menu.getBoundingClientRect();
     const safeInset = 12;
@@ -3044,7 +3017,7 @@ function LiveChatsPage() {
       shift -= rect.right + shift - (window.innerWidth - safeInset);
     }
     menu.style.setProperty("--message-menu-shift-x", `${Math.round(shift)}px`);
-  }, [messageMenu, pinnedMessageMenu]);
+  }, [messageMenu]);
 
   useEffect(() => {
     if (!cacheScope) return;
@@ -4116,11 +4089,10 @@ function LiveChatsPage() {
   };
 
   useEffect(() => {
-    if (!messageMenu && !pinnedMessageMenu) return;
+    if (!messageMenu) return;
 
     const close = () => {
       setMessageMenu(null);
-      setPinnedMessageMenu(null);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
@@ -4135,7 +4107,7 @@ function LiveChatsPage() {
       window.removeEventListener("scroll", close, true);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [messageMenu, pinnedMessageMenu]);
+  }, [messageMenu]);
 
   useLayoutEffect(() => {
     if (!selectedChat) {
@@ -5734,7 +5706,9 @@ function LiveChatsPage() {
 
   const openSingleMessageForwardPicker = (message: ChatMessage) => {
     if (!canForwardMessage(message)) return;
+    const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setMessageMenu(null);
+    if (fromPinnedDrawer) setPinnedDrawerOpen(false);
     setForwardSourceMessageIds([message.id as number]);
     setForwardTargetChatIds([]);
     setForwardMode("individual");
@@ -7188,6 +7162,8 @@ function LiveChatsPage() {
           initialScrollToEnd={pinnedDrawerOpen}
           messages={orderedPinnedMessages.map((pin) => pin.message)}
           onMessageAction={openPinnedMessageMenu}
+          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
+          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
           renderMessageFooter={(message) => {
             const pin = pinnedMessages.find((item) => item.message.message_id === message.message_id);
             if (!pin?.pinned_by_users.length) return null;
@@ -7989,32 +7965,6 @@ function LiveChatsPage() {
         onClose={() => setTravelMapRevokeConfirmOpen(false)}
         onConfirm={() => void revokeTravelMapAccess()}
       />
-      {pinnedMessageMenu ? (
-        <div className="message-context-layer" onClick={() => setPinnedMessageMenu(null)} role="presentation">
-          <div
-            ref={messageMenuRef}
-            className={`message-context-menu ${pinnedMessageMenu.placement === "bottom" ? "below" : "above"}`}
-            onClick={(event) => event.stopPropagation()}
-            style={{ left: pinnedMessageMenu.anchorX, top: pinnedMessageMenu.anchorY }}
-          >
-            <div className="message-context-actions is-confirm pinned-message-context-actions">
-              <button className="message-context-button" onClick={() => revealPinnedMessage(pinnedMessageMenu.pin.message.message_id)} type="button">
-                <span className="material-symbols-outlined" aria-hidden="true">my_location</span>
-                {t("pin.jump")}
-              </button>
-              <button
-                className="message-context-button recall"
-                disabled={pinSavingMessageId === pinnedMessageMenu.pin.message.message_id || !pinnedMessageMenu.pin.pinned_by_users.some((user) => user.user_id === currentUserId)}
-                onClick={() => void removeOwnPinnedMessage(pinnedMessageMenu.pin)}
-                type="button"
-              >
-                <ComposerSvgIcon className="message-context-action-icon" kind="pin-off" />
-                {t("pin.remove")}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
       {messageMenu && !messageMenu.confirmDelete ? (
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
@@ -8027,6 +7977,12 @@ function LiveChatsPage() {
             }}
           >
             <div className="message-context-actions">
+                {messageMenu.origin === "pinned" && typeof messageMenu.message.id === "number" ? (
+                  <button className="message-context-button" onClick={() => revealPinnedMessage(messageMenu.message.id as number)} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">my_location</span>
+                    {t("pin.jump")}
+                  </button>
+                ) : null}
                 {messageMenu.message.kind === "sticker" && !ownsStickerMessage(messageMenu.message) ? (
                   <button className="message-context-button" disabled={stickerSaving} onClick={() => void collectStickerMessage()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
@@ -8066,7 +8022,7 @@ function LiveChatsPage() {
                     {t("common.copy")}
                   </button>
                 ) : null}
-                {(["image", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
+                {(["image", "video", "file"].includes(messageMenu.message.kind) || (messageMenu.message.kind === "audio" && canDownloadAudio)) ? (
                   <button
                     className="message-context-button"
                     onClick={() => {
@@ -8468,15 +8424,7 @@ export function ChatPreview({
   return (
     <section
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
-      onClickCapture={onMessageAction ? (event) => {
-        const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
-        const messageId = Number(messageNode?.dataset.messageId);
-        const source = dtoById.get(messageId);
-        if (!source || !messageNode) return;
-        event.preventDefault();
-        event.stopPropagation();
-        onMessageAction(source, messageNode);
-      } : onMessageClick ? (event) => {
+      onClickCapture={onMessageClick ? (event) => {
         const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
         const messageId = Number(messageNode?.dataset.messageId);
         const source = dtoById.get(messageId);
