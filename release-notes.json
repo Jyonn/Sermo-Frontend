@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.27",
+  "id": "2026.08.26.28",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "聊天中的发言更好用",
+      "title": "匿名发言身份更清晰",
       "items": [
-        "聊天中的发言视频会进入沉浸预览，语音提供轻量播放条，合并聊天记录可直接打开查看"
+        "聊天中的匿名发言卡片现在使用统一匿名头像与身份，不再出现容易误解的字母头像"
       ]
     },
     "en": {
-      "title": "Better shared posts in chat",
+      "title": "Clearer anonymous posts in chat",
       "items": [
-        "Shared post videos now open in the media viewer, audio uses a focused playback bar, and embedded chat records open directly"
+        "Anonymous post cards in chat now use a consistent anonymous avatar and identity instead of a misleading letter avatar"
       ]
     }
   }

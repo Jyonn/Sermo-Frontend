@@ -5227,6 +5227,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   border-radius: 10px;
 }
 
+.message-statement-anonymous-avatar{display:grid;place-items:center;border:1px solid color-mix(in srgb,currentColor 13%,transparent);background:color-mix(in srgb,currentColor 7%,transparent)}
+.message-statement-anonymous-avatar>.material-symbols-outlined{font-size:18px;opacity:.72}
+.message-statement-card.is-anonymous .message-statement-head small{font-weight:800;letter-spacing:.04em}
+
 .message-statement-head > span:nth-child(2) {
   display: grid;
   min-width: 0;

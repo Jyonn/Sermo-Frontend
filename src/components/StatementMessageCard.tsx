@@ -50,10 +50,15 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
             : "text";
   const visibleImages = images.slice(0, 3);
   return (
-    <div className={`message-statement-card layout-${layout}`}>
+    <div className={`message-statement-card layout-${layout}${statement.is_anonymous ? " is-anonymous" : ""}`}>
       <button className="message-statement-head" onClick={openStatement} type="button">
-        <UserAvatar className="message-statement-avatar" frame={statement.user.avatar_frame_style} name={statement.user.name} uri={statement.user.avatar_uri} vip={Boolean(statement.user.is_permanent_vip)} />
-        <span><strong>{statement.user.name}</strong><small>{t("message.statement")}</small></span>
+        {statement.is_anonymous
+          ? <span className="message-statement-avatar message-statement-anonymous-avatar"><span className="material-symbols-outlined">person</span></span>
+          : <UserAvatar className="message-statement-avatar" frame={statement.user.avatar_frame_style} name={statement.user.name} uri={statement.user.avatar_uri} vip={Boolean(statement.user.is_permanent_vip)} />}
+        <span>
+          <strong>{statement.is_anonymous ? t("square.anonymousUser") : statement.user.name}</strong>
+          <small>{statement.is_anonymous ? t("square.publishAnonymously") : t("message.statement")}</small>
+        </span>
         <span className="material-symbols-outlined">chevron_right</span>
       </button>
       <div className="message-statement-content">
