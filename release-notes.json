@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.27.1",
+  "id": "2026.08.27.2",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "让每一次表达更温暖",
+      "title": "互动额度更清晰",
       "items": [
-        "聊天与评论输入框加入友善表达提醒"
+        "互动额度采用余波布局，当前余额与等级权益更容易查看",
+        "视频发言调整为 LV10 解锁"
       ]
     },
     "en": {
-      "title": "A kinder place to speak",
+      "title": "Clearer activity allowances",
       "items": [
-        "Chat and comment fields now include a gentle reminder to speak kindly"
+        "The new ripple layout makes current allowances and level benefits easier to understand",
+        "Video statements now unlock at LV10"
       ]
     }
   }

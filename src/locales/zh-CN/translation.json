@@ -219,7 +219,7 @@
   "square.like": "点赞",
   "square.video": "视频",
   "square.voiceUnlock": "LV6 解锁语音发言",
-  "square.videoUnlock": "LV8 解锁视频发言",
+  "square.videoUnlock": "LV10 解锁视频发言",
   "square.videoTooLong": "视频最长 60 秒",
   "square.deleteStatement": "删除发言",
   "square.deleteStatementHint": "删除后，其他人将无法继续查看这条发言。",
@@ -1909,6 +1909,9 @@
   ,"square.quotaMediaHint": "随等级自然解锁"
   ,"square.quotaLevelRules": "查看等级额度"
   ,"square.quotaRule": "24小时 {{daily}} 言 · 7天 {{weekly}} 言"
+  ,"square.quotaLevelBenefits": "等级权益"
+  ,"square.quotaSwipeLevels": "横滑查看"
+  ,"square.quotaCurrent": "当前"
   ,"square.text": "文字"
   ,"guest.appearanceAndLanguage": "外观与语言"
   ,"guest.useLightTheme": "切换浅色外观"

@@ -111,6 +111,12 @@ function formatActivityDateRange(startsAt: number, endsAt: number, language: str
 
 function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQuotaDTO | null }) {
   const { t } = useI18n();
+  const levelDeckRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!quota || quota.unlimited) return;
+    const current = levelDeckRef.current?.querySelector<HTMLElement>(".is-current");
+    requestAnimationFrame(() => current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }));
+  }, [quota?.level, quota?.unlimited, quota?.vip]);
   if (loading && !quota) return <div className="square-quota-loading"><span className="material-symbols-outlined">progress_activity</span></div>;
   if (!quota) return <FeedbackState title={t("square.quotaLoadFailed")} />;
   const remaining = (used: number, limit: number | null) => limit === null ? null : Math.max(0, limit - used);
@@ -121,43 +127,46 @@ function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQ
     { key: "comment", icon: "forum", label: t("square.quotaComments"), used: quota.comments.daily_used, limit: quota.comments.daily_limit, weeklyUsed: quota.comments.weekly_used, weeklyLimit: quota.comments.weekly_limit, remaining: commentRemaining },
   ];
   const levels = [
-    { label: "LV1–5", daily: 1, weekly: 5 },
-    { label: "LV6–9", daily: 2, weekly: 10 },
-    { label: "LV10–13", daily: 3, weekly: 15 },
-    { label: "LV14–17", daily: 4, weekly: 20 },
-    { label: "LV18 / VIP", daily: 5, weekly: 35 },
-  ];
+    { range: "1–5", min: 1, max: 5, daily: 1, weekly: 5, formats: [["notes", "square.text"], ["image", "square.photo"]] },
+    { range: "6–9", min: 6, max: 9, daily: 2, weekly: 10, formats: [["notes", "square.text"], ["image", "square.photo"], ["mic", "square.voice"]] },
+    { range: "10–13", min: 10, max: 13, daily: 3, weekly: 15, formats: [["notes", "square.text"], ["image", "square.photo"], ["mic", "square.voice"], ["videocam", "square.video"]] },
+    { range: "14–17", min: 14, max: 17, daily: 4, weekly: 20, formats: [["notes", "square.text"], ["image", "square.photo"], ["mic", "square.voice"], ["videocam", "square.video"]] },
+    { range: "18", min: 18, max: 18, daily: 5, weekly: 35, formats: [["notes", "square.text"], ["image", "square.photo"], ["mic", "square.voice"], ["videocam", "square.video"]] },
+  ] as const;
   return <div className="square-quota-panel">
     <section className={`square-quota-hero${quota.verified ? "" : " is-locked"}`}>
       <div><span>{quota.unlimited ? t("square.quotaOfficial") : quota.vip ? "VIP" : `LV${quota.level}`}</span><strong>{!quota.verified ? t("square.quotaVerifyFirst") : quota.unlimited ? t("square.quotaUnlimited") : t("square.quotaHero", { count: statementRemaining ?? 0 })}</strong></div>
       <span className="material-symbols-outlined">{quota.verified ? "data_usage" : "lock"}</span>
     </section>
-    <div className="square-quota-cards">
+    <div className="square-quota-track">
       {quotaCards.map((item) => {
         const ratio = item.limit === null ? 0 : Math.min(1, item.used / Math.max(1, item.limit));
         return <article className={item.remaining === 0 ? "is-exhausted" : ""} key={item.key}>
-          <header><span className="material-symbols-outlined">{item.icon}</span><strong>{item.label}</strong><b>{item.limit === null ? t("square.quotaUnlimitedShort") : t("square.quotaRemaining", { count: item.remaining ?? 0 })}</b></header>
+          <span className="material-symbols-outlined square-quota-track-icon">{item.icon}</span>
+          <div className="square-quota-track-copy"><strong>{item.label}</strong><small>{t("square.quota24Hours")} {item.used}/{item.limit ?? "∞"} · {t("square.quota7Days")} {item.weeklyUsed}/{item.weeklyLimit ?? "∞"}</small></div>
+          <b>{item.limit === null ? t("square.quotaUnlimitedShort") : t("square.quotaRemaining", { count: item.remaining ?? 0 })}</b>
           <div className="square-quota-meter"><i style={{ transform: `scaleX(${ratio})` }} /></div>
-          <footer><span>{t("square.quota24Hours")} · {item.used}/{item.limit ?? "∞"}</span><span>{t("square.quota7Days")} · {item.weeklyUsed}/{item.weeklyLimit ?? "∞"}</span></footer>
         </article>;
       })}
       {quota.statements.anonymous_available && quota.statements.anonymous_weekly_limit !== null ? <article className="square-quota-anonymous-card">
-        <header><span className="material-symbols-outlined">visibility_off</span><strong>{t("square.quotaAnonymous")}</strong><b>{t("square.quotaRemaining", { count: Math.max(0, quota.statements.anonymous_weekly_limit - quota.statements.anonymous_weekly_used) })}</b></header>
+        <span className="material-symbols-outlined square-quota-track-icon">visibility_off</span>
+        <div className="square-quota-track-copy"><strong>{t("square.quotaAnonymous")}</strong><small>{t("square.quotaAnonymousWeekly", { used: quota.statements.anonymous_weekly_used, limit: quota.statements.anonymous_weekly_limit })} · {t("square.exploreOnly")}</small></div>
+        <b>{t("square.quotaRemaining", { count: Math.max(0, quota.statements.anonymous_weekly_limit - quota.statements.anonymous_weekly_used) })}</b>
         <div className="square-quota-meter"><i style={{ transform: `scaleX(${Math.min(1, quota.statements.anonymous_weekly_used / Math.max(1, quota.statements.anonymous_weekly_limit))})` }} /></div>
-        <footer><span>{t("square.quotaAnonymousWeekly", { used: quota.statements.anonymous_weekly_used, limit: quota.statements.anonymous_weekly_limit })}</span><span>{t("square.exploreOnly")}</span></footer>
       </article> : null}
-      <article className="square-quota-like-card"><header><span className="material-symbols-outlined">favorite</span><strong>{t("square.quotaLikes")}</strong><b>{t("square.quotaUnlimitedShort")}</b></header><p>{t("square.quotaLikesToday", { count: quota.likes.daily_used })}</p></article>
+      <article className="square-quota-like-card"><span className="material-symbols-outlined square-quota-track-icon">favorite</span><div className="square-quota-track-copy"><strong>{t("square.quotaLikes")}</strong><small>{t("square.quotaLikesToday", { count: quota.likes.daily_used })}</small></div><b>{t("square.quotaUnlimitedShort")}</b></article>
     </div>
-    <section className="square-quota-capabilities">
-      <header><strong>{t("square.quotaMedia")}</strong><span>{t("square.quotaMediaHint")}</span></header>
-      <div>
-        <span className="is-active"><i className="material-symbols-outlined">notes</i>{t("square.text")}</span>
-        <span className="is-active"><i className="material-symbols-outlined">image</i>{t("square.photo")}</span>
-        <span className={quota.media.audio ? "is-active" : ""}><i className="material-symbols-outlined">mic</i>{quota.media.audio ? t("square.voice") : `LV${quota.media.audio_level}`}</span>
-        <span className={quota.media.video ? "is-active" : ""}><i className="material-symbols-outlined">videocam</i>{quota.media.video ? t("square.video") : `LV${quota.media.video_level}`}</span>
-      </div>
-    </section>
-    {!quota.unlimited ? <details className="square-quota-rules"><summary>{t("square.quotaLevelRules")}<span className="material-symbols-outlined">expand_more</span></summary><div>{levels.map((row, index) => <p className={quota.vip ? index === levels.length - 1 ? "is-current" : "" : quota.level >= Number(row.label.match(/\d+/)?.[0]) && quota.level <= Number(row.label.match(/\d+(?!.*\d)/)?.[0] ?? 18) ? "is-current" : ""} key={row.label}><strong>{row.label}</strong><span>{t("square.quotaRule", { daily: row.daily, weekly: row.weekly })}</span></p>)}</div></details> : null}
+    {!quota.unlimited ? <section className="square-quota-levels">
+      <header><strong>{t("square.quotaLevelBenefits")}</strong><span>{t("square.quotaSwipeLevels")}</span></header>
+      <div className="square-quota-level-deck" ref={levelDeckRef}>{levels.map((row, index) => {
+        const current = quota.vip ? index === levels.length - 1 : quota.level >= row.min && quota.level <= row.max;
+        return <article className={current ? "is-current" : ""} key={row.range}>
+          <div className="square-quota-level-title"><span>LV</span><strong>{row.range}</strong>{row.min === 18 ? <em>VIP</em> : null}{current ? <b>{t("square.quotaCurrent")}</b> : null}</div>
+          <div className="square-quota-level-metrics"><span><small>{t("square.quota24Hours")}</small><strong>{row.daily}</strong></span><span><small>{t("square.quota7Days")}</small><strong>{row.weekly}</strong></span></div>
+          <div className="square-quota-level-formats">{row.formats.map(([icon, key]) => <span key={key}><i className="material-symbols-outlined">{icon}</i>{t(key)}</span>)}</div>
+        </article>;
+      })}</div>
+    </section> : null}
   </div>;
 }
 

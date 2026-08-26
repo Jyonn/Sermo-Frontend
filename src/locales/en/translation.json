@@ -219,7 +219,7 @@
   "square.like": "Like",
   "square.video": "Video",
   "square.voiceUnlock": "Voice statements unlock at LV6",
-  "square.videoUnlock": "Video statements unlock at LV8",
+  "square.videoUnlock": "Video statements unlock at LV10",
   "square.videoTooLong": "Videos can be up to 60 seconds",
   "square.deleteStatement": "Delete statement",
   "square.deleteStatementHint": "Other people will no longer be able to view this statement.",
@@ -1909,6 +1909,9 @@
   ,"square.quotaMediaHint": "Unlocks as you grow"
   ,"square.quotaLevelRules": "View level allowances"
   ,"square.quotaRule": "{{daily}} per 24h · {{weekly}} per 7d"
+  ,"square.quotaLevelBenefits": "Level benefits"
+  ,"square.quotaSwipeLevels": "Swipe to explore"
+  ,"square.quotaCurrent": "Current"
   ,"square.text": "Text"
   ,"guest.appearanceAndLanguage": "Appearance and language"
   ,"guest.useLightTheme": "Use light appearance"
