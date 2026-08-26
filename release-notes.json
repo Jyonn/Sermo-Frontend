@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.14",
+  "id": "2026.08.27.15",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录卡片更紧凑",
+      "title": "消息操作栏更利落",
       "items": [
-        "合并转发的聊天记录卡片减少纵向留白，在保留首条预览和消息数的同时占用更少聊天空间"
+        "消息操作不超过 5 项时保持单行展示，更多操作按需展开，并移除浅色与深色模式中的行间分割线"
       ]
     },
     "en": {
-      "title": "More compact chat record cards",
+      "title": "Cleaner message actions",
       "items": [
-        "Forwarded chat record cards now use less vertical space while keeping the first-message preview and message count clear"
+        "Up to five message actions now stay on one row; larger sets expand only when needed, without a divider in either theme"
       ]
     }
   }

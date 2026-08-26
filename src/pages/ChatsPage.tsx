@@ -8193,10 +8193,14 @@ function LiveChatsPage() {
                 );
               }
 
-              if (primaryActions.length + secondaryActions.length <= 5) {
-                primaryActions.push(...secondaryActions.splice(0));
-              } else if (primaryActions.length > 4) {
-                secondaryActions.unshift(...primaryActions.splice(4));
+              const allActions = [...primaryActions, ...secondaryActions];
+              primaryActions.splice(0, primaryActions.length);
+              secondaryActions.splice(0, secondaryActions.length);
+              if (allActions.length <= 5) {
+                primaryActions.push(...allActions);
+              } else {
+                primaryActions.push(...allActions.slice(0, 4));
+                secondaryActions.push(...allActions.slice(4));
               }
               const primaryActionCount = primaryActions.length + (secondaryActions.length ? 1 : 0);
               const primaryActionWidth = primaryActionCount * 74 + Math.max(0, primaryActionCount - 1) * 5;
