@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.21",
+  "id": "2026.08.26.22",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "聊天查找与快捷操作更顺手",
+      "title": "聊天记录发言更完整",
       "items": [
-        "图片与视频聊天记录改为三列预览，点击头像可查看用户详情，消息操作按钮也保持整齐一致"
+        "官方账号转发聊天记录时可先补充文字与位置，广场中的图片、语音和视频也能直接查看，浏览滚动更加顺畅"
       ]
     },
     "en": {
-      "title": "Smoother chat search and quick actions",
+      "title": "Richer chat-record statements",
       "items": [
-        "Image and video search uses a three-column gallery, avatars open user details, and message actions stay consistently sized"
+        "Official accounts can add text and location before publishing a chat record, while its media stays interactive without blocking Square scrolling"
       ]
     }
   }

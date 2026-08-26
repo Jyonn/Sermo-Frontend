@@ -47,6 +47,10 @@ type SelectedPhoto = {
   preview: string;
 };
 type SelectedVideo = SelectedPhoto & { duration: number };
+type SquareChatRecordDraft = {
+  messageIds: number[];
+  redacted: boolean;
+};
 
 const MAX_TEXT_LENGTH = 140;
 type InlineTransitionPhase = "idle" | "preparing" | "opening" | "open" | "closing";
@@ -387,6 +391,7 @@ export default function SquarePage() {
   const [contentSheetOpen, setContentSheetOpen] = useState(false);
   const [statementLocation, setStatementLocation] = useState<SquareStatementDTO["location"]>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [chatRecordDraft, setChatRecordDraft] = useState<SquareChatRecordDraft | null>(null);
 
   useEffect(() => {
     if (!features.squareExploreEnabled && feedMode === "all") setFeedMode("friends");
@@ -402,8 +407,25 @@ export default function SquarePage() {
   const [chatRecordVideo, setChatRecordVideo] = useState<{ uri: string; metadata: VideoMetadataDTO | null } | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
-  const routeState = location.state as { squareInlineFocus?: boolean } | null;
+  const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[] } } | null;
   const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
+  const consumedChatRecordDraftRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const messageIds = routeState?.squareChatRecordDraft?.messageIds?.filter((value) => Number.isInteger(value) && value > 0) ?? [];
+    if (!messageIds.length) return;
+    const draftKey = messageIds.join(",");
+    if (consumedChatRecordDraftRef.current === draftKey) return;
+    consumedChatRecordDraftRef.current = draftKey;
+    setChatRecordDraft({ messageIds, redacted: false });
+    setPhotos([]);
+    setVoiceFile(null);
+    setVoiceDuration(0);
+    setVideo(null);
+    setAnonymousStatement(false);
+    setComposerOpen(true);
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.pathname, location.search, navigate, routeState?.squareChatRecordDraft]);
   const [desktopWorkspace, setDesktopWorkspace] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches);
   const [inlineStatementId, setInlineStatementId] = useState<number | null>(null);
   const [inlineStatementExpanded, setInlineStatementExpanded] = useState(false);
@@ -721,8 +743,8 @@ export default function SquarePage() {
   };
 
   const publishable = useMemo(
-    () => Boolean(text.trim() || photos.length || voiceFile || video) && !publishing && text.length <= MAX_TEXT_LENGTH,
-    [photos.length, publishing, text, video, voiceFile],
+    () => Boolean(text.trim() || photos.length || voiceFile || video || chatRecordDraft) && !publishing && text.length <= MAX_TEXT_LENGTH,
+    [chatRecordDraft, photos.length, publishing, text, video, voiceFile],
   );
 
   useEffect(() => {
@@ -1141,6 +1163,27 @@ export default function SquarePage() {
     const total = photos.length + (voiceFile ? 1 : 0) + (video ? 1 : 0);
     let completed = 0;
     try {
+      if (chatRecordDraft) {
+        const statement = await api.createSquareChatRecordStatement({
+          message_ids: chatRecordDraft.messageIds,
+          text: text.trim(),
+          visibility,
+          location: statementLocation,
+          pin: pinOnPublish ? 1 : 0,
+          redact_chat_record: chatRecordDraft.redacted ? 1 : 0,
+        });
+        setStatements((current) => [statement, ...current]);
+        if (pinOnPublish) setPinnedStatement(statement);
+        setText("");
+        setVisibility("public");
+        setStatementLocation(null);
+        setPinOnPublish(false);
+        setChatRecordDraft(null);
+        setComposerOpen(false);
+        void refreshActivities();
+        showToast(t("message.forwardedToSquare"), "success");
+        return;
+      }
       const media: SquareStatementDraftMedia[] = [];
       for (const photo of photos) {
         const upload = await uploadMessageMediaWith(photo.file, "image", (kind, fileName, contentType) => api.createSquareUpload(kind as "image", fileName, contentType), (progress) => {
@@ -1517,7 +1560,7 @@ export default function SquarePage() {
         className="square-compose-side-drawer"
         historyKey="square-compose"
         onRouteOpen={() => setComposerOpen(true)}
-        onClose={() => setComposerOpen(false)}
+        onClose={() => { setComposerOpen(false); setChatRecordDraft(null); }}
         open={composerOpen}
         title={t("square.composeTitle")}
       >
@@ -1532,18 +1575,24 @@ export default function SquarePage() {
               <textarea autoFocus aria-label={t("square.saySomething")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setText(event.target.value)} placeholder={t("square.saySomething")} value={text} />
               <span className={`square-compose-count${text.length >= MAX_TEXT_LENGTH - 20 ? " is-near-limit" : ""}`}>{text.length}<i>/{MAX_TEXT_LENGTH}</i></span>
             </div>
+            {chatRecordDraft ? <div className="square-compose-chat-record">
+              <span className="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+              <div><strong>{t("message.forwardBundleTitle")}</strong><small>{t("message.forwardBundleCount", { count: chatRecordDraft.messageIds.length })}</small></div>
+              <button aria-label={t("common.close")} onClick={() => setChatRecordDraft(null)} type="button"><span className="material-symbols-outlined">close</span></button>
+            </div> : null}
             {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
             {video ? <div className="square-composer-video"><video muted playsInline src={video.preview} /><button onClick={() => { URL.revokeObjectURL(video.preview); setVideo(null); }} type="button"><span className="material-symbols-outlined">close</span></button><span>{video.duration}s</span></div> : null}
             {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><div><strong>{t("square.voiceReady")}</strong>{voicePreview ? <audio controls preload="metadata" src={voicePreview} /> : null}</div><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
             {statementLocation ? <button className="square-compose-location-pill is-active" onClick={() => setStatementLocation(null)} type="button"><span className="material-symbols-outlined">location_on</span><span>{statementLocation.address || t("square.locationAddedShort")}</span><span className="material-symbols-outlined">close</span></button> : null}
             {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
             <div className="square-compose-content-actions">
-              <button onClick={() => setContentSheetOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{photos.length ? t("square.photosAdded", { count: photos.length }) : voiceFile ? t("square.voiceReady") : video ? t("square.videoReady") : t("square.addMedia")}</span></button>
+              {!chatRecordDraft ? <button onClick={() => setContentSheetOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{photos.length ? t("square.photosAdded", { count: photos.length }) : voiceFile ? t("square.voiceReady") : video ? t("square.videoReady") : t("square.addMedia")}</span></button> : null}
               {!statementLocation ? <button disabled={locationLoading} onClick={locateStatement} type="button"><span className={`material-symbols-outlined${locationLoading ? " is-spinning" : ""}`}>{locationLoading ? "progress_activity" : "location_on"}</span><span>{locationLoading ? t("square.locating") : t("square.location")}</span></button> : null}
             </div>
             <div className="square-compose-settings">
               <button disabled={anonymousStatement} onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{anonymousStatement ? t("square.exploreOnly") : visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
-              {features.squareExploreEnabled ? <button aria-checked={anonymousStatement} className="square-compose-anonymous-row" onClick={() => { setAnonymousStatement((current) => !current); setVisibility("public"); }} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("square.publishAnonymouslyHint")}</small></div><i className={anonymousStatement ? "is-on" : ""}><span /></i></button> : null}
+              {features.squareExploreEnabled && !chatRecordDraft ? <button aria-checked={anonymousStatement} className="square-compose-anonymous-row" onClick={() => { setAnonymousStatement((current) => !current); setVisibility("public"); }} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("square.publishAnonymouslyHint")}</small></div><i className={anonymousStatement ? "is-on" : ""}><span /></i></button> : null}
+              {chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="material-symbols-outlined">privacy_tip</span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
               {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
             </div>
           </div>

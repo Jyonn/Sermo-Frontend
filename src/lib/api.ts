@@ -809,11 +809,18 @@ export const api = {
     });
   },
 
-  createSquareChatRecordStatement(message_ids: number[], visibility: "public" | "friends" = "public", redact_chat_record = false) {
+  createSquareChatRecordStatement(payload: {
+    message_ids: number[];
+    text?: string;
+    visibility?: "public" | "friends";
+    location?: { latitude: number; longitude: number; address?: string; geocoding_provider?: string } | null;
+    pin?: 0 | 1;
+    redact_chat_record?: 0 | 1;
+  }) {
     return request<SquareStatementDTO>("/square/statements/chat-record", {
       method: "POST",
       auth: true,
-      body: { message_ids, visibility, redact_chat_record: redact_chat_record ? 1 : 0 },
+      body: payload,
     });
   },
 

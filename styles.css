@@ -7480,6 +7480,21 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+.square-chat-record-preview.chat-conversation-preview .message-scroll :is(button, a, audio, video) {
+  pointer-events: auto;
+}
+.square-statement-card:not(.is-detail) .square-chat-record {
+  overscroll-behavior: auto;
+}
+.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview {
+  height: auto;
+}
+.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview :is(.chat-detail-scene, .message-scroll) {
+  height: auto;
+  overflow: visible;
+  overscroll-behavior: auto;
+  touch-action: pan-y;
+}
 .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview {
   height: clamp(340px, 54vh, 520px);
 }
@@ -26857,6 +26872,41 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-compose-content-actions button:last-child { flex: none; color: var(--brand-primary-press); }
 .square-compose-content-actions button .material-symbols-outlined { font-size: 18px; }
 .square-compose-content-actions button span:not(.material-symbols-outlined) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.square-compose-chat-record {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 30%, var(--line-soft));
+  border-radius: 16px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--brand-primary) 10%, var(--bg-elevated)), var(--bg-elevated));
+}
+.square-compose-chat-record > .material-symbols-outlined {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--brand-primary);
+  background: color-mix(in srgb, var(--brand-primary) 13%, transparent);
+}
+.square-compose-chat-record > div { display: grid; gap: 2px; min-width: 0; }
+.square-compose-chat-record strong { color: var(--text-primary); font-size: 14px; }
+.square-compose-chat-record small { color: var(--text-muted); font-size: 12px; }
+.square-compose-chat-record > button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 9%, transparent);
+}
+.square-compose-chat-record > button .material-symbols-outlined { font-size: 18px; }
 .square-compose-location-pill { display: inline-flex; align-items: center; align-self: flex-start; gap: 6px; max-width: 100%; min-height: 38px; margin: 3px 0 5px; padding: 0 10px; border: 1px solid color-mix(in srgb, var(--brand-primary) 32%, var(--line-soft)); border-radius: 12px; color: var(--brand-primary-press); font: inherit; font-size: 12px; font-weight: 750; background: color-mix(in srgb, var(--brand-primary) 10%, var(--bg-elevated)); }
 .square-compose-location-pill span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .square-compose-location-pill .material-symbols-outlined { flex: none; font-size: 17px; }
