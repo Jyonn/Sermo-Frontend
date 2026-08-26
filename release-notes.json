@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.13",
+  "id": "2026.08.27.14",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "活动提醒更准确",
+      "title": "聊天记录卡片更紧凑",
       "items": [
-        "领取八仙活动的全部奖励后，广场与活动入口将不再显示领取红点"
+        "合并转发的聊天记录卡片减少纵向留白，在保留首条预览和消息数的同时占用更少聊天空间"
       ]
     },
     "en": {
-      "title": "More accurate activity reminders",
+      "title": "More compact chat record cards",
       "items": [
-        "After collecting every Baxian activity reward, claim badges disappear from Square and the activity entry"
+        "Forwarded chat record cards now use less vertical space while keeping the first-message preview and message count clear"
       ]
     }
   }
