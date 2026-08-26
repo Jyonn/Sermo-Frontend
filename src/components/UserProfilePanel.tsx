@@ -6,6 +6,7 @@ import { QuietState } from "./BoundaryState";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
+import { GrowthLevelBadge } from "./GrowthLevelBadge";
 import { ImageLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
@@ -341,7 +342,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           </div>
         </div>
         <div className="user-profile-facts">
-          {!user.official && user.growth_level ? <span className="is-level">LV {user.growth_level}</span> : null}
+          {!user.official && user.growth_level ? <GrowthLevelBadge level={user.growth_level} /> : null}
           {user.is_permanent_vip ? (
             <span className="is-vip">
               {user.permanent_vip_slot

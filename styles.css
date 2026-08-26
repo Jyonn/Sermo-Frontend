@@ -1387,8 +1387,9 @@ img {
   transform: translateX(1px);
 }
 
-.menu-growth-level {
+.growth-level-badge {
   display: grid;
+  flex: none;
   min-width: 38px;
   height: 22px;
   padding: 0 7px;
@@ -1400,23 +1401,25 @@ img {
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.menu-growth-entry.stage-plain .menu-growth-level {
+.growth-level-badge.stage-plain {
   color: #5f6965;
   background: #fffef9;
   box-shadow: inset 0 0 0 1px #d9dedb;
 }
-.menu-growth-entry.stage-basic .menu-growth-level { color: #505b56; background: #e9edeb; }
-.menu-growth-entry.stage-select .menu-growth-level { color: #087751; background: #e0f5ea; }
-.menu-growth-entry.stage-rare .menu-growth-level { color: #245fa9; background: #eaf3ff; }
-.menu-growth-entry.stage-epic .menu-growth-level { color: #7040aa; background: #f0eaff; }
-.menu-growth-entry.stage-legendary .menu-growth-level {
+.growth-level-badge.stage-basic { color: #505b56; background: #e9edeb; }
+.growth-level-badge.stage-select { color: #087751; background: #e0f5ea; }
+.growth-level-badge.stage-rare { color: #245fa9; background: #eaf3ff; }
+.growth-level-badge.stage-epic { color: #7040aa; background: #f0eaff; }
+.growth-level-badge.stage-legendary {
   color: #7b4b08;
   background: linear-gradient(120deg, #fff6d7, #f6d48a);
   box-shadow: inset 0 0 0 1px rgba(200, 135, 25, 0.22);
 }
-.menu-growth-entry.stage-mythic .menu-growth-level {
+.growth-level-badge.stage-mythic {
   color: #fff5f1;
   background: linear-gradient(125deg, #9f1f2f, #d5483d);
   box-shadow: inset 0 0 0 1px rgba(255, 224, 202, 0.34), 0 5px 14px rgba(159, 31, 47, 0.18);
@@ -30058,4 +30061,34 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 .message-group.bubble-style-fufu { --bubble-skin-group-outer-radius: 17px; }
 .message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
   --bubble-skin-group-outer-radius: 18px;
+}
+
+/* Keep the shared stage badge intact inside profile-card theme overrides. */
+.user-profile-panel .user-profile-facts > .growth-level-badge {
+  min-width: 38px;
+  min-height: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 7px;
+  font-size: 0.66rem;
+}
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-plain {
+  color: #5f6965;
+  background: #fffef9;
+  box-shadow: inset 0 0 0 1px #d9dedb;
+}
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-basic { color: #505b56; background: #e9edeb; box-shadow: none; }
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-select { color: #087751; background: #e0f5ea; box-shadow: none; }
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-rare { color: #245fa9; background: #eaf3ff; box-shadow: none; }
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-epic { color: #7040aa; background: #f0eaff; box-shadow: none; }
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-legendary {
+  color: #7b4b08;
+  background: linear-gradient(120deg, #fff6d7, #f6d48a);
+  box-shadow: inset 0 0 0 1px rgba(200, 135, 25, 0.22);
+}
+.user-profile-panel .user-profile-facts > .growth-level-badge.stage-mythic {
+  color: #fff5f1;
+  background: linear-gradient(125deg, #9f1f2f, #d5483d);
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 202, 0.34), 0 5px 14px rgba(159, 31, 47, 0.18);
 }

@@ -11,6 +11,7 @@ import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { GestureSetupPanel } from "../components/GestureLock";
+import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
@@ -1927,7 +1928,7 @@ export default function MenuPage() {
               {space?.slug ? <span>@{space.slug}</span> : null}
             </div>
             <button className={`menu-growth-entry stage-${currentLevelStage}`} onClick={() => setGrowthDrawerOpen(true)} type="button">
-              <span className="menu-growth-level">Lv.{me?.growth?.level ?? 1}</span>
+              <GrowthLevelBadge className="menu-growth-level" label={`Lv.${me?.growth?.level ?? 1}`} level={me?.growth?.level ?? 1} />
               <span className="menu-growth-identity">
                 <small>{t(`growth.levelStage.${currentLevelStage}` as TranslationKey)}</small>
                 <strong>{me?.growth?.name ?? space?.level_names?.[0] ?? t("growth.firstLevel")}</strong>
