@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.26",
+  "id": "2026.08.26.27",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "匿名回复显示更清楚",
+      "title": "聊天中的发言更好用",
       "items": [
-        "匿名发言作者默认匿名回复，公开回复会再次确认；评论区现在会完整显示“匿名用户”"
+        "聊天中的发言视频会进入沉浸预览，语音提供轻量播放条，合并聊天记录可直接打开查看"
       ]
     },
     "en": {
-      "title": "Clearer anonymous replies",
+      "title": "Better shared posts in chat",
       "items": [
-        "Anonymous post authors reply anonymously by default with confirmation for public replies, and the anonymous identity label now stays fully visible"
+        "Shared post videos now open in the media viewer, audio uses a focused playback bar, and embedded chat records open directly"
       ]
     }
   }
