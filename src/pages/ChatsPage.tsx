@@ -50,6 +50,7 @@ import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../l
 import { addStickerFile } from "../lib/stickers";
 import { cacheMediaLocally, purgeCachedMedia } from "../lib/mediaCache";
 import { loadMessagesAfterThrough } from "../lib/messageHistory";
+import { formatMentionTokens } from "../lib/mentions";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
@@ -90,7 +91,6 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_LOCATION, label: "messageSearch.locations" },
   { value: MESSAGE_TYPE_MAP_ACCESS, label: "messageSearch.travelMaps" },
   { value: MESSAGE_TYPE_STATEMENT, label: "messageSearch.statements" },
-  { value: MESSAGE_TYPE_STICKER, label: "sticker.tab" },
   { value: MESSAGE_TYPE_ACTIVITY, label: "messageSearch.activities" },
 ] as const;
 const AUDIO_MAX_DURATION_SECONDS = 60;
@@ -264,8 +264,11 @@ function mentionSelectionAccent(style?: string) {
 }
 
 function readableMentionText(text: string, mentions: Array<{ user_id: number; name: string }>) {
-  const names = new Map(mentions.map((user) => [user.user_id, user.name]));
-  return text.replace(/<@(\d+)>/g, (_, userId: string) => `@${names.get(Number(userId)) || userId}`);
+  return formatMentionTokens(text, mentions);
+}
+
+function chatPreviewMentionText(text: string, mentions: Array<{ user_id: number; name: string }>) {
+  return formatMentionTokens(text, mentions, true).replace(/\s{2,}/g, " ").trimEnd();
 }
 
 function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
@@ -945,7 +948,7 @@ function previewFromKind(kind: MessageKind, text: string) {
 }
 
 function previewFromMessage(message: Pick<ChatMessage, "kind" | "text" | "mentions">) {
-  const text = message.kind === "text" ? readableMentionText(message.text, message.mentions ?? []) : message.text;
+  const text = message.kind === "text" ? chatPreviewMentionText(message.text, message.mentions ?? []) : message.text;
   return previewFromKind(message.kind, text);
 }
 
@@ -953,7 +956,7 @@ function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
   const rawText = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
-  const text = kind === "text" ? readableMentionText(rawText, message.mentions ?? []) : rawText;
+  const text = kind === "text" ? chatPreviewMentionText(rawText, message.mentions ?? []) : rawText;
   return previewFromKind(kind, text);
 }
 
@@ -1868,7 +1871,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   );
 });
 
-function MessageAvatarMentionTarget({ children, name, onMention }: { children: ReactNode; name: string; onMention: () => void }) {
+function MessageAvatarMentionTarget({ children, name, onMention, onOpenProfile }: { children: ReactNode; name: string; onMention?: () => void; onOpenProfile?: () => void }) {
   const timerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const suppressClickRef = useRef(false);
@@ -1882,6 +1885,7 @@ function MessageAvatarMentionTarget({ children, name, onMention }: { children: R
   useEffect(() => clearLongPress, []);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!onMention) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     clearLongPress();
     suppressClickRef.current = false;
@@ -1900,18 +1904,21 @@ function MessageAvatarMentionTarget({ children, name, onMention }: { children: R
       aria-label={i18n.t("chat.mentionUser", { name })}
       className="message-avatar-mention-trigger"
       onClick={(event) => {
-        if (event.detail === 0) {
-          onMention();
+        if (suppressClickRef.current) {
+          suppressClickRef.current = false;
+          event.preventDefault();
+          event.stopPropagation();
           return;
         }
-        if (!suppressClickRef.current) return;
-        suppressClickRef.current = false;
-        event.preventDefault();
-        event.stopPropagation();
+        onOpenProfile?.();
       }}
-      onContextMenu={(event) => event.preventDefault()}
+      onContextMenu={(event) => {
+        if (!onMention) return;
+        event.preventDefault();
+        onMention();
+      }}
       onPointerCancel={clearLongPress}
-      onPointerDown={handlePointerDown}
+      onPointerDown={onMention ? handlePointerDown : undefined}
       onPointerLeave={clearLongPress}
       onPointerMove={(event) => {
         const start = pointerStartRef.current;
@@ -1933,6 +1940,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   onOpenVideo,
   onOpenActions,
   onMentionAuthor,
+  onOpenAuthorProfile,
   onRetry,
   onToggleGroupSelection,
   onToggleSelection,
@@ -2011,8 +2019,12 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
           >
             {groupAvatar}
           </button>
-        ) : group.from === "other" && groupAvatar && onMentionAuthor && typeof group.userId === "number" ? (
-          <MessageAvatarMentionTarget name={group.name} onMention={() => onMentionAuthor(group.userId!)}>
+        ) : group.from === "other" && groupAvatar && typeof group.userId === "number" && (onMentionAuthor || onOpenAuthorProfile) ? (
+          <MessageAvatarMentionTarget
+            name={group.name}
+            onMention={onMentionAuthor ? () => onMentionAuthor(group.userId!) : undefined}
+            onOpenProfile={onOpenAuthorProfile ? () => onOpenAuthorProfile(group.userId!) : undefined}
+          >
             {groupAvatar}
           </MessageAvatarMentionTarget>
         ) : groupAvatar}
@@ -2189,6 +2201,7 @@ interface MessageGroupBlockProps {
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
   onMentionAuthor?: (userId: number) => void;
+  onOpenAuthorProfile?: (userId: number) => void;
   onRetry: (message: ChatMessage) => void;
   onToggleGroupSelection: (messages: ChatMessage[]) => void;
   onToggleSelection: (message: ChatMessage) => void;
@@ -6501,6 +6514,7 @@ function LiveChatsPage() {
                       onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                       onOpenActions={openMessageMenu}
                       onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
+                      onOpenAuthorProfile={setProfileDrawerUserId}
                       onRetry={retryFailedMessage}
                       onToggleGroupSelection={toggleMessageGroupSelection}
                       onToggleSelection={toggleMessageSelection}
@@ -7470,7 +7484,7 @@ function LiveChatsPage() {
             </div>
           </div>
 
-          <div className="message-search-results" aria-busy={messageSearchState === "loading"}>
+          <div className={`message-search-results${[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? " is-media-grid" : ""}`} aria-busy={messageSearchState === "loading"}>
             {messageSearchState === "loading" ? (
               <div className="message-search-loading"><HeaderSyncIndicator syncing /></div>
             ) : null}
@@ -7499,7 +7513,7 @@ function LiveChatsPage() {
               }[message.type] ?? "chat_bubble";
               return (
                 <button
-                  className="message-search-result"
+                  className={`message-search-result${mediaUri && [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? " is-media-tile" : ""}`}
                   key={message.message_id}
                   onClick={() => {
                     const drawerStack = window.history.state?.sermoDrawerStack;
@@ -7512,7 +7526,12 @@ function LiveChatsPage() {
                   }}
                   type="button"
                 >
-                  {mediaUri ? (
+                  {mediaUri && [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? (
+                    <>
+                      <img alt="" className="message-search-result-media" src={mediaUri} />
+                      {message.type === MESSAGE_TYPE_VIDEO ? <span className="message-search-video-mark material-symbols-outlined" aria-hidden="true">play_arrow</span> : null}
+                    </>
+                  ) : mediaUri ? (
                     <img alt="" className="message-search-result-media" src={mediaUri} />
                   ) : (
                     <span className="message-search-result-icon material-symbols-outlined" aria-hidden="true">{typeIcon}</span>
@@ -8222,7 +8241,7 @@ function LiveChatsPage() {
                       <div>
                         <div
                           className="message-context-actions is-secondary"
-                          style={{ gridTemplateColumns: `repeat(${Math.min(5, secondaryActions.length)}, minmax(0, 1fr))` }}
+                          style={{ gridTemplateColumns: `repeat(${Math.min(5, secondaryActions.length)}, 74px)` }}
                         >
                           {secondaryActions}
                         </div>

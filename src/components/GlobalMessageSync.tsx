@@ -9,6 +9,7 @@ import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
 import { loadMessagesAfterThrough } from "../lib/messageHistory";
+import { formatMentionTokens } from "../lib/mentions";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
@@ -188,7 +189,9 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     title,
     avatarUri: peer?.avatar_uri,
     subtitle: chat.group ? i18n.t("chat.memberCount", { count: chat.members.length }) : presence,
-    preview: chat.last_message?.content || i18n.t("chat.noMessages"),
+    preview: chat.last_message
+      ? formatMentionTokens(chat.last_message.content, chat.last_message.mentions ?? [], true).replace(/\s{2,}/g, " ").trimEnd()
+      : i18n.t("chat.noMessages"),
     time: formatChatListTime(lastActivity),
     lastActivity,
     unread: chat.unread_count ?? 0,

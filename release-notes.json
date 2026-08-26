@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.20",
+  "id": "2026.08.26.21",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "群聊成员管理更清晰",
+      "title": "聊天查找与快捷操作更顺手",
       "items": [
-        "群成员按入群时间排列，群主现在可以安全转让群主身份"
+        "图片与视频聊天记录改为三列预览，点击头像可查看用户详情，消息操作按钮也保持整齐一致"
       ]
     },
     "en": {
-      "title": "Clearer group member management",
+      "title": "Smoother chat search and quick actions",
       "items": [
-        "Members are ordered by join time, and owners can now safely transfer group ownership"
+        "Image and video search uses a three-column gallery, avatars open user details, and message actions stay consistently sized"
       ]
     }
   }
