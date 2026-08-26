@@ -23993,7 +23993,7 @@ html[data-theme="dark"] :is(
 .message-search-filters::-webkit-scrollbar { display:none; }
 .message-search-filters button { min-height:32px;padding:0 13px;border:1px solid color-mix(in srgb,var(--line,#dfe7e2) 85%,transparent);border-radius:999px;color:var(--text-muted);background:color-mix(in srgb,var(--surface,#fff) 94%,transparent);font-size:.76rem;font-weight:700;white-space:nowrap;transition:all 150ms ease; }
 .message-search-filters button.active { color:#075c42;border-color:rgba(0,168,107,.25);background:rgba(0,168,107,.11);box-shadow:inset 0 0 0 1px rgba(0,168,107,.04); }
-.message-search-results { position:relative;display:flex;min-height:180px;align-items:stretch;flex-direction:column; }
+.message-search-results { position:relative;display:flex;min-height:180px;flex:0 0 auto;align-items:stretch;flex-direction:column; }
 .message-search-loading { display:grid;min-height:140px;place-items:center; }
 .message-search-empty {
   position:relative;
@@ -24052,11 +24052,11 @@ html[data-theme="dark"] :is(
 .message-search-result-arrow { color:var(--text-muted);font-size:18px;opacity:.62; }
 .message-search-more { width:100%;min-height:42px;margin:12px 0 6px;border-radius:12px;color:#087751;background:rgba(0,168,107,.08);font-size:.78rem;font-weight:780; }
 .message-search-more:disabled { opacity:.55; }
-.message-search-results.is-media-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;gap:7px;padding:8px 0; }
+.message-search-results.is-media-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;align-content:start;gap:7px;padding:8px 0; }
 .message-search-results.is-media-grid .message-search-loading,
 .message-search-results.is-media-grid .message-search-empty,
 .message-search-results.is-media-grid .message-search-more { grid-column:1/-1; }
-.message-search-result.is-media-tile { position:relative;display:block;overflow:hidden;width:100%;min-width:0;aspect-ratio:1;padding:0;border:0;border-radius:13px;background:#edf2ef; }
+.message-search-result.is-media-tile { position:relative;display:block;overflow:hidden;width:100%;min-width:0;height:auto;aspect-ratio:1 / 1;padding:0;border:0;border-radius:13px;background:#edf2ef; }
 .message-search-result.is-media-tile .message-search-result-media { width:100%;height:100%;border-radius:inherit;object-fit:cover; }
 .message-search-result.is-media-tile .message-search-result-main,
 .message-search-result.is-media-tile .message-search-result-arrow { display:none; }

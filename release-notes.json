@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.23",
+  "id": "2026.08.26.24",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "群聊管理更清晰",
+      "title": "聊天媒体查找更顺畅",
       "items": [
-        "群主转让入口调整到聊天记录管理区域，确认时会准确显示新群主昵称"
+        "图片和视频搜索结果较多时可以正常滚动浏览，预览缩略图始终保持清晰的正方形比例"
       ]
     },
     "en": {
-      "title": "Clearer group management",
+      "title": "Smoother chat media search",
       "items": [
-        "Ownership transfer now sits beside chat-history management and correctly names the incoming group owner"
+        "Large image and video result sets now scroll normally while every thumbnail keeps its square proportions"
       ]
     }
   }
