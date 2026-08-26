@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.29",
-  "publishedAt": "2026-08-26",
+  "id": "2026.08.27.1",
+  "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "广场聊天记录更适配小屏",
+      "title": "让每一次表达更温暖",
       "items": [
-        "广场转发的聊天记录现在采用更紧凑的头像与气泡比例，在窄屏上阅读更舒适"
+        "聊天与评论输入框加入友善表达提醒"
       ]
     },
     "en": {
-      "title": "Shared chats fit smaller screens",
+      "title": "A kinder place to speak",
       "items": [
-        "Chat records shared to Square now use more compact avatars and bubbles for comfortable reading on narrow screens"
+        "Chat and comment fields now include a gentle reminder to speak kindly"
       ]
     }
   }
