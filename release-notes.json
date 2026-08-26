@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.24",
+  "id": "2026.08.26.25",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "聊天媒体查找更顺畅",
+      "title": "匿名回复更安心",
       "items": [
-        "图片和视频搜索结果较多时可以正常滚动浏览，预览缩略图始终保持清晰的正方形比例"
+        "匿名发言作者默认以匿名身份回复；切换为公开回复时会再次确认，并完整保护匿名通知中的身份信息"
       ]
     },
     "en": {
-      "title": "Smoother chat media search",
+      "title": "Safer anonymous replies",
       "items": [
-        "Large image and video result sets now scroll normally while every thumbnail keeps its square proportions"
+        "Anonymous post authors now reply anonymously by default; public replies require confirmation and anonymous notifications keep identity details private"
       ]
     }
   }

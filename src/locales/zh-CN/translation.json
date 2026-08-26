@@ -2157,6 +2157,9 @@
   ,"square.exploreOnly": "仅探索可见"
   ,"square.commentAnonymously": "匿名回复"
   ,"square.commentPublicly": "公开回复"
+  ,"square.publicReplyConfirmTitle": "公开这条回复？"
+  ,"square.publicReplyConfirmHint": "发送后将展示你的头像和昵称，但不会标记为匿名发言作者。"
+  ,"square.confirmPublicReply": "公开回复"
   ,"square.quotaAnonymous": "匿名发言"
   ,"square.quotaAnonymousWeekly": "近7天 · {{used}}/{{limit}}"
 }

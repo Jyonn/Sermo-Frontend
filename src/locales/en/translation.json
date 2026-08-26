@@ -2157,6 +2157,9 @@
   ,"square.exploreOnly": "Explore only"
   ,"square.commentAnonymously": "Reply anonymously"
   ,"square.commentPublicly": "Reply publicly"
+  ,"square.publicReplyConfirmTitle": "Post this reply publicly?"
+  ,"square.publicReplyConfirmHint": "Your avatar and name will be visible, without identifying you as the anonymous post author."
+  ,"square.confirmPublicReply": "Reply publicly"
   ,"square.quotaAnonymous": "Anonymous posts"
   ,"square.quotaAnonymousWeekly": "7 days · {{used}}/{{limit}}"
 }

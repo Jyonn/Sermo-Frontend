@@ -382,6 +382,7 @@ export default function SquarePage() {
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
   const [anonymousStatement, setAnonymousStatement] = useState(false);
   const [anonymousComment, setAnonymousComment] = useState(false);
+  const [publicCommentConfirmOpen, setPublicCommentConfirmOpen] = useState(false);
   const [pinOnPublish, setPinOnPublish] = useState(false);
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [video, setVideo] = useState<SelectedVideo | null>(null);
@@ -494,10 +495,16 @@ export default function SquarePage() {
   const canSendVoice = Boolean(currentUser?.official) || growthLevel >= 6;
   const canSendVideo = Boolean(currentUser?.official) || growthLevel >= 8;
   const activeCommentStatement = statements.find((item) => item.statement_id === commentStatementId) ?? null;
+  const canCommentAnonymously = Boolean(activeCommentStatement?.is_anonymous && activeCommentStatement.is_mine);
   const galleryStatement = statements.find((item) => item.statement_id === gallery?.statementId) ?? null;
   const galleryImages = galleryStatement?.media.filter((item) => item.kind === "image") ?? [];
   const galleryVideo = statements.find((item) => item.statement_id === videoGalleryStatementId)?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+
+  useEffect(() => {
+    setAnonymousComment(canCommentAnonymously);
+    setPublicCommentConfirmOpen(false);
+  }, [canCommentAnonymously, commentStatementId]);
 
   useEffect(() => {
     const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
@@ -1060,7 +1067,7 @@ export default function SquarePage() {
         : statement));
       setCommentText("");
       setReplyTarget(null);
-      setAnonymousComment(false);
+      setAnonymousComment(canCommentAnonymously);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("square.commentFailed"));
     } finally {
@@ -1070,6 +1077,7 @@ export default function SquarePage() {
 
   const beginCommentReply = (comment: SquareStatementCommentDTO) => {
     setReplyTarget(comment);
+    if (canCommentAnonymously) setAnonymousComment(true);
     window.requestAnimationFrame(() => commentInputRef.current?.focus({ preventScroll: true }));
   };
 
@@ -1361,8 +1369,7 @@ export default function SquarePage() {
     </section>
   );
 
-  const canCommentAnonymously = Boolean(activeCommentStatement?.is_anonymous && activeCommentStatement.is_mine);
-  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); void sendComment(); }}>{anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />}<div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} />{canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}</div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
+  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); if (canCommentAnonymously && !anonymousComment) setPublicCommentConfirmOpen(true); else void sendComment(); }}>{anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />}<div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} />{canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}</div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
@@ -1756,6 +1763,7 @@ export default function SquarePage() {
       {chatRecordVideo ? <MediaLightbox index={0} items={[{ uri: chatRecordVideo.uri, kind: "video", width: chatRecordVideo.metadata?.pixel_width, height: chatRecordVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={chatRecordVideo.metadata} />, downloadLabel: formatImageFileSize(chatRecordVideo.metadata?.file_size) }]} onClose={() => setChatRecordVideo(null)} onIndexChange={() => undefined} /> : null}
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
+      <ConfirmDialog busy={commentSending} confirmLabel={t("square.confirmPublicReply")} description={t("square.publicReplyConfirmHint")} onClose={() => { if (!commentSending) setPublicCommentConfirmOpen(false); }} onConfirm={() => { setPublicCommentConfirmOpen(false); void sendComment(); }} open={publicCommentConfirmOpen} title={t("square.publicReplyConfirmTitle")} warning />
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} />
       </BottomSheet>
