@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.22",
+  "id": "2026.08.26.23",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录发言更完整",
+      "title": "群聊管理更清晰",
       "items": [
-        "官方账号转发聊天记录时可先补充文字与位置，广场中的图片、语音和视频也能直接查看，浏览滚动更加顺畅"
+        "群主转让入口调整到聊天记录管理区域，确认时会准确显示新群主昵称"
       ]
     },
     "en": {
-      "title": "Richer chat-record statements",
+      "title": "Clearer group management",
       "items": [
-        "Official accounts can add text and location before publishing a chat record, while its media stays interactive without blocking Square scrolling"
+        "Ownership transfer now sits beside chat-history management and correctly names the incoming group owner"
       ]
     }
   }

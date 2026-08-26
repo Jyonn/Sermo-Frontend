@@ -7373,13 +7373,6 @@ function LiveChatsPage() {
                   </div>
                   </FeatureDiscoveryTarget>
                 ) : null}
-                {selectedChat.type === "group" && selectedChat.isOwner ? (
-                  <SettingRow
-                    icon={<span className="material-symbols-outlined" aria-hidden="true">groups</span>}
-                    onClick={openGroupOwnerTransfer}
-                    title={t("chat.transferOwner")}
-                  />
-                ) : null}
               </SettingGroup>
             </section>
 
@@ -7409,6 +7402,17 @@ function LiveChatsPage() {
 
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">
+                {selectedChat.type === "group" && selectedChat.isOwner ? (
+                  <button
+                    className="chat-detail-setting-row"
+                    onClick={openGroupOwnerTransfer}
+                    type="button"
+                  >
+                    <div className="row-main">
+                      <strong>{t("chat.transferOwner")}</strong>
+                    </div>
+                  </button>
+                ) : null}
                 <button
                   className="chat-detail-setting-row danger-row"
                   onClick={() => setClearHistoryConfirmOpen(true)}
@@ -7658,10 +7662,10 @@ function LiveChatsPage() {
       />
       <ConfirmDialog
         open={groupOwnerTransferConfirmOpen}
-        title={t("chat.transferOwnerConfirmTitle")}
-        description={t("chat.transferOwnerConfirmHint", {
+        title={t("chat.transferOwnerConfirmTitle", {
           name: selectedChat?.detail.members.find((member) => member.userId === chatMemberActionIds[0])?.name ?? "",
         })}
+        description={t("chat.transferOwnerConfirmHint")}
         confirmLabel={t("chat.confirmTransfer")}
         busy={groupManageState === "saving"}
         onClose={() => {
