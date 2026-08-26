@@ -2264,13 +2264,10 @@ function sortChatDetailMembers(
     avatarCacheKey?: string;
     isSelf: boolean;
     isOwner: boolean;
+    joinedAt?: number;
   }>
 ) {
-  return [...members].sort((left, right) => {
-    if (left.isOwner !== right.isOwner) return left.isOwner ? -1 : 1;
-    if (left.isSelf !== right.isSelf) return left.isSelf ? -1 : 1;
-    return left.name.localeCompare(right.name, getActiveLocale());
-  });
+  return [...members].sort((left, right) => (left.joinedAt ?? 0) - (right.joinedAt ?? 0) || left.userId - right.userId);
 }
 
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
@@ -2314,6 +2311,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
           avatarFrameStyle: member.avatar_frame_style,
           isSelf: member.user_id === currentUserId,
           isOwner: Boolean(chat.owner?.user_id === member.user_id),
+          joinedAt: member.joined_at ?? chat.created_at,
         }))
       ),
     },
@@ -2536,7 +2534,8 @@ function LiveChatsPage() {
   const [groupFriendPool, setGroupFriendPool] = useState<UserDTO[]>([]);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
   const [chatMemberLockedIds, setChatMemberLockedIds] = useState<number[]>([]);
-  const [chatMemberPickerMode, setChatMemberPickerMode] = useState<"add" | "remove">("add");
+  const [chatMemberPickerMode, setChatMemberPickerMode] = useState<"add" | "remove" | "transfer">("add");
+  const [groupOwnerTransferConfirmOpen, setGroupOwnerTransferConfirmOpen] = useState(false);
   const [groupRenameOpen, setGroupRenameOpen] = useState(false);
   const [groupRenameValue, setGroupRenameValue] = useState("");
   const [groupManageState, setGroupManageState] = useState<"idle" | "saving" | "loading-candidates">("idle");
@@ -4303,7 +4302,7 @@ function LiveChatsPage() {
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
-  const chatMemberActionIds = chatMemberPickerMode === "remove" ? groupSelectedIds : chatMemberNewIds;
+  const chatMemberActionIds = chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer" ? groupSelectedIds : chatMemberNewIds;
 
   const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute" | "badge", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
@@ -4368,6 +4367,16 @@ function LiveChatsPage() {
     setChatMemberLockedIds(
       selectedChat.detail.members.filter((member) => member.isSelf || member.isOwner).map((member) => member.userId)
     );
+    setGroupSelectedIds([]);
+    setChatMemberPickerOpen(true);
+  };
+
+  const openGroupOwnerTransfer = () => {
+    if (!selectedChat || selectedChat.type !== "group" || !selectedChat.isOwner) return;
+    setDetailsSheetOpen(false);
+    setGroupQuery("");
+    setChatMemberPickerMode("transfer");
+    setChatMemberLockedIds([currentUserId]);
     setGroupSelectedIds([]);
     setChatMemberPickerOpen(true);
   };
@@ -4444,7 +4453,7 @@ function LiveChatsPage() {
     const chatMemberRows =
       chatMemberPickerOpen && selectedChat
         ? selectedChat.detail.members
-            .filter((member) => chatMemberPickerMode === "remove" || !member.isSelf)
+            .filter((member) => chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer" || !member.isSelf)
             .map(
               (member) =>
                 ({
@@ -4460,7 +4469,7 @@ function LiveChatsPage() {
                 }) as UserDTO
             )
         : [];
-    const baseCandidates = (chatMemberPickerMode === "remove" ? chatMemberRows : [...chatMemberRows, ...groupFriendPool]).filter(
+    const baseCandidates = (chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer" ? chatMemberRows : [...chatMemberRows, ...groupFriendPool]).filter(
       (user, index, rows) => rows.findIndex((item) => item.user_id === user.user_id) === index
     );
 
@@ -5946,7 +5955,10 @@ function LiveChatsPage() {
 
   const toggleGroupCandidate = (userId: number) => {
     if (chatMemberLockedIds.includes(userId)) return;
-    setGroupSelectedIds((current) => (current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId]));
+    setGroupSelectedIds((current) => {
+      if (chatMemberPickerMode === "transfer") return current.includes(userId) ? [] : [userId];
+      return current.includes(userId) ? current.filter((item) => item !== userId) : [...current, userId];
+    });
   };
 
   const createGroup = async () => {
@@ -6002,6 +6014,10 @@ function LiveChatsPage() {
   const submitChatMemberPicker = async () => {
     if (!selectedChat) return;
     if (!chatMemberActionIds.length) return;
+    if (chatMemberPickerMode === "transfer") {
+      setGroupOwnerTransferConfirmOpen(true);
+      return;
+    }
     if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "chat.group.invite" : "chat.group.create", 4, selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup"))) return;
 
     try {
@@ -6031,6 +6047,26 @@ function LiveChatsPage() {
         apiError instanceof ApiError ? apiError.message : chatMemberPickerMode === "remove" ? t("chat.removeMemberFailed") : t("chat.addMemberFailed"),
         "error"
       );
+    } finally {
+      setGroupManageState("idle");
+    }
+  };
+
+  const transferGroupOwner = async () => {
+    if (!selectedChat || chatMemberActionIds.length !== 1) return;
+    try {
+      setGroupManageState("saving");
+      const updated = await api.transferGroupOwner(selectedChat.id, chatMemberActionIds[0]);
+      applyUpdatedGroupChat(updated);
+      setGroupOwnerTransferConfirmOpen(false);
+      setChatMemberPickerOpen(false);
+      setGroupQuery("");
+      setGroupSelectedIds([]);
+      setChatMemberLockedIds([]);
+      setChatMemberPickerMode("add");
+      showToast(t("chat.ownerTransferred"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("chat.ownerTransferFailed"), "error");
     } finally {
       setGroupManageState("idle");
     }
@@ -7007,6 +7043,9 @@ function LiveChatsPage() {
                               <button className="ghost-button" disabled={!canInviteGroupMember} onClick={() => void openChatMemberAdder()} type="button">
                                 {canInviteGroupMember ? t("chat.inviteMembers") : t("chat.inviteUnlockAtLevel", { level: 4 })}
                               </button>
+                              <button className="ghost-button" onClick={openGroupOwnerTransfer} type="button">
+                                {t("chat.transferOwner")}
+                              </button>
                             </>
                           ) : null}
                           <button className="danger-button" onClick={() => setGroupDangerConfirmOpen(true)} type="button">
@@ -7328,6 +7367,13 @@ function LiveChatsPage() {
                   </div>
                   </FeatureDiscoveryTarget>
                 ) : null}
+                {selectedChat.type === "group" && selectedChat.isOwner ? (
+                  <SettingRow
+                    icon={<span className="material-symbols-outlined" aria-hidden="true">groups</span>}
+                    onClick={openGroupOwnerTransfer}
+                    title={t("chat.transferOwner")}
+                  />
+                ) : null}
               </SettingGroup>
             </section>
 
@@ -7600,6 +7646,19 @@ function LiveChatsPage() {
         onConfirm={() => void restoreChatHistory()}
       />
       <ConfirmDialog
+        open={groupOwnerTransferConfirmOpen}
+        title={t("chat.transferOwnerConfirmTitle")}
+        description={t("chat.transferOwnerConfirmHint", {
+          name: selectedChat?.detail.members.find((member) => member.userId === chatMemberActionIds[0])?.name ?? "",
+        })}
+        confirmLabel={t("chat.confirmTransfer")}
+        busy={groupManageState === "saving"}
+        onClose={() => {
+          if (groupManageState !== "saving") setGroupOwnerTransferConfirmOpen(false);
+        }}
+        onConfirm={() => void transferGroupOwner()}
+      />
+      <ConfirmDialog
         open={clearHistoryConfirmOpen}
         title={t("chat.clearHistoryConfirmTitle")}
         description={t("chat.clearHistoryConfirmHint")}
@@ -7713,6 +7772,8 @@ function LiveChatsPage() {
                 {selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
                     ? t("chat.removeGroupMembers")
+                    : chatMemberPickerMode === "transfer"
+                      ? t("chat.transferOwner")
                     : t("chat.addGroupMembers")
                   : t("chat.createGroup")}
               </strong>
@@ -7728,6 +7789,8 @@ function LiveChatsPage() {
                 : selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
                     ? t("admin.remove")
+                    : chatMemberPickerMode === "transfer"
+                      ? t("chat.transfer")
                     : t("common.add")
                   : t("common.create")}
             </button>
@@ -7740,7 +7803,7 @@ function LiveChatsPage() {
             <input
               className="input"
               style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-              placeholder={t("friends.search")}
+              placeholder={chatMemberPickerMode === "remove" ? t("chat.searchGroupMembers") : t("friends.search")}
               value={groupQuery}
               onChange={(event) => setGroupQuery(event.target.value)}
             />
@@ -7761,7 +7824,7 @@ function LiveChatsPage() {
                   <div className="row-main">
                     <strong>{user.name}</strong>
                     <div className="row-subtle">
-                      {chatMemberPickerMode === "remove"
+                      {chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer"
                         ? protectedMember?.isOwner
                           ? t("chat.owner")
                           : protectedMember?.isSelf
@@ -7776,7 +7839,7 @@ function LiveChatsPage() {
                   </div>
                   {locked ? (
                     <span className="member-picker-status member-picker-status-locked">
-                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : t("chat.alreadyInGroup")}
+                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : chatMemberPickerMode === "transfer" ? t("account.current") : t("chat.alreadyInGroup")}
                     </span>
                   ) : (
                     <span className={`member-picker-check ${selected ? "is-selected" : ""}`} aria-hidden="true" />

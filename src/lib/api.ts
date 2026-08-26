@@ -622,6 +622,15 @@ export const api = {
     });
   },
 
+  transferGroupOwner(chat_id: number, user_id: number) {
+    return request<ChatDTO>("/chats/group/owner", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: { user_id },
+    });
+  },
+
   deleteGroupChat(chat_id: number) {
     return request<Record<string, never>>("/chats/group", {
       method: "DELETE",

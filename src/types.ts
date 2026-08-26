@@ -33,6 +33,7 @@ export interface TinyUserDTO {
 }
 
 export interface UserDTO extends TinyUserDTO {
+  joined_at?: number;
   is_alive: boolean;
   verified: boolean;
   last_heartbeat: number;
@@ -1121,6 +1122,7 @@ export interface ChatDetail {
     avatarFrameStyle?: AvatarFrameStyle;
     isSelf: boolean;
     isOwner: boolean;
+    joinedAt?: number;
   }>;
 }
 
