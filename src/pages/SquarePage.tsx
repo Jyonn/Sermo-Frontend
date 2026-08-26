@@ -257,7 +257,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           </div>
           <span>{formatRelativeTime(statement.created_at)}</span>
         </div>
-        <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button>
+        {statement.can_pin || statement.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {statement.chat_record?.items?.length ? (
@@ -309,10 +309,10 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           <span className="material-symbols-outlined">chat_bubble</span>
           <span>{statement.comment_count ? t("square.commentsCount", { count: statement.comment_count }) : t("square.comment")}</span>
         </button>
+        <button onClick={(event) => { event.stopPropagation(); onShare(); }} type="button"><span className="material-symbols-outlined">send</span><span>{t("square.share")}</span></button>
       </footer>
       {menuPosition && typeof document !== "undefined" ? createPortal(
         <div className="square-statement-dropdown" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}>
-          <button onClick={() => { setMenuPosition(null); onShare(); }} type="button"><span className="material-symbols-outlined">send</span><span>{t("square.share")}</span></button>
           {statement.can_pin ? <button onClick={() => { setMenuPosition(null); onPin(); }} type="button"><span className="material-symbols-outlined">keep</span><span>{statement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</span></button> : null}
           {statement.can_delete ? <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button> : null}
         </div>,
@@ -331,6 +331,7 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUs
   rootUserId?: number;
 }) {
   const { t } = useI18n();
+  const [repliesExpanded, setRepliesExpanded] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -350,6 +351,7 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUs
     ? comment.reply_to_user
     : null;
   const displayName = comment.is_anonymous ? t("square.anonymousUser") : comment.user.name;
+  const replyCount = Math.max(comment.reply_count || 0, comment.replies?.length || 0);
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}`} onClick={beginReply}>
     {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />}
     <div>
@@ -362,7 +364,8 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUs
           <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
         </div>
       </div>
-      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} rootUserId={threadRootUserId} />)}</div> : null}
+      {!comment.parent_id && replyCount ? <button aria-expanded={repliesExpanded} className="square-comment-replies-toggle" onClick={(event) => { event.stopPropagation(); setRepliesExpanded((current) => !current); }} type="button"><span>{repliesExpanded ? t("square.hideReplies") : t("square.viewReplies", { count: replyCount })}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
+      {!comment.parent_id && repliesExpanded && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} rootUserId={threadRootUserId} />)}</div> : null}
     </div>
     {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
   </article>;

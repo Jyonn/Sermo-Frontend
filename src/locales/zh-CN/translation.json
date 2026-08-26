@@ -209,6 +209,8 @@
   "square.commentsHot": "热门",
   "square.commentsLatest": "最新",
   "square.commentsCount": "{{count}} 条评论",
+  "square.viewReplies": "查看 {{count}} 条回复",
+  "square.hideReplies": "收起回复",
   "square.writeComment": "善言结善缘，恶语伤人心",
   "square.noComments": "还没有评论",
   "square.noCommentsHint": "说点什么，让话题继续。",

@@ -209,6 +209,8 @@
   "square.commentsHot": "Top",
   "square.commentsLatest": "Latest",
   "square.commentsCount": "{{count}} comments",
+  "square.viewReplies": "View {{count}} replies",
+  "square.hideReplies": "Hide replies",
   "square.writeComment": "Kind words build bonds; harsh words leave wounds",
   "square.noComments": "No comments yet",
   "square.noCommentsHint": "Say something and keep it going.",

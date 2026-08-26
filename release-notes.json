@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.4",
+  "id": "2026.08.27.5",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "用户详情更一致",
+      "title": "发言讨论更聚焦",
       "items": [
-        "桌面端与手机端的用户详情现已使用统一、紧凑的排版"
+        "二级回复按需展开，点赞、评论与分享操作更清晰"
       ]
     },
     "en": {
-      "title": "Consistent profile details",
+      "title": "More focused discussions",
       "items": [
-        "User details now share the same compact layout on desktop and mobile"
+        "Replies now expand on demand, with clearer like, comment, and share actions"
       ]
     }
   }
