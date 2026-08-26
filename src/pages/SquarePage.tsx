@@ -13,6 +13,7 @@ import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
+import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { api } from "../lib/api";
@@ -25,7 +26,7 @@ import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, TinyUserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -419,11 +420,26 @@ export default function SquarePage() {
   const [videoGalleryStatementId, setVideoGalleryStatementId] = useState<number | null>(null);
   const [chatRecordGallery, setChatRecordGallery] = useState<{ uris: string[]; index: number; metadata: Array<ImageMetadataDTO | null> } | null>(null);
   const [chatRecordVideo, setChatRecordVideo] = useState<{ uri: string; metadata: VideoMetadataDTO | null } | null>(null);
+  const [chatRecordLocation, setChatRecordLocation] = useState<{
+    location: { latitude: number; longitude: number; address?: string };
+    owner: TinyUserDTO;
+  } | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[] } } | null;
   const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
   const consumedChatRecordDraftRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const openLocationMessage = (event: Event) => {
+      setChatRecordLocation((event as CustomEvent<{
+        location: { latitude: number; longitude: number; address?: string };
+        owner: TinyUserDTO;
+      }>).detail);
+    };
+    window.addEventListener("sermo:location-message", openLocationMessage);
+    return () => window.removeEventListener("sermo:location-message", openLocationMessage);
+  }, []);
 
   useEffect(() => {
     const messageIds = routeState?.squareChatRecordDraft?.messageIds?.filter((value) => Number.isInteger(value) && value > 0) ?? [];
@@ -1612,7 +1628,7 @@ export default function SquarePage() {
             <div className="square-compose-settings">
               <button disabled={anonymousStatement} onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{anonymousStatement ? t("square.exploreOnly") : visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
               {features.squareExploreEnabled && !chatRecordDraft ? <button aria-checked={anonymousStatement} className="square-compose-anonymous-row" onClick={() => { setAnonymousStatement((current) => !current); setVisibility("public"); }} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("square.publishAnonymouslyHint")}</small></div><i className={anonymousStatement ? "is-on" : ""}><span /></i></button> : null}
-              {chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="material-symbols-outlined">privacy_tip</span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
+              {chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
               {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
             </div>
           </div>
@@ -1631,6 +1647,13 @@ export default function SquarePage() {
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
       </BottomSheet>
+      <TravelMapDrawer
+        focusLocation={chatRecordLocation?.location}
+        focusOwner={chatRecordLocation?.owner}
+        historyKey="square-shared-location"
+        onClose={() => setChatRecordLocation(null)}
+        open={Boolean(chatRecordLocation)}
+      />
       <ChatTargetPicker
         busy={sharingChatId !== null}
         busyTargetId={sharingChatId}

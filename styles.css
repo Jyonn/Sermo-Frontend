@@ -7572,7 +7572,8 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 .square-chat-record-preview.chat-conversation-preview {
   width: 100%;
-  height: clamp(300px, 46vh, 440px);
+  height: min(420px, 48vh);
+  max-height: 420px;
   min-height: 0;
   border: 0;
   border-radius: 0;
@@ -7593,15 +7594,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .square-statement-card:not(.is-detail) .square-chat-record {
   overscroll-behavior: auto;
 }
-.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview {
-  height: auto;
-}
-.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview :is(.chat-detail-scene, .message-scroll) {
-  height: auto;
-  overflow: visible;
-  overscroll-behavior: auto;
-  touch-action: pan-y;
-}
+.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview { height: min(360px, 42vh); }
+.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview :is(.chat-detail-scene, .message-scroll) { height: 100%; min-height: 0; }
+.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview .message-scroll { overflow-y: auto; touch-action: pan-y; }
 .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview {
   height: clamp(340px, 54vh, 520px);
 }
@@ -24752,6 +24747,19 @@ html[data-theme="dark"] .message-search-more {
 .chat-preview-shared .chat-detail-scene,
 .chat-preview-shared .message-scroll { overflow: visible; }
 .chat-preview-shared .message-scroll { padding: 14px 10px 20px; }
+.chat-preview-shared.square-chat-record-preview .chat-detail-scene {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.chat-preview-shared.square-chat-record-preview .message-scroll {
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .chat-preview-shared:is(.platform-audit-chat-preview, .forward-bundle-chat-preview, .pinned-message-chat-preview) .message-scroll :is(button, a, audio, video) { pointer-events: auto; }
 :is(.forward-bundle-drawer, .pinned-message-drawer) .drawer-body {
   display: flex;
@@ -26993,11 +27001,11 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-statement-avatar { width: 42px; height: 42px; }
 .square-compose-side-drawer .drawer-body { min-height: 0; padding: 0; overflow: hidden; }
 .square-compose-drawer { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; }
-.square-compose-canvas { display: flex; min-height: 0; flex: 1; flex-direction: column; padding: 20px 18px 18px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.square-compose-canvas { display: flex; min-height: 0; flex: 1; flex-direction: column; padding: 20px 18px max(28px, env(safe-area-inset-bottom)); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scroll-padding-bottom: 28px; -webkit-overflow-scrolling: touch; }
 .square-compose-editor { display: flex; align-items: center; gap: 11px; padding: 0; }
 .square-compose-editor strong { min-width: 0; overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
 .square-compose-writing-zone { position: relative; margin-top: 20px; }
-.square-compose-writing-zone textarea { display: block; width: 100%; min-height: clamp(190px, 30dvh, 270px); resize: none; border: 0; outline: 0; padding: 0 2px 32px; color: var(--text-primary); font: inherit; font-size: 18px; font-weight: 500; line-height: 1.65; letter-spacing: -.015em; background: transparent; }
+.square-compose-writing-zone textarea { display: block; width: 100%; min-height: clamp(190px, 30dvh, 270px); resize: none; border: 0; outline: 0; padding: 0 2px 32px; color: var(--text-primary); font: inherit; font-size: 18px; font-weight: 500; line-height: 1.65; letter-spacing: -.015em; background: transparent !important; box-shadow: none; appearance: none; }
 .square-compose-writing-zone textarea::placeholder { color: var(--text-muted); font-weight: 500; }
 .square-compose-count { position: absolute; right: 2px; bottom: 6px; color: var(--text-secondary); font: 700 12px/1 "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums; }
 .square-compose-count i { color: var(--text-muted); font-style: normal; font-weight: 500; }
@@ -27092,13 +27100,16 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-composer-location span { font-size: 15px; }
 .square-publish-progress { height: 2px; margin: 12px -16px 0; overflow: hidden; background: var(--bg-canvas); }
 .square-publish-progress i { display: block; height: 100%; border-radius: 99px; background: var(--brand-primary); transition: width 180ms ease; }
-.square-compose-settings { margin-top: auto; overflow: hidden; border: 1px solid var(--line-soft); border-radius: 18px; background: color-mix(in srgb, var(--bg-elevated) 78%, transparent); }
+.square-compose-settings { flex: none; margin-top: 18px; overflow: visible; border: 1px solid var(--line-soft); border-radius: 18px; background: color-mix(in srgb, var(--bg-elevated) 78%, transparent); }
 .square-compose-settings > button { display: grid; grid-template-columns: 34px minmax(0, 1fr) 22px; align-items: center; gap: 11px; width: 100%; min-height: 62px; padding: 9px 13px; border: 0; border-bottom: 1px solid var(--line-soft); color: var(--text-primary); font: inherit; text-align: left; background: transparent; }
+.square-compose-settings > button:first-child { border-radius: 17px 17px 0 0; }
+.square-compose-settings > button:last-child { border-radius: 0 0 17px 17px; }
 .square-compose-settings > button:last-child { border-bottom: 0; }
 .square-compose-settings > button > span:first-child { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 14%, transparent); }
 .square-compose-settings > button > span:last-child { color: var(--text-muted); font-size: 20px; }
 .square-compose-settings strong,.square-compose-settings small { display: block; }.square-compose-settings strong { font-size: 14px; }.square-compose-settings small { margin-top: 3px; color: var(--text-muted); font-size: 11px; }
-.square-compose-settings .square-compose-pin-row>i{position:relative;width:38px;height:22px;border-radius:99px;background:var(--line-strong);transition:background 160ms ease}
+.square-compose-settings .square-compose-pin-row{grid-template-columns:34px minmax(0,1fr) 38px}
+.square-compose-settings .square-compose-pin-row>i{position:relative;display:block;align-self:center;width:38px;height:22px;margin:0;border-radius:99px;background:var(--line-strong);transition:background 160ms ease}
 .square-compose-settings .square-compose-pin-row>i span{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:transform 160ms ease}
 .square-compose-settings .square-compose-pin-row>i.is-on{background:var(--brand-primary)}
 .square-compose-settings .square-compose-pin-row>i.is-on span{transform:translateX(16px)}
@@ -27269,7 +27280,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-comment-identity[aria-pressed="true"]{color:var(--text-secondary);background:color-mix(in srgb,var(--text-muted) 11%,var(--bg-elevated))}
 .square-compose-settings .square-compose-anonymous-row{grid-template-columns:34px minmax(0,1fr) 38px}
 .square-compose-settings .square-compose-anonymous-row>.square-anonymous-avatar{width:34px;height:34px;border-radius:11px;box-shadow:none}
-.square-compose-settings .square-compose-anonymous-row>i{position:relative;width:38px;height:22px;border-radius:99px;background:var(--line-strong);transition:background 160ms ease}
+.square-compose-settings .square-compose-anonymous-row>i{position:relative;display:block;align-self:center;width:38px;height:22px;margin:0;border-radius:99px;background:var(--line-strong);transition:background 160ms ease}
 .square-compose-settings .square-compose-anonymous-row>i span{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:transform 160ms ease}
 .square-compose-settings .square-compose-anonymous-row>i.is-on{background:var(--brand-primary)}
 .square-compose-settings .square-compose-anonymous-row>i.is-on span{transform:translateX(16px)}

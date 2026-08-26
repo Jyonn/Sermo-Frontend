@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.11",
+  "id": "2026.08.27.12",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "视频预览更顺手",
+      "title": "发表与聊天记录预览更顺手",
       "items": [
-        "视频沉浸预览现在提供播放、暂停与进度控制，轻触画面即可显示或隐藏操作栏",
-        "聊天中的发言图片和视频现在也能查看完整影像记录"
+        "发表发言时可以顺畅滚动查看全部设置，深色模式下的输入区与开关排版也更加统一",
+        "广场中的合并聊天记录现在支持独立滚动，并可直接打开其中的位置卡片"
       ]
     },
     "en": {
-      "title": "A smoother video viewer",
+      "title": "Smoother posting and chat record previews",
       "items": [
-        "Immersive video previews now include play, pause, and timeline controls with a tap-to-toggle action bar",
-        "Photos and videos embedded in shared Square posts now retain their complete media records"
+        "The post composer now scrolls through every setting cleanly, with a calmer dark-mode editor and aligned switches",
+        "Merged chat records in Square now scroll independently and open shared location cards directly"
       ]
     }
   }
