@@ -12808,7 +12808,8 @@ html[data-theme="dark"] .message-context-menu::after {
 }
 
 html[data-theme="dark"] .message-context-actions.is-secondary {
-  border-color: rgba(184, 197, 190, 0.12);
+  border-top: 0;
+  border-bottom: 0;
 }
 
 html[data-theme="dark"] .message-context-button {

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.5",
+  "id": "2026.08.27.6",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "发言讨论更聚焦",
+      "title": "深色操作栏更干净",
       "items": [
-        "二级回复按需展开，点赞、评论与分享操作更清晰"
+        "聊天消息的更多操作展开后不再出现突兀分隔线"
       ]
     },
     "en": {
-      "title": "More focused discussions",
+      "title": "Cleaner dark action menus",
       "items": [
-        "Replies now expand on demand, with clearer like, comment, and share actions"
+        "Expanded message actions no longer show a distracting divider in dark mode"
       ]
     }
   }
