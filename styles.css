@@ -17118,6 +17118,17 @@ html[data-theme="dark"] .user-profile-panel {
   gap: 10px;
 }
 
+.forward-square-privacy-row {
+  min-height: 78px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-muted) 82%, transparent);
+}
+
+.forward-square-privacy-row .setting-row-icon {
+  color: var(--accent-strong);
+}
+
 .warning-button {
   border-color: rgba(190, 127, 30, 0.3);
   background: rgba(231, 174, 75, 0.16);

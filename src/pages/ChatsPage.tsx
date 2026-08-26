@@ -2505,6 +2505,7 @@ function LiveChatsPage() {
   const [messageSelectionActionPrompt, setMessageSelectionActionPrompt] = useState<MessageSelectionActionPrompt | null>(null);
   const [forwardPickerOpen, setForwardPickerOpen] = useState(false);
   const [forwardSquareConfirmOpen, setForwardSquareConfirmOpen] = useState(false);
+  const [forwardSquareRedacted, setForwardSquareRedacted] = useState(false);
   const [forwardMode, setForwardMode] = useState<"individual" | "bundle">("bundle");
   const [forwardSourceMessageIds, setForwardSourceMessageIds] = useState<number[]>([]);
   const [forwardTargetChatIds, setForwardTargetChatIds] = useState<number[]>([]);
@@ -5752,7 +5753,7 @@ function LiveChatsPage() {
     if (!forwardSourceMessageIds.length || forwardSending) return;
     try {
       setForwardSending(true);
-      await api.createSquareChatRecordStatement(forwardSourceMessageIds);
+      await api.createSquareChatRecordStatement(forwardSourceMessageIds, "public", forwardSquareRedacted);
       setForwardSquareConfirmOpen(false);
       setForwardPickerOpen(false);
       finishMessageSelection();
@@ -7107,7 +7108,7 @@ function LiveChatsPage() {
         beforeList={forwardSourceMessageIds.length > 1 ? (
           <>
           {forwardOpenedFromSelection && Boolean(currentUserMe?.official ?? session?.user.official) ? (
-            <button className="forward-square-destination" disabled={forwardSending} onClick={() => setForwardSquareConfirmOpen(true)} type="button">
+            <button className="forward-square-destination" disabled={forwardSending} onClick={() => { setForwardSquareRedacted(false); setForwardSquareConfirmOpen(true); }} type="button">
               <span className="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
               <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
               <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
@@ -8179,7 +8180,15 @@ function LiveChatsPage() {
         busy={forwardSending}
         onClose={() => { if (!forwardSending) setForwardSquareConfirmOpen(false); }}
         onConfirm={() => void publishForwardBundleToSquare()}
-      />
+      >
+        <SettingRow
+          className="forward-square-privacy-row"
+          description={t("message.forwardToSquareRedactHint")}
+          icon={<span className="material-symbols-outlined" aria-hidden="true">privacy_tip</span>}
+          title={t("message.forwardToSquareRedact")}
+          trailing={<SettingSwitch checked={forwardSquareRedacted} disabled={forwardSending} label={t("message.forwardToSquareRedact")} onChange={setForwardSquareRedacted} />}
+        />
+      </ConfirmDialog>
       <ConfirmDialog
         open={Boolean(messageMenu?.confirmDelete)}
         title={t("message.deleteConfirmTitle")}

@@ -847,6 +847,7 @@ export interface ChatMessagePayloadDTO {
   item_count?: number;
   items?: ForwardBundleItemDTO[];
   first_person_user_id?: number | null;
+  redacted_identity?: boolean;
 }
 
 export interface ForwardBundleItemDTO {

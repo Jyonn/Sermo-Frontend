@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
@@ -13,6 +13,7 @@ interface ConfirmDialogProps {
   danger?: boolean;
   warning?: boolean;
   showCancelButton?: boolean;
+  children?: ReactNode;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   danger = false,
   warning = false,
   showCancelButton = true,
+  children,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
@@ -56,6 +58,7 @@ export function ConfirmDialog({
           <h2>{title}</h2>
           <p>{description}</p>
         </div>
+        {children}
         <div className="confirm-dialog-actions">
           {showCancelButton ? (
             <button className="ghost-button" disabled={busy} onClick={onClose} type="button">

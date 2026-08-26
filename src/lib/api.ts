@@ -800,11 +800,11 @@ export const api = {
     });
   },
 
-  createSquareChatRecordStatement(message_ids: number[], visibility: "public" | "friends" = "public") {
+  createSquareChatRecordStatement(message_ids: number[], visibility: "public" | "friends" = "public", redact_chat_record = false) {
     return request<SquareStatementDTO>("/square/statements/chat-record", {
       method: "POST",
       auth: true,
-      body: { message_ids, visibility },
+      body: { message_ids, visibility, redact_chat_record: redact_chat_record ? 1 : 0 },
     });
   },
 

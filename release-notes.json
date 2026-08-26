@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.18",
+  "id": "2026.08.26.19",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "永久 VIP 权益更清晰",
+      "title": "聊天记录发言支持隐私打码",
       "items": [
-        "永久 VIP 活动页现在完整展示 7 天消息撤回、500 成长值、专属头像框、气泡、名片、广场金名与唯一编号铭牌"
+        "官方账号发布聊天记录到广场时，可以隐藏参与者的头像、昵称与个性化外观"
       ]
     },
     "en": {
-      "title": "Permanent VIP benefits at a glance",
+      "title": "Privacy controls for shared chat records",
       "items": [
-        "The campaign now presents 7-day message recall, 500 Growth Points, exclusive frames, bubbles and profile cards, a golden Square name, and a unique numbered badge"
+        "Official accounts can hide participant names, avatars, and personalization when publishing chat records to Square"
       ]
     }
   }

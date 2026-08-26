@@ -250,12 +250,15 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
       {statement.chat_record?.items?.length ? (
         <div className="square-chat-record" onClick={(event) => event.stopPropagation()}>
           <ChatPreview
-            backgroundTheme={chatBackgroundTheme || "default"}
-            backgroundUri={chatBackgroundUri}
+            backgroundTheme={statement.chat_record.redacted_identity ? "default" : chatBackgroundTheme || "default"}
+            backgroundUri={statement.chat_record.redacted_identity ? undefined : chatBackgroundUri}
             className="square-chat-record-preview"
             firstPersonUserId={statement.chat_record.first_person_user_id}
             initialScrollToEnd
-            messages={forwardBundleItemsAsMessages(statement.chat_record.items)}
+            messages={forwardBundleItemsAsMessages(statement.chat_record.items).map((message) => statement.chat_record?.redacted_identity ? {
+              ...message,
+              user: { ...message.user, name: t("message.redactedParticipant", { number: message.user.name }) },
+            } : message)}
             onOpenImage={(uris, index, metadata) => onOpenChatImage(uris, index, metadata)}
             onOpenVideo={(uri, metadata) => onOpenChatVideo(uri, metadata)}
             showSelfAuthors
