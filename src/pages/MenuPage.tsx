@@ -139,6 +139,21 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
 const activityBubbleStyles = new Set<ChatBubbleStyle>(["baxian-lv", "baxian-zhongli", "baxian-he"]);
 const cityBubbleStyles = new Set<ChatBubbleStyle>(["city-jdz", "city-shanghai", "city-nyc", "city-beijing"]);
+const bubbleRarityOverrides: Partial<Record<ChatBubbleStyle, GrowthRewardDTO["rarity"]>> = {
+  zen: "common",
+  mosaic: "common",
+  newspaper: "common",
+  hero: "uncommon",
+  bauhaus: "uncommon",
+  dragon: "rare",
+  "city-jdz": "rare",
+  "city-shanghai": "rare",
+  "city-nyc": "rare",
+  "city-beijing": "rare",
+  "baxian-lv": "epic",
+  "baxian-zhongli": "epic",
+  "baxian-he": "epic",
+};
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
 const statementStyleRarity: Record<StatementCardStyle, GrowthRewardDTO["rarity"]> = {
   default: "common",
@@ -543,12 +558,15 @@ export default function MenuPage() {
     me?.growth?.levels?.flatMap((item) => item.rewards ?? []).find((reward) => reward.category === category && reward.asset_key === assetKey);
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
     rewardFor(category, assetKey)?.level ?? 1;
-  const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string) =>
-    (category === "bubble" && cityBubbleStyles.has(assetKey as ChatBubbleStyle))
-      ? "epic"
-      : (category === "bubble" && activityBubbleStyles.has(assetKey as ChatBubbleStyle))
-        ? "legendary"
-      : (assetKey === "vip" ? (category === "frame" ? "rare" : "epic") : rewardFor(category, assetKey)?.rarity ?? "common");
+  const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string): GrowthRewardDTO["rarity"] => {
+    if (category === "bubble") {
+      const override = bubbleRarityOverrides[assetKey as ChatBubbleStyle];
+      if (override) return override;
+    }
+    return assetKey === "vip"
+      ? (category === "frame" ? "rare" : "epic")
+      : rewardFor(category, assetKey)?.rarity ?? "common";
+  };
   const currentLevelStage = growthStageForLevel(growthLevel);
   const canCustomizeChatBackground = hasGrowthCapability("menu.personalization.background.use.custom", 8);
   const canUseBackgroundStyle = (theme: ChatBackgroundTheme) => ownsInventoryResource(

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.7",
+  "id": "2026.08.27.8",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "消息转发更从容",
+      "title": "气泡品质更清晰",
       "items": [
-        "单条消息也可选择逐条或卡片转发，会话选择页的底部操作不再遮挡内容"
+        "重新校准多款聊天气泡的品质归类，并修复角色气泡连续展示时的末尾圆角"
       ]
     },
     "en": {
-      "title": "More flexible forwarding",
+      "title": "Clearer bubble tiers",
       "items": [
-        "A single selected message can be forwarded separately or as a card, with a clearer conversation picker footer"
+        "Updated rarity tiers across the bubble catalog and restored the outer corner on grouped character bubbles"
       ]
     }
   }

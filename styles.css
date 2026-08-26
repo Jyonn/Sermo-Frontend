@@ -30032,3 +30032,30 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 .drawer-body > .user-profile-panel .user-profile-group-tile { flex-basis: 70px; }
 .drawer-body > .user-profile-panel .user-profile-group-tile-avatar { width: 60px; height: 60px; border-radius: 18px; }
 .drawer-body > .user-profile-panel .user-profile-relationship-actions { margin-top: 30px; }
+
+/* Character bubbles keep the outside corner fully rounded at the end of a run. */
+.message-group:is(
+  .bubble-style-niko,
+  .bubble-style-fufu,
+  .bubble-style-baxian-lv,
+  .bubble-style-baxian-zhongli,
+  .bubble-style-baxian-he
+) .message-bubble.other.group-end:not(.is-sticker) {
+  border-bottom-left-radius: var(--bubble-skin-group-outer-radius) !important;
+}
+
+.message-group.self:is(
+  .bubble-style-niko,
+  .bubble-style-fufu,
+  .bubble-style-baxian-lv,
+  .bubble-style-baxian-zhongli,
+  .bubble-style-baxian-he
+) .message-bubble.self.group-end:not(.is-sticker) {
+  border-bottom-right-radius: var(--bubble-skin-group-outer-radius) !important;
+}
+
+.message-group.bubble-style-niko { --bubble-skin-group-outer-radius: 19px; }
+.message-group.bubble-style-fufu { --bubble-skin-group-outer-radius: 17px; }
+.message-group:is(.bubble-style-baxian-lv,.bubble-style-baxian-zhongli,.bubble-style-baxian-he) {
+  --bubble-skin-group-outer-radius: 18px;
+}
