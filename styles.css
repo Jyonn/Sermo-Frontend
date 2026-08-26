@@ -5950,6 +5950,101 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   cursor: grabbing;
 }
 
+.immersive-video-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.immersive-video-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.immersive-video-actionbar {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.immersive-video-play {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-self: start;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  font-weight: 750;
+  backdrop-filter: blur(18px);
+}
+
+.immersive-video-time {
+  color: rgba(255, 255, 255, 0.7);
+  font: 700 0.75rem/1 var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.immersive-video-center-control {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(5, 8, 7, 0.56);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+  transition: opacity 160ms ease, transform 180ms ease;
+  backdrop-filter: blur(18px);
+}
+
+.immersive-video-center-control.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.immersive-video-center-control .material-symbols-outlined { font-size: 34px; }
+
+.immersive-video-timeline {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(18px, env(safe-area-inset-left));
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(.22, .8, .3, 1);
+}
+
+.immersive-video-timeline.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.immersive-video-timeline input {
+  width: 100%;
+  accent-color: #43d7ad;
+}
+
 .immersive-image-canvas {
   position: absolute;
   top: 50%;

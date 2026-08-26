@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.27.10",
+  "id": "2026.08.27.11",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "等级标识更统一",
+      "title": "视频预览更顺手",
       "items": [
-        "用户详情、广场发言与评论现在统一展示对应等级的专属胶囊样式"
+        "视频沉浸预览现在提供播放、暂停与进度控制，轻触画面即可显示或隐藏操作栏",
+        "聊天中的发言图片和视频现在也能查看完整影像记录"
       ]
     },
     "en": {
-      "title": "Consistent level badges",
+      "title": "A smoother video viewer",
       "items": [
-        "User profiles, Square posts, and comments now share the same stage-specific level badges"
+        "Immersive video previews now include play, pause, and timeline controls with a tap-to-toggle action bar",
+        "Photos and videos embedded in shared Square posts now retain their complete media records"
       ]
     }
   }

@@ -784,6 +784,8 @@
   "media.fitPage": "Fit",
   "media.fillScreen": "Fill",
   "media.actualSize": "Actual size",
+  "media.play": "Play",
+  "media.pause": "Pause",
   "media.zoomIn": "Zoom in",
   "media.zoomOut": "Zoom out",
   "media.downloadImage": "Download image",

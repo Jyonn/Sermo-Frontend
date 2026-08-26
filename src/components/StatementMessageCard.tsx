@@ -4,10 +4,17 @@ import type { SquareStatementDTO } from "../types";
 import { useI18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import { ImageLightbox, MediaLightbox } from "./ImageLightbox";
+import { MediaMetadataPanel } from "./MediaMetadataPanel";
 
 function formatDuration(value: number) {
   const seconds = Math.max(0, Math.floor(value || 0));
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function formatFileSize(value?: number | null) {
+  if (value == null) return "";
+  if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(value / 1024))} KB`;
 }
 
 export function StatementMessageCard({ statement }: { statement: SquareStatementDTO | null | undefined }) {
@@ -122,13 +129,15 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
         <span><span className="material-symbols-outlined">chat_bubble</span>{statement.comment_count}</span>
         <strong>{t("message.viewStatement")}</strong>
       </button>
-      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} uris={images.map((image) => image.uri)} /> : null}
+      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} details={images.map((image) => <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} />)} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} uris={images.map((image) => image.uri)} /> : null}
       {videoOpen && video ? <MediaLightbox altPrefix={t("square.video")} index={0} items={[{
         kind: "video",
         uri: video.uri,
         posterUri: video.thumbnail_uri,
         width: video.metadata?.pixel_width,
         height: video.metadata?.pixel_height,
+        detail: <MediaMetadataPanel kind="video" metadata={video.metadata} />,
+        downloadLabel: formatFileSize(video.metadata?.file_size),
       }]} onClose={() => setVideoOpen(false)} onIndexChange={() => undefined} /> : null}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 
@@ -300,6 +300,83 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
   </div>;
 }
 
+function formatPlaybackTime(value: number) {
+  const seconds = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src: string; onClose: () => void }) {
+  const { t } = useI18n();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => () => videoRef.current?.pause(), []);
+
+  const togglePlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) void video.play(); else video.pause();
+  };
+
+  return <div
+    className="immersive-video-stage"
+    onClick={(event) => {
+      event.stopPropagation();
+      setControlsVisible((visible) => !visible);
+    }}
+    role="presentation"
+  >
+    <video
+      className="immersive-video-canvas"
+      onDurationChange={(event) => setDuration(event.currentTarget.duration)}
+      onEnded={() => setPlaying(false)}
+      onPause={() => setPlaying(false)}
+      onPlay={() => setPlaying(true)}
+      onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+      playsInline
+      poster={poster || undefined}
+      preload="metadata"
+      ref={videoRef}
+      src={src}
+    />
+    <button
+      aria-label={playing ? t("media.pause") : t("media.play")}
+      className={`immersive-video-center-control${controlsVisible ? " is-visible" : ""}`}
+      onClick={(event) => { event.stopPropagation(); togglePlayback(); }}
+      type="button"
+    >
+      <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+    </button>
+    <div className={`immersive-image-actionbar immersive-video-actionbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
+      <button aria-label={playing ? t("media.pause") : t("media.play")} className="immersive-video-play" onClick={togglePlayback} type="button">
+        <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+        <span>{playing ? t("media.pause") : t("media.play")}</span>
+      </button>
+      <span className="immersive-video-time">{formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}</span>
+      <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <div className={`immersive-video-timeline${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
+      <input
+        aria-label={t("media.duration")}
+        max={Math.max(duration, 0)}
+        min={0}
+        onChange={(event) => {
+          const video = videoRef.current;
+          if (video) video.currentTime = Number(event.currentTarget.value);
+        }}
+        step={0.01}
+        type="range"
+        value={Math.min(currentTime, duration || 0)}
+      />
+    </div>
+  </div>;
+}
+
 export function MediaLightbox({
   index,
   items,
@@ -326,7 +403,7 @@ export function MediaLightbox({
 
   return createPortal(
     <div className="dialog-backdrop message-image-preview-backdrop" onClick={() => {
-      if (immersive && activeItem.kind === "image") return;
+      if (immersive) return;
       if (gestureRef.current?.moved) {
         gestureRef.current = null;
         return;
@@ -346,7 +423,9 @@ export function MediaLightbox({
             <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
               <div className={`message-image-preview-frame${item.kind === "video" ? " message-video-preview-frame" : ""}`}>
                 {item.kind === "video"
-                  ? <video className="message-video-preview" controls={!immersive} onClick={immersive ? undefined : (event) => event.stopPropagation()} playsInline poster={item.posterUri || undefined} preload="metadata" src={item.uri} />
+                  ? immersive && itemIndex === index
+                    ? <ImmersiveVideo onClose={close} poster={item.posterUri} src={item.uri} />
+                    : <video className="message-video-preview" controls onClick={(event) => event.stopPropagation()} playsInline poster={item.posterUri || undefined} preload="metadata" src={item.uri} />
                   : immersive && itemIndex === index
                     ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} src={item.uri} />
                     : <img alt={`${resolvedAltPrefix} ${itemIndex + 1}`} className="message-image-preview" draggable={false} src={item.uri} />}
