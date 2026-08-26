@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.25",
+  "id": "2026.08.26.26",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "匿名回复更安心",
+      "title": "匿名回复显示更清楚",
       "items": [
-        "匿名发言作者默认以匿名身份回复；切换为公开回复时会再次确认，并完整保护匿名通知中的身份信息"
+        "匿名发言作者默认匿名回复，公开回复会再次确认；评论区现在会完整显示“匿名用户”"
       ]
     },
     "en": {
-      "title": "Safer anonymous replies",
+      "title": "Clearer anonymous replies",
       "items": [
-        "Anonymous post authors now reply anonymously by default; public replies require confirmation and anonymous notifications keep identity details private"
+        "Anonymous post authors reply anonymously by default with confirmation for public replies, and the anonymous identity label now stays fully visible"
       ]
     }
   }
