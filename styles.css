@@ -7486,6 +7486,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+.square-chat-record-preview.chat-conversation-preview .message-group {
+  zoom: .8;
+}
 .square-chat-record-preview.chat-conversation-preview .message-scroll :is(button, a, audio, video) {
   pointer-events: auto;
 }

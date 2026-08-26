@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.28",
+  "id": "2026.08.26.29",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "匿名发言身份更清晰",
+      "title": "广场聊天记录更适配小屏",
       "items": [
-        "聊天中的匿名发言卡片现在使用统一匿名头像与身份，不再出现容易误解的字母头像"
+        "广场转发的聊天记录现在采用更紧凑的头像与气泡比例，在窄屏上阅读更舒适"
       ]
     },
     "en": {
-      "title": "Clearer anonymous posts in chat",
+      "title": "Shared chats fit smaller screens",
       "items": [
-        "Anonymous post cards in chat now use a consistent anonymous avatar and identity instead of a misleading letter avatar"
+        "Chat records shared to Square now use more compact avatars and bubbles for comfortable reading on narrow screens"
       ]
     }
   }
