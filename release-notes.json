@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.13",
+  "id": "2026.08.26.14",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "消息操作更清爽",
+      "title": "消息操作栏更紧凑",
       "items": [
-        "消息长按操作会优先展示常用功能，更多操作可在原位置展开；置顶消息仍可快速跳转到上下文"
+        "消息操作会根据可用功能自动调整宽度，不再留下多余空位，更多操作仍可在原位置展开"
       ]
     },
     "en": {
-      "title": "Cleaner message actions",
+      "title": "More compact message actions",
       "items": [
-        "Long-press now prioritizes common actions and reveals the rest in place, while pinned messages retain quick context jumping"
+        "The message action menu now fits its available actions without empty slots, while additional actions still expand in place"
       ]
     }
   }

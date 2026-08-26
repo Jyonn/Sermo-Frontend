@@ -8099,10 +8099,18 @@ function LiveChatsPage() {
               } else if (primaryActions.length > 4) {
                 secondaryActions.unshift(...primaryActions.splice(4));
               }
+              const primaryActionCount = primaryActions.length + (secondaryActions.length ? 1 : 0);
+              const primaryActionWidth = primaryActionCount * 74 + Math.max(0, primaryActionCount - 1) * 5;
 
               return (
                 <div className="message-context-sections">
-                  <div className="message-context-actions is-primary">
+                  <div
+                    className="message-context-actions is-primary"
+                    style={{
+                      gridTemplateColumns: `repeat(${primaryActionCount}, minmax(0, 1fr))`,
+                      width: `min(${primaryActionWidth}px, calc(100vw - 42px))`,
+                    }}
+                  >
                     {primaryActions}
                     {secondaryActions.length ? (
                       <button
@@ -8119,7 +8127,12 @@ function LiveChatsPage() {
                   {secondaryActions.length ? (
                     <div className={`message-context-more${messageMenu.expanded ? " is-open" : ""}`} aria-hidden={!messageMenu.expanded}>
                       <div>
-                        <div className="message-context-actions is-secondary">{secondaryActions}</div>
+                        <div
+                          className="message-context-actions is-secondary"
+                          style={{ gridTemplateColumns: `repeat(${Math.min(5, secondaryActions.length)}, minmax(0, 1fr))` }}
+                        >
+                          {secondaryActions}
+                        </div>
                       </div>
                     </div>
                   ) : null}
