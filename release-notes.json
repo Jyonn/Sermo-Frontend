@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.15",
+  "id": "2026.08.26.16",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "广场评论更清晰",
+      "title": "聊天记录也能成为发言",
       "items": [
-        "评论时间、回复与点赞重新排布，层间回复关系更直观，点击评论即可快速回复"
+        "官方账号可把多选聊天合并发布到广场，读者可以像浏览会话一样滚动查看并打开其中的图片或视频"
       ]
     },
     "en": {
-      "title": "Clearer Square discussions",
+      "title": "Chat records can become statements",
       "items": [
-        "Comment timing, replies, and likes are now easier to scan, with clearer reply relationships and faster inline replies"
+        "Official accounts can publish selected chat messages to Square as a scrollable record with full image and video viewing"
       ]
     }
   }

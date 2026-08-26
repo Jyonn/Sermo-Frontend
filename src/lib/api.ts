@@ -799,6 +799,14 @@ export const api = {
     });
   },
 
+  createSquareChatRecordStatement(message_ids: number[], visibility: "public" | "friends" = "public") {
+    return request<SquareStatementDTO>("/square/statements/chat-record", {
+      method: "POST",
+      auth: true,
+      body: { message_ids, visibility },
+    });
+  },
+
   resolveSquareLocation(latitude: number, longitude: number) {
     return request<{ latitude: number; longitude: number; address: string; geocoding_provider?: string }>("/square/location", {
       method: "POST",

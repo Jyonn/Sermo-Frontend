@@ -24,8 +24,8 @@ import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import type { ActivityCampaignDTO, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, VideoMetadataDTO } from "../types";
-import ChatsPage from "./ChatsPage";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, VideoMetadataDTO } from "../types";
+import ChatsPage, { ChatPreview, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
 import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.webp";
@@ -175,15 +175,19 @@ function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
   return chat.title || shareChatPeer(chat, currentUserId)?.name || "Sermo";
 }
 
-function StatementCard({ statement, canInteract, cardRef, detail = false, onDelete, onLike, onOpen, onOpenImage, onOpenProfile, onOpenVideo, onPin, onShare }: {
+function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, onDelete, onLike, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenProfile, onOpenVideo, onPin, onShare }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   cardRef?: (node: HTMLElement | null) => void;
   detail?: boolean;
+  chatBackgroundTheme?: ChatBackgroundTheme;
+  chatBackgroundUri?: string;
   onDelete: () => void;
   onLike: () => void;
   onOpen: () => void;
   onOpenImage: (index: number) => void;
+  onOpenChatImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>) => void;
+  onOpenChatVideo: (uri: string, metadata: VideoMetadataDTO | null) => void;
   onOpenProfile: () => void;
   onOpenVideo: () => void;
   onPin: () => void;
@@ -237,6 +241,21 @@ function StatementCard({ statement, canInteract, cardRef, detail = false, onDele
         <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button>
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
+      {statement.chat_record?.items?.length ? (
+        <div className="square-chat-record" onClick={(event) => event.stopPropagation()}>
+          <ChatPreview
+            backgroundTheme={chatBackgroundTheme || "default"}
+            backgroundUri={chatBackgroundUri}
+            className="square-chat-record-preview"
+            firstPersonUserId={statement.chat_record.first_person_user_id}
+            initialScrollToEnd
+            messages={forwardBundleItemsAsMessages(statement.chat_record.items)}
+            onOpenImage={(uris, index, metadata) => onOpenChatImage(uris, index, metadata)}
+            onOpenVideo={(uri, metadata) => onOpenChatVideo(uri, metadata)}
+            showSelfAuthors
+          />
+        </div>
+      ) : null}
       {images.length ? (
         <div className={`square-statement-images count-${Math.min(images.length, 9)}`}>
           {images.map((image, index) => (
@@ -367,6 +386,8 @@ export default function SquarePage() {
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
   const [gallery, setGallery] = useState<{ statementId: number; index: number } | null>(null);
   const [videoGalleryStatementId, setVideoGalleryStatementId] = useState<number | null>(null);
+  const [chatRecordGallery, setChatRecordGallery] = useState<{ uris: string[]; index: number; metadata: Array<ImageMetadataDTO | null> } | null>(null);
+  const [chatRecordVideo, setChatRecordVideo] = useState<{ uri: string; metadata: VideoMetadataDTO | null } | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const routeState = location.state as { squareInlineFocus?: boolean } | null;
@@ -1411,7 +1432,7 @@ export default function SquarePage() {
                   <strong>{t("square.statementDetail")}</strong>
                   <span aria-hidden="true" />
                 </header> : null}
-                <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+                <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
                 {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
                 </div>
               </Fragment>;
@@ -1429,7 +1450,7 @@ export default function SquarePage() {
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <div className="square-desktop-detail-scroll">
             <div className="square-statement-detail-stage">
-              <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
+              <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
             </div>
             {discussionContent}
           </div>
@@ -1543,7 +1564,7 @@ export default function SquarePage() {
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             {discussionContent}
           </div>
@@ -1650,6 +1671,8 @@ export default function SquarePage() {
       </SideDrawer>
       {gallery && galleryImages.length ? <MediaLightbox altPrefix={t("square.photo")} index={gallery.index} items={galleryImages.map((image) => ({ uri: image.uri, kind: "image", width: image.metadata?.pixel_width, height: image.metadata?.pixel_height, detail: <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} />, downloadLabel: formatImageFileSize(image.metadata?.file_size) }))} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} /> : null}
       {galleryVideo ? <MediaLightbox index={0} items={[{ uri: galleryVideo.uri, kind: "video", posterUri: galleryVideo.thumbnail_uri, width: galleryVideo.metadata?.pixel_width, height: galleryVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={galleryVideo.metadata} />, downloadLabel: formatImageFileSize(galleryVideo.metadata?.file_size) }]} onClose={() => setVideoGalleryStatementId(null)} onIndexChange={() => undefined} /> : null}
+      {chatRecordGallery ? <MediaLightbox altPrefix={t("square.photo")} index={chatRecordGallery.index} items={chatRecordGallery.uris.map((uri, index) => ({ uri, kind: "image" as const, width: chatRecordGallery.metadata[index]?.pixel_width, height: chatRecordGallery.metadata[index]?.pixel_height, detail: <MediaMetadataPanel key={`${uri}-${index}`} kind="image" metadata={chatRecordGallery.metadata[index]} />, downloadLabel: formatImageFileSize(chatRecordGallery.metadata[index]?.file_size) }))} onClose={() => setChatRecordGallery(null)} onIndexChange={(index) => setChatRecordGallery((current) => current ? { ...current, index } : null)} /> : null}
+      {chatRecordVideo ? <MediaLightbox index={0} items={[{ uri: chatRecordVideo.uri, kind: "video", width: chatRecordVideo.metadata?.pixel_width, height: chatRecordVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={chatRecordVideo.metadata} />, downloadLabel: formatImageFileSize(chatRecordVideo.metadata?.file_size) }]} onClose={() => setChatRecordVideo(null)} onIndexChange={() => undefined} /> : null}
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>

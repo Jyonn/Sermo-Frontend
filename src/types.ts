@@ -23,6 +23,8 @@ export interface TinyUserDTO {
   permanent_vip_slot?: number | null;
   show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
+  chat_background_theme?: ChatBackgroundTheme;
+  chat_background_uri?: string;
   avatar_frame_style?: AvatarFrameStyle;
   statement_card_style?: StatementCardStyle;
   profile_card_theme?: ProfileCardTheme;
@@ -170,6 +172,8 @@ export interface AccessPayload {
   is_permanent_vip?: boolean;
   show_self_avatar?: boolean;
   chat_bubble_style?: ChatBubbleStyle;
+  chat_background_theme?: ChatBackgroundTheme;
+  chat_background_uri?: string;
   avatar_frame_style?: AvatarFrameStyle;
   statement_card_style?: StatementCardStyle;
   expire?: number;
@@ -665,6 +669,7 @@ export interface SquareStatementDTO {
     geocoding_provider?: string;
   } | null;
   media: SquareStatementMediaDTO[];
+  chat_record?: ChatMessagePayloadDTO | null;
   comment_count: number;
   like_count: number;
   liked: boolean;
