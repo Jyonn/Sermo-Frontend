@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.17",
+  "id": "2026.08.26.18",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "探索支持匿名发言",
+      "title": "永久 VIP 权益更清晰",
       "items": [
-        "探索开启后可以匿名发言；匿名内容不会出现在好友圈或个人主页，作者仍可在“我的”中管理，并可选择匿名回复"
+        "永久 VIP 活动页现在完整展示 7 天消息撤回、500 成长值、专属头像框、气泡、名片、广场金名与唯一编号铭牌"
       ]
     },
     "en": {
-      "title": "Anonymous posts in Explore",
+      "title": "Permanent VIP benefits at a glance",
       "items": [
-        "When Explore is enabled, members can post anonymously; anonymous posts stay out of Friends and profiles while remaining manageable in My"
+        "The campaign now presents 7-day message recall, 500 Growth Points, exclusive frames, bubbles and profile cards, a golden Square name, and a unique numbered badge"
       ]
     }
   }

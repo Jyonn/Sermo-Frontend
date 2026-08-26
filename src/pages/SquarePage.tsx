@@ -1654,7 +1654,19 @@ export default function SquarePage() {
             <span>FOUNDING 100</span>
             <strong>{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
             <p>{t("vip.rewards")}</p>
-            <small>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ?? "-" }) : t("vip.remaining", { count: vipCampaign.remaining })}</small>
+            <small>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ? String(vipCampaign.slot).padStart(3, "0") : "---" }) : t("vip.remaining", { count: vipCampaign.remaining })}</small>
+          </section>
+          <section className="vip-campaign-benefits">
+            <header><span>{t("vip.privilegesEyebrow")}</span><strong>{t("vip.privilegesTitle")}</strong></header>
+            <div className="vip-campaign-benefit-grid">
+              <article className="is-featured"><b>7D</b><span><strong>{t("vip.recallTitle")}</strong><small>{t("vip.recallDescription")}</small></span></article>
+              <article className="is-featured"><b>+500</b><span><strong>{t("vip.growthTitle")}</strong><small>{t("vip.growthDescription")}</small></span></article>
+              <article><b>FRAME</b><span><strong>{t("vip.frameTitle")}</strong><small>{t("vip.frameDescription")}</small></span></article>
+              <article><b>BUBBLE</b><span><strong>{t("vip.bubbleTitle")}</strong><small>{t("vip.bubbleDescription")}</small></span></article>
+              <article><b>CARD</b><span><strong>{t("vip.cardTitle")}</strong><small>{t("vip.cardDescription")}</small></span></article>
+              <article><b>GOLD</b><span><strong>{t("vip.squareTitle")}</strong><small>{t("vip.squareDescription")}</small></span></article>
+              <article className="is-wide"><b>{vipCampaign.claimed_by_user && vipCampaign.slot ? String(vipCampaign.slot).padStart(3, "0") : "001"}</b><span><strong>{t("vip.badgeTitle")}</strong><small>{t("vip.badgeDescription")}</small></span></article>
+            </div>
           </section>
           {!vipCampaign.claimed_by_user ? <div className="vip-campaign-requirements">{[
             ["email", t("contact.verifyEmail"), vipCampaign.requirements.email],
