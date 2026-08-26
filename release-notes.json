@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.16",
+  "id": "2026.08.26.17",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录也能成为发言",
+      "title": "探索支持匿名发言",
       "items": [
-        "官方账号可把多选聊天合并发布到广场，读者可以像浏览会话一样滚动查看并打开其中的图片或视频"
+        "探索开启后可以匿名发言；匿名内容不会出现在好友圈或个人主页，作者仍可在“我的”中管理，并可选择匿名回复"
       ]
     },
     "en": {
-      "title": "Chat records can become statements",
+      "title": "Anonymous posts in Explore",
       "items": [
-        "Official accounts can publish selected chat messages to Square as a scrollable record with full image and video viewing"
+        "When Explore is enabled, members can post anonymously; anonymous posts stay out of Friends and profiles while remaining manageable in My"
       ]
     }
   }

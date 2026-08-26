@@ -137,6 +137,11 @@ function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQ
           <footer><span>{t("square.quota24Hours")} · {item.used}/{item.limit ?? "∞"}</span><span>{t("square.quota7Days")} · {item.weeklyUsed}/{item.weeklyLimit ?? "∞"}</span></footer>
         </article>;
       })}
+      {quota.statements.anonymous_available && quota.statements.anonymous_weekly_limit !== null ? <article className="square-quota-anonymous-card">
+        <header><span className="material-symbols-outlined">visibility_off</span><strong>{t("square.quotaAnonymous")}</strong><b>{t("square.quotaRemaining", { count: Math.max(0, quota.statements.anonymous_weekly_limit - quota.statements.anonymous_weekly_used) })}</b></header>
+        <div className="square-quota-meter"><i style={{ transform: `scaleX(${Math.min(1, quota.statements.anonymous_weekly_used / Math.max(1, quota.statements.anonymous_weekly_limit))})` }} /></div>
+        <footer><span>{t("square.quotaAnonymousWeekly", { used: quota.statements.anonymous_weekly_used, limit: quota.statements.anonymous_weekly_limit })}</span><span>{t("square.exploreOnly")}</span></footer>
+      </article> : null}
       <article className="square-quota-like-card"><header><span className="material-symbols-outlined">favorite</span><strong>{t("square.quotaLikes")}</strong><b>{t("square.quotaUnlimitedShort")}</b></header><p>{t("square.quotaLikesToday", { count: quota.likes.daily_used })}</p></article>
     </div>
     <section className="square-quota-capabilities">
@@ -202,6 +207,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   const images = statement.media.filter((item) => item.kind === "image");
   const audio = statement.media.find((item) => item.kind === "audio");
   const video = statement.media.find((item) => item.kind === "video");
+  const anonymousName = t("square.anonymousUser");
   useEffect(() => {
     if (!menuPosition) return;
     const close = (event: PointerEvent) => {
@@ -222,19 +228,19 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   return (
     <article className={`square-statement-card${detail ? " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} ref={cardRef} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
       <header className="square-statement-author">
-        <button className="square-statement-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(); }} type="button">
-          <UserAvatar
+        <button className={`square-statement-avatar-button${statement.is_anonymous ? " is-anonymous" : ""}`} disabled={statement.is_anonymous} onClick={(event) => { event.stopPropagation(); if (!statement.is_anonymous) onOpenProfile(); }} type="button">
+          {statement.is_anonymous ? <span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar
             className="square-statement-avatar"
             frame={statement.user.avatar_frame_style}
             name={statement.user.name}
             uri={statement.user.avatar_uri}
             vip={Boolean(statement.user.is_permanent_vip)}
-          />
+          />}
         </button>
         <div className="square-statement-author-copy">
           <div className={`square-statement-author-name${statement.user.is_permanent_vip ? " is-vip" : ""}`}>
-            <strong>{statement.user.name}</strong>
-            {!statement.user.official && statement.user.growth_level ? <b>LV{statement.user.growth_level}</b> : null}
+            <strong>{statement.is_anonymous ? anonymousName : statement.user.name}</strong>
+            {!statement.is_anonymous && !statement.user.official && statement.user.growth_level ? <b>LV{statement.user.growth_level}</b> : null}
           </div>
           <span>{formatRelativeTime(statement.created_at)}</span>
         </div>
@@ -327,10 +333,11 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUs
   const layerReplyTarget = comment.parent_id && comment.reply_to_user?.user_id !== threadRootUserId
     ? comment.reply_to_user
     : null;
+  const displayName = comment.is_anonymous ? t("square.anonymousUser") : comment.user.name;
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}`} onClick={beginReply}>
-    <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
+    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />}
     <div>
-      <header><div className={`square-comment-author-name${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
+      <header><div className={`square-comment-author-name${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
       <p>{comment.text}</p>
       <div className="square-comment-footer">
         <time>{formatRelativeTime(comment.created_at)}</time>
@@ -366,6 +373,8 @@ export default function SquarePage() {
   const [error, setError] = useState("");
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
+  const [anonymousStatement, setAnonymousStatement] = useState(false);
+  const [anonymousComment, setAnonymousComment] = useState(false);
   const [pinOnPublish, setPinOnPublish] = useState(false);
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [video, setVideo] = useState<SelectedVideo | null>(null);
@@ -876,6 +885,10 @@ export default function SquarePage() {
     return () => controller.abort();
   }, [commentSort, commentStatementId, t]);
 
+  useEffect(() => {
+    setAnonymousComment(false);
+  }, [commentStatementId]);
+
   const alignStatementBelowHeader = (element: HTMLElement, behavior: ScrollBehavior) => {
     const screen = element.closest<HTMLElement>(".square-feed-screen");
     const header = screen?.querySelector<HTMLElement>(".tab-sticky-header");
@@ -1012,7 +1025,7 @@ export default function SquarePage() {
     if (commentStatementId === null || !content || commentSending) return;
     setCommentSending(true);
     try {
-      const comment = await api.createSquareStatementComment(commentStatementId, content, replyTarget?.comment_id);
+      const comment = await api.createSquareStatementComment(commentStatementId, content, replyTarget?.comment_id, anonymousComment);
       const rootId = comment.root_id ?? replyTarget?.root_id ?? replyTarget?.comment_id;
       setComments((current) => replyTarget
         ? current.map((item) => item.comment_id === rootId ? { ...item, reply_count: item.reply_count + 1, replies: [...(item.replies ?? []), comment] } : item)
@@ -1022,6 +1035,7 @@ export default function SquarePage() {
         : statement));
       setCommentText("");
       setReplyTarget(null);
+      setAnonymousComment(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("square.commentFailed"));
     } finally {
@@ -1149,7 +1163,7 @@ export default function SquarePage() {
         });
         media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
       }
-      const statement = await api.createSquareStatement({ text: text.trim(), visibility, media, location: statementLocation, pin: pinOnPublish ? 1 : 0 });
+      const statement = await api.createSquareStatement({ text: text.trim(), visibility: anonymousStatement ? "public" : visibility, media, location: statementLocation, pin: pinOnPublish ? 1 : 0, anonymous: anonymousStatement ? 1 : 0 });
       setStatements((current) => [statement, ...current]);
       if (pinOnPublish) setPinnedStatement(statement);
       photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
@@ -1158,6 +1172,7 @@ export default function SquarePage() {
       setVoiceFile(null);
       setVoiceDuration(0);
       setVisibility("public");
+      setAnonymousStatement(false);
       setStatementLocation(null);
       setPinOnPublish(false);
       if (video) URL.revokeObjectURL(video.preview);
@@ -1300,7 +1315,8 @@ export default function SquarePage() {
     </section>
   );
 
-  const commentComposer = canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
+  const canCommentAnonymously = Boolean(activeCommentStatement?.is_anonymous && activeCommentStatement.is_mine);
+  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); void sendComment(); }}>{anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />}<div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} />{canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}</div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
@@ -1523,7 +1539,8 @@ export default function SquarePage() {
               {!statementLocation ? <button disabled={locationLoading} onClick={locateStatement} type="button"><span className={`material-symbols-outlined${locationLoading ? " is-spinning" : ""}`}>{locationLoading ? "progress_activity" : "location_on"}</span><span>{locationLoading ? t("square.locating") : t("square.location")}</span></button> : null}
             </div>
             <div className="square-compose-settings">
-              <button onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
+              <button disabled={anonymousStatement} onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{anonymousStatement ? t("square.exploreOnly") : visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
+              {features.squareExploreEnabled ? <button aria-checked={anonymousStatement} className="square-compose-anonymous-row" onClick={() => { setAnonymousStatement((current) => !current); setVisibility("public"); }} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("square.publishAnonymouslyHint")}</small></div><i className={anonymousStatement ? "is-on" : ""}><span /></i></button> : null}
               {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
             </div>
           </div>

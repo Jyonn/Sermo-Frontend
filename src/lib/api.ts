@@ -791,6 +791,7 @@ export const api = {
     media: SquareStatementDraftMedia[];
     location?: { latitude: number; longitude: number; address?: string; geocoding_provider?: string } | null;
     pin?: 0 | 1;
+    anonymous?: 0 | 1;
   }) {
     return request<SquareStatementDTO>("/square/statements", {
       method: "POST",
@@ -835,11 +836,11 @@ export const api = {
     });
   },
 
-  createSquareStatementComment(statementId: number, text: string, parentId?: number | null) {
+  createSquareStatementComment(statementId: number, text: string, parentId?: number | null, anonymous = false) {
     return request<SquareStatementCommentDTO>(`/square/statements/${statementId}/comments`, {
       method: "POST",
       auth: true,
-      body: { text, parent_id: parentId ?? null },
+      body: { text, parent_id: parentId ?? null, anonymous: anonymous ? 1 : 0 },
     });
   },
 

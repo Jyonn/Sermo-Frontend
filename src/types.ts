@@ -29,6 +29,7 @@ export interface TinyUserDTO {
   statement_card_style?: StatementCardStyle;
   profile_card_theme?: ProfileCardTheme;
   growth_level?: number;
+  anonymous?: boolean;
 }
 
 export interface UserDTO extends TinyUserDTO {
@@ -662,6 +663,8 @@ export interface SquareStatementDTO {
   user: TinyUserDTO;
   text: string;
   visibility: "public" | "friends";
+  is_anonymous?: boolean;
+  is_mine?: boolean;
   location?: {
     latitude: number;
     longitude: number;
@@ -691,6 +694,8 @@ export interface SquareStatementCommentDTO {
   reply_count: number;
   liked: boolean;
   can_delete: boolean;
+  is_anonymous?: boolean;
+  is_author?: boolean;
   replies?: SquareStatementCommentDTO[];
   created_at: number;
 }
@@ -724,6 +729,9 @@ export interface SquareQuotaDTO {
     daily_limit: number | null;
     weekly_used: number;
     weekly_limit: number | null;
+    anonymous_weekly_used: number;
+    anonymous_weekly_limit: number | null;
+    anonymous_available: boolean;
   };
   comments: {
     daily_used: number;

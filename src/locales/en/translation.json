@@ -2123,4 +2123,13 @@
   ,"activity.limitedReward": "Event exclusive"
   ,"cloudResources.emptyFiles": "No cloud files yet"
   ,"cloudResources.noMatchingFiles": "No matching files"
+  ,"square.anonymousUser": "Anonymous"
+  ,"square.authorTag": "Author"
+  ,"square.publishAnonymously": "Post anonymously"
+  ,"square.publishAnonymouslyHint": "Shown only in Explore without revealing your identity"
+  ,"square.exploreOnly": "Explore only"
+  ,"square.commentAnonymously": "Reply anonymously"
+  ,"square.commentPublicly": "Reply publicly"
+  ,"square.quotaAnonymous": "Anonymous posts"
+  ,"square.quotaAnonymousWeekly": "7 days · {{used}}/{{limit}}"
 }
