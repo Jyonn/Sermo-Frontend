@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.26.14",
+  "id": "2026.08.26.15",
   "publishedAt": "2026-08-26",
   "locales": {
     "zh-CN": {
-      "title": "消息操作栏更紧凑",
+      "title": "广场评论更清晰",
       "items": [
-        "消息操作会根据可用功能自动调整宽度，不再留下多余空位，更多操作仍可在原位置展开"
+        "评论时间、回复与点赞重新排布，层间回复关系更直观，点击评论即可快速回复"
       ]
     },
     "en": {
-      "title": "More compact message actions",
+      "title": "Clearer Square discussions",
       "items": [
-        "The message action menu now fits its available actions without empty slots, while additional actions still expand in place"
+        "Comment timing, replies, and likes are now easier to scan, with clearer reply relationships and faster inline replies"
       ]
     }
   }

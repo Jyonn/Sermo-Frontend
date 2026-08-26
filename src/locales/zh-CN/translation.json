@@ -256,6 +256,7 @@
   "square.desktopSelectStatementHint": "在左侧浏览，详情与评论会留在这里。",
   "square.reply": "回复",
   "square.writeReply": "写下回复",
+  "square.replyPlaceholder": "回复 @{{name}}",
   "square.replyingTo": "回复 {{name}}",
   "menu.squareTabOutfit": "衣服",
   "menu.squareTabLimbs": "四肢",

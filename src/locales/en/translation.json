@@ -256,6 +256,7 @@
   "square.desktopSelectStatementHint": "Browse the feed on the left. Details and comments stay here.",
   "square.reply": "Reply",
   "square.writeReply": "Write a reply",
+  "square.replyPlaceholder": "Reply to @{{name}}",
   "square.replyingTo": "Replying to {{name}}",
   "menu.squareTabOutfit": "Outfit",
   "menu.squareTabLimbs": "Limbs",

@@ -281,12 +281,13 @@ function StatementCard({ statement, canInteract, cardRef, detail = false, onDele
   );
 }
 
-function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
+function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUserId }: {
   comment: SquareStatementCommentDTO;
   canInteract: boolean;
   onDelete: (comment: SquareStatementCommentDTO) => void;
   onLike: (comment: SquareStatementCommentDTO) => void;
   onReply: (comment: SquareStatementCommentDTO) => void;
+  rootUserId?: number;
 }) {
   const { t } = useI18n();
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
@@ -303,16 +304,23 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply }: {
     event.stopPropagation();
     if (canInteract) onReply(comment);
   };
+  const threadRootUserId = rootUserId ?? comment.user.user_id;
+  const layerReplyTarget = comment.parent_id && comment.reply_to_user?.user_id !== threadRootUserId
+    ? comment.reply_to_user
+    : null;
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}`} onClick={beginReply}>
     <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />
     <div>
-      <header><div className={`square-comment-author-name${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}<time>{formatRelativeTime(comment.created_at)}</time></div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
-      <p>{comment.reply_to_user ? <span className="square-comment-reply-prefix">{t("square.replyingTo", { name: comment.reply_to_user.name })}</span> : null}{comment.text}</p>
-      <div className="square-comment-actions">
-        <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
-        {canInteract ? <button onClick={beginReply} type="button"><span className="material-symbols-outlined">chat_bubble</span><span>{t("square.reply")}</span></button> : null}
+      <header><div className={`square-comment-author-name${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{comment.user.name}</strong>{comment.user.growth_level ? <b>LV{comment.user.growth_level}</b> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
+      <p>{comment.text}</p>
+      <div className="square-comment-footer">
+        <time>{formatRelativeTime(comment.created_at)}</time>
+        <div className="square-comment-actions">
+          {canInteract ? <button onClick={beginReply} type="button"><span>{t("square.reply")}</span></button> : null}
+          <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
+        </div>
       </div>
-      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} />)}</div> : null}
+      {!comment.parent_id && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} rootUserId={threadRootUserId} />)}</div> : null}
     </div>
     {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
   </article>;
@@ -1271,7 +1279,7 @@ export default function SquarePage() {
     </section>
   );
 
-  const commentComposer = canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div>{replyTarget ? <button className="square-reply-target" onClick={() => { setReplyTarget(null); window.requestAnimationFrame(() => commentInputRef.current?.focus()); }} type="button">{t("square.replyingTo", { name: replyTarget.user.name })}<span className="material-symbols-outlined">close</span></button> : null}<input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.writeReply") : t("square.writeComment")} ref={commentInputRef} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
+  const commentComposer = canPublish ? <form className="square-comment-composer" onSubmit={(event) => { event.preventDefault(); void sendComment(); }}><UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} /><div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} /></div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
