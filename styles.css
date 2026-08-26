@@ -7572,10 +7572,25 @@ html[data-theme="dark"] .square-chat-record {
   font-variant-numeric: tabular-nums;
 }
 
+.chat-target-picker-sheet {
+  overflow: hidden;
+}
+
+.chat-target-picker-body {
+  height: calc(min(78dvh, 720px) - 108px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
 .chat-target-picker-list {
+  flex: 1 1 auto;
   width: 100%;
   min-width: 0;
-  max-height: min(46vh, 480px);
+  min-height: 0;
+  max-height: none;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-x: none;
@@ -7618,8 +7633,18 @@ html[data-theme="dark"] .square-chat-record {
 .chat-target-picker-meta > .material-symbols-outlined { grid-column: 2; grid-row: 1 / -1; }
 .chat-target-picker-list > button.is-selected .chat-target-picker-meta .material-symbols-outlined:last-child { color: var(--brand-primary); }
 .chat-target-picker-meta .is-loading { animation: spin 900ms linear infinite; }
-.chat-target-picker-submit { position: sticky; bottom: 0; padding-top: 12px; background: var(--surface); }
+.chat-target-picker-submit {
+  flex: 0 0 auto;
+  padding: 12px 0 max(10px, env(safe-area-inset-bottom));
+  background: var(--surface);
+}
 .chat-target-picker-submit .button { width: 100%; min-height: 50px; }
+
+@media (min-width: 901px) {
+  .chat-target-picker-body {
+    height: calc(min(82dvh, 760px) - 104px);
+  }
+}
 
 .message-forward-bundle-card {
   width: min(310px, 72vw);

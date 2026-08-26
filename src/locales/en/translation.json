@@ -1551,7 +1551,7 @@
   "message.forwardSourceCount": "{{count}} messages selected",
   "message.forwardIndividual": "Forward separately",
   "message.forwardIndividualHint": "Send each message into the destination chat",
-  "message.forwardBundle": "Combine",
+  "message.forwardBundle": "Forward as card",
   "message.forwardBundleHint": "Send one chat history card",
   "message.chooseForwardChats": "Choose chats",
   "message.forwardToChats": "Forward to {{count}} chats",

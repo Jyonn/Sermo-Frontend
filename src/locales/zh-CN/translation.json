@@ -1551,7 +1551,7 @@
   "message.forwardSourceCount": "已选择 {{count}} 条消息",
   "message.forwardIndividual": "逐条转发",
   "message.forwardIndividualHint": "在目标会话中依次发送",
-  "message.forwardBundle": "合并转发",
+  "message.forwardBundle": "卡片转发",
   "message.forwardBundleHint": "收进一张聊天记录卡片",
   "message.chooseForwardChats": "选择会话",
   "message.forwardToChats": "转发到 {{count}} 个会话",

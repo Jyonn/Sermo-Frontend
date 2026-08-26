@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.6",
+  "id": "2026.08.27.7",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "深色操作栏更干净",
+      "title": "消息转发更从容",
       "items": [
-        "聊天消息的更多操作展开后不再出现突兀分隔线"
+        "单条消息也可选择逐条或卡片转发，会话选择页的底部操作不再遮挡内容"
       ]
     },
     "en": {
-      "title": "Cleaner dark action menus",
+      "title": "More flexible forwarding",
       "items": [
-        "Expanded message actions no longer show a distracting divider in dark mode"
+        "A single selected message can be forwarded separately or as a card, with a clearer conversation picker footer"
       ]
     }
   }

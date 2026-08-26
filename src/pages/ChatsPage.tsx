@@ -7150,9 +7150,9 @@ function LiveChatsPage() {
         onClose={() => {
           if (!forwardSending) setForwardPickerOpen(false);
         }}
-        beforeList={forwardSourceMessageIds.length > 1 ? (
+        beforeList={forwardOpenedFromSelection ? (
           <>
-          {forwardOpenedFromSelection && Boolean(currentUserMe?.official ?? session?.user.official) ? (
+          {forwardSourceMessageIds.length > 1 && Boolean(currentUserMe?.official ?? session?.user.official) ? (
             <button className="forward-square-destination" disabled={forwardSending} onClick={composeForwardBundleForSquare} type="button">
               <span className="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
               <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
