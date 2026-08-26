@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.27.12",
+  "id": "2026.08.27.13",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "发表与聊天记录预览更顺手",
+      "title": "活动提醒更准确",
       "items": [
-        "发表发言时可以顺畅滚动查看全部设置，深色模式下的输入区与开关排版也更加统一",
-        "广场中的合并聊天记录现在支持独立滚动，并可直接打开其中的位置卡片"
+        "领取八仙活动的全部奖励后，广场与活动入口将不再显示领取红点"
       ]
     },
     "en": {
-      "title": "Smoother posting and chat record previews",
+      "title": "More accurate activity reminders",
       "items": [
-        "The post composer now scrolls through every setting cleanly, with a calmer dark-mode editor and aligned switches",
-        "Merged chat records in Square now scroll independently and open shared location cards directly"
+        "After collecting every Baxian activity reward, claim badges disappear from Square and the activity entry"
       ]
     }
   }
