@@ -27438,7 +27438,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-comment-thread .square-comment-avatar{width:38px;height:38px}
 .square-comment-thread>div>header{display:flex;align-items:center;gap:8px;min-height:26px}
 .square-comment-author-name{display:flex;align-items:center;gap:6px;min-width:0}
-.square-comment-author-name strong{overflow:hidden;max-width:52%;font-size:14px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+.square-comment-author-name strong{overflow:hidden;max-width:80%;font-size:14px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
 .square-comment-author-name.is-anonymous>strong{flex:0 0 auto;max-width:none;overflow:visible;text-overflow:clip}
 .square-comment-author-name b{flex:0 0 auto;font:800 9px/1 var(--font-mono,monospace)}
 .square-comment-relation{display:inline-flex;align-items:center;gap:5px;min-width:0;margin-left:0!important;overflow:hidden;color:var(--text-muted);font-size:11px;font-weight:700;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}

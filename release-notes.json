@@ -1,19 +1,17 @@
 {
-  "id": "2026.08.27.2",
+  "id": "2026.08.27.3",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "互动额度更清晰",
+      "title": "评论昵称展示更完整",
       "items": [
-        "互动额度采用余波布局，当前余额与等级权益更容易查看",
-        "视频发言调整为 LV10 解锁"
+        "发言详情中的评论昵称获得更充足的展示空间"
       ]
     },
     "en": {
-      "title": "Clearer activity allowances",
+      "title": "Clearer commenter names",
       "items": [
-        "The new ripple layout makes current allowances and level benefits easier to understand",
-        "Video statements now unlock at LV10"
+        "Commenter names now have more room in statement details"
       ]
     }
   }
