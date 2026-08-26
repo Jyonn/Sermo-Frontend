@@ -29955,3 +29955,49 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
   .composer-lab-format-list button > .material-symbols-outlined { background: #263c33; }
   .composer-lab-visibility-sheet button { color: #edf8f3; border-color: #2d4038; }
 }
+
+/* User profile drawers keep one mobile-first composition at every viewport. */
+.drawer-body > .user-profile-panel {
+  padding: 0 20px calc(28px + env(safe-area-inset-bottom));
+}
+.drawer-body > .user-profile-panel .user-profile-social-card {
+  margin-inline: -20px;
+  padding: 0 20px 24px;
+}
+.drawer-body > .user-profile-panel .user-profile-cover {
+  height: 132px;
+  margin-inline: -20px;
+}
+.drawer-body > .user-profile-panel .user-profile-identity {
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 16px;
+  margin-top: -58px;
+}
+.drawer-body > .user-profile-panel .user-profile-avatar-wrap {
+  width: 108px;
+  height: 108px;
+  padding: 6px;
+  border-radius: 29px;
+}
+.drawer-body > .user-profile-panel .user-profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 23px;
+}
+.drawer-body > .user-profile-panel .user-profile-copy { padding: 73px 0 5px; }
+.drawer-body > .user-profile-panel .user-profile-copy h2 { font-size: clamp(1.45rem, 6.8vw, 1.8rem); }
+.drawer-body > .user-profile-panel .user-profile-copy p { margin-top: 9px; font-size: 0.78rem; }
+.drawer-body > .user-profile-panel .user-profile-facts { gap: 7px; margin-top: 20px; }
+.drawer-body > .user-profile-panel .user-profile-facts span { min-height: 30px; padding: 5px 10px; font-size: 0.68rem; }
+.drawer-body > .user-profile-panel .user-profile-primary-actions { gap: 10px; margin-top: 8px; }
+.drawer-body > .user-profile-panel .user-profile-primary-actions .button { min-height: 56px; border-radius: 17px; font-size: 0.9rem; }
+.drawer-body > .user-profile-panel .user-profile-recent-statement { min-height: 128px; margin-top: 22px; padding: 20px 31% 20px 20px; border-radius: 22px; }
+.drawer-body > .user-profile-panel .user-profile-reminders { margin-top: 22px; padding-block: 10px; }
+.drawer-body > .user-profile-panel .user-profile-reminders::after { top: 10px; bottom: 10px; }
+.drawer-body > .user-profile-panel .user-profile-reminders strong { font-size: 0.74rem; }
+.drawer-body > .user-profile-panel .user-profile-reminders small { min-width: 62px; padding: 7px 9px; }
+.drawer-body > .user-profile-panel .user-profile-section { margin-top: 24px; }
+.drawer-body > .user-profile-panel .user-profile-groups { gap: 18px; }
+.drawer-body > .user-profile-panel .user-profile-group-tile { flex-basis: 70px; }
+.drawer-body > .user-profile-panel .user-profile-group-tile-avatar { width: 60px; height: 60px; border-radius: 18px; }
+.drawer-body > .user-profile-panel .user-profile-relationship-actions { margin-top: 30px; }

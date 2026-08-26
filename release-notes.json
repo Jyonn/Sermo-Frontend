@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.3",
+  "id": "2026.08.27.4",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "评论昵称展示更完整",
+      "title": "用户详情更一致",
       "items": [
-        "发言详情中的评论昵称获得更充足的展示空间"
+        "桌面端与手机端的用户详情现已使用统一、紧凑的排版"
       ]
     },
     "en": {
-      "title": "Clearer commenter names",
+      "title": "Consistent profile details",
       "items": [
-        "Commenter names now have more room in statement details"
+        "User details now share the same compact layout on desktop and mobile"
       ]
     }
   }
