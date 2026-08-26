@@ -2535,7 +2535,6 @@ function LiveChatsPage() {
   const [restoreHistorySaving, setRestoreHistorySaving] = useState(false);
   const [restoreHistoryPassword, setRestoreHistoryPassword] = useState("");
   const [historyRecoveryStatus, setHistoryRecoveryStatus] = useState<ChatHistoryRecoveryStatusDTO | null>(null);
-  const [historyRecoveryLoading, setHistoryRecoveryLoading] = useState(false);
   const [historyReloadVersion, setHistoryReloadVersion] = useState(0);
   const [closingChatSnapshot, setClosingChatSnapshot] = useState<Chat | null>(null);
   const [isClosingChatView, setIsClosingChatView] = useState(false);
@@ -3477,13 +3476,9 @@ function LiveChatsPage() {
       return;
     }
     const controller = new AbortController();
-    setHistoryRecoveryLoading(true);
     api.getChatHistoryRecoveryStatus(selectedChat.id, controller.signal)
       .then(setHistoryRecoveryStatus)
-      .catch(() => setHistoryRecoveryStatus(null))
-      .finally(() => {
-        if (!controller.signal.aborted) setHistoryRecoveryLoading(false);
-      });
+      .catch(() => setHistoryRecoveryStatus(null));
     return () => controller.abort();
   }, [detailsSheetOpen, historyReloadVersion, selectedChat?.id]);
 
@@ -7376,29 +7371,25 @@ function LiveChatsPage() {
               </SettingGroup>
             </section>
 
-            <section className="chat-detail-settings-section">
-              <SettingGroup>
-                <SettingRow
-                  disabled={historyRecoveryLoading || !historyRecoveryStatus?.can_restore}
-                  icon={<span className="material-symbols-outlined" aria-hidden="true">history</span>}
-                  onClick={() => setRestoreHistoryConfirmOpen(true)}
-                  description={historyRecoveryLoading
-                    ? t("common.loading")
-                    : !historyRecoveryStatus
-                      ? t("chat.restoreHistoryUnavailable")
-                      : !historyRecoveryStatus.eligible
-                        ? t("chat.restoreHistoryVerify")
-                        : !historyRecoveryStatus.has_password
-                          ? t("chat.restoreHistorySetPassword")
-                          : historyRecoveryStatus.remaining <= 0
+            {historyRecoveryStatus && historyRecoveryStatus.hidden_count > 0 ? (
+              <section className="chat-detail-settings-section">
+                <SettingGroup>
+                  <SettingRow
+                    disabled={!historyRecoveryStatus.can_restore}
+                    icon={<span className="material-symbols-outlined" aria-hidden="true">history</span>}
+                    onClick={() => setRestoreHistoryConfirmOpen(true)}
+                    description={!historyRecoveryStatus.eligible
+                      ? t("chat.restoreHistoryVerify")
+                      : !historyRecoveryStatus.has_password
+                        ? t("chat.restoreHistorySetPassword")
+                        : historyRecoveryStatus.remaining <= 0
                           ? t("chat.restoreHistoryExhausted")
-                          : historyRecoveryStatus.hidden_count <= 0
-                            ? t("chat.restoreHistoryEmpty")
-                            : t("chat.restoreHistorySummary", { count: historyRecoveryStatus.hidden_count, remaining: historyRecoveryStatus.remaining })}
-                  title={t("chat.restoreHistory")}
-                />
-              </SettingGroup>
-            </section>
+                          : t("chat.restoreHistorySummary", { count: historyRecoveryStatus.hidden_count, remaining: historyRecoveryStatus.remaining })}
+                    title={t("chat.restoreHistory")}
+                  />
+                </SettingGroup>
+              </section>
+            ) : null}
 
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">

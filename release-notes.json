@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.8",
+  "id": "2026.08.27.9",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "气泡品质更清晰",
+      "title": "聊天详情更简洁",
       "items": [
-        "重新校准多款聊天气泡的品质归类，并修复角色气泡连续展示时的末尾圆角"
+        "没有可恢复记录时，聊天详情不再展示无效的恢复入口"
       ]
     },
     "en": {
-      "title": "Clearer bubble tiers",
+      "title": "Cleaner chat details",
       "items": [
-        "Updated rarity tiers across the bubble catalog and restored the outer corner on grouped character bubbles"
+        "The recovery action is now hidden when a conversation has no restorable history"
       ]
     }
   }
