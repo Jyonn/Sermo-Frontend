@@ -44,6 +44,8 @@ import ChatsPage, { type ChatPreviewDemoKind, type ChatPreviewDemoSide } from ".
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 
+const MAX_NICKNAME_LENGTH = 8;
+
 const channelRows: Array<[NotificationChannel, number, TranslationKey]> = [
   ["email", 1, "channel.email"],
   ["sms", 2, "channel.sms"],
@@ -1713,6 +1715,11 @@ export default function MenuPage() {
   const confirmBasicEdit = async () => {
     if (!basicEditField) return;
 
+    if (basicEditField === "name" && Array.from(basicEditValue.trim()).length > MAX_NICKNAME_LENGTH) {
+      showToast(t("profile.nicknameTooLong", { count: MAX_NICKNAME_LENGTH }), "error");
+      return;
+    }
+
     try {
       setBasicEditSaving(true);
       const editingField = basicEditField;
@@ -3342,7 +3349,9 @@ export default function MenuPage() {
       <InputDialog
         busy={basicEditSaving}
         confirmLabel={basicEditField === "name" ? t("profile.saveNickname") : t("profile.saveWelcome")}
-        onChange={setBasicEditValue}
+        maxLength={basicEditField === "name" ? MAX_NICKNAME_LENGTH : undefined}
+        description={basicEditField === "name" ? t("profile.nicknameLengthHint", { count: MAX_NICKNAME_LENGTH }) : undefined}
+        onChange={(value) => setBasicEditValue(basicEditField === "name" ? Array.from(value).slice(0, MAX_NICKNAME_LENGTH).join("") : value)}
         onClose={() => setBasicEditField(null)}
         onConfirm={() => void confirmBasicEdit()}
         open={Boolean(basicEditField)}

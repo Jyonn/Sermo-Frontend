@@ -13,6 +13,12 @@ import { buildAdminEntryHref, buildAdminHrefForCurrentHost, buildAdminPath, buil
 import type { SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
 
+const MAX_NICKNAME_LENGTH = 8;
+
+function limitNickname(value: string) {
+  return Array.from(value).slice(0, MAX_NICKNAME_LENGTH).join("");
+}
+
 function displaySlug(value: string) {
   return value
     .split("-")
@@ -207,6 +213,10 @@ export default function JoinSpacePage() {
       setSubmitError(t("join.enterNickname"));
       return;
     }
+    if (Array.from(nickname.trim()).length > MAX_NICKNAME_LENGTH) {
+      setSubmitError(t("join.nicknameTooLong", { count: MAX_NICKNAME_LENGTH }));
+      return;
+    }
 
     setSubmitError(null);
     setPasswordHint(null);
@@ -336,10 +346,11 @@ export default function JoinSpacePage() {
                 <label className="field-label">{t("join.nickname")}</label>
                 <input
                   className="input"
+                  maxLength={MAX_NICKNAME_LENGTH}
                   placeholder={t("join.nicknamePlaceholder")}
                   value={nickname}
                   onChange={(event) => {
-                    setNickname(event.target.value);
+                    setNickname(limitNickname(event.target.value));
                     setPasswordHint(null);
                   }}
                 />

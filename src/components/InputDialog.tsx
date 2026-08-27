@@ -13,6 +13,7 @@ interface InputDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   busy?: boolean;
+  maxLength?: number;
   onChange: (value: string) => void;
   onClose: () => void;
   onConfirm: () => void;
@@ -28,6 +29,7 @@ export function InputDialog({
   confirmLabel,
   cancelLabel,
   busy = false,
+  maxLength,
   onChange,
   onClose,
   onConfirm,
@@ -80,6 +82,7 @@ export function InputDialog({
           ref={inputRef}
           className="input input-dialog-field"
           placeholder={placeholder}
+          maxLength={maxLength}
           type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}

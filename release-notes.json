@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.17",
+  "id": "2026.08.27.18",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "评论回复展开更自然",
+      "title": "昵称长度更加统一",
       "items": [
-        "点击一级评论的空白区域即可展开回复，同时自动收起其他评论；头像可直接进入用户详情，回复展开过程更加顺滑"
+        "新建账号和修改昵称时，昵称统一限制为最多 8 个字符"
       ]
     },
     "en": {
-      "title": "Smoother comment threads",
+      "title": "Consistent nickname length",
       "items": [
-        "Tap the open area of a top-level comment to expand its replies while other threads collapse automatically; avatars now open profiles and reply transitions feel smoother"
+        "Nicknames are now consistently limited to 8 characters when joining or editing a profile"
       ]
     }
   }
