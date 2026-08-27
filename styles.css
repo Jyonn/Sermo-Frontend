@@ -6798,7 +6798,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-context-more > div {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 0;
   overflow: hidden;
 }
@@ -6812,13 +6812,13 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-context-actions.is-secondary {
-  margin-top: 4px;
+  margin-top: 8px;
   padding-top: 0;
   border: 0;
 }
 
 .message-context-menu.above .message-context-actions.is-secondary {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
   padding: 0;
   border: 0;
 }
