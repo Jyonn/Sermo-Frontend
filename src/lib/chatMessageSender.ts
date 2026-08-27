@@ -5,6 +5,7 @@ type ChatMessageSender = Pick<
   | "userId"
   | "from"
   | "name"
+  | "anonymous"
   | "avatarUri"
   | "avatarCacheKey"
   | "isPermanentVip"
@@ -17,6 +18,7 @@ export function mapChatMessageSender(message: ChatMessageDTO, currentUserId: num
     userId: message.user.user_id,
     from: message.user.user_id === currentUserId ? "self" : "other",
     name: message.user.name,
+    anonymous: message.user.anonymous,
     avatarUri: message.user.avatar_uri,
     avatarCacheKey: message.user.avatar_cache_key,
     isPermanentVip: message.user.is_permanent_vip,

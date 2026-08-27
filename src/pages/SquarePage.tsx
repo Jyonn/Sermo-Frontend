@@ -272,11 +272,12 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
             initialScrollToEnd
             messages={forwardBundleItemsAsMessages(statement.chat_record.items).map((message) => statement.chat_record?.redacted_identity ? {
               ...message,
-              user: { ...message.user, name: t("message.redactedParticipant", { number: message.user.name }) },
+              user: message.user.anonymous ? { ...message.user, name: t("message.redactedParticipant", { number: message.user.name }) } : message.user,
             } : message)}
             onOpenImage={(uris, index, metadata) => onOpenChatImage(uris, index, metadata)}
             onOpenVideo={(uri, metadata) => onOpenChatVideo(uri, metadata)}
             showSelfAuthors
+            wheelScrollMode="parent"
           />
         </div>
       ) : null}
@@ -1640,7 +1641,7 @@ export default function SquarePage() {
             <div className="square-compose-settings">
               <button disabled={anonymousStatement} onClick={() => setVisibilitySheetOpen(true)} type="button"><span className="material-symbols-outlined">{visibility === "friends" ? "group" : "public"}</span><div><strong>{t("square.visibility")}</strong><small>{anonymousStatement ? t("square.exploreOnly") : visibility === "friends" ? t("square.friendsOnly") : t("square.public")}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
               {features.squareExploreEnabled && !chatRecordDraft ? <button aria-checked={anonymousStatement} className="square-compose-anonymous-row" onClick={() => { setAnonymousStatement((current) => !current); setVisibility("public"); }} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("square.publishAnonymouslyHint")}</small></div><i className={anonymousStatement ? "is-on" : ""}><span /></i></button> : null}
-              {chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("square.publishAnonymously")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
+              {chatRecordDraft ? <button aria-checked={chatRecordDraft.redacted} className="square-compose-anonymous-row" onClick={() => setChatRecordDraft((current) => current ? { ...current, redacted: !current.redacted } : null)} role="switch" type="button"><span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span><div><strong>{t("message.forwardToSquareRedact")}</strong><small>{t("message.forwardToSquareRedactHint")}</small></div><i className={chatRecordDraft.redacted ? "is-on" : ""}><span /></i></button> : null}
               {currentUser?.official ? <button aria-checked={pinOnPublish} className="square-compose-pin-row" onClick={() => setPinOnPublish((current) => !current)} role="switch" type="button"><span className="material-symbols-outlined">keep</span><div><strong>{t("square.pinOnPublish")}</strong><small>{t("square.pinOnPublishHint")}</small></div><i className={pinOnPublish ? "is-on" : ""}><span /></i></button> : null}
             </div>
           </div>

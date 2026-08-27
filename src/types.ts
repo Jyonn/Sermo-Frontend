@@ -1099,6 +1099,7 @@ export interface ChatMessage {
   type: number;
   kind: MessageKind;
   name: string;
+  anonymous?: boolean;
   avatarUri?: string;
   avatarCacheKey?: string;
   isPermanentVip?: boolean;

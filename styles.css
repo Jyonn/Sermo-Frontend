@@ -7587,6 +7587,17 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .square-chat-record-preview.chat-conversation-preview .message-group {
   zoom: .8;
 }
+.message-anonymous-avatar {
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, var(--line-soft));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-soft) 78%, transparent);
+}
+.message-anonymous-avatar .material-symbols-outlined {
+  font-size: 20px;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
 .square-chat-record-preview.chat-conversation-preview .message-scroll :is(button, a, audio, video) {
   pointer-events: auto;
 }

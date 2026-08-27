@@ -1686,6 +1686,7 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
   const entering = group.messages.filter((message) => enteringMessageIds.includes(message.clientId)).map((message) => message.clientId);
   return JSON.stringify({
     key: group.key,
+    anonymous: group.anonymous,
     isPermanentVip: group.isPermanentVip,
     chatBubbleStyle: group.chatBubbleStyle,
     avatarFrameStyle: group.avatarFrameStyle,
@@ -1992,7 +1993,11 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   }
 
   const showGroupAvatar = group.from === "other" || showSelfAvatar || selectionMode;
-  const groupAvatar = showGroupAvatar ? (
+  const groupAvatar = showGroupAvatar && group.anonymous ? (
+    <span className="avatar message-avatar message-anonymous-avatar" aria-hidden="true">
+      <span className="material-symbols-outlined">person</span>
+    </span>
+  ) : showGroupAvatar ? (
     <UserAvatar
       className="avatar message-avatar"
       frame={group.from === "self" ? selfAvatarFrame : group.avatarFrameStyle}
@@ -2091,6 +2096,7 @@ interface MessageGroup {
   userId?: number;
   from: "self" | "other";
   name: string;
+  anonymous?: boolean;
   avatarUri?: string;
   avatarCacheKey?: string;
   isPermanentVip?: boolean;
@@ -2115,6 +2121,7 @@ function buildMessageGroups(messages: ChatMessage[], separateMessages = false): 
       userId: message.userId,
       from: message.from,
       name: message.name,
+      anonymous: message.anonymous,
       avatarUri: message.avatarUri,
       avatarCacheKey: message.avatarCacheKey,
       isPermanentVip: message.isPermanentVip,
@@ -8538,6 +8545,7 @@ export function ChatPreview({
   className = "",
   firstPersonUserId,
   initialScrollToEnd = false,
+  wheelScrollMode = "internal",
   messages,
   onMessageClick,
   onMessageAction,
@@ -8553,6 +8561,7 @@ export function ChatPreview({
   className?: string;
   firstPersonUserId?: number | null;
   initialScrollToEnd?: boolean;
+  wheelScrollMode?: "internal" | "parent";
   messages: ChatMessageDTO[];
   onMessageClick?: (message: ChatMessageDTO) => void;
   onMessageAction?: (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => void;
@@ -8618,7 +8627,25 @@ export function ChatPreview({
       } : undefined}
     >
       <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
-        <div className="message-scroll" ref={scrollRef}>
+        <div
+          className="message-scroll"
+          onWheelCapture={wheelScrollMode === "parent" ? (event) => {
+            if (!window.matchMedia("(pointer: fine)").matches || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+            event.preventDefault();
+            event.stopPropagation();
+            let parent = event.currentTarget.parentElement;
+            while (parent) {
+              const overflowY = window.getComputedStyle(parent).overflowY;
+              if (/(auto|scroll)/.test(overflowY) && parent.scrollHeight > parent.clientHeight + 1) {
+                parent.scrollTop += event.deltaY;
+                return;
+              }
+              parent = parent.parentElement;
+            }
+            window.scrollBy({ top: event.deltaY });
+          } : undefined}
+          ref={scrollRef}
+        >
           {groups.map((group) => (
             <MessageGroupBlock
               enteringMessageIds={[]}

@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.27.23",
+  "id": "2026.08.27.24",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "消息操作更整齐",
+      "title": "聊天记录发言更顺手",
       "items": [
-        "展开更多消息操作时，按钮会从左侧整齐排列，并保留清晰的行间距"
+        "桌面端现在可以在聊天记录预览区域直接滚动广场",
+        "参与者打码会保留官方账号身份，其余成员统一显示为匿名用户"
       ]
     },
     "en": {
-      "title": "Tidier message actions",
+      "title": "Smoother chat-record posts",
       "items": [
-        "Expanded message actions now align from the left with clearer spacing between rows"
+        "Desktop Square pages now scroll normally while the pointer is over a chat preview",
+        "Participant masking keeps the official account visible while anonymizing everyone else"
       ]
     }
   }
