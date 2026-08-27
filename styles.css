@@ -10604,9 +10604,14 @@ html:not([data-theme="dark"]) .user-profile-panel .user-profile-cover {
 }
 
 .composer-rich-input:empty::before {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
   color: var(--text-muted);
   content: attr(data-placeholder);
   pointer-events: none;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .composer-mention-chip {

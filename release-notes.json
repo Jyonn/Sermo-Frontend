@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.29",
+  "id": "2026.08.27.30",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "发言分享浮层更可靠",
+      "title": "小屏聊天输入更整洁",
       "items": [
-        "修复手机端从发言详情分享时，会话选择面板被详情页遮挡的问题",
-        "分享面板及遮罩现在会完整显示在发言详情上方"
+        "小屏手机上的聊天输入提示固定为单行，不再撑高输入框",
+        "开始输入后仍可正常使用多行消息"
       ]
     },
     "en": {
-      "title": "More reliable statement sharing",
+      "title": "Cleaner chat composer on small screens",
       "items": [
-        "Fixed the chat picker appearing beneath statement details on mobile",
-        "The sharing sheet and its backdrop now stay fully above the detail view"
+        "Kept the chat placeholder on one clipped line on narrow phones",
+        "Messages can still expand naturally across multiple lines while typing"
       ]
     }
   }
