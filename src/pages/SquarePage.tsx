@@ -31,6 +31,7 @@ import ChatsPage, { ChatPreview, forwardBundleItemsAsMessages } from "./ChatsPag
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
 import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.webp";
+import spiderMan4PreviewBanner from "../assets/activity/spider-man-4-preview.webp";
 import tieguaiLi from "../assets/activity/immortals/tieguai-li.png";
 import zhongliQuan from "../assets/activity/immortals/zhongli-quan.png";
 import zhangGuolao from "../assets/activity/immortals/zhang-guolao.png";
@@ -625,7 +626,7 @@ export default function SquarePage() {
   }, [feedMode, session?.user.space_id, session?.user.user_id]);
 
   const showVipCampaign = Boolean(vipCampaign && (vipCampaign.active || vipCampaign.claimed_by_user));
-  const activityBannerCount = activities.length + (showVipCampaign ? 1 : 0);
+  const activityBannerCount = activities.length + (showVipCampaign ? 1 : 0) + 1;
 
   useEffect(() => {
     if (activityBannerCount < 2 || feedMode !== "all") return;
@@ -1519,6 +1520,16 @@ export default function SquarePage() {
               </span>
               <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
             </button> : null}
+            <button aria-label={`${t("activity.spiderMan4Title")} · ${t("activity.comingSoon")}`} className="square-activity-banner is-spider-man-preview" onClick={() => showToast(t("activity.spiderMan4ComingSoon"))} type="button">
+              <img alt="" aria-hidden="true" className="square-spider-man-preview-art" src={spiderMan4PreviewBanner} />
+              <span className="square-spider-man-preview-copy">
+                <small>{t("activity.preview")}</small>
+                <strong>{t("activity.spiderMan4Title")}</strong>
+                <b>{t("activity.spiderMan4Subtitle")}</b>
+                <span>{t("activity.spiderMan4Description")}</span>
+              </span>
+              <span className="square-spider-man-preview-status"><i />{t("activity.comingSoon")}</span>
+            </button>
             {activities.slice(1).map((activity) => {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
               const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
