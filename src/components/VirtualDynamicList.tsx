@@ -100,25 +100,34 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
   const spacerRef = useRef<HTMLDivElement | null>(null);
   const measurementsRef = useRef(new Map<string, number>());
   const observersRef = useRef(new Map<string, ResizeObserver>());
+  const rowRefCallbacksRef = useRef(new Map<string, (element: HTMLDivElement | null) => void>());
   const pendingAnchorRef = useRef<PendingAnchor | null>(null);
   const previousLayoutRef = useRef<LayoutSnapshot | null>(null);
   const measurementFrameRef = useRef<number | null>(null);
   const layoutRef = useRef<VirtualLayoutItem[]>([]);
+  const estimateSizeRef = useRef(estimateSize);
+  const followEndRef = useRef(followEnd);
+  const itemKeyRef = useRef(itemKey);
+  const measureElementRef = useRef<(key: string, element: HTMLDivElement | null) => void>(() => undefined);
   const [measurementVersion, setMeasurementVersion] = useState(0);
   const [viewport, setViewport] = useState({ height: 0, top: 0 });
+
+  estimateSizeRef.current = estimateSize;
+  followEndRef.current = followEnd;
+  itemKeyRef.current = itemKey;
 
   const layout = useMemo(() => {
     let cursor = 0;
     const next = items.map((item, index) => {
-      const key = itemKey(item);
+      const key = itemKeyRef.current(item);
       const measured = measurementsRef.current.get(key);
-      const size = Math.max(1, measured ?? estimateSize(item, index));
+      const size = Math.max(1, measured ?? estimateSizeRef.current(item, index));
       const row = { key, index, size, start: cursor, end: cursor + size };
       cursor = row.end + (index === items.length - 1 ? 0 : rowGap);
       return row;
     });
     return { items: next, totalSize: Math.max(0, cursor) };
-  }, [estimateSize, itemKey, items, measurementVersion, rowGap]);
+  }, [items, measurementVersion, rowGap]);
 
   layoutRef.current = layout.items;
 
@@ -161,7 +170,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
       );
       const wasAtEnd = previous.spacerOffset + previous.totalSize - scroller.scrollTop - scroller.clientHeight <= 3;
 
-      if (wasAtEnd && followEnd?.()) {
+      if (wasAtEnd && followEndRef.current?.()) {
         scroller.scrollTop = scroller.scrollHeight;
       } else {
         for (let index = previousAnchorIndex; index < previous.items.length; index += 1) {
@@ -182,14 +191,17 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
       totalSize: layout.totalSize,
     };
     updateViewport();
-  }, [followEnd, layout.items, layout.totalSize, scrollRef]);
+  }, [layout.items, layout.totalSize, scrollRef]);
 
   useEffect(() => {
-    const validKeys = new Set(items.map(itemKey));
+    const validKeys = new Set(items.map((item) => itemKeyRef.current(item)));
     for (const key of measurementsRef.current.keys()) {
       if (!validKeys.has(key)) measurementsRef.current.delete(key);
     }
-  }, [itemKey, items]);
+    for (const key of rowRefCallbacksRef.current.keys()) {
+      if (!validKeys.has(key)) rowRefCallbacksRef.current.delete(key);
+    }
+  }, [items]);
 
   useEffect(() => {
     const scroller = scrollRef.current;
@@ -231,7 +243,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     pendingAnchorRef.current = {
       key: anchor.key,
       offset: currentViewport.top - anchor.start,
-      followEnd: nearEnd && Boolean(followEnd?.()),
+      followEnd: nearEnd && Boolean(followEndRef.current?.()),
     };
   };
 
@@ -259,6 +271,16 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     observer.observe(element);
     observersRef.current.set(key, observer);
     commit();
+  };
+
+  measureElementRef.current = measureElement;
+
+  const getRowRef = (key: string) => {
+    const current = rowRefCallbacksRef.current.get(key);
+    if (current) return current;
+    const callback = (element: HTMLDivElement | null) => measureElementRef.current(key, element);
+    rowRefCallbacksRef.current.set(key, callback);
+    return callback;
   };
 
   const scrollToIndex = (index: number, alignment: VirtualListAlignment = "center", behavior: ScrollBehavior = "auto") => {
@@ -317,7 +339,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
             className="virtual-dynamic-list-row"
             data-virtual-index={virtualItem.index}
             key={virtualItem.key}
-            ref={(element) => measureElement(virtualItem.key, element)}
+            ref={getRowRef(virtualItem.key)}
             role="row"
             style={{ transform: `translate3d(0, ${virtualItem.start}px, 0)` }}
           >

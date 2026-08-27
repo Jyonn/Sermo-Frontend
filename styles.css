@@ -3992,6 +3992,8 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   overflow-anchor: none;
   padding: 24px 24px 14px;
   display: flex;
@@ -6704,6 +6706,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-bubble-actionable {
   cursor: pointer;
+  touch-action: pan-y;
 }
 
 .message-bubble-actionable:active {

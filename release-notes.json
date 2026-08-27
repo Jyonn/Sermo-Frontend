@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.25",
+  "id": "2026.08.27.26",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "从发言直达地图",
+      "title": "手机聊天滚动更顺滑",
       "items": [
-        "带有位置的广场发言现在可以直接打开地图定位",
-        "位置入口升级为更清晰的地址胶囊"
+        "优化长聊天记录在手机端的触摸与惯性滚动",
+        "减少消息高度变化时的滚动跳动"
       ]
     },
     "en": {
-      "title": "Open post locations on the map",
+      "title": "Smoother mobile chat scrolling",
       "items": [
-        "Square posts with a location can now open directly in the map view",
-        "Location details now use a clearer address pill"
+        "Improved touch and momentum scrolling in long mobile conversations",
+        "Reduced scroll jumps while message heights settle"
       ]
     }
   }
