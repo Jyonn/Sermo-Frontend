@@ -2341,7 +2341,6 @@ export default function MenuPage() {
                   ? t("profile.permanentVipRank", { slot: String(me.permanent_vip_slot).padStart(3, "0") })
                   : t("profile.permanentVip")}
                 presence={t("profile.onlineNow")}
-                relationshipLabel={t("profile.sameSpace")}
               />
             </div>
           </div>

@@ -65,6 +65,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const isSelf = session?.user.user_id === userId;
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
   const initialCached = useMemo(
     () => readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data ?? null,
@@ -111,7 +112,10 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       api.getChats(controller.signal),
       api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal),
       api.getFriendStatus(userId, controller.signal),
-      api.getSquareStatements({ limit: 5, scope: "all", user_id: userId }, controller.signal).catch(() => []),
+      api.getSquareStatements(
+        isSelf ? { limit: 5, scope: "mine" } : { limit: 5, scope: "all", user_id: userId },
+        controller.signal
+      ).catch(() => []),
     ])
       .then(([friends, chats, users, status, statements]) => {
         const matchedFriend = friends.find((row) => row.user_id === userId) ?? null;
@@ -163,7 +167,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       controller.abort();
       syncingCallbackRef.current?.(false);
     };
-  }, [cacheScope, userId]);
+  }, [cacheScope, isSelf, userId]);
 
   const presence = useMemo(() => {
     if (!user) return "";
@@ -315,7 +319,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   if (!user || viewState === "error") return <FeedbackState title={t("profile.unavailable")} description={error ?? t("profile.tryLater")} />;
 
   return (
-    <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}`}>
+    <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}${isSelf ? " is-self" : ""}`}>
       <UserProfileCard
         avatarLabel={t("profile.avatarLabel", { name: user.name })}
         avatarFrame={user.avatar_frame_style}
@@ -330,13 +334,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           ? t("profile.permanentVipRank", { slot: String(user.permanent_vip_slot).padStart(3, "0") })
           : t("profile.permanentVip")}
         presence={presence}
-        relationshipLabel={isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}
+        relationshipLabel={isSelf ? undefined : isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}
       />
 
       <div className="user-profile-primary-actions">
-        {isFriend === true ? (
+        {!isSelf && isFriend === true ? (
           <button className="button" onClick={() => void openChat()} type="button">{t("profile.sendMessage")}</button>
-        ) : isFriend === false ? (
+        ) : !isSelf && isFriend === false ? (
           <button className="button" disabled={requestState !== "idle"} onClick={() => void sendRequest()} type="button">
             {requestState === "sending" ? t("profile.sending") : requestState === "sent" ? t("profile.sent") : t("profile.addFriend")}
           </button>

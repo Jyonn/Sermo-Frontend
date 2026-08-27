@@ -1787,7 +1787,7 @@ export default function SquarePage() {
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         onClose={() => setProfileDrawerUserId(null)}
         open={profileDrawerUserId !== null}
-        title={t("profile.details")}
+        title={profileDrawerUserId === session?.user.user_id ? t("profile.myCard") : t("profile.details")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
       >
         {profileDrawerUserId !== null ? (

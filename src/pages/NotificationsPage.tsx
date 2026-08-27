@@ -490,7 +490,7 @@ export default function NotificationsPage() {
       <SideDrawer
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}
-        title={t("contacts.userDetails")}
+        title={profileDrawerUserId === session?.user.user_id ? t("profile.myCard") : t("contacts.userDetails")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >

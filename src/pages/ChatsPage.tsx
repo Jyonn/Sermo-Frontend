@@ -7545,7 +7545,7 @@ function LiveChatsPage() {
       <SideDrawer
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}
-        title={t("profile.details")}
+        title={profileDrawerUserId === session?.user.user_id ? t("profile.myCard") : t("profile.details")}
         titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >

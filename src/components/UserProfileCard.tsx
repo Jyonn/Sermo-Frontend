@@ -14,7 +14,7 @@ interface UserProfileCardProps {
   onAvatarClick?: () => void;
   permanentVipLabel?: string;
   presence: string;
-  relationshipLabel: string;
+  relationshipLabel?: string;
 }
 
 export function UserProfileCard({
@@ -62,7 +62,7 @@ export function UserProfileCard({
       <div className="user-profile-facts">
         {!official && growthLevel ? <GrowthLevelBadge level={growthLevel} /> : null}
         {isPermanentVip && permanentVipLabel ? <span className="is-vip">{permanentVipLabel}</span> : null}
-        <span className="is-relationship">{relationshipLabel}</span>
+        {relationshipLabel ? <span className="is-relationship">{relationshipLabel}</span> : null}
       </div>
     </section>
   );

@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.21",
+  "id": "2026.08.27.22",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "消息操作更紧凑",
+      "title": "个人名片更完整",
       "items": [
-        "长按消息后的操作按钮更轻巧，展开后的操作也会自然居中排列"
+        "打开自己的名片时会展示专属标题、最近发言与更连贯的主题封面"
       ]
     },
     "en": {
-      "title": "A more compact message menu",
+      "title": "A more complete personal card",
       "items": [
-        "Long-press message actions are now more compact, with expanded actions arranged in a balanced centered row"
+        "Your own card now has a dedicated title, recent post, and a more seamless themed cover"
       ]
     }
   }

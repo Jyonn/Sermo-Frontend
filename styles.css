@@ -30543,23 +30543,70 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 
 /* Match each profile theme in the drawer chrome without changing header metrics. */
 .side-drawer:has(.user-profile-panel.profile-theme-level-12) .drawer-topbar {
-  background: color-mix(in srgb, #d8ebe9 74%, transparent);
+  background:
+    linear-gradient(rgba(225, 248, 246, 0.68), rgba(214, 239, 238, 0.62)),
+    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
   backdrop-filter: blur(22px) saturate(1.28);
   -webkit-backdrop-filter: blur(22px) saturate(1.28);
 }
 
 .side-drawer:has(.user-profile-panel.profile-theme-vip) .drawer-topbar {
-  background: color-mix(in srgb, #ead7ae 70%, transparent);
+  background:
+    linear-gradient(rgba(255, 246, 222, 0.7), rgba(235, 213, 171, 0.64)),
+    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
   backdrop-filter: blur(22px) saturate(1.22);
   -webkit-backdrop-filter: blur(22px) saturate(1.22);
 }
 
 html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-level-12) .drawer-topbar {
-  background: color-mix(in srgb, #09242d 82%, transparent);
+  background:
+    linear-gradient(rgba(6, 24, 32, 0.72), rgba(9, 36, 45, 0.68)),
+    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
 }
 
 html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-vip) .drawer-topbar {
-  background: color-mix(in srgb, #21180e 84%, transparent);
+  background:
+    linear-gradient(rgba(23, 17, 10, 0.72), rgba(33, 24, 14, 0.68)),
+    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
+}
+
+/* A personal card keeps the standard action rhythm without relationship chrome. */
+.user-profile-panel.is-self .user-profile-primary-actions {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.user-profile-panel.is-self .user-profile-primary-actions .button {
+  width: 100%;
+  min-height: 52px;
+  max-height: 52px;
+}
+
+.shell-friend-profile:has(.user-profile-panel.profile-theme-level-12) .friend-profile-header {
+  background:
+    linear-gradient(rgba(225, 248, 246, 0.68), rgba(214, 239, 238, 0.62)),
+    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
+  backdrop-filter: blur(22px) saturate(1.28);
+  -webkit-backdrop-filter: blur(22px) saturate(1.28);
+}
+
+.shell-friend-profile:has(.user-profile-panel.profile-theme-vip) .friend-profile-header {
+  background:
+    linear-gradient(rgba(255, 246, 222, 0.7), rgba(235, 213, 171, 0.64)),
+    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
+  backdrop-filter: blur(22px) saturate(1.22);
+  -webkit-backdrop-filter: blur(22px) saturate(1.22);
+}
+
+html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-theme-level-12) .friend-profile-header {
+  background:
+    linear-gradient(rgba(6, 24, 32, 0.72), rgba(9, 36, 45, 0.68)),
+    url("/assets/profile-card-themes/tidal-blue.webp") center top / cover;
+}
+
+html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-theme-vip) .friend-profile-header {
+  background:
+    linear-gradient(rgba(23, 17, 10, 0.72), rgba(33, 24, 14, 0.68)),
+    url("/assets/profile-card-themes/gilded-hour.webp") center top / cover;
 }
 
 /* Character bubbles keep the outside corner fully rounded at the end of a run. */
