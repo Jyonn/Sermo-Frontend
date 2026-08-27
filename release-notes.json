@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.31",
+  "id": "2026.08.27.32",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "广场活动打开更及时",
+      "title": "评论回复排版更紧凑",
       "items": [
-        "探索页会立即恢复最近的活动横幅，不再等待后突然出现",
-        "活动与 VIP 状态仍会在后台静默刷新"
+        "移除评论回复列表末尾多余的留白",
+        "保留回复之间清晰舒适的阅读间距"
       ]
     },
     "en": {
-      "title": "Faster activity banners in Square",
+      "title": "Tighter comment reply layout",
       "items": [
-        "Restored recent activity banners immediately when opening Explore",
-        "Activity and VIP status still refresh quietly in the background"
+        "Removed the extra space below comment reply threads",
+        "Kept comfortable spacing between individual replies"
       ]
     }
   }

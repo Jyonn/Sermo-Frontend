@@ -27919,6 +27919,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-comment-replies{position:relative;min-height:0;overflow:hidden;gap:0;margin-top:0;padding:2px 0 0 14px;border:0}
 .square-comment-replies::before{position:absolute;top:10px;bottom:11px;left:0;width:1px;border-radius:99px;background:color-mix(in srgb,var(--text-muted) 22%,transparent);content:""}
 .square-comment-replies .square-comment-thread{grid-template-columns:32px minmax(0,1fr);gap:9px;padding:10px 0}
+.square-comment-replies .square-comment-thread:last-child{padding-bottom:0}
 .square-comment-replies .square-comment-avatar{width:32px;height:32px}
 .square-comment-replies .square-comment-avatar-button{width:32px;height:32px}
 @media(prefers-reduced-motion:reduce){.square-comment-replies-shell{transition:none}}
