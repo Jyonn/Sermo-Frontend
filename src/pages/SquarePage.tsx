@@ -507,8 +507,12 @@ export default function SquarePage() {
   const [quota, setQuota] = useState<SquareQuotaDTO | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [pinnedStatement, setPinnedStatement] = useState<SquareStatementDTO | null>(null);
-  const [activities, setActivities] = useState<ActivityCampaignDTO[]>([]);
-  const [vipCampaign, setVipCampaign] = useState<PermanentVipCampaignDTO | null>(null);
+  const [activities, setActivities] = useState<ActivityCampaignDTO[]>(() => (
+    readTabCache<ActivityCampaignDTO[]>(cacheScope, "square:activities")?.data ?? []
+  ));
+  const [vipCampaign, setVipCampaign] = useState<PermanentVipCampaignDTO | null>(() => (
+    readTabCache<PermanentVipCampaignDTO | null>(cacheScope, "square:vip-campaign")?.data ?? null
+  ));
   const [vipCampaignOpen, setVipCampaignOpen] = useState(false);
   const [vipClaiming, setVipClaiming] = useState(false);
   const [activityBannerSlide, setActivityBannerSlide] = useState(0);
@@ -582,6 +586,14 @@ export default function SquarePage() {
   const voicePreview = useMemo(() => voiceFile ? URL.createObjectURL(voiceFile) : null, [voiceFile]);
   const activeActivity = activities.find((item) => item.key === routeActivityKey) ?? null;
   const refreshActivities = () => api.getActiveActivities().then(setActivities).catch(() => undefined);
+
+  useEffect(() => {
+    writeTabCache(cacheScope, "square:activities", activities);
+  }, [activities, cacheScope]);
+
+  useEffect(() => {
+    writeTabCache(cacheScope, "square:vip-campaign", vipCampaign);
+  }, [cacheScope, vipCampaign]);
 
   const applySquareStatus = (status: SquareStatusDTO) => {
     notificationUnreadRef.current = status.notification_unread;

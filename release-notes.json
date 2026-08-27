@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.30",
+  "id": "2026.08.27.31",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "小屏聊天输入更整洁",
+      "title": "广场活动打开更及时",
       "items": [
-        "小屏手机上的聊天输入提示固定为单行，不再撑高输入框",
-        "开始输入后仍可正常使用多行消息"
+        "探索页会立即恢复最近的活动横幅，不再等待后突然出现",
+        "活动与 VIP 状态仍会在后台静默刷新"
       ]
     },
     "en": {
-      "title": "Cleaner chat composer on small screens",
+      "title": "Faster activity banners in Square",
       "items": [
-        "Kept the chat placeholder on one clipped line on narrow phones",
-        "Messages can still expand naturally across multiple lines while typing"
+        "Restored recent activity banners immediately when opening Explore",
+        "Activity and VIP status still refresh quietly in the background"
       ]
     }
   }
