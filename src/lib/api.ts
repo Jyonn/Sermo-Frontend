@@ -72,7 +72,6 @@ import type {
   PlatformDashboardDTO,
   PlatformAuditDTO,
 } from "../types";
-import type { FeatureCollection } from "geojson";
 import { i18n } from "./i18n";
 import { showToast } from "./toast";
 
@@ -736,12 +735,6 @@ export const api = {
     });
   },
 
-  createCloudResourceUpload(kind: "video" | "file", file_name: string, content_type: string, file_size: number, content_hash: string) {
-    return request<MessageUploadDTO>("/messages/resources", {
-      method: "POST", auth: true, body: { kind, file_name, content_type, file_size, content_hash },
-    });
-  },
-
   finalizeCloudResource(kind: MessageMediaKind, key: string, file_name: string, content_type: string, file_size: number, content_hash: string, duration_seconds?: number) {
     return request<{ resource: CloudResourceDTO; instant: boolean; quota: CloudResourceListDTO["quota"] }>("/messages/resources/finalize", {
       method: "POST", auth: true, body: { kind, content: key, file_name, content_type, file_size, content_hash, duration_seconds },
@@ -941,22 +934,10 @@ export const api = {
     });
   },
 
-  getTravelMapAccess(user_id: number) {
-    return request<TravelMapAccessDTO>("/maps/access", { auth: true, query: { user_id } });
-  },
-
   getTravelMapAccessOverview(signal?: AbortSignal) {
     return request<TravelMapAccessOverviewDTO>("/maps/access/overview", {
       auth: true,
       signal,
-    });
-  },
-
-  grantTravelMapAccess(user_id: number) {
-    return request<TravelMapAccessDTO>("/maps/access", {
-      method: "POST",
-      auth: true,
-      query: { user_id },
     });
   },
 
@@ -1004,14 +985,6 @@ export const api = {
     return request<ChatTravelMapDTO>("/maps/chats/maps", {
       auth: true,
       query: { chat_id },
-      signal,
-    });
-  },
-
-  getTravelMapGeometry(country_code: string, signal?: AbortSignal) {
-    return request<FeatureCollection>("/maps/geometry", {
-      auth: true,
-      query: { country_code },
       signal,
     });
   },

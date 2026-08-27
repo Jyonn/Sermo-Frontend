@@ -4,13 +4,7 @@ import { i18n } from "./language";
 export type WebPushState = "checking" | "unsupported" | "needs-install" | "denied" | "off" | "on";
 
 const WEB_PUSH_ENDPOINT_KEY = "sermo.web-push.endpoint";
-const CANONICAL_WEB_HOST = "sermo.jyonn.space";
 let reconciliation: Promise<void> | null = null;
-
-function isLegacySpaceHost() {
-  const hostname = window.location.hostname.toLowerCase();
-  return hostname.endsWith(`.${CANONICAL_WEB_HOST}`) && hostname !== CANONICAL_WEB_HOST;
-}
 
 function isIos() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -96,14 +90,6 @@ async function reconcileWebPushSubscriptionOnce() {
   const storedEndpoint = window.localStorage.getItem(WEB_PUSH_ENDPOINT_KEY);
   let registration = await navigator.serviceWorker.getRegistration();
   let subscription = registration ? await registration.pushManager.getSubscription() : null;
-
-  if (isLegacySpaceHost()) {
-    const endpoint = subscription?.endpoint || storedEndpoint;
-    if (endpoint) await api.deleteWebPush(endpoint);
-    if (subscription) await subscription.unsubscribe();
-    window.localStorage.removeItem(WEB_PUSH_ENDPOINT_KEY);
-    return;
-  }
 
   if (Notification.permission === "denied") {
     if (storedEndpoint) {

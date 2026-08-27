@@ -21,9 +21,8 @@ function currentHostname() {
 }
 
 function resolveCookieDomain(hostname: string) {
-  if (!hostname || hostname === "localhost" || looksLikeIp(hostname) || hostname.endsWith(".localhost")) return null;
+  if (!hostname || hostname === "localhost" || looksLikeIp(hostname)) return null;
   if (hostname === "sermo.jyonn.space") return ".sermo.jyonn.space";
-  if (hostname.endsWith(".sermo.jyonn.space")) return ".sermo.jyonn.space";
   return null;
 }
 
@@ -56,7 +55,7 @@ function writeCookie(name: string, value: string, domain: string | null) {
 function buildDomainForSlug(slug: string) {
   const hostname = currentHostname();
   if (!hostname) return `sermo.jyonn.space/${slug}`;
-  if (hostname === "localhost" || hostname.endsWith(".localhost")) return `localhost/${slug}`;
+  if (hostname === "localhost") return `localhost/${slug}`;
   return `${hostname}/${slug}`;
 }
 

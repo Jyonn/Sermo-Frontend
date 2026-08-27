@@ -25,11 +25,10 @@ interface SideDrawerProps {
 }
 
 const DRAWER_QUERY_KEY = "panel";
-const LEGACY_DRAWER_QUERY_KEY = "_drawer";
 
 export function drawerPathFromSearch(search: string) {
   const params = new URLSearchParams(search);
-  const value = params.get(DRAWER_QUERY_KEY) || params.get(LEGACY_DRAWER_QUERY_KEY) || "";
+  const value = params.get(DRAWER_QUERY_KEY) || "";
   return value.split("/").map((item) => item.trim()).filter(Boolean);
 }
 
@@ -88,7 +87,6 @@ export function SideDrawer({
     const url = new URL(window.location.href);
     if (path.length) url.searchParams.set(DRAWER_QUERY_KEY, path.join("/"));
     else url.searchParams.delete(DRAWER_QUERY_KEY);
-    url.searchParams.delete(LEGACY_DRAWER_QUERY_KEY);
     return `${url.pathname}${url.search}${url.hash}`;
   };
 
@@ -119,7 +117,7 @@ export function SideDrawer({
   useEffect(() => {
     if (!routeRequested) return;
     onRouteOpenRef.current?.();
-    if (routePath[routeIndex] === routeKey && !new URLSearchParams(location.search).has(LEGACY_DRAWER_QUERY_KEY)) return;
+    if (routePath[routeIndex] === routeKey) return;
     const canonicalPath = [...routePath];
     canonicalPath[routeIndex] = routeKey;
     window.history.replaceState(
