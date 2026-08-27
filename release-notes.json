@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.34",
+  "id": "2026.08.27.35",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "真机聊天滚动恢复顺滑",
+      "title": "好友与群聊列表更新更及时",
       "items": [
-        "修复手机真机中聊天消息难以滑动、惯性滚动被打断的问题",
-        "媒体加载与气泡高度变化不再和正在进行的滚动争夺位置"
+        "好友申请通过、删除好友、加入或退出群聊后，会话与通讯列表会及时同步",
+        "列表继续优先展示本地缓存，后台刷新不再打断当前浏览"
       ]
     },
     "en": {
-      "title": "Smoother chat scrolling on real devices",
+      "title": "Faster friend and group list updates",
       "items": [
-        "Fixed difficult and interrupted chat scrolling on physical mobile devices",
-        "Media loading and bubble resizing no longer fight active momentum scrolling"
+        "Chat and contact lists now update promptly after friend and group membership changes",
+        "Cached lists remain visible while quiet background refreshes complete"
       ]
     }
   }

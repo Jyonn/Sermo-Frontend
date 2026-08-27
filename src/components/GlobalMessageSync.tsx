@@ -16,10 +16,13 @@ import { UserAvatar } from "./UserAvatar";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageSender } from "../lib/chatMessageSender";
+import { emitAccountStateChanged } from "../lib/accountStateSync";
+import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
 const CURSOR_KEY_PREFIX = "sermo-sync-v2-cursor:";
+const STATE_CURSOR_KEY_PREFIX = "sermo-state-events-cursor:";
 const DEBUG_SYNC = false;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
@@ -234,6 +237,23 @@ function persistCursor(scope: string, value: number) {
   window.localStorage.setItem(getCursorKey(scope), String(value));
 }
 
+function getStateCursorKey(scope: string) {
+  return `${STATE_CURSOR_KEY_PREFIX}${scope}`;
+}
+
+function readStateCursor(scope: string) {
+  if (typeof window === "undefined") return null;
+  const value = window.localStorage.getItem(getStateCursorKey(scope));
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function persistStateCursor(scope: string, value: number) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(getStateCursorKey(scope), String(value));
+}
+
 function previewFromMessage(message: ChatMessage) {
   if (message.kind === "image") return i18n.t("message.imagePlaceholder");
   if (message.kind === "video") return i18n.t("message.videoPlaceholder");
@@ -286,6 +306,7 @@ export function GlobalMessageSync() {
   const features = useSpaceFeatures();
   const pageActive = usePageActive();
   const [afterMessageId, setAfterMessageId] = useState<number | null>(null);
+  const [afterStateEventId, setAfterStateEventId] = useState<number | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
   const [popupDragOffset, setPopupDragOffset] = useState(0);
   const [popupDragging, setPopupDragging] = useState(false);
@@ -293,6 +314,8 @@ export function GlobalMessageSync() {
   const popupPointerRef = useRef<{ pointerId: number; startY: number } | null>(null);
   const suppressPopupClickRef = useRef(false);
   const syncInFlightRef = useRef(false);
+  const stateSyncInFlightRef = useRef(false);
+  const stateCursorRef = useRef<number | null>(null);
   const presencePollCountRef = useRef(0);
   const presenceBaselineRef = useRef<Map<number, boolean> | null>(null);
   const sessionUserId = session?.user.user_id ?? null;
@@ -358,6 +381,120 @@ export function GlobalMessageSync() {
       if (retryTimer !== null) window.clearTimeout(retryTimer);
     };
   }, [features.chatEnabled, features.ready, pageActive, scope, sessionAccessToken, sessionUserId]);
+
+  useEffect(() => {
+    if (!scope || !session || !features.ready) {
+      setAfterStateEventId(null);
+      stateCursorRef.current = null;
+      return;
+    }
+
+    const existing = readStateCursor(scope);
+    if (existing !== null && existing >= 0) {
+      stateCursorRef.current = existing;
+      setAfterStateEventId(existing);
+      return;
+    }
+
+    stateCursorRef.current = null;
+    setAfterStateEventId(null);
+    if (!pageActive) return;
+
+    let cancelled = false;
+    let retryTimer: number | null = null;
+    const controller = new AbortController();
+
+    const establishBaseline = async (attempt = 0) => {
+      try {
+        const baseline = await api.getUserStateEventsSyncBaseline(controller.signal);
+        if (cancelled) return;
+        const cursor = Math.max(0, baseline.next_after);
+        stateCursorRef.current = cursor;
+        setAfterStateEventId(cursor);
+        persistStateCursor(scope, cursor);
+      } catch {
+        if (cancelled || controller.signal.aborted) return;
+        const delay = Math.min(30_000, 2_000 * 2 ** attempt);
+        retryTimer = window.setTimeout(() => void establishBaseline(attempt + 1), delay);
+      }
+    };
+
+    void establishBaseline();
+    return () => {
+      cancelled = true;
+      controller.abort();
+      if (retryTimer !== null) window.clearTimeout(retryTimer);
+    };
+  }, [features.ready, pageActive, scope, sessionAccessToken, sessionUserId]);
+
+  useEffect(() => {
+    if (!pageActive || !scope || !session || afterStateEventId === null || !features.ready) return;
+
+    let cancelled = false;
+    const poll = async () => {
+      if (stateSyncInFlightRef.current) return;
+      stateSyncInFlightRef.current = true;
+      try {
+        let cursor = stateCursorRef.current ?? afterStateEventId;
+        let hasMore = true;
+        let loopCount = 0;
+        let chatsChanged = false;
+        let friendsChanged = false;
+        let friendRequestsChanged = false;
+
+        while (hasMore && loopCount < 5) {
+          const response = await api.getUserStateEventsSync({ after: cursor, limit: SYNC_LIMIT });
+          response.events.forEach((event) => {
+            chatsChanged ||= event.kind === "chats.changed";
+            friendsChanged ||= event.kind === "friends.changed";
+            friendRequestsChanged ||= event.kind === "friend_requests.changed";
+          });
+          cursor = response.next_after;
+          hasMore = response.has_more;
+          loopCount += 1;
+          if (!response.events.length && !response.has_more) break;
+        }
+
+        if (cancelled) return;
+        if (chatsChanged && features.chatEnabled) {
+          const freshChats = sortChats((await api.getChats()).map((chat) => mapChat(chat, session.user.user_id)));
+          await chatCache.persistChatList(scope, freshChats);
+          presenceBaselineRef.current = new Map(freshChats.map((chat) => [chat.id, chat.online]));
+        }
+
+        if (friendsChanged || friendRequestsChanged) {
+          const [friendRows, requestRows] = await Promise.all([api.getFriends(), api.getFriendRequests()]);
+          if (cancelled) return;
+          emitAccountStateChanged({
+            chats: chatsChanged,
+            friends: friendsChanged,
+            friendRequests: friendRequestsChanged,
+            friendRows,
+            requestRows,
+          });
+          emitFriendRequestsUpdated(requestRows.incoming.filter((request) => request.status === 0).length);
+        }
+
+        if (cursor !== (stateCursorRef.current ?? afterStateEventId)) {
+          stateCursorRef.current = cursor;
+          setAfterStateEventId(cursor);
+          persistStateCursor(scope, cursor);
+        }
+      } catch (error) {
+        if (cancelled || (error instanceof ApiError && error.status === 401)) return;
+      } finally {
+        stateSyncInFlightRef.current = false;
+      }
+    };
+
+    void poll();
+    const timer = window.setInterval(() => void poll(), 3_000);
+    return () => {
+      cancelled = true;
+      stateSyncInFlightRef.current = false;
+      window.clearInterval(timer);
+    };
+  }, [afterStateEventId, features.chatEnabled, features.ready, pageActive, scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!pageActive || !scope || !session || afterMessageId === null || !features.ready || !features.chatEnabled) return;

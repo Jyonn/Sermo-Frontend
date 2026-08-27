@@ -15,6 +15,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { showToast } from "../lib/toast";
 import type { AppViewState, FriendAccepted, FriendTab, FriendshipRequestDTO, UserDTO } from "../types";
 import { i18n, useI18n } from "../lib/language";
+import { ACCOUNT_STATE_CHANGED_EVENT, type AccountStateChange } from "../lib/accountStateSync";
 
 const FRIEND_REQUEST_STATUS_PENDING = 0;
 
@@ -116,6 +117,50 @@ export default function FriendsPage() {
 
     return () => controller.abort();
   }, [cacheScope]);
+
+  useEffect(() => {
+    let controller: AbortController | null = null;
+    const handleStateChange = (event: Event) => {
+      const detail = (event as CustomEvent<AccountStateChange>).detail;
+      if (!detail?.friends && !detail?.friendRequests) return;
+      controller?.abort();
+      const nextController = new AbortController();
+      controller = nextController;
+      setSyncing(true);
+      const rowsPromise = detail.friendRows && detail.requestRows
+        ? Promise.resolve([detail.friendRows, detail.requestRows] as const)
+        : Promise.all([api.getFriends(nextController.signal), api.getFriendRequests(nextController.signal)]);
+      rowsPromise
+        .then(([friendRows, requestRows]) => {
+          if (nextController.signal.aborted) return;
+          const normalizedRequests = normalizePendingRequests(requestRows);
+          const nextFriends = friendRows.map(mapFriend);
+          setFriends(nextFriends);
+          setIncoming(normalizedRequests.incoming);
+          setOutgoing(normalizedRequests.outgoing);
+          writeTabCache(cacheScope, "friends", {
+            friends: nextFriends,
+            incoming: normalizedRequests.incoming,
+            outgoing: normalizedRequests.outgoing,
+          });
+          emitFriendRequestsUpdated(normalizedRequests.incoming.length);
+          setViewState("ready");
+        })
+        .catch((apiError) => {
+          if (nextController.signal.aborted) return;
+          showToast(apiError instanceof ApiError ? apiError.message : t("friends.loadFailed"), "error");
+        })
+        .finally(() => {
+          if (!nextController.signal.aborted) setSyncing(false);
+        });
+    };
+
+    window.addEventListener(ACCOUNT_STATE_CHANGED_EVENT, handleStateChange);
+    return () => {
+      controller?.abort();
+      window.removeEventListener(ACCOUNT_STATE_CHANGED_EVENT, handleStateChange);
+    };
+  }, [cacheScope, t]);
 
   useEffect(() => {
     if (viewState !== "ready") return;

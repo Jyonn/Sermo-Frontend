@@ -1061,6 +1061,25 @@ export interface MessageEventSyncBaselineDTO {
   next_after: number;
 }
 
+export type UserStateEventKind = "chats.changed" | "friends.changed" | "friend_requests.changed";
+
+export interface UserStateEventDTO {
+  event_id: number;
+  kind: UserStateEventKind;
+  resource_id: number | null;
+  created_at: number;
+}
+
+export interface UserStateEventSyncResponseDTO {
+  events: UserStateEventDTO[];
+  next_after: number;
+  has_more: boolean;
+}
+
+export interface UserStateEventSyncBaselineDTO {
+  next_after: number;
+}
+
 export interface ChatSyncStateDTO {
   chat_id: number;
   unread_count: number;

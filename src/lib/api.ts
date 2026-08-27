@@ -16,6 +16,8 @@ import type {
   CloudResourceListDTO,
   MessageEventSyncBaselineDTO,
   MessageEventSyncResponseDTO,
+  UserStateEventSyncBaselineDTO,
+  UserStateEventSyncResponseDTO,
   FriendshipRequestDTO,
   FriendInvitePreviewDTO,
   FriendshipStatusDTO,
@@ -735,6 +737,21 @@ export const api = {
 
   getMessageEventsSyncBaseline(signal?: AbortSignal) {
     return request<MessageEventSyncBaselineDTO>("/messages/sync-v2/baseline", {
+      auth: true,
+      signal,
+    });
+  },
+
+  getUserStateEventsSync(params: { after: number; limit: number }, signal?: AbortSignal) {
+    return request<UserStateEventSyncResponseDTO>("/users/me/state-events", {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  getUserStateEventsSyncBaseline(signal?: AbortSignal) {
+    return request<UserStateEventSyncBaselineDTO>("/users/me/state-events/baseline", {
       auth: true,
       signal,
     });
