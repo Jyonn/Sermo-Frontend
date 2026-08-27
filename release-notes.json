@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.28",
+  "id": "2026.08.27.29",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录卡片更规整",
+      "title": "发言分享浮层更可靠",
       "items": [
-        "修复合并转发卡片中的消息摘要和箭头越出边界的问题",
-        "不同屏幕宽度与聊天气泡外观下都能保持完整布局"
+        "修复手机端从发言详情分享时，会话选择面板被详情页遮挡的问题",
+        "分享面板及遮罩现在会完整显示在发言详情上方"
       ]
     },
     "en": {
-      "title": "Cleaner chat history cards",
+      "title": "More reliable statement sharing",
       "items": [
-        "Fixed message previews and arrows overflowing merged-forward cards",
-        "Cards now stay contained across screen sizes and bubble styles"
+        "Fixed the chat picker appearing beneath statement details on mobile",
+        "The sharing sheet and its backdrop now stay fully above the detail view"
       ]
     }
   }

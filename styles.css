@@ -7682,6 +7682,12 @@ html[data-theme="dark"] .square-chat-record {
   overflow: hidden;
 }
 
+/* Conversation pickers can be opened from focused statements and drawers.
+   Keep the whole sheet layer above those surfaces, not just the sheet panel. */
+.sheet-backdrop:has(> .chat-target-picker-sheet) {
+  z-index: 90;
+}
+
 .chat-target-picker-body {
   height: calc(min(78dvh, 720px) - 108px);
   min-height: 0;
