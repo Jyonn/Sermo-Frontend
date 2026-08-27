@@ -3359,7 +3359,7 @@ export default function MenuPage() {
         confirmLabel={basicEditField === "name" ? t("profile.saveNickname") : t("profile.saveWelcome")}
         maxLength={basicEditField === "name" ? MAX_NICKNAME_LENGTH : undefined}
         description={basicEditField === "name" ? t("profile.nicknameLengthHint", { count: MAX_NICKNAME_LENGTH }) : undefined}
-        onChange={(value) => setBasicEditValue(basicEditField === "name" ? Array.from(value).slice(0, MAX_NICKNAME_LENGTH).join("") : value)}
+        onChange={setBasicEditValue}
         onClose={() => setBasicEditField(null)}
         onConfirm={() => void confirmBasicEdit()}
         open={Boolean(basicEditField)}

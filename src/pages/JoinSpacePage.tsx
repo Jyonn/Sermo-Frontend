@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
@@ -46,6 +46,7 @@ export default function JoinSpacePage() {
     return slug ? `sermo.jyonn.space/${slug}` : "sermo.jyonn.space";
   }, [slug]);
   const [nickname, setNickname] = useState("");
+  const nicknameComposingRef = useRef(false);
   const [password, setPassword] = useState("");
   const [showPasswordField, setShowPasswordField] = useState(false);
   const [passwordHint, setPasswordHint] = useState<string | null>(null);
@@ -346,12 +347,19 @@ export default function JoinSpacePage() {
                 <label className="field-label">{t("join.nickname")}</label>
                 <input
                   className="input"
-                  maxLength={MAX_NICKNAME_LENGTH}
                   placeholder={t("join.nicknamePlaceholder")}
                   value={nickname}
                   onChange={(event) => {
-                    setNickname(limitNickname(event.target.value));
+                    const nextValue = event.target.value;
+                    setNickname(nicknameComposingRef.current ? nextValue : limitNickname(nextValue));
                     setPasswordHint(null);
+                  }}
+                  onCompositionStart={() => {
+                    nicknameComposingRef.current = true;
+                  }}
+                  onCompositionEnd={(event) => {
+                    nicknameComposingRef.current = false;
+                    setNickname(limitNickname(event.currentTarget.value));
                   }}
                 />
               </div>

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.35",
+  "id": "2026.08.27.36",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "好友与群聊列表更新更及时",
+      "title": "中文昵称输入更顺畅",
       "items": [
-        "好友申请通过、删除好友、加入或退出群聊后，会话与通讯列表会及时同步",
-        "列表继续优先展示本地缓存，后台刷新不再打断当前浏览"
+        "输入拼音时不再被 8 字限制提前截断，选定汉字后再按昵称长度处理",
+        "首次进入空间和修改昵称均采用一致的输入规则"
       ]
     },
     "en": {
-      "title": "Faster friend and group list updates",
+      "title": "Smoother nickname input",
       "items": [
-        "Chat and contact lists now update promptly after friend and group membership changes",
-        "Cached lists remain visible while quiet background refreshes complete"
+        "Pinyin composition is no longer cut off before Chinese characters are selected",
+        "The eight-character limit is now applied consistently after composition"
       ]
     }
   }

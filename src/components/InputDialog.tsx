@@ -36,6 +36,7 @@ export function InputDialog({
 }: InputDialogProps) {
   const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const composingRef = useRef(false);
   const closeRef = useRef(onClose);
   const confirmRef = useRef(onConfirm);
 
@@ -55,6 +56,7 @@ export function InputDialog({
     }, 10);
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.isComposing || event.keyCode === 229) return;
       if (event.key === "Escape") closeRef.current();
       if (event.key === "Enter") {
         event.preventDefault();
@@ -82,10 +84,24 @@ export function InputDialog({
           ref={inputRef}
           className="input input-dialog-field"
           placeholder={placeholder}
-          maxLength={maxLength}
           type={type}
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => {
+            const nextValue = event.target.value;
+            onChange(composingRef.current || maxLength === undefined
+              ? nextValue
+              : Array.from(nextValue).slice(0, maxLength).join(""));
+          }}
+          onCompositionStart={() => {
+            composingRef.current = true;
+          }}
+          onCompositionEnd={(event) => {
+            composingRef.current = false;
+            const nextValue = event.currentTarget.value;
+            onChange(maxLength === undefined
+              ? nextValue
+              : Array.from(nextValue).slice(0, maxLength).join(""));
+          }}
         />
         <div className="input-dialog-actions">
           <button className="ghost-button" disabled={busy} onClick={onClose} type="button">
