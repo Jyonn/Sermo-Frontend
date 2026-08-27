@@ -1045,6 +1045,10 @@ export interface MessageEventSyncResponseDTO {
   has_more: boolean;
 }
 
+export interface MessageEventSyncBaselineDTO {
+  next_after: number;
+}
+
 export interface ChatSyncStateDTO {
   chat_id: number;
   unread_count: number;

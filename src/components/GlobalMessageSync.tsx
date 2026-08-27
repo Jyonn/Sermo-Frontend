@@ -326,10 +326,38 @@ export function GlobalMessageSync() {
       return;
     }
 
-    cursorRef.current = 0;
-    setAfterMessageId(0);
-    persistCursor(scope, 0);
-  }, [features.chatEnabled, features.ready, scope, sessionAccessToken, sessionUserId]);
+    cursorRef.current = null;
+    setAfterMessageId(null);
+    if (!pageActive) return;
+
+    let cancelled = false;
+    let retryTimer: number | null = null;
+    const controller = new AbortController();
+
+    const establishBaseline = async (attempt = 0) => {
+      try {
+        const baseline = await api.getMessageEventsSyncBaseline(controller.signal);
+        if (cancelled) return;
+        const cursor = Math.max(0, baseline.next_after);
+        cursorRef.current = cursor;
+        setAfterMessageId(cursor);
+        persistCursor(scope, cursor);
+        recordChatHealth(scope, true);
+      } catch {
+        if (cancelled || controller.signal.aborted) return;
+        recordChatHealth(scope, false);
+        const delay = Math.min(30_000, 2_000 * 2 ** attempt);
+        retryTimer = window.setTimeout(() => void establishBaseline(attempt + 1), delay);
+      }
+    };
+
+    void establishBaseline();
+    return () => {
+      cancelled = true;
+      controller.abort();
+      if (retryTimer !== null) window.clearTimeout(retryTimer);
+    };
+  }, [features.chatEnabled, features.ready, pageActive, scope, sessionAccessToken, sessionUserId]);
 
   useEffect(() => {
     if (!pageActive || !scope || !session || afterMessageId === null || !features.ready || !features.chatEnabled) return;

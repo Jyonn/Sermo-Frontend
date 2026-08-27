@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.19",
+  "id": "2026.08.27.20",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "个人名片主题排版统一",
+      "title": "新设备聊天加载更轻快",
       "items": [
-        "潮汐蓝与鎏金时刻现在沿用默认名片布局，个性化预览也与真实用户详情保持一致"
+        "新设备首次登录只加载最近消息，旧记录会在上滑时按需载入"
       ]
     },
     "en": {
-      "title": "Consistent profile card themes",
+      "title": "Faster chat loading on new devices",
       "items": [
-        "Tidal Blue and Gilded Hour now preserve the default profile layout, with personalization previews matching the real profile"
+        "New devices now load recent messages first, while older history appears on demand as you scroll up"
       ]
     }
   }

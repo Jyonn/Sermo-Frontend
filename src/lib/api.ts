@@ -14,6 +14,7 @@ import type {
   MessageUploadDTO,
   CloudResourceDTO,
   CloudResourceListDTO,
+  MessageEventSyncBaselineDTO,
   MessageEventSyncResponseDTO,
   FriendshipRequestDTO,
   FriendInvitePreviewDTO,
@@ -708,6 +709,13 @@ export const api = {
     return request<MessageEventSyncResponseDTO>("/messages/sync-v2", {
       auth: true,
       query: params,
+      signal,
+    });
+  },
+
+  getMessageEventsSyncBaseline(signal?: AbortSignal) {
+    return request<MessageEventSyncBaselineDTO>("/messages/sync-v2/baseline", {
+      auth: true,
       signal,
     });
   },
