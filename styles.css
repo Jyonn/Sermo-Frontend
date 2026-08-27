@@ -27409,9 +27409,11 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-comment-author-name.is-vip > strong { color: #ad741d; }
 .square-statement-author-name > b { flex: none; padding: 2px 6px; border: 1px solid color-mix(in srgb, var(--brand-primary) 30%, transparent); border-radius: 999px; color: var(--brand-primary-press); font-size: 9px; font-weight: 800; line-height: 1; letter-spacing: .03em; background: color-mix(in srgb, var(--brand-primary) 8%, transparent); }
 .square-statement-text { margin: 13px 0 0; color: var(--text-primary); font-size: 16px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
-.square-statement-location { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; margin-top: 9px; color: var(--text-secondary); font-size: 12px; }
+.square-statement-location { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; margin-top: 9px; padding: 4px 7px 4px 5px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--brand-primary) 8%, transparent); color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
 .square-statement-location .material-symbols-outlined { flex: none; color: var(--brand-primary-press); font-size: 16px; }
-.square-statement-location span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.square-statement-location span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.square-statement-location span:last-child { margin-left: 1px; color: var(--text-tertiary); font-size: 14px; }
+.square-statement-location:hover { background: color-mix(in srgb, var(--brand-primary) 14%, transparent); color: var(--text-primary); }
 .square-statement-footer { display: flex; align-items: center; margin: 14px -4px -5px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent); }
 .square-statement-footer button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 9px; border: 0; border-radius: 10px; color: var(--text-secondary); font: inherit; font-size: 12px; background: transparent; }
 .square-statement-footer button:hover { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 9%, transparent); }
