@@ -6,10 +6,10 @@ import { QuietState } from "./BoundaryState";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { FeedbackState } from "./FeedbackState";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
-import { GrowthLevelBadge } from "./GrowthLevelBadge";
 import { ImageLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
+import { UserProfileCard } from "./UserProfileCard";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
@@ -316,43 +316,22 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
   return (
     <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}`}>
-      <section className="user-profile-social-card">
-        <div className="user-profile-cover" aria-hidden="true" />
-        <div className="user-profile-identity">
-          <button
-            aria-label={t("profile.avatarLabel", { name: user.name })}
-            className="user-profile-avatar-wrap"
-            disabled={!user.avatar_uri}
-            onClick={() => setAvatarPreviewOpen(true)}
-            type="button"
-          >
-            <UserAvatar
-              className={`user-profile-avatar ${user.is_alive ? "status-online" : ""}`}
-              frame={user.avatar_frame_style}
-              name={user.name}
-              uri={user.avatar_uri}
-              vip={Boolean(user.is_permanent_vip)}
-            />
-          </button>
-          <div className="user-profile-copy">
-            <div className="user-profile-name-row">
-              <h2>{user.name}</h2>
-            </div>
-            <p className={user.is_alive ? "is-online" : ""}>{presence}</p>
-          </div>
-        </div>
-        <div className="user-profile-facts">
-          {!user.official && user.growth_level ? <GrowthLevelBadge level={user.growth_level} /> : null}
-          {user.is_permanent_vip ? (
-            <span className="is-vip">
-              {user.permanent_vip_slot
-                ? t("profile.permanentVipRank", { slot: String(user.permanent_vip_slot).padStart(3, "0") })
-                : t("profile.permanentVip")}
-            </span>
-          ) : null}
-          <span className="is-relationship">{isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}</span>
-        </div>
-      </section>
+      <UserProfileCard
+        avatarLabel={t("profile.avatarLabel", { name: user.name })}
+        avatarFrame={user.avatar_frame_style}
+        avatarUri={user.avatar_uri}
+        growthLevel={user.growth_level}
+        isOnline={user.is_alive}
+        isPermanentVip={user.is_permanent_vip}
+        name={user.name}
+        official={user.official}
+        onAvatarClick={user.avatar_uri ? () => setAvatarPreviewOpen(true) : undefined}
+        permanentVipLabel={user.permanent_vip_slot
+          ? t("profile.permanentVipRank", { slot: String(user.permanent_vip_slot).padStart(3, "0") })
+          : t("profile.permanentVip")}
+        presence={presence}
+        relationshipLabel={isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}
+      />
 
       <div className="user-profile-primary-actions">
         {isFriend === true ? (

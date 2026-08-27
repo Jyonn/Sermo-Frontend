@@ -16,6 +16,7 @@ import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
+import { UserProfileCard } from "../components/UserProfileCard";
 import { RarityIcon } from "../components/RarityIcon";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
@@ -2327,13 +2328,21 @@ export default function MenuPage() {
       >
         <div className="profile-card-personalization">
           <div className="profile-card-preview-viewport">
-            <div className={`profile-card-preview profile-theme-${personalizationDraft.profile_card_theme}`}>
-              <div className="profile-card-preview-cover" />
-              <div className="profile-card-preview-person">
-                <UserAvatar className="profile-card-preview-avatar" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={permanentVip} />
-                <span><strong>{session?.user.name ?? t("brand.user")}</strong><small>{t("profile.onlineNow")}</small></span>
-              </div>
-              <div className="profile-card-preview-facts"><i>LV {growthLevel}</i>{permanentVip ? <i>VIP</i> : null}<i>{t("profile.knownDays", { count: 28 })}</i></div>
+            <div className={`user-profile-panel profile-card-preview-scale profile-theme-${personalizationDraft.profile_card_theme}`}>
+              <UserProfileCard
+                avatarFrame={me?.avatar_frame_style}
+                avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
+                growthLevel={growthLevel}
+                isOnline
+                isPermanentVip={permanentVip}
+                name={session?.user.name ?? t("brand.user")}
+                official={me?.official}
+                permanentVipLabel={me?.permanent_vip_slot
+                  ? t("profile.permanentVipRank", { slot: String(me.permanent_vip_slot).padStart(3, "0") })
+                  : t("profile.permanentVip")}
+                presence={t("profile.onlineNow")}
+                relationshipLabel={t("profile.sameSpace")}
+              />
             </div>
           </div>
           <div className="profile-card-theme-list">

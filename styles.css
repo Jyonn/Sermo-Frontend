@@ -30411,6 +30411,157 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 .drawer-body > .user-profile-panel .user-profile-group-tile-avatar { width: 60px; height: 60px; border-radius: 18px; }
 .drawer-body > .user-profile-panel .user-profile-relationship-actions { margin-top: 30px; }
 
+/* Profile cards share one geometry. Themes may paint surfaces, never reflow content. */
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-social-card {
+  margin-inline: -20px;
+  padding: 0 20px 24px;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-cover {
+  height: 132px;
+  margin-inline: -20px;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-identity {
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 16px;
+  margin-top: -58px;
+  padding-inline: 0;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-avatar-wrap {
+  width: 108px;
+  height: 108px;
+  padding: 6px;
+  border-radius: 29px;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 23px;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-copy {
+  padding: 73px 0 5px;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-copy h2 {
+  font-size: clamp(1.45rem, 6.8vw, 1.8rem);
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-copy p {
+  margin-top: 9px;
+  font-size: 0.78rem;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-facts {
+  gap: 7px;
+  margin-top: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale) .user-profile-facts span {
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale).profile-theme-level-12 .user-profile-facts span {
+  border-color: rgba(43, 134, 151, 0.24);
+  background: linear-gradient(90deg, rgba(65, 162, 174, 0.14), rgba(244, 255, 253, 0.26));
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale).profile-theme-vip .user-profile-facts span {
+  border: 1px solid rgba(154, 103, 31, 0.2);
+  background: color-mix(in srgb, var(--profile-card) 86%, transparent);
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale).profile-theme-vip .user-profile-facts span:last-child {
+  border-right: 1px solid rgba(154, 103, 31, 0.2);
+}
+
+:is(.drawer-body > .user-profile-panel, .profile-card-preview-scale).profile-theme-vip .user-profile-facts .is-vip {
+  border-color: rgba(188, 128, 36, 0.28);
+  background: linear-gradient(120deg, #fff1bf, #dba443 62%, #f2d180);
+}
+
+/* Restore the default component silhouettes under every profile theme. */
+.user-profile-panel:is(.profile-theme-level-12, .profile-theme-vip) .user-profile-avatar-wrap {
+  border-radius: 29px;
+}
+
+.user-profile-panel:is(.profile-theme-level-12, .profile-theme-vip) .user-profile-avatar {
+  border-radius: 23px;
+}
+
+.user-profile-panel:is(.profile-theme-level-12, .profile-theme-vip) .user-profile-primary-actions .button,
+.user-profile-panel:is(.profile-theme-level-12, .profile-theme-vip) .user-profile-statements-action {
+  border-radius: 17px;
+  clip-path: none;
+}
+
+.user-profile-panel:is(.profile-theme-level-12, .profile-theme-vip) .user-profile-recent-statement {
+  border-radius: 22px;
+  clip-path: none;
+}
+
+.user-profile-panel:is(.profile-theme-level-12, .profile-theme-vip) .user-profile-group-tile-avatar {
+  border-radius: 18px;
+}
+
+/* The picker renders the production profile card at 80%, not a separate mock. */
+.profile-card-preview-viewport {
+  display: grid;
+  min-height: 272px;
+  place-items: start center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
+  border-radius: 24px;
+  background: var(--surface-subtle);
+}
+
+.profile-card-preview-scale {
+  width: 100%;
+  min-height: 100%;
+  padding: 0 20px 24px;
+  zoom: 0.8;
+}
+
+.profile-card-preview-scale .user-profile-social-card {
+  width: auto;
+  box-shadow: none;
+}
+
+.profile-card-preview-scale .user-profile-avatar-wrap[aria-disabled="true"] {
+  cursor: default;
+}
+
+/* Match each profile theme in the drawer chrome without changing header metrics. */
+.side-drawer:has(.user-profile-panel.profile-theme-level-12) .drawer-topbar {
+  background: color-mix(in srgb, #d8ebe9 74%, transparent);
+  backdrop-filter: blur(22px) saturate(1.28);
+  -webkit-backdrop-filter: blur(22px) saturate(1.28);
+}
+
+.side-drawer:has(.user-profile-panel.profile-theme-vip) .drawer-topbar {
+  background: color-mix(in srgb, #ead7ae 70%, transparent);
+  backdrop-filter: blur(22px) saturate(1.22);
+  -webkit-backdrop-filter: blur(22px) saturate(1.22);
+}
+
+html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-level-12) .drawer-topbar {
+  background: color-mix(in srgb, #09242d 82%, transparent);
+}
+
+html[data-theme="dark"] .side-drawer:has(.user-profile-panel.profile-theme-vip) .drawer-topbar {
+  background: color-mix(in srgb, #21180e 84%, transparent);
+}
+
 /* Character bubbles keep the outside corner fully rounded at the end of a run. */
 .message-group:is(
   .bubble-style-niko,

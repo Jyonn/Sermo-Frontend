@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.18",
+  "id": "2026.08.27.19",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "昵称长度更加统一",
+      "title": "个人名片主题排版统一",
       "items": [
-        "新建账号和修改昵称时，昵称统一限制为最多 8 个字符"
+        "潮汐蓝与鎏金时刻现在沿用默认名片布局，个性化预览也与真实用户详情保持一致"
       ]
     },
     "en": {
-      "title": "Consistent nickname length",
+      "title": "Consistent profile card themes",
       "items": [
-        "Nicknames are now consistently limited to 8 characters when joining or editing a profile"
+        "Tidal Blue and Gilded Hour now preserve the default profile layout, with personalization previews matching the real profile"
       ]
     }
   }
