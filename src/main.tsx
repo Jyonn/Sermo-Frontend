@@ -45,9 +45,6 @@ const preventGestureZoom = (event: Event) => event.preventDefault();
 document.addEventListener("gesturestart", preventGestureZoom, { passive: false, signal: pageZoomController.signal });
 document.addEventListener("gesturechange", preventGestureZoom, { passive: false, signal: pageZoomController.signal });
 document.addEventListener("gestureend", preventGestureZoom, { passive: false, signal: pageZoomController.signal });
-document.addEventListener("touchmove", (event) => {
-  if (event.touches.length > 1) event.preventDefault();
-}, { passive: false, signal: pageZoomController.signal });
 window.addEventListener("wheel", (event) => {
   if (event.ctrlKey) event.preventDefault();
 }, { passive: false, signal: pageZoomController.signal });

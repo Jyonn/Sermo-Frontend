@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.33",
+  "id": "2026.08.27.34",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "探索页迎来全新活动预告",
+      "title": "真机聊天滚动恢复顺滑",
       "items": [
-        "探索页活动轮播加入蜘蛛侠全新活动预告",
-        "预告横幅针对手机与深色模式完成清晰适配"
+        "修复手机真机中聊天消息难以滑动、惯性滚动被打断的问题",
+        "媒体加载与气泡高度变化不再和正在进行的滚动争夺位置"
       ]
     },
     "en": {
-      "title": "A new event preview lands in Explore",
+      "title": "Smoother chat scrolling on real devices",
       "items": [
-        "Added a new Spider-Man event preview to the Explore carousel",
-        "Refined the banner for mobile screens and dark mode"
+        "Fixed difficult and interrupted chat scrolling on physical mobile devices",
+        "Media loading and bubble resizing no longer fight active momentum scrolling"
       ]
     }
   }

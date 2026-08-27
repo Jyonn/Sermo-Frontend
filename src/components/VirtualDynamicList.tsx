@@ -104,6 +104,11 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
   const pendingAnchorRef = useRef<PendingAnchor | null>(null);
   const previousLayoutRef = useRef<LayoutSnapshot | null>(null);
   const measurementFrameRef = useRef<number | null>(null);
+  const deferredMeasurementRef = useRef(false);
+  const touchActiveRef = useRef(false);
+  const scrollActiveRef = useRef(false);
+  const scrollSettleTimerRef = useRef<number | null>(null);
+  const flushDeferredMeasurementsRef = useRef<() => void>(() => undefined);
   const layoutRef = useRef<VirtualLayoutItem[]>([]);
   const estimateSizeRef = useRef(estimateSize);
   const followEndRef = useRef(followEnd);
@@ -211,14 +216,62 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(updateViewport);
     };
+    const clearScrollSettleTimer = () => {
+      if (scrollSettleTimerRef.current === null) return;
+      window.clearTimeout(scrollSettleTimerRef.current);
+      scrollSettleTimerRef.current = null;
+    };
+    const pauseMeasurementCommit = () => {
+      if (measurementFrameRef.current === null) return;
+      cancelAnimationFrame(measurementFrameRef.current);
+      measurementFrameRef.current = null;
+      pendingAnchorRef.current = null;
+      deferredMeasurementRef.current = true;
+    };
+    const settleScroll = () => {
+      scrollSettleTimerRef.current = null;
+      if (touchActiveRef.current) return;
+      scrollActiveRef.current = false;
+      flushDeferredMeasurementsRef.current();
+    };
+    const scheduleScrollSettle = (delay = 160) => {
+      clearScrollSettleTimer();
+      scrollSettleTimerRef.current = window.setTimeout(settleScroll, delay);
+    };
+    const handleScroll = () => {
+      scrollActiveRef.current = true;
+      pauseMeasurementCommit();
+      scheduleViewport();
+      scheduleScrollSettle();
+    };
+    const handleTouchStart = () => {
+      touchActiveRef.current = true;
+      scrollActiveRef.current = true;
+      clearScrollSettleTimer();
+      pauseMeasurementCommit();
+    };
+    const handleTouchEnd = () => {
+      touchActiveRef.current = false;
+      // Momentum scrolling keeps emitting scroll events and extends this timer.
+      scheduleScrollSettle(180);
+    };
     const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleViewport);
     observer?.observe(scroller);
-    scroller.addEventListener("scroll", scheduleViewport, { passive: true });
+    scroller.addEventListener("scroll", handleScroll, { passive: true });
+    scroller.addEventListener("touchstart", handleTouchStart, { passive: true });
+    scroller.addEventListener("touchend", handleTouchEnd, { passive: true });
+    scroller.addEventListener("touchcancel", handleTouchEnd, { passive: true });
     scheduleViewport();
     return () => {
       cancelAnimationFrame(frame);
+      clearScrollSettleTimer();
+      touchActiveRef.current = false;
+      scrollActiveRef.current = false;
       observer?.disconnect();
-      scroller.removeEventListener("scroll", scheduleViewport);
+      scroller.removeEventListener("scroll", handleScroll);
+      scroller.removeEventListener("touchstart", handleTouchStart);
+      scroller.removeEventListener("touchend", handleTouchEnd);
+      scroller.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [scrollRef]);
 
@@ -248,11 +301,22 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
   };
 
   const scheduleMeasurementCommit = () => {
+    if (touchActiveRef.current || scrollActiveRef.current) {
+      deferredMeasurementRef.current = true;
+      return;
+    }
     if (measurementFrameRef.current !== null) return;
     measurementFrameRef.current = requestAnimationFrame(() => {
       measurementFrameRef.current = null;
       setMeasurementVersion((version) => version + 1);
     });
+  };
+
+  flushDeferredMeasurementsRef.current = () => {
+    if (!deferredMeasurementRef.current || touchActiveRef.current || scrollActiveRef.current) return;
+    deferredMeasurementRef.current = false;
+    captureAnchor();
+    scheduleMeasurementCommit();
   };
 
   const measureElement = (key: string, element: HTMLDivElement | null) => {
@@ -263,8 +327,10 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     const commit = () => {
       const nextSize = Math.ceil(element.getBoundingClientRect().height);
       if (!nextSize || measurementsRef.current.get(key) === nextSize) return;
-      captureAnchor();
+      const isScrolling = touchActiveRef.current || scrollActiveRef.current;
+      if (!isScrolling) captureAnchor();
       measurementsRef.current.set(key, nextSize);
+      if (isScrolling) deferredMeasurementRef.current = true;
       scheduleMeasurementCommit();
     };
     const observer = new ResizeObserver(commit);
