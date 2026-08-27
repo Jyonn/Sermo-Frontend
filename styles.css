@@ -27864,10 +27864,18 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-comment-thread>div>.square-comment-replies-toggle:active{transform:scale(.97)}
 .square-comment-thread>div>.square-comment-replies-toggle .material-symbols-outlined{font-size:15px;transition:transform 180ms ease}
 .square-comment-thread>div>.square-comment-replies-toggle[aria-expanded="true"] .material-symbols-outlined{transform:rotate(90deg)}
-.square-comment-replies{position:relative;margin-top:8px;padding:2px 0 0 14px;border:0}
+.square-comment-avatar-button{display:block;width:38px;height:38px;margin:0;padding:0;border:0;border-radius:28%;background:transparent;cursor:pointer}
+.square-comment-avatar-button>.square-comment-avatar{width:100%;height:100%}
+.square-comment-thread.has-replies{cursor:pointer}
+.square-comment-thread>div>p{cursor:text}
+.square-comment-replies-shell{display:grid;grid-template-rows:0fr;margin-top:0;visibility:hidden;opacity:0;pointer-events:none;transition:grid-template-rows 260ms cubic-bezier(.22,1,.36,1),margin-top 260ms cubic-bezier(.22,1,.36,1),opacity 180ms ease,visibility 0s linear 260ms}
+.square-comment-replies-shell.is-expanded{grid-template-rows:1fr;margin-top:8px;visibility:visible;opacity:1;pointer-events:auto;transition-delay:0s}
+.square-comment-replies{position:relative;min-height:0;overflow:hidden;gap:0;margin-top:0;padding:2px 0 0 14px;border:0}
 .square-comment-replies::before{position:absolute;top:10px;bottom:11px;left:0;width:1px;border-radius:99px;background:color-mix(in srgb,var(--text-muted) 22%,transparent);content:""}
 .square-comment-replies .square-comment-thread{grid-template-columns:32px minmax(0,1fr);gap:9px;padding:10px 0}
 .square-comment-replies .square-comment-avatar{width:32px;height:32px}
+.square-comment-replies .square-comment-avatar-button{width:32px;height:32px}
+@media(prefers-reduced-motion:reduce){.square-comment-replies-shell{transition:none}}
 .square-comments-empty{min-height:230px;margin:0;padding:42px 18px}
 .square-comments-empty>span{width:auto;height:auto;margin:0 0 9px;color:color-mix(in srgb,var(--text-muted) 76%,transparent);font-size:31px;background:transparent}
 .square-comment-composer{position:relative;z-index:2;right:auto;bottom:auto;flex:0 0 auto;width:calc(100% - 24px);min-height:64px;margin:8px 12px max(12px,env(safe-area-inset-bottom));padding:9px 10px;border:1px solid color-mix(in srgb,var(--line-soft) 84%,transparent);border-radius:20px;background:color-mix(in srgb,var(--bg-elevated) 91%,transparent);box-shadow:0 14px 40px rgba(20,36,30,.14);backdrop-filter:blur(24px)}

@@ -324,16 +324,18 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   );
 }
 
-function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUserId }: {
+function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies, rootUserId }: {
   comment: SquareStatementCommentDTO;
   canInteract: boolean;
+  expanded?: boolean;
   onDelete: (comment: SquareStatementCommentDTO) => void;
   onLike: (comment: SquareStatementCommentDTO) => void;
+  onOpenProfile: (userId: number) => void;
   onReply: (comment: SquareStatementCommentDTO) => void;
+  onToggleReplies?: (commentId: number) => void;
   rootUserId?: number;
 }) {
   const { t } = useI18n();
-  const [repliesExpanded, setRepliesExpanded] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -354,11 +356,16 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUs
     : null;
   const displayName = comment.is_anonymous ? t("square.anonymousUser") : comment.user.name;
   const replyCount = Math.max(comment.reply_count || 0, comment.replies?.length || 0);
-  return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}`} onClick={beginReply}>
-    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} />}
+  const hasExpandableReplies = !comment.parent_id && replyCount > 0;
+  const toggleReplies = (event: ReactMouseEvent) => {
+    event.stopPropagation();
+    if (hasExpandableReplies) onToggleReplies?.(comment.comment_id);
+  };
+  return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}${hasExpandableReplies ? " has-replies" : ""}`} onClick={comment.parent_id ? beginReply : toggleReplies}>
+    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user.user_id); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} /></button>}
     <div>
       <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} /> : null}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
-      <p>{comment.text}</p>
+      <p onClick={beginReply}>{comment.text}</p>
       <div className="square-comment-footer">
         <time>{formatRelativeTime(comment.created_at)}</time>
         <div className="square-comment-actions">
@@ -366,8 +373,8 @@ function CommentThread({ comment, canInteract, onDelete, onLike, onReply, rootUs
           <button className={comment.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(comment); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{comment.like_count || t("square.like")}</span></button>
         </div>
       </div>
-      {!comment.parent_id && replyCount ? <button aria-expanded={repliesExpanded} className="square-comment-replies-toggle" onClick={(event) => { event.stopPropagation(); setRepliesExpanded((current) => !current); }} type="button"><span>{repliesExpanded ? t("square.hideReplies") : t("square.viewReplies", { count: replyCount })}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
-      {!comment.parent_id && repliesExpanded && comment.replies?.length ? <div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onReply={onReply} rootUserId={threadRootUserId} />)}</div> : null}
+      {hasExpandableReplies ? <button aria-expanded={expanded} className="square-comment-replies-toggle" onClick={toggleReplies} type="button"><span>{expanded ? t("square.hideReplies") : t("square.viewReplies", { count: replyCount })}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
+      {hasExpandableReplies && comment.replies?.length ? <div aria-hidden={!expanded} className={`square-comment-replies-shell${expanded ? " is-expanded" : ""}`}><div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onOpenProfile={onOpenProfile} onReply={onReply} rootUserId={threadRootUserId} />)}</div></div> : null}
     </div>
     {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
   </article>;
@@ -467,6 +474,7 @@ export default function SquarePage() {
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsHasMore, setCommentsHasMore] = useState(false);
+  const [expandedCommentId, setExpandedCommentId] = useState<number | null>(null);
   const [commentSort, setCommentSort] = useState<"hot" | "latest">("hot");
   const [commentText, setCommentText] = useState("");
   const [replyTarget, setReplyTarget] = useState<SquareStatementCommentDTO | null>(null);
@@ -534,6 +542,10 @@ export default function SquarePage() {
     setAnonymousComment(canCommentAnonymously);
     setPublicCommentConfirmOpen(false);
   }, [canCommentAnonymously, commentStatementId]);
+
+  useEffect(() => {
+    setExpandedCommentId(null);
+  }, [commentSort, commentStatementId]);
 
   useEffect(() => {
     const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
@@ -1389,7 +1401,7 @@ export default function SquarePage() {
       </div>
       {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
       {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
-      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onReply={beginCommentReply} />)}</div>
+      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={setProfileDrawerUserId} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
       {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
         if (commentStatementId === null) return;
         setCommentsLoading(true);

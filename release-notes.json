@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.16",
+  "id": "2026.08.27.17",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "等级图鉴展开成长长卷",
+      "title": "评论回复展开更自然",
       "items": [
-        "等级图鉴改为连续的成长长卷，完整展示每一级的真实奖励；桌面端采用宽屏沉浸式侧栏，手机端保持自然的单列旅程"
+        "点击一级评论的空白区域即可展开回复，同时自动收起其他评论；头像可直接进入用户详情，回复展开过程更加顺滑"
       ]
     },
     "en": {
-      "title": "A new growth scroll for the level atlas",
+      "title": "Smoother comment threads",
       "items": [
-        "The level atlas now unfolds as a continuous journey with every real reward, using a wide immersive drawer on desktop and a natural single-column scroll on mobile"
+        "Tap the open area of a top-level comment to expand its replies while other threads collapse automatically; avatars now open profiles and reply transitions feel smoother"
       ]
     }
   }
