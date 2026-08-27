@@ -10,6 +10,7 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   busy?: boolean;
+  confirmDisabled?: boolean;
   danger?: boolean;
   warning?: boolean;
   showCancelButton?: boolean;
@@ -25,6 +26,7 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel,
   busy = false,
+  confirmDisabled = false,
   danger = false,
   warning = false,
   showCancelButton = true,
@@ -65,7 +67,7 @@ export function ConfirmDialog({
               {cancelLabel ?? t("common.cancel")}
             </button>
           ) : null}
-          <button className={danger ? "danger-button" : warning ? "warning-button" : "button"} disabled={busy} onClick={onConfirm} type="button">
+          <button className={danger ? "danger-button" : warning ? "warning-button" : "button"} disabled={busy || confirmDisabled} onClick={onConfirm} type="button">
             {busy ? `${t("common.loading")}...` : confirmLabel ?? t("common.confirm")}
           </button>
         </div>

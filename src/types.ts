@@ -679,8 +679,20 @@ export interface SquareStatementDTO {
   liked: boolean;
   can_delete: boolean;
   can_pin?: boolean;
+  can_mute?: boolean;
   is_pinned?: boolean;
   created_at: number;
+}
+
+export interface SquareMuteDTO {
+  mute_id: number;
+  user: TinyUserDTO;
+  reason: string;
+  muted_until: number | null;
+  permanent: boolean;
+  created_by: TinyUserDTO | null;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface SquareStatementCommentDTO {

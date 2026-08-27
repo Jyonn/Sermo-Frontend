@@ -17,7 +17,7 @@ import { copyText } from "../lib/presentation";
 import { setCachedSpaceFeatures } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
-import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareStatementDTO } from "../types";
+import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
 import { showToast } from "../lib/toast";
 
 type MemberFilter = "all" | "online";
@@ -121,6 +121,14 @@ export default function SpaceAdminDashboardPage() {
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
   const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
   const [verificationOpen, setVerificationOpen] = useState(false);
+  const [squareMutesOpen, setSquareMutesOpen] = useState(false);
+  const [squareMutes, setSquareMutes] = useState<SquareMuteDTO[]>([]);
+  const [squareMutesState, setSquareMutesState] = useState<AppViewState>("idle");
+  const [muteEditTarget, setMuteEditTarget] = useState<SquareMuteDTO | null>(null);
+  const [muteDuration, setMuteDuration] = useState<"1d" | "3d" | "7d" | "30d" | "permanent">("1d");
+  const [muteReason, setMuteReason] = useState("");
+  const [muteBusy, setMuteBusy] = useState(false);
+  const [unmuteTarget, setUnmuteTarget] = useState<SquareMuteDTO | null>(null);
   const [adminPhone, setAdminPhone] = useState("");
   const [adminPhoneCode, setAdminPhoneCode] = useState("");
   const [phoneCodeSent, setPhoneCodeSent] = useState(false);
@@ -257,6 +265,57 @@ export default function SpaceAdminDashboardPage() {
     });
     return () => controller.abort();
   }, [activeTab, settingsSquareEnabled, squareState, t]);
+
+  useEffect(() => {
+    if (!squareMutesOpen) return;
+    const controller = new AbortController();
+    setSquareMutesState("loading");
+    api.getAdminSquareMutes(controller.signal).then((rows) => {
+      setSquareMutes(rows);
+      setSquareMutesState("ready");
+    }).catch((apiError) => {
+      if (controller.signal.aborted) return;
+      setSquareMutesState("error");
+      showToast(apiError instanceof ApiError ? apiError.message : t("admin.muteLoadFailed"), "error");
+    });
+    return () => controller.abort();
+  }, [squareMutesOpen, t]);
+
+  const editSquareMute = (mute: SquareMuteDTO) => {
+    setMuteEditTarget(mute);
+    setMuteDuration(mute.permanent ? "permanent" : "1d");
+    setMuteReason(mute.reason);
+  };
+
+  const saveSquareMute = async () => {
+    if (!muteEditTarget || !muteReason.trim()) return;
+    setMuteBusy(true);
+    try {
+      const updated = await api.setAdminSquareMute(muteEditTarget.user.user_id, muteDuration, muteReason.trim());
+      setSquareMutes((rows) => rows.map((row) => row.user.user_id === updated.user.user_id ? updated : row));
+      setMuteEditTarget(null);
+      showToast(t("admin.muteUpdated"), "success");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("common.operationFailed"), "error");
+    } finally {
+      setMuteBusy(false);
+    }
+  };
+
+  const removeSquareMute = async () => {
+    if (!unmuteTarget) return;
+    setMuteBusy(true);
+    try {
+      await api.removeAdminSquareMute(unmuteTarget.user.user_id);
+      setSquareMutes((rows) => rows.filter((row) => row.user.user_id !== unmuteTarget.user.user_id));
+      setUnmuteTarget(null);
+      showToast(t("admin.muteRemoved"), "success");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("common.operationFailed"), "error");
+    } finally {
+      setMuteBusy(false);
+    }
+  };
 
   const copyEntryLink = async () => {
     if (!entryHref) return;
@@ -691,6 +750,7 @@ export default function SpaceAdminDashboardPage() {
               <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setSquareMutesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">voice_over_off</span></span><span><strong>{t("admin.squareMutes")}</strong><small>{t("admin.squareMutesHint", { count: squareMutes.length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
             </div></section>
             <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
@@ -703,6 +763,18 @@ export default function SpaceAdminDashboardPage() {
 
       <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
         {selectedMember ? <div className="admin-member-drawer"><section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section><section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section><section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section><button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button></div> : null}
+      </SideDrawer>
+
+      <SideDrawer historyKey="admin-square-mutes" onClose={() => setSquareMutesOpen(false)} open={squareMutesOpen} title={t("admin.squareMutes")}>
+        <div className="admin-square-mute-list">
+          {squareMutes.map((mute) => <article className="admin-square-mute-card" key={mute.mute_id}>
+            <header><UserAvatar className="admin-square-mute-avatar" name={mute.user.name} uri={mute.user.avatar_uri} /><span><strong>{mute.user.name}</strong><small>{mute.permanent ? t("admin.mutePermanent") : t("admin.muteUntil", { time: new Date((mute.muted_until ?? 0) * 1000).toLocaleString(getActiveLocale()) })}</small></span></header>
+            <p>{mute.reason}</p>
+            <footer><span>{mute.created_by ? t("admin.mutedBy", { name: mute.created_by.name }) : ""}</span><div><button onClick={() => editSquareMute(mute)} type="button">{t("admin.adjustMute")}</button><button className="is-danger" onClick={() => setUnmuteTarget(mute)} type="button">{t("admin.unmute")}</button></div></footer>
+          </article>)}
+          {squareMutesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
+          {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState description={t("admin.noSquareMutesHint")} title={t("admin.noSquareMutes")} /> : null}
+        </div>
       </SideDrawer>
 
       <SideDrawer actionBusy={settingsSaving} actionLabel={t("common.save")} historyKey="admin-features" onAction={() => void saveSettings()} onClose={() => setModuleSettingsOpen(false)} open={moduleSettingsOpen} title={t("admin.featureAccess")}>
@@ -905,6 +977,10 @@ export default function SpaceAdminDashboardPage() {
         open={Boolean(removeUser)}
         title={removeUser?.is_deleted ? t("admin.cleanResidualTitle") : t("admin.removeMemberTitle")}
       />
+      <ConfirmDialog busy={muteBusy} confirmDisabled={!muteReason.trim()} confirmLabel={t("common.save")} description={t("square.muteAuthorHint")} onClose={() => setMuteEditTarget(null)} onConfirm={() => void saveSquareMute()} open={Boolean(muteEditTarget)} title={t("admin.adjustMute")} warning>
+        <div className="square-mute-form"><div className="square-mute-duration">{(["1d", "3d", "7d", "30d", "permanent"] as const).map((duration) => <button aria-pressed={muteDuration === duration} className={muteDuration === duration ? "is-selected" : ""} key={duration} onClick={() => setMuteDuration(duration)} type="button">{t(`square.muteDuration.${duration}` as TranslationKey)}</button>)}</div><label><span>{t("square.muteReason")}</span><textarea maxLength={240} onChange={(event) => setMuteReason(event.target.value)} placeholder={t("square.muteReasonPlaceholder")} value={muteReason} /></label></div>
+      </ConfirmDialog>
+      <ConfirmDialog busy={muteBusy} confirmLabel={t("admin.unmute")} description={unmuteTarget ? t("admin.unmuteHint", { name: unmuteTarget.user.name }) : ""} onClose={() => setUnmuteTarget(null)} onConfirm={() => void removeSquareMute()} open={Boolean(unmuteTarget)} title={t("admin.unmuteTitle")} warning />
     </AppChrome>
   );
 }

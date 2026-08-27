@@ -18,7 +18,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { useI18n } from "../lib/language";
+import { useI18n, type TranslationKey } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
@@ -195,7 +195,7 @@ function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
   return chat.title || shareChatPeer(chat, currentUserId)?.name || "Sermo";
 }
 
-function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, onDelete, onLike, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
+function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, onDelete, onLike, onMute, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   cardRef?: (node: HTMLElement | null) => void;
@@ -204,6 +204,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   chatBackgroundUri?: string;
   onDelete: () => void;
   onLike: () => void;
+  onMute: () => void;
   onOpen: () => void;
   onOpenImage: (index: number) => void;
   onOpenChatImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>) => void;
@@ -260,7 +261,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           </div>
           <span>{formatRelativeTime(statement.created_at)}</span>
         </div>
-        {statement.can_pin || statement.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
+        {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
       {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
       {statement.chat_record?.items?.length ? (
@@ -318,6 +319,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
       {menuPosition && typeof document !== "undefined" ? createPortal(
         <div className="square-statement-dropdown" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}>
           {statement.can_pin ? <button onClick={() => { setMenuPosition(null); onPin(); }} type="button"><span className="material-symbols-outlined">keep</span><span>{statement.is_pinned ? t("square.unpinStatement") : t("square.pinStatement")}</span></button> : null}
+          {statement.can_mute ? <button onClick={() => { setMenuPosition(null); onMute(); }} type="button"><span className="material-symbols-outlined">voice_over_off</span><span>{t("square.muteAuthor")}</span></button> : null}
           {statement.can_delete ? <button className="is-danger" onClick={() => { setMenuPosition(null); onDelete(); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button> : null}
         </div>,
         document.body,
@@ -483,6 +485,10 @@ export default function SquarePage() {
   const [commentSending, setCommentSending] = useState(false);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
   const [deletingStatement, setDeletingStatement] = useState(false);
+  const [muteStatement, setMuteStatement] = useState<SquareStatementDTO | null>(null);
+  const [muteDuration, setMuteDuration] = useState<"1d" | "3d" | "7d" | "30d" | "permanent">("1d");
+  const [muteReason, setMuteReason] = useState("");
+  const [mutingAuthor, setMutingAuthor] = useState(false);
   const [deleteCommentTarget, setDeleteCommentTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [deletingComment, setDeletingComment] = useState(false);
   const [shareStatement, setShareStatement] = useState<SquareStatementDTO | null>(null);
@@ -1351,6 +1357,22 @@ export default function SquarePage() {
     }
   };
 
+  const confirmMuteStatementAuthor = async () => {
+    if (!muteStatement || !muteReason.trim() || mutingAuthor) return;
+    setMutingAuthor(true);
+    try {
+      await api.muteSquareStatementAuthor(muteStatement.statement_id, muteDuration, muteReason.trim());
+      showToast(t("square.muteApplied"), "success");
+      setMuteStatement(null);
+      setMuteReason("");
+      setMuteDuration("1d");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("square.muteFailed"));
+    } finally {
+      setMutingAuthor(false);
+    }
+  };
+
   const toggleCommentLike = async (comment: SquareStatementCommentDTO) => {
     if (!canPublish) return;
     const liked = !comment.liked;
@@ -1544,7 +1566,7 @@ export default function SquarePage() {
                   <strong>{t("square.statementDetail")}</strong>
                   <span aria-hidden="true" />
                 </header> : null}
-                <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+                <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
                 {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
                 </div>
               </Fragment>;
@@ -1562,7 +1584,7 @@ export default function SquarePage() {
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <div className="square-desktop-detail-scroll">
             <div className="square-statement-detail-stage">
-              <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
+              <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
             </div>
             {discussionContent}
           </div>
@@ -1690,7 +1712,7 @@ export default function SquarePage() {
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             {discussionContent}
           </div>
@@ -1811,6 +1833,14 @@ export default function SquarePage() {
       {galleryVideo ? <MediaLightbox index={0} items={[{ uri: galleryVideo.uri, kind: "video", posterUri: galleryVideo.thumbnail_uri, width: galleryVideo.metadata?.pixel_width, height: galleryVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={galleryVideo.metadata} />, downloadLabel: formatImageFileSize(galleryVideo.metadata?.file_size) }]} onClose={() => setVideoGalleryStatementId(null)} onIndexChange={() => undefined} /> : null}
       {chatRecordGallery ? <MediaLightbox altPrefix={t("square.photo")} index={chatRecordGallery.index} items={chatRecordGallery.uris.map((uri, index) => ({ uri, kind: "image" as const, width: chatRecordGallery.metadata[index]?.pixel_width, height: chatRecordGallery.metadata[index]?.pixel_height, detail: <MediaMetadataPanel key={`${uri}-${index}`} kind="image" metadata={chatRecordGallery.metadata[index]} />, downloadLabel: formatImageFileSize(chatRecordGallery.metadata[index]?.file_size) }))} onClose={() => setChatRecordGallery(null)} onIndexChange={(index) => setChatRecordGallery((current) => current ? { ...current, index } : null)} /> : null}
       {chatRecordVideo ? <MediaLightbox index={0} items={[{ uri: chatRecordVideo.uri, kind: "video", width: chatRecordVideo.metadata?.pixel_width, height: chatRecordVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={chatRecordVideo.metadata} />, downloadLabel: formatImageFileSize(chatRecordVideo.metadata?.file_size) }]} onClose={() => setChatRecordVideo(null)} onIndexChange={() => undefined} /> : null}
+      <ConfirmDialog busy={mutingAuthor} confirmDisabled={!muteReason.trim()} confirmLabel={t("square.confirmMute")} description={t("square.muteAuthorHint")} onClose={() => { if (!mutingAuthor) setMuteStatement(null); }} onConfirm={() => void confirmMuteStatementAuthor()} open={muteStatement !== null} title={t("square.muteAuthorTitle")} warning>
+        <div className="square-mute-form">
+          <div aria-label={t("square.muteDuration")} className="square-mute-duration" role="group">
+            {(["1d", "3d", "7d", "30d", "permanent"] as const).map((duration) => <button aria-pressed={muteDuration === duration} className={muteDuration === duration ? "is-selected" : ""} key={duration} onClick={() => setMuteDuration(duration)} type="button">{t(`square.muteDuration.${duration}` as TranslationKey)}</button>)}
+          </div>
+          <label className="square-mute-reason"><span>{t("square.muteReason")}</span><textarea autoFocus maxLength={240} onChange={(event) => setMuteReason(event.target.value)} placeholder={t("square.muteReasonPlaceholder")} rows={3} value={muteReason} /></label>
+        </div>
+      </ConfirmDialog>
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
       <ConfirmDialog busy={commentSending} confirmLabel={t("square.confirmPublicReply")} description={t("square.publicReplyConfirmHint")} onClose={() => { if (!commentSending) setPublicCommentConfirmOpen(false); }} onConfirm={() => { setPublicCommentConfirmOpen(false); void sendComment(); }} open={publicCommentConfirmOpen} title={t("square.publicReplyConfirmTitle")} warning />

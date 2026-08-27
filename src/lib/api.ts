@@ -60,6 +60,7 @@ import type {
   TravelMapComparisonDTO,
   TravelMapAccessOverviewDTO,
   SquareStatementDTO,
+  SquareMuteDTO,
   SquareStatementCommentDTO,
   SquareStatementDraftMedia,
   SquareQuotaDTO,
@@ -509,6 +510,26 @@ export const api = {
     });
   },
 
+  getAdminSquareMutes(signal?: AbortSignal) {
+    return request<SquareMuteDTO[]>("/square/admin/mutes", { adminAuth: true, signal });
+  },
+
+  setAdminSquareMute(userId: number, duration: string, reason: string) {
+    return request<SquareMuteDTO>("/square/admin/mutes", {
+      method: "POST",
+      adminAuth: true,
+      body: { user_id: userId, duration, reason },
+    });
+  },
+
+  removeAdminSquareMute(userId: number) {
+    return request<{ user_id: number; muted: boolean }>("/square/admin/mutes", {
+      method: "DELETE",
+      adminAuth: true,
+      query: { user_id: userId },
+    });
+  },
+
   broadcastAdminMessage(payload: { content: string; type: number; broadcast_id: string }) {
     return request<SpaceAdminBroadcastResultDTO>("/spaces/admin/broadcast", {
       method: "POST",
@@ -842,6 +863,14 @@ export const api = {
       method: "POST",
       auth: true,
       body: { pin: pin ? 1 : 0 },
+    });
+  },
+
+  muteSquareStatementAuthor(statementId: number, duration: string, reason: string) {
+    return request<SquareMuteDTO>(`/square/statements/${statementId}/mute-author`, {
+      method: "POST",
+      auth: true,
+      body: { duration, reason },
     });
   },
 

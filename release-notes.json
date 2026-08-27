@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.26",
+  "id": "2026.08.27.27",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "手机聊天滚动更顺滑",
+      "title": "广场秩序管理更清晰",
       "items": [
-        "优化长聊天记录在手机端的触摸与惯性滚动",
-        "减少消息高度变化时的滚动跳动"
+        "官方账号可从发言菜单按时长禁言，并记录处理原因",
+        "空间管理员可统一查看、调整或解除广场禁言"
       ]
     },
     "en": {
-      "title": "Smoother mobile chat scrolling",
+      "title": "Clearer Square moderation",
       "items": [
-        "Improved touch and momentum scrolling in long mobile conversations",
-        "Reduced scroll jumps while message heights settle"
+        "Official accounts can mute members from a statement with a duration and reason",
+        "Space admins can review, adjust, or remove active Square mutes"
       ]
     }
   }

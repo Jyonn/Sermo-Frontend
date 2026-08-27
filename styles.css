@@ -30681,3 +30681,28 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   background: linear-gradient(125deg, #9f1f2f, #d5483d);
   box-shadow: inset 0 0 0 1px rgba(255, 224, 202, 0.34), 0 5px 14px rgba(159, 31, 47, 0.18);
 }
+
+.square-mute-form { display: grid; gap: 14px; margin-top: 4px; }
+.square-mute-duration { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+.square-mute-duration button { min-height: 42px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; color: var(--muted); background: var(--surface-soft); font: inherit; font-weight: 700; }
+.square-mute-duration button.is-selected { color: var(--accent-strong); border-color: color-mix(in srgb, var(--accent) 58%, var(--line)); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.square-mute-form label { display: grid; gap: 7px; color: var(--text); font-weight: 700; }
+.square-mute-form textarea { box-sizing: border-box; width: 100%; min-height: 92px; resize: vertical; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; color: var(--text); background: var(--surface-soft); font: inherit; line-height: 1.55; }
+
+.admin-square-mute-list { display: grid; gap: 12px; padding: 18px; align-content: start; }
+.admin-square-mute-card { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+.admin-square-mute-card header { display: flex; align-items: center; gap: 11px; }
+.admin-square-mute-card header > :first-child { width: 46px; height: 46px; flex: 0 0 46px; border-radius: 14px; }
+.admin-square-mute-card header span { display: grid; gap: 3px; min-width: 0; }
+.admin-square-mute-card header strong { color: var(--text); }
+.admin-square-mute-card header small, .admin-square-mute-card footer > span { color: var(--muted); }
+.admin-square-mute-card p { margin: 0; color: var(--text); line-height: 1.55; }
+.admin-square-mute-card footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.admin-square-mute-card footer div { display: flex; gap: 8px; }
+.admin-square-mute-card footer button { min-height: 36px; padding: 0 13px; border: 0; border-radius: 11px; color: var(--accent-strong); background: color-mix(in srgb, var(--accent) 11%, var(--surface-soft)); font: inherit; font-weight: 700; }
+.admin-square-mute-card footer button.is-danger { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, var(--surface-soft)); }
+
+@media (max-width: 520px) {
+  .square-mute-duration { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .admin-square-mute-list { padding: 14px; }
+}
