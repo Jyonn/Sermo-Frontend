@@ -8203,7 +8203,11 @@ function LiveChatsPage() {
                 secondaryActions.push(...allActions.slice(4));
               }
               const primaryActionCount = primaryActions.length + (secondaryActions.length ? 1 : 0);
-              const primaryActionWidth = primaryActionCount * 74 + Math.max(0, primaryActionCount - 1) * 5;
+              const actionWidth = 66;
+              const actionGap = 4;
+              const primaryActionWidth = primaryActionCount * actionWidth + Math.max(0, primaryActionCount - 1) * actionGap;
+              const secondaryActionCount = Math.min(5, secondaryActions.length);
+              const secondaryActionWidth = secondaryActionCount * actionWidth + Math.max(0, secondaryActionCount - 1) * actionGap;
 
               return (
                 <div className="message-context-sections">
@@ -8232,7 +8236,10 @@ function LiveChatsPage() {
                       <div>
                         <div
                           className="message-context-actions is-secondary"
-                          style={{ gridTemplateColumns: `repeat(${Math.min(5, secondaryActions.length)}, 74px)` }}
+                          style={{
+                            gridTemplateColumns: `repeat(${secondaryActionCount}, minmax(0, 1fr))`,
+                            width: `min(${secondaryActionWidth}px, calc(100vw - 42px))`,
+                          }}
                         >
                           {secondaryActions}
                         </div>
