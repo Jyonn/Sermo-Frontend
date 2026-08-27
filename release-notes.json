@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.27.27",
+  "id": "2026.08.27.28",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "广场秩序管理更清晰",
+      "title": "聊天记录卡片更规整",
       "items": [
-        "官方账号可从发言菜单按时长禁言，并记录处理原因",
-        "空间管理员可统一查看、调整或解除广场禁言"
+        "修复合并转发卡片中的消息摘要和箭头越出边界的问题",
+        "不同屏幕宽度与聊天气泡外观下都能保持完整布局"
       ]
     },
     "en": {
-      "title": "Clearer Square moderation",
+      "title": "Cleaner chat history cards",
       "items": [
-        "Official accounts can mute members from a statement with a duration and reason",
-        "Space admins can review, adjust, or remove active Square mutes"
+        "Fixed message previews and arrows overflowing merged-forward cards",
+        "Cards now stay contained across screen sizes and bubble styles"
       ]
     }
   }

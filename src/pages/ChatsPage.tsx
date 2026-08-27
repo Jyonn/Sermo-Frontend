@@ -1654,7 +1654,9 @@ function renderMessageContent(
           </span>
         </span>
         <span className="message-forward-bundle-footer">
-          {i18n.t("message.forwardBundleCount", { count: message.payload?.item_count ?? items.length })}
+          <span className="message-forward-bundle-count">
+            {i18n.t("message.forwardBundleCount", { count: message.payload?.item_count ?? items.length })}
+          </span>
           <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
         </span>
       </button>
