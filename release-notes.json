@@ -1,17 +1,17 @@
 {
-  "id": "2026.08.27.15",
+  "id": "2026.08.27.16",
   "publishedAt": "2026-08-27",
   "locales": {
     "zh-CN": {
-      "title": "消息操作栏更利落",
+      "title": "等级图鉴展开成长长卷",
       "items": [
-        "消息操作不超过 5 项时保持单行展示，更多操作按需展开，并移除浅色与深色模式中的行间分割线"
+        "等级图鉴改为连续的成长长卷，完整展示每一级的真实奖励；桌面端采用宽屏沉浸式侧栏，手机端保持自然的单列旅程"
       ]
     },
     "en": {
-      "title": "Cleaner message actions",
+      "title": "A new growth scroll for the level atlas",
       "items": [
-        "Up to five message actions now stay on one row; larger sets expand only when needed, without a divider in either theme"
+        "The level atlas now unfolds as a continuous journey with every real reward, using a wide immersive drawer on desktop and a natural single-column scroll on mobile"
       ]
     }
   }

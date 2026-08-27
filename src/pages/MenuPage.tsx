@@ -2137,95 +2137,61 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer historyKey="growth-levels" onRouteOpen={() => setGrowthLevelsOpen(true)} open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
-        <div className={`growth-level-guide growth-stage-${growthStageForLevel(activeGrowthGuideLevel)}`}>
-          <div className="growth-level-guide-summary">
+      <SideDrawer className="growth-level-atlas-drawer" historyKey="growth-levels" onRouteOpen={() => setGrowthLevelsOpen(true)} open={growthLevelsOpen} onClose={() => setGrowthLevelsOpen(false)} title={t("growth.levelGuide")}>
+        <div className={`growth-scroll-atlas growth-stage-${growthStageForLevel(activeGrowthGuideLevel)}`}>
+          <aside className="growth-scroll-chapter">
+            <span className="growth-scroll-eyebrow">CURRENT CHAPTER</span>
+            <div className="growth-scroll-level-number"><small>LV</small>{String(activeGrowthGuideLevel).padStart(2, "0")}</div>
             <span>{String(activeGrowthGuideLevel).padStart(2, "0")} / 18</span>
             <strong>{growthLevels[activeGrowthGuideLevel - 1]?.name ?? `Lv.${activeGrowthGuideLevel}`}</strong>
             <em>{t(`growth.levelStage.${growthStageForLevel(activeGrowthGuideLevel)}` as TranslationKey)}</em>
             <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? t("growth.currentLevelLabel") : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? t("growth.reached") : t("growth.keepGrowing")}</small>
-          </div>
+            <div className="growth-scroll-score">
+              <span>{t("growth.unlockCondition")}</span>
+              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>{t("growth.points")}</small></strong>
+            </div>
+          </aside>
           <div
-            className="growth-level-list"
+            className="growth-scroll-map"
             ref={growthLevelTrackRef}
-            onScroll={(event) => {
-              const track = event.currentTarget;
-              const center = track.scrollLeft + track.clientWidth / 2;
-              const cards = Array.from(track.querySelectorAll<HTMLElement>("[data-growth-level]"));
-              const closest = cards.reduce<{ level: number; distance: number } | null>((best, card) => {
-                const level = Number(card.dataset.growthLevel);
-                const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
-                return !best || distance < best.distance ? { level, distance } : best;
-              }, null);
-              if (closest && closest.level !== activeGrowthGuideLevel) setActiveGrowthGuideLevel(closest.level);
-            }}
           >
             {growthLevels.map((item) => {
               const current = item.level === (me?.growth?.level ?? 1);
               const next = item.level === (me?.growth?.level ?? 1) + 1;
               return (
-                <button
-                  className={`growth-level-card growth-stage-${growthStageForLevel(item.level)}${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
+                <article
+                  className={`growth-scroll-node growth-stage-${growthStageForLevel(item.level)}${item.unlocked ? " is-unlocked" : ""}${current ? " is-current" : ""}${next ? " is-next" : ""}${activeGrowthGuideLevel === item.level ? " is-focused" : ""}${item.level > (me?.growth?.level_cap ?? 18) ? " is-capped" : ""}`}
                   data-growth-level={item.level}
                   key={item.level}
-                  onClick={(event) => {
-                    setActiveGrowthGuideLevel(item.level);
-                    event.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-                    window.navigator.vibrate?.(8);
-                  }}
-                  type="button"
                 >
-                  <div className="growth-level-card-stage">
-                    <span>LEVEL</span>
-                    <strong>{String(item.level).padStart(2, "0")}</strong>
+                  <button
+                    className="growth-scroll-node-heading"
+                    onClick={(event) => {
+                      setActiveGrowthGuideLevel(item.level);
+                      event.currentTarget.closest<HTMLElement>("[data-growth-level]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      window.navigator.vibrate?.(8);
+                    }}
+                    type="button"
+                  >
+                    <span className="growth-scroll-node-number">{String(item.level).padStart(2, "0")}</span>
+                    <span className="growth-scroll-node-copy">
+                      <b>{item.name}</b>
+                      <small>{item.score.toLocaleString()} {t("growth.points")}</small>
+                    </span>
+                    <span className="growth-scroll-node-state">{current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}</span>
+                  </button>
+                  <div className="growth-scroll-rewards">
+                    {(item.rewards ?? []).map((reward) => (
+                      <article className={`growth-scroll-reward is-${reward.rarity}`} key={reward.id}>
+                        <GrowthRewardVisual me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
+                        <span><b>{reward.title}</b>{reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}</span>
+                      </article>
+                    ))}
+                    {!(item.rewards ?? []).length ? <span className="growth-scroll-rest">{t("growth.stage")}</span> : null}
                   </div>
-                  <div className="growth-level-card-copy">
-                    <strong>{item.name}</strong>
-                    <div className="growth-level-card-rewards">
-                      {(item.rewards ?? []).slice(0, 4).map((reward) => (
-                        <GrowthRewardVisual key={reward.id} me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="growth-level-card-state">
-                    {current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}
-                  </div>
-                </button>
+                </article>
               );
             })}
-          </div>
-          <section className="growth-level-detail">
-            <div className="growth-level-detail-score">
-              <span>{t("growth.unlockCondition")}</span>
-              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>{t("growth.points")}</small></strong>
-            </div>
-            <div className="growth-level-detail-unlocks">
-              {(growthLevels[activeGrowthGuideLevel - 1]?.rewards ?? []).length ? (
-                (growthLevels[activeGrowthGuideLevel - 1]?.rewards ?? []).map((reward) => (
-                  <article className={`growth-reward-card is-${reward.rarity}`} key={reward.id}>
-                    <GrowthRewardVisual me={me} name={session?.user.name ?? t("brand.user")} reward={reward} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
-                    <span><b>{reward.title}</b>{reward.implementation_status === "planned" ? <small>{t("growth.planned")}</small> : null}</span>
-                  </article>
-                ))
-              ) : (
-                <span><i />{t("growth.stage")}</span>
-              )}
-            </div>
-          </section>
-          <div className="growth-level-rail" aria-label={t("growth.selectLevel")}>
-            {growthLevels.map((item) => (
-              <button
-                aria-label={t("growth.viewLevel", { level: item.level })}
-                className={activeGrowthGuideLevel === item.level ? "is-active" : ""}
-                key={`rail-${item.level}`}
-                onClick={() => {
-                  growthLevelTrackRef.current
-                    ?.querySelector<HTMLElement>(`[data-growth-level="${item.level}"]`)
-                    ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-                }}
-                type="button"
-              />
-            ))}
           </div>
           {me?.growth?.level_cap_reason ? <p className="growth-level-cap-note">{me.growth.level_cap_reason}</p> : null}
         </div>
