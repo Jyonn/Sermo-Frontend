@@ -1,19 +1,21 @@
 {
-  "id": "2026.08.27.36",
-  "publishedAt": "2026-08-27",
+  "id": "2026.08.28.1",
+  "publishedAt": "2026-08-28",
   "locales": {
     "zh-CN": {
-      "title": "中文昵称输入更顺畅",
+      "title": "JZDXQ 小程序全面升级",
       "items": [
-        "输入拼音时不再被 8 字限制提前截断，选定汉字后再按昵称长度处理",
-        "首次进入空间和修改昵称均采用一致的输入规则"
+        "微信小程序现已覆盖聊天、通讯、广场、成长、个性化与常用账户能力",
+        "会话和广场优先展示缓存内容，并通过原生角标及时提示新消息与活动奖励",
+        "通知渠道会按手机系统智能筛选，后台时停止无意义同步"
       ]
     },
     "en": {
-      "title": "Smoother nickname input",
+      "title": "A complete JZDXQ Mini Program",
       "items": [
-        "Pinyin composition is no longer cut off before Chinese characters are selected",
-        "The eight-character limit is now applied consistently after composition"
+        "The WeChat Mini Program now covers chat, contacts, Square, growth, personalization, and everyday account features",
+        "Chats and Square render cached content first, with native badges for new messages and claimable rewards",
+        "Notification providers are filtered by device platform and background syncing pauses automatically"
       ]
     }
   }
