@@ -1,21 +1,23 @@
 {
-  "id": "2026.08.28.1",
-  "publishedAt": "2026-08-28",
+  "id": "2026.08.29.1",
+  "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "JZDXQ 小程序全面升级",
+      "title": "JZDXQ 小程序能力补全",
       "items": [
-        "微信小程序现已覆盖聊天、通讯、广场、成长、个性化与常用账户能力",
-        "会话和广场优先展示缓存内容，并通过原生角标及时提示新消息与活动奖励",
-        "通知渠道会按手机系统智能筛选，后台时停止无意义同步"
+        "通讯录新增空间成员与在线成员视图，好友、申请和群聊变化会及时安静同步",
+        "足迹地图补全一对一授权与共同足迹，聊天中可以直接分享、查看和管理足迹",
+        "广场发布会提示额度与媒体权限，匿名发言作者也可选择匿名或公开评论",
+        "聊天文件支持从云端资源快速选择，表情探索与常用列表会优先读取缓存"
       ]
     },
     "en": {
-      "title": "A complete JZDXQ Mini Program",
+      "title": "JZDXQ Mini Program parity completed",
       "items": [
-        "The WeChat Mini Program now covers chat, contacts, Square, growth, personalization, and everyday account features",
-        "Chats and Square render cached content first, with native badges for new messages and claimable rewards",
-        "Notification providers are filtered by device platform and background syncing pauses automatically"
+        "Contacts now includes space-wide and online member views, with quiet refreshes for friendship and group changes",
+        "Footprints now covers one-to-one access and shared maps that open directly from chat",
+        "Square explains quotas and media access, while anonymous authors can choose anonymous or public comments",
+        "Chat files can be selected from cloud resources, and sticker lists now render from cache first"
       ]
     }
   }
