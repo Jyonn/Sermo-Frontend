@@ -1,23 +1,25 @@
 {
-  "id": "2026.08.29.1",
+  "id": "2026.08.29.2",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "JZDXQ 小程序能力补全",
+      "title": "JZDXQ 小程序个性化补全",
       "items": [
         "通讯录新增空间成员与在线成员视图，好友、申请和群聊变化会及时安静同步",
         "足迹地图补全一对一授权与共同足迹，聊天中可以直接分享、查看和管理足迹",
         "广场发布会提示额度与媒体权限，匿名发言作者也可选择匿名或公开评论",
-        "聊天文件支持从云端资源快速选择，表情探索与常用列表会优先读取缓存"
+        "聊天文件支持从云端资源快速选择，表情探索与常用列表会优先读取缓存",
+        "聊天背景、气泡、本人头像、发言卡片和个人名片均会在真实界面生效，LV8 用户还可上传自定义背景"
       ]
     },
     "en": {
-      "title": "JZDXQ Mini Program parity completed",
+      "title": "JZDXQ Mini Program personalization completed",
       "items": [
         "Contacts now includes space-wide and online member views, with quiet refreshes for friendship and group changes",
         "Footprints now covers one-to-one access and shared maps that open directly from chat",
         "Square explains quotas and media access, while anonymous authors can choose anonymous or public comments",
-        "Chat files can be selected from cloud resources, and sticker lists now render from cache first"
+        "Chat files can be selected from cloud resources, and sticker lists now render from cache first",
+        "Chat backgrounds, bubbles, self avatars, statement cards, and profile themes now render in real surfaces, with custom backgrounds at LV8"
       ]
     }
   }
