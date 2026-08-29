@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.14",
+  "id": "2026.08.29.15",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "运营者任免通知",
+      "title": "运营者联系与禁言记录",
       "items": [
-        "设置或取消运营者时，官方账号会通过私聊向对应用户发送通知",
-        "通知会同步进入会话未读与消息提醒，并根据用户语言展示"
+        "添加好友页会展示空间运营者及双方好友状态，任何成员均可直接发起好友申请",
+        "广场禁言记录现在明确展示执行操作的官方账号或运营者"
       ]
     },
     "en": {
-      "title": "Operator role notifications",
+      "title": "Operator contacts and mute records",
       "items": [
-        "The official account now sends a direct message whenever an operator role is assigned or removed",
-        "These notices appear in unread chats and notifications, localized to the member's language"
+        "Add Friend now lists space operators and friendship status, allowing every member to send a request",
+        "Square mute records now identify the official account or operator who performed the action"
       ]
     }
   }

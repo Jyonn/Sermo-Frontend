@@ -1180,6 +1180,14 @@ export const api = {
     });
   },
 
+  getFriendOperators(signal?: AbortSignal) {
+    return request<import("../types").FriendOperatorDTO[]>("/friends/operators", { auth: true, signal });
+  },
+
+  createOperatorFriendRequest(to_user_id: number) {
+    return request<FriendshipRequestDTO>("/friends/operators", { method: "POST", auth: true, body: { to_user_id } });
+  },
+
   createFriendInviteToken(permanent = false) {
     return request<{ token: string; expire: number | null; permanent: boolean }>("/friends/invites/token", {
       method: "POST",

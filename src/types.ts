@@ -448,6 +448,11 @@ export interface SpaceOperatorDTO {
   created_at: number;
 }
 
+export interface FriendOperatorDTO {
+  user: UserDTO;
+  relationship: "self" | "none" | "pending" | "friend";
+}
+
 export interface AdminActivityDTO {
   key: string;
   title: string;

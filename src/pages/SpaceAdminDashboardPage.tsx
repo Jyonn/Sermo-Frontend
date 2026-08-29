@@ -848,7 +848,7 @@ export default function SpaceAdminDashboardPage() {
       <SideDrawer historyKey="admin-square-mutes" onClose={() => setSquareMutesOpen(false)} open={squareMutesOpen} title={t("admin.squareMutes")}>
         <div className="admin-square-mute-list">
           {squareMutes.map((mute) => <article className="admin-square-mute-card" key={mute.mute_id}>
-            <header><UserAvatar className="admin-square-mute-avatar" name={mute.user.name} uri={mute.user.avatar_uri} /><span><strong>{mute.user.name}</strong><small>{mute.permanent ? t("admin.mutePermanent") : t("admin.muteUntil", { time: new Date((mute.muted_until ?? 0) * 1000).toLocaleString(getActiveLocale()) })}</small></span></header>
+            <header><UserAvatar className="admin-square-mute-avatar" name={mute.user.name} uri={mute.user.avatar_uri} /><span><strong>{mute.user.name}</strong><small>{mute.permanent ? t("admin.mutePermanent") : t("admin.muteUntil", { time: new Date((mute.muted_until ?? 0) * 1000).toLocaleString(getActiveLocale()) })}</small>{mute.created_by ? <small>{t("admin.muteCreatedBy", { name: mute.created_by.name })}</small> : null}</span></header>
             <p>{mute.reason}</p>
             <footer><span>{mute.created_by ? t("admin.mutedBy", { name: mute.created_by.name }) : ""}</span><div><button onClick={() => editSquareMute(mute)} type="button">{t("admin.adjustMute")}</button><button className="is-danger" onClick={() => setUnmuteTarget(mute)} type="button">{t("admin.unmute")}</button></div></footer>
           </article>)}
