@@ -1,5 +1,6 @@
 import type {
   ApiEnvelope,
+  AdminActivityDTO,
   AdminMemberDTO,
   AvatarUploadDTO,
   AuthSession,
@@ -439,6 +440,20 @@ export const api = {
     return request<SpaceAdminDashboardDTO>("/spaces/admin/dashboard", {
       adminAuth: true,
       signal,
+    });
+  },
+
+  getAdminActivities(signal?: AbortSignal) {
+    return request<AdminActivityDTO[]>("/activities/admin", {
+      adminAuth: true,
+      signal,
+    });
+  },
+
+  claimAdminActivity(key: string) {
+    return request<AdminActivityDTO[]>(`/activities/admin/${key}/claim`, {
+      method: "POST",
+      adminAuth: true,
     });
   },
 

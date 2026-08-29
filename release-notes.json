@@ -1,17 +1,19 @@
 {
-  "id": "2026.08.29.3",
+  "id": "2026.08.29.4",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "JZDXQ 小程序编译修复",
+      "title": "空间活动领取与计时",
       "items": [
-        "修复会话头像数据与表情页条件分支引起的 WXML 编译错误，并确保私聊始终展示对方头像"
+        "八仙、蜘蛛侠等活动改由空间管理员领取，活动时间从领取时开始计算；永久 VIP 由系统自动安排",
+        "探索页现在只展示本空间已领取且仍在进行中的活动"
       ]
     },
     "en": {
-      "title": "JZDXQ Mini Program build fix",
+      "title": "Space activity claims and timing",
       "items": [
-        "Fixed WXML compilation issues in chat avatar data and sticker-page conditionals while keeping direct-chat avatars pointed at the peer"
+        "Space admins now claim activities such as Baxian and Spider-Man, with each activity starting its timer when claimed; Permanent VIP is assigned automatically",
+        "Explore now shows only activities claimed by the current space and still in progress"
       ]
     }
   }

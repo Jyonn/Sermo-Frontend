@@ -247,6 +247,7 @@ export interface PermanentVipCampaignDTO {
   claimed_by_user: boolean;
   slot: number | null;
   active: boolean;
+  space_activity_active: boolean;
   resource_inventory?: UserResourceInventoryDTO[];
   requirements: {
     email: boolean;
@@ -436,6 +437,22 @@ export interface SpaceAdminDashboardDTO {
     members_count: number;
     online_count: number;
   };
+}
+
+export interface AdminActivityDTO {
+  key: string;
+  title: string;
+  title_en: string;
+  summary: string;
+  summary_en: string;
+  theme: string;
+  assignment_mode: "automatic" | "manual";
+  mandatory: boolean;
+  duration_seconds: number | null;
+  status: "unclaimed" | "active" | "ended";
+  claimed: boolean;
+  claimed_at: number | null;
+  ends_at: number | null;
 }
 
 export interface AdminMemberContactDTO {
@@ -782,8 +799,11 @@ export interface ActivityCampaignDTO {
   summary: string;
   summary_en: string;
   starts_at: number;
-  ends_at: number;
+  ends_at: number | null;
   active: boolean;
+  assignment_mode: "automatic" | "manual";
+  duration_seconds: number | null;
+  theme: string;
   verified: boolean;
   today_earned: boolean;
   claimable_points: number;

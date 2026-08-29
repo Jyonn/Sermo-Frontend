@@ -17,7 +17,7 @@ import { copyText } from "../lib/presentation";
 import { setCachedSpaceFeatures } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
-import type { AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
+import type { AdminActivityDTO, AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
 import { showToast } from "../lib/toast";
 
 type MemberFilter = "all" | "online";
@@ -121,6 +121,10 @@ export default function SpaceAdminDashboardPage() {
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
   const [accessPolicyOpen, setAccessPolicyOpen] = useState(false);
   const [verificationOpen, setVerificationOpen] = useState(false);
+  const [activitiesOpen, setActivitiesOpen] = useState(false);
+  const [activities, setActivities] = useState<AdminActivityDTO[]>([]);
+  const [activitiesState, setActivitiesState] = useState<AppViewState>("idle");
+  const [activityClaimingKey, setActivityClaimingKey] = useState<string | null>(null);
   const [squareMutesOpen, setSquareMutesOpen] = useState(false);
   const [squareMutes, setSquareMutes] = useState<SquareMuteDTO[]>([]);
   const [squareMutesState, setSquareMutesState] = useState<AppViewState>("idle");
@@ -208,6 +212,19 @@ export default function SpaceAdminDashboardPage() {
         setDashboardState("error");
       });
 
+    return () => controller.abort();
+  }, [refreshTick]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setActivitiesState("loading");
+    api.getAdminActivities(controller.signal).then((payload) => {
+      if (controller.signal.aborted) return;
+      setActivities(payload);
+      setActivitiesState("ready");
+    }).catch(() => {
+      if (!controller.signal.aborted) setActivitiesState("error");
+    });
     return () => controller.abort();
   }, [refreshTick]);
 
@@ -314,6 +331,19 @@ export default function SpaceAdminDashboardPage() {
       showToast(apiError instanceof ApiError ? apiError.message : t("common.operationFailed"), "error");
     } finally {
       setMuteBusy(false);
+    }
+  };
+
+  const claimActivity = async (activity: AdminActivityDTO) => {
+    if (activity.claimed || activityClaimingKey) return;
+    setActivityClaimingKey(activity.key);
+    try {
+      setActivities(await api.claimAdminActivity(activity.key));
+      showToast(t("admin.activityClaimed", { name: activity.title }), "success");
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("admin.activityClaimFailed"), "error");
+    } finally {
+      setActivityClaimingKey(null);
     }
   };
 
@@ -749,6 +779,7 @@ export default function SpaceAdminDashboardPage() {
             <section className="admin-menu-section"><h2>{t("admin.spaceGovernance")}</h2><div className="admin-menu-list">
               <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setActivitiesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">local_activity</span></span><span><strong>{t("admin.activityManagement")}</strong><small>{t("admin.activityManagementHint", { count: activities.filter((activity) => activity.status === "active").length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setSquareMutesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">voice_over_off</span></span><span><strong>{t("admin.squareMutes")}</strong><small>{t("admin.squareMutesHint", { count: squareMutes.length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
@@ -763,6 +794,26 @@ export default function SpaceAdminDashboardPage() {
 
       <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
         {selectedMember ? <div className="admin-member-drawer"><section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section><section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section><section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section><button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button></div> : null}
+      </SideDrawer>
+
+      <SideDrawer historyKey="admin-activities" onClose={() => setActivitiesOpen(false)} open={activitiesOpen} title={t("admin.activityManagement")}>
+        <div className="admin-activity-list">
+          <section className="admin-policy-intro"><strong>{t("admin.activityArrangementTitle")}</strong><p>{t("admin.activityArrangementHint")}</p></section>
+          {activities.map((activity) => {
+            const durationDays = activity.duration_seconds ? Math.ceil(activity.duration_seconds / 86400) : null;
+            const localizedTitle = getActiveLocale() === "zh-CN" ? activity.title : activity.title_en || activity.title;
+            const localizedSummary = getActiveLocale() === "zh-CN" ? activity.summary : activity.summary_en || activity.summary;
+            return <article className={`admin-activity-card is-${activity.status}`} key={activity.key}>
+              <header><span><small>{activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
+              <p>{localizedSummary}</p>
+              <dl><div><dt>{t("admin.activityDuration")}</dt><dd>{durationDays === null ? t("admin.activityNoTimeLimit") : t("admin.activityDays", { count: durationDays })}</dd></div>{activity.ends_at ? <div><dt>{t("admin.activityEndsAt")}</dt><dd>{new Date(activity.ends_at * 1000).toLocaleString(getActiveLocale())}</dd></div> : null}</dl>
+              {!activity.claimed && !activity.mandatory ? <button disabled={Boolean(activityClaimingKey)} onClick={() => void claimActivity(activity)} type="button">{activityClaimingKey === activity.key ? t("common.processing") : t("admin.claimActivity")}</button> : null}
+              {activity.mandatory ? <footer><span className="material-symbols-outlined">verified_user</span>{t("admin.activityMandatoryHint")}</footer> : null}
+            </article>;
+          })}
+          {activitiesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
+          {activitiesState === "error" ? <FeedbackState title={t("admin.activityLoadFailed")} /> : null}
+        </div>
       </SideDrawer>
 
       <SideDrawer historyKey="admin-square-mutes" onClose={() => setSquareMutesOpen(false)} open={squareMutesOpen} title={t("admin.squareMutes")}>

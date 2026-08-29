@@ -106,9 +106,10 @@ function ActivityForceProgress({ total, target }: { total: number; target: numbe
   </div>;
 }
 
-function formatActivityDateRange(startsAt: number, endsAt: number, language: string) {
+function formatActivityDateRange(startsAt: number, endsAt: number | null, language: string, ongoingLabel: string) {
   const locale = language === "zh-CN" ? "zh-CN" : "en-US";
   const formatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
+  if (endsAt === null) return `${formatter.format(new Date(startsAt * 1000))} · ${ongoingLabel}`;
   return `${formatter.format(new Date(startsAt * 1000))} - ${formatter.format(new Date(endsAt * 1000))}`;
 }
 
@@ -625,8 +626,10 @@ export default function SquarePage() {
     void api.markSquareFeedRead(feedMode).then(applySquareStatus).catch(() => undefined);
   }, [feedMode, session?.user.space_id, session?.user.user_id]);
 
-  const showVipCampaign = Boolean(vipCampaign && (vipCampaign.active || vipCampaign.claimed_by_user));
-  const activityBannerCount = activities.length + (showVipCampaign ? 1 : 0) + 1;
+  const spiderManActivity = activities.find((activity) => activity.theme === "spider-man-4") ?? null;
+  const regularActivities = activities.filter((activity) => activity.theme !== "spider-man-4");
+  const showVipCampaign = Boolean(vipCampaign?.space_activity_active && (vipCampaign.active || vipCampaign.claimed_by_user));
+  const activityBannerCount = regularActivities.length + (spiderManActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
 
   useEffect(() => {
     if (activityBannerCount < 2 || feedMode !== "all") return;
@@ -1496,14 +1499,14 @@ export default function SquarePage() {
             const nearest = slides.reduce((best, slide, index) => Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft) < Math.abs(slides[best].offsetLeft - track.offsetLeft - track.scrollLeft) ? index : best, 0);
             setActivityBannerSlide(nearest);
           }} ref={activityBannerTrackRef}>
-            {activities.slice(0, 1).map((activity) => {
+            {regularActivities.slice(0, 1).map((activity) => {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
-              const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
+              const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
                 {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-activity-banner-copy">
-                  <small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small>
+                  <small>{t("activity.spaceCoop")} · {days === null ? t("activity.noTimeLimit") : t("activity.daysLeft", { count: days })}</small>
                   <span><b>{activity.space_total}</b><i>/</i>{activity.target} {t("activity.force")}</span>
                 </span>
                 <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
@@ -1520,7 +1523,7 @@ export default function SquarePage() {
               </span>
               <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
             </button> : null}
-            <button aria-label={`${t("activity.spiderMan4Title")} · ${t("activity.comingSoon")}`} className="square-activity-banner is-spider-man-preview" onClick={() => showToast(t("activity.spiderMan4ComingSoon"))} type="button">
+            {spiderManActivity ? <button aria-label={`${t("activity.spiderMan4Title")} · ${t("activity.comingSoon")}`} className="square-activity-banner is-spider-man-preview" onClick={() => showToast(t("activity.spiderMan4ComingSoon"))} type="button">
               <img alt="" aria-hidden="true" className="square-spider-man-preview-art" src={spiderMan4PreviewBanner} />
               <span className="square-spider-man-preview-copy">
                 <small>{t("activity.preview")}</small>
@@ -1529,15 +1532,15 @@ export default function SquarePage() {
                 <span>{t("activity.spiderMan4Description")}</span>
               </span>
               <span className="square-spider-man-preview-status"><i />{t("activity.comingSoon")}</span>
-            </button>
-            {activities.slice(1).map((activity) => {
+            </button> : null}
+            {regularActivities.slice(1).map((activity) => {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
-              const days = Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000));
+              const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
                 {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-activity-banner-copy">
-                  <small>{t("activity.spaceCoop")} · {t("activity.daysLeft", { count: days })}</small>
+                  <small>{t("activity.spaceCoop")} · {days === null ? t("activity.noTimeLimit") : t("activity.daysLeft", { count: days })}</small>
                   <span><b>{activity.space_total}</b><i>/</i>{activity.target} {t("activity.force")}</span>
                 </span>
                 <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
@@ -1748,7 +1751,7 @@ export default function SquarePage() {
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-192.png" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
             <div className="activity-detail-index">
               <div><button onClick={() => setActivityRulesOpen(true)} type="button">{t("activity.rules")}</button><i aria-hidden="true" /><button onClick={() => setActivityPoolOpen(true)} type="button">{t("activity.prizePool")}</button></div>
-              <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language)}</time>
+              <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}</time>
             </div>
           </div>
           <section className="activity-detail-visual" />
