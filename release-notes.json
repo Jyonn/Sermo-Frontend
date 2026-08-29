@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.16",
+  "id": "2026.08.29.17",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "广场禁言选择反馈",
+      "title": "运营者好友列表排版",
       "items": [
-        "禁言时长现在拥有清晰的选中底色、描边和状态标记",
-        "点击、悬停和键盘聚焦均会提供即时视觉反馈"
+        "运营者列表改用与普通好友搜索结果一致的紧凑排版",
+        "输入昵称或展示搜索结果时会自动隐藏运营者列表，减少干扰"
       ]
     },
     "en": {
-      "title": "Square mute selection feedback",
+      "title": "Operator friend list layout",
       "items": [
-        "Mute durations now have a clear selected background, border, and status marker",
-        "Click, hover, and keyboard focus states now provide immediate visual feedback"
+        "The operator list now uses the same compact layout as regular friend search results",
+        "The list automatically hides while typing or showing search results"
       ]
     }
   }

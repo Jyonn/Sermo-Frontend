@@ -880,10 +880,8 @@ img {
 .friend-operator-section { display: grid; gap: 12px; margin-top: 18px; }
 .friend-operator-section > header { display: grid; gap: 4px; }
 .friend-operator-section > header small { color: var(--text-muted); }
-.friend-operator-section > div { display: grid; gap: 8px; }
-.friend-operator-section article { align-items: center; display: grid; gap: 12px; grid-template-columns: auto minmax(0, 1fr) auto; padding: 12px; border: 1px solid var(--border-soft); border-radius: 16px; background: var(--bg-panel); }
-.friend-operator-section article > span { display: grid; gap: 4px; min-width: 0; }
-.friend-operator-section article small { color: var(--text-muted); }
+.friend-operator-section > div { display: grid; }
+.friend-operator-section .friend-search-result { background: transparent; }
 .friend-operator-section .friend-search-state { display: inline-flex; color: var(--text-muted); font-size: 12px; white-space: nowrap; }
 
 .official-badge .material-symbols-outlined {

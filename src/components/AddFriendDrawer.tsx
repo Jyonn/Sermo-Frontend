@@ -7,7 +7,6 @@ import type { FriendOperatorDTO, UserDTO } from "../types";
 import { QuietState } from "./BoundaryState";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
-import { OperatorBadge } from "./OperatorBadge";
 
 export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean; onClose: () => void; onRouteOpen?: () => void }) {
   const { t } = useI18n();
@@ -90,7 +89,7 @@ export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean;
             ) : <QuietState icon="person_off" title={t("friendSearch.notFound")} description={t("friendSearch.notFoundHint")} /> : !operators.length && session?.user.verified ? (
               <div className="friend-search-intro"><span className="material-symbols-outlined">fingerprint</span><strong>{t("friendSearch.exactOnly")}</strong><p>{t("friendSearch.exactOnlyHint")}</p></div>
             ) : null}
-            {operators.length ? <section className="friend-operator-section"><header><strong>{t("friendSearch.operators")}</strong><small>{t("friendSearch.operatorsHint")}</small></header><div>{operators.map((operator) => <article key={operator.user.user_id}><UserAvatar className="friend-search-avatar" frame={operator.user.avatar_frame_style} name={operator.user.name} uri={operator.user.avatar_uri} /><span><span className="person-name-row"><strong>{operator.user.name}</strong><OperatorBadge /></span><small>{operator.relationship === "self" ? t("friendSearch.self") : operator.relationship === "friend" ? t("friendSearch.alreadyFriend") : operator.relationship === "pending" ? t("friendSearch.pending") : t("friendSearch.operatorRole")}</small></span>{operator.relationship === "none" ? <button className="button" disabled={operatorBusyId === operator.user.user_id} onClick={() => void addOperator(operator)} type="button">{t("profile.addFriend")}</button> : <span className="friend-search-state">{operator.relationship === "self" ? t("friendSearch.self") : operator.relationship === "friend" ? t("friendSearch.alreadyFriend") : t("friendSearch.pending")}</span>}</article>)}</div></section> : null}
+            {operators.length && name.length === 0 && result === null ? <section className="friend-operator-section"><header><strong>{t("friendSearch.operators")}</strong><small>{t("friendSearch.operatorsHint")}</small></header><div>{operators.map((operator) => <div className="friend-search-result" key={operator.user.user_id}><UserAvatar className="friend-search-avatar" frame={operator.user.avatar_frame_style} name={operator.user.name} uri={operator.user.avatar_uri} /><div><strong>{operator.user.name}</strong><small>{t("friendSearch.exactMatch")}</small></div>{operator.relationship === "none" ? <button className="button" disabled={operatorBusyId === operator.user.user_id} onClick={() => void addOperator(operator)} type="button">{t("profile.addFriend")}</button> : <span className="friend-search-state">{operator.relationship === "self" ? t("friendSearch.self") : operator.relationship === "friend" ? t("friendSearch.alreadyFriend") : t("friendSearch.pending")}</span>}</div>)}</div></section> : null}
           </>
         )}
       </div>
