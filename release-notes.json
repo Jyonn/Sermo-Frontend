@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.12",
+  "id": "2026.08.29.13",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "官方账号标识修正",
+      "title": "空间运营者上线",
       "items": [
-        "通讯录现已正确展示官方账号标识",
-        "用户详情中的官方标识恢复为紧凑胶囊，不再横向拉伸"
+        "空间管理员可任命最多 5 位完成邮箱与手机双认证的运营者",
+        "运营者拥有统一身份标识，并可处理广场禁言与聊天记录发言"
       ]
     },
     "en": {
-      "title": "Official account badge fixes",
+      "title": "Space operators",
       "items": [
-        "Official account badges now appear correctly in Contacts",
-        "The profile badge is compact again instead of stretching across the row"
+        "Space administrators can assign up to five members with verified email and phone as operators",
+        "Operators have a consistent identity badge and can manage Square mutes and publish chat-record posts"
       ]
     }
   }

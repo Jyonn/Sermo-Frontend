@@ -28,6 +28,7 @@ import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
+import { OperatorBadge } from "../components/OperatorBadge";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
@@ -2380,6 +2381,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     online: chat.group ? false : Boolean(peer?.is_alive),
     verified: Boolean(peer?.verified),
     official: Boolean(peer?.official),
+    operator: Boolean(peer?.operator),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
     isOwner,
@@ -6354,7 +6356,7 @@ function LiveChatsPage() {
         ) : null}
       </div>
       <div className="chat-copy">
-        <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}</p>
+        <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}</p>
         <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.preview}</span></div>
       </div>
       <div className="chat-meta">
@@ -7290,7 +7292,7 @@ function LiveChatsPage() {
         }}
         beforeList={forwardOpenedFromSelection ? (
           <>
-          {forwardSourceMessageIds.length > 1 && Boolean(currentUserMe?.official ?? session?.user.official) ? (
+          {forwardSourceMessageIds.length > 1 && Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? (
             <button className="forward-square-destination" disabled={forwardSending} onClick={composeForwardBundleForSquare} type="button">
               <span className="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
               <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>

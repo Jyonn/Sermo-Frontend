@@ -143,6 +143,8 @@ export default function SpaceAdminDashboardPage() {
   const [settingsLevelNames, setSettingsLevelNames] = useState<string[]>(defaultLevelNames);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [officialLoginBusy, setOfficialLoginBusy] = useState(false);
+  const [operatorsOpen, setOperatorsOpen] = useState(false);
+  const [operatorBusyUserId, setOperatorBusyUserId] = useState<number | null>(null);
   const [removeUser, setRemoveUser] = useState<AdminMemberDTO | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
@@ -166,6 +168,7 @@ export default function SpaceAdminDashboardPage() {
   const broadcastRecordingTimerRef = useRef<number | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
   const deferredQuery = useDeferredValue(query);
+  const operators = dashboard?.operators ?? [];
 
   const currentSpace = dashboard?.space ?? session?.space ?? null;
   const entryHref = useMemo(() => (currentSpace ? buildJoinHrefForCurrentHost(currentSpace.slug) : ""), [currentSpace]);
@@ -182,6 +185,26 @@ export default function SpaceAdminDashboardPage() {
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return t("time.hoursAgo", { count: hours });
     return new Date(value * 1000).toLocaleDateString(getActiveLocale(), { month: "short", day: "numeric" });
+  };
+
+  const setOperator = async (user: AdminMemberDTO, enabled: boolean) => {
+    try {
+      setOperatorBusyUserId(user.user_id);
+      if (enabled) {
+        const operator = await api.addSpaceOperator(user.user_id);
+        setDashboard((current) => current ? { ...current, operators: [...current.operators.filter((item) => item.user.user_id !== user.user_id), operator] } : current);
+      } else {
+        await api.removeSpaceOperator(user.user_id);
+        setDashboard((current) => current ? { ...current, operators: current.operators.filter((item) => item.user.user_id !== user.user_id) } : current);
+      }
+      setMembers((current) => current.map((item) => item.user_id === user.user_id ? { ...item, operator: enabled } : item));
+      setSelectedMember((current) => current?.user_id === user.user_id ? { ...current, operator: enabled } : current);
+      showToast(t(enabled ? "admin.operatorAdded" : "admin.operatorRemoved"));
+    } catch (cause) {
+      showToast(cause instanceof ApiError ? cause.message : t("admin.operatorUpdateFailed"), "error");
+    } finally {
+      setOperatorBusyUserId(null);
+    }
   };
 
   useEffect(() => {
@@ -783,6 +806,7 @@ export default function SpaceAdminDashboardPage() {
               <button onClick={() => setActivitiesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">local_activity</span></span><span><strong>{t("admin.activityManagement")}</strong><small>{t("admin.activityManagementHint", { count: activities.filter((activity) => activity.status === "active").length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setAccessPolicyOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield</span></span><span><strong>{t("admin.unverifiedAccess")}</strong><small>{t(`admin.unverifiedPolicy${settingsUnverifiedGroupPolicy}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setSquareMutesOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">voice_over_off</span></span><span><strong>{t("admin.squareMutes")}</strong><small>{t("admin.squareMutesHint", { count: squareMutes.length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+              <button onClick={() => setOperatorsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">shield_person</span></span><span><strong>{t("admin.operators")}</strong><small>{t("admin.operatorCount", { count: operators.length })}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setVerificationOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">verified_user</span></span><span><strong>{t("admin.spaceVerification")}</strong><small>{t(`admin.tier.${currentSpace.verification_tier ?? "email"}` as TranslationKey)}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
             </div></section>
             <section className="admin-menu-section"><h2>{t("admin.officialAccount")}</h2><div className="admin-menu-list"><button onClick={openBroadcast} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">campaign</span></span><span><strong>{t("admin.broadcast")}</strong><small>{t("admin.broadcastDescription", { count: dashboard?.stats.members_count ?? 0 })}</small></span><span className="material-symbols-outlined">chevron_right</span></button><button disabled={officialLoginBusy} onClick={() => void loginAsOfficial()} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">login</span></span><span><strong>{t("admin.enterAccount")}</strong><small>{currentSpace.official_user?.name}</small></span><span className="material-symbols-outlined">chevron_right</span></button></div></section>
@@ -794,7 +818,11 @@ export default function SpaceAdminDashboardPage() {
       </section>
 
       <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
-        {selectedMember ? <div className="admin-member-drawer"><section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section><section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section><section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section><button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button></div> : null}
+        {selectedMember ? <div className="admin-member-drawer"><section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section><section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section><section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section><button className="ghost-button" disabled={operatorBusyUserId === selectedMember.user_id || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button><button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button></div> : null}
+      </SideDrawer>
+
+      <SideDrawer historyKey="admin-operators" onClose={() => setOperatorsOpen(false)} open={operatorsOpen} title={t("admin.operators")}>
+        <div className="admin-operator-list"><section className="admin-policy-intro"><strong>{t("admin.operatorCount", { count: operators.length })}</strong><p>{t("admin.operatorHint")}</p></section>{operators.map((operator) => <article className="admin-operator-card" key={operator.operator_id}><UserAvatar className="mini-avatar" name={operator.user.name} uri={operator.user.avatar_uri} /><span><strong>{operator.user.name}</strong><small>{t("profile.operator")}</small></span><button disabled={operatorBusyUserId === operator.user.user_id} onClick={() => { const member = members.find((item) => item.user_id === operator.user.user_id); if (member) void setOperator(member, false); }} type="button">{t("admin.removeOperator")}</button></article>)}</div>
       </SideDrawer>
 
       <SideDrawer historyKey="admin-activities" onClose={() => setActivitiesOpen(false)} open={activitiesOpen} title={t("admin.activityManagement")}>

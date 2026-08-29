@@ -22,6 +22,7 @@ export interface UserProfileSeed {
   user_id: number;
   name: string;
   official?: boolean;
+  operator?: boolean;
   avatar_uri?: string;
   is_alive?: boolean;
   last_heartbeat?: number;
@@ -329,6 +330,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         isPermanentVip={user.is_permanent_vip}
         name={user.name}
         official={user.official}
+        operator={user.operator}
         onAvatarClick={user.avatar_uri ? () => setAvatarPreviewOpen(true) : undefined}
         permanentVipLabel={user.permanent_vip_slot
           ? t("profile.permanentVipRank", { slot: String(user.permanent_vip_slot).padStart(3, "0") })

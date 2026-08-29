@@ -443,6 +443,14 @@ export const api = {
     });
   },
 
+  addSpaceOperator(userId: number) {
+    return request<import("../types").SpaceOperatorDTO>("/spaces/admin/operators", { method: "POST", adminAuth: true, body: { user_id: userId } });
+  },
+
+  removeSpaceOperator(userId: number) {
+    return request<Record<string, never>>("/spaces/admin/operators", { method: "DELETE", adminAuth: true, query: { user_id: userId } });
+  },
+
   getAdminActivities(signal?: AbortSignal) {
     return request<AdminActivityDTO[]>("/activities/admin", {
       adminAuth: true,

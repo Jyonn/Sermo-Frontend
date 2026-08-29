@@ -7,6 +7,7 @@ import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
+import { OperatorBadge } from "../components/OperatorBadge";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -41,6 +42,7 @@ function mapFriend(user: UserDTO): FriendAccepted {
     mood: user.verified ? i18n.t("friends.verifiedMember") : i18n.t("friends.member"),
     verified: user.verified,
     official: Boolean(user.official),
+    operator: Boolean(user.operator),
   };
 }
 
@@ -236,7 +238,7 @@ export default function FriendsPage() {
                     uri={friend.avatarUri}
                   />
                   <div className="row-main">
-                    <div className="person-name-row"><strong>{friend.name}</strong>{friend.official ? <OfficialBadge /> : null}</div>
+                    <div className="person-name-row"><strong>{friend.name}</strong>{friend.official ? <OfficialBadge /> : null}{friend.operator ? <OperatorBadge /> : null}</div>
                     <div className="row-subtle">{friend.status}</div>
                   </div>
                   <button className="ghost-button row-button" onClick={() => void startDirectChat(friend.id)} type="button">

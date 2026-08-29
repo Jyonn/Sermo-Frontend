@@ -851,6 +851,32 @@ img {
   white-space: nowrap;
 }
 
+.operator-badge {
+  align-items: center;
+  background: color-mix(in srgb, #d88919 13%, var(--bg-panel));
+  border: 1px solid color-mix(in srgb, #d88919 42%, transparent);
+  border-radius: 999px;
+  color: #a45b00;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 2px;
+  line-height: 18px;
+  padding: 0 7px 0 5px;
+  white-space: nowrap;
+  width: max-content;
+}
+
+.operator-badge .material-symbols-outlined { font-size: 13px; }
+.chat-name .operator-badge { margin-left: 7px; }
+
+.admin-operator-list { display: grid; gap: 12px; }
+.admin-operator-card { align-items: center; display: grid; gap: 12px; grid-template-columns: auto minmax(0, 1fr) auto; padding: 14px; border: 1px solid var(--border-soft); border-radius: 18px; background: var(--bg-panel); }
+.admin-operator-card > span { display: grid; gap: 3px; }
+.admin-operator-card small { color: var(--text-muted); }
+.admin-operator-card button { padding: 8px 12px; border-radius: 12px; color: var(--danger); background: color-mix(in srgb, var(--danger) 9%, transparent); }
+
 .official-badge .material-symbols-outlined {
   font-size: 13px;
 }

@@ -15,6 +15,7 @@ import { formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
+import { OperatorBadge } from "../components/OperatorBadge";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
@@ -323,6 +324,7 @@ export default function NotificationsPage() {
                           <div className="person-name-row">
                             <strong>{friend.name}</strong>
                             {friend.official ? <OfficialBadge /> : null}
+                            {friend.operator ? <OperatorBadge /> : null}
                           </div>
                           <div className="row-subtle">{formatLastSeen(friend)}</div>
                         </div>

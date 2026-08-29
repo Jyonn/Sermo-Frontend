@@ -1,5 +1,6 @@
 import { GrowthLevelBadge } from "./GrowthLevelBadge";
 import { OfficialBadge } from "./OfficialBadge";
+import { OperatorBadge } from "./OperatorBadge";
 import { UserAvatar } from "./UserAvatar";
 import type { UserDTO } from "../types";
 
@@ -12,6 +13,7 @@ interface UserProfileCardProps {
   isPermanentVip?: boolean;
   name: string;
   official?: boolean;
+  operator?: boolean;
   onAvatarClick?: () => void;
   permanentVipLabel?: string;
   presence: string;
@@ -27,6 +29,7 @@ export function UserProfileCard({
   isPermanentVip,
   name,
   official,
+  operator,
   onAvatarClick,
   permanentVipLabel,
   presence,
@@ -57,6 +60,7 @@ export function UserProfileCard({
           <div className="user-profile-name-row">
             <h2>{name}</h2>
             {official ? <OfficialBadge /> : null}
+            {operator ? <OperatorBadge /> : null}
           </div>
           <p className={isOnline ? "is-online" : ""}>{presence}</p>
         </div>

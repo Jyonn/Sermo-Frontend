@@ -16,6 +16,7 @@ export interface TinyUserDTO {
   user_id: number;
   name: string;
   official?: boolean;
+  operator?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
   avatar_cache_key?: string;
@@ -158,6 +159,7 @@ export interface AccessPayload {
   space_id: number;
   has_password?: boolean;
   official?: boolean;
+  operator?: boolean;
   verified?: boolean;
   avatar_type?: "preset" | "custom";
   avatar_uri?: string;
@@ -433,10 +435,17 @@ export interface PlatformMessageDeliveryAuditDTO {
 
 export interface SpaceAdminDashboardDTO {
   space: SpaceDTO;
+  operators: SpaceOperatorDTO[];
   stats: {
     members_count: number;
     online_count: number;
   };
+}
+
+export interface SpaceOperatorDTO {
+  operator_id: number;
+  user: UserDTO;
+  created_at: number;
 }
 
 export interface AdminActivityDTO {
@@ -1204,6 +1213,7 @@ export interface Chat {
   online: boolean;
   verified: boolean;
   official: boolean;
+  operator: boolean;
   members: number;
   type: "direct" | "group";
   isOwner: boolean;
@@ -1225,6 +1235,7 @@ export interface FriendAccepted {
   mood: string;
   verified: boolean;
   official: boolean;
+  operator: boolean;
 }
 
 export interface NotificationPreference {
