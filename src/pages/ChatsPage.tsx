@@ -213,6 +213,7 @@ function messageResultPreview(message: ChatMessageDTO) {
     [MESSAGE_TYPE_MAP_ACCESS]: i18n.t("travelMap.action"),
     [MESSAGE_TYPE_STATEMENT]: message.payload?.statement?.text || i18n.t("message.statementPlaceholder"),
     [MESSAGE_TYPE_ACTIVITY]: message.payload?.activity?.title || message.payload?.title || i18n.t("message.activityPlaceholder"),
+    [MESSAGE_TYPE_FORWARD_BUNDLE]: i18n.t("messageSearch.forwardBundle"),
   }[message.type] ?? i18n.t("message.generic");
 }
 
@@ -256,6 +257,7 @@ function compactSearchMessagePreview(message: ChatMessageDTO) {
     const title = /活动$|\bevent$/i.test(rawTitle) ? rawTitle : `${rawTitle}${i18n.t("messageSearch.activitySuffix")}`;
     return i18n.t("messageSearch.compactActivity", { title });
   }
+  if (message.type === MESSAGE_TYPE_FORWARD_BUNDLE) return i18n.t("messageSearch.compactForwardBundle");
   return messageResultPreview(message);
 }
 
@@ -3495,7 +3497,7 @@ function LiveChatsPage() {
       });
       setMessageSearchResults((current) => {
         const known = new Set(current.map((message) => message.message_id));
-        return [...current, ...response.items.filter((message) => !known.has(message.message_id))];
+        return [...current, ...response.items.filter((message) => message.type !== MESSAGE_TYPE_SYSTEM && !known.has(message.message_id))];
       });
       setMessageSearchHasMore(response.has_more);
       setMessageSearchNextBefore(response.next_before);
@@ -3518,7 +3520,7 @@ function LiveChatsPage() {
         type: messageSearchType ?? undefined,
       }, controller.signal)
         .then((response) => {
-          setMessageSearchResults(response.items);
+          setMessageSearchResults(response.items.filter((message) => message.type !== MESSAGE_TYPE_SYSTEM));
           setMessageSearchHasMore(response.has_more);
           setMessageSearchNextBefore(response.next_before);
           setMessageSearchTotal(response.total_count);
@@ -3590,7 +3592,7 @@ function LiveChatsPage() {
     uri: message.payload?.uri || "",
     thumbnailUri: message.payload?.thumbnail_uri,
     createdAt: message.created_at,
-    durationSeconds: message.payload?.duration_seconds,
+    durationSeconds: message.payload?.duration_seconds ?? message.payload?.video_metadata?.duration_seconds,
     label: message.payload?.file_name || message.user.name,
   }));
 
@@ -7630,6 +7632,7 @@ function LiveChatsPage() {
                 [MESSAGE_TYPE_LOCATION]: "location_on",
                 [MESSAGE_TYPE_STATEMENT]: "campaign",
                 [MESSAGE_TYPE_ACTIVITY]: "celebration",
+                [MESSAGE_TYPE_FORWARD_BUNDLE]: "layers",
               }[message.type] ?? "chat_bubble";
               const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button>;
               const openResult = () => {
@@ -7645,11 +7648,7 @@ function LiveChatsPage() {
                   revealMessageFromSearch(message.message_id);
                 }
               };
-              const displayName = message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement?.is_anonymous
-                ? t("square.anonymousUser")
-                : message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement
-                  ? message.payload.statement.user.name || t("square.anonymousUser")
-                  : message.user.name;
+              const displayName = message.user.name;
               const richFile = messageSearchType === MESSAGE_TYPE_FILE && message.type === MESSAGE_TYPE_FILE && Boolean(message.payload?.uri);
               return (
                 <article

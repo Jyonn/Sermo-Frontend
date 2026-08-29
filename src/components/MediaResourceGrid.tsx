@@ -24,7 +24,7 @@ export const MediaResourceGrid = forwardRef<HTMLDivElement, {
         <button aria-label={item.label} className="shared-media-preview" onClick={() => onSelect(item)} type="button">
           <img alt={item.label || ""} loading="lazy" onError={() => onImageError?.(item)} src={item.thumbnailUri || item.uri} />
           {item.kind === "video" ? <span className="shared-media-play material-symbols-outlined">play_arrow</span> : null}
-          {item.durationSeconds ? <small>{Math.floor(item.durationSeconds / 60)}:{String(Math.round(item.durationSeconds % 60)).padStart(2, "0")}</small> : null}
+          {Number.isFinite(item.durationSeconds) && Number(item.durationSeconds) > 0 ? <small>{Math.floor(Number(item.durationSeconds) / 60)}:{String(Math.round(Number(item.durationSeconds) % 60)).padStart(2, "0")}</small> : null}
         </button>
         {renderAction?.(item)}
       </article>)}

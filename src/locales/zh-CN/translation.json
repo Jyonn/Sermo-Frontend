@@ -1857,6 +1857,8 @@
   "messageSearch.compactActivity": "[{{title}}]",
   "messageSearch.activitySuffix": "活动",
   "messageSearch.durationSeconds": "{{seconds}}秒",
+  "messageSearch.forwardBundle": "转发合并消息",
+  "messageSearch.compactForwardBundle": "[转发合并消息]",
   "square.notifications": "广场消息",
   "square.noNotifications": "还没有广场消息",
   "square.showEarlierNotifications": "查看更早消息",

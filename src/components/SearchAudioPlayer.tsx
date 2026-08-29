@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../lib/language";
 
 function durationLabel(seconds: number) {
-  const safe = Math.max(0, Math.round(seconds));
+  const safe = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;
   return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
 }
 
@@ -45,7 +45,8 @@ export function SearchAudioTile({ src, durationSeconds = 0, avatarUri, name, onJ
   const { t } = useI18n();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [duration, setDuration] = useState(durationSeconds || 0);
+  const fallbackDuration = Number.isFinite(durationSeconds) ? Number(durationSeconds) : 0;
+  const [duration, setDuration] = useState(fallbackDuration);
   useEffect(() => () => audioRef.current?.pause(), []);
   const toggle = async () => {
     const audio = audioRef.current;
@@ -54,7 +55,7 @@ export function SearchAudioTile({ src, durationSeconds = 0, avatarUri, name, onJ
     else audio.pause();
   };
   return <article className={`message-search-audio-tile${playing ? " is-playing" : ""}`} style={avatarUri ? { backgroundImage: `url("${avatarUri.replace(/"/g, "%22")}")` } : undefined}>
-    <audio onDurationChange={(event) => setDuration(event.currentTarget.duration || durationSeconds || 0)} onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={src} />
+    <audio onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : fallbackDuration)} onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={src} />
     {!avatarUri ? <span className="message-search-audio-initial">{name.trim().slice(0, 1).toUpperCase()}</span> : null}
     <span className="message-search-audio-shade" />
     <button aria-label={`${name} · ${playing ? t("media.pause") : t("media.play")}`} onClick={() => void toggle()} type="button"><svg aria-hidden="true" viewBox="0 0 24 24">{playing ? <path d="M8 6v12M16 6v12" /> : <path d="m9 6 9 6-9 6Z" />}</svg></button>
