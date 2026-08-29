@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.13",
+  "id": "2026.08.29.14",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "空间运营者上线",
+      "title": "运营者任免通知",
       "items": [
-        "空间管理员可任命最多 5 位完成邮箱与手机双认证的运营者",
-        "运营者拥有统一身份标识，并可处理广场禁言与聊天记录发言"
+        "设置或取消运营者时，官方账号会通过私聊向对应用户发送通知",
+        "通知会同步进入会话未读与消息提醒，并根据用户语言展示"
       ]
     },
     "en": {
-      "title": "Space operators",
+      "title": "Operator role notifications",
       "items": [
-        "Space administrators can assign up to five members with verified email and phone as operators",
-        "Operators have a consistent identity badge and can manage Square mutes and publish chat-record posts"
+        "The official account now sends a direct message whenever an operator role is assigned or removed",
+        "These notices appear in unread chats and notifications, localized to the member's language"
       ]
     }
   }
