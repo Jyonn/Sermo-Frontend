@@ -601,9 +601,9 @@ export function GlobalMessageSync() {
     };
 
     const poll = async () => {
-      if (isGestureAccessSuppressed(gestureScope)) {
+      const accessSuppressed = isGestureAccessSuppressed(gestureScope);
+      if (accessSuppressed) {
         setPopup(null);
-        return;
       }
       if (syncInFlightRef.current) {
         if (DEBUG_SYNC) {
@@ -625,7 +625,7 @@ export function GlobalMessageSync() {
           presenceBaselineRef.current = new Map(freshChats.map((chat) => [chat.id, chat.online]));
           chatCache.setChatList(scope, freshChats);
           void chatCache.persistChatList(scope, freshChats);
-          if (newlyOnline && !isGestureAccessSuppressed(gestureScope)) {
+          if (newlyOnline && !accessSuppressed) {
             setPopup({
               chatId: newlyOnline.id,
               title: newlyOnline.title,
@@ -705,7 +705,7 @@ export function GlobalMessageSync() {
           return readState.last_read_at === null || item.message.createdAt > readState.last_read_at;
         });
         if (!otherChatItems.length) return;
-        if (isGestureAccessSuppressed(gestureScope)) {
+        if (accessSuppressed || isGestureAccessSuppressed(gestureScope)) {
           setPopup(null);
           return;
         }

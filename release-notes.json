@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.6",
+  "id": "2026.08.29.7",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录查找升级",
+      "title": "消息同步稳定性",
       "items": [
-        "搜索聊天记录按相对日期整理，图片、视频、语音、文件、位置、发言和活动拥有更合适的查看方式",
-        "新增按日期查找，并支持媒体预览自动续载、真实总数、退出定位和一键跳回原消息"
+        "修复部分设备上用户状态正常更新、但新消息停止同步的问题",
+        "隐私锁定期间继续安全推进消息同步，解锁后无需等待或重新加载"
       ]
     },
     "en": {
-      "title": "Better chat history search",
+      "title": "More reliable message sync",
       "items": [
-        "Chat history is now grouped by relative date, with purpose-built viewing for media, audio, files, locations, posts, and activities",
-        "Find by date is now available, while media previews support automatic paging, true totals, return positioning, and jumping to the original message"
+        "Fixed an issue where account state could keep updating while new message sync stopped on some devices",
+        "Message sync now advances safely while privacy lock is active, so unlocking no longer requires waiting or reloading"
       ]
     }
   }
