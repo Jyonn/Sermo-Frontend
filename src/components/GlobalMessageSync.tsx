@@ -200,6 +200,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     unread: chat.unread_count ?? 0,
     online: chat.group ? false : Boolean(peer?.is_alive),
     verified: Boolean(peer?.verified),
+    official: Boolean(peer?.official),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
     isOwner,

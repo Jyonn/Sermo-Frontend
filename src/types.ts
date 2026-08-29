@@ -1203,6 +1203,7 @@ export interface Chat {
   unread: number;
   online: boolean;
   verified: boolean;
+  official: boolean;
   members: number;
   type: "direct" | "group";
   isOwner: boolean;
@@ -1223,6 +1224,7 @@ export interface FriendAccepted {
   status: string;
   mood: string;
   verified: boolean;
+  official: boolean;
 }
 
 export interface NotificationPreference {

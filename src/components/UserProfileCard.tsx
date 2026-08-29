@@ -1,4 +1,5 @@
 import { GrowthLevelBadge } from "./GrowthLevelBadge";
+import { OfficialBadge } from "./OfficialBadge";
 import { UserAvatar } from "./UserAvatar";
 import type { UserDTO } from "../types";
 
@@ -55,6 +56,7 @@ export function UserProfileCard({
         <div className="user-profile-copy">
           <div className="user-profile-name-row">
             <h2>{name}</h2>
+            {official ? <OfficialBadge /> : null}
           </div>
           <p className={isOnline ? "is-online" : ""}>{presence}</p>
         </div>

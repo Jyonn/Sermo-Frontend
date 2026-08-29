@@ -27,6 +27,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { OfficialBadge } from "../components/OfficialBadge";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
@@ -1534,6 +1535,24 @@ export function forwardBundleItemsAsMessages(items: ForwardBundleItemDTO[]): Cha
   }));
 }
 
+function StickerImage({ alt = "", className = "", height, src, width }: {
+  alt?: string;
+  className?: string;
+  height?: number;
+  src: string;
+  width?: number;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => setFailed(false), [src]);
+
+  if (failed) {
+    return <span className={`sticker-load-failed${className ? ` ${className}` : ""}`}>{i18n.t("sticker.unavailable")}</span>;
+  }
+
+  return <img alt={alt} className={className} draggable={false} height={height} loading="lazy" onError={() => setFailed(true)} src={src} width={width} />;
+}
+
 function renderMessageContent(
   message: ChatMessage,
   onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined,
@@ -1545,12 +1564,10 @@ function renderMessageContent(
       return <span className="message-sticker-unavailable">{i18n.t("sticker.unavailable")}</span>;
     }
     const uri = message.localPreviewUri ?? resolveStableResourceUri(message.payload.uri) ?? message.payload.uri;
-    return <img
+    return <StickerImage
       alt={i18n.t("sticker.messagePlaceholder")}
       className="message-sticker-image"
-      draggable={false}
       height={message.payload.pixel_height || undefined}
-      loading="lazy"
       src={uri}
       width={message.payload.pixel_width || undefined}
     />;
@@ -2362,6 +2379,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     unread: chat.unread_count ?? 0,
     online: chat.group ? false : Boolean(peer?.is_alive),
     verified: Boolean(peer?.verified),
+    official: Boolean(peer?.official),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
     isOwner,
@@ -6336,7 +6354,7 @@ function LiveChatsPage() {
         ) : null}
       </div>
       <div className="chat-copy">
-        <p className="chat-name">{chat.title}</p>
+        <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}</p>
         <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.preview}</span></div>
       </div>
       <div className="chat-meta">
@@ -6902,7 +6920,7 @@ function LiveChatsPage() {
                                 onClick={() => void sendSticker(sticker)}
                                 type="button"
                               >
-                                <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                                <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                               </button>
                             ))}
                             {mineStickersLoading ? (
@@ -6928,7 +6946,7 @@ function LiveChatsPage() {
                             {exploreStickers.map((sticker) => (
                               <div className="composer-sticker-explore-item" key={sticker.sticker_asset_id}>
                                 <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
-                                  <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                                  <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                                 </button>
                                 <span className={`composer-sticker-source is-${sticker.source_scope ?? "external"}`}>
                                   {sticker.source_scope === "local" && sticker.source_user ? (
@@ -7765,7 +7783,7 @@ function LiveChatsPage() {
                   onClick={() => toggleStickerSelection(sticker.sticker_id)}
                   type="button"
                 >
-                  <img alt="" loading="lazy" src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
+                  <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                   {stickerManagerSelecting ? (
                     <span className="sticker-manager-check material-symbols-outlined">{selected ? "check" : ""}</span>
                   ) : null}

@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.10",
+  "id": "2026.08.29.11",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "聊天查找细节修复",
+      "title": "账号标识与表情反馈优化",
       "items": [
-        "进一步压缩聊天查找列表，并修复链接换行、发言转发者、合并消息和系统消息展示",
-        "视频和语音时长现在拥有可靠的元数据回退，不再出现无效时长"
+        "官方账号在会话、通讯录和用户详情中使用统一标识",
+        "无法加载的表情现在会显示明确提示，不再出现破损图片"
       ]
     },
     "en": {
-      "title": "Chat search detail fixes",
+      "title": "Account identity and sticker feedback",
       "items": [
-        "Chat search rows are denser, with fixes for link wrapping, post forwarders, merged messages, and system-message filtering",
-        "Video and voice durations now use reliable metadata fallbacks and no longer show invalid values"
+        "Official accounts now use one consistent badge across chats, contacts, and profiles",
+        "Stickers that cannot load now show a clear status instead of a broken image"
       ]
     }
   }
