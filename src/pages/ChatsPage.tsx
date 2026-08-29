@@ -32,7 +32,7 @@ import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
 import { RelativeDateSections } from "../components/RelativeDateSections";
 import { ResourceFileRow } from "../components/ResourceFileRow";
-import { SearchAudioPlayer } from "../components/SearchAudioPlayer";
+import { SearchAudioTile } from "../components/SearchAudioPlayer";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
@@ -216,17 +216,47 @@ function messageResultPreview(message: ChatMessageDTO) {
   }[message.type] ?? i18n.t("message.generic");
 }
 
-function statementAttachmentSummary(message: ChatMessageDTO) {
+function statementAttachmentParts(message: ChatMessageDTO) {
   const statement = message.payload?.statement;
-  if (!statement) return "";
+  if (!statement) return [];
   const images = statement.media.filter((item) => item.kind === "image").length;
-  const parts = [
+  return [
     images ? i18n.t("messageSearch.imageCount", { count: images }) : "",
     statement.media.some((item) => item.kind === "video") ? i18n.t("messageSearch.oneVideo") : "",
     statement.media.some((item) => item.kind === "audio") ? i18n.t("messageSearch.oneAudio") : "",
     statement.chat_record ? i18n.t("messageSearch.chatRecord") : "",
   ].filter(Boolean);
+}
+
+function statementAttachmentSummary(message: ChatMessageDTO) {
+  const parts = statementAttachmentParts(message);
   return parts.length ? i18n.t("messageSearch.withAttachments", { summary: parts.join(i18n.t("messageSearch.summarySeparator")) }) : "";
+}
+
+function compactSearchMessagePreview(message: ChatMessageDTO) {
+  const duration = message.payload?.duration_seconds ? i18n.t("messageSearch.durationSeconds", { seconds: Math.round(message.payload.duration_seconds) }) : "";
+  if (message.type === MESSAGE_TYPE_IMAGE) return i18n.t("messageSearch.compactImage");
+  if (message.type === MESSAGE_TYPE_VIDEO) return i18n.t("messageSearch.compactVideo", { duration });
+  if (message.type === MESSAGE_TYPE_AUDIO) return i18n.t("messageSearch.compactAudio", { duration });
+  if (message.type === MESSAGE_TYPE_FILE) return i18n.t("messageSearch.compactFile", {
+    name: message.payload?.file_name || i18n.t("media.file"),
+    size: message.payload?.file_size ? formatImageFileSize(message.payload.file_size) : "",
+  });
+  if (message.type === MESSAGE_TYPE_LOCATION) return i18n.t("messageSearch.compactLocation", { address: message.payload?.address || i18n.t("media.location") });
+  if (message.type === MESSAGE_TYPE_STATEMENT) {
+    const statement = message.payload?.statement;
+    if (!statement) return i18n.t("message.statementUnavailable");
+    const author = statement.is_anonymous ? i18n.t("square.anonymousUser") : statement.user.name || i18n.t("square.anonymousUser");
+    const parts = statementAttachmentParts(message);
+    const detail = parts.length ? i18n.t("messageSearch.compactStatementDetail", { summary: parts.join(i18n.t("messageSearch.summarySeparator")) }) : "";
+    return i18n.t("messageSearch.compactStatement", { author, detail });
+  }
+  if (message.type === MESSAGE_TYPE_ACTIVITY) {
+    const rawTitle = message.payload?.activity?.title || message.payload?.title || i18n.t("message.activityPlaceholder");
+    const title = /活动$|\bevent$/i.test(rawTitle) ? rawTitle : `${rawTitle}${i18n.t("messageSearch.activitySuffix")}`;
+    return i18n.t("messageSearch.compactActivity", { title });
+  }
+  return messageResultPreview(message);
 }
 
 function pinnedMessagePreview(pin: PinnedMessageDTO) {
@@ -7587,17 +7617,19 @@ function LiveChatsPage() {
               highlightedId={messageSearchHighlightId}
               items={messageSearchMediaItems}
               onSelect={(item) => setMessageSearchPreviewIndex(messageSearchMediaResults.findIndex((message) => message.message_id === item.id))}
-            /> : <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
+            /> : messageSearchType === MESSAGE_TYPE_AUDIO ? <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
+              {(group) => <div className="message-search-audio-grid">{group.map((message) => message.payload?.uri ? <SearchAudioTile avatarUri={message.user.avatar_uri} durationSeconds={message.payload.duration_seconds} key={message.message_id} name={message.user.name} onJump={() => revealMessageFromSearch(message.message_id)} src={message.payload.uri} /> : null)}</div>}
+            </RelativeDateSections> : <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
               {(group) => <div className="message-search-date-group">{group.map((message) => {
-              const mediaUri = [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(message.type)
-                ? message.payload?.thumbnail_uri || message.payload?.uri
-                : null;
               const typeIcon = {
                 [MESSAGE_TYPE_TEXT]: "chat_bubble",
                 [MESSAGE_TYPE_IMAGE]: "image",
                 [MESSAGE_TYPE_VIDEO]: "movie",
                 [MESSAGE_TYPE_AUDIO]: "mic",
+                [MESSAGE_TYPE_FILE]: "draft",
                 [MESSAGE_TYPE_LOCATION]: "location_on",
+                [MESSAGE_TYPE_STATEMENT]: "campaign",
+                [MESSAGE_TYPE_ACTIVITY]: "celebration",
               }[message.type] ?? "chat_bubble";
               const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button>;
               const openResult = () => {
@@ -7613,32 +7645,22 @@ function LiveChatsPage() {
                   revealMessageFromSearch(message.message_id);
                 }
               };
+              const displayName = message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement?.is_anonymous
+                ? t("square.anonymousUser")
+                : message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement
+                  ? message.payload.statement.user.name || t("square.anonymousUser")
+                  : message.user.name;
+              const richFile = messageSearchType === MESSAGE_TYPE_FILE && message.type === MESSAGE_TYPE_FILE && Boolean(message.payload?.uri);
               return (
                 <article
-                  className={`message-search-result${message.type === MESSAGE_TYPE_FILE ? " is-file" : ""}`}
+                  className={`message-search-result is-compact${richFile ? " is-file" : ""}`}
                   key={message.message_id}
                 >
-                  {mediaUri && [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? (
-                    <>
-                      <img alt="" className="message-search-result-media" src={mediaUri} />
-                      {message.type === MESSAGE_TYPE_VIDEO ? <span className="message-search-video-mark material-symbols-outlined" aria-hidden="true">play_arrow</span> : null}
-                    </>
-                  ) : mediaUri ? (
-                    <img alt="" className="message-search-result-media" src={mediaUri} />
-                  ) : message.type !== MESSAGE_TYPE_FILE ? (
+                  {!richFile ? (
                     <span className="message-search-result-icon material-symbols-outlined" aria-hidden="true">{typeIcon}</span>
                   ) : null}
                   <span className="message-search-result-main">
-                    <span className="message-search-result-meta">
-                      <strong>{message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement?.is_anonymous ? t("square.anonymousUser") : message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement ? (message.payload.statement.user.name || t("square.anonymousUser")) : message.user.name}</strong>
-                      <time>{formatRelativeTime(message.created_at)}</time>
-                    </span>
-                    {message.type === MESSAGE_TYPE_AUDIO && message.payload?.uri ? <SearchAudioPlayer durationSeconds={message.payload.duration_seconds} src={message.payload.uri} /> : null}
-                    {message.type === MESSAGE_TYPE_FILE && message.payload?.uri ? <ResourceFileRow detail={message.payload.file_size ? formatImageFileSize(message.payload.file_size) : undefined} download={message.payload.file_name} href={message.payload.uri} title={messageResultPreview(message)} /> : null}
-                    {message.type !== MESSAGE_TYPE_AUDIO && message.type !== MESSAGE_TYPE_FILE ? <button className="message-search-result-preview" onClick={openResult} type="button">
-                      {message.type === MESSAGE_TYPE_LOCATION ? (message.payload?.address || messageResultPreview(message)) : messageResultPreview(message)}
-                      {message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement ? <small>{message.payload.statement.user.name}{statementAttachmentSummary(message) ? ` · ${statementAttachmentSummary(message)}` : ""}</small> : null}
-                    </button> : null}
+                    {richFile ? <><strong className="message-search-file-author">{displayName}</strong><ResourceFileRow detail={message.payload?.file_size ? formatImageFileSize(message.payload.file_size) : undefined} download={message.payload?.file_name} href={message.payload?.uri} title={message.payload?.file_name || i18n.t("media.file")} /></> : <button className="message-search-compact-copy" onClick={openResult} type="button"><strong>{displayName}：</strong><span>{compactSearchMessagePreview(message)}</span></button>}
                   </span>
                   {jumpButton}
                 </article>

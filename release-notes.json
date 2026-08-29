@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.8",
+  "id": "2026.08.29.9",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "聊天查找体验优化",
+      "title": "聊天记录展示优化",
       "items": [
-        "聊天记录查找现已自动加载后续内容，滚动时可快捷回到顶部",
-        "重新设计语音和文件结果，并完善媒体跳转图标、匿名或失效发言提示与列表字号"
+        "语音记录改为头像背景的轻量播放卡片，支持查看时长并快速跳回原消息",
+        "全部类型采用更紧凑的昵称与消息摘要排版，图片、视频、文件、位置、发言和活动信息更加清晰"
       ]
     },
     "en": {
-      "title": "Improved chat history browsing",
+      "title": "Refined chat history results",
       "items": [
-        "Chat history search now loads subsequent results automatically and offers a quick return-to-top action while scrolling",
-        "Voice and file results were redesigned, with clearer media jump icons, anonymous or unavailable post states, and refined typography"
+        "Voice history now uses compact avatar-backed playback cards with duration and quick access to the original message",
+        "All results now use denser name-and-summary rows with clearer details for images, videos, files, locations, posts, and activities"
       ]
     }
   }
