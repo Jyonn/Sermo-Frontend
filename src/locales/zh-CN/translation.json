@@ -1846,6 +1846,7 @@
   "messageSearch.chatRecord": "合并聊天记录",
   "messageSearch.withAttachments": "附有{{summary}}",
   "messageSearch.summarySeparator": "、",
+  "messageSearch.backToTop": "回到顶部",
   "square.notifications": "广场消息",
   "square.noNotifications": "还没有广场消息",
   "square.showEarlierNotifications": "查看更早消息",

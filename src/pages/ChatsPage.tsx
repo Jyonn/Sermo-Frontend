@@ -32,6 +32,7 @@ import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
 import { RelativeDateSections } from "../components/RelativeDateSections";
 import { ResourceFileRow } from "../components/ResourceFileRow";
+import { SearchAudioPlayer } from "../components/SearchAudioPlayer";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
@@ -200,6 +201,7 @@ function sortEmojiUsage(rows: EmojiUsageDTO[]) {
 
 function messageResultPreview(message: ChatMessageDTO) {
   if (message.type === MESSAGE_TYPE_TEXT) return readableMentionText(message.content, message.mentions ?? []);
+  if (message.type === MESSAGE_TYPE_STATEMENT && !message.payload?.statement) return i18n.t("message.statementUnavailable");
   return {
     [MESSAGE_TYPE_IMAGE]: i18n.t("media.image"),
     [MESSAGE_TYPE_FILE]: message.payload?.file_name || i18n.t("media.file"),
@@ -2468,6 +2470,9 @@ function LiveChatsPage() {
   const [messageSearchNextBefore, setMessageSearchNextBefore] = useState<number | null>(null);
   const [messageSearchHasMore, setMessageSearchHasMore] = useState(false);
   const [messageSearchTotal, setMessageSearchTotal] = useState(0);
+  const [messageSearchShowScrollTop, setMessageSearchShowScrollTop] = useState(false);
+  const messageSearchPanelRef = useRef<HTMLDivElement | null>(null);
+  const messageSearchLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [messageSearchPreviewIndex, setMessageSearchPreviewIndex] = useState<number | null>(null);
   const [messageSearchHighlightId, setMessageSearchHighlightId] = useState<number | null>(null);
   const [messageSearchCalendarOpen, setMessageSearchCalendarOpen] = useState(false);
@@ -3498,6 +3503,26 @@ function LiveChatsPage() {
       controller.abort();
     };
   }, [messageSearchKeyword, messageSearchOpen, messageSearchType, selectedChat?.id]);
+
+  useEffect(() => {
+    const sentinel = messageSearchLoadMoreRef.current;
+    const scrollRoot = messageSearchPanelRef.current?.closest(".drawer-body");
+    if (!messageSearchOpen || !sentinel || !scrollRoot || !messageSearchHasMore || messageSearchState === "loading" || messageSearchState === "loading-more") return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) void loadMoreMessageSearchResults();
+    }, { root: scrollRoot, rootMargin: "360px 0px" });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [messageSearchHasMore, messageSearchOpen, messageSearchResults.length, messageSearchState]);
+
+  useEffect(() => {
+    const scrollRoot = messageSearchPanelRef.current?.closest(".drawer-body");
+    if (!messageSearchOpen || !scrollRoot) return;
+    const update = () => setMessageSearchShowScrollTop(scrollRoot.scrollTop > 320);
+    update();
+    scrollRoot.addEventListener("scroll", update, { passive: true });
+    return () => scrollRoot.removeEventListener("scroll", update);
+  }, [messageSearchOpen]);
 
   useEffect(() => {
     if (!messageSearchCalendarOpen || !selectedChat) return;
@@ -7505,7 +7530,7 @@ function LiveChatsPage() {
         title={t("messageSearch.title")}
         onClose={() => setMessageSearchOpen(false)}
       >
-        <div className="message-search-panel">
+        <div className="message-search-panel" ref={messageSearchPanelRef}>
           <div className="message-search-controls">
             <label className="message-search-input-wrap">
               <span className="material-symbols-outlined" aria-hidden="true">search</span>
@@ -7572,10 +7597,9 @@ function LiveChatsPage() {
                 [MESSAGE_TYPE_IMAGE]: "image",
                 [MESSAGE_TYPE_VIDEO]: "movie",
                 [MESSAGE_TYPE_AUDIO]: "mic",
-                [MESSAGE_TYPE_FILE]: "draft",
                 [MESSAGE_TYPE_LOCATION]: "location_on",
               }[message.type] ?? "chat_bubble";
-              const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><span className="material-symbols-outlined">my_location</span></button>;
+              const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button>;
               const openResult = () => {
                 if (message.type === MESSAGE_TYPE_IMAGE || message.type === MESSAGE_TYPE_VIDEO) {
                   setMessageSearchPreviewIndex(messageSearchMediaResults.findIndex((item) => item.message_id === message.message_id));
@@ -7591,7 +7615,7 @@ function LiveChatsPage() {
               };
               return (
                 <article
-                  className="message-search-result"
+                  className={`message-search-result${message.type === MESSAGE_TYPE_FILE ? " is-file" : ""}`}
                   key={message.message_id}
                 >
                   {mediaUri && [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? (
@@ -7601,15 +7625,15 @@ function LiveChatsPage() {
                     </>
                   ) : mediaUri ? (
                     <img alt="" className="message-search-result-media" src={mediaUri} />
-                  ) : (
+                  ) : message.type !== MESSAGE_TYPE_FILE ? (
                     <span className="message-search-result-icon material-symbols-outlined" aria-hidden="true">{typeIcon}</span>
-                  )}
+                  ) : null}
                   <span className="message-search-result-main">
                     <span className="message-search-result-meta">
-                      <strong>{message.user.name}</strong>
+                      <strong>{message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement?.is_anonymous ? t("square.anonymousUser") : message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement ? (message.payload.statement.user.name || t("square.anonymousUser")) : message.user.name}</strong>
                       <time>{formatRelativeTime(message.created_at)}</time>
                     </span>
-                    {message.type === MESSAGE_TYPE_AUDIO && message.payload?.uri ? <audio controls preload="none" src={message.payload.uri} /> : null}
+                    {message.type === MESSAGE_TYPE_AUDIO && message.payload?.uri ? <SearchAudioPlayer durationSeconds={message.payload.duration_seconds} src={message.payload.uri} /> : null}
                     {message.type === MESSAGE_TYPE_FILE && message.payload?.uri ? <ResourceFileRow detail={message.payload.file_size ? formatImageFileSize(message.payload.file_size) : undefined} download={message.payload.file_name} href={message.payload.uri} title={messageResultPreview(message)} /> : null}
                     {message.type !== MESSAGE_TYPE_AUDIO && message.type !== MESSAGE_TYPE_FILE ? <button className="message-search-result-preview" onClick={openResult} type="button">
                       {message.type === MESSAGE_TYPE_LOCATION ? (message.payload?.address || messageResultPreview(message)) : messageResultPreview(message)}
@@ -7621,12 +7645,9 @@ function LiveChatsPage() {
               );
             })}</div>}
             </RelativeDateSections>}
-            {messageSearchHasMore && messageSearchResults.length ? (
-              <button className="message-search-more" disabled={messageSearchState === "loading-more"} onClick={() => void loadMoreMessageSearchResults()} type="button">
-                {messageSearchState === "loading-more" ? t("common.loading") : t("common.loadMore")}
-              </button>
-            ) : null}
+            <div aria-hidden="true" className={`message-search-load-sentinel${messageSearchState === "loading-more" ? " is-loading" : ""}`} ref={messageSearchLoadMoreRef}>{messageSearchState === "loading-more" ? <HeaderSyncIndicator syncing /> : null}</div>
           </div>
+          {messageSearchShowScrollTop ? <button aria-label={t("messageSearch.backToTop")} className="message-search-scroll-top" onClick={() => messageSearchPanelRef.current?.closest(".drawer-body")?.scrollTo({ top: 0, behavior: "smooth" })} title={t("messageSearch.backToTop")} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11 12 4l7 7M12 4v16" /></svg></button> : null}
         </div>
       </SideDrawer>
       {messageSearchPreviewIndex !== null && messageSearchMediaResults.length ? <MediaLightbox

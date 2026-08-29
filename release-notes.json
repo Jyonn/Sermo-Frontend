@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.7",
+  "id": "2026.08.29.8",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "消息同步稳定性",
+      "title": "聊天查找体验优化",
       "items": [
-        "修复部分设备上用户状态正常更新、但新消息停止同步的问题",
-        "隐私锁定期间继续安全推进消息同步，解锁后无需等待或重新加载"
+        "聊天记录查找现已自动加载后续内容，滚动时可快捷回到顶部",
+        "重新设计语音和文件结果，并完善媒体跳转图标、匿名或失效发言提示与列表字号"
       ]
     },
     "en": {
-      "title": "More reliable message sync",
+      "title": "Improved chat history browsing",
       "items": [
-        "Fixed an issue where account state could keep updating while new message sync stopped on some devices",
-        "Message sync now advances safely while privacy lock is active, so unlocking no longer requires waiting or reloading"
+        "Chat history search now loads subsequent results automatically and offers a quick return-to-top action while scrolling",
+        "Voice and file results were redesigned, with clearer media jump icons, anonymous or unavailable post states, and refined typography"
       ]
     }
   }

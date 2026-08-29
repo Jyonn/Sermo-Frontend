@@ -449,7 +449,7 @@ export function MediaLightbox({
         </div>
         {!immersive ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
           {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
-          {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><span className="material-symbols-outlined">my_location</span></button> : null}
+          {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button> : null}
           <button aria-label={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg>
           </button>

@@ -1846,6 +1846,7 @@
   "messageSearch.chatRecord": "a merged chat record",
   "messageSearch.withAttachments": "Includes {{summary}}",
   "messageSearch.summarySeparator": ", ",
+  "messageSearch.backToTop": "Back to top",
   "square.notifications": "Square activity",
   "square.noNotifications": "No Square activity yet",
   "square.showEarlierNotifications": "View earlier updates",

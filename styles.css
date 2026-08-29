@@ -24517,11 +24517,30 @@ html[data-theme="dark"] :is(
 .message-search-date-trigger .material-symbols-outlined:last-child { color:var(--text-muted); }
 .message-search-date-group { display:grid; }
 .message-search-result { grid-template-columns:42px minmax(0,1fr) 38px; }
-.message-search-result-preview:is(button,a) { width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;text-decoration:none;font:inherit; }
+.message-search-result-preview:is(button,a) { width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;text-decoration:none;font-family:inherit;font-size:.78rem;font-weight:500;line-height:1.42; }
 .message-search-result-preview small { display:block;margin-top:3px;color:var(--text-muted);font-size:.7rem; }
-.message-search-result-main audio { width:min(100%,320px);height:34px; }
 .message-search-result-jump { display:grid;width:36px;height:36px;place-items:center;border:0;border-radius:50%;color:var(--brand-primary);background:color-mix(in srgb,var(--brand-primary) 9%,transparent); }
-.message-search-result-jump .material-symbols-outlined { font-size:19px; }
+.message-search-result-jump svg { width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round; }
+.message-search-result.is-file { grid-template-columns:minmax(0,1fr) 38px; }
+.message-search-result.is-file .message-search-result-main { grid-column:1; }
+.message-search-result.is-file .cloud-resource-file { min-height:56px;border:0; }
+.message-search-result.is-file .cloud-resource-file-main { min-height:54px; }
+.message-search-audio { display:grid;grid-template-columns:34px minmax(80px,1fr) auto;align-items:center;gap:10px;width:min(100%,310px);min-height:46px;padding:5px 10px 5px 6px;border:1px solid color-mix(in srgb,var(--brand-primary) 15%,var(--line-soft));border-radius:15px;background:color-mix(in srgb,var(--brand-primary) 7%,var(--surface,#fff)); }
+.message-search-audio > button { display:grid;width:34px;height:34px;place-items:center;border:0;border-radius:50%;color:#fff;background:var(--brand-primary);box-shadow:0 5px 12px color-mix(in srgb,var(--brand-primary) 20%,transparent); }
+.message-search-audio > button svg { width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+.message-search-audio > button svg path[d$="Z"] { fill:currentColor;stroke:none; }
+.message-search-audio-wave { display:flex;height:18px;align-items:center;gap:2px;overflow:hidden; }
+.message-search-audio-wave i { flex:1 1 2px;max-width:3px;border-radius:9px;background:color-mix(in srgb,var(--brand-primary) 58%,var(--text-muted));opacity:.72;transform-origin:center; }
+.message-search-audio.is-playing .message-search-audio-wave i { animation:message-search-wave 700ms ease-in-out infinite alternate; }
+.message-search-audio-wave i:nth-child(3n) { animation-delay:-220ms; }
+.message-search-audio-wave i:nth-child(4n) { animation-delay:-410ms; }
+.message-search-audio time { color:var(--text-muted);font-size:.66rem;font-variant-numeric:tabular-nums; }
+@keyframes message-search-wave { to { transform:scaleY(.45);opacity:1; } }
+.message-search-load-sentinel { display:grid;min-height:24px;place-items:center; }
+.message-search-load-sentinel.is-loading { min-height:52px; }
+.message-search-scroll-top { position:fixed;z-index:8;right:max(18px,env(safe-area-inset-right));bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));display:grid;width:46px;height:46px;place-items:center;border:1px solid color-mix(in srgb,var(--brand-primary) 25%,transparent);border-radius:50%;color:#fff;background:color-mix(in srgb,var(--brand-primary) 88%,#163c31);box-shadow:0 12px 28px rgba(7,45,34,.24);animation:message-search-float-in 180ms ease-out both; }
+.message-search-scroll-top svg { width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+@keyframes message-search-float-in { from { opacity:0;transform:translateY(8px) scale(.9); } }
 .message-search-calendar { display:grid;gap:15px;padding:2px 2px max(12px,env(safe-area-inset-bottom)); }
 .message-search-calendar-head { display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center; }
 .message-search-calendar-head strong { text-align:center;font-size:1rem; }
