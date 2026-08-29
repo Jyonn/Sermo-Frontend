@@ -30909,8 +30909,12 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 
 .square-mute-form { display: grid; gap: 14px; margin-top: 4px; }
 .square-mute-duration { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
-.square-mute-duration button { min-height: 42px; padding: 0 8px; border: 1px solid var(--line); border-radius: 13px; color: var(--muted); background: var(--surface-soft); font: inherit; font-weight: 700; }
-.square-mute-duration button.is-selected { color: var(--accent-strong); border-color: color-mix(in srgb, var(--accent) 58%, var(--line)); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.square-mute-duration button { position: relative; min-height: 42px; padding: 0 8px; border: 1px solid var(--line-soft); border-radius: 13px; color: var(--text-muted); background: var(--bg-elevated); box-shadow: inset 0 0 0 0 transparent; font: inherit; font-weight: 700; transition: transform 120ms ease, color 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease; }
+.square-mute-duration button:hover { border-color: color-mix(in srgb, var(--brand-primary) 34%, var(--line-soft)); color: var(--text-primary); }
+.square-mute-duration button:active { transform: scale(.96); }
+.square-mute-duration button:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand-primary) 24%, transparent); outline-offset: 2px; }
+.square-mute-duration button.is-selected { color: var(--brand-primary); border-color: var(--brand-primary); background: color-mix(in srgb, var(--brand-primary) 13%, var(--bg-elevated)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 42%, transparent), 0 5px 14px color-mix(in srgb, var(--brand-primary) 13%, transparent); }
+.square-mute-duration button.is-selected::after { position: absolute; right: 7px; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ""; }
 .square-mute-form label { display: grid; gap: 7px; color: var(--text); font-weight: 700; }
 .square-mute-form textarea { box-sizing: border-box; width: 100%; min-height: 92px; resize: vertical; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; color: var(--text); background: var(--surface-soft); font: inherit; line-height: 1.55; }
 
