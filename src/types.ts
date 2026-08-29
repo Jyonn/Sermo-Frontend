@@ -648,6 +648,7 @@ export interface CloudResourceDTO {
 export interface CloudResourceListDTO {
   items: CloudResourceDTO[];
   quota: CloudResourceQuotaDTO;
+  total_count: number;
   has_more: boolean;
   next_offset: number;
 }
@@ -1039,8 +1040,15 @@ export interface PinnedMessageDTO {
 
 export interface MessageSearchResponseDTO {
   items: ChatMessageDTO[];
+  total_count: number;
   has_more: boolean;
   next_before: number | null;
+}
+
+export interface MessageSearchCalendarDTO {
+  year: number;
+  month: number;
+  days: Array<{ date: string; first_message_id: number }>;
 }
 
 export interface ChatHistoryRecoveryStatusDTO {

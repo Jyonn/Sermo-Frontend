@@ -30,6 +30,9 @@ interface MediaLightboxProps {
   fileNamePrefix?: string;
   onClose: () => void;
   onIndexChange: (index: number) => void;
+  totalCount?: number;
+  onApproachingEnd?: () => void;
+  onJumpToMessage?: () => void;
 }
 
 async function downloadMedia(uri: string, fileNamePrefix: string) {
@@ -384,12 +387,22 @@ export function MediaLightbox({
   fileNamePrefix = "sermo-media",
   onClose,
   onIndexChange,
+  totalCount,
+  onApproachingEnd,
+  onJumpToMessage,
 }: MediaLightboxProps) {
   const { t } = useI18n();
   const resolvedAltPrefix = altPrefix || t("media.imagePreview");
   const trackRef = useRef<HTMLDivElement | null>(null);
   const gestureRef = useRef<{ moved: boolean; x: number } | null>(null);
+  const approachingEndRef = useRef(onApproachingEnd);
   const [immersive, setImmersive] = useState(false);
+
+  useEffect(() => { approachingEndRef.current = onApproachingEnd; }, [onApproachingEnd]);
+
+  useEffect(() => {
+    if (items.length - index <= 5) approachingEndRef.current?.();
+  }, [index, items.length]);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
@@ -435,7 +448,8 @@ export function MediaLightbox({
           </div>)}
         </div>
         {!immersive ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
-          {items.length > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(items.length).padStart(2, "0")}</span> : null}
+          {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
+          {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><span className="material-symbols-outlined">my_location</span></button> : null}
           <button aria-label={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg>
           </button>

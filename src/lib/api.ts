@@ -718,6 +718,14 @@ export const api = {
     });
   },
 
+  getMessageSearchCalendar(chat_id: number, year: number, month: number, signal?: AbortSignal) {
+    return request<import("../types").MessageSearchCalendarDTO>("/messages/search/calendar", {
+      auth: true,
+      query: { chat_id, year, month },
+      signal,
+    });
+  },
+
   getPinnedMessages(chat_id: number, signal?: AbortSignal) {
     return request<PinnedMessageDTO[]>("/messages/pins", {
       auth: true,

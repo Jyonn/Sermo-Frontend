@@ -29,6 +29,9 @@ import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ImageLightbox, MediaLightbox } from "../components/ImageLightbox";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
+import { MediaResourceGrid, type MediaResourceGridItem } from "../components/MediaResourceGrid";
+import { RelativeDateSections } from "../components/RelativeDateSections";
+import { ResourceFileRow } from "../components/ResourceFileRow";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
@@ -60,7 +63,7 @@ import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -90,7 +93,6 @@ const MESSAGE_SEARCH_TYPES = [
   { value: MESSAGE_TYPE_AUDIO, label: "messageSearch.audio" },
   { value: MESSAGE_TYPE_FILE, label: "messageSearch.files" },
   { value: MESSAGE_TYPE_LOCATION, label: "messageSearch.locations" },
-  { value: MESSAGE_TYPE_MAP_ACCESS, label: "messageSearch.travelMaps" },
   { value: MESSAGE_TYPE_STATEMENT, label: "messageSearch.statements" },
   { value: MESSAGE_TYPE_ACTIVITY, label: "messageSearch.activities" },
 ] as const;
@@ -207,9 +209,22 @@ function messageResultPreview(message: ChatMessageDTO) {
       : i18n.t("media.audio"),
     [MESSAGE_TYPE_LOCATION]: i18n.t("media.location"),
     [MESSAGE_TYPE_MAP_ACCESS]: i18n.t("travelMap.action"),
-    [MESSAGE_TYPE_STATEMENT]: i18n.t("message.statementPlaceholder"),
-    [MESSAGE_TYPE_ACTIVITY]: i18n.t("message.activityPlaceholder"),
+    [MESSAGE_TYPE_STATEMENT]: message.payload?.statement?.text || i18n.t("message.statementPlaceholder"),
+    [MESSAGE_TYPE_ACTIVITY]: message.payload?.activity?.title || message.payload?.title || i18n.t("message.activityPlaceholder"),
   }[message.type] ?? i18n.t("message.generic");
+}
+
+function statementAttachmentSummary(message: ChatMessageDTO) {
+  const statement = message.payload?.statement;
+  if (!statement) return "";
+  const images = statement.media.filter((item) => item.kind === "image").length;
+  const parts = [
+    images ? i18n.t("messageSearch.imageCount", { count: images }) : "",
+    statement.media.some((item) => item.kind === "video") ? i18n.t("messageSearch.oneVideo") : "",
+    statement.media.some((item) => item.kind === "audio") ? i18n.t("messageSearch.oneAudio") : "",
+    statement.chat_record ? i18n.t("messageSearch.chatRecord") : "",
+  ].filter(Boolean);
+  return parts.length ? i18n.t("messageSearch.withAttachments", { summary: parts.join(i18n.t("messageSearch.summarySeparator")) }) : "";
 }
 
 function pinnedMessagePreview(pin: PinnedMessageDTO) {
@@ -2452,6 +2467,17 @@ function LiveChatsPage() {
   const [messageSearchState, setMessageSearchState] = useState<"idle" | "loading" | "loading-more" | "error">("idle");
   const [messageSearchNextBefore, setMessageSearchNextBefore] = useState<number | null>(null);
   const [messageSearchHasMore, setMessageSearchHasMore] = useState(false);
+  const [messageSearchTotal, setMessageSearchTotal] = useState(0);
+  const [messageSearchPreviewIndex, setMessageSearchPreviewIndex] = useState<number | null>(null);
+  const [messageSearchHighlightId, setMessageSearchHighlightId] = useState<number | null>(null);
+  const [messageSearchCalendarOpen, setMessageSearchCalendarOpen] = useState(false);
+  const [messageSearchCalendarMonth, setMessageSearchCalendarMonth] = useState(() => {
+    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit" }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    return { year: Number(values.year), month: Number(values.month) };
+  });
+  const [messageSearchCalendar, setMessageSearchCalendar] = useState<MessageSearchCalendarDTO | null>(null);
+  const [messageSearchCalendarLoading, setMessageSearchCalendarLoading] = useState(false);
   const [pinnedDrawerOpen, setPinnedDrawerOpen] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
@@ -3438,6 +3464,7 @@ function LiveChatsPage() {
       });
       setMessageSearchHasMore(response.has_more);
       setMessageSearchNextBefore(response.next_before);
+      setMessageSearchTotal(response.total_count);
       setMessageSearchState("idle");
     } catch {
       setMessageSearchState("error");
@@ -3459,6 +3486,7 @@ function LiveChatsPage() {
           setMessageSearchResults(response.items);
           setMessageSearchHasMore(response.has_more);
           setMessageSearchNextBefore(response.next_before);
+          setMessageSearchTotal(response.total_count);
           setMessageSearchState("idle");
         })
         .catch((error) => {
@@ -3470,6 +3498,55 @@ function LiveChatsPage() {
       controller.abort();
     };
   }, [messageSearchKeyword, messageSearchOpen, messageSearchType, selectedChat?.id]);
+
+  useEffect(() => {
+    if (!messageSearchCalendarOpen || !selectedChat) return;
+    const controller = new AbortController();
+    setMessageSearchCalendarLoading(true);
+    void api.getMessageSearchCalendar(selectedChat.id, messageSearchCalendarMonth.year, messageSearchCalendarMonth.month, controller.signal)
+      .then(setMessageSearchCalendar)
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setMessageSearchCalendar(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMessageSearchCalendarLoading(false);
+      });
+    return () => controller.abort();
+  }, [messageSearchCalendarOpen, messageSearchCalendarMonth, selectedChat?.id]);
+
+  const revealMessageFromSearch = (messageId: number) => {
+    setMessageSearchPreviewIndex(null);
+    setMessageSearchCalendarOpen(false);
+    const drawerStack = window.history.state?.sermoDrawerStack;
+    if (Array.isArray(drawerStack) && drawerStack.length >= 2) window.history.go(-2);
+    else {
+      setMessageSearchOpen(false);
+      setDetailsSheetOpen(false);
+    }
+    window.setTimeout(() => window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId } })), 240);
+  };
+
+  const messageSearchMediaResults = messageSearchResults.filter((message) => (
+    message.type === MESSAGE_TYPE_IMAGE || message.type === MESSAGE_TYPE_VIDEO
+  ));
+  const messageSearchMediaItems: MediaResourceGridItem[] = messageSearchMediaResults.map((message) => ({
+    id: message.message_id,
+    kind: message.type === MESSAGE_TYPE_VIDEO ? "video" : "image",
+    uri: message.payload?.uri || "",
+    thumbnailUri: message.payload?.thumbnail_uri,
+    createdAt: message.created_at,
+    durationSeconds: message.payload?.duration_seconds,
+    label: message.payload?.file_name || message.user.name,
+  }));
+
+  const closeMessageSearchPreview = () => {
+    const message = messageSearchPreviewIndex === null ? null : messageSearchMediaResults[messageSearchPreviewIndex];
+    setMessageSearchPreviewIndex(null);
+    if (!message) return;
+    setMessageSearchHighlightId(message.message_id);
+    window.setTimeout(() => document.querySelector(`[data-resource-id="${message.message_id}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" }), 80);
+    window.setTimeout(() => setMessageSearchHighlightId((current) => current === message.message_id ? null : current), 1800);
+  };
 
   useEffect(() => {
     if (!detailsSheetOpen) return;
@@ -7446,6 +7523,11 @@ function LiveChatsPage() {
                 </button>
               ) : null}
             </label>
+            <button className="message-search-date-trigger" onClick={() => setMessageSearchCalendarOpen(true)} type="button">
+              <span className="material-symbols-outlined">calendar_month</span>
+              <span>{t("messageSearch.byDate")}</span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
             <div className="message-search-filters" role="tablist" aria-label={t("messageSearch.filter") }>
               {MESSAGE_SEARCH_TYPES.map((filter) => (
                 <button
@@ -7476,7 +7558,12 @@ function LiveChatsPage() {
                 <p>{messageSearchState === "error" ? t("messageSearch.failedHint") : t("messageSearch.emptyHint")}</p>
               </div>
             ) : null}
-            {messageSearchResults.map((message) => {
+            {[MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? <MediaResourceGrid
+              highlightedId={messageSearchHighlightId}
+              items={messageSearchMediaItems}
+              onSelect={(item) => setMessageSearchPreviewIndex(messageSearchMediaResults.findIndex((message) => message.message_id === item.id))}
+            /> : <RelativeDateSections identity={(message) => message.message_id} items={messageSearchResults} timestamp={(message) => message.created_at}>
+              {(group) => <div className="message-search-date-group">{group.map((message) => {
               const mediaUri = [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(message.type)
                 ? message.payload?.thumbnail_uri || message.payload?.uri
                 : null;
@@ -7487,22 +7574,25 @@ function LiveChatsPage() {
                 [MESSAGE_TYPE_AUDIO]: "mic",
                 [MESSAGE_TYPE_FILE]: "draft",
                 [MESSAGE_TYPE_LOCATION]: "location_on",
-                [MESSAGE_TYPE_MAP_ACCESS]: "map",
               }[message.type] ?? "chat_bubble";
+              const jumpButton = <button aria-label={t("messageSearch.jumpToMessage")} className="message-search-result-jump" onClick={(event) => { event.stopPropagation(); revealMessageFromSearch(message.message_id); }} type="button"><span className="material-symbols-outlined">my_location</span></button>;
+              const openResult = () => {
+                if (message.type === MESSAGE_TYPE_IMAGE || message.type === MESSAGE_TYPE_VIDEO) {
+                  setMessageSearchPreviewIndex(messageSearchMediaResults.findIndex((item) => item.message_id === message.message_id));
+                } else if (message.type === MESSAGE_TYPE_LOCATION && message.payload?.latitude !== undefined && message.payload.longitude !== undefined) {
+                  setLocationMessagePreview({ location: { latitude: message.payload.latitude, longitude: message.payload.longitude, address: message.payload.address }, owner: message.user });
+                } else if (message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement_id) {
+                  navigate(`/app/square/statements/${message.payload.statement_id}`);
+                } else if (message.type === MESSAGE_TYPE_ACTIVITY && message.payload?.activity_key) {
+                  navigate(`/app/square/activities/${message.payload.activity_key}`);
+                } else {
+                  revealMessageFromSearch(message.message_id);
+                }
+              };
               return (
-                <button
-                  className={`message-search-result${mediaUri && [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? " is-media-tile" : ""}`}
+                <article
+                  className="message-search-result"
                   key={message.message_id}
-                  onClick={() => {
-                    const drawerStack = window.history.state?.sermoDrawerStack;
-                    if (Array.isArray(drawerStack) && drawerStack.length >= 2) window.history.go(-2);
-                    else {
-                      setMessageSearchOpen(false);
-                      setDetailsSheetOpen(false);
-                    }
-                    window.setTimeout(() => window.dispatchEvent(new CustomEvent("sermo:reveal-message", { detail: { messageId: message.message_id } })), 240);
-                  }}
-                  type="button"
                 >
                   {mediaUri && [MESSAGE_TYPE_IMAGE, MESSAGE_TYPE_VIDEO].includes(messageSearchType ?? -1) ? (
                     <>
@@ -7519,12 +7609,18 @@ function LiveChatsPage() {
                       <strong>{message.user.name}</strong>
                       <time>{formatRelativeTime(message.created_at)}</time>
                     </span>
-                    <span className="message-search-result-preview">{messageResultPreview(message)}</span>
+                    {message.type === MESSAGE_TYPE_AUDIO && message.payload?.uri ? <audio controls preload="none" src={message.payload.uri} /> : null}
+                    {message.type === MESSAGE_TYPE_FILE && message.payload?.uri ? <ResourceFileRow detail={message.payload.file_size ? formatImageFileSize(message.payload.file_size) : undefined} download={message.payload.file_name} href={message.payload.uri} title={messageResultPreview(message)} /> : null}
+                    {message.type !== MESSAGE_TYPE_AUDIO && message.type !== MESSAGE_TYPE_FILE ? <button className="message-search-result-preview" onClick={openResult} type="button">
+                      {message.type === MESSAGE_TYPE_LOCATION ? (message.payload?.address || messageResultPreview(message)) : messageResultPreview(message)}
+                      {message.type === MESSAGE_TYPE_STATEMENT && message.payload?.statement ? <small>{message.payload.statement.user.name}{statementAttachmentSummary(message) ? ` · ${statementAttachmentSummary(message)}` : ""}</small> : null}
+                    </button> : null}
                   </span>
-                  <span className="material-symbols-outlined message-search-result-arrow" aria-hidden="true">chevron_right</span>
-                </button>
+                  {jumpButton}
+                </article>
               );
-            })}
+            })}</div>}
+            </RelativeDateSections>}
             {messageSearchHasMore && messageSearchResults.length ? (
               <button className="message-search-more" disabled={messageSearchState === "loading-more"} onClick={() => void loadMoreMessageSearchResults()} type="button">
                 {messageSearchState === "loading-more" ? t("common.loading") : t("common.loadMore")}
@@ -7533,6 +7629,47 @@ function LiveChatsPage() {
           </div>
         </div>
       </SideDrawer>
+      {messageSearchPreviewIndex !== null && messageSearchMediaResults.length ? <MediaLightbox
+        index={messageSearchPreviewIndex}
+        items={messageSearchMediaResults.map((message) => ({
+          uri: message.payload?.uri || "",
+          kind: message.type === MESSAGE_TYPE_VIDEO ? "video" : "image",
+          posterUri: message.payload?.thumbnail_uri,
+          width: message.payload?.pixel_width,
+          height: message.payload?.pixel_height,
+          detail: <MediaMetadataPanel kind={message.type === MESSAGE_TYPE_VIDEO ? "video" : "image"} metadata={message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata} />,
+          downloadLabel: formatImageFileSize((message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata)?.file_size),
+        }))}
+        onApproachingEnd={() => { if (messageSearchHasMore && messageSearchState !== "loading-more") void loadMoreMessageSearchResults(); }}
+        onClose={closeMessageSearchPreview}
+        onIndexChange={setMessageSearchPreviewIndex}
+        onJumpToMessage={() => {
+          const message = messageSearchMediaResults[messageSearchPreviewIndex];
+          if (message) revealMessageFromSearch(message.message_id);
+        }}
+        totalCount={messageSearchTotal}
+      /> : null}
+      <BottomSheet className="message-search-calendar-sheet" onClose={() => setMessageSearchCalendarOpen(false)} open={messageSearchCalendarOpen} title={t("messageSearch.byDate")}>
+        <div className="message-search-calendar">
+          <div className="message-search-calendar-head">
+            <button aria-label={t("common.back")} onClick={() => setMessageSearchCalendarMonth((current) => current.month === 1 ? { year: current.year - 1, month: 12 } : { ...current, month: current.month - 1 })} type="button"><span className="material-symbols-outlined">chevron_left</span></button>
+            <strong>{t("messageSearch.yearMonth", { year: messageSearchCalendarMonth.year, month: messageSearchCalendarMonth.month })}</strong>
+            <button aria-label={t("common.next")} onClick={() => setMessageSearchCalendarMonth((current) => current.month === 12 ? { year: current.year + 1, month: 1 } : { ...current, month: current.month + 1 })} type="button"><span className="material-symbols-outlined">chevron_right</span></button>
+          </div>
+          <div className="message-search-calendar-weekdays">{t("messageSearch.weekdays").split(",").map((day) => <span key={day}>{day}</span>)}</div>
+          <div className={`message-search-calendar-grid${messageSearchCalendarLoading ? " is-loading" : ""}`}>
+            {Array.from({ length: new Date(Date.UTC(messageSearchCalendarMonth.year, messageSearchCalendarMonth.month, 0)).getUTCDate() + new Date(Date.UTC(messageSearchCalendarMonth.year, messageSearchCalendarMonth.month - 1, 1)).getUTCDay() }, (_, index) => {
+              const offset = new Date(Date.UTC(messageSearchCalendarMonth.year, messageSearchCalendarMonth.month - 1, 1)).getUTCDay();
+              const day = index - offset + 1;
+              if (day < 1) return <span aria-hidden="true" key={`blank-${index}`} />;
+              const date = `${messageSearchCalendarMonth.year}-${String(messageSearchCalendarMonth.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              const entry = messageSearchCalendar?.days.find((item) => item.date === date);
+              return <button className={entry ? "has-messages" : "is-empty"} disabled={!entry} key={date} onClick={() => entry && revealMessageFromSearch(entry.first_message_id)} type="button">{day}</button>;
+            })}
+          </div>
+          <p>{t("messageSearch.dateHint")}</p>
+        </div>
+      </BottomSheet>
       <SideDrawer
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}

@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { api, ApiError } from "../lib/api";
-import { formatCloudResourceBytes, groupCloudResourcesByPeriod } from "../lib/cloudResources";
+import { formatCloudResourceBytes } from "../lib/cloudResources";
 import { uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
 import { useI18n } from "../lib/language";
@@ -12,6 +12,7 @@ import { ContentLoader, QuietState } from "./BoundaryState";
 import { CloudFileList } from "./CloudFileList";
 import { MediaLightbox } from "./ImageLightbox";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
+import { MediaResourceGrid, type MediaResourceGridItem } from "./MediaResourceGrid";
 import { SideDrawer } from "./SideDrawer";
 
 type ResourceTab = "image" | "video" | "file";
@@ -32,7 +33,7 @@ function chatTitle(chat: ChatDTO) {
 }
 
 export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { session } = useAuth();
   const [tab, setTab] = useState<ResourceTab>(initialTab);
   const [data, setData] = useState<CloudResourceListDTO | null>(null);
@@ -47,6 +48,7 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
   const [chats, setChats] = useState<ChatDTO[]>([]);
   const [chatsLoading, setChatsLoading] = useState(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [highlightedResourceId, setHighlightedResourceId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const requestSerialRef = useRef(0);
@@ -193,7 +195,6 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
 
   const quota = data?.quota;
   const mediaItems = (data?.items || []).filter((asset) => asset.kind === "image" || asset.kind === "video");
-  const resourceGroups = groupCloudResourcesByPeriod(data?.items || [], language);
   const headerAction = tab !== "image" ? (
     <button
       aria-label={t("cloudResources.upload")}
@@ -223,6 +224,27 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
     </button>
   );
 
+  const closePreview = () => {
+    const asset = previewIndex === null ? null : mediaItems[previewIndex];
+    setPreviewIndex(null);
+    if (!asset) return;
+    setHighlightedResourceId(asset.resource_id);
+    window.setTimeout(() => {
+      document.querySelector(`[data-resource-id="${asset.resource_id}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 80);
+    window.setTimeout(() => setHighlightedResourceId((current) => current === asset.resource_id ? null : current), 1800);
+  };
+
+  const mediaGridItems: MediaResourceGridItem[] = mediaItems.map((asset) => ({
+    id: asset.resource_id,
+    kind: asset.kind as "image" | "video",
+    uri: asset.uri,
+    thumbnailUri: asset.thumbnail_uri,
+    createdAt: asset.created_at,
+    durationSeconds: asset.duration_seconds,
+    label: asset.file_name,
+  }));
+
   return (
     <>
       <SideDrawer className="cloud-resource-drawer" headerAction={headerAction} historyKey="cloud-resources" onRouteOpen={onRouteOpen} onClose={onClose} open={open} title={t("cloudResources.title")}>
@@ -244,46 +266,21 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
           </div>
           {loading && !data ? <ContentLoader label={t("common.loading")} /> : null}
           {tab !== "file" && !loading && data?.items.length === 0 ? <QuietState title={t("cloudResources.empty")} /> : null}
-          {tab === "image" ? (
-            <div className="cloud-resource-sections">
-              {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
-                <h3>{group.label}</h3>
-                <div className="cloud-resource-image-grid">
-                {group.items.map((asset) => (
-                <article className="cloud-resource-image" key={asset.resource_id}>
-                  <button className="cloud-resource-image-link" onClick={() => setPreviewIndex(mediaItems.findIndex((item) => item.resource_id === asset.resource_id))} type="button">
-                    <img alt={asset.file_name || ""} loading="lazy" onError={() => removeUnavailableResource(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
-                  </button>
-                  {moreButton(asset)}
-                </article>
-                ))}
-                </div>
-              </section>)}
-            </div>
-          ) : null}
-          {tab === "video" ? (
-            <div className="cloud-resource-sections">
-              {resourceGroups.map((group) => <section className="cloud-resource-section" key={group.label}>
-                <h3>{group.label}</h3>
-                <div className="cloud-resource-video-grid">
-              {group.items.map((asset) => (
-                <article className="cloud-resource-video" key={asset.resource_id}>
-                  <button className="cloud-resource-video-preview" onClick={() => setPreviewIndex(mediaItems.findIndex((item) => item.resource_id === asset.resource_id))} type="button">
-                    <img alt="" loading="lazy" onError={() => removeUnavailableResource(asset.resource_id)} src={asset.thumbnail_uri || asset.uri} />
-                    <span className="cloud-resource-play material-symbols-outlined">play_arrow</span>
-                    {asset.duration_seconds ? <small>{Math.floor(asset.duration_seconds / 60)}:{String(Math.round(asset.duration_seconds % 60)).padStart(2, "0")}</small> : null}
-                  </button>
-                  <div><strong>{asset.file_name || t("cloudResources.tab.video")}</strong><span>{formatCloudResourceBytes(asset.file_size)}</span></div>
-                  {moreButton(asset)}
-                </article>
-              ))}
-                </div>
-              </section>)}
-            </div>
-          ) : null}
+          {tab === "image" || tab === "video" ? <MediaResourceGrid
+            highlightedId={highlightedResourceId}
+            items={mediaGridItems}
+            onImageError={(item) => removeUnavailableResource(Number(item.id))}
+            onSelect={(item) => setPreviewIndex(mediaItems.findIndex((asset) => asset.resource_id === item.id))}
+            renderAction={(item) => moreButton(mediaItems.find((asset) => asset.resource_id === item.id)!)}
+          /> : null}
           {tab === "file" ? (
             <>
-              <CloudFileList items={data?.items || []} onQueryChange={setFileQuery} query={fileQuery} renderAction={moreButton} />
+              <CloudFileList items={data?.items || []} onQueryChange={setFileQuery} onSelect={(asset) => {
+                const anchor = document.createElement("a");
+                anchor.href = asset.uri;
+                anchor.download = asset.file_name || "sermo-file";
+                anchor.click();
+              }} query={fileQuery} renderAction={moreButton} />
               {!loading && data?.items.length === 0 ? (
                 <QuietState title={deferredFileQuery ? t("cloudResources.noMatchingFiles") : t("cloudResources.emptyFiles")} />
               ) : null}
@@ -341,8 +338,10 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
           detail: <MediaMetadataPanel kind={asset.kind as "image" | "video"} metadata={asset.metadata} />,
           downloadLabel: formatCloudResourceBytes(asset.file_size),
         }))}
-        onClose={() => setPreviewIndex(null)}
+        onApproachingEnd={() => { if (data?.has_more && !loadingMore) void load(tab, true); }}
+        onClose={closePreview}
         onIndexChange={setPreviewIndex}
+        totalCount={data?.total_count}
       /> : null}
     </>
   );

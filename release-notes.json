@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.5",
+  "id": "2026.08.29.6",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "语音录制降噪",
+      "title": "聊天记录查找升级",
       "items": [
-        "聊天、广场发言和管理员广播录音统一启用回声消除、环境降噪与自动增益",
-        "支持的设备会进一步过滤低频杂音与高频嘶声并平衡音量，不支持时自动安全回退"
+        "搜索聊天记录按相对日期整理，图片、视频、语音、文件、位置、发言和活动拥有更合适的查看方式",
+        "新增按日期查找，并支持媒体预览自动续载、真实总数、退出定位和一键跳回原消息"
       ]
     },
     "en": {
-      "title": "Cleaner voice recordings",
+      "title": "Better chat history search",
       "items": [
-        "Chat, Square, and admin broadcast recordings now share echo cancellation, noise suppression, and automatic gain control",
-        "Supported devices also filter low-frequency rumble and high-frequency hiss while balancing volume, with a safe automatic fallback"
+        "Chat history is now grouped by relative date, with purpose-built viewing for media, audio, files, locations, posts, and activities",
+        "Find by date is now available, while media previews support automatic paging, true totals, return positioning, and jumping to the original message"
       ]
     }
   }
