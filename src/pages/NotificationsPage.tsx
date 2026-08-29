@@ -14,6 +14,7 @@ import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { OfficialBadge } from "../components/OfficialBadge";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import type { AppViewState, ChatDTO, FriendshipRequestDTO, UserDTO } from "../types";
@@ -319,7 +320,10 @@ export default function NotificationsPage() {
                           uri={friend.avatar_uri}
                         />
                         <div className="row-main">
-                          <strong>{friend.name}</strong>
+                          <div className="person-name-row">
+                            <strong>{friend.name}</strong>
+                            {friend.official ? <OfficialBadge /> : null}
+                          </div>
                           <div className="row-subtle">{formatLastSeen(friend)}</div>
                         </div>
                         <span className="material-symbols-outlined chevron-inline">chevron_right</span>

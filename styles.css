@@ -15161,9 +15161,16 @@ html[data-theme="dark"] .growth-scroll-score strong {
 }
 
 .user-profile-name-row {
-  display: grid;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
   min-width: 0;
   gap: 8px;
+}
+
+.user-profile-name-row .official-badge {
+  align-self: center;
+  width: max-content;
 }
 
 .user-profile-status-badges {
