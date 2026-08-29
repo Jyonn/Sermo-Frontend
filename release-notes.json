@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.29.4",
+  "id": "2026.08.29.5",
   "publishedAt": "2026-08-29",
   "locales": {
     "zh-CN": {
-      "title": "空间活动领取与计时",
+      "title": "语音录制降噪",
       "items": [
-        "八仙、蜘蛛侠等活动改由空间管理员领取，活动时间从领取时开始计算；永久 VIP 由系统自动安排",
-        "探索页现在只展示本空间已领取且仍在进行中的活动"
+        "聊天、广场发言和管理员广播录音统一启用回声消除、环境降噪与自动增益",
+        "支持的设备会进一步过滤低频杂音与高频嘶声并平衡音量，不支持时自动安全回退"
       ]
     },
     "en": {
-      "title": "Space activity claims and timing",
+      "title": "Cleaner voice recordings",
       "items": [
-        "Space admins now claim activities such as Baxian and Spider-Man, with each activity starting its timer when claimed; Permanent VIP is assigned automatically",
-        "Explore now shows only activities claimed by the current space and still in progress"
+        "Chat, Square, and admin broadcast recordings now share echo cancellation, noise suppression, and automatic gain control",
+        "Supported devices also filter low-frequency rumble and high-frequency hiss while balancing volume, with a safe automatic fallback"
       ]
     }
   }

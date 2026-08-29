@@ -17,6 +17,7 @@ import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { api } from "../lib/api";
+import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
@@ -537,7 +538,7 @@ export default function SquarePage() {
   const lastReadStatementRef = useRef<number | null>(null);
   const notificationMutationVersionRef = useRef(0);
   const notificationUnreadRef = useRef(0);
-  const recorderStreamRef = useRef<MediaStream | null>(null);
+  const audioCaptureRef = useRef<NoiseReducedAudioCapture | null>(null);
   const recorderChunksRef = useRef<Blob[]>([]);
   const recordingStartedAtRef = useRef(0);
   const recordingTimerRef = useRef<number | null>(null);
@@ -875,7 +876,8 @@ export default function SquarePage() {
   }, [profileFeedUserId]);
 
   useEffect(() => () => {
-    recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+    audioCaptureRef.current?.cleanup();
+    audioCaptureRef.current = null;
     if (recordingTimerRef.current !== null) window.clearInterval(recordingTimerRef.current);
   }, []);
 
@@ -1197,23 +1199,28 @@ export default function SquarePage() {
       stopRecording();
       return;
     }
+    let capture: NoiseReducedAudioCapture | null = null;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      recorderStreamRef.current = stream;
+      audioCaptureRef.current?.cleanup();
+      capture = await createNoiseReducedAudioCapture();
+      const mimeType = preferredAudioMimeType();
+      const recorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
+      audioCaptureRef.current = capture;
       recorderRef.current = recorder;
       recorderChunksRef.current = [];
       recordingStartedAtRef.current = Date.now();
       recorder.addEventListener("dataavailable", (event) => event.data.size && recorderChunksRef.current.push(event.data));
       recorder.addEventListener("stop", () => {
         const duration = Math.max(1, Math.min(MAX_AUDIO_SECONDS, Math.round((Date.now() - recordingStartedAtRef.current) / 1000)));
-        const blob = new Blob(recorderChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        const resolvedType = recorder.mimeType || mimeType || "audio/webm";
+        const blob = new Blob(recorderChunksRef.current, { type: resolvedType });
         setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
         setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
-        setVoiceFile(new File([blob], `statement-${Date.now()}.webm`, { type: blob.type }));
+        setVoiceFile(new File([blob], `statement-${Date.now()}.${audioFileExtension(resolvedType)}`, { type: resolvedType }));
         setVoiceDuration(duration);
         setRecording(false);
-        stream.getTracks().forEach((track) => track.stop());
+        audioCaptureRef.current?.cleanup();
+        audioCaptureRef.current = null;
         if (recordingTimerRef.current !== null) window.clearInterval(recordingTimerRef.current);
       });
       recorder.start(250);
@@ -1225,6 +1232,8 @@ export default function SquarePage() {
         if (elapsed >= MAX_AUDIO_SECONDS) stopRecording();
       }, 500);
     } catch {
+      capture?.cleanup();
+      if (audioCaptureRef.current === capture) audioCaptureRef.current = null;
       setError(t("square.recordingFailed"));
     }
   };

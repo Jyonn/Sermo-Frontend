@@ -42,6 +42,7 @@ import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { VirtualDynamicList, type VirtualDynamicListHandle } from "../components/VirtualDynamicList";
 import { ApiError, api } from "../lib/api";
+import { createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
@@ -2694,8 +2695,7 @@ function LiveChatsPage() {
     }, 420);
   };
 
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioCaptureRef = useRef<NoiseReducedAudioCapture | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const waveformFrameRef = useRef<number | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
@@ -2847,12 +2847,9 @@ function LiveChatsPage() {
       window.clearInterval(recordingTimerRef.current);
       recordingTimerRef.current = null;
     }
-    analyserRef.current?.disconnect();
     analyserRef.current = null;
-    audioContextRef.current?.close().catch(() => undefined);
-    audioContextRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-    mediaStreamRef.current = null;
+    audioCaptureRef.current?.cleanup();
+    audioCaptureRef.current = null;
     mediaRecorderRef.current = null;
   };
 
@@ -5368,33 +5365,18 @@ function LiveChatsPage() {
     });
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          channelCount: 1,
-        },
-      });
+      const capture = await createNoiseReducedAudioCapture();
       if (attempt !== recordingAttemptRef.current) {
-        stream.getTracks().forEach((track) => track.stop());
+        capture.cleanup();
         return;
       }
-      const mimeTypeCandidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
-      const mimeType = mimeTypeCandidates.find((item) => MediaRecorder.isTypeSupported(item)) ?? "";
-      const mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-      mediaStreamRef.current = stream;
+      const mimeType = preferredAudioMimeType();
+      audioCaptureRef.current = capture;
+      const mediaRecorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
       mediaRecorderRef.current = mediaRecorder;
 
-      const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (AudioContextCtor) {
-        const audioContext = new AudioContextCtor();
-        await audioContext.resume().catch(() => undefined);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 64;
-        const source = audioContext.createMediaStreamSource(stream);
-        source.connect(analyser);
-        audioContextRef.current = audioContext;
+      const analyser = capture.analyser;
+      if (analyser) {
         analyserRef.current = analyser;
 
         const data = new Uint8Array(analyser.frequencyBinCount);

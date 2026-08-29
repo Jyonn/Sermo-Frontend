@@ -11,6 +11,7 @@ import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRo
 import { PermissionWorkspace } from "../components/PermissionWorkspace";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
+import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAdminAuth } from "../lib/adminAuth";
 import { resolveMediaKind, toMessageUploadError, uploadFormData, uploadMessageMediaWith } from "../lib/messageUpload";
 import { copyText } from "../lib/presentation";
@@ -159,7 +160,7 @@ export default function SpaceAdminDashboardPage() {
   const broadcastGalleryInputRef = useRef<HTMLInputElement | null>(null);
   const broadcastFileInputRef = useRef<HTMLInputElement | null>(null);
   const broadcastRecorderRef = useRef<MediaRecorder | null>(null);
-  const broadcastStreamRef = useRef<MediaStream | null>(null);
+  const broadcastAudioCaptureRef = useRef<NoiseReducedAudioCapture | null>(null);
   const broadcastChunksRef = useRef<Blob[]>([]);
   const broadcastRecordingStartedAtRef = useRef(0);
   const broadcastRecordingTimerRef = useRef<number | null>(null);
@@ -191,7 +192,8 @@ export default function SpaceAdminDashboardPage() {
 
   useEffect(() => () => {
     if (broadcastRecordingTimerRef.current !== null) window.clearInterval(broadcastRecordingTimerRef.current);
-    broadcastStreamRef.current?.getTracks().forEach((track) => track.stop());
+    broadcastAudioCaptureRef.current?.cleanup();
+    broadcastAudioCaptureRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -549,8 +551,8 @@ export default function SpaceAdminDashboardPage() {
       window.clearInterval(broadcastRecordingTimerRef.current);
       broadcastRecordingTimerRef.current = null;
     }
-    broadcastStreamRef.current?.getTracks().forEach((track) => track.stop());
-    broadcastStreamRef.current = null;
+    broadcastAudioCaptureRef.current?.cleanup();
+    broadcastAudioCaptureRef.current = null;
     broadcastRecorderRef.current = null;
   };
 
@@ -572,11 +574,10 @@ export default function SpaceAdminDashboardPage() {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeTypes = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
-      const mimeType = mimeTypes.find((candidate) => MediaRecorder.isTypeSupported(candidate)) ?? "";
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-      broadcastStreamRef.current = stream;
+      const capture = await createNoiseReducedAudioCapture();
+      const mimeType = preferredAudioMimeType();
+      broadcastAudioCaptureRef.current = capture;
+      const recorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
       broadcastRecorderRef.current = recorder;
       broadcastChunksRef.current = [];
       broadcastRecordingStartedAtRef.current = Date.now();
@@ -589,7 +590,7 @@ export default function SpaceAdminDashboardPage() {
       recorder.onstop = () => {
         const duration = Math.max(1, Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - broadcastRecordingStartedAtRef.current) / 1000));
         const resolvedType = recorder.mimeType || mimeType || "audio/webm";
-        const extension = resolvedType.includes("mp4") ? "m4a" : resolvedType.includes("ogg") ? "ogg" : "webm";
+        const extension = audioFileExtension(resolvedType);
         const blob = new Blob(broadcastChunksRef.current, { type: resolvedType });
         const file = new File([blob], `broadcast-${Date.now()}.${extension}`, { type: resolvedType });
         stopBroadcastRecordingResources();
