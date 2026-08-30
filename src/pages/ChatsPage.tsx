@@ -1041,8 +1041,97 @@ function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   return Math.abs(current.createdAt - previous.createdAt) >= 10 * 60;
 }
 
+const MEDIA_IMAGE_RETRY_DELAYS = [350, 900, 1800, 3600];
+
+function retryableMediaUri(uri: string, attempt: number) {
+  const resolved = resolveStableResourceUri(uri) ?? uri;
+  if (!attempt || resolved.startsWith("blob:") || resolved.startsWith("data:")) return resolved;
+
+  try {
+    const parsed = new URL(resolved, window.location.href);
+    if (!parsed.pathname.includes("/messages/blob/")) return resolved;
+    parsed.searchParams.set("sermo_retry", `${attempt}-${Date.now()}`);
+    return parsed.toString();
+  } catch {
+    return resolved;
+  }
+}
+
+const RetryingMediaImage = memo(function RetryingMediaImage({
+  alt,
+  ariaHidden,
+  className,
+  fallbackSrc,
+  loading = "lazy",
+  onFinalError,
+  onLoad,
+  src,
+}: {
+  alt: string;
+  ariaHidden?: boolean;
+  className?: string;
+  fallbackSrc?: string;
+  loading?: "eager" | "lazy";
+  onFinalError?: () => void;
+  onLoad?: () => void;
+  src: string;
+}) {
+  const [activeSrc, setActiveSrc] = useState(src);
+  const [attempt, setAttempt] = useState(0);
+  const retryTimerRef = useRef<number | null>(null);
+  const usableFallback = fallbackSrc && fallbackSrc !== activeSrc ? fallbackSrc : undefined;
+  const displaySrc = retryableMediaUri(activeSrc, attempt);
+
+  useEffect(() => {
+    if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
+    retryTimerRef.current = null;
+    setActiveSrc(src);
+    setAttempt(0);
+  }, [src, fallbackSrc]);
+
+  useEffect(() => () => {
+    if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
+  }, []);
+
+  const handleError = () => {
+    forgetStableResourceUri(activeSrc);
+    if (activeSrc.startsWith("blob:") && usableFallback) {
+      setActiveSrc(usableFallback);
+      setAttempt(0);
+      return;
+    }
+    if (attempt < MEDIA_IMAGE_RETRY_DELAYS.length) {
+      retryTimerRef.current = window.setTimeout(() => {
+        retryTimerRef.current = null;
+        setAttempt((current) => current + 1);
+      }, MEDIA_IMAGE_RETRY_DELAYS[attempt]);
+      return;
+    }
+    if (usableFallback) {
+      setActiveSrc(usableFallback);
+      setAttempt(0);
+      return;
+    }
+    onFinalError?.();
+  };
+
+  return (
+    <img
+      key={`${activeSrc}:${attempt}`}
+      alt={alt}
+      aria-hidden={ariaHidden}
+      className={className}
+      loading={loading}
+      src={displaySrc}
+      onError={handleError}
+      onLoad={onLoad}
+    />
+  );
+});
+
 const MessageMediaImage = memo(function MessageMediaImage({
   groupClassName,
+  localPreviewUri,
   metadata,
   messageId,
   onOpenImage,
@@ -1050,6 +1139,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
   uri,
 }: {
   groupClassName: string;
+  localPreviewUri?: string;
   metadata?: ImageMetadataDTO | null;
   messageId?: number;
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
@@ -1057,10 +1147,10 @@ const MessageMediaImage = memo(function MessageMediaImage({
   uri: string;
 }) {
   const [loaded, setLoaded] = useState(false);
-  const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
-  const imageRef = useRef<HTMLImageElement | null>(null);
-  const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
+  const resolvedUri = resolveStableResourceUri(uri) ?? uri;
   const resolvedThumbnailUri = resolveStableResourceUri(thumbnailUri) ?? thumbnailUri;
+  const displayUri = localPreviewUri ?? resolvedUri;
+  const fallbackUri = localPreviewUri ? resolvedThumbnailUri ?? resolvedUri : resolvedThumbnailUri;
   const imageAspect = metadata?.pixel_width && metadata.pixel_height
     ? metadata.pixel_width / metadata.pixel_height
     : null;
@@ -1070,14 +1160,7 @@ const MessageMediaImage = memo(function MessageMediaImage({
 
   useEffect(() => {
     setLoaded(false);
-    setRetryWithFreshUri(false);
-  }, [uri]);
-
-  useEffect(() => {
-    if (imageRef.current?.complete) {
-      setLoaded(true);
-    }
-  }, [resolvedUri]);
+  }, [displayUri]);
 
   return (
     <button
@@ -1086,22 +1169,14 @@ const MessageMediaImage = memo(function MessageMediaImage({
       style={frameStyle}
       type="button"
     >
-      {resolvedThumbnailUri ? <img alt="" aria-hidden="true" className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
-      <img
+      {resolvedThumbnailUri ? <RetryingMediaImage alt="" ariaHidden className="message-media-image message-media-image-thumb" src={resolvedThumbnailUri} /> : null}
+      <RetryingMediaImage
         alt={i18n.t("message.image")}
         className="message-media-image message-media-image-main"
-        loading="lazy"
-        ref={imageRef}
-        src={resolvedUri}
+        fallbackSrc={fallbackUri}
+        src={displayUri}
+        onFinalError={() => setLoaded(true)}
         onLoad={() => setLoaded(true)}
-        onError={() => {
-          if (!retryWithFreshUri) {
-            forgetStableResourceUri(uri);
-            setRetryWithFreshUri(true);
-            return;
-          }
-          setLoaded(true);
-        }}
       />
     </button>
   );
@@ -1322,7 +1397,11 @@ const MessageImageGallery = memo(function MessageImageGallery({
                   onPointerUp={clearLongPress}
                   type="button"
                 >
-                  <img alt="" loading="lazy" src={displayUri} />
+                  <RetryingMediaImage
+                    alt=""
+                    fallbackSrc={message.localPreviewUri ? thumbnailUri ?? message.payload?.uri : uri !== displayUri ? uri : undefined}
+                    src={displayUri}
+                  />
                   {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
                   {hasMore ? (
                     <span className="message-image-gallery-more">
@@ -1575,7 +1654,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "image" && message.payload?.uri) {
-    return <MessageMediaImage groupClassName={groupClassName} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.localPreviewUri ? undefined : message.payload.thumbnail_uri} uri={message.localPreviewUri ?? message.payload.uri} />;
+    return <MessageMediaImage groupClassName={groupClassName} localPreviewUri={message.localPreviewUri} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {

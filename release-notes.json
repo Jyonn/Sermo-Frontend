@@ -1,21 +1,19 @@
 {
-  "id": "2026.08.30.1",
+  "id": "2026.08.30.2",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "小程序界面全面对齐",
+      "title": "聊天图片加载更可靠",
       "items": [
-        "聊天、广场、用户详情、发言、设置与云端资源等页面现已统一采用网页端的视觉与交互语言",
-        "导航与操作区已适配微信原生胶囊，窄屏页面不再发生标题或按钮遮挡",
-        "城市气泡、活动、头像框与个人名片等素材现已在小程序中完整呈现"
+        "刚发送或从其他设备同步到的聊天图片现在会自动重试，无需刷新页面即可恢复",
+        "本地图片预览不可用时会自动切换到云端资源"
       ]
     },
     "en": {
-      "title": "Mini Program interface parity",
+      "title": "More reliable chat image loading",
       "items": [
-        "Chat, Square, profiles, statements, settings, and cloud resources now share the web app's visual and interaction language",
-        "Navigation and actions now avoid the native WeChat capsule on narrow screens",
-        "City bubbles, activities, avatar frames, and profile card artwork are now fully represented in the Mini Program"
+        "Newly sent and cross-device chat images now retry automatically without requiring a page refresh",
+        "Unavailable local previews now fall back to the cloud copy automatically"
       ]
     }
   }
