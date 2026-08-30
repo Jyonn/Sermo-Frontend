@@ -11,18 +11,19 @@ const blockedMediaSlugs = new Set();
 
 function mediaIdentity(value) {
   const url = new URL(value, self.location.origin);
+  const revision = url.searchParams.get("variant") === "playback" ? "-playback" : "";
   const messageMatch = url.pathname.match(/\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
   if (messageMatch) {
     return {
       slug: messageMatch[1].toLowerCase(),
-      variant: messageMatch[2] ? "thumbnail" : "original",
+      variant: `${messageMatch[2] ? "thumbnail" : "original"}${revision}`,
     };
   }
   const squareMatch = url.pathname.match(/\/(?:api\/)?square\/media\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
   if (squareMatch) {
     return {
       slug: squareMatch[1].toLowerCase(),
-      variant: squareMatch[2] ? "thumbnail" : "original",
+      variant: `${squareMatch[2] ? "thumbnail" : "original"}${revision}`,
     };
   }
   const stickerMatch = url.pathname.match(/\/(?:api\/)?stickers\/assets\/(\d+)\/?$/i);
@@ -87,6 +88,11 @@ async function deleteMediaEntry(identity) {
     cache.delete(mediaCacheRequest(identity)),
     withMediaStore("readwrite", (store) => store.delete(mediaEntryKey(identity))),
   ]);
+}
+
+async function deleteMediaSlug(slug) {
+  const entries = await listMediaEntries();
+  await Promise.all(entries.filter((entry) => entry.slug === slug).map((entry) => deleteMediaEntry(entry)));
 }
 
 async function enforceMediaLimit() {
@@ -185,13 +191,7 @@ self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
   if (event.data?.type === "PURGE_MEDIA" && Array.isArray(event.data.slugs)) {
     event.data.slugs.forEach((slug) => blockedMediaSlugs.add(slug));
-    event.waitUntil(Promise.all(
-      event.data.slugs.flatMap((slug) => [
-        deleteMediaEntry({ slug, variant: "original" }),
-        deleteMediaEntry({ slug, variant: "thumbnail" }),
-        deleteMediaEntry({ slug, variant: "display" }),
-      ])
-    ));
+    event.waitUntil(Promise.all(event.data.slugs.map(deleteMediaSlug)));
   }
   if (event.data?.type === "CACHE_MEDIA" && Array.isArray(event.data.urls)) {
     event.waitUntil(Promise.all(event.data.urls.map(async (url) => {

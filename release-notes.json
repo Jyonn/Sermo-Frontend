@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.7",
+  "id": "2026.08.30.8",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "视频资料预览焕新",
+      "title": "视频传输更加轻量",
       "items": [
-        "带影像资料的视频预览不再使用浏览器原生播放器",
-        "底部新增简洁的播放控制与可拖动进度条，视觉与网页整体风格保持一致"
+        "新上传及历史视频将逐步转换为更轻量的单档 MP4",
+        "播放与下载统一使用压缩版本，同时保留画面比例与常用设备兼容性"
       ]
     },
     "en": {
-      "title": "Refined video archive preview",
+      "title": "Lighter video delivery",
       "items": [
-        "Video previews with media details no longer rely on the browser's native player",
-        "A compact play control and draggable timeline now match the rest of the web experience"
+        "New and historical videos will progressively convert to a lighter single-quality MP4",
+        "Playback and downloads now use the compressed version with broad device compatibility"
       ]
     }
   }
