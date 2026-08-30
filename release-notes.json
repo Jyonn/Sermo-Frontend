@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.3",
+  "id": "2026.08.30.4",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "手机图片预览操作更顺畅",
+      "title": "运营身份标识焕新",
       "items": [
-        "沉浸预览顶部的完整显示、铺满屏幕与实际大小按钮现在可以单击生效",
-        "触摸操作栏时不再意外收起控制按钮"
+        "运营用户现在使用与官方账号一致的认证图标",
+        "运营标签更新为更易区分的蓝色样式"
       ]
     },
     "en": {
-      "title": "Smoother mobile image preview controls",
+      "title": "Refreshed operator identity",
       "items": [
-        "Fit, fill, and actual-size controls in immersive preview now respond to a single tap",
-        "Touching the action bar no longer dismisses its controls unexpectedly"
+        "Operators now use the same verification icon as official accounts",
+        "Operator badges now use a distinct blue treatment"
       ]
     }
   }

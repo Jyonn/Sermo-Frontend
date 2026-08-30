@@ -853,10 +853,10 @@ img {
 
 .operator-badge {
   align-items: center;
-  background: color-mix(in srgb, #d88919 13%, var(--bg-panel));
-  border: 1px solid color-mix(in srgb, #d88919 42%, transparent);
+  background: color-mix(in srgb, var(--info) 12%, var(--bg-panel));
+  border: 1px solid color-mix(in srgb, var(--info) 34%, transparent);
   border-radius: 999px;
-  color: #a45b00;
+  color: var(--info);
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 11px;
