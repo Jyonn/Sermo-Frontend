@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.2",
+  "id": "2026.08.30.3",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "聊天图片加载更可靠",
+      "title": "手机图片预览操作更顺畅",
       "items": [
-        "刚发送或从其他设备同步到的聊天图片现在会自动重试，无需刷新页面即可恢复",
-        "本地图片预览不可用时会自动切换到云端资源"
+        "沉浸预览顶部的完整显示、铺满屏幕与实际大小按钮现在可以单击生效",
+        "触摸操作栏时不再意外收起控制按钮"
       ]
     },
     "en": {
-      "title": "More reliable chat image loading",
+      "title": "Smoother mobile image preview controls",
       "items": [
-        "Newly sent and cross-device chat images now retry automatically without requiring a page refresh",
-        "Unavailable local previews now fall back to the cloud copy automatically"
+        "Fit, fill, and actual-size controls in immersive preview now respond to a single tap",
+        "Touching the action bar no longer dismisses its controls unexpectedly"
       ]
     }
   }

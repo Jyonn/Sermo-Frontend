@@ -228,6 +228,7 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
   };
 
   const endGesture = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
     pointersRef.current.delete(event.pointerId);
     if (pointersRef.current.size === 1) {
       const remaining = [...pointersRef.current.values()][0];
@@ -275,7 +276,13 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
         width: naturalSize.width ? `${naturalSize.width}px` : "auto",
       }}
     />
-    <div className={`immersive-image-actionbar${controlsVisible ? " is-visible" : ""}`} onPointerDown={(event) => event.stopPropagation()}>
+    <div
+      className={`immersive-image-actionbar${controlsVisible ? " is-visible" : ""}`}
+      onClick={(event) => event.stopPropagation()}
+      onPointerCancel={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
+      onPointerUp={(event) => event.stopPropagation()}
+    >
       <div className="immersive-image-view-modes" role="group" aria-label={t("media.viewMode")}>
         <button className={mode === "fit" ? "is-active" : ""} onClick={() => applyMode("fit")} type="button">{t("media.fitPage")}</button>
         <button className={mode === "fill" ? "is-active" : ""} onClick={() => applyMode("fill")} type="button">{t("media.fillScreen")}</button>
