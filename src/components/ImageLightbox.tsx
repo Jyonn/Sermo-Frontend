@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 
@@ -315,6 +315,64 @@ function formatPlaybackTime(value: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
+function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?: string | null; src: string }) {
+  const { t } = useI18n();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (!active) videoRef.current?.pause();
+  }, [active]);
+
+  useEffect(() => () => videoRef.current?.pause(), []);
+
+  const togglePlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) void video.play(); else video.pause();
+  };
+  const progress = duration ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+
+  return (
+    <div className="message-video-player" onClick={(event) => event.stopPropagation()}>
+      <video
+        className="message-video-preview"
+        onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
+        onEnded={() => setPlaying(false)}
+        onPause={() => setPlaying(false)}
+        onPlay={() => setPlaying(true)}
+        onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+        playsInline
+        poster={poster || undefined}
+        preload={active ? "metadata" : "none"}
+        ref={videoRef}
+        src={src}
+      />
+      <div className="message-video-player-controls">
+        <button aria-label={playing ? t("media.pause") : t("media.play")} onClick={togglePlayback} type="button">
+          <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+        </button>
+        <input
+          aria-label={t("media.duration")}
+          max={Math.max(duration, 0)}
+          min={0}
+          onChange={(event) => {
+            const video = videoRef.current;
+            if (video) video.currentTime = Number(event.currentTarget.value);
+          }}
+          step={0.01}
+          style={{ "--video-progress": `${progress}%` } as CSSProperties}
+          type="range"
+          value={Math.min(currentTime, duration || 0)}
+        />
+        <time>{formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}</time>
+      </div>
+    </div>
+  );
+}
+
 function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src: string; onClose: () => void }) {
   const { t } = useI18n();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -454,7 +512,7 @@ export function MediaLightbox({
                 {item.kind === "video"
                   ? immersive && itemIndex === index
                     ? <ImmersiveVideo onClose={close} poster={item.posterUri} src={item.uri} />
-                    : <video className="message-video-preview" controls onClick={(event) => event.stopPropagation()} playsInline poster={item.posterUri || undefined} preload="metadata" src={item.uri} />
+                    : <ArchiveVideoPlayer active={itemIndex === index} poster={item.posterUri} src={item.uri} />
                   : immersive && itemIndex === index
                     ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} src={item.uri} />
                     : <img alt={`${resolvedAltPrefix} ${itemIndex + 1}`} className="message-image-preview" draggable={false} src={item.uri} />}

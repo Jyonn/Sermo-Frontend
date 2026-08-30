@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.6",
+  "id": "2026.08.30.7",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "广场素材加载更迅速",
+      "title": "视频资料预览焕新",
       "items": [
-        "浏览过的广场图片与视频缩略图现在会保存在本地媒体缓存中",
-        "再次进入广场时可直接复用缓存，减少重复请求与素材闪烁"
+        "带影像资料的视频预览不再使用浏览器原生播放器",
+        "底部新增简洁的播放控制与可拖动进度条，视觉与网页整体风格保持一致"
       ]
     },
     "en": {
-      "title": "Faster Square media loading",
+      "title": "Refined video archive preview",
       "items": [
-        "Viewed Square images and video thumbnails are now retained in the local media cache",
-        "Returning to Square now reuses cached media to reduce repeated requests and visual reloads"
+        "Video previews with media details no longer rely on the browser's native player",
+        "A compact play control and draggable timeline now match the rest of the web experience"
       ]
     }
   }
