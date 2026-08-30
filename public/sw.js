@@ -18,6 +18,13 @@ function mediaIdentity(value) {
       variant: messageMatch[2] ? "thumbnail" : "original",
     };
   }
+  const squareMatch = url.pathname.match(/\/(?:api\/)?square\/media\/([a-z0-9-]+)(\/thumbnail)?\/?$/i);
+  if (squareMatch) {
+    return {
+      slug: squareMatch[1].toLowerCase(),
+      variant: squareMatch[2] ? "thumbnail" : "original",
+    };
+  }
   const stickerMatch = url.pathname.match(/\/(?:api\/)?stickers\/assets\/(\d+)\/?$/i);
   if (!stickerMatch) return null;
   return {

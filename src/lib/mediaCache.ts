@@ -1,4 +1,5 @@
 const MEDIA_BLOB_PATTERN = /\/(?:api\/)?messages\/blob\/([a-z0-9-]+)(?:\/thumbnail)?\/?$/i;
+const SQUARE_MEDIA_PATTERN = /\/(?:api\/)?square\/media\/([a-z0-9-]+)(?:\/thumbnail)?\/?$/i;
 const STICKER_ASSET_PATTERN = /\/(?:api\/)?stickers\/assets\/(\d+)\/?$/i;
 
 export function mediaBlobSlug(value?: string | null) {
@@ -8,12 +9,16 @@ export function mediaBlobSlug(value?: string | null) {
     const pathname = new URL(trimmed, window.location.origin).pathname;
     const mediaSlug = pathname.match(MEDIA_BLOB_PATTERN)?.[1]?.toLowerCase();
     if (mediaSlug) return mediaSlug;
+    const squareMediaSlug = pathname.match(SQUARE_MEDIA_PATTERN)?.[1]?.toLowerCase();
+    if (squareMediaSlug) return squareMediaSlug;
     const stickerId = pathname.match(STICKER_ASSET_PATTERN)?.[1];
     return stickerId ? `sticker-${stickerId}` : null;
   } catch {
     const pathname = trimmed.split("?")[0];
     const mediaSlug = pathname.match(MEDIA_BLOB_PATTERN)?.[1]?.toLowerCase();
     if (mediaSlug) return mediaSlug;
+    const squareMediaSlug = pathname.match(SQUARE_MEDIA_PATTERN)?.[1]?.toLowerCase();
+    if (squareMediaSlug) return squareMediaSlug;
     const stickerId = pathname.match(STICKER_ASSET_PATTERN)?.[1];
     return stickerId ? `sticker-${stickerId}` : null;
   }

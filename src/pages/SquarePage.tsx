@@ -25,6 +25,7 @@ import { useI18n, type TranslationKey } from "../lib/language";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
+import { purgeCachedMedia } from "../lib/mediaCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
@@ -1373,7 +1374,9 @@ export default function SquarePage() {
     const id = deleteStatementId;
     setDeletingStatement(true);
     try {
+      const deletedStatement = statements.find((statement) => statement.statement_id === id);
       await api.deleteSquareStatement(id);
+      if (deletedStatement) purgeCachedMedia(deletedStatement.media.flatMap((media) => [media.uri, media.thumbnail_uri]));
       setStatements((current) => current.filter((item) => item.statement_id !== id));
       if (pinnedStatement?.statement_id === id) setPinnedStatement(null);
       if (commentStatementId === id) navigate("/app/square", { replace: true });

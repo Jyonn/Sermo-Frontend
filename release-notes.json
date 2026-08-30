@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.5",
+  "id": "2026.08.30.6",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "广场视频浏览体验升级",
+      "title": "广场素材加载更迅速",
       "items": [
-        "广场发言与聊天中的发言卡片现在使用轻量视频缩略图，不再提前加载视频本体",
-        "沉浸播放支持 0.75 至 3 倍速循环切换，播放与暂停仍可在画面中央操作"
+        "浏览过的广场图片与视频缩略图现在会保存在本地媒体缓存中",
+        "再次进入广场时可直接复用缓存，减少重复请求与素材闪烁"
       ]
     },
     "en": {
-      "title": "Improved Square video browsing",
+      "title": "Faster Square media loading",
       "items": [
-        "Square posts and shared post cards now use lightweight video thumbnails without preloading the video",
-        "Immersive playback now cycles from 0.75x to 3x while play and pause remain centered"
+        "Viewed Square images and video thumbnails are now retained in the local media cache",
+        "Returning to Square now reuses cached media to reduce repeated requests and visual reloads"
       ]
     }
   }
