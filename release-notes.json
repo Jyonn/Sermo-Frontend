@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.4",
+  "id": "2026.08.30.5",
   "publishedAt": "2026-08-30",
   "locales": {
     "zh-CN": {
-      "title": "运营身份标识焕新",
+      "title": "广场视频浏览体验升级",
       "items": [
-        "运营用户现在使用与官方账号一致的认证图标",
-        "运营标签更新为更易区分的蓝色样式"
+        "广场发言与聊天中的发言卡片现在使用轻量视频缩略图，不再提前加载视频本体",
+        "沉浸播放支持 0.75 至 3 倍速循环切换，播放与暂停仍可在画面中央操作"
       ]
     },
     "en": {
-      "title": "Refreshed operator identity",
+      "title": "Improved Square video browsing",
       "items": [
-        "Operators now use the same verification icon as official accounts",
-        "Operator badges now use a distinct blue treatment"
+        "Square posts and shared post cards now use lightweight video thumbnails without preloading the video",
+        "Immersive playback now cycles from 0.75x to 3x while play and pause remain centered"
       ]
     }
   }

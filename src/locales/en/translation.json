@@ -736,6 +736,7 @@
   "media.actualSize": "Actual size",
   "media.play": "Play",
   "media.pause": "Pause",
+  "media.playbackSpeed": "Playback speed {{speed}}x",
   "media.zoomIn": "Zoom in",
   "media.zoomOut": "Zoom out",
   "media.downloadImage": "Download image",

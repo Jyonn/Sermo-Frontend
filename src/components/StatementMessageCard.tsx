@@ -5,6 +5,7 @@ import { useI18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import { ImageLightbox, MediaLightbox } from "./ImageLightbox";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
+import { StatementVideoThumbnail } from "./StatementVideoThumbnail";
 
 function formatDuration(value: number) {
   const seconds = Math.max(0, Math.floor(value || 0));
@@ -103,11 +104,7 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
           </button>
         ) : null}
         {layout === "video" && video ? (
-          <button className="message-statement-video" onClick={(event) => { event.stopPropagation(); setVideoOpen(true); }} type="button">
-            {video.thumbnail_uri ? <img alt="" loading="lazy" src={video.thumbnail_uri} /> : <span className="message-statement-video-placeholder" />}
-            <span className="message-statement-video-play material-symbols-outlined">play_arrow</span>
-            {video.duration_seconds ? <time>{formatDuration(video.duration_seconds)}</time> : null}
-          </button>
+          <StatementVideoThumbnail className="message-statement-video" durationSeconds={video.duration_seconds} onClick={() => setVideoOpen(true)} thumbnailUri={video.thumbnail_uri} />
         ) : null}
         {layout === "chat-record" && statement.chat_record ? (
           <button className="message-statement-chat-record" onClick={(event) => {

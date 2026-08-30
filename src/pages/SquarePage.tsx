@@ -10,6 +10,7 @@ import { FeedbackState } from "../components/FeedbackState";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
+import { StatementVideoThumbnail } from "../components/StatementVideoThumbnail";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
@@ -311,7 +312,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           <audio hidden onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
-      {video ? <button className="square-statement-video-button" onClick={(event) => { event.stopPropagation(); onOpenVideo(); }} type="button"><video className="square-statement-video" muted playsInline poster={video.thumbnail_uri || undefined} preload="metadata" src={video.uri} /><span className="material-symbols-outlined">play_arrow</span></button> : null}
+      {video ? <StatementVideoThumbnail className="square-statement-video" durationSeconds={video.duration_seconds} onClick={() => onOpenVideo()} thumbnailUri={video.thumbnail_uri} /> : null}
       {statement.location ? <button aria-label={statement.location.address || t("square.location")} className="square-statement-location" onClick={(event) => { event.stopPropagation(); onOpenLocation(); }} type="button"><span className="material-symbols-outlined">location_on</span><span>{statement.location.address || `${statement.location.latitude.toFixed(4)}, ${statement.location.longitude.toFixed(4)}`}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
       <footer className="square-statement-footer">
         <button className={statement.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{statement.like_count || t("square.like")}</span></button>

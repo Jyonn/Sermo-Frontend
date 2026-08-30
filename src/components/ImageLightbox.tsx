@@ -322,6 +322,8 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const playbackRates = [0.75, 1, 1.25, 1.5, 2, 3] as const;
 
   useEffect(() => () => videoRef.current?.pause(), []);
 
@@ -329,6 +331,14 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) void video.play(); else video.pause();
+  };
+
+  const cyclePlaybackRate = () => {
+    const currentIndex = playbackRates.indexOf(playbackRate as typeof playbackRates[number]);
+    const nextRate = playbackRates[(currentIndex + 1) % playbackRates.length];
+    const video = videoRef.current;
+    if (video) video.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
   };
 
   return <div
@@ -361,9 +371,8 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
       <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
     </button>
     <div className={`immersive-image-actionbar immersive-video-actionbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
-      <button aria-label={playing ? t("media.pause") : t("media.play")} className="immersive-video-play" onClick={togglePlayback} type="button">
-        <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
-        <span>{playing ? t("media.pause") : t("media.play")}</span>
+      <button aria-label={t("media.playbackSpeed", { speed: playbackRate })} className="immersive-video-play immersive-video-speed" onClick={cyclePlaybackRate} type="button">
+        <span>{playbackRate}x</span>
       </button>
       <span className="immersive-video-time">{formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}</span>
       <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
