@@ -29,6 +29,14 @@ const isWechatMini = embeddedClient === "wechat-mini"
 if (isWechatMini) {
   document.documentElement.dataset.wechatMini = "true";
   window.sessionStorage.setItem("sermo:wechat-mini", "true");
+  const embeddedParams = new URLSearchParams(window.location.search);
+  let storedMetrics: { safeTop?: number; capsuleClearance?: number } = {};
+  try { storedMetrics = JSON.parse(window.sessionStorage.getItem("sermo:wechat-mini-metrics") || "{}"); } catch { /* Ignore stale host data. */ }
+  const safeTop = Math.min(72, Math.max(0, Number(embeddedParams.get("safe_top") ?? storedMetrics.safeTop) || 0));
+  const capsuleClearance = Math.min(160, Math.max(88, Number(embeddedParams.get("capsule_clearance") ?? storedMetrics.capsuleClearance) || 108));
+  window.sessionStorage.setItem("sermo:wechat-mini-metrics", JSON.stringify({ safeTop, capsuleClearance }));
+  document.documentElement.style.setProperty("--wechat-mini-safe-top", `${safeTop}px`);
+  document.documentElement.style.setProperty("--wechat-mini-capsule-clearance", `${capsuleClearance}px`);
 }
 
 function initializeMaterialSymbols(attempt = 0) {

@@ -31028,11 +31028,38 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 /* The WeChat capsule floats above a custom-navigation web-view. Keep page actions usable. */
 @media (max-width: 900px) {
   html[data-wechat-mini="true"] {
+    --wechat-mini-safe-top: 0px;
     --wechat-mini-capsule-clearance: 108px;
   }
 
   html[data-wechat-mini="true"] :is(.topbar-actions, .page-toolbar-actions, .chat-conversation-actions) {
     padding-right: var(--wechat-mini-capsule-clearance);
+  }
+
+  html[data-wechat-mini="true"] .topbar {
+    min-height: calc(56px + var(--wechat-mini-safe-top));
+    padding-top: calc(10px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .shell-no-topbar .tab-sticky-header {
+    padding-top: calc(14px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .drawer-topbar {
+    padding-top: calc(10px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .square-scene-title {
+    margin-top: calc(12px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .message-image-preview-toolbar {
+    top: calc(10px + var(--wechat-mini-safe-top));
+    right: var(--wechat-mini-capsule-clearance);
+  }
+
+  html[data-wechat-mini="true"] .message-image-preview-slide {
+    padding-top: max(68px, calc(38px + var(--wechat-mini-safe-top)));
   }
 
   html[data-wechat-mini="true"] :is(.pwa-recommendation, .pwa-update-prompt) {
