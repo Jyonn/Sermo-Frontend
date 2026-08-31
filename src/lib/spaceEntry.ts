@@ -73,7 +73,3 @@ export function buildAdminEntryHref(mode: "create" | "login" = "login", slug?: s
   const [pathname, search = ""] = buildAdminPath(slug, mode).split("?");
   return buildRootUrl(pathname, search ? `?${search}` : "");
 }
-
-export function buildAdminHrefForCurrentHost(slug: string) {
-  return buildAdminEntryHref("login", slug);
-}

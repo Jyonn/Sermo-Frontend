@@ -59,7 +59,6 @@
   "landing.enterSpace": "Enter space",
   "landing.slugPlaceholder": "Space slug",
   "landing.slugRequired": "Enter a space slug.",
-  "join.adminLogin": "Admin login",
   "join.checking": "Checking space",
   "join.missing": "This space has not been created",
   "join.missingHint": "Create it, or return to Yanlang.",

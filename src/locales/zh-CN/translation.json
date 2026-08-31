@@ -59,7 +59,6 @@
   "landing.enterSpace": "进入空间",
   "landing.slugPlaceholder": "输入空间标识",
   "landing.slugRequired": "请输入空间标识。",
-  "join.adminLogin": "管理员登录",
   "join.checking": "正在确认空间",
   "join.missing": "这个空间还没有创建",
   "join.missingHint": "创建它，或返回言浪主页。",
