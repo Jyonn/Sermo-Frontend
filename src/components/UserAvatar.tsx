@@ -88,7 +88,8 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, vip =
   const sourceCacheKey = singleSource?.cacheKey ?? cacheKey;
   const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);
   const canShowImage = Boolean(source) && !failed;
-  const hasFrame = frame !== "none";
+  // The retired VIP frame may still arrive from older profiles; render it as no frame.
+  const hasFrame = frame !== "none" && frame !== "vip";
 
   return (
     <div className={`${className} user-avatar ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>

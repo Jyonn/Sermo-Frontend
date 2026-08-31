@@ -29,7 +29,6 @@ import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import PlatformAdminPage from "./pages/PlatformAdminPage";
-import PersonalizationCatalogLabPage from "./pages/PersonalizationCatalogLabPage";
 
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
 
@@ -80,7 +79,6 @@ export default function App() {
         <Route path="/account-switch" element={<AccountSwitchPage />} />
         <Route path="/pwa" element={<PwaAccountEntryPage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
-        <Route path="/design/personalization-catalog" element={<PersonalizationCatalogLabPage />} />
         <Route
           path="/design/square-composer"
           element={<Suspense fallback={<FeedbackState title="Loading design study" tone="loading" />}><SquareComposerLabPage /></Suspense>}

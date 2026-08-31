@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.30.8",
-  "publishedAt": "2026-08-30",
+  "id": "2026.08.31.1",
+  "publishedAt": "2026-08-31",
   "locales": {
     "zh-CN": {
-      "title": "视频传输更加轻量",
+      "title": "个性化选项更清晰",
       "items": [
-        "新上传及历史视频将逐步转换为更轻量的单档 MP4",
-        "播放与下载统一使用压缩版本，同时保留画面比例与常用设备兼容性"
+        "已移除停用的永久 VIP 专属头像框",
+        "广场发言统一使用基础卡片，不再展示历史发言卡片样式"
       ]
     },
     "en": {
-      "title": "Lighter video delivery",
+      "title": "Clearer personalization options",
       "items": [
-        "New and historical videos will progressively convert to a lighter single-quality MP4",
-        "Playback and downloads now use the compressed version with broad device compatibility"
+        "The retired permanent-VIP avatar frame has been removed",
+        "Square posts now use one shared base card without legacy post-card styles"
       ]
     }
   }

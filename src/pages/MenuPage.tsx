@@ -40,7 +40,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, StatementCardStyle, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage, { type ChatPreviewDemoKind, type ChatPreviewDemoSide } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
@@ -95,18 +95,7 @@ const personalizationOptions = {
     ["orbit", "menu.frameOrbit"],
     ["aurora", "menu.frameAurora"],
     ["polaroid", "menu.framePolaroid"],
-    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"], ["vip", "menu.frameVip"],
-  ],
-  statement_card_style: [
-    ["default", "menu.statementStyleDefault"],
-    ["editorial", "menu.statementStyleEditorial"],
-    ["mosaic", "menu.statementStyleMosaic"],
-    ["hero", "menu.statementStyleHero"],
-    ["comic", "menu.statementStyleComic"],
-    ["receipt", "menu.statementStyleReceipt"],
-    ["vip", "menu.statementStyleVip"],
-    ["niko", "menu.statementStyleNiko"],
-    ["fufu", "menu.statementStyleFufu"],
+    ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"],
   ],
 } as const;
 
@@ -137,7 +126,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "polaroid"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["orbit", "papercut", "mechanical"].includes(value)) },
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => value === "aurora") },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "vip"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave"].includes(value)) },
 ];
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
@@ -159,18 +148,6 @@ const bubbleRarityOverrides: Partial<Record<ChatBubbleStyle, GrowthRewardDTO["ra
   "baxian-he": "epic",
 };
 const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
-const statementStyleRarity: Record<StatementCardStyle, GrowthRewardDTO["rarity"]> = {
-  default: "common",
-  editorial: "uncommon",
-  mosaic: "uncommon",
-  comic: "rare",
-  receipt: "rare",
-  hero: "epic",
-  vip: "legendary",
-  niko: "legendary",
-  fufu: "legendary",
-};
-
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
 }
@@ -488,7 +465,6 @@ export default function MenuPage() {
   const [chatPreviewDemoGrouped, setChatPreviewDemoGrouped] = useState(true);
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
-  const [statementCardDrawerOpen, setStatementCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
@@ -553,7 +529,7 @@ export default function MenuPage() {
   const growthLevel = me?.growth?.level ?? 1;
   const permanentVip = Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const ownsInventoryResource = (
-    resourceType: "background" | "bubble" | "frame" | "statement" | "vip",
+    resourceType: "background" | "bubble" | "frame" | "vip",
     resourceKey: string,
   ) => me?.resource_inventory?.some(
     (item) => item.resource_type === resourceType && item.resource_key === resourceKey,
@@ -589,7 +565,6 @@ export default function MenuPage() {
       "frame",
       frame,
     );
-  const canUseStatementStyle = (style: StatementCardStyle) => ownsInventoryResource("statement", style);
   const buildPersonalizationSections = (
     items: readonly PersonalizationCatalogItem[],
     category: "background" | "bubble" | "frame",
@@ -613,18 +588,6 @@ export default function MenuPage() {
       items: groups.get(key) ?? [],
     }));
   };
-  const statementStyleSections = (() => {
-    const rarityOrder: GrowthRewardDTO["rarity"][] = ["common", "uncommon", "rare", "epic", "legendary"];
-    const filtered = personalizationOptions.statement_card_style.filter(([value]) => {
-      const owned = canUseStatementStyle(value as StatementCardStyle);
-      return personalizationOwnershipFilter === "all" || (personalizationOwnershipFilter === "owned" ? owned : !owned);
-    });
-    return rarityOrder.map((rarity) => ({
-      key: rarity,
-      label: t(`growth.rarity.${rarity}` as TranslationKey),
-      items: filtered.filter(([value]) => statementStyleRarity[value as StatementCardStyle] === rarity),
-    })).filter((section) => section.items.length);
-  })();
   const gestureScope = useMemo(() => getGestureLockScope(session), [session]);
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
@@ -716,7 +679,7 @@ export default function MenuPage() {
   }, [chatPageDrawerOpen, me?.chat_background_theme, me?.chat_bubble_style, me?.avatar_frame_style, me?.statement_card_style, me?.show_self_avatar]);
 
   useEffect(() => {
-    if (!(avatarFrameDrawerOpen || statementCardDrawerOpen || profileCardDrawerOpen) || !me) return;
+    if (!(avatarFrameDrawerOpen || profileCardDrawerOpen) || !me) return;
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
@@ -727,7 +690,6 @@ export default function MenuPage() {
   }, [
     avatarFrameDrawerOpen,
     profileCardDrawerOpen,
-    statementCardDrawerOpen,
     me?.avatar_frame_style,
     me?.chat_bubble_style,
     me?.statement_card_style,
@@ -1537,11 +1499,10 @@ export default function MenuPage() {
     }
   };
 
-  const savePersonalization = async (drawer: "frame" | "statement" | "profile-card") => {
+  const savePersonalization = async (drawer: "frame" | "profile-card") => {
     if (!me || personalizationSaving) return;
     const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
     const avatarFrameChanged = personalizationDraft.avatar_frame_style !== (me.avatar_frame_style ?? "none");
-    const statementChanged = personalizationDraft.statement_card_style !== (me.statement_card_style ?? "default");
     const profileCardChanged = personalizationDraft.profile_card_theme !== (me.profile_card_theme ?? "default");
     if (bubbleChanged && personalizationDraft.chat_bubble_style === "vip" && !me.is_permanent_vip) {
       showToast(t("menu.vipBubbleOnly"), "error");
@@ -1562,24 +1523,11 @@ export default function MenuPage() {
       return;
     }
     if (avatarFrameChanged && !canUseAvatarFrame(personalizationDraft.avatar_frame_style)) {
-      if (personalizationDraft.avatar_frame_style === "vip") {
-        showToast(t("menu.vipBubbleOnly"), "error");
-        return;
-      }
       const level = rewardLevel("frame", personalizationDraft.avatar_frame_style);
       showToast(
         vipOrLevelAvatarFrames.has(personalizationDraft.avatar_frame_style)
           ? t("menu.levelOrVipUnlock", { level })
           : t("menu.levelUnlock", { level }),
-        "error"
-      );
-      return;
-    }
-    if (statementChanged && !canUseStatementStyle(personalizationDraft.statement_card_style)) {
-      showToast(
-        personalizationDraft.statement_card_style === "vip"
-          ? t("menu.vipBubbleOnly")
-          : t("menu.levelOrVipUnlock", { level: 16 }),
         "error"
       );
       return;
@@ -1599,7 +1547,6 @@ export default function MenuPage() {
       patchSessionUser(nextMe);
       showToast(t("personalization.updated"));
       if (drawer === "frame") setAvatarFrameDrawerOpen(false);
-      if (drawer === "statement") setStatementCardDrawerOpen(false);
       if (drawer === "profile-card") setProfileCardDrawerOpen(false);
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("personalization.updateFailed"), "error");
@@ -2603,69 +2550,6 @@ export default function MenuPage() {
                       {!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? (
                         <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value as PersonalizationDTO["avatar_frame_style"]) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        </div>
-      </SideDrawer>
-
-      <SideDrawer
-        actionBusy={personalizationSaving}
-        actionDisabled={personalizationDraft.statement_card_style === (me?.statement_card_style ?? "default")}
-        actionLabel={t("common.save")}
-        onAction={() => void savePersonalization("statement")}
-        historyKey="statement-style"
-        onRouteOpen={() => setStatementCardDrawerOpen(true)}
-        open={statementCardDrawerOpen}
-        onClose={() => setStatementCardDrawerOpen(false)}
-        title={t("menu.statementCard")}
-      >
-        <div className="personalization-editor statement-card-personalization">
-          <div className="statement-card-preview-stage personalization-sticky-preview">
-            <article className={`square-statement-card statement-style-${personalizationDraft.statement_card_style}`}>
-              <header className="square-statement-author">
-                <UserAvatar
-                  className="square-statement-avatar"
-                  frame={me?.avatar_frame_style}
-                  name={session?.user.name ?? t("brand.user")}
-                  uri={me?.avatar_uri ?? session?.user.avatar_uri}
-                  vip={Boolean(me?.is_permanent_vip)}
-                />
-                <div className="square-statement-author-copy">
-                  <div className="square-statement-author-name"><strong>{session?.user.name ?? t("brand.user")}</strong></div>
-                  <span>{t("menu.statementPreviewTime")}</span>
-                </div>
-              </header>
-              <p className="square-statement-text">{t("menu.statementPreviewText")}</p>
-              <footer className="square-statement-actions">
-                <span><b>♡</b> 12</span><span><b>◌</b> 3</span>
-              </footer>
-            </article>
-          </div>
-          <div className="personalization-library">
-            <PersonalizationCatalogControls
-              onOwnershipChange={setPersonalizationOwnershipFilter}
-              ownership={personalizationOwnershipFilter}
-            />
-            {statementStyleSections.map((section) => (
-              <section className={`personalization-library-section rarity-${section.key}`} key={section.key}>
-                <header><h3>{section.label}</h3><span>{section.items.length}</span></header>
-                <div className="statement-card-style-grid">
-                  {section.items.map(([value, label]) => (
-                    <button
-                      aria-pressed={personalizationDraft.statement_card_style === value}
-                      className={`statement-card-style-choice statement-style-${value} rarity-${statementStyleRarity[value as StatementCardStyle]}${personalizationDraft.statement_card_style === value ? " is-selected" : ""}${!canUseStatementStyle(value as StatementCardStyle) ? " is-locked" : ""}`}
-                      disabled={personalizationSaving}
-                      key={value}
-                      onClick={() => setPersonalizationDraft((current) => ({ ...current, statement_card_style: value as StatementCardStyle }))}
-                      type="button"
-                    >
-                      <span className="statement-card-style-sample"><i>{t("menu.statementStyleSample")}</i></span>
-                      <div className="personalization-item-name"><RarityIcon rarity={statementStyleRarity[value as StatementCardStyle]} /><strong>{t(label)}</strong></div>
-                      {!canUseStatementStyle(value as StatementCardStyle) ? <small>{value === "vip" ? "VIP" : t("menu.levelOrVipUnlock", { level: 16 })}</small> : null}
                     </button>
                   ))}
                 </div>
