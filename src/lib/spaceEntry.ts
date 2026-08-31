@@ -27,11 +27,22 @@ export function detectSpaceSlugFromPathname(pathname: string) {
 
 export function getDetectedSpaceSlug() {
   if (typeof window === "undefined") return null;
-  return detectSpaceSlugFromPathname(window.location.pathname);
+  const pathSlug = detectSpaceSlugFromPathname(window.location.pathname);
+  if (pathSlug) {
+    if (document.documentElement.dataset.wechatMini === "true") window.sessionStorage.setItem("sermo:wechat-mini-space", pathSlug);
+    return pathSlug;
+  }
+  const querySlug = normalizeSlug(new URLSearchParams(window.location.search).get("space") || "");
+  if (querySlug) {
+    window.sessionStorage.setItem("sermo:wechat-mini-space", querySlug);
+    return querySlug;
+  }
+  return window.sessionStorage.getItem("sermo:wechat-mini-space") || null;
 }
 
 export function getSpaceRouterBasename() {
-  const slug = getDetectedSpaceSlug();
+  if (typeof window === "undefined") return "/";
+  const slug = detectSpaceSlugFromPathname(window.location.pathname);
   return slug ? `/${encodeURIComponent(slug)}` : "/";
 }
 
