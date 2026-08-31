@@ -79,7 +79,7 @@ function groupLayoutClass(count: number) {
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ name, uri, cacheKey, className, groupMembers, vip = false, frame = "none" }: UserAvatarProps) {
+export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame = "none" }: UserAvatarProps) {
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
@@ -88,11 +88,10 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, vip =
   const sourceCacheKey = singleSource?.cacheKey ?? cacheKey;
   const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);
   const canShowImage = Boolean(source) && !failed;
-  // The retired VIP frame may still arrive from older profiles; render it as no frame.
-  const hasFrame = frame !== "none" && frame !== "vip";
+  const hasFrame = frame !== "none";
 
   return (
-    <div className={`${className} user-avatar ${canShowImage ? "avatar-has-image" : ""}${vip ? " is-permanent-vip" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
+    <div className={`${className} user-avatar ${canShowImage ? "avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
       <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${frame}` : ""}`}>
         {canShowGroup ? (
           <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>

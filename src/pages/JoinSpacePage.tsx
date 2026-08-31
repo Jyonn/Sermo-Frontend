@@ -9,7 +9,7 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
 import { getBrowserJoinLanguage, useI18n } from "../lib/language";
-import { buildAdminEntryHref, buildAdminHrefForCurrentHost, buildAdminPath, buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
+import { buildAdminEntryHref, buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
 import type { SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
 
@@ -108,9 +108,6 @@ export default function JoinSpacePage() {
 
     return () => controller.abort();
   }, [slug]);
-
-  const adminHref =
-    typeof window !== "undefined" && window.location.hostname !== "localhost" ? buildAdminHrefForCurrentHost(slug) : buildAdminPath(slug, "login");
 
   const closeRecovery = () => {
     if (recoveryBusy) return;
@@ -260,11 +257,6 @@ export default function JoinSpacePage() {
       hidePageTitle
       publicHeader
       title={space?.name || displaySlug(slug) || slug}
-      topbarAction={
-        <a className="ghost-chip" href={adminHref}>
-          {t("join.adminLogin")}
-        </a>
-      }
     >
       <section className="auth-shell">
         <div className={`auth-card ${lookupState !== "ready" ? "is-space-state" : ""}`}>
@@ -390,6 +382,11 @@ export default function JoinSpacePage() {
 
               <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">
                 {submitState === "submitting" ? t("join.entering") : t("join.enter")}
+              </button>
+              <div className="join-login-divider"><i /><span>{t("join.or")}</span><i /></div>
+              <button className="ghost-button join-wechat-login" onClick={() => showToast(t("join.wechatMiniProgramHint"))} type="button">
+                <span className="material-symbols-outlined">chat</span>
+                {t("join.wechatLogin")}
               </button>
             </form>
           ) : null}

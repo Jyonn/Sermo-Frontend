@@ -30612,3 +30612,4 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   .square-mute-duration { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .admin-square-mute-list { padding: 14px; }
 }
+.join-login-divider{align-items:center;color:var(--muted);display:grid;font-size:12px;gap:12px;grid-template-columns:1fr auto 1fr;margin:2px 0}.join-login-divider i{background:var(--line-soft);height:1px}.join-wechat-login{align-items:center;display:flex;gap:9px;justify-content:center;width:100%}.join-wechat-login .material-symbols-outlined{color:#08a86b;font-size:20px}

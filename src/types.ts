@@ -27,7 +27,6 @@ export interface TinyUserDTO {
   chat_background_theme?: ChatBackgroundTheme;
   chat_background_uri?: string;
   avatar_frame_style?: AvatarFrameStyle;
-  statement_card_style?: StatementCardStyle;
   profile_card_theme?: ProfileCardTheme;
   growth_level?: number;
   anonymous?: boolean;
@@ -179,7 +178,6 @@ export interface AccessPayload {
   chat_background_theme?: ChatBackgroundTheme;
   chat_background_uri?: string;
   avatar_frame_style?: AvatarFrameStyle;
-  statement_card_style?: StatementCardStyle;
   expire?: number;
   time?: number;
   type?: string;
@@ -225,13 +223,11 @@ export interface UserResourceInventoryDTO {
 
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "spaceport" | "noir-film" | "custom";
-export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run" | "vip";
-export type StatementCardStyle = "default" | "editorial" | "mosaic" | "hero" | "comic" | "receipt" | "vip" | "niko" | "fufu";
+export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run";
 export type ProfileCardTheme = "default" | "level-12" | "vip";
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;
   avatar_frame_style: AvatarFrameStyle;
-  statement_card_style: StatementCardStyle;
   show_self_avatar: boolean;
   profile_card_theme?: ProfileCardTheme;
 }

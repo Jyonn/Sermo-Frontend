@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.31.2",
+  "id": "2026.08.31.3",
   "publishedAt": "2026-08-31",
   "locales": {
     "zh-CN": {
-      "title": "永久 VIP 权益展示更准确",
+      "title": "空间登录入口更清晰",
       "items": [
-        "永久 VIP 权益清单不再展示已停用的头像框",
-        "成长页现在准确展示专属气泡与个人名片权益"
+        "PWA 选择空间后会直接进入普通用户登录，不再混入管理员入口",
+        "登录页新增微信登录指引，并清理已停用的头像与发言卡片外观"
       ]
     },
     "en": {
-      "title": "More accurate permanent VIP benefits",
+      "title": "Clearer space sign-in",
       "items": [
-        "The permanent VIP benefit list no longer shows the retired avatar frame",
-        "The growth page now accurately highlights exclusive bubbles and profile cards"
+        "Choosing a space in the PWA now opens regular member sign-in without admin entry points",
+        "The sign-in page adds WeChat guidance and retires obsolete avatar and statement-card appearances"
       ]
     }
   }

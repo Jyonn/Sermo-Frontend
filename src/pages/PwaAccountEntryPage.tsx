@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { UserAvatar } from "../components/UserAvatar";
 import { useI18n } from "../lib/language";
 import { getDefaultPwaAccountKey, isPwaAutoLoginEnabled, listPwaCachedAccounts, setDefaultPwaAccountKey, setPwaAutoLoginEnabled } from "../lib/pwaAccounts";
-import { buildSpaceHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
+import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
 
 function launchDestination(slug: string) {
   const shortcut = new URLSearchParams(window.location.search).get("shortcut");
@@ -50,7 +50,7 @@ export default function PwaAccountEntryPage() {
     const slug = normalizeSlug(spaceSlug);
     if (!slug || launching) return;
     setLaunching(true);
-    window.location.assign(buildSpaceHrefForCurrentHost(slug));
+    window.location.assign(buildJoinHrefForCurrentHost(slug));
   };
 
   return (

@@ -473,7 +473,6 @@ export default function MenuPage() {
   const [personalizationDraft, setPersonalizationDraft] = useState<PersonalizationDTO>({
     chat_bubble_style: "default",
     avatar_frame_style: "none",
-    statement_card_style: "default",
     show_self_avatar: false,
     profile_card_theme: "default",
   });
@@ -672,18 +671,16 @@ export default function MenuPage() {
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
-      statement_card_style: me.statement_card_style ?? "default",
       show_self_avatar: Boolean(me.show_self_avatar),
       profile_card_theme: me.profile_card_theme ?? "default",
     });
-  }, [chatPageDrawerOpen, me?.chat_background_theme, me?.chat_bubble_style, me?.avatar_frame_style, me?.statement_card_style, me?.show_self_avatar]);
+  }, [chatPageDrawerOpen, me?.chat_background_theme, me?.chat_bubble_style, me?.avatar_frame_style, me?.show_self_avatar]);
 
   useEffect(() => {
     if (!(avatarFrameDrawerOpen || profileCardDrawerOpen) || !me) return;
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
       avatar_frame_style: me.avatar_frame_style ?? "none",
-      statement_card_style: me.statement_card_style ?? "default",
       show_self_avatar: Boolean(me.show_self_avatar),
       profile_card_theme: me.profile_card_theme ?? "default",
     });
@@ -692,7 +689,6 @@ export default function MenuPage() {
     profileCardDrawerOpen,
     me?.avatar_frame_style,
     me?.chat_bubble_style,
-    me?.statement_card_style,
     me?.show_self_avatar,
   ]);
 
@@ -1574,7 +1570,6 @@ export default function MenuPage() {
       const nextMe = await api.setPersonalization({
         chat_bubble_style: me.chat_bubble_style ?? "default",
         avatar_frame_style: me.avatar_frame_style ?? "none",
-        statement_card_style: me.statement_card_style ?? "default",
         show_self_avatar: next,
         profile_card_theme: me.profile_card_theme ?? "default",
       });
