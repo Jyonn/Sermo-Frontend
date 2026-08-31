@@ -22,6 +22,14 @@ void setupSpacePwaIdentity();
 initializeTheme();
 initializeScheduledSiteTheme();
 const routerBasename = getSpaceRouterBasename();
+const embeddedClient = new URLSearchParams(window.location.search).get("client");
+const isWechatMini = embeddedClient === "wechat-mini"
+  || /miniProgram/i.test(window.navigator.userAgent)
+  || window.sessionStorage.getItem("sermo:wechat-mini") === "true";
+if (isWechatMini) {
+  document.documentElement.dataset.wechatMini = "true";
+  window.sessionStorage.setItem("sermo:wechat-mini", "true");
+}
 
 function initializeMaterialSymbols(attempt = 0) {
   void document.fonts.load('24px "Material Symbols Outlined"').then((faces) => {

@@ -31024,3 +31024,18 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   .square-mute-duration { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .admin-square-mute-list { padding: 14px; }
 }
+
+/* The WeChat capsule floats above a custom-navigation web-view. Keep page actions usable. */
+@media (max-width: 900px) {
+  html[data-wechat-mini="true"] {
+    --wechat-mini-capsule-clearance: 108px;
+  }
+
+  html[data-wechat-mini="true"] :is(.topbar-actions, .page-toolbar-actions, .chat-conversation-actions) {
+    padding-right: var(--wechat-mini-capsule-clearance);
+  }
+
+  html[data-wechat-mini="true"] :is(.pwa-recommendation, .pwa-update-prompt) {
+    display: none !important;
+  }
+}

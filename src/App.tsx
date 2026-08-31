@@ -60,6 +60,7 @@ export default function App() {
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
   const isDesignLab = location.pathname.startsWith("/design/");
+  const isWechatMini = typeof document !== "undefined" && document.documentElement.dataset.wechatMini === "true";
   const routeLocation = showFriendInviteOverlay
     ? {
         ...location,
@@ -202,8 +203,8 @@ export default function App() {
       {ready && !isPlatformAdmin && !isDesignLab ? <GlobalMessageSync /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <AppBottomNav /> : null}
-      {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}
-      {!isPlatformAdmin && !isDesignLab ? <PwaUpdatePrompt /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab && !isWechatMini ? <PwaRecommendation /> : null}
+      {!isPlatformAdmin && !isDesignLab && !isWechatMini ? <PwaUpdatePrompt /> : null}
       <AppToast />
     </>
   );
