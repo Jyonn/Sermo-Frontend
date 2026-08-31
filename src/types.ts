@@ -212,7 +212,7 @@ export interface UserMeDTO extends UserDTO {
 }
 
 export interface UserResourceInventoryDTO {
-  resource_type: "background" | "bubble" | "frame" | "statement" | "identity" | "vip";
+  resource_type: "background" | "bubble" | "frame" | "identity" | "vip";
   reward_id: string;
   resource_key: string;
   source: "growth" | "vip_campaign" | "system";

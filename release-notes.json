@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.31.4",
+  "id": "2026.08.31.5",
   "publishedAt": "2026-08-31",
   "locales": {
     "zh-CN": {
-      "title": "成员登录入口更纯粹",
+      "title": "个性化展示更准确",
       "items": [
-        "PWA 选择空间后会直接进入普通用户登录，空间异常页也不再混入创建与管理入口",
-        "成员登录页保留昵称密码登录，并在下方提供微信登录选项"
+        "已下线的 VIP 专有头像框和发言卡片外观不再因旧账号数据重新出现",
+        "PWA 与小程序均会先选择空间，再进入普通用户登录并保留微信登录选项"
       ]
     },
     "en": {
-      "title": "A focused member sign-in",
+      "title": "More accurate personalization",
       "items": [
-        "Choosing a space in the PWA now opens member sign-in, with no creation or admin entry points on error states",
-        "Member sign-in keeps nickname and password access with a WeChat option below"
+        "Retired VIP avatar frames and statement-card appearances no longer resurface from legacy account data",
+        "The PWA and mini program now choose a space before member sign-in, with WeChat sign-in still available"
       ]
     }
   }

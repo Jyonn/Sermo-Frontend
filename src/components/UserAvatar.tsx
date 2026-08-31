@@ -18,6 +18,10 @@ interface UserAvatarProps {
   frame?: AvatarFrameStyle;
 }
 
+const supportedAvatarFrames = new Set<AvatarFrameStyle>([
+  "orbit", "aurora", "polaroid", "papercut", "mechanical", "niko-run", "fufu-wave", "xiaobai-run",
+]);
+
 function avatarLabel(name: string) {
   return (name?.trim() || "Sermo").slice(0, 2).toUpperCase();
 }
@@ -87,11 +91,12 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame
   const sourceCacheKey = singleSource?.cacheKey ?? cacheKey;
   const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);
   const canShowImage = Boolean(source) && !failed;
-  const hasFrame = frame !== "none";
+  const normalizedFrame = supportedAvatarFrames.has(frame) ? frame : "none";
+  const hasFrame = normalizedFrame !== "none";
 
   return (
     <div className={`${className} user-avatar ${canShowImage ? "avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
-      <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${frame}` : ""}`}>
+      <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${normalizedFrame}` : ""}`}>
         {canShowGroup ? (
           <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
             {normalizedGroupMembers.map((member, index) => (
