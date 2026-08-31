@@ -31062,6 +31062,55 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
     padding-top: max(68px, calc(38px + var(--wechat-mini-safe-top)));
   }
 
+  html[data-wechat-mini="true"] .immersive-image-actionbar {
+    min-height: calc(58px + var(--wechat-mini-safe-top));
+    padding-top: calc(8px + var(--wechat-mini-safe-top));
+    padding-right: var(--wechat-mini-capsule-clearance);
+  }
+
+  html[data-wechat-mini="true"] .immersive-image-zoom-controls {
+    top: calc(58px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] :is(.auth-restore-screen, .pwa-account-entry) {
+    padding-top: calc(22px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .pwa-account-entry-shell {
+    min-height: calc(100dvh - 46px - var(--wechat-mini-safe-top) - env(safe-area-inset-bottom));
+  }
+
+  html[data-wechat-mini="true"] .session-refresh-indicator {
+    top: var(--wechat-mini-safe-top);
+  }
+
+  html[data-wechat-mini="true"] .gesture-lock-screen {
+    padding-top: max(18px, var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .gesture-screen-close {
+    top: calc(8px + var(--wechat-mini-safe-top));
+    right: var(--wechat-mini-capsule-clearance);
+  }
+
+  html[data-wechat-mini="true"] .friend-profile-header {
+    padding-top: calc(12px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] :is(.growth-celebration-stage, .growth-ceremony) {
+    padding-top: max(24px, var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .chat-sync-popup {
+    top: calc(12px + var(--wechat-mini-safe-top));
+  }
+
+  html[data-wechat-mini="true"] .square-inline-detail-header {
+    min-height: calc(58px + var(--wechat-mini-safe-top));
+    padding-top: var(--wechat-mini-safe-top);
+    padding-right: var(--wechat-mini-capsule-clearance);
+  }
+
   html[data-wechat-mini="true"] :is(.pwa-recommendation, .pwa-update-prompt) {
     display: none !important;
   }
