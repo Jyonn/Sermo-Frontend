@@ -151,6 +151,9 @@ const dualUnlockAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
 }
+function visibleAvatarFrame(style?: string) {
+  return personalizationOptions.avatar_frame_style.some(([value]) => value === style) ? style as PersonalizationDTO["avatar_frame_style"] : "none";
+}
 
 type NotificationSettingsMode = "channel" | "type";
 type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
@@ -670,7 +673,7 @@ export default function MenuPage() {
     setChatBackgroundDraft(me.chat_background_theme ?? "default");
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
-      avatar_frame_style: me.avatar_frame_style ?? "none",
+      avatar_frame_style: visibleAvatarFrame(me.avatar_frame_style),
       show_self_avatar: Boolean(me.show_self_avatar),
       profile_card_theme: me.profile_card_theme ?? "default",
     });
@@ -680,7 +683,7 @@ export default function MenuPage() {
     if (!(avatarFrameDrawerOpen || profileCardDrawerOpen) || !me) return;
     setPersonalizationDraft({
       chat_bubble_style: me.chat_bubble_style ?? "default",
-      avatar_frame_style: me.avatar_frame_style ?? "none",
+      avatar_frame_style: visibleAvatarFrame(me.avatar_frame_style),
       show_self_avatar: Boolean(me.show_self_avatar),
       profile_card_theme: me.profile_card_theme ?? "default",
     });
@@ -1498,7 +1501,7 @@ export default function MenuPage() {
   const savePersonalization = async (drawer: "frame" | "profile-card") => {
     if (!me || personalizationSaving) return;
     const bubbleChanged = personalizationDraft.chat_bubble_style !== (me.chat_bubble_style ?? "default");
-    const avatarFrameChanged = personalizationDraft.avatar_frame_style !== (me.avatar_frame_style ?? "none");
+    const avatarFrameChanged = personalizationDraft.avatar_frame_style !== visibleAvatarFrame(me.avatar_frame_style);
     const profileCardChanged = personalizationDraft.profile_card_theme !== (me.profile_card_theme ?? "default");
     if (bubbleChanged && personalizationDraft.chat_bubble_style === "vip" && !me.is_permanent_vip) {
       showToast(t("menu.vipBubbleOnly"), "error");
@@ -1569,7 +1572,7 @@ export default function MenuPage() {
     try {
       const nextMe = await api.setPersonalization({
         chat_bubble_style: me.chat_bubble_style ?? "default",
-        avatar_frame_style: me.avatar_frame_style ?? "none",
+        avatar_frame_style: visibleAvatarFrame(me.avatar_frame_style),
         show_self_avatar: next,
         profile_card_theme: me.profile_card_theme ?? "default",
       });
@@ -2493,7 +2496,7 @@ export default function MenuPage() {
 
       <SideDrawer
         actionBusy={personalizationSaving}
-        actionDisabled={personalizationDraft.avatar_frame_style === (me?.avatar_frame_style ?? "none")}
+        actionDisabled={personalizationDraft.avatar_frame_style === visibleAvatarFrame(me?.avatar_frame_style)}
         actionLabel={t("common.save")}
         onAction={() => void savePersonalization("frame")}
         historyKey="avatar-frames"
