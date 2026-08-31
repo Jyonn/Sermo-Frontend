@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.31.3",
+  "id": "2026.08.31.4",
   "publishedAt": "2026-08-31",
   "locales": {
     "zh-CN": {
-      "title": "空间登录入口更清晰",
+      "title": "成员登录入口更纯粹",
       "items": [
-        "PWA 选择空间后会直接进入普通用户登录，不再混入管理员入口",
-        "登录页新增微信登录指引，并清理已停用的头像与发言卡片外观"
+        "PWA 选择空间后会直接进入普通用户登录，空间异常页也不再混入创建与管理入口",
+        "成员登录页保留昵称密码登录，并在下方提供微信登录选项"
       ]
     },
     "en": {
-      "title": "Clearer space sign-in",
+      "title": "A focused member sign-in",
       "items": [
-        "Choosing a space in the PWA now opens regular member sign-in without admin entry points",
-        "The sign-in page adds WeChat guidance and retires obsolete avatar and statement-card appearances"
+        "Choosing a space in the PWA now opens member sign-in, with no creation or admin entry points on error states",
+        "Member sign-in keeps nickname and password access with a WeChat option below"
       ]
     }
   }

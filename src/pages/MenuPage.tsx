@@ -147,7 +147,7 @@ const bubbleRarityOverrides: Partial<Record<ChatBubbleStyle, GrowthRewardDTO["ra
   "baxian-zhongli": "epic",
   "baxian-he": "epic",
 };
-const vipOrLevelAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
+const dualUnlockAvatarFrames = new Set<PersonalizationDTO["avatar_frame_style"]>(["niko-run", "fufu-wave"]);
 function visibleBubbleStyle(style?: string) {
   return personalizationOptions.chat_bubble_style.some(([value]) => value === style) ? style as ChatBubbleStyle : "default";
 }
@@ -1521,7 +1521,7 @@ export default function MenuPage() {
     if (avatarFrameChanged && !canUseAvatarFrame(personalizationDraft.avatar_frame_style)) {
       const level = rewardLevel("frame", personalizationDraft.avatar_frame_style);
       showToast(
-        vipOrLevelAvatarFrames.has(personalizationDraft.avatar_frame_style)
+        dualUnlockAvatarFrames.has(personalizationDraft.avatar_frame_style)
           ? t("menu.levelOrVipUnlock", { level })
           : t("menu.levelUnlock", { level }),
         "error"
@@ -2542,7 +2542,7 @@ export default function MenuPage() {
                       </i>
                       <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("frame", value)} /><strong>{t(label)}</strong></div>
                       {!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? (
-                        <small>{value === "vip" ? "VIP" : vipOrLevelAvatarFrames.has(value as PersonalizationDTO["avatar_frame_style"]) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
+                        <small>{dualUnlockAvatarFrames.has(value as PersonalizationDTO["avatar_frame_style"]) ? t("menu.levelOrVipUnlock", { level: rewardLevel("frame", value) }) : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
                     </button>
                   ))}

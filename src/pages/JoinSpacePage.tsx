@@ -9,7 +9,7 @@ import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
 import { getBrowserJoinLanguage, useI18n } from "../lib/language";
-import { buildAdminEntryHref, buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
+import { buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
 import type { SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
 
@@ -281,9 +281,6 @@ export default function JoinSpacePage() {
               <div className="join-space-state-actions">
                 <a className="button" href={buildHomeHrefForCurrentHost()}>
                   {t("join.about")}
-                </a>
-                <a className="ghost-button" href={buildAdminEntryHref("create", slug)}>
-                  {t("join.createThis")}
                 </a>
               </div>
             </div>
