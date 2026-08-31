@@ -1833,7 +1833,6 @@ export default function SquarePage() {
             <div className="vip-campaign-benefit-grid">
               <article className="is-featured"><b>7D</b><span><strong>{t("vip.recallTitle")}</strong><small>{t("vip.recallDescription")}</small></span></article>
               <article className="is-featured"><b>+500</b><span><strong>{t("vip.growthTitle")}</strong><small>{t("vip.growthDescription")}</small></span></article>
-              <article><b>FRAME</b><span><strong>{t("vip.frameTitle")}</strong><small>{t("vip.frameDescription")}</small></span></article>
               <article><b>BUBBLE</b><span><strong>{t("vip.bubbleTitle")}</strong><small>{t("vip.bubbleDescription")}</small></span></article>
               <article><b>CARD</b><span><strong>{t("vip.cardTitle")}</strong><small>{t("vip.cardDescription")}</small></span></article>
               <article><b>GOLD</b><span><strong>{t("vip.squareTitle")}</strong><small>{t("vip.squareDescription")}</small></span></article>

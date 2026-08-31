@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.31.1",
+  "id": "2026.08.31.2",
   "publishedAt": "2026-08-31",
   "locales": {
     "zh-CN": {
-      "title": "个性化选项更清晰",
+      "title": "永久 VIP 权益展示更准确",
       "items": [
-        "已移除停用的永久 VIP 专属头像框",
-        "广场发言统一使用基础卡片，不再展示历史发言卡片样式"
+        "永久 VIP 权益清单不再展示已停用的头像框",
+        "成长页现在准确展示专属气泡与个人名片权益"
       ]
     },
     "en": {
-      "title": "Clearer personalization options",
+      "title": "More accurate permanent VIP benefits",
       "items": [
-        "The retired permanent-VIP avatar frame has been removed",
-        "Square posts now use one shared base card without legacy post-card styles"
+        "The permanent VIP benefit list no longer shows the retired avatar frame",
+        "The growth page now accurately highlights exclusive bubbles and profile cards"
       ]
     }
   }
