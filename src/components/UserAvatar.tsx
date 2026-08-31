@@ -15,7 +15,6 @@ interface UserAvatarProps {
   cacheKey?: string | null;
   className: string;
   groupMembers?: GroupAvatarMember[] | null;
-  vip?: boolean;
   frame?: AvatarFrameStyle;
 }
 

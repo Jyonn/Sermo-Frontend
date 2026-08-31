@@ -62,7 +62,7 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
       <button className="message-statement-head" onClick={openStatement} type="button">
         {statement.is_anonymous
           ? <span className="message-statement-avatar message-statement-anonymous-avatar"><span className="material-symbols-outlined">person</span></span>
-          : <UserAvatar className="message-statement-avatar" frame={statement.user.avatar_frame_style} name={statement.user.name} uri={statement.user.avatar_uri} vip={Boolean(statement.user.is_permanent_vip)} />}
+          : <UserAvatar className="message-statement-avatar" frame={statement.user.avatar_frame_style} name={statement.user.name} uri={statement.user.avatar_uri} />}
         <span>
           <strong>{statement.is_anonymous ? t("square.anonymousUser") : statement.user.name}</strong>
           <small>{statement.is_anonymous ? t("square.publishAnonymously") : t("message.statement")}</small>

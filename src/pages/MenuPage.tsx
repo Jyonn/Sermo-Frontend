@@ -387,7 +387,7 @@ function GrowthRewardVisual({ reward, me, name, uri }: {
   if (reward.category === "frame") {
     return (
       <span className="growth-reward-visual is-frame">
-        <UserAvatar className="growth-reward-avatar" frame={asset as PersonalizationDTO["avatar_frame_style"]} name={name} uri={uri} vip={Boolean(me?.is_permanent_vip)} />
+        <UserAvatar className="growth-reward-avatar" frame={asset as PersonalizationDTO["avatar_frame_style"]} name={name} uri={uri} />
       </span>
     );
   }
@@ -1870,7 +1870,7 @@ export default function MenuPage() {
         />
         <div className="menu-profile-card">
           <button className="profile-avatar-button menu-profile-avatar" onClick={() => setAvatarDialogOpen(true)} type="button">
-            <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} vip={Boolean(me?.is_permanent_vip)} />
+            <UserAvatar className="avatar-large" frame={me?.avatar_frame_style} name={session?.user.name ?? t("brand.user")} uri={me?.avatar_uri ?? session?.user.avatar_uri} />
           </button>
           <div className="row-main menu-profile-copy">
             <div className="menu-profile-heading">
@@ -2510,7 +2510,6 @@ export default function MenuPage() {
               frame={personalizationDraft.avatar_frame_style}
               name={session?.user.name ?? t("brand.user")}
               uri={me?.avatar_uri ?? session?.user.avatar_uri}
-              vip={Boolean(me?.is_permanent_vip)}
             />
             <strong>{session?.user.name ?? t("brand.user")}</strong>
             <span>{t("menu.avatarFramePreviewHint")}</span>

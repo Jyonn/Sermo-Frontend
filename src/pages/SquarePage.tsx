@@ -257,7 +257,6 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
             frame={statement.user.avatar_frame_style}
             name={statement.user.name}
             uri={statement.user.avatar_uri}
-            vip={Boolean(statement.user.is_permanent_vip)}
           />}
         </button>
         <div className="square-statement-author-copy">
@@ -373,7 +372,7 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     if (hasExpandableReplies) onToggleReplies?.(comment.comment_id);
   };
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}${hasExpandableReplies ? " has-replies" : ""}`} onClick={comment.parent_id ? beginReply : toggleReplies}>
-    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user.user_id); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} vip={Boolean(comment.user.is_permanent_vip)} /></button>}
+    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user.user_id); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} /></button>}
     <div>
       <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} /> : null}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
       <p onClick={beginReply}>{comment.text}</p>
@@ -1465,7 +1464,7 @@ export default function SquarePage() {
     </section>
   );
 
-  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); if (canCommentAnonymously && !anonymousComment) setPublicCommentConfirmOpen(true); else void sendComment(); }}>{anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />}<div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} />{canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}</div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
+  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); if (canCommentAnonymously && !anonymousComment) setPublicCommentConfirmOpen(true); else void sendComment(); }}>{anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />}<div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} />{canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}</div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
@@ -1570,7 +1569,7 @@ export default function SquarePage() {
           {feedMode === "all" && pinnedStatement ? (
             <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
-              <UserAvatar className="square-pinned-avatar" frame={pinnedStatement.user.avatar_frame_style} name={pinnedStatement.user.name} uri={pinnedStatement.user.avatar_uri} vip={Boolean(pinnedStatement.user.is_permanent_vip)} />
+              <UserAvatar className="square-pinned-avatar" frame={pinnedStatement.user.avatar_frame_style} name={pinnedStatement.user.name} uri={pinnedStatement.user.avatar_uri} />
               <span className="square-pinned-copy"><small>{t("square.pinnedStatement")}</small><strong>{pinnedStatement.text || t("square.mediaStatement")}</strong></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -1660,7 +1659,7 @@ export default function SquarePage() {
                 }}
                 type="button"
               >
-                <UserAvatar className="square-notification-avatar" frame={event.actor?.avatar_frame_style} name={actor} uri={event.actor?.avatar_uri} vip={Boolean(event.actor?.is_permanent_vip)} />
+                <UserAvatar className="square-notification-avatar" frame={event.actor?.avatar_frame_style} name={actor} uri={event.actor?.avatar_uri} />
                 <span><strong>{label}</strong>{removed && event.payload.statement_excerpt ? <small className="square-notification-excerpt">“{event.payload.statement_excerpt}”</small> : null}<small>{formatStatementTime(event.created_at, language)}</small></span>
                 <span className="material-symbols-outlined">{removed ? "info" : "chevron_right"}</span>
               </button>
@@ -1681,7 +1680,7 @@ export default function SquarePage() {
           <div className="square-compose-canvas">
             {error ? <div className="square-inline-error">{error}</div> : null}
             <div className="square-compose-editor">
-              <UserAvatar className="square-composer-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} vip={Boolean(currentUser?.is_permanent_vip)} />
+              <UserAvatar className="square-composer-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />
               <strong>{currentUser?.name}</strong>
             </div>
             <div className="square-compose-writing-zone">

@@ -74,7 +74,7 @@ export default function PwaAccountEntryPage() {
                 const selected = account.key === selectedKey;
                 return (
                   <button aria-selected={selected} className={`pwa-account-card${selected ? " is-selected" : ""}`} key={account.key} onClick={() => selectAccount(account.key)} role="option" type="button">
-                    <UserAvatar className="pwa-account-avatar" frame={account.session.user.avatar_frame_style} name={account.session.user.name} uri={account.session.user.avatar_uri} vip={account.session.user.is_permanent_vip} />
+                    <UserAvatar className="pwa-account-avatar" frame={account.session.user.avatar_frame_style} name={account.session.user.name} uri={account.session.user.avatar_uri} />
                     <span className="pwa-account-card-copy">
                       <strong>{account.session.user.name}</strong>
                       <small><b>{account.spaceName}</b><span>@{account.slug}</span></small>

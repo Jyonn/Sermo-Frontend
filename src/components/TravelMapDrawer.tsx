@@ -862,7 +862,6 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
                         frame={displayedLocationOwner?.avatar_frame_style}
                         name={displayedLocationOwner?.name ?? t("travelMap.me")}
                         uri={displayedLocationOwner?.avatar_uri}
-                        vip={displayedLocationOwner?.is_permanent_vip}
                       />
                       {focusLocation && locationFocusPhase === "selecting" ? (
                         <span className="travel-map-focus-tap" aria-hidden="true">

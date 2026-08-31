@@ -53,7 +53,6 @@ export function UserProfileCard({
             frame={avatarFrame}
             name={name}
             uri={avatarUri}
-            vip={Boolean(isPermanentVip)}
           />
         </button>
         <div className="user-profile-copy">

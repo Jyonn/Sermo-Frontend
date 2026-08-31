@@ -265,7 +265,6 @@ export function AppBottomNav() {
           frame={session.user.avatar_frame_style}
           name={session.user.name}
           uri={session.user.avatar_uri}
-          vip={Boolean(session.user.is_permanent_vip)}
         />
         <span>{session.user.name}</span>
       </Link>

@@ -2153,7 +2153,6 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       name={group.from === "self" ? selfAvatarName ?? "" : group.name}
       uri={group.from === "self" ? selfAvatarUri : group.avatarUri}
       cacheKey={group.from === "self" ? undefined : group.avatarCacheKey}
-      vip={group.from === "self" ? selfIsPermanentVip : group.isPermanentVip}
     />
   ) : null;
   const selectableGroupMessages = group.messages.filter((message) => message.kind !== "system");
