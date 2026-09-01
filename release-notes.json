@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.01.1",
+  "id": "2026.09.01.2",
   "publishedAt": "2026-09-01",
   "locales": {
     "zh-CN": {
-      "title": "登录更快捷",
+      "title": "SERMO 品牌焕新",
       "items": [
-        "PWA 登录首页重新支持选择本机最近登录过的账号，一步返回对应空间",
-        "仍可展开空间名输入区登录其他空间，退出或登录失效的账号会自动移除"
+        "网页与安装图标启用全新的极简 SERMO 字标，在不同尺寸下都更清晰醒目"
       ]
     },
     "en": {
-      "title": "Faster sign-in",
+      "title": "A renewed SERMO identity",
       "items": [
-        "The PWA account entry once again lets you return to a recently signed-in account in one step",
-        "You can still expand the space field to sign in elsewhere, while signed-out or expired accounts are removed automatically"
+        "The website and install icons now use a sharper, minimalist SERMO wordmark tuned for every size"
       ]
     }
   }

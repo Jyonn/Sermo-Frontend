@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SERMO inverted</title>
+  <desc id="desc">SERMO set in tightly spaced Helvetica Neue in warm white on near black.</desc>
+  <rect id="background" width="512" height="512" fill="#11110F"/>
+  <g id="wordmark" fill="#FBFAF7">
+    <text x="256" y="307" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="144" font-stretch="condensed" font-weight="700" letter-spacing="-12" textLength="458" lengthAdjust="spacingAndGlyphs">SERMO</text>
+  </g>
+</svg>

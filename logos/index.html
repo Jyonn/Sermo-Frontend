@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SERMO Logo System</title>
+    <style>
+      :root { color-scheme: light; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #11110f; background: #efeee9; }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 72px 0 96px; }
+      header { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr) auto; align-items: end; margin-bottom: 56px; }
+      h1 { margin: 0; font-size: clamp(64px, 14vw, 176px); font-stretch: condensed; font-weight: 700; letter-spacing: -.085em; line-height: .76; }
+      header p { width: min(320px, 100%); margin: 0; color: #696963; font-size: 13px; line-height: 1.6; }
+      .eyebrow { display: block; margin-bottom: 12px; font-size: 10px; font-weight: 700; letter-spacing: .18em; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+      figure { margin: 0; padding: 14px; border: 1px solid rgba(17,17,15,.14); background: rgba(255,255,255,.42); }
+      figure img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+      figure.dark { background: #11110f; color: #fbfaf7; }
+      figure.transparent .art { background-color: #fbfaf7; background-image: linear-gradient(45deg,#e4e3df 25%,transparent 25%),linear-gradient(-45deg,#e4e3df 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e4e3df 75%),linear-gradient(-45deg,transparent 75%,#e4e3df 75%); background-position: 0 0,0 10px,10px -10px,-10px 0; background-size: 20px 20px; }
+      figcaption { display: flex; justify-content: space-between; gap: 16px; padding: 14px 2px 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+      figcaption span:last-child { opacity: .55; }
+      .sizes { margin-top: 18px; padding: 24px; border: 1px solid rgba(17,17,15,.14); background: #fbfaf7; }
+      .sizes h2 { margin: 0 0 24px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+      .size-row { display: flex; align-items: end; gap: 24px; overflow-x: auto; padding-bottom: 6px; }
+      .sample { display: grid; gap: 8px; justify-items: center; flex: 0 0 auto; }
+      .sample img { display: block; width: var(--size); height: var(--size); }
+      .sample small { color: #77766f; font-size: 10px; }
+      .note { margin: 18px 0 0; color: #696963; font-size: 12px; line-height: 1.6; }
+      @media (max-width: 720px) { main { padding-top: 44px; } header { grid-template-columns: 1fr; } .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><span class="eyebrow">SERMO / IDENTITY 2026</span><h1>SERMO</h1></div>
+        <p>以 Helvetica Neue Bold、紧字距和大留白建立排版标识。主字标负责品牌表达，紧凑 S 标负责极小尺寸识别。</p>
+      </header>
+      <section class="grid" aria-label="Logo variants">
+        <figure><img src="export/logo.svg" alt="SERMO 暖白底主字标" /><figcaption><span>Primary</span><span>Warm white</span></figcaption></figure>
+        <figure class="dark"><img src="export/logo-dark.svg" alt="SERMO 深色反白字标" /><figcaption><span>Inverse</span><span>Near black</span></figcaption></figure>
+        <figure class="transparent"><div class="art"><img src="export/logo-transparent.svg" alt="SERMO 透明底字标" /></div><figcaption><span>Transparent</span><span>Artwork only</span></figcaption></figure>
+        <figure><img src="export/logo-mark.svg" alt="SERMO 紧凑 S 标" /><figcaption><span>Compact</span><span>Small UI</span></figcaption></figure>
+      </section>
+      <section class="sizes">
+        <h2>Optical size check</h2>
+        <div class="size-row">
+          <div class="sample" style="--size:16px"><img src="export/mark/logo-16.png" alt="16 px" /><small>16</small></div>
+          <div class="sample" style="--size:32px"><img src="export/mark/logo-32.png" alt="32 px" /><small>32</small></div>
+          <div class="sample" style="--size:48px"><img src="export/mark/logo-48.png" alt="48 px" /><small>48</small></div>
+          <div class="sample" style="--size:96px"><img src="export/logo-192.png" alt="96 px" /><small>96</small></div>
+          <div class="sample" style="--size:192px"><img src="export/logo-192.png" alt="192 px" /><small>192</small></div>
+        </div>
+        <p class="note">16–48 px 使用紧凑 S 标；64 px 以上使用完整 SERMO 字标。Maskable 版本为系统圆形、圆角矩形裁切预留了安全区。</p>
+      </section>
+    </main>
+  </body>
+</html>
