@@ -9,10 +9,9 @@ quietly monumental.
 - `export/logo-dark.svg`: inverted square for dark placements.
 - `export/logo-transparent.svg`: transparent wordmark artwork.
 - `export/logo-maskable.svg`: safe-area version for adaptive PWA masks.
-- `export/logo-mark.svg`: compact `S` for favicons and small UI placements.
 - `export/logo-*.png` and variant subfolders: raster exports from 16–2048 px.
 - `index.html`: offline visual guide and optical-size check.
 
-Keep the primary wordmark at 64 px or larger. Use the compact mark below that
-size. Do not alter the wordmark tracking, stretch, or warm-white/near-black
-palette.
+Use the complete SERMO wordmark consistently across external and in-product
+placements. Prefer SVG in browsers and 512 px raster artwork in interface
+surfaces. Do not alter the wordmark tracking, stretch, or warm-white/near-black palette.

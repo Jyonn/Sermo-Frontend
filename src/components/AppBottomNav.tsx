@@ -208,7 +208,7 @@ export function AppBottomNav() {
     <nav aria-label={t("nav.main")} className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
         <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to={!features.ready ? "/app" : features.chatEnabled ? "/app/chats" : "/app/square"}>
-          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-mark-192.png?v=5" />
+          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/sermo-512.png?v=6" />
           {space ? (
             <>
               <span aria-hidden="true" className="desktop-brand-collaboration-mark">×</span>

@@ -44,7 +44,7 @@ export default function PwaAccountEntryPage() {
       <div className="pwa-account-entry-atmosphere" aria-hidden="true"><i /><i /><i /></div>
       <section className="pwa-account-entry-shell">
         <header className="pwa-account-entry-brand">
-          <img alt="" aria-hidden="true" src="/icons/sermo-mark-192.png?v=5" />
+          <img alt="" aria-hidden="true" src="/icons/sermo-512.png?v=6" />
           <div><span>WEB APP</span><strong>{t("brand.fullName")}</strong></div>
         </header>
         <div className="pwa-account-entry-heading">
