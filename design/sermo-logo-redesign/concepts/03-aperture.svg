@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Sermo Aperture wordmark</title>
+  <desc id="desc">A geometric Sermo wordmark with an open circular O representing an invitation to speak.</desc>
+  <rect width="512" height="512" fill="#fbfaf7"/>
+  <g id="wordmark" fill="#111210">
+    <text x="52" y="286"
+      font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+      font-size="102"
+      font-weight="700"
+      letter-spacing="-7"
+      textLength="310"
+      lengthAdjust="spacingAndGlyphs">SERM</text>
+    <circle cx="420" cy="253" r="45" fill="none" stroke="#111210" stroke-width="24"/>
+    <path d="M382 208 L421 248 L390 268 L368 237 Z" fill="#fbfaf7"/>
+  </g>
+</svg>

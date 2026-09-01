@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Sermo Dialogue stack</title>
+  <desc id="desc">Sermo split across two bold lines to evoke turn-taking in a conversation.</desc>
+  <rect width="512" height="512" fill="#fbfaf7"/>
+  <g id="wordmark" fill="#111210" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700">
+    <text x="56" y="250" font-size="166" letter-spacing="-13" textLength="400" lengthAdjust="spacingAndGlyphs">SER</text>
+    <text x="55" y="395" font-size="166" letter-spacing="-13" textLength="330" lengthAdjust="spacingAndGlyphs">MO</text>
+  </g>
+  <rect id="cursor" x="420" y="337" width="38" height="58" fill="#111210"/>
+</svg>

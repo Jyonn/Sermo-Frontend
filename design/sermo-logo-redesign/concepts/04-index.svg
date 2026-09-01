@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Sermo Index label</title>
+  <desc id="desc">A black editorial index band carrying a compact white Sermo wordmark.</desc>
+  <rect width="512" height="512" fill="#fbfaf7"/>
+  <g id="label">
+    <rect x="0" y="198" width="512" height="116" fill="#111210"/>
+    <text x="256" y="278"
+      text-anchor="middle"
+      fill="#fbfaf7"
+      font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+      font-size="76"
+      font-weight="700"
+      letter-spacing="5"
+      textLength="375"
+      lengthAdjust="spacingAndGlyphs">SERMO</text>
+  </g>
+</svg>

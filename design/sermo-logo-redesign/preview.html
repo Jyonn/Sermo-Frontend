@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SERMO — Logo Direction Study</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: oklch(97.7% 0.006 85);
+      --surface: oklch(99.2% 0.003 85);
+      --ink: oklch(18% 0.008 105);
+      --quiet: oklch(48% 0.012 85);
+      --line: oklch(86% 0.008 85);
+      --inverse: oklch(16% 0.008 105);
+      --inverse-ink: oklch(96% 0.006 85);
+      --space-1: .25rem;
+      --space-2: .5rem;
+      --space-3: .75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --ease-out: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: oklch(15% 0.008 105);
+      --surface: oklch(20% 0.008 105);
+      --ink: oklch(94% 0.006 85);
+      --quiet: oklch(70% 0.008 85);
+      --line: oklch(31% 0.009 105);
+      --inverse: oklch(94% 0.006 85);
+      --inverse-ink: oklch(16% 0.008 105);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Helvetica Neue", Helvetica, "PingFang SC", sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      font-kerning: normal;
+      transition: background-color 240ms var(--ease-out), color 240ms var(--ease-out);
+    }
+
+    button { font: inherit; }
+    .shell { margin: 0 auto; max-width: 96rem; padding: var(--space-6); }
+    .masthead {
+      align-items: flex-start;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: var(--space-8);
+      justify-content: space-between;
+      padding: var(--space-4) 0 var(--space-8);
+    }
+    .kicker, .folio, .meta, .concept-number, .scale-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .folio { color: var(--quiet); font-variant-numeric: tabular-nums; }
+    .controls { display: flex; gap: var(--space-2); }
+    .control {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      cursor: pointer;
+      min-height: 44px;
+      padding: .65rem 1rem;
+      transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out), transform 150ms var(--ease-out);
+    }
+    .control[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .control:active { transform: scale(.97); }
+    .control:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+    .intro {
+      display: grid;
+      gap: var(--space-12);
+      grid-template-columns: minmax(0, 1.7fr) minmax(18rem, .65fr);
+      padding: clamp(4rem, 10vw, 9rem) 0 clamp(4rem, 8vw, 7rem);
+    }
+    h1 {
+      font-size: clamp(4.4rem, 13vw, 12rem);
+      font-stretch: condensed;
+      font-weight: 700;
+      letter-spacing: -.085em;
+      line-height: .76;
+      margin: 0 0 0 -.065em;
+      text-transform: uppercase;
+    }
+    .intro-copy { align-self: end; max-width: 34ch; }
+    .intro-copy p { margin: var(--space-4) 0 0; }
+    .meta { color: var(--quiet); }
+
+    .principles {
+      border-bottom: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: var(--space-16);
+    }
+    .principle { min-height: 10rem; padding: var(--space-6) var(--space-6) var(--space-8) 0; }
+    .principle + .principle { border-left: 1px solid var(--line); padding-left: var(--space-6); }
+    .principle strong { display: block; font-size: 1.1rem; margin-bottom: var(--space-3); }
+    .principle span { color: var(--quiet); display: block; font-size: .88rem; max-width: 27ch; }
+
+    .section-head {
+      align-items: baseline;
+      display: flex;
+      gap: var(--space-6);
+      justify-content: space-between;
+      margin-bottom: var(--space-8);
+    }
+    h2 { font-size: clamp(2rem, 4vw, 4rem); letter-spacing: -.055em; line-height: 1; margin: 0; }
+    .section-note { color: var(--quiet); font-size: .82rem; margin: 0; }
+
+    .concept-grid {
+      display: grid;
+      gap: 1px;
+      grid-template-columns: repeat(12, 1fr);
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .concept {
+      --delay: 0ms;
+      animation: enter 650ms var(--ease-out) both;
+      animation-delay: var(--delay);
+      background: var(--surface);
+      grid-column: span 4;
+      min-width: 0;
+    }
+    .concept:nth-child(1), .concept:nth-child(4) { grid-column: span 6; }
+    .concept:nth-child(2), .concept:nth-child(3) { grid-column: span 3; }
+    .artboard-wrap {
+      align-items: center;
+      background: oklch(93.5% 0.007 85);
+      display: flex;
+      justify-content: center;
+      padding: clamp(1.5rem, 4vw, 4rem);
+    }
+    html[data-theme="dark"] .artboard-wrap { background: oklch(24% 0.008 105); }
+    .artboard {
+      aspect-ratio: 1;
+      display: block;
+      max-width: 100%;
+      transition: filter 240ms var(--ease-out), transform 300ms var(--ease-out);
+      width: 31rem;
+    }
+    html[data-theme="dark"] .artboard { filter: invert(1) hue-rotate(180deg); }
+    .concept-copy { min-height: 12rem; padding: var(--space-6); }
+    .concept-line { align-items: baseline; display: flex; gap: var(--space-4); justify-content: space-between; }
+    .concept-number { color: var(--quiet); }
+    h3 { font-size: 1.35rem; letter-spacing: -.035em; margin: 0; }
+    .concept-copy p { color: var(--quiet); font-size: .9rem; margin: var(--space-4) 0 0; max-width: 42ch; }
+    .concept-role { border-top: 1px solid var(--line); color: var(--quiet); font-size: .72rem; margin-top: var(--space-6); padding-top: var(--space-3); }
+
+    .scale-section { border-top: 1px solid var(--line); margin-top: var(--space-16); padding-top: var(--space-12); }
+    .scale-list { display: grid; gap: 1px; grid-template-columns: repeat(5, 1fr); background: var(--line); border: 1px solid var(--line); }
+    .scale-item { background: var(--surface); padding: var(--space-6); }
+    .scale-demo { align-items: end; display: flex; gap: var(--space-4); min-height: 8rem; padding: var(--space-4) 0; }
+    .scale-demo img { display: block; }
+    html[data-theme="dark"] .scale-demo img { filter: invert(1) hue-rotate(180deg); }
+    .scale-label { color: var(--quiet); }
+
+    .verdict {
+      display: grid;
+      gap: var(--space-12);
+      grid-template-columns: 1fr 2fr;
+      margin-top: clamp(5rem, 10vw, 9rem);
+      padding: var(--space-12) 0 var(--space-16);
+    }
+    .verdict p { font-size: clamp(1.3rem, 2.5vw, 2.2rem); letter-spacing: -.035em; line-height: 1.25; margin: 0; max-width: 34ch; }
+    footer { border-top: 1px solid var(--line); color: var(--quiet); display: flex; font-size: .72rem; justify-content: space-between; padding: var(--space-6) 0; }
+
+    body.compact .concept-grid { grid-template-columns: repeat(5, 1fr); }
+    body.compact .concept, body.compact .concept:nth-child(n) { grid-column: span 1; }
+    body.compact .artboard-wrap { padding: var(--space-6); }
+    body.compact .concept-copy { min-height: 15rem; }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (hover: hover) {
+      .concept:hover .artboard { transform: scale(1.018); }
+      .control:hover { background: var(--ink); color: var(--paper); }
+    }
+    @media (max-width: 68rem) {
+      .concept, .concept:nth-child(n) { grid-column: span 6; }
+      .concept:nth-child(5) { grid-column: 4 / span 6; }
+      .scale-list { grid-template-columns: repeat(3, 1fr); }
+      body.compact .concept-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 44rem) {
+      .shell { padding: var(--space-4); }
+      .masthead { align-items: stretch; flex-direction: column; }
+      .controls { display: grid; grid-template-columns: 1fr 1fr; }
+      .intro { grid-template-columns: 1fr; }
+      h1 { font-size: clamp(4.3rem, 26vw, 7rem); }
+      .principles { grid-template-columns: 1fr 1fr; }
+      .principle:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+      .principle:nth-child(4) { border-top: 1px solid var(--line); }
+      .concept, .concept:nth-child(n), .concept:nth-child(5) { grid-column: 1 / -1; }
+      .scale-list { grid-template-columns: 1fr; }
+      .verdict { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: var(--space-2); }
+      body.compact .concept-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <div class="kicker">Sermo Identity Study</div>
+        <div class="folio">01 / Concept Round · 2026</div>
+      </div>
+      <div class="controls" aria-label="预览控制">
+        <button class="control" id="theme-toggle" type="button" aria-pressed="false">反白测试</button>
+        <button class="control" id="density-toggle" type="button" aria-pressed="false">并排比较</button>
+      </div>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">SERMO</h1>
+      </div>
+      <div class="intro-copy">
+        <div class="meta">Logo Redesign / Direction 01</div>
+        <p>从高级时装的克制字标出发，把“说话”做成一种空间，而不是一个聊天图标。白底、近黑、正方形；真正的识别来自比例与沉默。</p>
+      </div>
+    </section>
+
+    <section class="principles" aria-label="设计原则">
+      <div class="principle"><strong>克制</strong><span>不借助彩色、渐变或拟物，用字距和尺度建立品牌重量。</span></div>
+      <div class="principle"><strong>社交</strong><span>断口、换行与游标暗示一来一回，但避免常见气泡符号。</span></div>
+      <div class="principle"><strong>国际</strong><span>纯英文 SERMO，接近时装编辑体系，适用于中文与英文界面。</span></div>
+      <div class="principle"><strong>可缩放</strong><span>每一案都在 512 × 512 正方形中成立，并接受 16 px 压力测试。</span></div>
+    </section>
+
+    <section aria-labelledby="concept-title">
+      <div class="section-head">
+        <h2 id="concept-title">Five directions</h2>
+        <p class="section-note">不是字重微调，而是五种不同的品牌性格。</p>
+      </div>
+
+      <div class="concept-grid">
+        <article class="concept" style="--delay: 0ms">
+          <div class="artboard-wrap"><img class="artboard" src="concepts/01-monument.svg" alt="方案一 Monument：横向紧缩的 SERMO 字标"></div>
+          <div class="concept-copy">
+            <div class="concept-line"><h3>Monument / 纪念碑</h3><span class="concept-number">01</span></div>
+            <p>最接近高级时装语汇的一案。极紧字距、强横向张力，像建筑铭牌一样稳定，不依赖任何图形说明自己。</p>
+            <div class="concept-role">PRIMARY WORDMARK · 稳重 / 直接 / 长寿</div>
+          </div>
+        </article>
+
+        <article class="concept" style="--delay: 55ms">
+          <div class="artboard-wrap"><img class="artboard" src="concepts/02-dialogue.svg" alt="方案二 Dialogue：SER 与 MO 上下叠排"></div>
+          <div class="concept-copy">
+            <div class="concept-line"><h3>Dialogue / 对话</h3><span class="concept-number">02</span></div>
+            <p>SER 与 MO 分成两次发言，右下实心块是等待输入的游标。更年轻，也更适合应用图标。</p>
+            <div class="concept-role">APP ICON · 社交 / 编辑感 / 高识别</div>
+          </div>
+        </article>
+
+        <article class="concept" style="--delay: 110ms">
+          <div class="artboard-wrap"><img class="artboard" src="concepts/03-aperture.svg" alt="方案三 Aperture：末尾 O 带有开放断口"></div>
+          <div class="concept-copy">
+            <div class="concept-line"><h3>Aperture / 开口</h3><span class="concept-number">03</span></div>
+            <p>让 O 留下一道入口：既是嘴形，也是一个尚未结束的谈话。品牌含义藏在字母内部，而不增加图标。</p>
+            <div class="concept-role">SIGNATURE DETAIL · 开放 / 聪明 / 现代</div>
+          </div>
+        </article>
+
+        <article class="concept" style="--delay: 165ms">
+          <div class="artboard-wrap"><img class="artboard" src="concepts/04-index.svg" alt="方案四 Index：黑色横向标签中的白色 SERMO"></div>
+          <div class="concept-copy">
+            <div class="concept-line"><h3>Index / 索引</h3><span class="concept-number">04</span></div>
+            <p>像书脊、刊头和服装织标。黑色横带把 SERMO 变成内容世界里的分类索引，适合启动页与运营物料。</p>
+            <div class="concept-role">EDITORIAL SYSTEM · 权威 / 内容 / 标签化</div>
+          </div>
+        </article>
+
+        <article class="concept" style="--delay: 220ms">
+          <div class="artboard-wrap"><img class="artboard" src="concepts/05-whisper.svg" alt="方案五 Whisper：大量留白中的小型 SERMO 字标"></div>
+          <div class="concept-copy">
+            <div class="concept-line"><h3>Whisper / 低语</h3><span class="concept-number">05</span></div>
+            <p>不是更大声，而是更有余地。两点标记谈话的两端，中间的 SERMO 像一句被认真听见的话。</p>
+            <div class="concept-role">PREMIUM LOCKUP · 安静 / 文艺 / 留白</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="scale-section" aria-labelledby="scale-title">
+      <div class="section-head">
+        <h2 id="scale-title">Small-size pressure test</h2>
+        <p class="section-note">同一图形分别以 64 / 32 / 16 px 显示。</p>
+      </div>
+      <div class="scale-list">
+        <div class="scale-item"><div class="scale-label">01 Monument</div><div class="scale-demo"><img src="concepts/01-monument.svg" width="64" height="64" alt=""><img src="concepts/01-monument.svg" width="32" height="32" alt=""><img src="concepts/01-monument.svg" width="16" height="16" alt=""></div></div>
+        <div class="scale-item"><div class="scale-label">02 Dialogue</div><div class="scale-demo"><img src="concepts/02-dialogue.svg" width="64" height="64" alt=""><img src="concepts/02-dialogue.svg" width="32" height="32" alt=""><img src="concepts/02-dialogue.svg" width="16" height="16" alt=""></div></div>
+        <div class="scale-item"><div class="scale-label">03 Aperture</div><div class="scale-demo"><img src="concepts/03-aperture.svg" width="64" height="64" alt=""><img src="concepts/03-aperture.svg" width="32" height="32" alt=""><img src="concepts/03-aperture.svg" width="16" height="16" alt=""></div></div>
+        <div class="scale-item"><div class="scale-label">04 Index</div><div class="scale-demo"><img src="concepts/04-index.svg" width="64" height="64" alt=""><img src="concepts/04-index.svg" width="32" height="32" alt=""><img src="concepts/04-index.svg" width="16" height="16" alt=""></div></div>
+        <div class="scale-item"><div class="scale-label">05 Whisper</div><div class="scale-demo"><img src="concepts/05-whisper.svg" width="64" height="64" alt=""><img src="concepts/05-whisper.svg" width="32" height="32" alt=""><img src="concepts/05-whisper.svg" width="16" height="16" alt=""></div></div>
+      </div>
+    </section>
+
+    <section class="verdict" aria-labelledby="verdict-title">
+      <div><div class="kicker" id="verdict-title">Design position</div></div>
+      <p>如果 SERMO 要成为一个长期品牌，首选 01 作为主字标，02 作为应用图标；如果只保留一枚正方形标志，02 的独立识别最强。</p>
+    </section>
+
+    <footer><span>SERMO · A SPACE TO SPEAK</span><span>Concept exploration, not production assets</span></footer>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    const themeButton = document.querySelector("#theme-toggle");
+    const densityButton = document.querySelector("#density-toggle");
+
+    themeButton.addEventListener("click", () => {
+      const dark = root.dataset.theme !== "dark";
+      root.dataset.theme = dark ? "dark" : "light";
+      themeButton.setAttribute("aria-pressed", String(dark));
+    });
+
+    densityButton.addEventListener("click", () => {
+      const compact = document.body.classList.toggle("compact");
+      densityButton.setAttribute("aria-pressed", String(compact));
+    });
+  </script>
+</body>
+</html>

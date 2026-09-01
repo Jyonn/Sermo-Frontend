@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Sermo Monument wordmark</title>
+  <desc id="desc">A tightly spaced, horizontally compressed Sermo wordmark centered in a white square.</desc>
+  <rect width="512" height="512" fill="#fbfaf7"/>
+  <g id="wordmark" fill="#111210">
+    <text x="256" y="281"
+      text-anchor="middle"
+      font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+      font-size="108"
+      font-weight="700"
+      letter-spacing="-7"
+      textLength="400"
+      lengthAdjust="spacingAndGlyphs">SERMO</text>
+  </g>
+</svg>

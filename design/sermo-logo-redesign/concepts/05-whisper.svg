@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Sermo Whisper wordmark</title>
+  <desc id="desc">A small, precise Sermo wordmark surrounded by generous white space.</desc>
+  <rect width="512" height="512" fill="#fbfaf7"/>
+  <g id="wordmark" fill="#111210">
+    <text x="256" y="269"
+      text-anchor="middle"
+      font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+      font-size="52"
+      font-weight="600"
+      letter-spacing="9"
+      textLength="280"
+      lengthAdjust="spacingAndGlyphs">SERMO</text>
+    <circle cx="104" cy="252" r="4"/>
+    <circle cx="408" cy="252" r="4"/>
+  </g>
+</svg>
