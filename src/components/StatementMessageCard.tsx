@@ -126,14 +126,14 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
         <span><span className="material-symbols-outlined">chat_bubble</span>{statement.comment_count}</span>
         <strong>{t("message.viewStatement")}</strong>
       </button>
-      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} details={images.map((image) => <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} />)} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} uris={images.map((image) => image.uri)} /> : null}
+      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} details={images.map((image) => <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} owner={statement.user} />)} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} uris={images.map((image) => image.uri)} /> : null}
       {videoOpen && video ? <MediaLightbox altPrefix={t("square.video")} index={0} items={[{
         kind: "video",
         uri: video.uri,
         posterUri: video.thumbnail_uri,
         width: video.metadata?.pixel_width,
         height: video.metadata?.pixel_height,
-        detail: <MediaMetadataPanel kind="video" metadata={video.metadata} />,
+        detail: <MediaMetadataPanel kind="video" metadata={video.metadata} owner={statement.user} />,
         downloadLabel: formatFileSize(video.metadata?.file_size),
       }]} onClose={() => setVideoOpen(false)} onIndexChange={() => undefined} /> : null}
     </div>

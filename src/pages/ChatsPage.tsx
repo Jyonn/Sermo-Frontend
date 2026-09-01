@@ -7777,7 +7777,7 @@ function LiveChatsPage() {
           posterUri: message.payload?.thumbnail_uri,
           width: message.payload?.pixel_width,
           height: message.payload?.pixel_height,
-          detail: <MediaMetadataPanel kind={message.type === MESSAGE_TYPE_VIDEO ? "video" : "image"} metadata={message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata} />,
+          detail: <MediaMetadataPanel kind={message.type === MESSAGE_TYPE_VIDEO ? "video" : "image"} metadata={message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata} owner={message.user} />,
           downloadLabel: formatImageFileSize((message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata)?.file_size),
         }))}
         onApproachingEnd={() => { if (messageSearchHasMore && messageSearchState !== "loading-more") void loadMoreMessageSearchResults(); }}

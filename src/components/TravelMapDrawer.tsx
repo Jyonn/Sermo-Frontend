@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent } from "react";
 import { geoBounds, geoContains, geoDistance, geoGraticule10, geoMercator, geoOrthographic, geoPath } from "d3-geo";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
@@ -22,6 +22,7 @@ countries.registerLocale(zhCountries);
 interface TravelMapDrawerProps {
   open: boolean;
   onClose: () => void;
+  backdropClassName?: string;
   historyKey?: string;
   onRouteOpen?: () => void;
   chatId?: number | null;
@@ -82,6 +83,35 @@ const HEIGHT = 500;
 const INITIAL_GLOBE_ROTATION: [number, number] = [-104, -28];
 const boundaryCache = new Map<string, FeatureCollection<Geometry, RegionProperties>>();
 let countryIndexPromise: Promise<Array<{ code: string; available: boolean; bounds?: [number, number, number, number] }>> | null = null;
+
+function mapPointFromClient(svg: SVGSVGElement, clientX: number, clientY: number) {
+  const rect = svg.getBoundingClientRect();
+  const renderedScale = Math.min(rect.width / WIDTH, rect.height / HEIGHT);
+  if (!Number.isFinite(renderedScale) || renderedScale <= 0) return { x: WIDTH / 2, y: HEIGHT / 2 };
+  const contentWidth = WIDTH * renderedScale;
+  const contentHeight = HEIGHT * renderedScale;
+  return {
+    x: (clientX - rect.left - (rect.width - contentWidth) / 2) / renderedScale,
+    y: (clientY - rect.top - (rect.height - contentHeight) / 2) / renderedScale,
+  };
+}
+
+function zoomTransformAroundPoint(current: MapTransform, nextScale: number, anchor: { x: number; y: number }, projectionScalesInternally: boolean) {
+  if (nextScale <= 1) return { x: 0, y: 0, scale: 1 };
+  const ratio = nextScale / current.scale;
+  if (projectionScalesInternally) {
+    return {
+      scale: nextScale,
+      x: anchor.x - WIDTH / 2 - ratio * (anchor.x - current.x - WIDTH / 2),
+      y: anchor.y - HEIGHT / 2 - ratio * (anchor.y - current.y - HEIGHT / 2),
+    };
+  }
+  return {
+    scale: nextScale,
+    x: anchor.x - ratio * (anchor.x - current.x),
+    y: anchor.y - ratio * (anchor.y - current.y),
+  };
+}
 
 function worldFeatures() {
   const topology = worldTopology as unknown as { objects: { countries: Parameters<typeof feature>[1] } };
@@ -260,7 +290,7 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
   ).values()];
 }
 
-export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRouteOpen, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
+export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey = "travel-map", onRouteOpen, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
   const [mode, setMode] = useState<"world" | "china">("china");
@@ -283,6 +313,8 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
   const [locationFocusCandidate, setLocationFocusCandidate] = useState<CheckInCandidate | null>(null);
   const [locationFlashVisible, setLocationFlashVisible] = useState(false);
   const gestureRef = useRef<MapGesture>({ pointers: new Map(), center: null, distance: null, moved: false, tapCountryCode: null });
+  const mapSvgRef = useRef<SVGSVGElement | null>(null);
+  const avatarClipId = `travel-map-avatar-${useId().replace(/:/g, "")}`;
 
   const world = useMemo(worldFeatures, []);
   const activeCountry = mode === "china" ? "CHN" : selectedCountry;
@@ -304,6 +336,7 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
     setLocationFocusPhase(focusLocation ? "flying" : "idle");
     setLocationFocusCandidate(null);
     setLocationFlashVisible(false);
+    gestureRef.current = { pointers: new Map(), center: null, distance: null, moved: false, tapCountryCode: null };
   }, [focusLocation, open]);
 
   useEffect(() => {
@@ -509,6 +542,15 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
     })) return null;
     return detailProjection(coordinate);
   }, [activeCountry, detailProjection, displayedLocation, focusLocation, geometry, globeRotation, worldProjection]);
+  const usesProjectedZoom = !activeCountry || Boolean(focusLocation);
+  const renderedLocationPoint = useMemo(() => {
+    if (!currentLocationPoint) return null;
+    if (usesProjectedZoom) return [currentLocationPoint[0] + transform.x, currentLocationPoint[1] + transform.y] as const;
+    return [
+      currentLocationPoint[0] * transform.scale + transform.x,
+      currentLocationPoint[1] * transform.scale + transform.y,
+    ] as const;
+  }, [currentLocationPoint, transform, usesProjectedZoom]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -609,10 +651,17 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
   };
 
   const maxZoom = focusLocation ? 8 : 4;
-  const zoom = (delta: number) => setTransform((current) => ({
-    ...current,
-    scale: Math.min(maxZoom, Math.max(1, current.scale + delta)),
-  }));
+  const zoomAroundClientPoint = (scaleChange: (currentScale: number) => number, clientPoint?: { x: number; y: number }) => {
+    const svg = mapSvgRef.current;
+    const anchor = svg && clientPoint
+      ? mapPointFromClient(svg, clientPoint.x, clientPoint.y)
+      : { x: WIDTH / 2, y: HEIGHT / 2 };
+    setTransform((current) => {
+      const nextScale = Math.min(maxZoom, Math.max(1, scaleChange(current.scale)));
+      return zoomTransformAroundPoint(current, nextScale, anchor, usesProjectedZoom);
+    });
+  };
+  const zoom = (delta: number) => zoomAroundClientPoint((currentScale) => currentScale + delta);
   const resetView = () => {
     setMode("world");
     setSelectedCountry(null);
@@ -622,7 +671,8 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
   };
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
-    zoom(event.deltaY < 0 ? 0.25 : -0.25);
+    const factor = Math.exp(-event.deltaY * 0.0015);
+    zoomAroundClientPoint((currentScale) => currentScale * factor, { x: event.clientX, y: event.clientY });
   };
   const gestureMetrics = (pointers: MapGesture["pointers"]) => {
     const points = [...pointers.values()];
@@ -683,7 +733,7 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
       const ratio = metrics.distance / previousDistance;
       if (Math.abs(ratio - 1) > 0.002) {
         gesture.moved = true;
-        setTransform((current) => ({ ...current, scale: Math.min(maxZoom, Math.max(1, current.scale * ratio)) }));
+        zoomAroundClientPoint((currentScale) => currentScale * ratio, metrics.center);
       }
     }
 
@@ -733,6 +783,7 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
 
   return (
     <SideDrawer
+      backdropClassName={backdropClassName}
       historyKey={historyKey}
       onRouteOpen={onRouteOpen}
       open={open}
@@ -802,10 +853,11 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerEnd}
             onWheel={handleWheel}
+            ref={mapSvgRef}
             role="img"
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           >
-            <g transform={activeCountry && !focusLocation ? `translate(${transform.x} ${transform.y}) scale(${transform.scale})` : undefined}>
+            <g transform={usesProjectedZoom ? `translate(${transform.x} ${transform.y})` : `translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
               {!activeCountry || focusLocation ? (
                 <>
                   <path className="travel-map-globe-sphere" d={worldPath({ type: "Sphere" }) ?? undefined} />
@@ -844,36 +896,33 @@ export function TravelMapDrawer({ open, onClose, historyKey = "travel-map", onRo
                   </path>
                 ) : null;
               })}
-              {currentLocationPoint ? (
-                <g
-                  className="travel-map-current-location-anchor"
-                  transform={`translate(${currentLocationPoint[0]} ${currentLocationPoint[1]}) scale(${activeCountry && !focusLocation ? 1 / transform.scale : 1})`}
-                >
-                  <foreignObject
-                    className="travel-map-current-location"
-                    height="44"
-                    width="44"
-                    x="-22"
-                    y="-22"
-                  >
-                    <div>
-                      <UserAvatar
-                        className="travel-map-current-avatar"
-                        frame={displayedLocationOwner?.avatar_frame_style}
-                        name={displayedLocationOwner?.name ?? t("travelMap.me")}
-                        uri={displayedLocationOwner?.avatar_uri}
-                      />
-                      {focusLocation && locationFocusPhase === "selecting" ? (
-                        <span className="travel-map-focus-tap" aria-hidden="true">
-                          <span className="material-symbols-outlined">touch_app</span>
-                        </span>
-                      ) : null}
-                    </div>
-                  </foreignObject>
-                </g>
-              ) : null}
             </g>
           </svg>
+          {renderedLocationPoint ? (
+            <svg aria-hidden="true" className="travel-map-marker-layer" viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>
+              <defs>
+                <clipPath id={avatarClipId}><circle cx="0" cy="0" r="19" /></clipPath>
+              </defs>
+              <g className="travel-map-current-location-anchor" transform={`translate(${renderedLocationPoint[0]} ${renderedLocationPoint[1]})`}>
+                <circle className="travel-map-current-location-pulse" r="20" />
+                <circle className="travel-map-current-location-pulse is-delayed" r="20" />
+                <g className="travel-map-current-avatar-svg">
+                  <circle className="travel-map-current-avatar-background" r="20" />
+                  <text className="travel-map-current-avatar-initial" dy="0.35em" textAnchor="middle">{(displayedLocationOwner?.name ?? t("travelMap.me")).slice(0, 1).toUpperCase()}</text>
+                  {displayedLocationOwner?.avatar_uri ? (
+                    <image clipPath={`url(#${avatarClipId})`} height="40" href={displayedLocationOwner.avatar_uri} preserveAspectRatio="xMidYMid slice" width="40" x="-20" y="-20" />
+                  ) : null}
+                  <circle className="travel-map-current-avatar-outline" r="20" />
+                </g>
+                {focusLocation && locationFocusPhase === "selecting" ? (
+                  <g className="travel-map-focus-tap-svg" transform="translate(23 23)">
+                    <circle r="14" />
+                    <path d="M0-7v14M-7 0H7" />
+                  </g>
+                ) : null}
+              </g>
+            </svg>
+          ) : null}
           {loading ? <div className="travel-map-loading"><span /></div> : null}
           {locationFlashVisible ? <div className="travel-map-focus-flash" aria-hidden="true" /> : null}
           <div className="travel-map-zoom">

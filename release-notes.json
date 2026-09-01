@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.01.3",
+  "id": "2026.09.01.4",
   "publishedAt": "2026-09-01",
   "locales": {
     "zh-CN": {
-      "title": "品牌标识更统一",
+      "title": "地图定位更准确",
       "items": [
-        "网页内外统一使用更高清的完整 SERMO 字标，品牌呈现更加一致"
+        "位置地图会让头像始终贴合定位点，并围绕手指或鼠标位置缩放",
+        "带有地理信息的照片和视频现在可以从媒体详情直接打开地图"
       ]
     },
     "en": {
-      "title": "A more consistent identity",
+      "title": "More precise map interactions",
       "items": [
-        "Every surface now uses a higher-resolution full SERMO wordmark for a more consistent identity"
+        "Location maps now keep avatars pinned correctly and zoom around your touch or pointer",
+        "Photos and videos with location data can now open the map directly from media details"
       ]
     }
   }

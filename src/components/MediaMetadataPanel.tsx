@@ -1,5 +1,6 @@
 import { useI18n } from "../lib/language";
-import type { ImageMetadataDTO, VideoMetadataDTO } from "../types";
+import { openMediaLocationMap } from "../lib/mediaLocation";
+import type { ImageMetadataDTO, TinyUserDTO, VideoMetadataDTO } from "../types";
 
 type MediaMetadata = ImageMetadataDTO | VideoMetadataDTO;
 
@@ -14,7 +15,7 @@ function formatBitRate(bitRate?: number | null) {
   return bitRate >= 1_000_000 ? `${(bitRate / 1_000_000).toFixed(1)} Mbps` : `${Math.round(bitRate / 1_000)} kbps`;
 }
 
-export function MediaMetadataPanel({ kind, metadata }: { kind: "image" | "video"; metadata?: MediaMetadata | null }) {
+export function MediaMetadataPanel({ kind, metadata, owner }: { kind: "image" | "video"; metadata?: MediaMetadata | null; owner?: TinyUserDTO | null }) {
   const { locale, t } = useI18n();
   const recordLabel = kind === "video" ? t("media.videoRecord") : t("media.imageRecord");
   if (!metadata || metadata.status !== 1) {
@@ -31,6 +32,7 @@ export function MediaMetadataPanel({ kind, metadata }: { kind: "image" | "video"
       })
     : "";
   const location = metadata.address || (metadata.geocoding_status === 0 && coordinate ? t("location.resolving") : coordinate);
+  const canOpenMap = Number.isFinite(metadata.latitude) && Number.isFinite(metadata.longitude);
   const videoMetadata = kind === "video" ? metadata as VideoMetadataDTO : null;
   const rows = [
     [t("media.takenAt"), takenAt],
@@ -52,10 +54,27 @@ export function MediaMetadataPanel({ kind, metadata }: { kind: "image" | "video"
         : null;
 
   return <div className={`message-image-archive${kind === "video" ? " message-video-archive" : ""}`}>
-    {location ? <div className="message-image-location">
-      <span className="message-image-archive-label">{t("media.locationLabel")}</span>
-      <strong>{location}</strong>
-      {coordinate ? <small>{coordinate}</small> : null}
+    {location ? <div className={`message-image-location${canOpenMap ? " is-interactive" : ""}`}>
+      {canOpenMap ? (
+        <button
+          aria-label={`${t("location.viewOnMap")} · ${location}`}
+          className="message-image-location-map"
+          onClick={() => openMediaLocationMap({
+            location: {
+              latitude: Number(metadata.latitude),
+              longitude: Number(metadata.longitude),
+              address: metadata.address,
+            },
+            owner,
+          })}
+          type="button"
+        >
+          <span><span className="message-image-archive-label">{t("media.locationLabel")}</span><strong>{location}</strong>{coordinate ? <small>{coordinate}</small> : null}</span>
+          <span aria-hidden="true" className="material-symbols-outlined">chevron_right</span>
+        </button>
+      ) : (
+        <><span className="message-image-archive-label">{t("media.locationLabel")}</span><strong>{location}</strong>{coordinate ? <small>{coordinate}</small> : null}</>
+      )}
       {provider && metadata.address ? <a href={provider.href} rel="noreferrer" target="_blank">GEOCODED BY {provider.label}</a> : null}
     </div> : null}
     <div className="message-image-record">

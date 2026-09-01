@@ -5,6 +5,7 @@ import { AppToast } from "./components/AppToast";
 import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
+import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
 import { GrowthLevelCelebration } from "./components/GrowthLevelCelebration";
 import { PwaRecommendation } from "./components/PwaRecommendation";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
@@ -198,6 +199,7 @@ export default function App() {
       ) : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <DocumentTitle /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GlobalMessageSync /> : null}
+      {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalMediaLocationMap /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <AppBottomNav /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}

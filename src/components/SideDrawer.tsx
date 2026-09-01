@@ -10,6 +10,7 @@ interface SideDrawerProps {
   open: boolean;
   title: string;
   className?: string;
+  backdropClassName?: string;
   titleLeading?: ReactNode;
   titleAccessory?: ReactNode;
   headerAction?: ReactNode;
@@ -45,6 +46,7 @@ export function SideDrawer({
   open,
   title,
   className = "",
+  backdropClassName = "",
   titleLeading,
   titleAccessory,
   headerAction,
@@ -206,7 +208,7 @@ export function SideDrawer({
   if (!visible || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="drawer-backdrop" onClick={requestClose} role="presentation">
+    <div className={`drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} onClick={requestClose} role="presentation">
       <aside aria-modal="true" className={`side-drawer${className ? ` ${className}` : ""}`} onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="drawer-topbar">
           <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
