@@ -1,19 +1,19 @@
 {
-  "id": "2026.08.31.5",
-  "publishedAt": "2026-08-31",
+  "id": "2026.09.01.1",
+  "publishedAt": "2026-09-01",
   "locales": {
     "zh-CN": {
-      "title": "个性化展示更准确",
+      "title": "登录更快捷",
       "items": [
-        "已下线的 VIP 专有头像框和发言卡片外观不再因旧账号数据重新出现",
-        "PWA 与小程序均会先选择空间，再进入普通用户登录并保留微信登录选项"
+        "PWA 登录首页重新支持选择本机最近登录过的账号，一步返回对应空间",
+        "仍可展开空间名输入区登录其他空间，退出或登录失效的账号会自动移除"
       ]
     },
     "en": {
-      "title": "More accurate personalization",
+      "title": "Faster sign-in",
       "items": [
-        "Retired VIP avatar frames and statement-card appearances no longer resurface from legacy account data",
-        "The PWA and mini program now choose a space before member sign-in, with WeChat sign-in still available"
+        "The PWA account entry once again lets you return to a recently signed-in account in one step",
+        "You can still expand the space field to sign in elsewhere, while signed-out or expired accounts are removed automatically"
       ]
     }
   }

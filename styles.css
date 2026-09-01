@@ -3406,7 +3406,30 @@ html[data-theme="dark"] body .growth-level-detail {
 .pwa-account-entry-heading h1 { margin: 0; font-size: clamp(29px, 7vw, 38px); line-height: 1.08; letter-spacing: -.04em; }
 .pwa-account-entry-heading small { display: block; margin-top: 8px; color: var(--entry-muted); font-size: 13px; }
 
+.pwa-account-rail { display: grid; gap: 10px; }
+.pwa-account-card { width: 100%; min-width: 0; display: grid; grid-template-columns: 58px minmax(0, 1fr) 24px; align-items: center; gap: 14px; padding: 13px 15px 13px 13px; border: 1px solid rgba(37, 79, 65, .11); border-radius: 21px; color: var(--entry-ink); text-align: left; background: rgba(253, 252, 246, .72); box-shadow: 0 9px 26px rgba(37, 73, 62, .055); backdrop-filter: blur(16px); transition: transform .22s cubic-bezier(.22, 1, .36, 1), border-color .22s, background .22s; }
+.pwa-account-card:active { transform: scale(.985); }
+.pwa-account-card.is-selected { border-color: rgba(8, 123, 90, .52); background: rgba(250, 253, 245, .95); box-shadow: 0 12px 30px rgba(25, 103, 78, .11); }
+.pwa-account-avatar { width: 58px; height: 58px; border-radius: 18px; }
+.pwa-account-card-copy { min-width: 0; display: grid; gap: 5px; }
+.pwa-account-card-copy > strong { overflow: hidden; font-size: 17px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.pwa-account-card-copy small { min-width: 0; display: flex; gap: 6px; color: var(--entry-muted); font-size: 12px; }
+.pwa-account-card-copy small b { overflow: hidden; color: #49675e; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.pwa-account-card-copy small span { flex: none; font-family: "JetBrains Mono", monospace; }
+.pwa-account-check { width: 20px; height: 20px; display: grid; place-items: center; border: 1.5px solid #b9c7c0; border-radius: 50%; }
+.pwa-account-check i { width: 7px; height: 7px; border-radius: 50%; background: transparent; transform: scale(.4); transition: transform .2s, background .2s; }
+.pwa-account-card.is-selected .pwa-account-check { border-color: var(--entry-accent); }
+.pwa-account-card.is-selected .pwa-account-check i { background: var(--entry-accent); transform: scale(1); }
+.pwa-account-primary { width: 100%; min-height: 58px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding: 0 19px 0 22px; border-radius: 18px; color: #f6fff9; background: #0b7356; box-shadow: 0 15px 30px rgba(10, 94, 69, .2); font-size: 16px; font-weight: 700; }
+.pwa-account-primary:disabled { opacity: .55; }
+.pwa-account-primary .material-symbols-outlined { font-size: 23px; }
+
 .pwa-other-login { margin-top: auto; }
+.pwa-other-login.has-accounts { margin-top: 24px; border-top: 1px solid rgba(36, 76, 63, .12); }
+.pwa-other-login-trigger { width: 100%; min-height: 52px; display: grid; grid-template-columns: 28px minmax(0, 1fr) 24px; align-items: center; gap: 9px; color: var(--entry-ink); text-align: left; }
+.pwa-other-login-trigger .material-symbols-outlined { color: var(--entry-muted); font-size: 20px; }
+.pwa-other-login-trigger strong { font-size: 13px; }
+.pwa-other-login-trigger .material-symbols-outlined:last-child { justify-self: end; font-size: 19px; }
 .pwa-other-login-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .28s cubic-bezier(.22, 1, .36, 1), opacity .2s; }
 .pwa-other-login-panel-inner { min-height: 0; overflow: hidden; }
 .pwa-other-login.is-open .pwa-other-login-panel { grid-template-rows: 1fr; opacity: 1; }
@@ -3428,6 +3451,9 @@ html[data-theme="dark"] .pwa-account-entry {
   background: radial-gradient(circle at 88% 7%, rgba(185, 129, 43, .15), transparent 28%), linear-gradient(148deg, #101b17, #0c1814 58%, #10261e);
 }
 html[data-theme="dark"] .pwa-other-login form { border-color: rgba(164, 205, 187, .12); background: rgba(22, 41, 34, .78); }
+html[data-theme="dark"] .pwa-account-card { border-color: rgba(164, 205, 187, .12); background: rgba(22, 41, 34, .78); }
+html[data-theme="dark"] .pwa-account-card.is-selected { border-color: rgba(101, 216, 172,.48); background: rgba(25, 50, 41, .96); }
+html[data-theme="dark"] .pwa-account-card-copy small b { color: #b6cbc1; }
 html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 
 @media (min-width: 760px) {
@@ -3439,9 +3465,13 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 @media (prefers-reduced-motion: no-preference) {
   .pwa-account-entry-brand,
   .pwa-account-entry-heading,
+  .pwa-account-rail,
+  .pwa-account-primary,
   .pwa-other-login { animation: pwa-entry-rise .55s both cubic-bezier(.22, 1, .36, 1); }
   .pwa-account-entry-heading { animation-delay: .05s; }
-  .pwa-other-login { animation-delay: .1s; }
+  .pwa-account-rail { animation-delay: .1s; }
+  .pwa-account-primary { animation-delay: .14s; }
+  .pwa-other-login { animation-delay: .18s; }
 }
 @keyframes pwa-entry-rise { from { opacity: 0; transform: translateY(14px); } }
 

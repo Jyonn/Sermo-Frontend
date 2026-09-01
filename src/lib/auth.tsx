@@ -18,6 +18,7 @@ import {
 } from "./gestureLock";
 import { getDetectedSpaceSlug } from "./spaceEntry";
 import { rememberRecentSpace } from "./recentSpaces";
+import { forgetPwaAccountSession, rememberPwaAccountSession } from "./pwaAccounts";
 import { authStorage } from "./storage";
 import type { AuthSession, GestureLockPreferenceDTO, JoinResponseDTO } from "../types";
 import { i18n } from "./i18n";
@@ -66,6 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     authStorage.set(session);
+    const slug = getDetectedSpaceSlug();
+    if (session && slug) rememberPwaAccountSession(session, slug);
   }, [session]);
 
   const setSession = useCallback((nextSession: AuthSession | null) => {
@@ -100,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     const current = authStorage.get();
+    const slug = getDetectedSpaceSlug();
     if (current?.refreshToken) {
       try {
         await api.logout(current.refreshToken);
@@ -107,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Best-effort logout; local cleanup still proceeds.
       }
     }
+    if (slug) forgetPwaAccountSession(current, slug);
     authStorage.set(null);
     setSessionState(null);
     setReady(true);
@@ -135,6 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setSessionState(latestSession);
             return;
           }
+          const slug = getDetectedSpaceSlug();
+          if (slug) forgetPwaAccountSession(storedSession, slug);
           authStorage.set(null);
           setSessionState(null);
           return;
