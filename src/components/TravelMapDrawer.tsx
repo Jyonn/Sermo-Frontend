@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent } from "react";
-import { geoBounds, geoContains, geoDistance, geoGraticule10, geoMercator, geoOrthographic, geoPath } from "d3-geo";
+import { geoBounds, geoContains, geoDistance, geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
@@ -76,7 +76,7 @@ export interface CheckInPosition {
 }
 
 type CheckInPhase = "idle" | "locating" | "matching" | "saving";
-type LocationFocusPhase = "idle" | "flying" | "arrived" | "selecting" | "country" | "focused";
+type LocationFocusPhase = "idle" | "flying" | "arrived" | "selecting" | "focused";
 
 const WIDTH = 920;
 const HEIGHT = 500;
@@ -128,22 +128,6 @@ function countryName(code: string, language: string) {
 
 function regionCode(country: string, item: Feature<Geometry, RegionProperties>) {
   return `${country}:${item.properties?.code || item.properties?.name || ""}`;
-}
-
-function normalizedRegionName(value: string) {
-  return value
-    .toLocaleLowerCase()
-    .replace(/special administrative region|autonomous region|municipality|province/g, "")
-    .replace(/\u58ee\u65cf\u81ea\u6cbb\u533a|\u56de\u65cf\u81ea\u6cbb\u533a|\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a|\u7279\u522b\u884c\u653f\u533a|\u81ea\u6cbb\u533a|\u7701|\u5e02/g, "")
-    .replace(/[^\p{L}\p{N}]/gu, "");
-}
-
-function hasRegion(regions: TravelMapRegionDTO[], code: string, name: string) {
-  const normalizedName = normalizedRegionName(name);
-  return regions.some((item) => (
-    item.region_code === code
-    || (item.country_code === code.slice(0, 3) && normalizedRegionName(item.region_name) === normalizedName)
-  ));
 }
 
 function rewindForD3(collection: FeatureCollection<Geometry, RegionProperties>) {
@@ -293,8 +277,6 @@ export async function resolveTravelMapCandidates(position: CheckInPosition, lang
 export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey = "travel-map", onRouteOpen, chatId, chatTitle, chatType, otherUser, focusLocation, focusOwner }: TravelMapDrawerProps) {
   const { session } = useAuth();
   const { language, t } = useI18n();
-  const [mode, setMode] = useState<"world" | "china">("china");
-  const [selectedCountry, setSelectedCountry] = useState<string | null>("CHN");
   const [maps, setMaps] = useState<MapOwner[]>([]);
   const [geometry, setGeometry] = useState<FeatureCollection<Geometry, RegionProperties> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -317,19 +299,14 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   const avatarClipId = `travel-map-avatar-${useId().replace(/:/g, "")}`;
 
   const world = useMemo(worldFeatures, []);
-  const activeCountry = mode === "china" ? "CHN" : selectedCountry;
   const currentUserId = session?.user.user_id;
   const mine = maps.find((item) => item.owner.user_id === currentUserId);
   const others = maps.filter((item) => item.owner.user_id !== currentUserId);
-  const myRegions = mine?.regions ?? [];
-  const otherRegions = useMemo(() => others.flatMap((item) => item.regions), [others]);
   const myCountries = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.country_code)), [mine]);
   const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
 
   useEffect(() => {
     if (!open) return;
-    setMode(focusLocation ? "world" : "china");
-    setSelectedCountry(focusLocation ? null : "CHN");
     setGeometry(null);
     setTransform({ x: 0, y: 0, scale: 1 });
     setGlobeRotation(INITIAL_GLOBE_ROTATION);
@@ -440,28 +417,24 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   useEffect(() => {
     if (locationFocusPhase !== "selecting" || !locationFocusCandidate) return;
     const revealFlash = window.setTimeout(() => setLocationFlashVisible(true), 420);
-    const switchMap = window.setTimeout(() => {
-      setMode("world");
-      setSelectedCountry(locationFocusCandidate.countryCode);
-      setLocationFocusPhase("country");
-    }, 720);
+    const finishFocus = window.setTimeout(() => setLocationFocusPhase("focused"), 720);
     const hideFlash = window.setTimeout(() => setLocationFlashVisible(false), 1160);
     return () => {
       window.clearTimeout(revealFlash);
-      window.clearTimeout(switchMap);
+      window.clearTimeout(finishFocus);
       window.clearTimeout(hideFlash);
     };
   }, [locationFocusCandidate, locationFocusPhase]);
 
   useEffect(() => {
-    if (!open || !activeCountry) {
+    const countryCode = locationFocusCandidate?.countryCode;
+    if (!open || !focusLocation || !countryCode) {
       setGeometry(null);
       return;
     }
     const controller = new AbortController();
     setLoading(true);
-    if (!focusLocation) setTransform({ x: 0, y: 0, scale: 1 });
-    void loadCountryBoundary(activeCountry)
+    void loadCountryBoundary(countryCode)
       .then((payload) => {
         if (!payload) throw new Error("geometry unavailable");
         setGeometry(payload);
@@ -475,14 +448,8 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [activeCountry, focusLocation, open]);
+  }, [focusLocation, locationFocusCandidate?.countryCode, open]);
 
-  const detailProjection = useMemo(() => geometry
-    ? geoMercator().fitExtent([[26, 26], [WIDTH - 26, HEIGHT - 26]], geometry)
-    : null, [geometry]);
-  const detailPath = useMemo(() => detailProjection
-    ? geoPath(detailProjection)
-    : null, [detailProjection]);
   const worldProjection = useMemo(() => geoOrthographic()
     .translate([WIDTH / 2, HEIGHT / 2])
     .scale(HEIGHT * 0.43 * transform.scale)
@@ -494,63 +461,16 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   const displayedLocation = focusLocation ?? currentLocation;
   const displayedLocationOwner = focusOwner ?? session?.user;
 
-  useEffect(() => {
-    if (!focusLocation || locationFocusPhase !== "country" || !geometry) return;
-    let cancelled = false;
-    let frame = 0;
-    const startedAt = performance.now();
-    const duration = 1500;
-    const startScale = 2.5;
-    const targetScale = 7;
-    const easeInOutQuint = (value: number) => value < 0.5
-      ? 16 * Math.pow(value, 5)
-      : 1 - Math.pow(-2 * value + 2, 5) / 2;
-    const animate = (now: number) => {
-      if (cancelled) return;
-      const progress = Math.min(1, (now - startedAt) / duration);
-      const eased = easeInOutQuint(progress);
-      setTransform({
-        x: 0,
-        y: 0,
-        scale: startScale + (targetScale - startScale) * eased,
-      });
-      if (progress < 1) frame = requestAnimationFrame(animate);
-      else setLocationFocusPhase("focused");
-    };
-    setTransform({ x: 0, y: 0, scale: startScale });
-    frame = requestAnimationFrame(animate);
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(frame);
-    };
-  }, [focusLocation, geometry, locationFocusPhase]);
-
   const currentLocationPoint = useMemo(() => {
     if (!displayedLocation) return null;
     const coordinate: [number, number] = [displayedLocation.longitude, displayedLocation.latitude];
-    if (!activeCountry || focusLocation) {
-      const globeCenter: [number, number] = [-globeRotation[0], -globeRotation[1]];
-      return geoDistance(coordinate, globeCenter) <= Math.PI / 2 ? worldProjection(coordinate) : null;
-    }
-    if (!detailProjection || !geometry?.features.some((item) => {
-      if (geoContains(item, coordinate)) return true;
-      const [[west, south], [east, north]] = geoBounds(item);
-      return displayedLocation.latitude >= south - 0.15
-        && displayedLocation.latitude <= north + 0.15
-        && displayedLocation.longitude >= west - 0.15
-        && displayedLocation.longitude <= east + 0.15;
-    })) return null;
-    return detailProjection(coordinate);
-  }, [activeCountry, detailProjection, displayedLocation, focusLocation, geometry, globeRotation, worldProjection]);
-  const usesProjectedZoom = !activeCountry || Boolean(focusLocation);
+    const globeCenter: [number, number] = [-globeRotation[0], -globeRotation[1]];
+    return geoDistance(coordinate, globeCenter) <= Math.PI / 2 ? worldProjection(coordinate) : null;
+  }, [displayedLocation, globeRotation, worldProjection]);
   const renderedLocationPoint = useMemo(() => {
     if (!currentLocationPoint) return null;
-    if (usesProjectedZoom) return [currentLocationPoint[0] + transform.x, currentLocationPoint[1] + transform.y] as const;
-    return [
-      currentLocationPoint[0] * transform.scale + transform.x,
-      currentLocationPoint[1] * transform.scale + transform.y,
-    ] as const;
-  }, [currentLocationPoint, transform, usesProjectedZoom]);
+    return [currentLocationPoint[0] + transform.x, currentLocationPoint[1] + transform.y] as const;
+  }, [currentLocationPoint, transform]);
 
   const tone = (mineSet: Set<string>, otherSet: Set<string>, code: string) => {
     if (mineSet.has(code) && otherSet.has(code)) return "overlap";
@@ -578,8 +498,6 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           ? current.map((item) => item.owner.user_id === payload.owner.user_id ? { owner: payload.owner, regions: payload.regions } : item)
           : [...current, { owner: payload.owner, regions: payload.regions }];
       });
-      setMode(payload.checked_region.country_code === "CHN" ? "china" : "world");
-      setSelectedCountry(payload.checked_region.country_code);
       setCheckInCandidates([]);
       setCheckInPosition(null);
       showToast(t("travelMap.checkedIn", { region: payload.checked_region.region_name }));
@@ -658,14 +576,11 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
       : { x: WIDTH / 2, y: HEIGHT / 2 };
     setTransform((current) => {
       const nextScale = Math.min(maxZoom, Math.max(1, scaleChange(current.scale)));
-      return zoomTransformAroundPoint(current, nextScale, anchor, usesProjectedZoom);
+      return zoomTransformAroundPoint(current, nextScale, anchor, true);
     });
   };
   const zoom = (delta: number) => zoomAroundClientPoint((currentScale) => currentScale + delta);
   const resetView = () => {
-    setMode("world");
-    setSelectedCountry(null);
-    setGeometry(null);
     setTransform({ x: 0, y: 0, scale: 1 });
     setGlobeRotation(INITIAL_GLOBE_ROTATION);
   };
@@ -737,14 +652,10 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
       }
     }
 
-    if (!activeCountry || focusLocation) {
-      setGlobeRotation(([longitude, latitude]) => [
-        longitude + dx * 0.32 / transform.scale,
-        Math.min(82, Math.max(-82, latitude - dy * 0.32 / transform.scale)),
-      ]);
-    } else if (transform.scale > 1) {
-      setTransform((current) => ({ ...current, x: current.x + dx, y: current.y + dy }));
-    }
+    setGlobeRotation(([longitude, latitude]) => [
+      longitude + dx * 0.32 / transform.scale,
+      Math.min(82, Math.max(-82, latitude - dy * 0.32 / transform.scale)),
+    ]);
     gesture.center = metrics.center;
     gesture.distance = metrics.distance;
   };
@@ -753,7 +664,6 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
     const shouldOpenCountry = !cancelled
       && gesture.pointers.size === 1
       && !gesture.moved
-      && !activeCountry
       && !focusLocation
       && gesture.tapCountryCode;
     gesture.pointers.delete(event.pointerId);
@@ -764,7 +674,13 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
       gesture.tapCountryCode = null;
       gesture.moved = false;
     }
-    if (shouldOpenCountry) setSelectedCountry(shouldOpenCountry);
+    if (shouldOpenCountry) {
+      const country = world.find((item) => countryCodeOf(item) === shouldOpenCountry);
+      if (country) {
+        const [[west, south], [east, north]] = geoBounds(country);
+        setGlobeRotation([-(west + east) / 2, -(south + north) / 2]);
+      }
+    }
   };
 
   const title = focusLocation
@@ -820,34 +736,15 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
               <small>{focusLocation ? t("location.focusing") : t("travelMap.regionCount", { count: totalRegions })}</small>
             </span>
           </div>
-          {!focusLocation ? <div className="travel-map-view-switch">
-            <button className={!activeCountry ? "is-active" : ""} onClick={resetView} type="button">{t("travelMap.world")}</button>
-            <button
-              className={activeCountry ? "is-active" : ""}
-              disabled={Boolean(focusLocation && !locationFocusCandidate)}
-              onClick={() => {
-                const countryCode = focusLocation ? locationFocusCandidate?.countryCode : "CHN";
-                if (!countryCode) return;
-                setMode(countryCode === "CHN" ? "china" : "world");
-                setSelectedCountry(countryCode);
-                if (focusLocation) setLocationFocusPhase("country");
-              }}
-              type="button"
-            >
-              {focusLocation && locationFocusCandidate
-                ? countryName(locationFocusCandidate.countryCode, language)
-                : t("travelMap.china")}
-            </button>
-          </div> : null}
         </div>
 
         <div className="travel-map-canvas">
           <div className="travel-map-paper-heading">
-            <span>{focusLocation ? t("location.focusing") : activeCountry ? t("travelMap.exploring") : t("travelMap.worldAtlas")}</span>
-            <strong>{focusLocation ? locationFocusCandidate?.regionName || locationFocusCandidate?.countryCode || t("travelMap.worldCode") : activeCountry || t("travelMap.worldCode")}</strong>
+            <span>{focusLocation ? t("location.focusing") : t("travelMap.worldAtlas")}</span>
+            <strong>{focusLocation ? locationFocusCandidate?.regionName || locationFocusCandidate?.countryCode || t("travelMap.worldCode") : t("travelMap.worldCode")}</strong>
           </div>
           <svg
-            aria-label={focusLocation ? focusLocation.address || t("location.shared") : activeCountry ? countryName(activeCountry, language) : t("travelMap.world")}
+            aria-label={focusLocation ? focusLocation.address || t("location.shared") : t("travelMap.world")}
             onPointerCancel={(event) => handlePointerEnd(event, true)}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
@@ -857,9 +754,8 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
             role="img"
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           >
-            <g transform={usesProjectedZoom ? `translate(${transform.x} ${transform.y})` : `translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
-              {!activeCountry || focusLocation ? (
-                <>
+            <g transform={`translate(${transform.x} ${transform.y})`}>
+              <>
                   <path className="travel-map-globe-sphere" d={worldPath({ type: "Sphere" }) ?? undefined} />
                   <path className="travel-map-globe-graticule" d={worldPath(worldGraticule) ?? undefined} />
                   {world.map((country) => {
@@ -873,7 +769,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
                 );
                   })}
                   {focusLocation && geometry ? geometry.features.map((region, index) => {
-                    const code = regionCode(activeCountry || locationFocusCandidate?.countryCode || "", region);
+                    const code = regionCode(locationFocusCandidate?.countryCode || "", region);
                     const name = region.properties?.name || code;
                     const path = worldPath(region);
                     const isTarget = code === locationFocusCandidate?.regionCode || name === locationFocusCandidate?.regionName;
@@ -883,19 +779,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
                       </path>
                     ) : null;
                   }) : null}
-                </>
-              ) : geometry?.features.map((region, index) => {
-                const code = regionCode(activeCountry, region);
-                const name = region.properties?.name || code;
-                const mineVisited = hasRegion(myRegions, code, name);
-                const othersVisited = hasRegion(otherRegions, code, name);
-                const path = detailPath?.(region);
-                return path ? (
-                  <path className={`travel-map-region is-${mineVisited && othersVisited ? "overlap" : mineVisited ? "mine" : othersVisited ? "theirs" : "empty"}`} d={path} key={`${code}:${index}`}>
-                    <title>{name}</title>
-                  </path>
-                ) : null;
-              })}
+              </>
             </g>
           </svg>
           {renderedLocationPoint ? (
@@ -927,7 +811,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           {locationFlashVisible ? <div className="travel-map-focus-flash" aria-hidden="true" /> : null}
           <div className="travel-map-zoom">
             <button aria-label={t("travelMap.zoomOut")} disabled={transform.scale <= 1} onClick={() => zoom(-0.5)} type="button">−</button>
-            <button aria-label={t("travelMap.resetZoom")} onClick={() => setTransform({ x: 0, y: 0, scale: 1 })} type="button">{Math.round(transform.scale * 100)}%</button>
+            <button aria-label={t("travelMap.resetZoom")} onClick={resetView} type="button">{Math.round(transform.scale * 100)}%</button>
             <button aria-label={t("travelMap.zoomIn")} disabled={transform.scale >= maxZoom} onClick={() => zoom(0.5)} type="button">＋</button>
           </div>
         </div>
@@ -937,13 +821,6 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           {others.length ? <span><i className="is-theirs" />{otherLegendLabel}</span> : null}
           {others.length ? <span><i className="is-overlap" />{t("travelMap.overlap")}</span> : null}
         </div> : null}
-
-        {activeCountry && !focusLocation ? (
-          <button className="travel-map-country-back" onClick={resetView} type="button">
-            <span>←</span>
-            <span><strong>{countryName(activeCountry, language)}</strong><small>{t("travelMap.readOnlyRegions")}</small></span>
-          </button>
-        ) : null}
 
         {focusLocation ? (
           <a

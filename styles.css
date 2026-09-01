@@ -22417,34 +22417,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   font-size: 0.67rem;
 }
 
-.travel-map-view-switch {
-  display: flex;
-  flex: none;
-  padding: 3px;
-  border-radius: 10px;
-  background: rgba(24, 35, 29, 0.07);
-}
-
-.travel-map-view-switch button {
-  min-height: 32px;
-  padding: 0 11px;
-  color: var(--text-muted);
-  border-radius: 8px;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.travel-map-view-switch button.is-active {
-  color: #17664a;
-  background: var(--bg-elevated);
-  box-shadow: 0 3px 10px rgba(24, 35, 29, 0.08);
-}
-
-.travel-map-view-switch button:disabled {
-  cursor: wait;
-  opacity: 0.45;
-}
-
 .travel-map-canvas {
   position: relative;
   min-height: 330px;
@@ -22773,30 +22745,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   box-shadow: 0 0 0 1px #9c5c18;
 }
 
-.travel-map-country-back {
-  display: flex;
-  min-height: 52px;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  color: var(--text-primary);
-  border: 1px solid var(--line-soft);
-  border-radius: 13px;
-  background: var(--bg-panel);
-  text-align: left;
-}
-
-.travel-map-country-back > span:first-child {
-  color: var(--brand-primary);
-  font-size: 1.1rem;
-}
-
-.travel-map-country-back > span:last-child {
-  display: grid;
-  gap: 2px;
-}
-
-.travel-map-country-back small,
 .travel-map-hint {
   color: var(--text-muted);
   font-size: 0.68rem;
@@ -22805,15 +22753,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .travel-map-hint {
   margin: 0;
   padding: 0 3px;
-}
-
-html[data-theme="dark"] body .travel-map-view-switch {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-html[data-theme="dark"] body .travel-map-view-switch button.is-active {
-  color: #77dfb8;
-  background: #27362f;
 }
 
 .message-travel-map-card {
