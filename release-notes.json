@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.6",
+  "id": "2026.09.02.7",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "重要通知更可信",
+      "title": "投稿通知更清晰",
       "items": [
-        "运营任免与投稿审批通知现在带有不可伪造的官方通知标识",
-        "重要通知会进入会话未读和提醒，不再容易错过"
+        "投稿审批通知直接说明处理结果，不再重复审批者姓名",
+        "审批者改为在通知底部弱化署名，信息更清楚"
       ]
     },
     "en": {
-      "title": "More trustworthy important notices",
+      "title": "Clearer submission notices",
       "items": [
-        "Operator role and submission review updates now carry a server-verified official notice badge",
-        "Important notices now appear in chat unread counts and notifications so they are harder to miss"
+        "Submission review notices now state the outcome without repeating the reviewer name",
+        "The reviewer appears as a subtle attribution below the notice"
       ]
     }
   }

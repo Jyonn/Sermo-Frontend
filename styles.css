@@ -4123,6 +4123,14 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   overflow-wrap: anywhere;
 }
 
+.message-official-notice footer {
+  margin-top: 7px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .message-history-actions {
   display: flex;
   justify-content: center;
