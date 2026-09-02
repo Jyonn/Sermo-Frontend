@@ -30862,17 +30862,86 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   min-height: 22px;
   padding: 1px 8px;
   border-radius: 999px;
+  border: 1px solid transparent;
   color: var(--text-muted);
-  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 9%, transparent);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.submission-status-badge.is-review,
-.submission-status-badge.is-ready { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 12%, transparent); }
-.submission-status-badge.is-revision { color: #a66200; background: color-mix(in srgb, #d98a10 14%, transparent); }
-.submission-status-badge.is-terminated { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+.submission-status-badge.is-draft {
+  border-color: color-mix(in srgb, var(--text-muted) 16%, transparent);
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 8%, transparent);
+}
+.submission-status-badge.is-review {
+  border-color: color-mix(in srgb, #1684d6 20%, transparent);
+  color: #0874be;
+  background: color-mix(in srgb, #28a4ed 11%, transparent);
+}
+.submission-status-badge.is-revision {
+  border-color: color-mix(in srgb, #d48a13 22%, transparent);
+  color: #9b5f00;
+  background: color-mix(in srgb, #e7a12f 13%, transparent);
+}
+.submission-status-badge.is-ready {
+  border-color: color-mix(in srgb, var(--brand-primary) 24%, transparent);
+  color: var(--brand-primary-press);
+  background: color-mix(in srgb, var(--brand-primary) 13%, transparent);
+}
+.submission-status-badge.is-published {
+  border-color: color-mix(in srgb, #50705f 14%, transparent);
+  color: #557063;
+  background: color-mix(in srgb, #71877b 10%, transparent);
+}
+.submission-status-badge.is-terminated {
+  border-color: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: color-mix(in srgb, var(--danger) 78%, var(--text-muted));
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.submission-create-menu { position: relative; }
+.submission-header-create { margin-left: 0; cursor: pointer; }
+.submission-recipient-dropdown {
+  position: absolute;
+  z-index: 140;
+  top: calc(100% + 9px);
+  right: 0;
+  display: grid;
+  width: min(280px, calc(100vw - 28px));
+  padding: 6px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 88%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
+  box-shadow: 0 18px 46px rgba(17, 29, 24, .18);
+  backdrop-filter: blur(20px);
+  animation: surface-enter 140ms ease-out;
+}
+.submission-recipient-dropdown > button {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 11px;
+  color: var(--text-primary);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.submission-recipient-dropdown > button:hover { background: var(--bg-soft); }
+.submission-recipient-dropdown .mini-avatar { width: 38px; height: 38px; border-radius: 12px; }
+.submission-recipient-dropdown > button > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
+.submission-recipient-dropdown strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.submission-recipient-dropdown small { color: var(--text-muted); font-size: 10px; font-weight: 650; }
+.submission-recipient-dropdown > button > .material-symbols-outlined { color: var(--text-muted); font-size: 17px; }
+.submission-recipient-dropdown-loading,
+.submission-recipient-dropdown-empty { display: flex; min-height: 58px; align-items: center; justify-content: center; gap: 8px; padding: 8px; color: var(--text-muted); font-size: 11px; font-weight: 650; }
 
 .chat-name.is-submission {
   display: flex;

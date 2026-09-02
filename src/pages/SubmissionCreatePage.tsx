@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
@@ -20,11 +20,13 @@ function makeClientId(prefix: string) {
 export default function SubmissionCreatePage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialRecipient = (location.state as { recipient?: SubmissionRecipientDTO } | null)?.recipient ?? null;
   const [recipients, setRecipients] = useState<SubmissionRecipientDTO[]>([]);
-  const [selected, setSelected] = useState<SubmissionRecipientDTO | null>(null);
+  const [selected, setSelected] = useState<SubmissionRecipientDTO | null>(initialRecipient);
   const [title, setTitle] = useState("");
   const [draft, setDraft] = useState("");
-  const [stage, setStage] = useState<"recipient" | "title" | "conversation">("recipient");
+  const [stage, setStage] = useState<"recipient" | "title" | "conversation">(initialRecipient ? "title" : "recipient");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const draftId = useMemo(() => makeClientId("submission"), []);
@@ -74,6 +76,7 @@ export default function SubmissionCreatePage() {
 
   const goBack = () => {
     if (stage === "conversation") setStage("title");
+    else if (stage === "title" && initialRecipient) navigate("/app/submissions");
     else if (stage === "title") setStage("recipient");
     else navigate("/app/submissions");
   };

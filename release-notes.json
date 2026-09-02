@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.8",
+  "id": "2026.09.02.9",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表更聚焦",
+      "title": "新建投稿更轻快",
       "items": [
-        "投稿列表优先展示处理状态与投稿标题",
-        "摘要直接展示最近一条消息，不再重复投稿对象"
+        "不同投稿状态使用更清楚的语义色与层级",
+        "新建投稿移至顶部，选择官方或运营后直接填写标题"
       ]
     },
     "en": {
-      "title": "A more focused submission list",
+      "title": "A quicker way to start submissions",
       "items": [
-        "Submission rows now lead with their status and title",
-        "The preview shows the latest message directly without repeating the recipient"
+        "Submission states now use clearer semantic colors and hierarchy",
+        "Start a submission from the header and choose an official account or operator inline"
       ]
     }
   }

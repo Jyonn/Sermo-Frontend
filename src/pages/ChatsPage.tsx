@@ -66,7 +66,7 @@ import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRecipientDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 import { PUBLIC_ORIGIN } from "../lib/siteConfig";
@@ -2608,6 +2608,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [submissionReviewSheetOpen, setSubmissionReviewSheetOpen] = useState(false);
   const [submissionActionBusy, setSubmissionActionBusy] = useState(false);
   const [submissionPublishSelection, setSubmissionPublishSelection] = useState(false);
+  const [submissionCreateMenuOpen, setSubmissionCreateMenuOpen] = useState(false);
+  const [submissionRecipients, setSubmissionRecipients] = useState<SubmissionRecipientDTO[]>([]);
+  const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
+  const submissionCreateMenuRef = useRef<HTMLDivElement | null>(null);
   const listPath = submissionMode ? "/app/submissions" : "/app/chats";
   const chatPath = (id: number) => `${listPath}/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
@@ -2638,6 +2642,48 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const messageSearchPanelRef = useRef<HTMLDivElement | null>(null);
   const messageSearchLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [messageSearchPreviewIndex, setMessageSearchPreviewIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!submissionCreateMenuOpen) return;
+    const closeMenu = (event: PointerEvent) => {
+      if (!submissionCreateMenuRef.current?.contains(event.target as Node)) setSubmissionCreateMenuOpen(false);
+    };
+    window.addEventListener("pointerdown", closeMenu);
+    return () => window.removeEventListener("pointerdown", closeMenu);
+  }, [submissionCreateMenuOpen]);
+
+  const toggleSubmissionCreateMenu = async () => {
+    if (submissionCreateMenuOpen) {
+      setSubmissionCreateMenuOpen(false);
+      return;
+    }
+    setSubmissionCreateMenuOpen(true);
+    if (submissionRecipients.length || submissionRecipientsLoading) return;
+    setSubmissionRecipientsLoading(true);
+    try {
+      setSubmissionRecipients(await api.getSubmissionRecipients());
+    } catch (error) {
+      setSubmissionCreateMenuOpen(false);
+      showToast(error instanceof ApiError ? error.message : t("submission.recipientsFailed"), "error");
+    } finally {
+      setSubmissionRecipientsLoading(false);
+    }
+  };
+
+  const beginSubmissionWith = async (recipient: SubmissionRecipientDTO) => {
+    if (recipient.relationship === "none" && recipient.role === "operator") {
+      try {
+        await api.createOperatorFriendRequest(recipient.user.user_id);
+      } catch (error) {
+        if (!(error instanceof ApiError) || !/already|exists|已/.test(error.message)) {
+          showToast(error instanceof ApiError ? error.message : t("submission.friendFailed"), "error");
+          return;
+        }
+      }
+    }
+    setSubmissionCreateMenuOpen(false);
+    navigate("/app/submissions/new", { state: { recipient } });
+  };
   const [messageSearchHighlightId, setMessageSearchHighlightId] = useState<number | null>(null);
   const [messageSearchCalendarOpen, setMessageSearchCalendarOpen] = useState(false);
   const [messageSearchCalendarMonth, setMessageSearchCalendarMonth] = useState(() => {
@@ -6582,7 +6628,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       <TabPageHeader
         title={submissionMode ? <span className="submission-header-title"><span>{t("submission.title")}</span>{canReviewSubmissionInvites ? <button aria-label={t("submission.switchView")} className="submission-view-switch" onClick={() => chooseSubmissionView(submissionView === "author" ? "reviewer" : "author")} type="button"><span className="material-symbols-outlined">swap_horiz</span><span>{submissionView === "author" ? t("submission.viewMine") : t("submission.viewReview")}</span></button> : null}</span> : t("chat.title")}
         syncing={viewState === "loading"}
-        actions={!submissionMode ? <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button> : undefined}
+        actions={submissionMode ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
+          <button aria-expanded={submissionCreateMenuOpen} aria-label={t("submission.new")} className="square-header-publish submission-header-create" onClick={() => void toggleSubmissionCreateMenu()} type="button"><span className="material-symbols-outlined">edit_square</span><span>{t("submission.new")}</span></button>
+          {submissionCreateMenuOpen ? <div className="submission-recipient-dropdown">
+            {submissionRecipientsLoading ? <div className="submission-recipient-dropdown-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => void beginSubmissionWith(recipient)} type="button"><UserAvatar className="mini-avatar" frame={recipient.user.avatar_frame_style} name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
+            {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="submission-recipient-dropdown-empty">{t("submission.noRecipients")}</div> : null}
+          </div> : null}
+        </div> : <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button>}
         status={!submissionMode ? (
           <span
             aria-label={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
@@ -6598,7 +6650,6 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
       <div className="chat-list-screen-body">
         <div className="chat-list">
-          {submissionMode && submissionView === "author" ? <button className="chat-item submission-create-row" onClick={() => navigate("/app/submissions/new")} type="button"><span className="submission-create-row-icon material-symbols-outlined">add</span><span className="chat-copy"><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button> : null}
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
         {!filteredChats.length && viewState === "ready" ? (
