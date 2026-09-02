@@ -30960,6 +30960,11 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   color: color-mix(in srgb, var(--danger) 78%, var(--text-muted));
   background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
+.submission-status-badge.is-withdrawn {
+  border-color: color-mix(in srgb, var(--text-muted) 18%, transparent);
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 8%, transparent);
+}
 
 .submission-create-menu { position: relative; }
 .submission-header-create { margin-left: 0; cursor: pointer; }
@@ -31083,6 +31088,30 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   font-weight: 800;
   cursor: pointer;
 }
+.submission-workflow-actions { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 7px; }
+.submission-workflow-actions > button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px 0 14px;
+  border: 0;
+  border-radius: 13px;
+  color: #06382a;
+  background: var(--brand-primary);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--brand-primary) 20%, transparent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.submission-workflow-actions > button:disabled { opacity: .45; cursor: default; }
+.submission-workflow-bar .is-withdraw {
+  color: color-mix(in srgb, var(--danger) 78%, var(--text-secondary));
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 18%, var(--line-soft));
+}
+.submission-workflow-bar.is-withdrawal { background: color-mix(in srgb, var(--bg-elevated) 96%, var(--text-muted) 4%); }
 .submission-workflow-bar > button:disabled { opacity: .45; cursor: default; }
 .submission-workflow-bar > button .material-symbols-outlined { font-size: 17px; }
 .submission-workflow-bar.is-review { background: color-mix(in srgb, var(--bg-elevated) 93%, #299ee7 7%); }
@@ -31092,6 +31121,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 @media (max-width: 520px) {
   .submission-workflow-bar { min-height: 58px; padding: 8px 10px 8px 12px; }
   .submission-workflow-bar > button { min-height: 36px; padding-inline: 12px 9px; }
+  .submission-workflow-actions > button { min-height: 36px; padding-inline: 10px; }
   .submission-workflow-bar small { max-width: 48vw; }
 }
 

@@ -2641,6 +2641,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   );
   const [submissionReviewSheetOpen, setSubmissionReviewSheetOpen] = useState(false);
   const [submissionActionBusy, setSubmissionActionBusy] = useState(false);
+  const [submissionWithdrawConfirmOpen, setSubmissionWithdrawConfirmOpen] = useState(false);
   const [submissionPublishSelection, setSubmissionPublishSelection] = useState(false);
   const [submissionCreateMenuOpen, setSubmissionCreateMenuOpen] = useState(false);
   const [submissionRecipients, setSubmissionRecipients] = useState<SubmissionRecipientDTO[]>([]);
@@ -5959,6 +5960,20 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     }
   };
 
+  const withdrawCurrentSubmission = async () => {
+    if (!selectedChat || submissionActionBusy) return;
+    try {
+      setSubmissionActionBusy(true);
+      replaceSubmissionChat(await api.withdrawSubmission(selectedChat.id));
+      setSubmissionWithdrawConfirmOpen(false);
+      showToast(t("submission.withdrawn"), "success");
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("submission.actionFailed"), "error");
+    } finally {
+      setSubmissionActionBusy(false);
+    }
+  };
+
   const beginSubmissionPublish = () => {
     setSubmissionPublishSelection(true);
     setMessageSelectionMode(true);
@@ -6850,7 +6865,15 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               {!messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? (
                 <div className="submission-workflow-bar">
                   <div><strong>{t("submission.authorActionTitle")}</strong><small>{t("submission.authorActionHint")}</small></div>
-                  <button disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span>{t("submission.submit")}</span><span className="material-symbols-outlined">send</span></button>
+                  <span className="submission-workflow-actions">
+                    <button className="is-withdraw" disabled={submissionActionBusy} onClick={() => setSubmissionWithdrawConfirmOpen(true)} type="button">{t("submission.withdraw")}</button>
+                    <button disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span>{t("submission.submit")}</span><span className="material-symbols-outlined">send</span></button>
+                  </span>
+                </div>
+              ) : !messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["review", "ready"].includes(displayedChat.submission?.status ?? "") ? (
+                <div className="submission-workflow-bar is-withdrawal">
+                  <div><strong>{t("submission.withdrawAvailableTitle")}</strong><small>{t("submission.withdrawAvailableHint")}</small></div>
+                  <button className="is-withdraw" disabled={submissionActionBusy} onClick={() => setSubmissionWithdrawConfirmOpen(true)} type="button"><span>{t("submission.withdraw")}</span><span className="material-symbols-outlined">undo</span></button>
                 </div>
               ) : !messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review" ? (
                 <div className="submission-workflow-bar is-review">
@@ -8191,6 +8214,18 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           }
         }}
         onConfirm={() => void restoreChatHistory()}
+      />
+      <ConfirmDialog
+        open={submissionWithdrawConfirmOpen}
+        title={t("submission.withdrawConfirmTitle")}
+        description={t("submission.withdrawConfirmHint")}
+        confirmLabel={t("submission.withdraw")}
+        busy={submissionActionBusy}
+        danger
+        onClose={() => {
+          if (!submissionActionBusy) setSubmissionWithdrawConfirmOpen(false);
+        }}
+        onConfirm={() => void withdrawCurrentSubmission()}
       />
       <ConfirmDialog
         open={groupOwnerTransferConfirmOpen}

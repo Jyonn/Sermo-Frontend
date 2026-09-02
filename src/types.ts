@@ -1151,7 +1151,7 @@ export interface ChatDTO {
   submission_role?: SubmissionRole;
 }
 
-export type SubmissionStatus = "draft" | "review" | "revision" | "terminated" | "ready" | "published";
+export type SubmissionStatus = "draft" | "review" | "revision" | "terminated" | "ready" | "published" | "withdrawn";
 export type SubmissionRole = "author" | "reviewer" | "member";
 
 export interface SubmissionDTO {
