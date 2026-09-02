@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.10",
+  "id": "2026.09.02.11",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "广场管理通知更及时",
+      "title": "投稿操作更直观",
       "items": [
-        "广场禁言会由实际操作的官方或运营发送可信通知",
-        "解除禁言后也会收到通知，并明确恢复发言和评论"
+        "审批列表不再显示新建投稿入口",
+        "投稿者与审批者的主要操作改为会话内显式按钮"
       ]
     },
     "en": {
-      "title": "Timelier Square moderation notices",
+      "title": "More visible submission actions",
       "items": [
-        "Square mutes now send a trusted notice from the official account or operator who took action",
-        "A follow-up notice confirms when posting and commenting access is restored"
+        "The review queue no longer shows the new submission action",
+        "Primary author and reviewer actions are now shown explicitly inside the conversation"
       ]
     }
   }

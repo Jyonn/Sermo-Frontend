@@ -6628,13 +6628,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       <TabPageHeader
         title={submissionMode ? <span className="submission-header-title"><span>{t("submission.title")}</span>{canReviewSubmissionInvites ? <button aria-label={t("submission.switchView")} className="submission-view-switch" onClick={() => chooseSubmissionView(submissionView === "author" ? "reviewer" : "author")} type="button"><span className="material-symbols-outlined">swap_horiz</span><span>{submissionView === "author" ? t("submission.viewMine") : t("submission.viewReview")}</span></button> : null}</span> : t("chat.title")}
         syncing={viewState === "loading"}
-        actions={submissionMode ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
+        actions={submissionMode && submissionView === "author" ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
           <button aria-expanded={submissionCreateMenuOpen} aria-label={t("submission.new")} className="square-header-publish submission-header-create" onClick={() => void toggleSubmissionCreateMenu()} type="button"><span className="material-symbols-outlined">edit_square</span><span>{t("submission.new")}</span></button>
           {submissionCreateMenuOpen ? <div className="submission-recipient-dropdown">
             {submissionRecipientsLoading ? <div className="submission-recipient-dropdown-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => void beginSubmissionWith(recipient)} type="button"><UserAvatar className="mini-avatar" frame={recipient.user.avatar_frame_style} name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
             {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="submission-recipient-dropdown-empty">{t("submission.noRecipients")}</div> : null}
           </div> : null}
-        </div> : <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button>}
+        </div> : !submissionMode ? <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button> : undefined}
         status={!submissionMode ? (
           <span
             aria-label={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
@@ -6750,14 +6750,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button">
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
-        ) : displayedChat && !messageSelectionMode ? (
+        ) : displayedChat && !messageSelectionMode && displayedChat.purpose !== "submission" ? (
           <div className="button-row message-actions">
-            {displayedChat.purpose === "submission" ? (
-              displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? <button aria-label={t("submission.submit")} className="icon-button submission-primary-action" disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span className="material-symbols-outlined">send</span></button>
-                : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review" ? <button aria-label={t("common.next")} className="icon-button submission-primary-action" onClick={() => setSubmissionReviewSheetOpen(true)} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "ready" ? <button aria-label={t("submission.publish")} className="icon-button submission-primary-action" onClick={beginSubmissionPublish} type="button"><span className="material-symbols-outlined">publish</span></button>
-                    : null
-            ) : <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button>}
+            <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button>
           </div>
         ) : undefined
       }
@@ -6806,18 +6801,29 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode && displayedChat.purpose === "submission" ? (
-                    displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? <button aria-label={t("submission.submit")} className="icon-button submission-primary-action" disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span className="material-symbols-outlined">send</span></button>
-                      : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review" ? <button aria-label={t("common.next")} className="icon-button submission-primary-action" onClick={() => setSubmissionReviewSheetOpen(true)} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                        : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "ready" ? <button aria-label={t("submission.publish")} className="icon-button submission-primary-action" onClick={beginSubmissionPublish} type="button"><span className="material-symbols-outlined">publish</span></button>
-                          : null
-                  ) : !messageSelectionMode ? <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button> : null}
+                  : !messageSelectionMode && displayedChat.purpose !== "submission" ? <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button> : null}
                 {sendProgress !== null ? (
                   <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />
                   </div>
                 ) : null}
               </header>
+              {!messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? (
+                <div className="submission-workflow-bar">
+                  <div><strong>{t("submission.authorActionTitle")}</strong><small>{t("submission.authorActionHint")}</small></div>
+                  <button disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span>{t("submission.submit")}</span><span className="material-symbols-outlined">send</span></button>
+                </div>
+              ) : !messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review" ? (
+                <div className="submission-workflow-bar is-review">
+                  <div><strong>{t("submission.reviewerActionTitle")}</strong><small>{t("submission.reviewerActionHint")}</small></div>
+                  <button onClick={() => setSubmissionReviewSheetOpen(true)} type="button"><span>{t("submission.reviewAction")}</span><span className="material-symbols-outlined">arrow_forward</span></button>
+                </div>
+              ) : !messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "ready" ? (
+                <div className="submission-workflow-bar is-ready">
+                  <div><strong>{t("submission.publishActionTitle")}</strong><small>{t("submission.publishActionHint")}</small></div>
+                  <button onClick={beginSubmissionPublish} type="button"><span>{t("submission.publish")}</span><span className="material-symbols-outlined">arrow_forward</span></button>
+                </div>
+              ) : null}
               {orderedPinnedMessages.length ? (
                 <div className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
                   <button
