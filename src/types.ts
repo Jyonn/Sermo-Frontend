@@ -877,6 +877,7 @@ export interface ChatMessagePayloadDTO {
   chat_grant?: boolean;
   chat_access?: ChatTravelMapAccessDTO;
   statement_id?: number;
+  submission_chat_id?: number;
   url?: string;
   statement?: SquareStatementDTO | null;
   activity_key?: string;

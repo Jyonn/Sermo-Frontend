@@ -1982,6 +1982,7 @@
   ,"message.officialNotice.badge": "官方通知"
   ,"message.officialNotice.placeholder": "你收到了一条官方通知"
   ,"message.officialNotice.byActor": "由 {{name}} 操作"
+  ,"message.officialNotice.openSubmission": "查看投稿"
   ,"chat.clearHistory": "清空聊天记录"
   ,"chat.clearHistoryHint": "仅从你这里清除"
   ,"chat.clearHistoryConfirmTitle": "清空这段聊天记录？"

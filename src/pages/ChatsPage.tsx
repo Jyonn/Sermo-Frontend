@@ -2093,6 +2093,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   onOpenImage,
   onOpenVideo,
   onOpenActions,
+  onOpenOfficialNotice,
   onMentionAuthor,
   onOpenAuthorProfile,
   onRetry,
@@ -2123,14 +2124,43 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   const officialNotice = group.messages.length === 1 && group.messages[0].kind === "official_notice" ? group.messages[0] : null;
   if (officialNotice) {
     const showActor = /^(submission_|square_)/.test(officialNotice.payload?.event ?? "") && Boolean(officialNotice.payload?.actor_name);
+    const submissionChatId = Number(officialNotice.payload?.submission_chat_id);
+    const canOpenSubmission = Boolean(onOpenOfficialNotice && Number.isInteger(submissionChatId) && submissionChatId > 0);
+    const noticeContent = (
+      <>
+        <header><span className="material-symbols-outlined" aria-hidden="true">verified</span><strong>{i18n.t("message.officialNotice.badge")}</strong></header>
+        <p>{officialNotice.text || i18n.t("message.officialNotice.placeholder")}</p>
+        {showActor || canOpenSubmission ? (
+          <footer>
+            {showActor ? <span>{i18n.t("message.officialNotice.byActor", { name: officialNotice.payload?.actor_name ?? "" })}</span> : <span />}
+            {canOpenSubmission ? (
+              <span className="message-official-notice-jump">
+                {i18n.t("message.officialNotice.openSubmission")}
+                <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              </span>
+            ) : null}
+          </footer>
+        ) : null}
+      </>
+    );
     return (
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
-        <article className="message-official-notice" data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}>
-          <header><span className="material-symbols-outlined" aria-hidden="true">verified</span><strong>{i18n.t("message.officialNotice.badge")}</strong></header>
-          <p>{officialNotice.text || i18n.t("message.officialNotice.placeholder")}</p>
-          {showActor ? <footer>{i18n.t("message.officialNotice.byActor", { name: officialNotice.payload?.actor_name ?? "" })}</footer> : null}
-        </article>
+        {canOpenSubmission ? (
+          <button
+            aria-label={i18n.t("message.officialNotice.openSubmission")}
+            className="message-official-notice is-actionable"
+            data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}
+            onClick={() => onOpenOfficialNotice?.(officialNotice)}
+            type="button"
+          >
+            {noticeContent}
+          </button>
+        ) : (
+          <article className="message-official-notice" data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}>
+            {noticeContent}
+          </article>
+        )}
       </div>
     );
   }
@@ -2374,6 +2404,7 @@ interface MessageGroupBlockProps {
   onOpenImage: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   onOpenActions: (message: ChatMessage, element: HTMLElement, pointerX?: number) => void;
+  onOpenOfficialNotice?: (message: ChatMessage) => void;
   onMentionAuthor?: (userId: number) => void;
   onOpenAuthorProfile?: (userId: number) => void;
   onRetry: (message: ChatMessage) => void;
@@ -6925,6 +6956,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                       }}
                       onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
                       onOpenActions={openMessageMenu}
+                      onOpenOfficialNotice={(message) => {
+                        const targetChatId = Number(message.payload?.submission_chat_id);
+                        if (Number.isInteger(targetChatId) && targetChatId > 0) navigate(`/app/submissions/${targetChatId}`);
+                      }}
                       onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
                       onOpenAuthorProfile={setProfileDrawerUserId}
                       onRetry={retryFailedMessage}

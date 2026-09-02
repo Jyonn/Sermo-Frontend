@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.11",
+  "id": "2026.09.02.12",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿操作更直观",
+      "title": "官方通知更清晰",
       "items": [
-        "审批列表不再显示新建投稿入口",
-        "投稿者与审批者的主要操作改为会话内显式按钮"
+        "官方通知增加轻量底色、细边框和装饰层次",
+        "投稿审批通知可直接进入对应投稿会话"
       ]
     },
     "en": {
-      "title": "More visible submission actions",
+      "title": "Clearer official notices",
       "items": [
-        "The review queue no longer shows the new submission action",
-        "Primary author and reviewer actions are now shown explicitly inside the conversation"
+        "Official notices now use a subtle surface, border, and accent treatment",
+        "Submission review notices can open the related submission conversation directly"
       ]
     }
   }

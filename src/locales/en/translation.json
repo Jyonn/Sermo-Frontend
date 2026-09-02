@@ -1982,6 +1982,7 @@
   ,"message.officialNotice.badge": "OFFICIAL NOTICE"
   ,"message.officialNotice.placeholder": "You received an official notice"
   ,"message.officialNotice.byActor": "Actioned by {{name}}"
+  ,"message.officialNotice.openSubmission": "View submission"
   ,"chat.clearHistory": "Clear chat history"
   ,"chat.clearHistoryHint": "Remove only from your account"
   ,"chat.clearHistoryConfirmTitle": "Clear this chat history?"
