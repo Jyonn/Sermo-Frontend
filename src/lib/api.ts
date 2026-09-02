@@ -472,7 +472,7 @@ export const api = {
     });
   },
 
-  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; square_explore_enabled: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; submission_enabled: 0 | 1; square_explore_enabled: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
       adminAuth: true,
@@ -621,8 +621,28 @@ export const api = {
     });
   },
 
-  getChats(signal?: AbortSignal) {
-    return request<ChatDTO[]>("/chats/", { auth: true, signal });
+  getChats(signal?: AbortSignal, purpose: "normal" | "submission" = "normal") {
+    return request<ChatDTO[]>("/chats/", { auth: true, query: purpose === "submission" ? { purpose } : undefined, signal });
+  },
+
+  getSubmissionRecipients(signal?: AbortSignal) {
+    return request<import("../types").SubmissionRecipientDTO[]>("/chats/submissions/recipients", { auth: true, signal });
+  },
+
+  startSubmission(payload: { peer_user_id: number; title: string; client_draft_id: string; content: string; client_message_id: string }) {
+    return request<{ chat: ChatDTO; message: ChatMessageDTO }>("/chats/submissions/start", {
+      method: "POST",
+      auth: true,
+      body: { ...payload, type: 0, resource_id: null },
+    });
+  },
+
+  getSubmissionInvites(chat_id: number, signal?: AbortSignal) {
+    return request<import("../types").SubmissionInviteDTO[]>("/chats/submissions/invites", { auth: true, query: { chat_id }, signal });
+  },
+
+  reviewSubmissionInvite(chat_id: number, user_id: number, accept: boolean) {
+    return request<ChatDTO>("/chats/submissions/invites", { method: "POST", auth: true, query: { chat_id }, body: { user_id, accept: accept ? 1 : 0 } });
   },
 
   createDirectChat(peer_user_id: number) {

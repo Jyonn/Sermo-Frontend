@@ -30522,3 +30522,249 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 }
 .platform-brand img.platform-brand-mark{display:block;object-fit:contain;background:#fbfaf7;color:transparent;font-size:0}
 .join-login-divider{align-items:center;color:var(--muted);display:grid;font-size:12px;gap:12px;grid-template-columns:1fr auto 1fr;margin:2px 0}.join-login-divider i{background:var(--line-soft);height:1px}.join-wechat-login{align-items:center;display:flex;gap:9px;justify-content:center;width:100%}.join-wechat-login .material-symbols-outlined{color:#08a86b;font-size:20px}
+/* Submission conversations reuse chat primitives while keeping creation lightweight. */
+.submission-create-row {
+  border-bottom: 1px solid var(--line);
+}
+
+.submission-create-row-icon {
+  align-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius: 18px;
+  color: var(--accent);
+  display: flex;
+  flex: 0 0 52px;
+  height: 52px;
+  justify-content: center;
+}
+
+.submission-create-row .chat-copy small {
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.submission-create-page {
+  background:
+    radial-gradient(circle at 90% 8%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 36%),
+    var(--page);
+  min-height: 100dvh;
+  padding-bottom: calc(var(--mobile-nav-height, 72px) + env(safe-area-inset-bottom));
+}
+
+.submission-create-page.is-conversation {
+  padding-bottom: 0;
+}
+
+.submission-create-header {
+  align-items: center;
+  background: color-mix(in srgb, var(--page) 88%, transparent);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  min-height: 66px;
+  padding: env(safe-area-inset-top) 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 8;
+}
+
+.submission-create-header > button {
+  background: none;
+  border: 0;
+  color: var(--text);
+  height: 44px;
+  padding: 0;
+}
+
+.submission-create-header > div {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+}
+
+.submission-create-header strong {
+  font-size: 17px;
+}
+
+.submission-create-header small {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.submission-recipient-list,
+.submission-title-card {
+  margin: 20px auto;
+  max-width: 680px;
+  padding: 0 18px;
+}
+
+.submission-recipient-row {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 54px minmax(0, 1fr) auto 24px;
+  padding: 16px 4px;
+  text-align: left;
+  width: 100%;
+}
+
+.submission-recipient-row .avatar {
+  height: 54px;
+  width: 54px;
+}
+
+.submission-recipient-row > span:nth-of-type(1) {
+  display: grid;
+  gap: 5px;
+}
+
+.submission-recipient-row small,
+.submission-empty {
+  color: var(--muted);
+}
+
+.submission-title-card {
+  display: grid;
+  gap: 24px;
+}
+
+.submission-selected-recipient {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.submission-title-card label {
+  display: grid;
+  font-weight: 700;
+  gap: 10px;
+}
+
+.submission-title-card input {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  color: var(--text);
+  font: inherit;
+  min-height: 60px;
+  padding: 0 18px;
+}
+
+.submission-continue {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 58px;
+  padding-inline: 22px;
+}
+
+.submission-draft-conversation {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: calc(100dvh - 66px - env(safe-area-inset-top));
+}
+
+.submission-draft-empty {
+  align-self: center;
+  color: var(--muted);
+  display: grid;
+  justify-items: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.submission-draft-empty > span {
+  color: var(--accent);
+  font-size: 40px;
+  margin-bottom: 14px;
+}
+
+.submission-draft-empty strong {
+  color: var(--text);
+}
+
+.submission-draft-empty p {
+  margin: 8px 0 0;
+}
+
+.submission-draft-composer {
+  align-items: end;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 46px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+}
+
+.submission-draft-composer textarea {
+  background: var(--surface-raised, var(--surface));
+  border: 1px solid var(--line-strong);
+  border-radius: 24px;
+  color: var(--text);
+  font: inherit;
+  max-height: 132px;
+  min-height: 46px;
+  padding: 11px 16px;
+  resize: none;
+}
+
+.submission-draft-composer button {
+  background: var(--accent);
+  border: 0;
+  border-radius: 50%;
+  color: var(--accent-contrast, white);
+  height: 46px;
+  width: 46px;
+}
+
+.submission-draft-composer button:disabled {
+  opacity: .38;
+}
+
+.submission-invite-review {
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 22px;
+  display: grid;
+  gap: 8px;
+  margin: 16px;
+  padding: 16px;
+}
+
+.submission-invite-review > header {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.submission-invite-review > header small,
+.submission-invite-review > div > span small {
+  color: var(--muted);
+}
+
+.submission-invite-review > div {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 42px minmax(0, 1fr) auto auto;
+  padding-top: 8px;
+}
+
+.submission-invite-review > div > span {
+  display: grid;
+  gap: 2px;
+}
+
+.submission-invite-review > div > button {
+  min-height: 38px;
+  padding-inline: 12px;
+}

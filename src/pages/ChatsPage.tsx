@@ -66,7 +66,7 @@ import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -2462,6 +2462,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     operator: Boolean(peer?.operator),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
+    purpose: chat.purpose ?? "normal",
     isOwner,
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
@@ -2570,7 +2571,7 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
   }
 }
 
-function LiveChatsPage() {
+function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submission" }) {
   const { t } = useI18n();
   const pageActive = usePageActive();
   const { discover: discoverFeature } = useFeatureDiscovery();
@@ -2578,6 +2579,9 @@ function LiveChatsPage() {
   const location = useLocation();
   const { chatId } = useParams();
   const { session } = useAuth();
+  const submissionMode = purpose === "submission";
+  const listPath = submissionMode ? "/app/submissions" : "/app/chats";
+  const chatPath = (id: number) => `${listPath}/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
   const initialMineStickerCache = useMemo(
     () => readTabCache<StickerPageCache<StickerDTO>>(stickerCacheScope, STICKER_MINE_CACHE_KEY),
@@ -2591,6 +2595,8 @@ function LiveChatsPage() {
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
+  const [submissionInvites, setSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
+  const [submissionInviteBusyId, setSubmissionInviteBusyId] = useState<number | null>(null);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [messageSearchOpen, setMessageSearchOpen] = useState(false);
   const [messageSearchKeyword, setMessageSearchKeyword] = useState("");
@@ -2936,7 +2942,8 @@ function LiveChatsPage() {
     chatBubbleStyle: currentUserMe?.chat_bubble_style ?? session?.user.chat_bubble_style,
     avatarFrameStyle: currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style,
   };
-  const cacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
+  const baseCacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
+  const cacheScope = baseCacheScope ? (submissionMode ? `${baseCacheScope}:submission` : baseCacheScope) : null;
   const updateDraft = (value: string) => {
     setDraft(value);
     if (cacheScope && selectedChat) writeChatDraft(cacheScope, selectedChat.id, value);
@@ -2948,7 +2955,7 @@ function LiveChatsPage() {
   useEffect(() => {
     if (!chatAccessNotice) return;
     showToast(t("chat.unavailable"), "error");
-    navigate("/app/chats", { replace: true, state: null });
+    navigate(listPath, { replace: true, state: null });
   }, [chatAccessNotice, navigate]);
   const chatHealth = resolveChatHealth(chatHealthSnapshot, healthClock);
   const growthCapability = (key: string, fallbackLevel: number) => currentUserMe?.growth?.capabilities?.[key] ?? {
@@ -2972,6 +2979,7 @@ function LiveChatsPage() {
   const canUseOnlineReminder = growthCapability("chat.reminder.online", 7).available;
   const canDownloadAudio = growthCapability("chat.message.download.audio", 8).available;
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
+  const canReviewSubmissionInvites = Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator);
   const canRecallMessage = (message: ChatMessage) => {
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
     const recallWindowSeconds = currentUserIsPermanentVip ? 7 * 24 * 60 * 60 : 2 * 60;
@@ -3224,7 +3232,7 @@ function LiveChatsPage() {
     if (!pageActive) return () => controller.abort();
 
     api
-      .getChats(controller.signal)
+      .getChats(controller.signal, purpose)
       .then((rows) => {
         recordChatHealth(cacheScope, true);
         didLoadNetwork = true;
@@ -3534,7 +3542,7 @@ function LiveChatsPage() {
       });
     }
 
-    navigate("/app/chats", {
+    navigate(listPath, {
       replace: true,
       state: {
         chatAccessError: message,
@@ -3721,6 +3729,31 @@ function LiveChatsPage() {
   }, [detailsSheetOpen, historyReloadVersion, selectedChat?.id]);
 
   useEffect(() => {
+    if (!detailsSheetOpen || selectedChat?.purpose !== "submission" || !canReviewSubmissionInvites) {
+      setSubmissionInvites([]);
+      return;
+    }
+    const controller = new AbortController();
+    api.getSubmissionInvites(selectedChat.id, controller.signal).then(setSubmissionInvites).catch(() => setSubmissionInvites([]));
+    return () => controller.abort();
+  }, [canReviewSubmissionInvites, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
+
+  const reviewSubmissionInvite = async (invite: SubmissionInviteDTO, accept: boolean) => {
+    if (!selectedChat || submissionInviteBusyId !== null) return;
+    setSubmissionInviteBusyId(invite.user.user_id);
+    try {
+      const updated = await api.reviewSubmissionInvite(selectedChat.id, invite.user.user_id, accept);
+      setSubmissionInvites((current) => current.filter((item) => item.user.user_id !== invite.user.user_id));
+      setChats((current) => current.map((chat) => chat.id === selectedChat.id ? mapChat(updated, currentUserId) : chat));
+      showToast(accept ? t("submission.inviteApproved") : t("submission.inviteRejected"), "success");
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("submission.inviteReviewFailed"), "error");
+    } finally {
+      setSubmissionInviteBusyId(null);
+    }
+  };
+
+  useEffect(() => {
     return;
   }, []);
 
@@ -3751,7 +3784,7 @@ function LiveChatsPage() {
       if (DEBUG_CHAT_SEND) {
         console.log("[chat-close] no selectedChat, navigate immediately");
       }
-      navigate("/app/chats");
+      navigate(listPath);
       return;
     }
 
@@ -6322,7 +6355,7 @@ function LiveChatsPage() {
       setDetailsSheetOpen(false);
       setGroupDangerConfirmOpen(false);
       showToast(selectedChat.isOwner ? t("chat.groupDisbanded") : t("chat.groupLeft"));
-      navigate("/app/chats");
+      navigate(listPath);
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : selectedChat.isOwner ? t("chat.disbandFailed") : t("chat.leaveFailed"), "error");
     } finally {
@@ -6415,7 +6448,7 @@ function LiveChatsPage() {
     <button
       key={chat.id}
       className={`chat-item${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
-      onClick={() => navigate(`/app/chats/${chat.id}`)}
+      onClick={() => navigate(chatPath(chat.id))}
       type="button"
     >
       <div className="avatar-wrap">
@@ -6447,9 +6480,9 @@ function LiveChatsPage() {
   const renderChatList = () => (
     <>
       <TabPageHeader
-        title={t("chat.title")}
+        title={submissionMode ? t("submission.title") : t("chat.title")}
         syncing={viewState === "loading"}
-        actions={<button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button>}
+        actions={!submissionMode ? <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button> : undefined}
         status={
           <span
             aria-label={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
@@ -6460,20 +6493,21 @@ function LiveChatsPage() {
           </span>
         }
       />
-      <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} />
-      <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} />
+      {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
+      {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
 
       <div className="chat-list-screen-body">
         <div className="chat-list">
+          {submissionMode ? <button className="chat-item submission-create-row" onClick={() => navigate("/app/submissions/new")} type="button"><span className="submission-create-row-icon material-symbols-outlined">add</span><span className="chat-copy"><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button> : null}
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
         {!filteredChats.length && viewState === "ready" ? (
           <QuietState
-            icon="chat_bubble"
-            title={t("chat.empty")}
-            description={groupSquareEnabled ? t("chat.emptyHint") : t("chat.emptyHintNoSquare")}
+            icon={submissionMode ? "outbox" : "chat_bubble"}
+            title={submissionMode ? t("submission.empty") : t("chat.empty")}
+            description={submissionMode ? t("submission.emptyHint") : groupSquareEnabled ? t("chat.emptyHint") : t("chat.emptyHintNoSquare")}
             action={
-              groupSquareEnabled ? (
+              !submissionMode && groupSquareEnabled ? (
                 <Link className="button" to="/app/square">
                   {t("chat.goSquare")}
                 </Link>
@@ -6657,7 +6691,7 @@ function LiveChatsPage() {
                     animationName: event.animationName,
                   });
                 }
-                navigate("/app/chats");
+                navigate(listPath);
                 setIsClosingChatView(false);
                 setClosingChatSnapshot(null);
                 }}
@@ -7489,6 +7523,15 @@ function LiveChatsPage() {
       >
         {selectedChat ? (
           <div className="chat-detail-panel">
+            {submissionInvites.length ? <section className="submission-invite-review">
+              <header><strong>{t("submission.pendingInvites")}</strong><small>{t("submission.pendingInvitesHint")}</small></header>
+              {submissionInvites.map((invite) => <div key={invite.user.user_id}>
+                <UserAvatar className="mini-avatar" name={invite.user.name} uri={invite.user.avatar_uri} />
+                <span><strong>{invite.user.name}</strong><small>{t("submission.invitedBy", { name: invite.invited_by?.name ?? t("common.unknown") })}</small></span>
+                <button disabled={submissionInviteBusyId === invite.user.user_id} onClick={() => void reviewSubmissionInvite(invite, false)} type="button">{t("common.reject")}</button>
+                <button className="button" disabled={submissionInviteBusyId === invite.user.user_id} onClick={() => void reviewSubmissionInvite(invite, true)} type="button">{t("common.approve")}</button>
+              </div>)}
+            </section> : null}
             <section className="chat-detail-people-section">
               <div className="chat-detail-member-grid">
                 {visibleDetailMembers.map((member) => (
@@ -7538,7 +7581,7 @@ function LiveChatsPage() {
               ) : null}
             </section>
 
-            <section className="chat-detail-settings-section">
+            {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
               <SettingGroup>
                 <SettingRow
                   icon={<span className="material-symbols-outlined" aria-hidden="true">search</span>}
@@ -7553,11 +7596,11 @@ function LiveChatsPage() {
                   title={t("messageSearch.action")}
                 />
               </SettingGroup>
-            </section>
+            </section> : null}
 
             <section className="chat-detail-settings-section">
               <SettingGroup>
-                <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
+                {selectedChat.purpose !== "submission" ? <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} /> : null}
                 {selectedChat.type === "direct" && canUseOnlineReminder ? (
                   <FeatureDiscoveryTarget
                     className="is-setting-row"
@@ -7567,10 +7610,10 @@ function LiveChatsPage() {
                   <SettingRow title={t("chat.onlineReminder")} trailing={<SettingSwitch checked={selectedChat.onlineReminderEnabled} disabled={preferenceSaving !== null} label={t("chat.toggleOnlineReminder")} onChange={(next) => void updateSelectedChatPreference("online", next)} />} />
                   </FeatureDiscoveryTarget>
                 ) : null}
-                {selectedChat.type === "group" ? (
+                {selectedChat.type === "group" && selectedChat.purpose !== "submission" ? (
                   <SettingRow description={t("chat.muteNotificationsHint")} title={t("chat.muteNotifications")} trailing={<SettingSwitch checked={selectedChat.notificationsMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteNotifications")} onChange={(next) => void updateSelectedChatPreference("mute", next)} />} />
                 ) : null}
-                {selectedChat.type === "group" && selectedChat.notificationsMuted ? (
+                {selectedChat.type === "group" && selectedChat.purpose !== "submission" && selectedChat.notificationsMuted ? (
                   <SettingRow className="is-dependent" description={t("chat.muteUnreadBadgeHint")} title={t("chat.muteUnreadBadge")} trailing={<SettingSwitch checked={selectedChat.unreadBadgeMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteUnreadBadge")} onChange={(next) => void updateSelectedChatPreference("badge", next)} />} />
                 ) : null}
                 {selectedChat.type === "group" && canRenameGroup ? (
@@ -7616,7 +7659,7 @@ function LiveChatsPage() {
 
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">
-                {selectedChat.type === "group" && selectedChat.isOwner ? (
+                {selectedChat.type === "group" && selectedChat.isOwner && selectedChat.purpose !== "submission" ? (
                   <button
                     className="chat-detail-setting-row"
                     onClick={openGroupOwnerTransfer}
@@ -7637,7 +7680,7 @@ function LiveChatsPage() {
                   </div>
                   <span className="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
                 </button>
-                <button
+                {selectedChat.purpose !== "submission" ? <button
                   className="chat-detail-setting-row danger-row"
                   onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : setFriendDangerConfirmOpen(true))}
                   type="button"
@@ -7646,7 +7689,7 @@ function LiveChatsPage() {
                     <strong>{selectedChat.type === "group" ? (selectedChat.isOwner ? t("chat.disband") : t("chat.leave")) : t("friends.delete")}</strong>
                   </div>
                   <span className="material-symbols-outlined">chevron_right</span>
-                </button>
+                </button> : null}
               </div>
             </section>
           </div>
@@ -8943,7 +8986,7 @@ export function ChatPreview({
   );
 }
 
-export default function ChatsPage({ preview }: { preview?: ChatsPagePreviewConfig }) {
+export default function ChatsPage({ preview, purpose }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission" }) {
   if (preview) return <PreviewChatConversation config={preview} />;
-  return <LiveChatsPage />;
+  return <LiveChatsPage purpose={purpose} />;
 }

@@ -4,6 +4,7 @@ import { useAuth } from "./auth";
 
 type SpaceFeatures = {
   chatEnabled: boolean;
+  submissionEnabled: boolean;
   squareEnabled: boolean;
   squareExploreEnabled: boolean;
 };
@@ -12,12 +13,12 @@ type SpaceFeaturesState = SpaceFeatures & { ready: boolean; spaceId: number | nu
 
 const featureCache = new Map<number, SpaceFeatures>();
 const featureRequests = new Map<number, Promise<SpaceFeatures>>();
-const FEATURE_CACHE_PREFIX = "sermo:space-features:v1";
+const FEATURE_CACHE_PREFIX = "sermo:space-features:v2";
 const GROUP_SQUARE_UPDATED_EVENT = "sermo:group-square-updated";
 const SPACE_FEATURES_UPDATED_EVENT = "sermo:space-features-updated";
 
 function defaultFeatures(): SpaceFeatures {
-  return { chatEnabled: true, squareEnabled: true, squareExploreEnabled: true };
+  return { chatEnabled: true, submissionEnabled: false, squareEnabled: true, squareExploreEnabled: true };
 }
 
 function readPersistedFeatures(spaceId: number) {
@@ -54,6 +55,7 @@ function loadSpaceFeatures(spaceId: number) {
   const request = api.getSpaceMe().then((space) => {
     const features = {
       chatEnabled: space.chat_enabled !== false,
+      submissionEnabled: space.submission_enabled === true,
       squareEnabled: space.group_square_enabled !== false,
       squareExploreEnabled: space.square_explore_enabled !== false,
     };

@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.01.4",
-  "publishedAt": "2026-09-01",
+  "id": "2026.09.02.1",
+  "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "地图定位更准确",
+      "title": "空间投稿正式开放",
       "items": [
-        "位置地图会让头像始终贴合定位点，并围绕手指或鼠标位置缩放",
-        "带有地理信息的照片和视频现在可以从媒体详情直接打开地图",
-        "足迹与位置地图统一使用可旋转的地球仪，不再切换到平面地图"
+        "空间可以开放独立投稿入口，成员可选择官方或运营发起投稿",
+        "投稿在发送第一句话后才会创建，并与普通聊天会话分开管理",
+        "投稿群成员邀请需经官方或运营同意，新成员可查看完整投稿记录"
       ]
     },
     "en": {
-      "title": "More precise map interactions",
+      "title": "Space submissions are here",
       "items": [
-        "Location maps now keep avatars pinned correctly and zoom around your touch or pointer",
-        "Photos and videos with location data can now open the map directly from media details",
-        "Footprint and location maps now stay on the interactive globe instead of switching to a flat map"
+        "Spaces can enable a dedicated submission tab where members can contact the official account or an operator",
+        "A submission is created only after the first message and stays separate from ordinary chats",
+        "New submission members require official or operator approval and can read the complete history"
       ]
     }
   }

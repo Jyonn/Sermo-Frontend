@@ -116,6 +116,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
   const [settingsChatEnabled, setSettingsChatEnabled] = useState(true);
+  const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
   const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
@@ -258,6 +259,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsName(dashboard.space.name);
     setSettingsSquareEnabled(Boolean(dashboard.space.group_square_enabled));
     setSettingsChatEnabled(dashboard.space.chat_enabled !== false);
+    setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsUnverifiedGroupPolicy(dashboard.space.unverified_group_policy ?? 2);
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
@@ -393,6 +395,7 @@ export default function SpaceAdminDashboardPage() {
         name: settingsName.trim(),
         group_square_enabled: settingsSquareEnabled ? 1 : 0,
         chat_enabled: settingsChatEnabled ? 1 : 0,
+        submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
@@ -400,6 +403,7 @@ export default function SpaceAdminDashboardPage() {
       });
       setCachedSpaceFeatures(payload.space_id, {
         chatEnabled: payload.chat_enabled !== false,
+        submissionEnabled: payload.submission_enabled === true,
         squareEnabled: payload.group_square_enabled !== false,
         squareExploreEnabled: payload.square_explore_enabled !== false,
       });
@@ -862,6 +866,7 @@ export default function SpaceAdminDashboardPage() {
           <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
           <SettingGroup>
             <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); }} />} />
+            <SettingRow disabled={!settingsChatEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSubmissionEnabled} disabled={!settingsChatEnabled} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
             <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
           </SettingGroup>

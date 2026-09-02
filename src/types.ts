@@ -58,6 +58,7 @@ export interface SpaceDTO {
   official_user?: TinyUserDTO | null;
   group_square_enabled?: boolean;
   chat_enabled?: boolean;
+  submission_enabled?: boolean;
   square_explore_enabled?: boolean;
   unverified_group_policy?: 0 | 1 | 2;
   member_limit?: number | null;
@@ -1129,6 +1130,7 @@ export interface ChatSyncStateDTO {
 export interface ChatDTO {
   chat_id: number;
   chat_type: number;
+  purpose?: "normal" | "submission";
   title: string | null;
   owner: TinyUserDTO | null;
   members: UserDTO[];
@@ -1217,6 +1219,7 @@ export interface Chat {
   operator: boolean;
   members: number;
   type: "direct" | "group";
+  purpose?: "normal" | "submission";
   isOwner: boolean;
   pinned: boolean;
   onlineReminderEnabled: boolean;
@@ -1225,6 +1228,22 @@ export interface Chat {
   hasUnreadMention: boolean;
   detail: ChatDetail;
   messages: ChatMessage[];
+}
+
+export interface SubmissionRecipientDTO {
+  user: UserDTO;
+  relationship: "self" | "none" | "pending" | "friend";
+  role: "official" | "operator";
+}
+
+export interface SubmissionInviteDTO {
+  chat_id: number;
+  user: UserDTO;
+  invited_by: TinyUserDTO | null;
+  role: number;
+  status: number;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface FriendAccepted {

@@ -13,6 +13,7 @@ import { usePageActive } from "../lib/pageActivity";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", labelKey: "nav.chats" },
+  { key: "submissions", href: "/app/submissions", icon: "outbox", labelKey: "nav.submissions" },
   { key: "square", href: "/app/square", icon: "explore", labelKey: "nav.square" },
   { key: "notifications", href: "/app/notifications", icon: "forum", labelKey: "nav.contacts" },
   { key: "menu", href: "/app/menu", icon: "menu", labelKey: "nav.menu" },
@@ -20,6 +21,7 @@ const mobileRoutes = [
 
 function activeKey(pathname: string) {
   if (pathname.startsWith("/app/chats")) return "chats";
+  if (pathname.startsWith("/app/submissions")) return "submissions";
   if (pathname.startsWith("/app/square")) return "square";
   if (pathname.startsWith("/app/notifications")) return "notifications";
   if (pathname.startsWith("/app/menu")) return "menu";
@@ -43,6 +45,7 @@ export function AppBottomNav() {
     [sessionSpaceId, sessionUserId]
   );
   const [totalUnread, setTotalUnread] = useState(0);
+  const [submissionUnread, setSubmissionUnread] = useState(0);
   const [incomingRequestCount, setIncomingRequestCount] = useState(0);
   const [squareUnread, setSquareUnread] = useState(0);
   const [squareHasFreshContent, setSquareHasFreshContent] = useState(false);
@@ -129,6 +132,23 @@ export function AppBottomNav() {
   }, [cacheScope]);
 
   useEffect(() => {
+    if (!session || !pageActive || !features.submissionEnabled) {
+      setSubmissionUnread(0);
+      return;
+    }
+    let cancelled = false;
+    const sync = () => void api.getChats(undefined, "submission").then((rows) => {
+      if (!cancelled) setSubmissionUnread(rows.reduce((sum, chat) => sum + Math.max(0, chat.unread_count ?? 0), 0));
+    }).catch(() => undefined);
+    sync();
+    const timer = window.setInterval(sync, 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [features.submissionEnabled, pageActive, sessionAccessToken, sessionUserId]);
+
+  useEffect(() => {
     if (!session) {
       setIncomingRequestCount(0);
       return;
@@ -195,12 +215,17 @@ export function AppBottomNav() {
   }, [pageActive, sessionAccessToken, sessionUserId]);
 
   if (!session || !effectivePathname.startsWith("/app/")) return null;
-  const isChatDetail = Boolean(matchPath("/app/chats/:chatId", effectivePathname));
+  const isChatDetail = Boolean(
+    matchPath("/app/chats/:chatId", effectivePathname)
+    || matchPath("/app/submissions/:chatId", effectivePathname)
+    || effectivePathname === "/app/submissions/new"
+  );
 
   const current = activeKey(effectivePathname);
   const visibleRoutes = mobileRoutes.filter((route) => {
     if (route.key === "square") return features.squareEnabled;
     if (route.key === "chats") return features.ready && features.chatEnabled;
+    if (route.key === "submissions") return features.ready && features.submissionEnabled;
     return true;
   });
 
@@ -246,6 +271,9 @@ export function AppBottomNav() {
               <span className="material-symbols-outlined nav-button-icon">{route.icon}</span>
               {route.key === "chats" && totalUnread > 0 ? (
                 <span className="nav-unread-badge">{totalUnread > 99 ? "99+" : totalUnread}</span>
+              ) : null}
+              {route.key === "submissions" && submissionUnread > 0 ? (
+                <span className="nav-unread-badge">{submissionUnread > 99 ? "99+" : submissionUnread}</span>
               ) : null}
               {route.key === "square" && squareUnread > 0 ? (
                 <span className="nav-unread-badge">{squareUnread > 99 ? "99+" : squareUnread}</span>
