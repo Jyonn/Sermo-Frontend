@@ -30919,12 +30919,14 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-status-filters {
   display: flex;
   flex: 0 0 auto;
+  align-items: center;
   gap: 7px;
   width: 100%;
-  padding: 7px 14px 9px;
+  min-height: 0;
+  padding: 5px 14px 8px;
   overflow-x: auto;
-  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
-  background: color-mix(in srgb, var(--bg-canvas) 88%, transparent);
+  border: 0;
+  background: transparent;
   box-sizing: border-box;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
@@ -30934,7 +30936,10 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-status-filters > button {
   display: inline-flex;
   flex: 0 0 auto;
+  width: auto;
+  height: 30px;
   min-height: 30px;
+  max-height: 30px;
   align-items: center;
   gap: 6px;
   padding: 0 9px 0 11px;
@@ -30969,6 +30974,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-status-filters > button.is-active b { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 16%, transparent); }
 .submission-status-filters > button:active { transform: scale(.97); }
 .submission-status-filters > button:focus-visible { outline: 2px solid color-mix(in srgb, var(--brand-primary) 40%, transparent); outline-offset: 1px; }
+.mobile-chat-list-screen.has-submission-filters { grid-template-rows: auto auto minmax(0, 1fr); }
 
 .submission-status-badge {
   display: inline-flex;

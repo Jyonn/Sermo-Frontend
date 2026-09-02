@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.16",
+  "id": "2026.09.02.17",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表支持状态筛选",
+      "title": "投稿筛选栏排版优化",
       "items": [
-        "我的投稿和审批投稿均可按状态快速筛选",
-        "筛选胶囊展示各状态数量，切换身份时自动重置"
+        "移除状态筛选栏的整条背景与分隔线",
+        "修复宽屏下筛选胶囊被异常拉高的问题"
       ]
     },
     "en": {
-      "title": "Filter submissions by status",
+      "title": "Refined submission filters",
       "items": [
-        "My submissions and review submissions can now be filtered by status",
-        "Filter chips show status counts and reset when switching roles"
+        "Removed the full-width background and divider from the status filters",
+        "Fixed filter chips stretching vertically on wider screens"
       ]
     }
   }
