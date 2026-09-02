@@ -69,6 +69,7 @@ import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } f
 import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
+import { PUBLIC_ORIGIN } from "../lib/siteConfig";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
@@ -8788,10 +8789,10 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
       kind: "text",
       payload: {
         kind: "text",
-        text: "https://sermo.jyonn.space",
+        text: PUBLIC_ORIGIN,
         link_preview: {
           status: "ready",
-          url: "https://sermo.jyonn.space",
+          url: PUBLIC_ORIGIN,
           site_name: "SERMO",
           title: i18n.t("menu.bubblePreviewLink"),
           description: i18n.t("menu.bubblePreviewLinkHint"),

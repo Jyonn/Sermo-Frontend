@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: [".sermo.jyonn.space", "sermo.jyonn.space"],
+    allowedHosts: [".sermo.jyonn.space", "sermo.jyonn.space", "sermo.6-79.cn"],
     proxy: {
       "/api": {
         target: "https://api.sermo.jyonn.space",

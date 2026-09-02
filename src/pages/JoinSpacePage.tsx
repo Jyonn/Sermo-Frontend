@@ -12,6 +12,7 @@ import { getBrowserJoinLanguage, useI18n } from "../lib/language";
 import { buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
 import type { SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
+import { PUBLIC_HOST } from "../lib/siteConfig";
 
 const MAX_NICKNAME_LENGTH = 8;
 
@@ -43,7 +44,7 @@ export default function JoinSpacePage() {
     if (typeof window !== "undefined" && window.location.host) {
       return slug ? `${window.location.host}/${slug}` : window.location.host;
     }
-    return slug ? `sermo.jyonn.space/${slug}` : "sermo.jyonn.space";
+    return slug ? `${PUBLIC_HOST}/${slug}` : PUBLIC_HOST;
   }, [slug]);
   const [nickname, setNickname] = useState("");
   const nicknameComposingRef = useRef(false);

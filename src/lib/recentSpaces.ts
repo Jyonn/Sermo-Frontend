@@ -1,4 +1,5 @@
 import type { SpaceDTO } from "../types";
+import { PUBLIC_HOST } from "./siteConfig";
 
 const RECENT_SPACES_COOKIE = "sermo_recent_spaces";
 const MAX_RECENT_SPACES = 8;
@@ -54,7 +55,7 @@ function writeCookie(name: string, value: string, domain: string | null) {
 
 function buildDomainForSlug(slug: string) {
   const hostname = currentHostname();
-  if (!hostname) return `sermo.jyonn.space/${slug}`;
+  if (!hostname) return `${PUBLIC_HOST}/${slug}`;
   if (hostname === "localhost") return `localhost/${slug}`;
   return `${hostname}/${slug}`;
 }

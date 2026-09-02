@@ -20,6 +20,7 @@ import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../li
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import type { AdminActivityDTO, AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
 import { showToast } from "../lib/toast";
+import { PUBLIC_HOST } from "../lib/siteConfig";
 
 type MemberFilter = "all" | "online";
 type AdminTab = "members" | "square" | "permissions" | "menu";
@@ -803,7 +804,7 @@ export default function SpaceAdminDashboardPage() {
           </section> : null}
 
           {activeTab === "menu" && currentSpace ? <section className="admin-tab-page admin-menu-tab">
-            <section className="admin-menu-profile"><UserAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>sermo.jyonn.space/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
+            <section className="admin-menu-profile"><UserAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>{PUBLIC_HOST}/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
             <section className="admin-menu-section"><h2>{t("admin.spaceGovernance")}</h2><div className="admin-menu-list">
               <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>

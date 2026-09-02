@@ -78,8 +78,7 @@ import type {
 } from "../types";
 import { i18n } from "./i18n";
 import { showToast } from "./toast";
-
-const API_BASE_URL = import.meta.env.DEV ? "/api" : "https://api.sermo.jyonn.space";
+import { API_BASE_URL } from "./siteConfig";
 
 type AuthConfig = {
   getSession: () => AuthSession | null;

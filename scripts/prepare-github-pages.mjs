@@ -10,4 +10,5 @@ if (!fs.existsSync(index)) {
 
 // GitHub Pages serves 404.html for unknown SPA routes while preserving the URL.
 fs.copyFileSync(index, path.join(dist, "404.html"));
-fs.writeFileSync(path.join(dist, "CNAME"), "sermo.jyonn.space\n");
+const cname = process.env.SERMO_CNAME === undefined ? "sermo.jyonn.space" : process.env.SERMO_CNAME.trim();
+if (cname) fs.writeFileSync(path.join(dist, "CNAME"), `${cname}\n`);

@@ -1,4 +1,5 @@
 import { normalizeStableResourceUri, resolveStableResourceUri } from "./stableResource";
+import { rewritePublicAssetUrl } from "./siteConfig";
 
 const CACHE_NAME = "sermo-avatar-v1";
 const MAX_PERSISTED_AVATARS = 600;
@@ -14,7 +15,7 @@ const pendingLoads = new Map<string, Promise<string>>();
 export function avatarResourceKey(uri?: string | null, explicitKey?: string | null) {
   const version = explicitKey?.trim();
   if (version) return `v:${version}`;
-  const normalized = normalizeStableResourceUri(uri);
+  const normalized = normalizeStableResourceUri(rewritePublicAssetUrl(uri));
   return normalized ? `u:${normalized}` : "";
 }
 
@@ -83,7 +84,7 @@ async function fetchAvatar(uri: string) {
 }
 
 export async function loadAvatarSource(uri?: string | null, explicitKey?: string | null) {
-  const source = resolveStableResourceUri(uri);
+  const source = resolveStableResourceUri(rewritePublicAssetUrl(uri));
   const key = avatarResourceKey(uri, explicitKey);
   if (!source || !key) return source;
 

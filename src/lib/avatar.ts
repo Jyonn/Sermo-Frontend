@@ -1,7 +1,9 @@
+import { buildPublicUrl } from "./siteConfig";
+
 export const AVATAR_PRESET_TOTAL = 36;
 export const AVATAR_PRESETS_PER_PAGE = 16;
 export const AVATAR_PRESET_PAGES = Math.ceil(AVATAR_PRESET_TOTAL / AVATAR_PRESETS_PER_PAGE);
-const AVATAR_PRESET_BASE_URI = "https://sermo.jyonn.space/assets/avatars/v2";
+const AVATAR_PRESET_BASE_URI = buildPublicUrl("assets/avatars/v2");
 
 export function formatAvatarPresetId(id: number) {
   return String(id).padStart(2, "0");
