@@ -1,21 +1,19 @@
 {
-  "id": "2026.09.02.3",
+  "id": "2026.09.02.4",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿视图切换更直接",
+      "title": "关键事件播报更清晰",
       "items": [
-        "投稿页固定展示清晰的标题，审批用户可直接切换“我的”和“审批”列表",
-        "官方和运营进入投稿页时默认查看待审批投稿",
-        "投稿页头部移除了与投稿无关的聊天连接状态提示"
+        "空间运营者的任命与取消改为无气泡的系统消息，不再混入普通聊天内容",
+        "投稿被要求修改、中止或标记待发布时，投稿者会在与审批者的私聊中看到系统播报"
       ]
     },
     "en": {
-      "title": "Faster submission view switching",
+      "title": "Clearer event announcements",
       "items": [
-        "The Submission header now stays clear while reviewers switch directly between Mine and Review",
-        "Official accounts and operators now open the review queue by default",
-        "The unrelated chat connection indicator has been removed from the Submission header"
+        "Operator assignments and removals now appear as bubble-free system messages instead of ordinary chat content",
+        "Authors receive a system announcement in their direct chat with the reviewer when changes are requested, a submission is closed, or it becomes ready to publish"
       ]
     }
   }
