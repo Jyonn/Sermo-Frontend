@@ -8,6 +8,7 @@ import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
+import { FriendlyNeighborhoodActivity } from "../components/FriendlyNeighborhoodActivity";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
@@ -529,6 +530,7 @@ export default function SquarePage() {
   const [activityClaiming, setActivityClaiming] = useState(false);
   const [personalRewardClaiming, setPersonalRewardClaiming] = useState(false);
   const [spaceRewardClaiming, setSpaceRewardClaiming] = useState(false);
+  const [milestoneRewardClaiming, setMilestoneRewardClaiming] = useState<string | null>(null);
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
   const [activityPoolOpen, setActivityPoolOpen] = useState(false);
@@ -739,6 +741,21 @@ export default function SquarePage() {
       showToast(cause instanceof Error ? cause.message : t("activity.spaceRewardClaimFailed"), "error");
     } finally {
       setSpaceRewardClaiming(false);
+    }
+  };
+
+  const claimMilestoneActivityReward = async (rewardKey: string) => {
+    if (!activeActivity || milestoneRewardClaiming) return;
+    setMilestoneRewardClaiming(rewardKey);
+    try {
+      const updated = await api.claimActivityMilestoneReward(activeActivity.key, rewardKey);
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      showToast(t("activity.friendly.unlocked"), "success");
+      void api.getUserMe().then((me) => patchSessionUser(me)).catch(() => undefined);
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
+    } finally {
+      setMilestoneRewardClaiming(null);
     }
   };
 
@@ -1541,7 +1558,7 @@ export default function SquarePage() {
               </span>
               <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
             </button> : null}
-            {spiderManActivity ? <button aria-label={`${t("activity.spiderMan4Title")} · ${t("activity.comingSoon")}`} className="square-activity-banner is-spider-man-preview" onClick={() => showToast(t("activity.spiderMan4ComingSoon"))} type="button">
+            {spiderManActivity ? <button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man-preview" onClick={() => navigate(`/app/square/activities/${spiderManActivity.key}`)} type="button">
               <img alt="" aria-hidden="true" className="square-spider-man-preview-art" src={spiderMan4PreviewBanner} />
               <span className="square-spider-man-preview-copy">
                 <small>{t("activity.preview")}</small>
@@ -1549,7 +1566,7 @@ export default function SquarePage() {
                 <b>{t("activity.spiderMan4Subtitle")}</b>
                 <span>{t("activity.spiderMan4Description")}</span>
               </span>
-              <span className="square-spider-man-preview-status"><i />{t("activity.comingSoon")}</span>
+              <span className="square-spider-man-preview-status"><i />{t("activity.friendly.webPoints")} {spiderManActivity.friendly_neighbor?.web_points ?? 0}</span>
             </button> : null}
             {regularActivities.slice(1).map((activity) => {
               const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
@@ -1763,8 +1780,8 @@ export default function SquarePage() {
           {commentComposer}
         </div>
       </SideDrawer>
-      <SideDrawer className="activity-drawer" headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
-        {activeActivity ? <div className="activity-detail">
+      <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity?.theme !== "spider-man-4" ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
+        {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-512.png?v=6" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
             <div className="activity-detail-index">

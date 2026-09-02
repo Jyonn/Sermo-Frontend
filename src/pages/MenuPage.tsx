@@ -96,6 +96,7 @@ const personalizationOptions = {
     ["aurora", "menu.frameAurora"],
     ["polaroid", "menu.framePolaroid"],
     ["papercut", "menu.framePapercut"], ["mechanical", "menu.frameMechanical"], ["niko-run", "menu.frameNikoRun"], ["fufu-wave", "menu.frameFufuWave"],
+    ["spider-web", "menu.frameSpiderWeb"],
   ],
 } as const;
 
@@ -126,7 +127,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
   { label: "menu.collectionClassic", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["none", "polaroid"].includes(value)) },
   { label: "menu.collectionCraft", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["orbit", "papercut", "mechanical"].includes(value)) },
   { label: "menu.collectionMotion", items: personalizationOptions.avatar_frame_style.filter(([value]) => value === "aurora") },
-  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave"].includes(value)) },
+  { label: "menu.collectionIdentity", items: personalizationOptions.avatar_frame_style.filter(([value]) => ["niko-run", "fufu-wave", "spider-web"].includes(value)) },
 ];
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
@@ -530,7 +531,7 @@ export default function MenuPage() {
   const growthLevel = me?.growth?.level ?? 1;
   const permanentVip = Boolean(me?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const ownsInventoryResource = (
-    resourceType: "background" | "bubble" | "frame" | "vip",
+    resourceType: "background" | "bubble" | "frame" | "vip" | "profile",
     resourceKey: string,
   ) => me?.resource_inventory?.some(
     (item) => item.resource_type === resourceType && item.resource_key === resourceKey,
@@ -2284,12 +2285,12 @@ export default function MenuPage() {
             </div>
           </div>
           <div className="profile-card-theme-list">
-            {(["default", "level-12", "vip"] as const).map((theme) => {
-              const locked = theme === "level-12" ? growthLevel < 12 : theme === "vip" ? !permanentVip : false;
+            {(["default", "level-12", "vip", "spider-city"] as const).map((theme) => {
+              const locked = theme === "level-12" ? growthLevel < 12 : theme === "vip" ? !permanentVip : theme === "spider-city" ? !ownsInventoryResource("profile", "spider-city") : false;
               return <button aria-pressed={personalizationDraft.profile_card_theme === theme} className={`profile-card-theme-option theme-${theme}${personalizationDraft.profile_card_theme === theme ? " is-selected" : ""}${locked ? " is-locked" : ""}`} key={theme} onClick={() => setPersonalizationDraft((current) => ({ ...current, profile_card_theme: theme }))} type="button">
                 <span><i /><b /></span>
                 <strong>{t(`menu.profileCardTheme.${theme}` as TranslationKey)}</strong>
-                <small>{locked ? t(theme === "vip" ? "menu.permanentVipOnly" : "menu.levelUnlock", theme === "vip" ? undefined : { level: 12 }) : t(theme === "level-12" ? "growth.rarity.rare" : theme === "vip" ? "growth.rarity.epic" : "growth.rarity.common")}</small>
+                <small>{locked ? t(theme === "vip" ? "menu.permanentVipOnly" : theme === "spider-city" ? "menu.activityUnlock" : "menu.levelUnlock", theme === "level-12" ? { level: 12 } : undefined) : t(theme === "level-12" ? "growth.rarity.rare" : theme === "vip" || theme === "spider-city" ? "growth.rarity.epic" : "growth.rarity.common")}</small>
               </button>;
             })}
           </div>

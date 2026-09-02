@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.17",
-  "publishedAt": "2026-09-02",
+  "id": "2026.09.03.1",
+  "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "投稿筛选栏排版优化",
+      "title": "友好邻居活动上线",
       "items": [
-        "移除状态筛选栏的整条背景与分隔线",
-        "修复宽屏下筛选胶囊被异常拉高的问题"
+        "回复广场发言可获得蛛网值，并手动解锁限定头像框和动态个人主页",
+        "个人主页改用更沉浸的无标题布局与毛玻璃返回按钮"
       ]
     },
     "en": {
-      "title": "Refined submission filters",
+      "title": "Friendly Neighborhood event",
       "items": [
-        "Removed the full-width background and divider from the status filters",
-        "Fixed filter chips stretching vertically on wider screens"
+        "Earn Web Points by replying in Square and manually unlock a limited frame and animated profile",
+        "Profiles now use an immersive title-free layout with a frosted back button"
       ]
     }
   }

@@ -213,7 +213,7 @@ export interface UserMeDTO extends UserDTO {
 }
 
 export interface UserResourceInventoryDTO {
-  resource_type: "background" | "bubble" | "frame" | "identity" | "vip";
+  resource_type: "background" | "bubble" | "frame" | "identity" | "vip" | "profile";
   reward_id: string;
   resource_key: string;
   source: "growth" | "vip_campaign" | "system";
@@ -224,8 +224,8 @@ export interface UserResourceInventoryDTO {
 
 export type ChatBubbleStyle = "default" | "comic" | "vip" | "niko" | "fufu" | "xiaobai" | "baxian-lv" | "baxian-zhongli" | "baxian-he" | "zen" | "hero" | "dragon" | "bauhaus" | "mosaic" | "typewriter" | "newspaper" | "receipt" | "city-jdz" | "city-shanghai" | "city-nyc" | "city-beijing";
 export type ChatBackgroundTheme = "default" | "paper" | "mint" | "comic" | "bauhaus" | "dragon" | "zen" | "mosaic" | "newsprint" | "aurora-sky" | "hologram" | "spaceport" | "noir-film" | "custom";
-export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run";
-export type ProfileCardTheme = "default" | "level-12" | "vip";
+export type AvatarFrameStyle = "none" | "orbit" | "aurora" | "polaroid" | "papercut" | "mechanical" | "niko-run" | "fufu-wave" | "xiaobai-run" | "spider-web";
+export type ProfileCardTheme = "default" | "level-12" | "vip" | "spider-city";
 export interface PersonalizationDTO {
   chat_bubble_style: ChatBubbleStyle;
   avatar_frame_style: AvatarFrameStyle;
@@ -835,6 +835,14 @@ export interface ActivityCampaignDTO {
     threshold: number;
     user: null | { user_id: number; name: string; avatar_uri?: string; avatar_frame_style?: string; is_permanent_vip?: boolean };
   }>;
+  friendly_neighbor?: {
+    web_points: number;
+    today_points: number;
+    today_reply_count: number;
+    daily_limit: number;
+    next_reply_points: number;
+    rewards: Array<{ key: string; threshold: number; resource_type: "frame" | "profile"; resource_key: string; claimed: boolean; claimable: boolean }>;
+  };
 }
 
 export interface LinkPreviewDTO {

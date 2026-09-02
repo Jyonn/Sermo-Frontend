@@ -6,6 +6,62 @@
   src: url("/fonts/material-symbols-outlined.woff2?v=1") format("woff2");
 }
 
+/* Friendly Neighborhood event and permanent city rewards. */
+.activity-drawer.is-friendly-neighbor .side-drawer-content { padding: 0; background: #071523; }
+.friendly-neighbor-activity { min-height: 100%; color: #f4f8fb; background: linear-gradient(180deg,#071523,#102940 56%,#f3f1ea 56%); }
+.friendly-neighbor-hero { position: relative; min-height: 440px; overflow: hidden; isolation: isolate; }
+.friendly-neighbor-hero::after { position: absolute; inset: 0; z-index: -1; content: ""; background: linear-gradient(180deg,rgba(3,11,20,.05),rgba(4,14,25,.34) 48%,#071523 100%); }
+.friendly-neighbor-hero > img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center 28%; }
+.friendly-neighbor-hero-copy { position: absolute; left: 24px; right: 24px; bottom: 92px; }
+.friendly-neighbor-hero-copy small,.friendly-neighbor-rewards header small { color: #68d8ff; font: 700 .7rem/1.2 ui-monospace,monospace; letter-spacing: .15em; }
+.friendly-neighbor-hero-copy h2 { margin: 8px 0 4px; max-width: 330px; font-size: clamp(2rem,9vw,3.35rem); line-height: .94; letter-spacing: -.055em; }
+.friendly-neighbor-hero-copy p { margin: 0; color: #b8cad9; }
+.friendly-neighbor-score { position: absolute; right: 22px; bottom: 20px; display: flex; align-items: baseline; gap: 5px; }
+.friendly-neighbor-score span { margin-right: 4px; color: #9db4c5; font-size: .76rem; }
+.friendly-neighbor-score strong { color: #fff; font-size: 2.35rem; line-height: 1; }
+.friendly-neighbor-score small { color: #56d6fa; }
+.friendly-neighbor-today { margin: -1px 18px 0; padding: 18px; border: 1px solid rgba(123,213,244,.22); border-radius: 20px; background: rgba(15,42,63,.88); box-shadow: 0 16px 32px rgba(0,0,0,.18); }
+.friendly-neighbor-today header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.friendly-neighbor-today header div { display: grid; gap: 3px; }
+.friendly-neighbor-today header small,.friendly-neighbor-today header span { color: #99b3c5; font-size: .75rem; }
+.friendly-neighbor-today header strong { font-size: 1.35rem; }
+.friendly-neighbor-today > div { height: 6px; margin-top: 14px; overflow: hidden; border-radius: 9px; background: rgba(255,255,255,.1); }
+.friendly-neighbor-today > div i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#e54149,#5ad9ff); box-shadow: 0 0 14px #59d8ff; }
+.friendly-neighbor-rewards { margin-top: 28px; padding: 26px 18px 24px; color: #102031; background: #f3f1ea; }
+.friendly-neighbor-rewards h3,.friendly-neighbor-rules h3 { margin: 5px 0 0; font-size: 1.65rem; }
+.friendly-neighbor-track { position: relative; height: 5px; margin: 34px 8px 38px; border-radius: 8px; background: #d6dce0; }
+.friendly-neighbor-track > i { display: block; height: 100%; background: linear-gradient(90deg,#d92d42,#1478aa); }
+.friendly-neighbor-track article { position: absolute; top: 50%; translate: -50% -50%; }
+.friendly-neighbor-track article span { display: grid; width: 34px; height: 34px; place-items: center; border: 3px solid #f3f1ea; border-radius: 50%; color: #73818b; background: #dfe4e7; font-size: .68rem; font-weight: 800; }
+.friendly-neighbor-track article.is-ready span,.friendly-neighbor-track article.is-claimed span { color: white; background: #1478aa; box-shadow: 0 0 0 3px rgba(20,120,170,.18); }
+.friendly-neighbor-reward { display: grid; grid-template-columns: 58px minmax(0,1fr); gap: 13px; margin-bottom: 12px; padding: 16px; border: 1px solid #dce1e3; border-radius: 20px; background: rgba(255,255,255,.68); }
+.friendly-neighbor-reward-art { display: grid; width: 58px; height: 58px; place-items: center; border-radius: 17px; color: #e7f8ff; background: linear-gradient(145deg,#152a43,#177cac); }
+.friendly-neighbor-reward-art span { font-size: 30px; }
+.friendly-neighbor-reward div:nth-child(2) { min-width: 0; }
+.friendly-neighbor-reward small { color: #1478aa; font-size: .69rem; font-weight: 800; text-transform: uppercase; }
+.friendly-neighbor-reward strong { display: block; margin: 2px 0; font-size: 1rem; }
+.friendly-neighbor-reward p { margin: 0; color: #74808a; font-size: .78rem; }
+.friendly-neighbor-reward button { grid-column: 1/-1; min-height: 40px; border: 0; border-radius: 13px; color: white; background: #113c58; font-weight: 750; }
+.friendly-neighbor-reward button:disabled { color: #7c878e; background: #e1e4e3; }
+.friendly-neighbor-reward.is-claimed { border-color: rgba(20,120,170,.35); }
+.friendly-neighbor-rules { padding: 24px 22px 36px; color: #172837; background: #e6eceb; }
+.friendly-neighbor-rules ol { margin: 16px 0 0; padding-left: 22px; color: #65737d; font-size: .82rem; line-height: 1.7; }
+.avatar-frame-spider-web { --avatar-frame-inset: 7%; --avatar-frame-paint: repeating-conic-gradient(from 8deg,#dcefff 0 4deg,#123c61 5deg 17deg,#df3448 18deg 24deg); }
+.avatar-frame-spider-web::after { position: absolute; inset: 3%; z-index: 2; border: 1px solid rgba(255,255,255,.72); border-radius: inherit; content: ""; box-shadow: inset 0 0 10px rgba(77,199,241,.7); }
+.user-profile-panel.profile-theme-spider-city { position: relative; overflow: hidden; color: #edf8ff; background: #081624 url("./src/assets/activity/friendly-neighborhood/profile-city.webp") center top/cover fixed; }
+.user-profile-panel.profile-theme-spider-city::before { position: absolute; inset: 0; content: ""; background: linear-gradient(180deg,rgba(3,12,21,.12),rgba(5,18,31,.78) 48%,#071521 100%); animation: spider-city-breathe 7s ease-in-out infinite alternate; pointer-events: none; }
+.user-profile-panel.profile-theme-spider-city > * { position: relative; z-index: 1; }
+.user-profile-panel.profile-theme-spider-city .user-profile-cover { background: transparent; }
+.user-profile-panel.profile-theme-spider-city :is(.user-profile-social-card,.user-profile-recent-statement,.user-profile-reminders,.user-profile-section) { border-color: rgba(112,205,239,.24); background: rgba(7,24,39,.7); box-shadow: 0 14px 34px rgba(0,0,0,.24); backdrop-filter: blur(16px); }
+.user-profile-panel.profile-theme-spider-city :is(h2,strong) { color: #f4fbff; }
+.user-profile-panel.profile-theme-spider-city :is(p,small,span) { color: #b6cad8; }
+.friend-profile-header { position: absolute !important; top: calc(12px + env(safe-area-inset-top)) !important; left: 14px; z-index: 20; width: 46px; min-height: 46px; padding: 0; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; background: rgba(245,248,247,.54); box-shadow: 0 8px 22px rgba(12,29,23,.18); backdrop-filter: blur(18px); }
+.friend-profile-header .chat-back-button { position: static; width: 100%; height: 100%; color: #183b31; }
+.friend-profile-sync { display: none; }
+.shell-friend-profile { position: relative; }
+@keyframes spider-city-breathe { from { background-color: rgba(5,16,27,.02); } to { background-color: rgba(32,113,151,.16); } }
+@media (prefers-reduced-motion: reduce) { .user-profile-panel.profile-theme-spider-city::before { animation: none; } }
+
 .pwa-recommendation {
   position: fixed;
   left: 50%;

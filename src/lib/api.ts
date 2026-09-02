@@ -883,6 +883,10 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}/personal-reward/claim`, { method: "POST", auth: true });
   },
 
+  claimActivityMilestoneReward(key: string, rewardKey: string) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/rewards/${rewardKey}/claim`, { method: "POST", auth: true });
+  },
+
   claimActivitySpaceReward(key: string) {
     return request<ActivityCampaignDTO>(`/activities/${key}/space-reward/claim`, { method: "POST", auth: true });
   },

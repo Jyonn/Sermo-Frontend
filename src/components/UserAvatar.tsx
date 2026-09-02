@@ -19,7 +19,7 @@ interface UserAvatarProps {
 }
 
 const supportedAvatarFrames = new Set<AvatarFrameStyle>([
-  "orbit", "aurora", "polaroid", "papercut", "mechanical", "niko-run", "fufu-wave", "xiaobai-run",
+  "orbit", "aurora", "polaroid", "papercut", "mechanical", "niko-run", "fufu-wave", "xiaobai-run", "spider-web",
 ]);
 
 function avatarLabel(name: string) {
