@@ -2583,15 +2583,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const { chatId } = useParams();
   const { session } = useAuth();
   const submissionMode = purpose === "submission";
-  const submissionViewStorageKey = session ? `sermo:submission-view:${session.user.space_id}:${session.user.user_id}` : "sermo:submission-view";
-  const [submissionView, setSubmissionView] = useState<"author" | "reviewer">(() => {
-    try {
-      return (session?.user.official || session?.user.operator) && window.localStorage.getItem(submissionViewStorageKey) === "reviewer" ? "reviewer" : "author";
-    } catch {
-      return "author";
-    }
-  });
-  const [submissionViewSheetOpen, setSubmissionViewSheetOpen] = useState(false);
+  const [submissionView, setSubmissionView] = useState<"author" | "reviewer">(
+    session?.user.official || session?.user.operator ? "reviewer" : "author",
+  );
   const [submissionReviewSheetOpen, setSubmissionReviewSheetOpen] = useState(false);
   const [submissionActionBusy, setSubmissionActionBusy] = useState(false);
   const [submissionPublishSelection, setSubmissionPublishSelection] = useState(false);
@@ -5831,12 +5825,6 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const chooseSubmissionView = (role: "author" | "reviewer") => {
     setSubmissionView(role);
-    setSubmissionViewSheetOpen(false);
-    try {
-      window.localStorage.setItem(submissionViewStorageKey, role);
-    } catch {
-      // The view preference is optional when storage is unavailable.
-    }
     if (chatId) navigate(listPath);
   };
 
@@ -6569,15 +6557,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const renderChatList = () => (
     <>
       <TabPageHeader
-        title={submissionMode && canReviewSubmissionInvites ? (
-          <button className="submission-view-switch" onClick={() => setSubmissionViewSheetOpen(true)} type="button">
-            <span>{submissionView === "author" ? t("submission.mine") : t("submission.reviewQueue")}</span>
-            <span className="material-symbols-outlined">unfold_more</span>
-          </button>
-        ) : submissionMode ? t("submission.mine") : t("chat.title")}
+        title={submissionMode ? <span className="submission-header-title"><span>{t("submission.title")}</span>{canReviewSubmissionInvites ? <button aria-label={t("submission.switchView")} className="submission-view-switch" onClick={() => chooseSubmissionView(submissionView === "author" ? "reviewer" : "author")} type="button"><span className="material-symbols-outlined">swap_horiz</span><span>{submissionView === "author" ? t("submission.viewMine") : t("submission.viewReview")}</span></button> : null}</span> : t("chat.title")}
         syncing={viewState === "loading"}
         actions={!submissionMode ? <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button> : undefined}
-        status={
+        status={!submissionMode ? (
           <span
             aria-label={chatHealth === "healthy" ? t("chat.connectionHealthy") : chatHealth === "warning" ? t("chat.connectionWarning") : t("chat.connectionOffline")}
             className={`chat-health-indicator is-${chatHealth}`}
@@ -6585,7 +6568,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           >
             <span className="chat-health-dot" />
           </span>
-        }
+        ) : undefined}
       />
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
       {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
@@ -7437,13 +7420,6 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           )}
         </aside>
       </section>
-
-      <BottomSheet open={submissionViewSheetOpen} title={t("submission.switchView")} onClose={() => setSubmissionViewSheetOpen(false)}>
-        <div className="submission-view-options">
-          <button className={submissionView === "author" ? "is-active" : ""} onClick={() => chooseSubmissionView("author")} type="button"><span className="material-symbols-outlined">outbox</span><span><strong>{t("submission.mine")}</strong><small>{t("submission.mineHint")}</small></span><span className="material-symbols-outlined">check_circle</span></button>
-          <button className={submissionView === "reviewer" ? "is-active" : ""} onClick={() => chooseSubmissionView("reviewer")} type="button"><span className="material-symbols-outlined">fact_check</span><span><strong>{t("submission.reviewQueue")}</strong><small>{t("submission.reviewQueueHint")}</small></span><span className="material-symbols-outlined">check_circle</span></button>
-        </div>
-      </BottomSheet>
 
       <BottomSheet open={submissionReviewSheetOpen} title={t("submission.reviewNext")} onClose={() => !submissionActionBusy && setSubmissionReviewSheetOpen(false)}>
         <div className="submission-review-actions">

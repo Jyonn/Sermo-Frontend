@@ -56,6 +56,8 @@
   "submission.reviewQueue": "审批投稿",
   "submission.reviewQueueHint": "处理提交给我的投稿",
   "submission.switchView": "切换投稿身份",
+  "submission.viewMine": "我的",
+  "submission.viewReview": "审批",
   "submission.from": "来自 {{name}}",
   "submission.submit": "发送投稿",
   "submission.submitted": "已发送，等待审批",

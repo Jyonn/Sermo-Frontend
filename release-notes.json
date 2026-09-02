@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.02.2",
+  "id": "2026.09.02.3",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿审批流程完善",
+      "title": "投稿视图切换更直接",
       "items": [
-        "官方和运营可在“我的投稿”与“审批投稿”之间切换，投稿双方身份与处理状态清晰展示",
-        "草稿、待处理、待补充、待发布和已发布拥有独立的发送与撤回规则",
-        "审批者可选取投稿消息直接发布到广场，发言正文会自动带入投稿标题"
+        "投稿页固定展示清晰的标题，审批用户可直接切换“我的”和“审批”列表",
+        "官方和运营进入投稿页时默认查看待审批投稿",
+        "投稿页头部移除了与投稿无关的聊天连接状态提示"
       ]
     },
     "en": {
-      "title": "A complete submission review flow",
+      "title": "Faster submission view switching",
       "items": [
-        "Official accounts and operators can switch between their own submissions and review queue, with clear roles and statuses",
-        "Draft, review, revision, ready, and published states now enforce the correct send and recall rules",
-        "Reviewers can select submission messages and publish them to Square with the submission title prefilled"
+        "The Submission header now stays clear while reviewers switch directly between Mine and Review",
+        "Official accounts and operators now open the review queue by default",
+        "The unrelated chat connection indicator has been removed from the Submission header"
       ]
     }
   }

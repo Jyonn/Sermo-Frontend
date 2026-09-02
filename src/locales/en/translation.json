@@ -56,6 +56,8 @@
   "submission.reviewQueue": "Review submissions",
   "submission.reviewQueueHint": "Handle submissions sent to me",
   "submission.switchView": "Switch submission role",
+  "submission.viewMine": "Mine",
+  "submission.viewReview": "Review",
   "submission.from": "From {{name}}",
   "submission.submit": "Submit",
   "submission.submitted": "Submitted for review",

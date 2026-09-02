@@ -30768,18 +30768,34 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   min-height: 38px;
   padding-inline: 12px;
 }
+.submission-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
 .submission-view-switch {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 7px;
   border: 0;
-  padding: 0;
-  color: inherit;
-  background: transparent;
-  font: inherit;
+  min-height: 38px;
+  padding: 7px 15px 7px 12px;
+  border-radius: 999px;
+  color: var(--brand-primary-press);
+  background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-surface));
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color 160ms ease, transform 160ms ease;
 }
 
-.submission-view-switch .material-symbols-outlined { font-size: 20px; color: var(--text-muted); }
+.submission-view-switch:active { transform: scale(.97); background: color-mix(in srgb, var(--brand-primary) 20%, var(--bg-surface)); }
+.submission-view-switch .material-symbols-outlined { font-size: 20px; color: currentColor; }
 
 .submission-status-badge {
   display: inline-flex;
@@ -30801,9 +30817,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 
 .submission-counterpart { margin-right: 8px; color: var(--text-muted); font-weight: 650; }
 
-.submission-view-options,
 .submission-review-actions { display: grid; gap: 8px; }
-.submission-view-options > button,
 .submission-review-actions > button {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) 24px;
@@ -30817,11 +30831,8 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   background: var(--bg-elevated);
   text-align: left;
 }
-.submission-view-options > button > span:nth-child(2),
 .submission-review-actions > button > span:nth-child(2) { display: grid; gap: 3px; }
-.submission-view-options small,
 .submission-review-actions small { color: var(--text-muted); font-size: 12px; }
-.submission-view-options > button > .material-symbols-outlined:first-child,
 .submission-review-actions > button > .material-symbols-outlined:first-child {
   display: grid;
   place-items: center;
@@ -30831,9 +30842,6 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   color: var(--brand-primary-press);
   background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
 }
-.submission-view-options > button > .material-symbols-outlined:last-child { opacity: 0; color: var(--brand-primary-press); }
-.submission-view-options > button.is-active { background: color-mix(in srgb, var(--brand-primary) 8%, var(--bg-surface)); }
-.submission-view-options > button.is-active > .material-symbols-outlined:last-child { opacity: 1; }
 .submission-review-actions > button.is-danger > .material-symbols-outlined:first-child { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
 .submission-review-actions > button.is-primary { color: #073b2b; background: var(--brand-primary); }
 .submission-review-actions > button.is-primary small { color: color-mix(in srgb, #073b2b 68%, transparent); }
