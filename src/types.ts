@@ -1146,6 +1146,19 @@ export interface ChatDTO {
   notifications_muted?: boolean;
   unread_badge_muted?: boolean;
   has_unread_mention?: boolean;
+  submission?: SubmissionDTO | null;
+  submission_role?: SubmissionRole;
+}
+
+export type SubmissionStatus = "draft" | "review" | "revision" | "terminated" | "ready" | "published";
+export type SubmissionRole = "author" | "reviewer" | "member";
+
+export interface SubmissionDTO {
+  author: TinyUserDTO;
+  recipient: TinyUserDTO;
+  status: SubmissionStatus;
+  submitted_at: number | null;
+  published_statement_id: number | null;
 }
 
 export interface ChatPreferenceDTO {
@@ -1220,6 +1233,8 @@ export interface Chat {
   members: number;
   type: "direct" | "group";
   purpose?: "normal" | "submission";
+  submission?: SubmissionDTO | null;
+  submissionRole?: SubmissionRole;
   isOwner: boolean;
   pinned: boolean;
   onlineReminderEnabled: boolean;

@@ -137,8 +137,13 @@ export function AppBottomNav() {
       return;
     }
     let cancelled = false;
-    const sync = () => void api.getChats(undefined, "submission").then((rows) => {
-      if (!cancelled) setSubmissionUnread(rows.reduce((sum, chat) => sum + Math.max(0, chat.unread_count ?? 0), 0));
+    const sync = () => void Promise.all([
+      api.getChats(undefined, "submission", "author"),
+      api.getChats(undefined, "submission", "reviewer"),
+    ]).then(([authored, reviewed]) => {
+      if (cancelled) return;
+      const unique = new Map([...authored, ...reviewed].map((chat) => [chat.chat_id, chat]));
+      setSubmissionUnread([...unique.values()].reduce((sum, chat) => sum + Math.max(0, chat.unread_count ?? 0), 0));
     }).catch(() => undefined);
     sync();
     const timer = window.setInterval(sync, 15_000);

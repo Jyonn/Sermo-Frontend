@@ -621,8 +621,8 @@ export const api = {
     });
   },
 
-  getChats(signal?: AbortSignal, purpose: "normal" | "submission" = "normal") {
-    return request<ChatDTO[]>("/chats/", { auth: true, query: purpose === "submission" ? { purpose } : undefined, signal });
+  getChats(signal?: AbortSignal, purpose: "normal" | "submission" = "normal", role?: "author" | "reviewer") {
+    return request<ChatDTO[]>("/chats/", { auth: true, query: purpose === "submission" ? { purpose, ...(role ? { role } : {}) } : undefined, signal });
   },
 
   getSubmissionRecipients(signal?: AbortSignal) {
@@ -635,6 +635,14 @@ export const api = {
       auth: true,
       body: { ...payload, type: 0, resource_id: null },
     });
+  },
+
+  submitSubmission(chat_id: number) {
+    return request<ChatDTO>("/chats/submissions/submit", { method: "POST", auth: true, query: { chat_id } });
+  },
+
+  reviewSubmission(chat_id: number, action: "revision" | "terminate" | "ready") {
+    return request<ChatDTO>("/chats/submissions/status", { method: "POST", auth: true, query: { chat_id }, body: { action } });
   },
 
   getSubmissionInvites(chat_id: number, signal?: AbortSignal) {

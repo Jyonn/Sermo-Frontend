@@ -443,7 +443,7 @@ export default function SquarePage() {
   } | null>(null);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
-  const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[] } } | null;
+  const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; text?: string } } | null;
   const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
   const consumedChatRecordDraftRef = useRef<string | null>(null);
 
@@ -470,6 +470,7 @@ export default function SquarePage() {
     setVoiceDuration(0);
     setVideo(null);
     setAnonymousStatement(false);
+    setText(routeState?.squareChatRecordDraft?.text?.trim() ?? "");
     setComposerOpen(true);
     navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
   }, [location.pathname, location.search, navigate, routeState?.squareChatRecordDraft]);

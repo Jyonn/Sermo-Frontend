@@ -66,7 +66,7 @@ import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 
@@ -2440,6 +2440,7 @@ function sortChatDetailMembers(
 
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
+  const submissionCounterpart = chat.submission_role === "reviewer" ? chat.submission?.author : chat.submission?.recipient;
   const title = chat.title || peer?.name || i18n.t("chat.unnamed");
   const presence = formatPresence(peer);
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
@@ -2448,9 +2449,9 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   return {
     id: chat.chat_id,
     title,
-    avatarUri: peer?.avatar_uri,
-    avatarCacheKey: peer?.avatar_cache_key,
-    avatarFrameStyle: peer?.avatar_frame_style,
+    avatarUri: submissionCounterpart?.avatar_uri ?? peer?.avatar_uri,
+    avatarCacheKey: submissionCounterpart?.avatar_cache_key ?? peer?.avatar_cache_key,
+    avatarFrameStyle: submissionCounterpart?.avatar_frame_style ?? peer?.avatar_frame_style,
     subtitle: chat.group ? i18n.t("chat.memberCount", { count: chat.members.length }) : presence,
     preview: previewFromDto(chat.last_message),
     time: formatChatListTime(lastActivity),
@@ -2458,11 +2459,13 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     unread: chat.unread_count ?? 0,
     online: chat.group ? false : Boolean(peer?.is_alive),
     verified: Boolean(peer?.verified),
-    official: Boolean(peer?.official),
-    operator: Boolean(peer?.operator),
+    official: Boolean(submissionCounterpart?.official ?? peer?.official),
+    operator: Boolean(submissionCounterpart?.operator ?? peer?.operator),
     members: chat.members.length,
     type: chat.group ? "group" : "direct",
     purpose: chat.purpose ?? "normal",
+    submission: chat.submission,
+    submissionRole: chat.submission_role,
     isOwner,
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
@@ -2580,6 +2583,18 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const { chatId } = useParams();
   const { session } = useAuth();
   const submissionMode = purpose === "submission";
+  const submissionViewStorageKey = session ? `sermo:submission-view:${session.user.space_id}:${session.user.user_id}` : "sermo:submission-view";
+  const [submissionView, setSubmissionView] = useState<"author" | "reviewer">(() => {
+    try {
+      return (session?.user.official || session?.user.operator) && window.localStorage.getItem(submissionViewStorageKey) === "reviewer" ? "reviewer" : "author";
+    } catch {
+      return "author";
+    }
+  });
+  const [submissionViewSheetOpen, setSubmissionViewSheetOpen] = useState(false);
+  const [submissionReviewSheetOpen, setSubmissionReviewSheetOpen] = useState(false);
+  const [submissionActionBusy, setSubmissionActionBusy] = useState(false);
+  const [submissionPublishSelection, setSubmissionPublishSelection] = useState(false);
   const listPath = submissionMode ? "/app/submissions" : "/app/chats";
   const chatPath = (id: number) => `${listPath}/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
@@ -2943,7 +2958,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     avatarFrameStyle: currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style,
   };
   const baseCacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
-  const cacheScope = baseCacheScope ? (submissionMode ? `${baseCacheScope}:submission` : baseCacheScope) : null;
+  const cacheScope = baseCacheScope ? (submissionMode ? `${baseCacheScope}:submission:${submissionView}` : baseCacheScope) : null;
   const updateDraft = (value: string) => {
     setDraft(value);
     if (cacheScope && selectedChat) writeChatDraft(cacheScope, selectedChat.id, value);
@@ -2982,6 +2997,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const canReviewSubmissionInvites = Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator);
   const canRecallMessage = (message: ChatMessage) => {
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
+    if (selectedChat?.purpose === "submission") {
+      return selectedChat.submissionRole === "author" && selectedChat.submission?.status === "draft";
+    }
     const recallWindowSeconds = currentUserIsPermanentVip ? 7 * 24 * 60 * 60 : 2 * 60;
     return Math.max(0, Math.floor(Date.now() / 1000) - message.createdAt) <= recallWindowSeconds;
   };
@@ -3150,6 +3168,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setSelectedMessageClientIds([]);
     setBatchDeleteConfirmOpen(false);
     setMessageSelectionActionPrompt(null);
+    setSubmissionPublishSelection(false);
   };
 
   const toggleMessageSelection = (message: ChatMessage) => {
@@ -3232,7 +3251,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!pageActive) return () => controller.abort();
 
     api
-      .getChats(controller.signal, purpose)
+      .getChats(controller.signal, purpose, submissionMode ? submissionView : undefined)
       .then((rows) => {
         recordChatHealth(cacheScope, true);
         didLoadNetwork = true;
@@ -3250,7 +3269,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       });
 
     return () => controller.abort();
-  }, [cacheScope, currentUserId, pageActive]);
+  }, [cacheScope, currentUserId, pageActive, purpose, submissionMode, submissionView]);
 
   useEffect(() => {
     if (!pageActive) return;
@@ -3279,6 +3298,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats]);
+  const submissionStatus = selectedChat?.submission?.status;
+  const submissionRole = selectedChat?.submissionRole;
+  const submissionCanSend = !submissionMode || (
+    (submissionRole === "author" && (submissionStatus === "draft" || submissionStatus === "revision"))
+    || (submissionRole === "reviewer" && submissionStatus === "review")
+  );
+  const submissionStatusLabel = (status?: SubmissionStatus) => status ? t(`submission.status.${status}` as TranslationKey) : "";
   const selectedChatId = selectedChat?.id ?? null;
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
   selectedChatIdRef.current = selectedChatId;
@@ -5794,8 +5820,70 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const refreshChats = async () => {
-    const rows = await api.getChats();
+    const rows = await api.getChats(undefined, purpose, submissionMode ? submissionView : undefined);
     setChats(sortChats(rows.map((item) => mapChat(item, currentUserId))));
+  };
+
+  const replaceSubmissionChat = (chat: ChatDTO) => {
+    const mapped = mapChat(chat, currentUserId);
+    setChats((current) => sortChats(current.map((item) => item.id === mapped.id ? mapped : item)));
+  };
+
+  const chooseSubmissionView = (role: "author" | "reviewer") => {
+    setSubmissionView(role);
+    setSubmissionViewSheetOpen(false);
+    try {
+      window.localStorage.setItem(submissionViewStorageKey, role);
+    } catch {
+      // The view preference is optional when storage is unavailable.
+    }
+    if (chatId) navigate(listPath);
+  };
+
+  const submitCurrentSubmission = async () => {
+    if (!selectedChat || submissionActionBusy) return;
+    try {
+      setSubmissionActionBusy(true);
+      replaceSubmissionChat(await api.submitSubmission(selectedChat.id));
+      showToast(t("submission.submitted"), "success");
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("submission.actionFailed"), "error");
+    } finally {
+      setSubmissionActionBusy(false);
+    }
+  };
+
+  const reviewCurrentSubmission = async (action: "revision" | "terminate" | "ready") => {
+    if (!selectedChat || submissionActionBusy) return;
+    try {
+      setSubmissionActionBusy(true);
+      replaceSubmissionChat(await api.reviewSubmission(selectedChat.id, action));
+      setSubmissionReviewSheetOpen(false);
+      showToast(t(`submission.reviewed.${action}` as TranslationKey), "success");
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("submission.actionFailed"), "error");
+    } finally {
+      setSubmissionActionBusy(false);
+    }
+  };
+
+  const beginSubmissionPublish = () => {
+    setSubmissionPublishSelection(true);
+    setMessageSelectionMode(true);
+    setSelectedMessageClientIds([]);
+    setSubmissionReviewSheetOpen(false);
+  };
+
+  const composeSubmissionForSquare = () => {
+    if (!selectedChat) return;
+    const messageIds = eligibleForwardMessages().map((message) => message.id as number);
+    if (!messageIds.length) {
+      showToast(t("submission.selectMessages"), "error");
+      return;
+    }
+    setSubmissionPublishSelection(false);
+    finishMessageSelection();
+    navigate("/app/square", { state: { squareChatRecordDraft: { messageIds, text: selectedChat.title } } });
   };
 
   const copyMessageText = async () => {
@@ -5891,6 +5979,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setMessageSelectionMode(false);
     setSelectedMessageClientIds([]);
     setMessageSelectionActionPrompt(null);
+    setSubmissionPublishSelection(false);
   };
 
   const executeSelectionAction = async (action: MessageSelectionAction, clientIds: string[]) => {
@@ -6455,7 +6544,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         <UserAvatar
           className={`avatar ${chat.online ? "status-online" : ""}`}
           groupMembers={
-            chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
+            chat.type === "group" && chat.purpose !== "submission" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
           }
           name={chat.title}
           uri={chat.avatarUri}
@@ -6467,8 +6556,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         ) : null}
       </div>
       <div className="chat-copy">
-        <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}</p>
-        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.preview}</span></div>
+        <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}{chat.submission ? <span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span> : null}</p>
+        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}{chat.submission ? <span className="submission-counterpart">{chat.submissionRole === "reviewer" ? t("submission.from", { name: chat.submission.author.name }) : t("submission.to", { name: chat.submission.recipient.name })}</span> : null}<span>{chat.preview}</span></div>
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
@@ -6480,7 +6569,12 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const renderChatList = () => (
     <>
       <TabPageHeader
-        title={submissionMode ? t("submission.title") : t("chat.title")}
+        title={submissionMode && canReviewSubmissionInvites ? (
+          <button className="submission-view-switch" onClick={() => setSubmissionViewSheetOpen(true)} type="button">
+            <span>{submissionView === "author" ? t("submission.mine") : t("submission.reviewQueue")}</span>
+            <span className="material-symbols-outlined">unfold_more</span>
+          </button>
+        ) : submissionMode ? t("submission.mine") : t("chat.title")}
         syncing={viewState === "loading"}
         actions={!submissionMode ? <button aria-label={t("friendSearch.title")} className="tab-header-action" onClick={() => setAddFriendOpen(true)} type="button"><span className="material-symbols-outlined">person_add</span></button> : undefined}
         status={
@@ -6498,7 +6592,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
       <div className="chat-list-screen-body">
         <div className="chat-list">
-          {submissionMode ? <button className="chat-item submission-create-row" onClick={() => navigate("/app/submissions/new")} type="button"><span className="submission-create-row-icon material-symbols-outlined">add</span><span className="chat-copy"><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button> : null}
+          {submissionMode && submissionView === "author" ? <button className="chat-item submission-create-row" onClick={() => navigate("/app/submissions/new")} type="button"><span className="submission-create-row-icon material-symbols-outlined">add</span><span className="chat-copy"><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button> : null}
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
         {!filteredChats.length && viewState === "ready" ? (
@@ -6569,7 +6663,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               <UserAvatar
                 className={`avatar ${displayedChat.online ? "status-online" : ""}`}
                 groupMembers={
-                  displayedChat.type === "group"
+                  displayedChat.type === "group" && displayedChat.purpose !== "submission"
                     ? displayedChat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri }))
                     : undefined
                 }
@@ -6580,7 +6674,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             </div>
             <div className="chat-topbar-meta">
               <strong className="chat-topbar-name">
-                {displayedChat.type === "group" ? (
+                {displayedChat.type === "group" && displayedChat.purpose !== "submission" ? (
                   <>
                     <span className="chat-topbar-title-text">{displayedChat.title}</span>
                     <span className="chat-topbar-title-count">({displayedChat.members})</span>
@@ -6589,17 +6683,24 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   displayedChat.title
                 )}
               </strong>
-              <div className="chat-topbar-status">{displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
+              <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
             </div>
           </div>
         ) : undefined
       }
       topbarAction={
-        displayedChat && !messageSelectionMode ? (
+        displayedChat && messageSelectionMode && submissionPublishSelection ? (
+          <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button">
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </button>
+        ) : displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
-            <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
-              <span className="material-symbols-outlined">more_vert</span>
-            </button>
+            {displayedChat.purpose === "submission" ? (
+              displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? <button aria-label={t("submission.submit")} className="icon-button submission-primary-action" disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span className="material-symbols-outlined">send</span></button>
+                : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review" ? <button aria-label={t("common.next")} className="icon-button submission-primary-action" onClick={() => setSubmissionReviewSheetOpen(true)} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
+                  : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "ready" ? <button aria-label={t("submission.publish")} className="icon-button submission-primary-action" onClick={beginSubmissionPublish} type="button"><span className="material-symbols-outlined">publish</span></button>
+                    : null
+            ) : <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button>}
           </div>
         ) : undefined
       }
@@ -6630,7 +6731,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <UserAvatar
                       className={`avatar ${displayedChat.online ? "status-online" : ""}`}
                       groupMembers={
-                        displayedChat.type === "group"
+                        displayedChat.type === "group" && displayedChat.purpose !== "submission"
                           ? displayedChat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri }))
                           : undefined
                       }
@@ -6642,14 +6743,18 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   <div className="chat-topbar-meta">
                     <strong className="chat-topbar-name">
                       <span className="chat-topbar-title-text">{displayedChat.title}</span>
-                      {displayedChat.type === "group" ? <span className="chat-topbar-title-count">({displayedChat.members})</span> : null}
+                      {displayedChat.type === "group" && displayedChat.purpose !== "submission" ? <span className="chat-topbar-title-count">({displayedChat.members})</span> : null}
                     </strong>
-                    <div className="chat-topbar-status">{displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
+                    <div className="chat-topbar-status">{displayedChat.purpose === "submission" ? submissionStatusLabel(displayedChat.submission?.status) : displayedChat.type === "group" ? t("chat.memberCount", { count: displayedChat.members }) : displayedChat.subtitle}</div>
                   </div>
                 </div>}
-                {!messageSelectionMode ? <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button">
-                  <span className="material-symbols-outlined">more_vert</span>
-                </button> : null}
+                {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
+                  : !messageSelectionMode && displayedChat.purpose === "submission" ? (
+                    displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? <button aria-label={t("submission.submit")} className="icon-button submission-primary-action" disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span className="material-symbols-outlined">send</span></button>
+                      : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review" ? <button aria-label={t("common.next")} className="icon-button submission-primary-action" onClick={() => setSubmissionReviewSheetOpen(true)} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
+                        : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "ready" ? <button aria-label={t("submission.publish")} className="icon-button submission-primary-action" onClick={beginSubmissionPublish} type="button"><span className="material-symbols-outlined">publish</span></button>
+                          : null
+                  ) : !messageSelectionMode ? <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button> : null}
                 {sendProgress !== null ? (
                   <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />
@@ -6782,7 +6887,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                 ) : null}
               </div>
 
-              {messageSelectionMode ? (
+              {messageSelectionMode && submissionPublishSelection ? null : messageSelectionMode ? (
                 <div className="composer message-selection-toolbar">
                   <button disabled={!selectionActionAvailability.forward || Boolean(messageSelectionAction)} onClick={openForwardPicker} type="button">
                     <span className="material-symbols-outlined">forward</span>
@@ -6796,7 +6901,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <span className="material-symbols-outlined">download</span>
                     <span>{t("common.save")}</span>
                   </button>
-                  <button
+                  {selectedChat?.purpose !== "submission" ? <button
                     className="message-selection-delete"
                     disabled={!selectionActionAvailability.delete || messageDeleteState === "deleting" || Boolean(messageSelectionAction)}
                     onClick={() => setBatchDeleteConfirmOpen(true)}
@@ -6804,7 +6909,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   >
                     <ComposerSvgIcon kind="delete" />
                     <span>{t("common.delete")}</span>
-                  </button>
+                  </button> : null}
                   <button
                     className="message-selection-recall"
                     disabled={!selectionActionAvailability.recall || Boolean(messageSelectionAction)}
@@ -6814,6 +6919,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <span className="material-symbols-outlined">undo</span>
                     <span>{t("message.recallForEveryone")}</span>
                   </button>
+                </div>
+              ) : submissionMode && !submissionCanSend ? (
+                <div className={`composer submission-composer-lock is-${submissionStatus ?? "unknown"}`}>
+                  <span className="material-symbols-outlined" aria-hidden="true">{submissionStatus === "ready" ? "campaign" : submissionStatus === "published" ? "task_alt" : "lock"}</span>
+                  <div><strong>{submissionStatusLabel(submissionStatus)}</strong><small>{t(`submission.locked.${submissionStatus ?? "review"}` as TranslationKey)}</small></div>
                 </div>
               ) : (
               <form
@@ -7328,6 +7438,21 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         </aside>
       </section>
 
+      <BottomSheet open={submissionViewSheetOpen} title={t("submission.switchView")} onClose={() => setSubmissionViewSheetOpen(false)}>
+        <div className="submission-view-options">
+          <button className={submissionView === "author" ? "is-active" : ""} onClick={() => chooseSubmissionView("author")} type="button"><span className="material-symbols-outlined">outbox</span><span><strong>{t("submission.mine")}</strong><small>{t("submission.mineHint")}</small></span><span className="material-symbols-outlined">check_circle</span></button>
+          <button className={submissionView === "reviewer" ? "is-active" : ""} onClick={() => chooseSubmissionView("reviewer")} type="button"><span className="material-symbols-outlined">fact_check</span><span><strong>{t("submission.reviewQueue")}</strong><small>{t("submission.reviewQueueHint")}</small></span><span className="material-symbols-outlined">check_circle</span></button>
+        </div>
+      </BottomSheet>
+
+      <BottomSheet open={submissionReviewSheetOpen} title={t("submission.reviewNext")} onClose={() => !submissionActionBusy && setSubmissionReviewSheetOpen(false)}>
+        <div className="submission-review-actions">
+          <button disabled={submissionActionBusy} onClick={() => void reviewCurrentSubmission("revision")} type="button"><span className="material-symbols-outlined">rate_review</span><span><strong>{t("submission.requestRevision")}</strong><small>{t("submission.requestRevisionHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+          <button className="is-danger" disabled={submissionActionBusy} onClick={() => void reviewCurrentSubmission("terminate")} type="button"><span className="material-symbols-outlined">block</span><span><strong>{t("submission.terminate")}</strong><small>{t("submission.terminateHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+          <button className="is-primary" disabled={submissionActionBusy} onClick={() => void reviewCurrentSubmission("ready")} type="button"><span className="material-symbols-outlined">task_alt</span><span><strong>{t("submission.markReady")}</strong><small>{t("submission.markReadyHint")}</small></span><span className="material-symbols-outlined">arrow_forward</span></button>
+        </div>
+      </BottomSheet>
+
       <BottomSheet
         open={groupCreateOpen}
         title={t("chat.createGroup")}
@@ -7548,6 +7673,12 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <UserAvatar className="chat-detail-member-avatar" name={member.name} uri={member.avatarUri} />
                     <span className="chat-detail-member-name">
                       <span className="chat-detail-member-label">{member.name}</span>
+                      {selectedChat.submission ? <small className="submission-member-roles">
+                        {member.userId === selectedChat.submission.author.user_id ? <span>{t("submission.role.author")}</span> : null}
+                        {member.userId === selectedChat.submission.recipient.user_id ? <span>{t("submission.role.recipient")}</span> : null}
+                        {member.userId === selectedChat.submission.recipient.user_id && selectedChat.submission.recipient.official ? <OfficialBadge /> : null}
+                        {member.userId === selectedChat.submission.recipient.user_id && selectedChat.submission.recipient.operator ? <OperatorBadge /> : null}
+                      </small> : null}
                     </span>
                   </button>
                 ))}
@@ -8490,7 +8621,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </button>
                 );
               }
-              if (typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image")) {
+              if (selectedChat?.purpose !== "submission" && (typeof messageMenu.message.id === "number" || (messageMenu.message.from === "self" && messageMenu.message.kind === "image"))) {
                 secondaryActions.push(
                   <button
                     key="delete"
