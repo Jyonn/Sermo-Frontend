@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.15",
+  "id": "2026.09.02.16",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "广场身份标识修复",
+      "title": "投稿列表支持状态筛选",
       "items": [
-        "广场中的官方标识恢复绿色文字",
-        "运营标识恢复蓝色文字，并与聊天列表保持一致"
+        "我的投稿和审批投稿均可按状态快速筛选",
+        "筛选胶囊展示各状态数量，切换身份时自动重置"
       ]
     },
     "en": {
-      "title": "Square identity badge fixes",
+      "title": "Filter submissions by status",
       "items": [
-        "Official badges in Square now use the correct green text",
-        "Operator badges now use the correct blue text, matching the chat list"
+        "My submissions and review submissions can now be filtered by status",
+        "Filter chips show status counts and reset when switching roles"
       ]
     }
   }

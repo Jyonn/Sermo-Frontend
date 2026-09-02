@@ -2639,6 +2639,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       ? requestedSubmissionView
       : session?.user.official || session?.user.operator ? "reviewer" : "author",
   );
+  const [submissionStatusFilter, setSubmissionStatusFilter] = useState<"all" | SubmissionStatus>("all");
   const [submissionReviewSheetOpen, setSubmissionReviewSheetOpen] = useState(false);
   const [submissionActionBusy, setSubmissionActionBusy] = useState(false);
   const [submissionWithdrawConfirmOpen, setSubmissionWithdrawConfirmOpen] = useState(false);
@@ -2655,6 +2656,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!submissionMode || (requestedSubmissionView !== "author" && requestedSubmissionView !== "reviewer")) return;
     setSubmissionView(requestedSubmissionView);
   }, [requestedSubmissionView, submissionMode]);
+
+  useEffect(() => {
+    setSubmissionStatusFilter("all");
+  }, [submissionView]);
   const initialMineStickerCache = useMemo(
     () => readTabCache<StickerPageCache<StickerDTO>>(stickerCacheScope, STICKER_MINE_CACHE_KEY),
     [stickerCacheScope],
@@ -4699,7 +4704,17 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     return () => window.clearTimeout(timer);
   }, [cacheScope, hasNewerMessages, hasOlderMessages, selectedChat, selectedMessages]);
 
-  const filteredChats = chats;
+  const submissionFilterStatuses: SubmissionStatus[] = submissionView === "author"
+    ? ["draft", "review", "revision", "ready", "published", "terminated", "withdrawn"]
+    : ["review", "revision", "ready", "published", "terminated", "withdrawn"];
+  const submissionStatusCounts = chats.reduce<Partial<Record<SubmissionStatus, number>>>((counts, chat) => {
+    const status = chat.submission?.status;
+    if (status) counts[status] = (counts[status] ?? 0) + 1;
+    return counts;
+  }, {});
+  const filteredChats = submissionMode && submissionStatusFilter !== "all"
+    ? chats.filter((chat) => chat.submission?.status === submissionStatusFilter)
+    : chats;
   const detailMembers = selectedChat?.detail.members ?? [];
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
@@ -5929,6 +5944,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const chooseSubmissionView = (role: "author" | "reviewer") => {
+    setSubmissionStatusFilter("all");
     setSubmissionView(role);
     if (chatId) navigate(listPath);
   };
@@ -6701,6 +6717,18 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       />
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
       {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
+      {submissionMode ? (
+        <nav aria-label={t("submission.filterLabel")} className="submission-status-filters">
+          <button aria-pressed={submissionStatusFilter === "all"} className={submissionStatusFilter === "all" ? "is-active" : ""} onClick={() => setSubmissionStatusFilter("all")} type="button">
+            <span>{t("submission.filterAll")}</span><b>{chats.length}</b>
+          </button>
+          {submissionFilterStatuses.map((status) => (
+            <button aria-pressed={submissionStatusFilter === status} className={submissionStatusFilter === status ? "is-active" : ""} key={status} onClick={() => setSubmissionStatusFilter(status)} type="button">
+              <span>{submissionStatusLabel(status)}</span><b>{submissionStatusCounts[status] ?? 0}</b>
+            </button>
+          ))}
+        </nav>
+      ) : null}
 
       <div className="chat-list-screen-body">
         <div className="chat-list">
@@ -6709,8 +6737,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         {!filteredChats.length && viewState === "ready" ? (
           <QuietState
             icon={submissionMode ? "outbox" : "chat_bubble"}
-            title={submissionMode ? t("submission.empty") : t("chat.empty")}
-            description={submissionMode ? t("submission.emptyHint") : groupSquareEnabled ? t("chat.emptyHint") : t("chat.emptyHintNoSquare")}
+            title={submissionMode && submissionStatusFilter !== "all" ? t("submission.filterEmpty") : submissionMode ? t("submission.empty") : t("chat.empty")}
+            description={submissionMode && submissionStatusFilter !== "all" ? t("submission.filterEmptyHint") : submissionMode ? t("submission.emptyHint") : groupSquareEnabled ? t("chat.emptyHint") : t("chat.emptyHintNoSquare")}
             action={
               !submissionMode && groupSquareEnabled ? (
                 <Link className="button" to="/app/square">

@@ -30916,6 +30916,60 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-view-switch:active { transform: scale(.97); background: color-mix(in srgb, var(--brand-primary) 20%, var(--bg-surface)); }
 .submission-view-switch .material-symbols-outlined { font-size: 20px; color: currentColor; }
 
+.submission-status-filters {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+  width: 100%;
+  padding: 7px 14px 9px;
+  overflow-x: auto;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
+  background: color-mix(in srgb, var(--bg-canvas) 88%, transparent);
+  box-sizing: border-box;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.submission-status-filters::-webkit-scrollbar { display: none; }
+.submission-status-filters > button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px 0 11px;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 90%, transparent);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+.submission-status-filters > button b {
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--line-soft) 72%, transparent);
+  box-sizing: border-box;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.submission-status-filters > button.is-active {
+  border-color: color-mix(in srgb, var(--brand-primary) 38%, transparent);
+  color: var(--brand-primary-press);
+  background: color-mix(in srgb, var(--brand-primary) 13%, var(--bg-elevated));
+}
+.submission-status-filters > button.is-active b { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 16%, transparent); }
+.submission-status-filters > button:active { transform: scale(.97); }
+.submission-status-filters > button:focus-visible { outline: 2px solid color-mix(in srgb, var(--brand-primary) 40%, transparent); outline-offset: 1px; }
+
 .submission-status-badge {
   display: inline-flex;
   align-items: center;
