@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.14",
+  "id": "2026.09.02.15",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿支持主动撤回",
+      "title": "广场身份标识修复",
       "items": [
-        "投稿者可以在正式发布前随时撤回整份投稿",
-        "撤回后保留历史消息，并清晰标记为已撤回"
+        "广场中的官方标识恢复绿色文字",
+        "运营标识恢复蓝色文字，并与聊天列表保持一致"
       ]
     },
     "en": {
-      "title": "Withdraw submissions before publishing",
+      "title": "Square identity badge fixes",
       "items": [
-        "Authors can withdraw a submission at any time before it is published",
-        "Withdrawn submissions retain their history and show a clear final status"
+        "Official badges in Square now use the correct green text",
+        "Operator badges now use the correct blue text, matching the chat list"
       ]
     }
   }

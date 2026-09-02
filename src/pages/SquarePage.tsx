@@ -9,6 +9,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
+import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
 import { StatementVideoThumbnail } from "../components/StatementVideoThumbnail";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
@@ -263,6 +264,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           <div className={`square-statement-author-name${statement.user.is_permanent_vip ? " is-vip" : ""}`}>
             <strong>{statement.is_anonymous ? anonymousName : statement.user.name}</strong>
             {!statement.is_anonymous && !statement.user.official && statement.user.growth_level ? <GrowthLevelBadge level={statement.user.growth_level} /> : null}
+            {!statement.is_anonymous && statement.user.official ? <OfficialBadge /> : null}
             {!statement.is_anonymous && statement.user.operator ? <OperatorBadge /> : null}
           </div>
           <span>{formatRelativeTime(statement.created_at)}</span>

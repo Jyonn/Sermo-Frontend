@@ -27705,7 +27705,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-statement-avatar-button:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
 .square-statement-author-copy { display: grid; gap: 2px; min-width: 0; }
 .square-statement-author strong { overflow: hidden; color: var(--text-primary); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
-.square-statement-author div span { color: var(--text-secondary); font-size: 11px; }
+.square-statement-author-copy > span { color: var(--text-secondary); font-size: 11px; }
 .square-statement-author-name { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .square-statement-author-name.is-vip > strong,
 .square-comment-author-name.is-vip > strong { color: #ad741d; }
