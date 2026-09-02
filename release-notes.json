@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.9",
+  "id": "2026.09.02.10",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "新建投稿更轻快",
+      "title": "广场管理通知更及时",
       "items": [
-        "不同投稿状态使用更清楚的语义色与层级",
-        "新建投稿移至顶部，选择官方或运营后直接填写标题"
+        "广场禁言会由实际操作的官方或运营发送可信通知",
+        "解除禁言后也会收到通知，并明确恢复发言和评论"
       ]
     },
     "en": {
-      "title": "A quicker way to start submissions",
+      "title": "Timelier Square moderation notices",
       "items": [
-        "Submission states now use clearer semantic colors and hierarchy",
-        "Start a submission from the header and choose an official account or operator inline"
+        "Square mutes now send a trusted notice from the official account or operator who took action",
+        "A follow-up notice confirms when posting and commenting access is restored"
       ]
     }
   }

@@ -2122,14 +2122,14 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   }
   const officialNotice = group.messages.length === 1 && group.messages[0].kind === "official_notice" ? group.messages[0] : null;
   if (officialNotice) {
-    const showActor = officialNotice.payload?.event?.startsWith("submission_") && Boolean(officialNotice.payload.actor_name);
+    const showActor = /^(submission_|square_)/.test(officialNotice.payload?.event ?? "") && Boolean(officialNotice.payload?.actor_name);
     return (
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
         <article className="message-official-notice" data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}>
           <header><span className="material-symbols-outlined" aria-hidden="true">verified</span><strong>{i18n.t("message.officialNotice.badge")}</strong></header>
           <p>{officialNotice.text || i18n.t("message.officialNotice.placeholder")}</p>
-          {showActor ? <footer>{i18n.t("message.officialNotice.byActor", { name: officialNotice.payload?.actor_name })}</footer> : null}
+          {showActor ? <footer>{i18n.t("message.officialNotice.byActor", { name: officialNotice.payload?.actor_name ?? "" })}</footer> : null}
         </article>
       </div>
     );
