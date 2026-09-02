@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.12",
+  "id": "2026.09.02.13",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "官方通知更清晰",
+      "title": "官方通知体验修复",
       "items": [
-        "官方通知增加轻量底色、细边框和装饰层次",
-        "投稿审批通知可直接进入对应投稿会话"
+        "官方通知现在会正确显示轻量底色、细边框和强调装饰",
+        "从通知查看投稿时会自动进入我的投稿并打开对应会话"
       ]
     },
     "en": {
-      "title": "Clearer official notices",
+      "title": "Official notice fixes",
       "items": [
-        "Official notices now use a subtle surface, border, and accent treatment",
-        "Submission review notices can open the related submission conversation directly"
+        "Official notices now correctly show their subtle surface, border, and accent treatment",
+        "Opening a submission notice now switches to My submissions and opens the matching conversation"
       ]
     }
   }

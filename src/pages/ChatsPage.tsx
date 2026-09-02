@@ -2633,8 +2633,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const { chatId } = useParams();
   const { session } = useAuth();
   const submissionMode = purpose === "submission";
+  const requestedSubmissionView = new URLSearchParams(location.search).get("view");
   const [submissionView, setSubmissionView] = useState<"author" | "reviewer">(
-    session?.user.official || session?.user.operator ? "reviewer" : "author",
+    requestedSubmissionView === "author" || requestedSubmissionView === "reviewer"
+      ? requestedSubmissionView
+      : session?.user.official || session?.user.operator ? "reviewer" : "author",
   );
   const [submissionReviewSheetOpen, setSubmissionReviewSheetOpen] = useState(false);
   const [submissionActionBusy, setSubmissionActionBusy] = useState(false);
@@ -2646,6 +2649,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const listPath = submissionMode ? "/app/submissions" : "/app/chats";
   const chatPath = (id: number) => `${listPath}/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
+
+  useEffect(() => {
+    if (!submissionMode || (requestedSubmissionView !== "author" && requestedSubmissionView !== "reviewer")) return;
+    setSubmissionView(requestedSubmissionView);
+  }, [requestedSubmissionView, submissionMode]);
   const initialMineStickerCache = useMemo(
     () => readTabCache<StickerPageCache<StickerDTO>>(stickerCacheScope, STICKER_MINE_CACHE_KEY),
     [stickerCacheScope],
@@ -6958,7 +6966,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                       onOpenActions={openMessageMenu}
                       onOpenOfficialNotice={(message) => {
                         const targetChatId = Number(message.payload?.submission_chat_id);
-                        if (Number.isInteger(targetChatId) && targetChatId > 0) navigate(`/app/submissions/${targetChatId}`);
+                        if (Number.isInteger(targetChatId) && targetChatId > 0) navigate(`/app/submissions/${targetChatId}?view=author`);
                       }}
                       onMentionAuthor={selectedChat?.type === "group" ? mentionGroupMember : undefined}
                       onOpenAuthorProfile={setProfileDrawerUserId}
