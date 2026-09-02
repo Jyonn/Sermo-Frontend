@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.4",
+  "id": "2026.09.02.5",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "关键事件播报更清晰",
+      "title": "媒体位置入口更克制",
       "items": [
-        "空间运营者的任命与取消改为无气泡的系统消息，不再混入普通聊天内容",
-        "投稿被要求修改、中止或标记待发布时，投稿者会在与审批者的私聊中看到系统播报"
+        "图片和视频全屏预览中的位置入口移除卡片背景与醒目的独立箭头",
+        "地址、坐标和地图来源保持清晰，点击文字区域仍可进入地图"
       ]
     },
     "en": {
-      "title": "Clearer event announcements",
+      "title": "A quieter media location entry",
       "items": [
-        "Operator assignments and removals now appear as bubble-free system messages instead of ordinary chat content",
-        "Authors receive a system announcement in their direct chat with the reviewer when changes are requested, a submission is closed, or it becomes ready to publish"
+        "The location entry in fullscreen photo and video previews no longer uses a card background or prominent standalone arrow",
+        "Address, coordinates, and map attribution stay readable, and the text area still opens the map"
       ]
     }
   }

@@ -69,8 +69,14 @@ export function MediaMetadataPanel({ kind, metadata, owner }: { kind: "image" | 
           })}
           type="button"
         >
-          <span><span className="message-image-archive-label">{t("media.locationLabel")}</span><strong>{location}</strong>{coordinate ? <small>{coordinate}</small> : null}</span>
-          <span aria-hidden="true" className="material-symbols-outlined">chevron_right</span>
+          <span>
+            <span className="message-image-location-heading">
+              <span className="message-image-archive-label">{t("media.locationLabel")}</span>
+              <span aria-hidden="true" className="material-symbols-outlined">arrow_outward</span>
+            </span>
+            <strong>{location}</strong>
+            {coordinate ? <small>{coordinate}</small> : null}
+          </span>
         </button>
       ) : (
         <><span className="message-image-archive-label">{t("media.locationLabel")}</span><strong>{location}</strong>{coordinate ? <small>{coordinate}</small> : null}</>

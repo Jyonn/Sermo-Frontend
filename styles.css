@@ -6534,34 +6534,45 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-image-location-map {
-  display: grid;
+  display: block;
   width: 100%;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
   margin: 0;
-  padding: 10px 12px;
+  padding: 3px 0;
   color: inherit;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface, #fff) 76%, transparent);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   text-align: right;
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .message-image-location-map:hover,
 .message-image-location-map:focus-visible {
-  border-color: color-mix(in srgb, var(--brand-primary) 30%, transparent);
-  background: color-mix(in srgb, var(--brand-soft) 62%, var(--surface, #fff));
+  opacity: .78;
+  outline: none;
 }
 
 .message-image-location-map:active {
   transform: scale(0.985);
 }
 
-.message-image-location-map > .material-symbols-outlined {
-  color: var(--brand-primary);
-  font-size: 20px;
+.message-image-location-heading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-bottom: 7px;
+  color: #8d948c;
+}
+
+.message-image-location-heading .message-image-archive-label {
+  margin-bottom: 0;
+}
+
+.message-image-location-heading > .material-symbols-outlined {
+  color: currentColor;
+  font-size: 14px;
+  font-variation-settings: "wght" 350;
 }
 
 .message-image-archive-label {
