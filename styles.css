@@ -30874,7 +30874,21 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-status-badge.is-revision { color: #a66200; background: color-mix(in srgb, #d98a10 14%, transparent); }
 .submission-status-badge.is-terminated { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
 
-.submission-counterpart { margin-right: 8px; color: var(--text-muted); font-weight: 650; }
+.chat-name.is-submission {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+}
+
+.chat-name.is-submission .submission-status-badge { flex: 0 0 auto; }
+
+.submission-list-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .submission-review-actions { display: grid; gap: 8px; }
 .submission-review-actions > button {

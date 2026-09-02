@@ -6563,8 +6563,12 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         ) : null}
       </div>
       <div className="chat-copy">
-        <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}{chat.submission ? <span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span> : null}</p>
-        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}{chat.submission ? <span className="submission-counterpart">{chat.submissionRole === "reviewer" ? t("submission.from", { name: chat.submission.author.name }) : t("submission.to", { name: chat.submission.recipient.name })}</span> : null}<span>{chat.preview}</span></div>
+        {chat.submission ? (
+          <p className="chat-name is-submission"><span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span><span className="submission-list-title">{chat.title}</span></p>
+        ) : (
+          <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}</p>
+        )}
+        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.preview}</span></div>
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>

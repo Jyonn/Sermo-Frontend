@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.02.7",
+  "id": "2026.09.02.8",
   "publishedAt": "2026-09-02",
   "locales": {
     "zh-CN": {
-      "title": "投稿通知更清晰",
+      "title": "投稿列表更聚焦",
       "items": [
-        "投稿审批通知直接说明处理结果，不再重复审批者姓名",
-        "审批者改为在通知底部弱化署名，信息更清楚"
+        "投稿列表优先展示处理状态与投稿标题",
+        "摘要直接展示最近一条消息，不再重复投稿对象"
       ]
     },
     "en": {
-      "title": "Clearer submission notices",
+      "title": "A more focused submission list",
       "items": [
-        "Submission review notices now state the outcome without repeating the reviewer name",
-        "The reviewer appears as a subtle attribution below the notice"
+        "Submission rows now lead with their status and title",
+        "The preview shows the latest message directly without repeating the recipient"
       ]
     }
   }
