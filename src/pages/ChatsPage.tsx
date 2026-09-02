@@ -81,6 +81,7 @@ const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
+const MESSAGE_TYPE_OFFICIAL_NOTICE = 12;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
@@ -749,6 +750,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_FORWARD_BUNDLE) return "forward_bundle";
   if (type === MESSAGE_TYPE_ACTIVITY) return "activity";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
+  if (type === MESSAGE_TYPE_OFFICIAL_NOTICE) return "official_notice";
   return "text";
 }
 
@@ -819,7 +821,7 @@ function systemMessageText(message: ChatMessageDTO) {
 
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const text = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
+  const text = kind === "system" || kind === "official_notice" ? systemMessageText(message) : message.payload?.text || message.content;
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
@@ -997,6 +999,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "forward_bundle") return i18n.t("message.forwardBundlePlaceholder");
   if (kind === "activity") return i18n.t("message.activityPlaceholder");
   if (kind === "system") return text || i18n.t("message.system.placeholder");
+  if (kind === "official_notice") return text || i18n.t("message.officialNotice.placeholder");
   return text || i18n.t("chat.noMessages");
 }
 
@@ -1008,7 +1011,7 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text" | "mentio
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const rawText = kind === "system" ? systemMessageText(message) : message.payload?.text || message.content;
+  const rawText = kind === "system" || kind === "official_notice" ? systemMessageText(message) : message.payload?.text || message.content;
   const text = kind === "text" ? chatPreviewMentionText(rawText, message.mentions ?? []) : rawText;
   return previewFromKind(kind, text);
 }
@@ -1024,7 +1027,7 @@ function clearChatUnread(chat: Chat) {
 
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
-  if (current.kind === "system" || neighbor.kind === "system") return false;
+  if (["system", "official_notice"].includes(current.kind) || ["system", "official_notice"].includes(neighbor.kind)) return false;
   if (current.from !== neighbor.from || Math.abs(current.createdAt - neighbor.createdAt) >= 5 * 60) return false;
   if (visibleBubbleStyle(current.chatBubbleStyle) !== visibleBubbleStyle(neighbor.chatBubbleStyle)) return false;
   if (current.from === "self") return true;
@@ -2117,6 +2120,18 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       </div>
     );
   }
+  const officialNotice = group.messages.length === 1 && group.messages[0].kind === "official_notice" ? group.messages[0] : null;
+  if (officialNotice) {
+    return (
+      <div>
+        {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
+        <article className="message-official-notice" data-message-id={typeof officialNotice.id === "number" ? officialNotice.id : undefined}>
+          <header><span className="material-symbols-outlined" aria-hidden="true">verified</span><strong>{i18n.t("message.officialNotice.badge")}</strong></header>
+          <p>{officialNotice.text || i18n.t("message.officialNotice.placeholder")}</p>
+        </article>
+      </div>
+    );
+  }
   const rows: Array<{ kind: "message"; message: ChatMessage; startIndex: number } | { kind: "gallery"; messages: ChatMessage[]; startIndex: number }> = [];
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
@@ -2156,7 +2171,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       cacheKey={group.from === "self" ? undefined : group.avatarCacheKey}
     />
   ) : null;
-  const selectableGroupMessages = group.messages.filter((message) => message.kind !== "system");
+  const selectableGroupMessages = group.messages.filter((message) => !["system", "official_notice"].includes(message.kind));
   const groupSelected = selectableGroupMessages.length > 0 && selectableGroupMessages.every((message) => selectedClientIds.includes(message.clientId));
 
   return (
@@ -2286,6 +2301,7 @@ function buildMessageGroups(messages: ChatMessage[], separateMessages = false): 
 function estimateMessageRowHeight(message: ChatMessage) {
   const replyHeight = message.replyTo ? 44 : 0;
   if (message.kind === "system") return 34;
+  if (message.kind === "official_notice") return 92;
   if (message.kind === "image") {
     const width = Number(message.payload?.pixel_width || message.payload?.image_metadata?.pixel_width || 0);
     const height = Number(message.payload?.pixel_height || message.payload?.image_metadata?.pixel_height || 0);
@@ -3137,7 +3153,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number, origin: MessageMenuState["origin"] = "chat") => {
-    if (messageSelectionMode || message.kind === "system") return;
+    if (messageSelectionMode || ["system", "official_notice"].includes(message.kind)) return;
     const rect = element.getBoundingClientRect();
     const spaceAbove = rect.top - 12;
     const spaceBelow = window.innerHeight - rect.bottom - 12;
@@ -3167,7 +3183,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const toggleMessageSelection = (message: ChatMessage) => {
-    if (messageDeleteState === "deleting" || message.kind === "system") return;
+    if (messageDeleteState === "deleting" || ["system", "official_notice"].includes(message.kind)) return;
     setSelectedMessageClientIds((current) => {
       if (current.includes(message.clientId)) return current.filter((item) => item !== message.clientId);
       if (current.length >= 50) {
@@ -3179,7 +3195,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const toggleMessageGroupSelection = (groupMessages: ChatMessage[]) => {
-    const selectableIds = groupMessages.filter((message) => message.kind !== "system").map((message) => message.clientId);
+    const selectableIds = groupMessages.filter((message) => !["system", "official_notice"].includes(message.kind)).map((message) => message.clientId);
     if (!selectableIds.length) return;
     setSelectedMessageClientIds((current) => {
       const selected = new Set(current);
@@ -3196,7 +3212,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const startMessageSelection = (message: ChatMessage) => {
-    if (message.kind === "system") return;
+    if (["system", "official_notice"].includes(message.kind)) return;
     const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setMessageMenu(null);
     setReplyTarget(null);
@@ -5951,7 +5967,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   });
 
   const canForwardMessage = (message: ChatMessage) => (
-    typeof message.id === "number" && !["system", "map_access", "forward_bundle"].includes(message.kind)
+    typeof message.id === "number" && !["system", "official_notice", "map_access", "forward_bundle"].includes(message.kind)
   );
 
   const eligibleForwardMessages = () => selectedActionMessages().filter(canForwardMessage);

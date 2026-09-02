@@ -1972,6 +1972,8 @@
   ,"message.system.memberLeft": "{{actor}} 退出了群聊"
   ,"message.system.messagePinned": "{{actor}} 置顶了一条消息"
   ,"message.system.messageUnpinned": "{{actor}} 取消置顶一条消息"
+  ,"message.officialNotice.badge": "官方通知"
+  ,"message.officialNotice.placeholder": "你收到了一条官方通知"
   ,"chat.clearHistory": "清空聊天记录"
   ,"chat.clearHistoryHint": "仅从你这里清除"
   ,"chat.clearHistoryConfirmTitle": "清空这段聊天记录？"

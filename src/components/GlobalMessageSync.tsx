@@ -27,6 +27,7 @@ const DEBUG_SYNC = false;
 const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
+const MESSAGE_TYPE_OFFICIAL_NOTICE = 12;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
@@ -88,6 +89,8 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
             ? "location"
           : message.type === MESSAGE_TYPE_SYSTEM
             ? "system"
+            : message.type === MESSAGE_TYPE_OFFICIAL_NOTICE
+              ? "official_notice"
             : "text");
   return {
     id: message.message_id,
@@ -97,7 +100,7 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     kind,
     time: "",
     createdAt: message.created_at,
-    text: message.content,
+    text: kind === "system" || kind === "official_notice" ? message.payload?.text || message.content : message.content,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     replyTo: message.reply_to ?? null,
     mentions: message.mentions ?? [],
