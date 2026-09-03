@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.3",
+  "id": "2026.09.03.4",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "用户名片更沉浸",
+      "title": "个人主页封面优化",
       "items": [
-        "用户详情和我的名片不再占用顶部标题栏",
-        "使用左上角毛玻璃圆形按钮返回，完整展示个人主页视觉"
+        "增高用户详情和我的名片的主页封面",
+        "不同屏幕高度下保持更舒展的视觉比例"
       ]
     },
     "en": {
-      "title": "More immersive profiles",
+      "title": "Improved profile covers",
       "items": [
-        "User profiles and My Card no longer reserve space for a title bar",
-        "A frosted circular back button keeps the full profile artwork visible"
+        "Increased the cover height on user profiles and My Card",
+        "Keeps a more spacious visual proportion across screen sizes"
       ]
     }
   }

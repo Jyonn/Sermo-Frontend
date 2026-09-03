@@ -31296,3 +31296,9 @@ html[data-theme="dark"] .drawer-floating-back {
   color: #eff8f4;
   background: rgba(20, 30, 27, 0.58);
 }
+
+/* Full profile pages need a cinematic cover; compact theme previews stay at 132px. */
+.drawer-body > .user-profile-panel .user-profile-cover,
+.friend-profile-page .user-profile-panel .user-profile-cover {
+  height: clamp(220px, 30dvh, 270px);
+}
