@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.17",
+  "id": "2026.09.03.18",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息操作栏更加紧凑",
+      "title": "合并聊天记录高度更加自然",
       "items": [
-        "长按操作栏现在会根据实际按钮数量自动收紧宽度",
-        "移除了非文字消息操作栏右侧的多余空白"
+        "发言中的合并聊天记录现在会根据实际消息内容自然撑开",
+        "移除了短记录的大面积留白，较长记录仍可在限定区域内滚动"
       ]
     },
     "en": {
-      "title": "Welcome message actions are now more compact",
+      "title": "Merged chat records now use natural heights",
       "items": [
-        "The long-press action bar now fits its actual number of actions",
-        "Extra space beside non-text message actions has been removed"
+        "Merged chat records in Square posts now grow naturally with their content",
+        "Short records no longer leave large blank areas while longer records remain scrollable"
       ]
     }
   }

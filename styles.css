@@ -7911,16 +7911,22 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   overscroll-behavior: contain;
 }
 .square-chat-record-preview.chat-conversation-preview {
+  --square-chat-record-max-height: min(420px, 48vh);
   width: 100%;
-  height: min(420px, 48vh);
-  max-height: 420px;
-  min-height: 0;
+  height: auto;
+  max-height: none;
+  grid-template-rows: auto;
   border: 0;
   border-radius: 0;
   box-shadow: none;
 }
+.square-chat-record-preview.chat-conversation-preview .chat-detail-scene {
+  height: auto;
+  grid-template-rows: auto;
+}
 .square-chat-record-preview.chat-conversation-preview .message-scroll {
-  min-height: 0;
+  height: auto;
+  max-height: var(--square-chat-record-max-height);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -7945,11 +7951,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .square-statement-card:not(.is-detail) .square-chat-record {
   overscroll-behavior: auto;
 }
-.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview { height: min(360px, 42vh); }
-.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview :is(.chat-detail-scene, .message-scroll) { height: 100%; min-height: 0; }
+.square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview { --square-chat-record-max-height: min(360px, 42vh); }
 .square-statement-card:not(.is-detail) .square-chat-record-preview.chat-conversation-preview .message-scroll { overflow-y: auto; touch-action: pan-y; }
 .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview {
-  height: clamp(340px, 54vh, 520px);
+  --square-chat-record-max-height: min(520px, 54vh);
 }
 html[data-theme="dark"] .square-chat-record {
   border-color: color-mix(in srgb, var(--line-soft) 86%, transparent);
@@ -7957,8 +7962,8 @@ html[data-theme="dark"] .square-chat-record {
   box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
 }
 @media (max-width: 900px) {
-  .square-chat-record-preview.chat-conversation-preview { height: min(390px, 48vh); }
-  .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview { height: min(440px, 54vh); }
+  .square-chat-record-preview.chat-conversation-preview { --square-chat-record-max-height: min(390px, 48vh); }
+  .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview { --square-chat-record-max-height: min(440px, 54vh); }
 }
 
 .forward-mode-switch button {
@@ -25391,13 +25396,11 @@ html[data-theme="dark"] .message-search-more {
 .chat-preview-shared .message-scroll { overflow: visible; }
 .chat-preview-shared .message-scroll { padding: 14px 10px 20px; }
 .chat-preview-shared.square-chat-record-preview .chat-detail-scene {
-  height: 100%;
-  min-height: 0;
+  height: auto;
   overflow: hidden;
 }
 .chat-preview-shared.square-chat-record-preview .message-scroll {
-  height: 100%;
-  min-height: 0;
+  height: auto;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
