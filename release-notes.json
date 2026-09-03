@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.6",
+  "id": "2026.09.03.7",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "手机端列表背景更统一",
+      "title": "网页资源加载更轻量",
       "items": [
-        "聊天、投稿与广场等信息流不再叠加额外背景",
-        "不同页面在手机端与整体背景衔接得更加自然"
+        "移除重复和不再使用的图片与字体素材",
+        "城市主题资源不再被重复打包，缩小网页部署包体积"
       ]
     },
     "en": {
-      "title": "More consistent mobile list backgrounds",
+      "title": "Lighter web asset loading",
       "items": [
-        "Chat, submissions, Square, and other feeds no longer add a separate background layer",
-        "Mobile lists now blend naturally with the surrounding page canvas"
+        "Removed duplicate and unused image and font assets",
+        "City theme resources are no longer bundled twice, reducing the web deployment size"
       ]
     }
   }

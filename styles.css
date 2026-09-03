@@ -9224,11 +9224,11 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 /* City Collection: each skin uses a distinct local material language, not a palette swap. */
 .personalization-bubble-stage.bubble-style-city-jdz,
 .message-group.bubble-style-city-jdz {
-  --bubble-skin-other-bg: linear-gradient(100deg, rgba(255,255,255,.98) 0 62%, rgba(247,250,248,.84)), url("./src/assets/city-bubbles/jingdezhen.png") right center / auto 118% no-repeat, #fbfaf4;
+  --bubble-skin-other-bg: linear-gradient(100deg, rgba(255,255,255,.98) 0 62%, rgba(247,250,248,.84)), url("/assets/city-bubbles/jingdezhen.png") right center / auto 118% no-repeat, #fbfaf4;
   --bubble-skin-other-color: #153d67;
   --bubble-skin-other-border: #1d5f91;
   --bubble-skin-other-shadow: inset 0 0 0 1px rgba(82,134,172,.2), 0 7px 18px rgba(22,72,108,.12);
-  --bubble-skin-self-bg: linear-gradient(100deg, rgba(19,67,111,.97) 0 66%, rgba(19,67,111,.76)), url("./src/assets/city-bubbles/jingdezhen.png") right center / auto 125% no-repeat, #174b78;
+  --bubble-skin-self-bg: linear-gradient(100deg, rgba(19,67,111,.97) 0 66%, rgba(19,67,111,.76)), url("/assets/city-bubbles/jingdezhen.png") right center / auto 125% no-repeat, #174b78;
   --bubble-skin-self-color: #fffdf4;
   --bubble-skin-self-border: #0e3d67;
   --bubble-skin-self-shadow: inset 0 0 0 1px rgba(255,255,255,.24), 0 8px 18px rgba(15,63,99,.2);
@@ -9242,11 +9242,11 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 
 .personalization-bubble-stage.bubble-style-city-shanghai,
 .message-group.bubble-style-city-shanghai {
-  --bubble-skin-other-bg: linear-gradient(96deg, rgba(14,31,52,.98) 0 58%, rgba(14,31,52,.66)), url("./src/assets/city-bubbles/shanghai.png") right center / auto 118% no-repeat, #10243a;
+  --bubble-skin-other-bg: linear-gradient(96deg, rgba(14,31,52,.98) 0 58%, rgba(14,31,52,.66)), url("/assets/city-bubbles/shanghai.png") right center / auto 118% no-repeat, #10243a;
   --bubble-skin-other-color: #f4f0df;
   --bubble-skin-other-border: #e06452;
   --bubble-skin-other-shadow: inset 0 -2px 0 rgba(246,193,85,.62), 0 9px 22px rgba(10,29,48,.24);
-  --bubble-skin-self-bg: linear-gradient(96deg, rgba(191,67,55,.97) 0 60%, rgba(191,67,55,.72)), url("./src/assets/city-bubbles/shanghai.png") right center / auto 122% no-repeat, #bd463b;
+  --bubble-skin-self-bg: linear-gradient(96deg, rgba(191,67,55,.97) 0 60%, rgba(191,67,55,.72)), url("/assets/city-bubbles/shanghai.png") right center / auto 122% no-repeat, #bd463b;
   --bubble-skin-self-color: #fffaf0;
   --bubble-skin-self-border: #742d2c;
   --bubble-skin-self-shadow: inset 0 -2px 0 #f4bf55, 0 9px 22px rgba(101,34,34,.23);
@@ -9260,11 +9260,11 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 
 .personalization-bubble-stage.bubble-style-city-nyc,
 .message-group.bubble-style-city-nyc {
-  --bubble-skin-other-bg: linear-gradient(98deg, rgba(246,241,224,.98) 0 64%, rgba(246,241,224,.78)), url("./src/assets/city-bubbles/new-york.png") right center / auto 125% no-repeat, #f3edda;
+  --bubble-skin-other-bg: linear-gradient(98deg, rgba(246,241,224,.98) 0 64%, rgba(246,241,224,.78)), url("/assets/city-bubbles/new-york.png") right center / auto 125% no-repeat, #f3edda;
   --bubble-skin-other-color: #163f3b;
   --bubble-skin-other-border: #3d8a80;
   --bubble-skin-other-shadow: inset 0 -3px 0 rgba(41,98,91,.16), 0 8px 18px rgba(40,72,68,.14);
-  --bubble-skin-self-bg: linear-gradient(98deg, rgba(43,110,102,.98) 0 65%, rgba(43,110,102,.7)), url("./src/assets/city-bubbles/new-york.png") right center / auto 125% no-repeat, #2e746c;
+  --bubble-skin-self-bg: linear-gradient(98deg, rgba(43,110,102,.98) 0 65%, rgba(43,110,102,.7)), url("/assets/city-bubbles/new-york.png") right center / auto 125% no-repeat, #2e746c;
   --bubble-skin-self-color: #fff8df;
   --bubble-skin-self-border: #b99042;
   --bubble-skin-self-shadow: inset 0 -3px 0 rgba(247,211,126,.38), 0 9px 20px rgba(34,85,79,.22);
@@ -9278,11 +9278,11 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
 
 .personalization-bubble-stage.bubble-style-city-beijing,
 .message-group.bubble-style-city-beijing {
-  --bubble-skin-other-bg: linear-gradient(100deg, rgba(255,247,223,.98) 0 64%, rgba(255,247,223,.76)), url("./src/assets/city-bubbles/beijing.png") right center / auto 120% no-repeat, #fff1cf;
+  --bubble-skin-other-bg: linear-gradient(100deg, rgba(255,247,223,.98) 0 64%, rgba(255,247,223,.76)), url("/assets/city-bubbles/beijing.png") right center / auto 120% no-repeat, #fff1cf;
   --bubble-skin-other-color: #53221d;
   --bubble-skin-other-border: #ad342d;
   --bubble-skin-other-shadow: inset 0 3px 0 #d9a739, 0 8px 18px rgba(116,45,35,.13);
-  --bubble-skin-self-bg: linear-gradient(100deg, rgba(148,34,31,.98) 0 64%, rgba(148,34,31,.72)), url("./src/assets/city-bubbles/beijing.png") right center / auto 125% no-repeat, #982622;
+  --bubble-skin-self-bg: linear-gradient(100deg, rgba(148,34,31,.98) 0 64%, rgba(148,34,31,.72)), url("/assets/city-bubbles/beijing.png") right center / auto 125% no-repeat, #982622;
   --bubble-skin-self-color: #fff5d7;
   --bubble-skin-self-border: #6f1d1b;
   --bubble-skin-self-shadow: inset 0 3px 0 #e3b44e, 0 9px 20px rgba(105,28,26,.23);
@@ -23253,19 +23253,19 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .personalization-bubble-stage.bubble-style-city-jdz,
 .message-group.bubble-style-city-jdz {
-  --city-magnet-image: url("./src/assets/city-bubbles/magnets/jingdezhen-enamel-v2.png");
+  --city-magnet-image: url("/assets/city-bubbles/magnets/jingdezhen-enamel-v2.png");
   --city-magnet-position: center;
   --city-magnet-accent: #337bb0;
   --bubble-theme-accent: #337bb0;
   --bubble-skin-other-bg:
     linear-gradient(rgba(255, 255, 255, .34), rgba(255, 255, 255, .34)),
-    url("./src/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 440px auto repeat;
   --bubble-skin-other-color: #173b58;
   --bubble-skin-other-border: #8eb6d7;
   --bubble-skin-other-shadow: 3px 4px 0 #d5e7f4, 0 8px 16px rgba(47, 91, 126, .1);
   --bubble-skin-self-bg:
     linear-gradient(rgba(27, 78, 118, .82), rgba(22, 70, 107, .82)),
-    url("./src/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 440px auto repeat;
   --bubble-skin-self-color: #fff;
   --bubble-skin-self-border: #174d78;
   --bubble-skin-self-shadow: 3px 4px 0 #a9cee8, 0 8px 17px rgba(32, 82, 120, .18);
@@ -23275,19 +23275,19 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .personalization-bubble-stage.bubble-style-city-shanghai,
 .message-group.bubble-style-city-shanghai {
-  --city-magnet-image: url("./src/assets/city-bubbles/magnets/shanghai-enamel-v2.png");
+  --city-magnet-image: url("/assets/city-bubbles/magnets/shanghai-enamel-v2.png");
   --city-magnet-position: center;
   --city-magnet-accent: #ef6658;
   --bubble-theme-accent: #ef6658;
   --bubble-skin-other-bg:
     linear-gradient(rgba(255, 255, 255, .32), rgba(255, 255, 255, .32)),
-    url("./src/assets/city-bubbles/patterns/shanghai-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/shanghai-pattern.png") center / 440px auto repeat;
   --bubble-skin-other-color: #24313a;
   --bubble-skin-other-border: #c9d0d3;
   --bubble-skin-other-shadow: 0 4px 0 #ef6658, 0 9px 17px rgba(32, 43, 51, .12);
   --bubble-skin-self-bg:
     linear-gradient(rgba(32, 42, 53, .85), rgba(27, 36, 46, .85)),
-    url("./src/assets/city-bubbles/patterns/shanghai-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/shanghai-pattern.png") center / 440px auto repeat;
   --bubble-skin-self-color: #fffaf5;
   --bubble-skin-self-border: #18222c;
   --bubble-skin-self-shadow: 0 4px 0 #ef6658, 0 9px 18px rgba(24, 34, 44, .22);
@@ -23297,19 +23297,19 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .personalization-bubble-stage.bubble-style-city-nyc,
 .message-group.bubble-style-city-nyc {
-  --city-magnet-image: url("./src/assets/city-bubbles/magnets/new-york-enamel-v2.png");
+  --city-magnet-image: url("/assets/city-bubbles/magnets/new-york-enamel-v2.png");
   --city-magnet-position: center;
   --city-magnet-accent: #4a9c8f;
   --bubble-theme-accent: #4a9c8f;
   --bubble-skin-other-bg:
     linear-gradient(rgba(255, 255, 255, .38), rgba(255, 255, 255, .38)),
-    url("./src/assets/city-bubbles/patterns/new-york-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 440px auto repeat;
   --bubble-skin-other-color: #1d423d;
   --bubble-skin-other-border: #73a99f;
   --bubble-skin-other-shadow: 4px 4px 0 #f0c951, 0 8px 16px rgba(43, 83, 76, .11);
   --bubble-skin-self-bg:
     linear-gradient(rgba(17, 91, 82, .84), rgba(12, 77, 69, .84)),
-    url("./src/assets/city-bubbles/patterns/new-york-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 440px auto repeat;
   --bubble-skin-self-color: #fffdf4;
   --bubble-skin-self-border: #12584f;
   --bubble-skin-self-shadow: 4px 4px 0 #f0c951, 0 8px 17px rgba(21, 92, 83, .2);
@@ -23319,19 +23319,19 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .personalization-bubble-stage.bubble-style-city-beijing,
 .message-group.bubble-style-city-beijing {
-  --city-magnet-image: url("./src/assets/city-bubbles/magnets/beijing-enamel-v2.png");
+  --city-magnet-image: url("/assets/city-bubbles/magnets/beijing-enamel-v2.png");
   --city-magnet-position: center;
   --city-magnet-accent: #e45245;
   --bubble-theme-accent: #e45245;
   --bubble-skin-other-bg:
     linear-gradient(rgba(255, 255, 255, .3), rgba(255, 255, 255, .3)),
-    url("./src/assets/city-bubbles/patterns/beijing-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/beijing-pattern.png") center / 440px auto repeat;
   --bubble-skin-other-color: #4b2925;
   --bubble-skin-other-border: #dc8b81;
   --bubble-skin-other-shadow: 4px 4px 0 #f1b34f, 0 8px 16px rgba(99, 52, 45, .11);
   --bubble-skin-self-bg:
     linear-gradient(rgba(165, 48, 43, .82), rgba(139, 37, 34, .82)),
-    url("./src/assets/city-bubbles/patterns/beijing-pattern.png") center / 440px auto repeat;
+    url("/assets/city-bubbles/patterns/beijing-pattern.png") center / 440px auto repeat;
   --bubble-skin-self-color: #fffaf0;
   --bubble-skin-self-border: #a8312d;
   --bubble-skin-self-shadow: 4px 4px 0 #f1b34f, 0 8px 17px rgba(126, 43, 37, .2);
@@ -23436,28 +23436,28 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 }
 
 .field-chat_bubble_style .preview-city-jdz > i {
-  background: url("./src/assets/city-bubbles/magnets/jingdezhen-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("./src/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 190px auto repeat;
+  background: url("/assets/city-bubbles/magnets/jingdezhen-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 190px auto repeat;
 }
-.field-chat_bubble_style .preview-city-jdz > i::before { width: 45%; height: 27%; left: 10%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.34), rgba(255,255,255,.34)), url("./src/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 150px auto repeat; }
-.field-chat_bubble_style .preview-city-jdz > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #174d78; border-radius: 13px 6px 6px 13px; background: linear-gradient(rgba(27,78,118,.82), rgba(22,70,107,.82)), url("./src/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 150px auto repeat; box-shadow: 3px 3px 0 #a9cee8; }
+.field-chat_bubble_style .preview-city-jdz > i::before { width: 45%; height: 27%; left: 10%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.34), rgba(255,255,255,.34)), url("/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 150px auto repeat; }
+.field-chat_bubble_style .preview-city-jdz > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #174d78; border-radius: 13px 6px 6px 13px; background: linear-gradient(rgba(27,78,118,.82), rgba(22,70,107,.82)), url("/assets/city-bubbles/patterns/jingdezhen-pattern.png") center / 150px auto repeat; box-shadow: 3px 3px 0 #a9cee8; }
 
 .field-chat_bubble_style .preview-city-shanghai > i {
-  background: url("./src/assets/city-bubbles/magnets/shanghai-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("./src/assets/city-bubbles/patterns/shanghai-pattern.png") center / 190px auto repeat;
+  background: url("/assets/city-bubbles/magnets/shanghai-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("/assets/city-bubbles/patterns/shanghai-pattern.png") center / 190px auto repeat;
 }
-.field-chat_bubble_style .preview-city-shanghai > i::before { width: 42%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.32), rgba(255,255,255,.32)), url("./src/assets/city-bubbles/patterns/shanghai-pattern.png") center / 150px auto repeat; }
-.field-chat_bubble_style .preview-city-shanghai > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #18222c; border-radius: 13px 5px 5px 13px; background: linear-gradient(rgba(32,42,53,.85), rgba(27,36,46,.85)), url("./src/assets/city-bubbles/patterns/shanghai-pattern.png") center / 150px auto repeat; box-shadow: 0 3px 0 #ef6658; }
+.field-chat_bubble_style .preview-city-shanghai > i::before { width: 42%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.32), rgba(255,255,255,.32)), url("/assets/city-bubbles/patterns/shanghai-pattern.png") center / 150px auto repeat; }
+.field-chat_bubble_style .preview-city-shanghai > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #18222c; border-radius: 13px 5px 5px 13px; background: linear-gradient(rgba(32,42,53,.85), rgba(27,36,46,.85)), url("/assets/city-bubbles/patterns/shanghai-pattern.png") center / 150px auto repeat; box-shadow: 0 3px 0 #ef6658; }
 
 .field-chat_bubble_style .preview-city-nyc > i {
-  background: url("./src/assets/city-bubbles/magnets/new-york-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("./src/assets/city-bubbles/patterns/new-york-pattern.png") center / 190px auto repeat;
+  background: url("/assets/city-bubbles/magnets/new-york-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 190px auto repeat;
 }
-.field-chat_bubble_style .preview-city-nyc > i::before { width: 43%; height: 27%; left: 9%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.38), rgba(255,255,255,.38)), url("./src/assets/city-bubbles/patterns/new-york-pattern.png") center / 150px auto repeat; }
-.field-chat_bubble_style .preview-city-nyc > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #12584f; border-radius: 14px 7px 7px 14px; background: linear-gradient(rgba(17,91,82,.84), rgba(12,77,69,.84)), url("./src/assets/city-bubbles/patterns/new-york-pattern.png") center / 150px auto repeat; box-shadow: 3px 3px 0 #f0c951; }
+.field-chat_bubble_style .preview-city-nyc > i::before { width: 43%; height: 27%; left: 9%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.38), rgba(255,255,255,.38)), url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 150px auto repeat; }
+.field-chat_bubble_style .preview-city-nyc > i::after { width: 54%; height: 31%; right: 8%; bottom: 14%; border-color: #12584f; border-radius: 14px 7px 7px 14px; background: linear-gradient(rgba(17,91,82,.84), rgba(12,77,69,.84)), url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 150px auto repeat; box-shadow: 3px 3px 0 #f0c951; }
 
 .field-chat_bubble_style .preview-city-beijing > i {
-  background: url("./src/assets/city-bubbles/magnets/beijing-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("./src/assets/city-bubbles/patterns/beijing-pattern.png") center / 190px auto repeat;
+  background: url("/assets/city-bubbles/magnets/beijing-enamel-v2.png") 90% 15% / 48px 32px no-repeat, url("/assets/city-bubbles/patterns/beijing-pattern.png") center / 190px auto repeat;
 }
-.field-chat_bubble_style .preview-city-beijing > i::before { width: 43%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,.3)), url("./src/assets/city-bubbles/patterns/beijing-pattern.png") center / 150px auto repeat; }
-.field-chat_bubble_style .preview-city-beijing > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #a8312d; border-radius: 13px 5px 5px 13px; background: linear-gradient(rgba(165,48,43,.82), rgba(139,37,34,.82)), url("./src/assets/city-bubbles/patterns/beijing-pattern.png") center / 150px auto repeat; box-shadow: 3px 3px 0 #f1b34f; }
+.field-chat_bubble_style .preview-city-beijing > i::before { width: 43%; height: 26%; left: 9%; top: 21%; border-radius: 12px; background: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,.3)), url("/assets/city-bubbles/patterns/beijing-pattern.png") center / 150px auto repeat; }
+.field-chat_bubble_style .preview-city-beijing > i::after { width: 55%; height: 31%; right: 7%; bottom: 14%; border-color: #a8312d; border-radius: 13px 5px 5px 13px; background: linear-gradient(rgba(165,48,43,.82), rgba(139,37,34,.82)), url("/assets/city-bubbles/patterns/beijing-pattern.png") center / 150px auto repeat; box-shadow: 3px 3px 0 #f1b34f; }
 
 .personalization-option.is-city-collectible > small {
   color: var(--text-muted);
