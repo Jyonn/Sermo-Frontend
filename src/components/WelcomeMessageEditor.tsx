@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { ApiError, api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
@@ -14,6 +14,7 @@ const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
+const WELCOME_EMOJIS = ["😀", "😄", "😂", "🥹", "😊", "🙂", "😉", "😍", "🥰", "🤔", "🤭", "😅", "😭", "😤", "🥳", "🤩", "👍", "👏", "🙏", "👀", "❤️", "💚", "✨", "🎉"];
 
 function messageTypeForKind(kind: MessageMediaKind) {
   if (kind === "image") return MESSAGE_TYPE_IMAGE;
@@ -53,6 +54,7 @@ interface WelcomeMessageEditorProps {
 
 export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarUri, backgroundTheme = "default", backgroundUri, bubbleStyle, isPermanentVip, name, onClose, onSaved, open, userId }: WelcomeMessageEditorProps) {
   const { t } = useI18n();
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const audioInputRef = useRef<HTMLInputElement | null>(null);
   const composerInputRef = useRef<MentionComposerHandle | null>(null);
@@ -62,6 +64,8 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [messageMenu, setMessageMenu] = useState<{
     message: ChatMessageDTO;
     anchorX: number;
@@ -146,6 +150,8 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
       setSaving(false);
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+      if (audioInputRef.current) audioInputRef.current.value = "";
     }
   };
 
@@ -172,6 +178,9 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     payload: message.payload,
     created_at: message.position + 1,
   }));
+  const chatSceneStyle = backgroundTheme === "custom" && backgroundUri
+    ? ({ "--chat-background-image": `url("${backgroundUri.replace(/"/g, "%22")}")` } as CSSProperties)
+    : undefined;
 
   useLayoutEffect(() => {
     const menu = messageMenuRef.current;
@@ -204,19 +213,20 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     await deleteMessage(messageId);
   };
 
-  return <SideDrawer className="welcome-template-drawer" historyKey="welcome-messages" onClose={onClose} open={open} title={t("profile.welcomeMessages")}>
-    <div className="welcome-template-editor">
-      <header className="welcome-template-context">
-        <span className="material-symbols-outlined">auto_awesome</span>
-        <div><strong>{t("profile.welcomeAutoSend")}</strong><small>{t("profile.welcomeAutoSendHint")}</small></div>
-        <b>{count}/{state?.max_messages ?? 3}</b>
-      </header>
+  return <SideDrawer
+    className={`welcome-template-drawer chat-background-${backgroundTheme}`}
+    historyKey="welcome-messages"
+    onClose={onClose}
+    open={open}
+    title={t("profile.welcomeMessages")}
+    titleAccessory={<span className="welcome-template-count">{count}/{state?.max_messages ?? 3}</span>}
+  >
+    <div className="welcome-template-editor chat-detail-active">
       {state?.delete_to_limit ? <div className="welcome-template-limit-note"><span className="material-symbols-outlined">info</span>{t("profile.welcomeDeleteFirst", { count: state.delete_to_limit })}</div> : null}
-      <div className="welcome-template-thread">
+      <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={chatSceneStyle}>
         {loading ? <div className="welcome-template-loading">{t("common.loading")}</div> : <ChatPreview
-          backgroundTheme={backgroundTheme}
-          backgroundUri={backgroundUri}
-          className="welcome-template-chat"
+          bare
+          className="welcome-template-message-scroll"
           firstPersonUserId={-1}
           initialScrollToEnd
           messages={previewMessages}
@@ -224,27 +234,64 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
           showAuthors={false}
           showDividers={false}
         />}
+        <form className="composer welcome-template-composer" onSubmit={(event) => void addText(event)} ref={composerRef}>
+          <ChatComposerTextRow
+            input={<MentionComposerInput
+              className="textarea composer-input composer-rich-input"
+              members={[]}
+              onChange={setDraft}
+              onFocus={() => setEmojiPickerOpen(false)}
+              onMentionQueryChange={() => undefined}
+              onSelectFirstMention={() => false}
+              onSubmit={() => composerRef.current?.requestSubmit()}
+              placeholder={state?.can_add ? t("profile.welcomeMessagePlaceholder") : t("profile.welcomeLimitReached")}
+              ref={composerInputRef}
+              value={draft}
+            />}
+            inputAccessory={<button
+              aria-expanded={emojiPickerOpen}
+              aria-label={t("emoji.choose")}
+              className={`composer-emoji-button${emojiPickerOpen ? " is-open" : ""}`}
+              disabled={!state?.can_add || saving}
+              onClick={() => {
+                setComposerMoreOpen(false);
+                setEmojiPickerOpen((current) => !current);
+              }}
+              type="button"
+            ><span className="material-symbols-outlined">{emojiPickerOpen ? "keyboard" : "sentiment_satisfied"}</span></button>}
+            leadingAction={<button aria-label={t("audio.record")} className="composer-action-button" disabled={!state?.can_add || saving} onClick={() => audioInputRef.current?.click()} type="button"><span className="material-symbols-outlined">mic</span></button>}
+            trailingAction={<button
+              aria-expanded={composerMoreOpen}
+              aria-label={composerMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
+              className={`composer-plus${composerMoreOpen ? " is-open" : ""}`}
+              disabled={!state?.can_add || saving}
+              onClick={() => {
+                setEmojiPickerOpen(false);
+                setComposerMoreOpen((current) => !current);
+              }}
+              type="button"
+            ><span className="material-symbols-outlined">add</span></button>}
+          />
+          {emojiPickerOpen ? <div className="composer-emoji-panel"><div className="composer-emoji-grid">
+            {WELCOME_EMOJIS.map((emoji) => <button key={emoji} onClick={() => composerInputRef.current?.insertText(emoji)} type="button">{emoji}</button>)}
+          </div></div> : null}
+          <div className={`composer-actions-reveal${composerMoreOpen ? " is-open" : ""}`} aria-hidden={!composerMoreOpen}>
+            <div className="composer-actions-grid">
+              <button className="composer-action-tile" disabled={!state?.can_add || saving} onClick={() => galleryInputRef.current?.click()} type="button">
+                <span className="composer-action-tile-icon"><span className="material-symbols-outlined">photo_library</span></span>
+                <span>{t("media.gallery")}</span>
+              </button>
+              <button className="composer-action-tile" disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button">
+                <span className="composer-action-tile-icon"><span className="material-symbols-outlined">draft</span></span>
+                <span>{t("media.file")}</span>
+              </button>
+            </div>
+          </div>
+          <input ref={galleryInputRef} accept="image/*,video/*" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
+          <input ref={fileInputRef} accept="audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
+          <input ref={audioInputRef} accept="audio/*" capture hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
+        </form>
       </div>
-      <form className="composer welcome-template-composer" onSubmit={(event) => void addText(event)} ref={composerRef}>
-        <ChatComposerTextRow
-          input={<MentionComposerInput
-            className="textarea composer-input composer-rich-input"
-            members={[]}
-            onChange={setDraft}
-            onMentionQueryChange={() => undefined}
-            onSelectFirstMention={() => false}
-            onSubmit={() => composerRef.current?.requestSubmit()}
-            placeholder={state?.can_add ? t("profile.welcomeMessagePlaceholder") : t("profile.welcomeLimitReached")}
-            ref={composerInputRef}
-            value={draft}
-          />}
-          inputAccessory={<button aria-label={t("emoji.choose")} className="composer-emoji-button" disabled={!state?.can_add || saving} onClick={() => composerInputRef.current?.insertText("😊")} type="button"><span className="material-symbols-outlined">sentiment_satisfied</span></button>}
-          leadingAction={<button aria-label={t("audio.record")} className="composer-action-button" disabled={!state?.can_add || saving} onClick={() => audioInputRef.current?.click()} type="button"><span className="material-symbols-outlined">mic</span></button>}
-          trailingAction={<button aria-label={t("profile.welcomeAddMedia")} className="composer-plus" disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button"><span className="material-symbols-outlined">add</span></button>}
-        />
-        <input ref={fileInputRef} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
-        <input ref={audioInputRef} accept="audio/*" capture hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
-      </form>
       {messageMenu ? <div className="message-context-layer" onClick={() => setMessageMenu(null)} role="presentation">
         <div
           className={`message-context-menu ${messageMenu.placement === "top" ? "above" : "below"}`}

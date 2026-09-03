@@ -9142,6 +9142,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
 export function ChatPreview({
   backgroundTheme = "default",
   backgroundUri,
+  bare = false,
   className = "",
   firstPersonUserId,
   initialScrollToEnd = false,
@@ -9159,6 +9160,7 @@ export function ChatPreview({
 }: {
   backgroundTheme?: ChatBackgroundTheme;
   backgroundUri?: string | null;
+  bare?: boolean;
   className?: string;
   firstPersonUserId?: number | null;
   initialScrollToEnd?: boolean;
@@ -9221,64 +9223,72 @@ export function ChatPreview({
     return () => window.cancelAnimationFrame(firstFrame);
   }, [initialScrollToEnd, messages.length]);
 
+  const handleMessageClick = onMessageClick ? (event: React.MouseEvent<HTMLElement>) => {
+    const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
+    const messageId = Number(messageNode?.dataset.messageId);
+    const source = dtoById.get(messageId);
+    if (source) onMessageClick(source);
+  } : undefined;
+  const messageList = (
+    <div
+      className={`message-scroll${bare && className ? ` ${className}` : ""}`}
+      onClickCapture={bare ? handleMessageClick : undefined}
+      onWheelCapture={wheelScrollMode === "parent" ? (event) => {
+        if (!window.matchMedia("(pointer: fine)").matches || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        let parent = event.currentTarget.parentElement;
+        while (parent) {
+          const overflowY = window.getComputedStyle(parent).overflowY;
+          if (/(auto|scroll)/.test(overflowY) && parent.scrollHeight > parent.clientHeight + 1) {
+            parent.scrollTop += event.deltaY;
+            return;
+          }
+          parent = parent.parentElement;
+        }
+        window.scrollBy({ top: event.deltaY });
+      } : undefined}
+      ref={scrollRef}
+    >
+      {groups.map((group) => (
+        <MessageGroupBlock
+          enteringMessageIds={[]}
+          group={group}
+          key={group.key}
+          onOpenActions={onMessageAction ? openMessageAction : (message) => openMessage(message)}
+          onOpenImage={onOpenImage ?? noop}
+          onOpenVideo={onOpenVideo ?? noop}
+          onRetry={noop}
+          onToggleGroupSelection={noop}
+          onToggleSelection={noop}
+          selectedClientIds={[]}
+          selectionMode={false}
+          showAuthor={showAuthors && group.from === "other"}
+          showSelfAuthor={showSelfAuthors}
+          showSelfAvatar
+          selfAvatarFrame={firstPersonAuthor?.avatar_frame_style}
+          selfAvatarName={firstPersonAuthor?.name}
+          selfAvatarUri={firstPersonAuthor?.avatar_uri}
+          selfIsPermanentVip={firstPersonAuthor?.is_permanent_vip}
+          renderMessageFooter={renderMessageFooter ? (message) => {
+            if (typeof message.id !== "number") return null;
+            const source = dtoById.get(message.id);
+            return source ? renderMessageFooter(source) : null;
+          } : undefined}
+        />
+      ))}
+    </div>
+  );
+
+  if (bare) return messageList;
+
   return (
     <section
       className={`chat-conversation-panel chat-conversation-preview chat-preview-shared ${className}`.trim()}
-      onClickCapture={onMessageClick ? (event) => {
-        const messageNode = (event.target as HTMLElement).closest<HTMLElement>("[data-message-id]");
-        const messageId = Number(messageNode?.dataset.messageId);
-        const source = dtoById.get(messageId);
-        if (source) onMessageClick(source);
-      } : undefined}
+      onClickCapture={handleMessageClick}
     >
       <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
-        <div
-          className="message-scroll"
-          onWheelCapture={wheelScrollMode === "parent" ? (event) => {
-            if (!window.matchMedia("(pointer: fine)").matches || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-            event.preventDefault();
-            event.stopPropagation();
-            let parent = event.currentTarget.parentElement;
-            while (parent) {
-              const overflowY = window.getComputedStyle(parent).overflowY;
-              if (/(auto|scroll)/.test(overflowY) && parent.scrollHeight > parent.clientHeight + 1) {
-                parent.scrollTop += event.deltaY;
-                return;
-              }
-              parent = parent.parentElement;
-            }
-            window.scrollBy({ top: event.deltaY });
-          } : undefined}
-          ref={scrollRef}
-        >
-          {groups.map((group) => (
-            <MessageGroupBlock
-              enteringMessageIds={[]}
-              group={group}
-              key={group.key}
-              onOpenActions={onMessageAction ? openMessageAction : (message) => openMessage(message)}
-              onOpenImage={onOpenImage ?? noop}
-              onOpenVideo={onOpenVideo ?? noop}
-              onRetry={noop}
-              onToggleGroupSelection={noop}
-              onToggleSelection={noop}
-              selectedClientIds={[]}
-              selectionMode={false}
-              showAuthor={showAuthors && group.from === "other"}
-              showSelfAuthor={showSelfAuthors}
-              showSelfAvatar
-              selfAvatarFrame={firstPersonAuthor?.avatar_frame_style}
-              selfAvatarName={firstPersonAuthor?.name}
-              selfAvatarUri={firstPersonAuthor?.avatar_uri}
-              selfIsPermanentVip={firstPersonAuthor?.is_permanent_vip}
-              renderMessageFooter={renderMessageFooter ? (message) => {
-                if (typeof message.id !== "number") return null;
-                const source = dtoById.get(message.id);
-                return source ? renderMessageFooter(source) : null;
-              } : undefined}
-            />
-          ))}
-        </div>
+        {messageList}
       </div>
     </section>
   );

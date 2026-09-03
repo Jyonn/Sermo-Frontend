@@ -433,22 +433,15 @@
 
 /* Welcome messages use the familiar chat rhythm without becoming a real conversation. */
 .welcome-template-drawer .drawer-body { display: block; height: 100%; min-height: 0; padding: 0; overflow: hidden; }
-.welcome-template-editor { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; min-height: 0; overflow: hidden; background: var(--bg-canvas); }
-.welcome-template-context { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--line-soft); background: color-mix(in srgb, var(--brand-primary) 5%, var(--bg-elevated)); }
-.welcome-template-context > .material-symbols-outlined { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 11px; color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 11%, transparent); font-size: 19px; }
-.welcome-template-context > div { display: grid; min-width: 0; gap: 2px; }
-.welcome-template-context strong { font-size: 13px; }
-.welcome-template-context small { color: var(--text-muted); font-size: 10px; line-height: 1.4; }
-.welcome-template-context b { min-width: 42px; padding: 6px 9px; border-radius: 999px; color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 12%, transparent); font: 700 11px/1 var(--font-mono); text-align: center; }
+.welcome-template-editor { display: flex; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; background: var(--bg-canvas); }
+.welcome-template-count { min-width: 42px; padding: 6px 9px; border-radius: 999px; color: var(--brand-primary-press); background: color-mix(in srgb,var(--brand-primary) 12%,transparent); font: 700 11px/1 var(--font-mono); text-align: center; }
 .welcome-template-limit-note { display: flex; align-items: center; gap: 7px; padding: 9px 16px; color: #95600d; background: #fff4d8; font-size: 11px; font-weight: 700; }
 .welcome-template-limit-note .material-symbols-outlined { font-size: 17px; }
-.welcome-template-thread { min-height: 0; overflow: hidden; background: var(--bg-canvas); }
-.welcome-template-loading { padding: 40px 0; color: var(--text-muted); text-align: center; }
-.welcome-template-chat,.welcome-template-chat .chat-detail-scene { width: 100%; height: 100%; min-height: 0; }
-.chat-preview-shared.welcome-template-chat .chat-detail-scene { overflow: hidden; }
-.chat-preview-shared.welcome-template-chat .message-scroll { height: 100%; min-height: 0; padding: 22px 16px 30px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-.chat-preview-shared.welcome-template-chat .message-scroll :is(button,a,audio,video) { pointer-events: auto; }
-.welcome-template-composer { align-self: end; }
+.welcome-template-editor > .chat-detail-scene { flex: 1 1 auto; width: 100%; min-height: 0; }
+.welcome-template-loading { display: grid; min-height: 0; place-items: center; color: var(--text-muted); }
+.welcome-template-message-scroll { min-height: 0; overflow-y: auto; }
+.welcome-template-composer .composer-actions-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.welcome-template-composer .composer-action-tile-icon > .material-symbols-outlined { font-size: 23px; }
 
 :root {
   --font-heading: "Space Grotesk", "Noto Sans SC", sans-serif;

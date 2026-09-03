@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.13",
+  "id": "2026.09.03.14",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息编辑进一步对齐聊天",
+      "title": "欢迎消息成为一段真正的会话",
       "items": [
-        "欢迎消息输入栏恢复聊天会话相同的圆角卡片、表情与附件布局",
-        "移除气泡旁的删除按钮，现在长按消息即可删除"
+        "欢迎消息 Drawer 现在完整采用聊天会话的消息区与底部输入栏结构",
+        "保留表情、语音、相册和文件，移除不适用的位置与足迹地图入口"
       ]
     },
     "en": {
-      "title": "Welcome message editing now better matches chat",
+      "title": "Welcome messages now behave like a real conversation",
       "items": [
-        "The composer now uses the same rounded card, emoji, and attachment layout as chat",
-        "Per-bubble delete buttons are gone; long-press a message to delete it"
+        "The welcome message drawer now uses the full chat conversation and composer structure",
+        "Emoji, voice, gallery, and files remain available without location or footprint map actions"
       ]
     }
   }
