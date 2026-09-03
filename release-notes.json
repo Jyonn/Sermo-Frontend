@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.8",
+  "id": "2026.09.03.9",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "深色模式列表背景更协调",
+      "title": "欢迎语升级为欢迎消息",
       "items": [
-        "修复手机端深色模式下聊天与投稿列表仍有独立底色的问题",
-        "列表信息流现在会自然融入页面背景"
+        "可以像编辑聊天一样设置多条欢迎消息，并加入图片、视频、语音或文件",
+        "新好友接受申请后会按顺序自动收到；普通用户最多 3 条，永久 VIP 与官方账号最多 10 条"
       ]
     },
     "en": {
-      "title": "Better dark-mode list backgrounds",
+      "title": "Welcome messages, upgraded",
       "items": [
-        "Fixed chat and submission lists retaining a separate surface on mobile dark mode",
-        "Feed lists now blend naturally into the page background"
+        "Build a multi-message greeting with text, images, video, audio, or files in a chat-style editor",
+        "New friends receive them in order after accepting; regular users get 3 slots, while permanent VIP and official accounts get 10"
       ]
     }
   }

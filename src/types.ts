@@ -1052,6 +1052,23 @@ export interface ChatMessageDTO {
   is_deleted?: boolean;
 }
 
+export interface WelcomeTemplateMessageDTO {
+  template_message_id: number;
+  type: number;
+  content: string;
+  payload?: ChatMessagePayloadDTO | null;
+  resource_id?: number | null;
+  position: number;
+}
+
+export interface WelcomeTemplateDTO {
+  welcome_message: string;
+  messages: WelcomeTemplateMessageDTO[];
+  max_messages: number;
+  can_add: boolean;
+  delete_to_limit: number;
+}
+
 export interface PinnedMessageDTO {
   pin_id: number;
   message: ChatMessageDTO;

@@ -55,6 +55,8 @@ import type {
   StickerPrepareDTO,
   WebPushInfoDTO,
   WebPushSubscriptionDTO,
+  WelcomeTemplateDTO,
+  WelcomeTemplateMessageDTO,
   MyTravelMapDTO,
   TravelMapCheckInDTO,
   ChatTravelMapAccessDTO,
@@ -1554,17 +1556,17 @@ export const api = {
   },
 
   getWelcomeMessage(signal?: AbortSignal) {
-    return request<{ welcome_message: string }>("/users/me/welcome-message", {
+    return request<WelcomeTemplateDTO>("/users/me/welcome-message", {
       auth: true,
       signal,
     });
   },
 
-  updateWelcomeMessage(welcome_message: string) {
-    return request<{ welcome_message: string }>("/users/me/welcome-message", {
+  updateWelcomeMessages(messages: Array<Pick<WelcomeTemplateMessageDTO, "type" | "content"> & Partial<Pick<WelcomeTemplateMessageDTO, "template_message_id" | "resource_id">>>) {
+    return request<WelcomeTemplateDTO>("/users/me/welcome-message", {
       method: "POST",
       auth: true,
-      body: { welcome_message },
+      body: { messages },
     });
   },
 

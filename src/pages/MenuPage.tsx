@@ -17,6 +17,7 @@ import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfileCard } from "../components/UserProfileCard";
+import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
 import { RarityIcon } from "../components/RarityIcon";
 import { ApiError, api } from "../lib/api";
 import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
@@ -494,6 +495,7 @@ export default function MenuPage() {
   const [prefEditorSaving, setPrefEditorSaving] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
   const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
+  const [welcomeEditorOpen, setWelcomeEditorOpen] = useState(false);
   const [basicEditValue, setBasicEditValue] = useState("");
   const [authTarget, setAuthTarget] = useState("");
   const [authCode, setAuthCode] = useState("");
@@ -1624,6 +1626,10 @@ export default function MenuPage() {
       showToast(t("profile.nextChange", { date: new Date(me.nickname_change.available_at * 1000).toLocaleDateString(getActiveLocale()) }), "error");
       return;
     }
+    if (field === "welcome") {
+      setWelcomeEditorOpen(true);
+      return;
+    }
     setBasicEditField(field);
     setBasicEditValue(field === "name" ? session?.user.name ?? "" : me?.welcome_message ?? session?.user?.welcome_message ?? "");
   };
@@ -1671,7 +1677,7 @@ export default function MenuPage() {
           name: payload.name,
         });
       } else if (basicEditField === "welcome") {
-        const payload = await api.updateWelcomeMessage(basicEditValue.trim());
+        const payload = await api.updateWelcomeMessages([{ type: 0, content: basicEditValue.trim() }]);
         const nextMessage = payload.welcome_message ?? "";
         setMe((current) => (current ? { ...current, welcome_message: nextMessage } : current));
         patchSessionUser({
@@ -3242,6 +3248,16 @@ export default function MenuPage() {
         placeholder={basicEditField === "name" ? t("profile.nicknamePlaceholder") : t("profile.welcomePlaceholder")}
         title={basicEditField === "name" ? t("profile.editNickname") : t("profile.editWelcome")}
         value={basicEditValue}
+      />
+      <WelcomeMessageEditor
+        avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
+        name={session?.user.name ?? t("brand.user")}
+        onClose={() => setWelcomeEditorOpen(false)}
+        onSaved={(payload) => {
+          setMe((current) => current ? { ...current, welcome_message: payload.welcome_message } : current);
+          patchSessionUser({ welcome_message: payload.welcome_message });
+        }}
+        open={welcomeEditorOpen}
       />
       <ConfirmDialog
         danger

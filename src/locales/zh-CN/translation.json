@@ -2280,4 +2280,12 @@
   ,"activity.friendly.rule1": "每天首个回复获得 20 点，第二个最多获得 10 点，之后每次 5 点。"
   ,"activity.friendly.rule2": "每天最多获得 25 点；已删除的评论仍计入当天次数和积分记录。"
   ,"activity.friendly.rule3": "达到 75 / 100 点后需手动解锁，领取的奖励永久拥有。"
+  ,"profile.welcomeMessages": "欢迎消息"
+  ,"profile.welcomeAutoSend": "新好友会自动收到"
+  ,"profile.welcomeAutoSendHint": "对方接受好友申请后，按这里的顺序发送"
+  ,"profile.welcomeDeleteFirst": "当前权益需先删除 {{count}} 条，之后才能继续添加"
+  ,"profile.welcomeAddMedia": "添加媒体或文件"
+  ,"profile.welcomeMessagePlaceholder": "输入一条欢迎消息"
+  ,"profile.welcomeLimitReached": "已达到欢迎消息上限"
+  ,"profile.welcomeLoadFailed": "欢迎消息加载失败"
 }

@@ -2280,4 +2280,12 @@
   ,"activity.friendly.rule1": "The first reply earns 20 points, the second up to 10, and later replies 5."
   ,"activity.friendly.rule2": "Earn up to 25 daily. Deleted comments still count toward the daily record."
   ,"activity.friendly.rule3": "Manually unlock rewards at 75 and 100 points; claimed rewards are permanent."
+  ,"profile.welcomeMessages": "Welcome messages"
+  ,"profile.welcomeAutoSend": "Sent automatically to new friends"
+  ,"profile.welcomeAutoSendHint": "These messages are sent in order after your friend request is accepted"
+  ,"profile.welcomeDeleteFirst": "Delete {{count}} message(s) to reach your current limit before adding more"
+  ,"profile.welcomeAddMedia": "Add media or a file"
+  ,"profile.welcomeMessagePlaceholder": "Write a welcome message"
+  ,"profile.welcomeLimitReached": "Welcome message limit reached"
+  ,"profile.welcomeLoadFailed": "Could not load welcome messages"
 }
