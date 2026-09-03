@@ -31310,7 +31310,12 @@ html[data-theme="dark"] .drawer-floating-back {
   .mobile-chat-list-screen,
   .mobile-chat-list-screen.is-active,
   .mobile-chat-list-screen.is-background {
-    background-color: transparent;
-    background-image: none;
+    background: transparent;
+  }
+
+  html[data-theme="dark"] body .list-screen.mobile-chat-list-screen,
+  html[data-theme="dark"] body .list-screen.mobile-chat-list-screen.is-active,
+  html[data-theme="dark"] body .list-screen.mobile-chat-list-screen.is-background {
+    background: transparent;
   }
 }

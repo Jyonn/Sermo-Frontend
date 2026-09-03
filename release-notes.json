@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.7",
+  "id": "2026.09.03.8",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "网页资源加载更轻量",
+      "title": "深色模式列表背景更协调",
       "items": [
-        "移除重复和不再使用的图片与字体素材",
-        "城市主题资源不再被重复打包，缩小网页部署包体积"
+        "修复手机端深色模式下聊天与投稿列表仍有独立底色的问题",
+        "列表信息流现在会自然融入页面背景"
       ]
     },
     "en": {
-      "title": "Lighter web asset loading",
+      "title": "Better dark-mode list backgrounds",
       "items": [
-        "Removed duplicate and unused image and font assets",
-        "City theme resources are no longer bundled twice, reducing the web deployment size"
+        "Fixed chat and submission lists retaining a separate surface on mobile dark mode",
+        "Feed lists now blend naturally into the page background"
       ]
     }
   }
