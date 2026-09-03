@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.10",
+  "id": "2026.09.03.11",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息编辑更自然",
+      "title": "欢迎消息与聊天体验保持一致",
       "items": [
-        "欢迎消息现在按新好友看到的接收方视角展示",
-        "优化消息气泡、删除操作和输入区域排版，编辑长短内容都更顺手"
+        "欢迎消息编辑器现在直接使用聊天会话的气泡、媒体、头像框与背景样式",
+        "消息按新好友看到的接收方视角展示，并保留简洁的逐条删除操作"
       ]
     },
     "en": {
-      "title": "A more natural welcome message editor",
+      "title": "Welcome messages now match chat",
       "items": [
-        "Welcome messages now appear from the recipient's point of view",
-        "Refined message bubbles, delete controls, and composer layout for smoother editing"
+        "The editor now uses the same bubbles, media, avatar frames, and backgrounds as chat",
+        "Messages appear from the recipient's point of view with a compact per-message delete action"
       ]
     }
   }

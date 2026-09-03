@@ -3,9 +3,9 @@ import { ApiError, api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
-import type { MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
+import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
+import { ChatPreview } from "../pages/ChatsPage";
 import { SideDrawer } from "./SideDrawer";
-import { UserAvatar } from "./UserAvatar";
 
 const MESSAGE_TYPE_TEXT = 0;
 const MESSAGE_TYPE_IMAGE = 1;
@@ -18,16 +18,6 @@ function messageTypeForKind(kind: MessageMediaKind) {
   if (kind === "video") return MESSAGE_TYPE_VIDEO;
   if (kind === "audio") return MESSAGE_TYPE_AUDIO;
   return MESSAGE_TYPE_FILE;
-}
-
-function formatFileSize(bytes = 0) {
-  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
-  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-}
-
-function formatDuration(seconds = 0) {
-  const safe = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;
-  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
 }
 
 async function audioDuration(file: File) {
@@ -44,35 +34,22 @@ async function audioDuration(file: File) {
   }
 }
 
-function WelcomeBubble({ message }: { message: WelcomeTemplateMessageDTO }) {
-  const payload = message.payload;
-  if (message.type === MESSAGE_TYPE_IMAGE) {
-    return <img alt="" className="welcome-template-image" src={payload?.thumbnail_uri || payload?.uri} />;
-  }
-  if (message.type === MESSAGE_TYPE_VIDEO) {
-    return <span className="welcome-template-video"><img alt="" src={payload?.thumbnail_uri || payload?.uri} /><span className="material-symbols-outlined">play_arrow</span></span>;
-  }
-  if (message.type === MESSAGE_TYPE_AUDIO) {
-    return <span className="welcome-template-audio"><span className="material-symbols-outlined">graphic_eq</span><strong>{formatDuration(payload?.duration_seconds)}</strong></span>;
-  }
-  if (message.type === MESSAGE_TYPE_FILE) {
-    return <span className="welcome-template-file"><span className="material-symbols-outlined">draft</span><span><strong>{payload?.file_name || message.content}</strong><small>{formatFileSize(payload?.file_size)}</small></span></span>;
-  }
-  if (payload?.kind === "sticker") {
-    return payload.unavailable ? <span className="welcome-template-unavailable">无法加载</span> : <img alt="" className="welcome-template-sticker" src={payload.uri} />;
-  }
-  return <span className="welcome-template-text">{message.content}</span>;
-}
-
 interface WelcomeMessageEditorProps {
+  avatarCacheKey?: string | null;
+  avatarFrameStyle?: AvatarFrameStyle;
   avatarUri?: string | null;
+  backgroundTheme?: ChatBackgroundTheme;
+  backgroundUri?: string | null;
+  bubbleStyle?: ChatBubbleStyle;
+  isPermanentVip?: boolean;
   name: string;
   onClose: () => void;
   onSaved: (payload: WelcomeTemplateDTO) => void;
   open: boolean;
+  userId: number;
 }
 
-export function WelcomeMessageEditor({ avatarUri, name, onClose, onSaved, open }: WelcomeMessageEditorProps) {
+export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarUri, backgroundTheme = "default", backgroundUri, bubbleStyle, isPermanentVip, name, onClose, onSaved, open, userId }: WelcomeMessageEditorProps) {
   const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [state, setState] = useState<WelcomeTemplateDTO | null>(null);
@@ -166,6 +143,23 @@ export function WelcomeMessageEditor({ avatarUri, name, onClose, onSaved, open }
   };
 
   const count = state?.messages.length ?? 0;
+  const previewMessages: ChatMessageDTO[] = (state?.messages ?? []).map((message) => ({
+    message_id: message.template_message_id,
+    client_message_id: `welcome-template-${message.template_message_id}`,
+    user: {
+      user_id: userId,
+      name,
+      avatar_uri: avatarUri ?? undefined,
+      avatar_cache_key: avatarCacheKey ?? undefined,
+      avatar_frame_style: avatarFrameStyle,
+      chat_bubble_style: bubbleStyle,
+      is_permanent_vip: isPermanentVip,
+    },
+    type: message.type,
+    content: message.content,
+    payload: message.payload,
+    created_at: message.position + 1,
+  }));
   return <SideDrawer className="welcome-template-drawer" historyKey="welcome-messages" onClose={onClose} open={open} title={t("profile.welcomeMessages")}>
     <div className="welcome-template-editor">
       <header className="welcome-template-context">
@@ -175,11 +169,22 @@ export function WelcomeMessageEditor({ avatarUri, name, onClose, onSaved, open }
       </header>
       {state?.delete_to_limit ? <div className="welcome-template-limit-note"><span className="material-symbols-outlined">info</span>{t("profile.welcomeDeleteFirst", { count: state.delete_to_limit })}</div> : null}
       <div className="welcome-template-thread">
-        {loading ? <div className="welcome-template-loading">{t("common.loading")}</div> : state?.messages.map((message) => <article className="welcome-template-row" key={message.template_message_id}>
-          <UserAvatar className="welcome-template-avatar" name={name} uri={avatarUri} />
-          <div className="welcome-template-message"><WelcomeBubble message={message} /></div>
-          <button aria-label={t("common.delete")} className="welcome-template-delete" disabled={saving || state.messages.length <= 1} onClick={() => void deleteMessage(message.template_message_id)} type="button"><span className="material-symbols-outlined">delete</span></button>
-        </article>) }
+        {loading ? <div className="welcome-template-loading">{t("common.loading")}</div> : <ChatPreview
+          backgroundTheme={backgroundTheme}
+          backgroundUri={backgroundUri}
+          className="welcome-template-chat"
+          firstPersonUserId={-1}
+          initialScrollToEnd
+          messages={previewMessages}
+          renderMessageFooter={(message) => <button
+            aria-label={t("common.delete")}
+            className="welcome-template-delete"
+            disabled={saving || previewMessages.length <= 1}
+            onClick={() => void deleteMessage(message.message_id)}
+            type="button"
+          ><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button>}
+          showAuthors={false}
+        />}
       </div>
       <form className="welcome-template-composer" onSubmit={(event) => void addText(event)}>
         <button aria-label={t("profile.welcomeAddMedia")} disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button"><span className="material-symbols-outlined">add</span></button>

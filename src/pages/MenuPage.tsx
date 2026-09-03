@@ -494,7 +494,7 @@ export default function MenuPage() {
   const [prefEditorValue, setPrefEditorValue] = useState("");
   const [prefEditorSaving, setPrefEditorSaving] = useState(false);
   const [authSheetChannel, setAuthSheetChannel] = useState<NotificationChannel | null>(null);
-  const [basicEditField, setBasicEditField] = useState<"name" | "welcome" | null>(null);
+  const [basicEditField, setBasicEditField] = useState<"name" | null>(null);
   const [welcomeEditorOpen, setWelcomeEditorOpen] = useState(false);
   const [basicEditValue, setBasicEditValue] = useState("");
   const [authTarget, setAuthTarget] = useState("");
@@ -1630,8 +1630,8 @@ export default function MenuPage() {
       setWelcomeEditorOpen(true);
       return;
     }
-    setBasicEditField(field);
-    setBasicEditValue(field === "name" ? session?.user.name ?? "" : me?.welcome_message ?? session?.user?.welcome_message ?? "");
+    setBasicEditField("name");
+    setBasicEditValue(session?.user.name ?? "");
   };
 
   const confirmAccountDeleteInput = () => {
@@ -1669,26 +1669,16 @@ export default function MenuPage() {
 
     try {
       setBasicEditSaving(true);
-      const editingField = basicEditField;
-      if (basicEditField === "name") {
-        const payload = await api.updateUserName(basicEditValue.trim());
-        setMe((current) => (current ? { ...current, name: payload.name, name_pinyin: payload.name_pinyin ?? current.name_pinyin } : current));
-        patchSessionUser({
-          name: payload.name,
-        });
-      } else if (basicEditField === "welcome") {
-        const payload = await api.updateWelcomeMessages([{ type: 0, content: basicEditValue.trim() }]);
-        const nextMessage = payload.welcome_message ?? "";
-        setMe((current) => (current ? { ...current, welcome_message: nextMessage } : current));
-        patchSessionUser({
-          welcome_message: nextMessage,
-        });
-      }
+      const payload = await api.updateUserName(basicEditValue.trim());
+      setMe((current) => (current ? { ...current, name: payload.name, name_pinyin: payload.name_pinyin ?? current.name_pinyin } : current));
+      patchSessionUser({
+        name: payload.name,
+      });
       setBasicEditField(null);
-      showToast(editingField === "name" ? t("profile.nicknameUpdated") : t("profile.welcomeUpdated"));
+      showToast(t("profile.nicknameUpdated"));
     } catch (apiError) {
       showToast(
-        apiError instanceof ApiError ? apiError.message : basicEditField === "name" ? t("profile.nicknameUpdateFailed") : t("profile.welcomeUpdateFailed"),
+        apiError instanceof ApiError ? apiError.message : t("profile.nicknameUpdateFailed"),
         "error"
       );
     } finally {
@@ -3238,19 +3228,25 @@ export default function MenuPage() {
       />
       <InputDialog
         busy={basicEditSaving}
-        confirmLabel={basicEditField === "name" ? t("profile.saveNickname") : t("profile.saveWelcome")}
-        maxLength={basicEditField === "name" ? MAX_NICKNAME_LENGTH : undefined}
-        description={basicEditField === "name" ? t("profile.nicknameLengthHint", { count: MAX_NICKNAME_LENGTH }) : undefined}
+        confirmLabel={t("profile.saveNickname")}
+        maxLength={MAX_NICKNAME_LENGTH}
+        description={t("profile.nicknameLengthHint", { count: MAX_NICKNAME_LENGTH })}
         onChange={setBasicEditValue}
         onClose={() => setBasicEditField(null)}
         onConfirm={() => void confirmBasicEdit()}
         open={Boolean(basicEditField)}
-        placeholder={basicEditField === "name" ? t("profile.nicknamePlaceholder") : t("profile.welcomePlaceholder")}
-        title={basicEditField === "name" ? t("profile.editNickname") : t("profile.editWelcome")}
+        placeholder={t("profile.nicknamePlaceholder")}
+        title={t("profile.editNickname")}
         value={basicEditValue}
       />
       <WelcomeMessageEditor
+        avatarCacheKey={me?.avatar_cache_key}
+        avatarFrameStyle={me?.avatar_frame_style ?? session?.user.avatar_frame_style}
         avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
+        backgroundTheme={me?.chat_background_theme ?? session?.user.chat_background_theme}
+        backgroundUri={me?.chat_background_uri ?? session?.user.chat_background_uri}
+        bubbleStyle={me?.chat_bubble_style ?? session?.user.chat_bubble_style}
+        isPermanentVip={me?.is_permanent_vip ?? session?.user.is_permanent_vip}
         name={session?.user.name ?? t("brand.user")}
         onClose={() => setWelcomeEditorOpen(false)}
         onSaved={(payload) => {
@@ -3258,6 +3254,7 @@ export default function MenuPage() {
           patchSessionUser({ welcome_message: payload.welcome_message });
         }}
         open={welcomeEditorOpen}
+        userId={session?.user.user_id ?? -1}
       />
       <ConfirmDialog
         danger

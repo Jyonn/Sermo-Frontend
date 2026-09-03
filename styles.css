@@ -442,39 +442,21 @@
 .welcome-template-context b { min-width: 42px; padding: 6px 9px; border-radius: 999px; color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 12%, transparent); font: 700 11px/1 var(--font-mono); text-align: center; }
 .welcome-template-limit-note { display: flex; align-items: center; gap: 7px; padding: 9px 16px; color: #95600d; background: #fff4d8; font-size: 11px; font-weight: 700; }
 .welcome-template-limit-note .material-symbols-outlined { font-size: 17px; }
-.welcome-template-thread { min-height: 0; padding: 22px 16px 30px; overflow-y: auto; overscroll-behavior: contain; background: radial-gradient(circle at 8% 4%, color-mix(in srgb, var(--brand-primary) 6%, transparent), transparent 31%), var(--bg-canvas); }
+.welcome-template-thread { min-height: 0; overflow: hidden; background: var(--bg-canvas); }
 .welcome-template-loading { padding: 40px 0; color: var(--text-muted); text-align: center; }
-.welcome-template-row { display: grid; grid-template-columns: 38px minmax(0, auto) 30px; justify-content: start; align-items: end; gap: 8px; margin-top: 13px; }
-.welcome-template-row:first-child { margin-top: 0; }
-.welcome-template-avatar { width: 38px; height: 38px; border-radius: 12px; }
-.welcome-template-avatar :is(.avatar-frame-clip,.avatar-image) { border-radius: inherit; }
-.welcome-template-delete { align-self: center; display: grid; width: 30px; height: 30px; padding: 0; place-items: center; border: 0; border-radius: 50%; color: color-mix(in srgb, var(--text-muted) 72%, transparent); background: transparent; opacity: 0; transition: opacity 150ms ease, color 150ms ease, background 150ms ease; }
-.welcome-template-row:hover .welcome-template-delete,.welcome-template-delete:focus-visible { opacity: 1; }
-.welcome-template-delete:hover { color: #b74b59; background: color-mix(in srgb, #d45a69 9%, transparent); }
+.welcome-template-chat,.welcome-template-chat .chat-detail-scene { width: 100%; height: 100%; min-height: 0; }
+.chat-preview-shared.welcome-template-chat .chat-detail-scene { overflow: hidden; }
+.chat-preview-shared.welcome-template-chat .message-scroll { height: 100%; min-height: 0; padding: 22px 16px 30px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.chat-preview-shared.welcome-template-chat .message-scroll :is(button,a,audio,video) { pointer-events: auto; }
+.welcome-template-delete { display: flex; width: fit-content; align-items: center; gap: 3px; margin: 3px 2px 9px; padding: 2px 5px; border: 0; border-radius: 6px; color: var(--text-muted); background: transparent; font-size: 10px; line-height: 1.2; opacity: .68; }
+.welcome-template-delete:hover,.welcome-template-delete:focus-visible { color: #b74b59; background: color-mix(in srgb,#d45a69 8%,transparent); opacity: 1; }
 .welcome-template-delete:disabled { visibility: hidden; }
-.welcome-template-delete .material-symbols-outlined { font-size: 17px; }
-.welcome-template-message { max-width: min(310px, 68vw); overflow: hidden; border: 1px solid var(--message-card-border); border-radius: 5px 18px 18px 18px; color: var(--chat-other-text); background: var(--message-other-surface); box-shadow: var(--message-card-shadow); }
-.welcome-template-text { display: block; padding: 10px 13px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.55; }
-.welcome-template-image,.welcome-template-sticker { display: block; width: min(230px, 58vw); max-height: 260px; object-fit: cover; }
-.welcome-template-sticker { width: 128px; height: 128px; object-fit: contain; }
-.welcome-template-video { position: relative; display: block; width: min(250px, 60vw); aspect-ratio: 16/10; background: #10251f; }
-.welcome-template-video img { width: 100%; height: 100%; object-fit: cover; }
-.welcome-template-video > span { position: absolute; inset: 50% auto auto 50%; display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #fff; background: rgba(6,20,16,.58); transform: translate(-50%,-50%); backdrop-filter: blur(8px); }
-.welcome-template-audio { display: flex; min-width: 150px; align-items: center; justify-content: space-between; gap: 28px; padding: 11px 13px; }
-.welcome-template-audio > span { font-size: 24px; }
-.welcome-template-audio strong { font: 700 11px/1 var(--font-mono); }
-.welcome-template-file { display: grid; grid-template-columns: 36px minmax(0,1fr); align-items: center; gap: 9px; min-width: 210px; padding: 11px 13px; }
-.welcome-template-file > .material-symbols-outlined { font-size: 28px; }
-.welcome-template-file > span:last-child { display: grid; min-width: 0; gap: 2px; }
-.welcome-template-file strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.welcome-template-file small { color: var(--text-muted); font-size: 10px; }
-.welcome-template-unavailable { display: block; padding: 16px; color: var(--text-muted); background: var(--bg-soft); font-size: 12px; }
+.welcome-template-delete .material-symbols-outlined { font-size: 13px; }
 .welcome-template-composer { display: grid; grid-template-columns: 40px minmax(0,1fr) 40px; align-items: end; gap: 8px; padding: 9px max(12px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); border-top: 1px solid var(--line-soft); background: color-mix(in srgb, var(--bg-elevated) 91%, transparent); backdrop-filter: blur(22px); }
 .welcome-template-composer > button { display: grid; width: 40px; height: 40px; padding: 0; place-items: center; border: 0; border-radius: 50%; color: var(--text-secondary); background: var(--bg-soft); }
 .welcome-template-composer > button.is-send { color: #073b2e; background: var(--brand-primary); }
 .welcome-template-composer > button:disabled { opacity: .38; }
 .welcome-template-composer textarea { width: 100%; max-height: 112px; min-height: 42px; resize: none; padding: 10px 13px; border: 1px solid var(--line-soft); border-radius: 17px; outline: 0; color: var(--text-primary); background: var(--bg-elevated); font: inherit; font-size: 14px; line-height: 1.45; }
-@media (hover: none) { .welcome-template-delete { opacity: .72; } }
 
 :root {
   --font-heading: "Space Grotesk", "Noto Sans SC", sans-serif;
