@@ -68,7 +68,7 @@ import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRecipientDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, AudioTranscriptDTO, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRecipientDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 import { PUBLIC_ORIGIN } from "../lib/siteConfig";
@@ -557,11 +557,13 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   durationSeconds,
   from,
   uri,
+  messageId,
   className,
 }: {
   durationSeconds?: number;
   from: "self" | "other";
   uri: string;
+  messageId?: number;
   className?: string;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -570,6 +572,9 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [resolvedDuration, setResolvedDuration] = useState(durationSeconds ?? 0);
   const [retryWithFreshUri, setRetryWithFreshUri] = useState(false);
+  const [transcript, setTranscript] = useState<AudioTranscriptDTO | null>(null);
+  const [transcriptVisible, setTranscriptVisible] = useState(false);
+  const transcriptRequestRef = useRef(0);
   const resolvedUri = retryWithFreshUri ? uri : resolveStableResourceUri(uri) ?? uri;
 
   useEffect(() => {
@@ -654,6 +659,15 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     setRetryWithFreshUri(false);
   }, [uri]);
 
+  useEffect(() => {
+    transcriptRequestRef.current += 1;
+    setTranscript(null);
+    setTranscriptVisible(false);
+    return () => {
+      transcriptRequestRef.current += 1;
+    };
+  }, [messageId]);
+
   const totalDuration = resolvedDuration > 0 ? resolvedDuration : durationSeconds ?? 0;
   const progress = totalDuration > 0 ? Math.min(1, currentTime / totalDuration) : 0;
   const activeBars = Math.max(1, Math.round(progress * AUDIO_WAVE_PATTERN.length));
@@ -690,6 +704,49 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     }
   };
 
+  const waitForTranscript = async (requestToken: number, initial: AudioTranscriptDTO) => {
+    let next = initial;
+    for (let attempt = 0; next.status === "processing" && attempt < 45; attempt += 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, 1200));
+      if (requestToken !== transcriptRequestRef.current) return;
+      next = await api.getMessageAudioTranscript(messageId as number);
+    }
+    if (requestToken !== transcriptRequestRef.current) return;
+    setTranscript(next.status === "processing" ? { ...next, status: "failed" } : next);
+  };
+
+  const toggleTranscript = async () => {
+    if (!messageId || messageId <= 0) return;
+    if (transcript?.status === "ready") {
+      setTranscriptVisible((visible) => !visible);
+      return;
+    }
+    if (transcript?.status === "processing") return;
+
+    const requestToken = transcriptRequestRef.current + 1;
+    transcriptRequestRef.current = requestToken;
+    setTranscriptVisible(true);
+    setTranscript({ status: "processing", text: "", cached: false });
+    try {
+      const next = await api.transcribeMessageAudio(messageId);
+      if (requestToken !== transcriptRequestRef.current) return;
+      setTranscript(next);
+      await waitForTranscript(requestToken, next);
+    } catch {
+      if (requestToken === transcriptRequestRef.current) {
+        setTranscript({ status: "failed", text: "", cached: false });
+      }
+    }
+  };
+
+  const transcriptButtonLabel = transcript?.status === "processing"
+    ? i18n.t("audio.transcribing")
+    : transcript?.status === "failed"
+      ? i18n.t("audio.transcribeRetry")
+      : transcript?.status === "ready" && transcriptVisible
+        ? i18n.t("audio.transcriptCollapse")
+        : i18n.t("audio.transcribe");
+
   return (
     <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}>
       <button
@@ -719,6 +776,32 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           ))}
         </div>
       </div>
+      {messageId && messageId > 0 ? (
+        <button
+          aria-expanded={transcript?.status === "ready" && transcriptVisible}
+          aria-label={transcriptButtonLabel}
+          className={`message-audio-transcribe${transcript?.status === "failed" ? " is-failed" : ""}`}
+          disabled={transcript?.status === "processing"}
+          onClick={(event) => {
+            event.stopPropagation();
+            void toggleTranscript();
+          }}
+          type="button"
+        >
+          {transcript?.status === "processing" ? <span aria-hidden="true" className="message-audio-transcribe-spinner" /> : <span aria-hidden="true" className="material-symbols-outlined">{transcript?.status === "ready" && transcriptVisible ? "keyboard_arrow_up" : "text_fields"}</span>}
+          <span>{transcriptButtonLabel}</span>
+        </button>
+      ) : null}
+      {transcriptVisible && transcript?.status === "ready" ? (
+        <div className="message-audio-transcript" role="status">
+          <span className="message-audio-transcript-label">{i18n.t("audio.transcriptLabel")}</span>
+          <p>{transcript.text || i18n.t("audio.transcriptEmpty")}</p>
+        </div>
+      ) : transcriptVisible && transcript?.status === "failed" ? (
+        <div className="message-audio-transcript is-failed" role="status">
+          <p>{i18n.t("audio.transcriptFailed")}</p>
+        </div>
+      ) : null}
       <audio
         className="message-audio-player"
         preload="metadata"
@@ -1677,7 +1760,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "audio" && message.payload?.uri) {
-    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} uri={message.localPreviewUri ?? message.payload.uri} />;
+    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
 
   if (message.kind === "file" && message.payload?.uri) {

@@ -858,6 +858,14 @@ export interface LinkPreviewDTO {
   favicon_url?: string;
 }
 
+export type AudioTranscriptStatus = "none" | "processing" | "ready" | "failed";
+
+export interface AudioTranscriptDTO {
+  status: AudioTranscriptStatus;
+  text: string;
+  cached: boolean;
+}
+
 export interface ChatMessagePayloadDTO {
   kind: MessageKind;
   event?: string;

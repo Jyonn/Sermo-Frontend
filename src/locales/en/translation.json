@@ -2293,4 +2293,11 @@
   ,"profile.welcomeLoadFailed": "Could not load welcome messages"
   ,"profile.welcomeMoveEarlier": "Earlier"
   ,"profile.welcomeMoveLater": "Later"
+  ,"audio.transcribe": "Transcribe"
+  ,"audio.transcribing": "Working"
+  ,"audio.transcribeRetry": "Retry"
+  ,"audio.transcriptCollapse": "Hide"
+  ,"audio.transcriptLabel": "TRANSCRIPT"
+  ,"audio.transcriptEmpty": "No clear speech was detected"
+  ,"audio.transcriptFailed": "Could not transcribe this audio. Tap retry."
 }

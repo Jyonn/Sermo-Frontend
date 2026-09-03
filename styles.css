@@ -6894,10 +6894,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-audio-card {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-width: min(68vw, 274px);
+  min-width: min(74vw, 310px);
   padding: 10px 12px;
   border-radius: var(--radius-bubble);
   border: 1px solid var(--message-card-border);
@@ -7034,6 +7034,91 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 .message-audio-player {
   width: 100%;
   display: none;
+}
+
+.message-audio-transcribe {
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: 20px auto;
+  place-items: center;
+  gap: 2px;
+  min-width: 54px;
+  padding: 2px 0 2px 10px;
+  border-left: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  opacity: 0.66;
+}
+
+.message-audio-transcribe:hover:not(:disabled),
+.message-audio-transcribe:focus-visible {
+  opacity: 1;
+}
+
+.message-audio-transcribe:disabled {
+  cursor: wait;
+}
+
+.message-audio-transcribe.is-failed {
+  color: var(--danger);
+  opacity: 0.88;
+}
+
+.message-audio-transcribe .material-symbols-outlined {
+  font-size: 19px;
+  font-variation-settings: "wght" 400;
+}
+
+.message-audio-transcribe > span:last-child {
+  font-size: 0.68rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.message-audio-transcribe-spinner {
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: message-audio-spin 0.72s linear infinite;
+}
+
+.message-audio-transcript {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 5px;
+  margin: 1px 2px -1px;
+  padding: 10px 2px 1px;
+  border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.message-audio-transcript-label {
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  opacity: 0.54;
+}
+
+.message-audio-transcript p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 540;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-audio-transcript.is-failed p {
+  color: var(--danger);
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+.message-audio-card > :not(.message-audio-player) {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes message-audio-spin {

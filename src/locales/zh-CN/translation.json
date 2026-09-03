@@ -2293,4 +2293,11 @@
   ,"profile.welcomeLoadFailed": "欢迎消息加载失败"
   ,"profile.welcomeMoveEarlier": "前移"
   ,"profile.welcomeMoveLater": "后移"
+  ,"audio.transcribe": "转文字"
+  ,"audio.transcribing": "识别中"
+  ,"audio.transcribeRetry": "重试"
+  ,"audio.transcriptCollapse": "收起"
+  ,"audio.transcriptLabel": "语音转写"
+  ,"audio.transcriptEmpty": "没有识别出清晰的文字"
+  ,"audio.transcriptFailed": "暂时无法识别，点击右侧重试"
 }

@@ -26,6 +26,7 @@ import type {
   JoinResponseDTO,
   LoginAuthDTO,
   LinkPreviewDTO,
+  AudioTranscriptDTO,
   ImageMetadataDTO,
   VideoMetadataDTO,
   OfficialLoginTicketDTO,
@@ -1166,6 +1167,23 @@ export const api = {
     return request<LinkPreviewDTO>("/messages/link-preview", {
       auth: true,
       query: { message_id },
+    });
+  },
+
+  getMessageAudioTranscript(message_id: number, signal?: AbortSignal) {
+    return request<AudioTranscriptDTO>("/messages/audio-transcript", {
+      auth: true,
+      query: { message_id },
+      signal,
+    });
+  },
+
+  transcribeMessageAudio(message_id: number, signal?: AbortSignal) {
+    return request<AudioTranscriptDTO>("/messages/audio-transcript", {
+      method: "POST",
+      auth: true,
+      query: { message_id },
+      signal,
     });
   },
 
