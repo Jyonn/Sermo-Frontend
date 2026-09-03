@@ -440,8 +440,8 @@
 .welcome-template-editor > .chat-detail-scene { flex: 1 1 auto; width: 100%; min-height: 0; }
 .welcome-template-loading { display: grid; min-height: 0; place-items: center; color: var(--text-muted); }
 .welcome-template-message-scroll { min-height: 0; overflow-y: auto; }
-.welcome-message-context-actions { width: min(210px,calc(100vw - 42px)); grid-template-columns: repeat(3,minmax(0,1fr)); }
-.welcome-message-context-actions.has-copy { width: min(278px,calc(100vw - 42px)); grid-template-columns: repeat(4,minmax(0,1fr)); }
+.message-context-actions.welcome-message-context-actions { width: min(210px,calc(100vw - 42px)); grid-template-columns: repeat(3,minmax(0,1fr)); }
+.message-context-actions.welcome-message-context-actions.has-copy { width: min(278px,calc(100vw - 42px)); grid-template-columns: repeat(4,minmax(0,1fr)); }
 .welcome-message-context-actions .message-context-button:disabled { opacity: .38; }
 
 :root {

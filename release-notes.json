@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.16",
+  "id": "2026.09.03.17",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息支持快速排序",
+      "title": "欢迎消息操作栏更加紧凑",
       "items": [
-        "长按欢迎消息即可前移、后移或删除，文字消息还可以直接复制",
-        "首尾消息会自动禁用无效的移动方向"
+        "长按操作栏现在会根据实际按钮数量自动收紧宽度",
+        "移除了非文字消息操作栏右侧的多余空白"
       ]
     },
     "en": {
-      "title": "Welcome messages can now be reordered quickly",
+      "title": "Welcome message actions are now more compact",
       "items": [
-        "Long-press a welcome message to move or delete it, with copy available for text messages",
-        "Unavailable move directions are disabled automatically for the first and last messages"
+        "The long-press action bar now fits its actual number of actions",
+        "Extra space beside non-text message actions has been removed"
       ]
     }
   }
