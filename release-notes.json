@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.1",
+  "id": "2026.09.03.2",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "友好邻居活动上线",
+      "title": "官方通知身份更清晰",
       "items": [
-        "回复广场发言可获得蛛网值，并手动解锁限定头像框和动态个人主页",
-        "个人主页改用更沉浸的无标题布局与毛玻璃返回按钮"
+        "管理与审批通知现在统一由官方账号发送",
+        "通知中仍会清楚标注实际操作人，便于识别和追溯"
       ]
     },
     "en": {
-      "title": "Friendly Neighborhood event",
+      "title": "Clearer official notices",
       "items": [
-        "Earn Web Points by replying in Square and manually unlock a limited frame and animated profile",
-        "Profiles now use an immersive title-free layout with a frosted back button"
+        "Management and review notices are now always sent by the official account",
+        "The actual operator remains clearly identified for context and accountability"
       ]
     }
   }
