@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.12",
+  "id": "2026.09.03.13",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息输入体验对齐聊天",
+      "title": "欢迎消息编辑进一步对齐聊天",
       "items": [
-        "欢迎消息现在与聊天会话共用输入栏结构和文本编辑组件",
-        "语音与附件入口回归聊天页布局，移除不一致的独立发送按钮"
+        "欢迎消息输入栏恢复聊天会话相同的圆角卡片、表情与附件布局",
+        "移除气泡旁的删除按钮，现在长按消息即可删除"
       ]
     },
     "en": {
-      "title": "Welcome message input now matches chat",
+      "title": "Welcome message editing now better matches chat",
       "items": [
-        "Welcome messages now share the chat composer's layout and text editor",
-        "Voice and attachment actions follow the chat layout, replacing the separate send button"
+        "The composer now uses the same rounded card, emoji, and attachment layout as chat",
+        "Per-bubble delete buttons are gone; long-press a message to delete it"
       ]
     }
   }

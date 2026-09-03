@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { ApiError, api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
@@ -57,10 +57,17 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
   const audioInputRef = useRef<HTMLInputElement | null>(null);
   const composerInputRef = useRef<MentionComposerHandle | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
+  const messageMenuRef = useRef<HTMLDivElement | null>(null);
   const [state, setState] = useState<WelcomeTemplateDTO | null>(null);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [messageMenu, setMessageMenu] = useState<{
+    message: ChatMessageDTO;
+    anchorX: number;
+    anchorY: number;
+    placement: "top" | "bottom";
+  } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -165,6 +172,38 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     payload: message.payload,
     created_at: message.position + 1,
   }));
+
+  useLayoutEffect(() => {
+    const menu = messageMenuRef.current;
+    if (!menu || !messageMenu) return;
+    menu.style.setProperty("--message-menu-shift-x", "0px");
+    const rect = menu.getBoundingClientRect();
+    const safeInset = 12;
+    let shift = rect.left < safeInset ? safeInset - rect.left : 0;
+    if (rect.right + shift > window.innerWidth - safeInset) shift -= rect.right + shift - (window.innerWidth - safeInset);
+    menu.style.setProperty("--message-menu-shift-x", `${Math.round(shift)}px`);
+  }, [messageMenu]);
+
+  const openMessageMenu = (message: ChatMessageDTO, element: HTMLElement, pointerX?: number) => {
+    const rect = element.getBoundingClientRect();
+    const spaceAbove = rect.top - 12;
+    const spaceBelow = window.innerHeight - rect.bottom - 12;
+    const placement = spaceAbove >= 100 || spaceAbove > spaceBelow ? "top" : "bottom";
+    setMessageMenu({
+      message,
+      anchorX: pointerX ?? rect.left + rect.width / 2,
+      anchorY: placement === "top" ? rect.top - 10 : rect.bottom + 10,
+      placement,
+    });
+  };
+
+  const deleteSelectedMessage = async () => {
+    const messageId = messageMenu?.message.message_id;
+    setMessageMenu(null);
+    if (messageId == null) return;
+    await deleteMessage(messageId);
+  };
+
   return <SideDrawer className="welcome-template-drawer" historyKey="welcome-messages" onClose={onClose} open={open} title={t("profile.welcomeMessages")}>
     <div className="welcome-template-editor">
       <header className="welcome-template-context">
@@ -181,13 +220,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
           firstPersonUserId={-1}
           initialScrollToEnd
           messages={previewMessages}
-          renderMessageFooter={(message) => <button
-            aria-label={t("common.delete")}
-            className="welcome-template-delete"
-            disabled={saving || previewMessages.length <= 1}
-            onClick={() => void deleteMessage(message.message_id)}
-            type="button"
-          ><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button>}
+          onMessageAction={openMessageMenu}
           showAuthors={false}
           showDividers={false}
         />}
@@ -205,12 +238,28 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
             ref={composerInputRef}
             value={draft}
           />}
+          inputAccessory={<button aria-label={t("emoji.choose")} className="composer-emoji-button" disabled={!state?.can_add || saving} onClick={() => composerInputRef.current?.insertText("😊")} type="button"><span className="material-symbols-outlined">sentiment_satisfied</span></button>}
           leadingAction={<button aria-label={t("audio.record")} className="composer-action-button" disabled={!state?.can_add || saving} onClick={() => audioInputRef.current?.click()} type="button"><span className="material-symbols-outlined">mic</span></button>}
           trailingAction={<button aria-label={t("profile.welcomeAddMedia")} className="composer-plus" disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button"><span className="material-symbols-outlined">add</span></button>}
         />
         <input ref={fileInputRef} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
         <input ref={audioInputRef} accept="audio/*" capture hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
       </form>
+      {messageMenu ? <div className="message-context-layer" onClick={() => setMessageMenu(null)} role="presentation">
+        <div
+          className={`message-context-menu ${messageMenu.placement === "top" ? "above" : "below"}`}
+          onClick={(event) => event.stopPropagation()}
+          ref={messageMenuRef}
+          style={{ left: messageMenu.anchorX, top: messageMenu.anchorY }}
+        >
+          <div className="message-context-actions is-single">
+            <button className="message-context-button danger" disabled={saving || previewMessages.length <= 1} onClick={() => void deleteSelectedMessage()} type="button">
+              <span className="material-symbols-outlined">delete</span>
+              {t("common.delete")}
+            </button>
+          </div>
+        </div>
+      </div> : null}
     </div>
   </SideDrawer>;
 }
