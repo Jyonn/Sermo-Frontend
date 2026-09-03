@@ -23,6 +23,7 @@ interface SideDrawerProps {
   historyKey?: string;
   historyMode?: "stack" | "route";
   onRouteOpen?: () => void;
+  headerless?: boolean;
 }
 
 const DRAWER_QUERY_KEY = "panel";
@@ -59,6 +60,7 @@ export function SideDrawer({
   historyKey,
   historyMode = "stack",
   onRouteOpen,
+  headerless = false,
 }: SideDrawerProps) {
   const { t } = useI18n();
   const location = useLocation();
@@ -209,8 +211,12 @@ export function SideDrawer({
 
   return createPortal(
     <div className={`drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} onClick={requestClose} role="presentation">
-      <aside aria-modal="true" className={`side-drawer${className ? ` ${className}` : ""}`} onClick={(event) => event.stopPropagation()} role="dialog">
-        <header className="drawer-topbar">
+      <aside aria-label={title} aria-modal="true" className={`side-drawer${headerless ? " is-headerless" : ""}${className ? ` ${className}` : ""}`} onClick={(event) => event.stopPropagation()} role="dialog">
+        {headerless ? (
+          <button className="drawer-floating-back" onClick={requestClose} type="button" aria-label={t("common.back")}>
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+        ) : <header className="drawer-topbar">
           <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
             <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label={t("common.back")}>
               <span className="material-symbols-outlined">arrow_back</span>
@@ -236,7 +242,7 @@ export function SideDrawer({
               </button>
             ) : null}
           </div>
-        </header>
+        </header>}
         <div className="drawer-body">{children}</div>
       </aside>
     </div>,

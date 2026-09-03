@@ -13,7 +13,6 @@ import { useAuth } from "../lib/auth";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import { formatRelativeTime } from "../lib/presentation";
 import { VerificationBanner } from "../components/VerificationBanner";
-import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { TabPageHeader } from "../components/TabPageHeader";
@@ -138,7 +137,7 @@ export default function NotificationsPage() {
   const [requestDrawerTab, setRequestDrawerTab] = useState<"incoming" | "outgoing">("incoming");
   const [groupSheetOpen, setGroupSheetOpen] = useState(false);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
-  const [profileSyncing, setProfileSyncing] = useState(false);
+  const [, setProfileSyncing] = useState(false);
   const [ignoreRequest, setIgnoreRequest] = useState<FriendshipRequestDTO | null>(null);
   const [revokeRequest, setRevokeRequest] = useState<FriendshipRequestDTO | null>(null);
   const [friendIndexNeeded, setFriendIndexNeeded] = useState(false);
@@ -494,10 +493,10 @@ export default function NotificationsPage() {
       </SideDrawer>
 
       <SideDrawer
+        headerless
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}
         title={profileDrawerUserId === session?.user.user_id ? t("profile.myCard") : t("contacts.userDetails")}
-        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >
         {profileDrawerUserId !== null ? (

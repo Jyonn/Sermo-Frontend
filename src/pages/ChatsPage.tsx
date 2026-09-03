@@ -2742,7 +2742,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageDTO[]>([]);
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
-  const [profileSyncing, setProfileSyncing] = useState(false);
+  const [, setProfileSyncing] = useState(false);
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
@@ -8135,10 +8135,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         </div>
       </BottomSheet>
       <SideDrawer
+        headerless
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         open={profileDrawerUserId !== null}
         title={profileDrawerUserId === session?.user.user_id ? t("profile.myCard") : t("profile.details")}
-        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
         onClose={() => setProfileDrawerUserId(null)}
       >
         {profileDrawerUserId !== null ? (

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.2",
+  "id": "2026.09.03.3",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "官方通知身份更清晰",
+      "title": "用户名片更沉浸",
       "items": [
-        "管理与审批通知现在统一由官方账号发送",
-        "通知中仍会清楚标注实际操作人，便于识别和追溯"
+        "用户详情和我的名片不再占用顶部标题栏",
+        "使用左上角毛玻璃圆形按钮返回，完整展示个人主页视觉"
       ]
     },
     "en": {
-      "title": "Clearer official notices",
+      "title": "More immersive profiles",
       "items": [
-        "Management and review notices are now always sent by the official account",
-        "The actual operator remains clearly identified for context and accountability"
+        "User profiles and My Card no longer reserve space for a title bar",
+        "A frosted circular back button keeps the full profile artwork visible"
       ]
     }
   }

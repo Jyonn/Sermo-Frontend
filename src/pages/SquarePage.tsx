@@ -537,7 +537,7 @@ export default function SquarePage() {
   const [activityPoolSlide, setActivityPoolSlide] = useState(0);
   const activityPoolTrackRef = useRef<HTMLDivElement>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
-  const [profileSyncing, setProfileSyncing] = useState(false);
+  const [, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -1868,11 +1868,11 @@ export default function SquarePage() {
         </div> : null}
       </BottomSheet>
       <SideDrawer
+        headerless
         historyKey={`user-profile-${profileDrawerUserId ?? "user"}`}
         onClose={() => setProfileDrawerUserId(null)}
         open={profileDrawerUserId !== null}
         title={profileDrawerUserId === session?.user.user_id ? t("profile.myCard") : t("profile.details")}
-        titleAccessory={<HeaderSyncIndicator syncing={profileSyncing} />}
       >
         {profileDrawerUserId !== null ? (
           <UserProfilePanel
