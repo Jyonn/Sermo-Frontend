@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.11",
+  "id": "2026.09.03.12",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息与聊天体验保持一致",
+      "title": "欢迎消息输入体验对齐聊天",
       "items": [
-        "欢迎消息编辑器现在直接使用聊天会话的气泡、媒体、头像框与背景样式",
-        "消息按新好友看到的接收方视角展示，并保留简洁的逐条删除操作"
+        "欢迎消息现在与聊天会话共用输入栏结构和文本编辑组件",
+        "语音与附件入口回归聊天页布局，移除不一致的独立发送按钮"
       ]
     },
     "en": {
-      "title": "Welcome messages now match chat",
+      "title": "Welcome message input now matches chat",
       "items": [
-        "The editor now uses the same bubbles, media, avatar frames, and backgrounds as chat",
-        "Messages appear from the recipient's point of view with a compact per-message delete action"
+        "Welcome messages now share the chat composer's layout and text editor",
+        "Voice and attachment actions follow the chat layout, replacing the separate send button"
       ]
     }
   }

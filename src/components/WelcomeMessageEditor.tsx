@@ -5,6 +5,8 @@ import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
 import { ChatPreview } from "../pages/ChatsPage";
+import { ChatComposerTextRow } from "./ChatComposerTextRow";
+import { MentionComposerInput, type MentionComposerHandle } from "./MentionComposerInput";
 import { SideDrawer } from "./SideDrawer";
 
 const MESSAGE_TYPE_TEXT = 0;
@@ -52,6 +54,9 @@ interface WelcomeMessageEditorProps {
 export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarUri, backgroundTheme = "default", backgroundUri, bubbleStyle, isPermanentVip, name, onClose, onSaved, open, userId }: WelcomeMessageEditorProps) {
   const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const composerInputRef = useRef<MentionComposerHandle | null>(null);
+  const composerRef = useRef<HTMLFormElement | null>(null);
   const [state, setState] = useState<WelcomeTemplateDTO | null>(null);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
@@ -184,13 +189,27 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
             type="button"
           ><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button>}
           showAuthors={false}
+          showDividers={false}
         />}
       </div>
-      <form className="welcome-template-composer" onSubmit={(event) => void addText(event)}>
-        <button aria-label={t("profile.welcomeAddMedia")} disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button"><span className="material-symbols-outlined">add</span></button>
-        <textarea disabled={!state?.can_add || saving} maxLength={512} onChange={(event) => setDraft(event.target.value)} placeholder={state?.can_add ? t("profile.welcomeMessagePlaceholder") : t("profile.welcomeLimitReached")} rows={1} value={draft} />
-        <button aria-label={t("common.send")} className="is-send" disabled={!draft.trim() || !state?.can_add || saving} type="submit"><span className="material-symbols-outlined">send</span></button>
+      <form className="composer welcome-template-composer" onSubmit={(event) => void addText(event)} ref={composerRef}>
+        <ChatComposerTextRow
+          input={<MentionComposerInput
+            className="textarea composer-input composer-rich-input"
+            members={[]}
+            onChange={setDraft}
+            onMentionQueryChange={() => undefined}
+            onSelectFirstMention={() => false}
+            onSubmit={() => composerRef.current?.requestSubmit()}
+            placeholder={state?.can_add ? t("profile.welcomeMessagePlaceholder") : t("profile.welcomeLimitReached")}
+            ref={composerInputRef}
+            value={draft}
+          />}
+          leadingAction={<button aria-label={t("audio.record")} className="composer-action-button" disabled={!state?.can_add || saving} onClick={() => audioInputRef.current?.click()} type="button"><span className="material-symbols-outlined">mic</span></button>}
+          trailingAction={<button aria-label={t("profile.welcomeAddMedia")} className="composer-plus" disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button"><span className="material-symbols-outlined">add</span></button>}
+        />
         <input ref={fileInputRef} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
+        <input ref={audioInputRef} accept="audio/*" capture hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
       </form>
     </div>
   </SideDrawer>;

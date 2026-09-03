@@ -22,6 +22,7 @@ import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
+import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
@@ -7101,9 +7102,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </div>
                 ) : null}
                 {!voiceComposer.open ? (
-                  <div className="composer-row composer-row-text">
-                    {canSendAudio ? (
-                      <div className="composer-leading-actions">
+                  <ChatComposerTextRow
+                    leadingAction={canSendAudio ? (
                         <FeatureDiscoveryTarget
                           rewardId="capability.audio"
                           guide={{
@@ -7117,9 +7117,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                             <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
                           </button>
                         </FeatureDiscoveryTarget>
-                      </div>
                     ) : null}
-                    <div className="composer-input-wrap">
+                    input={<>
                       <MentionComposerInput
                         ref={mentionEditorRef}
                         className="textarea composer-input composer-rich-input"
@@ -7147,6 +7146,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                           ))}
                         </div>
                       ) : null}
+                    </>}
+                    inputAccessory={
                       <button
                         aria-expanded={emojiPickerOpen}
                         aria-label={emojiPickerOpen ? t("emoji.keyboard") : t("emoji.choose")}
@@ -7165,8 +7166,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                       >
                         <ComposerSvgIcon className="composer-inline-svg" kind={emojiPickerOpen ? "keyboard" : "emoji"} />
                       </button>
-                    </div>
-                    <button
+                    }
+                    trailingAction={<button
                       aria-expanded={composerMoreOpen}
                       aria-label={composerMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
                       className={`composer-plus ${composerMoreOpen ? "is-open" : ""}`}
@@ -7178,9 +7179,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                       type="button"
                     >
                       <span className="material-symbols-outlined">add</span>
-                    </button>
-                    <button hidden type="submit" />
-                  </div>
+                    </button>}
+                  />
                 ) : (
                   <div className="composer-row composer-row-recording">
                     <button className="composer-recording-delete" disabled={voiceComposer.phase === "sending"} onClick={cancelVoiceRecording} type="button">
@@ -9152,6 +9152,7 @@ export function ChatPreview({
   onOpenImage,
   onOpenVideo,
   showAuthors = true,
+  showDividers = true,
   showSelfAuthors = false,
   separateMessages = false,
   renderMessageFooter,
@@ -9168,6 +9169,7 @@ export function ChatPreview({
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
   onOpenVideo?: (uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void;
   showAuthors?: boolean;
+  showDividers?: boolean;
   showSelfAuthors?: boolean;
   separateMessages?: boolean;
   renderMessageFooter?: (message: ChatMessageDTO) => ReactNode;
@@ -9184,7 +9186,10 @@ export function ChatPreview({
       : messages.find((message) => message.user.user_id === firstPersonUserId)?.user ?? null,
     [firstPersonUserId, messages],
   );
-  const groups = useMemo(() => buildMessageGroups(mappedMessages, separateMessages), [mappedMessages, separateMessages]);
+  const groups = useMemo(() => {
+    const nextGroups = buildMessageGroups(mappedMessages, separateMessages);
+    return showDividers ? nextGroups : nextGroups.map((group) => ({ ...group, dividerLabel: undefined }));
+  }, [mappedMessages, separateMessages, showDividers]);
   const noop = () => undefined;
   const backgroundStyle = backgroundTheme === "custom" && backgroundUri
     ? ({ "--chat-background-image": `url("${backgroundUri.replace(/"/g, "%22")}")` } as CSSProperties)

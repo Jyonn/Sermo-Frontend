@@ -452,11 +452,8 @@
 .welcome-template-delete:hover,.welcome-template-delete:focus-visible { color: #b74b59; background: color-mix(in srgb,#d45a69 8%,transparent); opacity: 1; }
 .welcome-template-delete:disabled { visibility: hidden; }
 .welcome-template-delete .material-symbols-outlined { font-size: 13px; }
-.welcome-template-composer { display: grid; grid-template-columns: 40px minmax(0,1fr) 40px; align-items: end; gap: 8px; padding: 9px max(12px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); border-top: 1px solid var(--line-soft); background: color-mix(in srgb, var(--bg-elevated) 91%, transparent); backdrop-filter: blur(22px); }
-.welcome-template-composer > button { display: grid; width: 40px; height: 40px; padding: 0; place-items: center; border: 0; border-radius: 50%; color: var(--text-secondary); background: var(--bg-soft); }
-.welcome-template-composer > button.is-send { color: #073b2e; background: var(--brand-primary); }
-.welcome-template-composer > button:disabled { opacity: .38; }
-.welcome-template-composer textarea { width: 100%; max-height: 112px; min-height: 42px; resize: none; padding: 10px 13px; border: 1px solid var(--line-soft); border-radius: 17px; outline: 0; color: var(--text-primary); background: var(--bg-elevated); font: inherit; font-size: 14px; line-height: 1.45; }
+.welcome-template-composer { margin: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid var(--chat-chrome-border,rgba(232,235,242,.92)); border-radius: 0; background: var(--chat-chrome-surface,rgba(255,255,255,.76)); box-shadow: none; backdrop-filter: blur(22px) saturate(1.12); }
+.welcome-template-composer:focus-within { border-top-color: rgba(0,166,255,.22); box-shadow: none; }
 
 :root {
   --font-heading: "Space Grotesk", "Noto Sans SC", sans-serif;
