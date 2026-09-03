@@ -79,7 +79,7 @@ import type {
   PlatformDashboardDTO,
   PlatformAuditDTO,
 } from "../types";
-import { i18n } from "./i18n";
+import { i18n, resolveJoinLanguage, type SupportedLanguage } from "./i18n";
 import { showToast } from "./toast";
 import { API_BASE_URL } from "./siteConfig";
 
@@ -260,7 +260,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   headers.set(
     "Accept-Language",
     session?.user.language
-      ?? (typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("zh") ? "zh-CN" : "en")
+      ?? resolveJoinLanguage(typeof navigator === "undefined" ? undefined : navigator.language)
   );
   if (body !== undefined) {
     headers.set("Content-Type", "application/json");
@@ -288,7 +288,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
   }
   if (response.status === 401 && platformAdminAuth) {
     platformAdminAuthConfig.setSession(null);
-    throw new ApiError("超级管理员会话已过期", "UNAUTHORIZED", response.status);
+    throw new ApiError(i18n.t("admin.sessionExpired"), "UNAUTHORIZED", response.status);
   }
 
   if (response.status === 401 && auth && retryOn401 && session?.refreshToken) {
@@ -385,7 +385,7 @@ export const api = {
     });
   },
 
-  createSpace(payload: { name: string; slug: string; email: string; code: string; language: "en" | "zh-CN" }) {
+  createSpace(payload: { name: string; slug: string; email: string; code: string; language: SupportedLanguage }) {
     return request<{ space: SpaceDTO; auth: SpaceAuthDTO }>("/spaces/", {
       method: "POST",
       body: payload,
@@ -399,7 +399,7 @@ export const api = {
     });
   },
 
-  joinSpace(payload: { slug: string; name: string; password?: string; language: "en" | "zh-CN" }) {
+  joinSpace(payload: { slug: string; name: string; password?: string; language: SupportedLanguage }) {
     return request<JoinResponseDTO>("/spaces/join", {
       method: "POST",
       body: payload,
@@ -1646,7 +1646,7 @@ export const api = {
     });
   },
 
-  setLanguagePreference(language_preference: "system" | "en" | "zh-CN", system_language: "en" | "zh-CN") {
+  setLanguagePreference(language_preference: "system" | SupportedLanguage, system_language: SupportedLanguage) {
     return request<UserMeDTO>("/users/me/language", {
       method: "POST",
       auth: true,

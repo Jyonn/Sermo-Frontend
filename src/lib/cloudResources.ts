@@ -1,4 +1,5 @@
 import type { CloudResourceDTO } from "../types";
+import { i18n, localeForLanguage } from "./language";
 
 export function formatCloudResourceBytes(bytes: number) {
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
@@ -20,12 +21,10 @@ export function groupCloudResourcesByPeriod(items: CloudResourceDTO[], language:
     const isThisMonth = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
     const key = isThisWeek ? "this-week" : isThisMonth ? "this-month" : `${date.getFullYear()}-${date.getMonth()}`;
     const label = isThisWeek
-      ? (language === "en" ? "This week" : "本周")
+      ? i18n.t("date.thisWeek", { lng: language })
       : isThisMonth
-        ? (language === "en" ? "This month" : "这个月")
-        : language === "en"
-          ? new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(date)
-          : `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, "0")}月`;
+        ? i18n.t("date.thisMonth", { lng: language })
+        : new Intl.DateTimeFormat(localeForLanguage(language), { month: "long", year: "numeric" }).format(date);
     const group = groups.get(key) || { label, items: [] };
     group.items.push(item);
     groups.set(key, group);

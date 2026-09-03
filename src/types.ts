@@ -183,14 +183,14 @@ export interface AccessPayload {
   time?: number;
   type?: string;
   language?: string;
-  language_preference?: "system" | "en" | "zh-CN";
+  language_preference?: import("./lib/i18n").SupportedLanguage | "system";
 }
 
 export interface UserMeDTO extends UserDTO {
   has_password: boolean;
   official?: boolean;
   language?: string;
-  language_preference?: "system" | "en" | "zh-CN";
+  language_preference?: import("./lib/i18n").SupportedLanguage | "system";
   welcome_message?: string;
   email?: string | null;
   phone?: string | null;

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useI18n } from "../lib/language";
+import { i18n, localeForLanguage, useI18n } from "../lib/language";
 
 const BASE_TIME_ZONE = "Asia/Shanghai";
 
@@ -19,11 +19,11 @@ export function relativeDateLabel(timestamp: number, language: string) {
   const itemDate = new Date(`${item.year}-${item.month}-${item.day}T00:00:00+08:00`);
   const nowDate = new Date(`${now.year}-${now.month}-${now.day}T00:00:00+08:00`);
   const days = Math.round((nowDate.getTime() - itemDate.getTime()) / 86_400_000);
-  if (days === 0) return language === "en" ? "Today" : "今天";
-  if (days === 1) return language === "en" ? "Yesterday" : "昨天";
-  if (days < 7) return language === "en" ? "This week" : "本周";
-  if (item.year === now.year && item.month === now.month) return language === "en" ? "This month" : "本月";
-  return new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-CN", {
+  if (days === 0) return i18n.t("date.today", { lng: language });
+  if (days === 1) return i18n.t("date.yesterday", { lng: language });
+  if (days < 7) return i18n.t("date.thisWeek", { lng: language });
+  if (item.year === now.year && item.month === now.month) return i18n.t("date.thisMonth", { lng: language });
+  return new Intl.DateTimeFormat(localeForLanguage(language), {
     timeZone: BASE_TIME_ZONE,
     year: item.year === now.year ? undefined : "numeric",
     month: "long",

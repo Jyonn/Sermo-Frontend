@@ -2,6 +2,9 @@ import { useEffect, useId, useMemo, useRef, useState, type PointerEvent as React
 import { geoBounds, geoContains, geoDistance, geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
+import esCountries from "i18n-iso-countries/langs/es.json";
+import jaCountries from "i18n-iso-countries/langs/ja.json";
+import koCountries from "i18n-iso-countries/langs/ko.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
 import { feature } from "topojson-client";
 import worldTopology from "world-atlas/countries-110m.json";
@@ -17,6 +20,9 @@ import { showToast } from "../lib/toast";
 import type { TinyUserDTO, TravelMapAccessOverviewDTO, TravelMapAccessOverviewEntryDTO, TravelMapRegionDTO } from "../types";
 
 countries.registerLocale(enCountries);
+countries.registerLocale(esCountries);
+countries.registerLocale(jaCountries);
+countries.registerLocale(koCountries);
 countries.registerLocale(zhCountries);
 
 interface TravelMapDrawerProps {
@@ -123,7 +129,8 @@ function countryCodeOf(item: Feature) {
 }
 
 function countryName(code: string, language: string) {
-  return countries.getName(code, language === "zh-CN" ? "zh" : "en") || code;
+  const locale = language.startsWith("zh") ? "zh" : ["es", "ja", "ko"].includes(language) ? language : "en";
+  return countries.getName(code, locale) || code;
 }
 
 function regionCode(country: string, item: Feature<Geometry, RegionProperties>) {

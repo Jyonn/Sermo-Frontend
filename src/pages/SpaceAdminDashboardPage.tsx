@@ -835,8 +835,8 @@ export default function SpaceAdminDashboardPage() {
           <section className="admin-policy-intro"><strong>{t("admin.activityArrangementTitle")}</strong><p>{t("admin.activityArrangementHint")}</p></section>
           {activities.map((activity) => {
             const durationDays = activity.duration_seconds ? Math.ceil(activity.duration_seconds / 86400) : null;
-            const localizedTitle = getActiveLocale() === "zh-CN" ? activity.title : activity.title_en || activity.title;
-            const localizedSummary = getActiveLocale() === "zh-CN" ? activity.summary : activity.summary_en || activity.summary;
+            const localizedTitle = getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title;
+            const localizedSummary = getActiveLocale().startsWith("zh") ? activity.summary : activity.summary_en || activity.summary;
             return <article className={`admin-activity-card is-${activity.status}`} key={activity.key}>
               <header><span><small>{activity.mandatory ? t("admin.activityAutomatic") : t("admin.activityManual")}</small><strong>{localizedTitle}</strong></span><b>{t(`admin.activityStatus.${activity.status}` as TranslationKey)}</b></header>
               <p>{localizedSummary}</p>

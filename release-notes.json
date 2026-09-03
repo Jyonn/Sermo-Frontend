@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.20",
+  "id": "2026.09.03.21",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "语音消息支持按需转文字",
+      "title": "新增四种界面语言",
       "items": [
-        "点击语音卡片右侧的转文字按钮即可生成并展开转写内容",
-        "转写结果会被保存，再次查看无需重复识别"
+        "网页端现已支持日语、韩语、繁体中文和西班牙语",
+        "语言偏好可跟随系统或手动选择，并会在账户中保存"
       ]
     },
     "en": {
-      "title": "On-demand transcripts for audio messages",
+      "title": "Four more interface languages",
       "items": [
-        "Use the action on an audio card to generate and reveal its transcript",
-        "Transcripts are saved, so later requests can reuse the result"
+        "The web app now supports Japanese, Korean, Traditional Chinese, and Spanish",
+        "Language preferences can follow the system or be selected manually and saved to your account"
       ]
     }
   }

@@ -45,7 +45,7 @@ export default function SubmissionCreatePage() {
       try {
         await api.createOperatorFriendRequest(recipient.user.user_id);
       } catch (error) {
-        if (!(error instanceof ApiError) || !/already|exists|已/.test(error.message)) {
+        if (!(error instanceof ApiError) || !/already|exists|已/.test(error.message)) { // i18n-ignore: accepts legacy localized API errors
           showToast(error instanceof ApiError ? error.message : t("submission.friendFailed"), "error");
           return;
         }

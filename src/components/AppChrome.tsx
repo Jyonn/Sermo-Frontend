@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
+import type { SupportedLanguage } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 
@@ -100,15 +101,21 @@ export function AppChrome({
                 >
                   <span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span>
                 </button>
-                <button
-                  aria-label={language === "zh-CN" ? t("guest.switchToEnglish") : t("guest.switchToChinese")}
-                  className="guest-topbar-tool guest-language-tool"
-                  onClick={() => void setLanguagePreference(language === "zh-CN" ? "en" : "zh-CN")}
-                  title={language === "zh-CN" ? t("guest.switchToEnglish") : t("guest.switchToChinese")}
-                  type="button"
-                >
-                  {language === "zh-CN" ? "EN" : "中"}
-                </button>
+                <label className="guest-language-tool" title={t("menu.language")}>
+                  <span className="material-symbols-outlined" aria-hidden="true">translate</span>
+                  <select
+                    aria-label={t("menu.language")}
+                    onChange={(event) => void setLanguagePreference(event.target.value as SupportedLanguage)}
+                    value={language}
+                  >
+                    <option value="zh-CN">简体中文</option>{/* i18n-ignore: language names stay native */}
+                    <option value="zh-TW">繁體中文</option>{/* i18n-ignore: language names stay native */}
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>{/* i18n-ignore: language names stay native */}
+                    <option value="ko">한국어</option>
+                    <option value="es">Español</option>
+                  </select>
+                </label>
               </div>
             ) : null}
             {!hideGuestEntryLink && !session && location.pathname !== "/entry" && !location.pathname.startsWith("/space/") ? (

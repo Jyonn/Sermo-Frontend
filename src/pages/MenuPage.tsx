@@ -2092,7 +2092,7 @@ export default function MenuPage() {
             <small>{activeGrowthGuideLevel === (me?.growth?.level ?? 1) ? t("growth.currentLevelLabel") : activeGrowthGuideLevel < (me?.growth?.level ?? 1) ? t("growth.reached") : t("growth.keepGrowing")}</small>
             <div className="growth-scroll-score">
               <span>{t("growth.unlockCondition")}</span>
-              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString()}<small>{t("growth.points")}</small></strong>
+              <strong>{(growthLevels[activeGrowthGuideLevel - 1]?.score ?? 0).toLocaleString(getActiveLocale())}<small>{t("growth.points")}</small></strong>
             </div>
           </aside>
           <div
@@ -2120,7 +2120,7 @@ export default function MenuPage() {
                     <span className="growth-scroll-node-number">{String(item.level).padStart(2, "0")}</span>
                     <span className="growth-scroll-node-copy">
                       <b>{item.name}</b>
-                      <small>{item.score.toLocaleString()} {t("growth.points")}</small>
+                      <small>{item.score.toLocaleString(getActiveLocale())} {t("growth.points")}</small>
                     </span>
                     <span className="growth-scroll-node-state">{current ? "NOW" : item.unlocked ? "OPEN" : item.level > (me?.growth?.level_cap ?? 18) ? "LOCK" : "NEXT"}</span>
                   </button>
@@ -2202,7 +2202,11 @@ export default function MenuPage() {
               options={[
                 { value: "system", label: t("common.system") },
                 { value: "zh-CN", label: t("common.chinese") },
+                { value: "zh-TW", label: t("common.traditionalChinese") },
                 { value: "en", label: t("common.english") },
+                { value: "ja", label: t("common.japanese") },
+                { value: "ko", label: t("common.korean") },
+                { value: "es", label: t("common.spanish") },
               ]}
               value={languagePreference}
             />

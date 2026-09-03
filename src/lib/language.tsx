@@ -6,7 +6,9 @@ import { useAuth } from "./auth";
 import {
   getBrowserJoinLanguage,
   i18n,
+  localeForLanguage,
   resolveJoinLanguage,
+  SUPPORTED_LANGUAGE_CODES,
   type SupportedLanguage,
   type TranslationKey,
 } from "./i18n";
@@ -28,7 +30,9 @@ let activeLanguage: SupportedLanguage = getBrowserJoinLanguage();
 function readGuestLanguagePreference(): LanguagePreference {
   if (typeof window === "undefined") return "system";
   const stored = window.localStorage.getItem(GUEST_LANGUAGE_STORAGE_KEY);
-  return stored === "zh-CN" || stored === "en" || stored === "system" ? stored : "system";
+  return stored === "system" || SUPPORTED_LANGUAGE_CODES.includes(stored as SupportedLanguage)
+    ? stored as LanguagePreference
+    : "system";
 }
 
 export function getActiveLanguage() {
@@ -36,7 +40,7 @@ export function getActiveLanguage() {
 }
 
 export function getActiveLocale() {
-  return activeLanguage === "zh-CN" ? "zh-CN" : "en-US";
+  return localeForLanguage(activeLanguage);
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -84,7 +88,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value = useMemo<LanguageContextValue>(() => ({
     language,
     preference,
-    locale: language === "zh-CN" ? "zh-CN" : "en-US",
+    locale: localeForLanguage(language),
     saving,
     async setPreference(nextPreference) {
       if (saving || nextPreference === preference) return;
@@ -130,6 +134,7 @@ export function useI18n() {
 export {
   getBrowserJoinLanguage,
   i18n,
+  localeForLanguage,
   resolveJoinLanguage,
   type SupportedLanguage,
   type TranslationKey,

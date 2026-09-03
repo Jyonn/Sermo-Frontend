@@ -26,6 +26,7 @@ import { api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
 import { useI18n, type TranslationKey } from "../lib/language";
+import { isChineseLanguage, localeForLanguage } from "../lib/i18n";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { formatRelativeTime } from "../lib/presentation";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
@@ -75,10 +76,10 @@ const MAX_VIDEO_SECONDS = 60;
 const MESSAGE_TYPE_STATEMENT = 8;
 const MESSAGE_TYPE_ACTIVITY = 11;
 const BAXIAN_IMMORTALS = [
-  ["铁拐李", "Tieguai Li", tieguaiLi], ["钟离权", "Zhongli Quan", zhongliQuan],
-  ["张果老", "Zhang Guolao", zhangGuolao], ["吕洞宾", "Lu Dongbin", lvDongbin],
-  ["何仙姑", "He Xiangu", heXiangu], ["蓝采和", "Lan Caihe", lanCaihe],
-  ["韩湘子", "Han Xiangzi", hanXiangzi], ["曹国舅", "Cao Guojiu", caoGuojiu],
+  ["铁拐李", "Tieguai Li", tieguaiLi], ["钟离权", "Zhongli Quan", zhongliQuan], // i18n-ignore: proper names
+  ["张果老", "Zhang Guolao", zhangGuolao], ["吕洞宾", "Lu Dongbin", lvDongbin], // i18n-ignore: proper names
+  ["何仙姑", "He Xiangu", heXiangu], ["蓝采和", "Lan Caihe", lanCaihe], // i18n-ignore: proper names
+  ["韩湘子", "Han Xiangzi", hanXiangzi], ["曹国舅", "Cao Guojiu", caoGuojiu], // i18n-ignore: proper names
 ] as const;
 const BAXIAN_PRIZE_BUBBLES = [
   { style: "baxian-lv", label: "menu.styleBaxianLv", dialogue: [
@@ -118,7 +119,7 @@ function ActivityForceProgress({ total, target }: { total: number; target: numbe
 }
 
 function formatActivityDateRange(startsAt: number, endsAt: number | null, language: string, ongoingLabel: string) {
-  const locale = language === "zh-CN" ? "zh-CN" : "en-US";
+  const locale = localeForLanguage(language);
   const formatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
   if (endsAt === null) return `${formatter.format(new Date(startsAt * 1000))} · ${ongoingLabel}`;
   return `${formatter.format(new Date(startsAt * 1000))} - ${formatter.format(new Date(endsAt * 1000))}`;
@@ -186,7 +187,7 @@ function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQ
 }
 
 function formatStatementTime(timestamp: number, language: string) {
-  return new Intl.DateTimeFormat(language === "zh-CN" ? "zh-CN" : "en", {
+  return new Intl.DateTimeFormat(localeForLanguage(language), {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -862,7 +863,7 @@ export default function SquarePage() {
           crypto.randomUUID(),
         );
       } else {
-        const title = language === "zh-CN" ? shareActivity!.title : shareActivity!.title_en || shareActivity!.title;
+        const title = isChineseLanguage(language) ? shareActivity!.title : shareActivity!.title_en || shareActivity!.title;
         await api.sendMessage(
           chat.chat_id,
           MESSAGE_TYPE_ACTIVITY,
@@ -1657,7 +1658,7 @@ export default function SquarePage() {
             setActivityBannerSlide(nearest);
           }} ref={activityBannerTrackRef}>
             {regularActivities.slice(0, 1).map((activity) => {
-              const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
+              const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
                 {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
@@ -1691,7 +1692,7 @@ export default function SquarePage() {
               <span className="square-spider-man-preview-status"><i />{t("activity.friendly.webPoints")} {spiderManActivity.friendly_neighbor?.web_points ?? 0}</span>
             </button> : null}
             {regularActivities.slice(1).map((activity) => {
-              const title = language === "zh-CN" ? activity.title : activity.title_en || activity.title;
+              const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
                 {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
@@ -1903,10 +1904,10 @@ export default function SquarePage() {
           {commentComposer}
         </div>
       </SideDrawer>
-      <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (language === "zh-CN" ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity?.theme !== "spider-man-4" ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
+      <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity?.theme !== "spider-man-4" ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">
-            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-512.png?v=6" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>
+            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-512.png?v=6" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>{/* i18n-ignore: brand name */}
             <div className="activity-detail-index">
               <div><button onClick={() => setActivityRulesOpen(true)} type="button">{t("activity.rules")}</button><i aria-hidden="true" /><button onClick={() => setActivityPoolOpen(true)} type="button">{t("activity.prizePool")}</button></div>
               <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}</time>
@@ -1921,7 +1922,7 @@ export default function SquarePage() {
             <header><div><small>{t("activity.spaceForce")}</small><strong>{activeActivity.space_total}<span> / {activeActivity.target}</span></strong></div><div className="activity-force-actions">{activeActivity.claimable_points ? <button disabled={activityClaiming || !activeActivity.active} onClick={() => void claimActivityForce()} type="button">{activityClaiming ? t("common.loading") : `${t("activity.claimForce")} · ${activeActivity.claimable_points}`}</button> : null}<button disabled={!activeActivity.available_points || activityContributing || !activeActivity.active} onClick={() => void contributeActivity()} type="button">{activityContributing ? t("common.loading") : `${t("activity.contribute")} · ${activeActivity.available_points}`}</button></div></header>
             <ActivityForceProgress target={activeActivity.target} total={activeActivity.space_total} />
             {activeActivity.space_reward_claimable ? <section className="activity-space-reward-ready"><div><small>{t("activity.spaceReward")}</small><strong>{t("activity.spaceRewardReady", { force: activeActivity.space_reward_claimable.threshold })}</strong></div><button disabled={spaceRewardClaiming} onClick={() => void claimSpaceActivityReward()} type="button">{spaceRewardClaiming ? t("common.processing") : t("activity.claimSpaceReward")}</button></section> : null}
-            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const firstAwakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const secondAwakening = activeActivity.awakenings?.find((item) => item.step === index + 9); const awakener = secondAwakening?.user; return <article className={secondAwakening ? "is-unlocked" : firstAwakening ? "is-awakened" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{language === "zh-CN" ? zh : en}</strong><div className="activity-awakener-node">{awakener ? <UserAvatar className="activity-awakener-avatar" name={awakener.name} uri={awakener.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
+            <div className="activity-immortal-track">{BAXIAN_IMMORTALS.map(([zh, en, image], index) => { const firstAwakening = activeActivity.awakenings?.find((item) => item.step === index + 1); const secondAwakening = activeActivity.awakenings?.find((item) => item.step === index + 9); const awakener = secondAwakening?.user; return <article className={secondAwakening ? "is-unlocked" : firstAwakening ? "is-awakened" : ""} key={zh}><div className="activity-immortal-figure"><img alt="" src={image} /></div><strong>{isChineseLanguage(language) ? zh : en}</strong><div className="activity-awakener-node">{awakener ? <UserAvatar className="activity-awakener-avatar" name={awakener.name} uri={awakener.avatar_uri} /> : <span>{index + 1}</span>}</div></article>; })}</div>
             <p className="activity-awakening-hint">{!activeActivity.verified ? t("activity.verifyHint") : activeActivity.claimable_points ? t("activity.claimHint") : activeActivity.today_earned ? t("activity.todayEarned") : t("activity.publishHint")}</p>
           </section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}

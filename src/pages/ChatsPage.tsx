@@ -260,7 +260,7 @@ function compactSearchMessagePreview(message: ChatMessageDTO) {
   }
   if (message.type === MESSAGE_TYPE_ACTIVITY) {
     const rawTitle = message.payload?.activity?.title || message.payload?.title || i18n.t("message.activityPlaceholder");
-    const title = /活动$|\bevent$/i.test(rawTitle) ? rawTitle : `${rawTitle}${i18n.t("messageSearch.activitySuffix")}`;
+    const title = /活动$|\bevent$/i.test(rawTitle) ? rawTitle : `${rawTitle}${i18n.t("messageSearch.activitySuffix")}`; // i18n-ignore: detects server-authored Chinese titles
     return i18n.t("messageSearch.compactActivity", { title });
   }
   if (message.type === MESSAGE_TYPE_FORWARD_BUNDLE) return i18n.t("messageSearch.compactForwardBundle");
@@ -474,7 +474,7 @@ function XiaobaiBubbleRunner() {
 }
 
 function formatTime(value: number) {
-  return new Date(value * 1000).toLocaleTimeString("zh-CN", {
+  return new Date(value * 1000).toLocaleTimeString(getActiveLocale(), {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -2869,7 +2869,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       try {
         await api.createOperatorFriendRequest(recipient.user.user_id);
       } catch (error) {
-        if (!(error instanceof ApiError) || !/already|exists|已/.test(error.message)) {
+        if (!(error instanceof ApiError) || !/already|exists|已/.test(error.message)) { // i18n-ignore: accepts legacy localized API errors
           showToast(error instanceof ApiError ? error.message : t("submission.friendFailed"), "error");
           return;
         }

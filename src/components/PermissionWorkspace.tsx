@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { showToast } from "../lib/toast";
+import { isChineseLanguage } from "../lib/i18n";
 import type { CapabilityCatalogDTO, CapabilityNodeDTO, CapabilityPolicyDTO, CapabilitySimulationRowDTO, PolicyExpression } from "../types";
 import "../styles/permission-workspace.css";
 
@@ -130,7 +131,7 @@ function InheritedPolicySummary({ entries, language, scope, selected, t }: { ent
   const chain = capabilityChain(entries, selected);
   const rows: Array<{ key: string; source: "platform" | "space"; title: string; type: "allow" | "deny"; expression: PolicyExpression }> = [];
   chain.forEach((entry) => {
-    const title = language === "en" ? entry.title_en : entry.title;
+    const title = isChineseLanguage(language) ? entry.title : entry.title_en;
     if ((scope === "space" || entry.key !== selected.key) && entry.platform_policy && hasExpression(entry.platform_policy.requirement)) rows.push({ key: `${entry.key}:platform:allow`, source: "platform", title, type: "allow", expression: entry.platform_policy.requirement });
     if ((scope === "space" || entry.key !== selected.key) && entry.platform_policy && hasExpression(entry.platform_policy.denial)) rows.push({ key: `${entry.key}:platform:deny`, source: "platform", title, type: "deny", expression: entry.platform_policy.denial });
     if (scope === "space" && entry.key !== selected.key && entry.space_policy && hasExpression(entry.space_policy.requirement)) rows.push({ key: `${entry.key}:space:allow`, source: "space", title, type: "allow", expression: entry.space_policy.requirement });
@@ -148,7 +149,7 @@ function policyFor(node: CapabilityNodeDTO, scope: Scope) {
 
 export function PermissionWorkspace({ scope }: { scope: Scope }) {
   const { i18n, t } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith("en") ? "en" : "zh-CN";
+  const language = i18n.resolvedLanguage ?? "en";
   const [catalog, setCatalog] = useState<CapabilityCatalogDTO | null>(null);
   const [selectedKey, setSelectedKey] = useState("");
   const [query, setQuery] = useState("");
@@ -278,7 +279,7 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
         const hasOverride = Boolean(policyFor(entry, scope));
         const hasChildren = branchKeys.has(entry.key);
         const collapsed = !queryValue && collapsedKeys.has(entry.key);
-        const title = language === "en" ? entry.title_en : entry.title;
+        const title = isChineseLanguage(language) ? entry.title : entry.title_en;
         return <div className={`permission-tree-row ${selectedKey === entry.key ? "is-selected" : ""} ${hasOverride ? "has-override" : ""}`} key={entry.key} style={{ "--permission-depth": entry.depth } as CSSProperties}>
           {hasChildren ? <button aria-expanded={!collapsed} aria-label={t(collapsed ? "permission.expandBranch" : "permission.collapseBranch", { name: title })} className={`permission-tree-toggle ${collapsed ? "" : "is-expanded"}`} onClick={() => toggleBranch(entry)} type="button"><span className="material-symbols-outlined">chevron_right</span></button> : <span className="permission-tree-spacer" />}
           <button className="permission-tree-select" onClick={() => setSelectedKey(entry.key)} type="button"><span className="material-symbols-outlined">{entry.icon}</span><span><strong>{title}</strong><small>{entry.key}</small></span>{hasOverride ? <i /> : null}</button>
@@ -286,7 +287,7 @@ export function PermissionWorkspace({ scope }: { scope: Scope }) {
       })}{!visibleEntries.length ? <div className="permission-tree-empty"><span className="material-symbols-outlined">search_off</span><small>{t("permission.noSearchResults")}</small></div> : null}</div>
     </aside>
     <main className="permission-editor-panel">{selected ? <>
-      <header className="permission-editor-header"><span className="permission-editor-icon"><span className="material-symbols-outlined">{selected.icon}</span></span><span><small>{selected.key}</small><h2>{language === "en" ? selected.title_en : selected.title}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>
+      <header className="permission-editor-header"><span className="permission-editor-icon"><span className="material-symbols-outlined">{selected.icon}</span></span><span><small>{selected.key}</small><h2>{isChineseLanguage(language) ? selected.title : selected.title_en}</h2></span><div><button disabled={busy || !policyFor(selected, scope)} onClick={() => void reset()} type="button">{t(scope === "platform" ? "permission.removePolicy" : "permission.inherit")}</button><button className="is-primary" disabled={busy} onClick={() => void save()} type="button">{busy ? <i /> : null}{t("common.save")}</button></div></header>
       <section className="permission-inheritance"><span className="material-symbols-outlined">account_tree</span><span><strong>{t(scope === "platform" ? "permission.platformBaseline" : "permission.spaceRestriction")}</strong><small>{t(scope === "platform" ? "permission.platformBaselineHint" : "permission.spaceRestrictionHint")}</small></span></section>
       <InheritedPolicySummary entries={entries} language={language} scope={scope} selected={selected} t={t} />
       <section className="permission-editor-section"><div><h3>{t("permission.allowWhen")}</h3><p>{t("permission.allowWhenHint")}</p></div><RuleEditor onChange={(requirement) => setDraft((current) => ({ ...current, requirement }))} t={t} value={draft.requirement} /></section>

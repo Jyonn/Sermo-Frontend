@@ -3,7 +3,7 @@ import { api, ApiError } from "../lib/api";
 import { formatCloudResourceBytes } from "../lib/cloudResources";
 import { uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
-import { useI18n } from "../lib/language";
+import { i18n, useI18n } from "../lib/language";
 import { useAuth } from "../lib/auth";
 import type { ChatDTO, CloudResourceDTO, CloudResourceListDTO } from "../types";
 import { BottomSheet } from "./BottomSheet";
@@ -29,7 +29,7 @@ interface CloudResourceDrawerProps {
 const messageType = { image: 1, file: 2, video: 4, audio: 5 } as const;
 
 function chatTitle(chat: ChatDTO) {
-  return chat.title || chat.owner?.name || chat.members.map((member) => member.name).join("、") || "会话";
+  return chat.title || chat.owner?.name || chat.members.map((member) => member.name).join(i18n.t("messageSearch.summarySeparator")) || i18n.t("chat.title");
 }
 
 export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId, initialTab = "image", onSent }: CloudResourceDrawerProps) {
