@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.9",
+  "id": "2026.09.03.10",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎语升级为欢迎消息",
+      "title": "欢迎消息编辑更自然",
       "items": [
-        "可以像编辑聊天一样设置多条欢迎消息，并加入图片、视频、语音或文件",
-        "新好友接受申请后会按顺序自动收到；普通用户最多 3 条，永久 VIP 与官方账号最多 10 条"
+        "欢迎消息现在按新好友看到的接收方视角展示",
+        "优化消息气泡、删除操作和输入区域排版，编辑长短内容都更顺手"
       ]
     },
     "en": {
-      "title": "Welcome messages, upgraded",
+      "title": "A more natural welcome message editor",
       "items": [
-        "Build a multi-message greeting with text, images, video, audio, or files in a chat-style editor",
-        "New friends receive them in order after accepting; regular users get 3 slots, while permanent VIP and official accounts get 10"
+        "Welcome messages now appear from the recipient's point of view",
+        "Refined message bubbles, delete controls, and composer layout for smoother editing"
       ]
     }
   }

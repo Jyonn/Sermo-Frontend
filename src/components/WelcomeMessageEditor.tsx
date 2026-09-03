@@ -176,9 +176,9 @@ export function WelcomeMessageEditor({ avatarUri, name, onClose, onSaved, open }
       {state?.delete_to_limit ? <div className="welcome-template-limit-note"><span className="material-symbols-outlined">info</span>{t("profile.welcomeDeleteFirst", { count: state.delete_to_limit })}</div> : null}
       <div className="welcome-template-thread">
         {loading ? <div className="welcome-template-loading">{t("common.loading")}</div> : state?.messages.map((message) => <article className="welcome-template-row" key={message.template_message_id}>
-          <button aria-label={t("common.delete")} className="welcome-template-delete" disabled={saving || state.messages.length <= 1} onClick={() => void deleteMessage(message.template_message_id)} type="button"><span className="material-symbols-outlined">delete</span></button>
-          <div className="welcome-template-message"><WelcomeBubble message={message} /></div>
           <UserAvatar className="welcome-template-avatar" name={name} uri={avatarUri} />
+          <div className="welcome-template-message"><WelcomeBubble message={message} /></div>
+          <button aria-label={t("common.delete")} className="welcome-template-delete" disabled={saving || state.messages.length <= 1} onClick={() => void deleteMessage(message.template_message_id)} type="button"><span className="material-symbols-outlined">delete</span></button>
         </article>) }
       </div>
       <form className="welcome-template-composer" onSubmit={(event) => void addText(event)}>
