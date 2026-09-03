@@ -31302,3 +31302,15 @@ html[data-theme="dark"] .drawer-floating-back {
 .friend-profile-page .user-profile-panel .user-profile-cover {
   height: clamp(220px, 30dvh, 270px);
 }
+
+/* Mobile feed screens should inherit the page canvas instead of painting a second surface. */
+@media (max-width: 900px) {
+  .list-screen,
+  .square-feed-screen,
+  .mobile-chat-list-screen,
+  .mobile-chat-list-screen.is-active,
+  .mobile-chat-list-screen.is-background {
+    background-color: transparent;
+    background-image: none;
+  }
+}
