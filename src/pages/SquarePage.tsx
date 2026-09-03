@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
+import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
@@ -14,6 +15,7 @@ import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
 import { StatementVideoThumbnail } from "../components/StatementVideoThumbnail";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
+import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
@@ -32,8 +34,9 @@ import { announceSquareUnread } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, TinyUserDTO, VideoMetadataDTO } from "../types";
-import ChatsPage, { ChatPreview, forwardBundleItemsAsMessages } from "./ChatsPage";
+import { resolveStableResourceUri } from "../lib/stableResource";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
 import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.webp";
@@ -62,6 +65,8 @@ type SquareChatRecordDraft = {
 };
 
 const MAX_TEXT_LENGTH = 140;
+const COMMENT_STICKER_PAGE = -1;
+const COMMENT_MENTION_RE = /<@(\d+)>/g;
 type InlineTransitionPhase = "idle" | "preparing" | "opening" | "open" | "closing";
 type InlineStatementOrigin = { left: number; top: number; width: number; height: number };
 const MAX_PHOTOS = 9;
@@ -337,6 +342,28 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   );
 }
 
+function CommentContent({ comment, onOpenProfile, onReply }: {
+  comment: SquareStatementCommentDTO;
+  onOpenProfile: (userId: number) => void;
+  onReply: (event: ReactMouseEvent) => void;
+}) {
+  if (comment.kind === "sticker" && comment.sticker?.uri) {
+    return <button className="square-comment-sticker" onClick={onReply} type="button"><StickerImage alt="" src={resolveStableResourceUri(comment.sticker.uri) ?? comment.sticker.uri} /></button>;
+  }
+  const mentions = new Map((comment.mentions ?? []).map((user) => [user.user_id, user]));
+  const parts: Array<string | { token: string; user: TinyUserDTO }> = [];
+  let cursor = 0;
+  for (const match of comment.text.matchAll(COMMENT_MENTION_RE)) {
+    const index = match.index ?? 0;
+    if (index > cursor) parts.push(comment.text.slice(cursor, index));
+    const user = mentions.get(Number(match[1]));
+    parts.push(user ? { token: match[0], user } : match[0]);
+    cursor = index + match[0].length;
+  }
+  if (cursor < comment.text.length) parts.push(comment.text.slice(cursor));
+  return <p onClick={onReply}>{parts.map((part, index) => typeof part === "string" ? <Fragment key={`${part}-${index}`}>{part}</Fragment> : <button className="square-comment-mention" key={`${part.token}-${index}`} onClick={(event) => { event.stopPropagation(); onOpenProfile(part.user.user_id); }} type="button">@{part.user.name}</button>)}</p>;
+}
+
 function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies, rootUserId }: {
   comment: SquareStatementCommentDTO;
   canInteract: boolean;
@@ -378,7 +405,7 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user.user_id); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} /></button>}
     <div>
       <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} /> : null}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
-      <p onClick={beginReply}>{comment.text}</p>
+      <CommentContent comment={comment} onOpenProfile={onOpenProfile} onReply={beginReply} />
       <div className="square-comment-footer">
         <time>{formatRelativeTime(comment.created_at)}</time>
         <div className="square-comment-actions">
@@ -493,6 +520,13 @@ export default function SquarePage() {
   const [commentText, setCommentText] = useState("");
   const [replyTarget, setReplyTarget] = useState<SquareStatementCommentDTO | null>(null);
   const [commentSending, setCommentSending] = useState(false);
+  const [commentFriends, setCommentFriends] = useState<UserDTO[]>([]);
+  const [commentMentionSearch, setCommentMentionSearch] = useState<string | null>(null);
+  const [commentEmojiOpen, setCommentEmojiOpen] = useState(false);
+  const [commentEmojiPage, setCommentEmojiPage] = useState(COMMENT_STICKER_PAGE);
+  const [commentStickers, setCommentStickers] = useState<StickerAssetDTO[]>([]);
+  const [commentStickersLoading, setCommentStickersLoading] = useState(false);
+  const [pendingCommentSticker, setPendingCommentSticker] = useState<StickerAssetDTO | null>(null);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
   const [deletingStatement, setDeletingStatement] = useState(false);
   const [muteStatement, setMuteStatement] = useState<SquareStatementDTO | null>(null);
@@ -542,7 +576,7 @@ export default function SquarePage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
-  const commentInputRef = useRef<HTMLInputElement>(null);
+  const commentInputRef = useRef<MentionComposerHandle>(null);
   const lastReadStatementRef = useRef<number | null>(null);
   const notificationMutationVersionRef = useRef(0);
   const notificationUnreadRef = useRef(0);
@@ -561,10 +595,18 @@ export default function SquarePage() {
   const galleryVideoStatement = statements.find((item) => item.statement_id === videoGalleryStatementId) ?? null;
   const galleryVideo = galleryVideoStatement?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+  const commentMentionCandidates = useMemo(() => {
+    if (commentMentionSearch === null) return [];
+    const query = commentMentionSearch.trim().toLocaleLowerCase();
+    return commentFriends.filter((friend) => !query || friend.name.toLocaleLowerCase().includes(query)).slice(0, 8);
+  }, [commentFriends, commentMentionSearch]);
 
   useEffect(() => {
     setAnonymousComment(canCommentAnonymously);
     setPublicCommentConfirmOpen(false);
+    setCommentEmojiOpen(false);
+    setCommentMentionSearch(null);
+    setPendingCommentSticker(null);
   }, [canCommentAnonymously, commentStatementId]);
 
   useEffect(() => {
@@ -1009,6 +1051,18 @@ export default function SquarePage() {
   }, [commentSort, commentStatementId, t]);
 
   useEffect(() => {
+    if (commentStatementId === null) return;
+    const controller = new AbortController();
+    void api.getFriends(controller.signal).then(setCommentFriends).catch(() => undefined);
+    setCommentStickersLoading(true);
+    void api.getStickers(0, 60, controller.signal)
+      .then((result) => setCommentStickers(result.items))
+      .catch(() => undefined)
+      .finally(() => setCommentStickersLoading(false));
+    return () => controller.abort();
+  }, [commentStatementId, session?.user.space_id, session?.user.user_id]);
+
+  useEffect(() => {
     setAnonymousComment(false);
   }, [commentStatementId]);
 
@@ -1143,12 +1197,16 @@ export default function SquarePage() {
     return () => document.documentElement.classList.remove("square-inline-focus-open");
   }, [desktopWorkspace, inlineStatementExpanded]);
 
-  const sendComment = async () => {
+  const sendComment = async (sticker: StickerAssetDTO | null = null) => {
     const content = commentText.trim();
-    if (commentStatementId === null || !content || commentSending) return;
+    if (commentStatementId === null || (!content && !sticker) || commentSending) return;
     setCommentSending(true);
     try {
-      const comment = await api.createSquareStatementComment(commentStatementId, content, replyTarget?.comment_id, anonymousComment);
+      const mentionUserIds = Array.from(content.matchAll(COMMENT_MENTION_RE), (match) => Number(match[1]));
+      const comment = await api.createSquareStatementComment(commentStatementId, sticker ? "" : content, replyTarget?.comment_id, anonymousComment, {
+        ...(sticker ? { sticker_asset_id: sticker.sticker_asset_id } : {}),
+        ...(!sticker && mentionUserIds.length ? { mention_user_ids: [...new Set(mentionUserIds)] } : {}),
+      });
       const rootId = comment.root_id ?? replyTarget?.root_id ?? replyTarget?.comment_id;
       setComments((current) => replyTarget
         ? current.map((item) => item.comment_id === rootId ? { ...item, reply_count: item.reply_count + 1, replies: [...(item.replies ?? []), comment] } : item)
@@ -1158,6 +1216,9 @@ export default function SquarePage() {
         : statement));
       setCommentText("");
       setReplyTarget(null);
+      setCommentEmojiOpen(false);
+      setCommentMentionSearch(null);
+      setPendingCommentSticker(null);
       setAnonymousComment(canCommentAnonymously);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("square.commentFailed"));
@@ -1168,8 +1229,31 @@ export default function SquarePage() {
 
   const beginCommentReply = (comment: SquareStatementCommentDTO) => {
     setReplyTarget(comment);
+    setCommentEmojiOpen(false);
     if (canCommentAnonymously) setAnonymousComment(true);
-    window.requestAnimationFrame(() => commentInputRef.current?.focus({ preventScroll: true }));
+    window.requestAnimationFrame(() => commentInputRef.current?.focus());
+  };
+
+  const selectCommentMention = (friend: UserDTO) => {
+    commentInputRef.current?.insertMention({ userId: friend.user_id, name: friend.name });
+    setCommentMentionSearch(null);
+  };
+
+  const selectCommentSticker = (sticker: StickerAssetDTO) => {
+    setCommentEmojiOpen(false);
+    if (canCommentAnonymously && !anonymousComment) {
+      setPendingCommentSticker(sticker);
+      setPublicCommentConfirmOpen(true);
+      return;
+    }
+    void sendComment(sticker);
+  };
+
+  const submitTextComment = () => {
+    if (!commentText.trim() || commentSending) return;
+    setPendingCommentSticker(null);
+    if (canCommentAnonymously && !anonymousComment) setPublicCommentConfirmOpen(true);
+    else void sendComment();
   };
 
   const choosePhotos = (files: FileList | null) => {
@@ -1485,7 +1569,45 @@ export default function SquarePage() {
     </section>
   );
 
-  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); if (canCommentAnonymously && !anonymousComment) setPublicCommentConfirmOpen(true); else void sendComment(); }}>{anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />}<div><input aria-label={t("square.writeComment")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setCommentText(event.target.value)} placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")} ref={commentInputRef} value={commentText} />{canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}</div><button disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button></form> : null;
+  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); submitTextComment(); }}>
+    {anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />}
+    <div className="square-comment-composer-main">
+      <ChatComposerTextRow
+        input={<>
+          <MentionComposerInput
+            className="textarea composer-input composer-rich-input square-comment-rich-input"
+            members={commentFriends.map((friend) => ({ userId: friend.user_id, name: friend.name }))}
+            onChange={(value) => setCommentText(value.slice(0, MAX_TEXT_LENGTH))}
+            onMentionQueryChange={setCommentMentionSearch}
+            onSelectFirstMention={() => {
+              if (commentMentionSearch === null || !commentMentionCandidates.length) return false;
+              selectCommentMention(commentMentionCandidates[0]);
+              return true;
+            }}
+            onSubmit={submitTextComment}
+            placeholder={replyTarget ? t("square.replyPlaceholder", { name: replyTarget.is_anonymous ? t("square.anonymousUser") : replyTarget.user.name }) : t("square.writeComment")}
+            ref={commentInputRef}
+            value={commentText}
+          />
+          {commentMentionSearch !== null && commentMentionCandidates.length ? <div className="composer-mention-picker" role="listbox" aria-label={t("square.mentionFriends")}>
+            {commentMentionCandidates.map((friend) => <button key={friend.user_id} onClick={() => selectCommentMention(friend)} onMouseDown={(event) => event.preventDefault()} role="option" type="button"><UserAvatar className="composer-mention-avatar" frame={friend.avatar_frame_style} name={friend.name} uri={friend.avatar_uri} /><span>{friend.name}</span></button>)}
+          </div> : null}
+        </>}
+        inputAccessory={<button aria-expanded={commentEmojiOpen} aria-label={commentEmojiOpen ? t("emoji.keyboard") : t("emoji.choose")} className={`composer-emoji-button${commentEmojiOpen ? " is-open" : ""}`} onClick={() => { setCommentMentionSearch(null); setCommentEmojiOpen((open) => !open); }} type="button"><ComposerSvgIcon className="composer-inline-svg" kind={commentEmojiOpen ? "keyboard" : "emoji"} /></button>}
+        trailingAction={<button aria-label={t("square.sendComment")} className="square-comment-send" disabled={!commentText.trim() || commentSending} type="submit"><span className="material-symbols-outlined">arrow_upward</span></button>}
+      />
+      {canCommentAnonymously ? <button aria-pressed={anonymousComment} className="square-comment-identity" onClick={() => setAnonymousComment((current) => !current)} type="button">{anonymousComment ? t("square.commentAnonymously") : t("square.commentPublicly")}</button> : null}
+      {commentEmojiOpen ? <div className="composer-emoji-panel square-comment-emoji-panel" aria-label={t("emoji.picker")}>
+        <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
+          <button aria-label={t("sticker.mine")} aria-selected={commentEmojiPage === COMMENT_STICKER_PAGE} className={commentEmojiPage === COMMENT_STICKER_PAGE ? "is-active" : ""} onClick={() => setCommentEmojiPage(COMMENT_STICKER_PAGE)} role="tab" type="button"><span className="material-symbols-outlined">photo_library</span><small>{t("sticker.mine")}</small></button>
+          {EMOJI_PAGES.map((page, index) => <button aria-label={t(page.labelKey as TranslationKey)} aria-selected={commentEmojiPage === index} className={commentEmojiPage === index ? "is-active" : ""} key={page.labelKey} onClick={() => setCommentEmojiPage(index)} role="tab" type="button"><span>{page.icon}</span><small>{t(page.labelKey as TranslationKey)}</small></button>)}
+        </div>
+        {commentEmojiPage === COMMENT_STICKER_PAGE ? <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
+          {commentStickers.length ? <div className="composer-sticker-grid">{commentStickers.map((sticker) => <button aria-label={t("sticker.send")} className="composer-sticker-item" disabled={commentSending} key={sticker.sticker_asset_id} onClick={() => selectCommentSticker(sticker)} type="button"><StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} /></button>)}</div> : commentStickersLoading ? <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} /> : <div className="composer-sticker-empty"><span className="material-symbols-outlined">photo_library</span><strong>{t("sticker.mineEmpty")}</strong></div>}
+        </div> : <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[commentEmojiPage].labelKey as TranslationKey)}>{EMOJI_PAGES[commentEmojiPage].emojis.map((emoji, index) => <button aria-label={t("emoji.insert", { emoji })} key={`${emoji}-${index}`} onClick={() => commentInputRef.current?.insertText(emoji)} type="button">{emoji}</button>)}</div>}
+      </div> : null}
+    </div>
+  </form> : null;
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
@@ -1665,6 +1787,7 @@ export default function SquarePage() {
             const actor = event.actor?.name || t("square.someone");
             const removed = event.event_type === 9;
             const label = removed ? t("square.notificationStatementRemoved")
+              : event.event_type === 10 ? t("square.notificationMentioned", { name: actor })
               : event.topic === 2 ? t("square.notificationLikedStatement", { name: actor })
               : event.topic === 3 ? t("square.notificationCommented", { name: actor })
                 : event.topic === 4 ? t("square.notificationLikedComment", { name: actor })
@@ -1903,7 +2026,7 @@ export default function SquarePage() {
       </ConfirmDialog>
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
-      <ConfirmDialog busy={commentSending} confirmLabel={t("square.confirmPublicReply")} description={t("square.publicReplyConfirmHint")} onClose={() => { if (!commentSending) setPublicCommentConfirmOpen(false); }} onConfirm={() => { setPublicCommentConfirmOpen(false); void sendComment(); }} open={publicCommentConfirmOpen} title={t("square.publicReplyConfirmTitle")} warning />
+      <ConfirmDialog busy={commentSending} confirmLabel={t("square.confirmPublicReply")} description={t("square.publicReplyConfirmHint")} onClose={() => { if (!commentSending) { setPublicCommentConfirmOpen(false); setPendingCommentSticker(null); } }} onConfirm={() => { setPublicCommentConfirmOpen(false); void sendComment(pendingCommentSticker); }} open={publicCommentConfirmOpen} title={t("square.publicReplyConfirmTitle")} warning />
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} />
       </BottomSheet>

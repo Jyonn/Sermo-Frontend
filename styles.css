@@ -31335,3 +31335,168 @@ html[data-theme="dark"] .drawer-floating-back {
     background: transparent;
   }
 }
+/* Square comments reuse the chat composer primitives for mentions, emoji, and stickers. */
+.square-comment-composer {
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: end;
+  overflow: visible;
+}
+
+.square-comment-composer-main {
+  position: relative;
+  min-width: 0;
+}
+
+.square-comment-composer .composer-row-text {
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 8px;
+}
+
+.square-comment-composer .composer-leading-actions.is-empty {
+  display: none;
+}
+
+.square-comment-composer .composer-input-wrap {
+  min-height: 40px;
+  margin: 0;
+  padding: 0 43px 0 13px;
+  border-color: var(--line-soft);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-canvas) 82%, transparent);
+}
+
+.square-comment-composer .square-comment-rich-input {
+  min-height: 22px !important;
+  max-height: 76px !important;
+  padding: 9px 0;
+  font-size: 14px;
+}
+
+.square-comment-composer .composer-emoji-button {
+  position: absolute;
+  right: 4px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.square-comment-composer .composer-emoji-button.is-open {
+  color: var(--brand-primary-press);
+  background: color-mix(in srgb, var(--brand-primary) 13%, transparent);
+}
+
+.square-comment-send {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #073b2c;
+  background: var(--brand-primary);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--brand-primary) 22%, transparent);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.square-comment-send:disabled {
+  opacity: .38;
+}
+
+.square-comment-send:not(:disabled):active {
+  transform: scale(.9);
+}
+
+.square-comment-send .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.square-comment-composer .square-comment-identity {
+  position: static;
+  min-height: 20px;
+  margin: 4px 0 0 5px;
+  padding: 0 7px;
+  transform: none;
+}
+
+.square-comment-emoji-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 45;
+  display: block;
+  width: auto;
+  min-width: min(330px, calc(100vw - 40px));
+  max-width: 410px;
+  margin: 0;
+  padding: 9px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 82%, transparent);
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  box-shadow: 0 18px 50px rgba(20, 36, 30, .18);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+  backdrop-filter: blur(22px) saturate(1.08);
+}
+
+.square-comment-emoji-panel .composer-emoji-tabs {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding: 0 0 8px;
+  overflow-x: auto;
+}
+
+.square-comment-emoji-panel .composer-emoji-tabs > button {
+  flex: 0 0 auto;
+}
+
+.square-comment-emoji-panel .composer-emoji-grid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  max-height: 205px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.square-comment-emoji-panel .composer-sticker-grid {
+  max-height: 205px;
+}
+
+.square-comment-thread > div > .square-comment-sticker {
+  display: block;
+  width: min(132px, 44vw);
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.square-comment-thread > div > .square-comment-sticker img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 116px;
+  object-fit: contain;
+}
+
+.square-comment-mention {
+  display: inline;
+  margin: 0 .08em;
+  padding: 0;
+  border: 0;
+  color: var(--brand-primary-press);
+  font: inherit;
+  font-weight: 750;
+  background: transparent;
+}
+
+@media (max-width: 420px) {
+  .square-comment-emoji-panel {
+    left: -44px;
+    min-width: calc(100vw - 40px);
+  }
+}

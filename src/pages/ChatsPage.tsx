@@ -115,7 +115,7 @@ function mergeStickerPage<T>(fresh: T[], cached: T[], identify: (item: T) => num
   const known = new Set(fresh.map(identify));
   return [...fresh, ...cached.filter((item) => !known.has(identify(item)))];
 }
-const EMOJI_PAGES = [
+export const EMOJI_PAGES = [
   {
     labelKey: "emoji.frequent",
     icon: "🕘",
@@ -1621,7 +1621,7 @@ export function forwardBundleItemsAsMessages(items: ForwardBundleItemDTO[]): Cha
   }));
 }
 
-function StickerImage({ alt = "", className = "", height, src, width }: {
+export function StickerImage({ alt = "", className = "", height, src, width }: {
   alt?: string;
   className?: string;
   height?: number;

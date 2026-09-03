@@ -262,6 +262,8 @@
   "square.viewReplies": "View {{count}} replies",
   "square.hideReplies": "Hide replies",
   "square.writeComment": "Kind words build bonds; harsh words leave wounds",
+  "square.sendComment": "Post comment",
+  "square.mentionFriends": "Mention friends",
   "square.noComments": "No comments yet",
   "square.noCommentsHint": "Say something and keep it going.",
   "square.mediaStatement": "Shared photos or a voice recording",
@@ -1939,6 +1941,7 @@
   "square.notificationCommented": "{{name}} commented on your statement",
   "square.notificationLikedComment": "{{name}} liked your comment",
   "square.notificationReplied": "{{name}} replied to your comment"
+  ,"square.notificationMentioned": "{{name}} mentioned you in a comment"
   ,"square.notificationStatementRemoved": "Your statement was removed by an administrator"
   ,"notification.byChannel": "By channel"
   ,"notification.byType": "By type"

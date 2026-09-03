@@ -262,6 +262,8 @@
   "square.viewReplies": "查看 {{count}} 条回复",
   "square.hideReplies": "收起回复",
   "square.writeComment": "善言结善缘，恶语伤人心",
+  "square.sendComment": "发送评论",
+  "square.mentionFriends": "艾特好友",
   "square.noComments": "还没有评论",
   "square.noCommentsHint": "说点什么，让话题继续。",
   "square.mediaStatement": "分享了照片或语音",
@@ -1939,6 +1941,7 @@
   "square.notificationCommented": "{{name}} 评论了你的发言",
   "square.notificationLikedComment": "{{name}} 赞了你的评论",
   "square.notificationReplied": "{{name}} 回复了你的评论"
+  ,"square.notificationMentioned": "{{name}} 在评论中艾特了你"
   ,"square.notificationStatementRemoved": "你的发言已被管理员删除"
   ,"notification.byChannel": "按渠道"
   ,"notification.byType": "按类型"

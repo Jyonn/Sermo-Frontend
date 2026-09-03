@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.18",
+  "id": "2026.09.03.19",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "合并聊天记录高度更加自然",
+      "title": "广场评论支持更丰富的互动",
       "items": [
-        "发言中的合并聊天记录现在会根据实际消息内容自然撑开",
-        "移除了短记录的大面积留白，较长记录仍可在限定区域内滚动"
+        "评论和回复现在可以艾特好友，并会向被艾特的好友发送广场提醒",
+        "评论输入框新增 emoji 与收藏表情包入口"
       ]
     },
     "en": {
-      "title": "Merged chat records now use natural heights",
+      "title": "Richer interactions in Square comments",
       "items": [
-        "Merged chat records in Square posts now grow naturally with their content",
-        "Short records no longer leave large blank areas while longer records remain scrollable"
+        "Comments and replies can now mention friends with a Square notification",
+        "The comment composer now includes emoji and saved stickers"
       ]
     }
   }

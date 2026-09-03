@@ -967,11 +967,14 @@ export const api = {
     });
   },
 
-  createSquareStatementComment(statementId: number, text: string, parentId?: number | null, anonymous = false) {
+  createSquareStatementComment(statementId: number, text: string, parentId?: number | null, anonymous = false, options: {
+    mention_user_ids?: number[];
+    sticker_asset_id?: number;
+  } = {}) {
     return request<SquareStatementCommentDTO>(`/square/statements/${statementId}/comments`, {
       method: "POST",
       auth: true,
-      body: { text, parent_id: parentId ?? null, anonymous: anonymous ? 1 : 0 },
+      body: { text, parent_id: parentId ?? null, anonymous: anonymous ? 1 : 0, ...options },
     });
   },
 

@@ -728,7 +728,10 @@ export interface SquareStatementCommentDTO {
   comment_id: number;
   statement_id: number;
   user: TinyUserDTO;
+  kind?: "text" | "sticker";
   text: string;
+  sticker?: StickerAssetDTO | null;
+  mentions?: TinyUserDTO[];
   parent_id?: number | null;
   root_id?: number | null;
   reply_to_user?: TinyUserDTO | null;
