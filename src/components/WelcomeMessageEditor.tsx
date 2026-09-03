@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { ApiError, api } from "../lib/api";
+import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useI18n } from "../lib/language";
 import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
 import { showToast } from "../lib/toast";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
-import { ChatPreview } from "../pages/ChatsPage";
+import { ChatPreview, ChatVoiceComposerRow, ComposerSvgIcon, type VoiceComposerState } from "../pages/ChatsPage";
 import { ChatComposerTextRow } from "./ChatComposerTextRow";
 import { MentionComposerInput, type MentionComposerHandle } from "./MentionComposerInput";
 import { SideDrawer } from "./SideDrawer";
@@ -14,6 +15,7 @@ const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
+const AUDIO_MAX_DURATION_SECONDS = 60;
 const WELCOME_EMOJIS = ["😀", "😄", "😂", "🥹", "😊", "🙂", "😉", "😍", "🥰", "🤔", "🤭", "😅", "😭", "😤", "🥳", "🤩", "👍", "👏", "🙏", "👀", "❤️", "💚", "✨", "🎉"];
 
 function messageTypeForKind(kind: MessageMediaKind) {
@@ -56,16 +58,36 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
   const { t } = useI18n();
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const audioInputRef = useRef<HTMLInputElement | null>(null);
   const composerInputRef = useRef<MentionComposerHandle | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
   const messageMenuRef = useRef<HTMLDivElement | null>(null);
+  const audioCaptureRef = useRef<NoiseReducedAudioCapture | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const waveformFrameRef = useRef<number | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingCancelledRef = useRef(false);
+  const recordingAttemptRef = useRef(0);
+  const recordingStartedAtRef = useRef(0);
+  const voicePreviewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const voicePreviewUriRef = useRef("");
   const [state, setState] = useState<WelcomeTemplateDTO | null>(null);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [voiceComposer, setVoiceComposer] = useState<VoiceComposerState>({
+    open: false,
+    phase: "idle",
+    durationSeconds: 0,
+    bars: Array.from({ length: 24 }, () => 0.28),
+    blob: null,
+    mimeType: "",
+  });
+  const [voicePreviewUri, setVoicePreviewUri] = useState("");
+  const [voicePreviewPlaying, setVoicePreviewPlaying] = useState(false);
   const [messageMenu, setMessageMenu] = useState<{
     message: ChatMessageDTO;
     anchorX: number;
@@ -118,13 +140,13 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     if (await persist(next)) setDraft("");
   };
 
-  const addMedia = async (file?: File) => {
+  const addMedia = async (file?: File, knownDuration?: number) => {
     if (!file || !state?.can_add || saving) return;
     let kind = resolveMediaKind(file);
     if (file.type.startsWith("audio/")) kind = "audio";
     setSaving(true);
     try {
-      const upload = await uploadMessageMedia(file, kind, undefined, await audioDuration(file));
+      const upload = await uploadMessageMedia(file, kind, undefined, knownDuration ?? await audioDuration(file));
       if (!upload.resource) throw new Error("missing resource");
       const resource = upload.resource;
       const next = [...state.messages, {
@@ -151,8 +173,209 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (galleryInputRef.current) galleryInputRef.current.value = "";
-      if (audioInputRef.current) audioInputRef.current.value = "";
     }
+  };
+
+  const cleanupRecordingResources = () => {
+    if (waveformFrameRef.current) {
+      cancelAnimationFrame(waveformFrameRef.current);
+      waveformFrameRef.current = null;
+    }
+    if (recordingTimerRef.current) {
+      window.clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    analyserRef.current = null;
+    audioCaptureRef.current?.cleanup();
+    audioCaptureRef.current = null;
+    mediaRecorderRef.current = null;
+  };
+
+  const resetVoiceComposer = () => {
+    recordingCancelledRef.current = false;
+    cleanupRecordingResources();
+    recordingChunksRef.current = [];
+    voicePreviewAudioRef.current?.pause();
+    setVoicePreviewPlaying(false);
+    setVoicePreviewUri((current) => {
+      if (current) URL.revokeObjectURL(current);
+      voicePreviewUriRef.current = "";
+      return "";
+    });
+    setVoiceComposer({
+      open: false,
+      phase: "idle",
+      durationSeconds: 0,
+      bars: Array.from({ length: 24 }, () => 0.28),
+      blob: null,
+      mimeType: "",
+    });
+  };
+
+  useEffect(() => {
+    if (open) return;
+    recordingAttemptRef.current += 1;
+    recordingCancelledRef.current = true;
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+    else resetVoiceComposer();
+  }, [open]);
+
+  useEffect(() => () => {
+    recordingAttemptRef.current += 1;
+    recordingCancelledRef.current = true;
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+    cleanupRecordingResources();
+    if (voicePreviewUriRef.current) URL.revokeObjectURL(voicePreviewUriRef.current);
+  }, []);
+
+  const startVoiceRecording = async () => {
+    if (!state?.can_add || saving || voiceComposer.open) return;
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      showToast(t("audio.unsupported"), "error");
+      return;
+    }
+
+    composerInputRef.current?.blur();
+    setComposerMoreOpen(false);
+    setEmojiPickerOpen(false);
+    const attempt = recordingAttemptRef.current + 1;
+    recordingAttemptRef.current = attempt;
+    recordingCancelledRef.current = false;
+    recordingChunksRef.current = [];
+    setVoiceComposer({
+      open: true,
+      phase: "requesting",
+      durationSeconds: 0,
+      bars: Array.from({ length: 24 }, () => 0.2),
+      blob: null,
+      mimeType: "",
+    });
+
+    try {
+      const capture = await createNoiseReducedAudioCapture();
+      if (attempt !== recordingAttemptRef.current) {
+        capture.cleanup();
+        return;
+      }
+      const mimeType = preferredAudioMimeType();
+      audioCaptureRef.current = capture;
+      const mediaRecorder = mimeType ? new MediaRecorder(capture.stream, { mimeType }) : new MediaRecorder(capture.stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      if (capture.analyser) {
+        analyserRef.current = capture.analyser;
+        const data = new Uint8Array(capture.analyser.frequencyBinCount);
+        const updateWaveform = () => {
+          const analyser = analyserRef.current;
+          if (!analyser) return;
+          analyser.getByteFrequencyData(data);
+          const bucketSize = Math.max(1, Math.floor(data.length / 24));
+          const bars = Array.from({ length: 24 }, (_, index) => {
+            const slice = data.slice(index * bucketSize, (index + 1) * bucketSize);
+            const average = slice.length ? slice.reduce((sum, value) => sum + value, 0) / slice.length : 0;
+            return Math.max(0.18, average / 255);
+          });
+          setVoiceComposer((current) => current.open ? { ...current, bars } : current);
+          waveformFrameRef.current = requestAnimationFrame(updateWaveform);
+        };
+        waveformFrameRef.current = requestAnimationFrame(updateWaveform);
+      }
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordingChunksRef.current.push(event.data);
+      };
+      mediaRecorder.onstop = () => {
+        const nextMimeType = mediaRecorder.mimeType || mimeType || "audio/webm";
+        const blob = new Blob(recordingChunksRef.current, { type: nextMimeType });
+        const durationSeconds = Math.min(AUDIO_MAX_DURATION_SECONDS, Math.max(0, (Date.now() - recordingStartedAtRef.current) / 1000));
+        cleanupRecordingResources();
+        if (recordingCancelledRef.current) {
+          resetVoiceComposer();
+          return;
+        }
+        if (blob.size === 0 || durationSeconds < 0.4) {
+          resetVoiceComposer();
+          showToast(t("audio.tooShort"), "error");
+          return;
+        }
+        const previewUri = URL.createObjectURL(blob);
+        setVoicePreviewUri((current) => {
+          if (current) URL.revokeObjectURL(current);
+          voicePreviewUriRef.current = previewUri;
+          return previewUri;
+        });
+        setVoiceComposer((current) => ({ ...current, phase: "recorded", durationSeconds, blob, mimeType: nextMimeType }));
+      };
+
+      mediaRecorder.start();
+      recordingStartedAtRef.current = Date.now();
+      setVoiceComposer({
+        open: true,
+        phase: "recording",
+        durationSeconds: 0,
+        bars: Array.from({ length: 24 }, () => 0.28),
+        blob: null,
+        mimeType: mediaRecorder.mimeType || mimeType || "audio/webm",
+      });
+      recordingTimerRef.current = window.setInterval(() => {
+        const durationSeconds = Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - recordingStartedAtRef.current) / 1000);
+        setVoiceComposer((current) => ({ ...current, durationSeconds }));
+        if (durationSeconds >= AUDIO_MAX_DURATION_SECONDS && mediaRecorderRef.current?.state === "recording") {
+          mediaRecorderRef.current.stop();
+        }
+      }, 120);
+    } catch (error) {
+      if (attempt !== recordingAttemptRef.current) return;
+      resetVoiceComposer();
+      const errorName = error instanceof DOMException ? error.name : "";
+      const message = errorName === "NotAllowedError"
+        ? t("audio.permissionRequired")
+        : errorName === "NotFoundError"
+          ? t("audio.noMicrophone")
+          : errorName === "NotReadableError"
+            ? t("audio.inUse")
+            : t("audio.startUnavailable");
+      showToast(message, "error");
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current?.state !== "recording") return;
+    setVoiceComposer((current) => ({ ...current, phase: "stopping" }));
+    mediaRecorderRef.current.stop();
+  };
+
+  const cancelVoiceRecording = () => {
+    recordingAttemptRef.current += 1;
+    recordingCancelledRef.current = true;
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+    else resetVoiceComposer();
+  };
+
+  const toggleVoicePreview = async () => {
+    const audio = voicePreviewAudioRef.current;
+    if (!audio || voiceComposer.phase !== "recorded") return;
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+    try {
+      await audio.play();
+    } catch {
+      setVoicePreviewPlaying(false);
+      showToast(t("audio.previewFailed"), "error");
+    }
+  };
+
+  const sendRecordedVoice = async () => {
+    if (!voiceComposer.blob || voiceComposer.phase !== "recorded") return;
+    const duration = voiceComposer.durationSeconds;
+    const file = new File([voiceComposer.blob], `voice-message.${audioFileExtension(voiceComposer.mimeType)}`, {
+      type: voiceComposer.mimeType || "audio/webm",
+    });
+    setVoiceComposer((current) => ({ ...current, phase: "sending" }));
+    await addMedia(file, duration);
+    resetVoiceComposer();
   };
 
   const deleteMessage = async (id: number) => {
@@ -234,8 +457,8 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
           showAuthors={false}
           showDividers={false}
         />}
-        <form className="composer welcome-template-composer" onSubmit={(event) => void addText(event)} ref={composerRef}>
-          <ChatComposerTextRow
+        <form className={`composer welcome-template-composer${voiceComposer.open ? " is-recording-mode" : ""}`} onSubmit={(event) => void addText(event)} ref={composerRef}>
+          {!voiceComposer.open ? <ChatComposerTextRow
             input={<MentionComposerInput
               className="textarea composer-input composer-rich-input"
               members={[]}
@@ -250,16 +473,21 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
             />}
             inputAccessory={<button
               aria-expanded={emojiPickerOpen}
-              aria-label={t("emoji.choose")}
+              aria-label={emojiPickerOpen ? t("emoji.keyboard") : t("emoji.choose")}
               className={`composer-emoji-button${emojiPickerOpen ? " is-open" : ""}`}
               disabled={!state?.can_add || saving}
               onClick={() => {
                 setComposerMoreOpen(false);
-                setEmojiPickerOpen((current) => !current);
+                if (emojiPickerOpen) {
+                  setEmojiPickerOpen(false);
+                  window.requestAnimationFrame(() => composerInputRef.current?.focus());
+                } else {
+                  setEmojiPickerOpen(true);
+                }
               }}
               type="button"
-            ><span className="material-symbols-outlined">{emojiPickerOpen ? "keyboard" : "sentiment_satisfied"}</span></button>}
-            leadingAction={<button aria-label={t("audio.record")} className="composer-action-button" disabled={!state?.can_add || saving} onClick={() => audioInputRef.current?.click()} type="button"><span className="material-symbols-outlined">mic</span></button>}
+            ><ComposerSvgIcon className="composer-inline-svg" kind={emojiPickerOpen ? "keyboard" : "emoji"} /></button>}
+            leadingAction={<button aria-label={t("audio.record")} className="composer-action-button" disabled={!state?.can_add || saving} onClick={() => void startVoiceRecording()} type="button"><ComposerSvgIcon className="composer-inline-svg" kind="mic" /></button>}
             trailingAction={<button
               aria-expanded={composerMoreOpen}
               aria-label={composerMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
@@ -271,25 +499,41 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
               }}
               type="button"
             ><span className="material-symbols-outlined">add</span></button>}
-          />
-          {emojiPickerOpen ? <div className="composer-emoji-panel"><div className="composer-emoji-grid">
+          /> : <ChatVoiceComposerRow
+            audioRef={voicePreviewAudioRef}
+            labels={{
+              generating: t("audio.generating"),
+              pausePreview: t("audio.pausePreview"),
+              preparingMicrophone: t("audio.preparingMicrophone"),
+              preview: t("audio.preview"),
+              stopRecording: t("audio.stopRecording"),
+            }}
+            onCancel={cancelVoiceRecording}
+            onPreviewPlayingChange={setVoicePreviewPlaying}
+            onSend={() => void sendRecordedVoice()}
+            onStop={stopVoiceRecording}
+            onTogglePreview={() => void toggleVoicePreview()}
+            previewPlaying={voicePreviewPlaying}
+            previewUri={voicePreviewUri}
+            state={voiceComposer}
+          />}
+          {!voiceComposer.open && emojiPickerOpen ? <div className="composer-emoji-panel"><div className="composer-emoji-grid">
             {WELCOME_EMOJIS.map((emoji) => <button key={emoji} onClick={() => composerInputRef.current?.insertText(emoji)} type="button">{emoji}</button>)}
           </div></div> : null}
-          <div className={`composer-actions-reveal${composerMoreOpen ? " is-open" : ""}`} aria-hidden={!composerMoreOpen}>
+          {!voiceComposer.open ? <div className={`composer-actions-reveal${composerMoreOpen ? " is-open" : ""}`} aria-hidden={!composerMoreOpen}>
             <div className="composer-actions-grid">
               <button className="composer-action-tile" disabled={!state?.can_add || saving} onClick={() => galleryInputRef.current?.click()} type="button">
-                <span className="composer-action-tile-icon"><span className="material-symbols-outlined">photo_library</span></span>
+                <span className="composer-action-tile-icon"><ComposerSvgIcon kind="album" /></span>
                 <span>{t("media.gallery")}</span>
               </button>
               <button className="composer-action-tile" disabled={!state?.can_add || saving} onClick={() => fileInputRef.current?.click()} type="button">
-                <span className="composer-action-tile-icon"><span className="material-symbols-outlined">draft</span></span>
+                <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
                 <span>{t("media.file")}</span>
               </button>
             </div>
-          </div>
+          </div> : null}
           <input ref={galleryInputRef} accept="image/*,video/*" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
           <input ref={fileInputRef} accept="audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
-          <input ref={audioInputRef} accept="audio/*" capture hidden onChange={(event) => void addMedia(event.target.files?.[0])} type="file" />
         </form>
       </div>
       {messageMenu ? <div className="message-context-layer" onClick={() => setMessageMenu(null)} role="presentation">

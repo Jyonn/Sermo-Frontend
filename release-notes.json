@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.14",
+  "id": "2026.09.03.15",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息成为一段真正的会话",
+      "title": "欢迎消息输入栏与聊天完全一致",
       "items": [
-        "欢迎消息 Drawer 现在完整采用聊天会话的消息区与底部输入栏结构",
-        "保留表情、语音、相册和文件，移除不适用的位置与足迹地图入口"
+        "欢迎消息与聊天会话共用同一套图标、附件展开方式和输入栏排版",
+        "语音按钮现在直接录音、试听并发送，不再打开文件选择器"
       ]
     },
     "en": {
-      "title": "Welcome messages now behave like a real conversation",
+      "title": "Welcome messages now match the chat composer",
       "items": [
-        "The welcome message drawer now uses the full chat conversation and composer structure",
-        "Emoji, voice, gallery, and files remain available without location or footprint map actions"
+        "Welcome messages now share the same icons, attachment expansion, and composer layout as chat",
+        "The voice button now records, previews, and sends audio instead of opening a file picker"
       ]
     }
   }

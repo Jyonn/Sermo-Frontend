@@ -11,6 +11,7 @@ import {
   type CSSProperties,
   type DragEvent as ReactDragEvent,
   type PointerEvent as ReactPointerEvent,
+  type RefObject,
   type ReactNode,
   type UIEvent as ReactUIEvent,
 } from "react";
@@ -326,7 +327,7 @@ function chatPreviewMentionText(text: string, mentions: Array<{ user_id: number;
   return formatMentionTokens(text, mentions, true).replace(/\s{2,}/g, " ").trimEnd();
 }
 
-function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
+export function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "location" | "map" | "mic" | "stop" | "delete" | "emoji" | "keyboard" | "pin" | "pin-off"; className?: string }) {
   if (kind === "emoji") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -424,7 +425,7 @@ function ComposerSvgIcon({ kind, className }: { kind: "album" | "file" | "locati
   );
 }
 
-function MessageControlIcon({ kind, className }: { kind: "play" | "pause"; className?: string }) {
+export function MessageControlIcon({ kind, className }: { kind: "play" | "pause"; className?: string }) {
   if (kind === "pause") {
     return (
       <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -2462,13 +2463,77 @@ function formatImageFileSize(fileSize?: number | null) {
 
 type VoiceComposerPhase = "idle" | "requesting" | "recording" | "stopping" | "recorded" | "sending";
 
-interface VoiceComposerState {
+export interface VoiceComposerState {
   open: boolean;
   phase: VoiceComposerPhase;
   durationSeconds: number;
   bars: number[];
   blob: Blob | null;
   mimeType: string;
+}
+
+interface ChatVoiceComposerRowProps {
+  audioRef: RefObject<HTMLAudioElement>;
+  labels: {
+    generating: string;
+    pausePreview: string;
+    preparingMicrophone: string;
+    preview: string;
+    stopRecording: string;
+  };
+  onCancel: () => void;
+  onPreviewEnded?: () => void;
+  onPreviewPlayingChange: (playing: boolean) => void;
+  onSend: () => void;
+  onStop: () => void;
+  onTogglePreview: () => void;
+  previewPlaying: boolean;
+  previewUri: string;
+  state: VoiceComposerState;
+}
+
+export function ChatVoiceComposerRow({ audioRef, labels, onCancel, onPreviewEnded, onPreviewPlayingChange, onSend, onStop, onTogglePreview, previewPlaying, previewUri, state }: ChatVoiceComposerRowProps) {
+  return <div className="composer-row composer-row-recording">
+    <button className="composer-recording-delete" disabled={state.phase === "sending"} onClick={onCancel} type="button">
+      <ComposerSvgIcon className="composer-inline-svg" kind="delete" />
+    </button>
+    <div className={`composer-recording-bar is-${state.phase}`}>
+      <button
+        aria-label={state.phase === "recorded" ? (previewPlaying ? labels.pausePreview : labels.preview) : labels.stopRecording}
+        className="composer-recording-stop"
+        disabled={!["recording", "recorded"].includes(state.phase)}
+        onClick={state.phase === "recorded" ? onTogglePreview : onStop}
+        type="button"
+      >
+        {state.phase === "recorded" ? <MessageControlIcon className="composer-inline-svg" kind={previewPlaying ? "pause" : "play"} />
+          : state.phase === "requesting" || state.phase === "stopping" ? <span className="composer-recording-spinner" />
+            : <ComposerSvgIcon className="composer-inline-svg composer-stop-svg" kind="stop" />}
+      </button>
+      <div className={`composer-recording-waveform${previewPlaying ? " is-previewing" : ""}`} aria-hidden="true">
+        {state.phase === "requesting" ? <span className="composer-recording-state">{labels.preparingMicrophone}</span>
+          : state.phase === "stopping" ? <span className="composer-recording-state">{labels.generating}</span>
+            : state.bars.map((bar, index) => <span key={`wave-${index}`} className="composer-recording-bar-item" style={{ "--voice-level": `${bar}` } as CSSProperties} />)}
+      </div>
+      <span className={`composer-recording-time${state.durationSeconds >= AUDIO_MAX_DURATION_SECONDS ? " is-limit" : ""}`}>
+        {formatDuration(state.durationSeconds)}
+      </span>
+    </div>
+    <button className="composer-recording-send" disabled={state.phase !== "recorded"} onClick={onSend} type="button">
+      {state.phase === "sending" ? <span className="composer-recording-spinner" /> : <span className="material-symbols-outlined">send</span>}
+    </button>
+    <audio
+      ref={audioRef}
+      hidden
+      onEnded={() => {
+        onPreviewPlayingChange(false);
+        onPreviewEnded?.();
+      }}
+      onPause={() => onPreviewPlayingChange(false)}
+      onPlay={() => onPreviewPlayingChange(true)}
+      preload="metadata"
+      src={previewUri}
+    />
+  </div>;
 }
 
 function getDirectPeer(chat: ChatDTO, currentUserId: number) {
@@ -7181,64 +7246,27 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                       <span className="material-symbols-outlined">add</span>
                     </button>}
                   />
-                ) : (
-                  <div className="composer-row composer-row-recording">
-                    <button className="composer-recording-delete" disabled={voiceComposer.phase === "sending"} onClick={cancelVoiceRecording} type="button">
-                      <ComposerSvgIcon className="composer-inline-svg" kind="delete" />
-                    </button>
-                    <div className={`composer-recording-bar is-${voiceComposer.phase}`}>
-                      <button
-                        className="composer-recording-stop"
-                        disabled={!["recording", "recorded"].includes(voiceComposer.phase)}
-                        onClick={voiceComposer.phase === "recorded" ? () => void toggleVoicePreview() : stopVoiceRecording}
-                        type="button"
-                        aria-label={voiceComposer.phase === "recorded" ? (voicePreviewPlaying ? t("audio.pausePreview") : t("audio.preview")) : t("audio.stopRecording")}
-                      >
-                        {voiceComposer.phase === "recorded" ? (
-                          <MessageControlIcon className="composer-inline-svg" kind={voicePreviewPlaying ? "pause" : "play"} />
-                        ) : voiceComposer.phase === "requesting" || voiceComposer.phase === "stopping" ? (
-                          <span className="composer-recording-spinner" />
-                        ) : (
-                          <ComposerSvgIcon className="composer-inline-svg composer-stop-svg" kind="stop" />
-                        )}
-                      </button>
-                      <div className={`composer-recording-waveform ${voicePreviewPlaying ? "is-previewing" : ""}`} aria-hidden="true">
-                        {voiceComposer.phase === "requesting" ? (
-                          <span className="composer-recording-state">{t("audio.preparingMicrophone")}</span>
-                        ) : voiceComposer.phase === "stopping" ? (
-                          <span className="composer-recording-state">{t("audio.generating")}</span>
-                        ) : (
-                          voiceComposer.bars.map((bar, index) => (
-                            <span key={`wave-${index}`} className="composer-recording-bar-item" style={{ "--voice-level": `${bar}` } as CSSProperties} />
-                          ))
-                        )}
-                      </div>
-                      <span className={`composer-recording-time ${voiceComposer.durationSeconds >= AUDIO_MAX_DURATION_SECONDS ? "is-limit" : ""}`}>
-                        {formatDuration(voiceComposer.durationSeconds)}
-                      </span>
-                    </div>
-                    <button
-                      className="composer-recording-send"
-                      disabled={voiceComposer.phase !== "recorded"}
-                      onClick={() => void sendRecordedVoiceMessage()}
-                      type="button"
-                    >
-                      {voiceComposer.phase === "sending" ? <span className="composer-recording-spinner" /> : <span className="material-symbols-outlined">send</span>}
-                    </button>
-                    <audio
-                      ref={voicePreviewAudioRef}
-                      hidden
-                      preload="metadata"
-                      src={voicePreviewUri}
-                      onEnded={() => {
-                        setVoicePreviewPlaying(false);
-                        if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null;
-                      }}
-                      onPause={() => setVoicePreviewPlaying(false)}
-                      onPlay={() => setVoicePreviewPlaying(true)}
-                    />
-                  </div>
-                )}
+                ) : <ChatVoiceComposerRow
+                  audioRef={voicePreviewAudioRef}
+                  labels={{
+                    generating: t("audio.generating"),
+                    pausePreview: t("audio.pausePreview"),
+                    preparingMicrophone: t("audio.preparingMicrophone"),
+                    preview: t("audio.preview"),
+                    stopRecording: t("audio.stopRecording"),
+                  }}
+                  onCancel={cancelVoiceRecording}
+                  onPreviewEnded={() => {
+                    if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null;
+                  }}
+                  onPreviewPlayingChange={setVoicePreviewPlaying}
+                  onSend={() => void sendRecordedVoiceMessage()}
+                  onStop={stopVoiceRecording}
+                  onTogglePreview={() => void toggleVoicePreview()}
+                  previewPlaying={voicePreviewPlaying}
+                  previewUri={voicePreviewUri}
+                  state={voiceComposer}
+                />}
                 {!voiceComposer.open && emojiPickerOpen ? (
                   <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
                     <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
