@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.21",
+  "id": "2026.09.03.22",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "新增四种界面语言",
+      "title": "广场评论体验优化",
       "items": [
-        "网页端现已支持日语、韩语、繁体中文和西班牙语",
-        "语言偏好可跟随系统或手动选择，并会在账户中保存"
+        "评论表情面板新增探索页，并支持点击外部快速收起",
+        "官方与运营不再受广场发言和评论次数限制，匿名发言收到评论时也会及时提醒"
       ]
     },
     "en": {
-      "title": "Four more interface languages",
+      "title": "Improved Square comments",
       "items": [
-        "The web app now supports Japanese, Korean, Traditional Chinese, and Spanish",
-        "Language preferences can follow the system or be selected manually and saved to your account"
+        "The comment emoji picker now includes Explore and closes when you tap outside it",
+        "Official and operator accounts no longer have Square posting limits, and comments on anonymous posts now trigger notifications"
       ]
     }
   }

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -67,6 +67,8 @@ type SquareChatRecordDraft = {
 
 const MAX_TEXT_LENGTH = 140;
 const COMMENT_STICKER_PAGE = -1;
+const COMMENT_STICKER_EXPLORE_PAGE = -2;
+const COMMENT_STICKER_PAGE_SIZE = 30;
 const COMMENT_MENTION_RE = /<@(\d+)>/g;
 type InlineTransitionPhase = "idle" | "preparing" | "opening" | "open" | "closing";
 type InlineStatementOrigin = { left: number; top: number; width: number; height: number };
@@ -527,6 +529,12 @@ export default function SquarePage() {
   const [commentEmojiPage, setCommentEmojiPage] = useState(COMMENT_STICKER_PAGE);
   const [commentStickers, setCommentStickers] = useState<StickerAssetDTO[]>([]);
   const [commentStickersLoading, setCommentStickersLoading] = useState(false);
+  const [commentExploreStickers, setCommentExploreStickers] = useState<StickerAssetDTO[]>([]);
+  const [commentExploreLoading, setCommentExploreLoading] = useState(false);
+  const [commentExploreHasMore, setCommentExploreHasMore] = useState(false);
+  const [commentExploreOffset, setCommentExploreOffset] = useState(0);
+  const [commentStickerSaving, setCommentStickerSaving] = useState(false);
+  const commentComposerRef = useRef<HTMLFormElement | null>(null);
   const [pendingCommentSticker, setPendingCommentSticker] = useState<StickerAssetDTO | null>(null);
   const [deleteStatementId, setDeleteStatementId] = useState<number | null>(null);
   const [deletingStatement, setDeletingStatement] = useState(false);
@@ -1064,6 +1072,30 @@ export default function SquarePage() {
   }, [commentStatementId, session?.user.space_id, session?.user.user_id]);
 
   useEffect(() => {
+    if (!commentEmojiOpen) return;
+    const closePicker = (event: PointerEvent) => {
+      if (!commentComposerRef.current?.contains(event.target as Node)) setCommentEmojiOpen(false);
+    };
+    window.addEventListener("pointerdown", closePicker);
+    return () => window.removeEventListener("pointerdown", closePicker);
+  }, [commentEmojiOpen]);
+
+  useEffect(() => {
+    if (!commentEmojiOpen || commentEmojiPage !== COMMENT_STICKER_EXPLORE_PAGE || commentExploreStickers.length) return;
+    const controller = new AbortController();
+    setCommentExploreLoading(true);
+    void api.exploreStickers(0, COMMENT_STICKER_PAGE_SIZE, controller.signal)
+      .then((result) => {
+        setCommentExploreStickers(result.items);
+        setCommentExploreHasMore(result.has_more);
+        setCommentExploreOffset(result.next_offset);
+      })
+      .catch(() => undefined)
+      .finally(() => { if (!controller.signal.aborted) setCommentExploreLoading(false); });
+    return () => controller.abort();
+  }, [commentEmojiOpen, commentEmojiPage, commentExploreStickers.length]);
+
+  useEffect(() => {
     setAnonymousComment(false);
   }, [commentStatementId]);
 
@@ -1248,6 +1280,40 @@ export default function SquarePage() {
       return;
     }
     void sendComment(sticker);
+  };
+
+  const loadMoreCommentExploreStickers = async (event: ReactUIEvent<HTMLDivElement>) => {
+    const grid = event.currentTarget;
+    if (grid.scrollHeight - grid.scrollTop - grid.clientHeight > 96 || !commentExploreHasMore || commentExploreLoading) return;
+    setCommentExploreLoading(true);
+    try {
+      const result = await api.exploreStickers(commentExploreOffset, COMMENT_STICKER_PAGE_SIZE);
+      setCommentExploreStickers((current) => {
+        const known = new Set(current.map((item) => item.sticker_asset_id));
+        return [...current, ...result.items.filter((item) => !known.has(item.sticker_asset_id))];
+      });
+      setCommentExploreHasMore(result.has_more);
+      setCommentExploreOffset(result.next_offset);
+    } catch {
+      // Keep the loaded stickers usable and retry when the user scrolls again.
+    } finally {
+      setCommentExploreLoading(false);
+    }
+  };
+
+  const collectCommentSticker = async (sticker: StickerAssetDTO) => {
+    if (commentStickerSaving) return;
+    setCommentStickerSaving(true);
+    try {
+      const collected = await api.collectStickerAsset(sticker.sticker_asset_id);
+      setCommentStickers((current) => [collected, ...current.filter((item) => item.sticker_asset_id !== collected.sticker_asset_id)]);
+      setCommentExploreStickers((current) => current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id));
+      showToast(t("sticker.added"));
+    } catch {
+      showToast(t("sticker.addFailed"), "error");
+    } finally {
+      setCommentStickerSaving(false);
+    }
   };
 
   const submitTextComment = () => {
@@ -1570,7 +1636,7 @@ export default function SquarePage() {
     </section>
   );
 
-  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); submitTextComment(); }}>
+  const commentComposer = canPublish ? <form className={`square-comment-composer${anonymousComment ? " is-anonymous" : ""}`} onSubmit={(event) => { event.preventDefault(); submitTextComment(); }} ref={commentComposerRef}>
     {anonymousComment ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-comment-avatar" frame={currentUser?.avatar_frame_style} name={currentUser?.name || ""} uri={currentUser?.avatar_uri} />}
     <div className="square-comment-composer-main">
       <ChatComposerTextRow
@@ -1601,10 +1667,17 @@ export default function SquarePage() {
       {commentEmojiOpen ? <div className="composer-emoji-panel square-comment-emoji-panel" aria-label={t("emoji.picker")}>
         <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
           <button aria-label={t("sticker.mine")} aria-selected={commentEmojiPage === COMMENT_STICKER_PAGE} className={commentEmojiPage === COMMENT_STICKER_PAGE ? "is-active" : ""} onClick={() => setCommentEmojiPage(COMMENT_STICKER_PAGE)} role="tab" type="button"><span className="material-symbols-outlined">photo_library</span><small>{t("sticker.mine")}</small></button>
+          <button aria-label={t("sticker.explore")} aria-selected={commentEmojiPage === COMMENT_STICKER_EXPLORE_PAGE} className={commentEmojiPage === COMMENT_STICKER_EXPLORE_PAGE ? "is-active" : ""} onClick={() => setCommentEmojiPage(COMMENT_STICKER_EXPLORE_PAGE)} role="tab" type="button"><span className="material-symbols-outlined">explore</span><small>{t("sticker.explore")}</small></button>
           {EMOJI_PAGES.map((page, index) => <button aria-label={t(page.labelKey as TranslationKey)} aria-selected={commentEmojiPage === index} className={commentEmojiPage === index ? "is-active" : ""} key={page.labelKey} onClick={() => setCommentEmojiPage(index)} role="tab" type="button"><span>{page.icon}</span><small>{t(page.labelKey as TranslationKey)}</small></button>)}
         </div>
         {commentEmojiPage === COMMENT_STICKER_PAGE ? <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
           {commentStickers.length ? <div className="composer-sticker-grid">{commentStickers.map((sticker) => <button aria-label={t("sticker.send")} className="composer-sticker-item" disabled={commentSending} key={sticker.sticker_asset_id} onClick={() => selectCommentSticker(sticker)} type="button"><StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} /></button>)}</div> : commentStickersLoading ? <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} /> : <div className="composer-sticker-empty"><span className="material-symbols-outlined">photo_library</span><strong>{t("sticker.mineEmpty")}</strong></div>}
+        </div> : commentEmojiPage === COMMENT_STICKER_EXPLORE_PAGE ? <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
+          {commentExploreStickers.length ? <div className="composer-sticker-grid" onScroll={(event) => void loadMoreCommentExploreStickers(event)}>{commentExploreStickers.map((sticker) => <div className="composer-sticker-explore-item" key={sticker.sticker_asset_id}>
+            <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={commentSending || commentStickerSaving} onClick={() => selectCommentSticker(sticker)} type="button"><StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} /></button>
+            <span className={`composer-sticker-source is-${sticker.source_scope ?? "external"}`}>{sticker.source_scope === "local" && sticker.source_user ? <><UserAvatar className="composer-sticker-source-avatar" name={sticker.source_user.name} uri={sticker.source_user.avatar_uri} /><span className={`composer-sticker-source-name${sticker.source_user.name.length > 8 ? " is-scrolling" : ""}`}><span>{sticker.source_user.name}</span></span></> : <><span className="material-symbols-outlined" aria-hidden="true">public</span><span>{t("sticker.externalSource")}</span></>}</span>
+            <button aria-label={t("sticker.collect")} className="composer-sticker-collect" disabled={commentStickerSaving} onClick={() => void collectCommentSticker(sticker)} type="button"><span className="material-symbols-outlined">add</span></button>
+          </div>)}{commentExploreLoading ? <span className="composer-sticker-page-loading" aria-label={t("common.loading")} /> : null}</div> : commentExploreLoading ? <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} /> : <div className="composer-sticker-empty"><span className="material-symbols-outlined">explore</span><strong>{t("sticker.exploreEmpty")}</strong></div>}
         </div> : <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[commentEmojiPage].labelKey as TranslationKey)}>{EMOJI_PAGES[commentEmojiPage].emojis.map((emoji, index) => <button aria-label={t("emoji.insert", { emoji })} key={`${emoji}-${index}`} onClick={() => commentInputRef.current?.insertText(emoji)} type="button">{emoji}</button>)}</div>}
       </div> : null}
     </div>
