@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.15",
+  "id": "2026.09.03.16",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "欢迎消息输入栏与聊天完全一致",
+      "title": "欢迎消息支持快速排序",
       "items": [
-        "欢迎消息与聊天会话共用同一套图标、附件展开方式和输入栏排版",
-        "语音按钮现在直接录音、试听并发送，不再打开文件选择器"
+        "长按欢迎消息即可前移、后移或删除，文字消息还可以直接复制",
+        "首尾消息会自动禁用无效的移动方向"
       ]
     },
     "en": {
-      "title": "Welcome messages now match the chat composer",
+      "title": "Welcome messages can now be reordered quickly",
       "items": [
-        "Welcome messages now share the same icons, attachment expansion, and composer layout as chat",
-        "The voice button now records, previews, and sends audio instead of opening a file picker"
+        "Long-press a welcome message to move or delete it, with copy available for text messages",
+        "Unavailable move directions are disabled automatically for the first and last messages"
       ]
     }
   }

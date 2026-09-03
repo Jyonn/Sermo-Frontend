@@ -3,6 +3,7 @@ import { ApiError, api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useI18n } from "../lib/language";
 import { resolveMediaKind, uploadMessageMedia } from "../lib/messageUpload";
+import { copyText } from "../lib/presentation";
 import { showToast } from "../lib/toast";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
 import { ChatPreview, ChatVoiceComposerRow, ComposerSvgIcon, type VoiceComposerState } from "../pages/ChatsPage";
@@ -436,6 +437,33 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     await deleteMessage(messageId);
   };
 
+  const copySelectedMessage = async () => {
+    const content = messageMenu?.message.content ?? "";
+    setMessageMenu(null);
+    if (!await copyText(content)) {
+      showToast(t("common.copyFailed"), "error");
+      return;
+    }
+    showToast(t("message.batchCopied", { count: 1 }));
+  };
+
+  const moveSelectedMessage = async (offset: -1 | 1) => {
+    const messageId = messageMenu?.message.message_id;
+    setMessageMenu(null);
+    if (!state || messageId == null || saving) return;
+    const index = state.messages.findIndex((message) => message.template_message_id === messageId);
+    const target = index + offset;
+    if (index < 0 || target < 0 || target >= state.messages.length) return;
+    const next = [...state.messages];
+    [next[index], next[target]] = [next[target], next[index]];
+    await persist(next);
+  };
+
+  const selectedMessageIndex = messageMenu && state
+    ? state.messages.findIndex((message) => message.template_message_id === messageMenu.message.message_id)
+    : -1;
+  const selectedMessageIsText = messageMenu?.message.type === MESSAGE_TYPE_TEXT;
+
   return <SideDrawer
     className={`welcome-template-drawer chat-background-${backgroundTheme}`}
     historyKey="welcome-messages"
@@ -543,7 +571,19 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
           ref={messageMenuRef}
           style={{ left: messageMenu.anchorX, top: messageMenu.anchorY }}
         >
-          <div className="message-context-actions is-single">
+          <div className={`message-context-actions welcome-message-context-actions${selectedMessageIsText ? " has-copy" : ""}`}>
+            {selectedMessageIsText ? <button className="message-context-button" disabled={saving} onClick={() => void copySelectedMessage()} type="button">
+              <span className="material-symbols-outlined">content_copy</span>
+              {t("common.copy")}
+            </button> : null}
+            <button className="message-context-button" disabled={saving || selectedMessageIndex <= 0} onClick={() => void moveSelectedMessage(-1)} type="button">
+              <span className="material-symbols-outlined">arrow_upward</span>
+              {t("profile.welcomeMoveEarlier")}
+            </button>
+            <button className="message-context-button" disabled={saving || selectedMessageIndex < 0 || selectedMessageIndex >= previewMessages.length - 1} onClick={() => void moveSelectedMessage(1)} type="button">
+              <span className="material-symbols-outlined">arrow_downward</span>
+              {t("profile.welcomeMoveLater")}
+            </button>
             <button className="message-context-button danger" disabled={saving || previewMessages.length <= 1} onClick={() => void deleteSelectedMessage()} type="button">
               <span className="material-symbols-outlined">delete</span>
               {t("common.delete")}

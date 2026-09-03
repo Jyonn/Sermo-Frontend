@@ -2288,4 +2288,6 @@
   ,"profile.welcomeMessagePlaceholder": "Write a welcome message"
   ,"profile.welcomeLimitReached": "Welcome message limit reached"
   ,"profile.welcomeLoadFailed": "Could not load welcome messages"
+  ,"profile.welcomeMoveEarlier": "Earlier"
+  ,"profile.welcomeMoveLater": "Later"
 }

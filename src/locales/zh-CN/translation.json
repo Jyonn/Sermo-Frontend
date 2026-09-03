@@ -2288,4 +2288,6 @@
   ,"profile.welcomeMessagePlaceholder": "输入一条欢迎消息"
   ,"profile.welcomeLimitReached": "已达到欢迎消息上限"
   ,"profile.welcomeLoadFailed": "欢迎消息加载失败"
+  ,"profile.welcomeMoveEarlier": "前移"
+  ,"profile.welcomeMoveLater": "后移"
 }
