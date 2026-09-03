@@ -4861,6 +4861,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (status) counts[status] = (counts[status] ?? 0) + 1;
     return counts;
   }, {});
+  const visibleSubmissionFilterStatuses = submissionFilterStatuses.filter((status) => (submissionStatusCounts[status] ?? 0) > 0);
+  useEffect(() => {
+    if (submissionStatusFilter === "all" || (submissionStatusCounts[submissionStatusFilter] ?? 0) > 0) return;
+    setSubmissionStatusFilter("all");
+  }, [chats, submissionStatusFilter]);
   const filteredChats = submissionMode && submissionStatusFilter !== "all"
     ? chats.filter((chat) => chat.submission?.status === submissionStatusFilter)
     : chats;
@@ -6866,12 +6871,12 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       />
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
       {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
-      {submissionMode ? (
+      {submissionMode && chats.length ? (
         <nav aria-label={t("submission.filterLabel")} className="submission-status-filters">
           <button aria-pressed={submissionStatusFilter === "all"} className={submissionStatusFilter === "all" ? "is-active" : ""} onClick={() => setSubmissionStatusFilter("all")} type="button">
             <span>{t("submission.filterAll")}</span><b>{chats.length}</b>
           </button>
-          {submissionFilterStatuses.map((status) => (
+          {visibleSubmissionFilterStatuses.map((status) => (
             <button aria-pressed={submissionStatusFilter === status} className={submissionStatusFilter === status ? "is-active" : ""} key={status} onClick={() => setSubmissionStatusFilter(status)} type="button">
               <span>{submissionStatusLabel(status)}</span><b>{submissionStatusCounts[status] ?? 0}</b>
             </button>

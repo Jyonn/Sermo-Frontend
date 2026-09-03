@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.03.22",
+  "id": "2026.09.03.23",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "广场评论体验优化",
+      "title": "投稿筛选更清爽",
       "items": [
-        "评论表情面板新增探索页，并支持点击外部快速收起",
-        "官方与运营不再受广场发言和评论次数限制，匿名发言收到评论时也会及时提醒"
+        "投稿列表会自动隐藏当前没有内容的状态筛选项"
       ]
     },
     "en": {
-      "title": "Improved Square comments",
+      "title": "Cleaner submission filters",
       "items": [
-        "The comment emoji picker now includes Explore and closes when you tap outside it",
-        "Official and operator accounts no longer have Square posting limits, and comments on anonymous posts now trigger notifications"
+        "Submission status filters with no matching items are now hidden automatically"
       ]
     }
   }
