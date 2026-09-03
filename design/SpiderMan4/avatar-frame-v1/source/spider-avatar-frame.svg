@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff4451"/>
+      <stop offset="0.45" stop-color="#c9192d"/>
+      <stop offset="1" stop-color="#680817"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#194f87"/>
+      <stop offset="0.5" stop-color="#092c51"/>
+      <stop offset="1" stop-color="#031326"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.45" stop-color="#b9d5e8"/>
+      <stop offset="1" stop-color="#55778e"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="40%" cy="34%" r="72%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.68" stop-color="#d8effc"/>
+      <stop offset="1" stop-color="#7ea6bd"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="13" result="b"/>
+      <feOffset dy="10" result="o"/>
+      <feColorMatrix in="o" type="matrix" values="0 0 0 0 0 0 0 0 0 0.03 0 0 0 0 0.08 0 0 0 .55 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="redArc"><path d="M167 653 A370 370 0 0 1 733 197 L696 260 A297 297 0 0 0 233 636Z"/></clipPath>
+  </defs>
+
+  <!-- Open center is intentionally transparent. -->
+  <g filter="url(#shadow)">
+    <circle cx="500" cy="525" r="366" fill="none" stroke="#050912" stroke-width="88"/>
+    <circle cx="500" cy="525" r="359" fill="none" stroke="url(#blue)" stroke-width="70"/>
+    <path d="M170 653 A370 370 0 0 1 733 197" fill="none" stroke="url(#red)" stroke-width="72" stroke-linecap="round"/>
+    <path d="M737 198 A370 370 0 0 1 841 696" fill="none" stroke="#153f70" stroke-width="66" stroke-linecap="round"/>
+    <path d="M839 698 A370 370 0 0 1 178 676" fill="none" stroke="url(#red)" stroke-width="67" stroke-linecap="round"/>
+    <circle cx="500" cy="525" r="323" fill="none" stroke="#96cce9" stroke-opacity=".7" stroke-width="5"/>
+    <circle cx="500" cy="525" r="397" fill="none" stroke="#07111f" stroke-opacity=".8" stroke-width="5"/>
+  </g>
+
+  <!-- Embossed suit webbing on red arcs. -->
+  <g clip-path="url(#redArc)" fill="none" stroke="#17040a" stroke-width="7" opacity=".9">
+    <path d="M122 260 C330 365 585 360 799 225M91 386 C321 476 596 460 852 313M76 520 C316 583 628 567 902 432M88 653 C327 691 628 676 905 568"/>
+    <path d="M254 102 C315 331 322 601 282 810M397 76 C431 324 434 610 403 875M546 76 C550 322 553 620 548 901M683 111 C655 343 661 617 696 852"/>
+  </g>
+
+  <!-- Restrained outer web, upper-left only. -->
+  <g fill="none" stroke="url(#silver)" stroke-linecap="round" filter="url(#glow)">
+    <path d="M102 372 C175 331 243 294 333 284M118 372 C191 402 248 427 294 480M161 247 C207 288 244 329 273 384M279 141 C281 226 294 297 326 355" stroke-width="8"/>
+    <path d="M150 331 Q196 330 224 354M188 278 Q235 289 264 321M230 223 Q278 247 296 281M127 373 Q160 394 177 425M185 353 Q219 380 233 414" stroke-width="5" opacity=".9"/>
+  </g>
+
+  <!-- Spider-Man upper-body accent emerging from behind the top-right rim. -->
+  <g transform="translate(668 52) rotate(8 128 170)" filter="url(#shadow)">
+    <path d="M43 332 C50 257 85 224 130 214 C181 216 226 255 244 333 L207 368 L69 363Z" fill="url(#blue)" stroke="#050913" stroke-width="12"/>
+    <path d="M68 332 C83 269 104 238 132 221 C155 241 176 275 190 335 L160 371 L91 362Z" fill="url(#red)" stroke="#17040a" stroke-width="8"/>
+    <path d="M60 139 C63 56 105 20 157 29 C218 39 240 93 225 167 C209 247 167 271 113 247 C73 229 55 191 60 139Z" fill="url(#red)" stroke="#090a10" stroke-width="13"/>
+    <g fill="none" stroke="#19050b" stroke-width="6" opacity=".92">
+      <path d="M144 31 L143 248M79 72 Q144 104 222 75M62 132 Q144 165 229 137M70 195 Q144 212 211 197"/>
+      <path d="M144 34 C109 75 88 119 64 164M144 34 C177 75 205 117 227 163M144 34 C119 97 111 169 116 245M144 34 C170 98 178 171 170 246"/>
+    </g>
+    <path d="M83 108 C95 82 119 72 142 75 C137 121 118 153 87 157 C80 141 78 123 83 108Z" fill="url(#lens)" stroke="#05070c" stroke-width="12"/>
+    <path d="M151 75 C178 71 202 84 213 111 C217 128 214 145 205 160 C174 153 156 121 151 75Z" fill="url(#lens)" stroke="#05070c" stroke-width="12"/>
+    <path d="M68 300 C34 301 7 324 5 356 C4 379 23 393 43 380 C56 371 56 351 69 343 C80 338 92 347 93 360 L132 350 C130 310 104 297 68 300Z" fill="url(#red)" stroke="#080a10" stroke-width="10"/>
+    <path d="M19 338 C38 337 49 346 53 363M41 316 C59 321 72 334 77 348" fill="none" stroke="#1b050b" stroke-width="5"/>
+  </g>
+
+  <!-- Small spider clasp at bottom. -->
+  <g transform="translate(500 887)" fill="#070a10" stroke="#e4f2fa" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)">
+    <ellipse cx="0" cy="0" rx="22" ry="35"/>
+    <ellipse cx="0" cy="-31" rx="14" ry="16"/>
+    <path d="M-15-23 -45-53 -68-48M15-23 45-53 68-48M-21-5 -58-19 -76-7M21-5 58-19 76-7M-20 12 -55 34 -72 55M20 12 55 34 72 55M-12 27 -33 64 -42 84M12 27 33 64 42 84" fill="none"/>
+  </g>
+</svg>
