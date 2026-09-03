@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.03.4",
+  "id": "2026.09.03.5",
   "publishedAt": "2026-09-03",
   "locales": {
     "zh-CN": {
-      "title": "个人主页封面优化",
+      "title": "运营变更通知更完整",
       "items": [
-        "增高用户详情和我的名片的主页封面",
-        "不同屏幕高度下保持更舒展的视觉比例"
+        "设置或取消空间运营者时显示实际操作人",
+        "官方通知中的操作来源现在更加清晰"
       ]
     },
     "en": {
-      "title": "Improved profile covers",
+      "title": "More complete operator notices",
       "items": [
-        "Increased the cover height on user profiles and My Card",
-        "Keeps a more spacious visual proportion across screen sizes"
+        "Shows the actual operator when assigning or removing a space operator",
+        "Official notices now provide clearer action attribution"
       ]
     }
   }

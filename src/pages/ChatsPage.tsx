@@ -2123,7 +2123,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   }
   const officialNotice = group.messages.length === 1 && group.messages[0].kind === "official_notice" ? group.messages[0] : null;
   if (officialNotice) {
-    const showActor = /^(submission_|square_)/.test(officialNotice.payload?.event ?? "") && Boolean(officialNotice.payload?.actor_name);
+    const showActor = /^(submission_|square_|operator_)/.test(officialNotice.payload?.event ?? "") && Boolean(officialNotice.payload?.actor_name);
     const submissionChatId = Number(officialNotice.payload?.submission_chat_id);
     const canOpenSubmission = Boolean(onOpenOfficialNotice && Number.isInteger(submissionChatId) && submissionChatId > 0);
     const noticeContent = (
