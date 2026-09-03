@@ -30,7 +30,6 @@ import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import PlatformAdminPage from "./pages/PlatformAdminPage";
-import SubmissionCreatePage from "./pages/SubmissionCreatePage";
 
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
 
@@ -125,7 +124,7 @@ export default function App() {
         />
         <Route
           path="/app/submissions/new"
-          element={<RequireAuth><RequireSubmissionFeature><SubmissionCreatePage /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions/:chatId"

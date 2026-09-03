@@ -44,6 +44,7 @@
   "submission.chooseRecipient": "选择投稿对象",
   "submission.titleStep": "填写投稿标题",
   "submission.titleLabel": "投稿标题",
+  "submission.unnamed": "未命名投稿",
   "submission.titlePlaceholder": "用一句话概括这次投稿",
   "submission.to": "投稿给 {{name}}",
   "submission.begin": "开始投稿",

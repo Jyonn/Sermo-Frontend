@@ -44,6 +44,7 @@
   "submission.chooseRecipient": "수신자를 선택",
   "submission.titleStep": "제출된 내용을 지정하십시오",
   "submission.titleLabel": "제출 제목",
+  "submission.unnamed": "제목 없는 제출",
   "submission.titlePlaceholder": "이 제출을 요약",
   "submission.to": "{{name}}",
   "submission.begin": "제출 시작",

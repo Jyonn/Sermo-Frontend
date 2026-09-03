@@ -175,6 +175,7 @@ const LINK_TRAILING_PUNCTUATION = ".,;:!?)]}，。！？、；：）】》";
 
 type ChatRouteState = {
   chatAccessError?: string;
+  recipient?: SubmissionRecipientDTO;
 };
 
 type ClipboardUploadCandidate = {
@@ -2797,6 +2798,24 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [submissionRecipients, setSubmissionRecipients] = useState<SubmissionRecipientDTO[]>([]);
   const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
   const submissionCreateMenuRef = useRef<HTMLDivElement | null>(null);
+  const newSubmissionRoute = submissionMode && location.pathname === "/app/submissions/new";
+  const initialSubmissionRecipient = (location.state as ChatRouteState | null)?.recipient ?? null;
+  const [newSubmissionRecipient, setNewSubmissionRecipient] = useState<SubmissionRecipientDTO | null>(initialSubmissionRecipient);
+  const [newSubmissionTitle, setNewSubmissionTitle] = useState("");
+  const [newSubmissionTitleOpen, setNewSubmissionTitleOpen] = useState(newSubmissionRoute && Boolean(initialSubmissionRecipient));
+  const newSubmissionDraftIdRef = useRef(`submission-${crypto.randomUUID()}`.slice(0, 64));
+
+  useEffect(() => {
+    if (!newSubmissionRoute) return;
+    if (!initialSubmissionRecipient) {
+      if (!newSubmissionRecipient) navigate("/app/submissions", { replace: true });
+      return;
+    }
+    setNewSubmissionRecipient(initialSubmissionRecipient);
+    setNewSubmissionTitle("");
+    setNewSubmissionTitleOpen(true);
+    newSubmissionDraftIdRef.current = `submission-${crypto.randomUUID()}`.slice(0, 64);
+  }, [location.key, newSubmissionRoute]);
   const listPath = submissionMode ? "/app/submissions" : "/app/chats";
   const chatPath = (id: number) => `${listPath}/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
@@ -3546,11 +3565,58 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     };
   }, [currentUserId, pageActive]);
 
+  const provisionalSubmissionChat = useMemo<Chat | null>(() => {
+    if (!newSubmissionRoute || !newSubmissionRecipient || !session) return null;
+    const recipient = newSubmissionRecipient.user;
+    const now = Math.floor(Date.now() / 1000);
+    return {
+      id: -1,
+      title: newSubmissionTitle.trim() || t("submission.unnamed"),
+      avatarUri: recipient.avatar_uri,
+      avatarCacheKey: recipient.avatar_cache_key,
+      avatarFrameStyle: recipient.avatar_frame_style,
+      subtitle: t("submission.status.draft"),
+      preview: "",
+      time: "",
+      lastActivity: now,
+      unread: 0,
+      online: false,
+      verified: Boolean(recipient.verified),
+      official: newSubmissionRecipient.role === "official",
+      operator: newSubmissionRecipient.role === "operator",
+      members: 2,
+      type: "group",
+      purpose: "submission",
+      submission: {
+        author: { user_id: session.user.user_id, name: session.user.name, avatar_uri: session.user.avatar_uri ?? "" },
+        recipient,
+        status: "draft",
+        submitted_at: null,
+        published_statement_id: null,
+      },
+      submissionRole: "author",
+      isOwner: false,
+      pinned: false,
+      onlineReminderEnabled: false,
+      notificationsMuted: false,
+      unreadBadgeMuted: false,
+      hasUnreadMention: false,
+      detail: {
+        summary: t("chat.groupSummary"),
+        relation: t("chat.memberRelation"),
+        actions: [],
+        members: [{ userId: recipient.user_id, name: recipient.name, avatarUri: recipient.avatar_uri, avatarCacheKey: recipient.avatar_cache_key, avatarFrameStyle: recipient.avatar_frame_style, isSelf: false, isOwner: true }],
+      },
+      messages: [],
+    };
+  }, [newSubmissionRecipient, newSubmissionRoute, newSubmissionTitle, session, t]);
+
   const selectedChat = useMemo(() => {
+    if (provisionalSubmissionChat) return provisionalSubmissionChat;
     const numericChatId = Number(chatId);
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
-  }, [chatId, chats]);
+  }, [chatId, chats, provisionalSubmissionChat]);
   const submissionStatus = selectedChat?.submission?.status;
   const submissionRole = selectedChat?.submissionRole;
   const submissionCanSend = !submissionMode || (
@@ -3558,7 +3624,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     || (submissionRole === "reviewer" && submissionStatus === "review")
   );
   const submissionStatusLabel = (status?: SubmissionStatus) => status ? t(`submission.status.${status}` as TranslationKey) : "";
-  const selectedChatId = selectedChat?.id ?? null;
+  const selectedChatId = selectedChat && selectedChat.id > 0 ? selectedChat.id : null;
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
   selectedChatIdRef.current = selectedChatId;
   const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
@@ -5157,6 +5223,27 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       triggerMessageEntrance(optimisticMessage.clientId);
       stickToBottomRef.current = true;
       recordOptimisticEmojiUsage(readableMessage);
+      if (selectedChat.id < 0 && newSubmissionRecipient) {
+        const result = await api.startSubmission({
+          peer_user_id: newSubmissionRecipient.user.user_id,
+          title: newSubmissionTitle.trim(),
+          client_draft_id: newSubmissionDraftIdRef.current,
+          content: message,
+          client_message_id: optimisticMessage.clientId,
+        });
+        const createdChat = mapChat(result.chat, currentUserId);
+        const deliveredMessage = mapChatMessage(result.message, currentUserId);
+        updateSendTask(optimisticMessage.clientId, 0.9);
+        setChats((currentChats) => sortChats([createdChat, ...currentChats.filter((chat) => chat.id !== createdChat.id)]));
+        setMessages((current) => {
+          const next = { ...current, [createdChat.id]: [deliveredMessage] };
+          delete next[selectedChat.id];
+          return next;
+        });
+        void syncEmojiUsage();
+        navigate(`/app/submissions/${createdChat.id}`, { replace: true, state: null });
+        return;
+      }
       const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId, mentionUserIds);
       updateSendTask(optimisticMessage.clientId, 0.9);
       const deliveredMessage = mapChatMessage(created, currentUserId);
@@ -5189,10 +5276,19 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           error: apiError instanceof Error ? apiError.message : String(apiError),
         });
       }
-      setMessages((current) => ({
-        ...current,
-        [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
-      }));
+      if (selectedChat.id < 0) {
+        setMessages((current) => ({
+          ...current,
+          [selectedChat.id]: (current[selectedChat.id] ?? []).filter((item) => item.clientId !== optimisticMessage.clientId),
+        }));
+        updateDraft(message);
+        showToast(apiError instanceof ApiError ? apiError.message : t("submission.startFailed"), "error");
+      } else {
+        setMessages((current) => ({
+          ...current,
+          [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
+        }));
+      }
       void syncEmojiUsage();
     } finally {
       finishSendTask(optimisticMessage.clientId);
@@ -7044,7 +7140,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </div>
                 ) : null}
               </header>
-              {!messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? (
+              {!messageSelectionMode && displayedChat.id > 0 && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? (
                 <div className="submission-workflow-bar">
                   <div><strong>{t("submission.authorActionTitle")}</strong><small>{t("submission.authorActionHint")}</small></div>
                   <span className="submission-workflow-actions">
@@ -8327,6 +8423,22 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           ) : null}
         </div>
       </SideDrawer>
+      <InputDialog
+        open={newSubmissionTitleOpen}
+        title={t("submission.titleStep")}
+        description={newSubmissionRecipient ? t("submission.to", { name: newSubmissionRecipient.user.name }) : undefined}
+        value={newSubmissionTitle}
+        placeholder={t("submission.titlePlaceholder")}
+        confirmLabel={t("submission.begin")}
+        maxLength={50}
+        onChange={setNewSubmissionTitle}
+        onClose={() => navigate("/app/submissions", { replace: true })}
+        onConfirm={() => {
+          if (!newSubmissionTitle.trim()) return;
+          setNewSubmissionTitleOpen(false);
+          window.requestAnimationFrame(() => mentionEditorRef.current?.focus());
+        }}
+      />
       <InputDialog
         open={groupRenameOpen}
         title={t("chat.editGroupName")}

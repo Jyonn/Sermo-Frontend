@@ -44,6 +44,7 @@
   "submission.chooseRecipient": "Choose a recipient",
   "submission.titleStep": "Name your submission",
   "submission.titleLabel": "Submission title",
+  "submission.unnamed": "Untitled submission",
   "submission.titlePlaceholder": "Summarize this submission",
   "submission.to": "Submit to {{name}}",
   "submission.begin": "Start submission",

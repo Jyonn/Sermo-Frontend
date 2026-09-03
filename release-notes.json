@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.03.23",
-  "publishedAt": "2026-09-03",
+  "id": "2026.09.04.1",
+  "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "投稿筛选更清爽",
+      "title": "投稿创建流程焕新",
       "items": [
-        "投稿列表会自动隐藏当前没有内容的状态筛选项"
+        "选择官方或运营后会直接进入草稿会话，并在会话内完成投稿命名",
+        "首条投稿消息现在与后续消息拥有一致的输入、展示和发送体验"
       ]
     },
     "en": {
-      "title": "Cleaner submission filters",
+      "title": "A smoother submission flow",
       "items": [
-        "Submission status filters with no matching items are now hidden automatically"
+        "Choosing an official or operator now opens a draft conversation where you name the submission",
+        "The first submission message now uses the same composer, appearance, and sending flow as later messages"
       ]
     }
   }

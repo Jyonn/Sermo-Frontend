@@ -44,6 +44,7 @@
   "submission.chooseRecipient": "Elige un destinatario",
   "submission.titleStep": "Nombre de su presentación",
   "submission.titleLabel": "Título de presentación",
+  "submission.unnamed": "Envío sin título",
   "submission.titlePlaceholder": "Resumen de esta presentación",
   "submission.to": "Envía a{{name}}",
   "submission.begin": "Inicio de envío",

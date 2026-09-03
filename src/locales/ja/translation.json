@@ -44,6 +44,7 @@
   "submission.chooseRecipient": "受信者を選択する",
   "submission.titleStep": "投稿の名前を表示する",
   "submission.titleLabel": "投稿タイトル",
+  "submission.unnamed": "無題の投稿",
   "submission.titlePlaceholder": "この投稿を概要する",
   "submission.to": "送信する{{name}}",
   "submission.begin": "送信を開始",
