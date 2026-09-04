@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.1",
+  "id": "2026.09.05.2",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "手机聊天输入更顺手",
+      "title": "聊天工具展开更自然",
       "items": [
-        "聊天输入区升级为双行工具栏，语音、表情、文件、位置和足迹操作更直接"
+        "文件、位置和足迹选项现在会随输入区平滑展开与收起"
       ]
     },
     "en": {
-      "title": "A smoother mobile chat composer",
+      "title": "Smoother chat tool panels",
       "items": [
-        "The mobile chat composer now uses a two-row toolbar with quicker access to voice, emoji, files, location, and footprints"
+        "File, location, and footprint options now expand and collapse smoothly with the mobile composer"
       ]
     }
   }

@@ -7783,27 +7783,33 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     )}
                   </div>
                 ) : null}
-                {mobileComposerLayout && mobileComposerPanel === "file" ? (
+                {mobileComposerLayout ? (
+                  <div className={`mobile-composer-reveal${mobileComposerPanel === "file" ? " is-open" : ""}`}>
+                    <div className="mobile-composer-reveal-inner">
                   <div className="mobile-composer-options" aria-label={t("cloudResources.fileSourceTitle")}>
-                    <button onClick={() => { setMobileComposerPanel(null); setCloudFilePickerOpen(true); }} type="button">
+                    <button tabIndex={mobileComposerPanel === "file" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); setCloudFilePickerOpen(true); }} type="button">
                       <span className="material-symbols-outlined">cloud</span>
                       <span><strong>{t("cloudResources.chooseCloud")}</strong><small>{t("composer.cloudFileHint")}</small></span>
                     </button>
-                    <button onClick={() => { setMobileComposerPanel(null); fileInputRef.current?.click(); }} type="button">
+                    <button tabIndex={mobileComposerPanel === "file" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); fileInputRef.current?.click(); }} type="button">
                       <span className="material-symbols-outlined">upload_file</span>
                       <span><strong>{t("cloudResources.chooseLocal")}</strong><small>{t("composer.localFileHint")}</small></span>
                     </button>
                   </div>
+                    </div>
+                  </div>
                 ) : null}
-                {mobileComposerLayout && mobileComposerPanel === "location" ? (
+                {mobileComposerLayout ? (
+                  <div className={`mobile-composer-reveal${mobileComposerPanel === "location" ? " is-open" : ""}`}>
+                    <div className="mobile-composer-reveal-inner">
                   <div className="mobile-composer-options is-location" aria-label={t("media.location")}>
                     {!locationDraft ? (
                       <>
-                        <button onClick={() => startLocationDraft(false, true)} type="button">
+                        <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} onClick={() => startLocationDraft(false, true)} type="button">
                           <span className="material-symbols-outlined">my_location</span>
                           <span><strong>{t("composer.preciseLocation")}</strong><small>{t("composer.preciseLocationHint")}</small></span>
                         </button>
-                        <button onClick={() => startLocationDraft(true, true)} type="button">
+                        <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} onClick={() => startLocationDraft(true, true)} type="button">
                           <span className="material-symbols-outlined">location_searching</span>
                           <span><strong>{t("composer.approximateLocation")}</strong><small>{t("composer.approximateLocationHint")}</small></span>
                         </button>
@@ -7815,22 +7821,28 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                           <strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : locationDraft.obscure ? t("composer.approximateLocation") : t("composer.preciseLocation")}</strong>
                           <small>{locationDraft.phase === "ready" ? (locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`) : locationDraft.error || t("common.pleaseWait")}</small>
                         </div>
-                        {locationDraft.phase !== "locating" ? <button className="mobile-location-cancel" onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button> : null}
-                        {locationDraft.phase === "ready" ? <button className="mobile-location-send" onClick={() => void sendLocationMessage()} type="button">{t("common.send")}</button> : locationDraft.phase === "error" ? <button className="mobile-location-send" onClick={() => startLocationDraft(Boolean(locationDraft.obscure), true)} type="button">{t("common.retry")}</button> : null}
+                        {locationDraft.phase !== "locating" ? <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} className="mobile-location-cancel" onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button> : null}
+                        {locationDraft.phase === "ready" ? <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} className="mobile-location-send" onClick={() => void sendLocationMessage()} type="button">{t("common.send")}</button> : locationDraft.phase === "error" ? <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} className="mobile-location-send" onClick={() => startLocationDraft(Boolean(locationDraft.obscure), true)} type="button">{t("common.retry")}</button> : null}
                       </div>
                     )}
                   </div>
+                    </div>
+                  </div>
                 ) : null}
-                {mobileComposerLayout && mobileComposerPanel === "footprint" ? (
+                {mobileComposerLayout ? (
+                  <div className={`mobile-composer-reveal${mobileComposerPanel === "footprint" ? " is-open" : ""}`}>
+                    <div className="mobile-composer-reveal-inner">
                   <div className="mobile-composer-options" aria-label={t("travelMap.actionShort")}>
-                    <button onClick={() => { setMobileComposerPanel(null); setChatTravelMapOpen(true); }} type="button">
+                    <button tabIndex={mobileComposerPanel === "footprint" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); setChatTravelMapOpen(true); }} type="button">
                       <span className="material-symbols-outlined">travel_explore</span>
                       <span><strong>{t("travelMap.openMap")}</strong><small>{t("composer.openFootprintHint")}</small></span>
                     </button>
-                    <button onClick={() => { setMobileComposerPanel(null); void openChatTravelMap(); }} type="button">
+                    <button tabIndex={mobileComposerPanel === "footprint" ? undefined : -1} onClick={() => { setMobileComposerPanel(null); void openChatTravelMap(); }} type="button">
                       <span className="material-symbols-outlined">group_add</span>
                       <span><strong>{t("composer.shareFootprint")}</strong><small>{t("composer.shareFootprintHint")}</small></span>
                     </button>
+                  </div>
+                    </div>
                   </div>
                 ) : null}
                 {!mobileComposerLayout && !voiceComposer.open ? (
