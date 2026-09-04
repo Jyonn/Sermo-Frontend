@@ -31540,6 +31540,10 @@ html[data-theme="dark"] .verification-banner-action {
 }
 
 @media (min-width: 901px) {
+  .mobile-chat-list-screen.has-verification-banner {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
   .mobile-chat-list-screen .chat-list-screen-body {
     display: block;
   }

@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.04.8",
+  "id": "2026.09.04.9",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "新用户引导与桌面布局优化",
+      "title": "桌面聊天列表布局修复",
       "items": [
-        "修复新用户桌面聊天列表沉底的问题，并优化深色模式下的邮箱认证提示",
-        "广场始终显示发言入口，未认证用户点击后会收到清晰的认证引导"
+        "修复新用户显示邮箱认证提示时，聊天列表被推到页面底部的问题"
       ]
     },
     "en": {
-      "title": "Improved onboarding and desktop layout",
+      "title": "Desktop chat list layout fix",
       "items": [
-        "Fixed desktop chat lists appearing at the bottom for new users and improved the email verification banner in dark mode",
-        "The Square post action now remains visible and guides unverified users through verification when selected"
+        "Fixed chat lists being pushed to the bottom when email verification guidance is shown to new users"
       ]
     }
   }

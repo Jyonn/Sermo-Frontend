@@ -7103,7 +7103,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       }
     >
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
-        <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
+        <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section
           ref={chatMainPaneRef}
