@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.04.10",
+  "id": "2026.09.04.11",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "聊天消息锁定",
+      "title": "Safari 发言详情修复",
       "items": [
-        "消息置顶正式更名为锁定，锁定后的消息会保持在会话顶部且无法撤回",
-        "采用更轻巧的静默门闩样式展示锁定消息"
+        "修复 Safari 手机端打开广场发言后，正文被背景遮罩错误覆盖的问题"
       ]
     },
     "en": {
-      "title": "Locked chat messages",
+      "title": "Safari statement detail fix",
       "items": [
-        "Message pinning is now called locking; locked messages stay at the top of the chat and cannot be recalled",
-        "Added a quieter latch-style locked-message bar"
+        "Fixed the background mask incorrectly covering statement content in Square on mobile Safari"
       ]
     }
   }

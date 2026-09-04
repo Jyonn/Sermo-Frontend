@@ -28362,6 +28362,19 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
   animation: square-focus-mask-in 180ms ease both;
 }
 
+.square-inline-detail-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 72;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.square-inline-detail-portal > .square-inline-statement {
+  pointer-events: auto;
+}
+
 /* Media inspection is the topmost interactive surface. The compound selector
    prevents the later generic .dialog-backdrop rule from lowering its layer. */
 .dialog-backdrop.message-image-preview-backdrop {

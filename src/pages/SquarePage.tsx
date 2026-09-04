@@ -1869,11 +1869,7 @@ export default function SquarePage() {
               description={feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
             />
           ) : null}
-          {inlineStatementExpanded && !desktopWorkspace ? (
-            <section className="square-statement-feed">
-              {activeCommentStatement ? <Fragment key={activeCommentStatement.statement_id}>{renderFeedStatement(activeCommentStatement)}</Fragment> : <ContentLoader label={t("common.loading")} rows={2} />}
-            </section>
-          ) : (
+          {inlineStatementExpanded && !desktopWorkspace ? null : (
             <VirtualDynamicList
               className="square-statement-feed square-virtual-feed"
               estimateSize={estimateStatementHeight}
@@ -1903,8 +1899,13 @@ export default function SquarePage() {
         </section>}
       </aside>
       </div>
-      {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />, document.body) : null}
-      {inlineStatementExpanded && !desktopWorkspace ? <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`}>{commentComposer}</div> : null}
+      {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<>
+        <button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />
+        <section className="square-statement-feed square-inline-detail-portal">
+          {activeCommentStatement ? <Fragment key={activeCommentStatement.statement_id}>{renderFeedStatement(activeCommentStatement)}</Fragment> : <ContentLoader label={t("common.loading")} rows={2} />}
+        </section>
+        <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`}>{commentComposer}</div>
+      </>, document.body) : null}
       <SideDrawer historyKey="square-notifications" onRouteOpen={() => setNotificationDrawerOpen(true)} onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">
           {!notificationEvents.length ? <QuietState icon="notifications_none" title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
