@@ -31520,6 +31520,36 @@ html[data-theme="dark"] .drawer-floating-back {
     background: transparent;
   }
 }
+
+html[data-theme="dark"] .verification-banner {
+  color: var(--text-primary);
+  border-color: rgba(218, 177, 84, 0.26);
+  background: linear-gradient(135deg, rgba(109, 85, 35, 0.3), rgba(43, 52, 43, 0.5));
+}
+
+html[data-theme="dark"] .verification-banner-copy strong {
+  color: #f1f7f3;
+}
+
+html[data-theme="dark"] .verification-banner-copy span {
+  color: #aebbb5;
+}
+
+html[data-theme="dark"] .verification-banner-action {
+  color: #d8b866;
+}
+
+@media (min-width: 901px) {
+  .mobile-chat-list-screen .chat-list-screen-body {
+    display: block;
+  }
+
+  .mobile-chat-list-screen .chat-list {
+    height: auto;
+    min-height: 0;
+    justify-content: flex-start;
+  }
+}
 /* Square comments reuse the chat composer primitives for mentions, emoji, and stickers. */
 .square-comment-composer {
   grid-template-columns: 36px minmax(0, 1fr);

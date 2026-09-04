@@ -466,6 +466,7 @@ export default function SquarePage() {
   const [publishing, setPublishing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [publishVerificationOpen, setPublishVerificationOpen] = useState(false);
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
   const [gallery, setGallery] = useState<{ statementId: number; index: number } | null>(null);
@@ -1430,6 +1431,10 @@ export default function SquarePage() {
   };
 
   const publish = async () => {
+    if (!canPublish) {
+      setPublishVerificationOpen(true);
+      return;
+    }
     if (!publishable) return;
     setPublishing(true);
     setError("");
@@ -1526,6 +1531,25 @@ export default function SquarePage() {
       },
       { enableHighAccuracy: true, maximumAge: 60_000, timeout: 12_000 },
     );
+  };
+
+  const openComposer = () => {
+    if (!canPublish) {
+      setPublishVerificationOpen(true);
+      return;
+    }
+    setComposerOpen(true);
+  };
+
+  const continueToVerification = () => {
+    setPublishVerificationOpen(false);
+    if (!currentUser?.has_password) {
+      navigate("/app/menu?panel=account-security");
+      return;
+    }
+    navigate("/app/menu?sheet=email-verification", {
+      state: { emailVerificationReturnTo: `${location.pathname}${location.search}` },
+    });
   };
 
   const toggleStatementLike = async (statement: SquareStatementDTO) => {
@@ -1762,12 +1786,10 @@ export default function SquarePage() {
               <span className="material-symbols-outlined">notifications</span>
               {notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}
             </button>
-            {canPublish ? (
-              <button className="square-header-publish" onClick={() => setComposerOpen(true)} type="button">
-                <span className="material-symbols-outlined">edit_square</span>
-                <span>{t("square.publish")}</span>
-              </button>
-            ) : null}
+            <button className="square-header-publish" onClick={openComposer} type="button">
+              <span className="material-symbols-outlined">edit_square</span>
+              <span>{t("square.publish")}</span>
+            </button>
           </div>}
         />
         <div className="square-feed-column">
@@ -1837,12 +1859,6 @@ export default function SquarePage() {
               <span className="square-pinned-copy"><small>{t("square.pinnedStatement")}</small><strong>{pinnedStatement.text || t("square.mediaStatement")}</strong></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-          ) : null}
-          {!canPublish ? (
-            <section className="square-readonly-notice">
-              <span className="material-symbols-outlined">visibility</span>
-              <div><strong>{t("square.readOnlyTitle")}</strong><p>{t("square.readOnlyHint")}</p></div>
-            </section>
           ) : null}
           {error ? <div className="square-inline-error">{error}</div> : null}
           {loading ? <ContentLoader label={t("common.loading")} rows={2} /> : null}
@@ -1923,7 +1939,7 @@ export default function SquarePage() {
       <SideDrawer
         className="square-compose-side-drawer"
         historyKey="square-compose"
-        onRouteOpen={() => setComposerOpen(true)}
+        onRouteOpen={openComposer}
         onClose={() => { setComposerOpen(false); setChatRecordDraft(null); }}
         open={composerOpen}
         title={t("square.composeTitle")}
@@ -2034,6 +2050,14 @@ export default function SquarePage() {
           </section>
         </div> : <ContentLoader label={t("common.loading")} rows={3} />}
       </SideDrawer>
+      <ConfirmDialog
+        confirmLabel={currentUser?.has_password ? t("verification.email") : t("verification.goSet")}
+        description={currentUser?.has_password ? t("square.readOnlyHint") : t("verification.passwordHint")}
+        onClose={() => setPublishVerificationOpen(false)}
+        onConfirm={continueToVerification}
+        open={publishVerificationOpen}
+        title={currentUser?.has_password ? t("verification.email") : t("verification.passwordFirst")}
+      />
       <BottomSheet className="activity-info-sheet" bodyClassName="activity-rules-sheet" onClose={() => setActivityRulesOpen(false)} open={activityRulesOpen} title={t("activity.rules")}>
         <div className="activity-rule-list">
           <article><span>01</span><div><strong>{t("activity.ruleVerifiedTitle")}</strong><p>{t("activity.ruleVerifiedBody")}</p></div></article>

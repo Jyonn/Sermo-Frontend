@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.04.7",
+  "id": "2026.09.04.8",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "移动端深色外观优化",
+      "title": "新用户引导与桌面布局优化",
       "items": [
-        "菜单页面现在与深色主题背景自然衔接，不再显示额外的面板底色"
+        "修复新用户桌面聊天列表沉底的问题，并优化深色模式下的邮箱认证提示",
+        "广场始终显示发言入口，未认证用户点击后会收到清晰的认证引导"
       ]
     },
     "en": {
-      "title": "Improved mobile dark appearance",
+      "title": "Improved onboarding and desktop layout",
       "items": [
-        "The Menu page now blends naturally with the dark theme without an extra panel background"
+        "Fixed desktop chat lists appearing at the bottom for new users and improved the email verification banner in dark mode",
+        "The Square post action now remains visible and guides unverified users through verification when selected"
       ]
     }
   }
