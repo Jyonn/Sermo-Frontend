@@ -31515,6 +31515,10 @@ html[data-theme="dark"] .drawer-floating-back {
   html[data-theme="dark"] body .list-screen.mobile-chat-list-screen.is-background {
     background: transparent;
   }
+
+  html[data-theme="dark"] body .menu-tab-shell > .page-stack {
+    background: transparent;
+  }
 }
 /* Square comments reuse the chat composer primitives for mentions, emoji, and stickers. */
 .square-comment-composer {

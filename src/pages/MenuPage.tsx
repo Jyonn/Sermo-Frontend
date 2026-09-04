@@ -1842,7 +1842,7 @@ export default function MenuPage() {
   };
 
   return (
-    <AppChrome title={t("menu.title")} hideTopbar shellClassName="desktop-tab-shell">
+    <AppChrome title={t("menu.title")} hideTopbar shellClassName="desktop-tab-shell menu-tab-shell">
       <section className="page-stack">
         <TabPageHeader
           title={t("menu.title")}

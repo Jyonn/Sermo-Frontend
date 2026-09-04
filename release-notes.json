@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.04.6",
+  "id": "2026.09.04.7",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "广场移动端显示修复",
+      "title": "移动端深色外观优化",
       "items": [
-        "恢复广场顶部栏随滚动呈现的毛玻璃效果",
-        "修复打开发言详情时正文未显示的问题"
+        "菜单页面现在与深色主题背景自然衔接，不再显示额外的面板底色"
       ]
     },
     "en": {
-      "title": "Fixed Square display on mobile",
+      "title": "Improved mobile dark appearance",
       "items": [
-        "Restored the frosted glass effect on the Square header while scrolling",
-        "Fixed missing post content when opening a post detail"
+        "The Menu page now blends naturally with the dark theme without an extra panel background"
       ]
     }
   }
