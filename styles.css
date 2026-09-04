@@ -31076,7 +31076,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-header-title {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -31084,23 +31084,24 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
   border: 0;
-  min-height: 38px;
-  padding: 7px 15px 7px 12px;
+  height: 30px;
+  padding: 0 11px 0 9px;
   border-radius: 999px;
   color: var(--brand-primary-press);
   background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-surface));
   font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 750;
+  font-size: 0.76rem;
+  font-weight: 700;
   line-height: 1;
   white-space: nowrap;
   transition: background-color 160ms ease, transform 160ms ease;
 }
 
 .submission-view-switch:active { transform: scale(.97); background: color-mix(in srgb, var(--brand-primary) 20%, var(--bg-surface)); }
-.submission-view-switch .material-symbols-outlined { font-size: 20px; color: currentColor; }
+.submission-view-switch svg { flex: 0 0 auto; width: 18px; height: 18px; }
+.submission-view-switch path { stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 
 .submission-status-filters {
   display: flex;
