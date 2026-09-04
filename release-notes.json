@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.04.4",
+  "id": "2026.09.04.5",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "广场长列表更流畅",
+      "title": "广场自动加载与虚拟列表修复",
       "items": [
-        "广场发言流现已按可见区域动态渲染，连续浏览大量发言时更流畅"
+        "滚动接近广场底部时会自动加载更多发言，不再需要手动点击",
+        "离开可见区域的发言元素会被及时卸载，长时间浏览也能保持流畅"
       ]
     },
     "en": {
-      "title": "Smoother long Square feeds",
+      "title": "Fixed Square auto-loading and virtualization",
       "items": [
-        "Square now renders posts dynamically around the visible area for smoother long browsing sessions"
+        "More posts now load automatically as you approach the end of the Square feed",
+        "Off-screen post elements are now removed correctly to keep long browsing sessions smooth"
       ]
     }
   }

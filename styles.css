@@ -27907,6 +27907,8 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-statement-footer button:hover { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 9%, transparent); }
 .square-statement-footer .material-symbols-outlined { font-size: 18px; }
 .square-load-more { justify-self: center; min-height: 40px; border: 0; padding: 0 20px; border-radius: 999px; color: var(--text-secondary); background: var(--bg-canvas); }
+.square-feed-sentinel { display: grid; min-height: 2px; place-items: center; }
+.square-feed-sentinel.is-loading { min-height: 46px; }
 
 .square-comments-drawer { min-height: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); scroll-padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
 .square-comments-context { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 4px 2px 15px; border-bottom: 1px solid var(--line-soft); }
@@ -27934,6 +27936,14 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 @keyframes square-orbit { 50% { transform: scale(1.12); opacity: .2; } }
 
 @media (max-width: 900px) {
+  .square-feed-screen {
+    height: 100dvh;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
   .square-feed-column { width: 100%; padding: 2px 0 110px; gap: 12px; }
   .square-compose-launcher { margin: 0 12px; width: calc(100% - 24px); }
   .square-statement-card,

@@ -442,6 +442,7 @@ export default function SquarePage() {
   const [syncing, setSyncing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const squareLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState("");
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
@@ -922,6 +923,19 @@ export default function SquarePage() {
     }
     return () => controller.abort();
   };
+
+  useEffect(() => {
+    const sentinel = squareLoadMoreRef.current;
+    const root = squareFeedScrollRef.current;
+    if (!sentinel || !root || !hasMore || loading || loadingMore || !statements.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      setLoadingMore(true);
+      void loadStatements(statements[statements.length - 1]?.statement_id);
+    }, { root, rootMargin: "600px 0px" });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, statements]);
 
   useEffect(() => {
     const cacheKey = feedMode === "user" ? `square:user:${profileFeedUserId}` : `square:${feedMode}`;
@@ -1848,12 +1862,7 @@ export default function SquarePage() {
             scrollRef={squareFeedScrollRef}
             renderItem={renderFeedStatement}
           />
-          {hasMore && statements.length ? (
-            <button className="square-load-more" disabled={loadingMore} onClick={() => {
-              setLoadingMore(true);
-              void loadStatements(statements[statements.length - 1]?.statement_id);
-            }} type="button">{loadingMore ? t("common.loading") : t("square.loadMore")}</button>
-          ) : null}
+          {hasMore && statements.length ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
       </main>
       <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
