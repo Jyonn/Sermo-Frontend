@@ -15,6 +15,7 @@ export interface MentionComposerHandle {
   blur: () => void;
   insertMention: (member: MentionComposerMember) => void;
   insertText: (text: string) => void;
+  insertTextWithoutFocus: (text: string) => void;
   moveCaretToEnd: () => void;
 }
 
@@ -163,12 +164,12 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     emitChange();
   };
 
-  const insertText = (text: string) => {
+  const insertTextAtSelection = (text: string, shouldFocus: boolean) => {
     const editor = editorRef.current;
     if (!editor) return;
-    editor.focus();
+    if (shouldFocus) editor.focus();
     const selection = window.getSelection();
-    const range = selection?.rangeCount && editor.contains(selection.getRangeAt(0).commonAncestorContainer)
+    const range = shouldFocus && selection?.rangeCount && editor.contains(selection.getRangeAt(0).commonAncestorContainer)
       ? selection.getRangeAt(0)
       : lastSelectionRangeRef.current;
     const target = range?.cloneRange() || document.createRange();
@@ -179,9 +180,19 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     target.deleteContents();
     const node = document.createTextNode(text);
     target.insertNode(node);
-    placeCaretAfter(node);
-    emitChange();
+    const nextRange = document.createRange();
+    nextRange.setStartAfter(node);
+    nextRange.collapse(true);
+    lastSelectionRangeRef.current = nextRange.cloneRange();
+    if (shouldFocus) placeCaretAfter(node);
+    if (shouldFocus) emitChange();
+    else {
+      onChange(serializeEditor(editor));
+      onMentionQueryChange(null);
+    }
   };
+
+  const insertText = (text: string) => insertTextAtSelection(text, true);
 
   useImperativeHandle(forwardedRef, () => ({
     getElement: () => editorRef.current,
@@ -189,6 +200,7 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     blur: () => editorRef.current?.blur(),
     insertMention,
     insertText,
+    insertTextWithoutFocus: (text: string) => insertTextAtSelection(text, false),
     moveCaretToEnd: () => {
       const editor = editorRef.current;
       if (!editor) return;

@@ -2294,5 +2294,18 @@
   "audio.transcriptCollapse": "收起",
   "audio.transcriptLabel": "語音轉寫",
   "audio.transcriptEmpty": "沒有識別出清晰的文字",
-  "audio.transcriptFailed": "暫時無法識別，點選右側重試"
+  "audio.transcriptFailed": "暫時無法識別，點選右側重試",
+  "composer.tools": "訊息工具",
+  "composer.holdToTalk": "按住說話",
+  "composer.slideToCancel": "上滑取消",
+  "composer.releaseToCancel": "放開取消",
+  "composer.cloudFileHint": "從空間雲端資源選擇",
+  "composer.localFileHint": "從本機檔案中選擇",
+  "composer.preciseLocation": "精確位置",
+  "composer.preciseLocationHint": "傳送目前準確座標",
+  "composer.approximateLocation": "模糊位置",
+  "composer.approximateLocationHint": "隨機偏移以保護隱私",
+  "composer.openFootprintHint": "查看對話共享的足跡",
+  "composer.shareFootprint": "共享足跡",
+  "composer.shareFootprintHint": "管理本對話查看權限"
 }

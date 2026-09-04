@@ -2930,6 +2930,12 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [mobileComposerPanel, setMobileComposerPanel] = useState<"file" | "location" | "footprint" | null>(null);
+  const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
+  const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "cancel">("idle");
+  const [mobileComposerLayout, setMobileComposerLayout] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches,
+  );
   const [emojiPage, setEmojiPage] = useState(STICKER_MY_PAGE);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [stickers, setStickers] = useState<StickerDTO[]>(() => initialMineStickerCache?.data.items ?? []);
@@ -2946,6 +2952,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
   const [stickerManagerSelecting, setStickerManagerSelecting] = useState(false);
   const [selectedStickerIds, setSelectedStickerIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px)");
+    const sync = () => setMobileComposerLayout(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const profileSegment = drawerPathFromSearch(location.search).find((item) => /^user-profile-\d+$/.test(item));
@@ -3171,6 +3185,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const recordingStopRequestedRef = useRef(false);
   const recordingAttemptRef = useRef(0);
   const recordingStartedAtRef = useRef(0);
+  const mobileVoiceStartYRef = useRef(0);
+  const mobileVoicePointerIdRef = useRef<number | null>(null);
+  const mobileVoiceAutoSendRef = useRef(false);
+  const mobileVoiceCancelRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
@@ -3329,6 +3347,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const resetVoiceComposer = () => {
     recordingCancelledRef.current = false;
     recordingStopRequestedRef.current = false;
+    mobileVoiceAutoSendRef.current = false;
+    mobileVoiceCancelRef.current = false;
+    mobileVoicePointerIdRef.current = null;
+    setMobileVoiceGesture("idle");
     cleanupRecordingResources();
     recordingChunksRef.current = [];
     voicePreviewAudioRef.current?.pause();
@@ -4512,11 +4534,49 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     const nextDraft = cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "";
     setDraft(nextDraft);
     setMentionSearch(null);
+    setMobileComposerPanel(null);
+    setMobileVoiceReady(false);
+    setMobileVoiceGesture("idle");
     window.requestAnimationFrame(() => mentionEditorRef.current?.moveCaretToEnd());
   }, [cacheScope, selectedChat?.id]);
 
   const insertEmoji = (emoji: string) => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+      mentionEditorRef.current?.insertTextWithoutFocus(emoji);
+      return;
+    }
     mentionEditorRef.current?.insertText(emoji);
+  };
+
+  const suspendMobileComposerInput = () => {
+    mentionEditorRef.current?.blur();
+    setMentionSearch(null);
+  };
+
+  const openMobileComposerPanel = (panel: "file" | "location" | "footprint") => {
+    suspendMobileComposerInput();
+    setMobileVoiceReady(false);
+    setEmojiPickerOpen(false);
+    setMobileComposerPanel((current) => current === panel ? null : panel);
+  };
+
+  const toggleMobileEmojiPanel = () => {
+    suspendMobileComposerInput();
+    setMobileVoiceReady(false);
+    setMobileComposerPanel(null);
+    setEmojiPickerOpen((current) => !current);
+  };
+
+  const prepareMobileVoice = () => {
+    suspendMobileComposerInput();
+    setEmojiPickerOpen(false);
+    setMobileComposerPanel(null);
+    if (!requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) return;
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      showToast(t("audio.unsupported"), "error");
+      return;
+    }
+    setMobileVoiceReady((current) => !current);
   };
 
   const sendSticker = async (sticker: StickerAssetDTO | StickerDTO) => {
@@ -5593,10 +5653,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setFileSourceSheetOpen(true);
   };
 
-  const openLocationPicker = () => {
+  const startLocationDraft = (obscure = false, mobileInline = false) => {
     if (composerBusy) return;
     if (!requireComposerCapability("chat.message.send.location", 3, t("message.sendLocation"))) return;
     setComposerMoreOpen(false);
+    if (mobileInline) setMobileComposerPanel("location");
     if (!navigator.geolocation) {
       setLocationDraft({ phase: "error", error: t("location.browserUnsupported") });
       return;
@@ -5609,7 +5670,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           accuracy: position.coords.accuracy,
-          obscure: false,
+          obscure,
         });
       },
       (error) => {
@@ -5621,6 +5682,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
     );
   };
+
+  const openLocationPicker = () => startLocationDraft(false, false);
 
   const sendLocationMessage = async () => {
     if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
@@ -5684,6 +5747,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         chat.id === selectedChat.id ? updateChatSummary(chat, t("message.locationPlaceholder"), deliveredMessage.createdAt) : chat
       ))));
       setLocationDraft(null);
+      setMobileComposerPanel(null);
       if (!obscure) {
         try {
           const candidates = await resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale());
@@ -6113,6 +6177,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         blob: null,
         mimeType: mediaRecorder.mimeType || mimeType || "audio/webm",
       });
+      if (recordingStopRequestedRef.current && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        return;
+      }
 
       recordingTimerRef.current = window.setInterval(() => {
         const durationSeconds = Math.min(AUDIO_MAX_DURATION_SECONDS, (Date.now() - recordingStartedAtRef.current) / 1000);
@@ -6195,6 +6263,47 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     });
     resetVoiceComposer();
     if (!sent) showToast(t("audio.sendRetry"), "error");
+  };
+
+  useEffect(() => {
+    if (voiceComposer.phase !== "recorded" || !mobileVoiceAutoSendRef.current) return;
+    mobileVoiceAutoSendRef.current = false;
+    void sendRecordedVoiceMessage();
+  }, [voiceComposer.phase]);
+
+  const beginMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (composerBusy || mobileVoiceGesture !== "idle") return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    mobileVoicePointerIdRef.current = event.pointerId;
+    mobileVoiceStartYRef.current = event.clientY;
+    mobileVoiceAutoSendRef.current = true;
+    mobileVoiceCancelRef.current = false;
+    setMobileVoiceGesture("recording");
+    void startVoiceRecording();
+  };
+
+  const moveMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (mobileVoicePointerIdRef.current !== event.pointerId) return;
+    const shouldCancel = mobileVoiceStartYRef.current - event.clientY > 72;
+    mobileVoiceCancelRef.current = shouldCancel;
+    setMobileVoiceGesture(shouldCancel ? "cancel" : "recording");
+  };
+
+  const endMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>, forceCancel = false) => {
+    if (mobileVoicePointerIdRef.current !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    const shouldCancel = forceCancel || mobileVoiceCancelRef.current;
+    mobileVoicePointerIdRef.current = null;
+    setMobileVoiceGesture("idle");
+    if (shouldCancel) {
+      mobileVoiceAutoSendRef.current = false;
+      cancelVoiceRecording();
+      return;
+    }
+    mobileVoiceAutoSendRef.current = true;
+    if (mediaRecorderRef.current?.state === "recording") stopVoiceRecording();
+    else recordingStopRequestedRef.current = true;
   };
 
   const refreshChats = async () => {
@@ -7226,6 +7335,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                 className="message-scroll"
                 onPointerDown={() => {
                   if (emojiPickerOpen) setEmojiPickerOpen(false);
+                  if (mobileComposerPanel) setMobileComposerPanel(null);
+                  if (mobileVoiceReady && mobileVoiceGesture === "idle") setMobileVoiceReady(false);
                 }}
                 onScroll={() => {
                   const element = messageScrollRef.current;
@@ -7349,7 +7460,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               ) : (
               <form
                 ref={composerRef}
-                className={`composer ${voiceComposer.open ? "is-recording-mode" : ""}`}
+                className={`composer ${!mobileComposerLayout && voiceComposer.open ? "is-recording-mode" : ""}${mobileComposerLayout ? " is-mobile-quiet" : ""}`}
                 onSubmit={submit}
                 style={{ "--mention-selection-accent": mentionSelectionAccent(pendingMessageAppearance.chatBubbleStyle) } as CSSProperties}
               >
@@ -7364,7 +7475,76 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     </button>
                   </div>
                 ) : null}
-                {!voiceComposer.open ? (
+                {mobileComposerLayout && mobileVoiceGesture !== "idle" ? (
+                  <div className={`mobile-voice-mask is-${mobileVoiceGesture}`} aria-live="polite">
+                    <div className="mobile-voice-mask-hint">
+                      <span className="material-symbols-outlined">{mobileVoiceGesture === "cancel" ? "close" : "keyboard_arrow_up"}</span>
+                      <strong>{t(mobileVoiceGesture === "cancel" ? "composer.releaseToCancel" : "composer.slideToCancel")}</strong>
+                    </div>
+                  </div>
+                ) : null}
+                {mobileComposerLayout ? (
+                  <div className="mobile-quiet-composer">
+                    <div className="mobile-quiet-input-row">
+                      {mobileVoiceReady ? (
+                        <button
+                          className={`mobile-voice-hold is-${mobileVoiceGesture}`}
+                          disabled={composerBusy}
+                          onContextMenu={(event) => event.preventDefault()}
+                          onPointerCancel={(event) => endMobileVoiceHold(event, true)}
+                          onPointerDown={beginMobileVoiceHold}
+                          onPointerMove={moveMobileVoiceHold}
+                          onPointerUp={(event) => endMobileVoiceHold(event)}
+                          type="button"
+                        >
+                          {voiceComposer.phase === "requesting" ? t("audio.preparingMicrophone") : t("composer.holdToTalk")}
+                        </button>
+                      ) : (
+                        <div className="mobile-quiet-input-wrap">
+                          <MentionComposerInput
+                            ref={mentionEditorRef}
+                            className="textarea composer-input composer-rich-input"
+                            members={selectedChat?.type === "group" ? selectedChat.detail.members.filter((member) => !member.isSelf) : []}
+                            onChange={updateDraft}
+                            onFocus={() => {
+                              setEmojiPickerOpen(false);
+                              setMobileComposerPanel(null);
+                              setMobileVoiceReady(false);
+                            }}
+                            onMentionQueryChange={(query) => setMentionSearch(selectedChat?.type === "group" ? query : null)}
+                            onPaste={handleComposerPaste}
+                            onSelectFirstMention={() => {
+                              if (mentionSearch === null || !mentionCandidates.length) return false;
+                              selectMention(mentionCandidates[0]);
+                              return true;
+                            }}
+                            onSubmit={() => composerRef.current?.requestSubmit()}
+                            placeholder={t("chat.inputPlaceholder")}
+                            value={draft}
+                          />
+                          {mentionSearch !== null && mentionCandidates.length ? (
+                            <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
+                              {mentionCandidates.map((member) => (
+                                <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMention(member)} role="option" type="button">
+                                  <UserAvatar className="composer-mention-avatar" frame={member.avatarFrameStyle} name={member.name} uri={member.avatarUri} />
+                                  <span>{member.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")}>
+                      <button aria-pressed={mobileVoiceReady} className={mobileVoiceReady ? "is-active" : ""} disabled={composerBusy} onClick={prepareMobileVoice} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
+                      <button aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={toggleMobileEmojiPanel} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
+                      <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setMobileComposerPanel(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
+                      <button aria-pressed={mobileComposerPanel === "file"} className={mobileComposerPanel === "file" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
+                      <button aria-pressed={mobileComposerPanel === "location"} className={mobileComposerPanel === "location" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("location")} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
+                      <button aria-pressed={mobileComposerPanel === "footprint"} className={mobileComposerPanel === "footprint" ? "is-active" : ""} disabled={composerBusy || travelMapSaving} onClick={() => openMobileComposerPanel("footprint")} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
+                    </div>
+                  </div>
+                ) : !voiceComposer.open ? (
                   <ChatComposerTextRow
                     leadingAction={canSendAudio ? (
                         <FeatureDiscoveryTarget
@@ -7603,7 +7783,57 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     )}
                   </div>
                 ) : null}
-                {!voiceComposer.open ? (
+                {mobileComposerLayout && mobileComposerPanel === "file" ? (
+                  <div className="mobile-composer-options" aria-label={t("cloudResources.fileSourceTitle")}>
+                    <button onClick={() => { setMobileComposerPanel(null); setCloudFilePickerOpen(true); }} type="button">
+                      <span className="material-symbols-outlined">cloud</span>
+                      <span><strong>{t("cloudResources.chooseCloud")}</strong><small>{t("composer.cloudFileHint")}</small></span>
+                    </button>
+                    <button onClick={() => { setMobileComposerPanel(null); fileInputRef.current?.click(); }} type="button">
+                      <span className="material-symbols-outlined">upload_file</span>
+                      <span><strong>{t("cloudResources.chooseLocal")}</strong><small>{t("composer.localFileHint")}</small></span>
+                    </button>
+                  </div>
+                ) : null}
+                {mobileComposerLayout && mobileComposerPanel === "location" ? (
+                  <div className="mobile-composer-options is-location" aria-label={t("media.location")}>
+                    {!locationDraft ? (
+                      <>
+                        <button onClick={() => startLocationDraft(false, true)} type="button">
+                          <span className="material-symbols-outlined">my_location</span>
+                          <span><strong>{t("composer.preciseLocation")}</strong><small>{t("composer.preciseLocationHint")}</small></span>
+                        </button>
+                        <button onClick={() => startLocationDraft(true, true)} type="button">
+                          <span className="material-symbols-outlined">location_searching</span>
+                          <span><strong>{t("composer.approximateLocation")}</strong><small>{t("composer.approximateLocationHint")}</small></span>
+                        </button>
+                      </>
+                    ) : (
+                      <div className={`mobile-location-status is-${locationDraft.phase}`}>
+                        <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : locationDraft.obscure ? "location_searching" : "my_location"}</span>
+                        <div>
+                          <strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : locationDraft.obscure ? t("composer.approximateLocation") : t("composer.preciseLocation")}</strong>
+                          <small>{locationDraft.phase === "ready" ? (locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`) : locationDraft.error || t("common.pleaseWait")}</small>
+                        </div>
+                        {locationDraft.phase !== "locating" ? <button className="mobile-location-cancel" onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button> : null}
+                        {locationDraft.phase === "ready" ? <button className="mobile-location-send" onClick={() => void sendLocationMessage()} type="button">{t("common.send")}</button> : locationDraft.phase === "error" ? <button className="mobile-location-send" onClick={() => startLocationDraft(Boolean(locationDraft.obscure), true)} type="button">{t("common.retry")}</button> : null}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                {mobileComposerLayout && mobileComposerPanel === "footprint" ? (
+                  <div className="mobile-composer-options" aria-label={t("travelMap.actionShort")}>
+                    <button onClick={() => { setMobileComposerPanel(null); setChatTravelMapOpen(true); }} type="button">
+                      <span className="material-symbols-outlined">travel_explore</span>
+                      <span><strong>{t("travelMap.openMap")}</strong><small>{t("composer.openFootprintHint")}</small></span>
+                    </button>
+                    <button onClick={() => { setMobileComposerPanel(null); void openChatTravelMap(); }} type="button">
+                      <span className="material-symbols-outlined">group_add</span>
+                      <span><strong>{t("composer.shareFootprint")}</strong><small>{t("composer.shareFootprintHint")}</small></span>
+                    </button>
+                  </div>
+                ) : null}
+                {!mobileComposerLayout && !voiceComposer.open ? (
                   <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
                     <div className="composer-actions-grid">
                       {canSendImage ? (
@@ -8763,7 +8993,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           onIndexChange={() => undefined}
         />
       ) : null}
-      {locationDraft ? (
+      {locationDraft && !mobileComposerLayout ? (
         <div
           className="dialog-backdrop location-share-backdrop"
           onClick={() => {

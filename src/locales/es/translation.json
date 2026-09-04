@@ -2294,5 +2294,18 @@
   "audio.transcriptCollapse": "Ocultar",
   "audio.transcriptLabel": "TRANSCRIPCIÓN",
   "audio.transcriptEmpty": "No se detectó habla clara",
-  "audio.transcriptFailed": "No pude transcribir este audio."
+  "audio.transcriptFailed": "No pude transcribir este audio.",
+  "composer.tools": "Herramientas de mensaje",
+  "composer.holdToTalk": "Mantén pulsado para hablar",
+  "composer.slideToCancel": "Desliza arriba para cancelar",
+  "composer.releaseToCancel": "Suelta para cancelar",
+  "composer.cloudFileHint": "Elige entre los recursos de la nube",
+  "composer.localFileHint": "Elige un archivo de este dispositivo",
+  "composer.preciseLocation": "Ubicación precisa",
+  "composer.preciseLocationHint": "Envía tus coordenadas actuales",
+  "composer.approximateLocation": "Ubicación aproximada",
+  "composer.approximateLocationHint": "Añade un desplazamiento para protegerte",
+  "composer.openFootprintHint": "Ver huellas compartidas en este chat",
+  "composer.shareFootprint": "Compartir huellas",
+  "composer.shareFootprintHint": "Gestiona el acceso de este chat"
 }

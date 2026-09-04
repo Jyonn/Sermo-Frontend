@@ -2294,5 +2294,18 @@
   "audio.transcriptCollapse": "閉じる",
   "audio.transcriptLabel": "文字起こし",
   "audio.transcriptEmpty": "明確な会話が検出されなかった",
-  "audio.transcriptFailed": "音声を文字に変換できませんでした。再試行してください"
+  "audio.transcriptFailed": "音声を文字に変換できませんでした。再試行してください",
+  "composer.tools": "メッセージツール",
+  "composer.holdToTalk": "長押しして話す",
+  "composer.slideToCancel": "上にスライドしてキャンセル",
+  "composer.releaseToCancel": "離してキャンセル",
+  "composer.cloudFileHint": "スペースのクラウドから選択",
+  "composer.localFileHint": "この端末からファイルを選択",
+  "composer.preciseLocation": "正確な位置",
+  "composer.preciseLocationHint": "現在の座標を送信",
+  "composer.approximateLocation": "おおよその位置",
+  "composer.approximateLocationHint": "位置をずらしてプライバシーを保護",
+  "composer.openFootprintHint": "このチャットで共有された足跡を表示",
+  "composer.shareFootprint": "足跡を共有",
+  "composer.shareFootprintHint": "このチャットの閲覧権限を管理"
 }

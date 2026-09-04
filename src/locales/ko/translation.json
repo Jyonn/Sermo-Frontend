@@ -2294,5 +2294,18 @@
   "audio.transcriptCollapse": "숨기기",
   "audio.transcriptLabel": "변환된 텍스트",
   "audio.transcriptEmpty": "명확한 음성 감지되지 않았습니다",
-  "audio.transcriptFailed": "이 음성을 텍스트로 변환하지 못했습니다. 다시 시도해 주세요."
+  "audio.transcriptFailed": "이 음성을 텍스트로 변환하지 못했습니다. 다시 시도해 주세요.",
+  "composer.tools": "메시지 도구",
+  "composer.holdToTalk": "누르고 말하기",
+  "composer.slideToCancel": "위로 밀어 취소",
+  "composer.releaseToCancel": "놓아서 취소",
+  "composer.cloudFileHint": "공간 클라우드 자료에서 선택",
+  "composer.localFileHint": "이 기기의 파일에서 선택",
+  "composer.preciseLocation": "정확한 위치",
+  "composer.preciseLocationHint": "현재 정확한 좌표 전송",
+  "composer.approximateLocation": "대략적인 위치",
+  "composer.approximateLocationHint": "임의 오프셋으로 개인정보 보호",
+  "composer.openFootprintHint": "이 채팅에서 공유된 발자국 보기",
+  "composer.shareFootprint": "발자국 공유",
+  "composer.shareFootprintHint": "이 채팅의 보기 권한 관리"
 }
