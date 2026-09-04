@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.2",
+  "id": "2026.09.05.3",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "聊天工具展开更自然",
+      "title": "表情面板展开更自然",
       "items": [
-        "文件、位置和足迹选项现在会随输入区平滑展开与收起"
+        "表情与其他聊天工具现在都会随输入区平滑展开与收起"
       ]
     },
     "en": {
-      "title": "Smoother chat tool panels",
+      "title": "Smoother emoji panel",
       "items": [
-        "File, location, and footprint options now expand and collapse smoothly with the mobile composer"
+        "Emoji and other chat tools now expand and collapse smoothly with the mobile composer"
       ]
     }
   }

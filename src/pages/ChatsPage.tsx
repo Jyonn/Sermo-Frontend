@@ -2930,6 +2930,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
   const [mobileComposerPanel, setMobileComposerPanel] = useState<"file" | "location" | "footprint" | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "cancel">("idle");
@@ -4534,6 +4535,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     const nextDraft = cacheScope && selectedChat ? readChatDraft(cacheScope, selectedChat.id) : "";
     setDraft(nextDraft);
     setMentionSearch(null);
+    setMobileEmojiPanelMounted(false);
     setMobileComposerPanel(null);
     setMobileVoiceReady(false);
     setMobileVoiceGesture("idle");
@@ -4564,6 +4566,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     suspendMobileComposerInput();
     setMobileVoiceReady(false);
     setMobileComposerPanel(null);
+    if (!emojiPickerOpen) setMobileEmojiPanelMounted(true);
     setEmojiPickerOpen((current) => !current);
   };
 
@@ -7645,7 +7648,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   previewUri={voicePreviewUri}
                   state={voiceComposer}
                 />}
-                {!voiceComposer.open && emojiPickerOpen ? (
+                {!voiceComposer.open && (emojiPickerOpen || (mobileComposerLayout && mobileEmojiPanelMounted)) ? (
+                  <div className={mobileComposerLayout ? `mobile-composer-reveal mobile-emoji-reveal${emojiPickerOpen ? " is-open" : ""}` : "desktop-emoji-reveal"}>
+                    <div className={mobileComposerLayout ? "mobile-composer-reveal-inner" : undefined}>
                   <div className="composer-emoji-panel" aria-label={t("emoji.picker")}>
                     <div className="composer-emoji-tabs" role="tablist" aria-label={t("emoji.categories")}>
                       <button
@@ -7781,6 +7786,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                         ))}
                       </div>
                     )}
+                  </div>
+                    </div>
                   </div>
                 ) : null}
                 {mobileComposerLayout ? (
