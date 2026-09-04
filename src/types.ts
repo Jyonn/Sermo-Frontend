@@ -341,7 +341,7 @@ export interface PlatformEmailDeliveryDTO {
   user: TinyUserDTO;
   recipient: string;
   space: { space_id: number; name: string; slug: string };
-  status: "pending" | "sent" | "failed" | "skipped";
+  status: "pending" | "processing" | "sent" | "failed" | "skipped";
   detail: string;
   created_at: number;
   attempted_at: number | null;

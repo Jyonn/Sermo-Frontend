@@ -91,7 +91,7 @@ function AuditList({ items }: { items: PlatformAuditDTO[] }) {
   return <div className="platform-audit-list">{items.map((item) => <article key={item.audit_id}><span className="platform-audit-dot" /><div><strong>{item.summary || item.action}</strong><small>{item.action} · {time(item.created_at)}{item.ip_address ? ` · ${item.ip_address}` : ""}</small></div></article>)}</div>;
 }
 
-const emailStatusLabel: Record<PlatformEmailDeliveryDTO["status"], string> = { pending: "等待发送", sent: "已发送", failed: "发送失败", skipped: "已跳过" };
+const emailStatusLabel: Record<PlatformEmailDeliveryDTO["status"], string> = { pending: "等待发送", processing: "投递中", sent: "已发送", failed: "发送失败", skipped: "已跳过" };
 const emailEventLabel: Record<number, string> = { 1: "私聊消息", 2: "群聊消息", 3: "群聊邀请", 4: "系统通知", 5: "发言获赞", 6: "发言评论", 7: "评论获赞", 8: "评论回复", 9: "发言处理", 10: "评论提及" };
 
 function EmailDeliveryList({ items }: { items: PlatformEmailDeliveryDTO[] }) {

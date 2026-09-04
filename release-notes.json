@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.04.11",
+  "id": "2026.09.04.12",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "Safari 发言详情修复",
+      "title": "邮件提醒更稳定",
       "items": [
-        "修复 Safari 手机端打开广场发言后，正文被背景遮罩错误覆盖的问题"
+        "优化邮件提醒的去重、发送节奏与故障恢复，减少重复邮件和短时间集中送达"
       ]
     },
     "en": {
-      "title": "Safari statement detail fix",
+      "title": "More reliable email reminders",
       "items": [
-        "Fixed the background mask incorrectly covering statement content in Square on mobile Safari"
+        "Improved email reminder deduplication, pacing, and recovery to reduce duplicates and delivery bursts"
       ]
     }
   }

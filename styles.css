@@ -31847,6 +31847,11 @@ html[data-theme="dark"] .verification-banner-action {
   color: #8a6525;
 }
 
+.platform-email-status.is-processing {
+  background: #dcebf1;
+  color: #316878;
+}
+
 .platform-email-row time {
   align-items: flex-end;
   gap: 4px;
