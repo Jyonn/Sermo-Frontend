@@ -8482,9 +8482,10 @@ html[data-theme="dark"] .square-chat-record {
 .chat-pinned-bar {
   position: relative;
   z-index: 7;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: stretch;
-  min-height: 43px;
+  min-height: 52px;
   overflow: hidden;
   border-bottom: 1px solid color-mix(in srgb, var(--chat-chrome-border, #dfe5e1) 72%, transparent);
   background: color-mix(in srgb, var(--chat-chrome-surface, #f8faf7) 92%, transparent);
@@ -8493,21 +8494,30 @@ html[data-theme="dark"] .square-chat-record {
   animation: pinned-bar-enter 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.chat-pinned-bar::before {
+  position: absolute;
+  inset: 7px auto 7px 0;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #00a86b;
+  content: "";
+}
+
 .chat-pinned-main {
   display: flex;
   flex: 1;
   align-items: center;
   min-width: 0;
-  gap: 10px;
-  padding: 6px 5px 6px 14px;
+  gap: 9px;
+  padding: 7px 5px 7px 15px;
   text-align: left;
 }
 
 .chat-pinned-marker {
   display: grid;
-  width: 27px;
-  height: 27px;
-  flex: 0 0 27px;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
   place-items: center;
   border-radius: 9px;
   color: #087751;
@@ -8515,14 +8525,16 @@ html[data-theme="dark"] .square-chat-record {
 }
 
 .chat-pinned-icon {
-  width: 16px;
-  height: 16px;
+  width: auto;
+  height: auto;
+  font-size: 16px;
+  font-variation-settings: "FILL" 1, "wght" 650, "GRAD" 0, "opsz" 20;
 }
 
 .chat-pinned-copy {
   display: grid;
   min-width: 0;
-  gap: 0;
+  gap: 1px;
 }
 
 .chat-pinned-kicker {
@@ -8564,8 +8576,8 @@ html[data-theme="dark"] .square-chat-record {
 .chat-pinned-list-button {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 0 11px 0 7px;
+  gap: 5px;
+  padding: 0 11px 0 8px;
   color: color-mix(in srgb, var(--text-muted) 88%, #087751);
   font-size: 0.72rem;
   font-weight: 800;
@@ -8581,9 +8593,16 @@ html[data-theme="dark"] .square-chat-record {
 }
 
 .chat-pinned-count {
-  min-width: 17px;
+  display: inline-grid;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  color: #087751;
+  background: rgba(0, 168, 107, 0.1);
+  font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
 .chat-pinned-list-button .material-symbols-outlined {

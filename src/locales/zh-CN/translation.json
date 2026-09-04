@@ -1556,9 +1556,9 @@
   "chat.accessDenied": "这个会话不存在，或者你没有访问权限。",
   "common.me": "我",
   "growth.capabilityRequired": "达到 Lv.{{level}} 后可{{capability}}",
-  "pin.removed": "已取消置顶",
-  "pin.added": "消息已置顶",
-  "pin.failed": "置顶操作失败",
+  "pin.removed": "已取消锁定",
+  "pin.added": "消息已锁定",
+  "pin.failed": "锁定操作失败",
   "chat.loadFailed": "加载会话失败",
   "message.locateOriginalFailed": "暂时无法定位原消息",
   "chat.invalidLink": "这个聊天链接格式不正确。",
@@ -1661,8 +1661,8 @@
   "message.historyLoadFailed": "加载历史消息失败",
   "chat.details": "聊天详情",
   "message.sendProgress": "发送进度 {{progress}}%",
-  "pin.label": "置顶",
-  "pin.viewAll": "查看全部 {{count}} 条置顶消息",
+  "pin.label": "锁定",
+  "pin.viewAll": "查看全部 {{count}} 条锁定消息",
   "message.viewMore": "查看更多消息",
   "message.viewNewer": "继续查看较新消息",
   "message.replyTo": "回复 {{name}}",
@@ -1713,9 +1713,9 @@
   "common.selected": "已选",
   "common.select": "选择",
   "common.creating": "创建中...",
-  "pin.messages": "置顶消息",
-  "pin.by": "{{names}}置顶",
-  "pin.remove": "取消置顶",
+  "pin.messages": "锁定消息",
+  "pin.by": "由 {{names}} 锁定",
+  "pin.remove": "取消锁定",
   "pin.jump": "跳转",
   "common.add": "添加",
   "chat.moreMembers": "更多群成员",
@@ -2001,8 +2001,8 @@
   ,"message.system.membersInvited": "{{actor}} 邀请 {{names}} 加入群聊"
   ,"message.system.membersRemoved": "{{actor}} 将 {{names}} 移出群聊"
   ,"message.system.memberLeft": "{{actor}} 退出了群聊"
-  ,"message.system.messagePinned": "{{actor}} 置顶了一条消息"
-  ,"message.system.messageUnpinned": "{{actor}} 取消置顶一条消息"
+  ,"message.system.messagePinned": "{{actor}} 锁定了一条消息"
+  ,"message.system.messageUnpinned": "{{actor}} 取消锁定一条消息"
   ,"message.officialNotice.badge": "官方通知"
   ,"message.officialNotice.placeholder": "你收到了一条官方通知"
   ,"message.officialNotice.byActor": "由 {{name}} 操作"

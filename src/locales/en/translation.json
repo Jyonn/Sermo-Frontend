@@ -1556,9 +1556,9 @@
   "chat.accessDenied": "This conversation does not exist or you do not have access.",
   "common.me": "Me",
   "growth.capabilityRequired": "Reach Lv.{{level}} to {{capability}}",
-  "pin.removed": "Unpinned",
-  "pin.added": "Message pinned",
-  "pin.failed": "Pin action failed",
+  "pin.removed": "Unlocked",
+  "pin.added": "Message locked",
+  "pin.failed": "Lock action failed",
   "chat.loadFailed": "Could not load conversations",
   "message.locateOriginalFailed": "Could not locate the original message",
   "chat.invalidLink": "This chat link is invalid.",
@@ -1661,8 +1661,8 @@
   "message.historyLoadFailed": "Could not load message history",
   "chat.details": "Chat details",
   "message.sendProgress": "Sending progress {{progress}}%",
-  "pin.label": "Pin",
-  "pin.viewAll": "View all {{count}} pinned messages",
+  "pin.label": "Lock",
+  "pin.viewAll": "View all {{count}} locked messages",
   "message.viewMore": "View more messages",
   "message.viewNewer": "Continue to newer messages",
   "message.replyTo": "Reply to {{name}}",
@@ -1713,9 +1713,9 @@
   "common.selected": "Selected",
   "common.select": "Select",
   "common.creating": "Creating...",
-  "pin.messages": "Pinned messages",
-  "pin.by": "Pinned by {{names}}",
-  "pin.remove": "Unpin",
+  "pin.messages": "Locked messages",
+  "pin.by": "Locked by {{names}}",
+  "pin.remove": "Unlock",
   "pin.jump": "Jump",
   "common.add": "Add",
   "chat.moreMembers": "More group members",
@@ -2001,8 +2001,8 @@
   ,"message.system.membersInvited": "{{actor}} invited {{names}} to the group"
   ,"message.system.membersRemoved": "{{actor}} removed {{names}} from the group"
   ,"message.system.memberLeft": "{{actor}} left the group"
-  ,"message.system.messagePinned": "{{actor}} pinned a message"
-  ,"message.system.messageUnpinned": "{{actor}} unpinned a message"
+  ,"message.system.messagePinned": "{{actor}} locked a message"
+  ,"message.system.messageUnpinned": "{{actor}} unlocked a message"
   ,"message.officialNotice.badge": "OFFICIAL NOTICE"
   ,"message.officialNotice.placeholder": "You received an official notice"
   ,"message.officialNotice.byActor": "Actioned by {{name}}"

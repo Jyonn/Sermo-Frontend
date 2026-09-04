@@ -3282,6 +3282,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const canReviewSubmissionInvites = Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator);
   const canRecallMessage = (message: ChatMessage) => {
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
+    if (pinnedMessages.some((pin) => pin.message.message_id === message.id)) return false;
     if (selectedChat?.purpose === "submission") {
       return selectedChat.submissionRole === "author" && selectedChat.submission?.status === "draft";
     }
@@ -7185,7 +7186,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     type="button"
                   >
                     <span className="chat-pinned-marker">
-                      <ComposerSvgIcon className="chat-pinned-icon" kind="pin" />
+                      <span className="material-symbols-outlined chat-pinned-icon">lock</span>
                     </span>
                     <span className="chat-pinned-copy">
                       <span className="chat-pinned-kicker">

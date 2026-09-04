@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.04.9",
+  "id": "2026.09.04.10",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "桌面聊天列表布局修复",
+      "title": "聊天消息锁定",
       "items": [
-        "修复新用户显示邮箱认证提示时，聊天列表被推到页面底部的问题"
+        "消息置顶正式更名为锁定，锁定后的消息会保持在会话顶部且无法撤回",
+        "采用更轻巧的静默门闩样式展示锁定消息"
       ]
     },
     "en": {
-      "title": "Desktop chat list layout fix",
+      "title": "Locked chat messages",
       "items": [
-        "Fixed chat lists being pushed to the bottom when email verification guidance is shown to new users"
+        "Message pinning is now called locking; locked messages stay at the top of the chat and cannot be recalled",
+        "Added a quieter latch-style locked-message bar"
       ]
     }
   }
