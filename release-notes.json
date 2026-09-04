@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.04.1",
+  "id": "2026.09.04.2",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "投稿创建流程焕新",
+      "title": "修复投稿标题取消操作",
       "items": [
-        "选择官方或运营后会直接进入草稿会话，并在会话内完成投稿命名",
-        "首条投稿消息现在与后续消息拥有一致的输入、展示和发送体验"
+        "填写投稿标题时点击取消，现在会正确放弃临时草稿并返回投稿列表"
       ]
     },
     "en": {
-      "title": "A smoother submission flow",
+      "title": "Fixed submission title cancellation",
       "items": [
-        "Choosing an official or operator now opens a draft conversation where you name the submission",
-        "The first submission message now uses the same composer, appearance, and sending flow as later messages"
+        "Canceling the submission title dialog now discards the temporary draft and returns to the submission list"
       ]
     }
   }

@@ -2897,6 +2897,19 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setSubmissionCreateMenuOpen(false);
     navigate("/app/submissions/new", { state: { recipient } });
   };
+
+  const cancelNewSubmission = () => {
+    setNewSubmissionTitleOpen(false);
+    setNewSubmissionTitle("");
+    setNewSubmissionRecipient(null);
+    setMessages((current) => {
+      if (!("-1" in current)) return current;
+      const next = { ...current };
+      delete next[-1];
+      return next;
+    });
+    navigate("/app/submissions", { replace: true, state: null });
+  };
   const [messageSearchHighlightId, setMessageSearchHighlightId] = useState<number | null>(null);
   const [messageSearchCalendarOpen, setMessageSearchCalendarOpen] = useState(false);
   const [messageSearchCalendarMonth, setMessageSearchCalendarMonth] = useState(() => {
@@ -8432,7 +8445,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         confirmLabel={t("submission.begin")}
         maxLength={50}
         onChange={setNewSubmissionTitle}
-        onClose={() => navigate("/app/submissions", { replace: true })}
+        onClose={cancelNewSubmission}
         onConfirm={() => {
           if (!newSubmissionTitle.trim()) return;
           setNewSubmissionTitleOpen(false);
