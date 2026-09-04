@@ -2256,7 +2256,7 @@
   "admin.activityClaimed": "{{name}}시작되었습니다",
   "admin.activityClaimFailed": "활동은 주장할 수 없었다",
   "admin.activityLoadFailed": "활동 스케줄을 로드 할 수 없었다",
-  "menu.frameSpiderWeb": "웹 센스",
+  "menu.frameSpiderWeb": "스파이더맨 아바타 프레임",
   "menu.profileCardTheme.spider-city": "친근한 이웃",
   "activity.friendly.title": "친근한 이웃",
   "activity.friendly.subtitle": "도시의 모든 전화에 응답해",

@@ -37,6 +37,8 @@
 .friendly-neighbor-reward { display: grid; grid-template-columns: 58px minmax(0,1fr); gap: 13px; margin-bottom: 12px; padding: 16px; border: 1px solid #dce1e3; border-radius: 20px; background: rgba(255,255,255,.68); }
 .friendly-neighbor-reward-art { display: grid; width: 58px; height: 58px; place-items: center; border-radius: 17px; color: #e7f8ff; background: linear-gradient(145deg,#152a43,#177cac); }
 .friendly-neighbor-reward-art span { font-size: 30px; }
+.friendly-neighbor-reward-art.is-avatar-frame { overflow: visible; background: radial-gradient(circle,rgba(242,248,248,.96) 0 45%,rgba(18,43,66,.92) 46% 100%); }
+.friendly-neighbor-reward-art.is-avatar-frame img { width: 132%; height: 132%; max-width: none; object-fit: contain; }
 .friendly-neighbor-reward div:nth-child(2) { min-width: 0; }
 .friendly-neighbor-reward small { color: #1478aa; font-size: .69rem; font-weight: 800; text-transform: uppercase; }
 .friendly-neighbor-reward strong { display: block; margin: 2px 0; font-size: 1rem; }
@@ -46,8 +48,6 @@
 .friendly-neighbor-reward.is-claimed { border-color: rgba(20,120,170,.35); }
 .friendly-neighbor-rules { padding: 24px 22px 36px; color: #172837; background: #e6eceb; }
 .friendly-neighbor-rules ol { margin: 16px 0 0; padding-left: 22px; color: #65737d; font-size: .82rem; line-height: 1.7; }
-.avatar-frame-spider-web { --avatar-frame-inset: 7%; --avatar-frame-paint: repeating-conic-gradient(from 8deg,#dcefff 0 4deg,#123c61 5deg 17deg,#df3448 18deg 24deg); }
-.avatar-frame-spider-web::after { position: absolute; inset: 3%; z-index: 2; border: 1px solid rgba(255,255,255,.72); border-radius: inherit; content: ""; box-shadow: inset 0 0 10px rgba(77,199,241,.7); }
 .user-profile-panel.profile-theme-spider-city { position: relative; overflow: hidden; color: #edf8ff; background: #081624 url("./src/assets/activity/friendly-neighborhood/profile-city.webp") center top/cover fixed; }
 .user-profile-panel.profile-theme-spider-city::before { position: absolute; inset: 0; content: ""; background: linear-gradient(180deg,rgba(3,12,21,.12),rgba(5,18,31,.78) 48%,#071521 100%); animation: spider-city-breathe 7s ease-in-out infinite alternate; pointer-events: none; }
 .user-profile-panel.profile-theme-spider-city > * { position: relative; z-index: 1; }
@@ -25188,6 +25188,27 @@ html[data-theme="dark"] .message-search-more {
 
 .user-avatar.has-avatar-frame .avatar-frame-ornament > i {
   display: none;
+}
+
+/* Event frame: keep the portrait clipped, but let the transparent artwork break the avatar edge. */
+.user-avatar.has-avatar-frame > .avatar-frame-spider-web {
+  --avatar-frame-inset: 9%;
+  --avatar-frame-paint: transparent;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-spider-web::after {
+  position: absolute;
+  z-index: 3;
+  inset: -18%;
+  display: block;
+  max-width: none;
+  max-height: none;
+  background: url("./src/assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp") center / contain no-repeat;
+  content: "" !important;
+  filter: drop-shadow(0 2px 3px rgba(5, 18, 31, .2));
+  pointer-events: none;
 }
 
 /* 01 Star orbit: elliptical track and a moving planet. */

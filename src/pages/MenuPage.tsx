@@ -133,6 +133,7 @@ const avatarFrameSections: Array<{ label: TranslationKey; items: Array<typeof pe
 
 const vipOrLevelBubbleStyles = new Set<ChatBubbleStyle>(["niko", "fufu"]);
 const activityBubbleStyles = new Set<ChatBubbleStyle>(["baxian-lv", "baxian-zhongli", "baxian-he"]);
+const activityAvatarFrameStyles = new Set<PersonalizationDTO["avatar_frame_style"]>(["spider-web"]);
 const cityBubbleStyles = new Set<ChatBubbleStyle>(["city-jdz", "city-shanghai", "city-nyc", "city-beijing"]);
 const bubbleRarityOverrides: Partial<Record<ChatBubbleStyle, GrowthRewardDTO["rarity"]>> = {
   zen: "common",
@@ -546,6 +547,9 @@ export default function MenuPage() {
     if (category === "bubble") {
       const override = bubbleRarityOverrides[assetKey as ChatBubbleStyle];
       if (override) return override;
+    }
+    if (category === "frame" && activityAvatarFrameStyles.has(assetKey as PersonalizationDTO["avatar_frame_style"])) {
+      return "epic";
     }
     return assetKey === "vip"
       ? (category === "frame" ? "rare" : "epic")
@@ -2540,7 +2544,9 @@ export default function MenuPage() {
                       </i>
                       <div className="personalization-item-name"><RarityIcon rarity={rewardRarity("frame", value)} /><strong>{t(label)}</strong></div>
                       {!canUseAvatarFrame(value as PersonalizationDTO["avatar_frame_style"]) ? (
-                        <small>{t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
+                        <small>{activityAvatarFrameStyles.has(value as PersonalizationDTO["avatar_frame_style"])
+                          ? t("menu.activityUnlock")
+                          : t("menu.levelUnlock", { level: rewardLevel("frame", value) })}</small>
                       ) : null}
                     </button>
                   ))}

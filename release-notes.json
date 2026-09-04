@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.3",
+  "id": "2026.09.05.4",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "表情面板展开更自然",
+      "title": "蜘蛛侠头像框焕新",
       "items": [
-        "表情与其他聊天工具现在都会随输入区平滑展开与收起"
+        "友好邻居活动头像框换用全新蜘蛛侠素材，并归入史诗活动奖励"
       ]
     },
     "en": {
-      "title": "Smoother emoji panel",
+      "title": "New Spider-Man avatar frame",
       "items": [
-        "Emoji and other chat tools now expand and collapse smoothly with the mobile composer"
+        "The Friendly Neighborhood avatar frame now uses new Spider-Man artwork as an Epic event reward"
       ]
     }
   }
