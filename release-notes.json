@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.5",
+  "id": "2026.09.05.6",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "更新提示更准确",
+      "title": "语音授权更顺畅",
       "items": [
-        "已加载最新版本时，更新日志只保留“知道了”，不再重复提示立即更新"
+        "首次使用语音时会先说明麦克风用途，授权完成后再进入按住说话"
       ]
     },
     "en": {
-      "title": "Clearer update prompts",
+      "title": "Smoother microphone setup",
       "items": [
-        "Release notes now show only “Got it” when the latest version is already loaded"
+        "Voice messages now explain microphone access before the system prompt and enter hold-to-talk after approval"
       ]
     }
   }

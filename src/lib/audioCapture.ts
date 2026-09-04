@@ -12,6 +12,14 @@ const AUDIO_MIME_TYPES = [
   "audio/ogg;codecs=opus",
 ];
 
+const AUDIO_CAPTURE_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: 1,
+  sampleRate: 48_000,
+};
+
 function audioContextConstructor() {
   return window.AudioContext
     || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
@@ -29,15 +37,35 @@ export function audioFileExtension(mimeType: string) {
   return "webm";
 }
 
+export async function readMicrophonePermission(): Promise<PermissionState | "unknown"> {
+  if (typeof navigator === "undefined") return "unknown";
+  if (navigator.permissions?.query) {
+    try {
+      const permission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+      return permission.state;
+    } catch {
+      // Safari does not consistently expose microphone state through Permissions API.
+    }
+  }
+  if (navigator.mediaDevices?.enumerateDevices) {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      if (devices.some((device) => device.kind === "audioinput" && device.label)) return "granted";
+    } catch {
+      // Device enumeration is only a no-prompt fallback for browsers without permission queries.
+    }
+  }
+  return "unknown";
+}
+
+export async function requestMicrophoneAccess() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: AUDIO_CAPTURE_CONSTRAINTS });
+  stream.getTracks().forEach((track) => track.stop());
+}
+
 export async function createNoiseReducedAudioCapture(): Promise<NoiseReducedAudioCapture> {
   const sourceStream = await navigator.mediaDevices.getUserMedia({
-    audio: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true,
-      channelCount: 1,
-      sampleRate: 48_000,
-    },
+    audio: AUDIO_CAPTURE_CONSTRAINTS,
   });
   const AudioContextCtor = audioContextConstructor();
   if (!AudioContextCtor) {

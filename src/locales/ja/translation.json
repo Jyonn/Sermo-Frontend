@@ -2307,5 +2307,12 @@
   "composer.approximateLocationHint": "位置をずらしてプライバシーを保護",
   "composer.openFootprintHint": "このチャットで共有された足跡を表示",
   "composer.shareFootprint": "足跡を共有",
-  "composer.shareFootprintHint": "このチャットの閲覧権限を管理"
+  "composer.shareFootprintHint": "このチャットの閲覧権限を管理",
+  "audio.permissionIntroTitle": "ボイスメッセージを有効にする",
+  "audio.permissionIntroHint": "ボイスメッセージを送信する前に、マイクの使用を許可してください。",
+  "audio.permissionAllow": "マイクを許可",
+  "audio.permissionBlockedTitle": "マイクへのアクセスがオフです",
+  "audio.permissionBlockedHint": "ブラウザのサイト設定でマイクを許可し、戻って再確認してください。",
+  "audio.permissionRetry": "再確認",
+  "audio.permissionPrivacy": "長押ししている間だけ音声を収録します。許可しただけでは録音は始まりません。"
 }

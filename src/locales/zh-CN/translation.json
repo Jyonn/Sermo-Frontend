@@ -2322,4 +2322,11 @@
   ,"composer.openFootprintHint": "查看会话共享的足迹"
   ,"composer.shareFootprint": "共享足迹"
   ,"composer.shareFootprintHint": "管理本会话查看权限"
+  ,"audio.permissionIntroTitle": "启用语音消息"
+  ,"audio.permissionIntroHint": "发送语音前，需要允许言浪使用麦克风。"
+  ,"audio.permissionAllow": "允许使用麦克风"
+  ,"audio.permissionBlockedTitle": "麦克风权限未开启"
+  ,"audio.permissionBlockedHint": "请在浏览器的网站设置中允许麦克风，然后返回重新检查。"
+  ,"audio.permissionRetry": "重新检查"
+  ,"audio.permissionPrivacy": "只有按住说话时才会采集声音；此次授权不会开始录音。"
 }

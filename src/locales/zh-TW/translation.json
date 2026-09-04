@@ -2307,5 +2307,12 @@
   "composer.approximateLocationHint": "隨機偏移以保護隱私",
   "composer.openFootprintHint": "查看對話共享的足跡",
   "composer.shareFootprint": "共享足跡",
-  "composer.shareFootprintHint": "管理本對話查看權限"
+  "composer.shareFootprintHint": "管理本對話查看權限",
+  "audio.permissionIntroTitle": "啟用語音訊息",
+  "audio.permissionIntroHint": "傳送語音前，需要允許言浪使用麥克風。",
+  "audio.permissionAllow": "允許使用麥克風",
+  "audio.permissionBlockedTitle": "麥克風權限未開啟",
+  "audio.permissionBlockedHint": "請在瀏覽器的網站設定中允許麥克風，然後返回重新檢查。",
+  "audio.permissionRetry": "重新檢查",
+  "audio.permissionPrivacy": "只有按住說話時才會採集聲音；此次授權不會開始錄音。"
 }

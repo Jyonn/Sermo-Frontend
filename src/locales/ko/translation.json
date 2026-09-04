@@ -2307,5 +2307,12 @@
   "composer.approximateLocationHint": "임의 오프셋으로 개인정보 보호",
   "composer.openFootprintHint": "이 채팅에서 공유된 발자국 보기",
   "composer.shareFootprint": "발자국 공유",
-  "composer.shareFootprintHint": "이 채팅의 보기 권한 관리"
+  "composer.shareFootprintHint": "이 채팅의 보기 권한 관리",
+  "audio.permissionIntroTitle": "음성 메시지 사용",
+  "audio.permissionIntroHint": "음성 메시지를 보내기 전에 마이크 사용을 허용해 주세요.",
+  "audio.permissionAllow": "마이크 허용",
+  "audio.permissionBlockedTitle": "마이크 권한이 꺼져 있습니다",
+  "audio.permissionBlockedHint": "브라우저의 사이트 설정에서 마이크를 허용한 뒤 돌아와 다시 확인해 주세요.",
+  "audio.permissionRetry": "다시 확인",
+  "audio.permissionPrivacy": "누르고 말하는 동안에만 소리를 수집하며, 권한 허용만으로 녹음이 시작되지는 않습니다."
 }

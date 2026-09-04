@@ -50,7 +50,7 @@ import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VerificationBanner } from "../components/VerificationBanner";
 import { VirtualDynamicList, type VirtualDynamicListHandle } from "../components/VirtualDynamicList";
 import { ApiError, api } from "../lib/api";
-import { createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
+import { createNoiseReducedAudioCapture, preferredAudioMimeType, readMicrophonePermission, requestMicrophoneAccess, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
@@ -2933,6 +2933,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
   const [mobileComposerPanel, setMobileComposerPanel] = useState<"file" | "location" | "footprint" | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
+  const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
+  const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
   const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "cancel">("idle");
   const [mobileComposerLayout, setMobileComposerLayout] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches,
@@ -3190,6 +3192,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const mobileVoicePointerIdRef = useRef<number | null>(null);
   const mobileVoiceAutoSendRef = useRef(false);
   const mobileVoiceCancelRef = useRef(false);
+  const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
@@ -4570,7 +4573,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setEmojiPickerOpen((current) => !current);
   };
 
-  const prepareMobileVoice = () => {
+  const prepareMobileVoice = async () => {
+    if (mobileMicrophoneBusy) return;
     suspendMobileComposerInput();
     setEmojiPickerOpen(false);
     setMobileComposerPanel(null);
@@ -4579,7 +4583,50 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       showToast(t("audio.unsupported"), "error");
       return;
     }
-    setMobileVoiceReady((current) => !current);
+    if (mobileVoiceReady) {
+      setMobileVoiceReady(false);
+      return;
+    }
+    if (mobileMicrophoneConfirmedRef.current) {
+      setMobileVoiceReady(true);
+      return;
+    }
+
+    setMobileMicrophoneBusy(true);
+    const permission = await readMicrophonePermission();
+    setMobileMicrophoneBusy(false);
+    if (permission === "granted") {
+      mobileMicrophoneConfirmedRef.current = true;
+      setMobileVoiceReady(true);
+      return;
+    }
+    setMobileMicrophoneSheet(permission === "denied" ? "blocked" : "intro");
+  };
+
+  const authorizeMobileMicrophone = async () => {
+    if (mobileMicrophoneBusy) return;
+    setMobileMicrophoneBusy(true);
+    setMobileMicrophoneSheet("requesting");
+    try {
+      await requestMicrophoneAccess();
+      mobileMicrophoneConfirmedRef.current = true;
+      setMobileMicrophoneSheet(null);
+      setMobileVoiceReady(true);
+    } catch (error) {
+      const errorName = error instanceof DOMException ? error.name : "";
+      if (errorName === "NotAllowedError" || errorName === "SecurityError") {
+        setMobileMicrophoneSheet("blocked");
+      } else {
+        setMobileMicrophoneSheet(null);
+        setPageError(errorName === "NotFoundError"
+          ? t("audio.noMicrophone")
+          : errorName === "NotReadableError"
+            ? t("audio.inUse")
+            : t("audio.startUnavailable"));
+      }
+    } finally {
+      setMobileMicrophoneBusy(false);
+    }
   };
 
   const sendSticker = async (sticker: StickerAssetDTO | StickerDTO) => {
@@ -7539,7 +7586,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                       )}
                     </div>
                     <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")}>
-                      <button aria-pressed={mobileVoiceReady} className={mobileVoiceReady ? "is-active" : ""} disabled={composerBusy} onClick={prepareMobileVoice} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
+                      <button aria-pressed={mobileVoiceReady} className={mobileVoiceReady ? "is-active" : ""} disabled={composerBusy || mobileMicrophoneBusy} onClick={() => void prepareMobileVoice()} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
                       <button aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={toggleMobileEmojiPanel} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setMobileComposerPanel(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
                       <button aria-pressed={mobileComposerPanel === "file"} className={mobileComposerPanel === "file" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
@@ -8069,6 +8116,35 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           )}
         </aside>
       </section>
+
+      <BottomSheet
+        bodyClassName="mobile-microphone-permission-body"
+        className="mobile-microphone-permission-sheet"
+        description={t(mobileMicrophoneSheet === "blocked" ? "audio.permissionBlockedHint" : "audio.permissionIntroHint")}
+        onClose={() => setMobileMicrophoneSheet(null)}
+        open={mobileMicrophoneSheet !== null}
+        showCloseButton={!mobileMicrophoneBusy}
+        title={t(mobileMicrophoneSheet === "blocked" ? "audio.permissionBlockedTitle" : "audio.permissionIntroTitle")}
+      >
+        <div className="mobile-microphone-permission">
+          <div className={`mobile-microphone-permission-mark${mobileMicrophoneSheet === "blocked" ? " is-blocked" : ""}`} aria-hidden="true">
+            <span className="material-symbols-outlined">{mobileMicrophoneSheet === "blocked" ? "mic_off" : "mic"}</span>
+            <i className="material-symbols-outlined">shield</i>
+          </div>
+          <div className="mobile-microphone-privacy">
+            <span className="material-symbols-outlined" aria-hidden="true">lock</span>
+            <p>{t("audio.permissionPrivacy")}</p>
+          </div>
+          <div className="mobile-microphone-actions">
+            <button className="ghost-button" disabled={mobileMicrophoneBusy} onClick={() => setMobileMicrophoneSheet(null)} type="button">{t("common.cancel")}</button>
+            <button className="button" disabled={mobileMicrophoneBusy} onClick={() => void authorizeMobileMicrophone()} type="button">
+              {mobileMicrophoneBusy
+                ? t("audio.preparingMicrophone")
+                : t(mobileMicrophoneSheet === "blocked" ? "audio.permissionRetry" : "audio.permissionAllow")}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
 
       <BottomSheet open={submissionReviewSheetOpen} title={t("submission.reviewNext")} onClose={() => !submissionActionBusy && setSubmissionReviewSheetOpen(false)}>
         <div className="submission-review-actions">

@@ -2322,4 +2322,11 @@
   ,"composer.openFootprintHint": "View footprints shared in this chat"
   ,"composer.shareFootprint": "Share footprints"
   ,"composer.shareFootprintHint": "Manage access for this chat"
+  ,"audio.permissionIntroTitle": "Enable voice messages"
+  ,"audio.permissionIntroHint": "Allow Sermo to use your microphone before sending voice messages."
+  ,"audio.permissionAllow": "Allow microphone"
+  ,"audio.permissionBlockedTitle": "Microphone access is off"
+  ,"audio.permissionBlockedHint": "Allow microphone access in this site's browser settings, then return and check again."
+  ,"audio.permissionRetry": "Check again"
+  ,"audio.permissionPrivacy": "Audio is captured only while you hold to talk. Granting access does not start a recording."
 }
