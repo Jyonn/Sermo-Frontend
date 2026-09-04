@@ -1697,6 +1697,11 @@ export const api = {
   getPlatformAudit(signal?: AbortSignal) {
     return request<PlatformAuditDTO[]>("/platform-admin/audit", { platformAdminAuth: true, signal });
   },
+  getPlatformEmailDeliveries(before?: number, limit = 40, signal?: AbortSignal) {
+    return request<import("../types").PlatformEmailDeliveryPageDTO>("/platform-admin/email-deliveries", {
+      platformAdminAuth: true, query: { before, limit }, signal,
+    });
+  },
   beginPlatformMfa() {
     return request<{ secret: string; otpauth_uri: string }>("/platform-admin/mfa/setup", { method: "POST", platformAdminAuth: true });
   },

@@ -9,15 +9,16 @@ import { ApiError, api } from "../lib/api";
 import { usePlatformAdminAuth } from "../lib/platformAdminAuth";
 import { formatRelativeTime } from "../lib/presentation";
 import { showToast } from "../lib/toast";
-import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
+import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformEmailDeliveryDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
 import { ChatPreview } from "./ChatsPage";
 
-type Section = "overview" | "spaces" | "permissions" | "reviews" | "audit" | "security";
+type Section = "overview" | "spaces" | "permissions" | "reviews" | "emails" | "audit" | "security";
 const nav: Array<{ id: Section; icon: string; label: string }> = [
   { id: "overview", icon: "space_dashboard", label: "总览" },
   { id: "spaces", icon: "domain", label: "空间" },
   { id: "permissions", icon: "account_tree", label: "权限" },
   { id: "reviews", icon: "verified_user", label: "审核" },
+  { id: "emails", icon: "mail", label: "邮件" },
   { id: "audit", icon: "policy", label: "审计" },
   { id: "security", icon: "shield_lock", label: "安全" },
 ];
@@ -90,6 +91,17 @@ function AuditList({ items }: { items: PlatformAuditDTO[] }) {
   return <div className="platform-audit-list">{items.map((item) => <article key={item.audit_id}><span className="platform-audit-dot" /><div><strong>{item.summary || item.action}</strong><small>{item.action} · {time(item.created_at)}{item.ip_address ? ` · ${item.ip_address}` : ""}</small></div></article>)}</div>;
 }
 
+const emailStatusLabel: Record<PlatformEmailDeliveryDTO["status"], string> = { pending: "等待发送", sent: "已发送", failed: "发送失败", skipped: "已跳过" };
+const emailEventLabel: Record<number, string> = { 1: "私聊消息", 2: "群聊消息", 3: "群聊邀请", 4: "系统通知", 5: "发言获赞", 6: "发言评论", 7: "评论获赞", 8: "评论回复", 9: "发言处理", 10: "评论提及" };
+
+function EmailDeliveryList({ items }: { items: PlatformEmailDeliveryDTO[] }) {
+  return <div className="platform-email-list">{items.map((item) => <article className={`platform-email-row is-${item.status}`} key={item.delivery_id}>
+    <span className="platform-email-icon material-symbols-outlined">mail</span>
+    <div className="platform-email-copy"><div><strong>{item.user.name}</strong><span className={`platform-email-status is-${item.status}`}>{emailStatusLabel[item.status]}</span></div><p>{item.recipient || "未记录邮箱"}</p><small>{emailEventLabel[item.event_type] || item.event_kind || `事件 #${item.event_id}`} · {item.space.name} @{item.space.slug}</small>{item.detail && item.status === "failed" ? <code>{item.detail}</code> : null}</div>
+    <time dateTime={item.attempted_at ? new Date(item.attempted_at * 1000).toISOString() : undefined}><strong>{item.attempted_at ? new Date(item.attempted_at * 1000).toLocaleString() : "尚未尝试"}</strong><small>{item.attempted_at ? time(item.attempted_at) : `创建于 ${time(item.created_at)}`}</small></time>
+  </article>)}</div>;
+}
+
 function SpaceRow({ space, onClick }: { space: PlatformAdminSpaceDTO; onClick: () => void }) {
   return <button className="platform-space-row" onClick={onClick} type="button"><UserAvatar className="platform-space-avatar" name={space.name} uri={space.official_user?.avatar_uri} /><div><strong>{space.name}</strong><small>@{space.slug} · {space.member_count}/{space.member_limit} 人</small></div><span className={`platform-tier is-${space.verification_tier}`}>{space.verification_tier === "identity" ? "实名" : space.verification_tier === "phone" ? "手机" : "邮箱"}</span><span className="material-symbols-outlined">chevron_right</span></button>;
 }
@@ -142,6 +154,11 @@ function PlatformAdminConsole() {
   const [dashboard, setDashboard] = useState<PlatformDashboardDTO | null>(null);
   const [spaces, setSpaces] = useState<PlatformAdminSpaceDTO[]>([]);
   const [audit, setAudit] = useState<PlatformAuditDTO[]>([]);
+  const [emailDeliveries, setEmailDeliveries] = useState<PlatformEmailDeliveryDTO[]>([]);
+  const [emailCursor, setEmailCursor] = useState<number | null>(null);
+  const [emailHasMore, setEmailHasMore] = useState(false);
+  const [emailLoaded, setEmailLoaded] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const [selectedSpace, setSelectedSpace] = useState<PlatformAdminSpaceDTO | null>(null);
   const [members, setMembers] = useState<PlatformAdminMemberDTO[]>([]);
   const [selectedMember, setSelectedMember] = useState<PlatformAdminMemberDTO | null>(null);
@@ -168,6 +185,14 @@ function PlatformAdminConsole() {
     setDashboard(nextDashboard); setSpaces(nextSpaces); setAudit(nextAudit);
   };
   useEffect(() => { void load().catch((cause) => showToast(cause instanceof Error ? cause.message : "加载失败", "error")); }, []);
+  useEffect(() => {
+    if (section !== "emails" || emailLoaded || emailLoading) return;
+    setEmailLoaded(true);
+    setEmailLoading(true);
+    void api.getPlatformEmailDeliveries(undefined, 40).then((result) => {
+      setEmailDeliveries(result.items); setEmailCursor(result.next_before); setEmailHasMore(result.has_more);
+    }).catch((cause) => showToast(cause instanceof Error ? cause.message : "邮件记录加载失败", "error")).finally(() => setEmailLoading(false));
+  }, [emailLoaded, emailLoading, section]);
   const pendingReviews = useMemo(() => spaces.filter((space) => space.identity_submitted_at && !space.identity_verified_at), [spaces]);
   const visibleSpaces = useMemo(() => { const keyword = query.trim().toLowerCase(); return keyword ? spaces.filter((item) => `${item.name} ${item.slug} ${item.email}`.toLowerCase().includes(keyword)) : spaces; }, [query, spaces]);
 
@@ -175,6 +200,7 @@ function PlatformAdminConsole() {
   const confirmChat = async () => { if (!pendingChat || !chatReason.trim()) return; try { const reason = chatReason.trim(); const result = await api.getPlatformChatMessages(pendingChat.chat_id, reason, undefined, selectedMember?.user_id); setOpenChat(result.chat); setMessages(result.messages); setAuditReason(reason); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); setPendingChat(null); setChatReason(""); } catch (cause) { showToast(cause instanceof Error ? cause.message : "会话读取失败", "error"); } };
   const loadOlderMessages = async () => { if (!openChat || !auditReason || !messageCursor || !hasOlderMessages || loadingOlderMessages) return; setLoadingOlderMessages(true); try { const result = await api.getPlatformChatMessages(openChat.chat_id, auditReason, messageCursor, selectedMember?.user_id); setMessages((current) => [...current, ...result.messages.filter((item) => !current.some((existing) => existing.message_id === item.message_id))]); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更早记录读取失败", "error"); } finally { setLoadingOlderMessages(false); } };
   const inspectDelivery = async (message: ChatMessageDTO) => { setDeliveryMessage(message); setDeliveryAudit(null); try { setDeliveryAudit(await api.getPlatformMessageDeliveries(message.message_id, auditReason)); } catch (cause) { setDeliveryMessage(null); showToast(cause instanceof Error ? cause.message : "投递链路读取失败", "error"); } };
+  const loadMoreEmailDeliveries = async () => { if (!emailHasMore || !emailCursor || emailLoading) return; setEmailLoading(true); try { const result = await api.getPlatformEmailDeliveries(emailCursor, 40); setEmailDeliveries((current) => [...current, ...result.items.filter((item) => !current.some((existing) => existing.delivery_id === item.delivery_id))]); setEmailCursor(result.next_before); setEmailHasMore(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更多邮件记录加载失败", "error"); } finally { setEmailLoading(false); } };
   const review = async () => { if (!reviewTarget || (!reviewTarget.approved && !reviewNote.trim())) return; try { await api.reviewPlatformIdentity(reviewTarget.space.space_id, reviewTarget.approved, reviewNote.trim()); showToast(reviewTarget.approved ? "实名认证已通过" : "申请已驳回"); setReviewTarget(null); setReviewNote(""); void load(); } catch (cause) { showToast(cause instanceof Error ? cause.message : "审核失败", "error"); } };
   const setupMfa = async () => { try { const result = await api.beginPlatformMfa(); setMfaSecret(result.secret); setMfaQr(await QRCode.toDataURL(result.otpauth_uri, { width: 320, margin: 1 })); } catch (cause) { showToast(cause instanceof Error ? cause.message : "MFA 配置失败", "error"); } };
   const verifyMfa = async () => { try { const result = await api.verifyPlatformMfa(mfaCode); setRecoveryCodes(result.recovery_codes); setSession(session ? { ...session, mfaEnabled: true } : null); setDashboard((value) => value ? { ...value, mfa_enabled: true } : value); } catch (cause) { showToast(cause instanceof Error ? cause.message : "动态口令无效", "error"); } };
@@ -184,6 +210,7 @@ function PlatformAdminConsole() {
     {section === "spaces" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DIRECTORY</span><h3>空间目录</h3></div><label className="platform-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder="名称、slug 或邮箱" value={query} /></label></div><div className="platform-space-list">{visibleSpaces.map((space) => <SpaceRow key={space.space_id} onClick={() => void selectSpace(space)} space={space} />)}</div></section> : null}
     {section === "permissions" ? <PermissionWorkspace scope="platform" /> : null}
     {section === "reviews" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IDENTITY QUEUE</span><h3>实名认证</h3></div><small>{pendingReviews.length} 项待处理</small></div>{pendingReviews.length ? pendingReviews.map((space) => <article className="platform-review-card" key={space.space_id}><div><span>{space.name}</span><strong>@{space.slug}</strong><small>提交于 {new Date((space.identity_submitted_at ?? 0) * 1000).toLocaleString()}</small></div><div><button onClick={() => void api.getPlatformIdentityDocument(space.space_id).then((result) => window.open(result.uri, "_blank", "noopener"))} type="button">查看材料</button><button onClick={() => setReviewTarget({ space, approved: false })} type="button">驳回</button><button className="is-approve" onClick={() => setReviewTarget({ space, approved: true })} type="button">通过</button></div></article>) : <div className="platform-empty is-large"><span className="material-symbols-outlined">task_alt</span><strong>审核队列已清空</strong><p>新的实名认证提交会出现在这里。</p></div>}</section> : null}
+    {section === "emails" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DELIVERY HISTORY</span><h3>通知邮件发送记录</h3></div><small>每页 40 条 · 收件地址已脱敏</small></div>{emailDeliveries.length ? <EmailDeliveryList items={emailDeliveries} /> : emailLoading ? <div className="platform-inline-loading"><i />正在读取邮件记录</div> : <div className="platform-empty is-large"><span className="material-symbols-outlined">mail</span><strong>暂无通知邮件</strong><p>后续发送记录会出现在这里。</p></div>}{emailHasMore ? <button className="platform-email-more" disabled={emailLoading} onClick={() => void loadMoreEmailDeliveries()} type="button">{emailLoading ? "正在加载" : "加载更多"}<span className="material-symbols-outlined">expand_more</span></button> : emailDeliveries.length ? <div className="platform-email-end">已显示全部记录</div> : null}</section> : null}
     {section === "audit" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IMMUTABLE TRAIL</span><h3>审计日志</h3></div><small>最近 100 条</small></div><AuditList items={audit} /></section> : null}
     {section === "security" ? <section className="platform-security-grid"><article className="platform-panel"><span className="platform-security-icon material-symbols-outlined">passkey</span><h3>多因素认证</h3><p>在邮箱验证码后增加动态口令。建议始终开启。</p><div className={`platform-status ${dashboard?.mfa_enabled ? "is-on" : ""}`}><i />{dashboard?.mfa_enabled ? "已启用" : "尚未启用"}</div>{!dashboard?.mfa_enabled ? <button className="platform-primary is-compact" onClick={() => void setupMfa()} type="button">开始设置</button> : null}</article><article className="platform-panel"><span className="platform-security-icon material-symbols-outlined">history</span><h3>会话策略</h3><p>令牌仅保存在当前标签会话，8 小时后自动失效。</p><button className="platform-secondary" onClick={logout} type="button">退出当前会话</button></article></section> : null}
   </main><nav className="platform-mobile-nav">{nav.map((item) => <button className={section === item.id ? "active" : ""} key={item.id} onClick={() => setSection(item.id)} type="button"><span className="material-symbols-outlined">{item.icon}</span><small>{item.label}</small></button>)}</nav>

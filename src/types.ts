@@ -333,6 +333,26 @@ export interface PlatformAuditDTO {
   created_at: number;
 }
 
+export interface PlatformEmailDeliveryDTO {
+  delivery_id: number;
+  event_id: number;
+  event_type: number;
+  event_kind: string;
+  user: TinyUserDTO;
+  recipient: string;
+  space: { space_id: number; name: string; slug: string };
+  status: "pending" | "sent" | "failed" | "skipped";
+  detail: string;
+  created_at: number;
+  attempted_at: number | null;
+}
+
+export interface PlatformEmailDeliveryPageDTO {
+  items: PlatformEmailDeliveryDTO[];
+  has_more: boolean;
+  next_before: number | null;
+}
+
 export interface PlatformDashboardDTO {
   spaces: number;
   members: number;
