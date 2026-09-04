@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.4",
+  "id": "2026.09.05.5",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "蜘蛛侠头像框焕新",
+      "title": "更新提示更准确",
       "items": [
-        "友好邻居活动头像框换用全新蜘蛛侠素材，并归入史诗活动奖励"
+        "已加载最新版本时，更新日志只保留“知道了”，不再重复提示立即更新"
       ]
     },
     "en": {
-      "title": "New Spider-Man avatar frame",
+      "title": "Clearer update prompts",
       "items": [
-        "The Friendly Neighborhood avatar frame now uses new Spider-Man artwork as an Epic event reward"
+        "Release notes now show only “Got it” when the latest version is already loaded"
       ]
     }
   }

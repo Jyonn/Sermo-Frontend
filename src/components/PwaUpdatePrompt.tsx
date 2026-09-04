@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   activatePwaUpdate,
   PWA_UPDATE_AVAILABLE_EVENT,
+  type PwaUpdateAnnouncement,
   type ReleaseNotes,
 } from "../lib/pwaUpdate";
 import { useI18n } from "../lib/language";
@@ -11,14 +12,17 @@ const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
 export function PwaUpdatePrompt() {
   const { language, t } = useI18n();
   const [available, setAvailable] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [release, setRelease] = useState<ReleaseNotes | null>(null);
 
   useEffect(() => {
     const show = (event: Event) => {
-      const nextRelease = (event as CustomEvent<ReleaseNotes | null>).detail;
+      const announcement = (event as CustomEvent<PwaUpdateAnnouncement>).detail;
+      const nextRelease = announcement.release;
       if (nextRelease?.id && window.localStorage.getItem(DISMISSED_UPDATE_KEY) === nextRelease.id) return;
       setRelease(nextRelease);
+      setUpdateAvailable(announcement.updateAvailable);
       setAvailable(true);
     };
     window.addEventListener(PWA_UPDATE_AVAILABLE_EVENT, show);
@@ -56,10 +60,12 @@ export function PwaUpdatePrompt() {
         )}
       </div>
       <div className="pwa-update-actions">
-        <button className="pwa-update-dismiss" disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
-        <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
-          {updating ? t("common.updating") : t("common.updateNow")}
-        </button>
+        <button className={updateAvailable ? "pwa-update-dismiss" : "pwa-recommendation-action"} disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
+        {updateAvailable ? (
+          <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
+            {updating ? t("common.updating") : t("common.updateNow")}
+          </button>
+        ) : null}
       </div>
     </aside>
   );

@@ -1,3 +1,5 @@
+import currentRelease from "../../release-notes.json";
+
 export const PWA_UPDATE_AVAILABLE_EVENT = "sermo:pwa-update-available";
 
 export interface ReleaseNotes {
@@ -7,6 +9,11 @@ export interface ReleaseNotes {
     title: string;
     items: string[];
   }>;
+}
+
+export interface PwaUpdateAnnouncement {
+  release: ReleaseNotes | null;
+  updateAvailable: boolean;
 }
 
 let waitingWorker: ServiceWorker | null = null;
@@ -22,9 +29,12 @@ async function getReleaseNotes() {
 }
 
 async function announceUpdate(worker: ServiceWorker) {
-  waitingWorker = worker;
   const release = await getReleaseNotes();
-  window.dispatchEvent(new CustomEvent(PWA_UPDATE_AVAILABLE_EVENT, { detail: release }));
+  const updateAvailable = !release?.id || release.id !== currentRelease.id;
+  waitingWorker = updateAvailable ? worker : null;
+  window.dispatchEvent(new CustomEvent<PwaUpdateAnnouncement>(PWA_UPDATE_AVAILABLE_EVENT, {
+    detail: { release, updateAvailable },
+  }));
 }
 
 export function watchPwaUpdates(registration: ServiceWorkerRegistration) {
