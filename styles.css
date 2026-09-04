@@ -28188,6 +28188,52 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
   border-top: 1px solid color-mix(in srgb, var(--line-soft) 62%, transparent);
 }
 
+.square-virtual-feed {
+  display: block;
+  contain: layout style;
+}
+
+.square-virtual-feed > .virtual-dynamic-list-row {
+  display: block;
+}
+
+.square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+}
+
+.square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement > .square-statement-card {
+  width: 100%;
+  margin: 0;
+  padding: 20px 4px 22px;
+  scroll-margin-top: 66px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 62%, transparent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-focused {
+  z-index: 72;
+  background: var(--bg-canvas);
+  box-shadow: 0 22px 70px rgba(12, 27, 22, .22);
+}
+
+.square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-focused > .square-statement-card {
+  cursor: default;
+  border-bottom-color: color-mix(in srgb, var(--line-soft) 76%, transparent);
+  background: var(--bg-canvas);
+}
+
+.square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement:not(.is-focused) > .square-statement-card.is-clickable:hover {
+  border-color: color-mix(in srgb, var(--line-soft) 62%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 2.5%, transparent);
+  transform: none;
+}
+
 .square-statement-feed > .square-statement-card {
   width: 100%;
   margin: 0;
@@ -28406,6 +28452,42 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     border-bottom-color: color-mix(in srgb, var(--line-soft) 54%, transparent);
     border-left: 0;
     border-radius: 0;
+  }
+
+  .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement > .square-statement-card {
+    margin: 0;
+    padding: 18px 16px 20px;
+    scroll-margin-top: 65px;
+    border-right: 0;
+    border-bottom-color: color-mix(in srgb, var(--line-soft) 54%, transparent);
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .square-virtual-feed > .virtual-dynamic-list-row:has(> .square-inline-statement.is-expanded) {
+    position: static;
+    transform: none !important;
+  }
+
+  .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-expanded {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 0;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: none;
+    background: var(--bg-canvas);
+    box-shadow: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-expanded > .square-statement-card {
+    width: 100vw;
+    max-width: none;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
   }
 
   .square-statement-feed > .square-inline-statement.is-expanded {

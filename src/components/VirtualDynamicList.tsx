@@ -26,7 +26,7 @@ interface VirtualDynamicListProps<T> {
   overscan?: number;
   renderItem: (item: T, index: number) => ReactNode;
   rowGap?: number;
-  scrollRef: RefObject<HTMLDivElement | null>;
+  scrollRef: RefObject<HTMLElement | null>;
 }
 
 interface VirtualLayoutItem {

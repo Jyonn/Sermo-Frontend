@@ -22,6 +22,7 @@ import { TabPageHeader } from "../components/TabPageHeader";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
+import { VirtualDynamicList } from "../components/VirtualDynamicList";
 import { api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
@@ -513,6 +514,7 @@ export default function SquarePage() {
   const [inlineTransitionPhase, setInlineTransitionPhase] = useState<InlineTransitionPhase>("idle");
   const [inlineStatementOrigin, setInlineStatementOrigin] = useState<InlineStatementOrigin | null>(null);
   const statementCardRefs = useRef(new Map<number, HTMLElement>());
+  const squareFeedScrollRef = useRef<HTMLElement | null>(null);
   const inlineExpandTimerRef = useRef<number | null>(null);
   const commentStatementId = routedStatementId ?? inlineStatementId;
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
@@ -1683,10 +1685,41 @@ export default function SquarePage() {
     </div>
   </form> : null;
 
+  const visibleStatements = statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id));
+  const estimateStatementHeight = (statement: SquareStatementDTO) => {
+    const media = statement.media ?? [];
+    if (statement.chat_record) return 380;
+    if (media.some((item) => item.kind === "video")) return 430;
+    if (media.length > 1) return 420;
+    if (media.length === 1) return 390;
+    return statement.text.length > 80 ? 250 : 190;
+  };
+  const renderFeedStatement = (statement: SquareStatementDTO) => {
+    const focused = inlineStatementId === statement.statement_id;
+    const transitionStyle = focused && inlineStatementOrigin ? {
+      "--square-inline-origin-left": `${inlineStatementOrigin.left}px`,
+      "--square-inline-origin-top": `${inlineStatementOrigin.top}px`,
+      "--square-inline-origin-width": `${inlineStatementOrigin.width}px`,
+    } as CSSProperties : undefined;
+    const showInlinePlaceholder = focused && inlineStatementExpanded && !desktopWorkspace && inlineStatementOrigin;
+    return <Fragment>
+      {showInlinePlaceholder ? <div aria-hidden="true" className="square-inline-statement-placeholder" style={{ height: inlineStatementOrigin.height }} /> : null}
+      <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`} style={transitionStyle}>
+        {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
+          <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
+          <strong>{t("square.statementDetail")}</strong>
+          <span aria-hidden="true" />
+        </header> : null}
+        <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
+      </div>
+    </Fragment>;
+  };
+
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
       <div className={`square-desktop-workspace${inlineRouteActive ? " has-selection" : ""}`}>
-      <main className="list-screen square-feed-screen">
+      <main className="list-screen square-feed-screen" ref={squareFeedScrollRef}>
         <TabPageHeader
           syncing={syncing}
           title={t("square.title")}
@@ -1806,29 +1839,15 @@ export default function SquarePage() {
               description={feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
             />
           ) : null}
-          <section className="square-statement-feed">
-            {statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id)).map((statement) => {
-              const focused = inlineStatementId === statement.statement_id;
-              const transitionStyle = focused && inlineStatementOrigin ? {
-                "--square-inline-origin-left": `${inlineStatementOrigin.left}px`,
-                "--square-inline-origin-top": `${inlineStatementOrigin.top}px`,
-                "--square-inline-origin-width": `${inlineStatementOrigin.width}px`,
-              } as CSSProperties : undefined;
-              const showInlinePlaceholder = focused && inlineStatementExpanded && !desktopWorkspace && inlineStatementOrigin;
-              return <Fragment key={statement.statement_id}>
-                {showInlinePlaceholder ? <div aria-hidden="true" className="square-inline-statement-placeholder" style={{ height: inlineStatementOrigin.height }} /> : null}
-                <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`} style={transitionStyle}>
-                {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
-                  <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
-                  <strong>{t("square.statementDetail")}</strong>
-                  <span aria-hidden="true" />
-                </header> : null}
-                <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
-                {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
-                </div>
-              </Fragment>;
-            })}
-          </section>
+          <VirtualDynamicList
+            className="square-statement-feed square-virtual-feed"
+            estimateSize={estimateStatementHeight}
+            itemKey={(statement) => `statement-${statement.statement_id}`}
+            items={visibleStatements}
+            overscan={900}
+            scrollRef={squareFeedScrollRef}
+            renderItem={renderFeedStatement}
+          />
           {hasMore && statements.length ? (
             <button className="square-load-more" disabled={loadingMore} onClick={() => {
               setLoadingMore(true);

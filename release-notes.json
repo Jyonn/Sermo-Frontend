@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.04.3",
+  "id": "2026.09.04.4",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "投稿切换按钮更轻巧",
+      "title": "广场长列表更流畅",
       "items": [
-        "投稿页的我的与审批切换按钮现在与菜单页保持一致的紧凑尺寸"
+        "广场发言流现已按可见区域动态渲染，连续浏览大量发言时更流畅"
       ]
     },
     "en": {
-      "title": "A more compact submission switcher",
+      "title": "Smoother long Square feeds",
       "items": [
-        "The Mine and Review switcher now uses the same compact sizing as the Menu header"
+        "Square now renders posts dynamically around the visible area for smoother long browsing sessions"
       ]
     }
   }
