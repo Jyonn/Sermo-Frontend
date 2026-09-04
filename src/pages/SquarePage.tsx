@@ -1853,16 +1853,22 @@ export default function SquarePage() {
               description={feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
             />
           ) : null}
-          <VirtualDynamicList
-            className="square-statement-feed square-virtual-feed"
-            estimateSize={estimateStatementHeight}
-            itemKey={(statement) => `statement-${statement.statement_id}`}
-            items={visibleStatements}
-            overscan={900}
-            scrollRef={squareFeedScrollRef}
-            renderItem={renderFeedStatement}
-          />
-          {hasMore && statements.length ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
+          {inlineStatementExpanded && !desktopWorkspace ? (
+            <section className="square-statement-feed">
+              {activeCommentStatement ? <Fragment key={activeCommentStatement.statement_id}>{renderFeedStatement(activeCommentStatement)}</Fragment> : <ContentLoader label={t("common.loading")} rows={2} />}
+            </section>
+          ) : (
+            <VirtualDynamicList
+              className="square-statement-feed square-virtual-feed"
+              estimateSize={estimateStatementHeight}
+              itemKey={(statement) => `statement-${statement.statement_id}`}
+              items={visibleStatements}
+              overscan={900}
+              scrollRef={squareFeedScrollRef}
+              renderItem={renderFeedStatement}
+            />
+          )}
+          {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
       </main>
       <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>

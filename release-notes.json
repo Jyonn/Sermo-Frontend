@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.04.5",
+  "id": "2026.09.04.6",
   "publishedAt": "2026-09-04",
   "locales": {
     "zh-CN": {
-      "title": "广场自动加载与虚拟列表修复",
+      "title": "广场移动端显示修复",
       "items": [
-        "滚动接近广场底部时会自动加载更多发言，不再需要手动点击",
-        "离开可见区域的发言元素会被及时卸载，长时间浏览也能保持流畅"
+        "恢复广场顶部栏随滚动呈现的毛玻璃效果",
+        "修复打开发言详情时正文未显示的问题"
       ]
     },
     "en": {
-      "title": "Fixed Square auto-loading and virtualization",
+      "title": "Fixed Square display on mobile",
       "items": [
-        "More posts now load automatically as you approach the end of the Square feed",
-        "Off-screen post elements are now removed correctly to keep long browsing sessions smooth"
+        "Restored the frosted glass effect on the Square header while scrolling",
+        "Fixed missing post content when opening a post detail"
       ]
     }
   }

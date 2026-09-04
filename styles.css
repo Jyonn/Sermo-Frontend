@@ -28474,32 +28474,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     border-radius: 0;
   }
 
-  .square-virtual-feed > .virtual-dynamic-list-row:has(> .square-inline-statement.is-expanded) {
-    position: static;
-    transform: none !important;
-  }
-
-  .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-expanded {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100dvh;
-    min-height: 0;
-    margin: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: none;
-    background: var(--bg-canvas);
-    box-shadow: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-expanded > .square-statement-card {
-    width: 100vw;
-    max-width: none;
-    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
-  }
-
   .square-statement-feed > .square-inline-statement.is-expanded {
     position: fixed;
     inset: 0;

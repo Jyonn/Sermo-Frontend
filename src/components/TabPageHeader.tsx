@@ -16,10 +16,18 @@ export function TabPageHeader({ title, syncing = false, status, actions, seconda
     if (!window.matchMedia("(max-width: 900px)").matches) return;
 
     let frame = 0;
+    let scrollElement = headerRef.current?.parentElement ?? null;
+    while (scrollElement) {
+      const overflowY = window.getComputedStyle(scrollElement).overflowY;
+      if (/auto|scroll|overlay/.test(overflowY)) break;
+      scrollElement = scrollElement.parentElement;
+    }
+    const scrollTarget: HTMLElement | Window = scrollElement ?? window;
 
     const updateElevation = () => {
       frame = 0;
-      const elevation = Math.min(1, Math.max(0, window.scrollY / 64));
+      const scrollTop = scrollElement?.scrollTop ?? window.scrollY;
+      const elevation = Math.min(1, Math.max(0, scrollTop / 64));
       headerRef.current?.style.setProperty("--tab-sticky-elevation", elevation.toFixed(3));
     };
 
@@ -29,10 +37,10 @@ export function TabPageHeader({ title, syncing = false, status, actions, seconda
     };
 
     updateElevation();
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      scrollTarget.removeEventListener("scroll", handleScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
