@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.4",
+  "id": "2026.09.06.5",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "投稿分类样式优化",
+      "title": "语音转写缓存优化",
       "items": [
-        "投稿分类栏调整为更轻巧统一的胶囊样式",
-        "分类数量不再使用独立圆点，明暗模式下的信息层级更加清晰"
+        "语音转写结果现在会跟随语音文件保存",
+        "转发已经识别过的语音时，无需再次等待识别"
       ]
     },
     "en": {
-      "title": "Refined submission filters",
+      "title": "Improved voice transcript caching",
       "items": [
-        "Submission filters now use a lighter, more consistent pill layout",
-        "Counts no longer use separate badges, with clearer hierarchy in light and dark modes"
+        "Voice transcripts are now stored with their audio files",
+        "Forwarded audio that was already transcribed no longer needs to be processed again"
       ]
     }
   }
