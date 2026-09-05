@@ -7249,6 +7249,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     const collaborators = chat.submissionRole === "reviewer" ? submissionReviewers : submissionAuthors;
     const counterpartNames = visibleCounterparts.map((member) => member.name).join(t("common.nameSeparator"));
     const counterpartOverflow = Math.max(0, counterparts.length - visibleCounterparts.length);
+    const avatarGroupMembers = chat.purpose === "submission"
+      ? visibleCounterparts.length > 1
+        ? visibleCounterparts.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
+        : undefined
+      : chat.type === "group"
+        ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey }))
+        : undefined;
     return <button
       key={chat.id}
       className={`chat-item${chat.submission ? ` is-submission-item is-status-${chat.submission.status}` : ""}${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
@@ -7258,11 +7265,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       <div className="avatar-wrap">
         <UserAvatar
           className={`avatar${chat.submission ? ` submission-list-avatar is-${counterparts.length === 1 ? "single" : "stacked"}` : chat.online ? " status-online" : ""}`}
-          groupMembers={
-            chat.purpose === "submission" && counterparts.length > 1
-              ? visibleCounterparts.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
-              : chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
-          }
+          groupMembers={avatarGroupMembers}
           name={chat.submission ? visibleCounterparts[0]?.name ?? chat.title : chat.title}
           uri={chat.submission ? visibleCounterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}
           cacheKey={chat.submission ? visibleCounterparts[0]?.avatar_cache_key ?? chat.avatarCacheKey : chat.avatarCacheKey}

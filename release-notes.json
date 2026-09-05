@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.05.14",
+  "id": "2026.09.05.15",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表视觉优化",
+      "title": "投稿头像显示修复",
       "items": [
-        "投稿列表现在使用更清晰的流程样式，并优化了状态、标题和消息层级",
-        "我的投稿仅展示审批者，审批列表仅展示投稿者；多人头像与剩余人数更加清楚",
-        "投稿人和审批人标识统一为稳定的深绿色，不再随投稿状态变化"
+        "我的投稿现在只展示审批者头像，审批列表只展示投稿者头像",
+        "只有一位对应成员时使用清晰的大圆形头像，不再混入自己的头像",
+        "多人投稿或审批继续使用斜向头像组合与剩余人数提示"
       ]
     },
     "en": {
-      "title": "Clearer submission lists",
+      "title": "Correct submission avatars",
       "items": [
-        "Submission lists now use a clearer workflow layout with improved status, title, and message hierarchy",
-        "My submissions show reviewers while the review list shows authors, with cleaner multi-person avatars and overflow counts",
-        "Author and reviewer labels now keep a consistent deep-green treatment across every submission status"
+        "My submissions now show reviewer avatars only, while the review list shows author avatars only",
+        "A single counterpart now appears as one clear circular avatar without including your own avatar",
+        "Collaborative submissions continue to use diagonal avatar stacks with an overflow count"
       ]
     }
   }
