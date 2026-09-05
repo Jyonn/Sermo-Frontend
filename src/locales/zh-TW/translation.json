@@ -2312,11 +2312,12 @@
   "composer.openFootprintHint": "查看對話共享的足跡",
   "composer.shareFootprint": "共享足跡",
   "composer.shareFootprintHint": "管理本對話查看權限",
-  "audio.permissionIntroTitle": "啟用語音訊息",
-  "audio.permissionIntroHint": "傳送語音前，需要允許言浪使用麥克風。",
-  "audio.permissionAllow": "允許使用麥克風",
+  "audio.permissionIntroTitle": "使用麥克風",
+  "audio.permissionIntroHint": "傳送語音訊息前，需要取得麥克風權限。",
+  "audio.permissionAllow": "繼續授權",
   "audio.permissionBlockedTitle": "麥克風權限未開啟",
   "audio.permissionBlockedHint": "請在瀏覽器的網站設定中允許麥克風，然後返回重新檢查。",
   "audio.permissionRetry": "重新檢查",
-  "audio.permissionPrivacy": "只有按住說話時才會採集聲音；此次授權不會開始錄音。"
+  "audio.permissionPrivacy": "只有按住說話時才會採集聲音；此次授權不會開始錄音。",
+  "audio.permissionLater": "暫不啟用"
 }

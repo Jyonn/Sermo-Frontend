@@ -8241,28 +8241,36 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       <BottomSheet
         bodyClassName="mobile-microphone-permission-body"
         className="mobile-microphone-permission-sheet"
-        description={t(mobileMicrophoneSheet === "blocked" ? "audio.permissionBlockedHint" : "audio.permissionIntroHint")}
-        onClose={() => setMobileMicrophoneSheet(null)}
+        header={(
+          <div className={`mobile-microphone-permission-heading${mobileMicrophoneSheet === "blocked" ? " is-blocked" : ""}`}>
+            <span className="mobile-microphone-permission-mark material-symbols-outlined" aria-hidden="true">
+              {mobileMicrophoneSheet === "blocked" ? "mic_off" : "mic"}
+            </span>
+            <span>
+              <h3>{t(mobileMicrophoneSheet === "blocked" ? "audio.permissionBlockedTitle" : "audio.permissionIntroTitle")}</h3>
+              <p>{t(mobileMicrophoneSheet === "blocked" ? "audio.permissionBlockedHint" : "audio.permissionIntroHint")}</p>
+            </span>
+          </div>
+        )}
+        onClose={() => {
+          if (!mobileMicrophoneBusy) setMobileMicrophoneSheet(null);
+        }}
         open={mobileMicrophoneSheet !== null}
-        showCloseButton={!mobileMicrophoneBusy}
+        showCloseButton={false}
         title={t(mobileMicrophoneSheet === "blocked" ? "audio.permissionBlockedTitle" : "audio.permissionIntroTitle")}
       >
         <div className="mobile-microphone-permission">
-          <div className={`mobile-microphone-permission-mark${mobileMicrophoneSheet === "blocked" ? " is-blocked" : ""}`} aria-hidden="true">
-            <span className="material-symbols-outlined">{mobileMicrophoneSheet === "blocked" ? "mic_off" : "mic"}</span>
-            <i className="material-symbols-outlined">shield</i>
-          </div>
           <div className="mobile-microphone-privacy">
             <span className="material-symbols-outlined" aria-hidden="true">lock</span>
             <p>{t("audio.permissionPrivacy")}</p>
           </div>
           <div className="mobile-microphone-actions">
-            <button className="ghost-button" disabled={mobileMicrophoneBusy} onClick={() => setMobileMicrophoneSheet(null)} type="button">{t("common.cancel")}</button>
             <button className="button" disabled={mobileMicrophoneBusy} onClick={() => void authorizeMobileMicrophone()} type="button">
               {mobileMicrophoneBusy
                 ? t("audio.preparingMicrophone")
                 : t(mobileMicrophoneSheet === "blocked" ? "audio.permissionRetry" : "audio.permissionAllow")}
             </button>
+            <button className="mobile-microphone-later" disabled={mobileMicrophoneBusy} onClick={() => setMobileMicrophoneSheet(null)} type="button">{t("audio.permissionLater")}</button>
           </div>
         </div>
       </BottomSheet>

@@ -2312,11 +2312,12 @@
   "composer.openFootprintHint": "Ver huellas compartidas en este chat",
   "composer.shareFootprint": "Compartir huellas",
   "composer.shareFootprintHint": "Gestiona el acceso de este chat",
-  "audio.permissionIntroTitle": "Activar mensajes de voz",
-  "audio.permissionIntroHint": "Permite que Sermo use el micrófono antes de enviar mensajes de voz.",
-  "audio.permissionAllow": "Permitir micrófono",
+  "audio.permissionIntroTitle": "Usar el micrófono",
+  "audio.permissionIntroHint": "Necesitas dar acceso al micrófono antes de enviar mensajes de voz.",
+  "audio.permissionAllow": "Continuar para permitir",
   "audio.permissionBlockedTitle": "El acceso al micrófono está desactivado",
   "audio.permissionBlockedHint": "Permite el micrófono en la configuración del sitio del navegador y vuelve a comprobarlo.",
   "audio.permissionRetry": "Comprobar de nuevo",
-  "audio.permissionPrivacy": "El audio solo se captura mientras mantienes pulsado para hablar. Dar permiso no inicia una grabación."
+  "audio.permissionPrivacy": "El audio solo se captura mientras mantienes pulsado para hablar. Dar permiso no inicia una grabación.",
+  "audio.permissionLater": "Ahora no"
 }

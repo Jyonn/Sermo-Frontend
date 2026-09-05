@@ -32105,97 +32105,107 @@ html[data-theme="dark"] .verification-banner-action {
     overflow: hidden;
   }
 
+  .mobile-microphone-permission-sheet .custom-sheet-header {
+    padding: 6px 0 0;
+    border-bottom: 0;
+  }
+
   .mobile-microphone-permission-body {
-    padding-top: 2px;
+    padding-top: 16px;
   }
 
   .mobile-microphone-permission {
     display: grid;
-    justify-items: center;
-    gap: 18px;
-    padding: 2px 0 max(4px, env(safe-area-inset-bottom));
+    gap: 14px;
+    padding: 0 0 max(2px, env(safe-area-inset-bottom));
+  }
+
+  .mobile-microphone-permission-heading {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-microphone-permission-heading > span:last-child {
+    min-width: 0;
+  }
+
+  .mobile-microphone-permission-heading h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.08rem;
+    line-height: 1.25;
+    letter-spacing: -.025em;
+  }
+
+  .mobile-microphone-permission-heading p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: .74rem;
+    line-height: 1.45;
   }
 
   .mobile-microphone-permission-mark {
-    position: relative;
     display: grid;
-    width: 76px;
-    height: 76px;
+    width: 46px;
+    height: 46px;
     place-items: center;
-    border: 1px solid color-mix(in srgb, var(--brand-primary) 28%, transparent);
-    border-radius: 25px;
-    color: var(--accent-ink, #087551);
-    background:
-      radial-gradient(circle at 28% 22%, rgba(255, 255, 255, .82), transparent 34%),
-      color-mix(in srgb, var(--brand-primary) 13%, var(--bg-canvas));
-    box-shadow: 0 14px 34px color-mix(in srgb, var(--brand-primary) 13%, transparent);
-  }
-
-  .mobile-microphone-permission-mark > span {
-    font-size: 36px;
-  }
-
-  .mobile-microphone-permission-mark > i {
-    position: absolute;
-    right: -5px;
-    bottom: -5px;
-    display: grid;
-    width: 28px;
-    height: 28px;
-    place-items: center;
-    border: 3px solid var(--surface-raised, #fff);
     border-radius: 50%;
-    color: #fff;
-    background: var(--accent-strong, #0a8b62);
-    font-size: 15px;
-    font-style: normal;
+    color: var(--accent-ink, #087551);
+    background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-canvas));
+    font-size: 24px;
   }
 
-  .mobile-microphone-permission-mark.is-blocked {
+  .mobile-microphone-permission-heading.is-blocked .mobile-microphone-permission-mark {
     color: #b63b4f;
-    border-color: color-mix(in srgb, #d7445d 28%, transparent);
     background: color-mix(in srgb, #d7445d 9%, var(--bg-canvas));
-    box-shadow: 0 14px 34px rgba(169, 47, 68, .1);
-  }
-
-  .mobile-microphone-permission-mark.is-blocked > i {
-    background: #b63b4f;
   }
 
   .mobile-microphone-privacy {
-    display: grid;
-    grid-template-columns: 24px minmax(0, 1fr);
-    align-items: start;
-    gap: 10px;
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
-    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
     color: var(--text-secondary);
-    background: color-mix(in srgb, var(--surface-muted) 72%, transparent);
   }
 
   .mobile-microphone-privacy .material-symbols-outlined {
     color: var(--accent-ink, #087551);
-    font-size: 20px;
+    font-size: 17px;
   }
 
   .mobile-microphone-privacy p {
     margin: 0;
-    font-size: .76rem;
-    line-height: 1.55;
+    font-size: .72rem;
+    line-height: 1.5;
   }
 
   .mobile-microphone-actions {
     display: grid;
-    grid-template-columns: minmax(0, .8fr) minmax(0, 1.35fr);
-    gap: 9px;
+    justify-items: center;
+    gap: 4px;
     width: 100%;
   }
 
-  .mobile-microphone-actions > button {
+  .mobile-microphone-actions > .button {
+    width: 100%;
     min-height: 46px;
     border-radius: 14px;
+  }
+
+  .mobile-microphone-later {
+    min-height: 30px;
+    padding: 0 12px;
+    border: 0;
+    color: var(--text-secondary);
+    background: transparent;
+    font-size: .72rem;
+    font-weight: 700;
+  }
+
+  .mobile-microphone-later:disabled {
+    opacity: .48;
   }
 
 }

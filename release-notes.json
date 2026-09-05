@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.10",
+  "id": "2026.09.05.11",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "广场浏览位置会保留",
+      "title": "语音授权提示更轻巧",
       "items": [
-        "探索、好友圈、我的和好友发言流会分别记住浏览位置，并可一键回到顶部"
+        "启用语音消息时会以更紧凑的说明解释麦克风用途与录音边界"
       ]
     },
     "en": {
-      "title": "Square feeds remember your place",
+      "title": "A lighter voice permission prompt",
       "items": [
-        "Explore, Friends, My Posts, and individual member feeds now keep separate scroll positions with a quick return-to-top action"
+        "The voice permission prompt now explains microphone use and recording boundaries in a more compact layout"
       ]
     }
   }
