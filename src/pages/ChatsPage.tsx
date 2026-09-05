@@ -58,7 +58,11 @@ import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, 
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { addStickerFile } from "../lib/stickers";
 import { cacheMediaLocally, purgeCachedMedia } from "../lib/mediaCache";
-import { latestWindowCandidates, latestWindowOverlaps } from "../lib/messageWindow";
+import {
+  latestWindowCandidates,
+  latestWindowOverlaps,
+  shouldFollowLatestWindow,
+} from "../lib/messageWindow";
 import { formatMentionTokens } from "../lib/mentions";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
@@ -3002,6 +3006,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [newerState, setNewerState] = useState<"idle" | "loading">("idle");
   const hasNewerMessagesRef = useRef(false);
   const latestWindowRequestRef = useRef<Promise<boolean> | null>(null);
+  const newerPageRequestRef = useRef(false);
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
   const [messageDeleteState, setMessageDeleteState] = useState<"idle" | "deleting">("idle");
@@ -4959,7 +4964,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   useEffect(() => {
     if (!selectedChat || !selectedMessages.length) return;
-    if (!stickToBottomRef.current || revealAnimatingRef.current) return;
+    if (
+      !shouldFollowLatestWindow(hasNewerMessagesRef.current, stickToBottomRef.current)
+      || revealAnimatingRef.current
+    ) return;
     scrollThreadToBottom(messageScrollRef.current);
   }, [selectedChat?.id, selectedMessages[selectedMessages.length - 1]?.clientId]);
 
@@ -7121,20 +7129,32 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const loadNewerMessages = async () => {
-    if (!selectedChat || !selectedMessages.length || newerState === "loading" || !hasNewerMessagesRef.current) return;
+    if (
+      !selectedChat
+      || !selectedMessages.length
+      || newerState === "loading"
+      || newerPageRequestRef.current
+      || !hasNewerMessagesRef.current
+    ) return;
+    const chatId = selectedChat.id;
     const newestId = Math.max(
       ...selectedMessages.flatMap((message) => typeof message.id === "number" ? [message.id] : [])
     );
     if (!Number.isFinite(newestId)) return;
 
     try {
+      newerPageRequestRef.current = true;
       setNewerState("loading");
       const pageSize = MESSAGE_PAGE_SIZE;
-      const rows = await api.getMessages({ chat_id: selectedChat.id, limit: pageSize + 1, after: newestId });
+      const rows = await api.getMessages({ chat_id: chatId, limit: pageSize + 1, after: newestId });
+      if (selectedChatIdRef.current !== chatId) return;
       const normalized = sortMessages(rows.slice(0, pageSize).map((row) => mapChatMessage(row, currentUserId)));
+      // This extends a historical window, so keep the reader anchored at the
+      // previous end instead of treating the appended page as live messages.
+      stickToBottomRef.current = false;
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: mergeMessages(current[selectedChat.id] ?? [], normalized),
+        [chatId]: mergeMessages(current[chatId] ?? [], normalized),
       }));
       const hasMore = rows.length > pageSize;
       hasNewerMessagesRef.current = hasMore;
@@ -7146,7 +7166,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       }
       setPageError(apiError instanceof ApiError ? apiError.message : t("message.historyLoadFailed"));
     } finally {
-      setNewerState("idle");
+      newerPageRequestRef.current = false;
+      if (selectedChatIdRef.current === chatId) setNewerState("idle");
     }
   };
 
@@ -7465,7 +7486,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     stickToBottomRef.current = true;
                     return;
                   }
-                  stickToBottomRef.current = isNearThreadBottom(element);
+                  stickToBottomRef.current = shouldFollowLatestWindow(
+                    hasNewerMessagesRef.current,
+                    isNearThreadBottom(element),
+                  );
                   if (element && element.scrollTop <= 24 && hasOlderMessages && olderState === "idle") {
                     void loadOlderMessages();
                   }
@@ -7490,7 +7514,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                 ) : null}
                 <VirtualDynamicList
                   estimateSize={estimateMessageGroupHeight}
-                  followEnd={() => stickToBottomRef.current}
+                  followEnd={() => shouldFollowLatestWindow(hasNewerMessagesRef.current, stickToBottomRef.current)}
                   itemKey={(group) => group.key}
                   items={messageGroups}
                   overscan={840}

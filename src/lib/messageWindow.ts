@@ -26,3 +26,7 @@ export function latestWindowCandidates<T extends MessageWindowItem>(cached: T[],
     : cached.filter((message) => !isServerMessage(message));
   return [...reusableCached, ...latest];
 }
+
+export function shouldFollowLatestWindow(hasNewerMessages: boolean, isNearWindowEnd: boolean) {
+  return !hasNewerMessages && isNearWindowEnd;
+}

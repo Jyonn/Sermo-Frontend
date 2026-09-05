@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { chatCache } from "../src/lib/chatCache.ts";
-import { latestWindowCandidates, latestWindowOverlaps } from "../src/lib/messageWindow.ts";
+import {
+  latestWindowCandidates,
+  latestWindowOverlaps,
+  shouldFollowLatestWindow,
+} from "../src/lib/messageWindow.ts";
 
 const messages = (...ids: Array<number | string>) => ids.map((id) => ({ id }));
 
@@ -70,4 +74,10 @@ test("a standalone historical window is not cached", () => {
   });
 
   assert.equal(chatCache.getThread(scope, chatId), null);
+});
+
+test("only the real latest tail follows newly appended messages", () => {
+  assert.equal(shouldFollowLatestWindow(false, true), true);
+  assert.equal(shouldFollowLatestWindow(false, false), false);
+  assert.equal(shouldFollowLatestWindow(true, true), false);
 });

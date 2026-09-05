@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.8",
+  "id": "2026.09.05.9",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录加载更完整",
+      "title": "历史消息浏览更顺畅",
       "items": [
-        "消息缓存现在会安全衔接最新记录，定位历史消息后继续上下浏览也不会遗漏中间内容"
+        "从锁定消息继续向后浏览时，新一页会保留当前阅读位置，不再自动连续翻页"
       ]
     },
     "en": {
-      "title": "More reliable chat history",
+      "title": "Smoother history browsing",
       "items": [
-        "Message caching now reconnects safely to recent history without leaving gaps after jumping to older messages"
+        "Loading newer pages from a locked message now preserves your reading position instead of advancing repeatedly"
       ]
     }
   }
