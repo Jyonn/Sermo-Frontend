@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.11",
+  "id": "2026.09.05.12",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "语音授权提示更轻巧",
+      "title": "广场顶部显示更完整",
       "items": [
-        "启用语音消息时会以更紧凑的说明解释麦克风用途与录音边界"
+        "手机端广场顶部的毛玻璃效果现在会完整覆盖屏幕两侧"
       ]
     },
     "en": {
-      "title": "A lighter voice permission prompt",
+      "title": "Full-width Square header",
       "items": [
-        "The voice permission prompt now explains microphone use and recording boundaries in a more compact layout"
+        "The frosted Square header now extends cleanly across the full mobile viewport"
       ]
     }
   }

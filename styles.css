@@ -28007,12 +28007,18 @@ html[data-theme="dark"] .square-feed-scroll-top { border-color: rgba(92, 224, 17
 
 @media (max-width: 900px) {
   .square-feed-screen {
+    width: 100vw;
     height: 100dvh;
     min-height: 0;
+    margin-inline: calc((100vw - 100%) / -2);
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
+  }
+  .square-feed-screen > .tab-sticky-header {
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
   }
   .square-feed-column { width: 100%; padding: 2px 0 110px; gap: 12px; }
   .square-compose-launcher { margin: 0 12px; width: calc(100% - 24px); }
