@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.05.23",
-  "publishedAt": "2026-09-05",
+  "id": "2026.09.06.1",
+  "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "投稿邀请状态优化",
+      "title": "iPhone 文字颜色修复",
       "items": [
-        "邀请成员时会明确区分已加入和等待确认，并显示待确认邀请的有效期",
-        "发送邀请按钮移动到更清晰的右侧主操作位置，并显示当前选择人数"
+        "修复 iPhone 上聊天、投稿、通讯和菜单列表文字被系统显示为蓝色的问题",
+        "可点击列表项现在会正确跟随浅色与深色外观"
       ]
     },
     "en": {
-      "title": "Clearer submission invitations",
+      "title": "iPhone text color fix",
       "items": [
-        "The member picker now clearly separates joined members from pending invitations and shows invitation validity",
-        "The send invitation action is easier to find on the right and shows the current selection count"
+        "Fixed list text appearing in the system blue color on iPhone across Chats, Submissions, Contacts, and Menu",
+        "Interactive list rows now correctly follow light and dark appearance colors"
       ]
     }
   }
