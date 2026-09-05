@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.05.18",
+  "id": "2026.09.05.19",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "投稿邀请卡片适配气泡",
+      "title": "投稿列表视觉优化",
       "items": [
-        "投稿邀请卡片现在会跟随发送者的气泡样式，适配对应的颜色、纹理、边框和圆角",
-        "不同邀请状态保持清晰可辨，并改善了深浅色气泡中的文字层级"
+        "重新校准投稿列表的状态线、时间轴和头像位置，在不同屏幕宽度下保持整齐",
+        "所有投稿状态现在都会常驻显示轻量背景，无需悬停即可辨认流程状态"
       ]
     },
     "en": {
-      "title": "Submission invites match chat bubbles",
+      "title": "Refined submission list",
       "items": [
-        "Submission invitation cards now follow the sender's bubble colors, textures, borders, and shape",
-        "Invitation states remain easy to distinguish with clearer text hierarchy across light and dark bubbles"
+        "Submission status rails, timelines, and avatars now stay aligned across screen sizes",
+        "Every submission state now has a subtle persistent background without requiring hover"
       ]
     }
   }

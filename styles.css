@@ -31735,6 +31735,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   position: relative;
   isolation: isolate;
   grid-template-columns: 56px minmax(0, 1fr) auto;
+  column-gap: 5px;
   min-height: 116px;
   padding-block: 16px;
   border-bottom: 0;
@@ -31744,23 +31745,30 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .chat-item.is-submission-item::before {
   content: "";
   position: absolute;
-  inset-block: 12px;
-  left: 0;
+  z-index: 2;
+  inset-block: 19px;
+  left: 18px;
   width: 3px;
-  border-radius: 0 999px 999px 0;
+  border-radius: 999px;
   background: var(--submission-flow-color);
-  opacity: .82;
+  opacity: .72;
 }
 
 .chat-item.is-submission-item::after {
   content: "";
   position: absolute;
   z-index: 0;
-  inset: 7px 0 7px 18px;
-  border-radius: 20px;
-  background: transparent;
+  inset: 7px 0 7px 27px;
+  border-radius: 22px 8px 8px 22px;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--submission-flow-color) 8%, var(--bg-surface)),
+    color-mix(in srgb, var(--submission-flow-color) 3%, var(--bg-surface)) 72%,
+    color-mix(in srgb, var(--submission-flow-color) 1%, var(--bg-surface))
+  );
+  box-shadow: inset 1px 0 color-mix(in srgb, var(--submission-flow-color) 10%, transparent);
   pointer-events: none;
-  transition: background 160ms ease;
+  transition: background 160ms ease, box-shadow 160ms ease;
 }
 
 .chat-item.is-submission-item.is-status-review { --submission-flow-color: #2798df; }
@@ -31769,32 +31777,24 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .chat-item.is-submission-item.is-status-published { --submission-flow-color: #668173; }
 .chat-item.is-submission-item.is-status-terminated { --submission-flow-color: var(--danger); }
 .chat-item.is-submission-item.is-status-withdrawn { --submission-flow-color: color-mix(in srgb, var(--text-muted) 62%, transparent); }
-.chat-item.is-submission-item:is(.is-status-review, .is-status-revision, .is-status-ready, .is-status-published)::after {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--submission-flow-color) 8%, var(--bg-surface)), color-mix(in srgb, var(--submission-flow-color) 3%, var(--bg-surface)) 78%);
-}
 .chat-item.is-submission-item.active,
 .chat-item.is-submission-item:hover {
   background: transparent;
 }
 .chat-item.is-submission-item.active::after,
 .chat-item.is-submission-item:hover::after {
-  background: color-mix(in srgb, var(--submission-flow-color) 9%, var(--bg-surface));
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--submission-flow-color) 11%, var(--bg-surface)),
+    color-mix(in srgb, var(--submission-flow-color) 5%, var(--bg-surface)) 72%,
+    color-mix(in srgb, var(--submission-flow-color) 2%, var(--bg-surface))
+  );
+  box-shadow: inset 1px 0 color-mix(in srgb, var(--submission-flow-color) 16%, transparent);
 }
 
 .chat-list:has(> .is-submission-item) {
   position: relative;
   gap: 2px;
-}
-
-.chat-list:has(> .is-submission-item)::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  top: 28px;
-  bottom: 28px;
-  left: 50px;
-  width: 1px;
-  background: color-mix(in srgb, var(--line-soft) 82%, transparent);
 }
 
 .chat-item.is-submission-item > * { position: relative; z-index: 1; }
@@ -31803,12 +31803,26 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   width: 56px;
   height: 56px;
   place-items: center;
+  transform: translateX(-2px);
+}
+.chat-item.is-submission-item .avatar-wrap::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -34px;
+  bottom: -34px;
+  left: 50%;
+  width: 1px;
+  background: color-mix(in srgb, var(--submission-flow-color) 16%, var(--line-soft));
+  transform: translateX(-.5px);
 }
 .chat-item.is-submission-item .avatar {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  box-shadow: 0 0 0 4px var(--bg-surface), 0 0 0 5px color-mix(in srgb, var(--submission-flow-color) 42%, var(--line-soft));
+  box-shadow:
+    0 0 0 4px var(--bg-surface),
+    0 0 0 5px color-mix(in srgb, var(--submission-flow-color) 28%, var(--line-soft));
 }
 .chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile {
   top: auto;
@@ -32036,10 +32050,6 @@ html[data-theme="dark"] .chat-item.is-submission-item {
   .submission-incoming-invites article { grid-template-columns: 38px minmax(0, 1fr); }
   .submission-incoming-invites .mini-avatar { width: 38px; height: 38px; }
   .submission-invite-actions { grid-column: 2; justify-content: flex-end; }
-}
-
-@media (max-width: 900px) {
-  .chat-list:has(> .is-submission-item)::before { left: 32px; }
 }
 
 .submission-review-actions { display: grid; gap: 8px; }
