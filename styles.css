@@ -31743,23 +31743,15 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 }
 
 .chat-item.is-submission-item::before {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  inset-block: 19px;
-  left: 18px;
-  width: 3px;
-  border-radius: 999px;
-  background: var(--submission-flow-color);
-  opacity: .72;
+  content: none;
 }
 
 .chat-item.is-submission-item::after {
   content: "";
   position: absolute;
   z-index: 0;
-  inset: 7px 0 7px 27px;
-  border-radius: 22px 8px 8px 22px;
+  inset: 0 0 0 27px;
+  border-radius: 22px 0 0 22px;
   background: linear-gradient(
     100deg,
     color-mix(in srgb, var(--submission-flow-color) 8%, var(--bg-surface)),
@@ -31794,7 +31786,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 
 .chat-list:has(> .is-submission-item) {
   position: relative;
-  gap: 2px;
+  gap: 0;
 }
 
 .chat-item.is-submission-item > * { position: relative; z-index: 1; }
@@ -31815,6 +31807,19 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   width: 1px;
   background: color-mix(in srgb, var(--submission-flow-color) 16%, var(--line-soft));
   transform: translateX(-.5px);
+}
+.chat-item.is-submission-item .avatar-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 78px;
+  border-radius: 999px;
+  background: var(--submission-flow-color);
+  opacity: .76;
+  transform: translateY(-50%);
 }
 .chat-item.is-submission-item .avatar {
   width: 52px;
