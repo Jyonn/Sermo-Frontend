@@ -9,6 +9,7 @@
     "build": "npm run release:prepare && tsc -b && vite build && node scripts/prepare-github-pages.mjs",
     "build:mirror": "npm run release:prepare && tsc -b && vite build --mode mirror && SERMO_CNAME= node scripts/prepare-github-pages.mjs",
     "i18n:check": "node scripts/check-i18n.mjs",
+    "test:message-windows": "node --test tests/messageWindow.test.ts",
     "maps:cache": "node scripts/cache-map-boundaries.mjs",
     "preview": "vite preview"
   },

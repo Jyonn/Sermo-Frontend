@@ -8,7 +8,7 @@ import { emitChatSync, type SyncedChatMessageItem } from "../lib/chatSync";
 import { recordChatHealth } from "../lib/chatHealth";
 import { getGestureLockScope, isGestureAccessSuppressed } from "../lib/gestureLock";
 import { installWebReminderAudioUnlock, playWebReminderSound } from "../lib/webReminderPreferences";
-import { loadMessagesAfterThrough } from "../lib/messageHistory";
+import { latestWindowCandidates } from "../lib/messageWindow";
 import { formatMentionTokens } from "../lib/mentions";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { getActiveLocale, i18n } from "../lib/language";
@@ -21,6 +21,7 @@ import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
 
 const SYNC_LIMIT = 50;
+const MESSAGE_CACHE_PAGE_SIZE = 30;
 const CURSOR_KEY_PREFIX = "sermo-sync-v2-cursor:";
 const STATE_CURSOR_KEY_PREFIX = "sermo-state-events-cursor:";
 const DEBUG_SYNC = false;
@@ -515,27 +516,26 @@ export function GlobalMessageSync() {
         grouped.set(item.chatId, bucket);
       });
 
-      for (const [chatId, incoming] of grouped) {
+      for (const [chatId] of grouped) {
         const existingThread = chatCache.getThread(scope, chatId) ?? (await chatCache.hydrateThread(scope, chatId));
-        const existingMessages = existingThread?.messages ?? [];
-        const existingIds = existingMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
-        const incomingIds = incoming.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
-        const existingMaxId = existingIds.length ? Math.max(...existingIds) : null;
-        const incomingMaxId = incomingIds.length ? Math.max(...incomingIds) : null;
-        const bridgeRows =
-          existingMaxId !== null && incomingMaxId !== null && existingMaxId < incomingMaxId
-            ? await loadMessagesAfterThrough(chatId, existingMaxId, incomingMaxId)
-            : [];
-        const bridgeMessages = bridgeRows.map((message) => mapChatMessage(message, session.user.user_id));
-        const mergedMessages = mergeMessages(mergeMessages(existingMessages, bridgeMessages), incoming);
-        const snapshot = {
-          messages: mergedMessages,
-          hasOlderMessages: existingThread?.hasOlderMessages ?? false,
-          scrollTop: existingThread?.scrollTop ?? 0,
-          updatedAt: Date.now(),
-        };
-        chatCache.setThread(scope, chatId, snapshot);
-        void chatCache.persistThread(scope, chatId, snapshot);
+        if (!existingThread) continue;
+        try {
+          const rows = await api.getMessages({ chat_id: chatId, limit: MESSAGE_CACHE_PAGE_SIZE + 1 });
+          const latest = sortMessages(
+            rows.slice(0, MESSAGE_CACHE_PAGE_SIZE).map((message) => mapChatMessage(message, session.user.user_id)),
+          );
+          const snapshot = {
+            messages: mergeMessages([], latestWindowCandidates(existingThread.messages, latest)),
+            hasOlderMessages: rows.length > MESSAGE_CACHE_PAGE_SIZE,
+            hasNewerMessages: false,
+            scrollTop: existingThread.scrollTop,
+            updatedAt: Date.now(),
+          };
+          chatCache.setThread(scope, chatId, snapshot);
+          void chatCache.persistThread(scope, chatId, snapshot);
+        } catch {
+          // The active page still receives the sync event; cache refresh is best-effort.
+        }
       }
 
       let listRecord = chatCache.getChatList(scope) ?? (await chatCache.hydrateChatList(scope));

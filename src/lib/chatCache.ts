@@ -1,7 +1,7 @@
 import type { Chat, ChatMessage } from "../types";
 
 const DB_NAME = "sermo-chat-cache";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const LIST_STORE = "chat-lists";
 const THREAD_STORE = "chat-threads";
 const MAX_PERSISTED_MESSAGES = 200;
@@ -17,6 +17,7 @@ interface ChatThreadRecord {
   key: string;
   messages: ChatMessage[];
   hasOlderMessages: boolean;
+  hasNewerMessages: false;
   scrollTop: number;
   updatedAt: number;
 }
@@ -24,6 +25,7 @@ interface ChatThreadRecord {
 export interface ChatThreadSnapshot {
   messages: ChatMessage[];
   hasOlderMessages: boolean;
+  hasNewerMessages: boolean;
   scrollTop: number;
   updatedAt: number;
 }
@@ -112,7 +114,7 @@ function openDatabase() {
       if (!database.objectStoreNames.contains(LIST_STORE)) {
         database.createObjectStore(LIST_STORE, { keyPath: "key" });
       }
-      if (event.oldVersion < 2 && database.objectStoreNames.contains(THREAD_STORE)) {
+      if (event.oldVersion < 3 && database.objectStoreNames.contains(THREAD_STORE)) {
         database.deleteObjectStore(THREAD_STORE);
       }
       if (!database.objectStoreNames.contains(THREAD_STORE)) {
@@ -195,11 +197,13 @@ export const chatCache = {
   },
 
   setThread(scope: string, chatId: number, snapshot: ChatThreadSnapshot) {
+    if (snapshot.hasNewerMessages) return;
     const trimmed = trimMessages(snapshot.messages, MAX_MEMORY_MESSAGES);
     const record: ChatThreadRecord = {
       key: threadKey(scope, chatId),
       messages: trimmed.messages,
       hasOlderMessages: snapshot.hasOlderMessages || trimmed.trimmed,
+      hasNewerMessages: false,
       scrollTop: snapshot.scrollTop,
       updatedAt: snapshot.updatedAt,
     };
@@ -227,11 +231,13 @@ export const chatCache = {
   },
 
   async persistThread(scope: string, chatId: number, snapshot: ChatThreadSnapshot) {
+    if (snapshot.hasNewerMessages) return;
     const memoryTrimmed = trimMessages(snapshot.messages, MAX_MEMORY_MESSAGES);
     const memoryRecord: ChatThreadRecord = {
       key: threadKey(scope, chatId),
       messages: memoryTrimmed.messages,
       hasOlderMessages: snapshot.hasOlderMessages || memoryTrimmed.trimmed,
+      hasNewerMessages: false,
       scrollTop: snapshot.scrollTop,
       updatedAt: snapshot.updatedAt,
     };

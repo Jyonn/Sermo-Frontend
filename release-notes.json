@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.7",
+  "id": "2026.09.05.8",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "语音录制反馈焕新",
+      "title": "聊天记录加载更完整",
       "items": [
-        "按住说话时会以全屏毛玻璃、实时波形与分阶段上滑提示清晰反馈录音状态"
+        "消息缓存现在会安全衔接最新记录，定位历史消息后继续上下浏览也不会遗漏中间内容"
       ]
     },
     "en": {
-      "title": "Redesigned voice recording feedback",
+      "title": "More reliable chat history",
       "items": [
-        "Hold-to-talk now uses full-screen glass, a live waveform, and staged slide-to-cancel guidance"
+        "Message caching now reconnects safely to recent history without leaving gaps after jumping to older messages"
       ]
     }
   }

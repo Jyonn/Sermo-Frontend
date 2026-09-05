@@ -58,7 +58,7 @@ import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, 
 import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { addStickerFile } from "../lib/stickers";
 import { cacheMediaLocally, purgeCachedMedia } from "../lib/mediaCache";
-import { loadMessagesAfterThrough } from "../lib/messageHistory";
+import { latestWindowCandidates, latestWindowOverlaps } from "../lib/messageWindow";
 import { formatMentionTokens } from "../lib/mentions";
 import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
@@ -75,6 +75,7 @@ import { PUBLIC_ORIGIN } from "../lib/siteConfig";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
+const MESSAGE_PAGE_SIZE = 30;
 const STICKER_PAGE_SIZE = 30;
 const STICKER_CACHE_MAX_AGE = 5 * 60 * 1000;
 const STICKER_MINE_CACHE_KEY = "stickers:mine";
@@ -3000,6 +3001,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [olderState, setOlderState] = useState<"idle" | "loading">("idle");
   const [newerState, setNewerState] = useState<"idle" | "loading">("idle");
   const hasNewerMessagesRef = useRef(false);
+  const latestWindowRequestRef = useRef<Promise<boolean> | null>(null);
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
   const [messageDeleteState, setMessageDeleteState] = useState<"idle" | "deleting">("idle");
@@ -3868,7 +3870,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       if (!selectedChat || !Number.isInteger(messageId) || revealElement(messageId)) return;
 
       const chatId = selectedChat.id;
-      const pageSize = 30;
+      const pageSize = MESSAGE_PAGE_SIZE;
       void Promise.all([
         api.getMessages({ chat_id: chatId, limit: pageSize + 1, before: messageId + 1 }),
         api.getMessages({ chat_id: chatId, limit: pageSize + 1, after: messageId }),
@@ -4217,7 +4219,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (restoredThread?.messages.length) {
       setMessages((current) => ({
         ...current,
-        [selectedChatId]: mergeMessages(current[selectedChatId] ?? [], sortMessages(restoredThread?.messages ?? [])),
+        [selectedChatId]: sortMessages(restoredThread?.messages ?? []),
       }));
       setHasOlderMessages(restoredThread.hasOlderMessages);
       restoreScroll();
@@ -4231,7 +4233,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           if (restoredThread?.messages.length) {
             setMessages((current) => ({
               ...current,
-              [selectedChatId]: mergeMessages(current[selectedChatId] ?? [], sortMessages(restoredThread?.messages ?? [])),
+              [selectedChatId]: sortMessages(restoredThread?.messages ?? []),
             }));
             setHasOlderMessages(restoredThread.hasOlderMessages);
             restoreScroll();
@@ -4241,14 +4243,16 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         const rows = await api.getMessages(
           {
             chat_id: selectedChatId,
-            limit: 30,
+            limit: MESSAGE_PAGE_SIZE + 1,
           },
           controller.signal
         );
         recordChatHealth(cacheScope, true);
-        const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
+        const normalized = sortMessages(rows.slice(0, MESSAGE_PAGE_SIZE).map((row) => mapChatMessage(row, currentUserId)));
         let cachedMessages = restoredThread?.messages ?? [];
-        const cachedIds = cachedMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
+        const cachedIds = latestWindowOverlaps(cachedMessages, normalized)
+          ? cachedMessages.flatMap((message) => (typeof message.id === "number" ? [message.id] : []))
+          : [];
         const reconciledDeletedIds = new Set<number>();
         for (let index = 0; index < cachedIds.length; index += 50) {
           const result = await api.reconcileMessages(selectedChatId, cachedIds.slice(index, index + 50));
@@ -4260,16 +4264,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             .forEach((message) => purgeCachedMedia([message.payload?.uri, message.payload?.thumbnail_uri]));
           cachedMessages = cachedMessages.filter((message) => typeof message.id !== "number" || !reconciledDeletedIds.has(message.id));
         }
-        const latestIds = normalized.flatMap((message) => (typeof message.id === "number" ? [message.id] : []));
-        const cachedMaxId = cachedIds.length ? Math.max(...cachedIds) : null;
-        const latestMaxId = latestIds.length ? Math.max(...latestIds) : null;
-        const bridgeRows =
-          cachedMaxId !== null && latestMaxId !== null && cachedMaxId < latestMaxId
-            ? await loadMessagesAfterThrough(selectedChatId, cachedMaxId, latestMaxId, controller.signal)
-            : [];
         if (controller.signal.aborted) return;
-        const bridged = bridgeRows.map((row) => mapChatMessage(row, currentUserId));
-        let mergedMessages = mergeMessages(mergeMessages(cachedMessages, bridged), normalized);
+        const mergedMessages = mergeMessages([], latestWindowCandidates(cachedMessages, normalized));
         if (DEBUG_CHAT_SEND) {
           console.log("[chat] loadLatestMessages response", {
             chatId: selectedChatId,
@@ -4280,37 +4276,37 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               text: message.text,
             })),
             cachedCount: cachedMessages.length,
-            bridgeCount: bridged.length,
+            reusedCachedTail: mergedMessages.length > normalized.length,
           });
         }
         setMessages((current) => {
-          const currentThreadMessages = (current[selectedChatId] ?? []).filter(
-            (message) => typeof message.id !== "number" || !reconciledDeletedIds.has(message.id)
-          );
-          mergedMessages = mergeMessages(mergeMessages(currentThreadMessages, bridged), normalized);
+          const localMessages = (current[selectedChatId] ?? []).filter((message) => typeof message.id !== "number");
+          const activeMessages = mergeMessages(mergedMessages, localMessages);
           if (DEBUG_CHAT_SEND) {
             console.log("[chat] loadLatestMessages merge", {
               chatId: selectedChatId,
-              currentCount: currentThreadMessages.length,
-              mergedCount: mergedMessages.length,
+              localCount: localMessages.length,
+              mergedCount: activeMessages.length,
             });
           }
           return {
             ...current,
-            [selectedChatId]: mergedMessages,
+            [selectedChatId]: activeMessages,
           };
         });
-        const hasOlder = rows.length >= 30 || restoredThread?.hasOlderMessages || false;
+        const hasOlder = rows.length > MESSAGE_PAGE_SIZE;
         setHasOlderMessages(hasOlder);
         chatCache.setThread(cacheScope, selectedChatId, {
           messages: mergedMessages,
           hasOlderMessages: hasOlder,
+          hasNewerMessages: false,
           scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
         void chatCache.persistThread(cacheScope, selectedChatId, {
           messages: mergedMessages,
           hasOlderMessages: hasOlder,
+          hasNewerMessages: false,
           scrollTop: restoredThread?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
@@ -4340,13 +4336,67 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     void loadLatestMessages();
     return () => {
       const element = messageScrollRef.current;
-      chatCache.updateThreadScroll(cacheScope, selectedChatId, element?.scrollTop ?? 0);
+      if (!hasNewerMessagesRef.current) {
+        chatCache.updateThreadScroll(cacheScope, selectedChatId, element?.scrollTop ?? 0);
+      }
       controller.abort();
       if (initialBottomAnchorRef.current === selectedChatId) {
         initialBottomAnchorRef.current = null;
       }
     };
   }, [cacheScope, currentUserId, historyReloadVersion, selectedChatId]);
+
+  const moveToLatestMessageWindow = async () => {
+    if (!selectedChat || !hasNewerMessagesRef.current) return true;
+    if (latestWindowRequestRef.current) return latestWindowRequestRef.current;
+
+    const chatId = selectedChat.id;
+    const task = (async () => {
+      try {
+        setNewerState("loading");
+        const rows = await api.getMessages({ chat_id: chatId, limit: MESSAGE_PAGE_SIZE + 1 });
+        if (selectedChatIdRef.current !== chatId) return false;
+        const normalized = sortMessages(
+          rows.slice(0, MESSAGE_PAGE_SIZE).map((row) => mapChatMessage(row, currentUserId)),
+        );
+        const latestMessages = mergeMessages([], latestWindowCandidates(selectedMessages, normalized));
+        const hasOlder = rows.length > MESSAGE_PAGE_SIZE;
+        setMessages((current) => ({ ...current, [chatId]: latestMessages }));
+        setHasOlderMessages(hasOlder);
+        hasNewerMessagesRef.current = false;
+        setHasNewerMessages(false);
+        if (cacheScope) {
+          const snapshot = {
+            messages: latestMessages,
+            hasOlderMessages: hasOlder,
+            hasNewerMessages: false,
+            scrollTop: 0,
+            updatedAt: Date.now(),
+          };
+          chatCache.setThread(cacheScope, chatId, snapshot);
+          void chatCache.persistThread(cacheScope, chatId, snapshot);
+        }
+        stickToBottomRef.current = true;
+        requestAnimationFrame(() => scrollThreadToBottom(messageScrollRef.current));
+        return true;
+      } catch (apiError) {
+        if (isChatAccessBoundaryError(apiError)) {
+          redirectToChatListWithNotice(chatAccessBoundaryMessage(apiError), chatId);
+          return false;
+        }
+        setPageError(apiError instanceof ApiError ? apiError.message : t("message.historyLoadFailed"));
+        return false;
+      } finally {
+        if (selectedChatIdRef.current === chatId) setNewerState("idle");
+      }
+    })();
+    latestWindowRequestRef.current = task;
+    try {
+      return await task;
+    } finally {
+      if (latestWindowRequestRef.current === task) latestWindowRequestRef.current = null;
+    }
+  };
 
   useEffect(() => {
     if (!selectedChat) {
@@ -4633,6 +4683,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const sendSticker = async (sticker: StickerAssetDTO | StickerDTO) => {
     if (!selectedChat || stickerSaving) return;
+    if (!await moveToLatestMessageWindow()) return;
     const clientId = `temp:sticker:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     const createdAt = Math.floor(Date.now() / 1000);
     const reply = consumeReplyTarget();
@@ -5031,12 +5082,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       chatCache.setThread(cacheScope, selectedChat.id, {
         messages: selectedMessages,
         hasOlderMessages,
+        hasNewerMessages: false,
         scrollTop: messageScrollRef.current?.scrollTop ?? 0,
         updatedAt: Date.now(),
       });
       void chatCache.persistThread(cacheScope, selectedChat.id, {
         messages: selectedMessages,
         hasOlderMessages,
+        hasNewerMessages: false,
         scrollTop: messageScrollRef.current?.scrollTop ?? 0,
         updatedAt: Date.now(),
       });
@@ -5300,6 +5353,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
     const message = draft.trim();
     if (!message) return;
+    if (!await moveToLatestMessageWindow()) return;
 
     const reply = consumeReplyTarget();
     const mentionUserIds = mentionUserIdsForText(message);
@@ -5424,6 +5478,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const retryFailedMessage = async (message: ChatMessage) => {
     if (!selectedChat || message.status !== "failed" || !["text", "image", "video", "audio", "file"].includes(message.kind)) return;
+    if (!await moveToLatestMessageWindow()) return;
 
     const retryMessage: ChatMessage = {
       ...message,
@@ -5533,6 +5588,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     extraPayload: Partial<ChatMessagePayloadDTO> = {}
   ) => {
     if (!selectedChat) return;
+    if (!await moveToLatestMessageWindow()) return false;
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const objectUrl = URL.createObjectURL(file);
@@ -5627,6 +5683,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const sendCloudFileMessage = async (asset: CloudResourceDTO) => {
     if (!selectedChat) return;
+    if (!await moveToLatestMessageWindow()) return;
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const clientId = `temp:cloud-file:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -5739,6 +5796,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const sendLocationMessage = async () => {
     if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
+    if (!await moveToLatestMessageWindow()) return;
     const latitude = locationDraft.latitude;
     const longitude = locationDraft.longitude;
     const accuracy = locationDraft.accuracy ?? 100;
@@ -5849,6 +5907,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const grantChatTravelMap = async () => {
     if (!selectedChat || travelMapSaving) return;
+    if (!await moveToLatestMessageWindow()) return;
     setTravelMapSaving(true);
     try {
       const access = await api.grantChatTravelMapAccess(selectedChat.id);
@@ -6577,6 +6636,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         const nextSnapshot = {
           messages: nextThreadMessages,
           hasOlderMessages,
+          hasNewerMessages,
           scrollTop: messageScrollRef.current?.scrollTop ?? 0,
           updatedAt: Date.now(),
         };
@@ -6638,6 +6698,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
   const submitForwardMessages = async () => {
     if (!forwardSourceMessageIds.length || !forwardTargetChatIds.length || forwardSending) return;
+    if (selectedChat && forwardTargetChatIds.includes(selectedChat.id) && !await moveToLatestMessageWindow()) return;
     try {
       setForwardSending(true);
       const result = await api.forwardMessages(forwardSourceMessageIds, forwardTargetChatIds, forwardMode);
@@ -6718,6 +6779,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         const nextSnapshot = {
           messages: nextThreadMessages,
           hasOlderMessages,
+          hasNewerMessages,
           scrollTop: messageScrollRef.current?.scrollTop ?? 0,
           updatedAt: Date.now(),
         };
@@ -6773,6 +6835,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         const nextSnapshot = {
           messages: nextThreadMessages,
           hasOlderMessages,
+          hasNewerMessages,
           scrollTop: messageScrollRef.current?.scrollTop ?? 0,
           updatedAt: Date.now(),
         };
@@ -7017,27 +7080,29 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       setOlderState("loading");
       const rows = await api.getMessages({
         chat_id: selectedChat.id,
-        limit: 30,
+        limit: MESSAGE_PAGE_SIZE + 1,
         before: oldestId,
       });
-      const normalized = sortMessages(rows.map((row) => mapChatMessage(row, currentUserId)));
+      const normalized = sortMessages(rows.slice(0, MESSAGE_PAGE_SIZE).map((row) => mapChatMessage(row, currentUserId)));
 
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: mergeMessages(normalized, current[selectedChat.id] ?? []),
       }));
       const mergedMessages = mergeMessages(normalized, selectedMessages);
-      setHasOlderMessages(rows.length >= 30);
+      setHasOlderMessages(rows.length > MESSAGE_PAGE_SIZE);
       if (!hasNewerMessagesRef.current) {
         chatCache.setThread(cacheScope, selectedChat.id, {
           messages: mergedMessages,
-          hasOlderMessages: rows.length >= 30,
+          hasOlderMessages: rows.length > MESSAGE_PAGE_SIZE,
+          hasNewerMessages: false,
           scrollTop: scroller?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
         void chatCache.persistThread(cacheScope, selectedChat.id, {
           messages: mergedMessages,
-          hasOlderMessages: rows.length >= 30,
+          hasOlderMessages: rows.length > MESSAGE_PAGE_SIZE,
+          hasNewerMessages: false,
           scrollTop: scroller?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
@@ -7064,7 +7129,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
 
     try {
       setNewerState("loading");
-      const pageSize = 30;
+      const pageSize = MESSAGE_PAGE_SIZE;
       const rows = await api.getMessages({ chat_id: selectedChat.id, limit: pageSize + 1, after: newestId });
       const normalized = sortMessages(rows.slice(0, pageSize).map((row) => mapChatMessage(row, currentUserId)));
       setMessages((current) => ({
@@ -7412,7 +7477,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   ) {
                     void loadNewerMessages();
                   }
-                  if (!cacheScope || !selectedChat) return;
+                  if (!cacheScope || !selectedChat || hasNewerMessagesRef.current) return;
                   chatCache.updateThreadScroll(cacheScope, selectedChat.id, element?.scrollTop ?? 0);
                 }}
               >
