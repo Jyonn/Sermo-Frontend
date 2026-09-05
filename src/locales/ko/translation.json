@@ -129,6 +129,7 @@
   "submission.inviteReviewer": "심사자 초대",
   "submission.sendInvite": "초대 보내기",
   "submission.searchMembers": "공간 멤버 검색",
+  "submission.searchFriends": "친구 검색",
   "submission.alreadyMemberOrInvited": "참여 중이거나 초대 대기 중",
   "submission.addedOrPending": "참여 / 동의 대기",
   "submission.invitesSent": "초대 {{count}}건을 보냈습니다",

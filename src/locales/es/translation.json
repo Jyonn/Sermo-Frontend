@@ -129,6 +129,7 @@
   "submission.inviteReviewer": "Invitar revisor",
   "submission.sendInvite": "Enviar invitación",
   "submission.searchMembers": "Buscar miembros del espacio",
+  "submission.searchFriends": "Buscar amigos",
   "submission.alreadyMemberOrInvited": "Ya participa o tiene invitación",
   "submission.addedOrPending": "En el grupo / pendiente",
   "submission.invitesSent": "Se enviaron {{count}} invitaciones",

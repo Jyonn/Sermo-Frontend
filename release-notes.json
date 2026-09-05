@@ -1,21 +1,19 @@
 {
-  "id": "2026.09.05.16",
+  "id": "2026.09.05.17",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "投稿协作邀请升级",
+      "title": "投稿人邀请范围调整",
       "items": [
-        "投稿协作邀请现在通过私聊卡片发送，并展示主题、投稿者与审批者信息",
-        "邀请在 7 日内有效，受邀者可在卡片详情中确认加入并查看全部历史消息",
-        "投稿者可邀请共同投稿者，审批者可邀请投稿者或审批者，且两种身份保持互斥"
+        "邀请新的投稿者时，现在只会展示并允许选择当前好友",
+        "后端会再次校验好友关系，避免通过过期页面或直接请求绕过限制"
       ]
     },
     "en": {
-      "title": "Better submission invitations",
+      "title": "Safer co-author invitations",
       "items": [
-        "Submission collaborators are now invited through private message cards showing the topic, authors, and reviewers",
-        "Invitations remain valid for 7 days and let recipients confirm before gaining access to the full history",
-        "Authors can invite co-authors, reviewers can invite either role, and the two roles remain mutually exclusive"
+        "Inviting a new submission author now only shows and accepts your current friends",
+        "The server verifies the friendship again so stale screens or direct requests cannot bypass the rule"
       ]
     }
   }

@@ -129,6 +129,7 @@
   "submission.inviteReviewer": "Invite reviewer",
   "submission.sendInvite": "Send invite",
   "submission.searchMembers": "Search space members",
+  "submission.searchFriends": "Search friends",
   "submission.alreadyMemberOrInvited": "Already joined or invited",
   "submission.addedOrPending": "Joined / pending",
   "submission.invitesSent": "Sent {{count}} invite(s)",

@@ -129,6 +129,7 @@
   "submission.inviteReviewer": "審査者を招待",
   "submission.sendInvite": "招待を送信",
   "submission.searchMembers": "スペースのメンバーを検索",
+  "submission.searchFriends": "友達を検索",
   "submission.alreadyMemberOrInvited": "参加済みまたは招待中",
   "submission.addedOrPending": "参加済み / 承認待ち",
   "submission.invitesSent": "{{count}}件の招待を送信しました",

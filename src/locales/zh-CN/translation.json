@@ -129,6 +129,7 @@
   "submission.inviteReviewer": "邀请审批者",
   "submission.sendInvite": "发送邀请",
   "submission.searchMembers": "搜索空间成员",
+  "submission.searchFriends": "搜索好友",
   "submission.alreadyMemberOrInvited": "已在投稿中或等待同意",
   "submission.addedOrPending": "已加入 / 待同意",
   "submission.invitesSent": "已发送 {{count}} 份邀请",

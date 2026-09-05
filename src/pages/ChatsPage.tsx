@@ -5344,6 +5344,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!groupCreateOpen && !chatMemberPickerOpen) return;
 
     const controller = new AbortController();
+    const submissionReviewerPicker = chatMemberPickerMode === "submission-reviewer";
     const submissionMemberPicker = chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer";
     if (groupCreateOpen) {
       setGroupCreateState((current) => (current === "creating" ? current : "loading-users"));
@@ -5353,12 +5354,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     }
 
     Promise.all([
-      submissionMemberPicker ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : api.getFriends(controller.signal),
+      submissionReviewerPicker ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : api.getFriends(controller.signal),
       currentUserVerified === null && !submissionMemberPicker ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : Promise.resolve([] as UserDTO[]),
     ])
       .then(([friendRows, spaceUsers]) => {
-        const verified = currentUserVerified ?? (submissionMemberPicker ? friendRows : spaceUsers).find((user) => user.user_id === currentUserId)?.verified ?? false;
-        setCurrentUserVerified(verified);
+        if (!submissionMemberPicker) {
+          const verified = currentUserVerified ?? spaceUsers.find((user) => user.user_id === currentUserId)?.verified ?? false;
+          setCurrentUserVerified(verified);
+        }
         setGroupFriendPool(friendRows.filter((user) => user.user_id !== currentUserId));
         setGroupCreateState((current) => (current === "creating" ? current : "idle"));
         setGroupManageState((current) => (current === "saving" ? current : "idle"));
@@ -9316,7 +9319,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             <input
               className="input"
               style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-              placeholder={chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer" ? t("submission.searchMembers") : chatMemberPickerMode === "remove" ? t("chat.searchGroupMembers") : t("friends.search")}
+              placeholder={chatMemberPickerMode === "submission-author" ? t("submission.searchFriends") : chatMemberPickerMode === "submission-reviewer" ? t("submission.searchMembers") : chatMemberPickerMode === "remove" ? t("chat.searchGroupMembers") : t("friends.search")}
               value={groupQuery}
               onChange={(event) => setGroupQuery(event.target.value)}
             />
