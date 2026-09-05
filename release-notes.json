@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.05.21",
+  "id": "2026.09.05.22",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表视觉优化",
+      "title": "共同投稿权限优化",
       "items": [
-        "投稿列表恢复流程侧标设计中的整行渐隐背景与紧凑排列",
-        "圆形头像增加留白并缩小内部头像，状态线与头像关系更加清晰"
+        "受邀加入的投稿者可以参与会话并发送内容，但不会再显示提交、撤回或邀请成员操作",
+        "发送投稿和撤回投稿仅由最初发起投稿的用户操作"
       ]
     },
     "en": {
-      "title": "Refined submission list",
+      "title": "Clearer co-author permissions",
       "items": [
-        "Submission rows now use the original flow-rail gradient treatment and compact spacing",
-        "Circular avatars now have more breathing room around a smaller inner portrait"
+        "Invited co-authors can join the conversation and contribute messages without submission management actions",
+        "Only the original author can submit or withdraw the submission"
       ]
     }
   }

@@ -3723,6 +3723,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   }, [chatId, chats, provisionalSubmissionChat]);
   const submissionStatus = selectedChat?.submission?.status;
   const submissionRole = selectedChat?.submissionRole;
+  const isSubmissionOriginator = Boolean(
+    selectedChat?.purpose === "submission" && selectedChat.submission?.author.user_id === currentUserId,
+  );
   const submissionCanSend = !submissionMode || (
     (submissionRole === "author" && (submissionStatus === "draft" || submissionStatus === "revision"))
     || (submissionRole === "reviewer" && submissionStatus === "review")
@@ -3730,7 +3733,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const submissionStatusLabel = (status?: SubmissionStatus) => status ? t(`submission.status.${status}` as TranslationKey) : "";
   const selectedChatId = selectedChat && selectedChat.id > 0 ? selectedChat.id : null;
   const canInviteSubmissionAuthors = Boolean(
-    selectedChat?.purpose === "submission" && ["author", "reviewer"].includes(selectedChat.submissionRole ?? "") && selectedChat.id > 0,
+    selectedChat?.purpose === "submission"
+      && (selectedChat.submissionRole === "reviewer" || isSubmissionOriginator)
+      && selectedChat.id > 0,
   );
   const canInviteSubmissionReviewers = Boolean(
     selectedChat?.purpose === "submission" && selectedChat.submissionRole === "reviewer" && selectedChat.id > 0,
@@ -6557,7 +6562,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const submitCurrentSubmission = async () => {
-    if (!selectedChat || submissionActionBusy) return;
+    if (!selectedChat || !isSubmissionOriginator || submissionActionBusy) return;
     try {
       setSubmissionActionBusy(true);
       replaceSubmissionChat(await api.submitSubmission(selectedChat.id));
@@ -6584,7 +6589,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const withdrawCurrentSubmission = async () => {
-    if (!selectedChat || submissionActionBusy) return;
+    if (!selectedChat || !isSubmissionOriginator || submissionActionBusy) return;
     try {
       setSubmissionActionBusy(true);
       replaceSubmissionChat(await api.withdrawSubmission(selectedChat.id));
@@ -7545,7 +7550,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </div>
                 ) : null}
               </header>
-              {!messageSelectionMode && displayedChat.id > 0 && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? (
+              {!messageSelectionMode && displayedChat.id > 0 && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && isSubmissionOriginator && ["draft", "revision"].includes(displayedChat.submission?.status ?? "") ? (
                 <div className="submission-workflow-bar">
                   <div><strong>{t("submission.authorActionTitle")}</strong><small>{t("submission.authorActionHint")}</small></div>
                   <span className="submission-workflow-actions">
@@ -7553,7 +7558,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <button disabled={submissionActionBusy} onClick={() => void submitCurrentSubmission()} type="button"><span>{t("submission.submit")}</span><span className="material-symbols-outlined">send</span></button>
                   </span>
                 </div>
-              ) : !messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && ["review", "ready"].includes(displayedChat.submission?.status ?? "") ? (
+              ) : !messageSelectionMode && displayedChat.purpose === "submission" && displayedChat.submissionRole === "author" && isSubmissionOriginator && ["review", "ready"].includes(displayedChat.submission?.status ?? "") ? (
                 <div className="submission-workflow-bar is-withdrawal">
                   <div><strong>{t("submission.withdrawAvailableTitle")}</strong><small>{t("submission.withdrawAvailableHint")}</small></div>
                   <button className="is-withdraw" disabled={submissionActionBusy} onClick={() => setSubmissionWithdrawConfirmOpen(true)} type="button"><span>{t("submission.withdraw")}</span><span className="material-symbols-outlined">undo</span></button>
