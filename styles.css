@@ -31428,9 +31428,14 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 
 .chat-item.is-submission-item {
   --submission-flow-color: var(--text-muted);
+  --submission-role-color: #17644f;
   position: relative;
-  min-height: 108px;
-  padding-block: 13px;
+  isolation: isolate;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  min-height: 116px;
+  padding-block: 16px;
+  border-bottom: 0;
+  background: transparent;
 }
 
 .chat-item.is-submission-item::before {
@@ -31444,21 +31449,38 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   opacity: .82;
 }
 
+.chat-item.is-submission-item::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 7px 0 7px 18px;
+  border-radius: 20px;
+  background: transparent;
+  pointer-events: none;
+  transition: background 160ms ease;
+}
+
 .chat-item.is-submission-item.is-status-review { --submission-flow-color: #2798df; }
 .chat-item.is-submission-item.is-status-revision { --submission-flow-color: #d58b18; }
 .chat-item.is-submission-item.is-status-ready { --submission-flow-color: var(--brand-primary); }
 .chat-item.is-submission-item.is-status-published { --submission-flow-color: #668173; }
 .chat-item.is-submission-item.is-status-terminated { --submission-flow-color: var(--danger); }
 .chat-item.is-submission-item.is-status-withdrawn { --submission-flow-color: color-mix(in srgb, var(--text-muted) 62%, transparent); }
-.chat-item.is-submission-item:is(.is-status-review, .is-status-revision, .is-status-ready) {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--submission-flow-color) 7%, transparent), transparent 72%);
+.chat-item.is-submission-item:is(.is-status-review, .is-status-revision, .is-status-ready, .is-status-published)::after {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--submission-flow-color) 8%, var(--bg-surface)), color-mix(in srgb, var(--submission-flow-color) 3%, var(--bg-surface)) 78%);
 }
-.chat-item.is-submission-item.active {
-  background: color-mix(in srgb, var(--submission-flow-color) 8%, transparent);
+.chat-item.is-submission-item.active,
+.chat-item.is-submission-item:hover {
+  background: transparent;
+}
+.chat-item.is-submission-item.active::after,
+.chat-item.is-submission-item:hover::after {
+  background: color-mix(in srgb, var(--submission-flow-color) 9%, var(--bg-surface));
 }
 
 .chat-list:has(> .is-submission-item) {
   position: relative;
+  gap: 2px;
 }
 
 .chat-list:has(> .is-submission-item)::before {
@@ -31467,15 +31489,40 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   z-index: 0;
   top: 28px;
   bottom: 28px;
-  left: 46px;
+  left: 50px;
   width: 1px;
   background: color-mix(in srgb, var(--line-soft) 82%, transparent);
 }
 
 .chat-item.is-submission-item > * { position: relative; z-index: 1; }
+.chat-item.is-submission-item .avatar-wrap {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+}
 .chat-item.is-submission-item .avatar {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  box-shadow: 0 0 0 4px var(--bg-surface), 0 0 0 5px color-mix(in srgb, var(--submission-flow-color) 34%, var(--line-soft));
+  box-shadow: 0 0 0 4px var(--bg-surface), 0 0 0 5px color-mix(in srgb, var(--submission-flow-color) 42%, var(--line-soft));
+}
+.chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile {
+  top: auto;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bg-surface);
+}
+.chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile-1 {
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+.chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile-2 {
+  right: 0;
+  bottom: 0;
+  z-index: 1;
 }
 .chat-name.is-submission .submission-status-badge {
   min-height: 0;
@@ -31484,8 +31531,28 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   border-radius: 0;
   color: var(--submission-flow-color);
   background: transparent;
+  font-size: .78rem;
   font-weight: 800;
   letter-spacing: .03em;
+}
+
+.chat-item.is-submission-item .chat-copy {
+  align-self: center;
+}
+
+.chat-item.is-submission-item .chat-name.is-submission {
+  line-height: 1.25;
+}
+
+.chat-item.is-submission-item .submission-list-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.chat-item.is-submission-item .chat-meta {
+  align-self: start;
+  align-content: start;
+  padding-top: 4px;
 }
 
 .submission-list-people {
@@ -31501,8 +31568,8 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 
 .submission-list-role {
   flex: 0 0 auto;
-  color: color-mix(in srgb, var(--submission-flow-color) 72%, var(--text-secondary));
-  font-weight: 750;
+  color: var(--submission-role-color);
+  font-weight: 800;
 }
 
 .submission-list-names {
@@ -31523,13 +31590,14 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 }
 
 .is-submission-item .chat-preview {
-  margin-top: 4px;
+  margin-top: 6px;
+  color: color-mix(in srgb, var(--text-muted) 82%, var(--text-secondary));
 }
 
 .submission-avatar-overflow {
   position: absolute;
-  right: -7px;
-  bottom: -4px;
+  right: -5px;
+  bottom: -5px;
   display: grid;
   min-width: 22px;
   height: 19px;
@@ -31541,8 +31609,12 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   background: var(--bg-elevated);
   box-shadow: 0 4px 10px rgba(15, 35, 28, .12);
   box-sizing: border-box;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
+}
+
+html[data-theme="dark"] .chat-item.is-submission-item {
+  --submission-role-color: #69c5a3;
 }
 
 .has-submission-filters .submission-status-filters > button {
@@ -31664,7 +31736,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 }
 
 @media (max-width: 900px) {
-  .chat-list:has(> .is-submission-item)::before { left: 28px; }
+  .chat-list:has(> .is-submission-item)::before { left: 32px; }
 }
 
 .submission-review-actions { display: grid; gap: 8px; }

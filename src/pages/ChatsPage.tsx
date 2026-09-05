@@ -7244,10 +7244,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const renderChatItem = (chat: Chat, active: boolean) => {
     const submissionAuthors = chat.submission?.authors?.length ? chat.submission.authors : chat.submission ? [chat.submission.author] : [];
     const submissionReviewers = chat.submission?.reviewers?.length ? chat.submission.reviewers : chat.submission ? [chat.submission.recipient] : [];
-    const counterparts = chat.submissionCounterparts ?? [];
+    const counterparts = Array.from(new Map((chat.submissionCounterparts ?? []).map((member) => [member.user_id, member])).values());
+    const visibleCounterparts = counterparts.slice(0, 2);
     const collaborators = chat.submissionRole === "reviewer" ? submissionReviewers : submissionAuthors;
-    const counterpartNames = counterparts.slice(0, 2).map((member) => member.name).join(t("common.nameSeparator"));
-    const counterpartOverflow = Math.max(0, counterparts.length - 2);
+    const counterpartNames = visibleCounterparts.map((member) => member.name).join(t("common.nameSeparator"));
+    const counterpartOverflow = Math.max(0, counterparts.length - visibleCounterparts.length);
     return <button
       key={chat.id}
       className={`chat-item${chat.submission ? ` is-submission-item is-status-${chat.submission.status}` : ""}${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
@@ -7256,16 +7257,16 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     >
       <div className="avatar-wrap">
         <UserAvatar
-          className={`avatar ${chat.online ? "status-online" : ""}`}
+          className={`avatar${chat.submission ? ` submission-list-avatar is-${counterparts.length === 1 ? "single" : "stacked"}` : chat.online ? " status-online" : ""}`}
           groupMembers={
             chat.purpose === "submission" && counterparts.length > 1
-              ? counterparts.slice(0, 2).map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
+              ? visibleCounterparts.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
               : chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
           }
-          name={chat.title}
-          uri={chat.avatarUri}
-          cacheKey={chat.avatarCacheKey}
-          frame={chat.avatarFrameStyle}
+          name={chat.submission ? visibleCounterparts[0]?.name ?? chat.title : chat.title}
+          uri={chat.submission ? visibleCounterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}
+          cacheKey={chat.submission ? visibleCounterparts[0]?.avatar_cache_key ?? chat.avatarCacheKey : chat.avatarCacheKey}
+          frame={chat.submission ? "none" : chat.avatarFrameStyle}
         />
         {chat.unread ? (
           <span className={`small-badge chat-list-unread${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
@@ -7278,7 +7279,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             <p className="chat-name is-submission"><span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span><span className="submission-list-title">{chat.title}</span></p>
             <div className="submission-list-people">
               <span className="submission-list-role">{t(chat.submissionRole === "reviewer" ? "submission.authorsShort" : "submission.reviewersShort")}</span>
-              <span className="submission-list-names">{counterpartNames || t("common.unknown")}{counterpartOverflow ? ` +${counterpartOverflow}` : ""}</span>
+              <span className="submission-list-names">{counterpartNames || t("common.unknown")}</span>
               {collaborators.length > 1 ? <span className="submission-list-collaboration">{t(chat.submissionRole === "reviewer" ? "submission.coReviewing" : "submission.coAuthoring", { count: collaborators.length })}</span> : null}
             </div>
           </>

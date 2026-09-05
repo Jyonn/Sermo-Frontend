@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.05.13",
+  "id": "2026.09.05.14",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "多人投稿协作",
+      "title": "投稿列表视觉优化",
       "items": [
-        "投稿与审批现在都支持多人协作，列表会清晰展示参与者和协作人数",
-        "审批者可以邀请投稿者或其他审批者，受邀者同意后即可查看完整历史消息",
-        "投稿详情页现在按投稿者与审批者分别展示成员"
+        "投稿列表现在使用更清晰的流程样式，并优化了状态、标题和消息层级",
+        "我的投稿仅展示审批者，审批列表仅展示投稿者；多人头像与剩余人数更加清楚",
+        "投稿人和审批人标识统一为稳定的深绿色，不再随投稿状态变化"
       ]
     },
     "en": {
-      "title": "Collaborative submissions",
+      "title": "Clearer submission lists",
       "items": [
-        "Submissions and reviews now support multiple collaborators with clearer participant details",
-        "Reviewers can invite authors or other reviewers, who gain full history access after accepting",
-        "Submission details now separate authors and reviewers into clear member lists"
+        "Submission lists now use a clearer workflow layout with improved status, title, and message hierarchy",
+        "My submissions show reviewers while the review list shows authors, with cleaner multi-person avatars and overflow counts",
+        "Author and reviewer labels now keep a consistent deep-green treatment across every submission status"
       ]
     }
   }
