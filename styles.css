@@ -31724,13 +31724,19 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-view-switch path { stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 
 .submission-status-filters {
+  --submission-filter-muted: #74847c;
+  --submission-filter-quiet: #97a29d;
+  --submission-filter-soft: #eef3ef;
+  --submission-filter-surface: #fffefa;
+  --submission-filter-green: #0fc181;
+  --submission-filter-green-deep: #087354;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   gap: 7px;
   width: 100%;
-  min-height: 0;
-  padding: 5px 14px 8px;
+  height: 49px;
+  padding: 4px 18px 9px;
   overflow-x: auto;
   border: 0;
   background: transparent;
@@ -31748,40 +31754,46 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   min-height: 30px;
   max-height: 30px;
   align-items: center;
-  gap: 6px;
-  padding: 0 9px 0 11px;
-  border: 1px solid color-mix(in srgb, var(--line-soft) 90%, transparent);
+  gap: 0;
+  padding: 0 10px;
+  border: 0;
   border-radius: 999px;
-  color: var(--text-secondary);
-  background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+  color: var(--submission-filter-muted);
+  background: var(--submission-filter-soft);
   font: inherit;
   font-size: 11px;
-  font-weight: 750;
+  font-weight: 700;
   white-space: nowrap;
-  transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
+  transition: color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 .submission-status-filters > button b {
-  display: grid;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 4px;
-  place-items: center;
-  border-radius: 999px;
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--line-soft) 72%, transparent);
-  box-sizing: border-box;
+  display: inline;
+  min-width: 0;
+  height: auto;
+  margin-left: 5px;
+  padding: 0;
+  color: var(--submission-filter-quiet);
+  background: transparent;
   font-size: 9px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .submission-status-filters > button.is-active {
-  border-color: color-mix(in srgb, var(--brand-primary) 38%, transparent);
-  color: var(--brand-primary-press);
-  background: color-mix(in srgb, var(--brand-primary) 13%, var(--bg-elevated));
+  color: var(--submission-filter-green-deep);
+  background: color-mix(in srgb, var(--submission-filter-green) 11%, var(--submission-filter-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--submission-filter-green) 34%, transparent);
 }
-.submission-status-filters > button.is-active b { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 16%, transparent); }
 .submission-status-filters > button:active { transform: scale(.97); }
 .submission-status-filters > button:focus-visible { outline: 2px solid color-mix(in srgb, var(--brand-primary) 40%, transparent); outline-offset: 1px; }
 .mobile-chat-list-screen.has-submission-filters { grid-template-rows: auto auto minmax(0, 1fr); }
+
+html[data-theme="dark"] .submission-status-filters {
+  --submission-filter-muted: #a2b0a9;
+  --submission-filter-quiet: #74877e;
+  --submission-filter-soft: #182b22;
+  --submission-filter-surface: #14231c;
+  --submission-filter-green-deep: #70e4b8;
+}
 
 .submission-status-badge {
   display: inline-flex;
@@ -32129,11 +32141,6 @@ html[data-theme="dark"] .chat-item.is-submission-item {
       0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 52%, var(--line-soft)),
       0 0 0 6px color-mix(in srgb, var(--submission-flow-color) 11%, transparent);
   }
-}
-
-.has-submission-filters .submission-status-filters > button {
-  border-color: transparent;
-  background: color-mix(in srgb, var(--line-soft) 48%, transparent);
 }
 
 .submission-incoming-invites {

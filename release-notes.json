@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.3",
+  "id": "2026.09.06.4",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "聊天气泡预览优化",
+      "title": "投稿分类样式优化",
       "items": [
-        "个性化聊天预览新增投稿邀请场景，可分别检查己方与他方效果",
-        "提升 Fufu 及其他气泡中投稿邀请文字、状态与辅助信息的清晰度"
+        "投稿分类栏调整为更轻巧统一的胶囊样式",
+        "分类数量不再使用独立圆点，明暗模式下的信息层级更加清晰"
       ]
     },
     "en": {
-      "title": "Improved chat bubble previews",
+      "title": "Refined submission filters",
       "items": [
-        "Chat personalization previews now include submission invitations on both sides",
-        "Improved the clarity of invitation text, status, and supporting details across Fufu and other bubbles"
+        "Submission filters now use a lighter, more consistent pill layout",
+        "Counts no longer use separate badges, with clearer hierarchy in light and dark modes"
       ]
     }
   }
