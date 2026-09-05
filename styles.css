@@ -31979,6 +31979,7 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   border-radius: 50%;
   background: var(--bg-surface);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 34%, var(--line-soft));
+  transition: box-shadow 180ms ease;
 }
 .chat-item.is-submission-item .avatar > .avatar-frame-clip {
   padding: 6px;
@@ -32105,6 +32106,29 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 
 html[data-theme="dark"] .chat-item.is-submission-item {
   --submission-role-color: #69c5a3;
+}
+
+@media (min-width: 901px) {
+  .mobile-chat-list-screen .chat-item.is-submission-item.active {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--submission-flow-color) 15%, transparent),
+      color-mix(in srgb, var(--submission-flow-color) 5%, transparent) 62%,
+      transparent 88%
+    );
+    box-shadow: none;
+  }
+
+  .mobile-chat-list-screen .chat-item.is-submission-item.active::before {
+    width: 4px;
+    opacity: 1;
+  }
+
+  .mobile-chat-list-screen .chat-item.is-submission-item.active .avatar {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 52%, var(--line-soft)),
+      0 0 0 6px color-mix(in srgb, var(--submission-flow-color) 11%, transparent);
+  }
 }
 
 .has-submission-filters .submission-status-filters > button {

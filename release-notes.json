@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.1",
+  "id": "2026.09.06.2",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "iPhone 文字颜色修复",
+      "title": "投稿选中样式优化",
       "items": [
-        "修复 iPhone 上聊天、投稿、通讯和菜单列表文字被系统显示为蓝色的问题",
-        "可点击列表项现在会正确跟随浅色与深色外观"
+        "桌面端投稿列表不再使用固定绿色边框表示选中",
+        "选中投稿会通过对应状态色的背景、流程线和头像光环进行提示"
       ]
     },
     "en": {
-      "title": "iPhone text color fix",
+      "title": "Refined submission selection",
       "items": [
-        "Fixed list text appearing in the system blue color on iPhone across Chats, Submissions, Contacts, and Menu",
-        "Interactive list rows now correctly follow light and dark appearance colors"
+        "Desktop submission lists no longer use a fixed green border for selection",
+        "Selected submissions now use their status color across the background, flow rail, and avatar halo"
       ]
     }
   }
