@@ -14595,6 +14595,165 @@ html[data-theme="dark"] .growth-scroll-score strong {
   background: rgba(0, 208, 132, 0.12);
 }
 
+.submission-member-picker-toolbar {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.submission-member-picker-toolbar > :first-child {
+  justify-self: start;
+}
+
+.submission-member-picker-toolbar .sheet-toolbar-title {
+  white-space: nowrap;
+}
+
+.sheet-toolbar .button.sheet-toolbar-button.submission-invite-send-button {
+  justify-self: end;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(0, 169, 108, 0.24);
+  border-radius: 13px;
+  color: #063f2e;
+  background: linear-gradient(135deg, #34dda8, #16c98c);
+  box-shadow: 0 8px 18px rgba(0, 169, 108, 0.16);
+  white-space: nowrap;
+}
+
+.submission-invite-send-button .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.submission-invite-send-count {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 5px;
+  border-radius: 999px;
+  color: #eafff7;
+  background: rgba(5, 88, 61, 0.54);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.sheet-toolbar .button.sheet-toolbar-button.submission-invite-send-button:disabled {
+  opacity: 1;
+  color: var(--text-muted);
+  border-color: var(--line-soft);
+  background: rgba(145, 154, 171, 0.1);
+  box-shadow: none;
+}
+
+.submission-member-picker-body .checkbox-person-row {
+  min-height: 74px;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.submission-member-picker-body .checkbox-person-row:disabled {
+  cursor: default;
+  opacity: 1;
+  color: var(--text-primary);
+}
+
+.submission-member-picker-body .checkbox-person-row.is-submission-joined {
+  background: rgba(0, 169, 108, 0.055);
+}
+
+.submission-member-picker-body .checkbox-person-row.is-submission-pending {
+  background: rgba(213, 153, 54, 0.075);
+}
+
+.submission-member-picker-body .checkbox-person-row.is-submission-joined .row-subtle {
+  color: #4f7367;
+}
+
+.submission-member-picker-body .checkbox-person-row.is-submission-pending .row-subtle {
+  color: #8d7040;
+}
+
+.submission-member-picker-body .member-picker-status-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+}
+
+.submission-member-picker-body .member-picker-status-locked .material-symbols-outlined {
+  font-size: 15px;
+}
+
+.submission-member-picker-body .member-picker-status-locked.is-joined {
+  color: #087852;
+  background: rgba(0, 169, 108, 0.13);
+}
+
+.submission-member-picker-body .member-picker-status-locked.is-pending {
+  color: #9b6410;
+  background: rgba(213, 153, 54, 0.15);
+}
+
+html[data-theme="dark"] .sheet-toolbar .button.sheet-toolbar-button.submission-invite-send-button {
+  color: #052f23;
+  border-color: rgba(76, 224, 170, 0.36);
+  background: linear-gradient(135deg, #45dfac, #1fc991);
+}
+
+html[data-theme="dark"] .sheet-toolbar .button.sheet-toolbar-button.submission-invite-send-button:disabled {
+  color: #8ea198;
+  border-color: rgba(160, 184, 172, 0.16);
+  background: rgba(140, 160, 150, 0.09);
+}
+
+html[data-theme="dark"] .submission-member-picker-body .checkbox-person-row.is-submission-joined {
+  background: rgba(47, 194, 139, 0.075);
+}
+
+html[data-theme="dark"] .submission-member-picker-body .checkbox-person-row.is-submission-pending {
+  background: rgba(219, 164, 76, 0.085);
+}
+
+html[data-theme="dark"] .submission-member-picker-body .checkbox-person-row.is-submission-joined .row-subtle {
+  color: #88ad9e;
+}
+
+html[data-theme="dark"] .submission-member-picker-body .checkbox-person-row.is-submission-pending .row-subtle {
+  color: #c8a96e;
+}
+
+html[data-theme="dark"] .submission-member-picker-body .member-picker-status-locked.is-joined {
+  color: #68dcb0;
+  background: rgba(47, 194, 139, 0.14);
+}
+
+html[data-theme="dark"] .submission-member-picker-body .member-picker-status-locked.is-pending {
+  color: #e1ba73;
+  background: rgba(219, 164, 76, 0.14);
+}
+
+@media (max-width: 420px) {
+  .submission-member-picker-toolbar {
+    gap: 8px;
+  }
+
+  .submission-member-picker-toolbar .sheet-toolbar-title {
+    overflow: hidden;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+  }
+
+  .sheet-toolbar .button.sheet-toolbar-button.submission-invite-send-button {
+    min-height: 38px;
+    padding-inline: 10px;
+    font-size: 0.86rem;
+  }
+
+  .submission-invite-send-button .material-symbols-outlined,
+  .submission-invite-send-count {
+    display: none;
+  }
+}
+
 @keyframes drawer-in {
   from {
     opacity: 1;

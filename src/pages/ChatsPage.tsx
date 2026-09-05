@@ -4190,14 +4190,16 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   }, [detailsSheetOpen, historyReloadVersion, selectedChat?.id]);
 
   useEffect(() => {
-    if (!detailsSheetOpen || selectedChat?.purpose !== "submission" || !canManageSubmissionMembers) {
+    const submissionPickerOpen = chatMemberPickerOpen
+      && (chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer");
+    if ((!detailsSheetOpen && !submissionPickerOpen) || selectedChat?.purpose !== "submission" || !canManageSubmissionMembers) {
       setSubmissionInvites([]);
       return;
     }
     const controller = new AbortController();
     api.getSubmissionInvites(selectedChat.id, controller.signal).then(setSubmissionInvites).catch(() => setSubmissionInvites([]));
     return () => controller.abort();
-  }, [canManageSubmissionMembers, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
+  }, [canManageSubmissionMembers, chatMemberPickerMode, chatMemberPickerOpen, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
 
   useEffect(() => {
     const openSubmissionInvite = (event: Event) => {
@@ -5222,7 +5224,19 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const submissionReviewerMembers = detailMembers.filter((member) => member.submissionRole === "reviewer" || submissionReviewerIds.has(member.userId));
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
-  const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
+  const submissionMemberPickerRole = chatMemberPickerMode === "submission-author"
+    ? "author"
+    : chatMemberPickerMode === "submission-reviewer"
+      ? "reviewer"
+      : null;
+  const pendingSubmissionInvitesByUserId = new Map(
+    submissionInvites
+      .filter((invite) => invite.status === "pending" && invite.role === submissionMemberPickerRole)
+      .map((invite) => [invite.invitee.user_id, invite])
+  );
+  const chatMemberNewIds = groupSelectedIds.filter(
+    (userId) => !chatMemberLockedIds.includes(userId) && !pendingSubmissionInvitesByUserId.has(userId)
+  );
   const chatMemberActionIds = chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer" ? groupSelectedIds : chatMemberNewIds;
 
   const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute" | "badge", enabled: boolean) => {
@@ -5287,7 +5301,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setChatMemberPickerMode(role === "author" ? "submission-author" : "submission-reviewer");
     setChatMemberLockedIds([
       ...selectedChat.detail.members.map((member) => member.userId),
-      ...submissionInvites.filter((invite) => invite.role === role).map((invite) => invite.invitee.user_id),
+      ...submissionInvites.filter((invite) => invite.role === role && invite.status === "pending").map((invite) => invite.invitee.user_id),
     ]);
     setGroupSelectedIds([]);
     setChatMemberPickerOpen(true);
@@ -9269,12 +9283,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       <BottomSheet
         open={chatMemberPickerOpen}
         title=""
+        className={submissionMemberPickerRole ? "submission-member-picker-sheet" : undefined}
+        bodyClassName={submissionMemberPickerRole ? "submission-member-picker-body" : undefined}
         onClose={() => {
           closeChatMemberPicker();
         }}
         showCloseButton={false}
         header={
-          <div className="sheet-toolbar">
+          <div className={`sheet-toolbar ${submissionMemberPickerRole ? "submission-member-picker-toolbar" : ""}`.trim()}>
             <button
               className="ghost-button sheet-toolbar-button"
               onClick={closeChatMemberPicker}
@@ -9298,22 +9314,26 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               </strong>
             </div>
             <button
-              className={`button sheet-toolbar-button ${chatMemberPickerMode === "remove" ? "danger-button" : ""}`}
+              className={`button sheet-toolbar-button ${chatMemberPickerMode === "remove" ? "danger-button" : ""} ${submissionMemberPickerRole ? "submission-invite-send-button" : ""}`.trim()}
               disabled={groupManageState === "saving" || !chatMemberActionIds.length}
               onClick={() => void submitChatMemberPicker()}
               type="button"
             >
+              {submissionMemberPickerRole ? <span className="material-symbols-outlined" aria-hidden="true">send</span> : null}
               {groupManageState === "saving"
                 ? t("common.processing")
-                : chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer"
+                : submissionMemberPickerRole
                   ? t("submission.sendInvite")
                   : selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
                     ? t("admin.remove")
                     : chatMemberPickerMode === "transfer"
-                      ? t("chat.transfer")
+                    ? t("chat.transfer")
                     : t("common.add")
                   : t("common.create")}
+              {submissionMemberPickerRole && chatMemberActionIds.length > 0 ? (
+                <span className="submission-invite-send-count" aria-label={String(chatMemberActionIds.length)}>{chatMemberActionIds.length}</span>
+              ) : null}
             </button>
           </div>
         }
@@ -9332,12 +9352,22 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           <div className="simple-list">
             {groupCandidates.map((user) => {
               const selected = groupSelectedIds.includes(user.user_id);
-              const locked = chatMemberLockedIds.includes(user.user_id);
               const protectedMember = selectedChat?.detail.members.find((member) => member.userId === user.user_id);
+              const pendingSubmissionInvite = pendingSubmissionInvitesByUserId.get(user.user_id);
+              const locked = chatMemberLockedIds.includes(user.user_id) || Boolean(pendingSubmissionInvite);
+              const submissionPickerState = submissionMemberPickerRole
+                ? protectedMember
+                  ? "joined"
+                  : pendingSubmissionInvite
+                    ? "pending"
+                    : null
+                : null;
+              const joinedSubmissionRole = protectedMember?.submissionRole === "reviewer" ? "reviewer" : "author";
               return (
                 <button
                   key={`picker-user-${user.user_id}`}
-                  className={`simple-row person-row checkbox-person-row ${locked ? "is-locked" : ""}`}
+                  className={`simple-row person-row checkbox-person-row ${locked ? "is-locked" : ""} ${submissionPickerState ? `is-submission-${submissionPickerState}` : ""}`.trim()}
+                  disabled={locked}
                   onClick={() => toggleGroupCandidate(user.user_id)}
                   type="button"
                 >
@@ -9351,8 +9381,12 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                           : protectedMember?.isSelf
                             ? t("account.current")
                             : t("chat.groupMember")
+                        : submissionPickerState === "joined"
+                          ? `${t(joinedSubmissionRole === "reviewer" ? "submission.role.reviewer" : "submission.role.author")} · ${t("submission.inviteStatus.accepted")}`
+                          : submissionPickerState === "pending" && pendingSubmissionInvite
+                            ? `${t(pendingSubmissionInvite.role === "reviewer" ? "submission.pendingReviewer" : "submission.pendingAuthor")} · ${t("submission.validUntil", { date: new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(pendingSubmissionInvite.expires_at * 1000) })}`
                         : locked
-                          ? t(chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer" ? "submission.alreadyMemberOrInvited" : "chat.alreadyInConversation")
+                          ? t("chat.alreadyInConversation")
                           : chatMemberPickerMode === "submission-reviewer"
                             ? user.official ? t("profile.official") : t("profile.operator")
                           : user.is_alive
@@ -9361,8 +9395,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     </div>
                   </div>
                   {locked ? (
-                    <span className="member-picker-status member-picker-status-locked">
-                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : chatMemberPickerMode === "transfer" ? t("account.current") : chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer" ? t("submission.addedOrPending") : t("chat.alreadyInGroup")}
+                    <span className={`member-picker-status member-picker-status-locked ${submissionPickerState ? `is-${submissionPickerState}` : ""}`.trim()}>
+                      {submissionPickerState ? (
+                        <span className="material-symbols-outlined" aria-hidden="true">{submissionPickerState === "joined" ? "check_circle" : "schedule"}</span>
+                      ) : null}
+                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : chatMemberPickerMode === "transfer" ? t("account.current") : submissionPickerState === "joined" ? t("submission.inviteStatus.accepted") : submissionPickerState === "pending" ? t("submission.inviteStatus.pending") : t("chat.alreadyInGroup")}
                     </span>
                   ) : (
                     <span className={`member-picker-check ${selected ? "is-selected" : ""}`} aria-hidden="true" />

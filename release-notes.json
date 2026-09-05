@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.05.22",
+  "id": "2026.09.05.23",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "共同投稿权限优化",
+      "title": "投稿邀请状态优化",
       "items": [
-        "受邀加入的投稿者可以参与会话并发送内容，但不会再显示提交、撤回或邀请成员操作",
-        "发送投稿和撤回投稿仅由最初发起投稿的用户操作"
+        "邀请成员时会明确区分已加入和等待确认，并显示待确认邀请的有效期",
+        "发送邀请按钮移动到更清晰的右侧主操作位置，并显示当前选择人数"
       ]
     },
     "en": {
-      "title": "Clearer co-author permissions",
+      "title": "Clearer submission invitations",
       "items": [
-        "Invited co-authors can join the conversation and contribute messages without submission management actions",
-        "Only the original author can submit or withdraw the submission"
+        "The member picker now clearly separates joined members from pending invitations and shows invitation validity",
+        "The send invitation action is easier to find on the right and shows the current selection count"
       ]
     }
   }
