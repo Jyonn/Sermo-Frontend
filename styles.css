@@ -4302,16 +4302,25 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 
 .message-submission-invite-card {
   --invite-accent: var(--brand-primary);
+  --invite-state-accent: var(--invite-accent);
+  --invite-surface:
+    linear-gradient(145deg, color-mix(in srgb, var(--invite-accent) 9%, transparent), transparent 58%),
+    color-mix(in srgb, var(--bg-panel-strong) 96%, transparent);
+  --invite-text: var(--text-primary);
+  --invite-muted: var(--text-muted);
+  --invite-border: color-mix(in srgb, var(--invite-accent) 28%, var(--line-soft));
+  --invite-shadow: 0 8px 22px color-mix(in srgb, var(--text-primary) 8%, transparent);
+  --invite-radius: 19px;
+  --invite-border-width: 1px;
+  --invite-icon-surface: color-mix(in srgb, var(--invite-accent) 13%, var(--bg-surface));
   display: grid;
   width: 100%;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--invite-accent) 28%, var(--line-soft));
-  border-radius: 19px;
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--invite-accent) 9%, transparent), transparent 58%),
-    color-mix(in srgb, var(--bg-panel-strong) 96%, transparent);
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--text-primary) 8%, transparent);
-  color: var(--text-primary);
+  border: var(--invite-border-width) solid var(--invite-border);
+  border-radius: var(--invite-radius);
+  background: var(--invite-surface);
+  box-shadow: var(--invite-shadow);
+  color: var(--invite-text);
   font: inherit;
   text-align: left;
   overflow: hidden;
@@ -4320,11 +4329,11 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 
 .message-submission-invite-card.is-expired,
 .message-submission-invite-card.is-conflict {
-  --invite-accent: var(--text-muted);
+  --invite-state-accent: var(--invite-muted);
 }
 
 .message-submission-invite-card.is-accepted {
-  --invite-accent: #4b8b73;
+  --invite-state-accent: #4b8b73;
 }
 
 .message-submission-invite-heading {
@@ -4341,7 +4350,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: color-mix(in srgb, var(--invite-accent) 13%, var(--bg-surface));
+  background: var(--invite-icon-surface);
   color: var(--invite-accent);
   font-size: 19px;
 }
@@ -4353,7 +4362,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 }
 
 .message-submission-invite-heading small {
-  color: var(--text-muted);
+  color: var(--invite-muted);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .05em;
@@ -4361,7 +4370,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 
 .message-submission-invite-heading strong {
   overflow: hidden;
-  color: var(--text-primary);
+  color: var(--invite-text);
   font-size: 14px;
   font-weight: 800;
   line-height: 1.35;
@@ -4373,7 +4382,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   padding: 5px 8px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--invite-accent) 12%, transparent);
-  color: color-mix(in srgb, var(--invite-accent) 88%, var(--text-primary));
+  color: color-mix(in srgb, var(--invite-accent) 78%, var(--invite-text));
   font-size: 10px;
   font-weight: 800;
 }
@@ -4383,7 +4392,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   gap: 6px;
   margin: 0 13px;
   padding: 10px 0;
-  border-top: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--invite-text) 14%, transparent);
 }
 
 .message-submission-invite-people > span {
@@ -4396,14 +4405,14 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 }
 
 .message-submission-invite-people b {
-  color: var(--brand-primary-press);
+  color: color-mix(in srgb, var(--invite-accent) 82%, var(--invite-text));
   font-style: normal;
   font-weight: 750;
 }
 
 .message-submission-invite-people i {
   overflow: hidden;
-  color: var(--text-secondary);
+  color: var(--invite-muted);
   font-style: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4415,10 +4424,16 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   align-items: center;
   gap: 6px;
   padding: 9px 13px;
-  background: color-mix(in srgb, var(--invite-accent) 7%, var(--bg-surface));
-  color: var(--text-muted);
+  border-top: 1px solid color-mix(in srgb, var(--invite-text) 10%, transparent);
+  background: color-mix(in srgb, var(--invite-text) 5%, transparent);
+  color: var(--invite-muted);
   font-size: 10px;
   font-weight: 650;
+}
+
+.message-submission-invite-footer > span:first-child {
+  color: var(--invite-state-accent);
+  font-weight: 800;
 }
 
 .message-submission-invite-footer > span:nth-child(2) {
@@ -33156,4 +33171,86 @@ html[data-theme="dark"] .verification-banner-action {
   .platform-email-row time strong {
     font-size: 11px;
   }
+}
+
+/* Submission invitations keep their own information layout while wearing the sender's bubble skin. */
+.message-group.other:not(.bubble-style-default) .message-submission-invite-card {
+  --invite-accent: var(--bubble-theme-accent, var(--brand-primary));
+  --invite-surface: var(--bubble-skin-other-bg);
+  --invite-text: var(--bubble-skin-other-color);
+  --invite-muted: var(--bubble-theme-muted-other, color-mix(in srgb, var(--bubble-skin-other-color) 62%, transparent));
+  --invite-border: var(--bubble-skin-other-border);
+  --invite-shadow: var(--bubble-skin-other-shadow);
+  --invite-radius: var(--bubble-skin-other-radius, 19px);
+  --invite-border-width: var(--bubble-skin-border-width, 1px);
+  --invite-icon-surface: var(--bubble-theme-icon-other, color-mix(in srgb, var(--bubble-theme-accent) 13%, transparent));
+}
+
+.message-group.self:not(.bubble-style-default) .message-submission-invite-card {
+  --invite-accent: var(--bubble-theme-accent, var(--brand-primary));
+  --invite-surface: var(--bubble-skin-self-bg);
+  --invite-text: var(--bubble-skin-self-color);
+  --invite-muted: var(--bubble-theme-muted-self, color-mix(in srgb, var(--bubble-skin-self-color) 66%, transparent));
+  --invite-border: var(--bubble-skin-self-border);
+  --invite-shadow: var(--bubble-skin-self-shadow);
+  --invite-radius: var(--bubble-skin-self-radius, 19px);
+  --invite-border-width: var(--bubble-skin-border-width, 1px);
+  --invite-icon-surface: var(--bubble-theme-icon-self, color-mix(in srgb, var(--bubble-theme-accent) 13%, transparent));
+}
+
+.message-group:not(.bubble-style-default) .message-bubble.is-submission-invite {
+  min-width: 0;
+  padding: 0 !important;
+  overflow: visible;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  clip-path: none;
+  -webkit-mask: none;
+  mask: none;
+  animation: none;
+  text-shadow: none;
+}
+
+.message-group:not(.bubble-style-default) .message-bubble.is-submission-invite::before,
+.message-group:not(.bubble-style-default) .message-bubble.is-submission-invite::after {
+  display: none !important;
+  content: none !important;
+}
+
+.message-group.bubble-style-typewriter .message-submission-invite-card {
+  border-width: 1px 2px 3px;
+  background:
+    linear-gradient(90deg, transparent 0 10px, color-mix(in srgb, var(--invite-text) 18%, transparent) 10px 11px, transparent 11px),
+    repeating-linear-gradient(0deg, transparent 0 21px, color-mix(in srgb, var(--invite-text) 7%, transparent) 21px 22px),
+    radial-gradient(ellipse at 20% 15%, color-mix(in srgb, var(--invite-text) 6%, transparent), transparent 42%),
+    var(--invite-surface);
+  clip-path: polygon(1px 0, calc(100% - 2px) 1px, 100% calc(100% - 2px), 2px 100%, 0 2px);
+  font-family: "JetBrains Mono", monospace;
+  letter-spacing: .012em;
+}
+
+.message-group.bubble-style-newspaper .message-submission-invite-card {
+  border-width: 1px 0 3px;
+  background:
+    radial-gradient(circle, rgba(20, 20, 20, .07) 0 1px, transparent 1.2px) 0 0 / 5px 5px,
+    var(--invite-surface);
+  box-shadow: inset 0 3px 0 currentColor, var(--invite-shadow);
+  font-family: Georgia, "Noto Serif SC", serif;
+}
+
+.message-group.bubble-style-receipt .message-submission-invite-card {
+  border: 0;
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--invite-text) 5%, transparent), transparent 36%),
+    var(--invite-surface);
+  -webkit-mask:
+    linear-gradient(#000 0 0) center / calc(100% - 8px) 100% no-repeat,
+    radial-gradient(circle at left center, transparent 0 2.5px, #000 3px) left / 8px 11px repeat-y,
+    radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
+  mask:
+    linear-gradient(#000 0 0) center / calc(100% - 8px) 100% no-repeat,
+    radial-gradient(circle at left center, transparent 0 2.5px, #000 3px) left / 8px 11px repeat-y,
+    radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
+  font-family: "JetBrains Mono", monospace;
 }

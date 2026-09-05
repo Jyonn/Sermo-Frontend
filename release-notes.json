@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.05.17",
+  "id": "2026.09.05.18",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "投稿人邀请范围调整",
+      "title": "投稿邀请卡片适配气泡",
       "items": [
-        "邀请新的投稿者时，现在只会展示并允许选择当前好友",
-        "后端会再次校验好友关系，避免通过过期页面或直接请求绕过限制"
+        "投稿邀请卡片现在会跟随发送者的气泡样式，适配对应的颜色、纹理、边框和圆角",
+        "不同邀请状态保持清晰可辨，并改善了深浅色气泡中的文字层级"
       ]
     },
     "en": {
-      "title": "Safer co-author invitations",
+      "title": "Submission invites match chat bubbles",
       "items": [
-        "Inviting a new submission author now only shows and accepts your current friends",
-        "The server verifies the friendship again so stale screens or direct requests cannot bypass the rule"
+        "Submission invitation cards now follow the sender's bubble colors, textures, borders, and shape",
+        "Invitation states remain easy to distinguish with clearer text hierarchy across light and dark bubbles"
       ]
     }
   }
