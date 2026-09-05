@@ -89,6 +89,7 @@ const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_OFFICIAL_NOTICE = 12;
+const MESSAGE_TYPE_SUBMISSION_INVITE = 13;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
@@ -842,6 +843,7 @@ function messageKindFromType(type: number): MessageKind {
   if (type === MESSAGE_TYPE_ACTIVITY) return "activity";
   if (type === MESSAGE_TYPE_SYSTEM) return "system";
   if (type === MESSAGE_TYPE_OFFICIAL_NOTICE) return "official_notice";
+  if (type === MESSAGE_TYPE_SUBMISSION_INVITE) return "submission_invite";
   return "text";
 }
 
@@ -1091,6 +1093,7 @@ function previewFromKind(kind: MessageKind, text: string) {
   if (kind === "activity") return i18n.t("message.activityPlaceholder");
   if (kind === "system") return text || i18n.t("message.system.placeholder");
   if (kind === "official_notice") return text || i18n.t("message.officialNotice.placeholder");
+  if (kind === "submission_invite") return i18n.t("submission.inviteCardPreview");
   return text || i18n.t("chat.noMessages");
 }
 
@@ -1118,7 +1121,7 @@ function clearChatUnread(chat: Chat) {
 
 function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
   if (!neighbor) return false;
-  if (["system", "official_notice"].includes(current.kind) || ["system", "official_notice"].includes(neighbor.kind)) return false;
+  if (["system", "official_notice", "submission_invite"].includes(current.kind) || ["system", "official_notice", "submission_invite"].includes(neighbor.kind)) return false;
   if (current.from !== neighbor.from || Math.abs(current.createdAt - neighbor.createdAt) >= 5 * 60) return false;
   if (visibleBubbleStyle(current.chatBubbleStyle) !== visibleBubbleStyle(neighbor.chatBubbleStyle)) return false;
   if (current.from === "self") return true;
@@ -1859,6 +1862,40 @@ function renderMessageContent(
     );
   }
 
+  if (message.kind === "submission_invite") {
+    const invitation = message.payload?.invitation;
+    if (!invitation) {
+      return <span className="submission-invite-card-unavailable">{i18n.t("submission.inviteUnavailable")}</span>;
+    }
+    const authorNames = invitation.submission.authors.map((user) => user.name).join(i18n.t("common.nameSeparator"));
+    const reviewerNames = invitation.submission.reviewers.map((user) => user.name).join(i18n.t("common.nameSeparator"));
+    return (
+      <button
+        className={`message-submission-invite-card is-${invitation.status} ${groupClassName}`.trim()}
+        onClick={(event) => {
+          event.stopPropagation();
+          window.dispatchEvent(new CustomEvent("sermo:submission-invite", { detail: invitation }));
+        }}
+        type="button"
+      >
+        <span className="message-submission-invite-heading">
+          <span className="message-submission-invite-mark material-symbols-outlined" aria-hidden="true">outbox</span>
+          <span><small>{i18n.t("submission.inviteCardEyebrow")}</small><strong>{invitation.submission.title || i18n.t("submission.unnamed")}</strong></span>
+          <span className="message-submission-invite-role">{i18n.t(invitation.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</span>
+        </span>
+        <span className="message-submission-invite-people">
+          <span><b>{i18n.t("submission.authorsShort")}</b><i>{authorNames}</i></span>
+          <span><b>{i18n.t("submission.reviewersShort")}</b><i>{reviewerNames}</i></span>
+        </span>
+        <span className="message-submission-invite-footer">
+          <span>{i18n.t(`submission.inviteStatus.${invitation.status}` as TranslationKey)}</span>
+          <span>{invitation.status === "pending" ? i18n.t("submission.validUntil", { date: new Intl.DateTimeFormat(getActiveLocale(), { month: "numeric", day: "numeric" }).format(invitation.expires_at * 1000) }) : i18n.t("submission.viewInvite")}</span>
+          <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </span>
+      </button>
+    );
+  }
+
   if (message.kind === "statement") {
     return <StatementMessageCard statement={message.payload?.statement} />;
   }
@@ -1976,7 +2013,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   selectionMode,
 }: MessageBubbleRowProps) {
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio"].includes(message.kind);
-  const canOpenActions = message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri));
+  const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -2048,6 +2085,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             from === "self" ? "self" : "other",
             isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
             message.kind === "location" ? "is-location" : "",
+            message.kind === "submission_invite" ? "is-submission-invite" : "",
             message.kind === "map_access" ? "is-travel-map" : "",
             message.kind === "statement" ? "is-statement" : "",
             message.kind === "activity" ? "is-activity" : "",
@@ -2294,7 +2332,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       cacheKey={group.from === "self" ? undefined : group.avatarCacheKey}
     />
   ) : null;
-  const selectableGroupMessages = group.messages.filter((message) => !["system", "official_notice"].includes(message.kind));
+  const selectableGroupMessages = group.messages.filter((message) => !["system", "official_notice", "submission_invite"].includes(message.kind));
   const groupSelected = selectableGroupMessages.length > 0 && selectableGroupMessages.every((message) => selectedClientIds.includes(message.clientId));
 
   return (
@@ -2425,6 +2463,7 @@ function estimateMessageRowHeight(message: ChatMessage) {
   const replyHeight = message.replyTo ? 44 : 0;
   if (message.kind === "system") return 34;
   if (message.kind === "official_notice") return 92;
+  if (message.kind === "submission_invite") return 196;
   if (message.kind === "image") {
     const width = Number(message.payload?.pixel_width || message.payload?.image_metadata?.pixel_width || 0);
     const height = Number(message.payload?.pixel_height || message.payload?.image_metadata?.pixel_height || 0);
@@ -2853,8 +2892,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [submissionInvites, setSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
-  const [incomingSubmissionInvites, setIncomingSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
   const [submissionInviteBusyId, setSubmissionInviteBusyId] = useState<number | null>(null);
+  const [submissionInviteSheetOpen, setSubmissionInviteSheetOpen] = useState(false);
+  const [submissionInviteDetail, setSubmissionInviteDetail] = useState<SubmissionInviteDTO | null>(null);
+  const [submissionInviteDetailLoading, setSubmissionInviteDetailLoading] = useState(false);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [messageSearchOpen, setMessageSearchOpen] = useState(false);
   const [messageSearchKeyword, setMessageSearchKeyword] = useState("");
@@ -3471,7 +3512,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const openMessageMenu = (message: ChatMessage, element: HTMLElement, pointerX?: number, origin: MessageMenuState["origin"] = "chat") => {
-    if (messageSelectionMode || ["system", "official_notice"].includes(message.kind)) return;
+    if (messageSelectionMode || ["system", "official_notice", "submission_invite"].includes(message.kind)) return;
     const rect = element.getBoundingClientRect();
     const spaceAbove = rect.top - 12;
     const spaceBelow = window.innerHeight - rect.bottom - 12;
@@ -3501,7 +3542,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const toggleMessageSelection = (message: ChatMessage) => {
-    if (messageDeleteState === "deleting" || ["system", "official_notice"].includes(message.kind)) return;
+    if (messageDeleteState === "deleting" || ["system", "official_notice", "submission_invite"].includes(message.kind)) return;
     setSelectedMessageClientIds((current) => {
       if (current.includes(message.clientId)) return current.filter((item) => item !== message.clientId);
       if (current.length >= 50) {
@@ -3513,7 +3554,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const toggleMessageGroupSelection = (groupMessages: ChatMessage[]) => {
-    const selectableIds = groupMessages.filter((message) => !["system", "official_notice"].includes(message.kind)).map((message) => message.clientId);
+    const selectableIds = groupMessages.filter((message) => !["system", "official_notice", "submission_invite"].includes(message.kind)).map((message) => message.clientId);
     if (!selectableIds.length) return;
     setSelectedMessageClientIds((current) => {
       const selected = new Set(current);
@@ -3530,7 +3571,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const startMessageSelection = (message: ChatMessage) => {
-    if (["system", "official_notice"].includes(message.kind)) return;
+    if (["system", "official_notice", "submission_invite"].includes(message.kind)) return;
     const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setMessageMenu(null);
     setReplyTarget(null);
@@ -3688,9 +3729,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   );
   const submissionStatusLabel = (status?: SubmissionStatus) => status ? t(`submission.status.${status}` as TranslationKey) : "";
   const selectedChatId = selectedChat && selectedChat.id > 0 ? selectedChat.id : null;
-  const canManageSubmissionMembers = Boolean(
+  const canInviteSubmissionAuthors = Boolean(
+    selectedChat?.purpose === "submission" && ["author", "reviewer"].includes(selectedChat.submissionRole ?? "") && selectedChat.id > 0,
+  );
+  const canInviteSubmissionReviewers = Boolean(
     selectedChat?.purpose === "submission" && selectedChat.submissionRole === "reviewer" && selectedChat.id > 0,
   );
+  const canManageSubmissionMembers = canInviteSubmissionAuthors || canInviteSubmissionReviewers;
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
   selectedChatIdRef.current = selectedChatId;
   const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
@@ -4150,38 +4195,40 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   }, [canManageSubmissionMembers, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
 
   useEffect(() => {
-    if (!submissionMode || !pageActive) {
-      setIncomingSubmissionInvites([]);
-      return;
-    }
-    const controller = new AbortController();
-    const syncInvites = () => {
-      api.getChatInvites(controller.signal)
-        .then((rows) => setIncomingSubmissionInvites(rows.filter((row) => row.chat?.purpose === "submission")))
-        .catch(() => undefined);
+    const openSubmissionInvite = (event: Event) => {
+      const invite = (event as CustomEvent<SubmissionInviteDTO>).detail;
+      if (!invite?.invite_id) return;
+      setSubmissionInviteDetail(invite);
+      setSubmissionInviteSheetOpen(true);
+      setSubmissionInviteDetailLoading(true);
+      api.getSubmissionInvite(invite.invite_id)
+        .then(setSubmissionInviteDetail)
+        .catch((error) => showToast(error instanceof ApiError ? error.message : t("submission.inviteLoadFailed"), "error"))
+        .finally(() => setSubmissionInviteDetailLoading(false));
     };
-    syncInvites();
-    const timer = window.setInterval(syncInvites, 30_000);
-    return () => {
-      controller.abort();
-      window.clearInterval(timer);
-    };
-  }, [pageActive, submissionMode]);
+    window.addEventListener("sermo:submission-invite", openSubmissionInvite);
+    return () => window.removeEventListener("sermo:submission-invite", openSubmissionInvite);
+  }, [t]);
 
-  const respondToSubmissionInvite = async (invite: SubmissionInviteDTO, accept: boolean) => {
-    if (submissionInviteBusyId !== null) return;
-    setSubmissionInviteBusyId(invite.chat_id);
+  const acceptSubmissionInvite = async () => {
+    const invite = submissionInviteDetail;
+    if (!invite?.can_accept || submissionInviteBusyId !== null) return;
+    setSubmissionInviteBusyId(invite.invite_id);
     try {
-      await api.respondChatInvite(invite.chat_id, accept);
-      setIncomingSubmissionInvites((current) => current.filter((item) => item.chat_id !== invite.chat_id));
-      if (accept) {
-        setSubmissionView(invite.submission_role);
-        const rows = await api.getChats(undefined, "submission", invite.submission_role);
-        setChats(sortChats(rows.map((item) => mapChat(item, currentUserId))));
-        navigate(`/app/submissions/${invite.chat_id}`);
-      }
-      showToast(accept ? t("submission.inviteApproved") : t("submission.inviteRejected"), "success");
+      const result = await api.acceptSubmissionInvite(invite.invite_id);
+      setSubmissionInviteDetail(result.invitation);
+      setSubmissionInviteSheetOpen(false);
+      const canOpenImmediately = result.invitation.role === "author" || result.invitation.submission.status !== "draft";
+      navigate(canOpenImmediately
+        ? `/app/submissions/${result.invitation.chat_id}?view=${result.invitation.role}`
+        : `/app/submissions?view=${result.invitation.role}`);
+      showToast(t("submission.inviteApproved"), "success");
     } catch (error) {
+      try {
+        setSubmissionInviteDetail(await api.getSubmissionInvite(invite.invite_id));
+      } catch {
+        // Keep the card context visible while showing the original acceptance error.
+      }
       showToast(error instanceof ApiError ? error.message : t("submission.inviteReviewFailed"), "error");
     } finally {
       setSubmissionInviteBusyId(null);
@@ -5229,13 +5276,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   };
 
   const openSubmissionMemberAdder = (role: "author" | "reviewer") => {
-    if (!selectedChat || !canManageSubmissionMembers) return;
+    if (!selectedChat || (role === "author" ? !canInviteSubmissionAuthors : !canInviteSubmissionReviewers)) return;
     setDetailsSheetOpen(false);
     setGroupQuery("");
     setChatMemberPickerMode(role === "author" ? "submission-author" : "submission-reviewer");
     setChatMemberLockedIds([
       ...selectedChat.detail.members.map((member) => member.userId),
-      ...submissionInvites.map((invite) => invite.user.user_id),
+      ...submissionInvites.filter((invite) => invite.role === role).map((invite) => invite.invitee.user_id),
     ]);
     setGroupSelectedIds([]);
     setChatMemberPickerOpen(true);
@@ -6642,7 +6689,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   });
 
   const canForwardMessage = (message: ChatMessage) => (
-    typeof message.id === "number" && !["system", "official_notice", "map_access", "forward_bundle"].includes(message.kind)
+    typeof message.id === "number" && !["system", "official_notice", "submission_invite", "map_access", "forward_bundle"].includes(message.kind)
   );
 
   const eligibleForwardMessages = () => selectedActionMessages().filter(canForwardMessage);
@@ -7057,9 +7104,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     try {
       setGroupManageState("saving");
       if (submissionInviteRole) {
-        const invites = await Promise.all(chatMemberActionIds.map((userId) => api.inviteSubmissionMember(selectedChat.id, userId, submissionInviteRole)));
-        setSubmissionInvites((current) => [...current, ...invites]);
-        showToast(t("submission.invitesSent", { count: invites.length }));
+        const results = await Promise.all(chatMemberActionIds.map((userId) => api.inviteSubmissionMember(selectedChat.id, userId, submissionInviteRole)));
+        setSubmissionInvites((current) => [...current, ...results.map((result) => result.invitation)]);
+        showToast(t("submission.invitesSent", { count: results.length }));
       } else if (selectedChat.type === "group" && chatMemberPickerMode === "remove") {
         const updated = await api.removeGroupMembers(selectedChat.id, chatMemberActionIds);
         applyUpdatedGroupChat(updated);
@@ -7336,27 +7383,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       ) : null}
 
       <div className="chat-list-screen-body">
-        {submissionMode && incomingSubmissionInvites.length ? (
-          <section className="submission-incoming-invites" aria-label={t("submission.incomingInvites")}>
-            {incomingSubmissionInvites.map((invite) => (
-              <article key={`submission-invite-${invite.chat_id}`}>
-                <UserAvatar className="mini-avatar" name={invite.invited_by?.name ?? t("common.unknown")} uri={invite.invited_by?.avatar_uri} cacheKey={invite.invited_by?.avatar_cache_key} />
-                <div>
-                  <strong>{invite.chat.title || t("submission.unnamed")}</strong>
-                  <small>{t(invite.submission_role === "reviewer" ? "submission.invitedAsReviewer" : "submission.invitedAsAuthor", { name: invite.invited_by?.name ?? t("common.unknown") })}</small>
-                </div>
-                <div className="submission-invite-actions">
-                  <button disabled={submissionInviteBusyId === invite.chat_id} onClick={() => void respondToSubmissionInvite(invite, false)} type="button">{t("common.reject")}</button>
-                  <button className="is-accept" disabled={submissionInviteBusyId === invite.chat_id} onClick={() => void respondToSubmissionInvite(invite, true)} type="button">{t("common.accept")}</button>
-                </div>
-              </article>
-            ))}
-          </section>
-        ) : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
-        {!filteredChats.length && viewState === "ready" && !(submissionMode && incomingSubmissionInvites.length) ? (
+        {!filteredChats.length && viewState === "ready" ? (
           <QuietState
             icon={submissionMode ? "outbox" : "chat_bubble"}
             title={submissionMode && submissionStatusFilter !== "all" ? t("submission.filterEmpty") : submissionMode ? t("submission.empty") : t("chat.empty")}
@@ -8384,6 +8414,44 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         </div>
       </BottomSheet>
 
+      <BottomSheet
+        bodyClassName="submission-invite-sheet-body"
+        className="submission-invite-sheet"
+        onClose={() => {
+          if (submissionInviteBusyId === null) setSubmissionInviteSheetOpen(false);
+        }}
+        open={submissionInviteSheetOpen}
+        title={t("submission.inviteSheetTitle")}
+      >
+        {submissionInviteDetail ? (
+          <div className={`submission-invite-sheet-content is-${submissionInviteDetail.status}`}>
+            <div className="submission-invite-sheet-title">
+              <span className="material-symbols-outlined" aria-hidden="true">outbox</span>
+              <div>
+                <small>{t("submission.invitedBy", { name: submissionInviteDetail.inviter.name })}</small>
+                <strong>{submissionInviteDetail.submission.title || t("submission.unnamed")}</strong>
+              </div>
+              <span>{t(submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</span>
+            </div>
+            <dl className="submission-invite-sheet-meta">
+              <div><dt>{t("submission.authorsShort")}</dt><dd>{submissionInviteDetail.submission.authors.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
+              <div><dt>{t("submission.reviewersShort")}</dt><dd>{submissionInviteDetail.submission.reviewers.map((user) => user.name).join(t("common.nameSeparator"))}</dd></div>
+              <div><dt>{t("submission.invitedRole")}</dt><dd>{t(submissionInviteDetail.role === "reviewer" ? "submission.role.reviewer" : "submission.role.author")}</dd></div>
+              <div><dt>{t("submission.validity")}</dt><dd>{t("submission.validUntil", { date: new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "numeric", day: "numeric" }).format(submissionInviteDetail.expires_at * 1000) })}</dd></div>
+            </dl>
+            <div className={`submission-invite-sheet-status is-${submissionInviteDetail.status}`}>
+              <span className="material-symbols-outlined" aria-hidden="true">{submissionInviteDetail.status === "accepted" ? "check_circle" : submissionInviteDetail.status === "expired" ? "schedule" : submissionInviteDetail.status === "conflict" ? "info" : "history"}</span>
+              <span><strong>{t(`submission.inviteStatus.${submissionInviteDetail.status}` as TranslationKey)}</strong><small>{t(submissionInviteDetail.status === "pending" && submissionInviteDetail.invitee.user_id !== currentUserId ? "submission.inviteStatusHint.sent" : `submission.inviteStatusHint.${submissionInviteDetail.status}` as TranslationKey)}</small></span>
+            </div>
+            {submissionInviteDetail.can_accept ? (
+              <button className="button submission-invite-confirm" disabled={submissionInviteBusyId !== null} onClick={() => void acceptSubmissionInvite()} type="button">
+                {submissionInviteBusyId !== null ? t("common.processing") : t("submission.confirmJoin")}
+              </button>
+            ) : null}
+          </div>
+        ) : submissionInviteDetailLoading ? <FeedbackState title={t("common.loading")} description={t("submission.inviteLoadingHint")} /> : <FeedbackState title={t("submission.inviteUnavailable")} description={t("submission.inviteUnavailableHint")} />}
+      </BottomSheet>
+
       <BottomSheet open={submissionReviewSheetOpen} title={t("submission.reviewNext")} onClose={() => !submissionActionBusy && setSubmissionReviewSheetOpen(false)}>
         <div className="submission-review-actions">
           <button disabled={submissionActionBusy} onClick={() => void reviewCurrentSubmission("revision")} type="button"><span className="material-symbols-outlined">rate_review</span><span><strong>{t("submission.requestRevision")}</strong><small>{t("submission.requestRevisionHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
@@ -8595,7 +8663,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               <section className="submission-detail-role-section">
                 <header>
                   <div><strong>{t("submission.authors")}</strong><small>{t("submission.coAuthoring", { count: submissionAuthorMembers.length })}</small></div>
-                  {canManageSubmissionMembers ? <button onClick={() => openSubmissionMemberAdder("author")} type="button"><span className="material-symbols-outlined">person_add</span>{t("submission.inviteAuthor")}</button> : null}
+                  {canInviteSubmissionAuthors ? <button onClick={() => openSubmissionMemberAdder("author")} type="button"><span className="material-symbols-outlined">person_add</span>{t("submission.inviteAuthor")}</button> : null}
                 </header>
                 <div className="submission-detail-member-list">
                   {submissionAuthorMembers.map((member) => <button disabled={member.isSelf} key={`submission-author-${member.userId}`} onClick={() => setProfileDrawerUserId(member.userId)} type="button">
@@ -8608,7 +8676,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               <section className="submission-detail-role-section is-reviewers">
                 <header>
                   <div><strong>{t("submission.reviewers")}</strong><small>{t("submission.coReviewing", { count: submissionReviewerMembers.length })}</small></div>
-                  {canManageSubmissionMembers ? <button onClick={() => openSubmissionMemberAdder("reviewer")} type="button"><span className="material-symbols-outlined">person_add</span>{t("submission.inviteReviewer")}</button> : null}
+                  {canInviteSubmissionReviewers ? <button onClick={() => openSubmissionMemberAdder("reviewer")} type="button"><span className="material-symbols-outlined">person_add</span>{t("submission.inviteReviewer")}</button> : null}
                 </header>
                 <div className="submission-detail-member-list">
                   {submissionReviewerMembers.map((member) => <button disabled={member.isSelf} key={`submission-reviewer-${member.userId}`} onClick={() => setProfileDrawerUserId(member.userId)} type="button">
@@ -8620,9 +8688,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               </section>
               {submissionInvites.length ? <section className="submission-invite-review">
                 <header><strong>{t("submission.pendingInvites")}</strong><small>{t("submission.pendingConsentHint")}</small></header>
-                {submissionInvites.map((invite) => <div key={invite.user.user_id}>
-                  <UserAvatar className="mini-avatar" name={invite.user.name} uri={invite.user.avatar_uri} cacheKey={invite.user.avatar_cache_key} />
-                  <span><strong>{invite.user.name}</strong><small>{t(invite.submission_role === "reviewer" ? "submission.pendingReviewer" : "submission.pendingAuthor")}</small></span>
+                {submissionInvites.map((invite) => <div key={invite.invite_id}>
+                  <UserAvatar className="mini-avatar" name={invite.invitee.name} uri={invite.invitee.avatar_uri} cacheKey={invite.invitee.avatar_cache_key} />
+                  <span><strong>{invite.invitee.name}</strong><small>{t(invite.role === "reviewer" ? "submission.pendingReviewer" : "submission.pendingAuthor")}</small></span>
                   <span className="submission-invite-pending">{t("submission.awaitingConsent")}</span>
                 </div>)}
               </section> : null}

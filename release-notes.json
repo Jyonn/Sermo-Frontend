@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.05.15",
+  "id": "2026.09.05.16",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "投稿头像显示修复",
+      "title": "投稿协作邀请升级",
       "items": [
-        "我的投稿现在只展示审批者头像，审批列表只展示投稿者头像",
-        "只有一位对应成员时使用清晰的大圆形头像，不再混入自己的头像",
-        "多人投稿或审批继续使用斜向头像组合与剩余人数提示"
+        "投稿协作邀请现在通过私聊卡片发送，并展示主题、投稿者与审批者信息",
+        "邀请在 7 日内有效，受邀者可在卡片详情中确认加入并查看全部历史消息",
+        "投稿者可邀请共同投稿者，审批者可邀请投稿者或审批者，且两种身份保持互斥"
       ]
     },
     "en": {
-      "title": "Correct submission avatars",
+      "title": "Better submission invitations",
       "items": [
-        "My submissions now show reviewer avatars only, while the review list shows author avatars only",
-        "A single counterpart now appears as one clear circular avatar without including your own avatar",
-        "Collaborative submissions continue to use diagonal avatar stacks with an overflow count"
+        "Submission collaborators are now invited through private message cards showing the topic, authors, and reviewers",
+        "Invitations remain valid for 7 days and let recipients confirm before gaining access to the full history",
+        "Authors can invite co-authors, reviewers can invite either role, and the two roles remain mutually exclusive"
       ]
     }
   }

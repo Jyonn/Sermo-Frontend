@@ -2,7 +2,7 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "forward_bundle" | "activity";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -892,6 +892,7 @@ export interface ChatMessagePayloadDTO {
   event?: string;
   actor_user_id?: number;
   actor_name?: string;
+  invitation?: SubmissionInviteDTO | null;
   old_title?: string;
   new_title?: string;
   member_names?: string[];
@@ -1317,15 +1318,32 @@ export interface SubmissionRecipientDTO {
 }
 
 export interface SubmissionInviteDTO {
+  invite_id: number;
   chat_id: number;
-  chat: ChatDTO;
-  user: UserDTO;
-  invited_by: TinyUserDTO | null;
-  role: number;
-  submission_role: Exclude<SubmissionRole, "member">;
-  status: number;
+  role: Exclude<SubmissionRole, "member">;
+  status: "pending" | "accepted" | "expired" | "conflict";
+  inviter: TinyUserDTO;
+  invitee: TinyUserDTO;
   created_at: number;
-  updated_at: number;
+  expires_at: number;
+  accepted_at: number | null;
+  can_accept: boolean;
+  submission: {
+    title: string;
+    status: SubmissionStatus;
+    authors: TinyUserDTO[];
+    reviewers: TinyUserDTO[];
+  };
+}
+
+export interface SubmissionInviteSendDTO {
+  invitation: SubmissionInviteDTO;
+  message: ChatMessageDTO;
+}
+
+export interface SubmissionInviteAcceptDTO {
+  invitation: SubmissionInviteDTO;
+  chat: ChatDTO;
 }
 
 export interface FriendAccepted {

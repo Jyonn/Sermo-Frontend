@@ -29,6 +29,7 @@ const MESSAGE_TYPE_IMAGE = 1;
 const MESSAGE_TYPE_FILE = 2;
 const MESSAGE_TYPE_SYSTEM = 3;
 const MESSAGE_TYPE_OFFICIAL_NOTICE = 12;
+const MESSAGE_TYPE_SUBMISSION_INVITE = 13;
 const MESSAGE_TYPE_VIDEO = 4;
 const MESSAGE_TYPE_AUDIO = 5;
 const MESSAGE_TYPE_LOCATION = 6;
@@ -92,6 +93,8 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
             ? "system"
             : message.type === MESSAGE_TYPE_OFFICIAL_NOTICE
               ? "official_notice"
+              : message.type === MESSAGE_TYPE_SUBMISSION_INVITE
+                ? "submission_invite"
             : "text");
   return {
     id: message.message_id,

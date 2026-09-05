@@ -656,15 +656,15 @@ export const api = {
   },
 
   inviteSubmissionMember(chat_id: number, user_id: number, role: "author" | "reviewer") {
-    return request<import("../types").SubmissionInviteDTO>("/chats/submissions/invites", { method: "POST", auth: true, query: { chat_id }, body: { user_id, role } });
+    return request<import("../types").SubmissionInviteSendDTO>("/chats/submissions/invites", { method: "POST", auth: true, query: { chat_id }, body: { user_id, role } });
   },
 
-  getChatInvites(signal?: AbortSignal) {
-    return request<import("../types").SubmissionInviteDTO[]>("/chats/group/invites", { auth: true, signal });
+  getSubmissionInvite(invite_id: number, signal?: AbortSignal) {
+    return request<import("../types").SubmissionInviteDTO>("/chats/submissions/invite", { auth: true, query: { invite_id }, signal });
   },
 
-  respondChatInvite(chat_id: number, accept: boolean) {
-    return request<ChatDTO>("/chats/group/invite/respond", { method: "POST", auth: true, query: { chat_id }, body: { accept: accept ? 1 : 0 } });
+  acceptSubmissionInvite(invite_id: number) {
+    return request<import("../types").SubmissionInviteAcceptDTO>("/chats/submissions/invite", { method: "POST", auth: true, query: { invite_id } });
   },
 
   createDirectChat(peer_user_id: number) {

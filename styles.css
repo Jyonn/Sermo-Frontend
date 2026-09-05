@@ -4289,6 +4289,294 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   font-variation-settings: "wght" 450;
 }
 
+.message-bubble.is-submission-invite {
+  width: min(78vw, 330px);
+  max-width: 330px;
+  padding: 0;
+  border: 0;
+  border-radius: 19px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.message-submission-invite-card {
+  --invite-accent: var(--brand-primary);
+  display: grid;
+  width: 100%;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--invite-accent) 28%, var(--line-soft));
+  border-radius: 19px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--invite-accent) 9%, transparent), transparent 58%),
+    color-mix(in srgb, var(--bg-panel-strong) 96%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--text-primary) 8%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.message-submission-invite-card.is-expired,
+.message-submission-invite-card.is-conflict {
+  --invite-accent: var(--text-muted);
+}
+
+.message-submission-invite-card.is-accepted {
+  --invite-accent: #4b8b73;
+}
+
+.message-submission-invite-heading {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 13px 11px;
+}
+
+.message-submission-invite-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--invite-accent) 13%, var(--bg-surface));
+  color: var(--invite-accent);
+  font-size: 19px;
+}
+
+.message-submission-invite-heading > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.message-submission-invite-heading small {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
+.message-submission-invite-heading strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-submission-invite-role {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--invite-accent) 12%, transparent);
+  color: color-mix(in srgb, var(--invite-accent) 88%, var(--text-primary));
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.message-submission-invite-people {
+  display: grid;
+  gap: 6px;
+  margin: 0 13px;
+  padding: 10px 0;
+  border-top: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
+}
+
+.message-submission-invite-people > span {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 7px;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.message-submission-invite-people b {
+  color: var(--brand-primary-press);
+  font-style: normal;
+  font-weight: 750;
+}
+
+.message-submission-invite-people i {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-submission-invite-footer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 15px;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 13px;
+  background: color-mix(in srgb, var(--invite-accent) 7%, var(--bg-surface));
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.message-submission-invite-footer > span:nth-child(2) {
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-submission-invite-footer .material-symbols-outlined {
+  font-size: 15px;
+}
+
+.submission-invite-card-unavailable {
+  display: inline-block;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.submission-invite-sheet-body {
+  padding-top: 6px;
+}
+
+.submission-invite-sheet-content {
+  display: grid;
+  gap: 15px;
+}
+
+.submission-invite-sheet-title {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+
+.submission-invite-sheet-title > .material-symbols-outlined {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand-primary) 13%, var(--bg-surface));
+  color: var(--brand-primary);
+}
+
+.submission-invite-sheet-title > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.submission-invite-sheet-title small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.submission-invite-sheet-title strong {
+  overflow-wrap: anywhere;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.submission-invite-sheet-title > span:last-child {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-primary) 11%, transparent);
+  color: var(--brand-primary-press);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.submission-invite-sheet-meta {
+  display: grid;
+  margin: 0;
+  padding: 4px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--bg-surface) 72%, transparent);
+}
+
+.submission-invite-sheet-meta > div {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.submission-invite-sheet-meta > div:last-child {
+  border-bottom: 0;
+}
+
+.submission-invite-sheet-meta dt {
+  color: var(--text-muted);
+}
+
+.submission-invite-sheet-meta dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 650;
+}
+
+.submission-invite-sheet-status {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 12px 13px;
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--brand-primary) 9%, transparent);
+  color: var(--brand-primary-press);
+}
+
+.submission-invite-sheet-status.is-expired,
+.submission-invite-sheet-status.is-conflict {
+  background: color-mix(in srgb, var(--text-muted) 9%, transparent);
+  color: var(--text-secondary);
+}
+
+.submission-invite-sheet-status > .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.submission-invite-sheet-status > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.submission-invite-sheet-status strong {
+  font-size: 12px;
+}
+
+.submission-invite-sheet-status small {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.submission-invite-confirm {
+  width: 100%;
+  min-height: 46px;
+}
+
+.message-bubble.self.is-submission-invite,
+.message-bubble.other.is-submission-invite {
+  width: min(78vw, 330px);
+  max-width: 330px;
+  padding: 0;
+  border: 0;
+  border-radius: 19px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
 .message-history-actions {
   display: flex;
   justify-content: center;
