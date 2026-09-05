@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
@@ -30,6 +30,13 @@ import { useI18n, type TranslationKey } from "../lib/language";
 import { isChineseLanguage, localeForLanguage } from "../lib/i18n";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
 import { formatRelativeTime } from "../lib/presentation";
+import {
+  mergeSquareFeedRefresh,
+  normalizeSquareFeedSnapshot,
+  squareFeedCacheKey,
+  type NormalizedSquareFeedSnapshot,
+  type SquareFeedSnapshot,
+} from "../lib/squareFeedCache";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
@@ -70,6 +77,7 @@ const MAX_TEXT_LENGTH = 140;
 const COMMENT_STICKER_PAGE = -1;
 const COMMENT_STICKER_EXPLORE_PAGE = -2;
 const COMMENT_STICKER_PAGE_SIZE = 30;
+const SQUARE_FEED_PAGE_SIZE = 20;
 const COMMENT_MENTION_RE = /<@(\d+)>/g;
 type InlineTransitionPhase = "idle" | "preparing" | "opening" | "open" | "closing";
 type InlineStatementOrigin = { left: number; top: number; width: number; height: number };
@@ -437,11 +445,24 @@ export default function SquarePage() {
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
   const profileFeedUserName = searchParams.get("user_name")?.trim() || t("square.userFeedFallback");
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(profileFeedUserId ? "user" : "all");
-  const [statements, setStatements] = useState<SquareStatementDTO[]>(() => readTabCache<SquareStatementDTO[]>(cacheScope, "square:all")?.data ?? []);
-  const [loading, setLoading] = useState(true);
+  const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
+    ? features.squareExploreEnabled ? "all" : "friends"
+    : feedMode;
+  const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId);
+  const initialFeedSnapshotRef = useRef<NormalizedSquareFeedSnapshot<SquareStatementDTO> | null>();
+  if (initialFeedSnapshotRef.current === undefined) {
+    const normalized = normalizeSquareFeedSnapshot(
+      readTabCache<SquareStatementDTO[] | SquareFeedSnapshot<SquareStatementDTO>>(cacheScope, activeFeedCacheKey)?.data,
+    );
+    initialFeedSnapshotRef.current = normalized?.trusted ? normalized : null;
+  }
+  const initialFeedSnapshot = initialFeedSnapshotRef.current;
+  const [statements, setStatements] = useState<SquareStatementDTO[]>(() => initialFeedSnapshot?.items ?? []);
+  const [statementsFeedKey, setStatementsFeedKey] = useState(activeFeedCacheKey);
+  const [loading, setLoading] = useState(() => !initialFeedSnapshot);
   const [syncing, setSyncing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(() => initialFeedSnapshot?.hasMore ?? true);
   const squareLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState("");
   const [text, setText] = useState("");
@@ -517,6 +538,12 @@ export default function SquarePage() {
   const [inlineStatementOrigin, setInlineStatementOrigin] = useState<InlineStatementOrigin | null>(null);
   const statementCardRefs = useRef(new Map<number, HTMLElement>());
   const squareFeedScrollRef = useRef<HTMLElement | null>(null);
+  const activeFeedCacheKeyRef = useRef(activeFeedCacheKey);
+  const feedScrollPositionsRef = useRef(new Map<string, number>());
+  const pendingFeedScrollRestoreRef = useRef<{ key: string; top: number } | null>(null);
+  const feedScrollRestoreFramesRef = useRef(new Set<number>());
+  const [feedScrollTopVisible, setFeedScrollTopVisible] = useState(false);
+  const [feedScrollTopRight, setFeedScrollTopRight] = useState(18);
   const inlineExpandTimerRef = useRef<number | null>(null);
   const commentStatementId = routedStatementId ?? inlineStatementId;
   const [comments, setComments] = useState<SquareStatementCommentDTO[]>([]);
@@ -597,6 +624,7 @@ export default function SquarePage() {
   const recorderChunksRef = useRef<Blob[]>([]);
   const recordingStartedAtRef = useRef(0);
   const recordingTimerRef = useRef<number | null>(null);
+  activeFeedCacheKeyRef.current = activeFeedCacheKey;
   const currentUser = session?.user;
   const canPublish = Boolean(currentUser?.verified);
   const canSendVoice = Boolean(currentUser?.official) || growthLevel >= 6;
@@ -909,20 +937,107 @@ export default function SquarePage() {
     return () => controller.abort();
   }, [session?.user.growth_level, session?.user.user_id]);
 
+  const cancelFeedScrollRestore = () => {
+    feedScrollRestoreFramesRef.current.forEach((frame) => window.cancelAnimationFrame(frame));
+    feedScrollRestoreFramesRef.current.clear();
+  };
+
+  const queueFeedScrollRestore = (cacheKey: string, top: number) => {
+    cancelFeedScrollRestore();
+    pendingFeedScrollRestoreRef.current = { key: cacheKey, top };
+    const schedule = (callback: () => void) => {
+      const frame = window.requestAnimationFrame(() => {
+        feedScrollRestoreFramesRef.current.delete(frame);
+        callback();
+      });
+      feedScrollRestoreFramesRef.current.add(frame);
+    };
+    schedule(() => schedule(() => {
+      const pending = pendingFeedScrollRestoreRef.current;
+      const scroller = squareFeedScrollRef.current;
+      if (!pending || pending.key !== cacheKey || activeFeedCacheKeyRef.current !== cacheKey || !scroller) return;
+      pendingFeedScrollRestoreRef.current = null;
+      scroller.scrollTop = pending.top;
+      feedScrollPositionsRef.current.set(cacheKey, scroller.scrollTop);
+      setFeedScrollTopVisible(scroller.scrollTop > 320);
+    }));
+  };
+
+  useLayoutEffect(() => {
+    const cacheKey = activeFeedCacheKey;
+    const normalizedCached = normalizeSquareFeedSnapshot(
+      readTabCache<SquareStatementDTO[] | SquareFeedSnapshot<SquareStatementDTO>>(cacheScope, cacheKey)?.data,
+    );
+    const cached = normalizedCached?.trusted ? normalizedCached : null;
+    const persistedTop = readTabCache<number>(cacheScope, `${cacheKey}:scroll`)?.data ?? 0;
+    const savedTop = cached?.items.length
+      ? feedScrollPositionsRef.current.get(cacheKey) ?? persistedTop
+      : 0;
+    const scroller = squareFeedScrollRef.current;
+
+    feedScrollPositionsRef.current.set(cacheKey, savedTop);
+    pendingFeedScrollRestoreRef.current = { key: cacheKey, top: savedTop };
+    if (scroller) scroller.scrollTop = 0;
+    setFeedScrollTopVisible(false);
+    setStatementsFeedKey(cacheKey);
+    setStatements(cached?.items ?? []);
+    setHasMore(cached?.hasMore ?? true);
+    setLoading(!cached);
+    setLoadingMore(false);
+    setError("");
+    queueFeedScrollRestore(cacheKey, savedTop);
+
+    return () => {
+      cancelFeedScrollRestore();
+      const pending = pendingFeedScrollRestoreRef.current;
+      const top = pending?.key === cacheKey ? pending.top : scroller?.scrollTop ?? savedTop;
+      pendingFeedScrollRestoreRef.current = null;
+      feedScrollPositionsRef.current.set(cacheKey, top);
+      writeTabCache(cacheScope, `${cacheKey}:scroll`, top);
+    };
+  }, [activeFeedCacheKey, cacheScope]);
+
+  useEffect(() => {
+    const scroller = squareFeedScrollRef.current;
+    if (!scroller) return;
+    const updateInset = () => {
+      const rect = scroller.getBoundingClientRect();
+      setFeedScrollTopRight(Math.max(18, Math.round(window.innerWidth - rect.right + 18)));
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(updateInset);
+    updateInset();
+    observer?.observe(scroller);
+    const root = document.getElementById("root");
+    if (root) observer?.observe(root);
+    window.addEventListener("resize", updateInset);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", updateInset);
+    };
+  }, []);
+
   const loadStatements = async (before?: number) => {
-    const controller = new AbortController();
+    const requestFeedKey = activeFeedCacheKey;
     try {
-      const rows = await api.getSquareStatements({ before, limit: 20, scope: feedMode === "user" ? "all" : feedMode, user_id: feedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal);
-      setStatements((current) => before ? [...current, ...rows] : rows);
-      setHasMore(rows.length === 20);
+      const rows = await api.getSquareStatements({ before, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined });
+      if (activeFeedCacheKeyRef.current !== requestFeedKey) return;
+      setStatements((current) => {
+        if (!before) return rows;
+        const knownIds = new Set(current.map((statement) => statement.statement_id));
+        return [...current, ...rows.filter((statement) => !knownIds.has(statement.statement_id))];
+      });
+      setHasMore(rows.length === SQUARE_FEED_PAGE_SIZE);
       setError("");
     } catch (cause) {
-      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("square.loadFailed"));
+      if (activeFeedCacheKeyRef.current === requestFeedKey) {
+        setError(cause instanceof Error ? cause.message : t("square.loadFailed"));
+      }
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (activeFeedCacheKeyRef.current === requestFeedKey) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
-    return () => controller.abort();
   };
 
   useEffect(() => {
@@ -936,36 +1051,66 @@ export default function SquarePage() {
     }, { root, rootMargin: "600px 0px" });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loading, loadingMore, statements]);
+  }, [activeFeedCacheKey, hasMore, loading, loadingMore, statements]);
 
   useEffect(() => {
-    const cacheKey = feedMode === "user" ? `square:user:${profileFeedUserId}` : `square:${feedMode}`;
-    const cached = readTabCache<SquareStatementDTO[]>(cacheScope, cacheKey)?.data;
-    setStatements(cached ?? []);
-    setLoading(!cached);
+    const cacheKey = activeFeedCacheKey;
+    const normalizedCached = normalizeSquareFeedSnapshot(
+      readTabCache<SquareStatementDTO[] | SquareFeedSnapshot<SquareStatementDTO>>(cacheScope, cacheKey)?.data,
+    );
+    const cached = normalizedCached?.trusted ? normalizedCached : null;
     setSyncing(true);
     const controller = new AbortController();
-    void api.getSquareStatements({ limit: 20, scope: feedMode === "user" ? "all" : feedMode, user_id: feedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
-      setStatements(rows);
-      writeTabCache(cacheScope, cacheKey, rows);
-      setHasMore(rows.length === 20);
+    void api.getSquareStatements({ limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
+      if (activeFeedCacheKeyRef.current !== cacheKey) return;
+      const refreshed = mergeSquareFeedRefresh(cached?.items ?? [], rows);
+      const nextHasMore = refreshed.connected && cached
+        ? cached.hasMore || rows.length === SQUARE_FEED_PAGE_SIZE
+        : rows.length === SQUARE_FEED_PAGE_SIZE;
+      setStatementsFeedKey(cacheKey);
+      setStatements(refreshed.items);
+      setHasMore(nextHasMore);
+      writeTabCache<SquareFeedSnapshot<SquareStatementDTO>>(cacheScope, cacheKey, {
+        version: 2,
+        items: refreshed.items,
+        hasMore: nextHasMore,
+      });
+      if (!refreshed.connected && cached?.items.length) {
+        feedScrollPositionsRef.current.set(cacheKey, 0);
+        writeTabCache(cacheScope, `${cacheKey}:scroll`, 0);
+        queueFeedScrollRestore(cacheKey, 0);
+      }
       setError("");
     }).catch((cause) => {
-      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("square.loadFailed"));
-    }).finally(() => { setLoading(false); setSyncing(false); });
+      if (!controller.signal.aborted && activeFeedCacheKeyRef.current === cacheKey) {
+        setError(cause instanceof Error ? cause.message : t("square.loadFailed"));
+      }
+    }).finally(() => {
+      if (activeFeedCacheKeyRef.current === cacheKey) {
+        setLoading(false);
+        setSyncing(false);
+      }
+    });
     return () => controller.abort();
-  }, [cacheScope, feedMode, profileFeedUserId, t]);
+  }, [activeFeedCacheKey, cacheScope, effectiveFeedMode, profileFeedUserId, t]);
 
   useEffect(() => {
-    if (statements.length) writeTabCache(cacheScope, feedMode === "user" ? `square:user:${profileFeedUserId}` : `square:${feedMode}`, statements);
-  }, [cacheScope, feedMode, profileFeedUserId, statements]);
+    if (loading || statementsFeedKey !== activeFeedCacheKey) return;
+    writeTabCache<SquareFeedSnapshot<SquareStatementDTO>>(cacheScope, activeFeedCacheKey, {
+      version: 2,
+      items: statements,
+      hasMore,
+    });
+  }, [activeFeedCacheKey, cacheScope, hasMore, loading, statements, statementsFeedKey]);
 
   useEffect(() => {
     if (profileFeedUserId) {
       setFeedMode("user");
       setProfileDrawerUserId(null);
+    } else if (feedMode === "user") {
+      setFeedMode(features.squareExploreEnabled ? "all" : "friends");
     }
-  }, [profileFeedUserId]);
+  }, [features.squareExploreEnabled, feedMode, profileFeedUserId]);
 
   useEffect(() => () => {
     audioCaptureRef.current?.cleanup();
@@ -1757,7 +1902,16 @@ export default function SquarePage() {
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
       <div className={`square-desktop-workspace${inlineRouteActive ? " has-selection" : ""}`}>
-      <main className="list-screen square-feed-screen" ref={squareFeedScrollRef}>
+      <main
+        className="list-screen square-feed-screen"
+        onScroll={(event) => {
+          const top = event.currentTarget.scrollTop;
+          setFeedScrollTopVisible(top > 320);
+          if (pendingFeedScrollRestoreRef.current?.key === activeFeedCacheKey) return;
+          feedScrollPositionsRef.current.set(activeFeedCacheKey, top);
+        }}
+        ref={squareFeedScrollRef}
+      >
         <TabPageHeader
           syncing={syncing}
           title={t("square.title")}
@@ -1875,6 +2029,7 @@ export default function SquarePage() {
               estimateSize={estimateStatementHeight}
               itemKey={(statement) => `statement-${statement.statement_id}`}
               items={visibleStatements}
+              key={activeFeedCacheKey}
               overscan={900}
               scrollRef={squareFeedScrollRef}
               renderItem={renderFeedStatement}
@@ -1882,6 +2037,23 @@ export default function SquarePage() {
           )}
           {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
+        {feedScrollTopVisible && !inlineStatementExpanded ? (
+          <button
+            aria-label={t("square.backToTop")}
+            className="square-feed-scroll-top"
+            onClick={() => {
+              pendingFeedScrollRestoreRef.current = null;
+              feedScrollPositionsRef.current.set(activeFeedCacheKey, 0);
+              writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, 0);
+              squareFeedScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{ "--square-feed-scroll-top-right": `${feedScrollTopRight}px` } as CSSProperties}
+            title={t("square.backToTop")}
+            type="button"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11 12 4l7 7M12 4v16" /></svg>
+          </button>
+        ) : null}
       </main>
       <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">

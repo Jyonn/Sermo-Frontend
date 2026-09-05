@@ -27949,6 +27949,36 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-load-more { justify-self: center; min-height: 40px; border: 0; padding: 0 20px; border-radius: 999px; color: var(--text-secondary); background: var(--bg-canvas); }
 .square-feed-sentinel { display: grid; min-height: 2px; place-items: center; }
 .square-feed-sentinel.is-loading { min-height: 46px; }
+.square-feed-scroll-top {
+  position: fixed;
+  z-index: 8;
+  right: max(var(--square-feed-scroll-top-right, 18px), env(safe-area-inset-right));
+  bottom: 30px;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 25%, transparent);
+  border-radius: 50%;
+  color: #fff;
+  background: color-mix(in srgb, var(--brand-primary) 88%, #163c31);
+  box-shadow: 0 12px 28px rgba(7, 45, 34, .24);
+  cursor: pointer;
+  animation: message-search-float-in 180ms ease-out both;
+}
+.square-feed-scroll-top:hover { transform: translateY(-2px); }
+.square-feed-scroll-top:focus-visible { outline: 2px solid color-mix(in srgb, var(--brand-primary) 52%, white); outline-offset: 3px; }
+.square-feed-scroll-top svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+html[data-theme="dark"] .square-feed-scroll-top { border-color: rgba(92, 224, 173, .28); background: color-mix(in srgb, var(--brand-primary) 70%, #15271f); box-shadow: 0 12px 30px rgba(0, 0, 0, .34); }
+
+@media (max-width: 900px) {
+  .square-feed-scroll-top { bottom: calc(88px + env(safe-area-inset-bottom)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .square-feed-scroll-top { animation: none; }
+}
 
 .square-comments-drawer { min-height: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: calc(104px + env(safe-area-inset-bottom)); scroll-padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
 .square-comments-context { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 4px 2px 15px; border-bottom: 1px solid var(--line-soft); }

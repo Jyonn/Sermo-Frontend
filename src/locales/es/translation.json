@@ -324,6 +324,7 @@
   "square.feedAll": "Explorar",
   "square.feedFriends": "Amigos",
   "square.feedMine": "mis publicaciones",
+  "square.backToTop": "Volver arriba",
   "square.userFeedFallback": "usuario",
   "square.closeUserFeed": "cerrar{{name}}las declaraciones de",
   "square.userFeedEmpty": "{{name}}aún no se ha publicado",

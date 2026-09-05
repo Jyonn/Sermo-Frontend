@@ -324,6 +324,7 @@
   "square.feedAll": "探索",
   "square.feedFriends": "友達",
   "square.feedMine": "私の投稿",
+  "square.backToTop": "トップへ戻る",
   "square.userFeedFallback": "ユーザー",
   "square.closeUserFeed": "閉じる{{name}}声明",
   "square.userFeedEmpty": "{{name}}まだ公開されていません",

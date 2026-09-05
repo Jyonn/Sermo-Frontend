@@ -324,6 +324,7 @@
   "square.feedAll": "探索",
   "square.feedFriends": "好友圈",
   "square.feedMine": "我的",
+  "square.backToTop": "回到頂部",
   "square.userFeedFallback": "使用者",
   "square.closeUserFeed": "關閉 {{name}} 的發言",
   "square.userFeedEmpty": "{{name}} 還沒有發言",

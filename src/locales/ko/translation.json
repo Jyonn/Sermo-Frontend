@@ -324,6 +324,7 @@
   "square.feedAll": "탐구",
   "square.feedFriends": "친구",
   "square.feedMine": "내 게시물",
+  "square.backToTop": "맨 위로",
   "square.userFeedFallback": "사용자",
   "square.closeUserFeed": "종료{{name}}'s 문서는",
   "square.userFeedEmpty": "{{name}}아직 게시되지 않았습니다",

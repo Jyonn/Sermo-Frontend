@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.9",
+  "id": "2026.09.05.10",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "历史消息浏览更顺畅",
+      "title": "广场浏览位置会保留",
       "items": [
-        "从锁定消息继续向后浏览时，新一页会保留当前阅读位置，不再自动连续翻页"
+        "探索、好友圈、我的和好友发言流会分别记住浏览位置，并可一键回到顶部"
       ]
     },
     "en": {
-      "title": "Smoother history browsing",
+      "title": "Square feeds remember your place",
       "items": [
-        "Loading newer pages from a locked message now preserves your reading position instead of advancing repeatedly"
+        "Explore, Friends, My Posts, and individual member feeds now keep separate scroll positions with a quick return-to-top action"
       ]
     }
   }

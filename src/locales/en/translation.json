@@ -324,6 +324,7 @@
   "square.feedAll": "Explore",
   "square.feedFriends": "Friends",
   "square.feedMine": "My posts",
+  "square.backToTop": "Back to top",
   "square.userFeedFallback": "User",
   "square.closeUserFeed": "Close {{name}}'s statements",
   "square.userFeedEmpty": "{{name}} has not posted yet",
