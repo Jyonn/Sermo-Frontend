@@ -31736,31 +31736,32 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   isolation: isolate;
   grid-template-columns: 56px minmax(0, 1fr) auto;
   column-gap: 5px;
-  min-height: 116px;
-  padding-block: 16px;
+  min-height: 108px;
+  padding-block: 9px;
   border-bottom: 0;
-  background: transparent;
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--submission-flow-color) 7%, transparent),
+    transparent 72%
+  );
 }
 
 .chat-item.is-submission-item::before {
-  content: none;
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 19px;
+  bottom: 19px;
+  left: -9px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--submission-flow-color);
+  opacity: .72;
 }
 
 .chat-item.is-submission-item::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: 0 0 0 27px;
-  border-radius: 22px 0 0 22px;
-  background: linear-gradient(
-    100deg,
-    color-mix(in srgb, var(--submission-flow-color) 8%, var(--bg-surface)),
-    color-mix(in srgb, var(--submission-flow-color) 3%, var(--bg-surface)) 72%,
-    color-mix(in srgb, var(--submission-flow-color) 1%, var(--bg-surface))
-  );
-  box-shadow: inset 1px 0 color-mix(in srgb, var(--submission-flow-color) 10%, transparent);
-  pointer-events: none;
-  transition: background 160ms ease, box-shadow 160ms ease;
+  content: none;
 }
 
 .chat-item.is-submission-item.is-status-review { --submission-flow-color: #2798df; }
@@ -31771,17 +31772,19 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .chat-item.is-submission-item.is-status-withdrawn { --submission-flow-color: color-mix(in srgb, var(--text-muted) 62%, transparent); }
 .chat-item.is-submission-item.active,
 .chat-item.is-submission-item:hover {
-  background: transparent;
-}
-.chat-item.is-submission-item.active::after,
-.chat-item.is-submission-item:hover::after {
   background: linear-gradient(
-    100deg,
-    color-mix(in srgb, var(--submission-flow-color) 11%, var(--bg-surface)),
-    color-mix(in srgb, var(--submission-flow-color) 5%, var(--bg-surface)) 72%,
-    color-mix(in srgb, var(--submission-flow-color) 2%, var(--bg-surface))
+    90deg,
+    color-mix(in srgb, var(--submission-flow-color) 10%, transparent),
+    transparent 72%
   );
-  box-shadow: inset 1px 0 color-mix(in srgb, var(--submission-flow-color) 16%, transparent);
+  transform: none;
+}
+
+.chat-mobile-layout > .mobile-chat-list-screen .chat-item.is-submission-item {
+  width: calc(100% - 26px);
+  margin-right: 0;
+  margin-left: 26px;
+  padding: 9px 8px 9px 0;
 }
 
 .chat-list:has(> .is-submission-item) {
@@ -31808,26 +31811,29 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   background: color-mix(in srgb, var(--submission-flow-color) 16%, var(--line-soft));
   transform: translateX(-.5px);
 }
-.chat-item.is-submission-item .avatar-wrap::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 0;
-  width: 3px;
-  height: 78px;
-  border-radius: 999px;
-  background: var(--submission-flow-color);
-  opacity: .76;
-  transform: translateY(-50%);
-}
 .chat-item.is-submission-item .avatar {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  box-shadow:
-    0 0 0 4px var(--bg-surface),
-    0 0 0 5px color-mix(in srgb, var(--submission-flow-color) 28%, var(--line-soft));
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 34%, var(--line-soft));
+}
+.chat-item.is-submission-item .avatar > .avatar-frame-clip {
+  padding: 6px;
+  background: var(--bg-surface);
+}
+.chat-item.is-submission-item .avatar :is(.avatar-image, .avatar-label) {
+  border-radius: 50%;
+}
+.chat-item.is-submission-item .avatar .avatar-label {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: var(--avatar-bg);
+}
+.chat-item.is-submission-item .avatar .avatar-group-stack {
+  inset: 6px;
 }
 .chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile {
   top: auto;

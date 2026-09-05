@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.05.20",
+  "id": "2026.09.05.21",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
       "title": "投稿列表视觉优化",
       "items": [
-        "投稿状态线现在贴合头像左侧，时间轴继续保持在头像中心",
-        "相邻投稿的状态背景改为连续排列，流程列表更加紧凑清晰"
+        "投稿列表恢复流程侧标设计中的整行渐隐背景与紧凑排列",
+        "圆形头像增加留白并缩小内部头像，状态线与头像关系更加清晰"
       ]
     },
     "en": {
       "title": "Refined submission list",
       "items": [
-        "Submission status rails now sit beside each avatar while the timeline remains centered",
-        "Adjacent submission backgrounds now connect into a tighter, clearer workflow list"
+        "Submission rows now use the original flow-rail gradient treatment and compact spacing",
+        "Circular avatars now have more breathing room around a smaller inner portrait"
       ]
     }
   }
