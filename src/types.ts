@@ -34,6 +34,7 @@ export interface TinyUserDTO {
 
 export interface UserDTO extends TinyUserDTO {
   joined_at?: number;
+  submission_role?: SubmissionRole | null;
   is_alive: boolean;
   verified: boolean;
   last_heartbeat: number;
@@ -1214,6 +1215,8 @@ export type SubmissionRole = "author" | "reviewer" | "member";
 export interface SubmissionDTO {
   author: TinyUserDTO;
   recipient: TinyUserDTO;
+  authors?: TinyUserDTO[];
+  reviewers?: TinyUserDTO[];
   status: SubmissionStatus;
   submitted_at: number | null;
   published_statement_id: number | null;
@@ -1269,6 +1272,9 @@ export interface ChatDetail {
     avatarFrameStyle?: AvatarFrameStyle;
     isSelf: boolean;
     isOwner: boolean;
+    official?: boolean;
+    operator?: boolean;
+    submissionRole?: SubmissionRole | null;
     joinedAt?: number;
   }>;
 }
@@ -1293,6 +1299,7 @@ export interface Chat {
   purpose?: "normal" | "submission";
   submission?: SubmissionDTO | null;
   submissionRole?: SubmissionRole;
+  submissionCounterparts?: TinyUserDTO[];
   isOwner: boolean;
   pinned: boolean;
   onlineReminderEnabled: boolean;
@@ -1311,9 +1318,11 @@ export interface SubmissionRecipientDTO {
 
 export interface SubmissionInviteDTO {
   chat_id: number;
+  chat: ChatDTO;
   user: UserDTO;
   invited_by: TinyUserDTO | null;
   role: number;
+  submission_role: Exclude<SubmissionRole, "member">;
   status: number;
   created_at: number;
   updated_at: number;

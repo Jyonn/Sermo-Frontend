@@ -2645,7 +2645,10 @@ function sortChatDetailMembers(
 
 function mapChat(chat: ChatDTO, currentUserId: number): Chat {
   const peer = chat.group ? null : getDirectPeer(chat, currentUserId);
-  const submissionCounterpart = chat.submission_role === "reviewer" ? chat.submission?.author : chat.submission?.recipient;
+  const submissionAuthors = chat.submission?.authors?.length ? chat.submission.authors : chat.submission ? [chat.submission.author] : [];
+  const submissionReviewers = chat.submission?.reviewers?.length ? chat.submission.reviewers : chat.submission ? [chat.submission.recipient] : [];
+  const submissionCounterparts = chat.submission_role === "reviewer" ? submissionAuthors : submissionReviewers;
+  const submissionCounterpart = submissionCounterparts[0];
   const title = chat.title || peer?.name || i18n.t("chat.unnamed");
   const presence = formatPresence(peer);
   const isOwner = Boolean(chat.group && chat.owner?.user_id === currentUserId);
@@ -2671,6 +2674,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     purpose: chat.purpose ?? "normal",
     submission: chat.submission,
     submissionRole: chat.submission_role,
+    submissionCounterparts,
     isOwner,
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
@@ -2690,6 +2694,9 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
           avatarFrameStyle: member.avatar_frame_style,
           isSelf: member.user_id === currentUserId,
           isOwner: Boolean(chat.owner?.user_id === member.user_id),
+          official: Boolean(member.official),
+          operator: Boolean(member.operator),
+          submissionRole: member.submission_role,
           joinedAt: member.joined_at ?? chat.created_at,
         }))
       ),
@@ -2846,6 +2853,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [replyingTo, setReplyingTo] = useState<QuotedMessageDTO | null>(null);
   const [detailsSheetOpen, setDetailsSheetOpen] = useState(false);
   const [submissionInvites, setSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
+  const [incomingSubmissionInvites, setIncomingSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
   const [submissionInviteBusyId, setSubmissionInviteBusyId] = useState<number | null>(null);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [messageSearchOpen, setMessageSearchOpen] = useState(false);
@@ -3045,7 +3053,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [groupFriendPool, setGroupFriendPool] = useState<UserDTO[]>([]);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
   const [chatMemberLockedIds, setChatMemberLockedIds] = useState<number[]>([]);
-  const [chatMemberPickerMode, setChatMemberPickerMode] = useState<"add" | "remove" | "transfer">("add");
+  const [chatMemberPickerMode, setChatMemberPickerMode] = useState<"add" | "remove" | "transfer" | "submission-author" | "submission-reviewer">("add");
   const [groupOwnerTransferConfirmOpen, setGroupOwnerTransferConfirmOpen] = useState(false);
   const [groupRenameOpen, setGroupRenameOpen] = useState(false);
   const [groupRenameValue, setGroupRenameValue] = useState("");
@@ -3639,11 +3647,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       submission: {
         author: { user_id: session.user.user_id, name: session.user.name, avatar_uri: session.user.avatar_uri ?? "" },
         recipient,
+        authors: [{ user_id: session.user.user_id, name: session.user.name, avatar_uri: session.user.avatar_uri ?? "" }],
+        reviewers: [recipient],
         status: "draft",
         submitted_at: null,
         published_statement_id: null,
       },
       submissionRole: "author",
+      submissionCounterparts: [recipient],
       isOwner: false,
       pinned: false,
       onlineReminderEnabled: false,
@@ -3654,7 +3665,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         summary: t("chat.groupSummary"),
         relation: t("chat.memberRelation"),
         actions: [],
-        members: [{ userId: recipient.user_id, name: recipient.name, avatarUri: recipient.avatar_uri, avatarCacheKey: recipient.avatar_cache_key, avatarFrameStyle: recipient.avatar_frame_style, isSelf: false, isOwner: true }],
+        members: [
+          { userId: session.user.user_id, name: session.user.name, avatarUri: session.user.avatar_uri, avatarFrameStyle: session.user.avatar_frame_style, isSelf: true, isOwner: false, submissionRole: "author" },
+          { userId: recipient.user_id, name: recipient.name, avatarUri: recipient.avatar_uri, avatarCacheKey: recipient.avatar_cache_key, avatarFrameStyle: recipient.avatar_frame_style, isSelf: false, isOwner: true, submissionRole: "reviewer" },
+        ],
       },
       messages: [],
     };
@@ -3674,6 +3688,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   );
   const submissionStatusLabel = (status?: SubmissionStatus) => status ? t(`submission.status.${status}` as TranslationKey) : "";
   const selectedChatId = selectedChat && selectedChat.id > 0 ? selectedChat.id : null;
+  const canManageSubmissionMembers = Boolean(
+    selectedChat?.purpose === "submission" && selectedChat.submissionRole === "reviewer" && selectedChat.id > 0,
+  );
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
   selectedChatIdRef.current = selectedChatId;
   const selectedDirectPeer = useMemo<TinyUserDTO | null>(() => {
@@ -4123,22 +4140,46 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   }, [detailsSheetOpen, historyReloadVersion, selectedChat?.id]);
 
   useEffect(() => {
-    if (!detailsSheetOpen || selectedChat?.purpose !== "submission" || !canReviewSubmissionInvites) {
+    if (!detailsSheetOpen || selectedChat?.purpose !== "submission" || !canManageSubmissionMembers) {
       setSubmissionInvites([]);
       return;
     }
     const controller = new AbortController();
     api.getSubmissionInvites(selectedChat.id, controller.signal).then(setSubmissionInvites).catch(() => setSubmissionInvites([]));
     return () => controller.abort();
-  }, [canReviewSubmissionInvites, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
+  }, [canManageSubmissionMembers, detailsSheetOpen, selectedChat?.id, selectedChat?.purpose]);
 
-  const reviewSubmissionInvite = async (invite: SubmissionInviteDTO, accept: boolean) => {
-    if (!selectedChat || submissionInviteBusyId !== null) return;
-    setSubmissionInviteBusyId(invite.user.user_id);
+  useEffect(() => {
+    if (!submissionMode || !pageActive) {
+      setIncomingSubmissionInvites([]);
+      return;
+    }
+    const controller = new AbortController();
+    const syncInvites = () => {
+      api.getChatInvites(controller.signal)
+        .then((rows) => setIncomingSubmissionInvites(rows.filter((row) => row.chat?.purpose === "submission")))
+        .catch(() => undefined);
+    };
+    syncInvites();
+    const timer = window.setInterval(syncInvites, 30_000);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, [pageActive, submissionMode]);
+
+  const respondToSubmissionInvite = async (invite: SubmissionInviteDTO, accept: boolean) => {
+    if (submissionInviteBusyId !== null) return;
+    setSubmissionInviteBusyId(invite.chat_id);
     try {
-      const updated = await api.reviewSubmissionInvite(selectedChat.id, invite.user.user_id, accept);
-      setSubmissionInvites((current) => current.filter((item) => item.user.user_id !== invite.user.user_id));
-      setChats((current) => current.map((chat) => chat.id === selectedChat.id ? mapChat(updated, currentUserId) : chat));
+      await api.respondChatInvite(invite.chat_id, accept);
+      setIncomingSubmissionInvites((current) => current.filter((item) => item.chat_id !== invite.chat_id));
+      if (accept) {
+        setSubmissionView(invite.submission_role);
+        const rows = await api.getChats(undefined, "submission", invite.submission_role);
+        setChats(sortChats(rows.map((item) => mapChat(item, currentUserId))));
+        navigate(`/app/submissions/${invite.chat_id}`);
+      }
       showToast(accept ? t("submission.inviteApproved") : t("submission.inviteRejected"), "success");
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("submission.inviteReviewFailed"), "error");
@@ -5123,6 +5164,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     ? chats.filter((chat) => chat.submission?.status === submissionStatusFilter)
     : chats;
   const detailMembers = selectedChat?.detail.members ?? [];
+  const submissionAuthorIds = new Set((selectedChat?.submission?.authors?.length ? selectedChat.submission.authors : selectedChat?.submission ? [selectedChat.submission.author] : []).map((member) => member.user_id));
+  const submissionReviewerIds = new Set((selectedChat?.submission?.reviewers?.length ? selectedChat.submission.reviewers : selectedChat?.submission ? [selectedChat.submission.recipient] : []).map((member) => member.user_id));
+  const submissionAuthorMembers = detailMembers.filter((member) => member.submissionRole === "author" || submissionAuthorIds.has(member.userId));
+  const submissionReviewerMembers = detailMembers.filter((member) => member.submissionRole === "reviewer" || submissionReviewerIds.has(member.userId));
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
   const chatMemberNewIds = groupSelectedIds.filter((userId) => !chatMemberLockedIds.includes(userId));
@@ -5183,6 +5228,19 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     setChatMemberPickerOpen(true);
   };
 
+  const openSubmissionMemberAdder = (role: "author" | "reviewer") => {
+    if (!selectedChat || !canManageSubmissionMembers) return;
+    setDetailsSheetOpen(false);
+    setGroupQuery("");
+    setChatMemberPickerMode(role === "author" ? "submission-author" : "submission-reviewer");
+    setChatMemberLockedIds([
+      ...selectedChat.detail.members.map((member) => member.userId),
+      ...submissionInvites.map((invite) => invite.user.user_id),
+    ]);
+    setGroupSelectedIds([]);
+    setChatMemberPickerOpen(true);
+  };
+
   const openChatMemberRemover = () => {
     if (!selectedChat || selectedChat.type !== "group" || !selectedChat.isOwner) return;
     setDetailsSheetOpen(false);
@@ -5239,6 +5297,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!groupCreateOpen && !chatMemberPickerOpen) return;
 
     const controller = new AbortController();
+    const submissionMemberPicker = chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer";
     if (groupCreateOpen) {
       setGroupCreateState((current) => (current === "creating" ? current : "loading-users"));
     }
@@ -5247,11 +5306,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     }
 
     Promise.all([
-      api.getFriends(controller.signal),
-      currentUserVerified === null ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : Promise.resolve([] as UserDTO[]),
+      submissionMemberPicker ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : api.getFriends(controller.signal),
+      currentUserVerified === null && !submissionMemberPicker ? api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal) : Promise.resolve([] as UserDTO[]),
     ])
       .then(([friendRows, spaceUsers]) => {
-        const verified = currentUserVerified ?? spaceUsers.find((user) => user.user_id === currentUserId)?.verified ?? false;
+        const verified = currentUserVerified ?? (submissionMemberPicker ? friendRows : spaceUsers).find((user) => user.user_id === currentUserId)?.verified ?? false;
         setCurrentUserVerified(verified);
         setGroupFriendPool(friendRows.filter((user) => user.user_id !== currentUserId));
         setGroupCreateState((current) => (current === "creating" ? current : "idle"));
@@ -5266,7 +5325,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       });
 
     return () => controller.abort();
-  }, [chatMemberPickerOpen, currentUserId, currentUserVerified, groupCreateOpen]);
+  }, [chatMemberPickerMode, chatMemberPickerOpen, currentUserId, currentUserVerified, groupCreateOpen]);
 
   useEffect(() => {
     if (!groupCreateOpen && !chatMemberPickerOpen) {
@@ -5293,12 +5352,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                 }) as UserDTO
             )
         : [];
+    const submissionReviewerPicker = chatMemberPickerMode === "submission-reviewer";
+    const submissionMemberPicker = chatMemberPickerMode === "submission-author" || submissionReviewerPicker;
     const baseCandidates = (chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer" ? chatMemberRows : [...chatMemberRows, ...groupFriendPool]).filter(
       (user, index, rows) => rows.findIndex((item) => item.user_id === user.user_id) === index
-    );
+    ).filter((user) => !submissionMemberPicker || (user.user_id !== currentUserId && (!submissionReviewerPicker || user.official || user.operator)));
 
     setGroupCandidates(filterUsersByName(baseCandidates, groupQuery));
-  }, [chatMemberPickerMode, chatMemberPickerOpen, groupCreateOpen, groupFriendPool, groupQuery, selectedChat]);
+  }, [chatMemberPickerMode, chatMemberPickerOpen, currentUserId, groupCreateOpen, groupFriendPool, groupQuery, selectedChat]);
 
   useEffect(() => {
     const element = mentionEditorRef.current?.getElement();
@@ -6986,11 +7047,20 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       setGroupOwnerTransferConfirmOpen(true);
       return;
     }
-    if (chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "chat.group.invite" : "chat.group.create", 4, selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup"))) return;
+    const submissionInviteRole = chatMemberPickerMode === "submission-author"
+      ? "author"
+      : chatMemberPickerMode === "submission-reviewer"
+        ? "reviewer"
+        : null;
+    if (!submissionInviteRole && chatMemberPickerMode !== "remove" && !requireComposerCapability(selectedChat.type === "group" ? "chat.group.invite" : "chat.group.create", 4, selectedChat.type === "group" ? t("chat.inviteGroupMembers") : t("chat.createGroup"))) return;
 
     try {
       setGroupManageState("saving");
-      if (selectedChat.type === "group" && chatMemberPickerMode === "remove") {
+      if (submissionInviteRole) {
+        const invites = await Promise.all(chatMemberActionIds.map((userId) => api.inviteSubmissionMember(selectedChat.id, userId, submissionInviteRole)));
+        setSubmissionInvites((current) => [...current, ...invites]);
+        showToast(t("submission.invitesSent", { count: invites.length }));
+      } else if (selectedChat.type === "group" && chatMemberPickerMode === "remove") {
         const updated = await api.removeGroupMembers(selectedChat.id, chatMemberActionIds);
         applyUpdatedGroupChat(updated);
         showToast(chatMemberActionIds.length > 1 ? t("chat.membersRemoved") : t("chat.memberRemoved"));
@@ -7171,10 +7241,16 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     }
   };
 
-  const renderChatItem = (chat: Chat, active: boolean) => (
-    <button
+  const renderChatItem = (chat: Chat, active: boolean) => {
+    const submissionAuthors = chat.submission?.authors?.length ? chat.submission.authors : chat.submission ? [chat.submission.author] : [];
+    const submissionReviewers = chat.submission?.reviewers?.length ? chat.submission.reviewers : chat.submission ? [chat.submission.recipient] : [];
+    const counterparts = chat.submissionCounterparts ?? [];
+    const collaborators = chat.submissionRole === "reviewer" ? submissionReviewers : submissionAuthors;
+    const counterpartNames = counterparts.slice(0, 2).map((member) => member.name).join(t("common.nameSeparator"));
+    const counterpartOverflow = Math.max(0, counterparts.length - 2);
+    return <button
       key={chat.id}
-      className={`chat-item${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
+      className={`chat-item${chat.submission ? ` is-submission-item is-status-${chat.submission.status}` : ""}${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
       onClick={() => navigate(chatPath(chat.id))}
       type="button"
     >
@@ -7182,7 +7258,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         <UserAvatar
           className={`avatar ${chat.online ? "status-online" : ""}`}
           groupMembers={
-            chat.type === "group" && chat.purpose !== "submission" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
+            chat.purpose === "submission" && counterparts.length > 1
+              ? counterparts.slice(0, 2).map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
+              : chat.type === "group" ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey })) : undefined
           }
           name={chat.title}
           uri={chat.avatarUri}
@@ -7192,10 +7270,18 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         {chat.unread ? (
           <span className={`small-badge chat-list-unread${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
         ) : null}
+        {chat.submission && counterpartOverflow ? <span className="submission-avatar-overflow">+{counterpartOverflow}</span> : null}
       </div>
       <div className="chat-copy">
         {chat.submission ? (
-          <p className="chat-name is-submission"><span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span><span className="submission-list-title">{chat.title}</span></p>
+          <>
+            <p className="chat-name is-submission"><span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span><span className="submission-list-title">{chat.title}</span></p>
+            <div className="submission-list-people">
+              <span className="submission-list-role">{t(chat.submissionRole === "reviewer" ? "submission.authorsShort" : "submission.reviewersShort")}</span>
+              <span className="submission-list-names">{counterpartNames || t("common.unknown")}{counterpartOverflow ? ` +${counterpartOverflow}` : ""}</span>
+              {collaborators.length > 1 ? <span className="submission-list-collaboration">{t(chat.submissionRole === "reviewer" ? "submission.coReviewing" : "submission.coAuthoring", { count: collaborators.length })}</span> : null}
+            </div>
+          </>
         ) : (
           <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}</p>
         )}
@@ -7205,8 +7291,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         <div className="chat-time">{chat.time}</div>
         {chat.pinned ? <span className="chat-pin-label">{t("chat.pinned")}</span> : null}
       </div>
-    </button>
-  );
+    </button>;
+  };
 
   const renderChatList = () => (
     <>
@@ -7246,10 +7332,27 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       ) : null}
 
       <div className="chat-list-screen-body">
+        {submissionMode && incomingSubmissionInvites.length ? (
+          <section className="submission-incoming-invites" aria-label={t("submission.incomingInvites")}>
+            {incomingSubmissionInvites.map((invite) => (
+              <article key={`submission-invite-${invite.chat_id}`}>
+                <UserAvatar className="mini-avatar" name={invite.invited_by?.name ?? t("common.unknown")} uri={invite.invited_by?.avatar_uri} cacheKey={invite.invited_by?.avatar_cache_key} />
+                <div>
+                  <strong>{invite.chat.title || t("submission.unnamed")}</strong>
+                  <small>{t(invite.submission_role === "reviewer" ? "submission.invitedAsReviewer" : "submission.invitedAsAuthor", { name: invite.invited_by?.name ?? t("common.unknown") })}</small>
+                </div>
+                <div className="submission-invite-actions">
+                  <button disabled={submissionInviteBusyId === invite.chat_id} onClick={() => void respondToSubmissionInvite(invite, false)} type="button">{t("common.reject")}</button>
+                  <button className="is-accept" disabled={submissionInviteBusyId === invite.chat_id} onClick={() => void respondToSubmissionInvite(invite, true)} type="button">{t("common.accept")}</button>
+                </div>
+              </article>
+            ))}
+          </section>
+        ) : null}
         <div className="chat-list">
           {filteredChats.map((chat) => renderChatItem(chat, chat.id === selectedChat?.id))}
         </div>
-        {!filteredChats.length && viewState === "ready" ? (
+        {!filteredChats.length && viewState === "ready" && !(submissionMode && incomingSubmissionInvites.length) ? (
           <QuietState
             icon={submissionMode ? "outbox" : "chat_bubble"}
             title={submissionMode && submissionStatusFilter !== "all" ? t("submission.filterEmpty") : submissionMode ? t("submission.empty") : t("chat.empty")}
@@ -7347,9 +7450,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button">
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
-        ) : displayedChat && !messageSelectionMode && displayedChat.purpose !== "submission" ? (
+        ) : displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
-            <button className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button>
+            <button aria-label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button>
           </div>
         ) : undefined
       }
@@ -7398,7 +7501,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode && displayedChat.purpose !== "submission" ? <button aria-label={t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button> : null}
+                  : !messageSelectionMode ? <button aria-label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button> : null}
                 {sendProgress !== null ? (
                   <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />
@@ -8134,7 +8237,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           {selectedChat ? (
             <>
               <div className="panel-header" style={{ padding: 0, borderBottom: "1px solid rgba(232,235,242,.9)" }}>
-                <h3 className="panel-title">{selectedChat.type === "direct" ? t("chat.conversationInfo") : t("chat.groupInfo")}</h3>
+                <h3 className="panel-title">{selectedChat.purpose === "submission" ? t("submission.detailsTitle") : selectedChat.type === "direct" ? t("chat.conversationInfo") : t("chat.groupInfo")}</h3>
                 <p className="card-subtitle">{selectedChat.detail.summary}</p>
               </div>
 
@@ -8193,7 +8296,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   <div className="detail-card">
                     <strong>{t("common.quickActions")}</strong>
                     <div className="settings-actions" style={{ marginTop: 12 }}>
-                      {selectedChat.type === "group" ? (
+                      {selectedChat.purpose === "submission" ? (
+                        <button className="ghost-button" onClick={() => setDetailsSheetOpen(true)} type="button">{t("submission.openDetails")}</button>
+                      ) : selectedChat.type === "group" ? (
                         <>
                           {selectedChat.isOwner ? (
                             <>
@@ -8473,21 +8578,51 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         historyKey="chat-details"
         onRouteOpen={() => setDetailsSheetOpen(true)}
         open={detailsSheetOpen}
-        title={t("chat.details")}
+        title={selectedChat?.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")}
         onClose={() => setDetailsSheetOpen(false)}
       >
         {selectedChat ? (
           <div className="chat-detail-panel">
-            {submissionInvites.length ? <section className="submission-invite-review">
-              <header><strong>{t("submission.pendingInvites")}</strong><small>{t("submission.pendingInvitesHint")}</small></header>
-              {submissionInvites.map((invite) => <div key={invite.user.user_id}>
-                <UserAvatar className="mini-avatar" name={invite.user.name} uri={invite.user.avatar_uri} />
-                <span><strong>{invite.user.name}</strong><small>{t("submission.invitedBy", { name: invite.invited_by?.name ?? t("common.unknown") })}</small></span>
-                <button disabled={submissionInviteBusyId === invite.user.user_id} onClick={() => void reviewSubmissionInvite(invite, false)} type="button">{t("common.reject")}</button>
-                <button className="button" disabled={submissionInviteBusyId === invite.user.user_id} onClick={() => void reviewSubmissionInvite(invite, true)} type="button">{t("common.approve")}</button>
-              </div>)}
-            </section> : null}
-            <section className="chat-detail-people-section">
+            {selectedChat.submission ? <>
+              <section className="submission-detail-summary">
+                <span className={`submission-status-badge is-${selectedChat.submission.status}`}>{submissionStatusLabel(selectedChat.submission.status)}</span>
+                <div><strong>{selectedChat.title}</strong><small>{t("submission.memberHistoryHint")}</small></div>
+              </section>
+              <section className="submission-detail-role-section">
+                <header>
+                  <div><strong>{t("submission.authors")}</strong><small>{t("submission.coAuthoring", { count: submissionAuthorMembers.length })}</small></div>
+                  {canManageSubmissionMembers ? <button onClick={() => openSubmissionMemberAdder("author")} type="button"><span className="material-symbols-outlined">person_add</span>{t("submission.inviteAuthor")}</button> : null}
+                </header>
+                <div className="submission-detail-member-list">
+                  {submissionAuthorMembers.map((member) => <button disabled={member.isSelf} key={`submission-author-${member.userId}`} onClick={() => setProfileDrawerUserId(member.userId)} type="button">
+                    <UserAvatar className="mini-avatar" name={member.name} uri={member.avatarUri} cacheKey={member.avatarCacheKey} />
+                    <span><strong>{member.name}</strong><small>{member.isSelf ? t("common.you") : t("submission.role.author")}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>)}
+                </div>
+              </section>
+              <section className="submission-detail-role-section is-reviewers">
+                <header>
+                  <div><strong>{t("submission.reviewers")}</strong><small>{t("submission.coReviewing", { count: submissionReviewerMembers.length })}</small></div>
+                  {canManageSubmissionMembers ? <button onClick={() => openSubmissionMemberAdder("reviewer")} type="button"><span className="material-symbols-outlined">person_add</span>{t("submission.inviteReviewer")}</button> : null}
+                </header>
+                <div className="submission-detail-member-list">
+                  {submissionReviewerMembers.map((member) => <button disabled={member.isSelf} key={`submission-reviewer-${member.userId}`} onClick={() => setProfileDrawerUserId(member.userId)} type="button">
+                    <UserAvatar className="mini-avatar" name={member.name} uri={member.avatarUri} cacheKey={member.avatarCacheKey} />
+                    <span><strong>{member.name}</strong><small>{member.isSelf ? t("common.you") : member.official ? t("profile.official") : member.operator ? t("profile.operator") : t("submission.role.reviewer")}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>)}
+                </div>
+              </section>
+              {submissionInvites.length ? <section className="submission-invite-review">
+                <header><strong>{t("submission.pendingInvites")}</strong><small>{t("submission.pendingConsentHint")}</small></header>
+                {submissionInvites.map((invite) => <div key={invite.user.user_id}>
+                  <UserAvatar className="mini-avatar" name={invite.user.name} uri={invite.user.avatar_uri} cacheKey={invite.user.avatar_cache_key} />
+                  <span><strong>{invite.user.name}</strong><small>{t(invite.submission_role === "reviewer" ? "submission.pendingReviewer" : "submission.pendingAuthor")}</small></span>
+                  <span className="submission-invite-pending">{t("submission.awaitingConsent")}</span>
+                </div>)}
+              </section> : null}
+            </> : <section className="chat-detail-people-section">
               <div className="chat-detail-member-grid">
                 {visibleDetailMembers.map((member) => (
                   <button
@@ -8503,12 +8638,6 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <UserAvatar className="chat-detail-member-avatar" name={member.name} uri={member.avatarUri} />
                     <span className="chat-detail-member-name">
                       <span className="chat-detail-member-label">{member.name}</span>
-                      {selectedChat.submission ? <small className="submission-member-roles">
-                        {member.userId === selectedChat.submission.author.user_id ? <span>{t("submission.role.author")}</span> : null}
-                        {member.userId === selectedChat.submission.recipient.user_id ? <span>{t("submission.role.recipient")}</span> : null}
-                        {member.userId === selectedChat.submission.recipient.user_id && selectedChat.submission.recipient.official ? <OfficialBadge /> : null}
-                        {member.userId === selectedChat.submission.recipient.user_id && selectedChat.submission.recipient.operator ? <OperatorBadge /> : null}
-                      </small> : null}
                     </span>
                   </button>
                 ))}
@@ -8540,7 +8669,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   {t("chat.moreMembers")}
                 </button>
               ) : null}
-            </section>
+            </section>}
 
             {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
               <SettingGroup>
@@ -8559,9 +8688,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
               </SettingGroup>
             </section> : null}
 
-            <section className="chat-detail-settings-section">
+            {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
               <SettingGroup>
-                {selectedChat.purpose !== "submission" ? <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} /> : null}
+                <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
                 {selectedChat.type === "direct" && canUseOnlineReminder ? (
                   <FeatureDiscoveryTarget
                     className="is-setting-row"
@@ -8571,10 +8700,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   <SettingRow title={t("chat.onlineReminder")} trailing={<SettingSwitch checked={selectedChat.onlineReminderEnabled} disabled={preferenceSaving !== null} label={t("chat.toggleOnlineReminder")} onChange={(next) => void updateSelectedChatPreference("online", next)} />} />
                   </FeatureDiscoveryTarget>
                 ) : null}
-                {selectedChat.type === "group" && selectedChat.purpose !== "submission" ? (
+                {selectedChat.type === "group" ? (
                   <SettingRow description={t("chat.muteNotificationsHint")} title={t("chat.muteNotifications")} trailing={<SettingSwitch checked={selectedChat.notificationsMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteNotifications")} onChange={(next) => void updateSelectedChatPreference("mute", next)} />} />
                 ) : null}
-                {selectedChat.type === "group" && selectedChat.purpose !== "submission" && selectedChat.notificationsMuted ? (
+                {selectedChat.type === "group" && selectedChat.notificationsMuted ? (
                   <SettingRow className="is-dependent" description={t("chat.muteUnreadBadgeHint")} title={t("chat.muteUnreadBadge")} trailing={<SettingSwitch checked={selectedChat.unreadBadgeMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteUnreadBadge")} onChange={(next) => void updateSelectedChatPreference("badge", next)} />} />
                 ) : null}
                 {selectedChat.type === "group" && canRenameGroup ? (
@@ -8596,7 +8725,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </FeatureDiscoveryTarget>
                 ) : null}
               </SettingGroup>
-            </section>
+            </section> : null}
 
             {historyRecoveryStatus && historyRecoveryStatus.hidden_count > 0 ? (
               <section className="chat-detail-settings-section">
@@ -9075,7 +9204,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             </button>
             <div className="sheet-toolbar-title">
               <strong>
-                {selectedChat?.type === "group"
+                {chatMemberPickerMode === "submission-author"
+                  ? t("submission.inviteAuthor")
+                  : chatMemberPickerMode === "submission-reviewer"
+                    ? t("submission.inviteReviewer")
+                    : selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
                     ? t("chat.removeGroupMembers")
                     : chatMemberPickerMode === "transfer"
@@ -9092,7 +9225,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             >
               {groupManageState === "saving"
                 ? t("common.processing")
-                : selectedChat?.type === "group"
+                : chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer"
+                  ? t("submission.sendInvite")
+                  : selectedChat?.type === "group"
                   ? chatMemberPickerMode === "remove"
                     ? t("admin.remove")
                     : chatMemberPickerMode === "transfer"
@@ -9109,7 +9244,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
             <input
               className="input"
               style={{ border: 0, background: "transparent", height: "auto", padding: 0 }}
-              placeholder={chatMemberPickerMode === "remove" ? t("chat.searchGroupMembers") : t("friends.search")}
+              placeholder={chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer" ? t("submission.searchMembers") : chatMemberPickerMode === "remove" ? t("chat.searchGroupMembers") : t("friends.search")}
               value={groupQuery}
               onChange={(event) => setGroupQuery(event.target.value)}
             />
@@ -9137,7 +9272,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                             ? t("account.current")
                             : t("chat.groupMember")
                         : locked
-                          ? t("chat.alreadyInConversation")
+                          ? t(chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer" ? "submission.alreadyMemberOrInvited" : "chat.alreadyInConversation")
+                          : chatMemberPickerMode === "submission-reviewer"
+                            ? user.official ? t("profile.official") : t("profile.operator")
                           : user.is_alive
                             ? t("presence.online")
                             : t("presence.offline")}
@@ -9145,7 +9282,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                   </div>
                   {locked ? (
                     <span className="member-picker-status member-picker-status-locked">
-                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : chatMemberPickerMode === "transfer" ? t("account.current") : t("chat.alreadyInGroup")}
+                      {chatMemberPickerMode === "remove" ? t("chat.cannotRemove") : chatMemberPickerMode === "transfer" ? t("account.current") : chatMemberPickerMode === "submission-author" || chatMemberPickerMode === "submission-reviewer" ? t("submission.addedOrPending") : t("chat.alreadyInGroup")}
                     </span>
                   ) : (
                     <span className={`member-picker-check ${selected ? "is-selected" : ""}`} aria-hidden="true" />

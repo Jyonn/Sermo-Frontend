@@ -1,17 +1,21 @@
 {
-  "id": "2026.09.05.12",
+  "id": "2026.09.05.13",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "广场顶部显示更完整",
+      "title": "多人投稿协作",
       "items": [
-        "手机端广场顶部的毛玻璃效果现在会完整覆盖屏幕两侧"
+        "投稿与审批现在都支持多人协作，列表会清晰展示参与者和协作人数",
+        "审批者可以邀请投稿者或其他审批者，受邀者同意后即可查看完整历史消息",
+        "投稿详情页现在按投稿者与审批者分别展示成员"
       ]
     },
     "en": {
-      "title": "Full-width Square header",
+      "title": "Collaborative submissions",
       "items": [
-        "The frosted Square header now extends cleanly across the full mobile viewport"
+        "Submissions and reviews now support multiple collaborators with clearer participant details",
+        "Reviewers can invite authors or other reviewers, who gain full history access after accepting",
+        "Submission details now separate authors and reviewers into clear member lists"
       ]
     }
   }
