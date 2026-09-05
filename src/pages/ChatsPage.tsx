@@ -15,7 +15,7 @@ import {
   type ReactNode,
   type UIEvent as ReactUIEvent,
 } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BaxianBubbleTransition, BaxianCharacterRunner } from "../components/BaxianBubbleRunner";
@@ -2935,7 +2935,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
-  const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "cancel">("idle");
+  const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "sliding" | "cancel">("idle");
   const [mobileComposerLayout, setMobileComposerLayout] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches,
   );
@@ -3192,6 +3192,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const mobileVoicePointerIdRef = useRef<number | null>(null);
   const mobileVoiceAutoSendRef = useRef(false);
   const mobileVoiceCancelRef = useRef(false);
+  const mobileVoiceSlideStartedRef = useRef(false);
   const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
@@ -3353,6 +3354,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     recordingStopRequestedRef.current = false;
     mobileVoiceAutoSendRef.current = false;
     mobileVoiceCancelRef.current = false;
+    mobileVoiceSlideStartedRef.current = false;
     mobileVoicePointerIdRef.current = null;
     setMobileVoiceGesture("idle");
     cleanupRecordingResources();
@@ -6329,15 +6331,19 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     mobileVoiceStartYRef.current = event.clientY;
     mobileVoiceAutoSendRef.current = true;
     mobileVoiceCancelRef.current = false;
+    mobileVoiceSlideStartedRef.current = false;
     setMobileVoiceGesture("recording");
     void startVoiceRecording();
   };
 
   const moveMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (mobileVoicePointerIdRef.current !== event.pointerId) return;
-    const shouldCancel = mobileVoiceStartYRef.current - event.clientY > 72;
+    const slideDistance = mobileVoiceStartYRef.current - event.clientY;
+    if (slideDistance > 12) mobileVoiceSlideStartedRef.current = true;
+    const cancelThresholdY = Math.min(mobileVoiceStartYRef.current - 72, window.innerHeight / 2 + 44);
+    const shouldCancel = mobileVoiceSlideStartedRef.current && event.clientY <= cancelThresholdY;
     mobileVoiceCancelRef.current = shouldCancel;
-    setMobileVoiceGesture(shouldCancel ? "cancel" : "recording");
+    setMobileVoiceGesture(shouldCancel ? "cancel" : mobileVoiceSlideStartedRef.current ? "sliding" : "recording");
   };
 
   const endMobileVoiceHold = (event: ReactPointerEvent<HTMLButtonElement>, forceCancel = false) => {
@@ -7525,13 +7531,39 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     </button>
                   </div>
                 ) : null}
-                {mobileComposerLayout && mobileVoiceGesture !== "idle" ? (
+                {mobileComposerLayout && mobileVoiceGesture !== "idle" && typeof document !== "undefined" ? createPortal(
                   <div className={`mobile-voice-mask is-${mobileVoiceGesture}`} aria-live="polite">
-                    <div className="mobile-voice-mask-hint">
-                      <span className="material-symbols-outlined">{mobileVoiceGesture === "cancel" ? "close" : "keyboard_arrow_up"}</span>
-                      <strong>{t(mobileVoiceGesture === "cancel" ? "composer.releaseToCancel" : "composer.slideToCancel")}</strong>
+                    {mobileVoiceGesture === "recording" ? (
+                      <div className="mobile-voice-initial-hint">
+                        <span className="material-symbols-outlined">keyboard_arrow_up</span>
+                        <strong>{t("composer.slideToCancel")}</strong>
+                      </div>
+                    ) : null}
+                    {mobileVoiceGesture === "sliding" ? (
+                      <div className="mobile-voice-slide-guide">
+                        <span className="material-symbols-outlined">arrow_upward</span>
+                        <strong>{t("composer.keepSliding")}</strong>
+                      </div>
+                    ) : null}
+                    {mobileVoiceGesture === "sliding" || mobileVoiceGesture === "cancel" ? (
+                      <div className="mobile-voice-cancel-target">
+                        <span className="material-symbols-outlined">{mobileVoiceGesture === "cancel" ? "close" : "keyboard_arrow_up"}</span>
+                        <strong>{t(mobileVoiceGesture === "cancel" ? "composer.releaseToCancel" : "composer.moveHereToCancel")}</strong>
+                      </div>
+                    ) : null}
+                    <div className="mobile-voice-recording-deck">
+                      <div className="mobile-voice-recording-meta">
+                        <span><i aria-hidden="true" />{t(voiceComposer.phase === "requesting" ? "audio.preparingMicrophone" : "composer.recording")}</span>
+                        <time>{formatDuration(voiceComposer.durationSeconds)}</time>
+                      </div>
+                      <div className="mobile-voice-live-waveform" aria-hidden="true">
+                        {voiceComposer.bars.map((level, index) => (
+                          <i key={index} style={{ "--voice-height": `${Math.max(4, level * 36)}px` } as CSSProperties} />
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  </div>,
+                  document.body,
                 ) : null}
                 {mobileComposerLayout ? (
                   <div className="mobile-quiet-composer">

@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.05.6",
+  "id": "2026.09.05.7",
   "publishedAt": "2026-09-05",
   "locales": {
     "zh-CN": {
-      "title": "语音授权更顺畅",
+      "title": "语音录制反馈焕新",
       "items": [
-        "首次使用语音时会先说明麦克风用途，授权完成后再进入按住说话"
+        "按住说话时会以全屏毛玻璃、实时波形与分阶段上滑提示清晰反馈录音状态"
       ]
     },
     "en": {
-      "title": "Smoother microphone setup",
+      "title": "Redesigned voice recording feedback",
       "items": [
-        "Voice messages now explain microphone access before the system prompt and enter hold-to-talk after approval"
+        "Hold-to-talk now uses full-screen glass, a live waveform, and staged slide-to-cancel guidance"
       ]
     }
   }
