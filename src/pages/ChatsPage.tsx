@@ -9842,7 +9842,7 @@ export interface ChatsPagePreviewConfig {
   selfOnly?: boolean;
 }
 
-export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "map_access" | "statement" | "forward_bundle" | "activity" | "link";
+export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "map_access" | "statement" | "forward_bundle" | "submission_invite" | "activity" | "link";
 export type ChatPreviewDemoSide = "other" | "both" | "self";
 
 const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
@@ -9881,6 +9881,35 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
       items: [{ position: 0, type: MESSAGE_TYPE_TEXT, author: { user_id: 2, name: config.avatarName, avatar_uri: config.avatarUri }, content: i18n.t("menu.bubblePreviewOther"), payload: { kind: "text", text: i18n.t("menu.bubblePreviewOther") }, sent_at: now }],
     },
   };
+  if (kind === "submission_invite") {
+    const self = { user_id: 1, name: i18n.t("common.me") };
+    const other = { user_id: 2, name: config.avatarName, avatar_uri: config.avatarUri };
+    return {
+      ...base,
+      type: MESSAGE_TYPE_SUBMISSION_INVITE,
+      payload: {
+        kind,
+        invitation: {
+          invite_id: index + 1,
+          chat_id: 1,
+          role: "author",
+          status: "pending",
+          inviter: from === "self" ? self : other,
+          invitee: from === "self" ? other : self,
+          created_at: now,
+          expires_at: now + 7 * 86400,
+          accepted_at: null,
+          can_accept: from === "other",
+          submission: {
+            title: i18n.t("menu.previewSubmissionTitle"),
+            status: "draft",
+            authors: [self],
+            reviewers: [other],
+          },
+        },
+      },
+    };
+  }
   if (kind === "activity") return {
     ...base,
     type: MESSAGE_TYPE_ACTIVITY,
@@ -9939,7 +9968,7 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
   return base;
 }
 
-const CHAT_PREVIEW_ALL_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "image", "video", "gallery", "audio", "file", "location", "map_access", "statement", "forward_bundle", "activity", "link"];
+const CHAT_PREVIEW_ALL_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "image", "video", "gallery", "audio", "file", "location", "map_access", "statement", "forward_bundle", "submission_invite", "activity", "link"];
 
 function previewMessagesForDemo(kind: ChatPreviewDemoKind, from: "self" | "other", startIndex: number, grouped: boolean, config: ChatsPagePreviewConfig) {
   const kinds: Array<Exclude<ChatPreviewDemoKind, "all">> = kind === "all" ? CHAT_PREVIEW_ALL_KINDS : [kind];

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.2",
+  "id": "2026.09.06.3",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "投稿选中样式优化",
+      "title": "聊天气泡预览优化",
       "items": [
-        "桌面端投稿列表不再使用固定绿色边框表示选中",
-        "选中投稿会通过对应状态色的背景、流程线和头像光环进行提示"
+        "个性化聊天预览新增投稿邀请场景，可分别检查己方与他方效果",
+        "提升 Fufu 及其他气泡中投稿邀请文字、状态与辅助信息的清晰度"
       ]
     },
     "en": {
-      "title": "Refined submission selection",
+      "title": "Improved chat bubble previews",
       "items": [
-        "Desktop submission lists no longer use a fixed green border for selection",
-        "Selected submissions now use their status color across the background, flow rail, and avatar halo"
+        "Chat personalization previews now include submission invitations on both sides",
+        "Improved the clarity of invitation text, status, and supporting details across Fufu and other bubbles"
       ]
     }
   }

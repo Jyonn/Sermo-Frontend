@@ -4354,7 +4354,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   height: 34px;
   border-radius: 11px;
   background: var(--invite-icon-surface);
-  color: var(--invite-accent);
+  color: color-mix(in srgb, var(--invite-accent) 58%, var(--invite-text));
   font-size: 19px;
 }
 
@@ -4385,7 +4385,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
   padding: 5px 8px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--invite-accent) 12%, transparent);
-  color: color-mix(in srgb, var(--invite-accent) 78%, var(--invite-text));
+  color: color-mix(in srgb, var(--invite-accent) 48%, var(--invite-text));
   font-size: 10px;
   font-weight: 800;
 }
@@ -4408,7 +4408,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 }
 
 .message-submission-invite-people b {
-  color: color-mix(in srgb, var(--invite-accent) 82%, var(--invite-text));
+  color: color-mix(in srgb, var(--invite-accent) 48%, var(--invite-text));
   font-style: normal;
   font-weight: 750;
 }
@@ -4435,7 +4435,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 }
 
 .message-submission-invite-footer > span:first-child {
-  color: var(--invite-state-accent);
+  color: color-mix(in srgb, var(--invite-state-accent) 52%, var(--invite-text));
   font-weight: 800;
 }
 
@@ -33385,7 +33385,7 @@ html[data-theme="dark"] .verification-banner-action {
   --invite-accent: var(--bubble-theme-accent, var(--brand-primary));
   --invite-surface: var(--bubble-skin-other-bg);
   --invite-text: var(--bubble-skin-other-color);
-  --invite-muted: var(--bubble-theme-muted-other, color-mix(in srgb, var(--bubble-skin-other-color) 62%, transparent));
+  --invite-muted: color-mix(in srgb, var(--bubble-theme-muted-other, var(--bubble-skin-other-color)) 58%, var(--bubble-skin-other-color));
   --invite-border: var(--bubble-skin-other-border);
   --invite-shadow: var(--bubble-skin-other-shadow);
   --invite-radius: var(--bubble-skin-other-radius, 19px);
@@ -33397,12 +33397,24 @@ html[data-theme="dark"] .verification-banner-action {
   --invite-accent: var(--bubble-theme-accent, var(--brand-primary));
   --invite-surface: var(--bubble-skin-self-bg);
   --invite-text: var(--bubble-skin-self-color);
-  --invite-muted: var(--bubble-theme-muted-self, color-mix(in srgb, var(--bubble-skin-self-color) 66%, transparent));
+  --invite-muted: color-mix(in srgb, var(--bubble-theme-muted-self, var(--bubble-skin-self-color)) 58%, var(--bubble-skin-self-color));
   --invite-border: var(--bubble-skin-self-border);
   --invite-shadow: var(--bubble-skin-self-shadow);
   --invite-radius: var(--bubble-skin-self-radius, 19px);
   --invite-border-width: var(--bubble-skin-border-width, 1px);
   --invite-icon-surface: var(--bubble-theme-icon-self, color-mix(in srgb, var(--bubble-theme-accent) 13%, transparent));
+}
+
+.message-group.bubble-style-fufu.other .message-submission-invite-card {
+  --invite-accent: #525a16;
+  --invite-muted: #5f5140;
+  --invite-icon-surface: rgba(82, 90, 22, .16);
+}
+
+.message-group.bubble-style-fufu.self .message-submission-invite-card {
+  --invite-accent: #d8d17b;
+  --invite-muted: #d8cbb4;
+  --invite-icon-surface: rgba(216, 209, 123, .13);
 }
 
 .message-group:not(.bubble-style-default) .message-bubble.is-submission-invite {

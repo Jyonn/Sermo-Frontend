@@ -175,6 +175,7 @@ const chatPreviewDemoKinds: Array<{ icon: string; kind: ChatPreviewDemoKind; lab
   { kind: "map_access", icon: "map", label: "menu.previewKindTravelMap" },
   { kind: "statement", icon: "speaker_notes", label: "menu.previewKindStatement" },
   { kind: "forward_bundle", icon: "forum", label: "menu.previewKindForward" },
+  { kind: "submission_invite", icon: "outbox", label: "menu.previewKindSubmissionInvite" },
   { kind: "activity", icon: "campaign", label: "menu.previewKindActivity" },
   { kind: "link", icon: "link", label: "menu.previewKindLink" },
 ];
