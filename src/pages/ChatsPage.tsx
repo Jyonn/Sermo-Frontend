@@ -755,7 +755,11 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         : i18n.t("audio.transcribe");
 
   return (
-    <div className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}>
+    <div
+      aria-label={i18n.t("message.audio")}
+      className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}
+      role="group"
+    >
       <button
         aria-label={isLoading ? i18n.t("audio.loading") : isPlaying ? i18n.t("audio.pause") : i18n.t("audio.play")}
         className="message-audio-play"
@@ -766,13 +770,6 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         {isLoading ? <span aria-hidden="true" className="message-audio-play-spinner" /> : <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />}
       </button>
       <div className="message-audio-body">
-        <div className="message-audio-head">
-          <div className="message-audio-meta">
-            <ComposerSvgIcon className="message-audio-icon" kind="mic" />
-            <span>{i18n.t("message.audio")}</span>
-          </div>
-          <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
-        </div>
         <div className="message-audio-wave" aria-hidden="true">
           {AUDIO_WAVE_PATTERN.map((bar, index) => (
             <span
@@ -782,6 +779,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
             />
           ))}
         </div>
+        <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
       </div>
       {messageId && messageId > 0 ? (
         <button
