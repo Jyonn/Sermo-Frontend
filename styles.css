@@ -17842,8 +17842,8 @@ html[data-theme="dark"] .user-profile-panel {
 
 .notification-threshold-editor {
   display: grid;
-  gap: 14px;
-  padding: 18px 16px 12px;
+  gap: 16px;
+  padding: 18px 16px 16px;
   border: 1px solid rgba(215, 220, 231, 0.72);
   border-radius: 16px;
   background: rgba(248, 250, 252, 0.78);
@@ -17855,16 +17855,41 @@ html[data-theme="dark"] .user-profile-panel {
   text-align: center;
 }
 
-.notification-threshold-editor input[type="range"] {
-  width: 100%;
-  accent-color: var(--brand-primary);
+.notification-threshold-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.notification-threshold-editor > div {
-  display: flex;
-  justify-content: space-between;
+.notification-threshold-options button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 6px;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 82%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notification-threshold-options button.is-selected {
+  border-color: color-mix(in srgb, var(--brand-primary) 52%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 13%, var(--bg-elevated));
+  color: var(--brand-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 12%, transparent);
+}
+
+.notification-threshold-options button:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+.notification-threshold-options button:disabled {
+  cursor: wait;
+  opacity: 0.66;
 }
 
 .notification-editor-textarea {

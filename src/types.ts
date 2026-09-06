@@ -522,6 +522,7 @@ export interface NotificationPreferenceDTO {
   channel: number;
   enabled: boolean;
   offline_threshold_minutes: number | null;
+  offline_threshold_options?: number[];
   hide_message_content: boolean;
   open_chat_on_tap: boolean;
   bark_icon_mode: 0 | 1 | 2;
@@ -1361,6 +1362,7 @@ export interface FriendAccepted {
 export interface NotificationPreference {
   enabled: boolean;
   threshold: number;
+  thresholdOptions: number[];
   hideMessageContent: boolean;
   openChatOnTap: boolean;
   barkIconMode: 0 | 1 | 2;

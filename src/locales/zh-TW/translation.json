@@ -1011,6 +1011,7 @@
   "common.enabled": "已開啟",
   "common.disabled": "未開啟",
   "common.minutes": "{{count}} 分鐘",
+  "common.hours": "{{count}} 小時",
   "admin.dashboardTitle": "空間後臺",
   "admin.friends": "好友",
   "admin.statements": "發言",

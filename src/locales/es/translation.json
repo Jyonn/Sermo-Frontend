@@ -1011,6 +1011,7 @@
   "common.enabled": "habilitado",
   "common.disabled": "Desactivado",
   "common.minutes": "{{count}}min",
+  "common.hours": "{{count}} h",
   "admin.dashboardTitle": "tablero de control espacial",
   "admin.friends": "amigos",
   "admin.statements": "declaraciones",

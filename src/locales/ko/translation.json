@@ -1011,6 +1011,7 @@
   "common.enabled": "활성화",
   "common.disabled": "비활성화",
   "common.minutes": "{{count}}min",
+  "common.hours": "{{count}}시간",
   "admin.dashboardTitle": "공간 패시보드",
   "admin.friends": "친구",
   "admin.statements": "진술",

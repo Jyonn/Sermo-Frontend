@@ -47,6 +47,7 @@ import { getActiveLocale, i18n, useI18n, type LanguagePreference, type Translati
 import { useTheme, type ThemePreference } from "../lib/theme";
 
 const MAX_NICKNAME_LENGTH = 8;
+const EMAIL_THRESHOLD_OPTIONS = [10, 20, 30, 60, 120, 180, 360, 720, 1440];
 
 const channelRows: Array<[NotificationChannel, number, TranslationKey]> = [
   ["email", 1, "channel.email"],
@@ -55,10 +56,20 @@ const channelRows: Array<[NotificationChannel, number, TranslationKey]> = [
 ];
 
 const emptyPrefs: NotificationPreferences = {
-  email: { enabled: false, threshold: 30, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
-  sms: { enabled: false, threshold: 15, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
-  bark: { enabled: false, threshold: 5, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
+  email: { enabled: false, threshold: 30, thresholdOptions: EMAIL_THRESHOLD_OPTIONS, hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
+  sms: { enabled: false, threshold: 15, thresholdOptions: [], hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
+  bark: { enabled: false, threshold: 5, thresholdOptions: [], hideMessageContent: false, openChatOnTap: true, barkIconMode: 1 },
 };
+
+function normalizeThreshold(value: number, options: number[]) {
+  return options.find((option) => option >= value) ?? options[options.length - 1] ?? value;
+}
+
+function formatThreshold(minutes: number) {
+  return minutes < 60
+    ? i18n.t("common.minutes", { count: minutes })
+    : i18n.t("common.hours", { count: minutes / 60 });
+}
 
 const barkAppStoreUrl = "https://apps.apple.com/cn/app/bark-%E7%BB%99%E4%BD%A0%E7%9A%84%E6%89%8B%E6%9C%BA%E5%8F%91%E6%8E%A8%E9%80%81/id1403753865";
 const menuGrowthMilestones = new Set([
@@ -251,6 +262,7 @@ function mapPrefs(rows: NotificationPreferenceDTO[]): NotificationPreferences {
     next[channel] = {
       enabled: row.enabled,
       threshold: row.offline_threshold_minutes ?? emptyPrefs[channel].threshold,
+      thresholdOptions: row.offline_threshold_options ?? emptyPrefs[channel].thresholdOptions,
       hideMessageContent: row.hide_message_content,
       openChatOnTap: row.open_chat_on_tap ?? true,
       barkIconMode: row.bark_icon_mode ?? 1,
@@ -1315,6 +1327,7 @@ export default function MenuPage() {
     return {
       enabled: updated.enabled,
       threshold: updated.offline_threshold_minutes ?? emptyPrefs[channel].threshold,
+      thresholdOptions: updated.offline_threshold_options ?? emptyPrefs[channel].thresholdOptions,
       hideMessageContent: updated.hide_message_content,
       openChatOnTap: updated.open_chat_on_tap ?? true,
       barkIconMode: updated.bark_icon_mode ?? 1,
@@ -1340,14 +1353,18 @@ export default function MenuPage() {
   };
 
   const openThresholdEditor = (channel: NotificationChannel) => {
+    const options = prefs[channel].thresholdOptions;
     setPrefEditor({ type: "threshold", channel });
-    setPrefEditorValue(String(prefs[channel].threshold));
+    setPrefEditorValue(String(normalizeThreshold(prefs[channel].threshold, options)));
   };
 
   const savePreferenceEditor = async () => {
     if (!prefEditor || prefEditorSaving) return;
+    const options = prefs[prefEditor.channel].thresholdOptions;
+    const threshold = Number(prefEditorValue);
+    if (!options.includes(threshold)) return;
     setPrefEditorSaving(true);
-    const patch = { offline_threshold_minutes: Math.min(60, Math.max(1, Number(prefEditorValue))) };
+    const patch = { offline_threshold_minutes: threshold };
     const saved = await savePreferencePatch(prefEditor.channel, patch);
     if (saved) setPrefEditor(null);
     setPrefEditorSaving(false);
@@ -2861,7 +2878,7 @@ export default function MenuPage() {
                   type="button"
                 />
               </div>
-              {prefDrawerChannel !== "bark" ? (
+              {prefDrawerChannel === "email" ? (
                 <button
                   className="menu-pref-row menu-pref-row-button"
                   disabled={!activePref.enabled}
@@ -2872,7 +2889,7 @@ export default function MenuPage() {
                     <strong>{t("notification.offlineThreshold")}</strong>
                   </div>
                   <div className="menu-pref-row-value">
-                    <span>{t("common.minutes", { count: activePref.threshold })}</span>
+                    <span>{formatThreshold(activePref.threshold)}</span>
                     <span className="material-symbols-outlined">chevron_right</span>
                   </div>
                 </button>
@@ -3350,9 +3367,21 @@ export default function MenuPage() {
               </button>
             </div>
             <div className="notification-threshold-editor">
-              <strong>{t("common.minutes", { count: Number(prefEditorValue) })}</strong>
-              <input aria-label={t("notification.offlineThreshold")} max={60} min={1} onChange={(event) => setPrefEditorValue(event.target.value)} type="range" value={prefEditorValue} />
-              <div><span>{t("common.minutes", { count: 1 })}</span><span>{t("common.minutes", { count: 60 })}</span></div>
+              <strong>{formatThreshold(Number(prefEditorValue))}</strong>
+              <div className="notification-threshold-options" role="group" aria-label={t("notification.offlineThreshold")}>
+                {prefs[prefEditor.channel].thresholdOptions.map((threshold) => (
+                  <button
+                    aria-pressed={Number(prefEditorValue) === threshold}
+                    className={Number(prefEditorValue) === threshold ? "is-selected" : ""}
+                    disabled={prefEditorSaving}
+                    key={threshold}
+                    onClick={() => setPrefEditorValue(String(threshold))}
+                    type="button"
+                  >
+                    {formatThreshold(threshold)}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="notification-editor-actions">
               <button className="ghost-button" disabled={prefEditorSaving} onClick={() => setPrefEditor(null)} type="button">{t("common.cancel")}</button>

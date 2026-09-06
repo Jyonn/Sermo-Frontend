@@ -1011,6 +1011,7 @@
   "common.enabled": "有効",
   "common.disabled": "障害物",
   "common.minutes": "{{count}}min",
+  "common.hours": "{{count}}時間",
   "admin.dashboardTitle": "スペースダッシュボード",
   "admin.friends": "友達",
   "admin.statements": "声明",

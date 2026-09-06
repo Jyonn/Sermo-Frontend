@@ -1018,6 +1018,7 @@
   "common.enabled": "Enabled",
   "common.disabled": "Disabled",
   "common.minutes": "{{count}} min",
+  "common.hours": "{{count}} hr",
   "admin.dashboardTitle": "Space dashboard",
   "admin.friends": "friends",
   "admin.statements": "statements",

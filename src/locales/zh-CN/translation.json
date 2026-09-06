@@ -1018,6 +1018,7 @@
   "common.enabled": "已开启",
   "common.disabled": "未开启",
   "common.minutes": "{{count}} 分钟",
+  "common.hours": "{{count}} 小时",
   "admin.dashboardTitle": "空间后台",
   "admin.friends": "好友",
   "admin.statements": "发言",
