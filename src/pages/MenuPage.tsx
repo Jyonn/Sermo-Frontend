@@ -1794,7 +1794,7 @@ export default function MenuPage() {
   );
   const topicSupported = (channel: number, topic: number, audience: number) => topicPreference(
     channel, topic, audience,
-  )?.supported ?? !(topic === 6 && (channel === 1 || channel === 2));
+  )?.supported ?? (topic !== 6 || channel === 3);
   const topicEnabled = (channel: number, topic: number, audience: number) => {
     if (!topicSupported(channel, topic, audience)) return false;
     return topicPreference(channel, topic, audience)?.enabled ?? channel !== 2;

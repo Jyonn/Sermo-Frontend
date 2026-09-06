@@ -5,15 +5,15 @@
     "zh-CN": {
       "title": "好友上线提醒更及时",
       "items": [
-        "好友上线消息仅通过系统通知与即时提醒发送，不再进入延迟邮件队列",
-        "通知设置会明确禁用好友上线的邮件与短信渠道"
+        "好友上线消息仅通过即时提醒发送，不再进入网页、邮件或短信渠道",
+        "通知设置会明确禁用好友上线不适用的提醒渠道"
       ]
     },
     "en": {
       "title": "Timelier friend-online alerts",
       "items": [
-        "Friend-online events now use system and instant notifications only, never delayed email delivery",
-        "Notification settings now clearly disable email and SMS for friend-online alerts"
+        "Friend-online events now use instant notifications only, never web, email, or SMS delivery",
+        "Notification settings now clearly disable unsupported routes for friend-online alerts"
       ]
     }
   }
