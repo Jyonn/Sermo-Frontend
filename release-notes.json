@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.7",
+  "id": "2026.09.06.8",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "语音转写更自然",
+      "title": "语音转写衔接更顺滑",
       "items": [
-        "转文字入口移到语音气泡靠近屏幕中线的一侧，加载、收起和重试状态更清楚",
-        "转写正文以贴合续页展示，并自动适配不同聊天气泡样式"
+        "转写续页现在会继承气泡圆角，并与连续消息自然衔接",
+        "展开和收起都有完整动效，个性化预览也可以直接测试转文字效果"
       ]
     },
     "en": {
-      "title": "More natural voice transcripts",
+      "title": "Smoother voice transcript continuity",
       "items": [
-        "The transcript action now sits beside the voice bubble with clear loading, hide, and retry states",
-        "Transcript text now opens as an attached continuation that adapts to every chat bubble style"
+        "Transcript continuations now inherit bubble corners and connect naturally with grouped messages",
+        "Both opening and closing are animated, and transcripts can now be tested in personalization previews"
       ]
     }
   }

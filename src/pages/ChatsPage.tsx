@@ -566,12 +566,14 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   uri,
   messageId,
   className,
+  previewTranscript = false,
 }: {
   durationSeconds?: number;
   from: "self" | "other";
   uri: string;
   messageId?: number;
   className?: string;
+  previewTranscript?: boolean;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -673,7 +675,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     return () => {
       transcriptRequestRef.current += 1;
     };
-  }, [messageId]);
+  }, [messageId, previewTranscript]);
 
   const totalDuration = resolvedDuration > 0 ? resolvedDuration : durationSeconds ?? 0;
   const progress = totalDuration > 0 ? Math.min(1, currentTime / totalDuration) : 0;
@@ -723,7 +725,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   };
 
   const toggleTranscript = async () => {
-    if (!messageId || messageId <= 0) return;
+    if ((!messageId || messageId <= 0) && !previewTranscript) return;
     if (transcript?.status === "ready") {
       setTranscriptVisible((visible) => !visible);
       return;
@@ -735,6 +737,17 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
     setTranscriptVisible(true);
     setTranscript({ status: "processing", text: "", cached: false });
     try {
+      if (previewTranscript) {
+        await new Promise((resolve) => window.setTimeout(resolve, 480));
+        if (requestToken !== transcriptRequestRef.current) return;
+        setTranscript({
+          status: "ready",
+          text: i18n.t(from === "self" ? "menu.bubblePreviewSelf" : "menu.bubblePreviewOther"),
+          cached: true,
+        });
+        return;
+      }
+      if (!messageId || messageId <= 0) return;
       const next = await api.transcribeMessageAudio(messageId);
       if (requestToken !== transcriptRequestRef.current) return;
       setTranscript(next);
@@ -757,7 +770,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   return (
     <div
       aria-label={i18n.t("message.audio")}
-      className={`message-audio-unit ${from}`}
+      className={`message-audio-unit ${from} ${className ?? ""}`.trim()}
       role="group"
     >
       <div
@@ -800,7 +813,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           }}
         />
       </div>
-      {messageId && messageId > 0 ? (
+      {(messageId && messageId > 0) || previewTranscript ? (
         <button
           aria-expanded={transcript?.status === "ready" && transcriptVisible}
           aria-label={transcriptButtonLabel}
@@ -816,13 +829,19 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
           <span>{transcriptButtonLabel}</span>
         </button>
       ) : null}
-      {transcriptVisible && transcript?.status === "ready" ? (
-        <div className={`message-audio-transcript ${from}`} role="status">
-          <p>{transcript.text || i18n.t("audio.transcriptEmpty")}</p>
-        </div>
-      ) : transcriptVisible && transcript?.status === "failed" ? (
-        <div className={`message-audio-transcript ${from} is-failed`} role="status">
-          <p>{i18n.t("audio.transcriptFailed")}</p>
+      {transcript?.status === "ready" || transcript?.status === "failed" ? (
+        <div
+          aria-hidden={!transcriptVisible}
+          className={`message-audio-transcript-reveal${transcriptVisible ? " is-open" : ""}`}
+        >
+          <div>
+            <div
+              className={`message-audio-transcript ${from} ${className ?? ""}${transcript.status === "failed" ? " is-failed" : ""}`.trim()}
+              role={transcriptVisible ? "status" : undefined}
+            >
+              <p>{transcript.status === "ready" ? transcript.text || i18n.t("audio.transcriptEmpty") : i18n.t("audio.transcriptFailed")}</p>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
@@ -1770,7 +1789,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "audio" && message.payload?.uri) {
-    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined} uri={message.localPreviewUri ?? message.payload.uri} />;
+    return <AudioMessagePlayer className={groupClassName} durationSeconds={message.payload.duration_seconds} from={message.from} messageId={typeof message.id === "number" && message.status !== "pending" ? message.id : undefined} previewTranscript={typeof message.id === "string" && message.id.startsWith("preview-")} uri={message.localPreviewUri ?? message.payload.uri} />;
   }
 
   if (message.kind === "file" && message.payload?.uri) {
@@ -10058,6 +10077,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
         aria-label={t("menu.chatBubble")}
         className={`chat-conversation-panel chat-conversation-preview${groups.length === 1 ? " is-single-message" : ""}`}
         onClickCapture={(event) => {
+          if ((event.target as HTMLElement).closest(".message-audio-transcribe")) return;
           event.preventDefault();
           event.stopPropagation();
         }}
