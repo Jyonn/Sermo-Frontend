@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.13",
+  "id": "2026.09.06.14",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "聊天外观中心展台",
+      "title": "更清晰的外观素材导航",
       "items": [
-        "聊天背景和气泡素材现在会自动居中展示，左右相邻选项更便于连续浏览",
-        "聊天气泡缩减为单个横向样本，移除了重复的倒影预览"
+        "聊天背景和气泡素材会自动居中展示，左右相邻选项更便于连续浏览",
+        "稀有度导航改为简洁的等分文字栏，分类和当前选择更加清楚"
       ]
     },
     "en": {
-      "title": "A centered chat appearance stage",
+      "title": "Clearer appearance browsing",
       "items": [
-        "Chat backgrounds and bubbles now center automatically, with neighboring options kept within easy reach",
-        "Bubble choices now use one compact horizontal sample without the duplicated reflection"
+        "Chat backgrounds and bubbles center automatically, with neighboring options kept within easy reach",
+        "Rarity navigation now uses a clean, evenly spaced text bar for clearer categories and selection"
       ]
     }
   }

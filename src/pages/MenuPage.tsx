@@ -2445,8 +2445,7 @@ export default function MenuPage() {
                 <>
                   <div className="chat-personalization-rarity-tabs" role="tablist" aria-label={t("menu.chatBackground")}>
                     {[...backgroundRarityTabs, "custom" as const].map((rarity) => (
-                      <button aria-selected={chatBackgroundRarity === rarity} className={chatBackgroundRarity === rarity ? "is-active" : ""} key={rarity} onClick={() => setChatBackgroundRarity(rarity)} role="tab" type="button">
-                        {rarity === "custom" ? <span className="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span> : <RarityIcon rarity={rarity} />}
+                      <button aria-selected={chatBackgroundRarity === rarity} className={`rarity-${rarity}${chatBackgroundRarity === rarity ? " is-active" : ""}`} key={rarity} onClick={() => setChatBackgroundRarity(rarity)} role="tab" type="button">
                         <span>{rarity === "custom" ? t("common.custom") : t(`growth.rarity.${rarity}` as TranslationKey)}</span>
                       </button>
                     ))}
@@ -2485,8 +2484,7 @@ export default function MenuPage() {
                 <>
                   <div className="chat-personalization-rarity-tabs" role="tablist" aria-label={t("menu.chatBubble")}>
                     {bubbleRarityTabs.map((rarity) => (
-                      <button aria-selected={chatBubbleRarity === rarity} className={chatBubbleRarity === rarity ? "is-active" : ""} key={rarity} onClick={() => setChatBubbleRarity(rarity)} role="tab" type="button">
-                        <RarityIcon rarity={rarity} />
+                      <button aria-selected={chatBubbleRarity === rarity} className={`rarity-${rarity}${chatBubbleRarity === rarity ? " is-active" : ""}`} key={rarity} onClick={() => setChatBubbleRarity(rarity)} role="tab" type="button">
                         <span>{t(`growth.rarity.${rarity}` as TranslationKey)}</span>
                       </button>
                     ))}
