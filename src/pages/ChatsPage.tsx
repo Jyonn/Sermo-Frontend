@@ -2104,6 +2104,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
             "message-bubble",
             from === "self" ? "self" : "other",
             isMediaMessageKind(message.kind) || message.kind === "location" ? "is-media" : "",
+            message.kind === "audio" ? "is-audio" : "",
             message.kind === "location" ? "is-location" : "",
             message.kind === "submission_invite" ? "is-submission-invite" : "",
             message.kind === "map_access" ? "is-travel-map" : "",

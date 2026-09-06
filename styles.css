@@ -33935,3 +33935,44 @@ html[data-theme="dark"] .verification-banner-action {
 .field-chat_bubble_style .personalization-option:is(.preview-niko, .preview-fufu) > i {
   border-radius: 14px;
 }
+
+/* Transcript actions sit outside playback cards and must not inherit skin clipping. */
+.message-group.bubble-style-newspaper .message-bubble.is-audio {
+  overflow: visible !important;
+}
+
+.message-group.bubble-style-typewriter .message-bubble.is-audio {
+  overflow: visible;
+  clip-path: none;
+}
+
+.message-group.bubble-style-receipt .message-bubble.is-audio {
+  overflow: visible;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-mask: none;
+  mask: none;
+}
+
+.message-group.bubble-style-receipt .message-bubble.is-audio::before {
+  z-index: -1;
+  inset: 0;
+  box-sizing: border-box;
+  height: auto;
+  padding: 4px 13px 0;
+  color: color-mix(in srgb, currentColor 60%, transparent);
+  background:
+    linear-gradient(90deg, transparent 10px, color-mix(in srgb, currentColor 20%, transparent) 10px calc(100% - 10px), transparent calc(100% - 10px)) 0 14px / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 10px, color-mix(in srgb, currentColor 20%, transparent) 10px calc(100% - 10px), transparent calc(100% - 10px)) 0 calc(100% - 15px) / 100% 1px no-repeat,
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, currentColor 5%, transparent), transparent 36%),
+    var(--bubble-theme-surface);
+  box-shadow: var(--bubble-theme-shadow);
+  -webkit-mask:
+    linear-gradient(#000 0 0) center / calc(100% - 8px) 100% no-repeat,
+    radial-gradient(circle at left center, transparent 0 2.5px, #000 3px) left / 8px 11px repeat-y,
+    radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
+  mask:
+    linear-gradient(#000 0 0) center / calc(100% - 8px) 100% no-repeat,
+    radial-gradient(circle at left center, transparent 0 2.5px, #000 3px) left / 8px 11px repeat-y,
+    radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
+}

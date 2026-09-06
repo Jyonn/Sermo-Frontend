@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.9",
+  "id": "2026.09.06.10",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "聊天气泡细节更统一",
+      "title": "语音转文字按钮显示修复",
       "items": [
-        "投稿邀请、活动和链接卡片现在会跟随连续消息正确合并圆角",
-        "优化晨报、包豪斯、打字机、小票、城市、八仙及 Niko/Fufu 等气泡的清晰度与主题细节"
+        "晨报、打字机和小票气泡现在会正常显示语音转文字按钮",
+        "保留各气泡原有纸张纹理与轮廓，不影响其他消息卡片"
       ]
     },
     "en": {
-      "title": "More consistent chat bubble details",
+      "title": "Voice transcript action visibility fix",
       "items": [
-        "Submission invitations, activities, and link cards now merge their corners correctly within message groups",
-        "Improved clarity and theme details across Newspaper, Bauhaus, Typewriter, Receipt, City, Eight Immortals, Niko, and Fufu bubbles"
+        "Voice transcript actions now remain visible with Newspaper, Typewriter, and Receipt bubbles",
+        "Each bubble keeps its existing paper texture and silhouette without affecting other message cards"
       ]
     }
   }
