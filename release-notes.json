@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.11",
+  "id": "2026.09.06.12",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "个性化气泡预览更完整",
+      "title": "沉浸式聊天外观预览",
       "items": [
-        "个性化聊天预览中的语音气泡现在可以点击转文字并展开转写内容",
-        "恢复连续文字气泡的三条示例消息，合并效果更容易辨认"
+        "聊天外观页现在以完整会话呈现，背景和气泡可以在真实消息场景中即时预览",
+        "新增按稀有度浏览的底部素材栏，未解锁素材会直接显示解锁条件"
       ]
     },
     "en": {
-      "title": "More complete personalized bubble previews",
+      "title": "Immersive chat appearance previews",
       "items": [
-        "Voice bubbles in chat personalization previews can now expand their sample transcripts",
-        "Restored all three sample messages used to demonstrate grouped text bubbles"
+        "Chat appearance now uses a full conversation view for live background and bubble previews",
+        "A rarity-based bottom catalog now shows clear unlock requirements for unavailable styles"
       ]
     }
   }

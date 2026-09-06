@@ -9857,14 +9857,11 @@ export interface ChatsPagePreviewConfig {
   }>;
   demo?: {
     kind: ChatPreviewDemoKind;
-    side: ChatPreviewDemoSide;
-    grouped: boolean;
   };
   selfOnly?: boolean;
 }
 
 export type ChatPreviewDemoKind = "all" | "text" | "image" | "video" | "gallery" | "audio" | "file" | "location" | "map_access" | "statement" | "forward_bundle" | "submission_invite" | "activity" | "link";
-export type ChatPreviewDemoSide = "other" | "both" | "self";
 
 const CHAT_PREVIEW_IMAGE = chatPreviewMediaImage;
 
@@ -9989,60 +9986,50 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
   return base;
 }
 
-const CHAT_PREVIEW_ALL_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "image", "video", "gallery", "audio", "file", "location", "map_access", "statement", "forward_bundle", "submission_invite", "activity", "link"];
+const CHAT_PREVIEW_MIXED_KINDS: Array<Exclude<ChatPreviewDemoKind, "all">> = ["text", "audio", "submission_invite", "image", "location", "link", "activity", "forward_bundle"];
 
-function previewMessagesForDemo(kind: ChatPreviewDemoKind, from: "self" | "other", startIndex: number, grouped: boolean, config: ChatsPagePreviewConfig) {
-  const kinds: Array<Exclude<ChatPreviewDemoKind, "all">> = kind === "all" ? CHAT_PREVIEW_ALL_KINDS : [kind];
+function previewMessagesForDemo(
+  kind: ChatPreviewDemoKind,
+  from: "self" | "other",
+  startIndex: number,
+  count: number,
+  config: ChatsPagePreviewConfig,
+  mixedOffset = 0,
+) {
   const messages: ChatMessage[] = [];
   let index = startIndex;
-  kinds.forEach((currentKind) => {
-    if (currentKind === "gallery") {
-      const galleryCount = grouped ? 4 : 3;
-      for (let offset = 0; offset < galleryCount; offset += 1) {
-        messages.push(previewMessage("image", from, index, config));
-        index += 1;
-      }
-      return;
+  for (let offset = 0; offset < count; offset += 1) {
+    const currentKind = kind === "all"
+      ? CHAT_PREVIEW_MIXED_KINDS[(mixedOffset + offset) % CHAT_PREVIEW_MIXED_KINDS.length]
+      : kind;
+    const message = previewMessage(currentKind === "gallery" ? "image" : currentKind, from, index, config);
+    if (currentKind === "text" && count > 1) {
+      const text = i18n.t(`menu.previewMergedText${Math.min(offset + 1, 3)}` as TranslationKey);
+      messages.push({ ...message, text, payload: { kind: "text", text } });
+    } else {
+      messages.push(message);
     }
-    const repeats = grouped && kind !== "all" ? 3 : 1;
-    for (let offset = 0; offset < repeats; offset += 1) {
-      const message = previewMessage(currentKind, from, index, config);
-      if (currentKind === "text" && repeats > 1) {
-        const text = i18n.t(`menu.previewMergedText${offset + 1}` as TranslationKey);
-        messages.push({ ...message, text, payload: { kind: "text", text } });
-      } else {
-        messages.push(message);
-      }
-      index += 1;
-    }
-  });
+    index += 1;
+  }
   return messages;
 }
 
 function previewDemoGroups(config: ChatsPagePreviewConfig, t: ReturnType<typeof useI18n>["t"]): MessageGroup[] {
   const demo = config.demo;
   if (!demo) return [];
-  const sides: Array<"self" | "other"> = demo.side === "both" ? ["other", "self"] : [demo.side];
-  if (demo.kind === "all" && !demo.grouped) {
-    return CHAT_PREVIEW_ALL_KINDS.map((kind, index) => {
-      const from = sides[index % sides.length];
-      return {
-        key: `preview-demo-${kind}-${from}-${index}`,
-        from,
-        name: from === "self" ? t("common.me") : config.avatarName,
-        avatarUri: from === "other" ? config.avatarUri : undefined,
-        chatBubbleStyle: config.bubbleStyle,
-        messages: previewMessagesForDemo(kind, from, index * 10, false, config),
-      };
-    });
-  }
-  return sides.map((from, index) => ({
-    key: `preview-demo-${demo.kind}-${from}`,
+  const sequence: Array<{ count: number; from: "self" | "other"; mixedOffset: number }> = [
+    { from: "other", count: 3, mixedOffset: 0 },
+    { from: "self", count: 3, mixedOffset: 3 },
+    { from: "other", count: 1, mixedOffset: 6 },
+    { from: "self", count: 1, mixedOffset: 7 },
+  ];
+  return sequence.map(({ count, from, mixedOffset }, index) => ({
+    key: `preview-demo-${demo.kind}-${from}-${index}`,
     from,
     name: from === "self" ? t("common.me") : config.avatarName,
     avatarUri: from === "other" ? config.avatarUri : undefined,
     chatBubbleStyle: config.bubbleStyle,
-    messages: previewMessagesForDemo(demo.kind, from, index * 100, demo.grouped, config),
+    messages: previewMessagesForDemo(demo.kind, from, index * 100, count, config, mixedOffset),
   }));
 }
 
