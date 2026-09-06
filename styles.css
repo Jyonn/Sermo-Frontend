@@ -33667,3 +33667,271 @@ html[data-theme="dark"] .verification-banner-action {
     transition: none;
   }
 }
+
+/* Message cards use the same edge-side grouping grammar as text bubbles. */
+.message-group.other:not(.bubble-style-default) .message-activity-card {
+  border-radius: var(--bubble-skin-other-radius, 18px);
+}
+
+.message-group.self:not(.bubble-style-default) .message-activity-card {
+  border-radius: var(--bubble-skin-self-radius, 18px);
+}
+
+.message-group :is(.message-submission-invite-card, .message-activity-card).other.group-start:not(.group-end) {
+  border-bottom-left-radius: 5px;
+}
+
+.message-group :is(.message-submission-invite-card, .message-activity-card).other:not(.group-start).group-end {
+  border-top-left-radius: 5px;
+}
+
+.message-group :is(.message-submission-invite-card, .message-activity-card).other:not(.group-start):not(.group-end) {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.message-group.self :is(.message-submission-invite-card, .message-activity-card).self.group-start:not(.group-end) {
+  border-bottom-right-radius: 5px;
+}
+
+.message-group.self :is(.message-submission-invite-card, .message-activity-card).self:not(.group-start).group-end {
+  border-top-right-radius: 5px;
+}
+
+.message-group.self :is(.message-submission-invite-card, .message-activity-card).self:not(.group-start):not(.group-end) {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+/* Default outgoing map cards need light copy over the evergreen surface. */
+.message-group.self.bubble-style-default .message-travel-map-card {
+  color: #f4fff9;
+}
+
+.message-group.self.bubble-style-default .message-travel-map-copy :is(small, span) {
+  color: rgba(235, 255, 246, .7);
+}
+
+.message-group.self.bubble-style-default .message-travel-map-arrow {
+  color: #9ef1cf;
+}
+
+/* Raked-paper link cards expose their edge-side seam between grouped messages. */
+.message-group.bubble-style-zen .message-text-stack.other.group-start:not(.group-end) > .message-link-preview-card {
+  border-bottom-left-radius: 5px !important;
+}
+
+.message-group.bubble-style-zen .message-text-stack.self.group-start:not(.group-end) > .message-link-preview-card {
+  border-bottom-right-radius: 5px !important;
+}
+
+/* Mosaic outlines need enough breathing room to avoid visually merging. */
+.message-group.bubble-style-mosaic .message-bubbles {
+  gap: 8px;
+}
+
+/* Newspaper cards share one square editorial rule and dotted stock. */
+.message-group.bubble-style-newspaper .message-bubble:not(.is-sticker):not(.is-activity):not(.is-submission-invite) {
+  overflow: hidden;
+  border-width: 2px 0 !important;
+  border-radius: 0 !important;
+  background:
+    radial-gradient(circle, rgba(20, 20, 20, .08) 0 1px, transparent 1.2px) 0 0 / 5px 5px,
+    var(--bubble-theme-surface) !important;
+  box-shadow: none !important;
+}
+
+.message-group.bubble-style-newspaper :is(
+  .message-media-frame,
+  .message-image-gallery,
+  .message-video-card,
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-travel-map-card,
+  .message-statement-card,
+  .message-forward-bundle-card,
+  .message-link-preview-card
+) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent;
+  box-shadow: none !important;
+}
+
+.message-group.bubble-style-newspaper .message-submission-invite-card {
+  border-width: 2px 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.message-group.bubble-style-newspaper .message-activity-card {
+  border-radius: 0;
+}
+
+.message-group.bubble-style-newspaper.self .message-audio-card {
+  color: var(--bubble-skin-self-color);
+}
+
+.message-group.bubble-style-newspaper.self .message-audio-wave-bar {
+  background: color-mix(in srgb, var(--bubble-skin-self-color) 28%, transparent);
+}
+
+.message-group.bubble-style-newspaper.self .message-audio-wave-bar.is-active {
+  background: #2dbfd1;
+}
+
+.message-group.bubble-style-newspaper.self .message-audio-progress {
+  color: color-mix(in srgb, var(--bubble-skin-self-color) 82%, transparent);
+}
+
+/* Bauhaus icon wells mirror the sender's own angular silhouette. */
+.message-group.bubble-style-bauhaus.other :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border-radius: 2px 12px 2px 12px;
+}
+
+.message-group.self.bubble-style-bauhaus :is(.message-audio-play, .message-file-icon, .message-location-mark, .message-travel-map-art) {
+  border-radius: 12px 2px 12px 2px;
+}
+
+/* Typewriter paper stays nearly square across every card type. */
+.message-group.bubble-style-typewriter :is(
+  .message-bubble,
+  .message-media-frame,
+  .message-image-gallery,
+  .message-video-card,
+  .message-audio-card,
+  .message-file-card,
+  .message-location-card,
+  .message-travel-map-card,
+  .message-statement-card,
+  .message-forward-bundle-card,
+  .message-submission-invite-card,
+  .message-activity-card,
+  .message-link-preview-card
+) {
+  border-radius: 3px !important;
+}
+
+/* Receipt audio remains legible on pale thermal stock. */
+.message-group.bubble-style-receipt.self .message-audio-card {
+  color: #26372f;
+}
+
+.message-group.bubble-style-receipt.self .message-audio-progress {
+  color: rgba(38, 55, 47, .76);
+}
+
+.message-group.bubble-style-receipt.self .message-audio-wave-bar {
+  background: rgba(38, 55, 47, .24);
+}
+
+.message-group.bubble-style-receipt.self .message-audio-wave-bar.is-active {
+  background: #2f9a74;
+}
+
+.message-group.bubble-style-receipt.self .message-audio-play {
+  color: #276c54;
+  border: 1px solid rgba(39, 108, 84, .3);
+  background: rgba(255, 255, 255, .5);
+}
+
+.message-group.bubble-style-receipt.self .message-audio-transcribe {
+  color: #245f4b;
+  border-color: rgba(36, 95, 75, .34);
+  background: #f7fff9;
+  box-shadow: 0 4px 12px rgba(31, 77, 61, .12);
+  opacity: .96;
+}
+
+.message-group.bubble-style-receipt .message-submission-invite-card::after {
+  display: block;
+  height: 8px;
+  margin: 0 14px 8px;
+  background: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 3px, currentColor 3px 6px, transparent 6px 8px);
+  content: "";
+  opacity: .52;
+}
+
+/* Pale capsules keep transcript actions readable on saturated outgoing skins. */
+.message-group.self[class*="bubble-style-city-"] .message-audio-transcribe {
+  color: color-mix(in srgb, var(--bubble-theme-accent) 62%, #16241f);
+  border-color: color-mix(in srgb, var(--bubble-theme-accent) 48%, rgba(20, 35, 29, .22));
+  background: rgba(255, 253, 244, .94);
+  box-shadow: 0 4px 13px rgba(14, 35, 28, .16);
+  opacity: .98;
+}
+
+.message-group.self:is(.bubble-style-baxian-lv, .bubble-style-baxian-zhongli, .bubble-style-baxian-he) .message-audio-transcribe {
+  color: #4f3c25;
+  border-color: rgba(110, 79, 39, .36);
+  background: #fff5dc;
+  box-shadow: 0 4px 13px rgba(57, 39, 19, .15);
+  opacity: .98;
+}
+
+/* New York's incoming surface keeps the souvenir pattern quiet enough for copy. */
+.message-group.other.bubble-style-city-nyc {
+  --bubble-skin-other-bg:
+    linear-gradient(rgba(250, 248, 238, .9), rgba(250, 248, 238, .9)),
+    url("/assets/city-bubbles/patterns/new-york-pattern.png") center / 440px auto repeat;
+  --bubble-skin-other-color: #173b36;
+  --bubble-theme-muted-other: rgba(23, 59, 54, .68);
+}
+
+/* VIP activity messages retain the badge when their outer bubble is transparent. */
+.message-group.bubble-style-vip .message-activity-card::before {
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  left: 10px;
+  display: grid;
+  min-width: 24px;
+  height: 15px;
+  place-items: center;
+  padding: 0 5px;
+  color: #6f4315;
+  border: 1px solid rgba(221, 180, 91, .72);
+  border-radius: 6px;
+  background: linear-gradient(135deg, #fff7d8, #e6bd68);
+  box-shadow: 0 3px 9px rgba(33, 19, 5, .2);
+  content: "VIP";
+  font-size: .45rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+/* Character bubbles derive small seams from group position, not a fixed tail. */
+:is(.personalization-bubble-stage, .message-group).bubble-style-niko {
+  --bubble-skin-other-radius: 19px;
+  --bubble-skin-self-radius: 19px;
+}
+
+:is(.personalization-bubble-stage, .message-group).bubble-style-fufu {
+  --bubble-skin-other-radius: 17px;
+  --bubble-skin-self-radius: 17px;
+}
+
+.message-group:is(.bubble-style-niko, .bubble-style-fufu) .message-text-stack.other:not(.group-start) > .message-link-preview-card {
+  border-top-left-radius: 5px !important;
+}
+
+.message-group.self:is(.bubble-style-niko, .bubble-style-fufu) .message-text-stack.self:not(.group-start) > .message-link-preview-card {
+  border-top-right-radius: 5px !important;
+}
+
+.message-group:is(.bubble-style-niko, .bubble-style-fufu) .message-bubble.other:not(.group-start):not(.is-sticker) {
+  border-top-left-radius: 5px !important;
+}
+
+.message-group.self:is(.bubble-style-niko, .bubble-style-fufu) .message-bubble.self:not(.group-start):not(.is-sticker) {
+  border-top-right-radius: 5px !important;
+}
+
+.field-chat_bubble_style .personalization-option:is(.preview-niko, .preview-fufu) {
+  border-radius: 18px;
+}
+
+.field-chat_bubble_style .personalization-option:is(.preview-niko, .preview-fufu) > i {
+  border-radius: 14px;
+}

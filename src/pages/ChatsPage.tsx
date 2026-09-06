@@ -1921,7 +1921,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "activity") {
-    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} title={message.payload?.title} />;
+    return <ActivityMessageCard activity={message.payload?.activity} activityKey={message.payload?.activity_key} className={groupClassName} title={message.payload?.title} />;
   }
 
   if (message.kind === "forward_bundle") {

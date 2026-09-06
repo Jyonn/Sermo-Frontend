@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.8",
+  "id": "2026.09.06.9",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "语音转写衔接更顺滑",
+      "title": "聊天气泡细节更统一",
       "items": [
-        "转写续页现在会继承气泡圆角，并与连续消息自然衔接",
-        "展开和收起都有完整动效，个性化预览也可以直接测试转文字效果"
+        "投稿邀请、活动和链接卡片现在会跟随连续消息正确合并圆角",
+        "优化晨报、包豪斯、打字机、小票、城市、八仙及 Niko/Fufu 等气泡的清晰度与主题细节"
       ]
     },
     "en": {
-      "title": "Smoother voice transcript continuity",
+      "title": "More consistent chat bubble details",
       "items": [
-        "Transcript continuations now inherit bubble corners and connect naturally with grouped messages",
-        "Both opening and closing are animated, and transcripts can now be tested in personalization previews"
+        "Submission invitations, activities, and link cards now merge their corners correctly within message groups",
+        "Improved clarity and theme details across Newspaper, Bauhaus, Typewriter, Receipt, City, Eight Immortals, Niko, and Fufu bubbles"
       ]
     }
   }

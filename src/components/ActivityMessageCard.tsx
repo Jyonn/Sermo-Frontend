@@ -6,10 +6,11 @@ import type { ActivityCampaignDTO } from "../types";
 interface ActivityMessageCardProps {
   activity?: ActivityCampaignDTO | null;
   activityKey?: string;
+  className?: string;
   title?: string;
 }
 
-export function ActivityMessageCard({ activity, activityKey, title }: ActivityMessageCardProps) {
+export function ActivityMessageCard({ activity, activityKey, className, title }: ActivityMessageCardProps) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const key = activity?.key || activityKey || "";
@@ -19,7 +20,7 @@ export function ActivityMessageCard({ activity, activityKey, title }: ActivityMe
 
   return (
     <button
-      className={`message-activity-card${activity ? "" : " is-unavailable"}`}
+      className={`message-activity-card${activity ? "" : " is-unavailable"}${className ? ` ${className}` : ""}`}
       disabled={!key}
       onClick={(event) => {
         event.stopPropagation();
