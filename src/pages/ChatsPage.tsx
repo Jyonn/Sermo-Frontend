@@ -10007,9 +10007,12 @@ function previewMessagesForDemo(kind: ChatPreviewDemoKind, from: "self" | "other
     const repeats = grouped && kind !== "all" ? 3 : 1;
     for (let offset = 0; offset < repeats; offset += 1) {
       const message = previewMessage(currentKind, from, index, config);
-      messages.push(currentKind === "text" && repeats > 1
-        ? { ...message, text: i18n.t(`menu.previewMergedText${offset + 1}` as TranslationKey) }
-        : message);
+      if (currentKind === "text" && repeats > 1) {
+        const text = i18n.t(`menu.previewMergedText${offset + 1}` as TranslationKey);
+        messages.push({ ...message, text, payload: { kind: "text", text } });
+      } else {
+        messages.push(message);
+      }
       index += 1;
     }
   });
@@ -10112,6 +10115,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
       aria-label={t("menu.chatBubble")}
       className="chat-conversation-panel chat-conversation-preview"
       onClickCapture={(event) => {
+        if ((event.target as HTMLElement).closest(".message-audio-transcribe")) return;
         if ((event.target as HTMLElement).closest(".message-scroll")) event.preventDefault();
       }}
       onContextMenu={(event) => event.preventDefault()}

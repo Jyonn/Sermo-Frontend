@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.10",
+  "id": "2026.09.06.11",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "语音转文字按钮显示修复",
+      "title": "个性化气泡预览更完整",
       "items": [
-        "晨报、打字机和小票气泡现在会正常显示语音转文字按钮",
-        "保留各气泡原有纸张纹理与轮廓，不影响其他消息卡片"
+        "个性化聊天预览中的语音气泡现在可以点击转文字并展开转写内容",
+        "恢复连续文字气泡的三条示例消息，合并效果更容易辨认"
       ]
     },
     "en": {
-      "title": "Voice transcript action visibility fix",
+      "title": "More complete personalized bubble previews",
       "items": [
-        "Voice transcript actions now remain visible with Newspaper, Typewriter, and Receipt bubbles",
-        "Each bubble keeps its existing paper texture and silhouette without affecting other message cards"
+        "Voice bubbles in chat personalization previews can now expand their sample transcripts",
+        "Restored all three sample messages used to demonstrate grouped text bubbles"
       ]
     }
   }

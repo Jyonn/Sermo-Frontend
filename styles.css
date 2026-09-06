@@ -33976,3 +33976,10 @@ html[data-theme="dark"] .verification-banner-action {
     radial-gradient(circle at left center, transparent 0 2.5px, #000 3px) left / 8px 11px repeat-y,
     radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
 }
+
+/* Personalization previews are inert except for the transcript demonstration. */
+.chat-personalization-preview-scale .chat-conversation-preview .message-audio-transcribe {
+  pointer-events: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
