@@ -521,6 +521,8 @@ export default function MenuPage() {
   const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const chatBackgroundFileInputRef = useRef<HTMLInputElement | null>(null);
+  const chatBackgroundTrackRef = useRef<HTMLDivElement | null>(null);
+  const chatBubbleTrackRef = useRef<HTMLDivElement | null>(null);
   const pwaGrowthClaimedRef = useRef(false);
   const growthLevelTrackRef = useRef<HTMLDivElement | null>(null);
   const accountSwitcherRouteHandledRef = useRef(false);
@@ -612,6 +614,14 @@ export default function MenuPage() {
     ? []
     : backgroundCatalog.filter(([assetKey]) => rewardRarity("background", assetKey) === chatBackgroundRarity);
   const visibleBubbleCatalog = bubbleCatalog.filter(([assetKey]) => rewardRarity("bubble", assetKey) === chatBubbleRarity);
+  const backgroundStageKey = chatBackgroundRarity === "custom"
+    ? "custom"
+    : visibleBackgroundCatalog.some(([assetKey]) => assetKey === chatBackgroundDraft)
+      ? chatBackgroundDraft
+      : visibleBackgroundCatalog[0]?.[0];
+  const bubbleStageKey = visibleBubbleCatalog.some(([assetKey]) => assetKey === personalizationDraft.chat_bubble_style)
+    ? personalizationDraft.chat_bubble_style
+    : visibleBubbleCatalog[0]?.[0];
   const bubbleUnlockLabel = (style: ChatBubbleStyle) => {
     if (style === "vip") return t("menu.permanentVipOnly");
     if (activityBubbleStyles.has(style)) return t("menu.activityUnlock");
@@ -726,6 +736,25 @@ export default function MenuPage() {
     me?.avatar_frame_style,
     me?.chat_bubble_style,
     me?.show_self_avatar,
+  ]);
+
+  useEffect(() => {
+    if (!chatPersonalizationPanel) return;
+    const track = chatPersonalizationPanel === "background" ? chatBackgroundTrackRef.current : chatBubbleTrackRef.current;
+    const frame = window.requestAnimationFrame(() => {
+      track?.querySelector<HTMLElement>(".is-stage-focus")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [
+    backgroundStageKey,
+    bubbleStageKey,
+    chatBackgroundRarity,
+    chatBubbleRarity,
+    chatPersonalizationPanel,
   ]);
 
   const switchAccount = async (account: SwitchAccountDTO) => {
@@ -2422,11 +2451,11 @@ export default function MenuPage() {
                       </button>
                     ))}
                   </div>
-                  <div className="chat-personalization-card-track">
+                  <div className="chat-personalization-card-track" ref={chatBackgroundTrackRef}>
                     {chatBackgroundRarity === "custom" ? (
                       <button
                         aria-pressed={chatBackgroundDraft === "custom"}
-                        className={`chat-personalization-card chat-background-choice theme-custom${chatBackgroundDraft === "custom" ? " is-selected" : ""}${!canCustomizeChatBackground ? " is-preview-only" : ""}`}
+                        className={`chat-personalization-card chat-background-choice theme-custom is-stage-focus${chatBackgroundDraft === "custom" ? " is-selected" : ""}${!canCustomizeChatBackground ? " is-preview-only" : ""}`}
                         disabled={chatBackgroundSaving || !canCustomizeChatBackground}
                         onClick={() => chatBackgroundFileInputRef.current?.click()}
                         type="button"
@@ -2439,7 +2468,7 @@ export default function MenuPage() {
                       return (
                         <button
                           aria-pressed={chatBackgroundDraft === theme}
-                          className={`chat-personalization-card chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${chatBackgroundDraft === theme ? " is-selected" : ""}${!owned ? " is-preview-only" : ""}`}
+                          className={`chat-personalization-card chat-background-choice theme-${theme} rarity-${rewardRarity("background", theme)}${backgroundStageKey === theme ? " is-stage-focus" : ""}${chatBackgroundDraft === theme ? " is-selected" : ""}${!owned ? " is-preview-only" : ""}`}
                           disabled={chatBackgroundSaving}
                           key={theme}
                           onClick={() => setChatBackgroundDraft(theme as ChatBackgroundTheme)}
@@ -2462,20 +2491,19 @@ export default function MenuPage() {
                       </button>
                     ))}
                   </div>
-                  <div className="chat-personalization-card-track field-chat_bubble_style">
+                  <div className="chat-personalization-card-track field-chat_bubble_style" ref={chatBubbleTrackRef}>
                     {visibleBubbleCatalog.map(([value, label]) => {
                       const style = value as ChatBubbleStyle;
                       const owned = canUseBubbleStyle(style);
                       return (
                         <button
                           aria-pressed={personalizationDraft.chat_bubble_style === value}
-                          className={`chat-personalization-card personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!owned ? " is-preview-only" : ""}`}
+                          className={`chat-personalization-card personalization-option preview-${value} rarity-${rewardRarity("bubble", value)}${bubbleStageKey === value ? " is-stage-focus" : ""}${personalizationDraft.chat_bubble_style === value ? " is-selected" : ""}${!owned ? " is-preview-only" : ""}`}
                           disabled={personalizationSaving}
                           key={value}
                           onClick={() => setPersonalizationDraft((current) => ({ ...current, chat_bubble_style: style }))}
                           type="button"
                         >
-                          <i aria-hidden="true"><span /></i>
                           <i aria-hidden="true"><span /></i>
                           <div className="chat-personalization-card-copy"><strong>{t(label)}</strong>{!owned ? <small>{bubbleUnlockLabel(style)}</small> : null}</div>
                         </button>

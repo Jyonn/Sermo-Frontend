@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.12",
+  "id": "2026.09.06.13",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "沉浸式聊天外观预览",
+      "title": "聊天外观中心展台",
       "items": [
-        "聊天外观页现在以完整会话呈现，背景和气泡可以在真实消息场景中即时预览",
-        "新增按稀有度浏览的底部素材栏，未解锁素材会直接显示解锁条件"
+        "聊天背景和气泡素材现在会自动居中展示，左右相邻选项更便于连续浏览",
+        "聊天气泡缩减为单个横向样本，移除了重复的倒影预览"
       ]
     },
     "en": {
-      "title": "Immersive chat appearance previews",
+      "title": "A centered chat appearance stage",
       "items": [
-        "Chat appearance now uses a full conversation view for live background and bubble previews",
-        "A rarity-based bottom catalog now shows clear unlock requirements for unavailable styles"
+        "Chat backgrounds and bubbles now center automatically, with neighboring options kept within easy reach",
+        "Bubble choices now use one compact horizontal sample without the duplicated reflection"
       ]
     }
   }
