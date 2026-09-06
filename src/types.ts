@@ -576,6 +576,7 @@ export interface NotificationTopicPreferenceDTO {
   channel: 0 | 1 | 2 | 3;
   topic: 1 | 2 | 3 | 4 | 5 | 6;
   audience: 0 | 1 | 2;
+  supported?: boolean;
   enabled: boolean;
 }
 

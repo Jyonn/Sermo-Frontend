@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.18",
+  "id": "2026.09.06.19",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "焕新黑色电影背景",
+      "title": "好友上线提醒更及时",
       "items": [
-        "典藏黑色电影背景新增缓慢流动的投影光束、胶片卷动和尘埃划痕",
-        "动态效果更加沉浸，同时保持聊天内容清晰并支持减少动态效果设置"
+        "好友上线消息仅通过系统通知与即时提醒发送，不再进入延迟邮件队列",
+        "通知设置会明确禁用好友上线的邮件与短信渠道"
       ]
     },
     "en": {
-      "title": "Refreshed the Noir Film background",
+      "title": "Timelier friend-online alerts",
       "items": [
-        "The collectible Noir Film background now features slow projector light, film movement, dust, and scratches",
-        "Motion feels more cinematic while keeping conversations readable and respecting reduced-motion settings"
+        "Friend-online events now use system and instant notifications only, never delayed email delivery",
+        "Notification settings now clearly disable email and SMS for friend-online alerts"
       ]
     }
   }

@@ -1789,12 +1789,19 @@ export default function MenuPage() {
     void api.getNotificationTopics().then(setNotificationTopics).catch(() => undefined);
   };
 
-  const topicEnabled = (channel: number, topic: number, audience: number) => notificationTopics.find(
+  const topicPreference = (channel: number, topic: number, audience: number) => notificationTopics.find(
     (item) => item.channel === channel && item.topic === topic && item.audience === audience,
-  )?.enabled ?? (channel !== 2 && topic !== 6);
+  );
+  const topicSupported = (channel: number, topic: number, audience: number) => topicPreference(
+    channel, topic, audience,
+  )?.supported ?? !(topic === 6 && (channel === 1 || channel === 2));
+  const topicEnabled = (channel: number, topic: number, audience: number) => {
+    if (!topicSupported(channel, topic, audience)) return false;
+    return topicPreference(channel, topic, audience)?.enabled ?? channel !== 2;
+  };
 
   const toggleNotificationTopic = async (channel: 0 | 1 | 2 | 3, topic: 1 | 2 | 3 | 4 | 5 | 6, audience: 0 | 1 | 2) => {
-    if (notificationTopicsSaving || channel === 2) return;
+    if (notificationTopicsSaving || channel === 2 || !topicSupported(channel, topic, audience)) return;
     const enabled = !topicEnabled(channel, topic, audience);
     const patch: NotificationTopicPreferenceDTO = { channel, topic, audience, enabled };
     setNotificationTopicsSaving(true);
@@ -1812,8 +1819,10 @@ export default function MenuPage() {
 
   const setNotificationTopicGroup = async (channel: 0 | 1 | 2 | 3, pairs: Array<[1 | 2 | 3 | 4 | 5 | 6, 0 | 1 | 2]>) => {
     if (notificationTopicsSaving || channel === 2) return;
-    const enabled = !pairs.every(([topic, audience]) => topicEnabled(channel, topic, audience));
-    const patches = pairs.map(([topic, audience]): NotificationTopicPreferenceDTO => ({ channel, topic, audience, enabled }));
+    const supportedPairs = pairs.filter(([topic, audience]) => topicSupported(channel, topic, audience));
+    if (supportedPairs.length === 0) return;
+    const enabled = !supportedPairs.every(([topic, audience]) => topicEnabled(channel, topic, audience));
+    const patches = supportedPairs.map(([topic, audience]): NotificationTopicPreferenceDTO => ({ channel, topic, audience, enabled }));
     setNotificationTopicsSaving(true);
     setNotificationTopics((current) => [
       ...current.filter((item) => !patches.some((patch) => patch.channel === item.channel && patch.topic === item.topic && patch.audience === item.audience)),
@@ -1914,7 +1923,10 @@ export default function MenuPage() {
       { label: t("notification.onlineType"), pairs: [[6, 0]] },
     ];
     return <div className="menu-pref-list notification-channel-topics">
-      {groups.map((group) => <div className="menu-pref-row" key={group.label}><div className="row-main"><strong>{group.label}</strong></div><button aria-label={group.label} className={`switch ${group.pairs.every(([topic, audience]) => topicEnabled(channel, topic, audience)) ? "active" : ""}`} disabled={notificationTopicsSaving || channel === 2} onClick={() => void setNotificationTopicGroup(channel, group.pairs)} type="button" /></div>)}
+      {groups.map((group) => {
+        const supportedPairs = group.pairs.filter(([topic, audience]) => topicSupported(channel, topic, audience));
+        return <div className="menu-pref-row" key={group.label}><div className="row-main"><strong>{group.label}</strong></div><button aria-label={group.label} className={`switch ${supportedPairs.length > 0 && supportedPairs.every(([topic, audience]) => topicEnabled(channel, topic, audience)) ? "active" : ""}`} disabled={notificationTopicsSaving || channel === 2 || supportedPairs.length === 0} onClick={() => void setNotificationTopicGroup(channel, group.pairs)} type="button" /></div>;
+      })}
     </div>;
   };
 
@@ -2716,7 +2728,7 @@ export default function MenuPage() {
                   {section.topics.map(([topic, audience]) => {
                     const labels: Record<number, string> = { 1: t("notification.chatType"), 2: t("notification.statementLikes"), 3: t("notification.statementComments"), 4: t("notification.commentLikes"), 5: t("notification.commentReplies"), 6: t("notification.onlineType") };
                     return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : null}</div><div className="notification-topic-channels">
-                      {([0, 1, 2, 3] as Array<0 | 1 | 2 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || channel === 2} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? "language" : channel === 1 ? "mail" : channel === 2 ? "sms" : "notifications_active"}</span></button>)}
+                      {([0, 1, 2, 3] as Array<0 | 1 | 2 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || channel === 2 || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? "language" : channel === 1 ? "mail" : channel === 2 ? "sms" : "notifications_active"}</span></button>)}
                     </div></div>;
                   })}
                 </section>
