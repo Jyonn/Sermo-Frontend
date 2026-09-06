@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.15",
+  "id": "2026.09.06.16",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "聊天背景预览优化",
+      "title": "修复未解锁背景预览",
       "items": [
-        "背景卡片的缩略图、名称和解锁条件不再互相遮挡",
-        "尚未解锁的聊天背景现在也可以先在聊天场景中预览"
+        "修复部分高等级聊天背景点击后未显示在预览场景中的问题",
+        "尚未解锁的背景仍可预览，保存时继续校验解锁条件"
       ]
     },
     "en": {
-      "title": "Improved chat background previews",
+      "title": "Fixed locked background previews",
       "items": [
-        "Background thumbnails, names, and unlock requirements no longer overlap",
-        "Locked chat backgrounds can now be previewed in the conversation before they are unlocked"
+        "Fixed some higher-level chat backgrounds not appearing in the preview after selection",
+        "Locked backgrounds remain previewable while unlock requirements are still enforced when saving"
       ]
     }
   }
