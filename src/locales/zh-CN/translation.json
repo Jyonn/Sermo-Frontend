@@ -2359,7 +2359,7 @@
   ,"audio.transcriptCollapse": "收起"
   ,"audio.transcriptLabel": "语音转写"
   ,"audio.transcriptEmpty": "没有识别出清晰的文字"
-  ,"audio.transcriptFailed": "暂时无法识别，点击右侧重试"
+  ,"audio.transcriptFailed": "暂时无法识别，点击重试"
   ,"composer.tools": "消息工具"
   ,"composer.holdToTalk": "按住说话"
   ,"composer.slideToCancel": "上滑取消"

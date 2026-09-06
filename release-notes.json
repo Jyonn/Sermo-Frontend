@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.6",
+  "id": "2026.09.06.7",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "语音消息更轻巧",
+      "title": "语音转写更自然",
       "items": [
-        "所有聊天气泡中的语音消息统一为简洁的单行布局",
-        "移除重复的语音标题，让播放、波形和时长更紧凑"
+        "转文字入口移到语音气泡靠近屏幕中线的一侧，加载、收起和重试状态更清楚",
+        "转写正文以贴合续页展示，并自动适配不同聊天气泡样式"
       ]
     },
     "en": {
-      "title": "More compact voice messages",
+      "title": "More natural voice transcripts",
       "items": [
-        "Voice messages now use a compact one-line layout across every chat bubble style",
-        "Redundant voice labels were removed so playback, waveform, and duration stay concise"
+        "The transcript action now sits beside the voice bubble with clear loading, hide, and retry states",
+        "Transcript text now opens as an attached continuation that adapts to every chat bubble style"
       ]
     }
   }

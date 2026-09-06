@@ -757,29 +757,48 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   return (
     <div
       aria-label={i18n.t("message.audio")}
-      className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}
+      className={`message-audio-unit ${from}`}
       role="group"
     >
-      <button
-        aria-label={isLoading ? i18n.t("audio.loading") : isPlaying ? i18n.t("audio.pause") : i18n.t("audio.play")}
-        className="message-audio-play"
-        disabled={isLoading}
-        onClick={() => void togglePlayback()}
-        type="button"
+      <div
+        className={`message-audio-card ${from} ${isPlaying ? "is-playing" : ""} ${className ?? ""}`.trim()}
       >
-        {isLoading ? <span aria-hidden="true" className="message-audio-play-spinner" /> : <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />}
-      </button>
-      <div className="message-audio-body">
-        <div className="message-audio-wave" aria-hidden="true">
-          {AUDIO_WAVE_PATTERN.map((bar, index) => (
-            <span
-              key={`audio-wave-${index}`}
-              className={`message-audio-wave-bar ${index < activeBars ? "is-active" : ""}`}
-              style={{ "--wave-scale": `${bar}` } as CSSProperties}
-            />
-          ))}
+        <button
+          aria-label={isLoading ? i18n.t("audio.loading") : isPlaying ? i18n.t("audio.pause") : i18n.t("audio.play")}
+          className="message-audio-play"
+          disabled={isLoading}
+          onClick={() => void togglePlayback()}
+          type="button"
+        >
+          {isLoading ? <span aria-hidden="true" className="message-audio-play-spinner" /> : <MessageControlIcon className="message-audio-play-icon" kind={isPlaying ? "pause" : "play"} />}
+        </button>
+        <div className="message-audio-body">
+          <div className="message-audio-wave" aria-hidden="true">
+            {AUDIO_WAVE_PATTERN.map((bar, index) => (
+              <span
+                key={`audio-wave-${index}`}
+                className={`message-audio-wave-bar ${index < activeBars ? "is-active" : ""}`}
+                style={{ "--wave-scale": `${bar}` } as CSSProperties}
+              />
+            ))}
+          </div>
+          <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
         </div>
-        <span className="message-audio-progress">{formatDuration(currentTime)} / {formatDuration(totalDuration)}</span>
+        <audio
+          className="message-audio-player"
+          preload="metadata"
+          ref={audioRef}
+          src={resolvedUri}
+          onError={() => {
+            setIsLoading(false);
+            if (!retryWithFreshUri) {
+              forgetStableResourceUri(uri);
+              setRetryWithFreshUri(true);
+              return;
+            }
+            setIsPlaying(false);
+          }}
+        />
       </div>
       {messageId && messageId > 0 ? (
         <button
@@ -798,30 +817,14 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         </button>
       ) : null}
       {transcriptVisible && transcript?.status === "ready" ? (
-        <div className="message-audio-transcript" role="status">
-          <span className="message-audio-transcript-label">{i18n.t("audio.transcriptLabel")}</span>
+        <div className={`message-audio-transcript ${from}`} role="status">
           <p>{transcript.text || i18n.t("audio.transcriptEmpty")}</p>
         </div>
       ) : transcriptVisible && transcript?.status === "failed" ? (
-        <div className="message-audio-transcript is-failed" role="status">
+        <div className={`message-audio-transcript ${from} is-failed`} role="status">
           <p>{i18n.t("audio.transcriptFailed")}</p>
         </div>
       ) : null}
-      <audio
-        className="message-audio-player"
-        preload="metadata"
-        ref={audioRef}
-        src={resolvedUri}
-        onError={() => {
-          setIsLoading(false);
-          if (!retryWithFreshUri) {
-            forgetStableResourceUri(uri);
-            setRetryWithFreshUri(true);
-            return;
-          }
-          setIsPlaying(false);
-        }}
-      />
     </div>
   );
 });

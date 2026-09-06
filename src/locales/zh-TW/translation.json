@@ -2345,7 +2345,7 @@
   "audio.transcriptCollapse": "收起",
   "audio.transcriptLabel": "語音轉寫",
   "audio.transcriptEmpty": "沒有識別出清晰的文字",
-  "audio.transcriptFailed": "暫時無法識別，點選右側重試",
+  "audio.transcriptFailed": "暫時無法識別，點選重試",
   "composer.tools": "訊息工具",
   "composer.holdToTalk": "按住說話",
   "composer.slideToCancel": "上滑取消",

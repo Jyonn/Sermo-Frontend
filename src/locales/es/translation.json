@@ -2340,7 +2340,7 @@
   "profile.welcomeMoveEarlier": "antes",
   "profile.welcomeMoveLater": "más adelante",
   "audio.transcribe": "Transcribir",
-  "audio.transcribing": "Transcribiendo",
+  "audio.transcribing": "Procesando",
   "audio.transcribeRetry": "Reintentar",
   "audio.transcriptCollapse": "Ocultar",
   "audio.transcriptLabel": "TRANSCRIPCIÓN",
