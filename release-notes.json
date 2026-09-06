@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.14",
+  "id": "2026.09.06.15",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的外观素材导航",
+      "title": "聊天背景预览优化",
       "items": [
-        "聊天背景和气泡素材会自动居中展示，左右相邻选项更便于连续浏览",
-        "稀有度导航改为简洁的等分文字栏，分类和当前选择更加清楚"
+        "背景卡片的缩略图、名称和解锁条件不再互相遮挡",
+        "尚未解锁的聊天背景现在也可以先在聊天场景中预览"
       ]
     },
     "en": {
-      "title": "Clearer appearance browsing",
+      "title": "Improved chat background previews",
       "items": [
-        "Chat backgrounds and bubbles center automatically, with neighboring options kept within easy reach",
-        "Rarity navigation now uses a clean, evenly spaced text bar for clearer categories and selection"
+        "Background thumbnails, names, and unlock requirements no longer overlap",
+        "Locked chat backgrounds can now be previewed in the conversation before they are unlocked"
       ]
     }
   }

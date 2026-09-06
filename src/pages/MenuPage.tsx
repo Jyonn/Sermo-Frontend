@@ -2410,7 +2410,7 @@ export default function MenuPage() {
           </div>
           <div className="chat-personalization-preview-viewport">
             <div className="chat-personalization-preview-scale">
-              <ChatsPage key={`chat-preview-${chatPreviewDemoKind}`} preview={{
+              <ChatsPage key={`chat-preview-${chatPreviewDemoKind}-${chatBackgroundDraft}-${personalizationDraft.chat_bubble_style}`} preview={{
                 avatarName: space?.official_user?.name ?? t("brand.user"),
                 avatarUri: space?.official_user?.avatar_uri,
                 backgroundTheme: chatBackgroundDraft,
