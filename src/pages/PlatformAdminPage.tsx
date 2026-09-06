@@ -9,7 +9,7 @@ import { ApiError, api } from "../lib/api";
 import { usePlatformAdminAuth } from "../lib/platformAdminAuth";
 import { formatRelativeTime } from "../lib/presentation";
 import { showToast } from "../lib/toast";
-import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformEmailDeliveryDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
+import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformEmailDeliveryDTO, PlatformEmailReviewDetailDTO, PlatformEmailReviewRecordDTO, PlatformEmailReviewStateDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
 import { ChatPreview } from "./ChatsPage";
 
 type Section = "overview" | "spaces" | "permissions" | "reviews" | "emails" | "audit" | "security";
@@ -102,6 +102,58 @@ function EmailDeliveryList({ items }: { items: PlatformEmailDeliveryDTO[] }) {
   </article>)}</div>;
 }
 
+const emailReviewStatusLabel: Record<PlatformEmailReviewRecordDTO["status"], string> = {
+  processing: "发送中",
+  sent: "发送成功",
+  failed: "发送失败",
+};
+
+function EmailReviewPanel({ busy, onOpen, onRefresh, onToggle, value }: {
+  busy: boolean;
+  onOpen: (record: PlatformEmailReviewRecordDTO) => void;
+  onRefresh: () => void;
+  onToggle: () => void;
+  value: PlatformEmailReviewStateDTO | null;
+}) {
+  const count = value?.captured_count ?? 0;
+  const limit = value?.limit ?? 20;
+  const active = Boolean(value?.enabled);
+  const completed = Boolean(value?.completed_at && count >= limit);
+  return <section className={`platform-email-review${active ? " is-active" : ""}`}>
+    <header>
+      <div><span>MAIL REVIEW</span><h3>邮件审阅采样</h3><p>开启后记录接下来 20 封邮件。成功与失败都会保留，满额后自动停止。</p></div>
+      <div className="platform-email-review-actions">
+        <button aria-label="刷新审阅进度" className="platform-email-review-refresh" disabled={busy} onClick={onRefresh} type="button"><span className="material-symbols-outlined">refresh</span></button>
+        <button className={active ? "is-stop" : "is-start"} disabled={busy} onClick={onToggle} type="button">{busy ? "处理中" : active ? "停止审阅" : count ? "开启新一轮" : "开启审阅"}</button>
+      </div>
+    </header>
+    <div className="platform-email-review-meter">
+      <div><strong>{count}<small> / {limit}</small></strong><span>{active ? `正在捕获，剩余 ${value?.remaining ?? limit} 封` : completed ? "已满 20 封，自动停止" : count ? "本轮已停止" : "等待开启"}</span></div>
+      <i><b style={{ width: `${Math.min(100, (count / limit) * 100)}%` }} /></i>
+      {value?.started_at ? <time>开始于 {new Date(value.started_at * 1000).toLocaleString()}</time> : <time>新一轮会替换当前审阅样本</time>}
+    </div>
+    {value?.items.length ? <div className="platform-email-review-list">{value.items.map((item) => <button className={`is-${item.status}`} key={item.record_id} onClick={() => onOpen(item)} type="button">
+      <span className="platform-email-review-sequence">{String(item.sequence).padStart(2, "0")}</span>
+      <span className="platform-email-review-summary"><strong>{item.title || "无标题邮件"}</strong><small>{item.recipient} · {item.mail_format || "默认格式"} · {item.locale || "默认语言"}</small>{item.detail ? <code>{item.detail}</code> : null}</span>
+      <span className={`platform-email-status is-${item.status}`}>{emailReviewStatusLabel[item.status]}</span>
+      <time>{time(item.completed_at ?? item.created_at)}</time>
+      <span className="material-symbols-outlined">chevron_right</span>
+    </button>)}</div> : <div className="platform-email-review-empty"><span className="material-symbols-outlined">mark_email_unread</span><div><strong>{active ? "正在等待下一封邮件" : "尚无审阅样本"}</strong><p>{active ? "邮件一旦进入发送流程，就会立即出现在这里。" : "开启后仅捕获接下来的 20 封，不影响邮件正常发送。"}</p></div></div>}
+  </section>;
+}
+
+function EmailReviewDetail({ value }: { value: PlatformEmailReviewDetailDTO | null }) {
+  if (!value) return <div className="platform-delivery-loading"><i /><strong>正在读取邮件正文</strong><span>正文访问会写入审计日志</span></div>;
+  return <div className="platform-email-review-detail">
+    <section className="platform-email-review-detail-head"><span>REVIEW #{String(value.sequence).padStart(2, "0")}</span><h2>{value.title || "无标题邮件"}</h2><div><span className={`platform-email-status is-${value.status}`}>{emailReviewStatusLabel[value.status]}</span><time>{new Date(value.created_at * 1000).toLocaleString()}</time></div></section>
+    <section className="platform-email-review-facts"><div><span>收件人</span><strong>{value.recipient_name || "未提供称呼"}</strong><small>{value.recipient}</small></div><div><span>渲染参数</span><strong>{value.mail_format || "默认格式"}</strong><small>{value.locale || "默认语言"}</small></div><div><span>服务请求</span><strong>{value.request_id || "无请求 ID"}</strong><small>{value.status === "processing" ? "等待服务响应" : emailReviewStatusLabel[value.status]}</small></div></section>
+    <section className="platform-email-review-body"><header><span className="material-symbols-outlined">draft</span><strong>邮件正文</strong></header><pre>{value.body_text || "（正文为空）"}</pre>{value.footer_note ? <footer>{value.footer_note}</footer> : null}</section>
+    {value.action_url ? <a className="platform-email-review-link" href={value.action_url} rel="noreferrer" target="_blank"><span className="material-symbols-outlined">open_in_new</span><span><strong>邮件跳转链接</strong><small>{value.action_url}</small></span></a> : null}
+    {value.detail ? <section className="platform-email-review-error"><strong>发送失败详情</strong><code>{value.detail}</code></section> : null}
+    {value.provider_response != null ? <details className="platform-email-review-response"><summary>查看邮件服务原始响应</summary><pre>{JSON.stringify(value.provider_response, null, 2)}</pre></details> : null}
+  </div>;
+}
+
 function SpaceRow({ space, onClick }: { space: PlatformAdminSpaceDTO; onClick: () => void }) {
   return <button className="platform-space-row" onClick={onClick} type="button"><UserAvatar className="platform-space-avatar" name={space.name} uri={space.official_user?.avatar_uri} /><div><strong>{space.name}</strong><small>@{space.slug} · {space.member_count}/{space.member_limit} 人</small></div><span className={`platform-tier is-${space.verification_tier}`}>{space.verification_tier === "identity" ? "实名" : space.verification_tier === "phone" ? "手机" : "邮箱"}</span><span className="material-symbols-outlined">chevron_right</span></button>;
 }
@@ -159,6 +211,10 @@ function PlatformAdminConsole() {
   const [emailHasMore, setEmailHasMore] = useState(false);
   const [emailLoaded, setEmailLoaded] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [emailReview, setEmailReview] = useState<PlatformEmailReviewStateDTO | null>(null);
+  const [emailReviewBusy, setEmailReviewBusy] = useState(false);
+  const [selectedEmailReview, setSelectedEmailReview] = useState<PlatformEmailReviewRecordDTO | null>(null);
+  const [emailReviewDetail, setEmailReviewDetail] = useState<PlatformEmailReviewDetailDTO | null>(null);
   const [selectedSpace, setSelectedSpace] = useState<PlatformAdminSpaceDTO | null>(null);
   const [members, setMembers] = useState<PlatformAdminMemberDTO[]>([]);
   const [selectedMember, setSelectedMember] = useState<PlatformAdminMemberDTO | null>(null);
@@ -189,10 +245,17 @@ function PlatformAdminConsole() {
     if (section !== "emails" || emailLoaded || emailLoading) return;
     setEmailLoaded(true);
     setEmailLoading(true);
-    void api.getPlatformEmailDeliveries(undefined, 40).then((result) => {
-      setEmailDeliveries(result.items); setEmailCursor(result.next_before); setEmailHasMore(result.has_more);
+    void Promise.all([api.getPlatformEmailDeliveries(undefined, 40), api.getPlatformEmailReview()]).then(([deliveries, reviewState]) => {
+      setEmailDeliveries(deliveries.items); setEmailCursor(deliveries.next_before); setEmailHasMore(deliveries.has_more); setEmailReview(reviewState);
     }).catch((cause) => showToast(cause instanceof Error ? cause.message : "邮件记录加载失败", "error")).finally(() => setEmailLoading(false));
   }, [emailLoaded, emailLoading, section]);
+  useEffect(() => {
+    if (section !== "emails" || !emailReview?.enabled) return;
+    const timer = window.setInterval(() => {
+      void api.getPlatformEmailReview().then(setEmailReview).catch(() => undefined);
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, [emailReview?.enabled, section]);
   const pendingReviews = useMemo(() => spaces.filter((space) => space.identity_submitted_at && !space.identity_verified_at), [spaces]);
   const visibleSpaces = useMemo(() => { const keyword = query.trim().toLowerCase(); return keyword ? spaces.filter((item) => `${item.name} ${item.slug} ${item.email}`.toLowerCase().includes(keyword)) : spaces; }, [query, spaces]);
 
@@ -201,6 +264,9 @@ function PlatformAdminConsole() {
   const loadOlderMessages = async () => { if (!openChat || !auditReason || !messageCursor || !hasOlderMessages || loadingOlderMessages) return; setLoadingOlderMessages(true); try { const result = await api.getPlatformChatMessages(openChat.chat_id, auditReason, messageCursor, selectedMember?.user_id); setMessages((current) => [...current, ...result.messages.filter((item) => !current.some((existing) => existing.message_id === item.message_id))]); setMessageCursor(result.next_before); setHasOlderMessages(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更早记录读取失败", "error"); } finally { setLoadingOlderMessages(false); } };
   const inspectDelivery = async (message: ChatMessageDTO) => { setDeliveryMessage(message); setDeliveryAudit(null); try { setDeliveryAudit(await api.getPlatformMessageDeliveries(message.message_id, auditReason)); } catch (cause) { setDeliveryMessage(null); showToast(cause instanceof Error ? cause.message : "投递链路读取失败", "error"); } };
   const loadMoreEmailDeliveries = async () => { if (!emailHasMore || !emailCursor || emailLoading) return; setEmailLoading(true); try { const result = await api.getPlatformEmailDeliveries(emailCursor, 40); setEmailDeliveries((current) => [...current, ...result.items.filter((item) => !current.some((existing) => existing.delivery_id === item.delivery_id))]); setEmailCursor(result.next_before); setEmailHasMore(result.has_more); } catch (cause) { showToast(cause instanceof Error ? cause.message : "更多邮件记录加载失败", "error"); } finally { setEmailLoading(false); } };
+  const refreshEmailReview = async () => { if (emailReviewBusy) return; setEmailReviewBusy(true); try { setEmailReview(await api.getPlatformEmailReview()); } catch (cause) { showToast(cause instanceof Error ? cause.message : "审阅进度刷新失败", "error"); } finally { setEmailReviewBusy(false); } };
+  const toggleEmailReview = async () => { if (emailReviewBusy) return; setEmailReviewBusy(true); try { const next = await api.setPlatformEmailReview(!emailReview?.enabled); setEmailReview(next); setSelectedEmailReview(null); setEmailReviewDetail(null); showToast(next.enabled ? "邮件审阅已开启" : next.captured_count >= next.limit ? "已捕获 20 封并自动停止" : "邮件审阅已停止"); } catch (cause) { showToast(cause instanceof Error ? cause.message : "邮件审阅状态更新失败", "error"); } finally { setEmailReviewBusy(false); } };
+  const openEmailReview = async (record: PlatformEmailReviewRecordDTO) => { setSelectedEmailReview(record); setEmailReviewDetail(null); try { setEmailReviewDetail(await api.getPlatformEmailReviewDetail(record.record_id)); } catch (cause) { setSelectedEmailReview(null); showToast(cause instanceof Error ? cause.message : "邮件正文读取失败", "error"); } };
   const review = async () => { if (!reviewTarget || (!reviewTarget.approved && !reviewNote.trim())) return; try { await api.reviewPlatformIdentity(reviewTarget.space.space_id, reviewTarget.approved, reviewNote.trim()); showToast(reviewTarget.approved ? "实名认证已通过" : "申请已驳回"); setReviewTarget(null); setReviewNote(""); void load(); } catch (cause) { showToast(cause instanceof Error ? cause.message : "审核失败", "error"); } };
   const setupMfa = async () => { try { const result = await api.beginPlatformMfa(); setMfaSecret(result.secret); setMfaQr(await QRCode.toDataURL(result.otpauth_uri, { width: 320, margin: 1 })); } catch (cause) { showToast(cause instanceof Error ? cause.message : "MFA 配置失败", "error"); } };
   const verifyMfa = async () => { try { const result = await api.verifyPlatformMfa(mfaCode); setRecoveryCodes(result.recovery_codes); setSession(session ? { ...session, mfaEnabled: true } : null); setDashboard((value) => value ? { ...value, mfa_enabled: true } : value); } catch (cause) { showToast(cause instanceof Error ? cause.message : "动态口令无效", "error"); } };
@@ -210,7 +276,7 @@ function PlatformAdminConsole() {
     {section === "spaces" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DIRECTORY</span><h3>空间目录</h3></div><label className="platform-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder="名称、slug 或邮箱" value={query} /></label></div><div className="platform-space-list">{visibleSpaces.map((space) => <SpaceRow key={space.space_id} onClick={() => void selectSpace(space)} space={space} />)}</div></section> : null}
     {section === "permissions" ? <PermissionWorkspace scope="platform" /> : null}
     {section === "reviews" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IDENTITY QUEUE</span><h3>实名认证</h3></div><small>{pendingReviews.length} 项待处理</small></div>{pendingReviews.length ? pendingReviews.map((space) => <article className="platform-review-card" key={space.space_id}><div><span>{space.name}</span><strong>@{space.slug}</strong><small>提交于 {new Date((space.identity_submitted_at ?? 0) * 1000).toLocaleString()}</small></div><div><button onClick={() => void api.getPlatformIdentityDocument(space.space_id).then((result) => window.open(result.uri, "_blank", "noopener"))} type="button">查看材料</button><button onClick={() => setReviewTarget({ space, approved: false })} type="button">驳回</button><button className="is-approve" onClick={() => setReviewTarget({ space, approved: true })} type="button">通过</button></div></article>) : <div className="platform-empty is-large"><span className="material-symbols-outlined">task_alt</span><strong>审核队列已清空</strong><p>新的实名认证提交会出现在这里。</p></div>}</section> : null}
-    {section === "emails" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DELIVERY HISTORY</span><h3>通知邮件发送记录</h3></div><small>每页 40 条 · 收件地址已脱敏</small></div>{emailDeliveries.length ? <EmailDeliveryList items={emailDeliveries} /> : emailLoading ? <div className="platform-inline-loading"><i />正在读取邮件记录</div> : <div className="platform-empty is-large"><span className="material-symbols-outlined">mail</span><strong>暂无通知邮件</strong><p>后续发送记录会出现在这里。</p></div>}{emailHasMore ? <button className="platform-email-more" disabled={emailLoading} onClick={() => void loadMoreEmailDeliveries()} type="button">{emailLoading ? "正在加载" : "加载更多"}<span className="material-symbols-outlined">expand_more</span></button> : emailDeliveries.length ? <div className="platform-email-end">已显示全部记录</div> : null}</section> : null}
+    {section === "emails" ? <div className="platform-email-workspace"><EmailReviewPanel busy={emailReviewBusy || emailLoading} onOpen={(record) => void openEmailReview(record)} onRefresh={() => void refreshEmailReview()} onToggle={() => void toggleEmailReview()} value={emailReview} /><section className="platform-panel"><div className="platform-section-title"><div><span>DELIVERY HISTORY</span><h3>通知邮件发送记录</h3></div><small>每页 40 条 · 收件地址已脱敏</small></div>{emailDeliveries.length ? <EmailDeliveryList items={emailDeliveries} /> : emailLoading ? <div className="platform-inline-loading"><i />正在读取邮件记录</div> : <div className="platform-empty is-large"><span className="material-symbols-outlined">mail</span><strong>暂无通知邮件</strong><p>后续发送记录会出现在这里。</p></div>}{emailHasMore ? <button className="platform-email-more" disabled={emailLoading} onClick={() => void loadMoreEmailDeliveries()} type="button">{emailLoading ? "正在加载" : "加载更多"}<span className="material-symbols-outlined">expand_more</span></button> : emailDeliveries.length ? <div className="platform-email-end">已显示全部记录</div> : null}</section></div> : null}
     {section === "audit" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IMMUTABLE TRAIL</span><h3>审计日志</h3></div><small>最近 100 条</small></div><AuditList items={audit} /></section> : null}
     {section === "security" ? <section className="platform-security-grid"><article className="platform-panel"><span className="platform-security-icon material-symbols-outlined">passkey</span><h3>多因素认证</h3><p>在邮箱验证码后增加动态口令。建议始终开启。</p><div className={`platform-status ${dashboard?.mfa_enabled ? "is-on" : ""}`}><i />{dashboard?.mfa_enabled ? "已启用" : "尚未启用"}</div>{!dashboard?.mfa_enabled ? <button className="platform-primary is-compact" onClick={() => void setupMfa()} type="button">开始设置</button> : null}</article><article className="platform-panel"><span className="platform-security-icon material-symbols-outlined">history</span><h3>会话策略</h3><p>令牌仅保存在当前标签会话，8 小时后自动失效。</p><button className="platform-secondary" onClick={logout} type="button">退出当前会话</button></article></section> : null}
   </main><nav className="platform-mobile-nav">{nav.map((item) => <button className={section === item.id ? "active" : ""} key={item.id} onClick={() => setSection(item.id)} type="button"><span className="material-symbols-outlined">{item.icon}</span><small>{item.label}</small></button>)}</nav>
@@ -220,6 +286,7 @@ function PlatformAdminConsole() {
   <InputDialog confirmLabel={reviewTarget?.approved ? "确认通过" : "确认驳回"} onChange={setReviewNote} onClose={() => { setReviewTarget(null); setReviewNote(""); }} onConfirm={() => void review()} open={Boolean(reviewTarget)} placeholder={reviewTarget?.approved ? "审核备注（可选）" : "请填写明确的驳回原因"} title={reviewTarget?.approved ? `通过 ${reviewTarget.space.name} 的实名认证？` : `驳回 ${reviewTarget?.space.name ?? ""} 的申请？`} value={reviewNote} />
   <SideDrawer className="platform-chat-drawer" historyKey="platform-chat" onClose={() => { setOpenChat(null); setMessages([]); setAuditReason(""); setMessageCursor(null); setHasOlderMessages(false); }} open={Boolean(openChat)} title={openChat?.title || "会话审计"}>{openChat ? <AuditConversation chat={openChat} firstPersonUserId={selectedMember?.user_id ?? null} hasMore={hasOlderMessages} loading={loadingOlderMessages} messages={messages} onLoadOlder={loadOlderMessages} onMessage={(message) => void inspectDelivery(message)} /> : null}</SideDrawer>
   <SideDrawer className="platform-delivery-drawer" historyKey="platform-message-delivery" onClose={() => { setDeliveryMessage(null); setDeliveryAudit(null); }} open={Boolean(deliveryMessage)} title="消息推送链路"><DeliveryAudit value={deliveryAudit} /></SideDrawer>
+  <SideDrawer className="platform-email-review-drawer" historyKey="platform-email-review" onClose={() => { setSelectedEmailReview(null); setEmailReviewDetail(null); }} open={Boolean(selectedEmailReview)} title="邮件审阅详情"><EmailReviewDetail value={emailReviewDetail} /></SideDrawer>
   <SideDrawer actionDisabled={mfaCode.length !== 6} actionLabel="验证并启用" historyKey="platform-mfa" onAction={() => void verifyMfa()} onClose={() => { setMfaQr(""); setMfaSecret(""); setMfaCode(""); }} open={Boolean(mfaQr)} title="连接验证器"><div className="platform-mfa"><p>使用任意验证器扫描二维码，然后输入 6 位动态口令。</p><img alt="MFA QR code" src={mfaQr} /><code>{mfaSecret}</code><VerificationCodeInput ariaLabel="动态口令" value={mfaCode} onChange={setMfaCode} /></div></SideDrawer>
   <SideDrawer historyKey="platform-recovery" onClose={() => setRecoveryCodes([])} open={recoveryCodes.length > 0} title="保存恢复码"><div className="platform-recovery"><span className="material-symbols-outlined">key</span><h2>仅展示这一次</h2><p>每个恢复码只能使用一次。请离线保存，不要截图上传云端。</p><div>{recoveryCodes.map((code) => <code key={code}>{code}</code>)}</div><button className="platform-primary" onClick={() => setRecoveryCodes([])} type="button">我已安全保存</button></div></SideDrawer></div>;
 }

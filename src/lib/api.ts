@@ -1710,6 +1710,21 @@ export const api = {
       platformAdminAuth: true, query: { before, limit }, signal,
     });
   },
+  getPlatformEmailReview(signal?: AbortSignal) {
+    return request<import("../types").PlatformEmailReviewStateDTO>("/platform-admin/email-review", {
+      platformAdminAuth: true, signal,
+    });
+  },
+  setPlatformEmailReview(enabled: boolean) {
+    return request<import("../types").PlatformEmailReviewStateDTO>("/platform-admin/email-review", {
+      method: "POST", platformAdminAuth: true, body: { enabled },
+    });
+  },
+  getPlatformEmailReviewDetail(recordId: number, signal?: AbortSignal) {
+    return request<import("../types").PlatformEmailReviewDetailDTO>(`/platform-admin/email-review/${recordId}`, {
+      platformAdminAuth: true, signal,
+    });
+  },
   beginPlatformMfa() {
     return request<{ secret: string; otpauth_uri: string }>("/platform-admin/mfa/setup", { method: "POST", platformAdminAuth: true });
   },

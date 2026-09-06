@@ -34001,6 +34001,409 @@ html[data-theme="dark"] .verification-banner-action {
   display: grid;
 }
 
+.platform-email-workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.platform-email-review {
+  overflow: hidden;
+  border: 1px solid #2e3c37;
+  border-radius: 22px;
+  color: #eef3ef;
+  background:
+    radial-gradient(circle at 88% -8%, rgba(219, 100, 58, .2), transparent 34%),
+    linear-gradient(145deg, #17211f, #202c28);
+  box-shadow: 0 18px 46px rgba(23, 33, 31, .12);
+}
+
+.platform-email-review > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 24px;
+}
+
+.platform-email-review > header > div:first-child {
+  min-width: 0;
+}
+
+.platform-email-review > header > div:first-child > span {
+  color: #df8b6c;
+  font: 700 10px/1.2 "JetBrains Mono", monospace;
+  letter-spacing: .15em;
+}
+
+.platform-email-review h3 {
+  margin: 7px 0 5px;
+  font-size: 21px;
+  letter-spacing: -.035em;
+}
+
+.platform-email-review header p {
+  max-width: 650px;
+  margin: 0;
+  color: #aab5b0;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.platform-email-review-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.platform-email-review-actions button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 12px;
+  color: #17211f;
+  background: #f1e7dc;
+  font: 750 12px inherit;
+}
+
+.platform-email-review-actions button:disabled {
+  opacity: .48;
+}
+
+.platform-email-review-actions .platform-email-review-refresh {
+  display: grid;
+  width: 40px;
+  padding: 0;
+  place-items: center;
+  color: #bdc8c3;
+  background: rgba(255, 255, 255, .06);
+}
+
+.platform-email-review-refresh .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.platform-email-review-actions .is-stop {
+  color: #f2c7b8;
+  background: rgba(219, 100, 58, .12);
+  border-color: rgba(227, 125, 88, .25);
+}
+
+.platform-email-review-meter {
+  display: grid;
+  grid-template-columns: minmax(190px, 280px) minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 17px 24px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(5, 13, 11, .2);
+}
+
+.platform-email-review-meter > div {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.platform-email-review-meter strong {
+  color: #fff8ef;
+  font: 700 26px/1 "JetBrains Mono", monospace;
+}
+
+.platform-email-review-meter strong small {
+  color: #77847e;
+  font-size: 12px;
+}
+
+.platform-email-review-meter span,
+.platform-email-review-meter time {
+  color: #aab5b0;
+  font-size: 11px;
+}
+
+.platform-email-review-meter > i {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .09);
+}
+
+.platform-email-review-meter > i > b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d66b43, #e8a16f);
+  transition: width 360ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.platform-email-review-list {
+  display: grid;
+}
+
+.platform-email-review-list > button {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto 78px 20px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 15px 24px;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.platform-email-review-list > button:first-child {
+  border-top: 0;
+}
+
+.platform-email-review-list > button:hover {
+  background: rgba(255, 255, 255, .045);
+}
+
+.platform-email-review-sequence {
+  color: #df8b6c;
+  font: 700 13px "JetBrains Mono", monospace;
+}
+
+.platform-email-review-summary {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.platform-email-review-summary strong,
+.platform-email-review-summary small,
+.platform-email-review-summary code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-email-review-summary strong {
+  color: #edf3ef;
+  font-size: 13px;
+}
+
+.platform-email-review-summary small {
+  color: #8e9b95;
+  font-size: 10px;
+}
+
+.platform-email-review-summary code {
+  color: #e6a58d;
+  font-size: 10px;
+}
+
+.platform-email-review-list .platform-email-status {
+  justify-self: end;
+}
+
+.platform-email-review-list > button > time {
+  color: #7f8d86;
+  font-size: 10px;
+  text-align: right;
+}
+
+.platform-email-review-list > button > .material-symbols-outlined {
+  color: #74817b;
+  font-size: 18px;
+}
+
+.platform-email-review-empty {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 25px 24px 27px;
+}
+
+.platform-email-review-empty > .material-symbols-outlined {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 13px;
+  color: #d98a6c;
+  background: rgba(255, 255, 255, .04);
+}
+
+.platform-email-review-empty div {
+  display: grid;
+  gap: 3px;
+}
+
+.platform-email-review-empty p {
+  margin: 0;
+  color: #89968f;
+  font-size: 11px;
+}
+
+.platform-email-review-detail {
+  display: grid;
+  gap: 14px;
+}
+
+.platform-email-review-detail-head {
+  padding: 8px 2px 13px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.platform-email-review-detail-head > span {
+  color: #bd5a37;
+  font: 750 10px "JetBrains Mono", monospace;
+  letter-spacing: .14em;
+}
+
+.platform-email-review-detail-head h2 {
+  margin: 10px 0 13px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.platform-email-review-detail-head > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.platform-email-review-detail-head time {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.platform-email-review-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+}
+
+.platform-email-review-facts > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  padding: 13px;
+  border-left: 1px solid var(--line-soft);
+}
+
+.platform-email-review-facts > div:first-child {
+  border-left: 0;
+}
+
+.platform-email-review-facts span,
+.platform-email-review-facts small {
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.platform-email-review-facts strong {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.platform-email-review-body {
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 17px;
+  background: var(--bg-elevated);
+}
+
+.platform-email-review-body header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.platform-email-review-body header .material-symbols-outlined {
+  color: #b75735;
+  font-size: 18px;
+}
+
+.platform-email-review-body pre,
+.platform-email-review-response pre {
+  margin: 0;
+  overflow: auto;
+  padding: 18px;
+  color: var(--text-primary);
+  font: 500 12px/1.75 "JetBrains Mono", monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.platform-email-review-body footer {
+  padding: 11px 14px;
+  border-top: 1px dashed var(--line-soft);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.platform-email-review-link {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  text-decoration: none;
+}
+
+.platform-email-review-link > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.platform-email-review-link small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-email-review-error {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #edc4b9;
+  border-radius: 14px;
+  color: #923b2d;
+  background: #fae9e4;
+}
+
+.platform-email-review-error code {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+.platform-email-review-response {
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.platform-email-review-response summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.platform-email-review-response pre {
+  padding: 12px 0 0;
+}
+
 .platform-email-row {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
@@ -34136,6 +34539,73 @@ html[data-theme="dark"] .verification-banner-action {
 }
 
 @media (max-width: 700px) {
+  .platform-email-review > header {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .platform-email-review-actions {
+    width: 100%;
+  }
+
+  .platform-email-review-actions .is-start,
+  .platform-email-review-actions .is-stop {
+    flex: 1;
+  }
+
+  .platform-email-review-meter {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 15px 20px;
+  }
+
+  .platform-email-review-list > button {
+    grid-template-columns: 30px minmax(0, 1fr) 18px;
+    grid-template-rows: auto auto;
+    gap: 9px;
+    padding: 14px 18px;
+  }
+
+  .platform-email-review-list .platform-email-review-sequence {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .platform-email-review-list .platform-email-review-summary {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .platform-email-review-list .platform-email-status,
+  .platform-email-review-list > button > time {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .platform-email-review-list > button > time {
+    justify-self: end;
+  }
+
+  .platform-email-review-list > button > .material-symbols-outlined {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .platform-email-review-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-email-review-facts > div {
+    border-top: 1px solid var(--line-soft);
+    border-left: 0;
+  }
+
+  .platform-email-review-facts > div:first-child {
+    border-top: 0;
+  }
+
   .platform-email-row {
     grid-template-columns: 38px minmax(0, 1fr);
   }

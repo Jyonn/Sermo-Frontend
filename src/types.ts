@@ -354,6 +354,39 @@ export interface PlatformEmailDeliveryPageDTO {
   next_before: number | null;
 }
 
+export interface PlatformEmailReviewRecordDTO {
+  record_id: number;
+  sequence: number;
+  recipient: string;
+  title: string;
+  mail_format: string;
+  locale: string;
+  status: "processing" | "sent" | "failed";
+  detail: string;
+  created_at: number;
+  completed_at: number | null;
+}
+
+export interface PlatformEmailReviewDetailDTO extends PlatformEmailReviewRecordDTO {
+  body: unknown;
+  body_text: string;
+  recipient_name: string;
+  action_url: string;
+  footer_note: string;
+  request_id: string;
+  provider_response: unknown;
+}
+
+export interface PlatformEmailReviewStateDTO {
+  enabled: boolean;
+  captured_count: number;
+  limit: number;
+  remaining: number;
+  started_at: number | null;
+  completed_at: number | null;
+  items: PlatformEmailReviewRecordDTO[];
+}
+
 export interface PlatformDashboardDTO {
   spaces: number;
   members: number;
