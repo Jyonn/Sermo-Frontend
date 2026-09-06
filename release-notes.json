@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.17",
+  "id": "2026.09.06.18",
   "publishedAt": "2026-09-06",
   "locales": {
     "zh-CN": {
-      "title": "优化邮件发送阈值",
+      "title": "焕新黑色电影背景",
       "items": [
-        "邮件离线发送阈值改为九个清晰档位，范围从 10 分钟到 24 小时",
-        "移除容易误选的连续分钟刻度，延迟时间更直观"
+        "典藏黑色电影背景新增缓慢流动的投影光束、胶片卷动和尘埃划痕",
+        "动态效果更加沉浸，同时保持聊天内容清晰并支持减少动态效果设置"
       ]
     },
     "en": {
-      "title": "Improved email delivery thresholds",
+      "title": "Refreshed the Noir Film background",
       "items": [
-        "Email offline delivery now offers nine clear presets from 10 minutes to 24 hours",
-        "Replaced the ambiguous continuous minute slider with explicit choices"
+        "The collectible Noir Film background now features slow projector light, film movement, dust, and scratches",
+        "Motion feels more cinematic while keeping conversations readable and respecting reduced-motion settings"
       ]
     }
   }

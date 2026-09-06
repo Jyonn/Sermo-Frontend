@@ -3210,21 +3210,6 @@ html[data-theme="dark"] body .growth-level-detail {
   animation: chat-background-spaceport-orbit 38s linear infinite;
 }
 
-.chat-detail-scene.chat-background-noir-film::before,
-:is(.chat-background-preview[data-theme="noir-film"], .chat-background-choice.theme-noir-film > span, .personalization-background-swatch.theme-noir-film) {
-  background:
-    radial-gradient(ellipse at 8px 15px, rgba(225, 210, 174, 0.2) 0 4px, transparent 4.8px) 0 0 / 100% 34px,
-    radial-gradient(ellipse at calc(100% - 8px) 15px, rgba(225, 210, 174, 0.2) 0 4px, transparent 4.8px) 0 0 / 100% 34px,
-    repeating-linear-gradient(90deg, transparent 0 17%, rgba(245, 231, 194, 0.055) 17.1% 17.25%, transparent 17.4% 61%, rgba(245, 231, 194, 0.035) 61.1% 61.2%, transparent 61.35%),
-    radial-gradient(circle at 1px 1px, rgba(238, 222, 185, 0.16) 0 0.65px, transparent 0.95px) 0 0 / 7px 7px,
-    linear-gradient(105deg, transparent 20%, rgba(249, 231, 181, 0.02) 32%, rgba(249, 231, 181, 0.2) 47%, rgba(249, 231, 181, 0.045) 58%, transparent 72%),
-    radial-gradient(ellipse at 68% 12%, rgba(231, 218, 185, 0.44), transparent 20%),
-    radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.58) 100%),
-    linear-gradient(148deg, #292a27, #111310 58%, #070806);
-  background-size: 100% 34px, 100% 34px, 260% 100%, 7px 7px, 230% 100%, 145% 145%, 100% 100%, auto;
-  animation: chat-background-noir-screening 18s steps(1, end) infinite;
-}
-
 @keyframes chat-background-aurora-living {
   0% { background-position: -20% 32%, 110% 54%, 0 0, 12px 8px, 42% 82%, 0 0; }
   48% { background-position: 42% 46%, 54% 36%, 9px 5px, 0 11px, 58% 58%, 0 0; }
@@ -3240,16 +3225,6 @@ html[data-theme="dark"] body .growth-level-detail {
 @keyframes chat-background-spaceport-orbit {
   from { --spaceport-bearing: 8deg; background-position: 0 0, 0 0, 50% 100%, 50% 100%, 50% 100%, 0 0; }
   to { --spaceport-bearing: 368deg; background-position: 83px 39px, -63px 119px, 50% 100%, 50% 100%, 50% 100%, 0 0; }
-}
-
-@keyframes chat-background-noir-screening {
-  0%, 100% { background-position: 0 0, 0 0, -14% 0, 0 0, 116% 0, 68% 12%, center, 0 0; opacity: 1; }
-  19% { background-position: 0 1px, 0 1px, 12% 0, 2px -1px, 88% 0, 70% 14%, center, 0 0; opacity: .97; }
-  20% { background-position: 0 2px, 0 2px, 13% 0, -1px 2px, 86% 0, 70% 14%, center, 0 0; opacity: .91; }
-  21%, 54% { background-position: 0 2px, 0 2px, 14% 0, 1px 1px, 82% 0, 72% 13%, center, 0 0; opacity: 1; }
-  55% { background-position: 0 3px, 0 3px, 48% 0, -2px 0, 44% 0, 74% 11%, center, 0 0; opacity: .94; }
-  56%, 82% { background-position: 0 3px, 0 3px, 50% 0, 1px -2px, 42% 0, 75% 11%, center, 0 0; opacity: .99; }
-  83% { background-position: 0 0, 0 0, 82% 0, -1px 1px, -6% 0, 69% 15%, center, 0 0; opacity: .92; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4957,7 +4932,40 @@ html[data-theme="dark"] :is(.chat-background-tidepool, .chat-background-forest, 
 .chat-detail-scene.chat-background-candy::before,
 :is(.chat-background-preview[data-theme="candy"], .chat-background-choice.theme-candy > span, .personalization-background-swatch.theme-candy) { background: radial-gradient(circle at 20% 30%, rgba(255,255,255,.5) 0 8px, transparent 9px) 0 0 / 45px 42px, linear-gradient(135deg, #ffd5df, #cceee4 52%, #f7dda1); }
 .chat-detail-scene.chat-background-noir-film::before,
-:is(.chat-background-preview[data-theme="noir-film"], .chat-background-choice.theme-noir-film > span, .personalization-background-swatch.theme-noir-film) { background: radial-gradient(circle at 1px 1px, rgba(245,236,211,.13) 0 .7px, transparent 1px), linear-gradient(103deg, transparent 0 31%, rgba(246,231,190,.035) 39%, rgba(246,231,190,.16) 48%, rgba(246,231,190,.025) 58%, transparent 68%), radial-gradient(ellipse at 77% 13%, rgba(222,213,188,.88) 0 5%, rgba(181,174,154,.18) 13%, transparent 31%), linear-gradient(152deg, #202321, #101211 58%, #080a09); background-size: 9px 9px, 210% 100%, 135% 135%, auto; animation: chat-background-noir-projector 32s cubic-bezier(.45,0,.55,1) infinite alternate; }
+:is(.chat-background-preview[data-theme="noir-film"], .chat-background-choice.theme-noir-film > span, .personalization-background-swatch.theme-noir-film) {
+  background:
+    radial-gradient(ellipse at 7px 15px, rgba(231, 219, 188, .17) 0 3.7px, transparent 4.6px) 0 0 / 100% 30px,
+    radial-gradient(ellipse at calc(100% - 7px) 15px, rgba(231, 219, 188, .17) 0 3.7px, transparent 4.6px) 0 0 / 100% 30px,
+    radial-gradient(circle at 1px 1px, rgba(246, 235, 204, .13) 0 .65px, transparent .95px) 0 0 / 7px 7px,
+    repeating-linear-gradient(90deg, transparent 0 13%, rgba(244, 231, 197, .045) 13.12% 13.24%, transparent 13.36% 58%, rgba(244, 231, 197, .028) 58.1% 58.2%, transparent 58.32%),
+    linear-gradient(106deg, transparent 10%, rgba(247, 232, 192, .015) 28%, rgba(247, 232, 192, .19) 45%, rgba(247, 232, 192, .045) 57%, transparent 73%),
+    radial-gradient(ellipse at 74% 12%, rgba(232, 219, 184, .56) 0 4%, rgba(194, 184, 158, .12) 13%, transparent 31%),
+    radial-gradient(ellipse at center, transparent 24%, rgba(0, 0, 0, .62) 100%),
+    linear-gradient(151deg, #292a27, #121411 57%, #060706);
+  background-size: 100% 30px, 100% 30px, 7px 7px, 250% 100%, 235% 112%, 150% 150%, 100% 100%, auto;
+  animation:
+    chat-background-noir-projector 56s cubic-bezier(.45, 0, .55, 1) infinite alternate,
+    chat-background-noir-exposure 19s steps(1, end) infinite;
+}
+
+.chat-detail-scene.chat-background-noir-film::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(255, 244, 213, .36) 0 .65px, transparent .9px) 8% 11% / 137px 151px,
+    radial-gradient(circle, rgba(255, 244, 213, .22) 0 .5px, transparent .8px) 62% 47% / 173px 191px,
+    linear-gradient(91deg, transparent 0 37%, rgba(244, 229, 191, .1) 37.15% 37.28%, transparent 37.42%),
+    linear-gradient(107deg, transparent 22%, rgba(247, 232, 193, .08) 40%, rgba(247, 232, 193, .015) 54%, transparent 68%);
+  background-size: 137px 151px, 173px 191px, 260% 100%, 240% 118%;
+  mix-blend-mode: screen;
+  opacity: .24;
+  animation:
+    chat-background-noir-dust 64s linear infinite,
+    chat-background-noir-breathe 23s steps(1, end) infinite;
+}
 
 @keyframes chat-background-aurora-drift {
   from { background-position: 0% 42%, 30% 80%, 0 0; filter: saturate(.94) brightness(.98); }
@@ -4980,9 +4988,30 @@ html[data-theme="dark"] :is(.chat-background-tidepool, .chat-background-forest, 
 }
 
 @keyframes chat-background-noir-projector {
-  0% { background-position: 0 0, 118% 0, 72% 14%, 0 0; filter: contrast(1.02) sepia(.03); }
-  46% { background-position: 4px 7px, 52% 0, 77% 16%, 0 0; filter: contrast(1.08) sepia(.08); }
-  100% { background-position: 8px 2px, -28% 0, 83% 11%, 0 0; filter: contrast(1.04) sepia(.05); }
+  0% { background-position: 0 -30px, 0 -30px, 0 0, -18% 0, 128% 0, 68% 10%, center, 0 0; filter: contrast(1.02) sepia(.03); }
+  48% { background-position: 0 0, 0 0, 4px 6px, 34% 0, 54% 0, 76% 17%, center, 0 0; filter: contrast(1.07) sepia(.075); }
+  100% { background-position: 0 30px, 0 30px, 7px 2px, 86% 0, -34% 0, 83% 11%, center, 0 0; filter: contrast(1.035) sepia(.045); }
+}
+
+@keyframes chat-background-noir-dust {
+  from { background-position: 8% 11%, 62% 47%, 112% 0, 124% 0; }
+  to { background-position: calc(8% + 137px) calc(11% + 151px), calc(62% - 173px) calc(47% + 191px), -52% 0, -36% 0; }
+}
+
+@keyframes chat-background-noir-exposure {
+  0%, 100% { opacity: 1; }
+  31% { opacity: .985; }
+  32% { opacity: .95; }
+  67% { opacity: .99; }
+  68% { opacity: .955; }
+  69% { opacity: 1; }
+}
+
+@keyframes chat-background-noir-breathe {
+  0%, 100% { opacity: .24; }
+  42% { opacity: .2; }
+  43% { opacity: .27; }
+  78% { opacity: .22; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4991,6 +5020,7 @@ html[data-theme="dark"] :is(.chat-background-tidepool, .chat-background-forest, 
   .chat-detail-scene.chat-background-arcade::before,
   .chat-detail-scene.chat-background-spaceport::before,
   .chat-detail-scene.chat-background-noir-film::before,
+  .chat-detail-scene.chat-background-noir-film::after,
   :is(.chat-background-preview[data-theme="aurora-sky"], .chat-background-choice.theme-aurora-sky > span, .personalization-background-swatch.theme-aurora-sky,
     .chat-background-preview[data-theme="hologram"], .chat-background-choice.theme-hologram > span, .personalization-background-swatch.theme-hologram,
     .chat-background-preview[data-theme="arcade"], .chat-background-choice.theme-arcade > span, .personalization-background-swatch.theme-arcade,
