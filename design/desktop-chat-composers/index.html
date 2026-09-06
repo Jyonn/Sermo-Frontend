@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sermo 言浪 · 桌面聊天输入工作台</title>
+  <style>
+    :root {
+      --ink: #17241f;
+      --muted: #728078;
+      --quiet: #99a29d;
+      --line: #d5ddd8;
+      --paper: #f7f7f2;
+      --canvas: #e8ede8;
+      --green: #0bc887;
+      --green-deep: #087454;
+      --warm: #ddb56d;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 1040px; background: var(--canvas); }
+    body {
+      min-width: 1040px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(249, 224, 177, .72), transparent 28%),
+        radial-gradient(circle at 90% 5%, rgba(177, 224, 202, .68), transparent 31%),
+        linear-gradient(135deg, #edf0eb, #e2e9e4);
+      font-family: "Avenir Next", "PingFang SC", sans-serif;
+    }
+    button, textarea { color: inherit; font: inherit; }
+    button { border: 0; }
+    button:focus-visible, textarea:focus-visible { outline: 2px solid color-mix(in srgb, var(--green) 72%, white); outline-offset: 3px; }
+    svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    .review-shell { min-height: 100vh; display: grid; grid-template-columns: 286px minmax(0, 1fr); }
+    .review-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 30px 24px 24px;
+      border-right: 1px solid rgba(67, 89, 78, .14);
+      background: rgba(248, 249, 245, .82);
+      backdrop-filter: blur(24px) saturate(1.1);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; color: #effff8; background: #153d31; font-family: "Baskerville", serif; font-size: 21px; font-weight: 700; box-shadow: 0 9px 22px rgba(17, 57, 44, .16); }
+    .brand strong, .brand small { display: block; }
+    .brand strong { font-size: 14px; }
+    .brand small { margin-top: 2px; color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .13em; }
+    .intro { margin: 44px 0 28px; }
+    .intro > span { color: var(--green-deep); font-size: 9px; font-weight: 800; letter-spacing: .16em; }
+    .intro h1 { margin: 9px 0 12px; font-family: "Songti SC", "STSong", serif; font-size: 30px; line-height: 1.13; letter-spacing: -.045em; }
+    .intro p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.72; }
+    .variant-nav { display: grid; gap: 7px; }
+    .variant-nav button { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 10px; min-height: 59px; padding: 8px 10px; border-radius: 15px; background: transparent; text-align: left; cursor: pointer; transition: .22s var(--ease); }
+    .variant-nav button:hover { background: rgba(220, 232, 225, .6); }
+    .variant-nav button.is-active { color: #123b2e; background: #dcece4; }
+    .variant-no { display: grid; width: 33px; height: 33px; place-items: center; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: 10px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .variant-nav button.is-active .variant-no { color: #effff8; border-color: #153d31; background: #153d31; }
+    .variant-copy strong, .variant-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .variant-copy strong { font-size: 12px; }
+    .variant-copy small { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .review-note { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(67, 89, 78, .13); color: #87938d; font-size: 9px; line-height: 1.65; }
+
+    .review-main { min-width: 0; padding: 26px clamp(26px, 4.2vw, 66px) 48px; }
+    .review-head { max-width: 1180px; display: flex; align-items: end; justify-content: space-between; gap: 24px; margin: 0 auto 16px; }
+    .review-head small { color: var(--green-deep); font-size: 9px; font-weight: 800; letter-spacing: .15em; }
+    .review-head h2 { margin: 6px 0 2px; font-size: 23px; letter-spacing: -.035em; }
+    .review-head p { margin: 0; color: var(--muted); font-size: 10px; }
+    .review-actions { display: flex; align-items: center; gap: 7px; }
+    .review-actions button { min-height: 34px; padding: 0 12px; border: 1px solid rgba(86, 107, 96, .18); border-radius: 999px; color: var(--muted); background: rgba(249, 250, 247, .72); font-size: 9px; font-weight: 800; cursor: pointer; }
+    .review-actions button.is-active { color: #effff8; border-color: #173d31; background: #173d31; }
+
+    .stage-wrap { max-width: 1180px; margin: auto; }
+    .app-window {
+      --app-ink: #192620;
+      --app-muted: #708078;
+      --app-quiet: #98a29d;
+      --app-line: #d8e0db;
+      --app-paper: #f9faf6;
+      --app-soft: #eff3ef;
+      --app-deep: #123b2f;
+      --app-green: #0bc887;
+      width: 100%;
+      height: min(770px, calc(100vh - 116px));
+      min-height: 640px;
+      display: grid;
+      grid-template-columns: 238px minmax(0, 1fr);
+      overflow: hidden;
+      border: 1px solid rgba(65, 88, 76, .19);
+      border-radius: 24px;
+      color: var(--app-ink);
+      background: var(--app-paper);
+      box-shadow: 0 28px 72px rgba(31, 57, 46, .18);
+      transition: color .28s ease, background .28s ease;
+    }
+    .app-window.is-dark {
+      --app-ink: #e8f1ec;
+      --app-muted: #9aaba2;
+      --app-quiet: #708178;
+      --app-line: #30443a;
+      --app-paper: #111d18;
+      --app-soft: #192820;
+      --app-deep: #dff8ed;
+      box-shadow: 0 30px 76px rgba(4, 13, 9, .4);
+    }
+
+    .chat-list { min-width: 0; display: grid; grid-template-rows: 68px auto minmax(0, 1fr) auto; border-right: 1px solid var(--app-line); background: color-mix(in srgb, var(--app-paper) 91%, #dcece4); }
+    .chat-list-head { display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--app-line); }
+    .chat-list-head strong { font-family: "Songti SC", serif; font-size: 20px; }
+    .round-action { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: var(--app-muted); background: var(--app-soft); cursor: pointer; }
+    .round-action svg { width: 18px; height: 18px; }
+    .search-shell { margin: 13px 14px 6px; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 11px; border: 1px solid color-mix(in srgb, var(--app-line) 80%, transparent); border-radius: 12px; color: var(--app-muted); background: color-mix(in srgb, var(--app-soft) 78%, transparent); font-size: 10px; }
+    .search-shell svg { width: 16px; height: 16px; }
+    .conversation-list { overflow: hidden; padding: 5px 9px; }
+    .conversation { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 65px; padding: 8px 9px; border-radius: 14px; }
+    .conversation.is-active { background: color-mix(in srgb, var(--app-green) 10%, var(--app-soft)); }
+    .conversation img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+    .conversation-copy { min-width: 0; }
+    .conversation-copy strong, .conversation-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .conversation-copy strong { font-size: 12px; }
+    .conversation-copy small { margin-top: 4px; color: var(--app-muted); font-size: 9px; }
+    .conversation time { align-self: start; margin-top: 4px; color: var(--app-quiet); font-size: 8px; }
+    .account { display: grid; grid-template-columns: 35px 1fr; align-items: center; gap: 9px; padding: 13px 17px; border-top: 1px solid var(--app-line); color: var(--app-muted); }
+    .account img { width: 35px; height: 35px; border-radius: 50%; }
+    .account strong, .account small { display: block; }
+    .account strong { color: var(--app-ink); font-size: 11px; }
+    .account small { margin-top: 1px; font-size: 8px; }
+
+    .conversation-pane { min-width: 0; min-height: 0; display: grid; grid-template-rows: 68px minmax(0, 1fr) auto; }
+    .conversation-head { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 0 20px 0 24px; border-bottom: 1px solid var(--app-line); background: color-mix(in srgb, var(--app-paper) 91%, transparent); }
+    .peer-copy { min-width: 0; display: flex; align-items: baseline; gap: 9px; }
+    .peer-copy strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+    .online { display: inline-flex; align-items: center; gap: 5px; color: var(--green-deep); font-size: 8px; font-weight: 700; }
+    .app-window.is-dark .online { color: #62d8ae; }
+    .online::before { width: 6px; height: 6px; border-radius: 50%; background: var(--app-green); content: ""; box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-green) 12%, transparent); }
+    .head-actions { display: flex; gap: 5px; }
+
+    .message-scroll {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 24px 30px 26px;
+      scroll-behavior: smooth;
+      background:
+        linear-gradient(45deg, rgba(239, 229, 207, .56) 25%, transparent 25%, transparent 75%, rgba(239, 229, 207, .56) 75%) 0 0 / 30px 30px,
+        linear-gradient(45deg, rgba(214, 228, 218, .52) 25%, transparent 25%, transparent 75%, rgba(214, 228, 218, .52) 75%) 15px 15px / 30px 30px,
+        color-mix(in srgb, var(--app-paper) 75%, #efeadd);
+    }
+    .app-window.is-dark .message-scroll { background: radial-gradient(circle at 1px 1px, rgba(214, 235, 224, .06) 1px, transparent 1.2px) 0 0 / 18px 18px, #102019; }
+    .date-marker { margin: 0 0 20px; color: var(--app-muted); font-size: 8px; text-align: center; }
+    .message { display: flex; align-items: flex-end; gap: 8px; margin-top: 7px; animation: message-in .36s var(--ease) both; }
+    .message.is-mine { justify-content: flex-end; }
+    .message.is-break { margin-top: 21px; }
+    .message-avatar { width: 31px; height: 31px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-paper) 76%, transparent); }
+    .message-bubble { max-width: min(62%, 520px); padding: 9px 13px; border: 1px solid color-mix(in srgb, var(--app-line) 82%, #c9b88f); border-radius: 5px 16px 16px 16px; color: #27352f; background: rgba(253, 250, 241, .92); box-shadow: 0 6px 16px rgba(37, 55, 47, .06); font-size: 12px; line-height: 1.55; }
+    .message.is-mine .message-bubble { color: #effff8; border-color: #145e48; border-radius: 16px 5px 16px 16px; background: #155c48; }
+    .app-window.is-dark .message:not(.is-mine) .message-bubble { color: #dfe9e4; border-color: #3b4b43; background: #26352e; }
+    .message-meta { margin-top: 4px; color: color-mix(in srgb, currentColor 56%, transparent); font-size: 7px; text-align: right; }
+
+    .desktop-composer {
+      --composer-height: 236px;
+      position: relative;
+      z-index: 5;
+      height: var(--composer-height);
+      min-height: 0;
+      border-top: 1px solid var(--app-line);
+      background: color-mix(in srgb, var(--app-paper) 94%, transparent);
+      transition: height .35s var(--ease), background .28s ease;
+    }
+    .app-window.is-expanded .desktop-composer { --composer-height: 292px; }
+    .composer-grip { position: absolute; z-index: 5; top: -4px; left: 50%; width: 42px; height: 8px; border: 1px solid var(--app-line); border-radius: 99px; background: var(--app-paper); transform: translateX(-50%); }
+    .composer-toolbar { display: flex; align-items: center; justify-content: space-between; min-width: 0; }
+    .primary-tools, .toolbar-end { display: flex; align-items: center; gap: 4px; }
+    .tool-button { position: relative; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; color: var(--app-muted); background: transparent; cursor: pointer; transition: .18s var(--ease); }
+    .tool-button:hover { color: var(--app-deep); background: var(--app-soft); }
+    .tool-button.is-active { color: var(--green-deep); background: color-mix(in srgb, var(--app-green) 13%, var(--app-soft)); }
+    .app-window.is-dark .tool-button.is-active { color: #6ae1b6; }
+    .tool-button::after { position: absolute; top: calc(100% + 6px); left: 50%; z-index: 20; padding: 5px 7px; border-radius: 6px; color: #effff8; background: #17392e; content: attr(aria-label); font-size: 8px; font-weight: 700; opacity: 0; pointer-events: none; transform: translate(-50%, -3px); transition: .18s ease; white-space: nowrap; }
+    .tool-button:hover::after { opacity: 1; transform: translate(-50%, 0); }
+    .shortcut { color: var(--app-quiet); font-size: 8px; font-weight: 700; letter-spacing: .03em; }
+    .context-strip { min-width: 0; }
+    .reply-card { display: grid; grid-template-columns: 2px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-width: 0; color: var(--app-muted); }
+    .reply-card > i { align-self: stretch; border-radius: 99px; background: var(--app-green); }
+    .reply-card strong, .reply-card span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .reply-card strong { color: var(--app-deep); font-size: 9px; }
+    .reply-card span { margin-top: 2px; font-size: 8px; }
+    .reply-card button { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; color: var(--app-muted); background: transparent; cursor: pointer; }
+    .reply-card button svg { width: 14px; height: 14px; }
+    .writing-row { min-width: 0; min-height: 0; }
+    #message-input { width: 100%; height: 100%; min-height: 76px; resize: none; border: 0; outline: 0; color: var(--app-ink); background: transparent; font-size: 13px; line-height: 1.65; caret-color: var(--app-green); }
+    #message-input::placeholder { color: var(--app-quiet); }
+    .send-column { display: flex; align-items: flex-end; justify-content: flex-end; }
+    .send-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 92px; min-height: 40px; padding: 0 14px; border-radius: 13px; color: #073326; background: var(--app-green); box-shadow: 0 9px 20px color-mix(in srgb, var(--app-green) 23%, transparent); font-size: 10px; font-weight: 800; cursor: pointer; transition: .2s var(--ease); }
+    .send-button:hover { transform: translateY(-1px); box-shadow: 0 12px 25px color-mix(in srgb, var(--app-green) 30%, transparent); }
+    .send-button svg { width: 16px; height: 16px; }
+    .composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--app-quiet); font-size: 8px; }
+    .composer-foot strong { color: var(--app-muted); font-weight: 700; }
+    .command-row { display: flex; min-width: 0; align-items: center; gap: 6px; overflow: hidden; }
+    .command-chip { flex: 0 0 auto; padding: 5px 8px; border: 1px solid var(--app-line); border-radius: 8px; color: var(--app-muted); background: transparent; font-size: 8px; font-weight: 700; cursor: pointer; }
+    .command-chip:hover { color: var(--app-deep); border-color: color-mix(in srgb, var(--app-green) 34%, var(--app-line)); }
+    .tool-panel { position: absolute; z-index: 12; display: none; overflow: hidden; border: 1px solid var(--app-line); border-radius: 14px; color: var(--app-ink); background: color-mix(in srgb, var(--app-paper) 96%, transparent); box-shadow: 0 17px 42px rgba(17, 43, 33, .18); backdrop-filter: blur(18px); }
+    .tool-panel.is-open { display: block; animation: panel-in .22s var(--ease) both; }
+    .tool-panel-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 11px 7px; border-bottom: 1px solid var(--app-line); }
+    .tool-panel-head strong { font-size: 9px; }
+    .tool-panel-head button { color: var(--app-muted); background: transparent; cursor: pointer; }
+    .tool-panel-head svg { width: 14px; height: 14px; }
+    .tool-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 8px; }
+    .tool-options button { min-width: 0; min-height: 54px; display: grid; place-items: center; gap: 3px; border-radius: 10px; color: var(--app-muted); background: var(--app-soft); font-size: 8px; cursor: pointer; }
+    .tool-options button b { color: var(--app-deep); font-size: 16px; }
+    .tool-options button:hover { color: var(--green-deep); background: color-mix(in srgb, var(--app-green) 12%, var(--app-soft)); }
+
+    /* 01 阔幅书写台：参考图的工具上置与完整写作画布。 */
+    .app-window[data-version="v1"] .desktop-composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 51px 1fr 30px; column-gap: 14px; padding: 0 20px 10px; }
+    .app-window[data-version="v1"] .composer-toolbar { grid-column: 1 / -1; border-bottom: 1px solid var(--app-line); }
+    .app-window[data-version="v1"] .context-strip { position: absolute; top: 59px; left: 20px; width: min(360px, 44%); padding: 7px 9px; border-radius: 8px; background: var(--app-soft); }
+    .app-window[data-version="v1"] .writing-row { grid-column: 1; grid-row: 2; padding: 42px 4px 4px; }
+    .app-window[data-version="v1"] .send-column { grid-column: 2; grid-row: 2; padding-bottom: 5px; }
+    .app-window[data-version="v1"] .composer-foot { grid-column: 1 / -1; grid-row: 3; }
+    .app-window[data-version="v1"] .command-row { display: none; }
+    .app-window[data-version="v1"] .tool-panel { left: 20px; bottom: calc(100% - 52px); width: 340px; }
+
+    /* 02 侧轨编辑台：高频工具垂直排布，正文获得完整横向宽度。 */
+    .app-window[data-version="v2"] .desktop-composer { display: grid; grid-template-columns: 64px minmax(0, 1fr) 106px; grid-template-rows: 42px 1fr 30px; padding: 14px 18px 9px 0; background: color-mix(in srgb, var(--app-soft) 72%, var(--app-paper)); }
+    .app-window[data-version="v2"] .composer-toolbar { grid-column: 1; grid-row: 1 / -1; align-self: stretch; justify-content: center; border-right: 1px solid var(--app-line); }
+    .app-window[data-version="v2"] .primary-tools { display: grid; align-content: center; gap: 1px; }
+    .app-window[data-version="v2"] .toolbar-end { display: none; }
+    .app-window[data-version="v2"] .tool-button { width: 38px; height: 31px; }
+    .app-window[data-version="v2"] .tool-button svg { width: 18px; height: 18px; }
+    .app-window[data-version="v2"] .context-strip { grid-column: 2 / -1; grid-row: 1; align-self: start; padding: 5px 9px; border-bottom: 1px solid var(--app-line); }
+    .app-window[data-version="v2"] .writing-row { grid-column: 2; grid-row: 2; padding: 10px 14px 4px 12px; }
+    .app-window[data-version="v2"] .send-column { grid-column: 3; grid-row: 2; padding: 8px 0 5px; }
+    .app-window[data-version="v2"] .send-button { min-width: 96px; min-height: 46px; border-radius: 14px 14px 4px 14px; }
+    .app-window[data-version="v2"] .composer-foot { grid-column: 2 / -1; grid-row: 3; padding-left: 12px; }
+    .app-window[data-version="v2"] .command-row { display: none; }
+    .app-window[data-version="v2"] .tool-panel { left: 56px; bottom: 18px; width: 340px; }
+
+    /* 03 上下文叠页：回复与草稿成为一张浮于输入台上的纸页。 */
+    .app-window[data-version="v3"] .desktop-composer { display: grid; grid-template-columns: minmax(0, 1fr) 116px; grid-template-rows: 41px minmax(0, 1fr) 34px; gap: 0 13px; padding: 18px 20px 10px; background: color-mix(in srgb, #dce6df 52%, var(--app-paper)); }
+    .app-window[data-version="v3"] .desktop-composer::before { position: absolute; inset: 12px 14px 8px; border: 1px solid var(--app-line); border-radius: 18px 18px 8px 18px; background: var(--app-paper); box-shadow: 0 10px 26px rgba(26, 51, 41, .08); content: ""; }
+    .app-window[data-version="v3"] .composer-toolbar, .app-window[data-version="v3"] .context-strip, .app-window[data-version="v3"] .writing-row, .app-window[data-version="v3"] .send-column, .app-window[data-version="v3"] .composer-foot { position: relative; z-index: 1; }
+    .app-window[data-version="v3"] .context-strip { grid-column: 1 / -1; grid-row: 1; padding: 0 10px 7px; border-bottom: 1px solid var(--app-line); }
+    .app-window[data-version="v3"] .writing-row { grid-column: 1; grid-row: 2; padding: 10px 10px 2px; }
+    .app-window[data-version="v3"] .composer-toolbar { grid-column: 1; grid-row: 3; align-self: center; padding: 0 5px; }
+    .app-window[data-version="v3"] .toolbar-end { display: none; }
+    .app-window[data-version="v3"] .tool-button { width: 32px; height: 30px; }
+    .app-window[data-version="v3"] .tool-button svg { width: 17px; height: 17px; }
+    .app-window[data-version="v3"] .send-column { grid-column: 2; grid-row: 2 / 4; padding: 8px 3px 5px 0; }
+    .app-window[data-version="v3"] .send-button { width: 76px; min-width: 76px; height: 76px; min-height: 76px; flex-direction: column; border-radius: 50%; }
+    .app-window[data-version="v3"] .composer-foot { display: none; }
+    .app-window[data-version="v3"] .command-row { display: none; }
+    .app-window[data-version="v3"] .tool-panel { left: 24px; bottom: 48px; width: 340px; }
+    .app-window.is-dark[data-version="v3"] .desktop-composer { background: color-mix(in srgb, #294137 36%, var(--app-paper)); }
+
+    /* 04 指令桌：把高频场景做成文字快捷项，图标只承担媒介入口。 */
+    .app-window[data-version="v4"] .desktop-composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 48px 38px 1fr 30px; column-gap: 14px; padding: 0 19px 9px; background: color-mix(in srgb, #e8e0cf 34%, var(--app-paper)); }
+    .app-window[data-version="v4"] .composer-toolbar { grid-column: 1 / -1; grid-row: 1; border-bottom: 1px solid var(--app-line); }
+    .app-window[data-version="v4"] .context-strip { grid-column: 1 / -1; grid-row: 2; padding: 6px 2px 4px; }
+    .app-window[data-version="v4"] .writing-row { grid-column: 1; grid-row: 3; padding: 3px 5px 0; }
+    .app-window[data-version="v4"] .send-column { grid-column: 2; grid-row: 3; padding-bottom: 5px; }
+    .app-window[data-version="v4"] .send-button { min-width: 104px; border-radius: 7px 14px 14px 14px; }
+    .app-window[data-version="v4"] .composer-foot { grid-column: 1 / -1; grid-row: 4; }
+    .app-window[data-version="v4"] .composer-foot > span { display: none; }
+    .app-window[data-version="v4"] .tool-panel { right: 18px; bottom: calc(100% - 49px); width: 340px; }
+    .app-window.is-dark[data-version="v4"] .desktop-composer { background: color-mix(in srgb, #443d30 28%, var(--app-paper)); }
+
+    .decision-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 13px; margin-top: 12px; padding: 10px 13px; border: 1px solid rgba(75, 101, 88, .13); border-radius: 14px; background: rgba(248, 250, 246, .64); }
+    .decision-strip > b { color: var(--green-deep); font-size: 9px; letter-spacing: .12em; }
+    .decision-strip strong { display: block; font-size: 11px; }
+    .decision-strip small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .decision-strip > span:last-child { padding: 5px 8px; border-radius: 999px; color: var(--green-deep); background: #dceee5; font-size: 8px; font-weight: 800; }
+    .toast { position: fixed; z-index: 100; right: 28px; bottom: 26px; padding: 10px 14px; border-radius: 10px; color: #effff8; background: rgba(20, 58, 46, .94); box-shadow: 0 14px 34px rgba(8, 28, 20, .2); font-size: 10px; font-weight: 700; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .22s var(--ease); }
+    .toast.is-visible { opacity: 1; transform: translateY(0); }
+    @keyframes panel-in { from { opacity: 0; transform: translateY(7px) scale(.98); } }
+    @keyframes message-in { from { opacity: 0; transform: translateY(8px); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+      <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14.5a5 5 0 0 0 8 0M9 9h.01M15 9h.01"/></symbol>
+      <symbol id="i-sticker" viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v9l-7 7H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 21v-5a2 2 0 0 1 2-2h5M8 9h.01M16 9h.01M8 13c2 2 6 2 8 0"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m5 18 4.5-4 3 2.5 2.5-2 4 3.5"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h4M10 13h5M10 17h5"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></symbol>
+      <symbol id="i-location" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="m4 4 17 8-17 8 3-8zM7 12h14"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3h3l1.5 5-2 1.5a16 16 0 0 0 5.4 5.4l1.5-2 5 1.5v3c0 2-1.7 3.6-3.7 3.4C10 20 4 14 3.2 6.7 3 4.7 4.6 3 6.6 3Z"/></symbol>
+    </defs>
+  </svg>
+
+  <main class="review-shell">
+    <aside class="review-sidebar">
+      <div class="brand"><span class="brand-mark">S</span><span><strong>Sermo 言浪</strong><small>DESKTOP COMPOSER STUDY</small></span></div>
+      <section class="intro"><span>04 DIRECTIONS · DESKTOP</span><h1>把输入框变成真正的工作台</h1><p>上方只负责阅读，下方专心组织消息。四版使用相同能力与对话内容，只比较输入区的层级、效率和沉浸感。</p></section>
+      <nav class="variant-nav" aria-label="桌面输入框版本">
+        <button class="is-active" data-version="v1" type="button"><span class="variant-no">01</span><span class="variant-copy"><strong>阔幅书写台</strong><small>工具上置，最接近参考图</small></span></button>
+        <button data-version="v2" type="button"><span class="variant-no">02</span><span class="variant-copy"><strong>侧轨编辑台</strong><small>工具移到左侧，正文更宽</small></span></button>
+        <button data-version="v3" type="button"><span class="variant-no">03</span><span class="variant-copy"><strong>上下文叠页</strong><small>回复、草稿与发送聚合</small></span></button>
+        <button data-version="v4" type="button"><span class="variant-no">04</span><span class="variant-copy"><strong>快捷指令桌</strong><small>图标媒介 + 文字场景入口</small></span></button>
+      </nav>
+      <p class="review-note">交互提示：可输入后按 Enter 发送，Shift + Enter 换行；点击工具会打开对应的桌面抽屉。右上可切换编辑区高度与明暗主题。</p>
+    </aside>
+
+    <section class="review-main">
+      <header class="review-head">
+        <div><small id="direction">DIRECTION 01 · WIDE DESK</small><h2 id="concept-title">阔幅书写台</h2><p id="concept-description">参考桌面聊天软件的宽幅编辑器，工具与文字分层，迁移成本最低。</p></div>
+        <div class="review-actions"><button id="density-toggle" type="button">舒展输入区</button><button id="theme-toggle" type="button">深色预览</button></div>
+      </header>
+
+      <div class="stage-wrap">
+        <section class="app-window" data-version="v1" id="app-window">
+          <aside class="chat-list">
+            <header class="chat-list-head"><strong>聊天</strong><button class="round-action" aria-label="新建会话" type="button"><svg><use href="#i-plus"/></svg></button></header>
+            <div class="search-shell"><svg><use href="#i-search"/></svg><span>搜索会话与消息</span></div>
+            <div class="conversation-list">
+              <article class="conversation is-active"><img src="../../public/assets/avatars/v2/14.png" alt="夏天之后"/><span class="conversation-copy"><strong>夏天之后</strong><small>嗯，照片也发给我吧</small></span><time>14:32</time></article>
+              <article class="conversation"><img src="../../public/assets/avatars/v2/28.png" alt="王者传呼机"/><span class="conversation-copy"><strong>王者传呼机</strong><small>投稿已经确认啦</small></span><time>昨天</time></article>
+              <article class="conversation"><img src="../../public/assets/avatars/v2/03.png" alt="晚风同学会"/><span class="conversation-copy"><strong>晚风同学会</strong><small>白噪音：周末见</small></span><time>周日</time></article>
+            </div>
+            <footer class="account"><img src="../../public/assets/avatars/v2/01.png" alt="Fly"/><span><strong>Fly</strong><small>在线 · Sermo 空间</small></span></footer>
+          </aside>
+
+          <section class="conversation-pane">
+            <header class="conversation-head">
+              <div class="peer-copy"><strong>夏天之后</strong><span class="online">在线</span></div>
+              <div class="head-actions"><button class="round-action" aria-label="语音通话" type="button"><svg><use href="#i-phone"/></svg></button><button class="round-action" aria-label="更多" type="button"><svg><use href="#i-more"/></svg></button></div>
+            </header>
+
+            <div class="message-scroll" id="message-scroll">
+              <p class="date-marker">今天 14:18</p>
+              <div class="message is-break"><img class="message-avatar" src="../../public/assets/avatars/v2/14.png" alt=""/><div class="message-bubble">今晚还去操场吗？</div></div>
+              <div class="message"><img class="message-avatar" src="../../public/assets/avatars/v2/14.png" alt=""/><div class="message-bubble">风应该会比昨天小一点。</div></div>
+              <div class="message is-mine"><div class="message-bubble">去呀，我大概七点到。<div class="message-meta">14:24 · 已读</div></div></div>
+              <div class="message is-mine"><div class="message-bubble">上次拍的那组照片也整理好了。</div></div>
+              <div class="message is-break"><img class="message-avatar" src="../../public/assets/avatars/v2/14.png" alt=""/><div class="message-bubble">嗯，照片也发给我吧</div></div>
+            </div>
+
+            <section class="desktop-composer" aria-label="桌面聊天输入工作台">
+              <span class="composer-grip" aria-hidden="true"></span>
+              <div class="composer-toolbar" role="toolbar" aria-label="消息工具">
+                <div class="primary-tools">
+                  <button class="tool-button" data-tool="emoji" aria-label="表情" type="button"><svg><use href="#i-smile"/></svg></button>
+                  <button class="tool-button" data-tool="sticker" aria-label="贴纸" type="button"><svg><use href="#i-sticker"/></svg></button>
+                  <button class="tool-button" data-tool="image" aria-label="图片与视频" type="button"><svg><use href="#i-image"/></svg></button>
+                  <button class="tool-button" data-tool="file" aria-label="文件" type="button"><svg><use href="#i-file"/></svg></button>
+                  <button class="tool-button" data-tool="location" aria-label="位置" type="button"><svg><use href="#i-location"/></svg></button>
+                  <button class="tool-button" data-tool="footprint" aria-label="足迹" type="button"><svg><use href="#i-map"/></svg></button>
+                  <button class="tool-button" data-tool="voice" aria-label="语音" type="button"><svg><use href="#i-mic"/></svg></button>
+                </div>
+                <div class="toolbar-end"><span class="shortcut">Enter 发送 · Shift + Enter 换行</span></div>
+              </div>
+
+              <div class="context-strip" id="context-strip">
+                <div class="reply-card"><i></i><span><strong>回复 夏天之后</strong><span>嗯，照片也发给我吧</span></span><button id="reply-close" aria-label="取消回复" type="button"><svg><use href="#i-close"/></svg></button></div>
+              </div>
+
+              <div class="writing-row"><textarea id="message-input" maxlength="2000" placeholder="写点什么，或输入 @ 提及会话成员…"></textarea></div>
+              <div class="send-column"><button class="send-button" id="send-button" type="button"><span>发送</span><svg><use href="#i-send"/></svg></button></div>
+              <footer class="composer-foot"><div class="command-row"><button class="command-chip" data-insert="@夏天之后 " type="button">@ 提及</button><button class="command-chip" data-insert="稍等一下，我整理好发给你。" type="button">常用回复</button><button class="command-chip" data-tool="location" type="button">共享位置</button><button class="command-chip" data-tool="footprint" type="button">会话足迹</button></div><span><strong id="char-count">0</strong> / 2000</span></footer>
+
+              <div class="tool-panel" id="tool-panel" aria-live="polite">
+                <header class="tool-panel-head"><strong id="tool-panel-title">选择表情</strong><button id="tool-panel-close" aria-label="关闭" type="button"><svg><use href="#i-close"/></svg></button></header>
+                <div class="tool-options" id="tool-options"></div>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <div class="decision-strip"><b id="decision-code">01 / WIDE</b><span><strong id="decision-title">适合：大多数桌面用户</strong><small id="decision-note">操作位置最符合既有认知，也最容易承载后续表情和附件面板。</small></span><span id="decision-tag">迁移最稳</span></div>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status">已完成操作</div>
+
+  <script>
+    const concepts = {
+      v1: { direction: "DIRECTION 01 · WIDE DESK", title: "阔幅书写台", description: "参考桌面聊天软件的宽幅编辑器，工具与文字分层，迁移成本最低。", code: "01 / WIDE", fit: "适合：大多数桌面用户", note: "操作位置最符合既有认知，也最容易承载后续表情和附件面板。", tag: "迁移最稳" },
+      v2: { direction: "DIRECTION 02 · SIDE RAIL", title: "侧轨编辑台", description: "将媒介入口收进左侧工具轨，让输入与阅读保持同一条水平轴线。", code: "02 / RAIL", fit: "适合：宽屏与高频附件用户", note: "高频入口始终可见，正文横向空间最大，但首次使用需要适应侧向工具轨。", tag: "效率优先" },
+      v3: { direction: "DIRECTION 03 · CONTEXT SHEET", title: "上下文叠页", description: "输入区像一张叠在会话上的纸页，回复关系与草稿内容最紧密。", code: "03 / SHEET", fit: "适合：重视回复关系的会话", note: "发送动作非常明确，回复上下文也最清楚，视觉性格最贴近 Sermo 的纸张语言。", tag: "关系最强" },
+      v4: { direction: "DIRECTION 04 · COMMAND DESK", title: "快捷指令桌", description: "媒介继续使用图标，高频沟通场景则转为可读的文字快捷项。", code: "04 / COMMAND", fit: "适合：运营、群聊与投稿沟通", note: "降低图标猜测成本，常用回复、提及、位置和足迹都能一步到达。", tag: "功能最清楚" }
+    };
+
+    const toolContent = {
+      emoji: { title: "选择表情", options: [["🙂", "微笑"], ["🥰", "喜欢"], ["👏", "鼓掌"], ["🌿", "松弛"]] },
+      sticker: { title: "最近使用的贴纸", options: [["🐈", "猫猫"], ["🌊", "言浪"], ["✨", "闪闪"], ["🫡", "收到"]] },
+      image: { title: "图片与视频", options: [["▧", "照片"], ["▶", "视频"], ["⌘", "粘贴"], ["↗", "最近"]] },
+      file: { title: "选择文件来源", options: [["☁", "空间云端"], ["⇧", "本机上传"], ["◫", "最近文件"], ["⌕", "搜索"]] },
+      location: { title: "发送位置", options: [["◎", "精确位置"], ["◌", "模糊位置"], ["⌖", "地图选点"], ["☆", "收藏地点"]] },
+      footprint: { title: "会话足迹", options: [["⌁", "打开地图"], ["＋", "共享足迹"], ["◉", "最近到访"], ["◇", "权限"]] },
+      voice: { title: "语音消息", options: [["●", "开始录音"], ["◖", "语音文件"], ["〽", "试听草稿"], ["⌫", "清除"]] }
+    };
+
+    const app = document.querySelector("#app-window");
+    const input = document.querySelector("#message-input");
+    const messageScroll = document.querySelector("#message-scroll");
+    const toolPanel = document.querySelector("#tool-panel");
+    const toolPanelTitle = document.querySelector("#tool-panel-title");
+    const toolOptions = document.querySelector("#tool-options");
+    const toast = document.querySelector("#toast");
+    let toastTimer;
+
+    const showToast = (copy) => {
+      toast.textContent = copy;
+      toast.classList.add("is-visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 1800);
+    };
+
+    const activateVersion = (version) => {
+      const concept = concepts[version];
+      app.dataset.version = version;
+      document.querySelectorAll(".variant-nav [data-version]").forEach((button) => button.classList.toggle("is-active", button.dataset.version === version));
+      document.querySelector("#direction").textContent = concept.direction;
+      document.querySelector("#concept-title").textContent = concept.title;
+      document.querySelector("#concept-description").textContent = concept.description;
+      document.querySelector("#decision-code").textContent = concept.code;
+      document.querySelector("#decision-title").textContent = concept.fit;
+      document.querySelector("#decision-note").textContent = concept.note;
+      document.querySelector("#decision-tag").textContent = concept.tag;
+      toolPanel.classList.remove("is-open");
+      document.querySelectorAll(".tool-button").forEach((button) => button.classList.remove("is-active"));
+    };
+
+    const openTool = (tool) => {
+      const data = toolContent[tool];
+      if (!data) return;
+      const current = toolPanel.dataset.tool;
+      if (current === tool && toolPanel.classList.contains("is-open")) {
+        toolPanel.classList.remove("is-open");
+        document.querySelectorAll(".tool-button").forEach((button) => button.classList.remove("is-active"));
+        return;
+      }
+      toolPanel.dataset.tool = tool;
+      toolPanelTitle.textContent = data.title;
+      toolOptions.innerHTML = data.options.map(([icon, label]) => `<button data-option="${label}" type="button"><b>${icon}</b><span>${label}</span></button>`).join("");
+      toolPanel.classList.add("is-open");
+      document.querySelectorAll(".tool-button").forEach((button) => button.classList.toggle("is-active", button.dataset.tool === tool));
+    };
+
+    const sendMessage = () => {
+      const content = input.value.trim();
+      if (!content) { showToast("先写一点内容再发送"); input.focus(); return; }
+      const message = document.createElement("div");
+      message.className = "message is-mine is-break";
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.textContent = content;
+      const meta = document.createElement("div");
+      meta.className = "message-meta";
+      meta.textContent = "刚刚 · 发送中";
+      bubble.append(meta);
+      message.append(bubble);
+      messageScroll.append(message);
+      input.value = "";
+      document.querySelector("#char-count").textContent = "0";
+      messageScroll.scrollTop = messageScroll.scrollHeight;
+      setTimeout(() => { meta.textContent = "刚刚 · 已送达"; }, 650);
+    };
+
+    document.querySelectorAll(".variant-nav [data-version]").forEach((button) => button.addEventListener("click", () => activateVersion(button.dataset.version)));
+    document.querySelectorAll("[data-tool]").forEach((button) => button.addEventListener("click", () => openTool(button.dataset.tool)));
+    document.querySelectorAll("[data-insert]").forEach((button) => button.addEventListener("click", () => { input.value += button.dataset.insert; input.dispatchEvent(new Event("input")); input.focus(); }));
+    document.querySelector("#tool-panel-close").addEventListener("click", () => { toolPanel.classList.remove("is-open"); document.querySelectorAll(".tool-button").forEach((button) => button.classList.remove("is-active")); });
+    toolOptions.addEventListener("click", (event) => { const option = event.target.closest("[data-option]"); if (!option) return; showToast(`${option.dataset.option}：设计稿交互已触发`); });
+    document.querySelector("#send-button").addEventListener("click", sendMessage);
+    input.addEventListener("input", () => { document.querySelector("#char-count").textContent = String(input.value.length); });
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); sendMessage(); } });
+    document.querySelector("#reply-close").addEventListener("click", () => { document.querySelector("#context-strip").style.visibility = "hidden"; showToast("已取消回复"); });
+    document.querySelector("#theme-toggle").addEventListener("click", (event) => { const dark = app.classList.toggle("is-dark"); event.currentTarget.textContent = dark ? "浅色预览" : "深色预览"; event.currentTarget.classList.toggle("is-active", dark); });
+    document.querySelector("#density-toggle").addEventListener("click", (event) => { const expanded = app.classList.toggle("is-expanded"); event.currentTarget.textContent = expanded ? "收紧输入区" : "舒展输入区"; event.currentTarget.classList.toggle("is-active", expanded); });
+  </script>
+</body>
+</html>
