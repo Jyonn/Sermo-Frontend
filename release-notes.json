@@ -1,19 +1,21 @@
 {
-  "id": "2026.09.07.1",
+  "id": "2026.09.07.2",
   "publishedAt": "2026-09-07",
   "locales": {
     "zh-CN": {
       "title": "QQ 历史身份可以认领了",
       "items": [
         "已获授权的空间会在账号与安全中显示 QQ 身份绑定入口",
-        "验证数字 QQ 邮箱后，迁移的历史说说和评论会归入当前账号"
+        "验证数字 QQ 邮箱后，迁移的历史说说和评论会归入当前账号",
+        "迁移自 QQ 空间的说说和评论现在可以还原原始动态表情"
       ]
     },
     "en": {
       "title": "Claim your historical QQ identity",
       "items": [
         "Eligible spaces now show QQ identity binding under Account & security",
-        "Verify the numeric QQ mailbox to bring migrated posts and comments into your account"
+        "Verify the numeric QQ mailbox to bring migrated posts and comments into your account",
+        "Posts and comments migrated from QZone can now restore their original animated emoticons"
       ]
     }
   }

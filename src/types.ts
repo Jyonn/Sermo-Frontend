@@ -756,10 +756,17 @@ export interface SquareStatementMediaDTO {
   metadata?: ImageMetadataDTO | VideoMetadataDTO | null;
 }
 
+export interface InlineEmoticonDTO {
+  code: string;
+  token: string;
+  uri: string;
+}
+
 export interface SquareStatementDTO {
   statement_id: number;
   user: TinyUserDTO;
   text: string;
+  inline_emoticons?: InlineEmoticonDTO[];
   visibility: "public" | "friends";
   is_anonymous?: boolean;
   is_mine?: boolean;
@@ -798,6 +805,7 @@ export interface SquareStatementCommentDTO {
   user: TinyUserDTO;
   kind?: "text" | "sticker";
   text: string;
+  inline_emoticons?: InlineEmoticonDTO[];
   sticker?: StickerAssetDTO | null;
   mentions?: TinyUserDTO[];
   parent_id?: number | null;

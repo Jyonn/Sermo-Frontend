@@ -44,7 +44,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -79,6 +79,35 @@ const COMMENT_STICKER_EXPLORE_PAGE = -2;
 const COMMENT_STICKER_PAGE_SIZE = 30;
 const SQUARE_FEED_PAGE_SIZE = 20;
 const COMMENT_MENTION_RE = /<@(\d+)>/g;
+const INLINE_RICH_TOKEN_RE = /<@(\d+)>|\[em\](e\d+)\[\/em\]/gi;
+
+function InlineRichText({ emoticons = [], mentions = [], onOpenProfile, text }: {
+  emoticons?: InlineEmoticonDTO[];
+  mentions?: TinyUserDTO[];
+  onOpenProfile?: (userId: number) => void;
+  text: string;
+}) {
+  const emoticonsByCode = new Map(emoticons.map((item) => [item.code.toLowerCase(), item]));
+  const mentionsById = new Map(mentions.map((user) => [user.user_id, user]));
+  const parts = [];
+  let cursor = 0;
+  for (const match of text.matchAll(INLINE_RICH_TOKEN_RE)) {
+    const index = match.index ?? 0;
+    if (index > cursor) parts.push(<Fragment key={`text-${cursor}`}>{text.slice(cursor, index)}</Fragment>);
+    const mention = match[1] ? mentionsById.get(Number(match[1])) : undefined;
+    const emoticon = match[2] ? emoticonsByCode.get(match[2].toLowerCase()) : undefined;
+    if (mention && onOpenProfile) {
+      parts.push(<button className="square-comment-mention" key={`mention-${index}`} onClick={(event) => { event.stopPropagation(); onOpenProfile(mention.user_id); }} type="button">@{mention.name}</button>);
+    } else if (emoticon?.uri) {
+      parts.push(<img alt={emoticon.token} className="qzone-inline-emoticon" draggable={false} key={`emoticon-${index}`} loading="lazy" src={resolveStableResourceUri(emoticon.uri) ?? emoticon.uri} />);
+    } else {
+      parts.push(<Fragment key={`token-${index}`}>{match[0]}</Fragment>);
+    }
+    cursor = index + match[0].length;
+  }
+  if (cursor < text.length) parts.push(<Fragment key={`text-${cursor}`}>{text.slice(cursor)}</Fragment>);
+  return <>{parts}</>;
+}
 type InlineTransitionPhase = "idle" | "preparing" | "opening" | "open" | "closing";
 type InlineStatementOrigin = { left: number; top: number; width: number; height: number };
 const MAX_PHOTOS = 9;
@@ -289,7 +318,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         </div>
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
-      {statement.text ? <p className="square-statement-text">{statement.text}</p> : null}
+      {statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
       {statement.chat_record?.items?.length ? (
         <div className="square-chat-record" onClick={(event) => event.stopPropagation()}>
           <ChatPreview
@@ -362,18 +391,7 @@ function CommentContent({ comment, onOpenProfile, onReply }: {
   if (comment.kind === "sticker" && comment.sticker?.uri) {
     return <button className="square-comment-sticker" onClick={onReply} type="button"><StickerImage alt="" src={resolveStableResourceUri(comment.sticker.uri) ?? comment.sticker.uri} /></button>;
   }
-  const mentions = new Map((comment.mentions ?? []).map((user) => [user.user_id, user]));
-  const parts: Array<string | { token: string; user: TinyUserDTO }> = [];
-  let cursor = 0;
-  for (const match of comment.text.matchAll(COMMENT_MENTION_RE)) {
-    const index = match.index ?? 0;
-    if (index > cursor) parts.push(comment.text.slice(cursor, index));
-    const user = mentions.get(Number(match[1]));
-    parts.push(user ? { token: match[0], user } : match[0]);
-    cursor = index + match[0].length;
-  }
-  if (cursor < comment.text.length) parts.push(comment.text.slice(cursor));
-  return <p onClick={onReply}>{parts.map((part, index) => typeof part === "string" ? <Fragment key={`${part}-${index}`}>{part}</Fragment> : <button className="square-comment-mention" key={`${part.token}-${index}`} onClick={(event) => { event.stopPropagation(); onOpenProfile(part.user.user_id); }} type="button">@{part.user.name}</button>)}</p>;
+  return <p onClick={onReply}><InlineRichText emoticons={comment.inline_emoticons} mentions={comment.mentions} onOpenProfile={onOpenProfile} text={comment.text} /></p>;
 }
 
 function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies, rootUserId }: {
