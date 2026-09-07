@@ -186,11 +186,28 @@ h3 { font: 800 25px/1.1 var(--serif); }
 .ticket-note { margin: 24px 0 0; color: var(--green); font-size: 13px; font-weight: 700; line-height: 1.65; }
 
 .review-toolbar, .table-toolbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 24px; }
+.review-controls { display: grid; justify-items: end; gap: 8px; }
+.review-kind-switcher { display: flex; gap: 4px; }
+.review-kind-button { padding: 8px 12px; border: 1px solid transparent; background: transparent; color: var(--ink-soft); font-size: 13px; font-weight: 800; cursor: pointer; }
+.review-kind-button span { display: inline-grid; place-items: center; min-width: 21px; height: 21px; margin-left: 4px; border-radius: 50%; background: var(--paper-deep); font-size: 10px; }
+.review-kind-button.active { border-color: var(--ink); background: var(--paper-bright); color: var(--ink); }
+.review-kind-button.active span { background: var(--orange-pale); color: var(--red); }
 .review-filter, .table-switcher { display: flex; padding: 4px; background: var(--paper-deep); }
 .filter-button, .table-button { padding: 9px 14px; border: 0; background: transparent; color: var(--ink-soft); font-size: 13px; font-weight: 800; cursor: pointer; }
 .filter-button.active, .table-button.active { background: var(--paper-bright); color: var(--ink); box-shadow: 0 1px 4px var(--shadow); }
 
 .review-list { display: grid; gap: 14px; }
+.review-subbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: -4px 0 18px; padding: 12px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.review-subbar p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+.compact-button { padding: 8px 12px; border: 1px solid var(--ink); background: transparent; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.compact-button.primary { background: var(--ink); color: var(--paper-bright); }
+.create-anomaly { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(150px, .35fr) minmax(280px, .7fr) auto; gap: 18px; align-items: end; margin-bottom: 18px; padding: 22px; border: 1px solid var(--orange); background: var(--orange-pale); }
+.create-anomaly[hidden] { display: none; }
+.create-anomaly h3 { margin: 0 0 5px; font-size: 20px; }
+.create-anomaly p:last-child { margin: 0; color: var(--ink-soft); font-size: 12px; }
+.create-anomaly label, .repair-fields label { display: grid; gap: 7px; color: var(--ink-soft); font-size: 11px; font-weight: 800; }
+.create-anomaly input, .repair-fields input { min-width: 0; padding: 10px 11px; border: 1px solid var(--rule); background: var(--paper-bright); outline: none; color: var(--ink); }
+.create-actions { display: flex; gap: 6px; }
 .review-card { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, .8fr); border-top: 1px solid var(--ink); background: rgba(251,248,238,.52); }
 .review-context { padding: 22px 24px 24px; }
 .review-action { padding: 22px 24px; border-left: 1px solid var(--rule); background: rgba(229,223,207,.46); }
@@ -200,6 +217,7 @@ h3 { font: 800 25px/1.1 var(--serif); }
 .comment-quote.reply::before { background: var(--orange); }
 .comment-quote strong { display: block; margin-bottom: 3px; font-size: 13px; }
 .mention-chip { display: inline-block; margin: 8px 0 0 18px; padding: 5px 9px; background: var(--orange-pale); color: var(--red); font-size: 12px; font-weight: 800; }
+.mention-chip.malformed { max-width: calc(100% - 18px); font-family: "SFMono-Regular", "Cascadia Mono", monospace; overflow-wrap: anywhere; }
 .review-action label { display: block; margin-bottom: 8px; color: var(--ink-soft); font-size: 12px; font-weight: 800; }
 .candidate-input { width: 100%; padding: 12px 13px; border: 1px solid var(--rule); outline: none; background: var(--paper-bright); color: var(--ink); }
 .candidate-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-pale); }
@@ -213,7 +231,13 @@ h3 { font: 800 25px/1.1 var(--serif); }
 .resolution-actions button { padding: 9px 12px; border: 1px solid var(--ink); background: transparent; font-size: 12px; font-weight: 800; cursor: pointer; }
 .resolution-actions button:disabled { opacity: .35; cursor: not-allowed; }
 .resolution-actions button.primary { background: var(--ink); color: var(--paper-bright); }
+.resolution-actions button.danger { border-color: color-mix(in srgb, var(--red) 68%, var(--rule)); color: var(--red); }
 .resolution-badge { display: inline-block; margin-top: 12px; color: var(--green); font-size: 12px; font-weight: 800; }
+.resolution-badge.deleted { color: var(--red); }
+.anomaly-editor { display: grid; align-content: start; }
+.content-editor { width: 100%; min-height: 96px; padding: 12px 13px; resize: vertical; border: 1px solid var(--rule); background: var(--paper-bright); color: var(--ink); font: 12px/1.6 "SFMono-Regular", "Cascadia Mono", monospace; }
+.repair-fields { display: grid; grid-template-columns: .7fr 1.3fr; gap: 8px; margin: 10px 0 12px; }
+.repair-fields label { display: grid; }
 
 .empty-state { padding: 58px 24px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); text-align: center; }
 .empty-state strong { display: block; margin-bottom: 8px; font: 800 24px/1.2 var(--serif); }
@@ -256,6 +280,8 @@ h3 { font: 800 25px/1.1 var(--serif); }
   .schema-ticket, .export-checklist { max-width: 560px; }
   .review-card { grid-template-columns: 1fr; }
   .review-action { border-top: 1px solid var(--rule); border-left: 0; }
+  .create-anomaly { grid-template-columns: 1fr 1fr; }
+  .create-anomaly > div:first-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 720px) {
@@ -274,7 +300,13 @@ h3 { font: 800 25px/1.1 var(--serif); }
   .rule-row { grid-template-columns: 26px 1fr auto; }
   .rule-row p { grid-column: 2 / 4; }
   .review-toolbar, .table-toolbar { align-items: stretch; flex-direction: column; }
+  .review-controls { justify-items: stretch; }
+  .review-kind-switcher, .review-filter { overflow-x: auto; }
   .review-filter, .table-switcher { align-self: flex-start; }
+  .review-subbar { align-items: flex-start; flex-direction: column; }
+  .create-anomaly { grid-template-columns: 1fr; }
+  .create-anomaly > div:first-child { grid-column: auto; }
+  .repair-fields { grid-template-columns: 1fr; }
   .table-search { justify-content: space-between; }
   .table-search input { width: 70vw; }
   .export-actions { grid-template-columns: 1fr; }

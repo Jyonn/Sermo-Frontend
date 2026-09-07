@@ -80,7 +80,7 @@
         <nav class="workspace-tabs" aria-label="数据工作区">
           <button class="tab-button active" data-tab="overview" type="button">装订概览</button>
           <button class="tab-button" data-tab="review" type="button">
-            人工合并 <span class="tab-count" id="reviewTabCount">0</span>
+            人工整理 <span class="tab-count" id="reviewTabCount">0</span>
           </button>
           <button class="tab-button" data-tab="tables" type="button">三张表</button>
           <button class="tab-button" data-tab="export" type="button">导出</button>
@@ -115,13 +115,37 @@
           <div class="review-toolbar">
             <div>
               <p class="section-kicker">逐条核对</p>
-              <h2>无法自动确定的回复目标</h2>
+              <h2 id="reviewHeading">无法自动确定的回复目标</h2>
             </div>
-            <div class="review-filter" role="group" aria-label="筛选人工合并项">
-              <button class="filter-button active" data-filter="pending" type="button">待处理</button>
-              <button class="filter-button" data-filter="resolved" type="button">已处理</button>
-              <button class="filter-button" data-filter="all" type="button">全部</button>
+            <div class="review-controls">
+              <div class="review-kind-switcher" role="group" aria-label="切换人工整理类型">
+                <button class="review-kind-button active" data-review-kind="targets" type="button">回复目标 <span id="targetReviewCount">0</span></button>
+                <button class="review-kind-button" data-review-kind="anomalies" type="button">异常提及 <span id="anomalyReviewCount">0</span></button>
+              </div>
+              <div class="review-filter" role="group" aria-label="筛选人工整理项">
+                <button class="filter-button active" data-filter="pending" type="button">待处理</button>
+                <button class="filter-button" data-filter="resolved" type="button">已处理</button>
+                <button class="filter-button" data-filter="deleted" type="button">已删除</button>
+                <button class="filter-button" data-filter="all" type="button">全部</button>
+              </div>
             </div>
+          </div>
+          <section class="create-anomaly" id="createAnomaly" hidden>
+            <div>
+              <p class="section-kicker">CREATE</p>
+              <h3>补记一条异常提及</h3>
+              <p>用于添加自动扫描遗漏的标记，只建立待处理项，不会立即修改评论。</p>
+            </div>
+            <label>评论 ID<input id="newAnomalyCommentId" inputmode="numeric" placeholder="例如 15918" /></label>
+            <label>异常标记原文<input id="newAnomalyToken" placeholder="例如 @{uin:123,,nickwho:}" /></label>
+            <div class="create-actions">
+              <button class="compact-button primary" id="confirmCreateAnomaly" type="button">加入待处理</button>
+              <button class="compact-button" id="cancelCreateAnomaly" type="button">取消</button>
+            </div>
+          </section>
+          <div class="review-subbar" id="reviewSubbar" hidden>
+            <p>扫描会识别损坏或字段残缺的 QQ 内部提及。修复后仍保留原始来源负载。</p>
+            <button class="compact-button" id="openCreateAnomaly" type="button">＋ 新增异常项</button>
           </div>
           <div class="review-list" id="reviewList"></div>
         </div>
