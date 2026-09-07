@@ -26,22 +26,28 @@
         <div class="board-number">01</div>
         <div class="board-copy">
           <p class="section-kicker">装入原始档案</p>
-          <h2>先放 HTML 数据，再补 Markdown</h2>
-          <p>HTML 导出的 <code>messages.json</code> 是主数据；Markdown 只用于核对缺失记录，不会覆盖 QQ 元数据。</p>
+          <h2>按档案文件夹装入数据</h2>
+          <p>HTML 文件夹会自动定位 <code>Messages/json/messages.json</code>；Markdown 文件夹只读取 <code>Messages/YYYY.md</code>。</p>
         </div>
         <div class="drop-grid">
-          <label class="drop-zone" id="jsonDrop">
-            <input id="jsonInput" type="file" accept="application/json,.json" multiple />
-            <span class="drop-mark">JSON</span>
-            <strong>选择 messages.json</strong>
-            <small id="jsonFileLabel">可同时选择东墙和西墙</small>
-          </label>
-          <label class="drop-zone secondary" id="mdDrop">
-            <input id="mdInput" type="file" accept="text/markdown,.md" multiple />
-            <span class="drop-mark">MD</span>
-            <strong>选择年份 Markdown</strong>
-            <small id="mdFileLabel">可选，用于交叉校验</small>
-          </label>
+          <div class="folder-picker">
+            <label class="drop-zone" id="jsonDrop">
+              <input id="jsonInput" type="file" webkitdirectory directory multiple />
+              <span class="drop-mark">HTML</span>
+              <strong>添加 HTML 导出文件夹</strong>
+              <small id="jsonFileLabel">可重复添加，自动寻找 messages.json</small>
+            </label>
+            <div class="folder-list" id="jsonFolderList" hidden></div>
+          </div>
+          <div class="folder-picker">
+            <label class="drop-zone secondary" id="mdDrop">
+              <input id="mdInput" type="file" webkitdirectory directory multiple />
+              <span class="drop-mark">MD</span>
+              <strong>添加 Markdown 导出文件夹</strong>
+              <small id="mdFileLabel">可重复添加，自动收集年份 Markdown</small>
+            </label>
+            <div class="folder-list" id="mdFolderList" hidden></div>
+          </div>
         </div>
         <button class="bind-button" id="processButton" type="button" disabled>
           <span>开始装订</span>

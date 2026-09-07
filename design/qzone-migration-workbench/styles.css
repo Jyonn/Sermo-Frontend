@@ -95,7 +95,8 @@ h3 { font: 800 25px/1.1 var(--serif); }
 
 .board-number { align-self: start; color: var(--orange); font: 800 36px/1 var(--serif); }
 .board-copy p:last-child { margin: 0; color: var(--ink-soft); line-height: 1.7; }
-.drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.folder-picker { min-width: 0; }
 
 .drop-zone {
   position: relative;
@@ -115,10 +116,41 @@ h3 { font: 800 25px/1.1 var(--serif); }
 .drop-zone:hover, .drop-zone.dragging { transform: translateY(-2px); background: var(--paper-bright); }
 .drop-zone.secondary { border-color: var(--rule); }
 .drop-zone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.drop-mark { grid-row: 1 / 3; display: grid; place-items: center; width: 48px; aspect-ratio: 1; background: var(--green); color: var(--paper-bright); font-size: 11px; font-weight: 900; letter-spacing: .12em; }
+.drop-mark { grid-row: 1 / 3; display: grid; place-items: center; width: 48px; aspect-ratio: 1; background: var(--green); color: var(--paper-bright); font-size: 10px; font-weight: 900; letter-spacing: .08em; }
 .secondary .drop-mark { background: var(--paper-deep); color: var(--ink-soft); }
 .drop-zone strong { align-self: end; font-size: 15px; }
 .drop-zone small { align-self: start; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.folder-list { display: grid; gap: 6px; margin-top: 7px; }
+.folder-list[hidden] { display: none; }
+.folder-chip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 8px 8px 11px;
+  border-left: 3px solid var(--green);
+  background: var(--green-pale);
+}
+.folder-chip.secondary { border-left-color: var(--orange); background: var(--orange-pale); }
+.folder-glyph { color: var(--green); font: 900 12px/1 var(--serif); }
+.folder-chip.secondary .folder-glyph { color: var(--orange); }
+.folder-copy { min-width: 0; }
+.folder-copy strong, .folder-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder-copy strong { font-size: 12px; }
+.folder-copy small { margin-top: 2px; color: var(--ink-soft); font-size: 10px; }
+.folder-remove {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.folder-remove:hover { background: rgba(255, 255, 255, .58); color: var(--red); }
 
 .bind-button {
   display: flex;

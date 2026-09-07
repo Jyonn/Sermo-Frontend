@@ -2,6 +2,7 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 const state = {
+  folderGroups: { json: new Map(), md: new Map() },
   jsonFiles: [],
   mdFiles: [],
   users: [],
@@ -26,6 +27,8 @@ const tableColumns = {
 const elements = {
   jsonInput: $("#jsonInput"),
   mdInput: $("#mdInput"),
+  jsonFolderList: $("#jsonFolderList"),
+  mdFolderList: $("#mdFolderList"),
   processButton: $("#processButton"),
   progressTrack: $("#progressTrack"),
   progressFill: $("#progressFill"),
@@ -41,25 +44,87 @@ const elements = {
   toast: $("#toast"),
 };
 
-function setFiles(kind, files) {
-  const accepted = [...files].filter((file) => kind === "json" ? file.name.toLowerCase().endsWith(".json") : file.name.toLowerCase().endsWith(".md"));
-  state[`${kind}Files`] = accepted;
-  const label = $(`#${kind}FileLabel`);
-  label.textContent = accepted.length ? `${accepted.length} 个文件 · ${formatBytes(accepted.reduce((sum, file) => sum + file.size, 0))}` : kind === "json" ? "可同时选择东墙和西墙" : "可选，用于交叉校验";
-  elements.processButton.disabled = state.jsonFiles.length === 0;
+function relativePath(file) {
+  return String(file.webkitRelativePath || file.name).replaceAll("\\", "/");
 }
 
-function wireDropZone(id, kind) {
-  const zone = $(`#${id}`);
-  ["dragenter", "dragover"].forEach((eventName) => zone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    zone.classList.add("dragging");
-  }));
-  ["dragleave", "drop"].forEach((eventName) => zone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    zone.classList.remove("dragging");
-  }));
-  zone.addEventListener("drop", (event) => setFiles(kind, event.dataTransfer.files));
+function locateArchiveFiles(kind, files) {
+  const matches = [];
+  [...files].forEach((file) => {
+    const path = relativePath(file);
+    const parts = path.split("/");
+    const messagesIndex = parts.lastIndexOf("Messages");
+    if (messagesIndex < 0) return;
+
+    const isHtmlData = parts[messagesIndex + 1]?.toLowerCase() === "json"
+      && parts[messagesIndex + 2]?.toLowerCase() === "messages.json"
+      && messagesIndex + 3 === parts.length;
+    const isMarkdownData = /^\d{4}\.md$/i.test(parts[messagesIndex + 1] || "")
+      && messagesIndex + 2 === parts.length;
+    if ((kind === "json" && !isHtmlData) || (kind === "md" && !isMarkdownData)) return;
+
+    const archiveName = messagesIndex > 0 ? parts[messagesIndex - 1] : "Messages";
+    matches.push({ file, archiveName, relativePath: path });
+  });
+
+  if (kind !== "json") return matches;
+  const namedHtmlArchives = matches.filter((entry) => /html$/i.test(entry.archiveName));
+  return namedHtmlArchives.length ? namedHtmlArchives : matches;
+}
+
+function syncSelectedFiles(kind) {
+  state[`${kind}Files`] = [...state.folderGroups[kind].values()]
+    .flatMap((group) => group.files)
+    .sort((a, b) => a.relativePath.localeCompare(b.relativePath, "zh-CN"));
+}
+
+function renderFolderSelection(kind) {
+  const groups = [...state.folderGroups[kind].values()];
+  const entries = state[`${kind}Files`];
+  const list = elements[`${kind}FolderList`];
+  const label = $(`#${kind}FileLabel`);
+  list.hidden = groups.length === 0;
+  list.innerHTML = groups.map((group) => `
+    <div class="folder-chip${kind === "md" ? " secondary" : ""}">
+      <span class="folder-glyph">DIR</span>
+      <span class="folder-copy">
+        <strong>${escapeHtml(group.name)}</strong>
+        <small>${group.files.length} 个目标文件 · ${formatBytes(group.files.reduce((sum, entry) => sum + entry.file.size, 0))}</small>
+      </span>
+      <button class="folder-remove" type="button" data-remove-folder="${escapeHtml(group.name)}" data-folder-kind="${kind}" aria-label="移除 ${escapeHtml(group.name)}">×</button>
+    </div>`).join("");
+
+  if (!entries.length) {
+    label.textContent = kind === "json" ? "可重复添加，自动寻找 messages.json" : "可重复添加，自动收集年份 Markdown";
+    return;
+  }
+  const totalSize = entries.reduce((sum, entry) => sum + entry.file.size, 0);
+  label.textContent = `${groups.length} 个文件夹 · ${entries.length} 个文件 · ${formatBytes(totalSize)}`;
+}
+
+function addFolderFiles(kind, files) {
+  const matches = locateArchiveFiles(kind, files);
+  if (!matches.length) {
+    const expected = kind === "json" ? "Messages/json/messages.json" : "Messages/YYYY.md";
+    showToast(`没有找到 ${expected}`);
+    return;
+  }
+
+  const discovered = new Map();
+  matches.forEach((entry) => {
+    if (!discovered.has(entry.archiveName)) discovered.set(entry.archiveName, []);
+    discovered.get(entry.archiveName).push(entry);
+  });
+  discovered.forEach((entries, name) => {
+    const uniqueEntries = [...new Map(entries.map((entry) => [entry.relativePath, entry])).values()]
+      .sort((a, b) => a.relativePath.localeCompare(b.relativePath, "zh-CN"));
+    state.folderGroups[kind].set(name, { name, files: uniqueEntries });
+  });
+
+  syncSelectedFiles(kind);
+  renderFolderSelection(kind);
+  elements.processButton.disabled = state.jsonFiles.length === 0;
+  showToast(`已加入 ${discovered.size} 个${kind === "json" ? " HTML" : " Markdown"} 文件夹`);
 }
 
 function formatBytes(value) {
@@ -324,19 +389,20 @@ async function processFiles() {
   try {
     const sources = [];
     for (let index = 0; index < state.jsonFiles.length; index += 1) {
-      const file = state.jsonFiles[index];
+      const entry = state.jsonFiles[index];
+      const file = entry.file;
       const text = await file.text();
-      setProgress(15 + Math.round((index / state.jsonFiles.length) * 35), `正在解析 ${file.name}…`);
+      setProgress(15 + Math.round((index / state.jsonFiles.length) * 35), `正在解析 ${entry.archiveName}…`);
       const parsed = JSON.parse(text);
-      if (!Array.isArray(parsed)) throw new Error(`${file.name} 顶层不是说说数组`);
-      sources.push({ filename: file.name, posts: parsed });
+      if (!Array.isArray(parsed)) throw new Error(`${entry.archiveName} 的 messages.json 顶层不是说说数组`);
+      sources.push({ filename: entry.relativePath, posts: parsed });
       await new Promise((resolve) => setTimeout(resolve, 0));
     }
 
     setProgress(58, "正在生成三张表…");
     buildTables(sources);
     const mdTexts = [];
-    for (const file of state.mdFiles) mdTexts.push(await file.text());
+    for (const entry of state.mdFiles) mdTexts.push(await entry.file.text());
     parseMarkdown(mdTexts);
     setProgress(86, "正在建立人工整理队列…");
     renderWorkspace();
@@ -634,11 +700,24 @@ function showToast(message) {
   toastTimer = setTimeout(() => elements.toast.classList.remove("visible"), 2400);
 }
 
-elements.jsonInput.addEventListener("change", (event) => setFiles("json", event.target.files));
-elements.mdInput.addEventListener("change", (event) => setFiles("md", event.target.files));
+elements.jsonInput.addEventListener("change", (event) => {
+  addFolderFiles("json", event.target.files);
+  event.target.value = "";
+});
+elements.mdInput.addEventListener("change", (event) => {
+  addFolderFiles("md", event.target.files);
+  event.target.value = "";
+});
+[$("#jsonFolderList"), $("#mdFolderList")].forEach((list) => list.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-remove-folder]");
+  if (!button) return;
+  const kind = button.dataset.folderKind;
+  state.folderGroups[kind].delete(button.dataset.removeFolder);
+  syncSelectedFiles(kind);
+  renderFolderSelection(kind);
+  elements.processButton.disabled = state.jsonFiles.length === 0;
+}));
 elements.processButton.addEventListener("click", processFiles);
-wireDropZone("jsonDrop", "json");
-wireDropZone("mdDrop", "md");
 
 $$('.tab-button').forEach((button) => button.addEventListener("click", () => {
   $$('.tab-button').forEach((item) => item.classList.toggle("active", item === button));
