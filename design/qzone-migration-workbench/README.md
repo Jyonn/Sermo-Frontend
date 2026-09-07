@@ -1,0 +1,17 @@
+# QQ 空间数据装订台
+
+用于在浏览器本地把 QQ 空间 HTML 导出的 `messages.json` 整理为三张表：
+
+- `qzone_user`：仅包含 `qq`、`nickname`，同一 QQ 保留时间上最新的昵称。
+- `qzone_post`：保留说说作者、原始 ID、正文、媒体、发布时间和原始负载。
+- `qzone_comment`：保留评论作者、所属说说、父评论、明确的回复目标、正文和发布时间。
+
+## 使用
+
+1. 直接打开 `index.html`。
+2. 选择一份或多份 HTML 导出的 `Messages/json/messages.json`。
+3. 可选加入 Markdown 年份文件进行数量校验。
+4. 在“人工合并”中处理普通文字 `@昵称` 无法确定 QQ 的记录。
+5. 分别导出三张 CSV，或导出完整 JSON。
+
+所有文件只在当前浏览器内解析，不会上传网络。

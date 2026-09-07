@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>江中东西墙 · 数据装订台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="paper-grain" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">QZONE ARCHIVE / LOCAL ONLY</p>
+          <h1>数据装订台</h1>
+          <p class="lede">把 QQ 空间说说、评论与用户身份整理成三张干净的表。</p>
+        </div>
+        <div class="privacy-stamp" title="所有处理均在当前浏览器内完成">
+          <span class="stamp-dot"></span>
+          <span>纯本地处理</span>
+        </div>
+      </header>
+
+      <section class="import-board" id="importBoard">
+        <div class="board-number">01</div>
+        <div class="board-copy">
+          <p class="section-kicker">装入原始档案</p>
+          <h2>先放 HTML 数据，再补 Markdown</h2>
+          <p>HTML 导出的 <code>messages.json</code> 是主数据；Markdown 只用于核对缺失记录，不会覆盖 QQ 元数据。</p>
+        </div>
+        <div class="drop-grid">
+          <label class="drop-zone" id="jsonDrop">
+            <input id="jsonInput" type="file" accept="application/json,.json" multiple />
+            <span class="drop-mark">JSON</span>
+            <strong>选择 messages.json</strong>
+            <small id="jsonFileLabel">可同时选择东墙和西墙</small>
+          </label>
+          <label class="drop-zone secondary" id="mdDrop">
+            <input id="mdInput" type="file" accept="text/markdown,.md" multiple />
+            <span class="drop-mark">MD</span>
+            <strong>选择年份 Markdown</strong>
+            <small id="mdFileLabel">可选，用于交叉校验</small>
+          </label>
+        </div>
+        <button class="bind-button" id="processButton" type="button" disabled>
+          <span>开始装订</span>
+          <span class="button-arrow">→</span>
+        </button>
+        <div class="progress-track" id="progressTrack" hidden>
+          <div class="progress-fill" id="progressFill"></div>
+          <span id="progressText">正在读取档案…</span>
+        </div>
+      </section>
+
+      <section class="workspace" id="workspace" hidden>
+        <div class="summary-strip">
+          <article>
+            <span>QQ 用户</span>
+            <strong id="userCount">0</strong>
+            <small id="aliasCount">0 个昵称变更</small>
+          </article>
+          <article>
+            <span>说说</span>
+            <strong id="postCount">0</strong>
+            <small id="postSourceCount">0 份源文件</small>
+          </article>
+          <article>
+            <span>评论与回复</span>
+            <strong id="commentCount">0</strong>
+            <small id="nestedCount">0 条嵌套回复</small>
+          </article>
+          <article class="review-metric">
+            <span>等待判断</span>
+            <strong id="reviewCount">0</strong>
+            <small id="reviewStatus">全部关系已明确</small>
+          </article>
+        </div>
+
+        <nav class="workspace-tabs" aria-label="数据工作区">
+          <button class="tab-button active" data-tab="overview" type="button">装订概览</button>
+          <button class="tab-button" data-tab="review" type="button">
+            人工合并 <span class="tab-count" id="reviewTabCount">0</span>
+          </button>
+          <button class="tab-button" data-tab="tables" type="button">三张表</button>
+          <button class="tab-button" data-tab="export" type="button">导出</button>
+        </nav>
+
+        <div class="tab-panel active" id="panel-overview" data-panel="overview">
+          <div class="overview-layout">
+            <section class="ledger-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="section-kicker">自动处理报告</p>
+                  <h2>数据已经如何合并</h2>
+                </div>
+                <span class="completion-ring" id="completionRing">100%</span>
+              </div>
+              <div class="rule-list" id="ruleList"></div>
+            </section>
+            <aside class="schema-ticket">
+              <p class="ticket-label">FINAL SCHEMA</p>
+              <h3>三表结构</h3>
+              <dl>
+                <div><dt>qzone_user</dt><dd>qq · nickname</dd></div>
+                <div><dt>qzone_post</dt><dd>作者 · 正文 · 媒体 · 时间</dd></div>
+                <div><dt>qzone_comment</dt><dd>作者 · 父评论 · 回复目标</dd></div>
+              </dl>
+              <p class="ticket-note">身份只认 QQ；昵称只保留时间上最新的一次。</p>
+            </aside>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="panel-review" data-panel="review">
+          <div class="review-toolbar">
+            <div>
+              <p class="section-kicker">逐条核对</p>
+              <h2>无法自动确定的回复目标</h2>
+            </div>
+            <div class="review-filter" role="group" aria-label="筛选人工合并项">
+              <button class="filter-button active" data-filter="pending" type="button">待处理</button>
+              <button class="filter-button" data-filter="resolved" type="button">已处理</button>
+              <button class="filter-button" data-filter="all" type="button">全部</button>
+            </div>
+          </div>
+          <div class="review-list" id="reviewList"></div>
+        </div>
+
+        <div class="tab-panel" id="panel-tables" data-panel="tables">
+          <div class="table-toolbar">
+            <div class="table-switcher" role="group" aria-label="切换数据表">
+              <button class="table-button active" data-table="users" type="button">qzone_user</button>
+              <button class="table-button" data-table="posts" type="button">qzone_post</button>
+              <button class="table-button" data-table="comments" type="button">qzone_comment</button>
+            </div>
+            <label class="table-search">
+              <span>筛选</span>
+              <input id="tableSearch" type="search" placeholder="输入 QQ、昵称或正文" />
+            </label>
+          </div>
+          <div class="data-table-wrap">
+            <table class="data-table" id="dataTable"></table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+
+        <div class="tab-panel" id="panel-export" data-panel="export">
+          <div class="export-layout">
+            <section>
+              <p class="section-kicker">完成装订</p>
+              <h2>导出可直接入库的三张表</h2>
+              <p class="export-copy">CSV 使用 UTF-8 BOM；JSON 包含三个数组和本次人工判断结果。未处理目标会以空值导出。</p>
+              <div class="export-actions">
+                <button class="export-button" data-export="users" type="button"><span>qzone_user.csv</span><small>QQ 与最新昵称</small></button>
+                <button class="export-button" data-export="posts" type="button"><span>qzone_post.csv</span><small>说说正文与媒体</small></button>
+                <button class="export-button" data-export="comments" type="button"><span>qzone_comment.csv</span><small>评论树与回复目标</small></button>
+                <button class="export-button accent" data-export="bundle" type="button"><span>完整 JSON</span><small>一次保存全部结果</small></button>
+              </div>
+            </section>
+            <aside class="export-checklist" id="exportChecklist"></aside>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
