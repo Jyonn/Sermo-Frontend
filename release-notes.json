@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.06.19",
-  "publishedAt": "2026-09-06",
+  "id": "2026.09.07.1",
+  "publishedAt": "2026-09-07",
   "locales": {
     "zh-CN": {
-      "title": "好友上线提醒更及时",
+      "title": "QQ 历史身份可以认领了",
       "items": [
-        "好友上线消息仅通过即时提醒发送，不再进入网页、邮件或短信渠道",
-        "通知设置会明确禁用好友上线不适用的提醒渠道"
+        "已获授权的空间会在账号与安全中显示 QQ 身份绑定入口",
+        "验证数字 QQ 邮箱后，迁移的历史说说和评论会归入当前账号"
       ]
     },
     "en": {
-      "title": "Timelier friend-online alerts",
+      "title": "Claim your historical QQ identity",
       "items": [
-        "Friend-online events now use instant notifications only, never web, email, or SMS delivery",
-        "Notification settings now clearly disable unsupported routes for friend-online alerts"
+        "Eligible spaces now show QQ identity binding under Account & security",
+        "Verify the numeric QQ mailbox to bring migrated posts and comments into your account"
       ]
     }
   }

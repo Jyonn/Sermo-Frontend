@@ -216,6 +216,13 @@ export interface UserMeDTO extends UserDTO {
   city_bubble_styles?: ChatBubbleStyle[];
 }
 
+export interface QQIdentityDTO {
+  available: boolean;
+  bound: boolean;
+  qq: string | null;
+  verified_at: number | null;
+}
+
 export interface UserResourceInventoryDTO {
   resource_type: "background" | "bubble" | "frame" | "identity" | "vip" | "profile";
   reward_id: string;

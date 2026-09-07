@@ -1549,6 +1549,26 @@ export const api = {
     });
   },
 
+  getQQIdentity(signal?: AbortSignal) {
+    return request<import("../types").QQIdentityDTO>("/users/me/qq-identity", { auth: true, signal });
+  },
+
+  sendQQIdentityCode(payload: { qq: string }) {
+    return request<{ expires_in: number; target: string }>("/users/me/qq-identity/code", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
+  bindQQIdentity(payload: { qq: string; code: string }) {
+    return request<import("../types").QQIdentityDTO>("/users/me/qq-identity", {
+      method: "POST",
+      auth: true,
+      body: payload,
+    });
+  },
+
   unbindContact(payload: { channel: number; code?: string }) {
     return request<UserMeDTO>("/users/me/unbind-contact", {
       method: "DELETE",

@@ -41,7 +41,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { disableWebPush, enableWebPush, getWebPushState, type WebPushState } from "../lib/webPush";
-import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
+import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPreferenceDTO, GrowthRewardDTO, InstantNotificationEndpointDTO, InstantNotificationProvider, NotificationChannel, NotificationPreferenceDTO, NotificationPreferences, NotificationTopicPreferenceDTO, PersonalizationDTO, QQIdentityDTO, SpaceDTO, SwitchAccountDTO, UserMeDTO } from "../types";
 import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
@@ -520,6 +520,15 @@ export default function MenuPage() {
   const [authActionState, setAuthActionState] = useState<"idle" | "sending" | "binding">("idle");
   const [authCooldown, setAuthCooldown] = useState(0);
   const [authExpiresIn, setAuthExpiresIn] = useState(0);
+  const [qqIdentityOpen, setQqIdentityOpen] = useState(false);
+  const [qqIdentity, setQqIdentity] = useState<QQIdentityDTO | null>(null);
+  const [qqIdentityLoading, setQqIdentityLoading] = useState(false);
+  const [qqIdentityValue, setQqIdentityValue] = useState("");
+  const [qqIdentityCode, setQqIdentityCode] = useState("");
+  const [qqIdentityPending, setQqIdentityPending] = useState(false);
+  const [qqIdentityAction, setQqIdentityAction] = useState<"idle" | "sending" | "binding">("idle");
+  const [qqIdentityCooldown, setQqIdentityCooldown] = useState(0);
+  const [qqIdentityExpiresIn, setQqIdentityExpiresIn] = useState(0);
   const [basicEditSaving, setBasicEditSaving] = useState(false);
   const [passwordCurrent, setPasswordCurrent] = useState("");
   const [passwordNext, setPasswordNext] = useState("");
@@ -1007,14 +1016,16 @@ export default function MenuPage() {
     }
     setSyncing(true);
     setError(null);
+    setQqIdentity(null);
 
     Promise.all([
       api.getSpaceMe(controller.signal),
       api.getUserMe(controller.signal),
       api.getWebReminderPrefs(controller.signal).catch(() => null),
       api.getGestureLockPrefs(controller.signal).catch(() => null),
+      api.getQQIdentity(controller.signal).catch(() => null),
     ])
-      .then(async ([spaceInfo, meInfo, webReminderInfo, gestureInfo]) => {
+      .then(async ([spaceInfo, meInfo, webReminderInfo, gestureInfo, qqIdentityInfo]) => {
         const [prefRows, endpointRows] = meInfo.has_password
           ? await Promise.all([
               api.getNotificationPrefs(controller.signal),
@@ -1027,6 +1038,7 @@ export default function MenuPage() {
         setPrefs(mapPrefs(prefRows));
         setInstantEndpoints(endpointRows);
         setGesturePreference(gestureInfo);
+        setQqIdentity(qqIdentityInfo);
         setWebReminderPrefs(nextWebReminderPrefs);
         setWebReminderPreferences(nextWebReminderPrefs);
         writeTabCache(cacheScope, "menu", {
@@ -1123,6 +1135,15 @@ export default function MenuPage() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [unbindCooldown]);
+
+  useEffect(() => {
+    if (!qqIdentityOpen || (qqIdentityCooldown <= 0 && qqIdentityExpiresIn <= 0)) return;
+    const timer = window.setInterval(() => {
+      setQqIdentityCooldown((current) => Math.max(0, current - 1));
+      setQqIdentityExpiresIn((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [qqIdentityCooldown, qqIdentityExpiresIn, qqIdentityOpen]);
 
   useEffect(() => {
     if (!authSheetChannel || !authPending) return;
@@ -1437,6 +1458,63 @@ export default function MenuPage() {
       );
     } finally {
       setAuthActionState("idle");
+    }
+  };
+
+  const openQqIdentity = () => {
+    setQqIdentityOpen(true);
+    setQqIdentityValue(qqIdentity?.qq ?? "");
+    setQqIdentityCode("");
+    setQqIdentityPending(false);
+    setQqIdentityCooldown(0);
+    setQqIdentityExpiresIn(0);
+    if (qqIdentity || qqIdentityLoading) return;
+    setQqIdentityLoading(true);
+    void api.getQQIdentity()
+      .then((identity) => {
+        setQqIdentity(identity);
+        setQqIdentityValue(identity.qq ?? "");
+      })
+      .catch((apiError) => {
+        showToast(apiError instanceof ApiError ? apiError.message : t("qqIdentity.loadFailed"), "error");
+      })
+      .finally(() => setQqIdentityLoading(false));
+  };
+
+  const sendQqIdentityCode = async () => {
+    if (!hasPassword) {
+      showPasswordReminder(t("qqIdentity.passwordRequired"));
+      return;
+    }
+    if (!/^\d{5,20}$/.test(qqIdentityValue)) return;
+    setQqIdentityAction("sending");
+    try {
+      const result = await api.sendQQIdentityCode({ qq: qqIdentityValue });
+      setQqIdentityPending(true);
+      setQqIdentityCode("");
+      setQqIdentityCooldown(60);
+      setQqIdentityExpiresIn(result.expires_in);
+      showToast(t("qqIdentity.codeSent", { target: result.target }));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("qqIdentity.codeSendFailed"), "error");
+    } finally {
+      setQqIdentityAction("idle");
+    }
+  };
+
+  const bindQqIdentity = async () => {
+    if (!/^\d{5,20}$/.test(qqIdentityValue) || qqIdentityCode.length !== 6) return;
+    setQqIdentityAction("binding");
+    try {
+      const identity = await api.bindQQIdentity({ qq: qqIdentityValue, code: qqIdentityCode });
+      setQqIdentity(identity);
+      setQqIdentityPending(false);
+      setQqIdentityCode("");
+      showToast(t("qqIdentity.boundToast", { qq: identity.qq ?? qqIdentityValue }));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("qqIdentity.bindFailed"), "error");
+    } finally {
+      setQqIdentityAction("idle");
     }
   };
 
@@ -2625,6 +2703,14 @@ export default function MenuPage() {
         <div className="detail-list">
           <SettingGroup>
             <SettingRow description={!hasPassword ? t("password.securityHint") : undefined} onClick={() => setPasswordSheetOpen(true)} title={hasPassword ? t("password.change") : t("password.setup")} />
+            {space?.qq_binding_available ? (
+              <SettingRow
+                description={qqIdentity?.bound ? t("qqIdentity.boundHint") : t("qqIdentity.entryHint")}
+                onClick={openQqIdentity}
+                title={t("qqIdentity.title")}
+                value={qqIdentity?.bound && qqIdentity.qq ? `QQ ${qqIdentity.qq}` : t("qqIdentity.bindNow")}
+              />
+            ) : null}
             <SettingRow
               description={
                   gestureEnabled
@@ -2657,6 +2743,103 @@ export default function MenuPage() {
           </SettingGroup>
         </div>
       </SideDrawer>
+
+      {space?.qq_binding_available ? (
+        <SideDrawer
+          className="qq-identity-drawer"
+          historyKey="qq-identity"
+          onRouteOpen={openQqIdentity}
+          open={qqIdentityOpen}
+          onClose={() => {
+            if (qqIdentityAction !== "idle") return;
+            setQqIdentityOpen(false);
+            setQqIdentityCode("");
+            setQqIdentityPending(false);
+          }}
+          title={t("qqIdentity.title")}
+        >
+          <div className="qq-identity-panel">
+            {qqIdentityLoading ? (
+              <ContentLoader label={t("qqIdentity.loading")} rows={2} />
+            ) : qqIdentity?.bound && qqIdentity.qq ? (
+              <section className="qq-identity-certificate">
+                <span className="qq-identity-seal material-symbols-outlined" aria-hidden="true">verified_user</span>
+                <div>
+                  <span>{t("qqIdentity.boundLabel")}</span>
+                  <strong>QQ {qqIdentity.qq}</strong>
+                  <small>{qqIdentity.verified_at ? t("qqIdentity.boundAt", { date: formatContactDate(qqIdentity.verified_at) }) : t("qqIdentity.boundHint")}</small>
+                </div>
+              </section>
+            ) : (
+              <>
+                <section className="qq-identity-intro">
+                  <span className="qq-identity-monogram" aria-hidden="true">QQ</span>
+                  <div>
+                    <strong>{t("qqIdentity.claimTitle")}</strong>
+                    <p>{t("qqIdentity.claimHint")}</p>
+                  </div>
+                </section>
+                <div className="qq-identity-form">
+                  <label className="field-label" htmlFor="qq-identity-number">{t("qqIdentity.number")}</label>
+                  <div className="qq-mailbox-field">
+                    <input
+                      aria-describedby="qq-identity-mailbox-hint"
+                      autoComplete="off"
+                      className="input"
+                      id="qq-identity-number"
+                      inputMode="numeric"
+                      maxLength={20}
+                      onChange={(event) => {
+                        setQqIdentityValue(event.target.value.replace(/\D/g, "").slice(0, 20));
+                        setQqIdentityCode("");
+                        setQqIdentityPending(false);
+                        setQqIdentityExpiresIn(0);
+                      }}
+                      placeholder="123456789"
+                      value={qqIdentityValue}
+                    />
+                    <span>@qq.com</span>
+                  </div>
+                  <small className="qq-identity-mailbox-hint" id="qq-identity-mailbox-hint">
+                    {t("qqIdentity.mailboxHint")}
+                  </small>
+                  <button
+                    className="button contact-flow-primary"
+                    disabled={qqIdentityAction !== "idle" || !/^\d{5,20}$/.test(qqIdentityValue) || qqIdentityCooldown > 0}
+                    onClick={() => void sendQqIdentityCode()}
+                    type="button"
+                  >
+                    {qqIdentityAction === "sending"
+                      ? t("common.sending")
+                      : qqIdentityCooldown > 0
+                        ? t("auth.retryIn", { seconds: qqIdentityCooldown })
+                        : t("qqIdentity.sendCode")}
+                  </button>
+                  <div className={`contact-verify-block${qqIdentityPending ? " is-visible" : ""}`}>
+                    <div className="field-label-row">
+                      <label className="field-label">{t("recovery.code")}</label>
+                      {qqIdentityExpiresIn > 0 ? <span className="field-countdown">{t("auth.validFor", { seconds: qqIdentityExpiresIn })}</span> : null}
+                    </div>
+                    <VerificationCodeInput ariaLabel={t("recovery.code")} value={qqIdentityCode} onChange={setQqIdentityCode} />
+                    <button
+                      className="button contact-flow-primary"
+                      disabled={qqIdentityAction !== "idle" || qqIdentityCode.length !== 6}
+                      onClick={() => void bindQqIdentity()}
+                      type="button"
+                    >
+                      {qqIdentityAction === "binding" ? t("common.processing") : t("qqIdentity.confirm")}
+                    </button>
+                  </div>
+                </div>
+                <p className="qq-identity-permanence">
+                  <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                  {t("qqIdentity.permanence")}
+                </p>
+              </>
+            )}
+          </div>
+        </SideDrawer>
+      ) : null}
 
       <BottomSheet
         open={accountSwitcherOpen}

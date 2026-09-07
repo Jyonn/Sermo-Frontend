@@ -30281,6 +30281,168 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
   cursor: pointer;
 }
 
+/* QQ identity is presented as a permanent provenance record, not a removable contact method. */
+.qq-identity-panel {
+  display: grid;
+  gap: 22px;
+  padding: 4px 2px 24px;
+}
+
+.qq-identity-intro {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  padding: 6px 4px 2px;
+}
+
+.qq-identity-monogram,
+.qq-identity-seal {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px 18px 18px 7px;
+  color: var(--brand-primary);
+  background: color-mix(in srgb, var(--brand-primary) 11%, var(--bg-panel-strong));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 17%, transparent);
+}
+
+.qq-identity-monogram {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+}
+
+.qq-identity-intro strong {
+  display: block;
+  margin: 2px 0 5px;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.qq-identity-intro p,
+.qq-identity-permanence {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.qq-identity-form {
+  display: grid;
+  gap: 12px;
+}
+
+.qq-mailbox-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 15px;
+  background: var(--bg-panel-strong);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.qq-mailbox-field:focus-within {
+  border-color: color-mix(in srgb, var(--brand-primary) 55%, var(--line-soft));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 10%, transparent);
+}
+
+.qq-mailbox-field .input {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.qq-mailbox-field > span {
+  padding: 0 15px 0 8px;
+  color: var(--text-secondary);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.qq-identity-mailbox-hint {
+  margin-top: -5px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.qq-identity-permanence {
+  display: grid;
+  grid-template-columns: 19px minmax(0, 1fr);
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.qq-identity-permanence .material-symbols-outlined {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+.qq-identity-certificate {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 17px;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 26%, var(--line-soft));
+  border-radius: 22px 22px 22px 8px;
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--brand-primary) 9%, transparent), transparent 58%),
+    var(--bg-panel-strong);
+}
+
+.qq-identity-certificate::after {
+  content: "QQ";
+  position: absolute;
+  right: -9px;
+  bottom: -28px;
+  color: color-mix(in srgb, var(--brand-primary) 7%, transparent);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 5.6rem;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  pointer-events: none;
+}
+
+.qq-identity-seal {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  font-size: 27px;
+}
+
+.qq-identity-certificate > div {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+}
+
+.qq-identity-certificate span:not(.qq-identity-seal),
+.qq-identity-certificate small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.qq-identity-certificate strong {
+  color: var(--text-primary);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.24rem;
+  letter-spacing: 0.01em;
+}
+
 .platform-feature-grant {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
