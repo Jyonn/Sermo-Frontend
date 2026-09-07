@@ -49,10 +49,17 @@
             <div class="folder-list" id="mdFolderList" hidden></div>
           </div>
         </div>
-        <button class="bind-button" id="processButton" type="button" disabled>
-          <span>开始装订</span>
-          <span class="button-arrow">→</span>
-        </button>
+        <div class="board-actions">
+          <button class="bind-button" id="processButton" type="button" disabled>
+            <span>开始装订</span>
+            <span class="button-arrow">→</span>
+          </button>
+          <label class="bundle-load-button">
+            <input id="bundleInput" type="file" accept="application/json,.json" />
+            <span>打开装订结果</span>
+            <small>qzone-migration.json</small>
+          </label>
+        </div>
         <div class="progress-track" id="progressTrack" hidden>
           <div class="progress-fill" id="progressFill"></div>
           <span id="progressText">正在读取档案…</span>
@@ -87,6 +94,9 @@
           <button class="tab-button active" data-tab="overview" type="button">装订概览</button>
           <button class="tab-button" data-tab="review" type="button">
             人工整理 <span class="tab-count" id="reviewTabCount">0</span>
+          </button>
+          <button class="tab-button" data-tab="compatibility" type="button">
+            兼容性审阅 <span class="tab-count compatibility-tab-count" id="compatibilityTabCount">0</span>
           </button>
           <button class="tab-button" data-tab="tables" type="button">三张表</button>
           <button class="tab-button" data-tab="export" type="button">导出</button>
@@ -154,6 +164,43 @@
             <button class="compact-button" id="openCreateAnomaly" type="button">＋ 新增异常项</button>
           </div>
           <div class="review-list" id="reviewList"></div>
+        </div>
+
+        <div class="tab-panel" id="panel-compatibility" data-panel="compatibility">
+          <section class="compatibility-intro">
+            <div>
+              <p class="section-kicker">SERMO COMPATIBILITY</p>
+              <h2>不兼容内容审阅</h2>
+              <p>按当前 Sermo 数据模型检查。这里只展示风险，不修改装订结果。</p>
+            </div>
+            <div class="audit-verdict" id="auditVerdict">
+              <span>可直接迁移</span>
+              <strong>0%</strong>
+              <small>按说说主体计算</small>
+            </div>
+          </section>
+
+          <div class="audit-summary" id="auditSummary"></div>
+
+          <div class="audit-toolbar">
+            <div class="audit-scope" id="auditScope" role="group" aria-label="按问题类型筛选"></div>
+            <div class="audit-tools">
+              <div class="severity-switcher" role="group" aria-label="按严重程度筛选">
+                <button class="severity-button active" data-severity="all" type="button">全部</button>
+                <button class="severity-button" data-severity="blocker" type="button">阻断</button>
+                <button class="severity-button" data-severity="adapt" type="button">需适配</button>
+                <button class="severity-button" data-severity="lossy" type="button">会失真</button>
+              </div>
+              <label class="audit-search">
+                <span>查找记录</span>
+                <input id="auditSearch" type="search" placeholder="正文、QQ、记录 ID" />
+              </label>
+            </div>
+          </div>
+
+          <div class="audit-result-meta" id="auditResultMeta"></div>
+          <div class="audit-list" id="auditList"></div>
+          <div class="pagination audit-pagination" id="auditPagination"></div>
         </div>
 
         <div class="tab-panel" id="panel-tables" data-panel="tables">
