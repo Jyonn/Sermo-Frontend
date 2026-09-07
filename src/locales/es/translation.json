@@ -1114,6 +1114,8 @@
   "admin.chatFeatureHint": "Conversaciones, mensajes y grupos",
   "admin.squareFeatureHint": "declaraciones, comentarios y reacciones",
   "admin.exploreFeatureHint": "navegar por las publicaciones públicas más allá de los amigos",
+  "admin.qqBindingFeature": "Vincular identidad QQ",
+  "admin.qqBindingFeatureHint": "Permite reclamar contenido migrado mediante un correo QQ verificado",
   "admin.moduleSafetyHint": "El chat o el Square deben permanecer activados.",
   "admin.unverifiedAccessTitle": "Establecer límites de grupo para los nuevos miembros",
   "admin.unverifiedAccessHint": "La verificación todavía protege la publicación, los comentarios, las solicitudes de amigos y la gestión de grupos.",

@@ -1121,6 +1121,8 @@
   "admin.chatFeatureHint": "Conversations, messages, and groups",
   "admin.squareFeatureHint": "Statements, comments, and reactions",
   "admin.exploreFeatureHint": "Browse public posts beyond friends",
+  "admin.qqBindingFeature": "Bind QQ identity",
+  "admin.qqBindingFeatureHint": "Let members claim migrated content through a verified QQ email address",
   "admin.moduleSafetyHint": "Chat or Square must remain enabled. Turning off Square also turns off Explore.",
   "admin.unverifiedAccessTitle": "Set group boundaries for new members",
   "admin.unverifiedAccessHint": "Verification still protects publishing, comments, friend requests, and group management. This policy only tightens group participation.",

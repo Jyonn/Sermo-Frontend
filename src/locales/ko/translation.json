@@ -1114,6 +1114,8 @@
   "admin.chatFeatureHint": "대화, 메시지 및 그룹",
   "admin.squareFeatureHint": "진술, 댓글 및 반응",
   "admin.exploreFeatureHint": "친구 이외의 공개 게시물을 탐색하십시오",
+  "admin.qqBindingFeature": "QQ 신원 연결",
+  "admin.qqBindingFeatureHint": "인증된 QQ 이메일로 이전 콘텐츠를 소유할 수 있도록 허용합니다",
   "admin.moduleSafetyHint": "채팅이나 스퀘어는 계속 작동해야 합니다. 스퀘어를 끄는 것은 익스플로어도 끄는 것입니다.",
   "admin.unverifiedAccessTitle": "새로운 회원들을 위한 그룹 경계를 설정",
   "admin.unverifiedAccessHint": "검증은 여전히 게시, 댓글, 친구 요청 및 그룹 관리에 대한 보호를 제공합니다. 이 정책은 그룹 참여를 강화합니다.",

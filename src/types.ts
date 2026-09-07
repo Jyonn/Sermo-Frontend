@@ -61,6 +61,9 @@ export interface SpaceDTO {
   chat_enabled?: boolean;
   submission_enabled?: boolean;
   square_explore_enabled?: boolean;
+  qq_binding_granted?: boolean;
+  qq_binding_enabled?: boolean;
+  qq_binding_available?: boolean;
   unverified_group_policy?: 0 | 1 | 2;
   member_limit?: number | null;
   verification_tier?: "email" | "phone" | "identity";
@@ -310,6 +313,8 @@ export interface PlatformAdminSpaceDTO {
   member_count: number;
   chat_enabled: boolean;
   square_enabled: boolean;
+  qq_binding_granted: boolean;
+  qq_binding_enabled: boolean;
   identity_submitted_at: number | null;
   identity_verified_at: number | null;
   created_at: number;

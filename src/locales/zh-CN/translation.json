@@ -1121,6 +1121,8 @@
   "admin.chatFeatureHint": "会话、消息与群聊",
   "admin.squareFeatureHint": "发言、评论与互动",
   "admin.exploreFeatureHint": "浏览非好友公开发言",
+  "admin.qqBindingFeature": "绑定 QQ 身份",
+  "admin.qqBindingFeatureHint": "允许成员通过已验证的 QQ 邮箱认领迁移内容",
   "admin.moduleSafetyHint": "聊天与广场至少开放一个。关闭广场时，探索会一并关闭。",
   "admin.unverifiedAccessTitle": "设置新成员的群聊边界",
   "admin.unverifiedAccessHint": "认证规则仍保护发言、评论、好友申请和群管理。这里只收紧未认证成员的群聊参与范围。",

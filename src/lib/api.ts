@@ -474,7 +474,7 @@ export const api = {
     });
   },
 
-  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; submission_enabled: 0 | 1; square_explore_enabled: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
+  updateAdminSettings(payload: { name: string; group_square_enabled: 0 | 1; chat_enabled: 0 | 1; submission_enabled: 0 | 1; square_explore_enabled: 0 | 1; qq_binding_enabled: 0 | 1; unverified_group_policy: 0 | 1 | 2; member_limit: number | null; level_names: string[] }) {
     return request<SpaceDTO>("/spaces/admin/settings", {
       method: "POST",
       adminAuth: true,
@@ -1680,6 +1680,11 @@ export const api = {
   },
   getPlatformMembers(spaceId: number, signal?: AbortSignal) {
     return request<PlatformAdminMemberDTO[]>(`/platform-admin/spaces/${spaceId}/members`, { platformAdminAuth: true, signal });
+  },
+  setPlatformSpaceFeature(spaceId: number, featureKey: "qq_identity_binding", enabled: boolean) {
+    return request<PlatformAdminSpaceDTO>(`/platform-admin/spaces/${spaceId}/features/${featureKey}`, {
+      method: "POST", platformAdminAuth: true, body: { enabled },
+    });
   },
   getPlatformMemberChats(userId: number, signal?: AbortSignal) {
     return request<ChatDTO[]>(`/platform-admin/members/${userId}/chats`, { platformAdminAuth: true, signal });

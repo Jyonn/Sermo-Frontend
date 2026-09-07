@@ -1114,6 +1114,8 @@
   "admin.chatFeatureHint": "會話、訊息與群聊",
   "admin.squareFeatureHint": "發言、評論與互動",
   "admin.exploreFeatureHint": "瀏覽非好友公開發言",
+  "admin.qqBindingFeature": "綁定 QQ 身份",
+  "admin.qqBindingFeatureHint": "允許成員透過已驗證的 QQ 信箱認領遷移內容",
   "admin.moduleSafetyHint": "聊天與廣場至少開放一個。關閉廣場時，探索會一併關閉。",
   "admin.unverifiedAccessTitle": "設定新成員的群聊邊界",
   "admin.unverifiedAccessHint": "認證規則仍保護髮言、評論、好友申請和群管理。這裡只收緊未認證成員的群聊參與範圍。",

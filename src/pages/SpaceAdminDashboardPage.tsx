@@ -119,6 +119,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsChatEnabled, setSettingsChatEnabled] = useState(true);
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
+  const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
   const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
   const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
@@ -262,6 +263,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsChatEnabled(dashboard.space.chat_enabled !== false);
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
+    setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
     setSettingsUnverifiedGroupPolicy(dashboard.space.unverified_group_policy ?? 2);
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
     setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : defaultLevelNames);
@@ -398,6 +400,7 @@ export default function SpaceAdminDashboardPage() {
         chat_enabled: settingsChatEnabled ? 1 : 0,
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
+        qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
         unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
         level_names: settingsLevelNames.map((name) => name.trim()),
@@ -870,6 +873,7 @@ export default function SpaceAdminDashboardPage() {
             <SettingRow disabled={!settingsChatEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSubmissionEnabled} disabled={!settingsChatEnabled} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
             <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; setSettingsSquareEnabled((value) => !value); }} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
+            {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
           </SettingGroup>
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
         </div>

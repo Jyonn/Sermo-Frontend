@@ -30281,6 +30281,76 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
   cursor: pointer;
 }
 
+.platform-feature-grant {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--pa-line);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.platform-feature-grant > .material-symbols-outlined {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: #eef0ec;
+  color: #6f7873;
+}
+
+.platform-feature-grant > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.platform-feature-grant small {
+  color: var(--pa-muted);
+  line-height: 1.45;
+}
+
+.platform-feature-grant button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--pa-ink);
+  color: #fff;
+  font-weight: 700;
+}
+
+.platform-feature-grant.is-granted {
+  border-color: #b9d9ca;
+  background: #f2f8f5;
+}
+
+.platform-feature-grant.is-granted > .material-symbols-outlined {
+  background: #dcefe6;
+  color: #247657;
+}
+
+.platform-feature-grant.is-granted button {
+  border: 1px solid #cbd4cf;
+  background: #fff;
+  color: #59635e;
+}
+
+@media (max-width: 520px) {
+  .platform-feature-grant {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .platform-feature-grant button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
 .chat-personalization-demo-toggle {
   position: static;
   z-index: auto;

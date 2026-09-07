@@ -1114,6 +1114,8 @@
   "admin.chatFeatureHint": "会話,メッセージ,グループ",
   "admin.squareFeatureHint": "声明,コメント,反応",
   "admin.exploreFeatureHint": "友達以外でも公開投稿を閲覧する",
+  "admin.qqBindingFeature": "QQ ID を連携",
+  "admin.qqBindingFeatureHint": "認証済みの QQ メールで移行コンテンツを引き継げるようにします",
   "admin.moduleSafetyHint": "チャットやスクエアも有効で スクエアをオフにすると 探索もオフになります",
   "admin.unverifiedAccessTitle": "新しいメンバーのためのグループ境界を設定する",
   "admin.unverifiedAccessHint": "検証は依然として 投稿,コメント,友達の要求,グループ管理を保護しています.この方針は グループ参加を厳しくします.",
