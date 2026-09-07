@@ -30284,12 +30284,22 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
 .platform-feature-grant {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
+  width: 100%;
   align-items: center;
   gap: 12px;
   padding: 16px;
   border: 1px solid var(--pa-line);
   border-radius: 18px;
   background: #fff;
+  color: var(--pa-ink);
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.platform-feature-grant:hover {
+  border-color: #9fb8ac;
+  background: #f8fbf9;
+  transform: translateY(-1px);
 }
 
 .platform-feature-grant > .material-symbols-outlined {
@@ -30314,14 +30324,21 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
   line-height: 1.45;
 }
 
-.platform-feature-grant button {
+.platform-feature-grant-action {
+  display: inline-flex;
   min-height: 38px;
-  padding: 0 14px;
-  border: 0;
+  align-items: center;
+  gap: 3px;
+  padding: 0 10px 0 14px;
   border-radius: 12px;
   background: var(--pa-ink);
   color: #fff;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.platform-feature-grant-action .material-symbols-outlined {
+  font-size: 18px;
 }
 
 .platform-feature-grant.is-granted {
@@ -30334,7 +30351,7 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
   color: #247657;
 }
 
-.platform-feature-grant.is-granted button {
+.platform-feature-grant.is-granted .platform-feature-grant-action {
   border: 1px solid #cbd4cf;
   background: #fff;
   color: #59635e;
@@ -30342,12 +30359,14 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
 
 @media (max-width: 520px) {
   .platform-feature-grant {
-    grid-template-columns: 42px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 10px;
   }
 
-  .platform-feature-grant button {
-    grid-column: 1 / -1;
-    width: 100%;
+  .platform-feature-grant-action {
+    min-height: 34px;
+    padding: 0 8px 0 11px;
+    font-size: 12px;
   }
 }
 
