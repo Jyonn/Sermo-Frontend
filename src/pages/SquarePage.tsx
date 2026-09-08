@@ -87,7 +87,7 @@ function isUnclaimedQqUser(user?: TinyUserDTO | null) {
 
 function QqSourceTag({ compact = false }: { compact?: boolean }) {
   const { t } = useI18n();
-  return <span className={`square-qq-source-tag${compact ? " is-compact" : ""}`}>{compact ? "QQ" : t("square.qqSource")}</span>;
+  return <span className={`square-qq-source-tag${compact ? " is-compact" : ""}`}><span className="square-qq-source-tag-mark">QQ</span>{compact ? null : <span className="square-qq-source-tag-label">{t("square.qqSource")}</span>}</span>;
 }
 
 function InlineRichText({ emoticons = [], mentions = [], onOpenProfile, text }: {

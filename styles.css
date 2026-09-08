@@ -34246,22 +34246,45 @@ html[data-theme="dark"] .verification-banner-action {
   display: inline-flex;
   flex: none;
   align-items: center;
-  min-height: 20px;
-  padding: 2px 7px;
-  border: 1px solid color-mix(in srgb, #12aee8 38%, var(--line-soft));
-  border-radius: 999px;
-  color: color-mix(in srgb, #0786b7 88%, var(--text-primary));
-  font: 800 9px/1 var(--font-mono, monospace);
-  letter-spacing: .04em;
-  background: color-mix(in srgb, #aeeaff 30%, var(--surface-muted));
+  height: 21px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, #168ac2 28%, var(--line-soft));
+  border-radius: 6px;
+  color: color-mix(in srgb, #168ac2 88%, var(--text-primary));
+  background: color-mix(in srgb, #168ac2 7%, var(--surface));
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.square-qq-source-tag-mark {
+  display: grid;
+  align-self: stretch;
+  place-items: center;
+  padding: 0 5px;
+  color: color-mix(in srgb, #168ac2 90%, var(--text-primary));
+  background: color-mix(in srgb, #168ac2 13%, transparent);
+  font-family: var(--font-heading);
+  font-size: 8px;
+  letter-spacing: .02em;
+}
+
+.square-qq-source-tag-label {
+  padding: 0 6px 0 5px;
+  letter-spacing: .02em;
 }
 
 .square-qq-source-tag.is-compact {
-  min-height: 15px;
+  height: 15px;
   margin-left: 4px;
-  padding: 1px 4px;
-  font-size: 7px;
+  border-color: color-mix(in srgb, #168ac2 22%, var(--line-soft));
+  border-radius: 4px;
   vertical-align: .12em;
+}
+
+.square-qq-source-tag.is-compact .square-qq-source-tag-mark {
+  padding: 0 4px;
+  font-size: 7px;
 }
 
 .square-comment-author-profile {

@@ -1,21 +1,19 @@
 {
-  "id": "2026.09.08.3",
+  "id": "2026.09.08.4",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "QQ 历史身份更清晰",
+      "title": "QQ 来源标识焕新",
       "items": [
-        "回复层主的历史评论会直接归入对应楼层，不再重复显示 @昵称",
-        "尚未认领的用户会显示 QQ 来源标签和 QQ 头像，点击即可查看历史身份资料",
-        "评论中的 QQ 提及会额外标记，并在对方绑定后自动关联新账号"
+        "尚未认领的 QQ 用户改用双区来源签，与等级和认证标识更易区分",
+        "评论中的 QQ 提及同步采用紧凑方签，在深浅主题下都更清晰"
       ]
     },
     "en": {
-      "title": "Clearer historical QQ identities",
+      "title": "Refined QQ source labels",
       "items": [
-        "Replies to a thread owner now sit directly in that thread without repeating an @name prefix",
-        "Unclaimed users now show a QQ source tag and avatar, with historical identity details available on click",
-        "QQ mentions are clearly marked and follow the user when they claim their identity"
+        "Unclaimed QQ users now use a split source label that is easier to distinguish from levels and verification badges",
+        "QQ mentions now use a compact matching marker with clearer contrast in light and dark themes"
       ]
     }
   }
