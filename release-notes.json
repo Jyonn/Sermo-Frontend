@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.08.14",
+  "id": "2026.09.08.15",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "小程序补齐历史功能",
+      "title": "小程序新功能视觉对齐",
       "items": [
-        "广场新增官方置顶发言与空间成员、在线成员入口",
-        "欢迎消息支持多条文字、图片、视频、语音和文件，并可调整顺序",
-        "未认证引导、更多语言偏好与跨设备消息删除同步现已补齐"
+        "空间成员目录现已对齐网页端的搜索、在线状态与快捷操作",
+        "欢迎消息编辑器会沿用当前聊天背景和气泡，并提供一致的输入与媒体面板",
+        "邮箱认证提示与广场置顶发言完成视觉统一"
       ]
     },
     "en": {
-      "title": "Earlier features completed in the mini program",
+      "title": "New mini program features visually aligned",
       "items": [
-        "Square now includes official pinned posts plus full and online member directories",
-        "Welcome messages can contain multiple texts, photos, videos, voice clips, and files in a custom order",
-        "Verification guidance, additional language preferences, and cross-device message deletion sync are now included"
+        "The space member directory now matches the web experience for search, presence, and quick actions",
+        "The welcome-message editor now uses your active chat background and bubbles with a consistent composer and media panel",
+        "Email verification guidance and pinned Square posts now share the same visual treatment"
       ]
     }
   }
