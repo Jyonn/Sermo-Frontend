@@ -2426,5 +2426,10 @@
   "contact.connectChannel": "連接{{channel}}",
   "contact.removeReceiver": "移除接收端",
   "notification.bindInAccountSecurity": "前往帳號與安全綁定",
-  "webReminder.systemTitle": "系統提醒"
+  "webReminder.systemTitle": "系統提醒",
+  "qqIdentity.bindFromEmail": "一鍵綁定 QQ",
+  "qqIdentity.bindFromEmailHint": "使用已認證信箱對應的 QQ {{qq}}，無需再次收取驗證碼",
+  "qqIdentity.bindFromEmailConfirmTitle": "綁定這個 QQ 號？",
+  "qqIdentity.bindFromEmailConfirmHint": "將使用已認證的數字 QQ 信箱直接綁定 QQ {{qq}}，並認領該身分下的歷史內容。",
+  "qqIdentity.bindFromEmailConfirm": "確認綁定"
 }

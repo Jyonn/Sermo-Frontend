@@ -2426,5 +2426,10 @@
   "contact.connectChannel": "{{channel}} 연결",
   "contact.removeReceiver": "수신처 삭제",
   "notification.bindInAccountSecurity": "계정 및 보안에서 연결",
-  "webReminder.systemTitle": "시스템 알림"
+  "webReminder.systemTitle": "시스템 알림",
+  "qqIdentity.bindFromEmail": "QQ 바로 연결",
+  "qqIdentity.bindFromEmailHint": "인증된 이메일의 QQ {{qq}}를 추가 코드 없이 사용합니다",
+  "qqIdentity.bindFromEmailConfirmTitle": "이 QQ 번호를 연결할까요?",
+  "qqIdentity.bindFromEmailConfirmHint": "인증된 숫자 QQ 이메일로 QQ {{qq}}를 바로 연결하고 과거 콘텐츠를 가져옵니다.",
+  "qqIdentity.bindFromEmailConfirm": "연결 확인"
 }

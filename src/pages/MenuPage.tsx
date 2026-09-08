@@ -302,6 +302,19 @@ function channelVerified(me: UserMeDTO | null, channel: NotificationChannel) {
   return false;
 }
 
+function maskContactValue(channel: "email" | "sms", value: string) {
+  if (channel === "email") {
+    const [local = "", domain = ""] = value.split("@");
+    if (!domain) return "••••••";
+    const head = local.slice(0, Math.min(2, local.length));
+    const tail = local.length > 4 ? local.slice(-2) : "";
+    return `${head}•••${tail}@${domain}`;
+  }
+  const compact = value.replace(/[\s()-]/g, "");
+  const prefix = compact.startsWith("+86") ? "+86 " : compact.startsWith("+") ? `${compact.slice(0, 3)} ` : "";
+  return `${prefix}••• •••• ${compact.slice(-4)}`;
+}
+
 function detectDeviceFamily(): "ios" | "android" | "desktop" {
   if (typeof navigator === "undefined") return "desktop";
   const userAgent = navigator.userAgent || "";
@@ -513,6 +526,7 @@ export default function MenuPage() {
   const [qqIdentityAction, setQqIdentityAction] = useState<"idle" | "sending" | "binding">("idle");
   const [qqIdentityCooldown, setQqIdentityCooldown] = useState(0);
   const [qqIdentityExpiresIn, setQqIdentityExpiresIn] = useState(0);
+  const [qqEmailBindConfirmOpen, setQqEmailBindConfirmOpen] = useState(false);
   const [basicEditSaving, setBasicEditSaving] = useState(false);
   const [passwordCurrent, setPasswordCurrent] = useState("");
   const [passwordNext, setPasswordNext] = useState("");
@@ -658,8 +672,8 @@ export default function MenuPage() {
   };
   const bindingChannelPurpose = (kind: BindingChannelKind) => t(`contact.purpose.${kind}` as TranslationKey);
   const bindingChannelValue = (kind: BindingChannelKind) => {
-    if (kind === "email") return me?.email ?? "";
-    if (kind === "sms") return me?.phone ?? "";
+    if (kind === "email") return maskContactValue("email", me?.email ?? "");
+    if (kind === "sms") return maskContactValue("sms", me?.phone ?? "");
     if (kind === "qq") return qqIdentity?.qq ? `QQ ${qqIdentity.qq}` : "";
     return instantEndpoints.find((endpoint) => endpoint.provider === kind)?.masked_target ?? "";
   };
@@ -873,6 +887,7 @@ export default function MenuPage() {
       is_private_account: updated.is_private_account,
     });
     setPrefs((current) => ({ ...current, [channel]: { ...current[channel], enabled: false } }));
+    if (channel === "email") setQqIdentity((current) => current ? { ...current, email_qq: null } : current);
     setPrefDrawerChannel(null);
     setUnbindConfirmOpen(false);
     setUnbindVerifyOpen(false);
@@ -1398,8 +1413,12 @@ export default function MenuPage() {
         language: nextMe.language,
         last_heartbeat: nextMe.last_heartbeat,
       });
-      const prefRows = await api.getNotificationPrefs();
+      const [prefRows, identity] = await Promise.all([
+        api.getNotificationPrefs(),
+        space?.qq_binding_available ? api.getQQIdentity().catch(() => null) : Promise.resolve(null),
+      ]);
       setPrefs(mapPrefs(prefRows));
+      if (identity) setQqIdentity(identity);
       setAuthPending(false);
       setAuthCode("");
       showToast(authSheetChannel === "email" ? t("contact.emailVerified") : authSheetChannel === "sms" ? t("contact.phoneBound") : t("contact.bound"));
@@ -1473,6 +1492,22 @@ export default function MenuPage() {
       setQqIdentityPending(false);
       setQqIdentityCode("");
       showToast(t("qqIdentity.boundToast", { qq: identity.qq ?? qqIdentityValue }));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("qqIdentity.bindFailed"), "error");
+    } finally {
+      setQqIdentityAction("idle");
+    }
+  };
+
+  const bindQqIdentityFromVerifiedEmail = async () => {
+    if (!qqIdentity?.email_qq) return;
+    setQqIdentityAction("binding");
+    try {
+      const identity = await api.bindQQIdentityFromVerifiedEmail();
+      setQqIdentity(identity);
+      setQqIdentityValue(identity.qq ?? "");
+      setQqEmailBindConfirmOpen(false);
+      showToast(t("qqIdentity.boundToast", { qq: identity.qq ?? qqIdentity.email_qq }));
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("qqIdentity.bindFailed"), "error");
     } finally {
@@ -2776,6 +2811,13 @@ export default function MenuPage() {
                     <small>{qqIdentity?.bound ? t("qqIdentity.boundHint") : t("qqIdentity.claimHint")}</small>
                   </div>
                 </section>
+                {!qqIdentity?.bound && qqIdentity?.email_qq ? (
+                  <button className="qq-email-claim" disabled={qqIdentityAction !== "idle"} onClick={() => setQqEmailBindConfirmOpen(true)} type="button">
+                    <ContactChannelIcon kind="qq" size="compact" />
+                    <span><strong>{t("qqIdentity.bindFromEmail")}</strong><small>{t("qqIdentity.bindFromEmailHint", { qq: qqIdentity.email_qq })}</small></span>
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                ) : null}
                 {qqIdentity?.bound && qqIdentity.qq ? (
                   <BindingSpine steps={[
                     { state: "complete", title: t("contact.step.prepareIdentity"), description: `QQ ${qqIdentity.qq}` },
@@ -3142,12 +3184,7 @@ export default function MenuPage() {
               state: "active",
               title: t("contact.step.channelConnected", { channel: providerName }),
               description: t("contact.step.instantReady"),
-              body: (
-                <div className="binding-spine-bound-actions">
-                  <div className="binding-flow-receipt"><span>{endpoint.masked_target}</span><strong>{t("contact.boundState")}</strong></div>
-                  <button className="danger-button" disabled={instantSaving} onClick={() => void removeInstantEndpoint(endpoint)} type="button">{t("contact.removeReceiver")}</button>
-                </div>
-              ),
+              body: <div className="binding-flow-receipt"><span>{endpoint.masked_target}</span><strong>{t("contact.boundState")}</strong></div>,
             },
           ] : [
             {
@@ -3198,6 +3235,11 @@ export default function MenuPage() {
                 <div><strong>{endpoint ? t("contact.manageChannel", { channel: providerName }) : t("notification.connectProvider", { provider: providerName })}</strong><small>{t(`notification.providerHint.${instantProviderDrawer}` as TranslationKey)}</small></div>
               </section>
               <BindingSpine steps={providerSteps} />
+              {endpoint ? (
+                <div className="binding-management-footer">
+                  <button className="danger-button" disabled={instantSaving} onClick={() => void removeInstantEndpoint(endpoint)} type="button">{t("contact.removeReceiver")}</button>
+                </div>
+              ) : null}
             </div>
           );
         })() : null}
@@ -3205,46 +3247,37 @@ export default function MenuPage() {
 
       <SideDrawer
         historyKey={`contact-binding-${authSheetChannel ?? "channel"}`}
-        open={Boolean(authSheetChannel)}
-        title={authSheetChannel ? (channelVerified(me, authSheetChannel) ? t("contact.manageChannel", { channel: bindingChannelName(authSheetChannel) }) : authSheetChannel === "email" ? t("contact.verifyEmail") : t("contact.bindPhone")) : t("contact.bindContact")}
+        open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
+        title={authSheetChannel && authSheetChannel !== "bark" ? (channelVerified(me, authSheetChannel) ? t("contact.manageChannel", { channel: bindingChannelName(authSheetChannel) }) : authSheetChannel === "email" ? t("contact.verifyEmail") : t("contact.bindPhone")) : t("contact.bindContact")}
         onClose={closeAuthSheet}
       >
-        {authSheetChannel ? (() => {
-          const bound = channelVerified(me, authSheetChannel);
-          const channelName = bindingChannelName(authSheetChannel);
+        {authSheetChannel && authSheetChannel !== "bark" ? (() => {
+          const contactChannel = authSheetChannel;
+          const bound = channelVerified(me, contactChannel);
+          const channelName = bindingChannelName(contactChannel);
           const contactSteps: BindingSpineStep[] = bound ? [
-            { state: "complete", title: t("contact.step.addContact", { channel: channelName }), description: contactValue(authSheetChannel) },
+            { state: "complete", title: t("contact.step.addContact", { channel: channelName }), description: maskContactValue(contactChannel, contactValue(contactChannel)) },
             { state: "complete", title: t("contact.step.verifyChannel"), description: t("contact.step.channelVerified") },
             {
               state: "active",
               title: t("contact.step.bindingComplete"),
-              description: bindingChannelPurpose(authSheetChannel),
-              body: (
-                <div className="binding-spine-bound-actions">
-                  <div className="binding-flow-receipt"><span>{contactValue(authSheetChannel)}</span><strong>{t("contact.boundState")}</strong></div>
-                  <div className="binding-contact-history">
-                    <span>{t("contact.lastUnbound")}</span>
-                    <strong>{formatContactDate(contactUnboundAt(authSheetChannel))}</strong>
-                    {contactUnbindAvailableAt(authSheetChannel) && contactUnbindAvailableAt(authSheetChannel)! > Date.now() ? <small>{t("contact.canUnbindAfter", { date: formatContactDate(contactUnbindAvailableAt(authSheetChannel)! / 1000) })}</small> : null}
-                  </div>
-                  <button className="danger-button" disabled={Boolean(contactUnbindAvailableAt(authSheetChannel) && contactUnbindAvailableAt(authSheetChannel)! > Date.now())} onClick={() => openUnbindConfirm(authSheetChannel)} type="button">{t("contact.unbind")}</button>
-                </div>
-              ),
+              description: bindingChannelPurpose(contactChannel),
+              body: <div className="binding-flow-receipt"><span>{maskContactValue(contactChannel, contactValue(contactChannel))}</span><strong>{t("contact.boundState")}</strong></div>,
             },
           ] : [
             {
               state: authPending ? "complete" : "active",
               title: t("contact.step.addContact", { channel: channelName }),
-              description: authPending ? authTarget : bindingChannelPurpose(authSheetChannel),
+              description: authPending ? authTarget : bindingChannelPurpose(contactChannel),
               body: (
                 <div className="binding-spine-form">
-                  <label className="field-label">{authSheetChannel === "email" ? t("contact.emailAddress") : t("contact.phoneNumber")}</label>
+                  <label className="field-label">{contactChannel === "email" ? t("contact.emailAddress") : t("contact.phoneNumber")}</label>
                   <input
                     className="input"
-                    autoComplete={authSheetChannel === "email" ? "email" : "tel"}
-                    inputMode={authSheetChannel === "email" ? "email" : "tel"}
-                    maxLength={authSheetChannel === "sms" ? 24 : undefined}
-                    placeholder={authSheetChannel === "email" ? "you@sermo.space" : "+86 138 0000 0000"}
+                    autoComplete={contactChannel === "email" ? "email" : "tel"}
+                    inputMode={contactChannel === "email" ? "email" : "tel"}
+                    maxLength={contactChannel === "sms" ? 24 : undefined}
+                    placeholder={contactChannel === "email" ? "you@sermo.space" : "+86 138 0000 0000"}
                     value={authTarget}
                     onChange={(event) => { setAuthTarget(event.target.value); setAuthCode(""); setAuthPending(false); setAuthExpiresIn(0); }}
                   />
@@ -3262,20 +3295,37 @@ export default function MenuPage() {
                 <div className="binding-spine-form">
                   <VerificationCodeInput ariaLabel={t("recovery.code")} value={authCode} onChange={setAuthCode} />
                   <button className="button" disabled={authActionState === "binding" || authCode.length !== 6} onClick={() => void bindAuthChannel()} type="button">
-                    {authActionState === "binding" ? t("common.processing") : authSheetChannel === "email" ? t("contact.confirmVerify") : t("contact.confirmBind")}
+                    {authActionState === "binding" ? t("common.processing") : contactChannel === "email" ? t("contact.confirmVerify") : t("contact.confirmBind")}
                   </button>
                 </div>
               ),
             },
-            { state: "upcoming", title: t("contact.step.bindingComplete"), description: bindingChannelPurpose(authSheetChannel) },
+            { state: "upcoming", title: t("contact.step.bindingComplete"), description: bindingChannelPurpose(contactChannel) },
           ];
           return (
             <div className="binding-flow-drawer">
               <section className="binding-flow-heading">
-                <ContactChannelIcon kind={authSheetChannel} size="large" />
-                <div><strong>{bound ? t("contact.manageChannel", { channel: channelName }) : t("contact.connectChannel", { channel: channelName })}</strong><small>{bindingChannelPurpose(authSheetChannel)}</small></div>
+                <ContactChannelIcon kind={contactChannel} size="large" />
+                <div><strong>{bound ? t("contact.manageChannel", { channel: channelName }) : t("contact.connectChannel", { channel: channelName })}</strong><small>{bindingChannelPurpose(contactChannel)}</small></div>
               </section>
               <BindingSpine steps={contactSteps} />
+              {bound && contactChannel === "email" && qqIdentity?.email_qq && !qqIdentity.bound && space?.qq_binding_available ? (
+                <button className="qq-email-claim" disabled={qqIdentityAction !== "idle"} onClick={() => setQqEmailBindConfirmOpen(true)} type="button">
+                  <ContactChannelIcon kind="qq" size="compact" />
+                  <span><strong>{t("qqIdentity.bindFromEmail")}</strong><small>{t("qqIdentity.bindFromEmailHint", { qq: qqIdentity.email_qq })}</small></span>
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </button>
+              ) : null}
+              {bound ? (
+                <div className="binding-management-footer">
+                  <div className="binding-contact-history">
+                    <span>{t("contact.lastUnbound")}</span>
+                    <strong>{formatContactDate(contactUnboundAt(contactChannel))}</strong>
+                    {contactUnbindAvailableAt(contactChannel) && contactUnbindAvailableAt(contactChannel)! > Date.now() ? <small>{t("contact.canUnbindAfter", { date: formatContactDate(contactUnbindAvailableAt(contactChannel)! / 1000) })}</small> : null}
+                  </div>
+                  <button className="danger-button" disabled={Boolean(contactUnbindAvailableAt(contactChannel) && contactUnbindAvailableAt(contactChannel)! > Date.now())} onClick={() => openUnbindConfirm(contactChannel)} type="button">{t("contact.unbind")}</button>
+                </div>
+              ) : null}
             </div>
           );
         })() : null}
@@ -3295,7 +3345,7 @@ export default function MenuPage() {
           <div className="simple-form contact-sheet-form">
             <div className="menu-unbind-current">
               <span>{t("contact.currentBinding")}</span>
-              <strong>{contactValue(unbindChannel)}</strong>
+              <strong>{maskContactValue(unbindChannel, contactValue(unbindChannel))}</strong>
             </div>
             <button
               className="secondary-button contact-flow-primary"
@@ -3492,6 +3542,18 @@ export default function MenuPage() {
           </section>
         </div>
       ) : null}
+      <ConfirmDialog
+        busy={qqIdentityAction === "binding"}
+        open={qqEmailBindConfirmOpen}
+        title={t("qqIdentity.bindFromEmailConfirmTitle")}
+        description={t("qqIdentity.bindFromEmailConfirmHint", { qq: qqIdentity?.email_qq ?? "" })}
+        confirmLabel={t("qqIdentity.bindFromEmailConfirm")}
+        onClose={() => {
+          if (qqIdentityAction === "binding") return;
+          setQqEmailBindConfirmOpen(false);
+        }}
+        onConfirm={() => void bindQqIdentityFromVerifiedEmail()}
+      />
       <ConfirmDialog
         busy={unbindState === "removing"}
         danger

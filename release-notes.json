@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.08.6",
+  "id": "2026.09.08.7",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "渠道绑定集中管理",
+      "title": "绑定信息更安全",
       "items": [
-        "邮件、手机、即时应用和 QQ 绑定现已集中到账号与安全",
-        "全新的纵向步骤让填写、验证和完成状态更清晰"
+        "已绑定的邮箱和手机号现在会脱敏展示，解绑操作也与绑定状态清晰分离",
+        "已认证数字 QQ 邮箱可在确认后直接绑定对应 QQ 号"
       ]
     },
     "en": {
-      "title": "Binding channels in one place",
+      "title": "Safer binding details",
       "items": [
-        "Email, phone, instant apps, and QQ bindings now live together in Account & security",
-        "A new vertical flow makes setup, verification, and completion easier to follow"
+        "Bound email addresses and phone numbers are now masked, with unbinding separated from binding status",
+        "A verified numeric QQ email can now bind its matching QQ number after confirmation"
       ]
     }
   }

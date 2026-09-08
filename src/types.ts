@@ -225,6 +225,7 @@ export interface QQIdentityDTO {
   bound: boolean;
   qq: string | null;
   verified_at: number | null;
+  email_qq: string | null;
 }
 
 export interface UserResourceInventoryDTO {

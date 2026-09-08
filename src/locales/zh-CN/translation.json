@@ -2441,4 +2441,9 @@
   ,"contact.removeReceiver": "移除接收端"
   ,"notification.bindInAccountSecurity": "前往账号与安全绑定"
   ,"webReminder.systemTitle": "系统提醒"
+  ,"qqIdentity.bindFromEmail": "一键绑定 QQ"
+  ,"qqIdentity.bindFromEmailHint": "使用已认证邮箱对应的 QQ {{qq}}，无需再次收取验证码"
+  ,"qqIdentity.bindFromEmailConfirmTitle": "绑定这个 QQ 号？"
+  ,"qqIdentity.bindFromEmailConfirmHint": "将使用已认证的数字 QQ 邮箱直接绑定 QQ {{qq}}，并认领该身份下的历史内容。"
+  ,"qqIdentity.bindFromEmailConfirm": "确认绑定"
 }

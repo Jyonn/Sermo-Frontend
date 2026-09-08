@@ -2426,5 +2426,10 @@
   "contact.connectChannel": "Conectar {{channel}}",
   "contact.removeReceiver": "Eliminar receptor",
   "notification.bindInAccountSecurity": "Vincular en Cuenta y seguridad",
-  "webReminder.systemTitle": "Avisos del sistema"
+  "webReminder.systemTitle": "Avisos del sistema",
+  "qqIdentity.bindFromEmail": "Vincular QQ al instante",
+  "qqIdentity.bindFromEmailHint": "Usa QQ {{qq}} de tu correo verificado sin otro código",
+  "qqIdentity.bindFromEmailConfirmTitle": "¿Vincular este número de QQ?",
+  "qqIdentity.bindFromEmailConfirmHint": "El correo numérico verificado vinculará QQ {{qq}} directamente y reclamará su contenido histórico.",
+  "qqIdentity.bindFromEmailConfirm": "Confirmar vinculación"
 }

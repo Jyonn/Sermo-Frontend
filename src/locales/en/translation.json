@@ -2441,4 +2441,9 @@
   ,"contact.removeReceiver": "Remove receiver"
   ,"notification.bindInAccountSecurity": "Bind in Account & security"
   ,"webReminder.systemTitle": "System reminders"
+  ,"qqIdentity.bindFromEmail": "Bind QQ instantly"
+  ,"qqIdentity.bindFromEmailHint": "Use QQ {{qq}} from your verified email without another code"
+  ,"qqIdentity.bindFromEmailConfirmTitle": "Bind this QQ number?"
+  ,"qqIdentity.bindFromEmailConfirmHint": "Your verified numeric QQ email will bind QQ {{qq}} directly and claim its historical content."
+  ,"qqIdentity.bindFromEmailConfirm": "Confirm binding"
 }

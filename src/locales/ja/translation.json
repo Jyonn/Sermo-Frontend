@@ -2426,5 +2426,10 @@
   "contact.connectChannel": "{{channel}}を接続",
   "contact.removeReceiver": "受信先を削除",
   "notification.bindInAccountSecurity": "アカウントとセキュリティで連携",
-  "webReminder.systemTitle": "システム通知"
+  "webReminder.systemTitle": "システム通知",
+  "qqIdentity.bindFromEmail": "QQ をすぐに連携",
+  "qqIdentity.bindFromEmailHint": "認証済みメールの QQ {{qq}} を追加認証なしで使用します",
+  "qqIdentity.bindFromEmailConfirmTitle": "この QQ 番号を連携しますか？",
+  "qqIdentity.bindFromEmailConfirmHint": "認証済みの数字 QQ メールから QQ {{qq}} を直接連携し、過去のコンテンツを引き継ぎます。",
+  "qqIdentity.bindFromEmailConfirm": "連携を確認"
 }

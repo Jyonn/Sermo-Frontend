@@ -1569,6 +1569,14 @@ export const api = {
     });
   },
 
+  bindQQIdentityFromVerifiedEmail() {
+    return request<import("../types").QQIdentityDTO>("/users/me/qq-identity/from-verified-email", {
+      method: "POST",
+      auth: true,
+      body: {},
+    });
+  },
+
   unbindContact(payload: { channel: number; code?: string }) {
     return request<UserMeDTO>("/users/me/unbind-contact", {
       method: "DELETE",

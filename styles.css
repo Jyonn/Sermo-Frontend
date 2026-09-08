@@ -30528,12 +30528,11 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
 .binding-spine-expansion > div { min-height: 0; overflow: hidden; }
 .binding-spine-step.is-active .binding-spine-expansion { grid-template-rows: 1fr; opacity: 1; }
 .binding-spine-step.is-active .binding-spine-expansion > div { overflow: visible; }
-.binding-spine-form,
-.binding-spine-bound-actions { display: grid; gap: 12px; margin-top: 13px; padding: 15px; border: 1px solid var(--line-soft); border-radius: 16px; background: color-mix(in srgb, var(--bg-soft) 82%, var(--bg-panel-strong)); }
+.binding-spine-form { display: grid; gap: 12px; margin-top: 13px; padding: 15px; border: 1px solid var(--line-soft); border-radius: 16px; background: color-mix(in srgb, var(--bg-soft) 82%, var(--bg-panel-strong)); }
 .binding-spine-form .field-label { margin: 0; }
-.binding-spine-form > .button,
-.binding-spine-bound-actions > .danger-button { min-height: 46px; margin-top: 1px; border-radius: 14px; }
+.binding-spine-form > .button { min-height: 46px; margin-top: 1px; border-radius: 14px; }
 .binding-flow-receipt { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 13px; color: var(--text-secondary); background: var(--bg-panel-strong); font-size: .78rem; }
+.binding-spine-expansion .binding-flow-receipt { margin-top: 13px; }
 .binding-flow-receipt span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .binding-flow-receipt strong { flex: 0 0 auto; color: var(--brand-primary-press); font-size: .74rem; }
 .binding-contact-history { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; padding: 2px; color: var(--text-muted); font-size: .76rem; }
@@ -30541,6 +30540,28 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
 .binding-contact-history small { grid-column: 1 / -1; color: var(--text-muted); font-size: .72rem; }
 .binding-flow-note { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; margin: -5px 3px 0; padding-top: 15px; border-top: 1px solid var(--line-soft); color: var(--text-muted); font-size: .76rem; line-height: 1.55; }
 .binding-flow-note .material-symbols-outlined { margin-top: 1px; font-size: 17px; }
+.binding-management-footer { display: grid; gap: 12px; margin-top: -4px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.binding-management-footer > .danger-button { min-height: 48px; border-radius: 15px; }
+.qq-email-claim {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 62px;
+  margin-top: -7px;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, #20a9e8 30%, var(--line-soft));
+  border-radius: 16px;
+  color: var(--text-primary);
+  text-align: left;
+  background: color-mix(in srgb, #20a9e8 7%, var(--bg-panel-strong));
+}
+.qq-email-claim > span:nth-child(2) { min-width: 0; display: grid; gap: 3px; }
+.qq-email-claim strong { font-size: .84rem; }
+.qq-email-claim small { overflow: hidden; color: var(--text-muted); font-size: .73rem; text-overflow: ellipsis; white-space: nowrap; }
+.qq-email-claim > .material-symbols-outlined { color: var(--text-muted); font-size: 19px; }
+.qq-email-claim:disabled { opacity: .55; }
 
 .instant-receiver-summary { display: grid; gap: 9px; padding: 0 2px; }
 .instant-receiver-summary > strong { color: var(--text-secondary); font-size: .76rem; }
@@ -30551,7 +30572,7 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
 .instant-receiver-chip small { overflow: hidden; color: var(--text-muted); font-size: .66rem; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 420px) {
-  .binding-spine-form, .binding-spine-bound-actions { margin-left: -4px; padding: 13px; }
+  .binding-spine-form { margin-left: -4px; padding: 13px; }
   .binding-flow-heading { gap: 12px; }
   .binding-channel-option small { white-space: normal; }
 }
