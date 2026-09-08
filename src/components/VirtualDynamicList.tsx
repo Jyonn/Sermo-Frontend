@@ -51,6 +51,12 @@ interface LayoutSnapshot {
 
 const DEFAULT_OVERSCAN = 720;
 
+function getElementScrollOffsetTop(scroller: HTMLElement, element: HTMLElement) {
+  const scrollerRect = scroller.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  return scroller.scrollTop + elementRect.top - scrollerRect.top - scroller.clientTop;
+}
+
 function findFirstEndingAfter(layout: VirtualLayoutItem[], position: number) {
   let low = 0;
   let high = layout.length - 1;
@@ -142,7 +148,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     if (!scroller || !spacer) return { height: 0, top: 0 };
     return {
       height: scroller.clientHeight,
-      top: Math.max(0, scroller.scrollTop - spacer.offsetTop),
+      top: Math.max(0, scroller.scrollTop - getElementScrollOffsetTop(scroller, spacer)),
     };
   };
 
@@ -159,15 +165,16 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     const pending = pendingAnchorRef.current;
     pendingAnchorRef.current = null;
     const previous = previousLayoutRef.current;
+    const spacerOffset = getElementScrollOffsetTop(scroller, spacer);
 
     if (pending) {
       if (pending.followEnd) {
         scroller.scrollTop = scroller.scrollHeight;
       } else {
         const anchor = layout.items.find((item) => item.key === pending.key);
-        if (anchor) scroller.scrollTop = spacer.offsetTop + anchor.start + pending.offset;
+        if (anchor) scroller.scrollTop = spacerOffset + anchor.start + pending.offset;
       }
-    } else if (previous?.items.length && layout.items.length) {
+    } else if (previous?.items.length && layout.items.length && scroller.scrollTop >= previous.spacerOffset) {
       const previousViewportTop = Math.max(0, scroller.scrollTop - previous.spacerOffset);
       const previousAnchorIndex = Math.min(
         Math.max(0, findFirstEndingAfter(previous.items, previousViewportTop)),
@@ -183,7 +190,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
           const nextAnchor = layout.items.find((item) => item.key === previousAnchor.key);
           if (!nextAnchor) continue;
           const anchorOffset = previousViewportTop - previousAnchor.start;
-          const nextScrollTop = spacer.offsetTop + nextAnchor.start + anchorOffset;
+          const nextScrollTop = spacerOffset + nextAnchor.start + anchorOffset;
           if (Math.abs(nextScrollTop - scroller.scrollTop) >= 0.5) scroller.scrollTop = nextScrollTop;
           break;
         }
@@ -192,7 +199,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
 
     previousLayoutRef.current = {
       items: layout.items,
-      spacerOffset: spacer.offsetTop,
+      spacerOffset,
       totalSize: layout.totalSize,
     };
     updateViewport();
@@ -283,6 +290,11 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
 
   const captureAnchor = () => {
     if (pendingAnchorRef.current) return;
+    const scroller = scrollRef.current;
+    const spacer = spacerRef.current;
+    if (!scroller || !spacer) return;
+    // Controls, banners, or pinned content can live before the virtual list.
+    if (scroller.scrollTop < getElementScrollOffsetTop(scroller, spacer)) return;
     const currentLayout = layoutRef.current;
     const currentViewport = readViewport();
     const anchorIndex = Math.min(
@@ -291,8 +303,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     );
     const anchor = currentLayout[anchorIndex];
     if (!anchor) return;
-    const scroller = scrollRef.current;
-    const nearEnd = scroller ? scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 3 : false;
+    const nearEnd = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 3;
     pendingAnchorRef.current = {
       key: anchor.key,
       offset: currentViewport.top - anchor.start,
@@ -356,8 +367,9 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     if (!scroller || !spacer || !item) return false;
 
     const viewportHeight = scroller.clientHeight;
-    const itemTop = spacer.offsetTop + item.start;
-    const itemBottom = spacer.offsetTop + item.end;
+    const spacerOffset = getElementScrollOffsetTop(scroller, spacer);
+    const itemTop = spacerOffset + item.start;
+    const itemBottom = spacerOffset + item.end;
     let target = itemTop;
     if (alignment === "center") target = itemTop - (viewportHeight - item.size) / 2;
     if (alignment === "end") target = itemBottom - viewportHeight;
@@ -369,7 +381,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     }
     const bounded = Math.max(0, Math.min(target, scroller.scrollHeight - viewportHeight));
     scroller.scrollTo({ top: bounded, behavior });
-    setViewport({ height: viewportHeight, top: Math.max(0, bounded - spacer.offsetTop) });
+    setViewport({ height: viewportHeight, top: Math.max(0, bounded - spacerOffset) });
     return true;
   };
 
