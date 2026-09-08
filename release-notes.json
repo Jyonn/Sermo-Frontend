@@ -1,19 +1,21 @@
 {
-  "id": "2026.09.08.12",
+  "id": "2026.09.08.13",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "广场回复关系更准确",
+      "title": "小程序同步近期功能",
       "items": [
-        "回复二级评论时会准确展示实际回复对象，不再因昵称相同而遗漏",
-        "QQ 迁移评论会按对话发生顺序还原回复关系，正文不再重复显示用于回复的艾特"
+        "小程序现已支持投稿协作、语音转写与更沉浸的聊天输入体验",
+        "聊天个性化、广场日期浏览、QQ 来源展示与身份绑定已与网页版保持一致",
+        "通知渠道管理与邮件提醒间隔已同步更新"
       ]
     },
     "en": {
-      "title": "Clearer reply relationships in Square",
+      "title": "Recent features arrive in the mini program",
       "items": [
-        "Replies to nested comments now show the actual target even when that person also wrote the root comment",
-        "Migrated QZone conversations now restore reply targets in chronological order without repeating reply mentions"
+        "The mini program now supports collaborative submissions, audio transcripts, and a more immersive chat composer",
+        "Chat personalization, Square date browsing, QZone source details, and QQ identity binding now match the web experience",
+        "Notification channel management and email reminder intervals have also been updated"
       ]
     }
   }
