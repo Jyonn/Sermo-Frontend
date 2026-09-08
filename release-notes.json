@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.08.8",
+  "id": "2026.09.08.9",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "广场回顶更准确",
+      "title": "广场浏览体验优化",
       "items": [
-        "探索页回到顶部时会完整展示活动横幅和置顶发言",
-        "修复首条发言顶部及头像被错误裁切的问题"
+        "手机端活动横幅和置顶发言现在拥有更舒适的左右留白",
+        "桌面端补充回到顶部操作，并强化当前发言的选中提示"
       ]
     },
     "en": {
-      "title": "Reliable Square navigation",
+      "title": "A clearer Square experience",
       "items": [
-        "Back to top now restores the full activity and pinned area in Explore",
-        "Fixed the first statement header and avatar being clipped after scrolling"
+        "Activity banners and pinned statements now have comfortable side spacing on mobile",
+        "Desktop adds reliable back-to-top access and a clearer selected-statement state"
       ]
     }
   }

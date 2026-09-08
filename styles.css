@@ -2958,17 +2958,17 @@ html[data-theme="dark"] body .growth-level-detail {
 
   .square-desktop-workspace .square-feed-column > * { grid-column: 1; }
 
-  .square-desktop-workspace .square-statement-feed > .square-inline-statement.is-focused {
+  .square-desktop-workspace .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-focused {
     z-index: auto;
     box-sizing: border-box;
     width: calc(100% + 36px);
     margin-inline: -18px;
     padding-inline: 18px;
-    background: color-mix(in srgb, var(--brand-primary) 5%, transparent);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand-primary) 72%, transparent);
+    background: color-mix(in srgb, var(--brand-primary) 9%, transparent);
+    box-shadow: inset 4px 0 0 var(--brand-primary);
   }
 
-  .square-desktop-workspace .square-statement-feed > .square-inline-statement.is-focused > .square-statement-card {
+  .square-desktop-workspace .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-focused > .square-statement-card {
     cursor: default;
     background: transparent;
   }
@@ -15509,7 +15509,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     padding-inline: 12px;
   }
 
-  .square-desktop-workspace .square-statement-feed > .square-inline-statement.is-focused {
+  .square-desktop-workspace .square-virtual-feed > .virtual-dynamic-list-row > .square-inline-statement.is-focused {
     width: calc(100% + 24px);
     margin-inline: -12px;
     padding-inline: 12px;
@@ -28636,6 +28636,10 @@ html[data-theme="dark"] .square-feed-scroll-top { border-color: rgba(92, 224, 17
     padding-left: max(12px, env(safe-area-inset-left));
   }
   .square-feed-column { width: 100%; padding: 2px 0 110px; gap: 12px; }
+  .square-feed-column > :is(.square-activity-carousel, .square-pinned-banner) {
+    width: calc(100% - 24px);
+    margin-inline: 12px;
+  }
   .square-compose-launcher { margin: 0 12px; width: calc(100% - 24px); }
   .square-statement-card,
   .square-readonly-notice { border-inline: 0; border-radius: 0; }

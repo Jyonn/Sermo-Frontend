@@ -2104,7 +2104,7 @@ export default function SquarePage() {
           )}
           {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
-        {feedScrollTopVisible && !inlineStatementExpanded ? (
+        {feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace) ? (
           <button
             aria-label={t("square.backToTop")}
             className="square-feed-scroll-top"
