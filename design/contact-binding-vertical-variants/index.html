@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sermo 纵向绑定流程设计</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #11241d;
+      --muted: #77867f;
+      --line: #dce4df;
+      --paper: #fff;
+      --soft: #f2f6f3;
+      --canvas: #e9efeb;
+      --green: #09c982;
+      --green-deep: #087652;
+      --bark: #ef4f42;
+      font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .lab-header {
+      position: sticky; z-index: 20; top: 0; display: flex; min-height: 70px; align-items: center; justify-content: space-between; gap: 20px;
+      padding: 10px 28px; border-bottom: 1px solid rgba(104,130,118,.23); background: rgba(250,252,250,.88); backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 13px 13px 13px 5px; color: #052f22; background: var(--green); font-weight: 900; }
+    .brand strong, .brand small { display: block; }
+    .brand strong { font-size: 13px; }
+    .brand small { margin-top: 2px; color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .13em; }
+    .state-tabs { display: flex; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
+    .state-tabs button { padding: 8px 15px; border: 0; border-radius: 10px; color: var(--muted); background: transparent; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+    .state-tabs button.is-active { color: var(--ink); background: var(--paper); box-shadow: 0 4px 13px rgba(34,58,48,.09); }
+    main { width: min(1160px, 100%); margin: auto; padding: 56px 24px 80px; }
+    .intro { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: end; gap: 35px; margin-bottom: 36px; }
+    .eyebrow { color: var(--green-deep); font-size: 10px; font-weight: 900; letter-spacing: .15em; }
+    h1 { margin: 11px 0 12px; font-size: clamp(37px, 5vw, 64px); line-height: 1.02; letter-spacing: -.05em; }
+    .intro p { max-width: 670px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
+    .principles { display: grid; gap: 7px; }
+    .principles span { padding: 8px 12px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: rgba(255,255,255,.52); font-size: 9px; font-weight: 800; text-align: center; }
+    .variants { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 25px; }
+    .concept { overflow: hidden; border: 1px solid rgba(104,130,118,.22); border-radius: 28px; background: rgba(251,252,250,.9); box-shadow: 0 18px 48px rgba(31,55,44,.09); }
+    .concept-head { display: grid; grid-template-columns: 43px minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+    .concept-no { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; color: var(--green-deep); background: var(--soft); font-size: 10px; font-weight: 900; }
+    .concept-head strong, .concept-head small { display: block; }
+    .concept-head strong { font-size: 13px; }
+    .concept-head small { margin-top: 3px; color: var(--muted); font-size: 8px; }
+    .fit { padding: 6px 9px; border-radius: 99px; color: var(--green-deep); background: rgba(8,201,130,.09); font-size: 8px; font-weight: 800; }
+    .stage { display: grid; min-height: 730px; place-items: center; padding: 28px 22px; background: radial-gradient(circle at 50% 25%, #fff, #edf2ee 72%); }
+    .drawer { width: min(100%, 405px); min-height: 662px; overflow: hidden; border: 1px solid #dfe6e2; border-radius: 25px 25px 18px 18px; background: var(--paper); box-shadow: 0 24px 60px rgba(29,50,41,.17); }
+    .drawer-header { display: grid; grid-template-columns: 42px 1fr 42px; height: 61px; align-items: center; border-bottom: 1px solid var(--line); }
+    .drawer-header button { width: 34px; height: 34px; margin-left: 8px; border: 0; border-radius: 50%; color: #52615b; background: transparent; font-size: 22px; cursor: pointer; }
+    .drawer-header strong { text-align: center; font-size: 14px; }
+    .drawer-body { min-height: 600px; padding: 22px; }
+    .app-heading { display: grid; grid-template-columns: 52px minmax(0,1fr); align-items: center; gap: 13px; }
+    .app-icon { width: 52px; height: 52px; overflow: hidden; border-radius: 15px; box-shadow: 0 5px 14px rgba(36,54,46,.12); }
+    .app-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .app-heading h2 { margin: 0 0 4px; font-size: 17px; }
+    .app-heading p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .state { display: none; animation: rise .24s ease both; }
+    .drawer[data-state="connect"] .state-connect, .drawer[data-state="verify"] .state-verify, .drawer[data-state="bound"] .state-bound { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(7px); } }
+    .field-label { display: block; margin: 0 2px 7px; color: var(--muted); font-size: 9px; font-weight: 800; }
+    .input-shell { display: flex; min-height: 50px; align-items: center; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
+    .input-shell input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 11px; font-weight: 700; }
+    .primary, .secondary { width: 100%; min-height: 47px; border-radius: 14px; font-size: 10px; font-weight: 900; cursor: pointer; }
+    .primary { border: 0; color: #053023; background: var(--green); box-shadow: 0 10px 22px rgba(8,201,130,.16); }
+    .secondary { border: 1px solid var(--line); color: var(--muted); background: transparent; }
+    .code-copy { margin: 0 0 20px; color: var(--muted); font-size: 9px; line-height: 1.6; text-align: center; }
+    .code-copy strong { display: block; margin-top: 4px; color: var(--ink); font-size: 12px; }
+    .code-boxes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .code-boxes i { display: grid; height: 49px; place-items: center; border: 1px solid var(--line); border-radius: 11px; color: var(--ink); background: var(--paper); font: normal 800 15px "Avenir Next", sans-serif; }
+    .code-boxes i:last-child { border-color: var(--green); box-shadow: 0 0 0 3px rgba(8,201,130,.09); }
+    .verify-actions { margin-top: 18px; }
+    .verify-actions .secondary { margin-top: 8px; }
+    .done-core { padding-top: 55px; text-align: center; }
+    .done-core .app-icon { width: 72px; height: 72px; margin: auto; border-radius: 21px; }
+    .done-check { position: relative; display: grid; width: 24px; height: 24px; margin: -17px auto 0; place-items: center; border: 3px solid var(--paper); border-radius: 50%; color: #063023; background: var(--green); font-size: 10px; font-weight: 900; }
+    .done-core h3 { margin: 18px 0 5px; font-size: 19px; }
+    .done-core > p { margin: 0; color: var(--muted); font-size: 9px; }
+    .receipt { margin: 23px 0; padding: 14px; border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); }
+    .receipt span, .receipt b { display: block; }
+    .receipt span { color: var(--muted); font-size: 8px; }
+    .receipt b { margin-top: 4px; font-size: 10px; }
+
+    /* 01 连接清单 */
+    .v1 .drawer-body { padding: 26px 25px 23px; }
+    .v1 .app-heading { margin-bottom: 28px; }
+    .v1 .guide-title { margin-bottom: 17px; }
+    .v1 .guide-title h3 { margin: 0 0 4px; font-size: 14px; }
+    .v1 .guide-title p { margin: 0; color: var(--muted); font-size: 8px; }
+    .v1 .steps { display: grid; gap: 18px; }
+    .v1 .step { display: grid; grid-template-columns: 28px minmax(0,1fr); gap: 9px; }
+    .v1 .step-no { color: var(--green-deep); font-size: 10px; font-weight: 900; text-align: center; }
+    .v1 .step strong { display: block; margin-bottom: 4px; font-size: 11px; }
+    .v1 .step p { margin: 0; color: #53635c; font-size: 8px; line-height: 1.55; }
+    .v1 .step a { display: inline-block; margin-top: 8px; color: var(--green-deep); font-size: 8px; font-weight: 900; }
+    .v1 .action-card { margin-top: 22px; padding: 16px; border-radius: 18px; background: #f7f8f6; box-shadow: 0 14px 28px rgba(42,57,51,.08); }
+    .v1 .action-card .primary { margin-top: 11px; }
+    .v1 .state-verify, .v1 .state-bound { padding-top: 39px; }
+
+    /* 02 展开脊柱 */
+    .v2 .app-heading { margin-bottom: 27px; }
+    .v2 .spine { position: relative; display: grid; gap: 0; }
+    .v2 .spine::before { position: absolute; top: 18px; bottom: 18px; left: 17px; width: 1px; background: var(--line); content: ""; }
+    .v2 .spine-step { position: relative; display: grid; grid-template-columns: 36px minmax(0,1fr); gap: 11px; padding-bottom: 17px; }
+    .v2 .spine-step:last-child { padding-bottom: 0; }
+    .v2 .spine-dot { z-index: 2; display: grid; width: 35px; height: 35px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: var(--paper); font-size: 9px; font-weight: 900; }
+    .v2 .spine-step.is-done .spine-dot { color: var(--green-deep); border-color: rgba(8,201,130,.34); }
+    .v2 .spine-step.is-active .spine-dot { color: #053023; border-color: var(--green); background: var(--green); box-shadow: 0 0 0 5px rgba(8,201,130,.1); }
+    .v2 .spine-content { min-height: 48px; padding: 8px 0; }
+    .v2 .spine-content > strong { display: block; font-size: 11px; }
+    .v2 .spine-content > small { display: block; margin-top: 4px; color: var(--muted); font-size: 8px; }
+    .v2 .expanded { margin-top: 13px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--soft); }
+    .v2 .expanded .primary { margin-top: 11px; }
+    .v2 .code-boxes { gap: 4px; }
+    .v2 .code-boxes i { height: 43px; }
+    .v2 .mini-receipt { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding: 13px; border-radius: 13px; background: var(--soft); font-size: 9px; }
+    .v2 .mini-receipt b { color: var(--green-deep); }
+
+    /* 03 任务折页 */
+    .v3 .drawer-body { background: #f6f8f6; }
+    .v3 .app-heading { margin: -22px -22px 18px; padding: 23px 22px 20px; background: var(--paper); }
+    .v3 .task-stack { display: grid; gap: 9px; }
+    .v3 .task-card { position: relative; overflow: hidden; padding: 15px 15px 15px 51px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); }
+    .v3 .task-card::before { position: absolute; top: 0; bottom: 0; left: 0; width: 37px; display: grid; place-items: center; color: var(--muted); background: var(--soft); font-size: 9px; font-weight: 900; content: attr(data-step); writing-mode: vertical-rl; }
+    .v3 .task-card.is-active { border-color: rgba(8,201,130,.42); box-shadow: 0 10px 24px rgba(26,73,53,.08); }
+    .v3 .task-card.is-active::before { color: #053023; background: var(--green); }
+    .v3 .task-card.is-done::after { position: absolute; top: 12px; right: 13px; color: var(--green-deep); content: "✓"; font-size: 10px; font-weight: 900; }
+    .v3 .task-card h3 { margin: 0 0 4px; font-size: 11px; }
+    .v3 .task-card > p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.5; }
+    .v3 .task-work { margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--line); }
+    .v3 .task-work .primary { margin-top: 10px; }
+    .v3 .code-boxes { gap: 4px; }
+    .v3 .code-boxes i { height: 42px; border-radius: 9px; }
+    .v3 .task-card.done-task { padding-block: 23px; text-align: center; }
+
+    /* 04 侧轨向导 */
+    .v4 .drawer-body { min-height: 600px; padding: 0; }
+    .v4 .state { min-height: 600px; grid-template-columns: 78px minmax(0,1fr); }
+    .v4 .drawer[data-state="connect"] .state-connect, .v4 .drawer[data-state="verify"] .state-verify, .v4 .drawer[data-state="bound"] .state-bound { display: grid; }
+    .v4 .side-rail { display: flex; flex-direction: column; align-items: center; padding: 23px 10px; color: #dcebe4; background: #173b30; }
+    .v4 .side-rail .app-icon { width: 43px; height: 43px; margin-bottom: 30px; border-radius: 13px; }
+    .v4 .rail-step { position: relative; display: grid; width: 100%; justify-items: center; gap: 5px; padding-bottom: 34px; color: #799489; font-size: 7px; font-weight: 800; }
+    .v4 .rail-step::before { z-index: 2; display: grid; width: 20px; height: 20px; place-items: center; border: 1px solid currentColor; border-radius: 50%; background: #173b30; content: attr(data-no); }
+    .v4 .rail-step::after { position: absolute; top: 23px; bottom: 5px; width: 1px; background: #34574b; content: ""; }
+    .v4 .rail-step:last-child::after { display: none; }
+    .v4 .rail-step.is-active { color: #62e0b3; }
+    .v4 .rail-step.is-active::before { color: #053023; border-color: var(--green); background: var(--green); box-shadow: 0 0 0 4px rgba(8,201,130,.11); }
+    .v4 .rail-step.is-done::before { color: #62e0b3; content: "✓"; }
+    .v4 .work-area { padding: 27px 21px; }
+    .v4 .work-area h2 { margin: 0 0 6px; font-size: 17px; }
+    .v4 .work-area > p { margin: 0 0 26px; color: var(--muted); font-size: 9px; line-height: 1.6; }
+    .v4 .mini-guide { display: grid; gap: 12px; margin-bottom: 23px; }
+    .v4 .mini-guide div { display: grid; grid-template-columns: 23px 1fr; gap: 9px; align-items: start; }
+    .v4 .mini-guide b { display: grid; width: 21px; height: 21px; place-items: center; border-radius: 7px; color: var(--green-deep); background: rgba(8,201,130,.1); font-size: 8px; }
+    .v4 .mini-guide strong, .v4 .mini-guide small { display: block; }
+    .v4 .mini-guide strong { font-size: 9px; }
+    .v4 .mini-guide small { margin-top: 3px; color: var(--muted); font-size: 7px; line-height: 1.5; }
+    .v4 .work-area .primary { margin-top: 11px; }
+    .v4 .code-boxes { gap: 4px; }
+    .v4 .code-boxes i { height: 43px; border-radius: 9px; }
+    .v4 .done-core { padding-top: 47px; }
+
+    .decision { display: grid; grid-template-columns: 50px minmax(0,1fr); gap: 10px; padding: 15px 21px 19px; color: var(--muted); font-size: 9px; line-height: 1.6; }
+    .decision b { color: var(--green-deep); font-size: 8px; letter-spacing: .1em; }
+    @media (max-width: 940px) { .intro { grid-template-columns: 1fr; } .principles { display: flex; flex-wrap: wrap; } .variants { grid-template-columns: 1fr; max-width: 600px; margin: auto; } }
+    @media (max-width: 560px) {
+      .lab-header { display: grid; grid-template-columns: 1fr; padding: 9px 12px; }
+      .brand small { display: none; }
+      .state-tabs button { flex: 1; padding-inline: 8px; font-size: 9px; }
+      main { padding: 38px 9px 55px; }
+      .intro { padding-inline: 9px; }
+      h1 { font-size: 38px; }
+      .concept-head { grid-template-columns: 39px 1fr; padding-inline: 14px; }
+      .fit { display: none; }
+      .stage { min-height: 690px; padding: 19px 8px; }
+      .drawer { min-height: 650px; }
+      .drawer-body { min-height: 588px; padding-inline: 18px; }
+      .v4 .drawer-body { padding: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="lab-header">
+    <div class="brand"><span class="brand-mark">S</span><span><strong>Sermo 言浪</strong><small>VERTICAL BINDING FLOW STUDY</small></span></div>
+    <div class="state-tabs" aria-label="统一切换四版流程状态"><button class="is-active" data-state="connect" type="button">配置渠道</button><button data-state="verify" type="button">输入验证码</button><button data-state="bound" type="button">绑定完成</button></div>
+  </header>
+  <main>
+    <section class="intro"><div><span class="eyebrow">04 VERTICAL DIRECTIONS</span><h1>步骤向下生长，<br />操作贴近当下。</h1><p>四版都取消横向进度条，并围绕同一套渠道绑定语义设计。以 Bark 为完整示例；替换应用图标、字段和说明后，也能承载邮箱、短信、QQ、ntfy、Gotify 与 PushDeer。</p></div><div class="principles"><span>纵向阅读路径</span><span>复用验证码组件</span><span>当前任务就近操作</span></div></section>
+    <section class="variants">
+      <article class="concept v1"><header class="concept-head"><span class="concept-no">01</span><span><strong>连接清单</strong><small>完整说明先行，操作集中收口</small></span><span class="fit">最接近参考</span></header><div class="stage"><div class="drawer" data-state="connect"><header class="drawer-header"><button type="button">‹</button><strong>Bark</strong><span></span></header><div class="drawer-body">
+        <section class="state state-connect"><div class="app-heading"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="Bark" /></span><span><h2>连接 Bark</h2><p>适合 iPhone，通过 Bark 专属链接接收即时提醒</p></span></div><div class="guide-title"><h3>连接步骤</h3><p>按顺序完成，收到验证码后才会正式启用</p></div><div class="steps"><div class="step"><span class="step-no">1</span><span><strong>安装并允许通知</strong><p>打开 Bark，首次启动时允许系统通知。</p><a>前往 App Store ↗</a></span></div><div class="step"><span class="step-no">2</span><span><strong>复制专属推送链接</strong><p>在 Bark 首页复制以 api.day.app 开头的链接。</p></span></div><div class="step"><span class="step-no">3</span><span><strong>发送测试验证码</strong><p>回到这里粘贴链接，发送一条测试消息。</p></span></div></div><div class="action-card"><label class="field-label">Bark 推送链接</label><div class="input-shell"><input value="https://api.day.app/AbCDefGh" /></div><button class="primary next" data-next="verify" type="button">发送测试验证码</button></div></section>
+        <section class="state state-verify"><div class="app-heading"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="" /></span><span><h2>检查 Bark</h2><p>测试消息已经发送到你的 iPhone</p></span></div><div style="padding-top:45px"><p class="code-copy">输入 Bark 消息中的六位验证码<strong>Bark · iPhone 15 Pro</strong></p><div class="code-boxes"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div><div class="verify-actions"><button class="primary next" data-next="bound" type="button">确认连接</button><button class="secondary" type="button">重新发送 · 48s</button></div></div></section>
+        <section class="state state-bound"><div class="done-core"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="" /></span><span class="done-check">✓</span><h3>Bark 已连接</h3><p>即时提醒现在会送达这台设备</p><div class="receipt"><span>绑定凭据</span><b>api.day.app/AbCDefGh</b></div><button class="secondary" type="button">完成</button></div></section>
+      </div></div></div><p class="decision"><b>取舍</b><span>阅读最自然，也最接近你给的参考；当 App 配置说明很长时，首屏会偏高。</span></p></article>
+
+      <article class="concept v2"><header class="concept-head"><span class="concept-no">02</span><span><strong>展开脊柱</strong><small>全程知道位置，只展开当前一步</small></span><span class="fit">推荐</span></header><div class="stage"><div class="drawer" data-state="connect"><header class="drawer-header"><button type="button">‹</button><strong>连接 Bark</strong><span></span></header><div class="drawer-body"><div class="app-heading"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="Bark" /></span><span><h2>Bark 即时提醒</h2><p>三步连接，每次只处理一个任务</p></span></div>
+        <section class="state state-connect"><div class="spine"><div class="spine-step is-active"><span class="spine-dot">1</span><div class="spine-content"><strong>准备 Bark</strong><small>安装应用并复制专属链接</small><div class="expanded"><label class="field-label">Bark 推送链接</label><div class="input-shell"><input value="https://api.day.app/AbCDefGh" /></div><button class="primary next" data-next="verify" type="button">发送测试验证码</button></div></div></div><div class="spine-step"><span class="spine-dot">2</span><div class="spine-content"><strong>验证设备</strong><small>输入 Bark 收到的六位验证码</small></div></div><div class="spine-step"><span class="spine-dot">3</span><div class="spine-content"><strong>启用提醒</strong><small>保存渠道并开始接收消息</small></div></div></div></section>
+        <section class="state state-verify"><div class="spine"><div class="spine-step is-done"><span class="spine-dot">✓</span><div class="spine-content"><strong>准备 Bark</strong><small>api.day.app/AbCDefGh</small></div></div><div class="spine-step is-active"><span class="spine-dot">2</span><div class="spine-content"><strong>验证设备</strong><small>验证码已发送到 Bark</small><div class="expanded"><div class="code-boxes"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div><button class="primary next" data-next="bound" type="button">确认连接</button></div></div></div><div class="spine-step"><span class="spine-dot">3</span><div class="spine-content"><strong>启用提醒</strong><small>验证后自动完成</small></div></div></div></section>
+        <section class="state state-bound"><div class="spine"><div class="spine-step is-done"><span class="spine-dot">✓</span><div class="spine-content"><strong>准备 Bark</strong><small>推送链接已保存</small></div></div><div class="spine-step is-done"><span class="spine-dot">✓</span><div class="spine-content"><strong>验证设备</strong><small>测试消息验证成功</small></div></div><div class="spine-step is-active"><span class="spine-dot">3</span><div class="spine-content"><strong>即时提醒已启用</strong><small>以后可以随时在这里停用</small><div class="mini-receipt"><span>Bark · iPhone</span><b>已连接</b></div></div></div></div></section>
+      </div></div></div><p class="decision"><b>取舍</b><span>状态与操作的对应关系最明确，适合统一落地；比方案一更紧凑，也更适合手机 Drawer。</span></p></article>
+
+      <article class="concept v3"><header class="concept-head"><span class="concept-no">03</span><span><strong>任务折页</strong><small>复杂配置拆成三张纵向任务卡</small></span><span class="fit">复杂渠道</span></header><div class="stage"><div class="drawer" data-state="connect"><header class="drawer-header"><button type="button">‹</button><strong>绑定即时应用</strong><span></span></header><div class="drawer-body"><div class="app-heading"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="Bark" /></span><span><h2>Bark</h2><p>把每一步当作一张可以完成的任务</p></span></div>
+        <section class="state state-connect"><div class="task-stack"><article class="task-card is-active" data-step="STEP 01"><h3>添加推送地址</h3><p>从 Bark 首页复制你的专属链接。</p><div class="task-work"><div class="input-shell"><input value="https://api.day.app/AbCDefGh" /></div><button class="primary next" data-next="verify" type="button">保存并发送测试</button></div></article><article class="task-card" data-step="STEP 02"><h3>输入验证码</h3><p>确认这台设备确实属于你。</p></article><article class="task-card" data-step="STEP 03"><h3>开始接收</h3><p>验证后自动启用即时提醒。</p></article></div></section>
+        <section class="state state-verify"><div class="task-stack"><article class="task-card is-done" data-step="STEP 01"><h3>推送地址已保存</h3><p>api.day.app/AbCDefGh</p></article><article class="task-card is-active" data-step="STEP 02"><h3>输入 Bark 验证码</h3><p>验证码 10 分钟内有效。</p><div class="task-work"><div class="code-boxes"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div><button class="primary next" data-next="bound" type="button">完成验证</button></div></article><article class="task-card" data-step="STEP 03"><h3>开始接收</h3><p>等待验证完成。</p></article></div></section>
+        <section class="state state-bound"><div class="task-stack"><article class="task-card is-done" data-step="STEP 01"><h3>推送地址已保存</h3><p>凭据已安全保存。</p></article><article class="task-card is-done" data-step="STEP 02"><h3>设备验证成功</h3><p>测试消息已经确认。</p></article><article class="task-card is-active done-task" data-step="STEP 03"><h3>Bark 已开始接收</h3><p>好友上线等即时事件将通过这里送达。</p></article></div></section>
+      </div></div></div><p class="decision"><b>取舍</b><span>最适合 Gotify、ntfy 这类多字段配置，也方便失败后定位具体任务；视觉组件感更强。</span></p></article>
+
+      <article class="concept v4"><header class="concept-head"><span class="concept-no">04</span><span><strong>侧轨向导</strong><small>固定纵向方位，工作区只呈现当前步骤</small></span><span class="fit">高专注</span></header><div class="stage"><div class="drawer" data-state="connect"><header class="drawer-header"><button type="button">‹</button><strong>连接 Bark</strong><span></span></header><div class="drawer-body">
+        <section class="state state-connect"><aside class="side-rail"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="Bark" /></span><span class="rail-step is-active" data-no="1">接入</span><span class="rail-step" data-no="2">验证</span><span class="rail-step" data-no="3">完成</span></aside><div class="work-area"><h2>准备推送地址</h2><p>先完成 Bark 端设置，再把专属链接交给 Sermo。</p><div class="mini-guide"><div><b>1</b><span><strong>安装 Bark</strong><small>首次启动时允许系统通知</small></span></div><div><b>2</b><span><strong>复制链接</strong><small>在 Bark 首页长按专属地址</small></span></div></div><label class="field-label">Bark 推送链接</label><div class="input-shell"><input value="https://api.day.app/AbCDefGh" /></div><button class="primary next" data-next="verify" type="button">发送测试验证码</button></div></section>
+        <section class="state state-verify"><aside class="side-rail"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="" /></span><span class="rail-step is-done" data-no="1">接入</span><span class="rail-step is-active" data-no="2">验证</span><span class="rail-step" data-no="3">完成</span></aside><div class="work-area"><h2>确认这台设备</h2><p>输入刚刚在 Bark 中收到的六位验证码。</p><div class="code-boxes"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div><button class="primary next" data-next="bound" type="button">确认连接</button><button class="secondary" style="margin-top:8px" type="button">重新发送 · 48s</button></div></section>
+        <section class="state state-bound"><aside class="side-rail"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="" /></span><span class="rail-step is-done" data-no="1">接入</span><span class="rail-step is-done" data-no="2">验证</span><span class="rail-step is-active" data-no="3">完成</span></aside><div class="work-area"><div class="done-core"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="" /></span><span class="done-check">✓</span><h3>连接完成</h3><p>Bark 已成为即时提醒渠道</p><div class="receipt"><span>推送设备</span><b>iPhone 15 Pro</b></div><button class="secondary" type="button">完成</button></div></div></section>
+      </div></div></div><p class="decision"><b>取舍</b><span>当前任务最聚焦，桌面与宽 Drawer 表现最好；在极窄手机上，左侧轨道会占用一些内容宽度。</span></p></article>
+    </section>
+  </main>
+  <script>
+    const drawers = [...document.querySelectorAll('.drawer')];
+    const tabs = [...document.querySelectorAll('.state-tabs button')];
+    function setState(state) {
+      drawers.forEach(drawer => drawer.dataset.state = state);
+      tabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.state === state));
+    }
+    tabs.forEach(tab => tab.addEventListener('click', () => setState(tab.dataset.state)));
+    document.querySelectorAll('.next').forEach(button => button.addEventListener('click', () => setState(button.dataset.next)));
+  </script>
+</body>
+</html>
