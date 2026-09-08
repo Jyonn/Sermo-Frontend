@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.08.2",
+  "id": "2026.09.08.3",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "QQ 历史评论关系更清晰",
+      "title": "QQ 历史身份更清晰",
       "items": [
         "回复层主的历史评论会直接归入对应楼层，不再重复显示 @昵称",
-        "对楼内其他人的提及现在可以点击，并会在对方绑定 QQ 后自动关联新账号",
-        "尚未认领的 QQ 用户会显示其 QQ 头像"
+        "尚未认领的用户会显示 QQ 来源标签和 QQ 头像，点击即可查看历史身份资料",
+        "评论中的 QQ 提及会额外标记，并在对方绑定后自动关联新账号"
       ]
     },
     "en": {
-      "title": "Clearer historical QQ comment threads",
+      "title": "Clearer historical QQ identities",
       "items": [
         "Replies to a thread owner now sit directly in that thread without repeating an @name prefix",
-        "Mentions of other participants are now interactive and follow them when they claim their QQ identity",
-        "Unclaimed QQ users now display their QQ avatar"
+        "Unclaimed users now show a QQ source tag and avatar, with historical identity details available on click",
+        "QQ mentions are clearly marked and follow the user when they claim their identity"
       ]
     }
   }

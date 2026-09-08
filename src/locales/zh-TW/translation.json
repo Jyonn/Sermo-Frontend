@@ -2395,5 +2395,10 @@
   "audio.permissionBlockedHint": "請在瀏覽器的網站設定中允許麥克風，然後返回重新檢查。",
   "audio.permissionRetry": "重新檢查",
   "audio.permissionPrivacy": "只有按住說話時才會採集聲音；此次授權不會開始錄音。",
-  "audio.permissionLater": "暫不啟用"
+  "audio.permissionLater": "暫不啟用",
+  "square.qqSource": "來自 QQ",
+  "square.qqProfileTitle": "QQ 歷史身分",
+  "square.qqNumber": "QQ 號",
+  "square.qqNickname": "QQ 暱稱",
+  "square.qqIdentityHint": "此資料來自遷移的 QQ 空間歷史記錄，該使用者尚未綁定 Sermo。"
 }

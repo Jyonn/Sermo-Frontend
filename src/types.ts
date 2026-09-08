@@ -30,6 +30,10 @@ export interface TinyUserDTO {
   profile_card_theme?: ProfileCardTheme;
   growth_level?: number;
   anonymous?: boolean;
+  external_identity?: {
+    provider: "qq";
+    identifier: string;
+  };
 }
 
 export interface UserDTO extends TinyUserDTO {

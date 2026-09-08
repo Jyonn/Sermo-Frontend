@@ -81,10 +81,19 @@ const SQUARE_FEED_PAGE_SIZE = 20;
 const COMMENT_MENTION_RE = /<@(\d+)>/g;
 const INLINE_RICH_TOKEN_RE = /<@(\d+)>|\[em\](e\d+)\[\/em\]/gi;
 
+function isUnclaimedQqUser(user?: TinyUserDTO | null) {
+  return user?.external_identity?.provider === "qq";
+}
+
+function QqSourceTag({ compact = false }: { compact?: boolean }) {
+  const { t } = useI18n();
+  return <span className={`square-qq-source-tag${compact ? " is-compact" : ""}`}>{compact ? "QQ" : t("square.qqSource")}</span>;
+}
+
 function InlineRichText({ emoticons = [], mentions = [], onOpenProfile, text }: {
   emoticons?: InlineEmoticonDTO[];
   mentions?: TinyUserDTO[];
-  onOpenProfile?: (userId: number) => void;
+  onOpenProfile?: (user: TinyUserDTO) => void;
   text: string;
 }) {
   const emoticonsByCode = new Map(emoticons.map((item) => [item.code.toLowerCase(), item]));
@@ -97,7 +106,7 @@ function InlineRichText({ emoticons = [], mentions = [], onOpenProfile, text }: 
     const mention = match[1] ? mentionsById.get(Number(match[1])) : undefined;
     const emoticon = match[2] ? emoticonsByCode.get(match[2].toLowerCase()) : undefined;
     if (mention && onOpenProfile) {
-      parts.push(<button className="square-comment-mention" key={`mention-${index}`} onClick={(event) => { event.stopPropagation(); onOpenProfile(mention.user_id); }} type="button">@{mention.name}</button>);
+      parts.push(<button className="square-comment-mention" key={`mention-${index}`} onClick={(event) => { event.stopPropagation(); onOpenProfile(mention); }} type="button">@{mention.name}{isUnclaimedQqUser(mention) ? <QqSourceTag compact /> : null}</button>);
     } else if (emoticon?.uri) {
       parts.push(<img alt={emoticon.token} className="qzone-inline-emoticon" draggable={false} key={`emoticon-${index}`} loading="lazy" src={resolveStableResourceUri(emoticon.uri) ?? emoticon.uri} />);
     } else {
@@ -279,6 +288,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
   const audio = statement.media.find((item) => item.kind === "audio");
   const video = statement.media.find((item) => item.kind === "video");
   const anonymousName = t("square.anonymousUser");
+  const qqUser = isUnclaimedQqUser(statement.user);
   useEffect(() => {
     if (!menuPosition) return;
     const close = (event: PointerEvent) => {
@@ -310,7 +320,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         <div className="square-statement-author-copy">
           <div className={`square-statement-author-name${statement.user.is_permanent_vip ? " is-vip" : ""}`}>
             <strong>{statement.is_anonymous ? anonymousName : statement.user.name}</strong>
-            {!statement.is_anonymous && !statement.user.official && statement.user.growth_level ? <GrowthLevelBadge level={statement.user.growth_level} /> : null}
+            {!statement.is_anonymous && qqUser ? <QqSourceTag /> : !statement.is_anonymous && !statement.user.official && statement.user.growth_level ? <GrowthLevelBadge level={statement.user.growth_level} /> : null}
             {!statement.is_anonymous && statement.user.official ? <OfficialBadge /> : null}
             {!statement.is_anonymous && statement.user.operator ? <OperatorBadge /> : null}
           </div>
@@ -385,7 +395,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
 
 function CommentContent({ comment, onOpenProfile, onReply }: {
   comment: SquareStatementCommentDTO;
-  onOpenProfile: (userId: number) => void;
+  onOpenProfile: (user: TinyUserDTO) => void;
   onReply: (event: ReactMouseEvent) => void;
 }) {
   if (comment.kind === "sticker" && comment.sticker?.uri) {
@@ -400,7 +410,7 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
   expanded?: boolean;
   onDelete: (comment: SquareStatementCommentDTO) => void;
   onLike: (comment: SquareStatementCommentDTO) => void;
-  onOpenProfile: (userId: number) => void;
+  onOpenProfile: (user: TinyUserDTO) => void;
   onReply: (comment: SquareStatementCommentDTO) => void;
   onToggleReplies?: (commentId: number) => void;
   rootUserId?: number;
@@ -421,6 +431,7 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     if (canInteract) onReply(comment);
   };
   const threadRootUserId = rootUserId ?? comment.user.user_id;
+  const qqUser = isUnclaimedQqUser(comment.user);
   const replyTargetAlreadyMentioned = comment.reply_to_user
     ? comment.mentions?.some((mention) => mention.user_id === comment.reply_to_user?.user_id)
     : false;
@@ -435,9 +446,9 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     if (hasExpandableReplies) onToggleReplies?.(comment.comment_id);
   };
   return <article className={`square-comment-thread${canInteract ? " is-replyable" : ""}${hasExpandableReplies ? " has-replies" : ""}`} onClick={comment.parent_id ? beginReply : toggleReplies}>
-    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user.user_id); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} /></button>}
+    {comment.is_anonymous ? <span className="square-anonymous-avatar square-comment-avatar"><span className="material-symbols-outlined">person</span></span> : <button aria-label={comment.user.name} className="square-comment-avatar-button" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><UserAvatar className="square-comment-avatar" frame={comment.user.avatar_frame_style} name={comment.user.name} uri={comment.user.avatar_uri} /></button>}
     <div>
-      <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} /> : null}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
+      <header><div className={`square-comment-author-name${comment.is_anonymous ? " is-anonymous" : ""}${comment.user.is_permanent_vip ? " is-vip" : ""}`}>{qqUser ? <button className="square-comment-author-profile" onClick={(event) => { event.stopPropagation(); onOpenProfile(comment.user); }} type="button"><strong>{displayName}</strong><QqSourceTag /></button> : <><strong>{displayName}</strong>{!comment.is_anonymous && comment.user.growth_level ? <GrowthLevelBadge level={comment.user.growth_level} /> : null}</>}{comment.is_author ? <em>{t("square.authorTag")}</em> : null}{layerReplyTarget ? <span className="square-comment-relation"><i aria-hidden="true" />{layerReplyTarget.anonymous ? t("square.anonymousUser") : layerReplyTarget.name}</span> : null}</div>{comment.can_delete ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-comment-more" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 104; setMenuPosition((current) => current ? null : { top: rect.bottom + 5, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}</header>
       <CommentContent comment={comment} onOpenProfile={onOpenProfile} onReply={beginReply} />
       <div className="square-comment-footer">
         <time>{formatRelativeTime(comment.created_at)}</time>
@@ -451,6 +462,33 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     </div>
     {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
   </article>;
+}
+
+function QqUserDialog({ onClose, user }: { onClose: () => void; user: TinyUserDTO }) {
+  const { t } = useI18n();
+  useEffect(() => {
+    const closeWithKeyboard = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", closeWithKeyboard);
+    return () => window.removeEventListener("keydown", closeWithKeyboard);
+  }, [onClose]);
+  const qq = user.external_identity?.identifier ?? "";
+  return createPortal(
+    <div className="dialog-backdrop qq-user-dialog-backdrop" onClick={onClose}>
+      <section aria-label={t("square.qqProfileTitle")} aria-modal="true" className="qq-user-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
+        <button aria-label={t("common.close")} className="qq-user-dialog-close" onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button>
+        <div className="qq-user-dialog-hero">
+          <UserAvatar className="qq-user-dialog-avatar" name={user.name} uri={user.avatar_uri} />
+          <div><QqSourceTag /><h2>{user.name}</h2><p>{t("square.qqProfileTitle")}</p></div>
+        </div>
+        <dl>
+          <div><dt>{t("square.qqNumber")}</dt><dd>{qq}</dd></div>
+          <div><dt>{t("square.qqNickname")}</dt><dd>{user.name}</dd></div>
+        </dl>
+        <p className="qq-user-dialog-hint">{t("square.qqIdentityHint")}</p>
+      </section>
+    </div>,
+    document.body,
+  );
 }
 
 export default function SquarePage() {
@@ -632,6 +670,7 @@ export default function SquarePage() {
   const [activityPoolSlide, setActivityPoolSlide] = useState(0);
   const activityPoolTrackRef = useRef<HTMLDivElement>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
+  const [qqProfileUser, setQqProfileUser] = useState<TinyUserDTO | null>(null);
   const [, setProfileSyncing] = useState(false);
   const [growthLevel, setGrowthLevel] = useState(() => session?.user.growth_level ?? 1);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -657,6 +696,13 @@ export default function SquarePage() {
   const galleryVideoStatement = statements.find((item) => item.statement_id === videoGalleryStatementId) ?? null;
   const galleryVideo = galleryVideoStatement?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+  const openUserProfile = (user: TinyUserDTO) => {
+    if (isUnclaimedQqUser(user)) {
+      setQqProfileUser(user);
+      return;
+    }
+    setProfileDrawerUserId(user.user_id);
+  };
   const commentMentionCandidates = useMemo(() => {
     if (commentMentionSearch === null) return [];
     const query = commentMentionSearch.trim().toLocaleLowerCase();
@@ -1833,7 +1879,7 @@ export default function SquarePage() {
       </div>
       {commentsLoading && !comments.length ? <ContentLoader label={t("common.loading")} rows={3} /> : null}
       {!commentsLoading && !comments.length ? <div className="square-comments-empty"><span className="material-symbols-outlined">forum</span><strong>{t("square.noComments")}</strong><p>{canPublish ? t("square.noCommentsHint") : t("square.readOnlyHint")}</p></div> : null}
-      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={setProfileDrawerUserId} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
+      <div className={`square-comment-list${commentsLoading && comments.length ? " is-refreshing" : ""}`}>{comments.map((comment) => <CommentThread canInteract={canPublish} comment={comment} expanded={expandedCommentId === comment.comment_id} key={comment.comment_id} onDelete={setDeleteCommentTarget} onLike={(target) => void toggleCommentLike(target)} onOpenProfile={openUserProfile} onReply={beginCommentReply} onToggleReplies={(commentId) => setExpandedCommentId((current) => current === commentId ? null : commentId)} />)}</div>
       {commentsHasMore ? <button className="square-load-more" disabled={commentsLoading} onClick={() => {
         if (commentStatementId === null) return;
         setCommentsLoading(true);
@@ -1914,7 +1960,7 @@ export default function SquarePage() {
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => setProfileDrawerUserId(statement.user.user_id)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2080,7 +2126,7 @@ export default function SquarePage() {
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <div className="square-desktop-detail-scroll">
             <div className="square-statement-detail-stage">
-              <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
+              <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
             </div>
             {discussionContent}
           </div>
@@ -2214,13 +2260,14 @@ export default function SquarePage() {
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">
-              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => setProfileDrawerUserId(activeCommentStatement.user.user_id)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
+              {activeCommentStatement ? <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} /> : null}
             </div>
             {discussionContent}
           </div>
           {commentComposer}
         </div>
       </SideDrawer>
+      {qqProfileUser ? <QqUserDialog onClose={() => setQqProfileUser(null)} user={qqProfileUser} /> : null}
       <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity?.theme !== "spider-man-4" ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">

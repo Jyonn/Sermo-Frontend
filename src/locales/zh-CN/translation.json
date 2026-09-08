@@ -2410,4 +2410,9 @@
   ,"audio.permissionRetry": "重新检查"
   ,"audio.permissionPrivacy": "只有按住说话时才会采集声音；此次授权不会开始录音。"
   ,"audio.permissionLater": "暂不启用"
+  ,"square.qqSource": "来自 QQ"
+  ,"square.qqProfileTitle": "QQ 历史身份"
+  ,"square.qqNumber": "QQ 号"
+  ,"square.qqNickname": "QQ 昵称"
+  ,"square.qqIdentityHint": "该资料来自迁移的 QQ 空间历史记录，此用户尚未绑定 Sermo。"
 }

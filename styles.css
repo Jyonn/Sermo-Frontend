@@ -34242,6 +34242,178 @@ html[data-theme="dark"] .verification-banner-action {
   background: transparent;
 }
 
+.square-qq-source-tag {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, #12aee8 38%, var(--line-soft));
+  border-radius: 999px;
+  color: color-mix(in srgb, #0786b7 88%, var(--text-primary));
+  font: 800 9px/1 var(--font-mono, monospace);
+  letter-spacing: .04em;
+  background: color-mix(in srgb, #aeeaff 30%, var(--surface-muted));
+}
+
+.square-qq-source-tag.is-compact {
+  min-height: 15px;
+  margin-left: 4px;
+  padding: 1px 4px;
+  font-size: 7px;
+  vertical-align: .12em;
+}
+
+.square-comment-author-profile {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  gap: 6px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.square-comment-author-profile:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--brand-primary) 48%, transparent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.qq-user-dialog-backdrop {
+  z-index: 245;
+}
+
+.qq-user-dialog {
+  position: relative;
+  width: min(100%, 390px);
+  overflow: hidden;
+  padding: 26px;
+  border: 1px solid color-mix(in srgb, #12aee8 20%, var(--line-soft));
+  border-radius: 28px;
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 92% -6%, color-mix(in srgb, #8cddf6 30%, transparent), transparent 42%),
+    color-mix(in srgb, var(--surface) 96%, #eefbff);
+  box-shadow: 0 28px 80px rgba(14, 55, 70, .22);
+}
+
+.qq-user-dialog::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  content: "";
+  background: linear-gradient(90deg, #12aee8, #6bd6c4 58%, #f1cc70);
+}
+
+.qq-user-dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--surface-muted) 76%, transparent);
+  cursor: pointer;
+}
+
+.qq-user-dialog-close span {
+  font-size: 19px;
+}
+
+.qq-user-dialog-hero {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: center;
+  gap: 17px;
+  padding: 8px 34px 22px 0;
+}
+
+.qq-user-dialog-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(15, 84, 108, .18);
+}
+
+.qq-user-dialog-avatar :is(.avatar-frame-clip, .avatar-image, .avatar-label) {
+  border-radius: inherit;
+}
+
+.qq-user-dialog-hero > div {
+  min-width: 0;
+}
+
+.qq-user-dialog-hero h2 {
+  overflow: hidden;
+  margin: 8px 0 3px;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qq-user-dialog-hero p,
+.qq-user-dialog-hint {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.qq-user-dialog-hero p {
+  font-size: 12px;
+}
+
+.qq-user-dialog dl {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: var(--line-soft);
+}
+
+.qq-user-dialog dl > div {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+}
+
+.qq-user-dialog dt {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.qq-user-dialog dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-weight: 760;
+}
+
+.qq-user-dialog dl > div:first-child dd {
+  font-family: var(--font-mono, monospace);
+  letter-spacing: .04em;
+}
+
+.qq-user-dialog-hint {
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
 @media (max-width: 420px) {
   .square-comment-emoji-panel {
     left: -44px;

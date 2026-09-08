@@ -2395,5 +2395,10 @@
   "audio.permissionBlockedHint": "ブラウザのサイト設定でマイクを許可し、戻って再確認してください。",
   "audio.permissionRetry": "再確認",
   "audio.permissionPrivacy": "長押ししている間だけ音声を収録します。許可しただけでは録音は始まりません。",
-  "audio.permissionLater": "今はしない"
+  "audio.permissionLater": "今はしない",
+  "square.qqSource": "QQ から",
+  "square.qqProfileTitle": "QQ 履歴プロフィール",
+  "square.qqNumber": "QQ 番号",
+  "square.qqNickname": "QQ ニックネーム",
+  "square.qqIdentityHint": "このプロフィールは移行された QZone の履歴から作成され、まだ Sermo に紐付けられていません。"
 }

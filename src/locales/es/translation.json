@@ -2395,5 +2395,10 @@
   "audio.permissionBlockedHint": "Permite el micrófono en la configuración del sitio del navegador y vuelve a comprobarlo.",
   "audio.permissionRetry": "Comprobar de nuevo",
   "audio.permissionPrivacy": "El audio solo se captura mientras mantienes pulsado para hablar. Dar permiso no inicia una grabación.",
-  "audio.permissionLater": "Ahora no"
+  "audio.permissionLater": "Ahora no",
+  "square.qqSource": "De QQ",
+  "square.qqProfileTitle": "Identidad histórica de QQ",
+  "square.qqNumber": "Número de QQ",
+  "square.qqNickname": "Apodo de QQ",
+  "square.qqIdentityHint": "Este perfil procede del historial migrado de QZone y aún no se ha vinculado a Sermo."
 }

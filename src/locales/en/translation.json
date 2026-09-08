@@ -2410,4 +2410,9 @@
   ,"audio.permissionRetry": "Check again"
   ,"audio.permissionPrivacy": "Audio is captured only while you hold to talk. Granting access does not start a recording."
   ,"audio.permissionLater": "Not now"
+  ,"square.qqSource": "From QQ"
+  ,"square.qqProfileTitle": "Historical QQ identity"
+  ,"square.qqNumber": "QQ number"
+  ,"square.qqNickname": "QQ nickname"
+  ,"square.qqIdentityHint": "This profile comes from migrated QZone history and has not yet been claimed on Sermo."
 }
