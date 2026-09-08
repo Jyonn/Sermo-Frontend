@@ -1388,6 +1388,17 @@ export default function SquarePage() {
   const openStatement = (statementId: number) => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
     setInlineStatementId(statementId);
+    if (desktopWorkspace) {
+      setInlineStatementExpanded(true);
+      setInlineTransitionPhase("open");
+      setInlineStatementOrigin(null);
+      navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
+      window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+        const card = statementCardRefs.current.get(statementId);
+        if (card) alignStatementBelowHeader(card, "smooth");
+      }));
+      return;
+    }
     setInlineStatementExpanded(false);
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const card = statementCardRefs.current.get(statementId);

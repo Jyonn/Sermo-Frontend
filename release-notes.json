@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.08.9",
+  "id": "2026.09.08.10",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "广场浏览体验优化",
+      "title": "广场切换更稳定",
       "items": [
-        "手机端活动横幅和置顶发言现在拥有更舒适的左右留白",
-        "桌面端补充回到顶部操作，并强化当前发言的选中提示"
+        "活动横幅移除圆角外溢阴影，边缘更加干净",
+        "桌面端切换发言时，新的选中提示会稳定保持"
       ]
     },
     "en": {
-      "title": "A clearer Square experience",
+      "title": "Smoother Square selection",
       "items": [
-        "Activity banners and pinned statements now have comfortable side spacing on mobile",
-        "Desktop adds reliable back-to-top access and a clearer selected-statement state"
+        "Activity banners now have clean rounded edges without an outside shadow",
+        "The new selection highlight now stays stable while switching statements on desktop"
       ]
     }
   }

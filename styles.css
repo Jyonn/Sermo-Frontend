@@ -28886,6 +28886,11 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
 
 @media(max-width:520px){.square-statement-card:not(.is-detail) .square-statement-images.count-1{width:min(82vw,310px)}}
 
+.square-activity-carousel .square-activity-banner,
+[data-theme="dark"] .square-activity-carousel .square-activity-banner {
+  box-shadow: none;
+}
+
 /* Square is a calm chronological stream. Statements use one shared visual
    language and are separated by rhythm and hairlines instead of cards. */
 .square-statement-feed {
