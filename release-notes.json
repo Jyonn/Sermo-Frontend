@@ -1,21 +1,19 @@
 {
-  "id": "2026.09.07.2",
-  "publishedAt": "2026-09-07",
+  "id": "2026.09.08.1",
+  "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "QQ 历史身份可以认领了",
+      "title": "QQ 历史昵称显示更准确",
       "items": [
-        "已获授权的空间会在账号与安全中显示 QQ 身份绑定入口",
-        "验证数字 QQ 邮箱后，迁移的历史说说和评论会归入当前账号",
-        "迁移自 QQ 空间的说说和评论现在可以还原原始动态表情"
+        "迁移昵称会自动清理无法显示的 QQ 表情，不再出现残缺标记",
+        "纯表情或空白昵称会使用稳定的 QQ 用户代称"
       ]
     },
     "en": {
-      "title": "Claim your historical QQ identity",
+      "title": "More accurate historical QQ names",
       "items": [
-        "Eligible spaces now show QQ identity binding under Account & security",
-        "Verify the numeric QQ mailbox to bring migrated posts and comments into your account",
-        "Posts and comments migrated from QZone can now restore their original animated emoticons"
+        "Migrated names now remove QQ emoticons that cannot be displayed instead of showing broken markers",
+        "Emoticon-only or blank names now use a stable QQ user label"
       ]
     }
   }
