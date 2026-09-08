@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sermo 联系方式绑定系统</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #10231c;
+      --muted: #74837d;
+      --line: #dce4df;
+      --paper: #fbfcfa;
+      --canvas: #e9efeb;
+      --soft: #f1f5f2;
+      --green: #08c983;
+      --green-deep: #087553;
+      --shadow: 0 24px 70px rgba(30, 54, 44, .13);
+      --drawer-ink: #10231c;
+      --drawer-muted: #77857f;
+      --drawer-line: #dce4df;
+      --drawer-paper: #fff;
+      --drawer-soft: #f4f7f5;
+      --provider: #12a8ee;
+      font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; display: flex; min-height: 70px; align-items: center;
+      justify-content: space-between; gap: 20px; padding: 10px 28px; border-bottom: 1px solid rgba(111, 133, 123, .22);
+      background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 13px 13px 13px 5px; color: #053023; background: var(--green); font-weight: 800; }
+    .brand strong, .brand small { display: block; }
+    .brand strong { font-size: 14px; }
+    .brand small { margin-top: 2px; color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .state-switch { display: flex; padding: 4px; border: 1px solid var(--line); border-radius: 13px; background: var(--soft); }
+    .state-switch button, .theme-button { border: 0; cursor: pointer; }
+    .state-switch button { padding: 8px 13px; border-radius: 9px; color: var(--muted); background: transparent; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .state-switch button.is-active { color: var(--ink); background: var(--paper); box-shadow: 0 4px 12px rgba(36, 60, 49, .08); }
+    .theme-button { padding: 10px 14px; border-radius: 12px; color: var(--muted); background: var(--soft); font-size: 11px; font-weight: 700; }
+    main { width: min(1500px, 100%); margin: auto; padding: 55px 28px 70px; }
+    .intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 40px; margin: 0 auto 38px; }
+    .eyebrow { color: var(--green-deep); font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+    h1 { max-width: 780px; margin: 12px 0 13px; font-size: clamp(35px, 4.5vw, 64px); line-height: 1.02; letter-spacing: -.05em; }
+    .intro p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+    .principle { display: grid; grid-template-columns: repeat(3, auto); gap: 7px; }
+    .principle span { padding: 9px 11px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: rgba(255,255,255,.45); font-size: 10px; font-weight: 700; }
+    .workbench { display: grid; grid-template-columns: 310px minmax(400px, 530px) minmax(260px, 1fr); min-height: 720px; overflow: hidden; border: 1px solid rgba(112, 136, 125, .25); border-radius: 32px; background: var(--paper); box-shadow: var(--shadow); }
+    .catalog { padding: 28px 21px; border-right: 1px solid var(--line); background: linear-gradient(145deg, color-mix(in srgb, var(--soft) 85%, #e2eee8), var(--paper)); }
+    .panel-label { display: flex; align-items: center; justify-content: space-between; margin: 0 4px 18px; }
+    .panel-label strong { font-size: 13px; }
+    .panel-label span { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+    .channel-group + .channel-group { margin-top: 27px; }
+    .channel-group h2 { margin: 0 5px 10px; color: var(--muted); font-size: 10px; letter-spacing: .08em; }
+    .channel-list { display: grid; gap: 7px; }
+    .channel-card {
+      position: relative; display: grid; grid-template-columns: 43px minmax(0,1fr) auto; align-items: center; gap: 11px;
+      width: 100%; padding: 10px; border: 1px solid transparent; border-radius: 16px; text-align: left; background: transparent; cursor: pointer; transition: .2s ease;
+    }
+    .channel-card:hover { background: color-mix(in srgb, var(--paper) 75%, transparent); }
+    .channel-card.is-active { border-color: color-mix(in srgb, var(--provider) 35%, var(--line)); background: var(--paper); box-shadow: 0 9px 22px rgba(43, 68, 57, .08); }
+    .channel-card.is-active::before { position: absolute; left: -22px; width: 3px; height: 28px; border-radius: 5px; background: var(--provider); content: ""; }
+    .app-icon { display: grid; width: 43px; height: 43px; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px solid rgba(25, 56, 43, .07); border-radius: 13px; background: #fff; box-shadow: 0 4px 11px rgba(44, 65, 57, .08); }
+    .app-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .app-icon svg { width: 23px; height: 23px; stroke: currentColor; }
+    .channel-card strong, .channel-card small { display: block; }
+    .channel-card strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .channel-card small { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .channel-card > b { width: 7px; height: 7px; border-radius: 50%; background: #cbd5d0; }
+    .channel-card.is-bound > b { background: var(--green); box-shadow: 0 0 0 4px rgba(8, 201, 131, .1); }
+
+    .stage { position: relative; display: grid; place-items: center; padding: 34px 35px; background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.95), rgba(237,243,239,.78)); }
+    .stage::before { position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(57, 92, 77, .12) 1px, transparent 1px), linear-gradient(90deg, rgba(57, 92, 77, .12) 1px, transparent 1px); background-size: 22px 22px; content: ""; mask-image: radial-gradient(circle, #000, transparent 72%); }
+    .drawer { position: relative; width: min(100%, 430px); min-height: 640px; overflow: hidden; border: 1px solid var(--drawer-line); border-radius: 28px 28px 20px 20px; color: var(--drawer-ink); background: var(--drawer-paper); box-shadow: 0 30px 70px rgba(26, 48, 39, .18); }
+    .drawer.is-dark { color-scheme: dark; --drawer-ink: #eef7f2; --drawer-muted: #90a49a; --drawer-line: #294137; --drawer-paper: #0d1c17; --drawer-soft: #14261f; }
+    .drawer-header { display: grid; grid-template-columns: 40px 1fr 40px; height: 64px; align-items: center; border-bottom: 1px solid var(--drawer-line); }
+    .drawer-header button { display: grid; width: 34px; height: 34px; margin-left: 10px; place-items: center; border: 0; border-radius: 50%; color: var(--drawer-muted); background: transparent; font-size: 24px; cursor: pointer; }
+    .drawer-header strong { text-align: center; font-size: 15px; }
+    .drawer-body { min-height: 575px; padding: 25px 25px 22px; }
+    .provider-head { display: grid; grid-template-columns: 58px minmax(0,1fr); gap: 15px; align-items: center; margin-bottom: 22px; }
+    .provider-head .app-icon { width: 58px; height: 58px; border-radius: 17px; }
+    .provider-head h3 { margin: 0 0 5px; font-size: 18px; }
+    .provider-head p { margin: 0; color: var(--drawer-muted); font-size: 10px; line-height: 1.55; }
+    .flow-rail { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0 0 22px; counter-reset: step; }
+    .flow-step { position: relative; display: grid; justify-items: center; gap: 6px; color: var(--drawer-muted); font-size: 9px; font-weight: 700; }
+    .flow-step::before { position: relative; z-index: 2; display: grid; width: 24px; height: 24px; place-items: center; border: 1px solid var(--drawer-line); border-radius: 50%; background: var(--drawer-paper); counter-increment: step; content: counter(step); }
+    .flow-step::after { position: absolute; z-index: 1; top: 12px; left: 50%; width: 100%; height: 1px; background: var(--drawer-line); content: ""; }
+    .flow-step:last-child::after { display: none; }
+    .flow-step.is-active { color: var(--green-deep); }
+    .drawer.is-dark .flow-step.is-active { color: #5de0b3; }
+    .flow-step.is-active::before { color: #062f22; border-color: var(--green); background: var(--green); box-shadow: 0 0 0 4px rgba(8,201,131,.11); }
+    .flow-step.is-past::before { color: var(--green-deep); border-color: color-mix(in srgb, var(--green) 42%, var(--drawer-line)); content: "✓"; }
+    .state { display: none; animation: rise .26s ease both; }
+    .drawer[data-state="connect"] .state-connect, .drawer[data-state="verify"] .state-verify, .drawer[data-state="bound"] .state-bound { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(7px); } }
+    .setup-note { display: none; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; gap: 10px; margin-bottom: 18px; padding: 11px 12px; border-radius: 13px; background: color-mix(in srgb, var(--provider) 8%, var(--drawer-soft)); }
+    .setup-note.is-visible { display: grid; }
+    .setup-note i { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; color: var(--provider); background: color-mix(in srgb, var(--provider) 12%, var(--drawer-paper)); font-size: 14px; font-style: normal; font-weight: 800; }
+    .setup-note strong, .setup-note small { display: block; }
+    .setup-note strong { font-size: 10px; }
+    .setup-note small { margin-top: 2px; color: var(--drawer-muted); font-size: 8px; }
+    .setup-note button { border: 0; color: var(--provider); background: transparent; font-size: 9px; font-weight: 800; cursor: pointer; }
+    .field + .field { margin-top: 13px; }
+    .field label { display: block; margin: 0 3px 7px; color: var(--drawer-muted); font-size: 9px; font-weight: 800; }
+    .input-shell { display: flex; min-height: 51px; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--drawer-line); border-radius: 14px; background: var(--drawer-soft); }
+    .input-shell:focus-within { border-color: color-mix(in srgb, var(--green) 65%, var(--drawer-line)); box-shadow: 0 0 0 3px rgba(8,201,131,.08); }
+    .input-shell input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--drawer-ink); background: transparent; font-size: 12px; font-weight: 650; }
+    .input-shell span { color: var(--drawer-muted); font-size: 10px; font-weight: 700; }
+    .field-hint { margin: 7px 3px 0; color: var(--drawer-muted); font-size: 8px; line-height: 1.55; }
+    .primary, .secondary { width: 100%; min-height: 48px; border-radius: 14px; cursor: pointer; font-size: 11px; font-weight: 800; }
+    .primary { margin-top: 18px; border: 0; color: #052c20; background: var(--green); box-shadow: 0 10px 22px rgba(8,201,131,.18); }
+    .secondary { margin-top: 9px; border: 1px solid var(--drawer-line); color: var(--drawer-muted); background: transparent; }
+    .safety { display: flex; gap: 8px; margin: 17px 2px 0; color: var(--drawer-muted); font-size: 8px; line-height: 1.55; }
+    .safety b { color: var(--green-deep); }
+    .verify-target { display: grid; grid-template-columns: 39px minmax(0,1fr); align-items: center; gap: 10px; margin-bottom: 23px; padding: 12px; border: 1px solid var(--drawer-line); border-radius: 15px; background: var(--drawer-soft); }
+    .verify-target .app-icon { width: 39px; height: 39px; border-radius: 11px; }
+    .verify-target small, .verify-target strong { display: block; }
+    .verify-target small { color: var(--drawer-muted); font-size: 8px; }
+    .verify-target strong { margin-top: 3px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .code-label { margin: 0 0 9px; color: var(--drawer-muted); font-size: 9px; font-weight: 800; }
+    .code-boxes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; }
+    .code-boxes i { display: grid; height: 51px; place-items: center; border: 1px solid var(--drawer-line); border-radius: 12px; color: var(--drawer-ink); background: var(--drawer-paper); font: normal 800 16px "Avenir Next", sans-serif; }
+    .code-boxes i:last-child { border-color: var(--green); box-shadow: 0 0 0 3px rgba(8,201,131,.08); }
+    .resend { margin: 11px 2px 0; color: var(--drawer-muted); font-size: 8px; text-align: center; }
+    .bound-card { margin-top: 15px; padding: 25px 20px 20px; border: 1px solid var(--drawer-line); border-radius: 20px; background: linear-gradient(145deg, color-mix(in srgb, var(--provider) 6%, var(--drawer-paper)), var(--drawer-paper)); text-align: center; }
+    .bound-card .app-icon { width: 68px; height: 68px; margin: auto; border-radius: 20px; }
+    .bound-card .check { position: relative; display: grid; width: 23px; height: 23px; margin: -17px auto 0; place-items: center; border: 3px solid var(--drawer-paper); border-radius: 50%; color: #052d20; background: var(--green); font-size: 10px; font-weight: 900; }
+    .bound-card h3 { margin: 17px 0 5px; font-size: 18px; }
+    .bound-card p { margin: 0; color: var(--drawer-muted); font-size: 9px; }
+    .receipt { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin-top: 20px; padding: 13px; border-top: 1px dashed var(--drawer-line); border-bottom: 1px dashed var(--drawer-line); text-align: left; }
+    .receipt span, .receipt b { display: block; }
+    .receipt span { color: var(--drawer-muted); font-size: 8px; }
+    .receipt b { margin-top: 3px; overflow: hidden; max-width: 250px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .receipt em { color: var(--green-deep); font-size: 9px; font-style: normal; font-weight: 800; }
+
+    .spec { padding: 29px 26px; border-left: 1px solid var(--line); }
+    .spec-block + .spec-block { margin-top: 29px; padding-top: 24px; border-top: 1px solid var(--line); }
+    .spec h2 { margin: 0 0 7px; font-size: 14px; }
+    .spec > p, .spec-block > p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .anatomy { position: relative; margin-top: 17px; padding: 18px; border-radius: 20px; background: var(--soft); }
+    .anatomy-row { display: grid; grid-template-columns: 33px 1fr auto; align-items: center; gap: 9px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .anatomy-row:last-child { border: 0; }
+    .anatomy-row b { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 9px; color: var(--green-deep); background: var(--paper); font-size: 9px; }
+    .anatomy-row strong { font-size: 10px; }
+    .anatomy-row span { color: var(--muted); font-size: 8px; }
+    .rules { display: grid; gap: 12px; margin-top: 17px; }
+    .rule { display: grid; grid-template-columns: 24px 1fr; gap: 9px; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .rule i { display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--green-deep); font-style: normal; font-weight: 800; }
+    .token-strip { display: flex; gap: 7px; margin-top: 15px; }
+    .token-strip span { flex: 1; height: 39px; border-radius: 10px; }
+    .token-strip span:nth-child(1) { background: var(--green); }
+    .token-strip span:nth-child(2) { background: var(--provider); }
+    .token-strip span:nth-child(3) { border: 1px solid var(--line); background: var(--soft); }
+    .token-strip span:nth-child(4) { background: var(--ink); }
+    .legend { display: flex; justify-content: space-between; margin-top: 7px; color: var(--muted); font-size: 7px; font-weight: 700; }
+
+    @media (max-width: 1130px) {
+      .intro { grid-template-columns: 1fr; }
+      .principle { justify-content: start; }
+      .workbench { grid-template-columns: 275px minmax(400px,1fr); }
+      .spec { display: none; }
+    }
+    @media (max-width: 760px) {
+      .topbar { display: grid; grid-template-columns: auto minmax(0,1fr); padding: 9px 12px; }
+      .brand small, .theme-button { display: none; }
+      .top-actions { min-width: 0; justify-content: flex-end; }
+      .state-switch button { flex: 1; padding-inline: 9px; font-size: 9px; }
+      main { padding: 35px 0 0; }
+      .intro { padding: 0 18px; }
+      .intro h1 { font-size: 37px; }
+      .principle { grid-template-columns: 1fr 1fr; }
+      .principle span:last-child { grid-column: 1 / -1; }
+      .workbench { display: block; min-height: 0; border: 0; border-radius: 28px 28px 0 0; box-shadow: none; }
+      .catalog { overflow: hidden; padding: 20px 14px 15px; border: 0; border-bottom: 1px solid var(--line); }
+      .channel-group { display: contents; }
+      .channel-group h2 { margin-top: 11px; }
+      .channel-list { display: flex; overflow-x: auto; padding: 1px 0 7px; scrollbar-width: none; }
+      .channel-list::-webkit-scrollbar { display: none; }
+      .channel-card { min-width: 155px; }
+      .channel-card.is-active::before { display: none; }
+      .stage { padding: 25px 10px 38px; }
+      .drawer { min-height: 620px; border-radius: 25px 25px 18px 18px; }
+      .drawer-body { min-height: 555px; padding-inline: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">S</span><span><strong>Sermo 言浪</strong><small>CHANNEL BINDING SYSTEM</small></span></div>
+    <div class="top-actions">
+      <div class="state-switch" aria-label="流程状态">
+        <button class="is-active" data-state="connect" type="button">填写信息</button>
+        <button data-state="verify" type="button">输入验证码</button>
+        <button data-state="bound" type="button">绑定完成</button>
+      </div>
+      <button class="theme-button" id="theme" type="button">深色 Drawer</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><span class="eyebrow">ONE FLOW · SEVEN CHANNELS</span><h1>不是七套表单，<br />而是一座绑定接驳台。</h1><p>身份地址与即时提醒使用同一套 Drawer 骨架：识别渠道、填写接入信息、验证码确认、生成绑定凭据。应用自己的图标和颜色负责“我正在绑定谁”，Sermo 绿色只负责“下一步做什么”。</p></div>
+      <div class="principle"><span>真实应用图标</span><span>复用验证码组件</span><span>字段按渠道伸缩</span></div>
+    </section>
+
+    <section class="workbench">
+      <aside class="catalog">
+        <div class="panel-label"><strong>绑定渠道</strong><span>7 CHANNELS</span></div>
+        <section class="channel-group"><h2>账号与送达</h2><div class="channel-list">
+          <button class="channel-card is-bound" data-provider="email" type="button"><span class="app-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke-width="1.8"/><path d="m5 8 7 5 7-5" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>电子邮箱</strong><small>已绑定</small></span><b></b></button>
+          <button class="channel-card" data-provider="sms" type="button"><span class="app-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2.5" width="12" height="19" rx="3" stroke-width="1.8"/><path d="M10 18.5h4" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>手机短信</strong><small>未绑定</small></span><b></b></button>
+          <button class="channel-card is-active" data-provider="qq" type="button"><span class="app-icon"><img src="assets/qqmail.jpg" alt="QQ 邮箱" /></span><span><strong>QQ 号</strong><small>身份认领</small></span><b></b></button>
+        </div></section>
+        <section class="channel-group"><h2>即时提醒应用</h2><div class="channel-list">
+          <button class="channel-card is-bound" data-provider="bark" type="button"><span class="app-icon"><img src="assets/bark.jpg" alt="Bark" /></span><span><strong>Bark</strong><small>已连接</small></span><b></b></button>
+          <button class="channel-card" data-provider="ntfy" type="button"><span class="app-icon"><img src="assets/ntfy.png" alt="ntfy" /></span><span><strong>ntfy</strong><small>未连接</small></span><b></b></button>
+          <button class="channel-card" data-provider="gotify" type="button"><span class="app-icon"><img src="assets/gotify.svg" alt="Gotify" /></span><span><strong>Gotify</strong><small>未连接</small></span><b></b></button>
+          <button class="channel-card" data-provider="pushdeer" type="button"><span class="app-icon"><img src="assets/pushdeer.png" alt="PushDeer" /></span><span><strong>PushDeer</strong><small>未连接</small></span><b></b></button>
+        </div></section>
+      </aside>
+
+      <section class="stage">
+        <div class="drawer" data-state="connect" data-provider="qq">
+          <header class="drawer-header"><button type="button" aria-label="返回">‹</button><strong id="drawer-title">QQ号绑定</strong><span></span></header>
+          <div class="drawer-body">
+            <div class="provider-head"><span class="app-icon" id="hero-icon"><img src="assets/qqmail.jpg" alt="" /></span><span><h3 id="provider-name">认领 QQ 身份</h3><p id="provider-desc">验证 QQ 邮箱，将历史说说与评论归入当前账号。</p></span></div>
+            <div class="flow-rail"><span class="flow-step is-active">接入</span><span class="flow-step">验证</span><span class="flow-step">完成</span></div>
+
+            <section class="state state-connect">
+              <div class="setup-note" id="setup-note"><i>↗</i><span><strong id="setup-title">先在应用中准备</strong><small id="setup-copy">取得接入所需的地址或密钥</small></span><button type="button">查看指引</button></div>
+              <div id="fields"></div>
+              <button class="primary next-state" data-next="verify" id="send-button" type="button">发送验证码</button>
+              <p class="safety"><b>✓</b><span id="safety-copy">验证码只用于确认当前渠道归你所有，不会读取邮箱内容。</span></p>
+            </section>
+
+            <section class="state state-verify">
+              <div class="verify-target"><span class="app-icon" id="verify-icon"><img src="assets/qqmail.jpg" alt="" /></span><span><small>验证码已送达</small><strong id="verify-target">1031086074@qq.com</strong></span></div>
+              <p class="code-label">6 位验证码</p>
+              <div class="code-boxes" aria-label="复用 VerificationCodeInput"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div>
+              <button class="primary next-state" data-next="bound" id="verify-button" type="button">确认绑定</button>
+              <button class="secondary" type="button">重新发送 · 48s</button>
+              <p class="resend">验证码 10 分钟内有效</p>
+            </section>
+
+            <section class="state state-bound">
+              <div class="bound-card"><span class="app-icon" id="bound-icon"><img src="assets/qqmail.jpg" alt="" /></span><span class="check">✓</span><h3 id="bound-title">QQ 号已绑定</h3><p id="bound-copy">该渠道已经可以接收 Sermo 的消息</p><div class="receipt"><span><span>绑定凭据</span><b id="receipt-value">1031086074</b></span><em>已验证</em></div></div>
+              <button class="secondary" type="button">完成</button>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <aside class="spec">
+        <div class="panel-label"><strong>统一视觉语法</strong><span>SYSTEM</span></div>
+        <p>Drawer 不随 App 重做皮肤，只在“渠道识别层”切换图标与辅助色。这样既有真实品牌感，也不会把设置页变成应用商店。</p>
+        <div class="anatomy">
+          <div class="anatomy-row"><b>01</b><strong>渠道身份</strong><span>图标 + 名称</span></div>
+          <div class="anatomy-row"><b>02</b><strong>接入凭据</strong><span>动态字段</span></div>
+          <div class="anatomy-row"><b>03</b><strong>所有权验证</strong><span>共享组件</span></div>
+          <div class="anatomy-row"><b>04</b><strong>绑定回执</strong><span>统一完成态</span></div>
+        </div>
+        <section class="spec-block"><h2>组件复用边界</h2><div class="rules"><div class="rule"><i>✓</i><span>验证码输入直接复用现有 <b>VerificationCodeInput</b>，包括焦点、粘贴和自动提交能力。</span></div><div class="rule"><i>✓</i><span>邮箱、短信和所有即时 App 共用 Header、步骤轨、按钮与绑定回执。</span></div><div class="rule"><i>↗</i><span>仅字段定义、准备指引、应用图标和品牌辅助色由 provider metadata 驱动。</span></div></div></section>
+        <section class="spec-block"><h2>颜色职责</h2><p>绿色是 Sermo 的操作反馈；第二格随当前渠道变化，只承担识别，不抢占主按钮。</p><div class="token-strip"><span></span><span></span><span></span><span></span></div><div class="legend"><span>ACTION</span><span>PROVIDER</span><span>SURFACE</span><span>TEXT</span></div></section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const svgIcons = {
+      email: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="m5 8 7 5 7-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      sms: '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2.5" width="12" height="19" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M10 18.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    };
+    const providers = {
+      email: { color:'#74867e', icon:'email', title:'绑定电子邮箱', name:'电子邮箱', desc:'用于安全验证、账号找回和延迟邮件提醒。', fields:[['邮箱地址','jyonn@example.com','']], target:'jy***@example.com', send:'发送验证码', verify:'确认绑定', receipt:'jyonn@example.com', safety:'我们只会发送账号与通知邮件，不会读取你的邮箱内容。', bound:'邮箱已绑定' },
+      sms: { color:'#16a978', icon:'sms', title:'绑定手机号', name:'手机短信', desc:'用于重要安全验证与需要立即送达的短信提醒。', fields:[['手机号码','138 0000 9072','+86']], target:'+86 138 **** 9072', send:'发送验证码', verify:'确认绑定', receipt:'+86 138 0000 9072', safety:'手机号仅用于安全与通知，不会在个人主页公开展示。', bound:'手机号已绑定' },
+      qq: { color:'#12a8ee', image:'assets/qqmail.jpg', title:'QQ号绑定', name:'认领 QQ 身份', desc:'验证 QQ 邮箱，将历史说说与评论归入当前账号。', fields:[['QQ 号','1031086074','@qq.com']], target:'1031086074@qq.com', send:'发送验证码', verify:'确认绑定并认领', receipt:'1031086074', safety:'绑定后历史身份将合并至当前账号，请确认 QQ 号无误。', bound:'QQ 号已绑定' },
+      bark: { color:'#20bd81', image:'assets/bark.jpg', title:'绑定 Bark', name:'Bark 即时提醒', desc:'通过你的 Bark 地址，将消息即时推送到 Apple 设备。', setup:['打开 Bark 获取地址','复制以 https://api.day.app 开头的推送地址'], fields:[['Bark 地址','https://api.day.app/AbCDefGh','']], target:'Bark · iPhone 15 Pro', send:'发送测试验证码', verify:'确认连接', receipt:'api.day.app/AbCDefGh', safety:'测试消息成功后才会保存地址；好友上线仅通过即时渠道发送。', bound:'Bark 已连接' },
+      ntfy: { color:'#338574', image:'assets/ntfy.png', title:'绑定 ntfy', name:'ntfy 即时提醒', desc:'订阅一个专属 topic，在任意设备上接收即时消息。', setup:['先创建私有 Topic','建议使用难以猜测的 topic 名称'], fields:[['Topic 地址','https://ntfy.sh/sermo-jyonn',''],['访问令牌（可选）','tk_xxxxxxxxxxxx','']], target:'ntfy.sh/sermo-jyonn', send:'发送测试验证码', verify:'确认订阅', receipt:'ntfy.sh/sermo-jyonn', safety:'公开 ntfy Topic 可能被他人订阅，推荐配置访问令牌。', bound:'ntfy 已连接' },
+      gotify: { color:'#2f8bd1', image:'assets/gotify.svg', title:'绑定 Gotify', name:'Gotify 即时提醒', desc:'连接你自托管的 Gotify 实例，消息数据由你掌控。', setup:['在 Gotify 创建应用','复制服务地址与 Application Token'], fields:[['服务器地址','https://push.example.com',''],['Application Token','A9.xxxxxxxxxxxxx','']], target:'push.example.com', send:'发送测试验证码', verify:'确认连接', receipt:'push.example.com · A9.••••••', safety:'Token 只用于向你的 Gotify 应用写入消息，将加密保存。', bound:'Gotify 已连接' },
+      pushdeer: { color:'#e49822', image:'assets/pushdeer.png', title:'绑定 PushDeer', name:'PushDeer 即时提醒', desc:'使用 PushKey 将 Sermo 消息投递到你的 PushDeer 客户端。', setup:['从 PushDeer 复制 PushKey','自托管用户可以同时修改服务器地址'], fields:[['PushKey','PDUxxxxxxxxxxxxxxxx',''],['服务器地址（可选）','https://api2.pushdeer.com','']], target:'PushDeer · PDU••••••••', send:'发送测试验证码', verify:'确认连接', receipt:'PDUxxxxxxxxxxxxxxxx', safety:'PushKey 等同于推送凭据，请勿分享给其他人。', bound:'PushDeer 已连接' }
+    };
+    const drawer = document.querySelector('.drawer');
+    const cards = [...document.querySelectorAll('.channel-card')];
+    const stateButtons = [...document.querySelectorAll('.state-switch button')];
+    let currentProvider = 'qq';
+    let dark = false;
+
+    function iconMarkup(provider) {
+      return provider.image ? `<img src="${provider.image}" alt="" />` : svgIcons[provider.icon];
+    }
+    function setState(state) {
+      drawer.dataset.state = state;
+      stateButtons.forEach(button => button.classList.toggle('is-active', button.dataset.state === state));
+      const order = ['connect','verify','bound'];
+      document.querySelectorAll('.flow-step').forEach((step, index) => {
+        const active = order.indexOf(state);
+        step.classList.toggle('is-active', index === active);
+        step.classList.toggle('is-past', index < active);
+      });
+    }
+    function setProvider(key) {
+      currentProvider = key;
+      const provider = providers[key];
+      drawer.dataset.provider = key;
+      drawer.style.setProperty('--provider', provider.color);
+      document.documentElement.style.setProperty('--provider', provider.color);
+      cards.forEach(card => {
+        card.classList.toggle('is-active', card.dataset.provider === key);
+        if (card.dataset.provider === key) card.style.setProperty('--provider', provider.color);
+      });
+      document.querySelector('#drawer-title').textContent = provider.title;
+      document.querySelector('#provider-name').textContent = provider.name;
+      document.querySelector('#provider-desc').textContent = provider.desc;
+      ['hero-icon','verify-icon','bound-icon'].forEach(id => document.querySelector(`#${id}`).innerHTML = iconMarkup(provider));
+      const setup = document.querySelector('#setup-note');
+      setup.classList.toggle('is-visible', Boolean(provider.setup));
+      if (provider.setup) {
+        document.querySelector('#setup-title').textContent = provider.setup[0];
+        document.querySelector('#setup-copy').textContent = provider.setup[1];
+      }
+      document.querySelector('#fields').innerHTML = provider.fields.map(([label,value,suffix]) => `<div class="field"><label>${label}</label><div class="input-shell"><input value="${value}" aria-label="${label}" />${suffix ? `<span>${suffix}</span>` : ''}</div></div>`).join('');
+      document.querySelector('#send-button').textContent = provider.send;
+      document.querySelector('#verify-button').textContent = provider.verify;
+      document.querySelector('#safety-copy').textContent = provider.safety;
+      document.querySelector('#verify-target').textContent = provider.target;
+      document.querySelector('#bound-title').textContent = provider.bound;
+      document.querySelector('#bound-copy').textContent = key === 'qq' ? '历史身份已归入当前 Sermo 账号' : '该渠道现在可以接收 Sermo 的消息';
+      document.querySelector('#receipt-value').textContent = provider.receipt;
+      setState('connect');
+    }
+    cards.forEach(card => card.addEventListener('click', () => setProvider(card.dataset.provider)));
+    stateButtons.forEach(button => button.addEventListener('click', () => setState(button.dataset.state)));
+    document.querySelectorAll('.next-state').forEach(button => button.addEventListener('click', () => setState(button.dataset.next)));
+    document.querySelector('#theme').addEventListener('click', event => {
+      dark = !dark;
+      drawer.classList.toggle('is-dark', dark);
+      event.currentTarget.textContent = dark ? '浅色 Drawer' : '深色 Drawer';
+    });
+    setProvider(currentProvider);
+  </script>
+</body>
+</html>
