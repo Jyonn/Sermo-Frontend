@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.08.5",
+  "id": "2026.09.08.6",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "QQ 号入口更清晰",
+      "title": "渠道绑定集中管理",
       "items": [
-        "账号与安全中的 QQ 号已移至独立分组，绑定状态一眼可见",
-        "QQ 绑定页标题和入口文案进一步统一"
+        "邮件、手机、即时应用和 QQ 绑定现已集中到账号与安全",
+        "全新的纵向步骤让填写、验证和完成状态更清晰"
       ]
     },
     "en": {
-      "title": "Clearer QQ number access",
+      "title": "Binding channels in one place",
       "items": [
-        "The QQ number now has its own group in Account & security with a clear binding status",
-        "QQ binding titles and entry labels are now consistent"
+        "Email, phone, instant apps, and QQ bindings now live together in Account & security",
+        "A new vertical flow makes setup, verification, and completion easier to follow"
       ]
     }
   }

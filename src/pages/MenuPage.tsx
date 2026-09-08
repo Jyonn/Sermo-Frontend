@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
+import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
+import { ContactChannelIcon } from "../components/ContactChannelIcon";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
-import barkAppIconUrl from "../assets/bark-app-icon.jpg";
 import { AppChrome } from "../components/AppChrome";
 import { AvatarPresetDialog } from "../components/AvatarPresetDialog";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -169,6 +170,7 @@ function visibleAvatarFrame(style?: string) {
 }
 
 type NotificationSettingsMode = "channel" | "type";
+type BindingChannelKind = "email" | "sms" | "qq" | InstantNotificationProvider;
 type PersonalizationOwnershipFilter = "all" | "owned" | "unowned";
 type ChatPersonalizationPanel = "background" | "bubble" | null;
 type ChatPersonalizationRarity = GrowthRewardDTO["rarity"] | "custom";
@@ -318,23 +320,17 @@ type InstantInstallLink = {
 };
 
 type InstantProviderMeta = {
-  icon: string;
   name: string;
-  platforms: Array<"ios" | "android" | "desktop">;
   installLinks: InstantInstallLink[];
 };
 
 const instantProviderMeta: Record<InstantNotificationProvider, InstantProviderMeta> = {
   bark: {
-    icon: "notifications_active",
     name: "Bark",
-    platforms: ["ios", "desktop"],
     installLinks: [{ href: barkAppStoreUrl, labelKey: "notification.installAppStore", platforms: ["ios", "desktop"] }],
   },
   ntfy: {
-    icon: "campaign",
     name: "ntfy",
-    platforms: ["ios", "android", "desktop"],
     installLinks: [
       { href: "https://apps.apple.com/us/app/ntfy/id1625396347", labelKey: "notification.installAppStore", platforms: ["ios", "desktop"] },
       { href: "https://play.google.com/store/apps/details?id=io.heckel.ntfy", labelKey: "notification.installGooglePlay", platforms: ["android", "desktop"] },
@@ -342,18 +338,14 @@ const instantProviderMeta: Record<InstantNotificationProvider, InstantProviderMe
     ],
   },
   gotify: {
-    icon: "bolt",
     name: "Gotify",
-    platforms: ["android", "desktop"],
     installLinks: [
       { href: "https://f-droid.org/packages/com.github.gotify/", labelKey: "notification.installFDroid", platforms: ["android", "desktop"] },
       { href: "https://github.com/gotify/android/releases", labelKey: "notification.installGithub", platforms: ["android", "desktop"] },
     ],
   },
   pushdeer: {
-    icon: "notifications_active",
     name: "PushDeer",
-    platforms: ["ios", "android", "desktop"],
     installLinks: [
       { href: "https://apps.apple.com/cn/search?term=PushDeer", labelKey: "notification.installAppStore", platforms: ["ios", "desktop"] },
       { href: "https://github.com/easychen/pushdeer/releases", labelKey: "notification.installGithub", platforms: ["android", "desktop"] },
@@ -368,14 +360,6 @@ function QrCodeIcon() {
       <path d="M4.5 4.5h5v5h-5zM14.5 4.5h5v5h-5zM4.5 14.5h5v5h-5z" stroke="currentColor" strokeWidth="1.8" />
       <path d="M15 15h1.5v1.5H18V18h1.5M15 18h1.5v1.5M18 13.5V15h1.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </svg>
-  );
-}
-
-function BarkGuideIcon({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className={`bark-guide-icon${compact ? " is-compact" : ""}`} aria-hidden="true">
-      <img alt="" src={barkAppIconUrl} />
-    </div>
   );
 }
 
@@ -497,7 +481,7 @@ export default function MenuPage() {
     show_self_avatar: false,
     profile_card_theme: "default",
   });
-  const [barkGuideOpen, setBarkGuideOpen] = useState(false);
+  const [bindMoreOpen, setBindMoreOpen] = useState(false);
   const [inviteDrawerOpen, setInviteDrawerOpen] = useState(false);
   const [passwordReminderOpen, setPasswordReminderOpen] = useState(false);
   const [passwordReminderDescription, setPasswordReminderDescription] = useState(() => t("menu.passwordReminder"));
@@ -538,8 +522,6 @@ export default function MenuPage() {
   const [friendInviteLoading, setFriendInviteLoading] = useState(false);
   const [friendInviteExpire, setFriendInviteExpire] = useState<number | null>(null);
   const [friendInviteMode, setFriendInviteMode] = useState<"limited" | "permanent">("limited");
-  const authVerifyRef = useRef<HTMLDivElement | null>(null);
-  const authSheetBodyRef = useRef<HTMLDivElement | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const chatBackgroundFileInputRef = useRef<HTMLInputElement | null>(null);
   const chatBackgroundTrackRef = useRef<HTMLDivElement | null>(null);
@@ -654,15 +636,33 @@ export default function MenuPage() {
   const emailVerified = Boolean(me ? me.email_verified_at : session?.user.email_verified_at);
   const phoneVerified = Boolean(me ? me.phone_verified_at : session?.user.phone_verified_at);
   const deviceFamily = useMemo(() => detectDeviceFamily(), []);
-  const visibleInstantProviders = useMemo(
-    () => (Object.keys(instantProviderMeta) as InstantNotificationProvider[]).filter(
-      (provider) => instantProviderMeta[provider].platforms.includes(deviceFamily),
-    ),
-    [deviceFamily],
-  );
-  const visibleChannelRows = channelRows;
-  const barkBound = instantEndpoints.some((endpoint) => endpoint.provider === "bark");
+  const allInstantProviders = Object.keys(instantProviderMeta) as InstantNotificationProvider[];
   const standalonePwa = isStandalonePwa();
+  const boundBindingChannels: BindingChannelKind[] = [
+    ...(emailVerified ? ["email" as const] : []),
+    ...(phoneVerified ? ["sms" as const] : []),
+    ...instantEndpoints.map((endpoint) => endpoint.provider),
+    ...(space?.qq_binding_available && qqIdentity?.bound ? ["qq" as const] : []),
+  ];
+  const availableBindingChannels: BindingChannelKind[] = [
+    ...(!emailVerified ? ["email" as const] : []),
+    ...(!phoneVerified ? ["sms" as const] : []),
+    ...allInstantProviders.filter((provider) => !instantEndpoints.some((endpoint) => endpoint.provider === provider)),
+    ...(space?.qq_binding_available && !qqIdentity?.bound ? ["qq" as const] : []),
+  ];
+  const bindingChannelName = (kind: BindingChannelKind) => {
+    if (kind === "email") return t("channel.email");
+    if (kind === "sms") return t("channel.sms");
+    if (kind === "qq") return t("qqIdentity.number");
+    return instantProviderMeta[kind].name;
+  };
+  const bindingChannelPurpose = (kind: BindingChannelKind) => t(`contact.purpose.${kind}` as TranslationKey);
+  const bindingChannelValue = (kind: BindingChannelKind) => {
+    if (kind === "email") return me?.email ?? "";
+    if (kind === "sms") return me?.phone ?? "";
+    if (kind === "qq") return qqIdentity?.qq ? `QQ ${qqIdentity.qq}` : "";
+    return instantEndpoints.find((endpoint) => endpoint.provider === kind)?.masked_target ?? "";
+  };
   const webReminderSummary = [
     webReminderPrefs.soundEnabled ? t("webReminder.soundOn") : t("webReminder.soundOff"),
     webReminderPrefs.titleEnabled ? t("webReminder.titleOn") : t("webReminder.titleOff"),
@@ -1110,6 +1110,7 @@ export default function MenuPage() {
       showPasswordReminder();
       return;
     }
+    setSecurityDrawerOpen(true);
     setAuthSheetChannel("email");
     setAuthTarget(channelTarget(me, "email"));
     setAuthCode("");
@@ -1144,18 +1145,6 @@ export default function MenuPage() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [qqIdentityCooldown, qqIdentityExpiresIn, qqIdentityOpen]);
-
-  useEffect(() => {
-    if (!authSheetChannel || !authPending) return;
-    requestAnimationFrame(() => {
-      const body = authSheetBodyRef.current;
-      if (body) {
-        body.scrollTo({ top: body.scrollHeight, behavior: "smooth" });
-      } else {
-        authVerifyRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      }
-    });
-  }, [authPending, authSheetChannel]);
 
   useEffect(() => {
     if (!inviteDrawerOpen || !space?.slug) return;
@@ -1199,19 +1188,9 @@ export default function MenuPage() {
     };
   }, [friendInviteMode, inviteDrawerOpen, space?.slug]);
 
-  const openAuthSheet = (channel: NotificationChannel) => {
+  const openAuthSheet = (channel: "email" | "sms") => {
     if (!hasPassword) {
       showPasswordReminder();
-      return;
-    }
-    if (channel === "bark") {
-      setBarkGuideOpen(true);
-      setAuthSheetChannel("bark");
-      setAuthTarget(channelTarget(me, "bark"));
-      setAuthCode("");
-      setAuthPending(false);
-      setAuthCooldown(0);
-      setAuthExpiresIn(0);
       return;
     }
     setAuthSheetChannel(channel);
@@ -1223,7 +1202,6 @@ export default function MenuPage() {
   };
 
   const closeAuthSheet = () => {
-    setBarkGuideOpen(false);
     setAuthSheetChannel(null);
     setAuthTarget("");
     setAuthCode("");
@@ -1235,25 +1213,6 @@ export default function MenuPage() {
       const routeState = location.state as { emailVerificationReturnTo?: string } | null;
       navigate(routeState?.emailVerificationReturnTo || "/app/menu", { replace: true });
     }
-  };
-
-  const closeBarkGuide = () => {
-    if (authActionState !== "idle") return;
-    setBarkGuideOpen(false);
-    closeAuthSheet();
-  };
-
-  const openBarkGuide = () => {
-    if (!hasPassword) {
-      showPasswordReminder();
-      return;
-    }
-    const current = instantEndpoints.find((item) => item.provider === "bark");
-    setInstantProviderDrawer("bark");
-    setInstantTarget(current?.target ?? "");
-    setInstantSecret("");
-    setInstantVerificationId(null);
-    setInstantCode("");
   };
 
   const closePrefDrawers = () => {
@@ -1277,6 +1236,19 @@ export default function MenuPage() {
     setInstantSecret("");
     setInstantVerificationId(null);
     setInstantCode("");
+  };
+
+  const openBindingChannel = (kind: BindingChannelKind) => {
+    setBindMoreOpen(false);
+    if (kind === "email" || kind === "sms") {
+      openAuthSheet(kind);
+      return;
+    }
+    if (kind === "qq") {
+      openQqIdentity();
+      return;
+    }
+    openInstantProvider(kind);
   };
 
   const sendInstantCode = async () => {
@@ -1308,22 +1280,11 @@ export default function MenuPage() {
       });
       setInstantEndpoints((current) => [...current.filter((item) => item.provider !== endpoint.provider), endpoint]);
       setPrefs((current) => ({ ...current, bark: { ...current.bark, enabled: true } }));
-      setInstantProviderDrawer(null);
+      setInstantVerificationId(null);
+      setInstantCode("");
       showToast(t("notification.instantBound", { provider: instantProviderMeta[endpoint.provider].name }));
     } catch (apiError) {
       showToast(apiError instanceof ApiError ? apiError.message : t("notification.instantBindFailed"), "error");
-    } finally {
-      setInstantSaving(false);
-    }
-  };
-
-  const toggleInstantEndpoint = async (endpoint: InstantNotificationEndpointDTO) => {
-    setInstantSaving(true);
-    try {
-      const updated = await api.updateInstantNotificationEndpoint(endpoint.endpoint_id, !endpoint.enabled);
-      setInstantEndpoints((current) => current.map((item) => item.endpoint_id === updated.endpoint_id ? updated : item));
-    } catch (apiError) {
-      showToast(apiError instanceof ApiError ? apiError.message : t("notification.updateFailed"), "error");
     } finally {
       setInstantSaving(false);
     }
@@ -1439,7 +1400,8 @@ export default function MenuPage() {
       });
       const prefRows = await api.getNotificationPrefs();
       setPrefs(mapPrefs(prefRows));
-      closeAuthSheet();
+      setAuthPending(false);
+      setAuthCode("");
       showToast(authSheetChannel === "email" ? t("contact.emailVerified") : authSheetChannel === "sms" ? t("contact.phoneBound") : t("contact.bound"));
     } catch (apiError) {
       if (apiError instanceof ApiError && apiError.identifier === "PASSWORD_NOT_SET") {
@@ -1867,6 +1829,16 @@ export default function MenuPage() {
     void api.getNotificationTopics().then(setNotificationTopics).catch(() => undefined);
   };
 
+  const openBindingFromNotifications = (kind: "email" | "instant") => {
+    setChannelsDrawerOpen(false);
+    setSecurityDrawerOpen(true);
+    if (kind === "email") {
+      openAuthSheet("email");
+      return;
+    }
+    setBindMoreOpen(true);
+  };
+
   const topicPreference = (channel: number, topic: number, audience: number) => notificationTopics.find(
     (item) => item.channel === channel && item.topic === topic && item.audience === audience,
   );
@@ -1921,12 +1893,9 @@ export default function MenuPage() {
       setSecurityDrawerOpen(true);
       return;
     }
-    if (kind === "bark" ? instantEndpoints.some((endpoint) => endpoint.enabled) : channelVerified(me, kind)) {
-      openPrefDrawer(kind);
-      return;
-    }
+    setSecurityDrawerOpen(true);
     if (kind === "bark") {
-      openBarkGuide();
+      openInstantProvider("bark");
       return;
     }
     openAuthSheet(kind);
@@ -2700,7 +2669,7 @@ export default function MenuPage() {
         }}
         title={t("menu.accountSecurity")}
       >
-        <div className="detail-list">
+        <div className="detail-list account-security-sections">
           <SettingGroup>
             <SettingRow description={!hasPassword ? t("password.securityHint") : undefined} onClick={() => setPasswordSheetOpen(true)} title={hasPassword ? t("password.change") : t("password.setup")} />
             <SettingRow
@@ -2723,6 +2692,30 @@ export default function MenuPage() {
               title={t("account.private")}
               trailing={<SettingSwitch checked={Boolean(me?.is_private_account)} disabled={privateAccountSaving || !phoneVerified} label={t("account.togglePrivate")} onChange={() => void togglePrivateAccount()} />}
             />
+          </SettingGroup>
+          <SettingGroup className="account-binding-group">
+            {boundBindingChannels.map((kind) => (
+              <SettingRow
+                className="account-binding-row"
+                description={bindingChannelValue(kind)}
+                icon={<ContactChannelIcon kind={kind} size="compact" />}
+                key={kind}
+                onClick={() => openBindingChannel(kind)}
+                title={bindingChannelName(kind)}
+                value={kind === "qq" ? t("qqIdentity.boundStatus") : t("contact.boundState")}
+              />
+            ))}
+            {availableBindingChannels.length ? (
+              <SettingRow
+                className="account-bind-more-row"
+                description={t("contact.bindMoreHint", { count: availableBindingChannels.length })}
+                icon={<span className="material-symbols-outlined">add_link</span>}
+                onClick={() => setBindMoreOpen(true)}
+                title={t("contact.bindMore")}
+              />
+            ) : null}
+          </SettingGroup>
+          <SettingGroup>
             <SettingRow
               description={t("account.deleteHint")}
               onClick={() => {
@@ -2733,17 +2726,29 @@ export default function MenuPage() {
               tone="danger"
             />
           </SettingGroup>
-          {space?.qq_binding_available ? (
-            <SettingGroup>
-              <SettingRow
-                onClick={openQqIdentity}
-                title={t("qqIdentity.number")}
-                value={qqIdentity?.bound ? t("qqIdentity.boundStatus") : t("qqIdentity.bindNow")}
-              />
-            </SettingGroup>
-          ) : null}
         </div>
       </SideDrawer>
+
+      <BottomSheet
+        bodyClassName="binding-channel-sheet-body"
+        className="binding-channel-sheet"
+        open={bindMoreOpen}
+        title={t("contact.bindMore")}
+        onClose={() => setBindMoreOpen(false)}
+      >
+        <div className="binding-channel-list">
+          {availableBindingChannels.map((kind) => (
+            <button className="binding-channel-option" key={kind} onClick={() => openBindingChannel(kind)} type="button">
+              <ContactChannelIcon kind={kind} />
+              <span>
+                <strong>{bindingChannelName(kind)}</strong>
+                <small>{bindingChannelPurpose(kind)}</small>
+              </span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
 
       {space?.qq_binding_available ? (
         <SideDrawer
@@ -2759,80 +2764,79 @@ export default function MenuPage() {
           }}
           title={t("qqIdentity.title")}
         >
-          <div className="qq-identity-panel">
+          <div className="binding-flow-drawer qq-identity-panel">
             {qqIdentityLoading ? (
               <ContentLoader label={t("qqIdentity.loading")} rows={2} />
-            ) : qqIdentity?.bound && qqIdentity.qq ? (
-              <section className="qq-identity-certificate">
-                <span className="qq-identity-seal material-symbols-outlined" aria-hidden="true">verified_user</span>
-                <div>
-                  <span>{t("qqIdentity.boundLabel")}</span>
-                  <strong>QQ {qqIdentity.qq}</strong>
-                  <small>{qqIdentity.verified_at ? t("qqIdentity.boundAt", { date: formatContactDate(qqIdentity.verified_at) }) : t("qqIdentity.boundHint")}</small>
-                </div>
-              </section>
             ) : (
               <>
-                <section className="qq-identity-intro">
-                  <span className="qq-identity-monogram" aria-hidden="true">QQ</span>
+                <section className="binding-flow-heading">
+                  <ContactChannelIcon kind="qq" size="large" />
                   <div>
-                    <strong>{t("qqIdentity.claimTitle")}</strong>
-                    <p>{t("qqIdentity.claimHint")}</p>
+                    <strong>{qqIdentity?.bound ? t("qqIdentity.boundLabel") : t("qqIdentity.claimTitle")}</strong>
+                    <small>{qqIdentity?.bound ? t("qqIdentity.boundHint") : t("qqIdentity.claimHint")}</small>
                   </div>
                 </section>
-                <div className="qq-identity-form">
-                  <label className="field-label" htmlFor="qq-identity-number">{t("qqIdentity.number")}</label>
-                  <div className="qq-mailbox-field">
-                    <input
-                      aria-describedby="qq-identity-mailbox-hint"
-                      autoComplete="off"
-                      className="input"
-                      id="qq-identity-number"
-                      inputMode="numeric"
-                      maxLength={20}
-                      onChange={(event) => {
-                        setQqIdentityValue(event.target.value.replace(/\D/g, "").slice(0, 20));
-                        setQqIdentityCode("");
-                        setQqIdentityPending(false);
-                        setQqIdentityExpiresIn(0);
-                      }}
-                      placeholder="123456789"
-                      value={qqIdentityValue}
-                    />
-                    <span>@qq.com</span>
-                  </div>
-                  <small className="qq-identity-mailbox-hint" id="qq-identity-mailbox-hint">
-                    {t("qqIdentity.mailboxHint")}
-                  </small>
-                  <button
-                    className="button contact-flow-primary"
-                    disabled={qqIdentityAction !== "idle" || !/^\d{5,20}$/.test(qqIdentityValue) || qqIdentityCooldown > 0}
-                    onClick={() => void sendQqIdentityCode()}
-                    type="button"
-                  >
-                    {qqIdentityAction === "sending"
-                      ? t("common.sending")
-                      : qqIdentityCooldown > 0
-                        ? t("auth.retryIn", { seconds: qqIdentityCooldown })
-                        : t("qqIdentity.sendCode")}
-                  </button>
-                  <div className={`contact-verify-block${qqIdentityPending ? " is-visible" : ""}`}>
-                    <div className="field-label-row">
-                      <label className="field-label">{t("recovery.code")}</label>
-                      {qqIdentityExpiresIn > 0 ? <span className="field-countdown">{t("auth.validFor", { seconds: qqIdentityExpiresIn })}</span> : null}
-                    </div>
-                    <VerificationCodeInput ariaLabel={t("recovery.code")} value={qqIdentityCode} onChange={setQqIdentityCode} />
-                    <button
-                      className="button contact-flow-primary"
-                      disabled={qqIdentityAction !== "idle" || qqIdentityCode.length !== 6}
-                      onClick={() => void bindQqIdentity()}
-                      type="button"
-                    >
-                      {qqIdentityAction === "binding" ? t("common.processing") : t("qqIdentity.confirm")}
-                    </button>
-                  </div>
-                </div>
-                <p className="qq-identity-permanence">
+                {qqIdentity?.bound && qqIdentity.qq ? (
+                  <BindingSpine steps={[
+                    { state: "complete", title: t("contact.step.prepareIdentity"), description: `QQ ${qqIdentity.qq}` },
+                    { state: "complete", title: t("contact.step.verifyChannel"), description: t("qqIdentity.boundLabel") },
+                    {
+                      state: "active",
+                      title: t("contact.step.bindingComplete"),
+                      description: qqIdentity.verified_at ? t("qqIdentity.boundAt", { date: formatContactDate(qqIdentity.verified_at) }) : t("qqIdentity.boundHint"),
+                      body: <div className="binding-flow-receipt"><span>QQ {qqIdentity.qq}</span><strong>{t("qqIdentity.boundStatus")}</strong></div>,
+                    },
+                  ]} />
+                ) : (
+                  <BindingSpine steps={[
+                    {
+                      state: qqIdentityPending ? "complete" : "active",
+                      title: t("contact.step.prepareIdentity"),
+                      description: qqIdentityPending ? `${qqIdentityValue}@qq.com` : t("qqIdentity.mailboxHint"),
+                      body: (
+                        <div className="binding-spine-form">
+                          <label className="field-label" htmlFor="qq-identity-number">{t("qqIdentity.number")}</label>
+                          <div className="qq-mailbox-field">
+                            <input
+                              autoComplete="off"
+                              className="input"
+                              id="qq-identity-number"
+                              inputMode="numeric"
+                              maxLength={20}
+                              onChange={(event) => {
+                                setQqIdentityValue(event.target.value.replace(/\D/g, "").slice(0, 20));
+                                setQqIdentityCode("");
+                                setQqIdentityPending(false);
+                                setQqIdentityExpiresIn(0);
+                              }}
+                              placeholder="123456789"
+                              value={qqIdentityValue}
+                            />
+                            <span>@qq.com</span>
+                          </div>
+                          <button className="button" disabled={qqIdentityAction !== "idle" || !/^\d{5,20}$/.test(qqIdentityValue) || qqIdentityCooldown > 0} onClick={() => void sendQqIdentityCode()} type="button">
+                            {qqIdentityAction === "sending" ? t("common.sending") : qqIdentityCooldown > 0 ? t("auth.retryIn", { seconds: qqIdentityCooldown }) : t("qqIdentity.sendCode")}
+                          </button>
+                        </div>
+                      ),
+                    },
+                    {
+                      state: qqIdentityPending ? "active" : "upcoming",
+                      title: t("contact.step.verifyChannel"),
+                      description: qqIdentityPending && qqIdentityExpiresIn > 0 ? t("auth.validFor", { seconds: qqIdentityExpiresIn }) : t("contact.step.verifyChannelHint"),
+                      body: (
+                        <div className="binding-spine-form">
+                          <VerificationCodeInput ariaLabel={t("recovery.code")} value={qqIdentityCode} onChange={setQqIdentityCode} />
+                          <button className="button" disabled={qqIdentityAction !== "idle" || qqIdentityCode.length !== 6} onClick={() => void bindQqIdentity()} type="button">
+                            {qqIdentityAction === "binding" ? t("common.processing") : t("qqIdentity.confirm")}
+                          </button>
+                        </div>
+                      ),
+                    },
+                    { state: "upcoming", title: t("contact.step.bindingComplete"), description: t("qqIdentity.boundHint") },
+                  ]} />
+                )}
+                <p className="binding-flow-note">
                   <span className="material-symbols-outlined" aria-hidden="true">info</span>
                   {t("qqIdentity.permanence")}
                 </p>
@@ -2890,15 +2894,17 @@ export default function MenuPage() {
           </div>
           {notificationSettingsMode === "channel" ? (
             <div className="notification-routing-grid">
-              <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">language</span><div><strong>{t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
-              {visibleChannelRows.map(([channel, _value, label]) => {
-                const verified = channel === "bark" ? instantEndpoints.length > 0 : channelVerified(me, channel);
-                return <button className={`notification-channel-card is-${channel}`} key={channel} onClick={() => channel === "bark" || verified ? openPrefDrawer(channel) : openAuthSheet(channel)} type="button">
-                  <span className="material-symbols-outlined">{channel === "email" ? "mail" : channel === "sms" ? "sms" : "notifications_active"}</span>
-                  <div><strong>{t(label)}</strong><small>{channel === "sms" ? t("common.unsupported") : channel === "bark" ? t("notification.instantEndpointCount", { count: instantEndpoints.filter((item) => item.enabled).length }) : verified ? t("contact.boundState") : t("contact.bindNow")}</small></div>
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>;
-              })}
+              <button className="notification-channel-card is-web" onClick={openWebReminderDrawer} type="button"><span className="material-symbols-outlined">{standalonePwa ? "desktop_windows" : "language"}</span><div><strong>{standalonePwa ? t("channel.system") : t("channel.web")}</strong><small>{webReminderSummary}</small></div><span className="material-symbols-outlined">chevron_right</span></button>
+              <button className="notification-channel-card is-email" onClick={() => emailVerified ? openPrefDrawer("email") : openBindingFromNotifications("email")} type="button">
+                <span className="material-symbols-outlined">mail</span>
+                <div><strong>{t("channel.email")}</strong><small>{emailVerified ? t("contact.boundState") : t("notification.bindInAccountSecurity")}</small></div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+              <button className="notification-channel-card is-bark" onClick={() => instantEndpoints.length ? openPrefDrawer("bark") : openBindingFromNotifications("instant")} type="button">
+                <span className="material-symbols-outlined">notifications_active</span>
+                <div><strong>{t("channel.instant")}</strong><small>{instantEndpoints.length ? t("notification.instantEndpointCount", { count: instantEndpoints.length }) : t("notification.bindInAccountSecurity")}</small></div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
             </div>
           ) : (
             <div className="notification-type-stack">
@@ -2912,7 +2918,7 @@ export default function MenuPage() {
                   {section.topics.map(([topic, audience]) => {
                     const labels: Record<number, string> = { 1: t("notification.chatType"), 2: t("notification.statementLikes"), 3: t("notification.statementComments"), 4: t("notification.commentLikes"), 5: t("notification.commentReplies"), 6: t("notification.onlineType") };
                     return <div className="notification-topic-row" key={`${topic}:${audience}`}><div><strong>{labels[topic]}</strong>{audience ? <small>{audience === 1 ? t("notification.fromFriends") : t("notification.fromOthers")}</small> : null}</div><div className="notification-topic-channels">
-                      {([0, 1, 2, 3] as Array<0 | 1 | 2 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || channel === 2 || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? "language" : channel === 1 ? "mail" : channel === 2 ? "sms" : "notifications_active"}</span></button>)}
+                      {([0, 1, 3] as Array<0 | 1 | 3>).map((channel) => <button aria-label={`${labels[topic]}-${channel}`} className={`notification-mini-toggle${topicEnabled(channel, topic, audience) ? " is-active" : ""}`} disabled={notificationTopicsSaving || (channel === 1 && !emailVerified) || (channel === 3 && instantEndpoints.length === 0) || !topicSupported(channel, topic, audience)} key={channel} onClick={() => void toggleNotificationTopic(channel, topic as 1 | 2 | 3 | 4 | 5 | 6, audience as 0 | 1 | 2)} type="button"><span className="material-symbols-outlined">{channel === 0 ? (standalonePwa ? "desktop_windows" : "language") : channel === 1 ? "mail" : "notifications_active"}</span></button>)}
                     </div></div>;
                   })}
                 </section>
@@ -2927,23 +2933,25 @@ export default function MenuPage() {
         onRouteOpen={() => setWebReminderDrawerOpen(true)}
         open={webReminderDrawerOpen}
         onClose={() => setWebReminderDrawerOpen(false)}
-        title={t("webReminder.title")}
+        title={standalonePwa ? t("webReminder.systemTitle") : t("webReminder.title")}
       >
         <div className="detail-list">
           <div className="menu-pref-list">
-            <div className="menu-pref-row">
-              <div className="row-main">
-                <strong>{t("webReminder.systemNotifications")}</strong>
-                {webPushDescription ? <div className="row-subtle">{webPushDescription}</div> : null}
+            {standalonePwa ? (
+              <div className="menu-pref-row">
+                <div className="row-main">
+                  <strong>{t("webReminder.systemNotifications")}</strong>
+                  {webPushDescription ? <div className="row-subtle">{webPushDescription}</div> : null}
+                </div>
+                <button
+                  aria-label={t("webReminder.toggleSystem")}
+                  className={`switch ${webPushState === "on" ? "active" : ""}`}
+                  disabled={webPushSaving || webPushState === "checking" || webPushState === "unsupported" || webPushState === "denied"}
+                  onClick={() => void toggleWebPush()}
+                  type="button"
+                />
               </div>
-              <button
-                aria-label={t("webReminder.toggleSystem")}
-                className={`switch ${webPushState === "on" ? "active" : ""}`}
-                disabled={webPushSaving || webPushState === "checking" || webPushState === "unsupported" || webPushState === "denied"}
-                onClick={() => void toggleWebPush()}
-                type="button"
-              />
-            </div>
+            ) : null}
             <div className="menu-pref-row">
               <div className="row-main">
                 <strong>{t("webReminder.messageSound")}</strong>
@@ -3036,27 +3044,15 @@ export default function MenuPage() {
         {prefDrawerChannel && activePref ? (
           <div className="menu-pref-settings-stack">
             {prefDrawerChannel === "bark" ? (
-              <section className="instant-endpoint-section">
-                <header>
-                  <strong>{t("notification.instantReceivers")}</strong>
-                  <small>{t("notification.instantReceiversHint")}</small>
-                </header>
-                <div className="instant-endpoint-list">
-                  {visibleInstantProviders.map((provider) => {
-                    const meta = instantProviderMeta[provider];
-                    const endpoint = instantEndpoints.find((item) => item.provider === provider);
-                    return (
-                      <div className={`instant-endpoint-row${endpoint?.enabled ? " is-active" : ""}`} key={provider}>
-                        <button className="instant-endpoint-main" onClick={() => openInstantProvider(provider)} type="button">
-                          <span className="material-symbols-outlined">{meta.icon}</span>
-                          <span><strong>{meta.name}</strong><small>{endpoint?.masked_target ?? t("contact.bindNow")}</small></span>
-                        </button>
-                        {endpoint ? (
-                          <button aria-label={t("notification.toggleReceiver", { provider: meta.name })} className={`switch ${endpoint.enabled ? "active" : ""}`} disabled={instantSaving} onClick={() => void toggleInstantEndpoint(endpoint)} type="button" />
-                        ) : <span className="material-symbols-outlined">chevron_right</span>}
-                      </div>
-                    );
-                  })}
+              <section className="instant-receiver-summary">
+                <strong>{t("notification.instantReceivers")}</strong>
+                <div className="instant-receiver-chips">
+                  {instantEndpoints.map((endpoint) => (
+                    <span className="instant-receiver-chip" key={endpoint.endpoint_id}>
+                      <ContactChannelIcon kind={endpoint.provider} size="compact" />
+                      <span><strong>{instantProviderMeta[endpoint.provider].name}</strong><small>{endpoint.masked_target}</small></span>
+                    </span>
+                  ))}
                 </div>
               </section>
             ) : null}
@@ -3124,42 +3120,6 @@ export default function MenuPage() {
               ) : null}
             </div>
             {renderChannelTopicControls(channelCode(prefDrawerChannel) as 1 | 2 | 3)}
-            {prefDrawerChannel !== "bark" ? <div className="menu-pref-list">
-              <div className="menu-pref-row">
-                <div className="row-main">
-                  <strong>{t("contact.lastUnbound")}</strong>
-                  {contactUnbindAvailableAt(prefDrawerChannel) &&
-                  contactUnbindAvailableAt(prefDrawerChannel)! > Date.now() ? (
-                    <div className="row-subtle">
-                      {t("contact.canUnbindAfter", { date: formatContactDate(contactUnbindAvailableAt(prefDrawerChannel)! / 1000) })}
-                    </div>
-                  ) : null}
-                </div>
-                <div className="menu-pref-row-value">{formatContactDate(contactUnboundAt(prefDrawerChannel))}</div>
-              </div>
-              <button
-                className="menu-pref-row menu-pref-row-button menu-contact-unbind"
-                disabled={
-                  prefSaving ||
-                  Boolean(
-                    contactUnbindAvailableAt(prefDrawerChannel) &&
-                    contactUnbindAvailableAt(prefDrawerChannel)! > Date.now()
-                  )
-                }
-                onClick={() => openUnbindConfirm(prefDrawerChannel)}
-                type="button"
-              >
-                <div className="row-main">
-                  <strong>{t("contact.unbind")}</strong>
-                  <div className="row-subtle">
-                    {prefDrawerChannel === "email"
-                        ? t("contact.emailUnbindLimit")
-                        : t("contact.phoneUnbindLimit")}
-                  </div>
-                </div>
-                <span className="material-symbols-outlined">chevron_right</span>
-              </button>
-            </div> : null}
           </div>
         ) : null}
       </SideDrawer>
@@ -3175,207 +3135,151 @@ export default function MenuPage() {
           const providerInstallLinks = instantProviderMeta[instantProviderDrawer].installLinks.filter(
             (item) => item.platforms.includes(deviceFamily),
           );
-          return (
-            <div className="instant-provider-drawer">
-              <div className="instant-provider-intro">
-                <span className="material-symbols-outlined">{instantProviderMeta[instantProviderDrawer].icon}</span>
-                <div><strong>{t("notification.connectProvider", { provider: providerName })}</strong><small>{t(`notification.providerHint.${instantProviderDrawer}` as TranslationKey)}</small></div>
-              </div>
-              <section className="instant-provider-guide" aria-label={t("notification.setupGuide")}>
-                <header>
-                  <strong>{t("notification.setupGuide")}</strong>
-                  <small>{t("notification.setupGuideHint", { provider: providerName })}</small>
-                </header>
-                <ol>
-                  {[1, 2, 3].map((step) => (
-                    <li key={step}>
-                      <span>{step}</span>
-                      <div>
-                        <strong>{t(`notification.guide.${instantProviderDrawer}.${step}.title` as TranslationKey)}</strong>
-                        <p>{t(`notification.guide.${instantProviderDrawer}.${step}.body` as TranslationKey)}</p>
-                        {step === 1 && providerInstallLinks.length ? (
-                          <div className="instant-provider-install-links">
-                            {providerInstallLinks.map((link) => (
-                              <a href={link.href} key={link.href} rel="noreferrer" target="_blank">
-                                <span>{t(link.labelKey)}</span>
-                                <span className="material-symbols-outlined">open_in_new</span>
-                              </a>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-                {instantProviderDrawer === "pushdeer" ? <p className="instant-provider-caution">{t("notification.pushdeerMaintenanceNote")}</p> : null}
-              </section>
-              <div className="menu-pref-list instant-provider-form">
-                <label className="menu-pref-field">
-                  <span>{t(`notification.providerTarget.${instantProviderDrawer}` as TranslationKey)}</span>
-                  <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} inputMode={instantProviderDrawer === "pushdeer" ? "text" : "url"} onChange={(event) => setInstantTarget(event.target.value)} placeholder={instantProviderDrawer === "bark" ? "https://api.day.app/..." : instantProviderDrawer === "ntfy" ? "https://ntfy.sh/topic" : instantProviderDrawer === "pushdeer" ? "PDU..." : "https://push.example.com"} value={instantTarget} />
-                </label>
-                {instantProviderDrawer !== "bark" ? (
+          const providerSteps: BindingSpineStep[] = endpoint ? [
+            { state: "complete", title: t(`notification.guide.${instantProviderDrawer}.1.title` as TranslationKey), description: t("contact.step.credentialsSaved") },
+            { state: "complete", title: t(`notification.guide.${instantProviderDrawer}.3.title` as TranslationKey), description: t("contact.step.channelVerified") },
+            {
+              state: "active",
+              title: t("contact.step.channelConnected", { channel: providerName }),
+              description: t("contact.step.instantReady"),
+              body: (
+                <div className="binding-spine-bound-actions">
+                  <div className="binding-flow-receipt"><span>{endpoint.masked_target}</span><strong>{t("contact.boundState")}</strong></div>
+                  <button className="danger-button" disabled={instantSaving} onClick={() => void removeInstantEndpoint(endpoint)} type="button">{t("contact.removeReceiver")}</button>
+                </div>
+              ),
+            },
+          ] : [
+            {
+              state: instantVerificationId ? "complete" : "active",
+              title: t(`notification.guide.${instantProviderDrawer}.1.title` as TranslationKey),
+              description: instantVerificationId ? instantTarget : t(`notification.guide.${instantProviderDrawer}.1.body` as TranslationKey),
+              body: (
+                <div className="binding-spine-form">
+                  {providerInstallLinks.length ? (
+                    <div className="instant-provider-install-links">
+                      {providerInstallLinks.map((link) => (
+                        <a href={link.href} key={link.href} rel="noreferrer" target="_blank"><span>{t(link.labelKey)}</span><span className="material-symbols-outlined">open_in_new</span></a>
+                      ))}
+                    </div>
+                  ) : null}
                   <label className="menu-pref-field">
-                    <span>{instantProviderDrawer === "gotify" ? t("notification.appToken") : instantProviderDrawer === "pushdeer" ? t("notification.pushdeerServerOptional") : t("notification.accessTokenOptional")}</span>
-                    <input className="input" disabled={instantSaving || Boolean(instantVerificationId)} inputMode={instantProviderDrawer === "pushdeer" ? "url" : "text"} onChange={(event) => setInstantSecret(event.target.value)} placeholder={instantProviderDrawer === "pushdeer" ? "https://push.example.com" : undefined} type={instantProviderDrawer === "pushdeer" ? "url" : "password"} value={instantSecret} />
+                    <span>{t(`notification.providerTarget.${instantProviderDrawer}` as TranslationKey)}</span>
+                    <input className="input" disabled={instantSaving} inputMode={instantProviderDrawer === "pushdeer" ? "text" : "url"} onChange={(event) => setInstantTarget(event.target.value)} placeholder={instantProviderDrawer === "bark" ? "https://api.day.app/..." : instantProviderDrawer === "ntfy" ? "https://ntfy.sh/topic" : instantProviderDrawer === "pushdeer" ? "PDU..." : "https://push.example.com"} value={instantTarget} />
                   </label>
-                ) : null}
-                {instantVerificationId ? (
-                  <div className="instant-verification-step">
-                    <span>{t("notification.enterReceiverCode")}</span>
-                    <VerificationCodeInput ariaLabel={t("notification.enterReceiverCode")} disabled={instantSaving} onChange={setInstantCode} value={instantCode} />
-                    <button className="button" disabled={instantSaving || instantCode.length !== 6} onClick={() => void bindInstantEndpoint()} type="button">{t("common.done")}</button>
-                  </div>
-                ) : (
-                  <button className="button" disabled={instantSaving || !instantTarget.trim() || (instantProviderDrawer === "gotify" && !instantSecret.trim())} onClick={() => void sendInstantCode()} type="button">{endpoint ? t("notification.reconnect") : t("notification.sendTestCode")}</button>
-                )}
-              </div>
-              {endpoint ? <button className="instant-provider-remove" disabled={instantSaving} onClick={() => void removeInstantEndpoint(endpoint)} type="button">{t("contact.unbind")}</button> : null}
+                  {instantProviderDrawer !== "bark" ? (
+                    <label className="menu-pref-field">
+                      <span>{instantProviderDrawer === "gotify" ? t("notification.appToken") : instantProviderDrawer === "pushdeer" ? t("notification.pushdeerServerOptional") : t("notification.accessTokenOptional")}</span>
+                      <input className="input" disabled={instantSaving} inputMode={instantProviderDrawer === "pushdeer" ? "url" : "text"} onChange={(event) => setInstantSecret(event.target.value)} placeholder={instantProviderDrawer === "pushdeer" ? "https://push.example.com" : undefined} type={instantProviderDrawer === "pushdeer" ? "url" : "password"} value={instantSecret} />
+                    </label>
+                  ) : null}
+                  {instantProviderDrawer === "pushdeer" ? <p className="instant-provider-caution">{t("notification.pushdeerMaintenanceNote")}</p> : null}
+                  <button className="button" disabled={instantSaving || !instantTarget.trim() || (instantProviderDrawer === "gotify" && !instantSecret.trim())} onClick={() => void sendInstantCode()} type="button">{t("notification.sendTestCode")}</button>
+                </div>
+              ),
+            },
+            {
+              state: instantVerificationId ? "active" : "upcoming",
+              title: t("contact.step.verifyReceiver"),
+              description: instantVerificationId ? t("notification.enterReceiverCode") : t(`notification.guide.${instantProviderDrawer}.3.body` as TranslationKey),
+              body: (
+                <div className="binding-spine-form">
+                  <VerificationCodeInput ariaLabel={t("notification.enterReceiverCode")} disabled={instantSaving} onChange={setInstantCode} value={instantCode} />
+                  <button className="button" disabled={instantSaving || instantCode.length !== 6} onClick={() => void bindInstantEndpoint()} type="button">{t("common.done")}</button>
+                </div>
+              ),
+            },
+            { state: "upcoming", title: t("contact.step.channelConnected", { channel: providerName }), description: t("contact.step.instantReady") },
+          ];
+          return (
+            <div className="binding-flow-drawer instant-provider-drawer">
+              <section className="binding-flow-heading">
+                <ContactChannelIcon kind={instantProviderDrawer} size="large" />
+                <div><strong>{endpoint ? t("contact.manageChannel", { channel: providerName }) : t("notification.connectProvider", { provider: providerName })}</strong><small>{t(`notification.providerHint.${instantProviderDrawer}` as TranslationKey)}</small></div>
+              </section>
+              <BindingSpine steps={providerSteps} />
             </div>
           );
         })() : null}
       </SideDrawer>
+
       <SideDrawer
-        historyKey="bark-guide"
-        onRouteOpen={() => setBarkGuideOpen(true)}
-        open={barkGuideOpen}
-        onClose={closeBarkGuide}
-        title={t("bark.bind")}
-      >
-        <div className="bark-guide">
-          <div className="bark-guide-app">
-            <BarkGuideIcon />
-            <div>
-              <strong>Bark</strong>
-              <span>{t("bark.receiveInstant")}</span>
-            </div>
-            <span className="bark-guide-duration">{t("bark.aboutOneMinute")}</span>
-          </div>
-
-          <ol className="bark-guide-steps">
-            <li className="bark-guide-step">
-              <span className="bark-guide-index">1</span>
-              <div className="bark-guide-step-content">
-                <strong>{t("bark.download")}</strong>
-                <p>{t("bark.allowNotifications")}</p>
-                <a className="bark-store-link" href={barkAppStoreUrl} rel="noreferrer" target="_blank">
-                  {t("bark.openAppStore")}
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </a>
-              </div>
-            </li>
-            <li className="bark-guide-step">
-              <span className="bark-guide-index">2</span>
-              <div className="bark-guide-step-content">
-                <strong>{t("bark.copyLink")}</strong>
-                <p>{t("bark.copyLinkHint")}</p>
-                <code className="bark-guide-link-example">https://api.day.app/••••••</code>
-              </div>
-            </li>
-            <li className="bark-guide-step is-action">
-              <span className="bark-guide-index">3</span>
-              <div className="bark-guide-step-content bark-guide-bind">
-                <strong>{authPending ? t("auth.enterCode") : t("bark.pasteLink")}</strong>
-                <p>{authPending ? t("bark.codeSent") : t("bark.pasteHint")}</p>
-                <div className="simple-form contact-sheet-form">
-                  <label className="field-label" htmlFor="bark-endpoint">{t("bark.pushLink")}</label>
-                  <input
-                    id="bark-endpoint"
-                    className="input"
-                    inputMode="url"
-                    placeholder="https://api.day.app/..."
-                    value={authTarget}
-                    onChange={(event) => {
-                      setAuthTarget(event.target.value);
-                      setAuthCode("");
-                      setAuthPending(false);
-                      setAuthExpiresIn(0);
-                    }}
-                  />
-                  <button
-                    className="button contact-flow-primary"
-                    disabled={authActionState === "sending" || !authTarget.trim() || authCooldown > 0}
-                    onClick={() => void sendAuthCode()}
-                    type="button"
-                  >
-                    {authActionState === "sending" ? t("common.sending") : authCooldown > 0 ? t("auth.retryIn", { seconds: authCooldown }) : t("auth.sendCode")}
-                  </button>
-                  <div className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
-                    <div className="field-label-row">
-                      <label className="field-label">{t("recovery.code")}</label>
-                      {authPending && authExpiresIn > 0 ? <span className="field-countdown">{t("auth.validFor", { seconds: authExpiresIn })}</span> : null}
-                    </div>
-                    <VerificationCodeInput ariaLabel={t("recovery.code")} value={authCode} onChange={setAuthCode} />
-                    <button
-                      className="button contact-flow-primary"
-                      disabled={authActionState === "binding" || authCode.length !== 6}
-                      onClick={() => void bindAuthChannel()}
-                      type="button"
-                    >
-                      {authActionState === "binding" ? t("common.processing") : t("bark.confirmBind")}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </SideDrawer>
-
-      <BottomSheet
-        bodyClassName="contact-sheet-body"
-        className="contact-bottom-sheet"
-        open={Boolean(authSheetChannel && authSheetChannel !== "bark")}
-        title={authSheetChannel === "email" ? t("contact.verifyEmail") : authSheetChannel === "sms" ? t("contact.bindPhone") : authSheetChannel === "bark" ? t("contact.bindInstant") : t("contact.bindContact")}
+        historyKey={`contact-binding-${authSheetChannel ?? "channel"}`}
+        open={Boolean(authSheetChannel)}
+        title={authSheetChannel ? (channelVerified(me, authSheetChannel) ? t("contact.manageChannel", { channel: bindingChannelName(authSheetChannel) }) : authSheetChannel === "email" ? t("contact.verifyEmail") : t("contact.bindPhone")) : t("contact.bindContact")}
         onClose={closeAuthSheet}
       >
-        {authSheetChannel ? (
-          <div ref={authSheetBodyRef} className="simple-form contact-sheet-form">
-            <div className="field-label-row">
-              <label className="field-label">{authSheetChannel === "email" ? t("contact.emailAddress") : authSheetChannel === "sms" ? t("contact.phoneNumber") : t("contact.targetAddress")}</label>
-              {authPending && authExpiresIn > 0 ? <span className="field-countdown">{t("auth.codeValidFor", { seconds: authExpiresIn })}</span> : null}
+        {authSheetChannel ? (() => {
+          const bound = channelVerified(me, authSheetChannel);
+          const channelName = bindingChannelName(authSheetChannel);
+          const contactSteps: BindingSpineStep[] = bound ? [
+            { state: "complete", title: t("contact.step.addContact", { channel: channelName }), description: contactValue(authSheetChannel) },
+            { state: "complete", title: t("contact.step.verifyChannel"), description: t("contact.step.channelVerified") },
+            {
+              state: "active",
+              title: t("contact.step.bindingComplete"),
+              description: bindingChannelPurpose(authSheetChannel),
+              body: (
+                <div className="binding-spine-bound-actions">
+                  <div className="binding-flow-receipt"><span>{contactValue(authSheetChannel)}</span><strong>{t("contact.boundState")}</strong></div>
+                  <div className="binding-contact-history">
+                    <span>{t("contact.lastUnbound")}</span>
+                    <strong>{formatContactDate(contactUnboundAt(authSheetChannel))}</strong>
+                    {contactUnbindAvailableAt(authSheetChannel) && contactUnbindAvailableAt(authSheetChannel)! > Date.now() ? <small>{t("contact.canUnbindAfter", { date: formatContactDate(contactUnbindAvailableAt(authSheetChannel)! / 1000) })}</small> : null}
+                  </div>
+                  <button className="danger-button" disabled={Boolean(contactUnbindAvailableAt(authSheetChannel) && contactUnbindAvailableAt(authSheetChannel)! > Date.now())} onClick={() => openUnbindConfirm(authSheetChannel)} type="button">{t("contact.unbind")}</button>
+                </div>
+              ),
+            },
+          ] : [
+            {
+              state: authPending ? "complete" : "active",
+              title: t("contact.step.addContact", { channel: channelName }),
+              description: authPending ? authTarget : bindingChannelPurpose(authSheetChannel),
+              body: (
+                <div className="binding-spine-form">
+                  <label className="field-label">{authSheetChannel === "email" ? t("contact.emailAddress") : t("contact.phoneNumber")}</label>
+                  <input
+                    className="input"
+                    autoComplete={authSheetChannel === "email" ? "email" : "tel"}
+                    inputMode={authSheetChannel === "email" ? "email" : "tel"}
+                    maxLength={authSheetChannel === "sms" ? 24 : undefined}
+                    placeholder={authSheetChannel === "email" ? "you@sermo.space" : "+86 138 0000 0000"}
+                    value={authTarget}
+                    onChange={(event) => { setAuthTarget(event.target.value); setAuthCode(""); setAuthPending(false); setAuthExpiresIn(0); }}
+                  />
+                  <button className="button" disabled={authActionState === "sending" || !authTarget.trim() || authCooldown > 0} onClick={() => void sendAuthCode()} type="button">
+                    {authActionState === "sending" ? t("common.sending") : authCooldown > 0 ? t("auth.retryIn", { seconds: authCooldown }) : t("auth.sendCode")}
+                  </button>
+                </div>
+              ),
+            },
+            {
+              state: authPending ? "active" : "upcoming",
+              title: t("contact.step.verifyChannel"),
+              description: authPending && authExpiresIn > 0 ? t("auth.codeValidFor", { seconds: authExpiresIn }) : t("contact.step.verifyChannelHint"),
+              body: (
+                <div className="binding-spine-form">
+                  <VerificationCodeInput ariaLabel={t("recovery.code")} value={authCode} onChange={setAuthCode} />
+                  <button className="button" disabled={authActionState === "binding" || authCode.length !== 6} onClick={() => void bindAuthChannel()} type="button">
+                    {authActionState === "binding" ? t("common.processing") : authSheetChannel === "email" ? t("contact.confirmVerify") : t("contact.confirmBind")}
+                  </button>
+                </div>
+              ),
+            },
+            { state: "upcoming", title: t("contact.step.bindingComplete"), description: bindingChannelPurpose(authSheetChannel) },
+          ];
+          return (
+            <div className="binding-flow-drawer">
+              <section className="binding-flow-heading">
+                <ContactChannelIcon kind={authSheetChannel} size="large" />
+                <div><strong>{bound ? t("contact.manageChannel", { channel: channelName }) : t("contact.connectChannel", { channel: channelName })}</strong><small>{bindingChannelPurpose(authSheetChannel)}</small></div>
+              </section>
+              <BindingSpine steps={contactSteps} />
             </div>
-            <input
-              className="input"
-              autoComplete={authSheetChannel === "email" ? "email" : authSheetChannel === "sms" ? "tel" : "off"}
-              inputMode={authSheetChannel === "email" ? "email" : authSheetChannel === "sms" ? "tel" : "url"}
-              maxLength={authSheetChannel === "sms" ? 24 : undefined}
-              placeholder={authSheetChannel === "email" ? "you@sermo.space" : authSheetChannel === "sms" ? "+86 138 0000 0000" : t("contact.instantAddressPlaceholder")}
-              value={authTarget}
-              onChange={(event) => {
-                setAuthTarget(event.target.value);
-                setAuthCode("");
-                setAuthPending(false);
-                setAuthExpiresIn(0);
-              }}
-            />
-            <div className="contact-flow-actions">
-              <button
-                className="button contact-flow-primary"
-                disabled={authActionState === "sending" || !authTarget.trim() || authCooldown > 0}
-                onClick={() => void sendAuthCode()}
-                type="button"
-              >
-                {authActionState === "sending" ? t("common.sending") : authCooldown > 0 ? t("auth.retryIn", { seconds: authCooldown }) : t("auth.sendCode")}
-              </button>
-            </div>
-            <div ref={authVerifyRef} className={`contact-verify-block ${authPending ? "is-visible" : ""}`}>
-              <label className="field-label">{t("recovery.code")}</label>
-              <VerificationCodeInput ariaLabel={t("recovery.code")} value={authCode} onChange={setAuthCode} />
-              <div className="contact-flow-actions">
-                <button
-                  className="button contact-flow-primary"
-                  disabled={authActionState === "binding" || authCode.length !== 6}
-                  onClick={() => void bindAuthChannel()}
-                  type="button"
-                >
-                  {authActionState === "binding" ? t("common.processing") : authSheetChannel === "email" ? t("contact.confirmVerify") : t("contact.confirmBind")}
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </BottomSheet>
+          );
+        })() : null}
+      </SideDrawer>
       <BottomSheet
         bodyClassName="contact-sheet-body"
         className="contact-bottom-sheet"

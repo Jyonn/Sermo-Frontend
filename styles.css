@@ -30444,6 +30444,118 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
   letter-spacing: 0.01em;
 }
 
+/* Channel binding lives in Account & security and follows the expanded-spine flow. */
+.account-security-sections { gap: 14px; }
+.account-binding-row .setting-row-icon { padding: 0; overflow: hidden; background: transparent; }
+.account-bind-more-row .setting-row-icon { color: var(--brand-primary-press); background: color-mix(in srgb, var(--brand-primary) 11%, var(--bg-panel-strong)); }
+
+.contact-channel-icon {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 82%, transparent);
+  border-radius: 13px;
+  color: var(--brand-primary-press);
+  background: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-panel-strong));
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+.contact-channel-icon.is-compact { width: 30px; height: 30px; border-radius: 9px; box-shadow: none; }
+.contact-channel-icon.is-large { width: 54px; height: 54px; border-radius: 16px; }
+.contact-channel-icon img { width: 100%; height: 100%; object-fit: cover; }
+.contact-channel-icon.is-gotify img { width: 76%; height: 76%; object-fit: contain; }
+.contact-channel-icon > .material-symbols-outlined { font-size: 21px; }
+.contact-channel-icon.is-large > .material-symbols-outlined { font-size: 27px; }
+
+.binding-channel-sheet .sheet-body { padding-top: 10px; }
+.binding-channel-list { display: grid; gap: 8px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
+.binding-channel-option {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 66px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 17px;
+  color: var(--text-primary);
+  text-align: left;
+  background: var(--bg-panel-strong);
+  transition: transform 180ms cubic-bezier(.22, 1, .36, 1), border-color 180ms ease, background 180ms ease;
+}
+.binding-channel-option:active { transform: scale(.985); background: color-mix(in srgb, var(--brand-primary) 7%, var(--bg-panel-strong)); }
+.binding-channel-option > span:nth-child(2) { min-width: 0; display: grid; gap: 3px; }
+.binding-channel-option strong { font-size: .91rem; }
+.binding-channel-option small { overflow: hidden; color: var(--text-muted); font-size: .76rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.binding-channel-option > .material-symbols-outlined { color: var(--text-muted); font-size: 20px; }
+
+.binding-flow-drawer { display: grid; gap: 25px; padding: 4px 2px 30px; }
+.binding-flow-heading { display: grid; grid-template-columns: 54px minmax(0, 1fr); align-items: center; gap: 14px; padding: 3px 3px 0; }
+.binding-flow-heading > div { min-width: 0; display: grid; gap: 4px; }
+.binding-flow-heading strong { color: var(--text-primary); font-size: 1rem; line-height: 1.25; }
+.binding-flow-heading small { color: var(--text-muted); font-size: .78rem; line-height: 1.48; }
+
+.binding-spine { position: relative; display: grid; margin: 0; padding: 0; list-style: none; }
+.binding-spine::before { position: absolute; top: 18px; bottom: 18px; left: 17px; width: 1px; background: var(--line-soft); content: ""; }
+.binding-spine-step { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding-bottom: 18px; }
+.binding-spine-step:last-child { padding-bottom: 0; }
+.binding-spine-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: var(--bg-panel-strong);
+  font-size: .72rem;
+  font-weight: 850;
+}
+.binding-spine-node .material-symbols-outlined { font-size: 17px; font-weight: 800; }
+.binding-spine-step.is-complete .binding-spine-node { border-color: color-mix(in srgb, var(--brand-primary) 34%, var(--line-soft)); color: var(--brand-primary-press); }
+.binding-spine-step.is-active .binding-spine-node { border-color: var(--brand-primary); color: #073e2e; background: var(--brand-primary); box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-primary) 11%, transparent); }
+.binding-spine-copy { min-width: 0; min-height: 48px; padding: 7px 0 0; }
+.binding-spine-copy > strong { display: block; color: var(--text-primary); font-size: .91rem; line-height: 1.35; }
+.binding-spine-copy > small { display: block; margin-top: 3px; color: var(--text-muted); font-size: .76rem; line-height: 1.45; }
+.binding-spine-step.is-upcoming .binding-spine-copy { opacity: .62; }
+.binding-spine-expansion { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 240ms cubic-bezier(.22, 1, .36, 1), opacity 180ms ease; }
+.binding-spine-expansion > div { min-height: 0; overflow: hidden; }
+.binding-spine-step.is-active .binding-spine-expansion { grid-template-rows: 1fr; opacity: 1; }
+.binding-spine-step.is-active .binding-spine-expansion > div { overflow: visible; }
+.binding-spine-form,
+.binding-spine-bound-actions { display: grid; gap: 12px; margin-top: 13px; padding: 15px; border: 1px solid var(--line-soft); border-radius: 16px; background: color-mix(in srgb, var(--bg-soft) 82%, var(--bg-panel-strong)); }
+.binding-spine-form .field-label { margin: 0; }
+.binding-spine-form > .button,
+.binding-spine-bound-actions > .danger-button { min-height: 46px; margin-top: 1px; border-radius: 14px; }
+.binding-flow-receipt { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 13px; color: var(--text-secondary); background: var(--bg-panel-strong); font-size: .78rem; }
+.binding-flow-receipt span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.binding-flow-receipt strong { flex: 0 0 auto; color: var(--brand-primary-press); font-size: .74rem; }
+.binding-contact-history { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; padding: 2px; color: var(--text-muted); font-size: .76rem; }
+.binding-contact-history strong { color: var(--text-secondary); font-size: .76rem; }
+.binding-contact-history small { grid-column: 1 / -1; color: var(--text-muted); font-size: .72rem; }
+.binding-flow-note { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; margin: -5px 3px 0; padding-top: 15px; border-top: 1px solid var(--line-soft); color: var(--text-muted); font-size: .76rem; line-height: 1.55; }
+.binding-flow-note .material-symbols-outlined { margin-top: 1px; font-size: 17px; }
+
+.instant-receiver-summary { display: grid; gap: 9px; padding: 0 2px; }
+.instant-receiver-summary > strong { color: var(--text-secondary); font-size: .76rem; }
+.instant-receiver-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.instant-receiver-chip { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 8px; max-width: 100%; padding: 7px 10px 7px 7px; border: 1px solid var(--line-soft); border-radius: 13px; background: color-mix(in srgb, var(--bg-panel-strong) 88%, transparent); }
+.instant-receiver-chip > span:last-child { min-width: 0; display: grid; gap: 1px; }
+.instant-receiver-chip strong { color: var(--text-primary); font-size: .75rem; }
+.instant-receiver-chip small { overflow: hidden; color: var(--text-muted); font-size: .66rem; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 420px) {
+  .binding-spine-form, .binding-spine-bound-actions { margin-left: -4px; padding: 13px; }
+  .binding-flow-heading { gap: 12px; }
+  .binding-channel-option small { white-space: normal; }
+}
+
 .platform-feature-grant {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
