@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.08.13",
+  "id": "2026.09.08.14",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "小程序同步近期功能",
+      "title": "小程序补齐历史功能",
       "items": [
-        "小程序现已支持投稿协作、语音转写与更沉浸的聊天输入体验",
-        "聊天个性化、广场日期浏览、QQ 来源展示与身份绑定已与网页版保持一致",
-        "通知渠道管理与邮件提醒间隔已同步更新"
+        "广场新增官方置顶发言与空间成员、在线成员入口",
+        "欢迎消息支持多条文字、图片、视频、语音和文件，并可调整顺序",
+        "未认证引导、更多语言偏好与跨设备消息删除同步现已补齐"
       ]
     },
     "en": {
-      "title": "Recent features arrive in the mini program",
+      "title": "Earlier features completed in the mini program",
       "items": [
-        "The mini program now supports collaborative submissions, audio transcripts, and a more immersive chat composer",
-        "Chat personalization, Square date browsing, QZone source details, and QQ identity binding now match the web experience",
-        "Notification channel management and email reminder intervals have also been updated"
+        "Square now includes official pinned posts plus full and online member directories",
+        "Welcome messages can contain multiple texts, photos, videos, voice clips, and files in a custom order",
+        "Verification guidance, additional language preferences, and cross-device message deletion sync are now included"
       ]
     }
   }
