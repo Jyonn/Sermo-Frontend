@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.08.4",
+  "id": "2026.09.08.5",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "QQ 来源标识焕新",
+      "title": "QQ 号入口更清晰",
       "items": [
-        "尚未认领的 QQ 用户改用双区来源签，与等级和认证标识更易区分",
-        "评论中的 QQ 提及同步采用紧凑方签，在深浅主题下都更清晰"
+        "账号与安全中的 QQ 号已移至独立分组，绑定状态一眼可见",
+        "QQ 绑定页标题和入口文案进一步统一"
       ]
     },
     "en": {
-      "title": "Refined QQ source labels",
+      "title": "Clearer QQ number access",
       "items": [
-        "Unclaimed QQ users now use a split source label that is easier to distinguish from levels and verification badges",
-        "QQ mentions now use a compact matching marker with clearer contrast in light and dark themes"
+        "The QQ number now has its own group in Account & security with a clear binding status",
+        "QQ binding titles and entry labels are now consistent"
       ]
     }
   }

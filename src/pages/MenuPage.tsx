@@ -2703,14 +2703,6 @@ export default function MenuPage() {
         <div className="detail-list">
           <SettingGroup>
             <SettingRow description={!hasPassword ? t("password.securityHint") : undefined} onClick={() => setPasswordSheetOpen(true)} title={hasPassword ? t("password.change") : t("password.setup")} />
-            {space?.qq_binding_available ? (
-              <SettingRow
-                description={qqIdentity?.bound ? t("qqIdentity.boundHint") : t("qqIdentity.entryHint")}
-                onClick={openQqIdentity}
-                title={t("qqIdentity.title")}
-                value={qqIdentity?.bound && qqIdentity.qq ? `QQ ${qqIdentity.qq}` : t("qqIdentity.bindNow")}
-              />
-            ) : null}
             <SettingRow
               description={
                   gestureEnabled
@@ -2741,6 +2733,15 @@ export default function MenuPage() {
               tone="danger"
             />
           </SettingGroup>
+          {space?.qq_binding_available ? (
+            <SettingGroup>
+              <SettingRow
+                onClick={openQqIdentity}
+                title={t("qqIdentity.number")}
+                value={qqIdentity?.bound ? t("qqIdentity.boundStatus") : t("qqIdentity.bindNow")}
+              />
+            </SettingGroup>
+          ) : null}
         </div>
       </SideDrawer>
 
