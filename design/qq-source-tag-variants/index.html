@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sermo · QQ 来源标识设计</title>
+  <style>
+    @font-face { font-family: SermoSans; src: url("../../src/assets/fonts/NotoSansSC-400.ttf"); }
+    @font-face { font-family: SermoSans; src: url("../../src/assets/fonts/NotoSansSC-700.ttf"); font-weight: 700; }
+    @font-face { font-family: SermoDisplay; src: url("../../src/assets/fonts/SpaceGrotesk-700.ttf"); font-weight: 700; }
+
+    :root {
+      --ink: #16231e;
+      --muted: #75827c;
+      --quiet: #9ba59f;
+      --line: #dce2de;
+      --paper: #fbfbf7;
+      --canvas: #e9eee9;
+      --green: #09be7d;
+      --green-deep: #087453;
+      --qq: #168ac2;
+      --qq-soft: #e6f4fa;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--canvas); }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 9% 0%, rgba(238, 213, 159, .42), transparent 27%),
+        radial-gradient(circle at 91% 8%, rgba(146, 210, 186, .42), transparent 30%),
+        linear-gradient(135deg, #f0f1eb, #e3ebe6);
+      font-family: SermoSans, sans-serif;
+    }
+    button { border: 0; color: inherit; font: inherit; }
+    button:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+
+    .lab-head {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 24px;
+      min-height: 72px;
+      padding: 12px clamp(18px, 4vw, 58px);
+      border-bottom: 1px solid rgba(62, 87, 75, .12);
+      background: rgba(247, 248, 243, .86);
+      backdrop-filter: blur(22px) saturate(1.1);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border-radius: 13px;
+      color: #eefbf5;
+      background: #153c30;
+      font: 700 18px SermoDisplay;
+      box-shadow: 0 8px 20px rgba(19, 58, 46, .18);
+    }
+    .brand strong, .brand small { display: block; }
+    .brand strong { font-size: 14px; }
+    .brand small { margin-top: 2px; color: var(--muted); font: 700 8px SermoDisplay; letter-spacing: .12em; }
+    .toolbar { display: flex; align-items: center; gap: 8px; }
+    .toolbar button {
+      min-height: 36px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      color: var(--muted);
+      background: rgba(251, 251, 247, .74);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .toolbar button.is-active { color: #eefbf5; border-color: #153c30; background: #153c30; }
+
+    main { width: min(1440px, 100%); margin: auto; padding: 58px clamp(18px, 4vw, 58px) 72px; }
+    .intro { display: grid; grid-template-columns: minmax(0, 650px) minmax(260px, 380px); justify-content: space-between; gap: 52px; margin-bottom: 38px; }
+    .kicker { color: var(--green-deep); font: 700 10px SermoDisplay; letter-spacing: .15em; }
+    .intro h1 { max-width: 650px; margin: 10px 0 14px; font-size: clamp(31px, 4vw, 52px); line-height: 1.08; letter-spacing: -.055em; }
+    .intro p { max-width: 590px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .criteria { display: grid; align-content: end; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; border: 1px solid rgba(61, 87, 75, .12); border-radius: 18px; background: rgba(61, 87, 75, .12); }
+    .criteria span { min-height: 82px; padding: 15px 12px; background: rgba(250, 250, 246, .76); }
+    .criteria b, .criteria small { display: block; }
+    .criteria b { color: var(--green-deep); font: 700 11px SermoDisplay; }
+    .criteria small { margin-top: 9px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+
+    .variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .variant {
+      --v-ink: #18231e;
+      --v-muted: #78827c;
+      --v-quiet: #a0a9a4;
+      --v-line: #e0e4e1;
+      --v-paper: #fbfbf8;
+      --v-soft: #f1f4f1;
+      --v-qq: #168ac2;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(61, 87, 75, .15);
+      border-radius: 25px;
+      color: var(--v-ink);
+      background: var(--v-paper);
+      box-shadow: 0 18px 54px rgba(36, 60, 49, .09);
+      transition: color .3s ease, background .3s ease;
+    }
+    .variant.is-dark {
+      --v-ink: #edf3ef;
+      --v-muted: #a1aea7;
+      --v-quiet: #78867f;
+      --v-line: #304039;
+      --v-paper: #13201b;
+      --v-soft: #1c2b24;
+      --v-qq: #65c4ed;
+      border-color: #2b3b34;
+      box-shadow: 0 20px 58px rgba(9, 21, 15, .24);
+    }
+    .variant-head { display: grid; grid-template-columns: 39px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 18px 19px; border-bottom: 1px solid var(--v-line); }
+    .variant-no { display: grid; width: 37px; height: 37px; place-items: center; border: 1px solid var(--v-line); border-radius: 12px; color: var(--v-muted); font: 700 10px SermoDisplay; }
+    .variant-head strong, .variant-head small { display: block; }
+    .variant-head strong { font-size: 14px; }
+    .variant-head small { margin-top: 3px; color: var(--v-muted); font-size: 9px; }
+    .variant-fit { padding: 5px 8px; border-radius: 7px; color: var(--green-deep); background: rgba(10, 190, 125, .09); font-size: 8px; font-weight: 700; }
+    .is-dark .variant-fit { color: #6cddb8; }
+
+    .feed { padding: 22px 20px 19px; }
+    .statement-author, .comment-author { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .avatar-wrap { position: relative; flex: 0 0 auto; }
+    .avatar {
+      display: grid;
+      width: 45px;
+      height: 45px;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 28%;
+      color: #f4fbf7;
+      background:
+        radial-gradient(circle at 50% 32%, #f3d5b5 0 12%, transparent 13%),
+        radial-gradient(ellipse at 50% 83%, #32443a 0 28%, transparent 29%),
+        linear-gradient(145deg, #638b76, #24372e);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+    }
+    .avatar::before { content: "千"; font-size: 16px; font-weight: 700; opacity: .82; }
+    .author-copy { min-width: 0; }
+    .author-line { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .author-line strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+    .author-copy time { display: block; margin-top: 4px; color: var(--v-quiet); font-size: 9px; }
+    .statement-text { margin: 15px 0 7px 56px; font-size: 13px; line-height: 1.75; }
+    .statement-meta { margin-left: 56px; color: var(--v-muted); font-size: 9px; }
+    .divider { height: 1px; margin: 18px 0 16px 56px; background: var(--v-line); }
+    .comment { display: grid; grid-template-columns: 35px minmax(0, 1fr); gap: 10px; margin-left: 56px; }
+    .comment .avatar { width: 35px; height: 35px; border-radius: 28%; }
+    .comment .avatar::before { font-size: 12px; }
+    .comment .author-line strong { font-size: 12px; }
+    .comment-body { margin: 7px 0 0; color: var(--v-ink); font-size: 12px; line-height: 1.7; }
+    .mention { color: var(--green-deep); font-weight: 700; }
+    .is-dark .mention { color: #6cddb8; }
+    .context-strip { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 9px; margin-top: 19px; padding: 12px 14px; border-top: 1px solid var(--v-line); color: var(--v-muted); background: var(--v-soft); font-size: 9px; }
+    .context-strip b { color: var(--v-ink); }
+
+    .qq-tag, .qq-mini { user-select: none; }
+
+    /* 01 来源签：克制的信息标签，QQ 作为索引，不做科技胶囊。 */
+    .v1 .qq-tag {
+      display: inline-flex;
+      align-items: center;
+      overflow: hidden;
+      height: 21px;
+      border: 1px solid color-mix(in srgb, var(--v-qq) 28%, var(--v-line));
+      border-radius: 6px;
+      color: color-mix(in srgb, var(--v-qq) 88%, var(--v-ink));
+      background: color-mix(in srgb, var(--v-qq) 7%, var(--v-paper));
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .v1 .qq-tag b { display: grid; align-self: stretch; place-items: center; padding: 0 5px; color: color-mix(in srgb, var(--v-qq) 88%, var(--v-ink)); background: color-mix(in srgb, var(--v-qq) 13%, transparent); font: 700 8px SermoDisplay; }
+    .v1 .qq-tag span { padding: 0 6px 0 5px; }
+    .v1 .qq-mini { display: inline-grid; width: 15px; height: 15px; margin-left: 3px; place-items: center; border-radius: 4px; color: var(--v-qq); background: color-mix(in srgb, var(--v-qq) 11%, transparent); font: 700 7px SermoDisplay; vertical-align: .13em; }
+
+    /* 02 档案印：强调这是历史资料，而非等级或身份认证。 */
+    .v2 .qq-tag {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 7px 0 6px;
+      border: 1px solid color-mix(in srgb, #c47a37 54%, var(--v-line));
+      border-radius: 3px;
+      color: color-mix(in srgb, #a45d25 88%, var(--v-ink));
+      background: color-mix(in srgb, #e9ad71 9%, var(--v-paper));
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .06em;
+    }
+    .v2 .qq-tag::before { width: 5px; height: 5px; margin-right: 5px; border: 1px solid currentColor; content: ""; transform: rotate(45deg); }
+    .v2 .qq-tag b { display: none; }
+    .v2 .qq-mini { display: inline-flex; align-items: center; margin-left: 4px; color: color-mix(in srgb, #b46b2f 88%, var(--v-ink)); font-size: 8px; font-weight: 700; vertical-align: .12em; }
+    .v2 .qq-mini::before { width: 5px; height: 5px; margin-right: 3px; border: 1px solid currentColor; content: ""; transform: rotate(45deg); }
+    .v2 .qq-mini span { display: none; }
+
+    /* 03 连点铭牌：用连接点表达昵称与外部来源的从属关系。 */
+    .v3 .author-line { gap: 5px; }
+    .v3 .qq-tag {
+      display: inline-flex;
+      align-items: center;
+      height: 21px;
+      color: color-mix(in srgb, var(--v-qq) 82%, var(--v-ink));
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .v3 .qq-tag::before { width: 13px; height: 1px; margin-right: 5px; background: color-mix(in srgb, var(--v-qq) 35%, transparent); content: ""; }
+    .v3 .qq-tag b { display: grid; width: 17px; height: 17px; margin-right: 4px; place-items: center; border-radius: 50%; color: var(--v-paper); background: color-mix(in srgb, var(--v-qq) 88%, #2b6d76); font: 700 8px SermoDisplay; }
+    .v3 .qq-mini { display: inline-flex; align-items: center; margin-left: 4px; color: var(--v-qq); font-size: 8px; font-weight: 700; vertical-align: .12em; }
+    .v3 .qq-mini::before { width: 4px; height: 4px; margin-right: 3px; border-radius: 50%; background: currentColor; content: ""; }
+
+    /* 04 头像挂角：把主要来源信息移出作者行，适合长昵称。 */
+    .v4 .qq-tag { color: var(--v-muted); font-size: 9px; font-weight: 700; }
+    .v4 .qq-tag b { color: var(--v-qq); font: 700 9px SermoDisplay; }
+    .v4 .qq-tag span::before { margin: 0 5px; color: var(--v-quiet); content: "·"; }
+    .v4 .avatar-wrap::after {
+      position: absolute;
+      right: -4px;
+      bottom: -4px;
+      display: grid;
+      width: 19px;
+      height: 19px;
+      place-items: center;
+      border: 2px solid var(--v-paper);
+      border-radius: 7px;
+      color: #f4fbff;
+      background: #238fc0;
+      content: "Q";
+      font: 700 8px SermoDisplay;
+      box-shadow: 0 3px 8px rgba(15, 99, 138, .22);
+    }
+    .v4 .comment .avatar-wrap::after { right: -3px; bottom: -3px; width: 16px; height: 16px; border-width: 2px; border-radius: 6px; font-size: 7px; }
+    .v4 .qq-mini { display: inline-grid; width: 15px; height: 15px; margin-left: 4px; place-items: center; border: 1px solid color-mix(in srgb, var(--v-qq) 32%, transparent); border-radius: 50%; color: var(--v-qq); font: 700 7px SermoDisplay; vertical-align: .13em; }
+
+    .open-profile { padding: 0; background: transparent; text-align: left; cursor: pointer; }
+    .open-profile:hover .author-line strong { color: var(--v-qq); }
+    .open-profile .author-line strong { transition: color .18s ease; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(19, 31, 25, .46);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      backdrop-filter: blur(8px);
+    }
+    .modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
+    .identity-card {
+      width: min(100%, 360px);
+      padding: 22px;
+      border-radius: 24px;
+      color: #17231e;
+      background: #fbfbf7;
+      box-shadow: 0 26px 80px rgba(8, 26, 17, .28);
+      transform: translateY(12px) scale(.98);
+      transition: transform .26s var(--ease);
+    }
+    .is-open .identity-card { transform: none; }
+    .identity-head { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 13px; }
+    .identity-head .avatar { width: 64px; height: 64px; }
+    .identity-head strong, .identity-head small { display: block; }
+    .identity-head strong { font-size: 18px; }
+    .identity-head small { margin-top: 5px; color: #7a867f; font-size: 10px; }
+    .identity-head button { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 10px; color: #76817b; background: #eff2ef; cursor: pointer; }
+    .identity-source { margin: 18px 0 0; padding: 13px 14px; border: 1px solid #dfe5e1; border-radius: 15px; background: #f3f6f3; }
+    .identity-source span { display: flex; justify-content: space-between; gap: 20px; font-size: 11px; }
+    .identity-source span + span { margin-top: 9px; }
+    .identity-source b { color: #748079; }
+    .identity-note { margin: 14px 2px 0; color: #7a867f; font-size: 10px; line-height: 1.65; }
+
+    @media (max-width: 980px) {
+      .intro { grid-template-columns: 1fr; gap: 24px; }
+      .criteria { max-width: 420px; }
+      .variants { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .lab-head { min-height: 62px; padding: 9px 14px; }
+      .brand small { display: none; }
+      .toolbar button:first-child { display: none; }
+      main { padding: 38px 12px 48px; }
+      .intro { padding: 0 6px; }
+      .intro h1 { font-size: 33px; }
+      .criteria { grid-template-columns: 1fr 1fr 1fr; }
+      .criteria span { min-height: 70px; padding: 12px 8px; }
+      .variant { border-radius: 20px; }
+      .variant-fit { display: none; }
+      .feed { padding: 20px 15px 17px; }
+      .statement-text, .statement-meta, .comment, .divider { margin-left: 0; }
+      .comment { margin-top: 15px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .001ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="lab-head">
+    <div class="brand"><span class="brand-mark">S</span><span><strong>Sermo 言浪</strong><small>QQ SOURCE IDENTITY STUDY</small></span></div>
+    <div class="toolbar"><button id="open-all" type="button">查看资料弹层</button><button id="theme" type="button">深色预览</button></div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><span class="kicker">04 DIRECTIONS · REAL COMMENT CONTEXT</span><h1>不是等级，也不是认证。<br />它只说明这段历史来自哪里。</h1><p>四版都避免把 QQ 来源做成抢眼的身份勋章，并统一处理发言作者、评论作者和正文艾特。点击任一 QQ 用户，可以查看资料弹层的搭配效果。</p></div>
+      <div class="criteria"><span><b>01</b><small>不与 LV<br />产生混淆</small></span><span><b>02</b><small>长昵称下<br />仍然稳定</small></span><span><b>03</b><small>深浅主题<br />均可辨认</small></span></div>
+    </section>
+
+    <section class="variants" id="variants">
+      <article class="variant v1">
+        <header class="variant-head"><span class="variant-no">01</span><span><strong>来源签</strong><small>方圆之间，信息最清楚</small></span><span class="variant-fit">推荐落地</span></header>
+        <div class="feed">
+          <button class="statement-author open-profile" type="button"><span class="avatar-wrap"><span class="avatar"></span></span><span class="author-copy"><span class="author-line"><strong>紫薯面包批发</strong><span class="qq-tag"><b>QQ</b><span>来源</span></span></span><time>2014 年 12 月 29 日</time></span></button>
+          <p class="statement-text">走最后，吃不到饭就去政教处闹。</p><span class="statement-meta">2 天前 · 江中东西墙</span><div class="divider"></div>
+          <div class="comment"><span class="avatar-wrap"><span class="avatar"></span></span><div><button class="open-profile" type="button"><span class="author-line"><strong>千丝</strong><span class="qq-tag"><b>QQ</b><span>来源</span></span></span></button><p class="comment-body"><span class="mention">@伊布拉烜莫维奇<span class="qq-mini">QQ</span></span> 对对对，所有高三学生联合起来。</p></div></div>
+        </div><div class="context-strip"><b>适合</b><span>最接近现有布局，认知直接，组件统一度最高。</span></div>
+      </article>
+
+      <article class="variant v2">
+        <header class="variant-head"><span class="variant-no">02</span><span><strong>档案印</strong><small>历史资料感，不像平台等级</small></span><span class="variant-fit">故事感</span></header>
+        <div class="feed">
+          <button class="statement-author open-profile" type="button"><span class="avatar-wrap"><span class="avatar"></span></span><span class="author-copy"><span class="author-line"><strong>紫薯面包批发</strong><span class="qq-tag"><b>QQ</b><span>QQ 空间</span></span></span><time>2014 年 12 月 29 日</time></span></button>
+          <p class="statement-text">走最后，吃不到饭就去政教处闹。</p><span class="statement-meta">2 天前 · 江中东西墙</span><div class="divider"></div>
+          <div class="comment"><span class="avatar-wrap"><span class="avatar"></span></span><div><button class="open-profile" type="button"><span class="author-line"><strong>千丝</strong><span class="qq-tag"><b>QQ</b><span>QQ 空间</span></span></span></button><p class="comment-body"><span class="mention">@伊布拉烜莫维奇<span class="qq-mini"><span>QQ</span></span></span> 对对对，所有高三学生联合起来。</p></div></div>
+        </div><div class="context-strip"><b>适合</b><span>迁移内容的年代与档案感更强，和普通新评论区分最明显。</span></div>
+      </article>
+
+      <article class="variant v3">
+        <header class="variant-head"><span class="variant-no">03</span><span><strong>连点铭牌</strong><small>昵称与来源建立柔和连接</small></span><span class="variant-fit">精致</span></header>
+        <div class="feed">
+          <button class="statement-author open-profile" type="button"><span class="avatar-wrap"><span class="avatar"></span></span><span class="author-copy"><span class="author-line"><strong>紫薯面包批发</strong><span class="qq-tag"><b>Q</b><span>QQ 用户</span></span></span><time>2014 年 12 月 29 日</time></span></button>
+          <p class="statement-text">走最后，吃不到饭就去政教处闹。</p><span class="statement-meta">2 天前 · 江中东西墙</span><div class="divider"></div>
+          <div class="comment"><span class="avatar-wrap"><span class="avatar"></span></span><div><button class="open-profile" type="button"><span class="author-line"><strong>千丝</strong><span class="qq-tag"><b>Q</b><span>QQ 用户</span></span></span></button><p class="comment-body"><span class="mention">@伊布拉烜莫维奇<span class="qq-mini">QQ</span></span> 对对对，所有高三学生联合起来。</p></div></div>
+        </div><div class="context-strip"><b>适合</b><span>视觉最精致，标签存在感适中；作者行会比方案一略长。</span></div>
+      </article>
+
+      <article class="variant v4">
+        <header class="variant-head"><span class="variant-no">04</span><span><strong>头像挂角</strong><small>来源回到头像，释放昵称空间</small></span><span class="variant-fit">长昵称</span></header>
+        <div class="feed">
+          <button class="statement-author open-profile" type="button"><span class="avatar-wrap"><span class="avatar"></span></span><span class="author-copy"><span class="author-line"><strong>紫薯面包批发</strong><span class="qq-tag"><b>QQ</b><span>历史用户</span></span></span><time>2014 年 12 月 29 日</time></span></button>
+          <p class="statement-text">走最后，吃不到饭就去政教处闹。</p><span class="statement-meta">2 天前 · 江中东西墙</span><div class="divider"></div>
+          <div class="comment"><span class="avatar-wrap"><span class="avatar"></span></span><div><button class="open-profile" type="button"><span class="author-line"><strong>千丝</strong><span class="qq-tag"><b>QQ</b><span>历史用户</span></span></span></button><p class="comment-body"><span class="mention">@伊布拉烜莫维奇<span class="qq-mini">Q</span></span> 对对对，所有高三学生联合起来。</p></div></div>
+        </div><div class="context-strip"><b>适合</b><span>昵称极长或标签很多的场景；头像角标承担主要来源识别。</span></div>
+      </article>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal">
+    <section aria-modal="true" class="identity-card" role="dialog">
+      <div class="identity-head"><span class="avatar"></span><span><strong>千丝</strong><small>来自 QQ 空间的历史用户</small></span><button id="close-modal" aria-label="关闭" type="button">×</button></div>
+      <div class="identity-source"><span><b>QQ 号</b><strong>1031086074</strong></span><span><b>历史昵称</b><strong>千丝</strong></span></div>
+      <p class="identity-note">该用户尚未绑定 Sermo 账号。绑定后，历史内容和艾特关系会自动归入其账号。</p>
+    </section>
+  </div>
+
+  <script>
+    const variants = [...document.querySelectorAll('.variant')];
+    const themeButton = document.querySelector('#theme');
+    const modal = document.querySelector('#modal');
+    const openModal = () => modal.classList.add('is-open');
+    const closeModal = () => modal.classList.remove('is-open');
+    document.querySelectorAll('.open-profile').forEach(button => button.addEventListener('click', openModal));
+    document.querySelector('#open-all').addEventListener('click', openModal);
+    document.querySelector('#close-modal').addEventListener('click', closeModal);
+    modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+    window.addEventListener('keydown', event => { if (event.key === 'Escape') closeModal(); });
+    themeButton.addEventListener('click', () => {
+      const dark = !variants[0].classList.contains('is-dark');
+      variants.forEach(variant => variant.classList.toggle('is-dark', dark));
+      themeButton.classList.toggle('is-active', dark);
+      themeButton.textContent = dark ? '浅色预览' : '深色预览';
+    });
+  </script>
+</body>
+</html>
