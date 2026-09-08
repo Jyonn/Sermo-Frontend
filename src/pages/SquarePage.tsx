@@ -421,7 +421,10 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     if (canInteract) onReply(comment);
   };
   const threadRootUserId = rootUserId ?? comment.user.user_id;
-  const layerReplyTarget = comment.parent_id && comment.reply_to_user?.user_id !== threadRootUserId
+  const replyTargetAlreadyMentioned = comment.reply_to_user
+    ? comment.mentions?.some((mention) => mention.user_id === comment.reply_to_user?.user_id)
+    : false;
+  const layerReplyTarget = comment.parent_id && !replyTargetAlreadyMentioned && comment.reply_to_user?.user_id !== threadRootUserId
     ? comment.reply_to_user
     : null;
   const displayName = comment.is_anonymous ? t("square.anonymousUser") : comment.user.name;
