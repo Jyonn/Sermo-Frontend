@@ -41,6 +41,16 @@
     .intro p { max-width: 670px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
     .principles { display: grid; gap: 7px; }
     .principles span { padding: 8px 12px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: rgba(255,255,255,.52); font-size: 9px; font-weight: 800; text-align: center; }
+    .channel-dock { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; margin-bottom: 24px; padding: 9px; border: 1px solid rgba(104,130,118,.22); border-radius: 22px; background: rgba(251,252,250,.82); box-shadow: 0 14px 38px rgba(31,55,44,.07); }
+    .channel-button { display: grid; grid-template-columns: 34px minmax(0,1fr); align-items: center; gap: 8px; min-width: 0; padding: 8px; border: 1px solid transparent; border-radius: 14px; background: transparent; text-align: left; cursor: pointer; }
+    .channel-button:hover { background: var(--soft); }
+    .channel-button.is-active { border-color: color-mix(in srgb, var(--provider) 42%, var(--line)); background: color-mix(in srgb, var(--provider) 7%, var(--paper)); box-shadow: 0 7px 16px rgba(31,55,44,.07); }
+    .channel-icon { display: grid; width: 34px; height: 34px; place-items: center; overflow: hidden; border: 1px solid rgba(40,65,54,.08); border-radius: 10px; color: var(--provider); background: var(--paper); }
+    .channel-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .channel-icon svg { width: 19px; height: 19px; }
+    .channel-button strong, .channel-button small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .channel-button strong { font-size: 9px; }
+    .channel-button small { margin-top: 2px; color: var(--muted); font-size: 7px; }
     .variants { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 25px; }
     .concept { overflow: hidden; border: 1px solid rgba(104,130,118,.22); border-radius: 28px; background: rgba(251,252,250,.9); box-shadow: 0 18px 48px rgba(31,55,44,.09); }
     .concept-head { display: grid; grid-template-columns: 43px minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
@@ -66,6 +76,8 @@
     .field-label { display: block; margin: 0 2px 7px; color: var(--muted); font-size: 9px; font-weight: 800; }
     .input-shell { display: flex; min-height: 50px; align-items: center; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
     .input-shell input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 11px; font-weight: 700; }
+    .field-block + .field-block { margin-top: 9px; }
+    .field-block .input-shell span { color: var(--muted); font-size: 8px; font-weight: 800; white-space: nowrap; }
     .primary, .secondary { width: 100%; min-height: 47px; border-radius: 14px; font-size: 10px; font-weight: 900; cursor: pointer; }
     .primary { border: 0; color: #053023; background: var(--green); box-shadow: 0 10px 22px rgba(8,201,130,.16); }
     .secondary { border: 1px solid var(--line); color: var(--muted); background: transparent; }
@@ -167,7 +179,7 @@
 
     .decision { display: grid; grid-template-columns: 50px minmax(0,1fr); gap: 10px; padding: 15px 21px 19px; color: var(--muted); font-size: 9px; line-height: 1.6; }
     .decision b { color: var(--green-deep); font-size: 8px; letter-spacing: .1em; }
-    @media (max-width: 940px) { .intro { grid-template-columns: 1fr; } .principles { display: flex; flex-wrap: wrap; } .variants { grid-template-columns: 1fr; max-width: 600px; margin: auto; } }
+    @media (max-width: 940px) { .intro { grid-template-columns: 1fr; } .principles { display: flex; flex-wrap: wrap; } .channel-dock { grid-template-columns: repeat(4, minmax(0,1fr)); } .variants { grid-template-columns: 1fr; max-width: 600px; margin: auto; } }
     @media (max-width: 560px) {
       .lab-header { display: grid; grid-template-columns: 1fr; padding: 9px 12px; }
       .brand small { display: none; }
@@ -175,6 +187,9 @@
       main { padding: 38px 9px 55px; }
       .intro { padding-inline: 9px; }
       h1 { font-size: 38px; }
+      .channel-dock { display: flex; overflow-x: auto; margin-inline: 4px; padding: 7px; scrollbar-width: none; }
+      .channel-dock::-webkit-scrollbar { display: none; }
+      .channel-button { min-width: 123px; }
       .concept-head { grid-template-columns: 39px 1fr; padding-inline: 14px; }
       .fit { display: none; }
       .stage { min-height: 690px; padding: 19px 8px; }
@@ -191,7 +206,8 @@
     <div class="state-tabs" aria-label="统一切换四版流程状态"><button class="is-active" data-state="connect" type="button">配置渠道</button><button data-state="verify" type="button">输入验证码</button><button data-state="bound" type="button">绑定完成</button></div>
   </header>
   <main>
-    <section class="intro"><div><span class="eyebrow">04 VERTICAL DIRECTIONS</span><h1>步骤向下生长，<br />操作贴近当下。</h1><p>四版都取消横向进度条，并围绕同一套渠道绑定语义设计。以 Bark 为完整示例；替换应用图标、字段和说明后，也能承载邮箱、短信、QQ、ntfy、Gotify 与 PushDeer。</p></div><div class="principles"><span>纵向阅读路径</span><span>复用验证码组件</span><span>当前任务就近操作</span></div></section>
+    <section class="intro"><div><span class="eyebrow">04 VERTICAL DIRECTIONS</span><h1>步骤向下生长，<br />操作贴近当下。</h1><p>四版都取消横向进度条，并围绕同一套渠道绑定语义设计。切换任一渠道，四种方案会同步更新字段、指引、验证码目标与完成回执。</p></div><div class="principles"><span>纵向阅读路径</span><span>复用验证码组件</span><span>当前任务就近操作</span></div></section>
+    <nav class="channel-dock" id="channel-dock" aria-label="切换绑定渠道"></nav>
     <section class="variants">
       <article class="concept v1"><header class="concept-head"><span class="concept-no">01</span><span><strong>连接清单</strong><small>完整说明先行，操作集中收口</small></span><span class="fit">最接近参考</span></header><div class="stage"><div class="drawer" data-state="connect"><header class="drawer-header"><button type="button">‹</button><strong>Bark</strong><span></span></header><div class="drawer-body">
         <section class="state state-connect"><div class="app-heading"><span class="app-icon"><img src="../contact-binding-system/assets/bark.jpg" alt="Bark" /></span><span><h2>连接 Bark</h2><p>适合 iPhone，通过 Bark 专属链接接收即时提醒</p></span></div><div class="guide-title"><h3>连接步骤</h3><p>按顺序完成，收到验证码后才会正式启用</p></div><div class="steps"><div class="step"><span class="step-no">1</span><span><strong>安装并允许通知</strong><p>打开 Bark，首次启动时允许系统通知。</p><a>前往 App Store ↗</a></span></div><div class="step"><span class="step-no">2</span><span><strong>复制专属推送链接</strong><p>在 Bark 首页复制以 api.day.app 开头的链接。</p></span></div><div class="step"><span class="step-no">3</span><span><strong>发送测试验证码</strong><p>回到这里粘贴链接，发送一条测试消息。</p></span></div></div><div class="action-card"><label class="field-label">Bark 推送链接</label><div class="input-shell"><input value="https://api.day.app/AbCDefGh" /></div><button class="primary next" data-next="verify" type="button">发送测试验证码</button></div></section>
@@ -221,12 +237,152 @@
   <script>
     const drawers = [...document.querySelectorAll('.drawer')];
     const tabs = [...document.querySelectorAll('.state-tabs button')];
+    const semanticIcons = {
+      email: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="m5 8 7 5 7-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      sms: '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2.5" width="12" height="19" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M10 18.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    };
+    const assetRoot = '../contact-binding-system/assets/';
+    const providers = {
+      email: {
+        label: '电子邮箱', sub: '账号与送达', color: '#71847b', icon: 'email', title: '绑定电子邮箱', heading: '电子邮箱',
+        desc: '用于账号安全、找回和延迟邮件提醒', credential: '邮箱地址', target: 'jy***@example.com', receipt: 'jyonn@example.com',
+        fields: [['邮箱地址', 'jyonn@example.com', '']], send: '发送邮箱验证码', verify: '确认绑定', bound: '邮箱已绑定', boundDesc: '账号与通知邮件将送达这个地址',
+        steps: [['填写常用邮箱', '输入你能够长期使用的邮箱地址。'], ['接收邮箱验证码', '前往收件箱查看六位验证码。'], ['启用邮件送达', '验证后用于账号安全与延迟提醒。']]
+      },
+      sms: {
+        label: '手机短信', sub: '账号与送达', color: '#16a978', icon: 'sms', title: '绑定手机号', heading: '手机短信',
+        desc: '用于安全验证和需要立即送达的短信提醒', credential: '手机号码', target: '+86 138 **** 9072', receipt: '+86 138 0000 9072',
+        fields: [['手机号码', '138 0000 9072', '+86']], send: '发送短信验证码', verify: '确认绑定', bound: '手机号已绑定', boundDesc: '重要安全消息可以通过短信送达',
+        steps: [['填写手机号码', '输入当前可以接收短信的号码。'], ['接收短信验证码', '查看短信中的六位验证码。'], ['启用短信送达', '验证后用于账号安全与重要提醒。']]
+      },
+      qq: {
+        label: 'QQ 号', sub: '身份认领', color: '#16a8eb', image: 'qq.jpg', title: 'QQ号绑定', heading: '认领 QQ 身份',
+        desc: '验证数字 QQ 邮箱，将历史内容归入当前账号', credential: 'QQ 号', target: '1031086074@qq.com', receipt: '1031086074',
+        fields: [['QQ 号', '1031086074', '@qq.com']], send: '发送邮箱验证码', verify: '确认绑定并认领', bound: 'QQ 号已绑定', boundDesc: '历史说说与评论已归入当前账号',
+        steps: [['填写 QQ 号', '确认需要认领历史内容的 QQ 号码。'], ['验证 QQ 邮箱', '从对应数字邮箱取得六位验证码。'], ['认领历史身份', '验证后自动迁移说说、评论与艾特关系。']]
+      },
+      bark: {
+        label: 'Bark', sub: '即时提醒', color: '#ef4f42', image: 'bark.jpg', title: '连接 Bark', heading: 'Bark 即时提醒',
+        desc: '适合 iPhone，通过 Bark 专属链接接收即时提醒', credential: '推送链接', target: 'Bark · iPhone 15 Pro', receipt: 'api.day.app/AbCDefGh',
+        fields: [['Bark 推送链接', 'https://api.day.app/AbCDefGh', '']], send: '发送测试验证码', verify: '确认连接', bound: 'Bark 已连接', boundDesc: '即时提醒现在会送达这台设备', appLink: '前往 App Store ↗',
+        steps: [['安装并允许通知', '打开 Bark，首次启动时允许系统通知。'], ['复制专属推送链接', '在 Bark 首页复制以 api.day.app 开头的链接。'], ['发送测试验证码', '粘贴链接并发送测试，再输入收到的验证码。']]
+      },
+      ntfy: {
+        label: 'ntfy', sub: '即时提醒', color: '#338574', image: 'ntfy.png', title: '连接 ntfy', heading: 'ntfy 即时提醒',
+        desc: '订阅专属 Topic，在任意设备上接收即时消息', credential: 'Topic', target: 'ntfy.sh/sermo-jyonn', receipt: 'ntfy.sh/sermo-jyonn',
+        fields: [['Topic 地址', 'https://ntfy.sh/sermo-jyonn', ''], ['访问令牌（可选）', 'tk_xxxxxxxxxxxx', '']], send: '发送测试验证码', verify: '确认订阅', bound: 'ntfy 已连接', boundDesc: '即时提醒将发布到这个私有 Topic', appLink: '查看 ntfy 指引 ↗',
+        steps: [['创建私有 Topic', '在 ntfy 中创建难以猜测的 Topic。'], ['填写 Topic 与令牌', '私有 Topic 需要同时提供访问令牌。'], ['发送测试验证码', '确认客户端已经订阅并能够收到消息。']]
+      },
+      gotify: {
+        label: 'Gotify', sub: '即时提醒', color: '#2f8bd1', image: 'gotify.svg', title: '连接 Gotify', heading: 'Gotify 即时提醒',
+        desc: '连接自托管 Gotify，消息数据由你掌控', credential: '服务器与 Token', target: 'push.example.com', receipt: 'push.example.com · A9.••••••',
+        fields: [['服务器地址', 'https://push.example.com', ''], ['Application Token', 'A9.xxxxxxxxxxxxx', '']], send: '发送测试验证码', verify: '确认连接', bound: 'Gotify 已连接', boundDesc: 'Sermo 可以向你的 Gotify 应用投递消息', appLink: '查看 Gotify 指引 ↗',
+        steps: [['创建 Gotify 应用', '在自托管实例中为 Sermo 新建应用。'], ['复制服务与 Token', '填写服务器地址和 Application Token。'], ['发送测试验证码', '通过测试消息确认服务可达。']]
+      },
+      pushdeer: {
+        label: 'PushDeer', sub: '即时提醒', color: '#df9225', image: 'pushdeer.png', title: '连接 PushDeer', heading: 'PushDeer 即时提醒',
+        desc: '使用 PushKey 将消息投递到 PushDeer 客户端', credential: 'PushKey', target: 'PushDeer · PDU••••••', receipt: 'PDUxxxxxxxxxxxxxxxx',
+        fields: [['PushKey', 'PDUxxxxxxxxxxxxxxxx', ''], ['服务器地址（可选）', 'https://api2.pushdeer.com', '']], send: '发送测试验证码', verify: '确认连接', bound: 'PushDeer 已连接', boundDesc: '即时提醒将使用这个 PushKey 投递', appLink: '查看 PushDeer 指引 ↗',
+        steps: [['取得 PushKey', '从 PushDeer 设备页复制 PushKey。'], ['确认服务器地址', '自托管用户可以替换默认服务器。'], ['发送测试验证码', '确认客户端已经正确接收消息。']]
+      }
+    };
+    let currentProvider = 'bark';
+
+    function iconMarkup(provider) {
+      return provider.image ? `<img src="${assetRoot}${provider.image}" alt="${provider.label}" />` : semanticIcons[provider.icon];
+    }
+    function fieldsMarkup(provider) {
+      return provider.fields.map(([label, value, suffix]) => `<div class="field-block"><label class="field-label">${label}</label><div class="input-shell"><input value="${value}" aria-label="${label}" />${suffix ? `<span>${suffix}</span>` : ''}</div></div>`).join('');
+    }
+    function codeMarkup() {
+      return '<div class="code-boxes" aria-label="复用 VerificationCodeInput"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div>';
+    }
+    function renderDock() {
+      document.querySelector('#channel-dock').innerHTML = Object.entries(providers).map(([key, provider]) => `<button class="channel-button${key === currentProvider ? ' is-active' : ''}" style="--provider:${provider.color}" data-provider="${key}" type="button"><span class="channel-icon">${iconMarkup(provider)}</span><span><strong>${provider.label}</strong><small>${provider.sub}</small></span></button>`).join('');
+    }
+    function setText(selector, value) {
+      document.querySelectorAll(selector).forEach(element => element.textContent = value);
+    }
+    function setProvider(key) {
+      currentProvider = key;
+      const provider = providers[key];
+      document.documentElement.style.setProperty('--provider', provider.color);
+      renderDock();
+      setState('connect');
+      document.querySelectorAll('.drawer .app-icon').forEach(icon => icon.innerHTML = iconMarkup(provider));
+      setText('.drawer-header strong', provider.title);
+      setText('.app-heading h2', provider.heading);
+      setText('.app-heading p', provider.desc);
+
+      const v1Steps = [...document.querySelectorAll('.v1 .state-connect .step')];
+      v1Steps.forEach((step, index) => {
+        step.querySelector('strong').textContent = provider.steps[index][0];
+        step.querySelector('p').textContent = provider.steps[index][1];
+      });
+      const guideLink = document.querySelector('.v1 .state-connect .step a');
+      guideLink.textContent = provider.appLink || '';
+      guideLink.style.display = provider.appLink ? 'inline-block' : 'none';
+      document.querySelector('.v1 .action-card').innerHTML = `${fieldsMarkup(provider)}<button class="primary next" data-next="verify" type="button">${provider.send}</button>`;
+      document.querySelector('.v1 .code-copy').innerHTML = `输入 ${provider.label} 收到的六位验证码<strong>${provider.target}</strong>`;
+      setText('.v1 .state-verify .primary', provider.verify);
+      setText('.v1 .state-bound h3', provider.bound);
+      setText('.v1 .state-bound .done-core > p', provider.boundDesc);
+      setText('.v1 .state-bound .receipt b', provider.receipt);
+
+      [...document.querySelectorAll('.v2 .state-connect .spine-step')].forEach((step, index) => {
+        step.querySelector('strong').textContent = provider.steps[index][0];
+        step.querySelector('small').textContent = provider.steps[index][1];
+      });
+      document.querySelector('.v2 .state-connect .expanded').innerHTML = `${fieldsMarkup(provider)}<button class="primary next" data-next="verify" type="button">${provider.send}</button>`;
+      const v2Verify = [...document.querySelectorAll('.v2 .state-verify .spine-step')];
+      v2Verify[0].querySelector('strong').textContent = `${provider.credential}已保存`;
+      v2Verify[0].querySelector('small').textContent = provider.receipt;
+      v2Verify[1].querySelector('strong').textContent = '验证所有权';
+      v2Verify[1].querySelector('small').textContent = `验证码已发送至 ${provider.target}`;
+      v2Verify[1].querySelector('.expanded').innerHTML = `${codeMarkup()}<button class="primary next" data-next="bound" type="button">${provider.verify}</button>`;
+      v2Verify[2].querySelector('strong').textContent = provider.bound;
+      const v2Bound = [...document.querySelectorAll('.v2 .state-bound .spine-step')];
+      v2Bound[0].querySelector('strong').textContent = `${provider.credential}已保存`;
+      v2Bound[1].querySelector('strong').textContent = '所有权验证成功';
+      v2Bound[2].querySelector('strong').textContent = provider.bound;
+      v2Bound[2].querySelector('small').textContent = provider.boundDesc;
+      v2Bound[2].querySelector('.mini-receipt span').textContent = provider.receipt;
+
+      const v3Connect = [...document.querySelectorAll('.v3 .state-connect .task-card')];
+      v3Connect.forEach((card, index) => {
+        card.querySelector('h3').textContent = provider.steps[index][0];
+        card.querySelector('p').textContent = provider.steps[index][1];
+      });
+      v3Connect[0].querySelector('.task-work').innerHTML = `${fieldsMarkup(provider)}<button class="primary next" data-next="verify" type="button">${provider.send}</button>`;
+      const v3Verify = [...document.querySelectorAll('.v3 .state-verify .task-card')];
+      v3Verify[0].querySelector('h3').textContent = `${provider.credential}已保存`;
+      v3Verify[0].querySelector('p').textContent = provider.receipt;
+      v3Verify[1].querySelector('h3').textContent = '输入六位验证码';
+      v3Verify[1].querySelector('p').textContent = `已送达 ${provider.target}`;
+      v3Verify[1].querySelector('.task-work').innerHTML = `${codeMarkup()}<button class="primary next" data-next="bound" type="button">${provider.verify}</button>`;
+      const v3Bound = [...document.querySelectorAll('.v3 .state-bound .task-card')];
+      v3Bound[0].querySelector('h3').textContent = `${provider.credential}已保存`;
+      v3Bound[1].querySelector('h3').textContent = '所有权验证成功';
+      v3Bound[2].querySelector('h3').textContent = provider.bound;
+      v3Bound[2].querySelector('p').textContent = provider.boundDesc;
+
+      const v4Connect = document.querySelector('.v4 .state-connect .work-area');
+      v4Connect.innerHTML = `<h2>准备${provider.credential}</h2><p>${provider.desc}</p><div class="mini-guide"><div><b>1</b><span><strong>${provider.steps[0][0]}</strong><small>${provider.steps[0][1]}</small></span></div><div><b>2</b><span><strong>${provider.steps[1][0]}</strong><small>${provider.steps[1][1]}</small></span></div></div>${fieldsMarkup(provider)}<button class="primary next" data-next="verify" type="button">${provider.send}</button>`;
+      document.querySelector('.v4 .state-verify .work-area').innerHTML = `<h2>验证${provider.label}</h2><p>输入发送至 ${provider.target} 的六位验证码。</p>${codeMarkup()}<button class="primary next" data-next="bound" type="button">${provider.verify}</button><button class="secondary" style="margin-top:8px" type="button">重新发送 · 48s</button>`;
+      document.querySelector('.v4 .state-bound .work-area').innerHTML = `<div class="done-core"><span class="app-icon">${iconMarkup(provider)}</span><span class="done-check">✓</span><h3>${provider.bound}</h3><p>${provider.boundDesc}</p><div class="receipt"><span>绑定凭据</span><b>${provider.receipt}</b></div><button class="secondary" type="button">完成</button></div>`;
+    }
     function setState(state) {
       drawers.forEach(drawer => drawer.dataset.state = state);
       tabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.state === state));
     }
     tabs.forEach(tab => tab.addEventListener('click', () => setState(tab.dataset.state)));
-    document.querySelectorAll('.next').forEach(button => button.addEventListener('click', () => setState(button.dataset.next)));
+    document.addEventListener('click', event => {
+      const channel = event.target.closest('.channel-button');
+      const next = event.target.closest('.next');
+      if (channel) setProvider(channel.dataset.provider);
+      if (next) setState(next.dataset.next);
+    });
+    setProvider(currentProvider);
   </script>
 </body>
 </html>

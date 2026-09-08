@@ -216,7 +216,7 @@
         <section class="channel-group"><h2>账号与送达</h2><div class="channel-list">
           <button class="channel-card is-bound" data-provider="email" type="button"><span class="app-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke-width="1.8"/><path d="m5 8 7 5 7-5" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>电子邮箱</strong><small>已绑定</small></span><b></b></button>
           <button class="channel-card" data-provider="sms" type="button"><span class="app-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2.5" width="12" height="19" rx="3" stroke-width="1.8"/><path d="M10 18.5h4" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>手机短信</strong><small>未绑定</small></span><b></b></button>
-          <button class="channel-card is-active" data-provider="qq" type="button"><span class="app-icon"><img src="assets/qqmail.jpg" alt="QQ 邮箱" /></span><span><strong>QQ 号</strong><small>身份认领</small></span><b></b></button>
+          <button class="channel-card is-active" data-provider="qq" type="button"><span class="app-icon"><img src="assets/qq.jpg" alt="QQ" /></span><span><strong>QQ 号</strong><small>身份认领</small></span><b></b></button>
         </div></section>
         <section class="channel-group"><h2>即时提醒应用</h2><div class="channel-list">
           <button class="channel-card is-bound" data-provider="bark" type="button"><span class="app-icon"><img src="assets/bark.jpg" alt="Bark" /></span><span><strong>Bark</strong><small>已连接</small></span><b></b></button>
@@ -230,7 +230,7 @@
         <div class="drawer" data-state="connect" data-provider="qq">
           <header class="drawer-header"><button type="button" aria-label="返回">‹</button><strong id="drawer-title">QQ号绑定</strong><span></span></header>
           <div class="drawer-body">
-            <div class="provider-head"><span class="app-icon" id="hero-icon"><img src="assets/qqmail.jpg" alt="" /></span><span><h3 id="provider-name">认领 QQ 身份</h3><p id="provider-desc">验证 QQ 邮箱，将历史说说与评论归入当前账号。</p></span></div>
+            <div class="provider-head"><span class="app-icon" id="hero-icon"><img src="assets/qq.jpg" alt="" /></span><span><h3 id="provider-name">认领 QQ 身份</h3><p id="provider-desc">验证 QQ 邮箱，将历史说说与评论归入当前账号。</p></span></div>
             <div class="flow-rail"><span class="flow-step is-active">接入</span><span class="flow-step">验证</span><span class="flow-step">完成</span></div>
 
             <section class="state state-connect">
@@ -241,7 +241,7 @@
             </section>
 
             <section class="state state-verify">
-              <div class="verify-target"><span class="app-icon" id="verify-icon"><img src="assets/qqmail.jpg" alt="" /></span><span><small>验证码已送达</small><strong id="verify-target">1031086074@qq.com</strong></span></div>
+              <div class="verify-target"><span class="app-icon" id="verify-icon"><img src="assets/qq.jpg" alt="" /></span><span><small>验证码已送达</small><strong id="verify-target">1031086074@qq.com</strong></span></div>
               <p class="code-label">6 位验证码</p>
               <div class="code-boxes" aria-label="复用 VerificationCodeInput"><i>2</i><i>0</i><i>4</i><i>8</i><i>1</i><i>6</i></div>
               <button class="primary next-state" data-next="bound" id="verify-button" type="button">确认绑定</button>
@@ -250,7 +250,7 @@
             </section>
 
             <section class="state state-bound">
-              <div class="bound-card"><span class="app-icon" id="bound-icon"><img src="assets/qqmail.jpg" alt="" /></span><span class="check">✓</span><h3 id="bound-title">QQ 号已绑定</h3><p id="bound-copy">该渠道已经可以接收 Sermo 的消息</p><div class="receipt"><span><span>绑定凭据</span><b id="receipt-value">1031086074</b></span><em>已验证</em></div></div>
+              <div class="bound-card"><span class="app-icon" id="bound-icon"><img src="assets/qq.jpg" alt="" /></span><span class="check">✓</span><h3 id="bound-title">QQ 号已绑定</h3><p id="bound-copy">该渠道已经可以接收 Sermo 的消息</p><div class="receipt"><span><span>绑定凭据</span><b id="receipt-value">1031086074</b></span><em>已验证</em></div></div>
               <button class="secondary" type="button">完成</button>
             </section>
           </div>
@@ -280,7 +280,7 @@
     const providers = {
       email: { color:'#74867e', icon:'email', title:'绑定电子邮箱', name:'电子邮箱', desc:'用于安全验证、账号找回和延迟邮件提醒。', fields:[['邮箱地址','jyonn@example.com','']], target:'jy***@example.com', send:'发送验证码', verify:'确认绑定', receipt:'jyonn@example.com', safety:'我们只会发送账号与通知邮件，不会读取你的邮箱内容。', bound:'邮箱已绑定' },
       sms: { color:'#16a978', icon:'sms', title:'绑定手机号', name:'手机短信', desc:'用于重要安全验证与需要立即送达的短信提醒。', fields:[['手机号码','138 0000 9072','+86']], target:'+86 138 **** 9072', send:'发送验证码', verify:'确认绑定', receipt:'+86 138 0000 9072', safety:'手机号仅用于安全与通知，不会在个人主页公开展示。', bound:'手机号已绑定' },
-      qq: { color:'#12a8ee', image:'assets/qqmail.jpg', title:'QQ号绑定', name:'认领 QQ 身份', desc:'验证 QQ 邮箱，将历史说说与评论归入当前账号。', fields:[['QQ 号','1031086074','@qq.com']], target:'1031086074@qq.com', send:'发送验证码', verify:'确认绑定并认领', receipt:'1031086074', safety:'绑定后历史身份将合并至当前账号，请确认 QQ 号无误。', bound:'QQ 号已绑定' },
+      qq: { color:'#12a8ee', image:'assets/qq.jpg', title:'QQ号绑定', name:'认领 QQ 身份', desc:'验证 QQ 邮箱，将历史说说与评论归入当前账号。', fields:[['QQ 号','1031086074','@qq.com']], target:'1031086074@qq.com', send:'发送验证码', verify:'确认绑定并认领', receipt:'1031086074', safety:'绑定后历史身份将合并至当前账号，请确认 QQ 号无误。', bound:'QQ 号已绑定' },
       bark: { color:'#20bd81', image:'assets/bark.jpg', title:'绑定 Bark', name:'Bark 即时提醒', desc:'通过你的 Bark 地址，将消息即时推送到 Apple 设备。', setup:['打开 Bark 获取地址','复制以 https://api.day.app 开头的推送地址'], fields:[['Bark 地址','https://api.day.app/AbCDefGh','']], target:'Bark · iPhone 15 Pro', send:'发送测试验证码', verify:'确认连接', receipt:'api.day.app/AbCDefGh', safety:'测试消息成功后才会保存地址；好友上线仅通过即时渠道发送。', bound:'Bark 已连接' },
       ntfy: { color:'#338574', image:'assets/ntfy.png', title:'绑定 ntfy', name:'ntfy 即时提醒', desc:'订阅一个专属 topic，在任意设备上接收即时消息。', setup:['先创建私有 Topic','建议使用难以猜测的 topic 名称'], fields:[['Topic 地址','https://ntfy.sh/sermo-jyonn',''],['访问令牌（可选）','tk_xxxxxxxxxxxx','']], target:'ntfy.sh/sermo-jyonn', send:'发送测试验证码', verify:'确认订阅', receipt:'ntfy.sh/sermo-jyonn', safety:'公开 ntfy Topic 可能被他人订阅，推荐配置访问令牌。', bound:'ntfy 已连接' },
       gotify: { color:'#2f8bd1', image:'assets/gotify.svg', title:'绑定 Gotify', name:'Gotify 即时提醒', desc:'连接你自托管的 Gotify 实例，消息数据由你掌控。', setup:['在 Gotify 创建应用','复制服务地址与 Application Token'], fields:[['服务器地址','https://push.example.com',''],['Application Token','A9.xxxxxxxxxxxxx','']], target:'push.example.com', send:'发送测试验证码', verify:'确认连接', receipt:'push.example.com · A9.••••••', safety:'Token 只用于向你的 Gotify 应用写入消息，将加密保存。', bound:'Gotify 已连接' },
