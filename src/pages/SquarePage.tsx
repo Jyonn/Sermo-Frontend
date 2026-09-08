@@ -40,6 +40,7 @@ import {
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
+import { visibleCommentReplyTarget } from "../lib/squareComments";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
@@ -428,7 +429,7 @@ function CommentContent({ comment, onOpenProfile, onReply }: {
   return <p onClick={onReply}><InlineRichText emoticons={comment.inline_emoticons} mentions={comment.mentions} onOpenProfile={onOpenProfile} text={comment.text} /></p>;
 }
 
-function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies, rootUserId }: {
+function CommentThread({ comment, canInteract, expanded = false, onDelete, onLike, onOpenProfile, onReply, onToggleReplies }: {
   comment: SquareStatementCommentDTO;
   canInteract: boolean;
   expanded?: boolean;
@@ -437,7 +438,6 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
   onOpenProfile: (user: TinyUserDTO) => void;
   onReply: (comment: SquareStatementCommentDTO) => void;
   onToggleReplies?: (commentId: number) => void;
-  rootUserId?: number;
 }) {
   const { t } = useI18n();
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
@@ -454,14 +454,8 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
     event.stopPropagation();
     if (canInteract) onReply(comment);
   };
-  const threadRootUserId = rootUserId ?? comment.user.user_id;
   const qqUser = isUnclaimedQqUser(comment.user);
-  const replyTargetAlreadyMentioned = comment.reply_to_user
-    ? comment.mentions?.some((mention) => mention.user_id === comment.reply_to_user?.user_id)
-    : false;
-  const layerReplyTarget = comment.parent_id && !replyTargetAlreadyMentioned && comment.reply_to_user?.user_id !== threadRootUserId
-    ? comment.reply_to_user
-    : null;
+  const layerReplyTarget = visibleCommentReplyTarget(comment);
   const displayName = comment.is_anonymous ? t("square.anonymousUser") : comment.user.name;
   const replyCount = Math.max(comment.reply_count || 0, comment.replies?.length || 0);
   const hasExpandableReplies = !comment.parent_id && replyCount > 0;
@@ -482,7 +476,7 @@ function CommentThread({ comment, canInteract, expanded = false, onDelete, onLik
         </div>
       </div>
       {hasExpandableReplies ? <button aria-expanded={expanded} className="square-comment-replies-toggle" onClick={toggleReplies} type="button"><span>{expanded ? t("square.hideReplies") : t("square.viewReplies", { count: replyCount })}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
-      {hasExpandableReplies && comment.replies?.length ? <div aria-hidden={!expanded} className={`square-comment-replies-shell${expanded ? " is-expanded" : ""}`}><div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onOpenProfile={onOpenProfile} onReply={onReply} rootUserId={threadRootUserId} />)}</div></div> : null}
+      {hasExpandableReplies && comment.replies?.length ? <div aria-hidden={!expanded} className={`square-comment-replies-shell${expanded ? " is-expanded" : ""}`}><div className="square-comment-replies">{comment.replies.map((reply) => <CommentThread canInteract={canInteract} comment={reply} key={reply.comment_id} onDelete={onDelete} onLike={onLike} onOpenProfile={onOpenProfile} onReply={onReply} />)}</div></div> : null}
     </div>
     {menuPosition && typeof document !== "undefined" ? createPortal(<div className="square-comment-menu" onClick={(event) => event.stopPropagation()} ref={menuRef} style={menuPosition}><button onClick={(event) => { event.stopPropagation(); setMenuPosition(null); onDelete(comment); }} type="button"><span className="material-symbols-outlined">delete</span><span>{t("common.delete")}</span></button></div>, document.body) : null}
   </article>;

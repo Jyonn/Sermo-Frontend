@@ -11,6 +11,7 @@
     "i18n:check": "node scripts/check-i18n.mjs",
     "test:message-windows": "node --test tests/messageWindow.test.ts",
     "test:square-feed-cache": "node --test tests/squareFeedCache.test.ts",
+    "test:square-comments": "node --test tests/squareComments.test.ts",
     "maps:cache": "node scripts/cache-map-boundaries.mjs",
     "preview": "vite preview"
   },
