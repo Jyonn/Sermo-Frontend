@@ -44,7 +44,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -80,6 +80,30 @@ const COMMENT_STICKER_PAGE_SIZE = 30;
 const SQUARE_FEED_PAGE_SIZE = 20;
 const COMMENT_MENTION_RE = /<@(\d+)>/g;
 const INLINE_RICH_TOKEN_RE = /<@(\d+)>|\[em\](e\d+)\[\/em\]/gi;
+const FEED_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function normalizeFeedDate(value: string | null) {
+  if (!value || !FEED_DATE_RE.test(value)) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  const candidate = new Date(Date.UTC(year, month - 1, day));
+  return candidate.getUTCFullYear() === year && candidate.getUTCMonth() === month - 1 && candidate.getUTCDate() === day
+    ? value
+    : null;
+}
+
+function shanghaiCalendarMonth(date?: string | null) {
+  if (date) {
+    const [year, month] = date.split("-").map(Number);
+    return { year, month };
+  }
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return { year: Number(values.year), month: Number(values.month) };
+}
 
 function isUnclaimedQqUser(user?: TinyUserDTO | null) {
   return user?.external_identity?.provider === "qq";
@@ -503,11 +527,12 @@ export default function SquarePage() {
   const profileFeedUserIdValue = Number(searchParams.get("user_id"));
   const profileFeedUserId = Number.isFinite(profileFeedUserIdValue) && profileFeedUserIdValue > 0 ? profileFeedUserIdValue : null;
   const profileFeedUserName = searchParams.get("user_name")?.trim() || t("square.userFeedFallback");
+  const selectedFeedDate = normalizeFeedDate(searchParams.get("date"));
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(profileFeedUserId ? "user" : "all");
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? features.squareExploreEnabled ? "all" : "friends"
     : feedMode;
-  const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId);
+  const activeFeedCacheKey = squareFeedCacheKey(effectiveFeedMode, profileFeedUserId, selectedFeedDate);
   const initialFeedSnapshotRef = useRef<NormalizedSquareFeedSnapshot<SquareStatementDTO> | null>();
   if (initialFeedSnapshotRef.current === undefined) {
     const normalized = normalizeSquareFeedSnapshot(
@@ -524,6 +549,10 @@ export default function SquarePage() {
   const [hasMore, setHasMore] = useState(() => initialFeedSnapshot?.hasMore ?? true);
   const squareLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState("");
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => shanghaiCalendarMonth(selectedFeedDate));
+  const [calendar, setCalendar] = useState<SquareCalendarDTO | null>(null);
+  const [calendarLoading, setCalendarLoading] = useState(false);
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<"public" | "friends">("public");
   const [anonymousStatement, setAnonymousStatement] = useState(false);
@@ -782,9 +811,9 @@ export default function SquarePage() {
   }, [session?.user.space_id, session?.user.user_id]);
 
   useEffect(() => {
-    if (feedMode !== "all" && feedMode !== "friends") return;
+    if (selectedFeedDate || (feedMode !== "all" && feedMode !== "friends")) return;
     void api.markSquareFeedRead(feedMode).then(applySquareStatus).catch(() => undefined);
-  }, [feedMode, session?.user.space_id, session?.user.user_id]);
+  }, [feedMode, selectedFeedDate, session?.user.space_id, session?.user.user_id]);
 
   const spiderManActivity = activities.find((activity) => activity.theme === "spider-man-4") ?? null;
   const regularActivities = activities.filter((activity) => activity.theme !== "spider-man-4");
@@ -792,7 +821,7 @@ export default function SquarePage() {
   const activityBannerCount = regularActivities.length + (spiderManActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
 
   useEffect(() => {
-    if (activityBannerCount < 2 || feedMode !== "all") return;
+    if (selectedFeedDate || activityBannerCount < 2 || feedMode !== "all") return;
     const timer = window.setInterval(() => {
       if (document.hidden) return;
       const track = activityBannerTrackRef.current;
@@ -803,7 +832,7 @@ export default function SquarePage() {
       setActivityBannerSlide(next);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [activityBannerCount, activityBannerSlide, feedMode]);
+  }, [activityBannerCount, activityBannerSlide, feedMode, selectedFeedDate]);
 
   const claimPermanentVip = async () => {
     if (!vipCampaign?.eligible || vipClaiming) return;
@@ -913,6 +942,21 @@ export default function SquarePage() {
     setQuotaOpen(true);
     setQuotaLoading(true);
     void api.getSquareQuota().then(setQuota).catch(() => setQuota(null)).finally(() => setQuotaLoading(false));
+  };
+
+  const openCalendar = () => {
+    setCalendarMonth(shanghaiCalendarMonth(selectedFeedDate));
+    setCalendarOpen(true);
+  };
+
+  const selectFeedDate = (date: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (date) next.set("date", date);
+    else next.delete("date");
+    const query = next.toString();
+    if (routedStatementId !== null) navigate({ pathname: "/app/square", search: query ? `?${query}` : "" });
+    else setSearchParams(next);
+    setCalendarOpen(false);
   };
 
   const refreshStatementMedia = (statementId: number) => {
@@ -1086,7 +1130,7 @@ export default function SquarePage() {
   const loadStatements = async (before?: number) => {
     const requestFeedKey = activeFeedCacheKey;
     try {
-      const rows = await api.getSquareStatements({ before, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined });
+      const rows = await api.getSquareStatements({ before, date: selectedFeedDate ?? undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined });
       if (activeFeedCacheKeyRef.current !== requestFeedKey) return;
       setStatements((current) => {
         if (!before) return rows;
@@ -1128,7 +1172,7 @@ export default function SquarePage() {
     const cached = normalizedCached?.trusted ? normalizedCached : null;
     setSyncing(true);
     const controller = new AbortController();
-    void api.getSquareStatements({ limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
+    void api.getSquareStatements({ date: selectedFeedDate ?? undefined, limit: SQUARE_FEED_PAGE_SIZE, scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode, user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined }, controller.signal).then((rows) => {
       if (activeFeedCacheKeyRef.current !== cacheKey) return;
       const refreshed = mergeSquareFeedRefresh(cached?.items ?? [], rows);
       const nextHasMore = refreshed.connected && cached
@@ -1159,7 +1203,25 @@ export default function SquarePage() {
       }
     });
     return () => controller.abort();
-  }, [activeFeedCacheKey, cacheScope, effectiveFeedMode, profileFeedUserId, t]);
+  }, [activeFeedCacheKey, cacheScope, effectiveFeedMode, profileFeedUserId, selectedFeedDate, t]);
+
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const controller = new AbortController();
+    setCalendar(null);
+    setCalendarLoading(true);
+    void api.getSquareCalendar({
+      year: calendarMonth.year,
+      month: calendarMonth.month,
+      scope: effectiveFeedMode === "user" ? "all" : effectiveFeedMode,
+      user_id: effectiveFeedMode === "user" ? profileFeedUserId ?? undefined : undefined,
+    }, controller.signal).then(setCalendar).catch((cause) => {
+      if ((cause as Error).name !== "AbortError") setCalendar(null);
+    }).finally(() => {
+      if (!controller.signal.aborted) setCalendarLoading(false);
+    });
+    return () => controller.abort();
+  }, [calendarMonth, calendarOpen, effectiveFeedMode, profileFeedUserId]);
 
   useEffect(() => {
     if (loading || statementsFeedKey !== activeFeedCacheKey) return;
@@ -1362,7 +1424,7 @@ export default function SquarePage() {
 
     if (navigateAfter && inlineRouteActive) {
       if (window.history.length > 1) navigate(-1);
-      else navigate("/app/square", { replace: true });
+      else navigate({ pathname: "/app/square", search: location.search }, { replace: true });
     }
 
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
@@ -1392,7 +1454,7 @@ export default function SquarePage() {
       setInlineStatementExpanded(true);
       setInlineTransitionPhase("open");
       setInlineStatementOrigin(null);
-      navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
+      navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
       window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
         const card = statementCardRefs.current.get(statementId);
         if (card) alignStatementBelowHeader(card, "smooth");
@@ -1403,7 +1465,7 @@ export default function SquarePage() {
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const card = statementCardRefs.current.get(statementId);
       if (!card) {
-        navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
+        navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
         setInlineStatementExpanded(true);
         setInlineTransitionPhase("open");
         return;
@@ -1413,7 +1475,7 @@ export default function SquarePage() {
         const rect = card.getBoundingClientRect();
         setInlineStatementOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
         setInlineTransitionPhase("preparing");
-        navigate(`/app/square/statements/${statementId}`, { state: { squareInlineFocus: true } });
+        navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
         setInlineStatementExpanded(true);
         inlineExpandTimerRef.current = window.setTimeout(() => {
           setInlineTransitionPhase("opening");
@@ -1427,7 +1489,7 @@ export default function SquarePage() {
   };
 
   const openStatementDrawer = (statementId: number) => {
-    navigate(`/app/square/statements/${statementId}`, { state: { squareStatementDrawer: true } });
+    navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareStatementDrawer: true } });
   };
 
   useEffect(() => () => {
@@ -1673,7 +1735,8 @@ export default function SquarePage() {
           pin: pinOnPublish ? 1 : 0,
           redact_chat_record: chatRecordDraft.redacted ? 1 : 0,
         });
-        setStatements((current) => [statement, ...current]);
+        if (selectedFeedDate) selectFeedDate(null);
+        else setStatements((current) => [statement, ...current]);
         if (pinOnPublish) setPinnedStatement(statement);
         setText("");
         setVisibility("public");
@@ -1711,7 +1774,8 @@ export default function SquarePage() {
         media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
       }
       const statement = await api.createSquareStatement({ text: text.trim(), visibility: anonymousStatement ? "public" : visibility, media, location: statementLocation, pin: pinOnPublish ? 1 : 0, anonymous: anonymousStatement ? 1 : 0 });
-      setStatements((current) => [statement, ...current]);
+      if (selectedFeedDate) selectFeedDate(null);
+      else setStatements((current) => [statement, ...current]);
       if (pinOnPublish) setPinnedStatement(statement);
       photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
       setText("");
@@ -1946,7 +2010,15 @@ export default function SquarePage() {
     </div>
   </form> : null;
 
-  const visibleStatements = statements.filter((statement) => !(feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id));
+  const selectedFeedDateLabel = selectedFeedDate ? new Intl.DateTimeFormat(localeForLanguage(language), {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "Asia/Shanghai",
+  }).format(new Date(`${selectedFeedDate}T00:00:00+08:00`)) : "";
+  const visibleStatements = statements.filter((statement) => !(
+    !selectedFeedDate && feedMode === "all" && statement.statement_id === pinnedStatement?.statement_id
+  ));
   const estimateStatementHeight = (statement: SquareStatementDTO) => {
     const media = statement.media ?? [];
     if (statement.chat_record) return 380;
@@ -2011,6 +2083,9 @@ export default function SquarePage() {
             ) : null}
           </div>}
           actions={<div className="square-header-actions">
+            <button aria-label={t("square.byDate")} aria-pressed={Boolean(selectedFeedDate)} className={`square-header-date${selectedFeedDate ? " is-active" : ""}`} onClick={openCalendar} type="button">
+              <span className="material-symbols-outlined">calendar_month</span>
+            </button>
             <button aria-label={t("square.quotaTitle")} className="square-header-quota" onClick={openQuota} type="button">
               <span className="material-symbols-outlined">data_usage</span>
             </button>
@@ -2025,7 +2100,12 @@ export default function SquarePage() {
           </div>}
         />
         <div className="square-feed-column">
-          {feedMode === "all" && activityBannerCount ? <div className="square-activity-carousel"><section className="square-activity-rail" aria-label={t("activity.active")} onScroll={(event) => {
+          {selectedFeedDate ? <div className="square-date-context">
+            <span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+            <span><small>{t("square.dateFiltered")}</small><strong>{selectedFeedDateLabel}</strong></span>
+            <button aria-label={t("square.clearDate")} onClick={() => selectFeedDate(null)} type="button"><span>{t("square.clearDate")}</span><span className="material-symbols-outlined">close</span></button>
+          </div> : null}
+          {!selectedFeedDate && feedMode === "all" && activityBannerCount ? <div className="square-activity-carousel"><section className="square-activity-rail" aria-label={t("activity.active")} onScroll={(event) => {
             const track = event.currentTarget;
             const slides = Array.from(track.children) as HTMLElement[];
             const nearest = slides.reduce((best, slide, index) => Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft) < Math.abs(slides[best].offsetLeft - track.offsetLeft - track.scrollLeft) ? index : best, 0);
@@ -2084,7 +2164,7 @@ export default function SquarePage() {
             const slide = track?.children[index] as HTMLElement | undefined;
             if (track && slide) track.scrollTo({ behavior: "smooth", left: slide.offsetLeft - track.offsetLeft });
           }} type="button" />)}</div> : null}</div> : null}
-          {feedMode === "all" && pinnedStatement ? (
+          {!selectedFeedDate && feedMode === "all" && pinnedStatement ? (
             <button className="square-pinned-banner" onClick={() => openStatementDrawer(pinnedStatement.statement_id)} type="button">
               <span className="square-pinned-mark"><span className="material-symbols-outlined">keep</span></span>
               <UserAvatar className="square-pinned-avatar" frame={pinnedStatement.user.avatar_frame_style} name={pinnedStatement.user.name} uri={pinnedStatement.user.avatar_uri} />
@@ -2096,9 +2176,9 @@ export default function SquarePage() {
           {loading ? <ContentLoader label={t("common.loading")} rows={2} /> : null}
           {!loading && !statements.length && !error ? (
             <QuietState
-              icon={feedMode === "mine" ? "edit_note" : "explore"}
-              title={feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : feedMode === "mine" ? t("square.mineEmpty") : t("square.empty")}
-              description={feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
+              icon={selectedFeedDate ? "event_busy" : feedMode === "mine" ? "edit_note" : "explore"}
+              title={selectedFeedDate ? t("square.dateEmpty") : feedMode === "user" ? t("square.userFeedEmpty", { name: profileFeedUserName }) : feedMode === "mine" ? t("square.mineEmpty") : t("square.empty")}
+              description={selectedFeedDate ? t("square.dateEmptyHint") : feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
             />
           ) : null}
           {inlineStatementExpanded && !desktopWorkspace ? null : (
@@ -2411,6 +2491,28 @@ export default function SquarePage() {
       <ConfirmDialog busy={deletingStatement} confirmLabel={t("common.delete")} danger description={t("square.deleteStatementHint")} onClose={() => { if (!deletingStatement) setDeleteStatementId(null); }} onConfirm={() => void confirmDeleteStatement()} open={deleteStatementId !== null} title={t("square.deleteStatement")} />
       <ConfirmDialog busy={deletingComment} confirmLabel={t("common.delete")} danger description={deleteCommentTarget?.parent_id ? t("square.deleteReplyHint") : t("square.deleteCommentHint")} onClose={() => { if (!deletingComment) setDeleteCommentTarget(null); }} onConfirm={() => void confirmDeleteComment()} open={deleteCommentTarget !== null} title={deleteCommentTarget?.parent_id ? t("square.deleteReply") : t("square.deleteComment")} />
       <ConfirmDialog busy={commentSending} confirmLabel={t("square.confirmPublicReply")} description={t("square.publicReplyConfirmHint")} onClose={() => { if (!commentSending) { setPublicCommentConfirmOpen(false); setPendingCommentSticker(null); } }} onConfirm={() => { setPublicCommentConfirmOpen(false); void sendComment(pendingCommentSticker); }} open={publicCommentConfirmOpen} title={t("square.publicReplyConfirmTitle")} warning />
+      <BottomSheet className="message-search-calendar-sheet square-calendar-sheet" onClose={() => setCalendarOpen(false)} open={calendarOpen} title={t("square.byDate")}>
+        <div className="message-search-calendar square-calendar">
+          <div className="message-search-calendar-head">
+            <button aria-label={t("common.back")} onClick={() => setCalendarMonth((current) => current.month === 1 ? { year: current.year - 1, month: 12 } : { ...current, month: current.month - 1 })} type="button"><span className="material-symbols-outlined">chevron_left</span></button>
+            <strong>{t("messageSearch.yearMonth", { year: calendarMonth.year, month: calendarMonth.month })}</strong>
+            <button aria-label={t("common.next")} onClick={() => setCalendarMonth((current) => current.month === 12 ? { year: current.year + 1, month: 1 } : { ...current, month: current.month + 1 })} type="button"><span className="material-symbols-outlined">chevron_right</span></button>
+          </div>
+          <div className="message-search-calendar-weekdays">{t("messageSearch.weekdays").split(",").map((day) => <span key={day}>{day}</span>)}</div>
+          <div className={`message-search-calendar-grid${calendarLoading ? " is-loading" : ""}`}>
+            {Array.from({ length: new Date(Date.UTC(calendarMonth.year, calendarMonth.month, 0)).getUTCDate() + new Date(Date.UTC(calendarMonth.year, calendarMonth.month - 1, 1)).getUTCDay() }, (_, index) => {
+              const offset = new Date(Date.UTC(calendarMonth.year, calendarMonth.month - 1, 1)).getUTCDay();
+              const day = index - offset + 1;
+              if (day < 1) return <span aria-hidden="true" key={`blank-${index}`} />;
+              const date = `${calendarMonth.year}-${String(calendarMonth.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              const entry = calendar?.days.find((item) => item.date === date);
+              const selected = selectedFeedDate === date;
+              return <button aria-pressed={selected} className={`${entry ? "has-messages" : "is-empty"}${selected ? " is-selected" : ""}`} disabled={!entry} key={date} onClick={() => entry && selectFeedDate(date)} type="button">{day}</button>;
+            })}
+          </div>
+          <p>{t("square.dateHint")}</p>
+        </div>
+      </BottomSheet>
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
         <SquareQuotaPanel loading={quotaLoading} quota={quota} />
       </BottomSheet>

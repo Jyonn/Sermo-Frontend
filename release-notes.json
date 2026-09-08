@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.08.10",
+  "id": "2026.09.08.11",
   "publishedAt": "2026-09-08",
   "locales": {
     "zh-CN": {
-      "title": "广场切换更稳定",
+      "title": "广场支持按日期浏览",
       "items": [
-        "活动横幅移除圆角外溢阴影，边缘更加干净",
-        "桌面端切换发言时，新的选中提示会稳定保持"
+        "现在可以通过日历查看指定日期的完整广场动态",
+        "日历会根据探索、好友圈、我的等当前范围标记可浏览日期"
       ]
     },
     "en": {
-      "title": "Smoother Square selection",
+      "title": "Browse Square by date",
       "items": [
-        "Activity banners now have clean rounded edges without an outside shadow",
-        "The new selection highlight now stays stable while switching statements on desktop"
+        "Use the calendar to browse the complete Square feed for a chosen date",
+        "Available dates now reflect the current Explore, Friends, My Posts, or profile scope"
       ]
     }
   }

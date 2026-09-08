@@ -793,6 +793,12 @@ export interface SquareStatementDTO {
   created_at: number;
 }
 
+export interface SquareCalendarDTO {
+  year: number;
+  month: number;
+  days: Array<{ date: string; statement_count: number }>;
+}
+
 export interface SquareMuteDTO {
   mute_id: number;
   user: TinyUserDTO;

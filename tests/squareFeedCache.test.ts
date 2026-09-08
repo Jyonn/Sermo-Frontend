@@ -14,6 +14,8 @@ test("builds an isolated cache key for every feed", () => {
   assert.equal(squareFeedCacheKey("mine", null), "square:mine");
   assert.equal(squareFeedCacheKey("user", 42), "square:user:42");
   assert.equal(squareFeedCacheKey("user", null), "square:all");
+  assert.equal(squareFeedCacheKey("all", null, "2026-09-08"), "square:all:date:2026-09-08");
+  assert.equal(squareFeedCacheKey("user", 42, "2026-09-08"), "square:user:42:date:2026-09-08");
 });
 
 test("normalizes the legacy array cache format", () => {
@@ -43,6 +45,20 @@ test("keeps cached pages when the refreshed first page overlaps", () => {
   );
   assert.equal(result.connected, true);
   assert.deepEqual(result.items.map((item) => item.statement_id), [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+});
+
+test("keeps migrated historical statements ordered by publication time", () => {
+  const result = mergeSquareFeedRefresh(
+    [
+      { statement_id: 3, created_at: 300 },
+      { statement_id: 9, created_at: 100 },
+    ],
+    [
+      { statement_id: 4, created_at: 400 },
+      { statement_id: 3, created_at: 300 },
+    ],
+  );
+  assert.deepEqual(result.items.map((item) => item.statement_id), [4, 3, 9]);
 });
 
 test("drops disconnected cached pages instead of restoring an invalid position", () => {

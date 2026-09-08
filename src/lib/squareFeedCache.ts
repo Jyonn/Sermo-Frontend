@@ -2,6 +2,7 @@ export type SquareFeedMode = "all" | "friends" | "mine" | "user";
 
 export interface SquareFeedItem {
   statement_id: number;
+  created_at?: number;
 }
 
 export interface SquareFeedSnapshot<T> {
@@ -16,9 +17,11 @@ export interface NormalizedSquareFeedSnapshot<T> {
   trusted: boolean;
 }
 
-export function squareFeedCacheKey(mode: SquareFeedMode, userId: number | null) {
-  if (mode !== "user") return `square:${mode}`;
-  return userId ? `square:user:${userId}` : "square:all";
+export function squareFeedCacheKey(mode: SquareFeedMode, userId: number | null, date?: string | null) {
+  const base = mode !== "user"
+    ? `square:${mode}`
+    : userId ? `square:user:${userId}` : "square:all";
+  return date ? `${base}:date:${date}` : base;
 }
 
 export function normalizeSquareFeedSnapshot<T>(
@@ -51,7 +54,12 @@ export function mergeSquareFeedRefresh<T extends SquareFeedItem>(cached: T[], la
   const merged = new Map(cached.map((item) => [item.statement_id, item]));
   latest.forEach((item) => merged.set(item.statement_id, item));
   return {
-    items: [...merged.values()].sort((left, right) => right.statement_id - left.statement_id),
+    items: [...merged.values()].sort((left, right) => {
+      if (typeof left.created_at === "number" && typeof right.created_at === "number" && left.created_at !== right.created_at) {
+        return right.created_at - left.created_at;
+      }
+      return right.statement_id - left.statement_id;
+    }),
     connected: true,
   };
 }

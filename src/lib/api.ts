@@ -858,8 +858,16 @@ export const api = {
     });
   },
 
-  getSquareStatements(params: { before?: number; limit?: number; scope?: "all" | "friends" | "mine"; user_id?: number }, signal?: AbortSignal) {
+  getSquareStatements(params: { before?: number; date?: string; limit?: number; scope?: "all" | "friends" | "mine"; user_id?: number }, signal?: AbortSignal) {
     return request<SquareStatementDTO[]>("/square/statements", {
+      auth: true,
+      query: params,
+      signal,
+    });
+  },
+
+  getSquareCalendar(params: { month: number; scope?: "all" | "friends" | "mine"; user_id?: number; year: number }, signal?: AbortSignal) {
+    return request<import("../types").SquareCalendarDTO>("/square/statements/calendar", {
       auth: true,
       query: params,
       signal,
