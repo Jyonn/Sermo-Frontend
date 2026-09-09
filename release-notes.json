@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.1",
+  "id": "2026.09.10.2",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "投稿回合协作",
+      "title": "投稿回合幕布",
       "items": [
-        "投稿与审批现在按回合交接，当前编辑内容仅本方可见，提交后再完整同步",
-        "投稿入口只显示待处理投稿数，投稿列表的新内容统一使用小红点提示"
+        "当前投稿回合现在使用连续幕布与历史内容区分，不再为每条消息重复添加边框",
+        "幕布会清晰提示当前内容仅本方可见，并说明交接后的同步方式"
       ]
     },
     "en": {
-      "title": "Turn-based submissions",
+      "title": "Submission round curtain",
       "items": [
-        "Authors and reviewers now hand submissions over in rounds, keeping current edits private until the next transition",
-        "The submissions tab now counts actionable submissions while list updates use a consistent dot indicator"
+        "The active submission round now appears in one continuous curtain instead of outlining every message",
+        "The curtain clearly marks private in-progress content and explains when it will sync"
       ]
     }
   }

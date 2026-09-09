@@ -129,6 +129,7 @@
   "submission.inviteReviewer": "Invite reviewer",
   "submission.sendInvite": "Send invite",
   "submission.currentRoundPrivate": "Current round · private to your side",
+  "submission.currentRoundPrivateHint": "Send or recall freely; everything syncs on handoff",
   "submission.searchMembers": "Search space members",
   "submission.searchFriends": "Search friends",
   "submission.alreadyMemberOrInvited": "Already joined or invited",

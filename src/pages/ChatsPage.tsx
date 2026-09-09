@@ -2017,7 +2017,12 @@ function groupRenderSignature(group: MessageGroup, enteringMessageIds: string[])
             deleted: message.replyTo.is_deleted,
           }
         : null,
+      submissionVisible: message.submissionVisible,
+      submissionRound: message.submissionRound,
     })),
+    submissionCurrent: group.submissionCurrent,
+    submissionCurrentStart: group.submissionCurrentStart,
+    submissionCurrentEnd: group.submissionCurrentEnd,
     entering,
   });
 }
@@ -2087,14 +2092,13 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 
   return (
     <div
-      className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}${message.submissionVisible === false ? " is-submission-current" : ""}`}
+      className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}`}
       onClick={selectionMode ? (event) => {
         event.preventDefault();
         event.stopPropagation();
         onToggleSelection(message);
       } : undefined}
     >
-      {message.submissionVisible === false ? <span className="submission-current-label">{i18n.t("submission.currentRoundPrivate")}</span> : null}
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
       <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`}>
         {showRetry ? (
@@ -2362,7 +2366,16 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
   const groupSelected = selectableGroupMessages.length > 0 && selectableGroupMessages.every((message) => selectedClientIds.includes(message.clientId));
 
   return (
-    <div>
+    <div className={group.submissionCurrent
+      ? `submission-round-curtain${group.submissionCurrentStart ? " is-start" : ""}${group.submissionCurrentEnd ? " is-end" : ""}`
+      : undefined}
+    >
+      {group.submissionCurrentStart ? (
+        <header className="submission-round-curtain-head">
+          <span><i aria-hidden="true" />{i18n.t("submission.currentRoundPrivate")}</span>
+          <small>{i18n.t("submission.currentRoundPrivateHint")}</small>
+        </header>
+      ) : null}
       {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
       <div className={`message-group ${group.from}${selectionMode ? " is-selection-mode" : ""} bubble-style-${visibleBubbleStyle(group.chatBubbleStyle)}`}>
         {selectionMode && groupAvatar ? (
@@ -2454,6 +2467,9 @@ interface MessageGroup {
   chatBubbleStyle?: ChatMessage["chatBubbleStyle"];
   avatarFrameStyle?: ChatMessage["avatarFrameStyle"];
   dividerLabel?: string;
+  submissionCurrent?: boolean;
+  submissionCurrentStart?: boolean;
+  submissionCurrentEnd?: boolean;
   messages: ChatMessage[];
 }
 
@@ -2463,7 +2479,14 @@ function buildMessageGroups(messages: ChatMessage[], separateMessages = false): 
     const previous = messages[index - 1];
     const dividerLabel = shouldShowThreadDivider(message, previous) ? formatThreadDivider(message.createdAt) : undefined;
     const lastGroup = groups[groups.length - 1];
-    if (!separateMessages && lastGroup && !dividerLabel && shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1])) {
+    if (
+      !separateMessages
+      && lastGroup
+      && !dividerLabel
+      && message.submissionVisible === lastGroup.messages[lastGroup.messages.length - 1].submissionVisible
+      && message.submissionRound === lastGroup.messages[lastGroup.messages.length - 1].submissionRound
+      && shouldGroupMessages(message, lastGroup.messages[lastGroup.messages.length - 1])
+    ) {
       lastGroup.messages.push(message);
       return;
     }
@@ -2481,6 +2504,13 @@ function buildMessageGroups(messages: ChatMessage[], separateMessages = false): 
       dividerLabel,
       messages: [message],
     });
+  });
+  groups.forEach((group, index) => {
+    const isCurrent = group.messages.every((message) => message.submissionVisible === false);
+    if (!isCurrent) return;
+    group.submissionCurrent = true;
+    group.submissionCurrentStart = !groups[index - 1]?.messages.every((message) => message.submissionVisible === false);
+    group.submissionCurrentEnd = !groups[index + 1]?.messages.every((message) => message.submissionVisible === false);
   });
   return groups;
 }
@@ -2518,6 +2548,8 @@ function estimateMessageRowHeight(message: ChatMessage) {
 
 function estimateMessageGroupHeight(group: MessageGroup) {
   let height = group.dividerLabel ? 52 : 0;
+  if (group.submissionCurrentStart) height += 47;
+  if (group.submissionCurrentEnd) height += 14;
   if (group.from === "other") height += 18;
   for (let index = 0; index < group.messages.length;) {
     const message = group.messages[index];
