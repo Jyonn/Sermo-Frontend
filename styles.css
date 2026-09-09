@@ -33217,26 +33217,43 @@ html[data-theme="dark"] .submission-status-filters {
   place-items: center;
   background: var(--avatar-bg);
 }
-.chat-item.is-submission-item .avatar .avatar-group-stack {
-  inset: 6px;
+.submission-avatar-stack {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 56px;
 }
-.chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile {
-  top: auto;
-  width: 72%;
-  height: 72%;
+
+.submission-stacked-avatar {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--bg-surface);
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--bg-surface);
+  background: var(--bg-surface);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 44%, var(--line-soft)),
+    0 3px 8px rgba(15, 35, 28, .12);
+  box-sizing: border-box;
 }
-.chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile-1 {
-  top: 0;
-  left: 0;
-  z-index: 2;
+
+.submission-stacked-avatar > .avatar-frame-clip,
+.submission-stacked-avatar :is(.avatar-image, .avatar-label) {
+  border-radius: 50%;
 }
-.chat-item.is-submission-item .submission-list-avatar.is-stacked .avatar-group-tile-2 {
-  right: 0;
-  bottom: 0;
-  z-index: 1;
+
+.submission-stacked-avatar .avatar-label {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: var(--avatar-bg);
+  font-size: 11px;
 }
+
+.submission-stacked-avatar.is-1 { top: 0; left: 0; z-index: 1; }
+.submission-stacked-avatar.is-2 { top: 11px; left: 11px; z-index: 2; }
+.submission-stacked-avatar.is-3 { top: 22px; left: 22px; z-index: 3; }
 .chat-name.is-submission .submission-status-badge {
   min-height: 0;
   padding: 0;

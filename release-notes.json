@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.09.11",
+  "id": "2026.09.09.12",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "日期与广场搜索升级",
+      "title": "多人投稿头像优化",
       "items": [
-        "聊天记录日期选择固定为六周视图，并会依据实际记录范围展示可选日期",
-        "广场现支持关键词与年、月、日组合筛选，网页与小程序体验保持一致"
+        "多人投稿与共同审批现在使用独立圆框头像斜向排列，成员关系更清晰",
+        "网页与小程序统一展示更多成员数量，并优化头像加载失败时的占位效果"
       ]
     },
     "en": {
-      "title": "Improved dates and Square search",
+      "title": "Improved collaborative submission avatars",
       "items": [
-        "Chat history calendars now use a consistent six-week view bounded by actual records",
-        "Square now supports combined keyword and year, month, or day filters across web and mini program"
+        "Collaborative submissions and reviews now show each member in a separate diagonally stacked avatar",
+        "Web and mini program now share clearer overflow counts and resilient avatar fallbacks"
       ]
     }
   }

@@ -7344,15 +7344,11 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     const submissionAuthors = chat.submission?.authors?.length ? chat.submission.authors : chat.submission ? [chat.submission.author] : [];
     const submissionReviewers = chat.submission?.reviewers?.length ? chat.submission.reviewers : chat.submission ? [chat.submission.recipient] : [];
     const counterparts = Array.from(new Map((chat.submissionCounterparts ?? []).map((member) => [member.user_id, member])).values());
-    const visibleCounterparts = counterparts.slice(0, 2);
+    const visibleCounterparts = counterparts.slice(0, 3);
     const collaborators = chat.submissionRole === "reviewer" ? submissionReviewers : submissionAuthors;
     const counterpartNames = visibleCounterparts.map((member) => member.name).join(t("common.nameSeparator"));
     const counterpartOverflow = Math.max(0, counterparts.length - visibleCounterparts.length);
-    const avatarGroupMembers = chat.purpose === "submission"
-      ? visibleCounterparts.length > 1
-        ? visibleCounterparts.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
-        : undefined
-      : chat.type === "group"
+    const avatarGroupMembers = chat.type === "group" && chat.purpose !== "submission"
         ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey }))
         : undefined;
     return <button
@@ -7362,14 +7358,29 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
       type="button"
     >
       <div className="avatar-wrap">
-        <UserAvatar
-          className={`avatar${chat.submission ? ` submission-list-avatar is-${counterparts.length === 1 ? "single" : "stacked"}` : chat.online ? " status-online" : ""}`}
-          groupMembers={avatarGroupMembers}
-          name={chat.submission ? visibleCounterparts[0]?.name ?? chat.title : chat.title}
-          uri={chat.submission ? visibleCounterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}
-          cacheKey={chat.submission ? visibleCounterparts[0]?.avatar_cache_key ?? chat.avatarCacheKey : chat.avatarCacheKey}
-          frame={chat.submission ? "none" : chat.avatarFrameStyle}
-        />
+        {chat.submission && visibleCounterparts.length > 1 ? (
+          <span aria-label={counterpartNames} className={`submission-avatar-stack has-${visibleCounterparts.length}`}>
+            {visibleCounterparts.map((member, index) => (
+              <UserAvatar
+                key={member.user_id}
+                className={`submission-stacked-avatar is-${index + 1}`}
+                name={member.name}
+                uri={member.avatar_uri}
+                cacheKey={member.avatar_cache_key}
+                frame="none"
+              />
+            ))}
+          </span>
+        ) : (
+          <UserAvatar
+            className={`avatar${chat.submission ? " submission-list-avatar is-single" : chat.online ? " status-online" : ""}`}
+            groupMembers={avatarGroupMembers}
+            name={chat.submission ? visibleCounterparts[0]?.name ?? chat.title : chat.title}
+            uri={chat.submission ? visibleCounterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}
+            cacheKey={chat.submission ? visibleCounterparts[0]?.avatar_cache_key ?? chat.avatarCacheKey : chat.avatarCacheKey}
+            frame={chat.submission ? "none" : chat.avatarFrameStyle}
+          />
+        )}
         {chat.unread ? (
           <span className={`small-badge chat-list-unread${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
         ) : null}
