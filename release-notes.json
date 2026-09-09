@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.10.4",
+  "id": "2026.09.10.5",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "投稿回合幕布",
+      "title": "投稿回合显示修复",
       "items": [
-        "当前投稿回合现在使用连续幕布与历史内容区分，不再为每条消息重复添加边框",
-        "幕布使用统一底色贯穿整个回合，消息分组之间不再出现颜色接缝"
+        "新发送的投稿消息会持续显示在本回合幕布中，不再因实时同步而短暂消失"
       ]
     },
     "en": {
-      "title": "Submission round curtain",
+      "title": "Submission round display fix",
       "items": [
-        "The active submission round now appears in one continuous curtain instead of outlining every message",
-        "A uniform curtain color now spans the whole round without seams between message groups"
+        "New submission messages now remain in the active round curtain instead of briefly disappearing after sync"
       ]
     }
   }

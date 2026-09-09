@@ -109,6 +109,8 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     replyTo: message.reply_to ?? null,
     mentions: message.mentions ?? [],
     status: "sent",
+    submissionRound: message.submission_round,
+    submissionVisible: message.submission_visible,
   };
 }
 
@@ -125,6 +127,8 @@ function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: Cha
     isPermanentVip: incoming.isPermanentVip ?? existing.isPermanentVip,
     chatBubbleStyle: incoming.chatBubbleStyle ?? existing.chatBubbleStyle,
     avatarFrameStyle: incoming.avatarFrameStyle ?? existing.avatarFrameStyle,
+    submissionRound: incoming.submissionRound ?? existing.submissionRound,
+    submissionVisible: incoming.submissionVisible ?? existing.submissionVisible,
   };
   if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
   if (existing.kind !== incoming.kind) return reconciled;

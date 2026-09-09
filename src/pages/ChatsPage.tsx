@@ -986,6 +986,8 @@ function preserveStableMediaUri(existing: ChatMessage | undefined, incoming: Cha
     isPermanentVip: incoming.isPermanentVip ?? existing.isPermanentVip,
     chatBubbleStyle: incoming.chatBubbleStyle ?? existing.chatBubbleStyle,
     avatarFrameStyle: incoming.avatarFrameStyle ?? existing.avatarFrameStyle,
+    submissionRound: incoming.submissionRound ?? existing.submissionRound,
+    submissionVisible: incoming.submissionVisible ?? existing.submissionVisible,
   };
   if (!existing.payload?.uri || !incoming.payload?.uri) return reconciled;
   if (!isMediaMessageKind(existing.kind) || !isMediaMessageKind(incoming.kind)) return reconciled;
@@ -1035,7 +1037,10 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]) {
   return sortMessages([...bucket.values()]);
 }
 
-type PendingMessageAppearance = Pick<ChatMessage, "isPermanentVip" | "chatBubbleStyle" | "avatarFrameStyle">;
+type PendingMessageAppearance = Pick<
+  ChatMessage,
+  "isPermanentVip" | "chatBubbleStyle" | "avatarFrameStyle" | "submissionRound" | "submissionVisible"
+>;
 
 function createPendingMessage(
   text: string,
@@ -3382,11 +3387,6 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     return () => controller.abort();
   }, [emojiUsageCacheKey]);
   const currentUserName = session?.user.name ?? t("common.me");
-  const pendingMessageAppearance: PendingMessageAppearance = {
-    isPermanentVip: currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip,
-    chatBubbleStyle: currentUserMe?.chat_bubble_style ?? session?.user.chat_bubble_style,
-    avatarFrameStyle: currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style,
-  };
   const baseCacheScope = session ? buildChatCacheScope(session.user.space_id, session.user.user_id) : null;
   const cacheScope = baseCacheScope ? (submissionMode ? `${baseCacheScope}:submission:${submissionView}` : baseCacheScope) : null;
   const updateDraft = (value: string) => {
@@ -3790,6 +3790,13 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats, provisionalSubmissionChat]);
+  const pendingMessageAppearance: PendingMessageAppearance = {
+    isPermanentVip: currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip,
+    chatBubbleStyle: currentUserMe?.chat_bubble_style ?? session?.user.chat_bubble_style,
+    avatarFrameStyle: currentUserMe?.avatar_frame_style ?? session?.user.avatar_frame_style,
+    submissionRound: selectedChat?.purpose === "submission" ? selectedChat.submission?.current_round : undefined,
+    submissionVisible: selectedChat?.purpose === "submission" ? false : undefined,
+  };
   const canManageGroupMutes = Boolean(selectedChat?.type === "group" && selectedChat.purpose !== "submission" && (selectedChat.isOwner || currentUserIsOperator));
   const submissionStatus = selectedChat?.submission?.status;
   const submissionRole = selectedChat?.submissionRole;
