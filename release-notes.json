@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.8",
+  "id": "2026.09.09.9",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序投稿流程全面升级",
+      "title": "小程序编译稳定性修复",
       "items": [
-        "投稿列表、发起投稿、协作详情、审阅与发布流程现已完整适配小程序，并与网页端保持一致"
+        "修复登录、活动与广场评论页面的模板兼容问题，小程序现可通过微信模板编译"
       ]
     },
     "en": {
-      "title": "A complete submission workflow for the mini program",
+      "title": "Mini program compilation restored",
       "items": [
-        "Submission lists, creation, collaboration details, reviews, and publishing now match the web experience throughout the mini program"
+        "Fixed template compatibility issues across sign-in, activity, and Square comments so the mini program compiles successfully"
       ]
     }
   }
