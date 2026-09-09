@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.09.12",
+  "id": "2026.09.09.13",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "多人投稿头像优化",
+      "title": "聊天禁言管理",
       "items": [
-        "多人投稿与共同审批现在使用独立圆框头像斜向排列，成员关系更清晰",
-        "网页与小程序统一展示更多成员数量，并优化头像加载失败时的占位效果"
+        "群主和空间运营现在可以按时长禁言群成员，群内会同步显示系统消息",
+        "空间管理员可以设置全局聊天禁言，成员会收到官方私聊通知"
       ]
     },
     "en": {
-      "title": "Improved collaborative submission avatars",
+      "title": "Chat mute controls",
       "items": [
-        "Collaborative submissions and reviews now show each member in a separate diagonally stacked avatar",
-        "Web and mini program now share clearer overflow counts and resilient avatar fallbacks"
+        "Group owners and space operators can now mute members for a selected duration with an in-chat system notice",
+        "Space administrators can apply a global chat mute and notify the member through an official direct message"
       ]
     }
   }

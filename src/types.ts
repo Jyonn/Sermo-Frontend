@@ -2,6 +2,14 @@ export type NotificationChannel = "email" | "sms" | "bark";
 export type FriendTab = "incoming" | "outgoing" | "accepted";
 export type AppViewState = "idle" | "loading" | "ready" | "error";
 export type MessageMediaKind = "image" | "video" | "audio" | "file";
+export type ChatMuteDuration = "10s" | "2m" | "10m" | "1h" | "6h" | "1d" | "7d" | "permanent";
+
+export interface ChatMuteState {
+  active: boolean;
+  permanent: boolean;
+  muted_until: number | null;
+  scope?: "group" | "global" | null;
+}
 export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
@@ -34,6 +42,7 @@ export interface TinyUserDTO {
     provider: "qq";
     identifier: string;
   };
+  group_chat_mute?: ChatMuteState;
 }
 
 export interface UserDTO extends TinyUserDTO {
@@ -555,6 +564,7 @@ export interface AdminMemberDTO extends UserDTO {
     enabled: boolean;
     offline_threshold_minutes: number | null;
   }>;
+  chat_mute: ChatMuteState;
 }
 
 export interface SpaceAdminBroadcastResultDTO {
@@ -1274,6 +1284,7 @@ export interface ChatDTO {
   notifications_muted?: boolean;
   unread_badge_muted?: boolean;
   has_unread_mention?: boolean;
+  send_restriction?: ChatMuteState;
   submission?: SubmissionDTO | null;
   submission_role?: SubmissionRole;
 }
@@ -1343,6 +1354,7 @@ export interface ChatDetail {
     isOwner: boolean;
     official?: boolean;
     operator?: boolean;
+    groupChatMute?: ChatMuteState;
     submissionRole?: SubmissionRole | null;
     joinedAt?: number;
   }>;

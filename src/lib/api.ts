@@ -581,6 +581,22 @@ export const api = {
     });
   },
 
+  setAdminGlobalChatMute(userId: number, duration: import("../types").ChatMuteDuration) {
+    return request<import("../types").ChatMuteState & { user_id: number }>("/spaces/admin/users/chat-mute", {
+      method: "POST",
+      adminAuth: true,
+      body: { user_id: userId, duration },
+    });
+  },
+
+  removeAdminGlobalChatMute(userId: number) {
+    return request<import("../types").ChatMuteState & { user_id: number }>("/spaces/admin/users/chat-mute", {
+      method: "DELETE",
+      adminAuth: true,
+      query: { user_id: userId },
+    });
+  },
+
   exchangeOfficialLoginTicket(token: string) {
     return request<JoinResponseDTO>("/spaces/official-login/exchange", {
       method: "POST",
@@ -716,6 +732,23 @@ export const api = {
       auth: true,
       query: { chat_id },
       body: { user_id },
+    });
+  },
+
+  muteGroupMember(chat_id: number, user_id: number, duration: import("../types").ChatMuteDuration) {
+    return request<ChatDTO>("/chats/group/mutes", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: { user_id, duration },
+    });
+  },
+
+  unmuteGroupMember(chat_id: number, user_id: number) {
+    return request<ChatDTO>("/chats/group/mutes", {
+      method: "DELETE",
+      auth: true,
+      query: { chat_id, user_id },
     });
   },
 

@@ -24,6 +24,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
+import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ContentDatePicker } from "../components/ContentDatePicker";
@@ -73,7 +74,7 @@ import { mapChatMessageSender } from "../lib/chatMessageSender";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
-import type { AppViewState, AudioTranscriptDTO, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRecipientDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
+import type { AppViewState, AudioTranscriptDTO, Chat, ChatBackgroundTheme, ChatBubbleStyle, ChatDTO, ChatHistoryRecoveryStatusDTO, ChatMessage, ChatMessageDTO, ChatMessagePayloadDTO, ChatMuteDuration, ChatTravelMapAccessDTO, CloudResourceDTO, EmojiUsageDTO, ForwardBundleItemDTO, ImageMetadataDTO, LinkPreviewDTO, MessageKind, MessageMediaKind, MessageSearchCalendarDTO, PinnedMessageDTO, QuotedMessageDTO, StickerAssetDTO, StickerDTO, SubmissionInviteDTO, SubmissionRecipientDTO, SubmissionRole, SubmissionStatus, TinyUserDTO, TravelMapAccessDTO, UserDTO, UserMeDTO, VideoMetadataDTO } from "../types";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
 import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 import { PUBLIC_ORIGIN } from "../lib/siteConfig";
@@ -2757,6 +2758,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
           isOwner: Boolean(chat.owner?.user_id === member.user_id),
           official: Boolean(member.official),
           operator: Boolean(member.operator),
+          groupChatMute: member.group_chat_mute,
           submissionRole: member.submission_role,
           joinedAt: member.joined_at ?? chat.created_at,
         }))
@@ -3003,6 +3005,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
+  const [groupMuteTarget, setGroupMuteTarget] = useState<Chat["detail"]["members"][number] | null>(null);
+  const [groupMuteBusy, setGroupMuteBusy] = useState(false);
   const [chatMemberPickerOpen, setChatMemberPickerOpen] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -3381,6 +3385,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const canDownloadAudio = growthCapability("chat.message.download.audio", 8).available;
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const canReviewSubmissionInvites = Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator);
+  const currentUserIsOperator = Boolean(currentUserMe?.operator || session?.user.operator);
   const canRecallMessage = (message: ChatMessage) => {
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
     if (pinnedMessages.some((pin) => pin.message.message_id === message.id)) return false;
@@ -3743,6 +3748,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (!numericChatId) return null;
     return chats.find((chat) => chat.id === numericChatId) ?? null;
   }, [chatId, chats, provisionalSubmissionChat]);
+  const canManageGroupMutes = Boolean(selectedChat?.type === "group" && selectedChat.purpose !== "submission" && (selectedChat.isOwner || currentUserIsOperator));
   const submissionStatus = selectedChat?.submission?.status;
   const submissionRole = selectedChat?.submissionRole;
   const isSubmissionOriginator = Boolean(
@@ -7223,6 +7229,45 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     }
   };
 
+  const canMuteGroupMember = (member: Chat["detail"]["members"][number]) => (
+    canManageGroupMutes
+    && !member.isSelf
+    && !member.isOwner
+    && !member.official
+    && !member.operator
+  );
+
+  const setGroupMemberMute = async (duration: ChatMuteDuration) => {
+    if (!selectedChat || !groupMuteTarget || groupMuteBusy) return;
+    setGroupMuteBusy(true);
+    try {
+      const updated = await api.muteGroupMember(selectedChat.id, groupMuteTarget.userId, duration);
+      applyUpdatedGroupChat(updated);
+      const nextMute = updated.members.find((member) => member.user_id === groupMuteTarget.userId)?.group_chat_mute;
+      setGroupMuteTarget((current) => current ? { ...current, groupChatMute: nextMute } : current);
+      showToast(t("chat.muteUpdated"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("chat.muteFailed"), "error");
+    } finally {
+      setGroupMuteBusy(false);
+    }
+  };
+
+  const removeGroupMemberMute = async () => {
+    if (!selectedChat || !groupMuteTarget || groupMuteBusy) return;
+    setGroupMuteBusy(true);
+    try {
+      const updated = await api.unmuteGroupMember(selectedChat.id, groupMuteTarget.userId);
+      applyUpdatedGroupChat(updated);
+      setGroupMuteTarget((current) => current ? { ...current, groupChatMute: { active: false, permanent: false, muted_until: null } } : current);
+      showToast(t("chat.muteRemoved"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("chat.muteFailed"), "error");
+    } finally {
+      setGroupMuteBusy(false);
+    }
+  };
+
   const leaveOrDeleteGroup = async () => {
     if (!selectedChat || selectedChat.type !== "group") return;
     try {
@@ -8380,11 +8425,18 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                             <span>{member.name}</span>
                           </div>
                           {member.isSelf ? <span className="count-badge">{t("common.you")}</span> : null}
-                          {selectedChat.type === "group" && selectedChat.isOwner && !member.isSelf ? (
-                            <button className="ghost-button member-line-action" onClick={() => void removeGroupMember(member.userId)} type="button">
-                              {t("admin.remove")}
-                            </button>
-                          ) : null}
+                          {selectedChat.type === "group" && !member.isSelf ? <div className="member-line-actions">
+                            {canMuteGroupMember(member) ? (
+                              <button className={`ghost-button member-line-action${member.groupChatMute?.active ? " is-muted" : ""}`} onClick={() => setGroupMuteTarget(member)} type="button">
+                                {member.groupChatMute?.active ? t("chat.memberMuted") : t("chat.muteMember")}
+                              </button>
+                            ) : null}
+                            {selectedChat.isOwner ? (
+                              <button className="ghost-button member-line-action" onClick={() => void removeGroupMember(member.userId)} type="button">
+                                {t("admin.remove")}
+                              </button>
+                            ) : null}
+                          </div> : null}
                         </div>
                       ))}
                     </div>
@@ -8762,9 +8814,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                 {visibleDetailMembers.map((member) => (
                   <button
                     key={`sheet-member-${member.userId}`}
-                    className={`chat-detail-member-item ${member.isOwner ? "is-owner" : ""} ${member.isSelf ? "is-self" : ""}`}
+                    className={`chat-detail-member-item ${member.isOwner ? "is-owner" : ""} ${member.isSelf ? "is-self" : ""}${member.groupChatMute?.active ? " is-chat-muted" : ""}`}
                     onClick={() => {
-                      if (!member.isSelf) setProfileDrawerUserId(member.userId);
+                      if (canMuteGroupMember(member)) setGroupMuteTarget(member);
+                      else if (!member.isSelf) setProfileDrawerUserId(member.userId);
                     }}
                     disabled={member.isSelf}
                     title={member.name}
@@ -8774,6 +8827,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                     <span className="chat-detail-member-name">
                       <span className="chat-detail-member-label">{member.name}</span>
                     </span>
+                    {member.groupChatMute?.active ? <span className="chat-detail-member-muted material-symbols-outlined" aria-label={t("chat.memberMuted")}>voice_over_off</span> : null}
                   </button>
                 ))}
                 {(selectedChat.type === "group" ? canInviteGroupMember : canCreateGroup) ? (
@@ -9066,6 +9120,21 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           onSelect={(_date, entry) => entry && revealMessageFromSearch(entry.first_message_id)}
           range={messageSearchCalendar?.range}
         />
+      </BottomSheet>
+      <BottomSheet
+        className="chat-member-mute-sheet"
+        onClose={() => !groupMuteBusy && setGroupMuteTarget(null)}
+        open={Boolean(groupMuteTarget)}
+        title={t("chat.groupMuteTitle")}
+      >
+        {groupMuteTarget ? <div className="chat-member-mute-panel">
+          <div className="chat-member-mute-person">
+            <UserAvatar className="mini-avatar" name={groupMuteTarget.name} uri={groupMuteTarget.avatarUri} cacheKey={groupMuteTarget.avatarCacheKey} />
+            <span><strong>{groupMuteTarget.name}</strong><small>{t("chat.groupMuteHint")}</small></span>
+            <button aria-label={t("profile.details")} className="icon-button" onClick={() => { setGroupMuteTarget(null); setProfileDrawerUserId(groupMuteTarget.userId); }} type="button"><span className="material-symbols-outlined">person</span></button>
+          </div>
+          <ChatMuteControls busy={groupMuteBusy} mute={groupMuteTarget.groupChatMute} onMute={(duration) => void setGroupMemberMute(duration)} onUnmute={() => void removeGroupMemberMute()} />
+        </div> : null}
       </BottomSheet>
       <SideDrawer
         headerless

@@ -2,6 +2,7 @@ import { type ChangeEvent, type FormEvent, useDeferredValue, useEffect, useMemo,
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ChatMuteControls } from "../components/ChatMuteControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -18,7 +19,7 @@ import { copyText } from "../lib/presentation";
 import { setCachedSpaceFeatures } from "../lib/spaceFeatures";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import { getActiveLocale, i18n, useI18n, type TranslationKey } from "../lib/language";
-import type { AdminActivityDTO, AdminMemberDTO, AppViewState, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
+import type { AdminActivityDTO, AdminMemberDTO, AppViewState, ChatMuteDuration, MessageMediaKind, SpaceAdminBroadcastResultDTO, SpaceAdminDashboardDTO, SquareMuteDTO, SquareStatementDTO } from "../types";
 import { showToast } from "../lib/toast";
 import { PUBLIC_HOST } from "../lib/siteConfig";
 
@@ -150,6 +151,7 @@ export default function SpaceAdminDashboardPage() {
   const [operatorBusyUserId, setOperatorBusyUserId] = useState<number | null>(null);
   const [removeUser, setRemoveUser] = useState<AdminMemberDTO | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
+  const [globalChatMuteBusy, setGlobalChatMuteBusy] = useState(false);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
   const [broadcastContent, setBroadcastContent] = useState("");
   const [broadcastState, setBroadcastState] = useState<"idle" | "sending" | "sent">("idle");
@@ -207,6 +209,39 @@ export default function SpaceAdminDashboardPage() {
       showToast(cause instanceof ApiError ? cause.message : t("admin.operatorUpdateFailed"), "error");
     } finally {
       setOperatorBusyUserId(null);
+    }
+  };
+
+  const updateSelectedMemberChatMute = (userId: number, chatMute: AdminMemberDTO["chat_mute"]) => {
+    setMembers((current) => current.map((item) => item.user_id === userId ? { ...item, chat_mute: chatMute } : item));
+    setSelectedMember((current) => current?.user_id === userId ? { ...current, chat_mute: chatMute } : current);
+  };
+
+  const setGlobalChatMute = async (duration: ChatMuteDuration) => {
+    if (!selectedMember || globalChatMuteBusy) return;
+    setGlobalChatMuteBusy(true);
+    try {
+      const result = await api.setAdminGlobalChatMute(selectedMember.user_id, duration);
+      updateSelectedMemberChatMute(selectedMember.user_id, result);
+      showToast(t("admin.globalChatMuteUpdated"));
+    } catch (cause) {
+      showToast(cause instanceof ApiError ? cause.message : t("admin.globalChatMuteFailed"), "error");
+    } finally {
+      setGlobalChatMuteBusy(false);
+    }
+  };
+
+  const removeGlobalChatMute = async () => {
+    if (!selectedMember || globalChatMuteBusy) return;
+    setGlobalChatMuteBusy(true);
+    try {
+      const result = await api.removeAdminGlobalChatMute(selectedMember.user_id);
+      updateSelectedMemberChatMute(selectedMember.user_id, result);
+      showToast(t("admin.globalChatMuteRemoved"));
+    } catch (cause) {
+      showToast(cause instanceof ApiError ? cause.message : t("admin.globalChatMuteFailed"), "error");
+    } finally {
+      setGlobalChatMuteBusy(false);
     }
   };
 
@@ -826,7 +861,14 @@ export default function SpaceAdminDashboardPage() {
       </section>
 
       <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
-        {selectedMember ? <div className="admin-member-drawer"><section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section><section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section><section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section><button className="ghost-button" disabled={operatorBusyUserId === selectedMember.user_id || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button><button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button></div> : null}
+        {selectedMember ? <div className="admin-member-drawer">
+          <section className="admin-member-profile"><UserAvatar className="admin-member-profile-avatar" name={selectedMember.name} uri={selectedMember.avatar_uri} /><span><strong>{selectedMember.name}</strong><small>{selectedMember.is_alive ? t("presence.online") : t("presence.offline")}</small></span><b>LV.{selectedMember.growth_level ?? 1}</b></section>
+          <section className="admin-member-facts"><div><span>{t("admin.verified")}</span><strong>{selectedMember.verified ? t("common.yes") : t("common.no")}</strong></div><div><span>{t("admin.friends")}</span><strong>{selectedMember.friend_count ?? 0}</strong></div><div><span>{t("admin.statements")}</span><strong>{selectedMember.statement_count ?? 0}</strong></div></section>
+          <section className="admin-member-detail-section"><h3>{t("admin.notificationAndContacts")}</h3><div className="admin-member-channel-list"><div><span>{t("channel.email")}</span>{notificationCell(selectedMember, "email", ADMIN_NOTIFICATION_CHANNEL.email)}</div><div><span>{t("channel.sms")}</span>{notificationCell(selectedMember, "sms", ADMIN_NOTIFICATION_CHANNEL.sms)}</div><div><span>{t("channel.instant")}</span>{notificationCell(selectedMember, "bark", ADMIN_NOTIFICATION_CHANNEL.bark)}</div></div></section>
+          {!selectedMember.is_deleted ? <section className="admin-member-detail-section admin-member-chat-mute"><h3>{t("admin.globalChatMute")}</h3><p>{t("admin.globalChatMuteHint")}</p><ChatMuteControls busy={globalChatMuteBusy} mute={selectedMember.chat_mute} onMute={(duration) => void setGlobalChatMute(duration)} onUnmute={() => void removeGlobalChatMute()} /></section> : null}
+          <button className="ghost-button" disabled={operatorBusyUserId === selectedMember.user_id || (!selectedMember.operator && (operators.length >= 5 || !selectedMember.contacts.email.verified || !selectedMember.contacts.sms.verified))} onClick={() => void setOperator(selectedMember, !selectedMember.operator)} type="button">{selectedMember.operator ? t("admin.removeOperator") : t("admin.assignOperator")}</button>
+          <button className="admin-member-danger" onClick={() => { setRemoveUser(selectedMember); setSelectedMember(null); }} type="button">{selectedMember.is_deleted ? t("common.clean") : t("admin.remove")}</button>
+        </div> : null}
       </SideDrawer>
 
       <SideDrawer historyKey="admin-operators" onClose={() => setOperatorsOpen(false)} open={operatorsOpen} title={t("admin.operators")}>
