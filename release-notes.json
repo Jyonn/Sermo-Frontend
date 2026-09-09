@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.3",
+  "id": "2026.09.09.4",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天背景细节优化",
+      "title": "小程序聊天导航细节优化",
       "items": [
-        "页面新增柔和的右上角光晕，置顶会话不再使用额外底色"
+        "聊天未读提醒移至头像与底部导航，身份签、置顶状态和投稿入口的视觉更加准确"
       ]
     },
     "en": {
-      "title": "Refined mini program chat backdrop",
+      "title": "Refined mini program chat navigation",
       "items": [
-        "Pages now feature a soft top-right glow, while pinned chats no longer use a separate background color"
+        "Chat unread badges now sit on avatars and navigation, with more accurate role tags, pinned states, and submission entry visuals"
       ]
     }
   }
