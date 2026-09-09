@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.4",
+  "id": "2026.09.09.5",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天导航细节优化",
+      "title": "小程序聊天角标细节优化",
       "items": [
-        "聊天未读提醒移至头像与底部导航，身份签、置顶状态和投稿入口的视觉更加准确"
+        "聊天未读角标的位置与形态更加清晰，置顶状态更醒目，投稿入口采用统一的 Material Symbols 图标"
       ]
     },
     "en": {
-      "title": "Refined mini program chat navigation",
+      "title": "Refined mini program chat badges",
       "items": [
-        "Chat unread badges now sit on avatars and navigation, with more accurate role tags, pinned states, and submission entry visuals"
+        "Chat unread badges are clearer and better positioned, pinned states stand out, and submissions now use the shared Material Symbols icon"
       ]
     }
   }
