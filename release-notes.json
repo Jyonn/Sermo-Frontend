@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.6",
+  "id": "2026.09.09.7",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天个性化焕新",
+      "title": "小程序聊天材质精细校准",
       "items": [
-        "小程序现已完整呈现聊天背景、气泡材质、场景预览与解锁状态，并与网页体验保持一致"
+        "逐款校准小程序的聊天背景与气泡细节，城市收藏、动态材质和场景预览现在更贴近网页效果"
       ]
     },
     "en": {
-      "title": "Chat personalization arrives in the mini program",
+      "title": "Refined chat materials in the mini program",
       "items": [
-        "The mini program now matches the web chat personalization experience with complete backgrounds, bubble materials, scene previews, and unlock states"
+        "Every chat background and bubble has been refined, bringing city collectibles, animated materials, and scene previews closer to the web experience"
       ]
     }
   }
