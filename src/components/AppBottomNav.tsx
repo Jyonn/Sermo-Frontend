@@ -143,7 +143,7 @@ export function AppBottomNav() {
     ]).then(([authored, reviewed]) => {
       if (cancelled) return;
       const unique = new Map([...authored, ...reviewed].map((chat) => [chat.chat_id, chat]));
-      setSubmissionUnread([...unique.values()].reduce((sum, chat) => sum + Math.max(0, chat.unread_count ?? 0), 0));
+      setSubmissionUnread([...unique.values()].reduce((sum, chat) => sum + (chat.submission?.action_required ? 1 : 0), 0));
     }).catch(() => undefined);
     sync();
     const timer = window.setInterval(sync, 15_000);

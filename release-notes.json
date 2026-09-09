@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.09.13",
-  "publishedAt": "2026-09-09",
+  "id": "2026.09.10.1",
+  "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "聊天禁言管理",
+      "title": "投稿回合协作",
       "items": [
-        "群主和空间运营现在可以按时长禁言群成员，群内会同步显示系统消息",
-        "空间管理员可以设置全局聊天禁言，成员会收到官方私聊通知"
+        "投稿与审批现在按回合交接，当前编辑内容仅本方可见，提交后再完整同步",
+        "投稿入口只显示待处理投稿数，投稿列表的新内容统一使用小红点提示"
       ]
     },
     "en": {
-      "title": "Chat mute controls",
+      "title": "Turn-based submissions",
       "items": [
-        "Group owners and space operators can now mute members for a selected duration with an in-chat system notice",
-        "Space administrators can apply a global chat mute and notify the member through an official direct message"
+        "Authors and reviewers now hand submissions over in rounds, keeping current edits private until the next transition",
+        "The submissions tab now counts actionable submissions while list updates use a consistent dot indicator"
       ]
     }
   }

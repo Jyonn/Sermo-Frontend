@@ -950,6 +950,8 @@ function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMes
     replyTo: message.reply_to ?? null,
     mentions: message.mentions ?? [],
     status: "sent",
+    submissionRound: message.submission_round,
+    submissionVisible: message.submission_visible,
   };
 }
 
@@ -2085,13 +2087,14 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
 
   return (
     <div
-      className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}`}
+      className={`message-bubble-wrap ${from} ${message.status !== "sent" ? `is-${message.status}` : "is-sent"} ${isEntering ? "is-entering" : ""}${selectionMode ? " is-selection-mode" : ""}${selected ? " is-selected" : ""}${message.submissionVisible === false ? " is-submission-current" : ""}`}
       onClick={selectionMode ? (event) => {
         event.preventDefault();
         event.stopPropagation();
         onToggleSelection(message);
       } : undefined}
     >
+      {message.submissionVisible === false ? <span className="submission-current-label">{i18n.t("submission.currentRoundPrivate")}</span> : null}
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
       <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`}>
         {showRetry ? (
@@ -3390,7 +3393,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
     if (pinnedMessages.some((pin) => pin.message.message_id === message.id)) return false;
     if (selectedChat?.purpose === "submission") {
-      return selectedChat.submissionRole === "author" && selectedChat.submission?.status === "draft";
+      return submissionCanSend && message.submissionVisible === false && message.submissionRound === selectedChat.submission?.current_round;
     }
     const recallWindowSeconds = currentUserIsPermanentVip ? 7 * 24 * 60 * 60 : 2 * 60;
     return Math.max(0, Math.floor(Date.now() / 1000) - message.createdAt) <= recallWindowSeconds;
@@ -3720,6 +3723,8 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         status: "draft",
         submitted_at: null,
         published_statement_id: null,
+        current_round: 1,
+        action_required: false,
       },
       submissionRole: "author",
       submissionCounterparts: [recipient],
@@ -3762,12 +3767,10 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
   const selectedChatId = selectedChat && selectedChat.id > 0 ? selectedChat.id : null;
   const canInviteSubmissionAuthors = Boolean(
     selectedChat?.purpose === "submission"
-      && (selectedChat.submissionRole === "reviewer" || isSubmissionOriginator)
+      && isSubmissionOriginator
       && selectedChat.id > 0,
   );
-  const canInviteSubmissionReviewers = Boolean(
-    selectedChat?.purpose === "submission" && selectedChat.submissionRole === "reviewer" && selectedChat.id > 0,
-  );
+  const canInviteSubmissionReviewers = false;
   const canManageSubmissionMembers = canInviteSubmissionAuthors || canInviteSubmissionReviewers;
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
   selectedChatIdRef.current = selectedChatId;
@@ -7427,7 +7430,7 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
           />
         )}
         {chat.unread ? (
-          <span className={`small-badge chat-list-unread${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
+          <span className={`small-badge chat-list-unread${chat.submission ? " is-submission-dot" : ""}${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.submission || chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
         ) : null}
         {chat.submission && counterpartOverflow ? <span className="submission-avatar-overflow">+{counterpartOverflow}</span> : null}
       </div>

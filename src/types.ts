@@ -1160,6 +1160,8 @@ export interface ChatMessageDTO {
   created_at: number;
   mentioned_me?: boolean;
   is_deleted?: boolean;
+  submission_round?: number | null;
+  submission_visible?: boolean;
 }
 
 export interface WelcomeTemplateMessageDTO {
@@ -1300,6 +1302,8 @@ export interface SubmissionDTO {
   status: SubmissionStatus;
   submitted_at: number | null;
   published_statement_id: number | null;
+  current_round: number;
+  action_required: boolean;
 }
 
 export interface ChatPreferenceDTO {
@@ -1338,6 +1342,8 @@ export interface ChatMessage {
   replyTo?: QuotedMessageDTO | null;
   mentions?: TinyUserDTO[];
   status: "sent" | "pending" | "failed";
+  submissionRound?: number | null;
+  submissionVisible?: boolean;
 }
 
 export interface ChatDetail {

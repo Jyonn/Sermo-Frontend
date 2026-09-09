@@ -128,6 +128,7 @@
   "submission.inviteAuthor": "邀请投稿者",
   "submission.inviteReviewer": "邀请审批者",
   "submission.sendInvite": "发送邀请",
+  "submission.currentRoundPrivate": "本回合 · 仅本方可见",
   "submission.searchMembers": "搜索空间成员",
   "submission.searchFriends": "搜索好友",
   "submission.alreadyMemberOrInvited": "已在投稿中或等待同意",
