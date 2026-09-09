@@ -797,6 +797,7 @@ export interface SquareCalendarDTO {
   year: number;
   month: number;
   days: Array<{ date: string; statement_count: number }>;
+  range?: { earliest_date: string | null; latest_date: string | null };
 }
 
 export interface SquareMuteDTO {
@@ -1186,6 +1187,7 @@ export interface MessageSearchCalendarDTO {
   year: number;
   month: number;
   days: Array<{ date: string; first_message_id: number }>;
+  range?: { earliest_date: string | null; latest_date: string | null };
 }
 
 export interface ChatHistoryRecoveryStatusDTO {

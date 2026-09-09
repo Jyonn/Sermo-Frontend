@@ -26,6 +26,7 @@ import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { ContentDatePicker } from "../components/ContentDatePicker";
 import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
 import { FeedbackState } from "../components/FeedbackState";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
@@ -4149,7 +4150,15 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
     const controller = new AbortController();
     setMessageSearchCalendarLoading(true);
     void api.getMessageSearchCalendar(selectedChat.id, messageSearchCalendarMonth.year, messageSearchCalendarMonth.month, controller.signal)
-      .then(setMessageSearchCalendar)
+      .then((data) => {
+        setMessageSearchCalendar(data);
+        const latest = data.range?.latest_date;
+        const viewedMonth = `${messageSearchCalendarMonth.year}-${String(messageSearchCalendarMonth.month).padStart(2, "0")}`;
+        if (!data.days.length && latest && !latest.startsWith(viewedMonth)) {
+          const [year, month] = latest.split("-").map(Number);
+          setMessageSearchCalendarMonth({ year, month });
+        }
+      })
       .catch((error) => {
         if ((error as Error).name !== "AbortError") setMessageSearchCalendar(null);
       })
@@ -9038,25 +9047,14 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
         totalCount={messageSearchTotal}
       /> : null}
       <BottomSheet className="message-search-calendar-sheet" onClose={() => setMessageSearchCalendarOpen(false)} open={messageSearchCalendarOpen} title={t("messageSearch.byDate")}>
-        <div className="message-search-calendar">
-          <div className="message-search-calendar-head">
-            <button aria-label={t("common.back")} onClick={() => setMessageSearchCalendarMonth((current) => current.month === 1 ? { year: current.year - 1, month: 12 } : { ...current, month: current.month - 1 })} type="button"><span className="material-symbols-outlined">chevron_left</span></button>
-            <strong>{t("messageSearch.yearMonth", { year: messageSearchCalendarMonth.year, month: messageSearchCalendarMonth.month })}</strong>
-            <button aria-label={t("common.next")} onClick={() => setMessageSearchCalendarMonth((current) => current.month === 12 ? { year: current.year + 1, month: 1 } : { ...current, month: current.month + 1 })} type="button"><span className="material-symbols-outlined">chevron_right</span></button>
-          </div>
-          <div className="message-search-calendar-weekdays">{t("messageSearch.weekdays").split(",").map((day) => <span key={day}>{day}</span>)}</div>
-          <div className={`message-search-calendar-grid${messageSearchCalendarLoading ? " is-loading" : ""}`}>
-            {Array.from({ length: new Date(Date.UTC(messageSearchCalendarMonth.year, messageSearchCalendarMonth.month, 0)).getUTCDate() + new Date(Date.UTC(messageSearchCalendarMonth.year, messageSearchCalendarMonth.month - 1, 1)).getUTCDay() }, (_, index) => {
-              const offset = new Date(Date.UTC(messageSearchCalendarMonth.year, messageSearchCalendarMonth.month - 1, 1)).getUTCDay();
-              const day = index - offset + 1;
-              if (day < 1) return <span aria-hidden="true" key={`blank-${index}`} />;
-              const date = `${messageSearchCalendarMonth.year}-${String(messageSearchCalendarMonth.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-              const entry = messageSearchCalendar?.days.find((item) => item.date === date);
-              return <button className={entry ? "has-messages" : "is-empty"} disabled={!entry} key={date} onClick={() => entry && revealMessageFromSearch(entry.first_message_id)} type="button">{day}</button>;
-            })}
-          </div>
-          <p>{t("messageSearch.dateHint")}</p>
-        </div>
+        <ContentDatePicker
+          entries={messageSearchCalendar?.days ?? []}
+          loading={messageSearchCalendarLoading}
+          month={messageSearchCalendarMonth}
+          onMonthChange={setMessageSearchCalendarMonth}
+          onSelect={(_date, entry) => entry && revealMessageFromSearch(entry.first_message_id)}
+          range={messageSearchCalendar?.range}
+        />
       </BottomSheet>
       <SideDrawer
         headerless

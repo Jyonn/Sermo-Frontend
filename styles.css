@@ -25605,19 +25605,30 @@ html[data-theme="dark"] :is(
 .message-search-scroll-top { position:fixed;z-index:8;right:max(18px,env(safe-area-inset-right));bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));display:grid;width:46px;height:46px;place-items:center;border:1px solid color-mix(in srgb,var(--brand-primary) 25%,transparent);border-radius:50%;color:#fff;background:color-mix(in srgb,var(--brand-primary) 88%,#163c31);box-shadow:0 12px 28px rgba(7,45,34,.24);animation:message-search-float-in 180ms ease-out both; }
 .message-search-scroll-top svg { width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
 @keyframes message-search-float-in { from { opacity:0;transform:translateY(8px) scale(.9); } }
-.message-search-calendar { display:grid;gap:15px;padding:2px 2px max(12px,env(safe-area-inset-bottom)); }
-.message-search-calendar-head { display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center; }
-.message-search-calendar-head strong { text-align:center;font-size:1rem; }
-.message-search-calendar-head button { display:grid;width:40px;height:40px;place-items:center;border-radius:50%;color:var(--text-main); }
-.message-search-calendar-weekdays,.message-search-calendar-grid { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px; }
-.message-search-calendar-weekdays span { color:var(--text-muted);font-size:.68rem;font-weight:750;text-align:center; }
-.message-search-calendar-grid { min-height:230px;transition:opacity 160ms ease; }
-.message-search-calendar-grid.is-loading { opacity:.45; }
-.message-search-calendar-grid > span,.message-search-calendar-grid button { aspect-ratio:1; }
-.message-search-calendar-grid button { border:0;border-radius:50%;color:var(--text-main);background:color-mix(in srgb,var(--brand-primary) 10%,var(--surface,#fff));font:inherit;font-size:.78rem;font-weight:780; }
-.message-search-calendar-grid button.is-empty { color:color-mix(in srgb,var(--text-muted) 48%,transparent);background:transparent; }
-.message-search-calendar-grid button.has-messages { box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--brand-primary) 28%,transparent); }
-.message-search-calendar > p { margin:0;color:var(--text-muted);font-size:.7rem;line-height:1.5;text-align:center; }
+.content-date-picker { display:grid;gap:13px;padding:2px 2px max(12px,env(safe-area-inset-bottom));transition:opacity 160ms ease; }
+.content-date-picker.is-loading { opacity:.46;pointer-events:none; }
+.content-date-picker-modes { display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:16px;background:color-mix(in srgb,var(--text-primary) 5%,transparent); }
+.content-date-picker-modes button { min-height:38px;border:0;border-radius:12px;color:var(--text-muted);background:transparent;font:inherit;font-size:.75rem;font-weight:780; }
+.content-date-picker-modes button.is-active { color:var(--brand-primary-press);background:var(--bg-elevated);box-shadow:0 3px 10px rgba(22,47,38,.07); }
+.content-date-picker-head { display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center; }
+.content-date-picker-head strong { text-align:center;font-size:1rem; }
+.content-date-picker-head button { display:grid;width:40px;height:40px;place-items:center;border:0;border-radius:50%;color:var(--text-main);background:transparent; }
+.content-date-picker-head button:disabled { color:color-mix(in srgb,var(--text-muted) 34%,transparent); }
+.content-date-picker-weekdays,.content-date-picker-days { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px; }
+.content-date-picker-weekdays span { color:var(--text-muted);font-size:.68rem;font-weight:750;text-align:center; }
+.content-date-picker-days > span,.content-date-picker-days button { aspect-ratio:1; }
+.content-date-picker-days button { border:0;border-radius:50%;font:inherit;font-size:.78rem;font-weight:780; }
+.content-date-picker-days button:disabled { opacity:1; }
+.content-date-picker-days button.is-current.is-available { color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 11%,var(--surface,#fff));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--brand-primary) 25%,transparent); }
+.content-date-picker-days button.is-current.is-unavailable { color:color-mix(in srgb,var(--text-muted) 48%,transparent);background:transparent; }
+.content-date-picker-days button.is-adjacent.is-available { color:color-mix(in srgb,var(--brand-primary) 68%,var(--text-muted));background:color-mix(in srgb,var(--brand-primary) 6%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--brand-primary) 16%,transparent); }
+.content-date-picker-days button.is-adjacent.is-unavailable { color:color-mix(in srgb,var(--text-muted) 28%,transparent);background:transparent; }
+.content-date-picker-days button.is-selected { color:var(--surface)!important;background:var(--brand-primary)!important;box-shadow:0 5px 14px color-mix(in srgb,var(--brand-primary) 28%,transparent)!important; }
+.content-date-picker-periods { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:230px;align-content:start; }
+.content-date-picker-periods button { min-height:52px;border:0;border-radius:15px;color:var(--text-primary);background:color-mix(in srgb,var(--text-primary) 4%,transparent);font:inherit;font-size:.8rem;font-weight:780; }
+.content-date-picker-periods button:disabled { color:color-mix(in srgb,var(--text-muted) 34%,transparent);background:transparent; }
+.content-date-picker-periods button.is-selected { color:var(--surface);background:var(--brand-primary); }
+.content-date-picker-periods.is-years { grid-template-columns:repeat(3,minmax(0,1fr));max-height:320px;overflow:auto; }
 .message-search-results.is-media-grid { display:block;padding:8px 0; }
 .message-search-results.is-media-grid .message-search-loading,
 .message-search-results.is-media-grid .message-search-empty,
@@ -28201,6 +28212,32 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-header-quota:hover,.square-header-date:hover,.square-header-date.is-active { color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 11%,transparent); }
 .square-header-quota .material-symbols-outlined,.square-header-date .material-symbols-outlined { font-size:21px; }
 
+.square-search-reveal { display:grid;grid-template-rows:0fr;overflow:hidden;opacity:0;transform:translateY(-6px);transition:grid-template-rows 220ms cubic-bezier(.22,1,.36,1),opacity 160ms ease,transform 220ms cubic-bezier(.22,1,.36,1); }
+.square-search-reveal.is-open { grid-template-rows:1fr;opacity:1;transform:none;animation:square-search-drop 220ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes square-search-drop{from{opacity:0;transform:translateY(-8px)}}
+.square-search-panel { display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.55fr) auto;gap:9px;min-height:0;padding:4px 0 2px; }
+.square-search-keyword,.square-search-date { display:flex;min-width:0;min-height:48px;align-items:center;gap:9px;padding:0 13px;border:1px solid var(--line-soft);border-radius:16px;color:var(--text-secondary);background:color-mix(in srgb,var(--bg-elevated) 94%,transparent); }
+.square-search-keyword:focus-within { border-color:color-mix(in srgb,var(--brand-primary) 46%,var(--line-soft));box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-primary) 9%,transparent); }
+.square-search-keyword>.material-symbols-outlined { font-size:20px; }
+.square-search-keyword input { width:100%;min-width:0;border:0;outline:0;color:var(--text-primary);background:transparent;font:inherit;font-size:13px; }
+.square-search-keyword input::placeholder { color:var(--text-muted); }
+.square-search-date { text-align:left; }
+.square-search-date.is-selected { border-color:color-mix(in srgb,var(--brand-primary) 28%,var(--line-soft));background:color-mix(in srgb,var(--brand-primary) 7%,var(--bg-elevated)); }
+.square-search-date>.material-symbols-outlined { flex:none;font-size:19px; }
+.square-search-date>span:nth-child(2) { display:grid;flex:1;gap:1px;min-width:0; }
+.square-search-date small { color:var(--text-muted);font-size:9px;font-weight:760; }
+.square-search-date strong { overflow:hidden;color:var(--text-primary);font-size:12px;text-overflow:ellipsis;white-space:nowrap; }
+.square-search-actions { display:flex;align-items:center;gap:5px; }
+.square-search-actions button { min-height:42px;padding:0 11px;border:0;border-radius:13px;color:var(--text-muted);background:transparent;font:inherit;font-size:11px;font-weight:800; }
+.square-search-actions button:last-child { display:inline-flex;align-items:center;gap:4px;color:#fff;background:var(--brand-primary-press); }
+.square-search-actions button:last-child .material-symbols-outlined { font-size:16px; }
+.square-search-actions button:disabled { opacity:.35; }
+@media(max-width:680px){
+  .square-search-panel{grid-template-columns:minmax(0,1fr) auto;padding-inline:18px}
+  .square-search-keyword{grid-column:1/-1}
+  .square-search-actions button:first-child{display:none}
+}
+
 .square-date-context { display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:11px;padding:10px 3px 12px;border-bottom:1px solid color-mix(in srgb,var(--brand-primary) 22%,var(--line-soft)); }
 .square-date-context>.material-symbols-outlined { display:grid;width:38px;height:38px;place-items:center;border-radius:50%;color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 11%,var(--bg-soft));font-size:20px; }
 .square-date-context>span:nth-child(2) { display:grid;min-width:0;gap:2px; }
@@ -28208,7 +28245,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-xiaobai,.
 .square-date-context strong { overflow:hidden;color:var(--text-primary);font-size:14px;text-overflow:ellipsis;white-space:nowrap; }
 .square-date-context button { display:inline-flex;align-items:center;gap:3px;padding:7px 8px 7px 11px;border-radius:999px;color:var(--brand-primary-press);background:color-mix(in srgb,var(--brand-primary) 9%,transparent);font-size:11px;font-weight:800; }
 .square-date-context button .material-symbols-outlined { font-size:15px; }
-.square-calendar .message-search-calendar-grid button.is-selected { color:var(--surface);background:var(--brand-primary);box-shadow:0 5px 14px color-mix(in srgb,var(--brand-primary) 28%,transparent); }
+.square-calendar-sheet .bottom-sheet { max-height:min(720px,92dvh); }
 
 .square-quota-sheet { padding-bottom:max(20px,env(safe-area-inset-bottom)); }
 .square-quota-panel { display:grid;gap:14px; }

@@ -17,11 +17,12 @@ export interface NormalizedSquareFeedSnapshot<T> {
   trusted: boolean;
 }
 
-export function squareFeedCacheKey(mode: SquareFeedMode, userId: number | null, date?: string | null) {
+export function squareFeedCacheKey(mode: SquareFeedMode, userId: number | null, date?: string | null, keyword?: string | null) {
   const base = mode !== "user"
     ? `square:${mode}`
     : userId ? `square:user:${userId}` : "square:all";
-  return date ? `${base}:date:${date}` : base;
+  const dateKey = date ? `${base}:date:${date}` : base;
+  return keyword ? `${dateKey}:keyword:${encodeURIComponent(keyword)}` : dateKey;
 }
 
 export function normalizeSquareFeedSnapshot<T>(

@@ -858,7 +858,7 @@ export const api = {
     });
   },
 
-  getSquareStatements(params: { before?: number; date?: string; limit?: number; scope?: "all" | "friends" | "mine"; user_id?: number }, signal?: AbortSignal) {
+  getSquareStatements(params: { before?: number; date?: string; keyword?: string; limit?: number; scope?: "all" | "friends" | "mine"; user_id?: number }, signal?: AbortSignal) {
     return request<SquareStatementDTO[]>("/square/statements", {
       auth: true,
       query: params,

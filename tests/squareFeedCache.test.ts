@@ -16,6 +16,7 @@ test("builds an isolated cache key for every feed", () => {
   assert.equal(squareFeedCacheKey("user", null), "square:all");
   assert.equal(squareFeedCacheKey("all", null, "2026-09-08"), "square:all:date:2026-09-08");
   assert.equal(squareFeedCacheKey("user", 42, "2026-09-08"), "square:user:42:date:2026-09-08");
+  assert.equal(squareFeedCacheKey("all", null, "2026-09", "毕业 快乐"), "square:all:date:2026-09:keyword:%E6%AF%95%E4%B8%9A%20%E5%BF%AB%E4%B9%90");
 });
 
 test("normalizes the legacy array cache format", () => {
