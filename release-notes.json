@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.9",
+  "id": "2026.09.09.10",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序编译稳定性修复",
+      "title": "小程序投稿列表视觉校准",
       "items": [
-        "修复登录、活动与广场评论页面的模板兼容问题，小程序现可通过微信模板编译"
+        "投稿列表的流程轨道、状态筛选、头像、协作信息和日期布局现已精细对齐网页端"
       ]
     },
     "en": {
-      "title": "Mini program compilation restored",
+      "title": "Refined submission list visuals",
       "items": [
-        "Fixed template compatibility issues across sign-in, activity, and Square comments so the mini program compiles successfully"
+        "Submission tracks, status filters, avatars, collaboration details, and dates now closely match the web layout"
       ]
     }
   }
