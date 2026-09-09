@@ -35942,7 +35942,7 @@ html[data-theme="dark"] .chat-mute-current small { color: #c59b72; }
   right: calc(var(--submission-curtain-gutter) * -1);
   bottom: 0;
   left: calc(var(--submission-curtain-gutter) * -1);
-  background: linear-gradient(180deg, rgba(0, 208, 132, .075), rgba(0, 208, 132, .035));
+  background: rgba(0, 208, 132, .055);
   box-shadow: inset 3px 0 0 rgba(0, 208, 132, .82);
   content: "";
   pointer-events: none;
@@ -35997,7 +35997,7 @@ html[data-theme="dark"] .chat-mute-current small { color: #c59b72; }
 }
 
 html[data-theme="dark"] .virtual-dynamic-list-row.is-submission-round::before {
-  background: linear-gradient(180deg, rgba(0, 208, 132, .11), rgba(0, 208, 132, .045));
+  background: rgba(0, 208, 132, .075);
 }
 
 html[data-theme="dark"] .submission-round-curtain-head { color: #70e4b8; }
