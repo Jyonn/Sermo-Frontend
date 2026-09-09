@@ -1,21 +1,17 @@
 {
-  "id": "2026.09.08.15",
-  "publishedAt": "2026-09-08",
+  "id": "2026.09.09.1",
+  "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序新功能视觉对齐",
+      "title": "小程序群聊头像视觉优化",
       "items": [
-        "空间成员目录现已对齐网页端的搜索、在线状态与快捷操作",
-        "欢迎消息编辑器会沿用当前聊天背景和气泡，并提供一致的输入与媒体面板",
-        "邮箱认证提示与广场置顶发言完成视觉统一"
+        "群聊头像现已与网页端统一，双人、三人和四人组合更加清晰紧凑"
       ]
     },
     "en": {
-      "title": "New mini program features visually aligned",
+      "title": "Refined group avatars in the mini program",
       "items": [
-        "The space member directory now matches the web experience for search, presence, and quick actions",
-        "The welcome-message editor now uses your active chat background and bubbles with a consistent composer and media panel",
-        "Email verification guidance and pinned Square posts now share the same visual treatment"
+        "Group avatars now match the web layout with clearer, more compact two-, three-, and four-person compositions"
       ]
     }
   }
