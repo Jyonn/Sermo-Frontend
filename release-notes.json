@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.1",
+  "id": "2026.09.09.2",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序群聊头像视觉优化",
+      "title": "小程序页面细节对齐",
       "items": [
-        "群聊头像现已与网页端统一，双人、三人和四人组合更加清晰紧凑"
+        "小程序统一了页面底色、标题栏留白，以及官方和运营身份签的视觉样式"
       ]
     },
     "en": {
-      "title": "Refined group avatars in the mini program",
+      "title": "Polished mini program page details",
       "items": [
-        "Group avatars now match the web layout with clearer, more compact two-, three-, and four-person compositions"
+        "The mini program now uses consistent page colors, header spacing, and official and operator identity badges"
       ]
     }
   }
