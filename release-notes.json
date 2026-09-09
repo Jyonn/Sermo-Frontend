@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.2",
+  "id": "2026.09.09.3",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序页面细节对齐",
+      "title": "小程序聊天背景细节优化",
       "items": [
-        "小程序统一了页面底色、标题栏留白，以及官方和运营身份签的视觉样式"
+        "页面新增柔和的右上角光晕，置顶会话不再使用额外底色"
       ]
     },
     "en": {
-      "title": "Polished mini program page details",
+      "title": "Refined mini program chat backdrop",
       "items": [
-        "The mini program now uses consistent page colors, header spacing, and official and operator identity badges"
+        "Pages now feature a soft top-right glow, while pinned chats no longer use a separate background color"
       ]
     }
   }
