@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.5",
+  "id": "2026.09.09.6",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天角标细节优化",
+      "title": "小程序聊天个性化焕新",
       "items": [
-        "聊天未读角标的位置与形态更加清晰，置顶状态更醒目，投稿入口采用统一的 Material Symbols 图标"
+        "小程序现已完整呈现聊天背景、气泡材质、场景预览与解锁状态，并与网页体验保持一致"
       ]
     },
     "en": {
-      "title": "Refined mini program chat badges",
+      "title": "Chat personalization arrives in the mini program",
       "items": [
-        "Chat unread badges are clearer and better positioned, pinned states stand out, and submissions now use the shared Material Symbols icon"
+        "The mini program now matches the web chat personalization experience with complete backgrounds, bubble materials, scene previews, and unlock states"
       ]
     }
   }
