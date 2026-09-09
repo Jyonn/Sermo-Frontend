@@ -35927,24 +35927,29 @@ html[data-theme="dark"] .chat-mute-current small { color: #c59b72; }
 }
 
 .submission-round-curtain {
-  --submission-curtain-gutter: 24px;
   position: relative;
-  width: calc(100% + var(--submission-curtain-gutter) * 2);
-  margin-inline: calc(var(--submission-curtain-gutter) * -1);
-  padding-inline: var(--submission-curtain-gutter);
-  background: linear-gradient(180deg, rgba(0, 208, 132, .075), rgba(0, 208, 132, .035));
-  box-shadow: inset 3px 0 0 rgba(0, 208, 132, .82);
+  z-index: 1;
 }
 
-.submission-round-curtain:not(.is-end)::after {
+.virtual-dynamic-list-row.is-submission-round {
+  --submission-curtain-gutter: 24px;
+}
+
+.virtual-dynamic-list-row.is-submission-round::before {
   position: absolute;
-  right: 0;
-  bottom: -18px;
-  left: 0;
-  height: 18px;
-  background: rgba(0, 208, 132, .035);
+  z-index: 0;
+  top: 0;
+  right: calc(var(--submission-curtain-gutter) * -1);
+  bottom: 0;
+  left: calc(var(--submission-curtain-gutter) * -1);
+  background: linear-gradient(180deg, rgba(0, 208, 132, .075), rgba(0, 208, 132, .035));
   box-shadow: inset 3px 0 0 rgba(0, 208, 132, .82);
   content: "";
+  pointer-events: none;
+}
+
+.virtual-dynamic-list-row.is-submission-round:not(.is-end)::before {
+  bottom: -18px;
 }
 
 .submission-round-curtain.is-start {
@@ -35991,7 +35996,7 @@ html[data-theme="dark"] .chat-mute-current small { color: #c59b72; }
   text-align: right;
 }
 
-html[data-theme="dark"] .submission-round-curtain {
+html[data-theme="dark"] .virtual-dynamic-list-row.is-submission-round::before {
   background: linear-gradient(180deg, rgba(0, 208, 132, .11), rgba(0, 208, 132, .045));
 }
 
@@ -35999,7 +36004,7 @@ html[data-theme="dark"] .submission-round-curtain-head { color: #70e4b8; }
 html[data-theme="dark"] .submission-round-curtain-head small { color: #9ab9ac; }
 
 @media (max-width: 700px) {
-  .submission-round-curtain { --submission-curtain-gutter: 16px; }
+  .virtual-dynamic-list-row.is-submission-round { --submission-curtain-gutter: 16px; }
   .submission-round-curtain-head { display: grid; gap: 4px; }
   .submission-round-curtain-head small { max-width: none; padding-left: 14px; text-align: left; }
 }

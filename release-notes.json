@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.2",
+  "id": "2026.09.10.3",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
       "title": "投稿回合幕布",
       "items": [
         "当前投稿回合现在使用连续幕布与历史内容区分，不再为每条消息重复添加边框",
-        "幕布会清晰提示当前内容仅本方可见，并说明交接后的同步方式"
+        "幕布在时间分隔处也会保持连续，每个新回合都会从明确的时间节点开始"
       ]
     },
     "en": {
       "title": "Submission round curtain",
       "items": [
         "The active submission round now appears in one continuous curtain instead of outlining every message",
-        "The curtain clearly marks private in-progress content and explains when it will sync"
+        "The curtain stays continuous across time dividers, and every new round starts with a clear timestamp"
       ]
     }
   }

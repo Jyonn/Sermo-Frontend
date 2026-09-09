@@ -22,6 +22,7 @@ interface VirtualDynamicListProps<T> {
   estimateSize: (item: T, index: number) => number;
   followEnd?: () => boolean;
   itemKey: (item: T) => string;
+  itemClassName?: (item: T, index: number) => string | undefined;
   items: T[];
   overscan?: number;
   renderItem: (item: T, index: number) => ReactNode;
@@ -95,6 +96,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     estimateSize,
     followEnd,
     itemKey,
+    itemClassName,
     items,
     overscan = DEFAULT_OVERSCAN,
     renderItem,
@@ -414,7 +416,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
         return (
           <div
             aria-rowindex={virtualItem.index + 1}
-            className="virtual-dynamic-list-row"
+            className={`virtual-dynamic-list-row ${itemClassName?.(item, virtualItem.index) ?? ""}`.trim()}
             data-virtual-index={virtualItem.index}
             key={virtualItem.key}
             ref={getRowRef(virtualItem.key)}

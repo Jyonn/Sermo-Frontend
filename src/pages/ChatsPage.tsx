@@ -1156,6 +1156,11 @@ function shouldGroupMessages(current: ChatMessage, neighbor?: ChatMessage) {
 function shouldShowThreadDivider(current: ChatMessage, previous?: ChatMessage) {
   if (!previous) return true;
 
+  if (
+    current.submissionRound != null
+    && current.submissionRound !== previous.submissionRound
+  ) return true;
+
   const currentDate = new Date(current.createdAt * 1000);
   const previousDate = new Date(previous.createdAt * 1000);
   if (currentDate.toDateString() !== previousDate.toDateString()) return true;
@@ -7795,6 +7800,9 @@ function LiveChatsPage({ purpose = "normal" }: { purpose?: "normal" | "submissio
                 <VirtualDynamicList
                   estimateSize={estimateMessageGroupHeight}
                   followEnd={() => shouldFollowLatestWindow(hasNewerMessagesRef.current, stickToBottomRef.current)}
+                  itemClassName={(group) => group.submissionCurrent
+                    ? `is-submission-round${group.submissionCurrentStart ? " is-start" : ""}${group.submissionCurrentEnd ? " is-end" : ""}`
+                    : undefined}
                   itemKey={(group) => group.key}
                   items={messageGroups}
                   overscan={840}
