@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.09.7",
+  "id": "2026.09.09.8",
   "publishedAt": "2026-09-09",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天材质精细校准",
+      "title": "小程序投稿流程全面升级",
       "items": [
-        "逐款校准小程序的聊天背景与气泡细节，城市收藏、动态材质和场景预览现在更贴近网页效果"
+        "投稿列表、发起投稿、协作详情、审阅与发布流程现已完整适配小程序，并与网页端保持一致"
       ]
     },
     "en": {
-      "title": "Refined chat materials in the mini program",
+      "title": "A complete submission workflow for the mini program",
       "items": [
-        "Every chat background and bubble has been refined, bringing city collectibles, animated materials, and scene previews closer to the web experience"
+        "Submission lists, creation, collaboration details, reviews, and publishing now match the web experience throughout the mini program"
       ]
     }
   }
