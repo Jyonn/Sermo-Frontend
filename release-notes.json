@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.9",
+  "id": "2026.09.10.10",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "广场栏目自然展开",
+      "title": "广场导航层级更清晰",
       "items": [
-        "广场与投稿现在共用同一套标题和栏目，切换时自然折叠展开",
-        "广场、投稿入口统一使用清晰的下划线栏目样式"
+        "当前栏目保留醒目的下划线，广场与投稿入口调整为低调的工作区切换",
+        "未读提示降低视觉强度，更容易辨认当前浏览位置"
       ]
     },
     "en": {
-      "title": "A naturally expanding Square navigation",
+      "title": "Clearer hierarchy in Square navigation",
       "items": [
-        "Square and submissions now share one header and tab rail with natural folding transitions",
-        "Square and submission switches now use a consistent underlined tab style"
+        "Active tabs keep the underline while Square and submission links become quieter workspace switches",
+        "Unread indicators are less prominent so the current location stays clear"
       ]
     }
   }

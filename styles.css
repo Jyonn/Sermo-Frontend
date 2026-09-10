@@ -33162,11 +33162,38 @@ html[data-theme="dark"] .submission-status-filters {
 .square-workspace-mode-tab {
   overflow: hidden;
   max-width: 110px;
+  color: var(--text-muted) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
   transition: max-width 300ms cubic-bezier(.16, 1, .3, 1), padding 300ms cubic-bezier(.16, 1, .3, 1), opacity 180ms ease, transform 300ms cubic-bezier(.16, 1, .3, 1);
+}
+.square-workspace-mode-tab::after { display: none; }
+.square-workspace-mode-tab:hover { color: var(--brand-primary-press) !important; }
+.square-workspace-mode-tab.is-submission-entry {
+  margin-left: 10px;
+  padding-left: 14px;
+  background-image: linear-gradient(color-mix(in srgb, var(--line-soft) 86%, var(--text-muted)), color-mix(in srgb, var(--line-soft) 86%, var(--text-muted)));
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 1px 50%;
+}
+.square-workspace-mode-tab.is-square-return {
+  margin-right: 10px;
+  padding-right: 14px;
+  background-image: linear-gradient(color-mix(in srgb, var(--line-soft) 86%, var(--text-muted)), color-mix(in srgb, var(--line-soft) 86%, var(--text-muted)));
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: 1px 50%;
+}
+.square-workspace-mode-tab > i {
+  color: color-mix(in srgb, var(--danger) 82%, var(--text-primary));
+  background: color-mix(in srgb, var(--danger) 13%, var(--bg-elevated));
+  font-weight: 800;
 }
 .square-workspace-tabs.is-square .is-square-return,
 .square-workspace-tabs.is-submission .is-submission-entry {
   max-width: 0;
+  margin-inline: 0;
   padding-inline: 0;
   opacity: 0;
   transform: scaleX(.65);
