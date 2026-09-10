@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FRIENDEN between mark</title>
+  <desc id="desc">Two speech forms meet around a shared space.</desc>
+  <rect id="background" width="512" height="512" rx="112" fill="#F5F4F0"/>
+  <g id="icon">
+    <path fill="#00D084" d="M70 116c0-30 24-54 54-54h172c30 0 54 24 54 54v118c0 30-24 54-54 54H184l-70 70 14-70h-4c-30 0-54-24-54-54V116Z"/>
+    <path fill="#17372D" d="M442 278c0-30-24-54-54-54H216c-30 0-54 24-54 54v118c0 30 24 54 54 54h172c30 0 54-24 54-54V278Z"/>
+    <circle cx="162" cy="176" r="18" fill="#F5F4F0"/>
+    <circle cx="258" cy="176" r="18" fill="#F5F4F0"/>
+    <circle cx="254" cy="338" r="18" fill="#F5F4F0"/>
+    <circle cx="350" cy="338" r="18" fill="#F5F4F0"/>
+  </g>
+</svg>

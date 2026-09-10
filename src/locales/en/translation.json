@@ -195,7 +195,7 @@
   "landing.createSpace": "Create space",
   "landing.joinSpace": "Join space",
   "landing.createMine": "Create my space",
-  "landing.slogan": "Your space. Your people. Talk freely.",
+  "landing.slogan": "A space of our own, between friends.",
   "landing.description": "Enter your space. Relationships, chats, and notifications stay naturally connected.",
   "landing.myEntrances": "My entrances",
   "landing.entrancesHint": "Spaces you recently visited appear here for quick access.",
@@ -205,8 +205,8 @@
   "landing.slugRequired": "Enter a space slug.",
   "join.checking": "Checking space",
   "join.missing": "This space has not been created",
-  "join.missingHint": "Create it, or return to Yanlang.",
-  "join.about": "About Sermo Yanlang",
+  "join.missingHint": "Create it, or return to FRIENDEN.",
+  "join.about": "About FRIENDEN",
   "join.createThis": "Create this space",
   "join.checkFailed": "Could not check this space",
   "join.checkNetwork": "Check your connection and try again.",
@@ -223,7 +223,7 @@
   "join.enter": "Enter space",
   "join.or": "or",
   "join.wechatLogin": "Continue with WeChat",
-  "join.wechatMiniProgramHint": "Open the Sermo mini program in WeChat and choose this space to sign in.",
+  "join.wechatMiniProgramHint": "Open the FRIENDEN mini program in WeChat and choose this space to sign in.",
   "account.officialLogin": "Official account login",
   "account.officialLoggingIn": "Signing in to the official account",
   "account.officialLoginFailed": "Official account login failed",
@@ -250,7 +250,7 @@
   "menu.avatarFrameHint": "Leave your mark wherever you appear",
   "menu.profileCard": "Profile card",
   "menu.profileCardHint": "Shape how others see you",
-  "menu.profileCardTheme.default": "Sermo Classic",
+  "menu.profileCardTheme.default": "FRIENDEN Classic",
   "menu.profileCardTheme.level-12": "Tidal Blue",
   "menu.profileCardTheme.vip": "Gilded Hour",
   "menu.permanentVipOnly": "Permanent VIP only",
@@ -408,7 +408,7 @@
   "square.replyingTo": "Replying to {{name}}",
   "menu.bubblePreviewFile": "Travel plan.pdf",
   "menu.bubblePreviewLocation": "Jeju Special Self-Governing Province",
-  "menu.bubblePreviewLink": "Yanlang · A space to talk freely",
+  "menu.bubblePreviewLink": "FRIENDEN · A space of our own, between friends",
   "menu.bubblePreviewLinkHint": "Open link card",
   "menu.themeDefault": "Default",
   "menu.themePaper": "Paper",
@@ -592,7 +592,7 @@
   "pwa.enable": "Enable",
   "pwa.installDesktop": "Install on desktop",
   "pwa.standaloneHint": "Opens in its own window and supports system notifications.",
-  "pwa.accountEntryTitle": "Yanlang accounts",
+  "pwa.accountEntryTitle": "FRIENDEN accounts",
   "pwa.accountEntryEyebrow": "ACCOUNT",
   "pwa.accountEntryWelcome": "Welcome back",
   "pwa.chooseAccount": "Choose an account to continue",
@@ -600,7 +600,7 @@
   "pwa.cachedAccounts": "Signed-in accounts",
   "pwa.autoLogin": "Enter automatically next time",
   "pwa.autoLoginHint": "Use the selected account",
-  "pwa.enterAccount": "Enter Yanlang",
+  "pwa.enterAccount": "Enter FRIENDEN",
   "pwa.entering": "Opening",
   "pwa.otherAccount": "Sign in with another account",
   "pwa.otherAccountHint": "Enter a space slug to continue",
@@ -620,7 +620,7 @@
   "growth.defaultUnlock": "A new growth stage",
   "growth.pointsAwarded": "Growth +{{points}}",
   "growth.confirmFailed": "Could not confirm. Check your connection and try again.",
-  "growth.badge": "Yanlang growth award",
+  "growth.badge": "FRIENDEN growth award",
   "growth.newWave": "A new wave has arrived",
   "growth.unlocked": "Unlocked at this level",
   "growth.confirming": "Confirming",
@@ -849,8 +849,8 @@
   "pwa.guideOther2": "Find the install option",
   "pwa.guideOther2Hint": "Choose “Install app” or “Add to Home screen”.",
   "pwa.guideOther3": "Confirm",
-  "pwa.guideOther3Hint": "When finished, open Yanlang from your Home screen.",
-  "brand.yanlang": "Yanlang",
+  "pwa.guideOther3Hint": "When finished, open FRIENDEN from your Home screen.",
+  "brand.yanlang": "FRIENDEN",
   "gesture.grid": "Gesture pattern grid",
   "gesture.autoLock": "Auto-lock",
   "gesture.minutes": "{{count}} min",
@@ -879,7 +879,7 @@
   "gesture.welcome": "Welcome back",
   "gesture.welcomeUser": "Welcome back, {{name}}",
   "auth.logout": "Log out",
-  "brand.fullName": "Sermo Yanlang",
+  "brand.fullName": "FRIENDEN",
   "nav.main": "Main navigation",
   "nav.expand": "Expand navigation",
   "nav.collapse": "Collapse navigation",
@@ -1097,7 +1097,7 @@
   "admin.phoneVerifyFailed": "Phone verification failed",
   "admin.phoneVerified": "Administrator phone verified",
   "admin.identityTitle": "Apply for identity verification",
-  "admin.identityHint": "Upload a PDF credential up to 10 MB for Sermo administrator review.",
+  "admin.identityHint": "Upload a PDF credential up to 10 MB for FRIENDEN administrator review.",
   "admin.uploadIdentity": "Upload credential",
   "admin.identityPending": "Identity review pending",
   "admin.identityPendingHint": "The result will be sent to the administrator email",
@@ -1293,7 +1293,7 @@
   "notification.onlineTitle": "Friend online",
   "notification.onlineContent": "Your friend is online.",
   "invite.verificationRequired": "Verify your email to use friend QR codes.",
-  "brand.user": "Yanlang user",
+  "brand.user": "FRIENDEN user",
   "growth.firstLevel": "First Hello",
   "invite.shareQr": "Share friend QR code",
   "invite.verifyToUseQr": "Complete verification to use friend QR codes",
@@ -1413,7 +1413,7 @@
   "growth.levelStage.legendary": "Collector",
   "growth.levelStage.mythic": "Mythic",
   "growth.daily": "Daily growth",
-  "growth.explore": "Explore Yanlang",
+  "growth.explore": "Explore FRIENDEN",
   "growth.recommended": "Recommended",
   "growth.recent": "Recently earned",
   "growth.unlocked": "Unlocked",
@@ -1495,7 +1495,7 @@
   "notification.customContent": "Custom content",
   "notification.defaultContent": "Use default content",
   "bark.bind": "Link Bark",
-  "bark.receiveInstant": "Receive Yanlang instant alerts",
+  "bark.receiveInstant": "Receive FRIENDEN instant alerts",
   "bark.aboutOneMinute": "About 1 min",
   "bark.download": "Download Bark",
   "bark.allowNotifications": "Allow notifications after installing.",
@@ -1553,11 +1553,11 @@
   "account.confirmDelete": "Delete account",
   "notification.thresholdHint": "Send reminders after being offline for",
   "notification.emptyUsesDefault": "Leave empty to use the default copy",
-  "bark.previewTitle": "【Yanlang】{{title}}",
+  "bark.previewTitle": "【FRIENDEN】{{title}}",
   "email.preview": "Email body preview",
   "email.previewGreeting": "Hello, {{name}}",
   "email.previewRecipient": "friend",
-  "email.previewAction": "Open Sermo",
+  "email.previewAction": "Open FRIENDEN",
   "email.previewFooter": "Adjust email delivery in Notifications & reminders.",
   "common.savingPlain": "Saving",
   "contact.unbindConfirmTitle": "Unlink {{channel}}?",
@@ -1670,13 +1670,13 @@
   "message.sendImage": "send images",
   "message.sendLocation": "Send location",
   "location.browserUnsupported": "Location is not supported by this browser",
-  "location.permissionRequired": "Allow Yanlang to access your location",
+  "location.permissionRequired": "Allow FRIENDEN to access your location",
   "location.unavailable": "Could not get your current location",
   "location.sendFailed": "Could not send location",
   "message.sendVideo": "send videos",
   "message.sendAudio": "send audio",
   "audio.tooShort": "Recording is too short",
-  "audio.permissionRequired": "Allow Yanlang to use your microphone in browser settings",
+  "audio.permissionRequired": "Allow FRIENDEN to use your microphone in browser settings",
   "audio.noMicrophone": "No microphone found",
   "audio.inUse": "The microphone is being used by another app",
   "audio.startUnavailable": "Could not start recording",
@@ -2228,7 +2228,7 @@
   ,"notification.guide.bark.1.title": "Install and allow notifications"
   ,"notification.guide.bark.1.body": "Open Bark and allow system notifications when prompted."
   ,"notification.guide.bark.2.title": "Copy your private push URL"
-  ,"notification.guide.bark.2.body": "Copy the URL beginning with https://api.day.app. Sample text at the end is safe to include; Sermo cleans it automatically."
+  ,"notification.guide.bark.2.body": "Copy the URL beginning with https://api.day.app. Sample text at the end is safe to include; FRIENDEN cleans it automatically."
   ,"notification.guide.bark.3.title": "Send a test code"
   ,"notification.guide.bark.3.body": "Paste the URL, send a test, then return from Bark and enter the six-digit code."
   ,"notification.guide.ntfy.1.title": "Install ntfy"
@@ -2240,7 +2240,7 @@
   ,"notification.guide.gotify.1.title": "Install the client and prepare a server"
   ,"notification.guide.gotify.1.body": "Gotify needs a reachable server. Install the Android client and sign in to your Gotify server first."
   ,"notification.guide.gotify.2.title": "Create an application token"
-  ,"notification.guide.gotify.2.body": "In the Gotify web console, create an application dedicated to Sermo and copy its application token, not a client token."
+  ,"notification.guide.gotify.2.body": "In the Gotify web console, create an application dedicated to FRIENDEN and copy its application token, not a client token."
   ,"notification.guide.gotify.3.title": "Verify the server and token"
   ,"notification.guide.gotify.3.body": "Enter the server root URL and application token, then confirm the test code in Gotify."
   ,"notification.guide.pushdeer.1.title": "Install a suitable client"
@@ -2327,7 +2327,7 @@
   ,"activity.spaceRewardClaimFailed": "The space reward could not be claimed"
   ,"activity.rules": "Rules"
   ,"activity.prizePool": "Prize pool"
-  ,"activity.coBranding": "Sermo × Baxian collaboration"
+  ,"activity.coBranding": "FRIENDEN × Baxian collaboration"
   ,"activity.baxian": "Baxian"
   ,"activity.ruleVerifiedTitle": "Verify to participate"
   ,"activity.ruleVerifiedBody": "Verify your account to join your space's shared progress."
@@ -2448,7 +2448,7 @@
   ,"square.qqProfileTitle": "Historical QQ identity"
   ,"square.qqNumber": "QQ number"
   ,"square.qqNickname": "QQ nickname"
-  ,"square.qqIdentityHint": "This profile comes from migrated QZone history and has not yet been claimed on Sermo."
+  ,"square.qqIdentityHint": "This profile comes from migrated QZone history and has not yet been claimed on FRIENDEN."
   ,"channel.system": "System"
   ,"contact.bindMore": "Bind more"
   ,"contact.bindMoreHint": "{{count}} more channels are available"

@@ -280,7 +280,7 @@ function shareChatPeer(chat: ChatDTO, currentUserId?: number) {
 }
 
 function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
-  return chat.title || shareChatPeer(chat, currentUserId)?.name || "Sermo";
+  return chat.title || shareChatPeer(chat, currentUserId)?.name || "FRIENDEN";
 }
 
 function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, onDelete, onLike, onMute, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
@@ -2530,7 +2530,7 @@ export default function SquarePage() {
       <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity?.theme !== "spider-man-4" ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
         {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">
-            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="Sermo 言浪" src="/icons/sermo-512.png?v=6" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>{/* i18n-ignore: brand name */}
+            <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=1" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>{/* i18n-ignore: brand name */}
             <div className="activity-detail-index">
               <div><button onClick={() => setActivityRulesOpen(true)} type="button">{t("activity.rules")}</button><i aria-hidden="true" /><button onClick={() => setActivityPoolOpen(true)} type="button">{t("activity.prizePool")}</button></div>
               <time>{formatActivityDateRange(activeActivity.starts_at, activeActivity.ends_at, language, t("activity.noTimeLimit"))}</time>

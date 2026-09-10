@@ -8,7 +8,7 @@ import { getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { getWebReminderPreferences, mapWebReminderPreferences, setWebReminderPreferences, WEB_REMINDER_PREFS_UPDATED_EVENT } from "../lib/webReminderPreferences";
 import { useI18n } from "../lib/language";
 
-const FALLBACK_TITLE = "Sermo";
+const FALLBACK_TITLE = "FRIENDEN";
 
 function getRememberedSpaceName(slug: string | null) {
   if (!slug) return null;

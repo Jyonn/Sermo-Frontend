@@ -195,7 +195,7 @@
   "landing.createSpace": "创建空间",
   "landing.joinSpace": "加入空间",
   "landing.createMine": "创建我的空间",
-  "landing.slogan": "一方空间，尽兴开聊。",
+  "landing.slogan": "朋友之间，自有一间。",
   "landing.description": "成员通过专属子域名进入，关系、聊天和通知自然围绕同一个空间发生。",
   "landing.myEntrances": "我的入口",
   "landing.entrancesHint": "你最近进入过的空间会显示在这里，下次可以直接跳转。",
@@ -205,8 +205,8 @@
   "landing.slugRequired": "请输入空间标识。",
   "join.checking": "正在确认空间",
   "join.missing": "这个空间还没有创建",
-  "join.missingHint": "创建它，或返回言浪主页。",
-  "join.about": "了解 Sermo 言浪",
+  "join.missingHint": "创建它，或返回友间主页。",
+  "join.about": "了解 FRIENDEN 友间",
   "join.createThis": "创建这个空间",
   "join.checkFailed": "暂时无法确认这个空间",
   "join.checkNetwork": "检查网络后再试一次。",
@@ -223,7 +223,7 @@
   "join.enter": "进入空间",
   "join.or": "或",
   "join.wechatLogin": "使用微信登录",
-  "join.wechatMiniProgramHint": "请在微信中打开 Sermo 言浪小程序，并选择这个空间登录。",
+  "join.wechatMiniProgramHint": "请在微信中打开 FRIENDEN 友间小程序，并选择这个空间登录。",
   "account.officialLogin": "官方账号登录",
   "account.officialLoggingIn": "正在登录官方账号",
   "account.officialLoginFailed": "官方账号登录失败",
@@ -250,7 +250,7 @@
   "menu.avatarFrameHint": "在任何出现头像的地方留下标记",
   "menu.profileCard": "个人名片",
   "menu.profileCardHint": "定制他人眼中的你",
-  "menu.profileCardTheme.default": "言浪经典",
+  "menu.profileCardTheme.default": "友间经典",
   "menu.profileCardTheme.level-12": "潮汐蓝",
   "menu.profileCardTheme.vip": "鎏金时刻",
   "menu.permanentVipOnly": "永久 VIP 专属",
@@ -408,7 +408,7 @@
   "square.replyingTo": "回复 {{name}}",
   "menu.bubblePreviewFile": "旅行计划.pdf",
   "menu.bubblePreviewLocation": "济州特别自治道",
-  "menu.bubblePreviewLink": "言浪 · 一方空间，尽兴开聊",
+  "menu.bubblePreviewLink": "友间 · 朋友之间，自有一间",
   "menu.bubblePreviewLinkHint": "打开链接卡片",
   "menu.themeDefault": "默认",
   "menu.themePaper": "纸感",
@@ -592,7 +592,7 @@
   "pwa.enable": "开启",
   "pwa.installDesktop": "安装到桌面",
   "pwa.standaloneHint": "独立窗口打开，并可接收系统通知。",
-  "pwa.accountEntryTitle": "言浪账户入口",
+  "pwa.accountEntryTitle": "友间账户入口",
   "pwa.accountEntryEyebrow": "账户",
   "pwa.accountEntryWelcome": "欢迎回来",
   "pwa.chooseAccount": "选择一个账户继续",
@@ -600,7 +600,7 @@
   "pwa.cachedAccounts": "已登录账户",
   "pwa.autoLogin": "下次自动进入",
   "pwa.autoLoginHint": "使用当前选中的账户",
-  "pwa.enterAccount": "进入言浪",
+  "pwa.enterAccount": "进入友间",
   "pwa.entering": "正在进入",
   "pwa.otherAccount": "登录其他账户",
   "pwa.otherAccountHint": "输入空间名后继续登录",
@@ -620,7 +620,7 @@
   "growth.defaultUnlock": "新的成长阶段",
   "growth.pointsAwarded": "成长值 +{{points}}",
   "growth.confirmFailed": "确认失败，请检查网络后重试",
-  "growth.badge": "言浪成长授章",
+  "growth.badge": "友间成长授章",
   "growth.newWave": "新的浪潮已经抵达",
   "growth.unlocked": "本级解锁",
   "growth.confirming": "正在确认",
@@ -849,8 +849,8 @@
   "pwa.guideOther2": "找到安装入口",
   "pwa.guideOther2Hint": "选择“安装应用”或“添加到主屏幕”。",
   "pwa.guideOther3": "确认添加",
-  "pwa.guideOther3Hint": "完成后从手机桌面打开言浪。",
-  "brand.yanlang": "言浪",
+  "pwa.guideOther3Hint": "完成后从手机桌面打开友间。",
+  "brand.yanlang": "友间",
   "gesture.grid": "手势九宫格",
   "gesture.autoLock": "自动上锁",
   "gesture.minutes": "{{count}} 分钟",
@@ -879,7 +879,7 @@
   "gesture.welcome": "欢迎回来",
   "gesture.welcomeUser": "欢迎回来，{{name}}",
   "auth.logout": "退出登录",
-  "brand.fullName": "Sermo 言浪",
+  "brand.fullName": "FRIENDEN 友间",
   "nav.main": "主导航",
   "nav.expand": "展开导航",
   "nav.collapse": "收起导航",
@@ -1097,7 +1097,7 @@
   "admin.phoneVerifyFailed": "手机认证失败",
   "admin.phoneVerified": "管理员手机已认证",
   "admin.identityTitle": "申请实名认证",
-  "admin.identityHint": "上传 PDF 身份凭证，最大 10 MB。提交后由 Sermo 管理员审阅。",
+  "admin.identityHint": "上传 PDF 身份凭证，最大 10 MB。提交后由 FRIENDEN 管理员审阅。",
   "admin.uploadIdentity": "上传身份凭证",
   "admin.identityPending": "实名认证待审核",
   "admin.identityPendingHint": "审核结果将通过管理员邮箱通知",
@@ -1293,7 +1293,7 @@
   "notification.onlineTitle": "好友上线",
   "notification.onlineContent": "你的好友上线了。",
   "invite.verificationRequired": "完成邮箱认证后才能使用好友二维码。",
-  "brand.user": "言浪用户",
+  "brand.user": "友间用户",
   "growth.firstLevel": "初见",
   "invite.shareQr": "分享好友二维码",
   "invite.verifyToUseQr": "完成认证后可使用好友二维码",
@@ -1413,7 +1413,7 @@
   "growth.levelStage.legendary": "典藏",
   "growth.levelStage.mythic": "神话",
   "growth.daily": "每日成长",
-  "growth.explore": "探索言浪",
+  "growth.explore": "探索友间",
   "growth.recommended": "推荐完善",
   "growth.recent": "最近获得",
   "growth.unlocked": "已经解锁",
@@ -1495,7 +1495,7 @@
   "notification.customContent": "内容自定义",
   "notification.defaultContent": "使用默认内容",
   "bark.bind": "绑定 Bark",
-  "bark.receiveInstant": "接收言浪即时提醒",
+  "bark.receiveInstant": "接收友间即时提醒",
   "bark.aboutOneMinute": "约 1 分钟",
   "bark.download": "下载 Bark",
   "bark.allowNotifications": "安装后允许通知。",
@@ -1553,11 +1553,11 @@
   "account.confirmDelete": "确认注销",
   "notification.thresholdHint": "离线多久后发送提醒",
   "notification.emptyUsesDefault": "留空将使用默认文案",
-  "bark.previewTitle": "【言浪】{{title}}",
+  "bark.previewTitle": "【友间】{{title}}",
   "email.preview": "邮件正文预览",
   "email.previewGreeting": "{{name}}，你好",
   "email.previewRecipient": "朋友",
-  "email.previewAction": "打开言浪",
+  "email.previewAction": "打开友间",
   "email.previewFooter": "可在“通知与提醒”中调整邮件。",
   "common.savingPlain": "保存中",
   "contact.unbindConfirmTitle": "解除{{channel}}绑定？",
@@ -1670,13 +1670,13 @@
   "message.sendImage": "发送图片",
   "message.sendLocation": "发送位置",
   "location.browserUnsupported": "当前浏览器不支持定位",
-  "location.permissionRequired": "请允许言浪访问你的位置",
+  "location.permissionRequired": "请允许友间访问你的位置",
   "location.unavailable": "暂时无法获取当前位置",
   "location.sendFailed": "位置发送失败",
   "message.sendVideo": "发送视频",
   "message.sendAudio": "发送语音",
   "audio.tooShort": "录音时间太短",
-  "audio.permissionRequired": "请在浏览器设置中允许言浪使用麦克风",
+  "audio.permissionRequired": "请在浏览器设置中允许友间使用麦克风",
   "audio.noMicrophone": "没有找到可用的麦克风",
   "audio.inUse": "麦克风正在被其他应用使用",
   "audio.startUnavailable": "暂时无法开始录音",
@@ -2228,7 +2228,7 @@
   ,"notification.guide.bark.1.title": "安装并允许通知"
   ,"notification.guide.bark.1.body": "打开 Bark，首次启动时允许系统通知。"
   ,"notification.guide.bark.2.title": "复制专属推送链接"
-  ,"notification.guide.bark.2.body": "在 Bark 首页复制以 https://api.day.app 开头的链接，后面的示例文字可以一起复制，言浪会自动整理。"
+  ,"notification.guide.bark.2.body": "在 Bark 首页复制以 https://api.day.app 开头的链接，后面的示例文字可以一起复制，友间会自动整理。"
   ,"notification.guide.bark.3.title": "发送测试验证码"
   ,"notification.guide.bark.3.body": "粘贴链接并发送测试；回到 Bark 查看六位验证码，再返回这里完成绑定。"
   ,"notification.guide.ntfy.1.title": "安装 ntfy"
@@ -2240,7 +2240,7 @@
   ,"notification.guide.gotify.1.title": "安装客户端并准备服务"
   ,"notification.guide.gotify.1.body": "Gotify 需要可访问的服务端。Android 安装客户端后，先用你的 Gotify 服务地址登录。"
   ,"notification.guide.gotify.2.title": "创建应用 Token"
-  ,"notification.guide.gotify.2.body": "在 Gotify 网页管理端创建一个专供言浪使用的应用，复制应用 Token；不要填写客户端 Token。"
+  ,"notification.guide.gotify.2.body": "在 Gotify 网页管理端创建一个专供友间使用的应用，复制应用 Token；不要填写客户端 Token。"
   ,"notification.guide.gotify.3.title": "验证服务与 Token"
   ,"notification.guide.gotify.3.body": "填写服务根地址和应用 Token，发送测试验证码并在 Gotify 中确认。"
   ,"notification.guide.pushdeer.1.title": "安装适合你的客户端"
@@ -2327,7 +2327,7 @@
   ,"activity.spaceRewardClaimFailed": "全空间奖励暂时未能领取"
   ,"activity.rules": "规则"
   ,"activity.prizePool": "奖池"
-  ,"activity.coBranding": "言浪与八仙联名活动"
+  ,"activity.coBranding": "友间与八仙联名活动"
   ,"activity.baxian": "八仙"
   ,"activity.ruleVerifiedTitle": "认证后参与"
   ,"activity.ruleVerifiedBody": "完成账号认证，即可加入本空间的聚力进程。"
@@ -2448,7 +2448,7 @@
   ,"square.qqProfileTitle": "QQ 历史身份"
   ,"square.qqNumber": "QQ 号"
   ,"square.qqNickname": "QQ 昵称"
-  ,"square.qqIdentityHint": "该资料来自迁移的 QQ 空间历史记录，此用户尚未绑定 Sermo。"
+  ,"square.qqIdentityHint": "该资料来自迁移的 QQ 空间历史记录，此用户尚未绑定 FRIENDEN。"
   ,"channel.system": "系统"
   ,"contact.bindMore": "绑定更多"
   ,"contact.bindMoreHint": "还有 {{count}} 个渠道可以绑定"

@@ -835,7 +835,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
             href={`https://uri.amap.com/marker?${new URLSearchParams({
               position: `${focusLocation.longitude},${focusLocation.latitude}`,
               name: focusLocation.address || t("location.shared"),
-              src: "Sermo",
+              src: "FRIENDEN",
               coordinate: "wgs84",
               callnative: "1",
             }).toString()}`}

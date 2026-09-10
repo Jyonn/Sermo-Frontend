@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FRIENDEN threshold</title>
+  <desc id="desc">An open doorway holds two people in a shared room.</desc>
+  <rect id="background" width="512" height="512" rx="112" fill="#F5F4F0"/>
+  <g id="icon">
+    <path fill="#17372D" d="M86 426V214C86 111 162 42 256 42s170 69 170 172v212h-90V220c0-49-31-88-80-88s-80 39-80 88v206H86Z"/>
+    <circle cx="220" cy="260" r="34" fill="#00D084"/>
+    <circle cx="302" cy="260" r="34" fill="#00D084"/>
+    <path fill="#00D084" d="M154 426c6-78 42-120 102-120s96 42 102 120H154Z"/>
+    <path fill="#F5F4F0" d="M244 306h24v120h-24z"/>
+  </g>
+</svg>

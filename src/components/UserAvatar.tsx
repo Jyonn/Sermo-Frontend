@@ -23,7 +23,7 @@ const supportedAvatarFrames = new Set<AvatarFrameStyle>([
 ]);
 
 function avatarLabel(name: string) {
-  return (name?.trim() || "Sermo").slice(0, 2).toUpperCase();
+  return (name?.trim() || "FRIENDEN").slice(0, 2).toUpperCase();
 }
 
 function normalizeGroupMembers(groupMembers?: GroupAvatarMember[] | null) {
@@ -86,7 +86,7 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
-  const resolvedName = singleSource?.name?.trim() || name?.trim() || "Sermo";
+  const resolvedName = singleSource?.name?.trim() || name?.trim() || "FRIENDEN";
   const sourceUri = singleSource?.uri ?? uri;
   const sourceCacheKey = singleSource?.cacheKey ?? cacheKey;
   const { source, failed, setFailed } = useCachedAvatar(sourceUri, sourceCacheKey);

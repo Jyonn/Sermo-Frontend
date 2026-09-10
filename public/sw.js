@@ -1,12 +1,12 @@
 importScripts("/sw-release.js");
 
-const CACHE_NAME = "sermo-shell-v8";
+const CACHE_NAME = "sermo-shell-v9";
 const MEDIA_CACHE_NAME = "sermo-media-v1";
 const MEDIA_DB_NAME = "sermo-media-metadata";
 const MEDIA_DB_STORE = "entries";
 const MEDIA_MAX_BYTES = 256 * 1024 * 1024;
 const MEDIA_MAX_ITEM_BYTES = 128 * 1024 * 1024;
-const SHELL = ["/", "/manifest.json", "/icons/sermo-192.png?v=6", "/icons/sermo-512.png?v=6", "/fonts/material-symbols-outlined.woff2?v=1"];
+const SHELL = ["/", "/manifest.json", "/icons/frienden-192.png?v=1", "/icons/frienden-512.png?v=1", "/fonts/material-symbols-outlined.woff2?v=1"];
 const blockedMediaSlugs = new Set();
 
 function mediaIdentity(value) {
@@ -266,10 +266,10 @@ self.addEventListener("push", (event) => {
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       const hasVisibleClient = clients.some((client) => client.visibilityState === "visible");
       if (hasVisibleClient) return undefined;
-      return self.registration.showNotification(payload.title || "Sermo 言浪", {
+      return self.registration.showNotification(payload.title || "FRIENDEN 友间", {
         body: payload.body || "你收到了一条新消息",
-        icon: payload.icon || "/icons/sermo-512.png?v=6",
-        badge: "/icons/sermo-192.png?v=6",
+        icon: payload.icon || "/icons/frienden-512.png?v=1",
+        badge: "/icons/frienden-192.png?v=1",
         tag: payload.chat_id ? `chat-${payload.chat_id}` : undefined,
         data: { url },
       });

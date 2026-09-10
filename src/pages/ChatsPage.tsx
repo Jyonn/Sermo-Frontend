@@ -10071,7 +10071,7 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
         link_preview: {
           status: "ready",
           url: PUBLIC_ORIGIN,
-          site_name: "SERMO",
+          site_name: "FRIENDEN",
           title: i18n.t("menu.bubblePreviewLink"),
           description: i18n.t("menu.bubblePreviewLinkHint"),
           image_url: CHAT_PREVIEW_IMAGE,

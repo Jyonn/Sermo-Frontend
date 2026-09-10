@@ -789,7 +789,7 @@ export default function SpaceAdminDashboardPage() {
       <section className="admin-app-shell">
         <nav className="admin-app-nav" aria-label={t("admin.dashboardTitle")}>
           <div className="admin-nav-brand">
-            <UserAvatar className="admin-nav-space-avatar" name={currentSpace?.name ?? "Sermo"} uri={currentSpace?.official_user?.avatar_uri} />
+            <UserAvatar className="admin-nav-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />
             <span><strong>{currentSpace?.name}</strong><small>@{currentSpace?.slug}</small></span>
           </div>
           <div className="admin-nav-items">

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.22",
+  "id": "2026.09.10.23",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面录音反馈更灵敏",
+      "title": "FRIENDEN 友间，全新品牌启程",
       "items": [
-        "录音波形改为更精简的左右对称布局，轻声反馈更明显且峰值更克制",
-        "足迹浮层继续向右调整，避免左侧内容贴近聊天框边界"
+        "产品品牌正式升级为 FRIENDEN 友间，并启用全新品牌标志",
+        "全新品牌口号：朋友之间，自有一间。"
       ]
     },
     "en": {
-      "title": "More responsive desktop voice feedback",
+      "title": "Introducing FRIENDEN",
       "items": [
-        "Voice waves are now compact and mirrored, with clearer low-volume feedback and calmer peaks",
-        "The footprint popover now sits farther right to keep content clear of the conversation edge"
+        "The product is now FRIENDEN, with a new identity and app icon",
+        "Our new promise: A space of our own, between friends."
       ]
     }
   }
