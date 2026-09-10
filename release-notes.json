@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.21",
+  "id": "2026.09.10.22",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面位置浮层精细化",
+      "title": "桌面录音反馈更灵敏",
       "items": [
-        "位置浮层现在清晰展示坐标与定位精度，并保留精确和模糊发送",
-        "足迹与录音浮层调整展开位置，完整显示在聊天框范围内"
+        "录音波形改为更精简的左右对称布局，轻声反馈更明显且峰值更克制",
+        "足迹浮层继续向右调整，避免左侧内容贴近聊天框边界"
       ]
     },
     "en": {
-      "title": "Refined desktop location popover",
+      "title": "More responsive desktop voice feedback",
       "items": [
-        "The location popover now presents coordinates and accuracy clearly with precise and approximate sending",
-        "Footprint and voice popovers now open fully within the conversation frame"
+        "Voice waves are now compact and mirrored, with clearer low-volume feedback and calmer peaks",
+        "The footprint popover now sits farther right to keep content clear of the conversation edge"
       ]
     }
   }

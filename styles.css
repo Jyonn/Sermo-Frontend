@@ -34252,6 +34252,10 @@ html[data-theme="dark"] .verification-banner-action {
     transform: none;
   }
 
+  .desktop-tool-popover.is-footprint {
+    right: -70px;
+  }
+
   .desktop-tool-popover.is-file {
     padding: 9px;
   }
@@ -34260,6 +34264,10 @@ html[data-theme="dark"] .verification-banner-action {
   .desktop-tool-popover.is-voice::after {
     right: 48px;
     left: auto;
+  }
+
+  .desktop-tool-popover.is-footprint::after {
+    right: 74px;
   }
 
   .desktop-tool-popover > header {
@@ -34525,7 +34533,7 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-voice-waveform i {
     width: 3px;
-    height: calc(5px + var(--voice-level) * 32px);
+    height: calc(4px + var(--voice-level) * 26px);
     flex: 1 1 auto;
     max-width: 5px;
     border-radius: 99px;

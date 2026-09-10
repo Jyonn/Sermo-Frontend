@@ -3211,7 +3211,7 @@ function LiveChatsPage({
     open: false,
     phase: "idle",
     durationSeconds: 0,
-    bars: Array.from({ length: 24 }, () => 0.28),
+    bars: Array.from({ length: 12 }, () => 0.2),
     blob: null,
     mimeType: "",
   });
@@ -3521,7 +3521,7 @@ function LiveChatsPage({
       open: false,
       phase: "idle",
       durationSeconds: 0,
-      bars: Array.from({ length: 24 }, () => 0.28),
+      bars: Array.from({ length: 12 }, () => 0.2),
       blob: null,
       mimeType: "",
     });
@@ -6500,7 +6500,7 @@ function LiveChatsPage({
       open: true,
       phase: "requesting",
       durationSeconds: 0,
-      bars: Array.from({ length: 24 }, () => 0.2),
+      bars: Array.from({ length: 12 }, () => 0.16),
       blob: null,
       mimeType: "",
     });
@@ -6524,12 +6524,14 @@ function LiveChatsPage({
         const updateWaveform = () => {
           if (!analyserRef.current) return;
           analyserRef.current.getByteFrequencyData(data);
-          const bars = Array.from({ length: 24 }, (_, index) => {
-            const bucketSize = Math.max(1, Math.floor(data.length / 24));
+          const halfBars = Array.from({ length: 6 }, (_, index) => {
+            const bucketSize = Math.max(1, Math.floor(data.length / 6));
             const slice = data.slice(index * bucketSize, (index + 1) * bucketSize);
             const average = slice.length ? slice.reduce((sum, value) => sum + value, 0) / slice.length : 0;
-            return Math.max(0.18, average / 255);
+            const sensitiveLevel = Math.pow(Math.min(1, average / 150), 0.62);
+            return Math.min(0.82, Math.max(0.12, sensitiveLevel));
           });
+          const bars = [...halfBars, ...[...halfBars].reverse()];
           setVoiceComposer((current) => (current.open ? { ...current, bars } : current));
           waveformFrameRef.current = requestAnimationFrame(updateWaveform);
         };
@@ -6581,7 +6583,7 @@ function LiveChatsPage({
         open: true,
         phase: "recording",
         durationSeconds: 0,
-        bars: Array.from({ length: 24 }, () => 0.28),
+        bars: Array.from({ length: 12 }, () => 0.2),
         blob: null,
         mimeType: mediaRecorder.mimeType || mimeType || "audio/webm",
       });
