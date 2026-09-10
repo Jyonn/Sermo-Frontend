@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.10.16",
+  "id": "2026.09.10.17",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面表情选择更轻巧",
+      "title": "桌面表情选择更连贯",
       "items": [
-        "阔幅书写台使用统一表情入口，选择面板会在按钮上方轻巧展开"
+        "桌面表情浮层改为清晰的不透明背景，并支持连续选择多个 emoji",
+        "点击浮层外即可收起，探索表情也不再展示上传者横幅"
       ]
     },
     "en": {
-      "title": "A lighter desktop emoji picker",
+      "title": "A smoother desktop emoji picker",
       "items": [
-        "The wide composer now uses one emoji entry and opens a compact picker above it"
+        "The opaque desktop picker now stays open for selecting multiple emoji",
+        "Clicking outside closes it, and Explore stickers no longer show uploader banners"
       ]
     }
   }

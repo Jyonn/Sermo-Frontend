@@ -4817,12 +4817,20 @@ function LiveChatsPage({
   }, [cacheScope, selectedChat?.id]);
 
   const insertEmoji = (emoji: string) => {
-    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
-      mentionEditorRef.current?.insertTextWithoutFocus(emoji);
-      return;
-    }
-    mentionEditorRef.current?.insertText(emoji);
+    mentionEditorRef.current?.insertTextWithoutFocus(emoji);
   };
+
+  useEffect(() => {
+    if (!emojiPickerOpen || mobileComposerLayout) return;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(".desktop-emoji-reveal, .desktop-emoji-trigger")) return;
+      setEmojiPickerOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer, true);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
+  }, [emojiPickerOpen, mobileComposerLayout]);
 
   const suspendMobileComposerInput = () => {
     mentionEditorRef.current?.blur();
@@ -8097,7 +8105,7 @@ function LiveChatsPage({
                       </div>
                     ) : undefined}
                     tools={<>
-                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
+                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       {canSendImage ? <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button> : null}
                       <button disabled={composerBusy} onClick={openFilePicker} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
                       {canSendLocation ? <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button> : null}
