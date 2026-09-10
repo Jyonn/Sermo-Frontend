@@ -2947,8 +2947,8 @@ function LiveChatsPage({
     setNewSubmissionTitleOpen(true);
     newSubmissionDraftIdRef.current = `submission-${crypto.randomUUID()}`.slice(0, 64);
   }, [location.key, newSubmissionRoute]);
-  const listPath = submissionMode && squareIntegrated ? "/app/square?workspace=submissions" : submissionMode ? "/app/submissions" : "/app/chats";
-  const chatPath = (id: number) => submissionMode ? `/app/submissions/${id}` : `/app/chats/${id}`;
+  const listPath = submissionMode && squareIntegrated ? `/app/square?workspace=submissions&view=${submissionView}` : submissionMode ? "/app/submissions" : "/app/chats";
+  const chatPath = (id: number) => submissionMode ? `/app/submissions/${id}?view=${submissionView}` : `/app/chats/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
 
   useEffect(() => {
@@ -5669,7 +5669,7 @@ function LiveChatsPage({
           return next;
         });
         void syncEmojiUsage();
-        navigate(`/app/submissions/${createdChat.id}`, { replace: true, state: null });
+        navigate(`/app/submissions/${createdChat.id}?view=author`, { replace: true, state: null });
         return;
       }
       const created = await api.sendMessage(selectedChat.id, MESSAGE_TYPE_TEXT, message, reply?.message_id, optimisticMessage.clientId, mentionUserIds);

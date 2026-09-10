@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.10",
+  "id": "2026.09.10.11",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "广场导航层级更清晰",
+      "title": "投稿列表体验修复",
       "items": [
-        "当前栏目保留醒目的下划线，广场与投稿入口调整为低调的工作区切换",
-        "未读提示降低视觉强度，更容易辨认当前浏览位置"
+        "投稿列表补充左右留白，浏览层次更加舒适",
+        "修复官方和运营从“我的”无法打开部分投稿的问题"
       ]
     },
     "en": {
-      "title": "Clearer hierarchy in Square navigation",
+      "title": "Submission list fixes",
       "items": [
-        "Active tabs keep the underline while Square and submission links become quieter workspace switches",
-        "Unread indicators are less prominent so the current location stays clear"
+        "Submission lists now have comfortable horizontal spacing",
+        "Fixed an issue that prevented officials and operators from opening some submissions under Mine"
       ]
     }
   }

@@ -33430,7 +33430,11 @@ html[data-theme="dark"] .submission-status-filters {
     padding-right: max(12px, env(safe-area-inset-right));
     padding-left: max(12px, env(safe-area-inset-left));
   }
-  .square-embedded-submission-list .chat-list-screen-body { padding-bottom: 110px; }
+  .square-embedded-submission-list .chat-list-screen-body {
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-bottom: 110px;
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
 }
 
 @media (min-width: 901px) {
@@ -33459,6 +33463,7 @@ html[data-theme="dark"] .submission-status-filters {
   .square-embedded-submission-list .chat-list-screen-body {
     width: min(100%, 820px);
     margin-inline: auto;
+    padding-inline: 18px;
   }
   .square-embedded-submission-list .submission-status-filters {
     padding-inline: max(18px, calc((100% - 820px) / 2));
