@@ -123,7 +123,7 @@ const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclu
     items: [["comic", "menu.themeComic"], ["bauhaus", "menu.themeBauhaus"], ["dragon", "menu.themeDragon"]],
   },
   { label: "menu.collectionMaterial", items: [["zen", "menu.themeZen"], ["mosaic", "menu.themeMosaic"], ["newsprint", "menu.themeNewsprint"]] },
-  { label: "menu.collectionAtmosphere", items: [["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"], ["spaceport", "menu.themeSpaceport"]] },
+  { label: "menu.collectionAtmosphere", items: [["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"], ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"]] },
   { label: "menu.collectionFantasy", items: [["noir-film", "menu.themeNoirFilm"]] },
 ];
 

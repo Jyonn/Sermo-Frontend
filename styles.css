@@ -12858,6 +12858,81 @@ html[data-theme="dark"] .gesture-lock-screen {
   }
 }
 
+/* FRIENDEN illustrated rooms: artwork stays anchored while the atmosphere moves above it. */
+:is(.chat-background-frienden-night, .chat-background-frienden-garden) {
+  --chat-chrome-surface: rgba(250, 246, 232, .8);
+  --chat-chrome-border: rgba(49, 55, 43, .2);
+  --chat-input-surface: rgba(255, 251, 239, .82);
+}
+
+.chat-detail-scene.chat-background-frienden-night::before,
+:is(.chat-background-preview[data-theme="frienden-night"], .chat-background-choice.theme-frienden-night > span, .personalization-background-swatch.theme-frienden-night) {
+  background: #102d63 url("/assets/frienden-wallpapers/night-rooms.webp") center 48% / cover no-repeat;
+  animation: frienden-rooms-breathe 18s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+}
+
+.chat-detail-scene.chat-background-frienden-garden::before,
+:is(.chat-background-preview[data-theme="frienden-garden"], .chat-background-choice.theme-frienden-garden > span, .personalization-background-swatch.theme-frienden-garden) {
+  background: #a9d6a0 url("/assets/frienden-wallpapers/garden-rooms.webp") center 48% / cover no-repeat;
+  animation: frienden-rooms-breathe 21s cubic-bezier(.45, 0, .55, 1) infinite alternate-reverse;
+}
+
+.chat-detail-scene:is(.chat-background-frienden-night, .chat-background-frienden-garden)::after {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.chat-detail-scene.chat-background-frienden-night::after {
+  background:
+    radial-gradient(circle, rgba(255, 230, 138, .92) 0 2px, transparent 2.8px) 8% 12% / 151px 173px,
+    radial-gradient(circle, rgba(194, 233, 203, .74) 0 1.5px, transparent 2.4px) 66% 43% / 197px 211px;
+  filter: drop-shadow(0 0 4px rgba(255, 220, 110, .42));
+  animation: frienden-night-lights 13s ease-in-out infinite alternate;
+}
+
+.chat-detail-scene.chat-background-frienden-garden::after {
+  background:
+    radial-gradient(ellipse at center, rgba(255, 246, 193, .86) 0 3px, transparent 3.8px) 7% 9% / 139px 181px,
+    radial-gradient(ellipse at center, rgba(103, 157, 97, .45) 0 2px, transparent 3px) 72% 36% / 181px 223px;
+  transform: rotate(-7deg);
+  animation: frienden-garden-petals 17s linear infinite;
+}
+
+@keyframes frienden-rooms-breathe {
+  from { background-position: center 46%; filter: saturate(.96) brightness(.98); }
+  to { background-position: center 52%; filter: saturate(1.04) brightness(1.025); }
+}
+
+@keyframes frienden-night-lights {
+  0%, 100% { opacity: .45; transform: translate3d(-8px, 5px, 0) scale(.99); }
+  42% { opacity: .88; }
+  70% { opacity: .6; }
+  100% { transform: translate3d(12px, -9px, 0) scale(1.015); }
+}
+
+@keyframes frienden-garden-petals {
+  from { background-position: 7% 9%, 72% 36%; transform: translate3d(-9px, -18px, 0) rotate(-7deg); }
+  to { background-position: 146px 190px, -109px 259px; transform: translate3d(12px, 18px, 0) rotate(-7deg); }
+}
+
+html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-frienden-garden) {
+  --chat-chrome-surface: rgba(22, 27, 23, .84);
+  --chat-chrome-border: rgba(231, 217, 176, .22);
+  --chat-input-surface: rgba(27, 32, 27, .86);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-detail-scene:is(.chat-background-frienden-night, .chat-background-frienden-garden)::before,
+  .chat-detail-scene:is(.chat-background-frienden-night, .chat-background-frienden-garden)::after,
+  :is(.chat-background-preview[data-theme="frienden-night"], .chat-background-choice.theme-frienden-night > span, .personalization-background-swatch.theme-frienden-night,
+    .chat-background-preview[data-theme="frienden-garden"], .chat-background-choice.theme-frienden-garden > span, .personalization-background-swatch.theme-frienden-garden) {
+    animation: none;
+  }
+}
+
 .square-character.is-max-level .square-character-name {
   color: #8c3d4b;
   border-color: rgba(184, 64, 85, 0.18);

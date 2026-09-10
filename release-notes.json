@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.23",
+  "id": "2026.09.10.24",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "FRIENDEN 友间，全新品牌启程",
+      "title": "两间会动的手绘小屋",
       "items": [
-        "产品品牌正式升级为 FRIENDEN 友间，并启用全新品牌标志",
-        "全新品牌口号：朋友之间，自有一间。"
+        "LV17 新增夜航友间与午后花房两款动态聊天背景",
+        "星光、窗灯与花叶会轻轻流动，也会尊重系统的减少动态效果设置"
       ]
     },
     "en": {
-      "title": "Introducing FRIENDEN",
+      "title": "Two illustrated rooms in motion",
       "items": [
-        "The product is now FRIENDEN, with a new identity and app icon",
-        "Our new promise: A space of our own, between friends."
+        "Level 17 now unlocks Rooms at Night and Afternoon Conservatory chat backgrounds",
+        "Stars, window lights, and petals move gently while respecting reduced-motion preferences"
       ]
     }
   }
