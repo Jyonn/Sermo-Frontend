@@ -2431,6 +2431,7 @@
   ,"composer.preciseLocation": "精确位置"
   ,"composer.preciseLocationHint": "发送当前准确坐标"
   ,"composer.approximateLocation": "模糊位置"
+  ,"composer.sendApproximateLocation": "发送模糊位置"
   ,"composer.approximateLocationHint": "随机偏移以保护隐私"
   ,"composer.openFootprintHint": "查看会话共享的足迹"
   ,"composer.shareFootprint": "共享足迹"

@@ -6087,13 +6087,13 @@ function LiveChatsPage({
     );
   };
 
-  const sendLocationMessage = async () => {
+  const sendLocationMessage = async (obscureOverride?: boolean) => {
     if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
     if (!await moveToLatestMessageWindow()) return;
     const latitude = locationDraft.latitude;
     const longitude = locationDraft.longitude;
     const accuracy = locationDraft.accuracy ?? 100;
-    const obscure = Boolean(locationDraft.obscure);
+    const obscure = obscureOverride ?? Boolean(locationDraft.obscure);
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -8124,7 +8124,6 @@ function LiveChatsPage({
                       <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "file"} className={`desktop-tool-trigger${desktopComposerTool === "file" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
                         {desktopComposerTool === "file" ? <div className="desktop-tool-popover is-file">
-                          <header><strong>{t("cloudResources.fileSourceTitle")}</strong></header>
                           <div className="desktop-tool-choice-grid">
                             <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong></button>
                             <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong></button>
@@ -8132,17 +8131,13 @@ function LiveChatsPage({
                         </div> : null}
                       </span>
                       {canSendLocation ? <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "location"} className={`desktop-tool-trigger${desktopComposerTool === "location" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("location")} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
+                        <button aria-expanded={desktopComposerTool === "location"} className={`desktop-tool-trigger${desktopComposerTool === "location" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { const opening = desktopComposerTool !== "location"; toggleDesktopComposerTool("location"); if (opening && locationDraft?.phase !== "ready" && locationDraft?.phase !== "locating") startLocationDraft(false, false); }} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
                         {desktopComposerTool === "location" ? <div className="desktop-tool-popover is-location">
-                          <header><strong>{t("media.location")}</strong></header>
-                          {!locationDraft ? <div className="desktop-tool-choice-grid">
-                            <button onClick={() => startLocationDraft(false, false)} type="button"><span className="material-symbols-outlined">my_location</span><strong>{t("composer.preciseLocation")}</strong></button>
-                            <button onClick={() => startLocationDraft(true, false)} type="button"><span className="material-symbols-outlined">location_searching</span><strong>{t("composer.approximateLocation")}</strong></button>
-                          </div> : <div className={`desktop-tool-status is-${locationDraft.phase}`}>
-                            <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : locationDraft.obscure ? "location_searching" : "my_location"}</span>
-                            <div><strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : locationDraft.obscure ? t("composer.approximateLocation") : t("composer.preciseLocation")}</strong><small>{locationDraft.phase === "ready" ? (locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`) : locationDraft.error || t("common.pleaseWait")}</small></div>
-                            <div className="desktop-tool-status-actions"><button disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button>{locationDraft.phase === "ready" ? <button className="is-primary" onClick={() => void sendLocationMessage()} type="button">{t("common.send")}</button> : locationDraft.phase === "error" ? <button className="is-primary" onClick={() => startLocationDraft(Boolean(locationDraft.obscure), false)} type="button">{t("common.retry")}</button> : locationDraft.phase === "sending" ? <span className="desktop-tool-inline-progress"><span className="composer-recording-spinner" />{t("common.sendingPlain")}</span> : null}</div>
-                          </div>}
+                          {locationDraft ? <div className={`desktop-tool-status is-${locationDraft.phase}`}>
+                            <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : "my_location"}</span>
+                            <div><strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : t("composer.preciseLocation")}</strong><small>{locationDraft.phase === "ready" ? `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}` : locationDraft.error || t("common.pleaseWait")}</small></div>
+                            <div className="desktop-tool-status-actions">{locationDraft.phase === "ready" ? <><button onClick={() => void sendLocationMessage(true)} type="button">{t("composer.sendApproximateLocation")}</button><button className="is-primary" onClick={() => void sendLocationMessage(false)} type="button">{t("common.send")}</button></> : locationDraft.phase === "error" ? <button className="is-primary" onClick={() => startLocationDraft(false, false)} type="button">{t("common.retry")}</button> : locationDraft.phase === "sending" ? <span className="desktop-tool-inline-progress"><span className="composer-recording-spinner" />{t("common.sendingPlain")}</span> : null}</div>
+                          </div> : <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("location.locating")}</div>}
                         </div> : null}
                       </span> : null}
                       {selectedChat ? <span className="desktop-tool-anchor">

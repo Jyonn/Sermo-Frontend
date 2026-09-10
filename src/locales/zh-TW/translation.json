@@ -2415,6 +2415,7 @@
   "composer.preciseLocation": "精確位置",
   "composer.preciseLocationHint": "傳送目前準確座標",
   "composer.approximateLocation": "模糊位置",
+  "composer.sendApproximateLocation": "傳送模糊位置",
   "composer.approximateLocationHint": "隨機偏移以保護隱私",
   "composer.openFootprintHint": "查看對話共享的足跡",
   "composer.shareFootprint": "共享足跡",

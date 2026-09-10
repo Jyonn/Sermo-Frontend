@@ -2415,6 +2415,7 @@
   "composer.preciseLocation": "Ubicación precisa",
   "composer.preciseLocationHint": "Envía tus coordenadas actuales",
   "composer.approximateLocation": "Ubicación aproximada",
+  "composer.sendApproximateLocation": "Enviar aproximada",
   "composer.approximateLocationHint": "Añade un desplazamiento para protegerte",
   "composer.openFootprintHint": "Ver huellas compartidas en este chat",
   "composer.shareFootprint": "Compartir huellas",

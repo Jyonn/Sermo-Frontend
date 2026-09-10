@@ -2431,6 +2431,7 @@
   ,"composer.preciseLocation": "Precise location"
   ,"composer.preciseLocationHint": "Send your current coordinates"
   ,"composer.approximateLocation": "Approximate location"
+  ,"composer.sendApproximateLocation": "Send approximate"
   ,"composer.approximateLocationHint": "Add a random offset for privacy"
   ,"composer.openFootprintHint": "View footprints shared in this chat"
   ,"composer.shareFootprint": "Share footprints"

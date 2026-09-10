@@ -2900,6 +2900,10 @@ html[data-theme="dark"] body .growth-level-detail {
 .square-desktop-detail-pane { display: none; }
 
 @media (min-width: 901px) {
+  .chat-detail-scene {
+    overflow-x: visible;
+  }
+
   .desktop-tab-shell > .square-desktop-workspace {
     display: grid;
     grid-template-columns: minmax(240px, .9fr) minmax(280px, 1.1fr);
@@ -34246,6 +34250,10 @@ html[data-theme="dark"] .verification-banner-action {
     left: auto;
     width: min(286px, calc(100vw - 48px));
     transform: none;
+  }
+
+  .desktop-tool-popover.is-file {
+    padding: 9px;
   }
 
   .desktop-tool-popover.is-footprint::after,

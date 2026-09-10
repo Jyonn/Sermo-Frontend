@@ -2415,6 +2415,7 @@
   "composer.preciseLocation": "정확한 위치",
   "composer.preciseLocationHint": "현재 정확한 좌표 전송",
   "composer.approximateLocation": "대략적인 위치",
+  "composer.sendApproximateLocation": "대략적 위치 보내기",
   "composer.approximateLocationHint": "임의 오프셋으로 개인정보 보호",
   "composer.openFootprintHint": "이 채팅에서 공유된 발자국 보기",
   "composer.shareFootprint": "발자국 공유",

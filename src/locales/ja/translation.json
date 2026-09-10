@@ -2415,6 +2415,7 @@
   "composer.preciseLocation": "正確な位置",
   "composer.preciseLocationHint": "現在の座標を送信",
   "composer.approximateLocation": "おおよその位置",
+  "composer.sendApproximateLocation": "曖昧な位置を送信",
   "composer.approximateLocationHint": "位置をずらしてプライバシーを保護",
   "composer.openFootprintHint": "このチャットで共有された足跡を表示",
   "composer.shareFootprint": "足跡を共有",
