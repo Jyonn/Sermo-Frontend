@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.10.13",
+  "id": "2026.09.10.14",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "表情管理更彻底",
+      "title": "表情清理更可靠",
       "items": [
-        "移除表情时，仅被已删除消息引用的无主素材会同步清理"
+        "修复部分已上传表情无法完成存储清理的问题"
       ]
     },
     "en": {
-      "title": "Cleaner sticker management",
+      "title": "More reliable sticker cleanup",
       "items": [
-        "Removing a sticker now cleans up unowned assets referenced only by deleted messages"
+        "Fixed storage cleanup failures affecting some uploaded stickers"
       ]
     }
   }
