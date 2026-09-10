@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.7",
+  "id": "2026.09.10.8",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "发言选择更顺手",
+      "title": "广场与投稿无缝切换",
       "items": [
-        "发言选择框现在紧贴入口展示",
-        "点击选择框外的区域即可自然收起"
+        "投稿现在直接在广场内展开，标题、操作与栏目会连贯切换",
+        "广场和投稿列表共享同一页面，往返浏览更加顺滑"
       ]
     },
     "en": {
-      "title": "A smoother post picker",
+      "title": "Seamless Square and submission switching",
       "items": [
-        "The post picker now opens directly beside its trigger",
-        "Clicking anywhere outside the picker closes it naturally"
+        "Submissions now unfold inside Square with coordinated title, action, and tab transitions",
+        "Square and submission lists share one page for smoother navigation"
       ]
     }
   }

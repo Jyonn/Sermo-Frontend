@@ -33214,9 +33214,42 @@ html[data-theme="dark"] .submission-status-filters {
 .mobile-chat-list-screen.is-square-integrated.is-active {
   animation: square-submission-workspace-enter 360ms cubic-bezier(.16, 1, .3, 1) both;
 }
+.square-workspace-surface,
+.square-embedded-submission-list { min-width: 0; }
+.square-workspace-surface.is-submission {
+  animation: square-submission-workspace-enter 360ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.square-workspace-surface.is-square {
+  animation: square-workspace-square-enter 320ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.square-desktop-workspace.is-workspace-transitioning .square-workspace-surface.is-submission {
+  animation: square-workspace-submission-exit 180ms ease-in both;
+}
+.square-workspace-surface.is-submission .tab-sticky-header .page-title,
+.square-workspace-surface.is-submission .tab-sticky-header .page-toolbar-actions {
+  animation: square-workspace-header-swap 300ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.square-workspace-surface.is-submission .square-submission-workspace-tabs {
+  animation: square-workspace-tabs-expand 340ms 35ms cubic-bezier(.16, 1, .3, 1) both;
+}
 @keyframes square-submission-workspace-enter {
   from { opacity: 0; transform: translateX(18px); }
   to { opacity: 1; transform: translateX(0); }
+}
+@keyframes square-workspace-header-swap {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes square-workspace-tabs-expand {
+  from { opacity: 0; clip-path: inset(0 44% 0 44% round 999px); }
+  to { opacity: 1; clip-path: inset(0 0 0 0 round 0); }
+}
+@keyframes square-workspace-square-enter {
+  from { opacity: 0; transform: translateX(-14px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes square-workspace-submission-exit {
+  to { opacity: 0; transform: translateX(14px); }
 }
 @media (max-width: 520px) {
   .square-feed-filter { gap: 13px; }
@@ -33224,8 +33257,55 @@ html[data-theme="dark"] .submission-status-filters {
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-chat-list-screen.is-square-integrated.is-active,
+  .square-workspace-surface.is-submission,
+  .square-workspace-surface.is-square,
+  .square-desktop-workspace.is-workspace-transitioning .square-workspace-surface.is-submission,
+  .square-workspace-surface.is-submission .tab-sticky-header .page-title,
+  .square-workspace-surface.is-submission .tab-sticky-header .page-toolbar-actions,
+  .square-workspace-surface.is-submission .square-submission-workspace-tabs,
   .square-feed-filter.is-submission-transitioning > :not(.square-submission-switch),
   .square-feed-filter.is-submission-transitioning .square-submission-switch { animation: none; }
+}
+
+@media (max-width: 900px) {
+  .square-feed-screen > .square-workspace-surface > .tab-sticky-header,
+  .square-feed-screen > .square-workspace-surface > .square-embedded-submission-list > .tab-sticky-header {
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+  .square-embedded-submission-list .chat-list-screen-body { padding-bottom: 110px; }
+}
+
+@media (min-width: 901px) {
+  .desktop-tab-shell > .square-desktop-workspace.is-submission {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .square-workspace-surface > .tab-sticky-header,
+  .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .square-workspace-surface > .square-embedded-submission-list > .tab-sticky-header {
+    display: grid;
+    grid-template-rows: 65px 44px;
+    box-sizing: border-box;
+    height: 110px;
+    min-height: 110px;
+    align-content: start;
+    margin: 0;
+    padding: 0 20px;
+    border-radius: 20px 20px 0 0;
+    background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.3);
+    backdrop-filter: blur(22px) saturate(1.3);
+    box-shadow: 0 9px 24px rgba(17, 29, 24, .055);
+  }
+  .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .square-workspace-surface .tab-sticky-header .page-toolbar {
+    height: 65px;
+  }
+  .square-embedded-submission-list .chat-list-screen-body {
+    width: min(100%, 820px);
+    margin-inline: auto;
+  }
+  .square-embedded-submission-list .submission-status-filters {
+    padding-inline: max(18px, calc((100% - 820px) / 2));
+  }
 }
 .submission-recipient-dropdown {
   position: absolute;

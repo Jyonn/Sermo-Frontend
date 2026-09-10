@@ -524,6 +524,7 @@ export default function SquarePage() {
   const selectedFeedDate = normalizeFeedDate(searchParams.get("date"));
   const selectedFeedKeyword = (searchParams.get("keyword") || "").trim().slice(0, 100);
   const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedKeyword);
+  const squareWorkspace = features.submissionEnabled && searchParams.get("workspace") === "submissions" ? "submission" : "square";
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(profileFeedUserId ? "user" : "all");
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? features.squareExploreEnabled ? "all" : "friends"
@@ -1927,7 +1928,29 @@ export default function SquarePage() {
   const openSubmissionWorkspace = () => {
     if (submissionTransitioning) return;
     setSubmissionTransitioning(true);
-    window.setTimeout(() => navigate("/app/submissions"), 180);
+    setPublishRouteOpen(false);
+    feedScrollPositionsRef.current.set(activeFeedCacheKey, squareFeedScrollRef.current?.scrollTop ?? 0);
+    window.setTimeout(() => {
+      const next = new URLSearchParams(searchParams);
+      next.set("workspace", "submissions");
+      setSearchParams(next);
+      squareFeedScrollRef.current?.scrollTo({ top: 0 });
+      setSubmissionTransitioning(false);
+    }, 180);
+  };
+
+  const closeSubmissionWorkspace = () => {
+    if (submissionTransitioning) return;
+    setSubmissionTransitioning(true);
+    window.setTimeout(() => {
+      const next = new URLSearchParams(searchParams);
+      next.delete("workspace");
+      setSearchParams(next);
+      setSubmissionTransitioning(false);
+      window.requestAnimationFrame(() => squareFeedScrollRef.current?.scrollTo({
+        top: feedScrollPositionsRef.current.get(activeFeedCacheKey) ?? 0,
+      }));
+    }, 180);
   };
 
   const continueToVerification = () => {
@@ -2157,10 +2180,11 @@ export default function SquarePage() {
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
-      <div className={`square-desktop-workspace${inlineRouteActive ? " has-selection" : ""}`}>
+      <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive ? " has-selection" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
       <main
-        className="list-screen square-feed-screen"
+        className={`list-screen square-feed-screen is-${squareWorkspace}-workspace`}
         onScroll={(event) => {
+          if (squareWorkspace !== "square") return;
           const top = event.currentTarget.scrollTop;
           setFeedScrollTopVisible(top > 320);
           if (pendingFeedScrollRestoreRef.current?.key === activeFeedCacheKey) return;
@@ -2168,6 +2192,7 @@ export default function SquarePage() {
         }}
         ref={squareFeedScrollRef}
       >
+        {squareWorkspace === "square" ? <div className="square-workspace-surface is-square">
         <TabPageHeader
           syncing={syncing}
           title={t("square.title")}
@@ -2352,8 +2377,11 @@ export default function SquarePage() {
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11 12 4l7 7M12 4v16" /></svg>
           </button>
         ) : null}
+        </div> : <div className="square-workspace-surface is-submission">
+          <ChatsPage embeddedListOnly onReturnToSquare={closeSubmissionWorkspace} purpose="submission" squareIntegrated />
+        </div>}
       </main>
-      <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
+      {squareWorkspace === "square" ? <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <div className="square-desktop-detail-scroll">
             <div className="square-statement-detail-stage">
@@ -2367,7 +2395,7 @@ export default function SquarePage() {
           <strong>{t("square.desktopSelectStatement")}</strong>
           <p>{t("square.desktopSelectStatementHint")}</p>
         </section>}
-      </aside>
+      </aside> : null}
       </div>
       {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<>
         <button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />

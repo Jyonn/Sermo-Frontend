@@ -120,7 +120,7 @@ export default function App() {
         />
         <Route
           path="/app/submissions"
-          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" squareIntegrated /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><Navigate replace to="/app/square?workspace=submissions" /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions/new"

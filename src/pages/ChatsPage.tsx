@@ -2894,7 +2894,17 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
   }
 }
 
-function LiveChatsPage({ purpose = "normal", squareIntegrated = false }: { purpose?: "normal" | "submission"; squareIntegrated?: boolean }) {
+function LiveChatsPage({
+  purpose = "normal",
+  squareIntegrated = false,
+  embeddedListOnly = false,
+  onReturnToSquare,
+}: {
+  purpose?: "normal" | "submission";
+  squareIntegrated?: boolean;
+  embeddedListOnly?: boolean;
+  onReturnToSquare?: () => void;
+}) {
   const { t } = useI18n();
   const pageActive = usePageActive();
   const { discover: discoverFeature } = useFeatureDiscovery();
@@ -2937,8 +2947,8 @@ function LiveChatsPage({ purpose = "normal", squareIntegrated = false }: { purpo
     setNewSubmissionTitleOpen(true);
     newSubmissionDraftIdRef.current = `submission-${crypto.randomUUID()}`.slice(0, 64);
   }, [location.key, newSubmissionRoute]);
-  const listPath = submissionMode ? "/app/submissions" : "/app/chats";
-  const chatPath = (id: number) => `${listPath}/${id}`;
+  const listPath = submissionMode && squareIntegrated ? "/app/square?workspace=submissions" : submissionMode ? "/app/submissions" : "/app/chats";
+  const chatPath = (id: number) => submissionMode ? `/app/submissions/${id}` : `/app/chats/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
 
   useEffect(() => {
@@ -7523,12 +7533,12 @@ function LiveChatsPage({ purpose = "normal", squareIntegrated = false }: { purpo
         title={submissionMode ? <span className="submission-header-title"><span>{t("submission.title")}</span>{!squareIntegrated && canReviewSubmissionInvites ? <button aria-label={t("submission.switchView")} className="submission-view-switch" onClick={() => chooseSubmissionView(submissionView === "author" ? "reviewer" : "author")} type="button"><svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><path d="M6.5 7.5h11m0 0-3-3m3 3-3 3M17.5 16.5h-11m0 0 3 3m-3-3 3-3" /></svg><span>{submissionView === "author" ? t("submission.viewMine") : t("submission.viewReview")}</span></button> : null}</span> : t("chat.title")}
         syncing={viewState === "loading"}
         secondary={submissionMode && squareIntegrated ? <nav className="square-submission-workspace-tabs">
-          <button className="square-submission-return" onClick={() => navigate("/app/square")} type="button"><span className="material-symbols-outlined">arrow_back</span><span>{t("square.title")}</span></button>
+          <button className="square-submission-return" onClick={() => onReturnToSquare ? onReturnToSquare() : navigate("/app/square")} type="button"><span className="material-symbols-outlined">explore</span><span>{t("square.title")}</span></button>
           <span className="square-submission-workspace-spacer" />
           <button aria-selected={submissionView === "author"} className={submissionView === "author" ? "is-active" : ""} onClick={() => chooseSubmissionView("author")} type="button"><span>{t("submission.viewMine")}</span>{submissionViewActionCounts.author ? <i>{submissionViewActionCounts.author > 99 ? "99+" : submissionViewActionCounts.author}</i> : null}</button>
           {canReviewSubmissionInvites ? <button aria-selected={submissionView === "reviewer"} className={submissionView === "reviewer" ? "is-active" : ""} onClick={() => chooseSubmissionView("reviewer")} type="button"><span>{t("submission.viewReview")}</span>{submissionViewActionCounts.reviewer ? <i>{submissionViewActionCounts.reviewer > 99 ? "99+" : submissionViewActionCounts.reviewer}</i> : null}</button> : null}
         </nav> : undefined}
-        actions={submissionMode && submissionView === "author" ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
+        actions={submissionMode && (squareIntegrated || submissionView === "author") ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
           <button aria-expanded={submissionCreateMenuOpen} aria-label={t("submission.new")} className="square-header-publish submission-header-create" onClick={() => void toggleSubmissionCreateMenu()} type="button"><span className="material-symbols-outlined">edit_square</span><span>{t("submission.new")}</span></button>
           {submissionCreateMenuOpen ? <div className="submission-recipient-dropdown">
             {submissionRecipientsLoading ? <div className="submission-recipient-dropdown-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => void beginSubmissionWith(recipient)} type="button"><UserAvatar className="mini-avatar" frame={recipient.user.avatar_frame_style} name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
@@ -7597,6 +7607,15 @@ function LiveChatsPage({ purpose = "normal", squareIntegrated = false }: { purpo
         chat.id === displayedChat.id || chat.unreadBadgeMuted ? total : total + Math.max(0, chat.unread)
       ), 0)
     : 0;
+
+  if (embeddedListOnly && !displayedChat) {
+    return (
+      <section className="square-embedded-submission-list">
+        {renderChatList()}
+        <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
+      </section>
+    );
+  }
 
   return (
     <AppChrome
@@ -10437,7 +10456,7 @@ export function ChatPreview({
   );
 }
 
-export default function ChatsPage({ preview, purpose, squareIntegrated }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; squareIntegrated?: boolean }) {
+export default function ChatsPage({ preview, purpose, squareIntegrated, embeddedListOnly, onReturnToSquare }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; squareIntegrated?: boolean; embeddedListOnly?: boolean; onReturnToSquare?: () => void }) {
   if (preview) return <PreviewChatConversation config={preview} />;
-  return <LiveChatsPage purpose={purpose} squareIntegrated={squareIntegrated} />;
+  return <LiveChatsPage embeddedListOnly={embeddedListOnly} onReturnToSquare={onReturnToSquare} purpose={purpose} squareIntegrated={squareIntegrated} />;
 }
