@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.10.12",
+  "id": "2026.09.10.13",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "常用表情更懂你",
+      "title": "表情管理更彻底",
       "items": [
-        "常用 emoji 扩展至八个，手机端首行展示更完整",
-        "探索表情会根据近期使用习惯个性化首行内容"
+        "移除表情时，仅被已删除消息引用的无主素材会同步清理"
       ]
     },
     "en": {
-      "title": "Frequently used reactions get personal",
+      "title": "Cleaner sticker management",
       "items": [
-        "The frequent emoji row now includes eight choices and fills one mobile row",
-        "Explore stickers now personalize the first row using recent usage"
+        "Removing a sticker now cleans up unowned assets referenced only by deleted messages"
       ]
     }
   }
