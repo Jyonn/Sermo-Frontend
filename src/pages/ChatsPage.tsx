@@ -23,7 +23,7 @@ import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
-import { ChatComposerTextRow } from "../components/ChatComposerTextRow";
+import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -7969,11 +7969,11 @@ function LiveChatsPage({
               ) : (
               <form
                 ref={composerRef}
-                className={`composer ${!mobileComposerLayout && voiceComposer.open ? "is-recording-mode" : ""}${mobileComposerLayout ? " is-mobile-quiet" : ""}`}
+                className={`composer ${!mobileComposerLayout && voiceComposer.open ? "is-recording-mode" : ""}${mobileComposerLayout ? " is-mobile-quiet" : ""}${!mobileComposerLayout && !voiceComposer.open ? " is-desktop-writing-desk" : ""}`}
                 onSubmit={submit}
                 style={{ "--mention-selection-accent": mentionSelectionAccent(pendingMessageAppearance.chatBubbleStyle) } as CSSProperties}
               >
-                {replyingTo && !voiceComposer.open ? (
+                {mobileComposerLayout && replyingTo && !voiceComposer.open ? (
                   <div className="composer-reply-preview">
                     <div>
                       <strong>{t("message.replyTo", { name: replyingTo.user.name })}</strong>
@@ -8080,22 +8080,31 @@ function LiveChatsPage({
                     </div>
                   </div>
                 ) : !voiceComposer.open ? (
-                  <ChatComposerTextRow
-                    leadingAction={canSendAudio ? (
-                        <FeatureDiscoveryTarget
-                          rewardId="capability.audio"
-                          guide={{
-                            title: t("featureDiscovery.audio.title"),
-                            description: t("featureDiscovery.audio.description"),
-                            actionLabel: t("featureDiscovery.audio.action"),
-                            onAction: () => startVoiceRecording(),
-                          }}
-                        >
-                          <button aria-label={t("audio.record")} className="composer-action-button" disabled={composerBusy} onClick={() => void startVoiceRecording()} title={t("audio.record")} type="button">
-                            <ComposerSvgIcon className="composer-inline-svg" kind="mic" />
-                          </button>
-                        </FeatureDiscoveryTarget>
-                    ) : null}
+                  <DesktopChatComposerDesk
+                    characterCount={draft.length}
+                    sendDisabled={composerBusy || !draft.trim()}
+                    sendLabel={t("common.send")}
+                    shortcutLabel={t("composer.desktopShortcut")}
+                    reply={replyingTo ? (
+                      <div className="composer-reply-preview">
+                        <div>
+                          <strong>{t("message.replyTo", { name: replyingTo.user.name })}</strong>
+                          <span>{replyingTo.content}</span>
+                        </div>
+                        <button aria-label={t("message.cancelReply")} onClick={() => setReplyTarget(null)} type="button">
+                          <span className="material-symbols-outlined">close</span>
+                        </button>
+                      </div>
+                    ) : undefined}
+                    tools={<>
+                      <button aria-pressed={emojiPickerOpen && emojiPage >= 0} className={emojiPickerOpen && emojiPage >= 0 ? "is-active" : ""} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPage(0); setEmojiPickerOpen((current) => !current || emojiPage < 0); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
+                      <button aria-pressed={emojiPickerOpen && emojiPage === STICKER_MY_PAGE} className={emojiPickerOpen && emojiPage === STICKER_MY_PAGE ? "is-active" : ""} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPage(STICKER_MY_PAGE); setEmojiPickerOpen((current) => !(current && emojiPage === STICKER_MY_PAGE)); }} title={t("sticker.mine")} type="button"><span className="material-symbols-outlined">photo_library</span></button>
+                      {canSendImage ? <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button> : null}
+                      <button disabled={composerBusy} onClick={openFilePicker} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
+                      {canSendLocation ? <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button> : null}
+                      {selectedChat ? <button disabled={composerBusy || travelMapSaving} onClick={() => void openChatTravelMap()} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button> : null}
+                      {canSendAudio ? <button disabled={composerBusy} onClick={() => void startVoiceRecording()} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button> : null}
+                    </>}
                     input={<>
                       <MentionComposerInput
                         ref={mentionEditorRef}
@@ -8125,39 +8134,6 @@ function LiveChatsPage({
                         </div>
                       ) : null}
                     </>}
-                    inputAccessory={
-                      <button
-                        aria-expanded={emojiPickerOpen}
-                        aria-label={emojiPickerOpen ? t("emoji.keyboard") : t("emoji.choose")}
-                        className={`composer-emoji-button ${emojiPickerOpen ? "is-open" : ""}`}
-                        disabled={composerBusy}
-                        onClick={() => {
-                          setComposerMoreOpen(false);
-                          if (emojiPickerOpen) {
-                            setEmojiPickerOpen(false);
-                            window.requestAnimationFrame(() => mentionEditorRef.current?.focus());
-                          } else {
-                            setEmojiPickerOpen(true);
-                          }
-                        }}
-                        type="button"
-                      >
-                        <ComposerSvgIcon className="composer-inline-svg" kind={emojiPickerOpen ? "keyboard" : "emoji"} />
-                      </button>
-                    }
-                    trailingAction={<button
-                      aria-expanded={composerMoreOpen}
-                      aria-label={composerMoreOpen ? t("common.collapseMore") : t("common.expandMore")}
-                      className={`composer-plus ${composerMoreOpen ? "is-open" : ""}`}
-                      disabled={composerBusy}
-                      onClick={() => {
-                        setEmojiPickerOpen(false);
-                        setComposerMoreOpen((current) => !current);
-                      }}
-                      type="button"
-                    >
-                      <span className="material-symbols-outlined">add</span>
-                    </button>}
                   />
                 ) : <ChatVoiceComposerRow
                   audioRef={voicePreviewAudioRef}

@@ -2420,6 +2420,7 @@
   ,"composer.moveHereToCancel": "移到这里取消"
   ,"composer.recording": "正在录音"
   ,"composer.releaseToCancel": "松开取消"
+  ,"composer.desktopShortcut": "Enter 发送 · Shift + Enter 换行"
   ,"composer.cloudFileHint": "从空间云端资源选择"
   ,"composer.localFileHint": "从本机文件中选择"
   ,"composer.preciseLocation": "精确位置"

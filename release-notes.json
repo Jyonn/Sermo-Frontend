@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.10.14",
+  "id": "2026.09.10.15",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "表情清理更可靠",
+      "title": "桌面聊天迎来阔幅书写台",
       "items": [
-        "修复部分已上传表情无法完成存储清理的问题"
+        "桌面聊天输入区升级为分层书写台，工具、正文与发送操作更加清晰",
+        "表情、附件、位置、足迹、语音、回复和成员提及均可从新书写台直接使用"
       ]
     },
     "en": {
-      "title": "More reliable sticker cleanup",
+      "title": "A wide writing desk for desktop chat",
       "items": [
-        "Fixed storage cleanup failures affecting some uploaded stickers"
+        "Desktop chat now separates tools, writing, and sending into a spacious composer",
+        "Emoji, attachments, location, footprints, voice, replies, and mentions remain directly available"
       ]
     }
   }

@@ -2420,6 +2420,7 @@
   ,"composer.moveHereToCancel": "Move here to cancel"
   ,"composer.recording": "Recording"
   ,"composer.releaseToCancel": "Release to cancel"
+  ,"composer.desktopShortcut": "Enter to send · Shift + Enter for a new line"
   ,"composer.cloudFileHint": "Choose from space cloud resources"
   ,"composer.localFileHint": "Choose a file from this device"
   ,"composer.preciseLocation": "Precise location"

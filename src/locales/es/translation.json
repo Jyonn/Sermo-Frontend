@@ -2404,6 +2404,7 @@
   "composer.moveHereToCancel": "Mueve aquí para cancelar",
   "composer.recording": "Grabando",
   "composer.releaseToCancel": "Suelta para cancelar",
+  "composer.desktopShortcut": "Enter para enviar · Shift + Enter para una línea nueva",
   "composer.cloudFileHint": "Elige entre los recursos de la nube",
   "composer.localFileHint": "Elige un archivo de este dispositivo",
   "composer.preciseLocation": "Ubicación precisa",

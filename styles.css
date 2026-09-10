@@ -34131,6 +34131,210 @@ html[data-theme="dark"] .verification-banner-action {
   display: contents;
 }
 
+/* Desktop wide writing desk: tools, writing canvas, and send action use separate visual planes. */
+@media (min-width: 901px) {
+  .chat-detail-active .composer.is-desktop-writing-desk {
+    min-height: 220px;
+    padding: 0 20px 10px;
+    background: color-mix(in srgb, var(--chat-chrome-surface, var(--bg-panel)) 96%, transparent);
+  }
+
+  .desktop-writing-desk {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 51px minmax(128px, 1fr) 30px;
+    min-width: 0;
+    min-height: 209px;
+    column-gap: 14px;
+  }
+
+  .desktop-writing-desk-toolbar {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    border-bottom: 1px solid var(--chat-chrome-border, var(--line-soft));
+  }
+
+  .desktop-writing-desk-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .desktop-writing-desk-tools button {
+    position: relative;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 11px;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+  }
+
+  .desktop-writing-desk-tools button:hover,
+  .desktop-writing-desk-tools button.is-active {
+    color: var(--accent-ink, #087454);
+    background: color-mix(in srgb, var(--brand-primary) 12%, var(--chat-input-surface, var(--bg-soft)));
+  }
+
+  .desktop-writing-desk-tools button:active {
+    transform: translateY(1px);
+  }
+
+  .desktop-writing-desk-tools button:disabled {
+    cursor: not-allowed;
+    opacity: .42;
+  }
+
+  .desktop-writing-desk-tools svg,
+  .desktop-writing-desk-tools .material-symbols-outlined {
+    width: 21px;
+    height: 21px;
+    font-size: 21px;
+  }
+
+  .desktop-writing-desk-shortcut {
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .015em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .desktop-writing-desk-context {
+    position: absolute;
+    z-index: 2;
+    top: 59px;
+    left: 0;
+    width: min(360px, 56%);
+  }
+
+  .desktop-writing-desk-context .composer-reply-preview {
+    min-height: 42px;
+    margin: 0;
+    padding: 6px 8px 6px 11px;
+    border: 0;
+    border-left: 3px solid var(--brand-primary);
+    border-radius: 4px 10px 10px 4px;
+    background: color-mix(in srgb, var(--brand-primary) 8%, var(--chat-input-surface, var(--bg-soft)));
+  }
+
+  .desktop-writing-desk-input {
+    position: relative;
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+    padding: 16px 4px 4px;
+  }
+
+  .desktop-writing-desk.has-reply .desktop-writing-desk-input {
+    padding-top: 62px;
+  }
+
+  .desktop-writing-desk-input .composer-rich-input {
+    width: 100%;
+    height: 100%;
+    min-height: 74px;
+    max-height: 150px;
+    padding: 0;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: .94rem;
+    line-height: 1.65;
+    caret-color: var(--brand-primary);
+  }
+
+  .desktop-writing-desk-input .composer-mention-picker {
+    right: 0;
+    bottom: calc(100% + 8px);
+    left: 0;
+  }
+
+  .desktop-writing-desk-send {
+    display: flex;
+    grid-column: 2;
+    grid-row: 2;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-bottom: 5px;
+  }
+
+  .desktop-writing-desk-send-button {
+    display: inline-flex;
+    min-width: 94px;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 15px;
+    border: 0;
+    border-radius: 13px;
+    color: #073326;
+    background: var(--brand-primary);
+    box-shadow: 0 9px 20px color-mix(in srgb, var(--brand-primary) 22%, transparent);
+    font-size: .78rem;
+    font-weight: 820;
+    cursor: pointer;
+    transition: transform 180ms cubic-bezier(.16, 1, .3, 1), box-shadow 180ms ease, opacity 180ms ease;
+  }
+
+  .desktop-writing-desk-send-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--brand-primary) 29%, transparent);
+  }
+
+  .desktop-writing-desk-send-button:disabled {
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: .42;
+  }
+
+  .desktop-writing-desk-send-button .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  .desktop-writing-desk-footer {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-muted);
+    font-size: .67rem;
+  }
+
+  .desktop-writing-desk-footer strong {
+    color: var(--text-secondary);
+    font-weight: 760;
+  }
+
+  .composer.is-desktop-writing-desk > .composer-actions-reveal {
+    display: none;
+  }
+
+  .composer.is-desktop-writing-desk > .desktop-emoji-reveal .composer-emoji-panel {
+    margin-top: 8px;
+  }
+
+  html[data-theme="dark"] .desktop-writing-desk-send-button {
+    color: #062b20;
+  }
+}
+
 /* Mobile conversations use a quiet two-row composer; desktop keeps the established layout. */
 @media (max-width: 900px) {
   .chat-detail-active .composer.is-mobile-quiet {

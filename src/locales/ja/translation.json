@@ -2404,6 +2404,7 @@
   "composer.moveHereToCancel": "ここまで移動してキャンセル",
   "composer.recording": "録音中",
   "composer.releaseToCancel": "離してキャンセル",
+  "composer.desktopShortcut": "Enterで送信 · Shift + Enterで改行",
   "composer.cloudFileHint": "スペースのクラウドから選択",
   "composer.localFileHint": "この端末からファイルを選択",
   "composer.preciseLocation": "正確な位置",

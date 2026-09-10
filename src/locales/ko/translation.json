@@ -2404,6 +2404,7 @@
   "composer.moveHereToCancel": "여기로 이동해 취소",
   "composer.recording": "녹음 중",
   "composer.releaseToCancel": "놓아서 취소",
+  "composer.desktopShortcut": "Enter로 전송 · Shift + Enter로 줄바꿈",
   "composer.cloudFileHint": "공간 클라우드 자료에서 선택",
   "composer.localFileHint": "이 기기의 파일에서 선택",
   "composer.preciseLocation": "정확한 위치",

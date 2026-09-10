@@ -2404,6 +2404,7 @@
   "composer.moveHereToCancel": "移到這裡取消",
   "composer.recording": "正在錄音",
   "composer.releaseToCancel": "放開取消",
+  "composer.desktopShortcut": "Enter 傳送 · Shift + Enter 換行",
   "composer.cloudFileHint": "從空間雲端資源選擇",
   "composer.localFileHint": "從本機檔案中選擇",
   "composer.preciseLocation": "精確位置",
