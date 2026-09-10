@@ -34246,7 +34246,7 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-popover.is-footprint,
   .desktop-tool-popover.is-voice {
-    right: -8px;
+    right: -44px;
     left: auto;
     width: min(286px, calc(100vw - 48px));
     transform: none;
@@ -34258,7 +34258,7 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-popover.is-footprint::after,
   .desktop-tool-popover.is-voice::after {
-    right: 12px;
+    right: 48px;
     left: auto;
   }
 
@@ -34340,6 +34340,77 @@ html[data-theme="dark"] .verification-banner-action {
     padding: 10px;
     border-radius: 13px;
     background: color-mix(in srgb, var(--brand-primary) 7%, #f8f9f5);
+  }
+
+  .desktop-tool-popover.is-location {
+    padding: 10px;
+  }
+
+  .desktop-tool-popover.is-location .desktop-tool-status {
+    display: block;
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .desktop-location-reading {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    min-height: 66px;
+    padding: 10px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--brand-primary) 7%, #f8f9f5);
+  }
+
+  .desktop-location-reading > .material-symbols-outlined {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--accent-ink, #087454);
+    background: color-mix(in srgb, var(--brand-primary) 15%, transparent);
+    font-size: 20px;
+  }
+
+  .desktop-location-reading > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .desktop-location-reading small {
+    color: var(--accent-ink, #087454);
+    font-size: .62rem;
+    font-weight: 760;
+  }
+
+  .desktop-location-reading strong {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 7px;
+    color: var(--text-primary);
+    font-size: .76rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+  }
+
+  .desktop-location-reading > i {
+    align-self: start;
+    padding: 3px 6px;
+    border-radius: 999px;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--surface-primary, #fff) 76%, transparent);
+    font-size: .58rem;
+    font-style: normal;
+    font-weight: 720;
+  }
+
+  .desktop-tool-popover.is-location .desktop-tool-status-actions {
+    margin-top: 8px;
   }
 
   .desktop-tool-status > .material-symbols-outlined {

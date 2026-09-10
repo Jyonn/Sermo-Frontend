@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.20",
+  "id": "2026.09.10.21",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面位置与浮层体验优化",
+      "title": "桌面位置浮层精细化",
       "items": [
-        "文件入口精简为云端资源和本地上传，位置可直接选择精确或模糊发送",
-        "足迹与语音浮层不再受聊天区域边界遮挡"
+        "位置浮层现在清晰展示坐标与定位精度，并保留精确和模糊发送",
+        "足迹与录音浮层调整展开位置，完整显示在聊天框范围内"
       ]
     },
     "en": {
-      "title": "Improved desktop location and popovers",
+      "title": "Refined desktop location popover",
       "items": [
-        "Files now offer concise cloud and local actions, while locations can be sent precisely or approximately",
-        "Footprint and voice popovers are no longer clipped by the conversation boundary"
+        "The location popover now presents coordinates and accuracy clearly with precise and approximate sending",
+        "Footprint and voice popovers now open fully within the conversation frame"
       ]
     }
   }
