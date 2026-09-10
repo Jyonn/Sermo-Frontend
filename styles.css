@@ -34216,8 +34216,8 @@ html[data-theme="dark"] .verification-banner-action {
     z-index: 70;
     bottom: calc(100% + 11px);
     left: 50%;
-    width: 334px;
-    padding: 13px;
+    width: min(286px, calc(100vw - 48px));
+    padding: 12px;
     border: 1px solid color-mix(in srgb, var(--line-soft) 86%, transparent);
     border-radius: 16px;
     color: var(--text-primary);
@@ -34242,22 +34242,22 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-popover.is-footprint,
   .desktop-tool-popover.is-voice {
-    right: -18px;
+    right: -8px;
     left: auto;
-    width: 360px;
+    width: min(286px, calc(100vw - 48px));
     transform: none;
   }
 
   .desktop-tool-popover.is-footprint::after,
   .desktop-tool-popover.is-voice::after {
-    right: 18px;
+    right: 12px;
     left: auto;
   }
 
   .desktop-tool-popover > header {
-    display: grid;
-    gap: 3px;
-    margin-bottom: 11px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 9px;
   }
 
   .desktop-tool-popover > header strong {
@@ -34282,13 +34282,13 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-choice-grid > button,
   .desktop-tool-wide-action {
-    display: grid;
-    grid-template-columns: 30px minmax(0, 1fr);
+    display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 7px;
     min-width: 0;
-    min-height: 66px;
-    padding: 9px;
+    min-height: 44px;
+    padding: 8px 10px;
     border: 1px solid color-mix(in srgb, var(--line-soft) 80%, transparent);
     border-radius: 12px;
     color: var(--text-primary);
@@ -34313,6 +34313,14 @@ html[data-theme="dark"] .verification-banner-action {
   .desktop-tool-wide-action strong,
   .desktop-tool-wide-action small {
     display: block;
+  }
+
+  .desktop-tool-choice-grid strong {
+    overflow: hidden;
+    font-size: .72rem;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .desktop-tool-status {
@@ -34374,6 +34382,20 @@ html[data-theme="dark"] .verification-banner-action {
     background: var(--brand-primary);
   }
 
+  .desktop-tool-primary-action.is-wide {
+    display: inline-flex;
+    width: 100%;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  .desktop-tool-primary-action.is-wide svg {
+    width: 18px;
+    height: 18px;
+  }
+
   .desktop-tool-stack {
     display: grid;
     gap: 9px;
@@ -34413,7 +34435,7 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-voice-waveform {
     display: flex;
-    height: 54px;
+    height: 44px;
     align-items: center;
     gap: 3px;
     padding: 0 9px;

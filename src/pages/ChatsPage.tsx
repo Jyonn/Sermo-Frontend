@@ -8124,20 +8124,20 @@ function LiveChatsPage({
                       <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "file"} className={`desktop-tool-trigger${desktopComposerTool === "file" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
                         {desktopComposerTool === "file" ? <div className="desktop-tool-popover is-file">
-                          <header><strong>{t("cloudResources.fileSourceTitle")}</strong><small>{t("composer.filePopoverHint")}</small></header>
+                          <header><strong>{t("cloudResources.fileSourceTitle")}</strong></header>
                           <div className="desktop-tool-choice-grid">
-                            <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><span><strong>{t("cloudResources.chooseCloud")}</strong><small>{t("composer.cloudFileHint")}</small></span></button>
-                            <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><span><strong>{t("cloudResources.chooseLocal")}</strong><small>{t("composer.localFileHint")}</small></span></button>
+                            <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong></button>
+                            <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong></button>
                           </div>
                         </div> : null}
                       </span>
                       {canSendLocation ? <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "location"} className={`desktop-tool-trigger${desktopComposerTool === "location" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("location")} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
                         {desktopComposerTool === "location" ? <div className="desktop-tool-popover is-location">
-                          <header><strong>{t("media.location")}</strong><small>{t("composer.locationPopoverHint")}</small></header>
+                          <header><strong>{t("media.location")}</strong></header>
                           {!locationDraft ? <div className="desktop-tool-choice-grid">
-                            <button onClick={() => startLocationDraft(false, false)} type="button"><span className="material-symbols-outlined">my_location</span><span><strong>{t("composer.preciseLocation")}</strong><small>{t("composer.preciseLocationHint")}</small></span></button>
-                            <button onClick={() => startLocationDraft(true, false)} type="button"><span className="material-symbols-outlined">location_searching</span><span><strong>{t("composer.approximateLocation")}</strong><small>{t("composer.approximateLocationHint")}</small></span></button>
+                            <button onClick={() => startLocationDraft(false, false)} type="button"><span className="material-symbols-outlined">my_location</span><strong>{t("composer.preciseLocation")}</strong></button>
+                            <button onClick={() => startLocationDraft(true, false)} type="button"><span className="material-symbols-outlined">location_searching</span><strong>{t("composer.approximateLocation")}</strong></button>
                           </div> : <div className={`desktop-tool-status is-${locationDraft.phase}`}>
                             <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : locationDraft.obscure ? "location_searching" : "my_location"}</span>
                             <div><strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : locationDraft.obscure ? t("composer.approximateLocation") : t("composer.preciseLocation")}</strong><small>{locationDraft.phase === "ready" ? (locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`) : locationDraft.error || t("common.pleaseWait")}</small></div>
@@ -8148,17 +8148,17 @@ function LiveChatsPage({
                       {selectedChat ? <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
                         {desktopComposerTool === "footprint" ? <div className="desktop-tool-popover is-footprint">
-                          <header><strong>{t("travelMap.sharedFootprints")}</strong><small>{t("composer.footprintPopoverHint")}</small></header>
+                          <header><strong>{t("travelMap.sharedFootprints")}</strong></header>
                           {travelMapSaving ? <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("common.loading")}</div> : chatTravelMapAccess?.authorized_by_me ? <div className="desktop-tool-stack">
                             <button className="desktop-tool-wide-action" onClick={() => { setDesktopComposerTool(null); setChatTravelMapOpen(true); }} type="button"><ComposerSvgIcon kind="map" /><span><strong>{t("travelMap.openMap")}</strong><small>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess.shared_members.length })}</small></span></button>
                             <button className="desktop-tool-text-danger" onClick={() => void revokeChatTravelMap()} type="button">{t("travelMap.stopSharing")}</button>
-                          </div> : <div className="desktop-tool-stack"><p>{selectedChat.type === "group" ? t("travelMap.chatGrantGroupHint") : t("travelMap.chatGrantDirectHint")}</p><button className="desktop-tool-primary-action" onClick={() => void grantChatTravelMap()} type="button">{t("travelMap.authorize")}</button></div>}
+                          </div> : <button className="desktop-tool-primary-action is-wide" onClick={() => void grantChatTravelMap()} type="button"><ComposerSvgIcon kind="map" />{t("travelMap.authorize")}</button>}
                         </div> : null}
                       </span> : null}
                       {canSendAudio ? <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={voiceComposer.phase === "sending"} onClick={() => toggleDesktopComposerTool("voice")} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
                         {desktopComposerTool === "voice" ? <div className="desktop-tool-popover is-voice">
-                          <header><strong>{t("audio.record")}</strong><small>{t("composer.voicePopoverHint")}</small></header>
+                          <header><strong>{t("audio.record")}</strong></header>
                           <div className={`desktop-voice-studio is-${voiceComposer.phase}`}>
                             <div className="desktop-voice-waveform" aria-hidden="true">{voiceComposer.bars.map((bar, index) => <i key={index} style={{ "--voice-level": `${bar}` } as CSSProperties} />)}</div>
                             <time>{formatDuration(voiceComposer.durationSeconds)}</time>

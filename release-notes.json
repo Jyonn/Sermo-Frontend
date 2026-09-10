@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.18",
+  "id": "2026.09.10.19",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面媒介工具全面浮层化",
+      "title": "桌面浮动工具更轻巧",
       "items": [
-        "文件、位置与会话足迹改为贴近工具按钮的轻量浮层",
-        "语音改为点击开始、停止、试听与发送，无需长按"
+        "文件、位置、足迹与语音浮层精简信息和占用空间",
+        "浮层会根据按钮位置向内展开，不再被聊天区域遮挡"
       ]
     },
     "en": {
-      "title": "Floating desktop media tools",
+      "title": "More compact desktop tool popovers",
       "items": [
-        "Files, locations, and chat footprints now open in lightweight anchored popovers",
-        "Voice recording now uses click-to-start, stop, preview, and send controls"
+        "File, location, footprint, and voice popovers now use less text and space",
+        "Popovers expand inward from their toolbar buttons so they remain fully visible"
       ]
     }
   }
