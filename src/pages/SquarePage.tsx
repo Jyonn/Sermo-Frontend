@@ -46,7 +46,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -576,6 +576,12 @@ export default function SquarePage() {
   const [publishing, setPublishing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [publishRouteOpen, setPublishRouteOpen] = useState(false);
+  const [submissionRecipientStep, setSubmissionRecipientStep] = useState(false);
+  const [submissionRecipients, setSubmissionRecipients] = useState<SubmissionRecipientDTO[]>([]);
+  const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
+  const [submissionActionCount, setSubmissionActionCount] = useState(0);
+  const [submissionTransitioning, setSubmissionTransitioning] = useState(false);
   const [publishVerificationOpen, setPublishVerificationOpen] = useState(false);
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
@@ -726,6 +732,28 @@ export default function SquarePage() {
   const galleryVideoStatement = statements.find((item) => item.statement_id === videoGalleryStatementId) ?? null;
   const galleryVideo = galleryVideoStatement?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
+
+  useEffect(() => {
+    if (!session || !features.submissionEnabled) {
+      setSubmissionActionCount(0);
+      return;
+    }
+    let cancelled = false;
+    const sync = () => void Promise.all([
+      api.getChats(undefined, "submission", "author"),
+      api.getChats(undefined, "submission", "reviewer"),
+    ]).then(([authored, reviewed]) => {
+      if (cancelled) return;
+      const unique = new Map([...authored, ...reviewed].map((chat) => [chat.chat_id, chat]));
+      setSubmissionActionCount([...unique.values()].filter((chat) => chat.submission?.action_required).length);
+    }).catch(() => undefined);
+    sync();
+    const timer = window.setInterval(sync, 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [features.submissionEnabled, session?.accessToken, session?.user.user_id]);
   const openUserProfile = (user: TinyUserDTO) => {
     if (isUnclaimedQqUser(user)) {
       setQqProfileUser(user);
@@ -1856,6 +1884,40 @@ export default function SquarePage() {
     setComposerOpen(true);
   };
 
+  const openPublishRoute = () => {
+    if (!features.submissionEnabled) {
+      openComposer();
+      return;
+    }
+    setSubmissionRecipientStep(false);
+    setPublishRouteOpen((open) => !open);
+  };
+
+  const openSubmissionRecipients = async () => {
+    setSubmissionRecipientStep(true);
+    if (submissionRecipients.length || submissionRecipientsLoading) return;
+    setSubmissionRecipientsLoading(true);
+    try {
+      setSubmissionRecipients(await api.getSubmissionRecipients());
+    } catch {
+      setSubmissionRecipients([]);
+    } finally {
+      setSubmissionRecipientsLoading(false);
+    }
+  };
+
+  const beginSubmission = (recipient: SubmissionRecipientDTO) => {
+    setPublishRouteOpen(false);
+    setSubmissionRecipientStep(false);
+    navigate("/app/submissions/new", { state: { recipient } });
+  };
+
+  const openSubmissionWorkspace = () => {
+    if (submissionTransitioning) return;
+    setSubmissionTransitioning(true);
+    window.setTimeout(() => navigate("/app/submissions"), 180);
+  };
+
   const continueToVerification = () => {
     setPublishVerificationOpen(false);
     if (!currentUser?.has_password) {
@@ -2097,7 +2159,7 @@ export default function SquarePage() {
         <TabPageHeader
           syncing={syncing}
           title={t("square.title")}
-          secondary={<div className="square-feed-filter" role="tablist">
+          secondary={<div className={`square-feed-filter${submissionTransitioning ? " is-submission-transitioning" : ""}`} role="tablist">
             {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <i className="square-fresh-dot" /> : null}</button> : null}
             <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && feedMode !== "friends" ? <i className="square-fresh-dot" /> : null}</button>
             <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
@@ -2113,6 +2175,11 @@ export default function SquarePage() {
                 }} type="button"><span className="material-symbols-outlined">close</span></button>
               </span>
             ) : null}
+            {features.submissionEnabled ? <button className="square-submission-switch" onClick={openSubmissionWorkspace} type="button">
+              <span className="material-symbols-outlined" aria-hidden="true">outbox</span>
+              <span>{t("submission.title")}</span>
+              {submissionActionCount ? <i>{submissionActionCount > 99 ? "99+" : submissionActionCount}</i> : null}
+            </button> : null}
           </div>}
           actions={<div className="square-header-actions">
             <button aria-expanded={feedSearchOpen} aria-label={t("square.search")} aria-pressed={hasFeedFilters} className={`square-header-date${feedSearchOpen || hasFeedFilters ? " is-active" : ""}`} onClick={() => setFeedSearchOpen((open) => !open)} type="button">
@@ -2125,10 +2192,22 @@ export default function SquarePage() {
               <span className="material-symbols-outlined">notifications</span>
               {notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}
             </button>
-            <button className="square-header-publish" onClick={openComposer} type="button">
-              <span className="material-symbols-outlined">edit_square</span>
-              <span>{t("square.publish")}</span>
-            </button>
+            <div className="square-publish-route">
+              <button aria-expanded={publishRouteOpen} className="square-header-publish" onClick={openPublishRoute} type="button">
+                <span className="material-symbols-outlined">edit_square</span>
+                <span>{t("square.publish")}</span>
+              </button>
+              {publishRouteOpen ? <div className={`square-publish-route-menu${submissionRecipientStep ? " is-recipient" : ""}`}>
+                {!submissionRecipientStep ? <>
+                  <button onClick={() => { setPublishRouteOpen(false); openComposer(); }} type="button"><span className="material-symbols-outlined">edit_square</span><span><strong>{t("square.publish")}</strong><small>{t("square.publishToSquare")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+                  <button onClick={() => void openSubmissionRecipients()} type="button"><span className="material-symbols-outlined">outbox</span><span><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+                </> : <>
+                  <button className="square-publish-route-back" onClick={() => setSubmissionRecipientStep(false)} type="button"><span className="material-symbols-outlined">arrow_back</span><strong>{t("submission.chooseRecipient")}</strong></button>
+                  {submissionRecipientsLoading ? <div className="square-publish-route-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => beginSubmission(recipient)} type="button"><UserAvatar className="mini-avatar" name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
+                  {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="square-publish-route-empty">{t("submission.noRecipients")}</div> : null}
+                </>}
+              </div> : null}
+            </div>
           </div>}
         />
         <div className="square-feed-column">

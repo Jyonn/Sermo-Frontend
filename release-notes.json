@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.10.5",
+  "id": "2026.09.10.6",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "投稿回合显示修复",
+      "title": "投稿融入广场",
       "items": [
-        "新发送的投稿消息会持续显示在本回合幕布中，不再因实时同步而短暂消失"
+        "发言入口现在可直接选择发布到广场或向官方、运营发起投稿",
+        "投稿工作区已并入广场，底部导航更加简洁"
       ]
     },
     "en": {
-      "title": "Submission round display fix",
+      "title": "Submissions join Square",
       "items": [
-        "New submission messages now remain in the active round curtain instead of briefly disappearing after sync"
+        "The post action can now publish directly or start a submission with an official account or operator",
+        "Submission work now lives inside Square with a simpler bottom navigation"
       ]
     }
   }

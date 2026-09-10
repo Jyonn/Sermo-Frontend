@@ -57,7 +57,7 @@ function RequireSubmissionFeature({ children }: { children: ReactNode }) {
   const features = useSpaceFeatures();
   const { t } = useI18n();
   if (!features.ready) return <FeedbackState title={t("common.loading")} tone="loading" />;
-  if (!features.submissionEnabled) return <Navigate replace to="/app/chats" />;
+  if (!features.submissionEnabled) return <Navigate replace to="/app/square" />;
   return children;
 }
 
@@ -120,15 +120,15 @@ export default function App() {
         />
         <Route
           path="/app/submissions"
-          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" squareIntegrated /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions/new"
-          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" squareIntegrated /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions/:chatId"
-          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" squareIntegrated /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/square"
