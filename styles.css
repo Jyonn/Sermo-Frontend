@@ -21179,6 +21179,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     content: "";
   }
 
+  .composer-emoji-grid.has-frequent-row > button.is-frequent {
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-panel));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--accent) 34%, transparent);
+  }
+
   .composer-emoji-grid > button:hover {
     background: rgba(255, 255, 255, 0.64);
     transform: translateY(-1px);
@@ -21505,6 +21510,31 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   width: 100%;
   height: 100%;
   aspect-ratio: auto;
+}
+
+.composer-sticker-grid.has-frequent-row > .composer-sticker-explore-item.is-frequent {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-panel));
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+.composer-sticker-grid.has-frequent-row > .composer-sticker-explore-item.is-frequent::after {
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  left: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent, #00a86b);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg-panel) 76%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .composer-emoji-grid.has-frequent-row > button.is-frequent:first-child { border-radius: 12px 8px 8px 12px; }
+  .composer-emoji-grid.has-frequent-row > button.is-frequent:nth-child(8) { border-radius: 8px 12px 12px 8px; }
 }
 
 .composer-sticker-source {

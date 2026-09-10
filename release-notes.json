@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.11",
+  "id": "2026.09.10.12",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表体验修复",
+      "title": "常用表情更懂你",
       "items": [
-        "投稿列表补充左右留白，浏览层次更加舒适",
-        "修复官方和运营从“我的”无法打开部分投稿的问题"
+        "常用 emoji 扩展至八个，手机端首行展示更完整",
+        "探索表情会根据近期使用习惯个性化首行内容"
       ]
     },
     "en": {
-      "title": "Submission list fixes",
+      "title": "Frequently used reactions get personal",
       "items": [
-        "Submission lists now have comfortable horizontal spacing",
-        "Fixed an issue that prevented officials and operators from opening some submissions under Mine"
+        "The frequent emoji row now includes eight choices and fills one mobile row",
+        "Explore stickers now personalize the first row using recent usage"
       ]
     }
   }

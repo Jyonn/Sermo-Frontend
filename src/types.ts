@@ -665,6 +665,7 @@ export interface StickerDTO extends StickerAssetDTO {
 
 export interface StickerListDTO<T extends StickerAssetDTO = StickerDTO> {
   items: T[];
+  frequent_items?: T[];
   has_more: boolean;
   next_offset: number;
 }

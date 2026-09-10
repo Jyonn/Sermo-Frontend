@@ -117,6 +117,7 @@ interface StickerPageCache<T> {
   items: T[];
   hasMore: boolean;
   nextOffset: number;
+  frequentIds?: number[];
 }
 
 function mergeStickerPage<T>(fresh: T[], cached: T[], identify: (item: T) => number) {
@@ -3095,6 +3096,7 @@ function LiveChatsPage({
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
   const [stickers, setStickers] = useState<StickerDTO[]>(() => initialMineStickerCache?.data.items ?? []);
   const [exploreStickers, setExploreStickers] = useState<StickerAssetDTO[]>(() => initialExploreStickerCache?.data.items ?? []);
+  const [frequentExploreStickerIds, setFrequentExploreStickerIds] = useState<number[]>(() => initialExploreStickerCache?.data.frequentIds ?? []);
   const [mineStickersLoading, setMineStickersLoading] = useState(false);
   const [exploreStickersLoading, setExploreStickersLoading] = useState(false);
   const [mineStickersHasMore, setMineStickersHasMore] = useState(() => initialMineStickerCache?.data.hasMore ?? false);
@@ -3352,7 +3354,7 @@ function LiveChatsPage({
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
   const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
-  const frequentEmojis = emojiUsage.slice(0, 5).map((item) => item.emoji);
+  const frequentEmojis = emojiUsage.slice(0, 8).map((item) => item.emoji);
   const visibleEmojis =
     emojiPage < 0
       ? []
@@ -4650,6 +4652,7 @@ function LiveChatsPage({
     setMineStickersHasMore(mineCache?.data.hasMore ?? false);
     mineStickerOffsetRef.current = mineCache?.data.nextOffset ?? 0;
     setExploreStickers(exploreCache?.data.items ?? []);
+    setFrequentExploreStickerIds(exploreCache?.data.frequentIds ?? []);
     setExploreStickersHasMore(exploreCache?.data.hasMore ?? false);
     exploreStickerOffsetRef.current = exploreCache?.data.nextOffset ?? 0;
   }, [stickerCacheScope]);
@@ -4696,15 +4699,19 @@ function LiveChatsPage({
     void api.exploreStickers(0, STICKER_PAGE_SIZE, controller.signal)
       .then((response) => {
         const preserveCachedPages = Boolean(cached?.data.items.length && cached.data.nextOffset > response.next_offset);
-        const items = preserveCachedPages
+        const pageItems = preserveCachedPages
           ? mergeStickerPage(response.items, cached!.data.items, (item) => item.sticker_asset_id)
           : response.items;
+        const frequentItems = response.frequent_items ?? [];
+        const items = mergeStickerPage(frequentItems, pageItems, (item) => item.sticker_asset_id);
+        const frequentIds = frequentItems.map((item) => item.sticker_asset_id);
         const hasMore = preserveCachedPages ? cached!.data.hasMore : response.has_more;
         const nextOffset = preserveCachedPages ? cached!.data.nextOffset : response.next_offset;
         setExploreStickers(items);
+        setFrequentExploreStickerIds(frequentIds);
         setExploreStickersHasMore(hasMore);
         exploreStickerOffsetRef.current = nextOffset;
-        writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, { items, hasMore, nextOffset });
+        writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, { items, hasMore, nextOffset, frequentIds });
       })
       .catch(() => undefined)
       .finally(() => {
@@ -4753,6 +4760,7 @@ function LiveChatsPage({
           items,
           hasMore: response.has_more,
           nextOffset: response.next_offset,
+          frequentIds: frequentExploreStickerIds,
         });
         return items;
       });
@@ -4784,11 +4792,12 @@ function LiveChatsPage({
     });
   };
 
-  const persistExploreStickerCache = (items: StickerAssetDTO[]) => {
+  const persistExploreStickerCache = (items: StickerAssetDTO[], frequentIds = frequentExploreStickerIds) => {
     writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, {
       items,
       hasMore: exploreStickersHasMore,
       nextOffset: exploreStickerOffsetRef.current,
+      frequentIds,
     });
   };
 
@@ -4946,6 +4955,20 @@ function LiveChatsPage({
         ...current,
         [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, delivered),
       }));
+      if (!("sticker_id" in sticker)) {
+        const nextFrequentIds = [sticker.sticker_asset_id, ...frequentExploreStickerIds.filter((id) => id !== sticker.sticker_asset_id)].slice(0, 5);
+        setFrequentExploreStickerIds(nextFrequentIds);
+        setExploreStickers((current) => {
+          const items = [sticker, ...current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id)];
+          writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, {
+            items,
+            hasMore: exploreStickersHasMore,
+            nextOffset: exploreStickerOffsetRef.current,
+            frequentIds: nextFrequentIds,
+          });
+          return items;
+        });
+      }
     } catch {
       setMessages((current) => ({
         ...current,
@@ -4968,7 +4991,9 @@ function LiveChatsPage({
       });
       setExploreStickers((current) => {
         const items = current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id);
-        persistExploreStickerCache(items);
+        const frequentIds = frequentExploreStickerIds.filter((id) => id !== sticker.sticker_asset_id);
+        setFrequentExploreStickerIds(frequentIds);
+        persistExploreStickerCache(items, frequentIds);
         return items;
       });
       showToast(t("sticker.added"));
@@ -5035,7 +5060,9 @@ function LiveChatsPage({
       });
       setExploreStickers((current) => {
         const items = current.filter((item) => item.sticker_asset_id !== asset.sticker_asset_id);
-        persistExploreStickerCache(items);
+        const frequentIds = frequentExploreStickerIds.filter((id) => id !== asset.sticker_asset_id);
+        setFrequentExploreStickerIds(frequentIds);
+        persistExploreStickerCache(items, frequentIds);
         return items;
       });
       showToast(t("sticker.added"));
@@ -8239,9 +8266,9 @@ function LiveChatsPage({
                     ) : emojiPage === STICKER_EXPLORE_PAGE ? (
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.explore")}>
                         {exploreStickers.length ? (
-                          <div className="composer-sticker-grid" onScroll={(event) => handleStickerGridScroll(event, "explore")}>
-                            {exploreStickers.map((sticker) => (
-                              <div className="composer-sticker-explore-item" key={sticker.sticker_asset_id}>
+                          <div className="composer-sticker-grid has-frequent-row" onScroll={(event) => handleStickerGridScroll(event, "explore")}>
+                            {exploreStickers.map((sticker, index) => (
+                              <div className={`composer-sticker-explore-item${index < 5 ? " is-frequent" : ""}`} key={sticker.sticker_asset_id}>
                                 <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
                                   <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                                 </button>
@@ -8277,11 +8304,11 @@ function LiveChatsPage({
                         ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
                       </div>
                     ) : (
-                      <div className="composer-emoji-grid" role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
+                      <div className={`composer-emoji-grid${emojiPage === 0 ? " has-frequent-row" : ""}`} role="tabpanel" aria-label={t(EMOJI_PAGES[emojiPage].labelKey as TranslationKey)}>
                         {visibleEmojis.map((emoji, index) => (
                           <button
                             aria-label={t("emoji.insert", { emoji })}
-                            className={emojiPage === 0 && index < frequentEmojis.length ? "is-frequent" : ""}
+                            className={emojiPage === 0 && index < 8 ? "is-frequent" : ""}
                             key={`${emoji}-${index}`}
                             onClick={() => insertEmoji(emoji)}
                             type="button"
