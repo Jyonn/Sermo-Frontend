@@ -7527,9 +7527,9 @@ function LiveChatsPage({
     </button>;
   };
 
-  const renderChatList = () => (
+  const renderChatList = (hideHeader = false) => (
     <>
-      <TabPageHeader
+      {!hideHeader ? <TabPageHeader
         title={submissionMode ? <span className="submission-header-title"><span>{t("submission.title")}</span>{!squareIntegrated && canReviewSubmissionInvites ? <button aria-label={t("submission.switchView")} className="submission-view-switch" onClick={() => chooseSubmissionView(submissionView === "author" ? "reviewer" : "author")} type="button"><svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><path d="M6.5 7.5h11m0 0-3-3m3 3-3 3M17.5 16.5h-11m0 0 3 3m-3-3 3-3" /></svg><span>{submissionView === "author" ? t("submission.viewMine") : t("submission.viewReview")}</span></button> : null}</span> : t("chat.title")}
         syncing={viewState === "loading"}
         secondary={submissionMode && squareIntegrated ? <nav className="square-submission-workspace-tabs">
@@ -7554,7 +7554,7 @@ function LiveChatsPage({
             <span className="chat-health-dot" />
           </span>
         ) : undefined}
-      />
+      /> : null}
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
       {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
       {submissionMode && chats.length ? (
@@ -7611,7 +7611,7 @@ function LiveChatsPage({
   if (embeddedListOnly && !displayedChat) {
     return (
       <section className="square-embedded-submission-list">
-        {renderChatList()}
+        {renderChatList(true)}
         <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
       </section>
     );

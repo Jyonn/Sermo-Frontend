@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.8",
+  "id": "2026.09.10.9",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "广场与投稿无缝切换",
+      "title": "广场栏目自然展开",
       "items": [
-        "投稿现在直接在广场内展开，标题、操作与栏目会连贯切换",
-        "广场和投稿列表共享同一页面，往返浏览更加顺滑"
+        "广场与投稿现在共用同一套标题和栏目，切换时自然折叠展开",
+        "广场、投稿入口统一使用清晰的下划线栏目样式"
       ]
     },
     "en": {
-      "title": "Seamless Square and submission switching",
+      "title": "A naturally expanding Square navigation",
       "items": [
-        "Submissions now unfold inside Square with coordinated title, action, and tab transitions",
-        "Square and submission lists share one page for smoother navigation"
+        "Square and submissions now share one header and tab rail with natural folding transitions",
+        "Square and submission switches now use a consistent underlined tab style"
       ]
     }
   }

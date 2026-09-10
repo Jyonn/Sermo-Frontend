@@ -33059,6 +33059,136 @@ html[data-theme="dark"] .submission-status-filters {
 .submission-header-create { margin-left: 0; cursor: pointer; }
 
 /* Square-owned submission workflow */
+.square-workspace-title {
+  display: inline-grid;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.square-workspace-title > span {
+  grid-area: 1 / 1;
+  transition: opacity 220ms ease, transform 280ms cubic-bezier(.16, 1, .3, 1);
+}
+.square-workspace-title.is-square > span:last-child,
+.square-workspace-title.is-submission > span:first-child {
+  opacity: 0;
+  pointer-events: none;
+}
+.square-workspace-title.is-square > span:last-child { transform: translateY(65%); }
+.square-workspace-title.is-submission > span:first-child { transform: translateY(-65%); }
+
+.square-workspace-tabs {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 36px;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
+}
+.square-workspace-tab-group {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  min-width: 0;
+  overflow: hidden;
+  transition: max-width 300ms cubic-bezier(.16, 1, .3, 1), opacity 180ms ease, transform 300ms cubic-bezier(.16, 1, .3, 1);
+}
+.square-workspace-tabs button {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  align-self: stretch;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  color: var(--text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.square-workspace-tabs button::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--brand-primary);
+  content: "";
+  opacity: 0;
+  transform: scaleX(.45);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.square-workspace-tabs button:is(.is-active, .square-workspace-mode-tab) { color: var(--text-primary); }
+.square-workspace-tabs button:is(.is-active, .square-workspace-mode-tab)::after { opacity: 1; transform: scaleX(1); }
+.square-workspace-tabs button:disabled { pointer-events: none; }
+.square-workspace-tabs .material-symbols-outlined { font-size: 17px; }
+.square-workspace-tabs button > i {
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--danger);
+  font-size: 9px;
+  font-style: normal;
+}
+.square-workspace-tabs .square-feed-user-close {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  align-self: auto;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.square-workspace-tabs .square-feed-user-close::after { display: none; }
+.square-workspace-tabs .square-feed-user-close .material-symbols-outlined { font-size: 15px; }
+.square-workspace-tab-spacer { flex: 1 1 auto; min-width: 10px; }
+.square-workspace-tabs.is-square .is-square-channels,
+.square-workspace-tabs.is-submission .is-submission-views { max-width: 520px; opacity: 1; transform: translateX(0); }
+.square-workspace-tabs.is-submission .is-square-channels { max-width: 0; opacity: 0; transform: translateX(-20px); }
+.square-workspace-tabs.is-square .is-submission-views { max-width: 0; opacity: 0; transform: translateX(20px); }
+.square-workspace-mode-tab {
+  overflow: hidden;
+  max-width: 110px;
+  transition: max-width 300ms cubic-bezier(.16, 1, .3, 1), padding 300ms cubic-bezier(.16, 1, .3, 1), opacity 180ms ease, transform 300ms cubic-bezier(.16, 1, .3, 1);
+}
+.square-workspace-tabs.is-square .is-square-return,
+.square-workspace-tabs.is-submission .is-submission-entry {
+  max-width: 0;
+  padding-inline: 0;
+  opacity: 0;
+  transform: scaleX(.65);
+}
+.square-header-square-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 150px;
+  overflow: hidden;
+  opacity: 1;
+  transition: max-width 280ms cubic-bezier(.16, 1, .3, 1), opacity 160ms ease, transform 280ms cubic-bezier(.16, 1, .3, 1);
+}
+.square-header-actions.is-submission .square-header-square-tools {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(16px);
+}
+.square-header-publish > span:last-child {
+  transition: opacity 160ms ease, transform 220ms cubic-bezier(.16, 1, .3, 1);
+}
+
 .square-feed-filter .square-submission-switch {
   display: inline-flex;
   align-items: center;
