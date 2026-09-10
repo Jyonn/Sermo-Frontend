@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.17",
+  "id": "2026.09.10.18",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面表情选择更连贯",
+      "title": "桌面媒介工具全面浮层化",
       "items": [
-        "桌面表情浮层改为清晰的不透明背景，并支持连续选择多个 emoji",
-        "点击浮层外即可收起，探索表情也不再展示上传者横幅"
+        "文件、位置与会话足迹改为贴近工具按钮的轻量浮层",
+        "语音改为点击开始、停止、试听与发送，无需长按"
       ]
     },
     "en": {
-      "title": "A smoother desktop emoji picker",
+      "title": "Floating desktop media tools",
       "items": [
-        "The opaque desktop picker now stays open for selecting multiple emoji",
-        "Clicking outside closes it, and Explore stickers no longer show uploader banners"
+        "Files, locations, and chat footprints now open in lightweight anchored popovers",
+        "Voice recording now uses click-to-start, stop, preview, and send controls"
       ]
     }
   }

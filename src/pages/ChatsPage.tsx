@@ -3139,6 +3139,7 @@ function LiveChatsPage({
   const [chatTravelMapAccess, setChatTravelMapAccess] = useState<ChatTravelMapAccessDTO | null>(null);
   const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
   const [chatTravelMapMenuOpen, setChatTravelMapMenuOpen] = useState(false);
+  const [desktopComposerTool, setDesktopComposerTool] = useState<"file" | "location" | "footprint" | "voice" | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [fileDropActive, setFileDropActive] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
@@ -3227,7 +3228,6 @@ function LiveChatsPage({
   const composerRef = useRef<HTMLFormElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [fileSourceSheetOpen, setFileSourceSheetOpen] = useState(false);
   const [cloudFilePickerOpen, setCloudFilePickerOpen] = useState(false);
   const stickerInputRef = useRef<HTMLInputElement | null>(null);
   const clipboardPreviewUrlsRef = useRef(new Set<string>());
@@ -4832,6 +4832,24 @@ function LiveChatsPage({
     return () => document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
   }, [emojiPickerOpen, mobileComposerLayout]);
 
+  useEffect(() => {
+    if (!desktopComposerTool || mobileComposerLayout) return;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(".desktop-tool-popover, .desktop-tool-trigger")) return;
+      setDesktopComposerTool(null);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer, true);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
+  }, [desktopComposerTool, mobileComposerLayout]);
+
+  const toggleDesktopComposerTool = (tool: "file" | "location" | "footprint" | "voice") => {
+    setEmojiPickerOpen(false);
+    setComposerMoreOpen(false);
+    setDesktopComposerTool((current) => current === tool ? null : tool);
+  };
+
   const suspendMobileComposerInput = () => {
     mentionEditorRef.current?.blur();
     setMentionSearch(null);
@@ -6039,12 +6057,6 @@ function LiveChatsPage({
     galleryInputRef.current?.click();
   };
 
-  const openFilePicker = () => {
-    if (composerBusy) return;
-    setComposerMoreOpen(false);
-    setFileSourceSheetOpen(true);
-  };
-
   const startLocationDraft = (obscure = false, mobileInline = false) => {
     if (composerBusy) return;
     if (!requireComposerCapability("chat.message.send.location", 3, t("message.sendLocation"))) return;
@@ -6074,8 +6086,6 @@ function LiveChatsPage({
       { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
     );
   };
-
-  const openLocationPicker = () => startLocationDraft(false, false);
 
   const sendLocationMessage = async () => {
     if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
@@ -6141,6 +6151,7 @@ function LiveChatsPage({
       ))));
       setLocationDraft(null);
       setMobileComposerPanel(null);
+      setDesktopComposerTool(null);
       if (!obscure) {
         try {
           const candidates = await resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale());
@@ -6172,15 +6183,17 @@ function LiveChatsPage({
     }
   };
 
-  const openChatTravelMap = async () => {
+  const openChatTravelMap = async (inline = false) => {
     if (!selectedChat || composerBusy || travelMapSaving) return;
     setComposerMoreOpen(false);
     setTravelMapSaving(true);
     try {
       const access = await api.getChatTravelMapAccess(selectedChat.id);
       setChatTravelMapAccess(access);
-      if (access.authorized_by_me) setChatTravelMapMenuOpen(true);
-      else setChatTravelMapGrantConfirmOpen(true);
+      if (!inline) {
+        if (access.authorized_by_me) setChatTravelMapMenuOpen(true);
+        else setChatTravelMapGrantConfirmOpen(true);
+      }
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("travelMap.accessFailed"), "error");
     } finally {
@@ -6211,6 +6224,7 @@ function LiveChatsPage({
         triggerMessageEntrance(String(delivered.id));
       }
       setChatTravelMapGrantConfirmOpen(false);
+      setDesktopComposerTool(null);
       setChatTravelMapOpen(true);
       showToast(t("travelMap.chatAccessGranted"));
     } catch (error) {
@@ -7977,7 +7991,7 @@ function LiveChatsPage({
               ) : (
               <form
                 ref={composerRef}
-                className={`composer ${!mobileComposerLayout && voiceComposer.open ? "is-recording-mode" : ""}${mobileComposerLayout ? " is-mobile-quiet" : ""}${!mobileComposerLayout && !voiceComposer.open ? " is-desktop-writing-desk" : ""}`}
+                className={`composer${mobileComposerLayout ? " is-mobile-quiet" : " is-desktop-writing-desk"}`}
                 onSubmit={submit}
                 style={{ "--mention-selection-accent": mentionSelectionAccent(pendingMessageAppearance.chatBubbleStyle) } as CSSProperties}
               >
@@ -8087,7 +8101,7 @@ function LiveChatsPage({
                       <button aria-pressed={mobileComposerPanel === "footprint"} className={mobileComposerPanel === "footprint" ? "is-active" : ""} disabled={composerBusy || travelMapSaving} onClick={() => openMobileComposerPanel("footprint")} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
                     </div>
                   </div>
-                ) : !voiceComposer.open ? (
+                ) : (
                   <DesktopChatComposerDesk
                     characterCount={draft.length}
                     sendDisabled={composerBusy || !draft.trim()}
@@ -8105,12 +8119,55 @@ function LiveChatsPage({
                       </div>
                     ) : undefined}
                     tools={<>
-                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
+                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setDesktopComposerTool(null); setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       {canSendImage ? <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button> : null}
-                      <button disabled={composerBusy} onClick={openFilePicker} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
-                      {canSendLocation ? <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button> : null}
-                      {selectedChat ? <button disabled={composerBusy || travelMapSaving} onClick={() => void openChatTravelMap()} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button> : null}
-                      {canSendAudio ? <button disabled={composerBusy} onClick={() => void startVoiceRecording()} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button> : null}
+                      <span className="desktop-tool-anchor">
+                        <button aria-expanded={desktopComposerTool === "file"} className={`desktop-tool-trigger${desktopComposerTool === "file" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
+                        {desktopComposerTool === "file" ? <div className="desktop-tool-popover is-file">
+                          <header><strong>{t("cloudResources.fileSourceTitle")}</strong><small>{t("composer.filePopoverHint")}</small></header>
+                          <div className="desktop-tool-choice-grid">
+                            <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><span><strong>{t("cloudResources.chooseCloud")}</strong><small>{t("composer.cloudFileHint")}</small></span></button>
+                            <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><span><strong>{t("cloudResources.chooseLocal")}</strong><small>{t("composer.localFileHint")}</small></span></button>
+                          </div>
+                        </div> : null}
+                      </span>
+                      {canSendLocation ? <span className="desktop-tool-anchor">
+                        <button aria-expanded={desktopComposerTool === "location"} className={`desktop-tool-trigger${desktopComposerTool === "location" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("location")} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
+                        {desktopComposerTool === "location" ? <div className="desktop-tool-popover is-location">
+                          <header><strong>{t("media.location")}</strong><small>{t("composer.locationPopoverHint")}</small></header>
+                          {!locationDraft ? <div className="desktop-tool-choice-grid">
+                            <button onClick={() => startLocationDraft(false, false)} type="button"><span className="material-symbols-outlined">my_location</span><span><strong>{t("composer.preciseLocation")}</strong><small>{t("composer.preciseLocationHint")}</small></span></button>
+                            <button onClick={() => startLocationDraft(true, false)} type="button"><span className="material-symbols-outlined">location_searching</span><span><strong>{t("composer.approximateLocation")}</strong><small>{t("composer.approximateLocationHint")}</small></span></button>
+                          </div> : <div className={`desktop-tool-status is-${locationDraft.phase}`}>
+                            <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : locationDraft.obscure ? "location_searching" : "my_location"}</span>
+                            <div><strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : locationDraft.obscure ? t("composer.approximateLocation") : t("composer.preciseLocation")}</strong><small>{locationDraft.phase === "ready" ? (locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`) : locationDraft.error || t("common.pleaseWait")}</small></div>
+                            <div className="desktop-tool-status-actions"><button disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button>{locationDraft.phase === "ready" ? <button className="is-primary" onClick={() => void sendLocationMessage()} type="button">{t("common.send")}</button> : locationDraft.phase === "error" ? <button className="is-primary" onClick={() => startLocationDraft(Boolean(locationDraft.obscure), false)} type="button">{t("common.retry")}</button> : locationDraft.phase === "sending" ? <span className="desktop-tool-inline-progress"><span className="composer-recording-spinner" />{t("common.sendingPlain")}</span> : null}</div>
+                          </div>}
+                        </div> : null}
+                      </span> : null}
+                      {selectedChat ? <span className="desktop-tool-anchor">
+                        <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
+                        {desktopComposerTool === "footprint" ? <div className="desktop-tool-popover is-footprint">
+                          <header><strong>{t("travelMap.sharedFootprints")}</strong><small>{t("composer.footprintPopoverHint")}</small></header>
+                          {travelMapSaving ? <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("common.loading")}</div> : chatTravelMapAccess?.authorized_by_me ? <div className="desktop-tool-stack">
+                            <button className="desktop-tool-wide-action" onClick={() => { setDesktopComposerTool(null); setChatTravelMapOpen(true); }} type="button"><ComposerSvgIcon kind="map" /><span><strong>{t("travelMap.openMap")}</strong><small>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess.shared_members.length })}</small></span></button>
+                            <button className="desktop-tool-text-danger" onClick={() => void revokeChatTravelMap()} type="button">{t("travelMap.stopSharing")}</button>
+                          </div> : <div className="desktop-tool-stack"><p>{selectedChat.type === "group" ? t("travelMap.chatGrantGroupHint") : t("travelMap.chatGrantDirectHint")}</p><button className="desktop-tool-primary-action" onClick={() => void grantChatTravelMap()} type="button">{t("travelMap.authorize")}</button></div>}
+                        </div> : null}
+                      </span> : null}
+                      {canSendAudio ? <span className="desktop-tool-anchor">
+                        <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={voiceComposer.phase === "sending"} onClick={() => toggleDesktopComposerTool("voice")} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
+                        {desktopComposerTool === "voice" ? <div className="desktop-tool-popover is-voice">
+                          <header><strong>{t("audio.record")}</strong><small>{t("composer.voicePopoverHint")}</small></header>
+                          <div className={`desktop-voice-studio is-${voiceComposer.phase}`}>
+                            <div className="desktop-voice-waveform" aria-hidden="true">{voiceComposer.bars.map((bar, index) => <i key={index} style={{ "--voice-level": `${bar}` } as CSSProperties} />)}</div>
+                            <time>{formatDuration(voiceComposer.durationSeconds)}</time>
+                            {!voiceComposer.open ? <button className="desktop-voice-main" onClick={() => void startVoiceRecording()} type="button"><span className="material-symbols-outlined">mic</span>{t("composer.startRecording")}</button> : voiceComposer.phase === "recording" ? <button className="desktop-voice-main is-stop" onClick={stopVoiceRecording} type="button"><span className="material-symbols-outlined">stop</span>{t("audio.stopRecording")}</button> : voiceComposer.phase === "recorded" ? <div className="desktop-voice-actions"><button onClick={() => void toggleVoicePreview()} type="button"><span className="material-symbols-outlined">{voicePreviewPlaying ? "pause" : "play_arrow"}</span>{voicePreviewPlaying ? t("audio.pausePreview") : t("audio.preview")}</button><button className="is-send" onClick={() => void sendRecordedVoiceMessage()} type="button"><span className="material-symbols-outlined">send</span>{t("common.send")}</button></div> : <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{voiceComposer.phase === "sending" ? t("common.sendingPlain") : voiceComposer.phase === "requesting" ? t("audio.preparingMicrophone") : t("audio.generating")}</div>}
+                            {voiceComposer.open && voiceComposer.phase !== "sending" ? <button className="desktop-voice-discard" onClick={cancelVoiceRecording} type="button">{t("common.cancel")}</button> : null}
+                            <audio ref={voicePreviewAudioRef} hidden onEnded={() => { setVoicePreviewPlaying(false); if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null; }} onPause={() => setVoicePreviewPlaying(false)} onPlay={() => setVoicePreviewPlaying(true)} preload="metadata" src={voicePreviewUri} />
+                          </div>
+                        </div> : null}
+                      </span> : null}
                     </>}
                     input={<>
                       <MentionComposerInput
@@ -8142,27 +8199,7 @@ function LiveChatsPage({
                       ) : null}
                     </>}
                   />
-                ) : <ChatVoiceComposerRow
-                  audioRef={voicePreviewAudioRef}
-                  labels={{
-                    generating: t("audio.generating"),
-                    pausePreview: t("audio.pausePreview"),
-                    preparingMicrophone: t("audio.preparingMicrophone"),
-                    preview: t("audio.preview"),
-                    stopRecording: t("audio.stopRecording"),
-                  }}
-                  onCancel={cancelVoiceRecording}
-                  onPreviewEnded={() => {
-                    if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null;
-                  }}
-                  onPreviewPlayingChange={setVoicePreviewPlaying}
-                  onSend={() => void sendRecordedVoiceMessage()}
-                  onStop={stopVoiceRecording}
-                  onTogglePreview={() => void toggleVoicePreview()}
-                  previewPlaying={voicePreviewPlaying}
-                  previewUri={voicePreviewUri}
-                  state={voiceComposer}
-                />}
+                )}
                 {!voiceComposer.open && (emojiPickerOpen || (mobileComposerLayout && mobileEmojiPanelMounted)) ? (
                   <div className={mobileComposerLayout ? `mobile-composer-reveal mobile-emoji-reveal${emojiPickerOpen ? " is-open" : ""}` : "desktop-emoji-reveal"}>
                     <div className={mobileComposerLayout ? "mobile-composer-reveal-inner" : undefined}>
@@ -8364,54 +8401,6 @@ function LiveChatsPage({
                       <span><strong>{t("composer.shareFootprint")}</strong><small>{t("composer.shareFootprintHint")}</small></span>
                     </button>
                   </div>
-                    </div>
-                  </div>
-                ) : null}
-                {!mobileComposerLayout && !voiceComposer.open ? (
-                  <div className={`composer-actions-reveal ${composerMoreOpen ? "is-open" : ""}`} aria-hidden={!composerMoreOpen}>
-                    <div className="composer-actions-grid">
-                      {canSendImage ? (
-                        <FeatureDiscoveryTarget
-                          rewardId="capability.video"
-                          guide={{ title: t("featureDiscovery.video.title"), description: t("featureDiscovery.video.description"), actionLabel: t("featureDiscovery.video.action"), onAction: openGalleryPicker }}
-                        >
-                          <FeatureDiscoveryTarget
-                            rewardId="capability.image"
-                            guide={{ title: t("featureDiscovery.image.title"), description: t("featureDiscovery.image.description"), actionLabel: t("featureDiscovery.image.action"), onAction: openGalleryPicker }}
-                          >
-                            <button className="composer-action-tile" disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button">
-                              <span className="composer-action-tile-icon"><ComposerSvgIcon kind="album" /></span>
-                              <span>{t("media.gallery")}</span>
-                            </button>
-                          </FeatureDiscoveryTarget>
-                        </FeatureDiscoveryTarget>
-                      ) : null}
-                      <button className="composer-action-tile" disabled={composerBusy} onClick={openFilePicker} type="button">
-                        <span className="composer-action-tile-icon"><ComposerSvgIcon kind="file" /></span>
-                        <span>{t("media.file")}</span>
-                      </button>
-                      {canSendLocation ? (
-                        <FeatureDiscoveryTarget
-                          rewardId="capability.location"
-                          guide={{
-                            title: t("featureDiscovery.location.title"),
-                            description: t("featureDiscovery.location.description"),
-                            actionLabel: t("featureDiscovery.location.action"),
-                            onAction: openLocationPicker,
-                          }}
-                        >
-                          <button className="composer-action-tile" disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button">
-                            <span className="composer-action-tile-icon"><ComposerSvgIcon kind="location" /></span>
-                            <span>{t("media.location")}</span>
-                          </button>
-                        </FeatureDiscoveryTarget>
-                      ) : null}
-                      {selectedChat ? (
-                        <button className="composer-action-tile" disabled={composerBusy || travelMapSaving} onClick={() => void openChatTravelMap()} type="button">
-                          <span className="composer-action-tile-icon"><ComposerSvgIcon kind="map" /></span>
-                          <span>{t("travelMap.actionShort")}</span>
-                        </button>
-                      ) : null}
                     </div>
                   </div>
                 ) : null}
@@ -9619,16 +9608,6 @@ function LiveChatsPage({
         onChange={(event) => void handleMediaSelection(event, "gallery")}
         type="file"
       />
-      <BottomSheet onClose={() => setFileSourceSheetOpen(false)} open={fileSourceSheetOpen} title={t("cloudResources.fileSourceTitle")}>
-        <div className="file-source-choice">
-          <button onClick={() => { setFileSourceSheetOpen(false); setCloudFilePickerOpen(true); }} type="button">
-            <span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong>
-          </button>
-          <button onClick={() => { setFileSourceSheetOpen(false); fileInputRef.current?.click(); }} type="button">
-            <span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong>
-          </button>
-        </div>
-      </BottomSheet>
       <CloudFilePickerSheet onClose={() => setCloudFilePickerOpen(false)} onSelect={sendCloudFileMessage} open={cloudFilePickerOpen} />
       <input
         ref={fileInputRef}
@@ -9671,69 +9650,6 @@ function LiveChatsPage({
           onClose={() => setVideoPreview(null)}
           onIndexChange={() => undefined}
         />
-      ) : null}
-      {locationDraft && !mobileComposerLayout ? (
-        <div
-          className="dialog-backdrop location-share-backdrop"
-          onClick={() => {
-            if (locationDraft.phase !== "sending") setLocationDraft(null);
-          }}
-          role="presentation"
-        >
-          <section
-            aria-labelledby="location-share-title"
-            aria-modal="true"
-            className="location-share-modal"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-          >
-            <div className="location-share-preview" aria-hidden="true">
-              <span className="message-location-road road-one" />
-              <span className="message-location-road road-two" />
-              <span className="location-share-pin"><ComposerSvgIcon kind="location" /></span>
-            </div>
-            <div className="location-share-copy">
-              <span className="location-share-eyebrow">{t("location.current")}</span>
-              <h2 id="location-share-title">
-                {locationDraft.phase === "locating"
-                  ? t("location.locating")
-                  : locationDraft.phase === "error"
-                    ? t("location.unavailable")
-                    : t("location.sendThis")}
-              </h2>
-              {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
-                <p>{locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`}</p>
-              ) : (
-                <p>{locationDraft.error || t("common.pleaseWait")}</p>
-              )}
-            </div>
-            {locationDraft.phase === "ready" || locationDraft.phase === "sending" ? (
-              <div className="location-share-privacy">
-                <div>
-                  <strong>{t("location.approximate")}</strong>
-                  <span>{t("location.randomOffset", { distance: 50 })}</span>
-                </div>
-                <button
-                  aria-label={t("location.toggleApproximate")}
-                  className={`switch ${locationDraft.obscure ? "active" : ""}`}
-                  disabled={locationDraft.phase === "sending"}
-                  onClick={() => setLocationDraft((current) => current ? { ...current, obscure: !current.obscure } : current)}
-                  type="button"
-                />
-              </div>
-            ) : null}
-            <div className="location-share-actions">
-              <button className="ghost-button" disabled={locationDraft.phase === "sending"} onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button>
-              {locationDraft.phase === "error" ? (
-                <button className="button" onClick={openLocationPicker} type="button">{t("common.retry")}</button>
-              ) : (
-                <button className="button" disabled={locationDraft.phase !== "ready"} onClick={() => void sendLocationMessage()} type="button">
-                  {locationDraft.phase === "sending" ? t("common.sendingPlain") : t("message.sendLocation")}
-                </button>
-              )}
-            </div>
-          </section>
-        </div>
       ) : null}
       <TravelMapDrawer
         historyKey="user-travel-map"
