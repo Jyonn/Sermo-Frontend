@@ -582,6 +582,7 @@ export default function SquarePage() {
   const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
   const [submissionActionCount, setSubmissionActionCount] = useState(0);
   const [submissionTransitioning, setSubmissionTransitioning] = useState(false);
+  const publishRouteRef = useRef<HTMLDivElement | null>(null);
   const [publishVerificationOpen, setPublishVerificationOpen] = useState(false);
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
@@ -593,6 +594,17 @@ export default function SquarePage() {
     location: { latitude: number; longitude: number; address?: string };
     owner: TinyUserDTO;
   } | null>(null);
+
+  useEffect(() => {
+    if (!publishRouteOpen) return;
+    const closePublishRoute = (event: PointerEvent) => {
+      if (publishRouteRef.current?.contains(event.target as Node)) return;
+      setPublishRouteOpen(false);
+      setSubmissionRecipientStep(false);
+    };
+    window.addEventListener("pointerdown", closePublishRoute);
+    return () => window.removeEventListener("pointerdown", closePublishRoute);
+  }, [publishRouteOpen]);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; text?: string } } | null;
@@ -2192,7 +2204,7 @@ export default function SquarePage() {
               <span className="material-symbols-outlined">notifications</span>
               {notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}
             </button>
-            <div className="square-publish-route">
+            <div className="square-publish-route" ref={publishRouteRef}>
               <button aria-expanded={publishRouteOpen} className="square-header-publish" onClick={openPublishRoute} type="button">
                 <span className="material-symbols-outlined">edit_square</span>
                 <span>{t("square.publish")}</span>

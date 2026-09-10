@@ -33103,7 +33103,7 @@ html[data-theme="dark"] .submission-status-filters {
 .square-publish-route-menu {
   position: absolute;
   z-index: 45;
-  top: calc(100% + 9px);
+  top: calc(100% + 4px);
   right: 0;
   width: min(290px, calc(100vw - 28px));
   padding: 8px;
@@ -33221,7 +33221,6 @@ html[data-theme="dark"] .submission-status-filters {
 @media (max-width: 520px) {
   .square-feed-filter { gap: 13px; }
   .square-feed-filter .square-submission-switch { position: sticky; right: 0; }
-  .square-publish-route-menu { position: fixed; top: 112px; right: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-chat-list-screen.is-square-integrated.is-active,

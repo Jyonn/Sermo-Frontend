@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.6",
+  "id": "2026.09.10.7",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "投稿融入广场",
+      "title": "发言选择更顺手",
       "items": [
-        "发言入口现在可直接选择发布到广场或向官方、运营发起投稿",
-        "投稿工作区已并入广场，底部导航更加简洁"
+        "发言选择框现在紧贴入口展示",
+        "点击选择框外的区域即可自然收起"
       ]
     },
     "en": {
-      "title": "Submissions join Square",
+      "title": "A smoother post picker",
       "items": [
-        "The post action can now publish directly or start a submission with an official account or operator",
-        "Submission work now lives inside Square with a simpler bottom navigation"
+        "The post picker now opens directly beside its trigger",
+        "Clicking anywhere outside the picker closes it naturally"
       ]
     }
   }
