@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.10.15",
+  "id": "2026.09.10.16",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "桌面聊天迎来阔幅书写台",
+      "title": "桌面表情选择更轻巧",
       "items": [
-        "桌面聊天输入区升级为分层书写台，工具、正文与发送操作更加清晰",
-        "表情、附件、位置、足迹、语音、回复和成员提及均可从新书写台直接使用"
+        "阔幅书写台使用统一表情入口，选择面板会在按钮上方轻巧展开"
       ]
     },
     "en": {
-      "title": "A wide writing desk for desktop chat",
+      "title": "A lighter desktop emoji picker",
       "items": [
-        "Desktop chat now separates tools, writing, and sending into a spacious composer",
-        "Emoji, attachments, location, footprints, voice, replies, and mentions remain directly available"
+        "The wide composer now uses one emoji entry and opens a compact picker above it"
       ]
     }
   }

@@ -8097,8 +8097,7 @@ function LiveChatsPage({
                       </div>
                     ) : undefined}
                     tools={<>
-                      <button aria-pressed={emojiPickerOpen && emojiPage >= 0} className={emojiPickerOpen && emojiPage >= 0 ? "is-active" : ""} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPage(0); setEmojiPickerOpen((current) => !current || emojiPage < 0); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
-                      <button aria-pressed={emojiPickerOpen && emojiPage === STICKER_MY_PAGE} className={emojiPickerOpen && emojiPage === STICKER_MY_PAGE ? "is-active" : ""} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPage(STICKER_MY_PAGE); setEmojiPickerOpen((current) => !(current && emojiPage === STICKER_MY_PAGE)); }} title={t("sticker.mine")} type="button"><span className="material-symbols-outlined">photo_library</span></button>
+                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={() => { setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       {canSendImage ? <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button> : null}
                       <button disabled={composerBusy} onClick={openFilePicker} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
                       {canSendLocation ? <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button> : null}
