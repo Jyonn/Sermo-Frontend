@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.24",
+  "id": "2026.09.10.25",
   "publishedAt": "2026-09-10",
   "locales": {
     "zh-CN": {
-      "title": "两间会动的手绘小屋",
+      "title": "桌面书写台更专注",
       "items": [
-        "LV17 新增夜航友间与午后花房两款动态聊天背景",
-        "星光、窗灯与花叶会轻轻流动，也会尊重系统的减少动态效果设置"
+        "桌面聊天输入区现在完整铺开，移除了发送按钮与字数提示",
+        "点击任意书写空白处即可输入，也可拖动工具栏边界调整书写高度"
       ]
     },
     "en": {
-      "title": "Two illustrated rooms in motion",
+      "title": "A more focused desktop writing desk",
       "items": [
-        "Level 17 now unlocks Rooms at Night and Afternoon Conservatory chat backgrounds",
-        "Stars, window lights, and petals move gently while respecting reduced-motion preferences"
+        "The desktop chat editor now uses the full width without a send button or character counter",
+        "Click anywhere on the writing canvas to type, or drag the toolbar edge to resize it"
       ]
     }
   }

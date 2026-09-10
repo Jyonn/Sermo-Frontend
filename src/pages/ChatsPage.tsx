@@ -8105,9 +8105,6 @@ function LiveChatsPage({
                   </div>
                 ) : (
                   <DesktopChatComposerDesk
-                    characterCount={draft.length}
-                    sendDisabled={composerBusy || !draft.trim()}
-                    sendLabel={t("common.send")}
                     shortcutLabel={t("composer.desktopShortcut")}
                     reply={replyingTo ? (
                       <div className="composer-reply-preview">

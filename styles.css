@@ -34210,10 +34210,10 @@ html[data-theme="dark"] .verification-banner-action {
   display: contents;
 }
 
-/* Desktop wide writing desk: tools, writing canvas, and send action use separate visual planes. */
+/* Desktop wide writing desk: a resizable toolbar and uninterrupted writing canvas. */
 @media (min-width: 901px) {
   .chat-detail-active .composer.is-desktop-writing-desk {
-    min-height: 220px;
+    min-height: 180px;
     padding: 0 20px 10px;
     background: color-mix(in srgb, var(--chat-chrome-surface, var(--bg-panel)) 96%, transparent);
   }
@@ -34221,20 +34221,54 @@ html[data-theme="dark"] .verification-banner-action {
   .desktop-writing-desk {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: 51px minmax(128px, 1fr) 30px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 51px minmax(0, 1fr);
+    width: 100%;
+    height: var(--desktop-writing-desk-height, 220px);
     min-width: 0;
-    min-height: 209px;
-    column-gap: 14px;
+    min-height: 180px;
+    max-height: min(480px, 50vh);
   }
 
   .desktop-writing-desk-toolbar {
+    position: relative;
     display: flex;
-    grid-column: 1 / -1;
     align-items: center;
     justify-content: space-between;
     min-width: 0;
     border-bottom: 1px solid var(--chat-chrome-border, var(--line-soft));
+  }
+
+  .desktop-writing-desk-resize-handle {
+    position: absolute;
+    z-index: 5;
+    top: 45px;
+    right: 0;
+    left: 0;
+    height: 13px;
+    outline: 0;
+    cursor: ns-resize;
+    touch-action: none;
+  }
+
+  .desktop-writing-desk-resize-handle::after {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 34px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--chat-chrome-border, var(--line-soft));
+    content: "";
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 140ms ease, width 140ms ease, background 140ms ease;
+  }
+
+  .desktop-writing-desk-resize-handle:is(:hover, :focus-visible)::after {
+    width: 46px;
+    background: color-mix(in srgb, var(--brand-primary) 60%, var(--chat-chrome-border, var(--line-soft)));
+    opacity: 1;
   }
 
   .desktop-writing-desk-tools {
@@ -34710,10 +34744,11 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-writing-desk-input {
     position: relative;
-    grid-column: 1;
     grid-row: 2;
     min-width: 0;
+    min-height: 0;
     padding: 16px 4px 4px;
+    cursor: text;
   }
 
   .desktop-writing-desk.has-reply .desktop-writing-desk-input {
@@ -34721,10 +34756,11 @@ html[data-theme="dark"] .verification-banner-action {
   }
 
   .desktop-writing-desk-input .composer-rich-input {
+    display: block;
     width: 100%;
     height: 100%;
-    min-height: 74px;
-    max-height: 150px;
+    min-height: 0;
+    max-height: none;
     padding: 0;
     overflow-y: auto;
     border: 0;
@@ -34741,64 +34777,6 @@ html[data-theme="dark"] .verification-banner-action {
     right: 0;
     bottom: calc(100% + 8px);
     left: 0;
-  }
-
-  .desktop-writing-desk-send {
-    display: flex;
-    grid-column: 2;
-    grid-row: 2;
-    align-items: flex-end;
-    justify-content: flex-end;
-    padding-bottom: 5px;
-  }
-
-  .desktop-writing-desk-send-button {
-    display: inline-flex;
-    min-width: 94px;
-    min-height: 42px;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    padding: 0 15px;
-    border: 0;
-    border-radius: 13px;
-    color: #073326;
-    background: var(--brand-primary);
-    box-shadow: 0 9px 20px color-mix(in srgb, var(--brand-primary) 22%, transparent);
-    font-size: .78rem;
-    font-weight: 820;
-    cursor: pointer;
-    transition: transform 180ms cubic-bezier(.16, 1, .3, 1), box-shadow 180ms ease, opacity 180ms ease;
-  }
-
-  .desktop-writing-desk-send-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 24px color-mix(in srgb, var(--brand-primary) 29%, transparent);
-  }
-
-  .desktop-writing-desk-send-button:disabled {
-    box-shadow: none;
-    cursor: not-allowed;
-    opacity: .42;
-  }
-
-  .desktop-writing-desk-send-button .material-symbols-outlined {
-    font-size: 18px;
-  }
-
-  .desktop-writing-desk-footer {
-    display: flex;
-    grid-column: 1 / -1;
-    grid-row: 3;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--text-muted);
-    font-size: .67rem;
-  }
-
-  .desktop-writing-desk-footer strong {
-    color: var(--text-secondary);
-    font-weight: 760;
   }
 
   .composer.is-desktop-writing-desk > .composer-actions-reveal {
@@ -34835,10 +34813,6 @@ html[data-theme="dark"] .verification-banner-action {
 
   .composer.is-desktop-writing-desk .composer-sticker-source {
     display: none;
-  }
-
-  html[data-theme="dark"] .desktop-writing-desk-send-button {
-    color: #062b20;
   }
 
   html[data-theme="dark"] .composer.is-desktop-writing-desk > .desktop-emoji-reveal .composer-emoji-panel {
