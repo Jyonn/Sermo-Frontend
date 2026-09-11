@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.7",
+  "id": "2026.09.12.8",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序动态聊天背景补齐",
+      "title": "广场回到顶部按钮修复",
       "items": [
-        "夜航友间与午后花房现已在小程序中完整显示，并恢复分层动植物动画",
-        "典藏星夜回旋背景加入小程序，支持慢速旋涡与云流动效"
+        "修复小程序回到顶部图标未垂直居中的问题",
+        "恢复网页版广场回到顶部图标显示"
       ]
     },
     "en": {
-      "title": "Living chat backgrounds arrive in the mini program",
+      "title": "Square back-to-top button fixes",
       "items": [
-        "Frienden Night and Afternoon Garden now render fully with layered living motion",
-        "The Collector Starry Rotation background now includes slow vortices and cloud flow"
+        "Fixed vertical alignment of the mini program back-to-top icon",
+        "Restored the back-to-top icon in the web Square"
       ]
     }
   }

@@ -2420,7 +2420,9 @@ export default function SquarePage() {
             title={t("square.backToTop")}
             type="button"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11 12 4l7 7M12 4v16" /></svg>
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+              <path d="M5 11 12 4l7 7M12 4v16" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+            </svg>
           </button>
         ) : null}
         </div> : <div className="square-workspace-surface is-submission">

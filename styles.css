@@ -28992,7 +28992,8 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 }
 .square-feed-scroll-top:hover { transform: translateY(-2px); }
 .square-feed-scroll-top:focus-visible { outline: 2px solid color-mix(in srgb, var(--brand-primary) 52%, white); outline-offset: 3px; }
-.square-feed-scroll-top svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.square-feed-scroll-top svg { display: block; flex: 0 0 22px; width: 22px; height: 22px; overflow: visible; color: #fff; }
+.square-feed-scroll-top svg path { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; vector-effect: non-scaling-stroke; }
 html[data-theme="dark"] .square-feed-scroll-top { border-color: rgba(92, 224, 173, .28); background: color-mix(in srgb, var(--brand-primary) 70%, #15271f); box-shadow: 0 12px 30px rgba(0, 0, 0, .34); }
 
 @media (max-width: 900px) {
