@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.14",
+  "id": "2026.09.11.15",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "星夜回旋预览比例修正",
+      "title": "星夜回旋更加舒缓",
       "items": [
-        "个性化聊天页中的星涡尺寸、中心位置与原始设计保持一致",
-        "修正天空动画的裁切范围，完整呈现星空与村庄之间的构图"
+        "降低星涡、月涡与星团的旋转速度，观看更加舒缓",
+        "保留各图层之间的速度差与正反转层次"
       ]
     },
     "en": {
-      "title": "Starry Rotation preview proportions corrected",
+      "title": "A calmer Starry Rotation",
       "items": [
-        "Star vortex sizes and centers in chat personalization now match the original design",
-        "The animated sky boundary has been corrected to preserve the intended sky and village composition"
+        "Slowed the rotating vortices, moon, and star clusters for a calmer experience",
+        "Preserved the layered speed differences and alternating rotation directions"
       ]
     }
   }
