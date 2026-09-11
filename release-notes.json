@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.3",
+  "id": "2026.09.12.4",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序顶部按钮对齐优化",
+      "title": "小程序广场排版修复",
       "items": [
-        "修复微信原生按钮样式导致 Header 主操作纵向偏移的问题",
-        "聊天、通讯、广场、投稿和菜单的主操作现在稳定保持方形并垂直居中"
+        "探索、好友圈和我的页签已恢复，并与通知、额度和搜索操作清晰排布",
+        "活动横幅与置顶发言恢复满宽展示，发言正文统一左对齐"
       ]
     },
     "en": {
-      "title": "Aligned mini program header actions",
+      "title": "Fixed mini program Square layout",
       "items": [
-        "Fixed vertical misalignment caused by WeChat's native button styles",
-        "Primary actions across Chat, Contacts, Square, Submissions, and Menu now stay square and vertically centered"
+        "Restored the Explore, Friends, and Mine tabs alongside the notification, quota, and search actions",
+        "Activity banners and pinned posts now span the content width, while statement text stays left-aligned"
       ]
     }
   }
