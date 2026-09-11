@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.5",
+  "id": "2026.09.12.6",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "广场与投稿切换更有空间感",
+      "title": "小程序通讯录焕新",
       "items": [
-        "广场与投稿切换时会通过立体翻转交换左右位置，状态变化更加明确",
-        "修复广场回到顶部按钮被拉伸为椭圆的问题"
+        "通讯页采用清晰的好友申请与群聊入口卡片，常用操作更集中",
+        "好友按字母分组展示，并补充在线状态、身份标签与快捷索引"
       ]
     },
     "en": {
-      "title": "A more dimensional Square and Submissions switch",
+      "title": "A refreshed mini program directory",
       "items": [
-        "Square and Submissions now exchange positions with a dimensional flip that makes the active workspace clearer",
-        "Fixed the Square back-to-top control being stretched into an oval"
+        "Friend requests and group chats now share a focused entry card for faster access",
+        "Friends are grouped alphabetically with presence, role badges, and a quick index"
       ]
     }
   }
