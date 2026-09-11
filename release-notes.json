@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.17",
+  "id": "2026.09.11.18",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "桌面聊天保持简洁背景",
+      "title": "聊天背景可读性提升",
       "items": [
-        "桌面端聊天页始终使用简洁默认背景",
-        "个人背景与群主设置的群聊背景仅在移动端展示"
+        "所有聊天背景统一使用清晰稳定的顶部栏与锁定区",
+        "群聊昵称增加轻量身份标签，在复杂背景上也能轻松辨认"
       ]
     },
     "en": {
-      "title": "A clean chat background on desktop",
+      "title": "Improved readability over chat backgrounds",
       "items": [
-        "Desktop conversations now always use the clean default background",
-        "Personal and group-owner backgrounds remain available on mobile"
+        "All chat backgrounds now share clear, consistent header and pinned-message surfaces",
+        "Group-chat names use lightweight identity labels that remain readable over detailed artwork"
       ]
     }
   }

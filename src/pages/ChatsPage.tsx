@@ -7683,6 +7683,7 @@ function LiveChatsPage({
     ? selectedChat.groupBackgroundTheme
     : personalChatBackgroundTheme;
   const chatBackgroundTheme = mobileComposerLayout ? preferredChatBackgroundTheme : "default";
+  const hasDecorativeChatBackground = chatBackgroundTheme !== "default";
   const usesPersonalCustomBackground = chatBackgroundTheme === "custom";
   const chatLayoutStyle = selectedChat
     ? ({
@@ -7714,7 +7715,7 @@ function LiveChatsPage({
       hideTopbar={!displayedChat}
       hideMobileNav={Boolean(displayedChat)}
       hidePageTitle={Boolean(displayedChat)}
-      topbarClassName={displayedChat ? `conversation-topbar chat-background-${chatBackgroundTheme}${isClosingChatView ? " is-closing" : ""}` : undefined}
+      topbarClassName={displayedChat ? `conversation-topbar chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? " has-chat-wallpaper" : ""}${isClosingChatView ? " is-closing" : ""}` : undefined}
       topbarStyle={displayedChat ? chatLayoutStyle : undefined}
       topbarProgress={displayedChat ? sendProgress : null}
       topbarLeading={
@@ -7779,7 +7780,7 @@ function LiveChatsPage({
         ) : undefined
       }
     >
-      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
+      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? " has-chat-wallpaper" : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : !session?.user?.verified ? " has-verification-banner" : ""}${squareIntegrated ? " is-square-integrated" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section
