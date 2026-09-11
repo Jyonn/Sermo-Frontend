@@ -2417,7 +2417,7 @@
   ,"activity.starry.reward": "Collector living chat background"
   ,"activity.starry.rewardHint": "True painted layers rotate around their celestial cores"
   ,"activity.starry.rules": "Stargazing rules"
-  ,"activity.starry.rule1": "Send any chat message between 20:00 and 24:00 Beijing time to light one star that evening."
+  ,"activity.starry.rule1": "The previous five days are checked when the event is claimed; send any chat message between 20:00 and 24:00 Beijing time to light one star that evening."
   ,"activity.starry.rule2": "Light five consecutive evenings. A missed night resets the streak; an unlocked reward remains permanent."
   ,"activity.starry.observed": "Observed"
   ,"activity.starry.tonight": "Tonight"

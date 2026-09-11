@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.10",
+  "id": "2026.09.11.11",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "广场活动横幅焕新",
+      "title": "五夜星旋支持历史进度",
       "items": [
-        "八仙、永久 VIP、友好邻居和五夜星旋现在拥有各自独立的活动排版",
-        "横幅直接展示活动进度与核心奖励，蜘蛛侠活动不再标记为预告"
+        "空间认领活动时会回溯过去五天的夜间聊天，并继承仍连续的观测进度",
+        "缩小活动奖励预览中的旋转星核，避免遮挡星空村庄与树木"
       ]
     },
     "en": {
-      "title": "Redesigned Square activity banners",
+      "title": "Five Nights now recognizes recent progress",
       "items": [
-        "Baxian, Permanent VIP, Friendly Neighborhood, and Five Nights now have distinct campaign layouts",
-        "Banners surface progress and key rewards directly, and Spider-Man is no longer marked as a preview"
+        "Claiming the event now checks the previous five evenings and carries forward an active observation streak",
+        "Rotating stars in the reward preview are smaller so the village and trees remain visible"
       ]
     }
   }

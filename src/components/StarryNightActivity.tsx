@@ -43,7 +43,7 @@ export function StarryNightActivity({ activity, onConfigure }: { activity: Activ
     <section className="starry-night-reward-stage">
       <header><small>COLLECTOR REWARD</small><h3>{t("menu.themeStarryNight")}</h3><p>{t("activity.starry.rewardHint")}</p></header>
       <div className="starry-night-chat-preview">
-        <FriendenLivingWallpaper theme="starry-night" />
+        <FriendenLivingWallpaper compact theme="starry-night" />
         <span className="starry-night-preview-time">22:18</span>
         <div className="starry-night-preview-message is-left"><i>✦</i><span>{t("activity.starry.previewLeft")}</span></div>
         <div className="starry-night-preview-message is-right"><span>{t("activity.starry.previewRight")}</span><i>☾</i></div>
