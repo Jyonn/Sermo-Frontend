@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.1",
+  "id": "2026.09.12.2",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序顶部操作更清晰",
+      "title": "小程序顶部按钮恢复紧凑尺寸",
       "items": [
-        "聊天、通讯、广场和菜单现在都在微信胶囊左侧提供一致的主操作",
-        "广场通知、额度与搜索已移至子页签右侧，投稿时会切换为新建投稿"
+        "修复微信基础库将 Header 主操作拉伸为横栏的问题",
+        "聊天、通讯、广场、投稿和菜单的主操作现在保持统一方形尺寸"
       ]
     },
     "en": {
-      "title": "Clearer mini program header actions",
+      "title": "Compact mini program header actions",
       "items": [
-        "Chat, Contacts, Square, and Menu now share one consistent primary action beside the WeChat capsule",
-        "Square notifications, quota, and search now sit beside the subtabs, while Submissions switches to a dedicated create action"
+        "Fixed a WeChat base-library sizing rule that stretched the primary header action",
+        "Primary actions across Chat, Contacts, Square, Submissions, and Menu now keep a consistent square size"
       ]
     }
   }
