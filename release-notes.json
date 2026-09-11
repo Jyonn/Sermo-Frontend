@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.7",
+  "id": "2026.09.11.8",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "连续五夜，让星空住进聊天",
+      "title": "五夜星旋活动页全面升级",
       "items": [
-        "空间管理员可认领限时 15 天的五夜星旋活动，认领后才会在广场展示",
-        "北京时间连续 5 晚在 20:00–24:00 聊天，可永久解锁典藏动态背景“星夜回旋”"
+        "以完整主视觉、五星观测航线和活动时间索引重构五夜星旋活动页",
+        "新增动态聊天实景奖励预览，可直观看到典藏背景的真实旋转效果"
       ]
     },
     "en": {
-      "title": "Five nights bring the stars into chat",
+      "title": "The Five Nights event gets a complete visual upgrade",
       "items": [
-        "Space admins can claim the 15-day Five Nights event; its Square banner appears only after claiming",
-        "Chat between 20:00 and 24:00 Beijing time for five consecutive evenings to permanently unlock the Collector Starry Rotation background"
+        "Rebuilt the Five Nights page with a full hero scene, five-star observation route, and event date index",
+        "Added a live chat reward preview that shows the Collector background's true rotating motion"
       ]
     }
   }
