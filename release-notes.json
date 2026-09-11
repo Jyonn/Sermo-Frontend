@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.22",
+  "id": "2026.09.11.23",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "广场与投稿切换更自然",
+      "title": "小程序广场与投稿融为一体",
       "items": [
-        "广场与投稿现在通过标题旁的同域页签直接切换",
-        "探索、好友圈、我的以及投稿审批页签统一左对齐并平滑过渡"
+        "微信小程序现在可从广场标题直接切换投稿，无需离开当前页面",
+        "我的投稿与审批沿用广场页签布局，并汇总展示待处理提醒"
       ]
     },
     "en": {
-      "title": "Smoother switching between Square and Submissions",
+      "title": "Square and Submissions now share one mini program workspace",
       "items": [
-        "Switch directly between Square and Submissions from the shared page title",
-        "Square and submission tabs now share a left-aligned track with smoother transitions"
+        "The WeChat mini program now switches between Square and Submissions from the shared title without leaving the page",
+        "My Submissions and Review use the same tab layout and surface combined pending alerts"
       ]
     }
   }
