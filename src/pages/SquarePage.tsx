@@ -2282,54 +2282,63 @@ export default function SquarePage() {
             {regularActivities.slice(0, 1).map((activity) => {
               const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
+              const litFormation = Math.min(8, Math.floor((activity.space_total / Math.max(1, activity.target)) * 8));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
                 {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
-                <span className="square-activity-banner-copy">
-                  <small>{t("activity.spaceCoop")} · {days === null ? t("activity.noTimeLimit") : t("activity.daysLeft", { count: days })}</small>
-                  <span><b>{activity.space_total}</b><i>/</i>{activity.target} {t("activity.force")}</span>
-                </span>
-                <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
-                <span className="square-activity-banner-progress"><i style={{ transform: `scaleX(${Math.min(1, activity.space_total / Math.max(1, activity.target))})` }} /></span>
+                <span className="square-baxian-banner-shade" />
+                <img alt="" aria-hidden="true" className="square-baxian-banner-title" src={baxianActivityTitle} />
+                <span className="square-baxian-banner-kicker"><small>SPACE CO-OP</small><strong>{t("activity.spaceCoop")}</strong></span>
+                <span className="square-baxian-banner-reward"><small>{days === null ? t("activity.noTimeLimit") : t("activity.daysLeft", { count: days })}</small><b>{t("activity.randomBaxian")} ×2</b></span>
+                <span className="square-baxian-banner-formation">{Array.from({ length: 8 }, (_, index) => <i className={index < litFormation ? "is-lit" : ""} key={index} />)}</span>
+                <span className="square-baxian-banner-count"><b>{activity.space_total}</b><small> / {activity.target} {t("activity.force")}</small></span>
+                <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
               </button>;
             })}
             {showVipCampaign && vipCampaign ? <button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => setVipCampaignOpen(true)} type="button">
               {claimableActivityKeys.includes("vip:founding-100") ? <i className="square-activity-claim-dot" /> : null}
-              <span className="square-vip-banner-orbit" aria-hidden="true"><i /><i /><b>VIP</b></span>
-              <span className="square-vip-banner-copy">
-                <small>FOUNDING 100</small>
-                <strong>{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
-                <span>{vipCampaign.claimed_by_user ? t("vip.claimedSlot", { slot: vipCampaign.slot ?? "-" }) : t("vip.remaining", { count: vipCampaign.remaining })}</span>
-              </span>
-              <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
+              <span className="square-vip-banner-index">FRIENDEN · FOUNDING 100</span>
+              <strong className="square-vip-banner-title">{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
+              <span className="square-vip-banner-number">{String(vipCampaign.slot ?? Math.max(1, 100 - vipCampaign.remaining)).padStart(3, "0")}</span>
+              <span className="square-vip-banner-seal"><b>{vipCampaign.claimed_by_user ? vipCampaign.slot : vipCampaign.remaining}</b><small>{vipCampaign.claimed_by_user ? "VIP" : t("vip.remaining", { count: vipCampaign.remaining })}</small></span>
+              <span className="square-vip-banner-reward"><i /><span><small>{t("activity.limitedReward")}</small><strong>{t("vip.bubbleTitle")} · {t("vip.badgeTitle")}</strong></span></span>
+              <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
-            {spiderManActivity ? <button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man-preview" onClick={() => navigate(`/app/square/activities/${spiderManActivity.key}`)} type="button">
-              <img alt="" aria-hidden="true" className="square-spider-man-preview-art" src={spiderMan4PreviewBanner} />
-              <span className="square-spider-man-preview-copy">
-                <small>{t("activity.preview")}</small>
-                <strong>{t("activity.spiderMan4Title")}</strong>
-                <b>{t("activity.spiderMan4Subtitle")}</b>
-                <span>{t("activity.spiderMan4Description")}</span>
-              </span>
-              <span className="square-spider-man-preview-status"><i />{t("activity.friendly.webPoints")} {spiderManActivity.friendly_neighbor?.web_points ?? 0}</span>
+            {spiderManActivity ? <button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man" onClick={() => navigate(`/app/square/activities/${spiderManActivity.key}`)} type="button">
+              <img alt="" aria-hidden="true" className="square-spider-man-art" src={spiderMan4PreviewBanner} />
+              <span className="square-spider-man-live"><i />{t("admin.activityStatus.active")}</span>
+              <strong className="square-spider-man-title">{t("activity.friendly.title")}</strong>
+              <span className="square-spider-man-web" aria-hidden="true" />
+              <span className="square-spider-man-score"><b>{spiderManActivity.friendly_neighbor?.web_points ?? 0}</b><span>{t("activity.friendly.webPoints")}<small>{t("activity.friendly.next", { count: spiderManActivity.friendly_neighbor?.next_reply_points ?? 0 })}</small></span></span>
+              <span className="square-spider-man-rewards">{(spiderManActivity.friendly_neighbor?.rewards?.length ? spiderManActivity.friendly_neighbor.rewards : [
+                { key: "frame", threshold: 75, resource_type: "frame" as const },
+                { key: "profile", threshold: 100, resource_type: "profile" as const },
+              ]).map((reward) => <span key={reward.key}><b>{reward.threshold}</b> {reward.resource_type === "frame" ? t("activity.friendly.frame") : t("activity.friendly.profile")}</span>)}</span>
+              <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {starryNightActivity ? <button aria-label={t("activity.starry.title")} className="square-activity-banner is-starry-night" onClick={() => navigate(`/app/square/activities/${starryNightActivity.key}`)} type="button">
               <img alt="" aria-hidden="true" src={starryNightBanner} />
-              <span className="square-starry-night-copy"><small>{t("growth.rarity.legendary")}</small><strong>{t("activity.starry.title")}</strong><span>{t("activity.starry.subtitle")}</span></span>
-              <span className="square-starry-night-status"><b>{starryNightActivity.starry_night?.streak_days ?? 0}</b> / {starryNightActivity.starry_night?.target_days ?? 5} ★</span>
+              <span className="square-starry-night-rarity">{t("growth.rarity.legendary")} · COLLECTION</span>
+              <span className="square-starry-night-orbit" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i className={index < (starryNightActivity.starry_night?.streak_days ?? 0) ? "is-lit" : ""} key={index}>★</i>)}</span>
+              <span className="square-starry-night-count"><b>{starryNightActivity.starry_night?.streak_days ?? 0}</b><small> / {starryNightActivity.starry_night?.target_days ?? 5} {t("activity.starry.currentStreak")}</small></span>
+              <span className="square-starry-night-title"><small>{starryNightActivity.starry_night?.window_start ?? "20:00"}—{starryNightActivity.starry_night?.window_end ?? "24:00"}</small><strong>{t("activity.starry.title")}</strong></span>
+              <span className="square-starry-night-reward"><small>{t("activity.starry.reward")}</small><b>{t("menu.themeStarryNight")}</b></span>
+              <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {regularActivities.slice(1).map((activity) => {
               const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
+              const litFormation = Math.min(8, Math.floor((activity.space_total / Math.max(1, activity.target)) * 8));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
                 {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
-                <span className="square-activity-banner-copy">
-                  <small>{t("activity.spaceCoop")} · {days === null ? t("activity.noTimeLimit") : t("activity.daysLeft", { count: days })}</small>
-                  <span><b>{activity.space_total}</b><i>/</i>{activity.target} {t("activity.force")}</span>
-                </span>
-                <span className="square-activity-banner-enter"><span>{t("activity.enter")}</span><span className="material-symbols-outlined">arrow_forward</span></span>
-                <span className="square-activity-banner-progress"><i style={{ transform: `scaleX(${Math.min(1, activity.space_total / Math.max(1, activity.target))})` }} /></span>
+                <span className="square-baxian-banner-shade" />
+                <img alt="" aria-hidden="true" className="square-baxian-banner-title" src={baxianActivityTitle} />
+                <span className="square-baxian-banner-kicker"><small>SPACE CO-OP</small><strong>{t("activity.spaceCoop")}</strong></span>
+                <span className="square-baxian-banner-reward"><small>{days === null ? t("activity.noTimeLimit") : t("activity.daysLeft", { count: days })}</small><b>{t("activity.randomBaxian")} ×2</b></span>
+                <span className="square-baxian-banner-formation">{Array.from({ length: 8 }, (_, index) => <i className={index < litFormation ? "is-lit" : ""} key={index} />)}</span>
+                <span className="square-baxian-banner-count"><b>{activity.space_total}</b><small> / {activity.target} {t("activity.force")}</small></span>
+                <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
               </button>;
             })}
           </section>{activityBannerCount > 1 ? <div className="square-activity-pagination" aria-label={t("activity.active")}>{Array.from({ length: activityBannerCount }, (_, index) => <button aria-current={activityBannerSlide === index ? "true" : undefined} className={activityBannerSlide === index ? "is-active" : ""} key={index} onClick={() => {

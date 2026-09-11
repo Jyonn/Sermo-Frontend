@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.9",
+  "id": "2026.09.11.10",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "群聊默认跟随你的聊天背景",
+      "title": "广场活动横幅焕新",
       "items": [
-        "未设置群背景时，每位成员都会看到自己的个人聊天背景",
-        "群主设置系统背景后，成员仍可选择继续使用自己的背景"
+        "八仙、永久 VIP、友好邻居和五夜星旋现在拥有各自独立的活动排版",
+        "横幅直接展示活动进度与核心奖励，蜘蛛侠活动不再标记为预告"
       ]
     },
     "en": {
-      "title": "Group chats now follow your background by default",
+      "title": "Redesigned Square activity banners",
       "items": [
-        "When no group background is set, every member sees their own personal chat background",
-        "After an owner selects a system background, members can still choose to keep their own"
+        "Baxian, Permanent VIP, Friendly Neighborhood, and Five Nights now have distinct campaign layouts",
+        "Banners surface progress and key rewards directly, and Spider-Man is no longer marked as a preview"
       ]
     }
   }
