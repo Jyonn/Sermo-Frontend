@@ -30,6 +30,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ContentDatePicker } from "../components/ContentDatePicker";
 import { CloudFilePickerSheet } from "../components/CloudFilePickerSheet";
 import { FeedbackState } from "../components/FeedbackState";
+import { FriendenLivingWallpaper } from "../components/FriendenLivingWallpaper";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { OperatorBadge } from "../components/OperatorBadge";
@@ -7857,6 +7858,7 @@ function LiveChatsPage({
                   event.preventDefault();
                 }}
               >
+              <FriendenLivingWallpaper theme={chatBackgroundTheme} />
               <div
                 ref={messageScrollRef}
                 className="message-scroll"
@@ -10168,6 +10170,7 @@ function PreviewChatConversation({ config }: { config: ChatsPagePreviewConfig })
         onContextMenu={(event) => event.preventDefault()}
       >
         <div className={`chat-detail-scene chat-background-${config.backgroundTheme ?? "default"}`} style={previewBackgroundStyle}>
+          <FriendenLivingWallpaper theme={config.backgroundTheme} />
           <div className="message-scroll">
             {groups.map((group) => <MessageGroupBlock enteringMessageIds={[]} group={group} key={group.key} onOpenActions={noop} onOpenImage={noop} onOpenVideo={noop} onRetry={noop} onToggleGroupSelection={noop} onToggleSelection={noop} selectedClientIds={[]} selectionMode={false} showAuthor={false} />)}
           </div>
@@ -10373,6 +10376,7 @@ export function ChatPreview({
       onClickCapture={handleMessageClick}
     >
       <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
+        <FriendenLivingWallpaper theme={backgroundTheme} />
         {messageList}
       </div>
     </section>

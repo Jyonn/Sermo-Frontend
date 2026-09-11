@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.10.25",
-  "publishedAt": "2026-09-10",
+  "id": "2026.09.11.1",
+  "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "桌面书写台更专注",
+      "title": "手绘小屋真正住进了朋友",
       "items": [
-        "桌面聊天输入区现在完整铺开，移除了发送按钮与字数提示",
-        "点击任意书写空白处即可输入，也可拖动工具栏边界调整书写高度"
+        "夜航友间与午后花房取消整幅漂移和随机飘落效果",
+        "动物会探头、呼吸、轻跳和浇水，植物也会沿着根部自然摆动"
       ]
     },
     "en": {
-      "title": "A more focused desktop writing desk",
+      "title": "The illustrated rooms come alive",
       "items": [
-        "The desktop chat editor now uses the full width without a send button or character counter",
-        "Click anywhere on the writing canvas to type, or drag the toolbar edge to resize it"
+        "Rooms at Night and Afternoon Conservatory no longer drift as a whole or use floating particles",
+        "Animals now peek, breathe, hop, and water plants while foliage sways naturally from its roots"
       ]
     }
   }

@@ -12858,7 +12858,7 @@ html[data-theme="dark"] .gesture-lock-screen {
   }
 }
 
-/* FRIENDEN illustrated rooms: artwork stays anchored while the atmosphere moves above it. */
+/* FRIENDEN illustrated rooms: the painting stays still while its inhabitants move. */
 :is(.chat-background-frienden-night, .chat-background-frienden-garden) {
   --chat-chrome-surface: rgba(250, 246, 232, .8);
   --chat-chrome-border: rgba(49, 55, 43, .2);
@@ -12868,54 +12868,116 @@ html[data-theme="dark"] .gesture-lock-screen {
 .chat-detail-scene.chat-background-frienden-night::before,
 :is(.chat-background-preview[data-theme="frienden-night"], .chat-background-choice.theme-frienden-night > span, .personalization-background-swatch.theme-frienden-night) {
   background: #102d63 url("/assets/frienden-wallpapers/night-rooms.webp") center 48% / cover no-repeat;
-  animation: frienden-rooms-breathe 18s cubic-bezier(.45, 0, .55, 1) infinite alternate;
 }
 
 .chat-detail-scene.chat-background-frienden-garden::before,
 :is(.chat-background-preview[data-theme="frienden-garden"], .chat-background-choice.theme-frienden-garden > span, .personalization-background-swatch.theme-frienden-garden) {
   background: #a9d6a0 url("/assets/frienden-wallpapers/garden-rooms.webp") center 48% / cover no-repeat;
-  animation: frienden-rooms-breathe 21s cubic-bezier(.45, 0, .55, 1) infinite alternate-reverse;
 }
 
-.chat-detail-scene:is(.chat-background-frienden-night, .chat-background-frienden-garden)::after {
+.frienden-living-wallpaper {
   position: absolute;
-  inset: -12%;
+  inset: 0;
   z-index: 0;
-  content: "";
+  overflow: hidden;
   pointer-events: none;
 }
 
-.chat-detail-scene.chat-background-frienden-night::after {
-  background:
-    radial-gradient(circle, rgba(255, 230, 138, .92) 0 2px, transparent 2.8px) 8% 12% / 151px 173px,
-    radial-gradient(circle, rgba(194, 233, 203, .74) 0 1.5px, transparent 2.4px) 66% 43% / 197px 211px;
-  filter: drop-shadow(0 0 4px rgba(255, 220, 110, .42));
-  animation: frienden-night-lights 13s ease-in-out infinite alternate;
+.frienden-living-wallpaper > i {
+  position: absolute;
+  inset: 0;
+  background-position: center 48%;
+  background-size: cover;
+  clip-path: var(--frienden-clip);
+  transform-origin: var(--frienden-origin);
+  animation-delay: var(--frienden-delay);
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(.45, 0, .22, 1);
+  will-change: transform;
 }
 
-.chat-detail-scene.chat-background-frienden-garden::after {
-  background:
-    radial-gradient(ellipse at center, rgba(255, 246, 193, .86) 0 3px, transparent 3.8px) 7% 9% / 139px 181px,
-    radial-gradient(ellipse at center, rgba(103, 157, 97, .45) 0 2px, transparent 3px) 72% 36% / 181px 223px;
-  transform: rotate(-7deg);
-  animation: frienden-garden-petals 17s linear infinite;
+.frienden-living-wallpaper.is-frienden-night > i {
+  background-image: url("/assets/frienden-wallpapers/night-rooms.webp");
 }
 
-@keyframes frienden-rooms-breathe {
-  from { background-position: center 46%; filter: saturate(.96) brightness(.98); }
-  to { background-position: center 52%; filter: saturate(1.04) brightness(1.025); }
+.frienden-living-wallpaper.is-frienden-garden > i {
+  background-image: url("/assets/frienden-wallpapers/garden-rooms.webp");
 }
 
-@keyframes frienden-night-lights {
-  0%, 100% { opacity: .45; transform: translate3d(-8px, 5px, 0) scale(.99); }
-  42% { opacity: .88; }
-  70% { opacity: .6; }
-  100% { transform: translate3d(12px, -9px, 0) scale(1.015); }
+.frienden-living-wallpaper .is-breathe { animation-name: frienden-creature-breathe; animation-duration: 4.8s; }
+.frienden-living-wallpaper .is-peek { animation-name: frienden-creature-peek; animation-duration: 6.2s; }
+.frienden-living-wallpaper .is-hop { animation-name: frienden-creature-hop; animation-duration: 7.4s; }
+.frienden-living-wallpaper .is-sway { animation-name: frienden-plant-sway; animation-duration: 5.6s; }
+.frienden-living-wallpaper .is-wag { animation-name: frienden-creature-wag; animation-duration: 3.9s; }
+.frienden-living-wallpaper .is-water { animation-name: frienden-creature-water; animation-duration: 5.2s; }
+
+.frienden-watering-drops {
+  position: absolute;
+  top: 30.5%;
+  left: 59%;
+  width: 8%;
+  height: 6%;
+  transform: rotate(-24deg);
 }
 
-@keyframes frienden-garden-petals {
-  from { background-position: 7% 9%, 72% 36%; transform: translate3d(-9px, -18px, 0) rotate(-7deg); }
-  to { background-position: 146px 190px, -109px 259px; transform: translate3d(12px, 18px, 0) rotate(-7deg); }
+.frienden-watering-drops b {
+  position: absolute;
+  top: 0;
+  left: calc(var(--drop-index, 0) * 18%);
+  width: clamp(2px, .45vw, 5px);
+  aspect-ratio: .62;
+  border-radius: 90% 20% 65% 45%;
+  background: #7fc9d9;
+  opacity: 0;
+  animation: frienden-water-drop 2.2s ease-in infinite;
+}
+
+.frienden-watering-drops b:nth-child(2) { --drop-index: 1; animation-delay: -.45s; }
+.frienden-watering-drops b:nth-child(3) { --drop-index: 2; animation-delay: -.9s; }
+.frienden-watering-drops b:nth-child(4) { --drop-index: 3; animation-delay: -1.35s; }
+
+@keyframes frienden-creature-breathe {
+  0%, 34%, 100% { transform: scale(1); }
+  52% { transform: translateY(-2px) scale(1.018, .986); }
+  68% { transform: scale(.994, 1.012); }
+}
+
+@keyframes frienden-creature-peek {
+  0%, 24%, 100% { transform: translateY(0) rotate(0); }
+  34%, 55% { transform: translateY(-7px) rotate(-1.2deg); }
+  43% { transform: translateY(-9px) rotate(1deg); }
+}
+
+@keyframes frienden-creature-hop {
+  0%, 48%, 100% { transform: translateY(0) rotate(0); }
+  55% { transform: translateY(-7px) rotate(-1deg); }
+  61% { transform: translateY(0) rotate(1deg); }
+  66% { transform: translateY(-3px); }
+}
+
+@keyframes frienden-creature-wag {
+  0%, 100% { transform: rotate(-.8deg); }
+  35% { transform: translateY(-2px) rotate(1.2deg); }
+  58% { transform: rotate(-1.5deg); }
+  74% { transform: translateY(-1px) rotate(.8deg); }
+}
+
+@keyframes frienden-creature-water {
+  0%, 30%, 100% { transform: rotate(0) translateY(0); }
+  43%, 67% { transform: rotate(1.8deg) translateY(-3px); }
+  55% { transform: rotate(-.8deg) translateY(-4px); }
+}
+
+@keyframes frienden-plant-sway {
+  0%, 100% { transform: rotate(-.65deg); }
+  48% { transform: rotate(1.05deg); }
+}
+
+@keyframes frienden-water-drop {
+  0%, 34% { opacity: 0; transform: translate(0, 0) scale(.65); }
+  43% { opacity: .9; }
+  76% { opacity: .65; }
+  100% { opacity: 0; transform: translate(24px, 34px) scale(1); }
 }
 
 html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-frienden-garden) {
@@ -12926,7 +12988,8 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
 
 @media (prefers-reduced-motion: reduce) {
   .chat-detail-scene:is(.chat-background-frienden-night, .chat-background-frienden-garden)::before,
-  .chat-detail-scene:is(.chat-background-frienden-night, .chat-background-frienden-garden)::after,
+  .frienden-living-wallpaper > i,
+  .frienden-watering-drops b,
   :is(.chat-background-preview[data-theme="frienden-night"], .chat-background-choice.theme-frienden-night > span, .personalization-background-swatch.theme-frienden-night,
     .chat-background-preview[data-theme="frienden-garden"], .chat-background-choice.theme-frienden-garden > span, .personalization-background-swatch.theme-frienden-garden) {
     animation: none;

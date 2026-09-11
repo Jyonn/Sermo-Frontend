@@ -8,6 +8,7 @@ import { showToast } from "../lib/toast";
 import type { AvatarFrameStyle, ChatBackgroundTheme, ChatBubbleStyle, ChatMessageDTO, MessageMediaKind, WelcomeTemplateDTO, WelcomeTemplateMessageDTO } from "../types";
 import { ChatPreview, ChatVoiceComposerRow, ComposerSvgIcon, type VoiceComposerState } from "../pages/ChatsPage";
 import { ChatComposerTextRow } from "./ChatComposerTextRow";
+import { FriendenLivingWallpaper } from "./FriendenLivingWallpaper";
 import { MentionComposerInput, type MentionComposerHandle } from "./MentionComposerInput";
 import { SideDrawer } from "./SideDrawer";
 
@@ -475,6 +476,7 @@ export function WelcomeMessageEditor({ avatarCacheKey, avatarFrameStyle, avatarU
     <div className="welcome-template-editor chat-detail-active">
       {state?.delete_to_limit ? <div className="welcome-template-limit-note"><span className="material-symbols-outlined">info</span>{t("profile.welcomeDeleteFirst", { count: state.delete_to_limit })}</div> : null}
       <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={chatSceneStyle}>
+        <FriendenLivingWallpaper theme={backgroundTheme} />
         {loading ? <div className="welcome-template-loading">{t("common.loading")}</div> : <ChatPreview
           bare
           className="welcome-template-message-scroll"
