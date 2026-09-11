@@ -38,15 +38,17 @@
     .verdict span{color:var(--muted);font-size:11px;line-height:1.55}
     .phone{background:#f7f6f1;border:1px solid rgba(16,36,29,.15);border-radius:34px;box-shadow:0 25px 70px rgba(30,43,36,.11);height:760px;overflow:hidden;position:relative;width:100%}
     .screen{height:100%;overflow:hidden;padding-bottom:72px;position:relative}
-    .statusbar{align-items:center;display:flex;font-family:var(--display);font-size:11px;font-weight:800;height:43px;justify-content:space-between;padding:0 120px 0 22px;position:relative;z-index:4}
-    .signal{display:flex;gap:3px}.signal i{background:currentColor;border-radius:3px;display:block;height:5px;width:5px}.signal i:nth-child(2){height:7px}.signal i:nth-child(3){height:9px}
-    .wechat-capsule{align-items:center;border:1px solid rgba(20,31,26,.16);border-radius:18px;display:grid;grid-template-columns:1fr 1fr;height:32px;position:absolute;right:8px;top:6px;width:88px;z-index:20}
+    .system-bar{align-items:center;display:flex;font-family:var(--display);font-size:11px;font-weight:800;height:44px;justify-content:space-between;padding:0 20px;position:relative;z-index:4}
+    .dynamic-island{background:#080b0a;border-radius:999px;height:27px;left:50%;position:absolute;top:8px;transform:translateX(-50%);width:91px}
+    .system-icons{align-items:center;display:flex;gap:7px}.wifi{border:2px solid currentColor;border-bottom-color:transparent;border-left-color:transparent;border-radius:50%;height:10px;transform:rotate(-45deg);width:10px}.battery{border:1.8px solid currentColor;border-radius:3px;height:9px;position:relative;width:20px}.battery:before{background:currentColor;border-radius:1px;content:"";inset:1.5px;position:absolute}.battery:after{background:currentColor;border-radius:0 1px 1px 0;content:"";height:4px;position:absolute;right:-4px;top:1px;width:2px}
+    .nav-row{position:relative}.wechat-capsule{align-items:center;background:rgba(255,255,255,.7);border:1px solid rgba(20,31,26,.16);border-radius:18px;display:grid;grid-template-columns:1fr 1fr;height:32px;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:88px;z-index:20}
     .wechat-capsule:after{background:rgba(20,31,26,.12);content:"";height:18px;left:50%;position:absolute;top:6px;width:1px}
     .capsule-more{align-items:center;display:flex;gap:3px;justify-content:center}.capsule-more i{background:#17251f;border-radius:50%;height:3px;width:3px}
     .capsule-ring{border:2px solid #17251f;border-radius:50%;height:15px;margin:auto;position:relative;width:15px}.capsule-ring:after{background:#17251f;border:2px solid #f7f6f1;border-radius:50%;content:"";height:4px;position:absolute;right:-3px;top:4px;width:4px}
     .mini-header{background:rgba(247,246,241,.96);border-bottom:1px solid var(--line);position:relative;z-index:3}
     .title{font-family:var(--display);font-size:27px;font-weight:800;letter-spacing:-.055em;white-space:nowrap}
     .title-meta{color:var(--muted);font-size:10px;font-weight:700;margin-left:8px;white-space:nowrap}
+    .title-cluster{align-items:baseline;display:flex;min-width:0}
     .domain-title{align-items:baseline;display:flex;gap:12px}
     .domain-title button{background:none;border:0;color:#8c9691;cursor:pointer;font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:-.04em;margin:0;padding:0;position:relative;transition:.3s var(--ease)}
     .domain-title button.active{color:var(--ink);font-size:27px}
@@ -71,15 +73,15 @@
     .identity-card{align-items:center;background:linear-gradient(135deg,#e8f5ee,#f8f4e9);border-radius:20px;display:grid;gap:12px;grid-template-columns:58px 1fr auto;padding:16px}.identity-card .avatar{border-radius:19px;height:58px;width:58px}.identity-card strong{font-size:15px}.identity-card span{color:var(--muted);display:block;font-size:9px;margin-top:5px}.level{background:#143f33;border-radius:999px;color:#c9f5e4;font-size:8px;font-weight:800;padding:5px 7px}.menu-group{border-top:1px solid var(--line);margin-top:20px}.menu-row{align-items:center;border-bottom:1px solid var(--line);display:flex;font-size:12px;font-weight:700;height:52px;justify-content:space-between;padding:0 4px}.menu-row span{color:#9aa49f;font-size:18px}
     .submission-row{align-items:center;border-bottom:1px solid var(--line);display:grid;gap:10px;grid-template-columns:40px minmax(0,1fr) auto;min-height:67px}.submission-row .avatar{height:40px;width:40px}.submission-row b{color:#d38418;font-size:9px;margin-right:5px}.submission-row small{color:var(--muted);display:block;font-size:9px;margin-top:5px}.submission-row time{color:var(--muted);font-size:8px}
     .bottom-nav{align-items:center;background:rgba(250,249,245,.97);border-top:1px solid var(--line);bottom:0;display:grid;grid-template-columns:repeat(4,1fr);height:72px;left:0;position:absolute;right:0;z-index:8}.bottom-nav button{align-items:center;background:none;border:0;color:#8d9792;cursor:pointer;display:flex;flex-direction:column;font-size:9px;font-weight:800;gap:4px;height:100%;justify-content:center;position:relative}.bottom-nav svg{height:20px;width:20px}.bottom-nav button.active{color:var(--green-deep)}.bottom-nav button.active:before{background:var(--green);border-radius:0 0 4px 4px;content:"";height:3px;position:absolute;top:0;width:28px}
-    /* 01: Product action shares the navigation row immediately before the native capsule. */
-    .v-balanced{--header-h:119px}.v-balanced .nav-row{align-items:center;display:flex;height:52px;padding:0 106px 0 18px}.v-balanced .nav-row .icon-action{border-radius:15px;height:38px;margin-left:auto;width:38px}.v-balanced .sub-row{align-items:center;display:flex;height:24px;padding:0 16px 0 18px}.v-balanced .subtabs button{padding-bottom:10px;padding-top:7px}.v-balanced .subtabs button.active:after{bottom:0}.v-balanced .utility-actions{transform:translateY(-3px)}
+    /* 01: Closest to WeChat's native anatomy: title and one action share the capsule row. */
+    .v-balanced{--header-h:144px}.v-balanced .nav-row{align-items:center;display:flex;height:57px;padding:0 104px 0 18px}.v-balanced .nav-row .icon-action{border-radius:14px;height:36px;margin-left:auto;width:36px}.v-balanced .sub-row{align-items:center;display:flex;height:43px;padding:0 14px 0 18px}.v-balanced .subtabs button{padding-bottom:12px;padding-top:11px}.v-balanced .subtabs button.active:after{bottom:1px}
     .v-balanced .icon-action span{display:none}
-    /* 02: All product actions live in a dedicated command rail below a quiet title row. */
-    .v-rail{--header-h:128px}.v-rail .nav-row{align-items:center;display:flex;height:50px;padding:0 106px 0 19px}.v-rail .command-rail{align-items:center;border-top:1px solid rgba(16,36,29,.055);display:flex;height:35px;padding:0 12px 0 19px}.v-rail .subtabs button{padding:9px 0 10px}.v-rail .rail-action{border-radius:999px;height:29px;margin-left:auto;padding:0 11px}.v-rail .utility-actions{margin-left:6px}.v-rail .utility-actions button{height:29px;width:29px}
-    /* 03: Native controls own the first row; the product title begins beneath them. */
-    .v-breathe{--header-h:153px}.v-breathe .statusbar-brand{color:var(--green-deep);font-family:var(--display);font-size:8px;font-weight:900;letter-spacing:.16em}.v-breathe .nav-row{align-items:end;display:flex;height:65px;padding:0 18px 11px}.v-breathe .title{font-size:31px}.v-breathe .primary-action{background:none;border-bottom:1px solid var(--green-deep);border-radius:0;margin:0 0 3px auto;padding:5px 0}.v-breathe .sub-row{align-items:center;display:flex;height:45px;padding:0 18px}.v-breathe .subtabs{gap:22px}.v-breathe .utility-actions button{background:#ecf1ed;border-radius:10px}
-    /* 04: A compact left identity block pairs with a contextual control strip. */
-    .v-console{--header-h:132px}.v-console .nav-row{align-items:center;display:grid;gap:8px;grid-template-columns:86px minmax(0,1fr);height:50px;padding:0 105px 0 12px}.v-console .tab-stamp{align-items:center;background:var(--ink);border-radius:14px;color:#edf9f4;display:flex;font-size:10px;font-weight:900;gap:7px;height:34px;padding:0 10px}.v-console .tab-stamp svg{height:16px;width:16px}.v-console .title{font-size:21px;overflow:hidden;text-overflow:ellipsis}.v-console .control-strip{align-items:center;background:#e8eee9;display:flex;height:39px;padding:0 12px}.v-console .subtabs{gap:20px}.v-console .subtabs button{padding:10px 0 11px}.v-console .console-action{background:var(--surface);border-radius:11px;height:29px;margin-left:auto;padding:0 10px}.v-console .utility-actions{margin-left:4px}.v-console .utility-actions button{height:29px;width:28px}
+    /* 02: The native row stays quiet; every product command moves to a lower rail. */
+    .v-rail{--header-h:145px}.v-rail .nav-row{align-items:center;display:flex;height:56px;padding:0 104px 0 19px}.v-rail .command-rail{align-items:center;border-top:1px solid rgba(16,36,29,.055);display:flex;height:45px;padding:0 11px 0 19px}.v-rail .subtabs button{padding:12px 0 13px}.v-rail .rail-action{border-radius:999px;height:31px;margin-left:auto;padding:0 11px}.v-rail .utility-actions{margin-left:5px}.v-rail .utility-actions button{height:31px;width:29px}
+    /* 03: A two-line title cluster carries context without competing with the capsule. */
+    .v-breathe{--header-h:154px}.v-breathe .nav-row{align-items:center;display:flex;height:66px;padding:0 104px 0 18px}.v-breathe .title-cluster{align-items:flex-start;flex-direction:column;justify-content:center}.v-breathe .title{font-size:25px}.v-breathe .title-meta{font-size:9px;margin:3px 0 0}.v-breathe .domain-title{align-items:center}.v-breathe .domain-title button.active{font-size:25px}.v-breathe .primary-action{background:none;border:1px solid #b7d6c8;border-radius:12px;height:34px;margin-left:auto;padding:0 9px}.v-breathe .primary-action span{display:none}.v-breathe .sub-row{align-items:center;background:linear-gradient(90deg,#f1f5f1,transparent);display:flex;height:44px;padding:0 15px 0 18px}.v-breathe .subtabs{gap:22px}.v-breathe .utility-actions button{border-radius:10px}
+    /* 04: A contextual deck below the native row owns section identity and tools. */
+    .v-console{--header-h:151px}.v-console .nav-row{align-items:center;display:flex;height:55px;padding:0 104px 0 18px}.v-console .nav-row .title{font-size:25px}.v-console .control-strip{align-items:center;background:#173b30;color:#edf9f4;display:flex;height:52px;padding:0 12px}.v-console .tab-stamp{align-items:center;border-right:1px solid rgba(255,255,255,.18);display:flex;font-size:9px;font-weight:900;gap:6px;margin-right:13px;padding-right:13px;white-space:nowrap}.v-console .tab-stamp svg{height:16px;width:16px}.v-console .subtabs{gap:18px}.v-console .subtabs button{color:#a9c2b8;padding:14px 0 15px}.v-console .subtabs button.active{color:white}.v-console .console-action{background:var(--green);border-radius:11px;color:#073f2d;height:31px;margin-left:auto;padding:0 9px}.v-console .console-action span{display:none}.v-console .utility-actions{margin-left:3px}.v-console .utility-actions button{color:#d6e7e0;height:31px;width:27px}.v-console .utility-actions .alert:after{border-color:#173b30}
     .toast{background:#153c31;border-radius:999px;bottom:88px;color:#ecfff7;font-size:10px;font-weight:800;left:50%;opacity:0;padding:9px 14px;pointer-events:none;position:absolute;transform:translate(-50%,8px);transition:.25s var(--ease);white-space:nowrap;z-index:30}.toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:1120px){.proposal{grid-template-columns:minmax(0,390px)}.proposal-meta{max-width:390px}.gallery{justify-items:center}.proposal-meta{grid-row:1}.phone{grid-row:2}}
     @media(max-width:780px){.masthead{align-items:start;grid-template-columns:1fr;padding-top:34px}.global-switch{overflow:auto;width:100%}.gallery{grid-template-columns:1fr;padding-inline:10px}.proposal{width:min(100%,390px)}.phone{border-inline:0;border-radius:0}.proposal-meta{padding-inline:10px}}
@@ -103,14 +105,14 @@
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
   </defs></svg>
   <header class="masthead">
-    <div><div class="eyebrow">FRIENDEN · WECHAT HEADER STUDY</div><h1>先尊重微信胶囊，<br><span>再建立产品自己的秩序。</span></h1><p class="mast-copy">右上角胶囊不是需要绕开的障碍，而是每个页面都必须共享的固定坐标。下面四套方案使用同一品牌语言、同一内容与真实安全区，只改变标题、上下文动作和二级导航的组织方式。</p></div>
-    <nav class="global-switch" aria-label="同时切换所有预览"><button class="active" data-global-tab="chats">聊天</button><button data-global-tab="square">广场</button><button data-global-tab="contacts">通讯</button><button data-global-tab="menu">菜单</button></nav>
+    <div><div class="eyebrow">FRIENDEN · WECHAT HEADER STUDY</div><h1>系统状态归系统，<br><span>产品导航归产品。</span></h1><p class="mast-copy">按照真实小程序结构重建：第一层只承载时间、灵动岛与系统信号，第二层才放页面标题、产品动作与微信胶囊。四套方案共用这条不可越界的基线，再分别探索四个主 Tab 的组织方式。</p></div>
+    <nav class="global-switch" aria-label="同时切换所有预览"><button data-global-tab="chats">聊天</button><button data-global-tab="square">广场</button><button class="active" data-global-tab="contacts">通讯</button><button data-global-tab="menu">菜单</button></nav>
   </header>
   <main class="gallery">
-    <article class="proposal"><div class="phone v-balanced" data-variant="balanced"></div><div class="proposal-meta"><div class="proposal-no">01 / Counterbalance</div><h2>胶囊左侧对衡</h2><p>高频动作压缩为胶囊左侧的单个方形按钮，二级导航与低频工具留在下一行。最接近当前结构，迁移成本最低。</p><div class="verdict"><b>适合直接落地</b><span>优势是高度克制；代价是广场工具仍需要在窄轨道里精细分配。</span></div></div></article>
-    <article class="proposal"><div class="phone v-rail" data-variant="rail"></div><div class="proposal-meta"><div class="proposal-no">02 / Command rail</div><h2>双层动作轨</h2><p>第一行只负责身份和标题，所有产品动作统一落到第二条命令轨。胶囊获得最彻底的独立空间。</p><div class="verdict"><b>信息最清楚</b><span>四个 Tab 规则一致，广场扩展性最好；Header 会比方案一略高。</span></div></div></article>
-    <article class="proposal"><div class="phone v-breathe" data-variant="breathe"></div><div class="proposal-meta"><div class="proposal-no">03 / Breathing room</div><h2>标题整体下移</h2><p>状态栏只留下 FRIENDEN 与微信胶囊，页面标题在下一行大幅展开。让系统控件和产品内容不再争抢同一水平线。</p><div class="verdict"><b>品牌感最强</b><span>视觉呼吸最从容，双域标题也最清晰；纵向空间消耗最高。</span></div></div></article>
-    <article class="proposal"><div class="phone v-console" data-variant="console"></div><div class="proposal-meta"><div class="proposal-no">04 / Context console</div><h2>上下文控制台</h2><p>当前 Tab 变成稳定的深色身份章，页面内状态与动作进入浅色控制条。导航感和工具感被明确拆开。</p><div class="verdict"><b>辨识度最高</b><span>适合功能继续增长的阶段；相比前三套，视觉语言更强，需要四页一起更新。</span></div></div></article>
+    <article class="proposal"><div class="phone v-balanced" data-variant="balanced"></div><div class="proposal-meta"><div class="proposal-no">01 / Native balance</div><h2>原生对衡</h2><p>完全沿用参考截图的两层骨架。标题在左，高频动作在胶囊左侧形成视觉支点，二级导航独占下一行。</p><div class="verdict"><b>推荐优先落地</b><span>最像微信原生页面，认知成本最低；复杂工具需要收进二级行。</span></div></div></article>
+    <article class="proposal"><div class="phone v-rail" data-variant="rail"></div><div class="proposal-meta"><div class="proposal-no">02 / Command rail</div><h2>下层命令轨</h2><p>标题与微信胶囊独占原生导航栏，产品动作、页签和工具全部进入下层轨道，避免任何横向争抢。</p><div class="verdict"><b>边界最稳妥</b><span>四页规则统一、扩展性最好；下层信息密度会稍高。</span></div></div></article>
+    <article class="proposal"><div class="phone v-breathe" data-variant="breathe"></div><div class="proposal-meta"><div class="proposal-no">03 / Title cabin</div><h2>信息标题舱</h2><p>在胶囊左侧用双行标题同时表达页面与状态，动作只保留图标。用户进入通讯或菜单时也能立即理解上下文。</p><div class="verdict"><b>信息层次最好</b><span>适合需要显示未读数、成员数与空间状态的页面；导航栏略高。</span></div></div></article>
+    <article class="proposal"><div class="phone v-console" data-variant="console"></div><div class="proposal-meta"><div class="proposal-no">04 / Context deck</div><h2>上下文甲板</h2><p>原生导航栏保持安静，下方用深色甲板承载当前模块、页签和操作，四个主 Tab 都拥有明确的场景色块。</p><div class="verdict"><b>产品辨识最强</b><span>适合强调 FRIENDEN 自身秩序；视觉存在感强于微信原生样式。</span></div></div></article>
   </main>
   <script>
     const TABS = [
@@ -127,10 +129,10 @@
     };
     const icon=name=>`<svg aria-hidden="true"><use href="#i-${name}"></use></svg>`;
     const capsule=`<div class="wechat-capsule" aria-label="微信胶囊"><span class="capsule-more"><i></i><i></i><i></i></span><span class="capsule-ring"></span></div>`;
-    const status=brand=>`<div class="statusbar"><span class="${brand?'statusbar-brand':''}">${brand?'FRIENDEN':'9:41'}</span><span class="signal"><i></i><i></i><i></i></span>${capsule}</div>`;
+    const status=()=>`<div class="system-bar"><span>23:31</span><span class="dynamic-island"></span><span class="system-icons"><i class="wifi"></i><i class="battery"></i></span></div>`;
     function titleMarkup(tab,domain){
-      if(tab!=='square') return `<span class="title">${DATA[tab].title}</span><span class="title-meta">${DATA[tab].meta}</span>`;
-      return `<span class="domain-title"><button class="${domain==='square'?'active':''}" data-domain="square">广场</button><button class="${domain==='submission'?'active':''}" data-domain="submission">投稿<i>3</i></button></span>`;
+      if(tab!=='square') return `<span class="title-cluster"><span class="title">${DATA[tab].title}</span><span class="title-meta">${DATA[tab].meta}</span></span>`;
+      return `<span class="title-cluster"><span class="domain-title"><button class="${domain==='square'?'active':''}" data-domain="square">广场</button><button class="${domain==='submission'?'active':''}" data-domain="submission">投稿<i>3</i></button></span></span>`;
     }
     function subtabs(tab,domain){
       const labels=tab==='square'&&domain==='submission'?['我的 2','审批 1']:DATA[tab].sub;
@@ -144,12 +146,12 @@
     }
     function renderHeader(variant,tab,domain){
       const title=titleMarkup(tab,domain),sub=subtabs(tab,domain);
-      if(variant==='balanced') return `<header class="mini-header">${status(false)}<div class="nav-row">${title}${action(tab,'icon-action')}</div><div class="sub-row">${sub}${utility(tab)}</div></header>`;
-      if(variant==='rail') return `<header class="mini-header">${status(false)}<div class="nav-row">${title}</div><div class="command-rail">${sub}${utility(tab)}${action(tab,'primary-action rail-action')}</div></header>`;
-      if(variant==='breathe') return `<header class="mini-header">${status(true)}<div class="nav-row">${title}${action(tab)}</div><div class="sub-row">${sub}${utility(tab)}</div></header>`;
-      const consoleTitle=tab==='square'?title:`<span class="title">${{chats:'最近会话',contacts:'好友',menu:'个人中心'}[tab]}</span>`;
+      if(variant==='balanced') return `<header class="mini-header">${status()}<div class="nav-row">${title}${action(tab,'icon-action')}${capsule}</div><div class="sub-row">${sub}${utility(tab)}</div></header>`;
+      if(variant==='rail') return `<header class="mini-header">${status()}<div class="nav-row">${title}${capsule}</div><div class="command-rail">${sub}${utility(tab)}${action(tab,'primary-action rail-action')}</div></header>`;
+      if(variant==='breathe') return `<header class="mini-header">${status()}<div class="nav-row">${title}${action(tab)}${capsule}</div><div class="sub-row">${sub}${utility(tab)}</div></header>`;
+      const consoleTitle=tab==='square'?title:`<span class="title-cluster"><span class="title">${{chats:'聊天',contacts:'通讯',menu:'菜单'}[tab]}</span><span class="title-meta">${DATA[tab].meta}</span></span>`;
       const stampLabel=tab==='square'?'社区':DATA[tab].title;
-      return `<header class="mini-header">${status(false)}<div class="nav-row"><span class="tab-stamp">${icon(DATA[tab].icon)}${stampLabel}</span>${consoleTitle}</div><div class="control-strip">${sub}${utility(tab)}${action(tab,'primary-action console-action')}</div></header>`;
+      return `<header class="mini-header">${status()}<div class="nav-row">${consoleTitle}${capsule}</div><div class="control-strip"><span class="tab-stamp">${icon(DATA[tab].icon)}${stampLabel}</span>${sub}${utility(tab)}${action(tab,'primary-action console-action')}</div></header>`;
     }
     const chatsBody=()=>`<div class="section-kicker">最近会话 · 8 unread</div>${[['林屿','你刚刚分享的照片很好看','2','刚刚',''],['七月','[语音] 0:18','','12:08','gold'],['山海俱乐部','阿迟：周六见','','昨天','blue'],['FRIENDEN 官方','欢迎来到友间','','周一','']].map(row=>`<div class="chat-row"><div class="avatar ${row[4]}">${row[0][0]}${row[2]?`<i class="badge">${row[2]}</i>`:''}</div><div class="row-copy"><strong>${row[0]}</strong><span>${row[1]}</span></div><time>${row[3]}</time></div>`).join('')}`;
     const squareBody=domain=>domain==='submission'
@@ -170,7 +172,7 @@
       phone.querySelectorAll('[data-action]').forEach(button=>button.onclick=()=>showToast(phone,phone.dataset.tab==='square'?(phone.dataset.domain==='submission'?'选择投稿接收方':'打开发布方式'):'打开'+DATA[phone.dataset.tab].action));
     }
     function showToast(phone,text){const toast=phone.querySelector('.toast');toast.textContent=text;toast.classList.add('show');clearTimeout(phone._toastTimer);phone._toastTimer=setTimeout(()=>toast.classList.remove('show'),1200)}
-    document.querySelectorAll('.phone').forEach(phone=>renderPhone(phone,'chats'));
+    document.querySelectorAll('.phone').forEach(phone=>renderPhone(phone,'contacts'));
     document.querySelectorAll('[data-global-tab]').forEach(button=>button.onclick=()=>{document.querySelectorAll('[data-global-tab]').forEach(item=>item.classList.toggle('active',item===button));document.querySelectorAll('.phone').forEach(phone=>renderPhone(phone,button.dataset.globalTab))});
   </script>
 </body>
