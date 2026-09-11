@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.4",
+  "id": "2026.09.12.5",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序广场排版修复",
+      "title": "广场与投稿切换更有空间感",
       "items": [
-        "探索、好友圈和我的页签已恢复，并与通知、额度和搜索操作清晰排布",
-        "活动横幅与置顶发言恢复满宽展示，发言正文统一左对齐"
+        "广场与投稿切换时会通过立体翻转交换左右位置，状态变化更加明确",
+        "修复广场回到顶部按钮被拉伸为椭圆的问题"
       ]
     },
     "en": {
-      "title": "Fixed mini program Square layout",
+      "title": "A more dimensional Square and Submissions switch",
       "items": [
-        "Restored the Explore, Friends, and Mine tabs alongside the notification, quota, and search actions",
-        "Activity banners and pinned posts now span the content width, while statement text stays left-aligned"
+        "Square and Submissions now exchange positions with a dimensional flip that makes the active workspace clearer",
+        "Fixed the Square back-to-top control being stretched into an oval"
       ]
     }
   }
