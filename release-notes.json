@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.9",
+  "id": "2026.09.12.10",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序媒体档案预览",
+      "title": "小程序添加好友体验焕新",
       "items": [
-        "聊天、广场、记录搜索与云端资源现已共用全新的图片和视频预览",
-        "媒体预览支持拍摄信息、定位、文件大小、视频控制、保存与全屏查看"
+        "添加好友现已升级为沉浸式全屏界面，搜索和返回操作更清晰",
+        "空间运营者名单会直接展示本人、好友、已申请与可添加状态"
       ]
     },
     "en": {
-      "title": "Media archive previews for the mini program",
+      "title": "A refreshed Add Friend experience on the mini program",
       "items": [
-        "Chats, Square, message search, and cloud resources now share one image and video preview",
-        "Media previews now include capture details, location, file size, video controls, saving, and fullscreen viewing"
+        "Add Friend now opens in an immersive full-screen view with clearer search and navigation",
+        "The space operator directory now shows self, friend, pending, and available states at a glance"
       ]
     }
   }
