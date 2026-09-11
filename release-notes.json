@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.6",
+  "id": "2026.09.12.7",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序通讯录焕新",
+      "title": "小程序动态聊天背景补齐",
       "items": [
-        "通讯页采用清晰的好友申请与群聊入口卡片，常用操作更集中",
-        "好友按字母分组展示，并补充在线状态、身份标签与快捷索引"
+        "夜航友间与午后花房现已在小程序中完整显示，并恢复分层动植物动画",
+        "典藏星夜回旋背景加入小程序，支持慢速旋涡与云流动效"
       ]
     },
     "en": {
-      "title": "A refreshed mini program directory",
+      "title": "Living chat backgrounds arrive in the mini program",
       "items": [
-        "Friend requests and group chats now share a focused entry card for faster access",
-        "Friends are grouped alphabetically with presence, role badges, and a quick index"
+        "Frienden Night and Afternoon Garden now render fully with layered living motion",
+        "The Collector Starry Rotation background now includes slow vortices and cloud flow"
       ]
     }
   }
