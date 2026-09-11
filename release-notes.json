@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.19",
+  "id": "2026.09.11.20",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "聊天背景明暗自适应",
+      "title": "深色聊天输入更加清晰",
       "items": [
-        "浅色背景使用暖白界面，深色背景使用深蓝界面",
-        "顶部栏、锁定区和昵称标签会统一适配背景明暗"
+        "深色聊天背景下的输入文字改为清晰浅色",
+        "输入光标、占位文字和提及内容同步适配"
       ]
     },
     "en": {
-      "title": "Adaptive light and dark chat backgrounds",
+      "title": "Clearer typing on dark chat backgrounds",
       "items": [
-        "Light backgrounds now use warm light chrome while dark backgrounds use deep blue chrome",
-        "Headers, pinned messages, and name labels adapt together to the wallpaper tone"
+        "Typed text now uses a clear light color over dark chat backgrounds",
+        "The caret, placeholder, and mention content adapt with it"
       ]
     }
   }
