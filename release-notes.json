@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.8",
+  "id": "2026.09.12.9",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "广场回到顶部按钮修复",
+      "title": "小程序媒体档案预览",
       "items": [
-        "修复小程序回到顶部图标未垂直居中的问题",
-        "恢复网页版广场回到顶部图标显示"
+        "聊天、广场、记录搜索与云端资源现已共用全新的图片和视频预览",
+        "媒体预览支持拍摄信息、定位、文件大小、视频控制、保存与全屏查看"
       ]
     },
     "en": {
-      "title": "Square back-to-top button fixes",
+      "title": "Media archive previews for the mini program",
       "items": [
-        "Fixed vertical alignment of the mini program back-to-top icon",
-        "Restored the back-to-top icon in the web Square"
+        "Chats, Square, message search, and cloud resources now share one image and video preview",
+        "Media previews now include capture details, location, file size, video controls, saving, and fullscreen viewing"
       ]
     }
   }
