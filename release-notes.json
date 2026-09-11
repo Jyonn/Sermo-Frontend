@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.21",
+  "id": "2026.09.11.22",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "活动横幅完整还原设计",
+      "title": "广场与投稿切换更自然",
       "items": [
-        "四类活动横幅恢复各自的排版比例、字体角色和奖励文案",
-        "真实活动进度与领取状态继续实时展示"
+        "广场与投稿现在通过标题旁的同域页签直接切换",
+        "探索、好友圈、我的以及投稿审批页签统一左对齐并平滑过渡"
       ]
     },
     "en": {
-      "title": "Activity banners now fully match their designs",
+      "title": "Smoother switching between Square and Submissions",
       "items": [
-        "All four campaign banners now restore their intended proportions, typography, and reward copy",
-        "Live progress and claim states continue to update in real time"
+        "Switch directly between Square and Submissions from the shared page title",
+        "Square and submission tabs now share a left-aligned track with smoother transitions"
       ]
     }
   }

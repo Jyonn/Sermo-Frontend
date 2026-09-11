@@ -1975,7 +1975,7 @@ export default function SquarePage() {
   };
 
   const openSubmissionWorkspace = () => {
-    if (submissionTransitioning) return;
+    if (submissionTransitioning || squareWorkspace === "submission") return;
     setSubmissionTransitioning(true);
     setPublishRouteOpen(false);
     feedScrollPositionsRef.current.set(activeFeedCacheKey, squareFeedScrollRef.current?.scrollTop ?? 0);
@@ -1987,7 +1987,7 @@ export default function SquarePage() {
   };
 
   const closeSubmissionWorkspace = () => {
-    if (submissionTransitioning) return;
+    if (submissionTransitioning || squareWorkspace === "square") return;
     setSubmissionTransitioning(true);
     const next = new URLSearchParams(searchParams);
     next.delete("workspace");
@@ -2239,7 +2239,10 @@ export default function SquarePage() {
       >
         <TabPageHeader
           syncing={squareWorkspace === "square" ? syncing : false}
-          title={<span className={`square-workspace-title is-${squareWorkspace}`}><span>{t("square.title")}</span><span>{t("submission.title")}</span></span>}
+          title={features.submissionEnabled ? <span aria-label={`${t("square.title")} / ${t("submission.title")}`} className={`square-workspace-title is-${squareWorkspace}`} role="tablist">
+            <button aria-selected={squareWorkspace === "square"} className={squareWorkspace === "square" ? "is-active" : ""} onClick={closeSubmissionWorkspace} role="tab" type="button">{t("square.title")}</button>
+            <button aria-selected={squareWorkspace === "submission"} className={squareWorkspace === "submission" ? "is-active" : ""} onClick={openSubmissionWorkspace} role="tab" type="button"><span>{t("submission.title")}</span>{submissionActionCounts.author + submissionActionCounts.reviewer ? <i>{submissionActionCounts.author + submissionActionCounts.reviewer > 99 ? "99+" : submissionActionCounts.author + submissionActionCounts.reviewer}</i> : null}</button>
+          </span> : t("square.title")}
           secondary={<div className={`square-workspace-tabs is-${squareWorkspace}${submissionTransitioning ? " is-transitioning" : ""}`} role="tablist">
             <div aria-hidden={squareWorkspace !== "square"} className="square-workspace-tab-group is-square-channels">
               {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <i className="square-fresh-dot" /> : null}</button> : null}
@@ -2247,9 +2250,6 @@ export default function SquarePage() {
               <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
               {profileFeedUserId ? <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}><button aria-selected={feedMode === "user"} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" disabled={squareWorkspace !== "square"} onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode("mine"); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
             </div>
-            <button aria-hidden={squareWorkspace !== "submission"} className="square-workspace-mode-tab is-square-return" disabled={squareWorkspace !== "submission"} onClick={closeSubmissionWorkspace} role="tab" type="button"><span className="material-symbols-outlined">explore</span><span>{t("square.title")}</span></button>
-            <span className="square-workspace-tab-spacer" />
-            {features.submissionEnabled ? <button aria-hidden={squareWorkspace !== "square"} className="square-workspace-mode-tab is-submission-entry" disabled={squareWorkspace !== "square"} onClick={openSubmissionWorkspace} role="tab" type="button"><span className="material-symbols-outlined">outbox</span><span>{t("submission.title")}</span>{submissionActionCounts.author + submissionActionCounts.reviewer ? <i>{submissionActionCounts.author + submissionActionCounts.reviewer > 99 ? "99+" : submissionActionCounts.author + submissionActionCounts.reviewer}</i> : null}</button> : null}
             <div aria-hidden={squareWorkspace !== "submission"} className="square-workspace-tab-group is-submission-views">
               <button aria-selected={submissionView === "author"} className={submissionView === "author" ? "is-active" : ""} disabled={squareWorkspace !== "submission"} onClick={() => chooseSubmissionView("author")} role="tab" type="button"><span>{t("submission.viewMine")}</span>{submissionActionCounts.author ? <i>{submissionActionCounts.author > 99 ? "99+" : submissionActionCounts.author}</i> : null}</button>
               {canReviewSubmissions ? <button aria-selected={submissionView === "reviewer"} className={submissionView === "reviewer" ? "is-active" : ""} disabled={squareWorkspace !== "submission"} onClick={() => chooseSubmissionView("reviewer")} role="tab" type="button"><span>{t("submission.viewReview")}</span>{submissionActionCounts.reviewer ? <i>{submissionActionCounts.reviewer > 99 ? "99+" : submissionActionCounts.reviewer}</i> : null}</button> : null}
