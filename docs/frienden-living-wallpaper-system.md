@@ -70,6 +70,7 @@ production assets. It:
 - exports compressed environment plates;
 - slices every actor and plant into an independent transparent image;
 - removes low-alpha studio halos and re-expands edge alpha;
+- isolates each plant's primary connected alpha region so overlapping atlas cells cannot leak fragments;
 - trims transparent bounds with safe antialiasing padding;
 - keeps deterministic asset names consumed by the scene manifest.
 
@@ -85,4 +86,3 @@ actor, plant, and insect assets are committed.
 - Plants must preserve a believable root or pot anchor.
 - New effects must belong to an action, such as water or sleep, not ambient visual noise.
 - Test both themes at portrait mobile size and wide desktop crop before release.
-

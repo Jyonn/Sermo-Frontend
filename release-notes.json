@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.5",
+  "id": "2026.09.11.6",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "群聊也有自己的背景",
+      "title": "午后花房的每个角色都更完整",
       "items": [
-        "群主可以为群聊选择自己拥有的系统背景",
-        "群成员可以选择跟随群背景，或仅为自己启用个人聊天背景"
+        "重新裁切午后花房的全部角色与植物图层，清除相邻素材碎片",
+        "升级素材处理流程，自动隔离植物主体并保留完整枝叶"
       ]
     },
     "en": {
-      "title": "Groups can now have their own backgrounds",
+      "title": "Every Afternoon Conservatory character is now clean and complete",
       "items": [
-        "Group owners can choose a system background they own for the whole group",
-        "Members can follow the group background or privately use their personal chat background"
+        "Recropped every character and plant layer to remove neighboring atlas fragments",
+        "Upgraded the asset pipeline to isolate plant subjects while preserving complete foliage"
       ]
     }
   }
