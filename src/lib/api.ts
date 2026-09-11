@@ -948,6 +948,10 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}/rewards/${rewardKey}/claim`, { method: "POST", auth: true });
   },
 
+  claimStarryNightReward(key: string) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/starry-reward/claim`, { method: "POST", auth: true });
+  },
+
   claimActivitySpaceReward(key: string) {
     return request<ActivityCampaignDTO>(`/activities/${key}/space-reward/claim`, { method: "POST", auth: true });
   },

@@ -952,6 +952,7 @@ export interface ActivityCampaignDTO {
     window_end: string;
     reward_key: string;
     reward_owned: boolean;
+    reward_claimable: boolean;
   };
 }
 

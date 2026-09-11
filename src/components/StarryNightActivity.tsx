@@ -8,7 +8,7 @@ const formatDate = (timestamp: number) => new Intl.DateTimeFormat(undefined, {
   day: "2-digit",
 }).format(new Date(timestamp * 1000));
 
-export function StarryNightActivity({ activity, onConfigure }: { activity: ActivityCampaignDTO; onConfigure: () => void }) {
+export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }: { activity: ActivityCampaignDTO; claiming: boolean; onClaim: () => void; onConfigure: () => void }) {
   const { t } = useI18n();
   const data = activity.starry_night;
   if (!data) return null;
@@ -37,7 +37,7 @@ export function StarryNightActivity({ activity, onConfigure }: { activity: Activ
           <strong>{lit ? t("activity.starry.observed") : current ? t("activity.starry.tonight") : t("activity.starry.waiting")}</strong>
         </article>;
       })}</div>
-      <p>{data.reward_owned ? t("activity.starry.completeHint") : t("activity.starry.continueHint", { count: remaining })}</p>
+      <p>{data.reward_owned ? t("activity.starry.completeHint") : data.reward_claimable ? t("activity.starry.rewardReady") : t("activity.starry.continueHint", { count: remaining })}</p>
     </section>
 
     <section className="starry-night-reward-stage">
@@ -49,7 +49,7 @@ export function StarryNightActivity({ activity, onConfigure }: { activity: Activ
         <div className="starry-night-preview-message is-right"><span>{t("activity.starry.previewRight")}</span><i>☾</i></div>
         <b>{t("growth.rarity.legendary")}</b>
       </div>
-      <footer><div><span>{data.reward_owned ? t("activity.starry.unlocked") : t("activity.starry.reward")}</span><small>{t("activity.starry.permanent")}</small></div>{data.reward_owned ? <button onClick={onConfigure} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button> : <span className="starry-night-locked"><span className="material-symbols-outlined">lock</span>{remaining}</span>}</footer>
+      <footer><div><span>{data.reward_owned ? t("activity.starry.unlocked") : data.reward_claimable ? t("activity.starry.rewardReady") : t("activity.starry.reward")}</span><small>{t("activity.starry.permanent")}</small></div>{data.reward_owned ? <button onClick={onConfigure} type="button">{t("activity.configureReward")}<span className="material-symbols-outlined">arrow_forward</span></button> : data.reward_claimable ? <button disabled={claiming} onClick={onClaim} type="button">{claiming ? t("common.processing") : t("activity.starry.claimReward")}<span className="material-symbols-outlined">redeem</span></button> : <span className="starry-night-locked"><span className="material-symbols-outlined">lock</span>{remaining}</span>}</footer>
     </section>
 
     <section className="starry-night-rules"><header><span>HOW TO OBSERVE</span><strong>{t("activity.starry.rules")}</strong></header><ol><li><b>01</b><p>{t("activity.starry.rule1")}</p></li><li><b>02</b><p>{t("activity.starry.rule2")}</p></li></ol></section>

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.11",
+  "id": "2026.09.11.12",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "五夜星旋支持历史进度",
+      "title": "五夜星旋奖励改为手动领取",
       "items": [
-        "空间认领活动时会回溯过去五天的夜间聊天，并继承仍连续的观测进度",
-        "缩小活动奖励预览中的旋转星核，避免遮挡星空村庄与树木"
+        "完成连续五晚观测后，典藏星夜回旋背景会在活动页等待你亲自领取",
+        "历史回溯只补充观测进度，不再自动将奖励加入收藏"
       ]
     },
     "en": {
-      "title": "Five Nights now recognizes recent progress",
+      "title": "Five Nights rewards are now claimed manually",
       "items": [
-        "Claiming the event now checks the previous five evenings and carries forward an active observation streak",
-        "Rotating stars in the reward preview are smaller so the village and trees remain visible"
+        "After completing five consecutive nights, claim the Collector Starry Rotation background from the event page",
+        "History backfill now restores observation progress without automatically adding the reward"
       ]
     }
   }

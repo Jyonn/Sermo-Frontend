@@ -720,6 +720,7 @@ export default function SquarePage() {
   const [personalRewardClaiming, setPersonalRewardClaiming] = useState(false);
   const [spaceRewardClaiming, setSpaceRewardClaiming] = useState(false);
   const [milestoneRewardClaiming, setMilestoneRewardClaiming] = useState<string | null>(null);
+  const [starryRewardClaiming, setStarryRewardClaiming] = useState(false);
   const [activityContributing, setActivityContributing] = useState(false);
   const [activityRulesOpen, setActivityRulesOpen] = useState(false);
   const [activityPoolOpen, setActivityPoolOpen] = useState(false);
@@ -987,6 +988,22 @@ export default function SquarePage() {
       showToast(cause instanceof Error ? cause.message : t("activity.personalRewardClaimFailed"), "error");
     } finally {
       setMilestoneRewardClaiming(null);
+    }
+  };
+
+  const claimStarryNightReward = async () => {
+    if (!activeActivity?.starry_night?.reward_claimable || starryRewardClaiming) return;
+    setStarryRewardClaiming(true);
+    try {
+      const updated = await api.claimStarryNightReward(activeActivity.key);
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      showToast(t("activity.starry.rewardClaimed"), "success");
+      void api.getSquareStatus().then(applySquareStatus).catch(() => undefined);
+      void api.getUserMe().then((me) => patchSessionUser(me)).catch(() => undefined);
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("activity.starry.rewardClaimFailed"), "error");
+    } finally {
+      setStarryRewardClaiming(false);
     }
   };
 
@@ -2545,7 +2562,7 @@ export default function SquarePage() {
       </SideDrawer>
       {qqProfileUser ? <QqUserDialog onClose={() => setQqProfileUser(null)} user={qqProfileUser} /> : null}
       <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}${activeActivity?.theme === "starry-night" ? " is-starry-night" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity && !["spider-man-4", "starry-night"].includes(activeActivity.theme) ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
-        {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity ? <div className="activity-detail">
+        {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} claiming={starryRewardClaiming} onClaim={() => void claimStarryNightReward()} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=1" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>{/* i18n-ignore: brand name */}
             <div className="activity-detail-index">
