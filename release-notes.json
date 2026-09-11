@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.2",
+  "id": "2026.09.12.3",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序顶部按钮恢复紧凑尺寸",
+      "title": "小程序顶部按钮对齐优化",
       "items": [
-        "修复微信基础库将 Header 主操作拉伸为横栏的问题",
-        "聊天、通讯、广场、投稿和菜单的主操作现在保持统一方形尺寸"
+        "修复微信原生按钮样式导致 Header 主操作纵向偏移的问题",
+        "聊天、通讯、广场、投稿和菜单的主操作现在稳定保持方形并垂直居中"
       ]
     },
     "en": {
-      "title": "Compact mini program header actions",
+      "title": "Aligned mini program header actions",
       "items": [
-        "Fixed a WeChat base-library sizing rule that stretched the primary header action",
-        "Primary actions across Chat, Contacts, Square, Submissions, and Menu now keep a consistent square size"
+        "Fixed vertical misalignment caused by WeChat's native button styles",
+        "Primary actions across Chat, Contacts, Square, Submissions, and Menu now stay square and vertically centered"
       ]
     }
   }
