@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.20",
+  "id": "2026.09.11.21",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "深色聊天输入更加清晰",
+      "title": "活动横幅完整还原设计",
       "items": [
-        "深色聊天背景下的输入文字改为清晰浅色",
-        "输入光标、占位文字和提及内容同步适配"
+        "四类活动横幅恢复各自的排版比例、字体角色和奖励文案",
+        "真实活动进度与领取状态继续实时展示"
       ]
     },
     "en": {
-      "title": "Clearer typing on dark chat backgrounds",
+      "title": "Activity banners now fully match their designs",
       "items": [
-        "Typed text now uses a clear light color over dark chat backgrounds",
-        "The caret, placeholder, and mention content adapt with it"
+        "All four campaign banners now restore their intended proportions, typography, and reward copy",
+        "Live progress and claim states continue to update in real time"
       ]
     }
   }

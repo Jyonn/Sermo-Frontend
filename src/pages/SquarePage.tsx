@@ -2325,23 +2325,23 @@ export default function SquarePage() {
             {showVipCampaign && vipCampaign ? <button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => setVipCampaignOpen(true)} type="button">
               {claimableActivityKeys.includes("vip:founding-100") ? <span className="square-activity-attention-tag">{t("activity.pendingClaim")}</span> : null}
               <span className="square-vip-banner-index">FRIENDEN · FOUNDING 100</span>
-              <strong className="square-vip-banner-title">{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
+              <strong className="square-vip-banner-title">{t("vip.bannerTitle")}</strong>
               <span className="square-vip-banner-number">{String(vipCampaign.slot ?? Math.max(1, 100 - vipCampaign.remaining)).padStart(3, "0")}</span>
               <span className="square-vip-banner-seal"><b>{vipCampaign.claimed_by_user ? vipCampaign.slot : vipCampaign.remaining}</b><small>{vipCampaign.claimed_by_user ? "VIP" : t("vip.remaining", { count: vipCampaign.remaining })}</small></span>
-              <span className="square-vip-banner-reward"><i /><span><small>{t("activity.limitedReward")}</small><strong>{t("vip.bubbleTitle")} · {t("vip.badgeTitle")}</strong></span></span>
+              <span className="square-vip-banner-reward"><i /><span><small>{t("vip.bannerOwnership")}</small><strong>{t("vip.bannerRewards")}</strong></span></span>
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {spiderManActivity ? <button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man" onClick={() => navigate(`/app/square/activities/${spiderManActivity.key}`)} type="button">
               {spiderManActivity.newly_claimed || claimableActivityKeys.includes(spiderManActivity.key) ? <span className="square-activity-attention-tag">{spiderManActivity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
               <img alt="" aria-hidden="true" className="square-spider-man-art" src={spiderMan4PreviewBanner} />
               <span className="square-spider-man-live"><i />{t("admin.activityStatus.active")}</span>
-              <strong className="square-spider-man-title">{t("activity.friendly.title")}</strong>
+              <strong className="square-spider-man-title">{t("activity.friendly.bannerTitle")}</strong>
               <span className="square-spider-man-web" aria-hidden="true" />
-              <span className="square-spider-man-score"><b>{spiderManActivity.friendly_neighbor?.web_points ?? 0}</b><span>{t("activity.friendly.webPoints")}<small>{t("activity.friendly.next", { count: spiderManActivity.friendly_neighbor?.next_reply_points ?? 0 })}</small></span></span>
+              <span className="square-spider-man-score"><b>{spiderManActivity.friendly_neighbor?.web_points ?? 0}</b><span>{t("activity.friendly.webPoints")}<small>{t("activity.friendly.bannerNext")}</small></span></span>
               <span className="square-spider-man-rewards">{(spiderManActivity.friendly_neighbor?.rewards?.length ? spiderManActivity.friendly_neighbor.rewards : [
                 { key: "frame", threshold: 75, resource_type: "frame" as const },
                 { key: "profile", threshold: 100, resource_type: "profile" as const },
-              ]).map((reward) => <span key={reward.key}><b>{reward.threshold}</b> {reward.resource_type === "frame" ? t("activity.friendly.frame") : t("activity.friendly.profile")}</span>)}</span>
+              ]).map((reward) => <span key={reward.key}><b>{reward.threshold}</b> {reward.resource_type === "frame" ? t("activity.friendly.bannerFrame") : t("activity.friendly.bannerProfile")}</span>)}</span>
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {starryNightActivity ? <button aria-label={t("activity.starry.title")} className="square-activity-banner is-starry-night" onClick={() => navigate(`/app/square/activities/${starryNightActivity.key}`)} type="button">
@@ -2349,9 +2349,9 @@ export default function SquarePage() {
               <img alt="" aria-hidden="true" src={starryNightBanner} />
               <span className="square-starry-night-rarity">{t("growth.rarity.legendary")} · COLLECTION</span>
               <span className="square-starry-night-orbit" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i className={index < (starryNightActivity.starry_night?.streak_days ?? 0) ? "is-lit" : ""} key={index}>★</i>)}</span>
-              <span className="square-starry-night-count"><b>{starryNightActivity.starry_night?.streak_days ?? 0}</b><small> / {starryNightActivity.starry_night?.target_days ?? 5} {t("activity.starry.currentStreak")}</small></span>
+              <span className="square-starry-night-count"><b>{starryNightActivity.starry_night?.streak_days ?? 0}</b><small> / {starryNightActivity.starry_night?.target_days ?? 5} {t("activity.starry.bannerNights")}</small></span>
               <span className="square-starry-night-title"><small>{starryNightActivity.starry_night?.window_start ?? "20:00"}—{starryNightActivity.starry_night?.window_end ?? "24:00"}</small><strong>{t("activity.starry.title")}</strong></span>
-              <span className="square-starry-night-reward"><small>{t("activity.starry.reward")}</small><b>{t("menu.themeStarryNight")}</b></span>
+              <span className="square-starry-night-reward"><small>{t("activity.starry.bannerRewardAction")}</small><b>{t("activity.starry.bannerRewardName")}</b></span>
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {regularActivities.slice(1).map((activity) => {

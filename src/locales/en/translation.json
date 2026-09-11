@@ -1301,6 +1301,9 @@
   "invite.verifyToUseQr": "Complete verification to use friend QR codes",
   "vip.remaining": "{{count}} spots left",
   "vip.title": "Permanent VIP for the earliest arrivals",
+  "vip.bannerTitle": "For the earliest arrivals",
+  "vip.bannerOwnership": "Claim once, own forever",
+  "vip.bannerRewards": "Identity · Nameplate · Chat bubble",
   "vip.rewards": "A permanent identity with a more expressive chat and social experience",
   "vip.privilegesEyebrow": "PERMANENT",
   "vip.privilegesTitle": "Your founding-member privileges",
@@ -2391,6 +2394,10 @@
   ,"menu.profileCardTheme.spider-city": "Friendly Neighborhood"
   ,"menu.activityUnlock": "Unlock in the event"
   ,"activity.friendly.title": "Friendly Neighborhood"
+  ,"activity.friendly.bannerTitle": "Friendly Neighbor"
+  ,"activity.friendly.bannerNext": "Answer one more call"
+  ,"activity.friendly.bannerFrame": "Avatar frame"
+  ,"activity.friendly.bannerProfile": "Living city profile"
   ,"activity.friendly.subtitle": "Answer every call across the city"
   ,"activity.friendly.webPoints": "Web Points"
   ,"activity.friendly.today": "Today's patrol"
@@ -2411,6 +2418,9 @@
   ,"activity.friendly.rule2": "Earn up to 25 daily. Deleted comments still count toward the daily record."
   ,"activity.friendly.rule3": "Manually unlock rewards at 75 and 100 points; claimed rewards are permanent."
   ,"activity.starry.title": "Five Nights Under the Stars"
+  ,"activity.starry.bannerNights": "nights"
+  ,"activity.starry.bannerRewardAction": "Unlock by chatting nightly"
+  ,"activity.starry.bannerRewardName": "Collector Starry Rotation background"
   ,"activity.starry.subtitle": "Let five connected evenings turn the night sky into your room."
   ,"activity.starry.currentStreak": "Night streak"
   ,"activity.starry.unlocked": "Collector reward unlocked"
