@@ -81,6 +81,14 @@ import chatPreviewMediaImage from "../assets/square/plaza-waterfront.jpg";
 import { PUBLIC_ORIGIN } from "../lib/siteConfig";
 
 const DEBUG_CHAT_SEND = import.meta.env.DEV;
+const GROUP_BACKGROUND_OPTIONS: Array<[Exclude<ChatBackgroundTheme, "custom">, TranslationKey]> = [
+  ["default", "menu.themeDefault"], ["paper", "menu.themePaper"], ["mint", "menu.themeMint"],
+  ["comic", "menu.themeComic"], ["bauhaus", "menu.themeBauhaus"], ["dragon", "menu.themeDragon"],
+  ["zen", "menu.themeZen"], ["mosaic", "menu.themeMosaic"], ["newsprint", "menu.themeNewsprint"],
+  ["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"],
+  ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"],
+  ["noir-film", "menu.themeNoirFilm"],
+];
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 const MESSAGE_PAGE_SIZE = 30;
 const STICKER_PAGE_SIZE = 30;
@@ -2789,6 +2797,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     notificationsMuted: Boolean(chat.notifications_muted),
     unreadBadgeMuted: Boolean(chat.unread_badge_muted),
+    groupBackgroundTheme: chat.group_background_theme ?? "default",
+    usePersonalBackground: Boolean(chat.use_personal_background),
     hasUnreadMention: Boolean(chat.has_unread_mention),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
@@ -3076,7 +3086,9 @@ function LiveChatsPage({
   const [pinSavingMessageId, setPinSavingMessageId] = useState<number | null>(null);
   const [profileDrawerUserId, setProfileDrawerUserId] = useState<number | null>(null);
   const [, setProfileSyncing] = useState(false);
-  const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | null>(null);
+  const [preferenceSaving, setPreferenceSaving] = useState<"pin" | "online" | "mute" | "badge" | "background" | null>(null);
+  const [groupBackgroundOpen, setGroupBackgroundOpen] = useState(false);
+  const [groupBackgroundSaving, setGroupBackgroundSaving] = useState(false);
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [groupCreateOpen, setGroupCreateOpen] = useState(false);
   const [groupMuteTarget, setGroupMuteTarget] = useState<Chat["detail"]["members"][number] | null>(null);
@@ -3800,6 +3812,8 @@ function LiveChatsPage({
       onlineReminderEnabled: false,
       notificationsMuted: false,
       unreadBadgeMuted: false,
+      groupBackgroundTheme: "default",
+      usePersonalBackground: false,
       hasUnreadMention: false,
       detail: {
         summary: t("chat.groupSummary"),
@@ -5388,6 +5402,11 @@ function LiveChatsPage({
   const submissionReviewerMembers = detailMembers.filter((member) => member.submissionRole === "reviewer" || submissionReviewerIds.has(member.userId));
   const visibleDetailMembers = detailMembers.slice(0, detailMemberLimit);
   const hasMoreDetailMembers = detailMembers.length > detailMemberLimit;
+  const availableGroupBackgrounds = GROUP_BACKGROUND_OPTIONS.filter(([theme]) => (
+    theme === "default"
+    || theme === selectedChat?.groupBackgroundTheme
+    || currentUserMe?.resource_inventory?.some((entry) => entry.resource_type === "background" && entry.resource_key === theme)
+  ));
   const submissionMemberPickerRole = chatMemberPickerMode === "submission-author"
     ? "author"
     : chatMemberPickerMode === "submission-reviewer"
@@ -5403,22 +5422,22 @@ function LiveChatsPage({
   );
   const chatMemberActionIds = chatMemberPickerMode === "remove" || chatMemberPickerMode === "transfer" ? groupSelectedIds : chatMemberNewIds;
 
-  const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute" | "badge", enabled: boolean) => {
+  const updateSelectedChatPreference = async (kind: "pin" | "online" | "mute" | "badge" | "background", enabled: boolean) => {
     if (!selectedChat || preferenceSaving) return;
     if (kind === "online" && enabled && !requireComposerCapability("chat.reminder.online", 7, t("chat.enableOnlineReminder"))) return;
     const chatIdToUpdate = selectedChat.id;
-    const field = kind === "pin" ? "pinned" : kind === "online" ? "onlineReminderEnabled" : kind === "mute" ? "notificationsMuted" : "unreadBadgeMuted";
+    const field = kind === "pin" ? "pinned" : kind === "online" ? "onlineReminderEnabled" : kind === "mute" ? "notificationsMuted" : kind === "badge" ? "unreadBadgeMuted" : "usePersonalBackground";
     setPreferenceSaving(kind);
     setChats((current) => sortChats(current.map((chat) => (chat.id === chatIdToUpdate ? { ...chat, [field]: enabled, ...(kind === "mute" && !enabled ? { unreadBadgeMuted: false } : {}), ...(kind === "badge" && enabled ? { notificationsMuted: true } : {}) } : chat))));
     try {
       const preference = await api.updateChatPreference(chatIdToUpdate, {
-        ...(kind === "pin" ? { pinned: enabled ? 1 : 0 } : kind === "online" ? { online_reminder_enabled: enabled ? 1 : 0 } : kind === "mute" ? { notifications_muted: enabled ? 1 : 0 } : { unread_badge_muted: enabled ? 1 : 0 }),
+        ...(kind === "pin" ? { pinned: enabled ? 1 : 0 } : kind === "online" ? { online_reminder_enabled: enabled ? 1 : 0 } : kind === "mute" ? { notifications_muted: enabled ? 1 : 0 } : kind === "badge" ? { unread_badge_muted: enabled ? 1 : 0 } : { use_personal_background: enabled ? 1 : 0 }),
       });
       setChats((current) =>
         sortChats(
           current.map((chat) =>
             chat.id === chatIdToUpdate
-              ? { ...chat, pinned: preference.pinned, onlineReminderEnabled: preference.online_reminder_enabled, notificationsMuted: preference.notifications_muted, unreadBadgeMuted: preference.unread_badge_muted }
+              ? { ...chat, pinned: preference.pinned, onlineReminderEnabled: preference.online_reminder_enabled, notificationsMuted: preference.notifications_muted, unreadBadgeMuted: preference.unread_badge_muted, usePersonalBackground: preference.use_personal_background }
               : chat
           )
         )
@@ -5428,6 +5447,20 @@ function LiveChatsPage({
       setPageError(apiError instanceof ApiError ? apiError.message : t("chat.settingsSaveFailed"));
     } finally {
       setPreferenceSaving(null);
+    }
+  };
+
+  const saveGroupBackground = async (theme: Exclude<ChatBackgroundTheme, "custom">) => {
+    if (!selectedChat || !selectedChat.isOwner || groupBackgroundSaving) return;
+    setGroupBackgroundSaving(true);
+    try {
+      applyUpdatedGroupChat(await api.updateGroupBackground(selectedChat.id, theme));
+      setGroupBackgroundOpen(false);
+      showToast(t("chat.groupBackgroundUpdated"));
+    } catch (apiError) {
+      setPageError(apiError instanceof ApiError ? apiError.message : t("chat.settingsSaveFailed"));
+    } finally {
+      setGroupBackgroundSaving(false);
     }
   };
 
@@ -7644,16 +7677,20 @@ function LiveChatsPage({
     </>
   );
 
+  const personalChatBackgroundTheme = currentUserMe?.chat_background_theme ?? "default";
+  const chatBackgroundTheme = selectedChat?.type === "group" && !selectedChat.usePersonalBackground
+    ? selectedChat.groupBackgroundTheme
+    : personalChatBackgroundTheme;
+  const usesPersonalCustomBackground = chatBackgroundTheme === "custom";
   const chatLayoutStyle = selectedChat
     ? ({
         "--chat-keyboard-offset": `${keyboardOffset}px`,
         "--chat-composer-height": `${composerHeight}px`,
-        "--chat-background-image": paintedChatBackgroundUri
+        "--chat-background-image": usesPersonalCustomBackground && paintedChatBackgroundUri
           ? `url("${paintedChatBackgroundUri.replace(/"/g, "%22")}")`
           : "none",
       } as CSSProperties)
     : undefined;
-  const chatBackgroundTheme = currentUserMe?.chat_background_theme ?? "default";
   const otherChatsUnreadCount = displayedChat
     ? chats.reduce((total, chat) => (
         chat.id === displayedChat.id || chat.unreadBadgeMuted ? total : total + Math.max(0, chat.unread)
@@ -8851,6 +8888,33 @@ function LiveChatsPage({
         />
       </SideDrawer>
 
+      <BottomSheet
+        open={groupBackgroundOpen}
+        title={t("chat.groupBackground")}
+        onClose={() => {
+          if (!groupBackgroundSaving) setGroupBackgroundOpen(false);
+        }}
+      >
+        <div className="chat-group-background-picker">
+          <p>{t("chat.groupBackgroundPickerHint")}</p>
+          <div className="chat-group-background-grid">
+            {availableGroupBackgrounds.map(([theme, label]) => (
+              <button
+                aria-pressed={selectedChat?.groupBackgroundTheme === theme}
+                className={`chat-background-choice theme-${theme}${selectedChat?.groupBackgroundTheme === theme ? " is-selected" : ""}`}
+                disabled={groupBackgroundSaving}
+                key={theme}
+                onClick={() => void saveGroupBackground(theme)}
+                type="button"
+              >
+                <span />
+                <strong>{t(label)}</strong>
+              </button>
+            ))}
+          </div>
+        </div>
+      </BottomSheet>
+
       <SideDrawer
         historyKey="chat-details"
         onRouteOpen={() => setDetailsSheetOpen(true)}
@@ -8969,6 +9033,22 @@ function LiveChatsPage({
 
             {selectedChat.purpose !== "submission" ? <section className="chat-detail-settings-section">
               <SettingGroup>
+                {selectedChat.type === "group" && selectedChat.isOwner ? (
+                  <SettingRow
+                    icon={<span className="material-symbols-outlined" aria-hidden="true">wallpaper</span>}
+                    onClick={() => setGroupBackgroundOpen(true)}
+                    description={t("chat.groupBackgroundHint")}
+                    title={t("chat.groupBackground")}
+                    trailing={<span className={`chat-group-background-swatch chat-background-choice theme-${selectedChat.groupBackgroundTheme}`} aria-hidden="true"><span /></span>}
+                  />
+                ) : null}
+                {selectedChat.type === "group" ? (
+                  <SettingRow
+                    description={selectedChat.usePersonalBackground ? t("chat.personalBackgroundEnabledHint") : t("chat.personalBackgroundDisabledHint")}
+                    title={t("chat.usePersonalBackground")}
+                    trailing={<SettingSwitch checked={selectedChat.usePersonalBackground} disabled={preferenceSaving !== null} label={t("chat.togglePersonalBackground")} onChange={(next) => void updateSelectedChatPreference("background", next)} />}
+                  />
+                ) : null}
                 <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />
                 {selectedChat.type === "direct" && canUseOnlineReminder ? (
                   <FeatureDiscoveryTarget

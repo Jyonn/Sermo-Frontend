@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.4",
+  "id": "2026.09.11.5",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "动态壁纸角色边缘更加干净",
+      "title": "群聊也有自己的背景",
       "items": [
-        "修复夜航友间中部分角色混入相邻素材的问题",
-        "小熊与企鹅现在拥有完整、干净的独立动画图层"
+        "群主可以为群聊选择自己拥有的系统背景",
+        "群成员可以选择跟随群背景，或仅为自己启用个人聊天背景"
       ]
     },
     "en": {
-      "title": "Cleaner character edges in living wallpapers",
+      "title": "Groups can now have their own backgrounds",
       "items": [
-        "Fixed neighboring artwork leaking into some Rooms at Night character layers",
-        "The bear and penguin now have clean, fully independent animation layers"
+        "Group owners can choose a system background they own for the whole group",
+        "Members can follow the group background or privately use their personal chat background"
       ]
     }
   }

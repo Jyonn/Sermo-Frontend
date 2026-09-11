@@ -220,6 +220,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     notificationsMuted: Boolean(chat.notifications_muted),
     unreadBadgeMuted: Boolean(chat.unread_badge_muted),
+    groupBackgroundTheme: chat.group_background_theme ?? "default",
+    usePersonalBackground: Boolean(chat.use_personal_background),
     hasUnreadMention: Boolean(chat.has_unread_mention),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),

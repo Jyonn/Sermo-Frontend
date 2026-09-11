@@ -708,6 +708,15 @@ export const api = {
     });
   },
 
+  updateGroupBackground(chat_id: number, background_theme: Exclude<import("../types").ChatBackgroundTheme, "custom">) {
+    return request<ChatDTO>("/chats/group/background", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: { background_theme },
+    });
+  },
+
   addGroupMembers(chat_id: number, users: number[]) {
     return request<ChatDTO>("/chats/group/members", {
       method: "POST",
@@ -776,7 +785,7 @@ export const api = {
     });
   },
 
-  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1; statement_reminder_enabled?: 0 | 1; notifications_muted?: 0 | 1; unread_badge_muted?: 0 | 1 }) {
+  updateChatPreference(chat_id: number, payload: { pinned?: 0 | 1; online_reminder_enabled?: 0 | 1; statement_reminder_enabled?: 0 | 1; notifications_muted?: 0 | 1; unread_badge_muted?: 0 | 1; use_personal_background?: 0 | 1 }) {
     return request<ChatPreferenceDTO>("/chats/preference", {
       method: "POST",
       auth: true,
