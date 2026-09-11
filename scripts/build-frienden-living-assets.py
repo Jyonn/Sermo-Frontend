@@ -12,14 +12,17 @@ from PIL import Image
 ACTOR_BOXES = {
     "night": {
         "door-rabbit": (0, 0, 410, 465),
-        "window-black-cat": (390, 0, 830, 465),
+        "window-black-cat": (450, 150, 770, 465),
         "sleeping-dog": (770, 0, 1230, 465),
-        "mug-bear": (0, 420, 435, 900),
-        "mug-window-cat": (390, 420, 855, 900),
-        "door-penguin": (800, 420, 1230, 920),
-        "window-sheep": (0, 850, 440, 1278),
-        "path-bird": (390, 850, 815, 1278),
-        "bottom-cat": (770, 850, 1230, 1278),
+        # Keep row boundaries clear of neighboring actors. The generated atlas
+        # has generous transparent gutters, but its visual rows do not start at
+        # the nominal grid lines.
+        "mug-bear": (0, 500, 435, 900),
+        "mug-window-cat": (445, 500, 850, 900),
+        "door-penguin": (855, 500, 1230, 920),
+        "window-sheep": (10, 945, 430, 1235),
+        "path-bird": (455, 945, 800, 1235),
+        "bottom-cat": (800, 945, 1230, 1235),
     },
     "garden": {
         "letter-rabbit": (0, 0, 410, 430),

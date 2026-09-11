@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.3",
+  "id": "2026.09.11.4",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "手绘小屋成为真正的多图层世界",
+      "title": "动态壁纸角色边缘更加干净",
       "items": [
-        "夜航友间与午后花房重制为环境、角色、前后景植物与动作效果多图层",
-        "每只动物按自身习性行动，植物从根部摆动，并彻底移除成品图裁切动画"
+        "修复夜航友间中部分角色混入相邻素材的问题",
+        "小熊与企鹅现在拥有完整、干净的独立动画图层"
       ]
     },
     "en": {
-      "title": "The illustrated rooms become truly layered worlds",
+      "title": "Cleaner character edges in living wallpapers",
       "items": [
-        "Rooms at Night and Afternoon Conservatory now use environment, character, vegetation, and action-effect layers",
-        "Every animal follows its own habits, plants move from rooted anchors, and finished-art cutout animation is gone"
+        "Fixed neighboring artwork leaking into some Rooms at Night character layers",
+        "The bear and penguin now have clean, fully independent animation layers"
       ]
     }
   }
