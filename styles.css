@@ -12867,12 +12867,12 @@ html[data-theme="dark"] .gesture-lock-screen {
 
 .chat-detail-scene.chat-background-frienden-night::before,
 :is(.chat-background-preview[data-theme="frienden-night"], .chat-background-choice.theme-frienden-night > span, .personalization-background-swatch.theme-frienden-night) {
-  background: #102d63 url("/assets/frienden-wallpapers/night-rooms.webp") center 48% / cover no-repeat;
+  background: #102d63 url("/assets/frienden-wallpapers/layers/night-environment.webp") center 48% / cover no-repeat;
 }
 
 .chat-detail-scene.chat-background-frienden-garden::before,
 :is(.chat-background-preview[data-theme="frienden-garden"], .chat-background-choice.theme-frienden-garden > span, .personalization-background-swatch.theme-frienden-garden) {
-  background: #a9d6a0 url("/assets/frienden-wallpapers/garden-rooms.webp") center 48% / cover no-repeat;
+  background: #a9d6a0 url("/assets/frienden-wallpapers/layers/garden-environment.webp") center 48% / cover no-repeat;
 }
 
 .frienden-living-wallpaper {
@@ -12887,8 +12887,237 @@ html[data-theme="dark"] .gesture-lock-screen {
   transition: opacity 280ms ease;
 }
 
-.frienden-living-wallpaper.is-ready {
+.frienden-living-wallpaper.is-visible {
   opacity: 1;
+}
+
+.frienden-living-item {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.frienden-living-wallpaper.is-active.is-visible .frienden-living-item {
+  animation-delay: var(--frienden-delay);
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(.45, 0, .2, 1);
+}
+
+.motion-rabbit-peek { animation: frienden-rabbit-peek 8.4s; }
+.motion-cat-watch { animation: frienden-cat-watch 10.8s; }
+.motion-sleep-breathe { animation: frienden-sleep-breathe 5.6s; }
+.motion-bear-sip { animation: frienden-bear-sip 9.2s; }
+.motion-cat-sip { animation: frienden-cat-sip 8.8s; }
+.motion-penguin-doze { animation: frienden-penguin-doze 7.6s; }
+.motion-bird-peck { animation: frienden-bird-peck 6.4s; }
+.motion-cat-stretch { animation: frienden-cat-stretch 11.5s; }
+.motion-letter-wave { animation: frienden-letter-wave 8.9s; }
+.motion-watering-cycle { animation: frienden-watering-cycle 7.8s; }
+.motion-fruit-nibble { animation: frienden-fruit-nibble 6.8s; }
+.motion-bouquet-sway { animation: frienden-bouquet-sway 7.2s; }
+.motion-tea-pour { animation: frienden-tea-pour 9.6s; }
+.motion-tea-watch { animation: frienden-tea-watch 8.2s; }
+.motion-basket-step { animation: frienden-basket-step 7.1s; }
+.motion-vine-breathe { animation: frienden-vine-breathe 6.7s; }
+.motion-arch-breathe { animation: frienden-arch-breathe 8.5s; }
+.motion-leaf-fan { animation: frienden-leaf-fan 5.9s; }
+.motion-cactus-listen { animation: frienden-cactus-listen 9.8s; }
+.motion-flower-nod { animation: frienden-flower-nod 6.2s; }
+.motion-shrub-rustle { animation: frienden-shrub-rustle 5.1s; }
+.motion-hanging-sway { animation: frienden-hanging-sway 7.3s; }
+.motion-sun-track { animation: frienden-sun-track 10.6s; }
+.motion-butterfly-roam { animation: frienden-butterfly-roam 8.2s; }
+.motion-butterfly-roam-alt { animation: frienden-butterfly-roam-alt 9.6s; }
+
+.frienden-sleep-puffs,
+.frienden-water-drops {
+  opacity: 0;
+}
+
+.frienden-sleep-puffs circle {
+  fill: rgba(255, 252, 236, .86);
+  stroke: rgba(37, 61, 61, .52);
+  stroke-width: 1.6;
+}
+
+.frienden-water-drops circle {
+  fill: #72c6d7;
+  stroke: rgba(39, 121, 142, .42);
+  stroke-width: 1;
+}
+
+.frienden-living-wallpaper.is-active.is-visible .frienden-sleep-puffs {
+  animation: frienden-sleep-puffs 5.6s ease-in-out infinite;
+}
+
+.frienden-living-wallpaper.is-active.is-visible .frienden-water-drops {
+  animation: frienden-water-drops 7.8s ease-in-out infinite;
+}
+
+@keyframes frienden-rabbit-peek {
+  0%, 18%, 100% { transform: translateY(12%) scaleY(.88) rotate(0); }
+  28%, 63% { transform: translateY(0) scaleY(1) rotate(-1.5deg); }
+  39% { transform: translateY(-3%) scaleY(1.025) rotate(2deg); }
+  48% { transform: translateY(-2%) scaleY(1.01) rotate(-1deg); }
+}
+
+@keyframes frienden-cat-watch {
+  0%, 38%, 100% { transform: scaleY(.96) rotate(0); }
+  45% { transform: scaleY(1.03) rotate(-3deg); }
+  58% { transform: scaleY(1.02) rotate(3deg); }
+  66% { transform: scaleY(.98) rotate(0); }
+}
+
+@keyframes frienden-sleep-breathe {
+  0%, 100% { transform: scale(1, .985) rotate(-.4deg); }
+  48% { transform: scale(1.025, 1.018) rotate(.35deg); }
+}
+
+@keyframes frienden-bear-sip {
+  0%, 52%, 100% { transform: rotate(0) scale(1); }
+  59%, 70% { transform: rotate(3deg) scale(.985, 1.015); }
+  76% { transform: rotate(-1deg) scale(1); }
+}
+
+@keyframes frienden-cat-sip {
+  0%, 45%, 100% { transform: rotate(0); }
+  52%, 62% { transform: rotate(-3.5deg) scaleY(1.015); }
+  69% { transform: rotate(1deg); }
+}
+
+@keyframes frienden-penguin-doze {
+  0%, 100% { transform: rotate(-1.5deg) scaleY(.99); }
+  45% { transform: rotate(2.5deg) scaleY(1.015); }
+  52% { transform: rotate(3deg) scaleY(.985); }
+}
+
+@keyframes frienden-bird-peck {
+  0%, 38%, 100% { transform: rotate(0) scale(1); }
+  44% { transform: rotate(8deg) scale(1.03, .96); }
+  49% { transform: rotate(-2deg) scale(.98, 1.02); }
+  55% { transform: rotate(7deg) scale(1.02, .97); }
+  62% { transform: rotate(0); }
+}
+
+@keyframes frienden-cat-stretch {
+  0%, 55%, 100% { transform: scale(1); }
+  63% { transform: scale(1.08, .92) rotate(-2deg); }
+  72% { transform: scale(.98, 1.05) rotate(1deg); }
+  80% { transform: scale(1); }
+}
+
+@keyframes frienden-letter-wave {
+  0%, 45%, 100% { transform: rotate(0) scale(1); }
+  52% { transform: rotate(-3deg) scale(1.02, .98); }
+  60% { transform: rotate(2deg) scale(.99, 1.01); }
+  68% { transform: rotate(-1deg); }
+}
+
+@keyframes frienden-watering-cycle {
+  0%, 32%, 100% { transform: rotate(0) scale(1); }
+  43%, 68% { transform: rotate(5deg) scale(.98, 1.02); }
+  55% { transform: rotate(3deg) scale(1.015, .985); }
+  78% { transform: rotate(-1deg); }
+}
+
+@keyframes frienden-fruit-nibble {
+  0%, 34%, 100% { transform: scale(1) rotate(0); }
+  42% { transform: scale(.98, 1.025) rotate(-2deg); }
+  48% { transform: scale(1.02, .98) rotate(1deg); }
+  55% { transform: scale(.99, 1.018) rotate(-1deg); }
+}
+
+@keyframes frienden-bouquet-sway {
+  0%, 100% { transform: rotate(-2deg) scaleY(1); }
+  45% { transform: rotate(3deg) scaleY(1.018); }
+  62% { transform: rotate(1deg) scale(.99, 1.01); }
+}
+
+@keyframes frienden-tea-pour {
+  0%, 42%, 100% { transform: rotate(0); }
+  52%, 68% { transform: rotate(5.5deg) scale(.99, 1.01); }
+  76% { transform: rotate(-1.5deg); }
+}
+
+@keyframes frienden-tea-watch {
+  0%, 40%, 100% { transform: rotate(0) scaleY(1); }
+  49%, 64% { transform: rotate(-3deg) scaleY(1.02); }
+  74% { transform: rotate(1deg); }
+}
+
+@keyframes frienden-basket-step {
+  0%, 18%, 100% { transform: translateX(-3%) rotate(-2deg) scaleY(.98); }
+  34% { transform: translateX(1%) rotate(2deg) scaleY(1.02); }
+  52% { transform: translateX(4%) rotate(-1deg) scaleY(.98); }
+  70% { transform: translateX(1%) rotate(2deg) scaleY(1.02); }
+}
+
+@keyframes frienden-vine-breathe {
+  0%, 100% { transform: rotate(-1.2deg) scaleX(.995); }
+  48% { transform: rotate(1.8deg) scaleX(1.015); }
+}
+
+@keyframes frienden-arch-breathe {
+  0%, 100% { transform: scale(1, .995) rotate(-.35deg); }
+  50% { transform: scale(1.012, 1.018) rotate(.45deg); }
+}
+
+@keyframes frienden-leaf-fan {
+  0%, 100% { transform: skewX(-1.2deg) scaleX(.99); }
+  45% { transform: skewX(2deg) scaleX(1.018); }
+  68% { transform: skewX(-.5deg) scaleX(1.005); }
+}
+
+@keyframes frienden-cactus-listen {
+  0%, 55%, 100% { transform: rotate(0) scaleX(1); }
+  64% { transform: rotate(-1.5deg) scaleX(1.012); }
+  74% { transform: rotate(1deg) scaleX(.995); }
+}
+
+@keyframes frienden-flower-nod {
+  0%, 100% { transform: rotate(-1.5deg) scaleY(1); }
+  48% { transform: rotate(2.4deg) scaleY(1.015); }
+}
+
+@keyframes frienden-shrub-rustle {
+  0%, 100% { transform: skewX(-.8deg) scale(1); }
+  35% { transform: skewX(1.4deg) scale(1.012, .99); }
+  68% { transform: skewX(-1.2deg) scale(.995, 1.01); }
+}
+
+@keyframes frienden-hanging-sway {
+  0%, 100% { transform: rotate(-2.2deg); }
+  50% { transform: rotate(2.6deg) scaleY(1.01); }
+}
+
+@keyframes frienden-sun-track {
+  0%, 100% { transform: rotate(-2.5deg) scaleY(1); }
+  48% { transform: rotate(3.5deg) scaleY(1.012); }
+}
+
+@keyframes frienden-butterfly-roam {
+  0%, 100% { transform: translate(-18%, 8%) rotate(-8deg) scaleX(.65); }
+  24% { transform: translate(22%, -38%) rotate(7deg) scaleX(1); }
+  52% { transform: translate(56%, -5%) rotate(-4deg) scaleX(.58); }
+  76% { transform: translate(12%, 32%) rotate(8deg) scaleX(1); }
+}
+
+@keyframes frienden-butterfly-roam-alt {
+  0%, 100% { transform: translate(22%, 12%) rotate(9deg) scaleX(1); }
+  30% { transform: translate(-38%, -24%) rotate(-7deg) scaleX(.58); }
+  58% { transform: translate(-4%, -48%) rotate(5deg) scaleX(1); }
+  82% { transform: translate(42%, -12%) rotate(-5deg) scaleX(.62); }
+}
+
+@keyframes frienden-sleep-puffs {
+  0%, 38%, 100% { opacity: 0; transform: translate(0, 8px) scale(.72); }
+  48% { opacity: .85; }
+  76% { opacity: .32; transform: translate(7px, -13px) scale(1.12); }
+}
+
+@keyframes frienden-water-drops {
+  0%, 34%, 76%, 100% { opacity: 0; transform: translate(0, 0); }
+  43% { opacity: .9; }
+  66% { opacity: .58; transform: translate(22px, 22px); }
 }
 
 html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-frienden-garden) {
@@ -12898,7 +13127,9 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frienden-living-wallpaper { display: none; }
+  .frienden-living-item,
+  .frienden-sleep-puffs,
+  .frienden-water-drops { animation: none !important; }
 }
 
 .square-character.is-max-level .square-character-name {

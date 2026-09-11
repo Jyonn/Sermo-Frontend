@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.2",
+  "id": "2026.09.11.3",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "手绘小屋以连续画面苏醒",
+      "title": "手绘小屋成为真正的多图层世界",
       "items": [
-        "夜航友间与午后花房取消整幅漂移、随机飘落与拼贴式动画",
-        "动物和植物现在通过连续画面自然活动，不再出现裁切边或重影"
+        "夜航友间与午后花房重制为环境、角色、前后景植物与动作效果多图层",
+        "每只动物按自身习性行动，植物从根部摆动，并彻底移除成品图裁切动画"
       ]
     },
     "en": {
-      "title": "The illustrated rooms wake as one continuous scene",
+      "title": "The illustrated rooms become truly layered worlds",
       "items": [
-        "Rooms at Night and Afternoon Conservatory no longer use whole-scene drift, floating particles, or cutout animation",
-        "Animals and plants now move through a continuous image without clipped edges or duplicated artwork"
+        "Rooms at Night and Afternoon Conservatory now use environment, character, vegetation, and action-effect layers",
+        "Every animal follows its own habits, plants move from rooted anchors, and finished-art cutout animation is gone"
       ]
     }
   }
