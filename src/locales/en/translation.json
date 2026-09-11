@@ -2298,6 +2298,8 @@
   ,"cloudResources.searchFiles": "Search file names"
   ,"activity.title": "Event"
   ,"activity.active": "Active events"
+  ,"activity.new": "NEW"
+  ,"activity.pendingClaim": "CLAIM"
   ,"activity.preview": "Event preview"
   ,"activity.comingSoon": "Coming soon"
   ,"activity.spiderMan4Title": "SPIDER-MAN"

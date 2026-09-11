@@ -918,6 +918,7 @@ export interface ActivityCampaignDTO {
   assignment_mode: "automatic" | "manual";
   duration_seconds: number | null;
   theme: string;
+  newly_claimed: boolean;
   verified: boolean;
   today_earned: boolean;
   claimable_points: number;

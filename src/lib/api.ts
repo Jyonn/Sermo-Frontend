@@ -936,6 +936,10 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
   },
 
+  markActivitySeen(key: string) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/seen`, { method: "POST", auth: true });
+  },
+
   claimActivityForce(key: string) {
     return request<ActivityCampaignDTO>(`/activities/${key}/claim`, { method: "POST", auth: true });
   },

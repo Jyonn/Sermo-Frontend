@@ -10123,6 +10123,7 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
         assignment_mode: "manual",
         duration_seconds: 15 * 86400,
         theme: "baxian",
+        newly_claimed: false,
         verified: true,
         today_earned: false,
         claimable_points: 0,

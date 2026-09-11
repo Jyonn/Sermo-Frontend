@@ -15327,6 +15327,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
 .square-fresh-dot { position: absolute; top: 5px; right: 4px; width: 7px; height: 7px; border-width: 1px; }
 .square-activity-banner { position: relative; }
 .square-activity-claim-dot { position: absolute; z-index: 4; top: 12px; right: 12px; width: 11px; height: 11px; border-color: rgba(255,255,255,.88); }
+.square-activity-attention-tag{position:absolute;z-index:18;top:10px;right:10px;display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border:1px solid rgba(255,255,255,.72);border-radius:7px;color:#fff;background:#eb3f58;box-shadow:0 5px 15px rgba(181,24,52,.36);font-size:9px;font-weight:900;letter-spacing:.08em;line-height:1;animation:square-activity-tag-arrive .42s cubic-bezier(.22,1,.36,1) both}.square-activity-banner:has(.square-activity-attention-tag) .square-baxian-banner-kicker{display:none}.square-activity-banner.is-vip .square-activity-attention-tag{right:77px}.square-activity-banner.is-spider-man .square-activity-attention-tag,.square-activity-banner.is-starry-night .square-activity-attention-tag{right:48px}.square-activity-banner.is-starry-night:has(.square-activity-attention-tag) .square-starry-night-count{right:118px}@keyframes square-activity-tag-arrive{from{opacity:0;transform:translateY(-5px) scale(.9)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.square-activity-attention-tag{animation:none}}
 
 .nav-button-label {
   font-size: 0.68rem;

@@ -916,6 +916,16 @@ export default function SquarePage() {
     return () => controller.abort();
   }, [activeActivity, navigate, routeActivityKey]);
 
+  useEffect(() => {
+    if (!routeActivityKey || !activeActivity?.newly_claimed) return;
+    const activityKey = activeActivity.key;
+    setActivities((current) => current.map((item) => item.key === activityKey ? { ...item, newly_claimed: false } : item));
+    void api.markActivitySeen(activityKey).then((updated) => {
+      setActivities((current) => current.map((item) => item.key === updated.key ? updated : item));
+      void api.getSquareStatus().then(applySquareStatus).catch(() => undefined);
+    }).catch(() => undefined);
+  }, [activeActivity, applySquareStatus, routeActivityKey]);
+
   const contributeActivity = async () => {
     if (!activeActivity?.available_points || activityContributing) return;
     setActivityContributing(true);
@@ -2301,7 +2311,7 @@ export default function SquarePage() {
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               const litFormation = Math.min(8, Math.floor((activity.space_total / Math.max(1, activity.target)) * 8));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
-                {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
+                {activity.newly_claimed || claimableActivityKeys.includes(activity.key) ? <span className="square-activity-attention-tag">{activity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-baxian-banner-shade" />
                 <img alt="" aria-hidden="true" className="square-baxian-banner-title" src={baxianActivityTitle} />
@@ -2313,7 +2323,7 @@ export default function SquarePage() {
               </button>;
             })}
             {showVipCampaign && vipCampaign ? <button className={`square-activity-banner is-vip${vipCampaign.claimed_by_user ? " is-claimed" : ""}`} onClick={() => setVipCampaignOpen(true)} type="button">
-              {claimableActivityKeys.includes("vip:founding-100") ? <i className="square-activity-claim-dot" /> : null}
+              {claimableActivityKeys.includes("vip:founding-100") ? <span className="square-activity-attention-tag">{t("activity.pendingClaim")}</span> : null}
               <span className="square-vip-banner-index">FRIENDEN · FOUNDING 100</span>
               <strong className="square-vip-banner-title">{vipCampaign.claimed_by_user ? t("vip.claimedTitle") : t("vip.title")}</strong>
               <span className="square-vip-banner-number">{String(vipCampaign.slot ?? Math.max(1, 100 - vipCampaign.remaining)).padStart(3, "0")}</span>
@@ -2322,6 +2332,7 @@ export default function SquarePage() {
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {spiderManActivity ? <button aria-label={t("activity.friendly.title")} className="square-activity-banner is-spider-man" onClick={() => navigate(`/app/square/activities/${spiderManActivity.key}`)} type="button">
+              {spiderManActivity.newly_claimed || claimableActivityKeys.includes(spiderManActivity.key) ? <span className="square-activity-attention-tag">{spiderManActivity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
               <img alt="" aria-hidden="true" className="square-spider-man-art" src={spiderMan4PreviewBanner} />
               <span className="square-spider-man-live"><i />{t("admin.activityStatus.active")}</span>
               <strong className="square-spider-man-title">{t("activity.friendly.title")}</strong>
@@ -2334,6 +2345,7 @@ export default function SquarePage() {
               <span className="square-campaign-arrow material-symbols-outlined">arrow_forward</span>
             </button> : null}
             {starryNightActivity ? <button aria-label={t("activity.starry.title")} className="square-activity-banner is-starry-night" onClick={() => navigate(`/app/square/activities/${starryNightActivity.key}`)} type="button">
+              {starryNightActivity.newly_claimed || claimableActivityKeys.includes(starryNightActivity.key) ? <span className="square-activity-attention-tag">{starryNightActivity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
               <img alt="" aria-hidden="true" src={starryNightBanner} />
               <span className="square-starry-night-rarity">{t("growth.rarity.legendary")} · COLLECTION</span>
               <span className="square-starry-night-orbit" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i className={index < (starryNightActivity.starry_night?.streak_days ?? 0) ? "is-lit" : ""} key={index}>★</i>)}</span>
@@ -2347,7 +2359,7 @@ export default function SquarePage() {
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               const litFormation = Math.min(8, Math.floor((activity.space_total / Math.max(1, activity.target)) * 8));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
-                {claimableActivityKeys.includes(activity.key) ? <i className="square-activity-claim-dot" /> : null}
+                {activity.newly_claimed || claimableActivityKeys.includes(activity.key) ? <span className="square-activity-attention-tag">{activity.newly_claimed ? t("activity.new") : t("activity.pendingClaim")}</span> : null}
                 <img alt={title} className="square-activity-banner-art" src={baxianActivityBanner} />
                 <span className="square-baxian-banner-shade" />
                 <img alt="" aria-hidden="true" className="square-baxian-banner-title" src={baxianActivityTitle} />

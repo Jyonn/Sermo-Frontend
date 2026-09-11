@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.12",
+  "id": "2026.09.11.13",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "五夜星旋奖励改为手动领取",
+      "title": "新活动提醒更加醒目",
       "items": [
-        "完成连续五晚观测后，典藏星夜回旋背景会在活动页等待你亲自领取",
-        "历史回溯只补充观测进度，不再自动将奖励加入收藏"
+        "空间新认领活动后，活动横幅会显示醒目的红色“新活动”标签",
+        "首次进入后标签自动消除，待领取奖励仍会继续提醒"
       ]
     },
     "en": {
-      "title": "Five Nights rewards are now claimed manually",
+      "title": "New event alerts stand out",
       "items": [
-        "After completing five consecutive nights, claim the Collector Starry Rotation background from the event page",
-        "History backfill now restores observation progress without automatically adding the reward"
+        "Newly claimed space events now show a prominent red New tag on their banners",
+        "The tag clears after your first visit while claimable rewards continue to be highlighted"
       ]
     }
   }
