@@ -90,6 +90,9 @@ const GROUP_BACKGROUND_OPTIONS: Array<[Exclude<ChatBackgroundTheme, "custom">, T
   ["starry-night", "menu.themeStarryNight"],
   ["noir-film", "menu.themeNoirFilm"],
 ];
+const DARK_CHAT_BACKGROUND_THEMES = new Set<ChatBackgroundTheme>([
+  "dragon", "aurora-sky", "frienden-night", "starry-night", "noir-film", "custom",
+]);
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;
 const MESSAGE_PAGE_SIZE = 30;
 const STICKER_PAGE_SIZE = 30;
@@ -7684,6 +7687,9 @@ function LiveChatsPage({
     : personalChatBackgroundTheme;
   const chatBackgroundTheme = mobileComposerLayout ? preferredChatBackgroundTheme : "default";
   const hasDecorativeChatBackground = chatBackgroundTheme !== "default";
+  const chatWallpaperToneClass = hasDecorativeChatBackground
+    ? DARK_CHAT_BACKGROUND_THEMES.has(chatBackgroundTheme) ? " is-dark-wallpaper" : " is-light-wallpaper"
+    : "";
   const usesPersonalCustomBackground = chatBackgroundTheme === "custom";
   const chatLayoutStyle = selectedChat
     ? ({
@@ -7715,7 +7721,7 @@ function LiveChatsPage({
       hideTopbar={!displayedChat}
       hideMobileNav={Boolean(displayedChat)}
       hidePageTitle={Boolean(displayedChat)}
-      topbarClassName={displayedChat ? `conversation-topbar chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? " has-chat-wallpaper" : ""}${isClosingChatView ? " is-closing" : ""}` : undefined}
+      topbarClassName={displayedChat ? `conversation-topbar chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""}${isClosingChatView ? " is-closing" : ""}` : undefined}
       topbarStyle={displayedChat ? chatLayoutStyle : undefined}
       topbarProgress={displayedChat ? sendProgress : null}
       topbarLeading={
@@ -7780,7 +7786,7 @@ function LiveChatsPage({
         ) : undefined
       }
     >
-      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? " has-chat-wallpaper" : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
+      <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
         <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : !session?.user?.verified ? " has-verification-banner" : ""}${squareIntegrated ? " is-square-integrated" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section

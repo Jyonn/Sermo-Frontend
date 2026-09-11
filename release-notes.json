@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.18",
+  "id": "2026.09.11.19",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "聊天背景可读性提升",
+      "title": "聊天背景明暗自适应",
       "items": [
-        "所有聊天背景统一使用清晰稳定的顶部栏与锁定区",
-        "群聊昵称增加轻量身份标签，在复杂背景上也能轻松辨认"
+        "浅色背景使用暖白界面，深色背景使用深蓝界面",
+        "顶部栏、锁定区和昵称标签会统一适配背景明暗"
       ]
     },
     "en": {
-      "title": "Improved readability over chat backgrounds",
+      "title": "Adaptive light and dark chat backgrounds",
       "items": [
-        "All chat backgrounds now share clear, consistent header and pinned-message surfaces",
-        "Group-chat names use lightweight identity labels that remain readable over detailed artwork"
+        "Light backgrounds now use warm light chrome while dark backgrounds use deep blue chrome",
+        "Headers, pinned messages, and name labels adapt together to the wallpaper tone"
       ]
     }
   }
