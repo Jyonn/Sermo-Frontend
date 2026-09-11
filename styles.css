@@ -31580,6 +31580,8 @@ html[data-theme="dark"] .chat-personalization-card.is-selected {
 
 .starry-night-route>i{right:9%;width:auto;transform-origin:left;transition:transform .5s ease}
 
+.chat-group-background-unset{color:var(--text-muted);font-size:12px;font-weight:700}
+
 /* User profile refinements live last so generic drawer/theme surfaces cannot win. */
 .drawer-body:has(> .user-profile-panel) {
   display: block;

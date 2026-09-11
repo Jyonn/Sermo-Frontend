@@ -1296,7 +1296,7 @@ export interface ChatDTO {
   unread_badge_muted?: boolean;
   has_unread_mention?: boolean;
   send_restriction?: ChatMuteState;
-  group_background_theme?: Exclude<ChatBackgroundTheme, "custom">;
+  group_background_theme?: Exclude<ChatBackgroundTheme, "custom"> | "";
   use_personal_background?: boolean;
   submission?: SubmissionDTO | null;
   submission_role?: SubmissionRole;
@@ -1404,7 +1404,7 @@ export interface Chat {
   onlineReminderEnabled: boolean;
   notificationsMuted: boolean;
   unreadBadgeMuted: boolean;
-  groupBackgroundTheme: Exclude<ChatBackgroundTheme, "custom">;
+  groupBackgroundTheme: Exclude<ChatBackgroundTheme, "custom"> | "";
   usePersonalBackground: boolean;
   hasUnreadMention: boolean;
   detail: ChatDetail;

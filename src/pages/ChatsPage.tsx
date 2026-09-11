@@ -2798,8 +2798,8 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     notificationsMuted: Boolean(chat.notifications_muted),
     unreadBadgeMuted: Boolean(chat.unread_badge_muted),
-    groupBackgroundTheme: chat.group_background_theme ?? "default",
-    usePersonalBackground: Boolean(chat.use_personal_background),
+    groupBackgroundTheme: chat.group_background_theme ?? "",
+    usePersonalBackground: !chat.group_background_theme || Boolean(chat.use_personal_background),
     hasUnreadMention: Boolean(chat.has_unread_mention),
     detail: {
       summary: chat.group ? i18n.t("chat.groupSummary") : i18n.t("chat.directSummary"),
@@ -3813,8 +3813,8 @@ function LiveChatsPage({
       onlineReminderEnabled: false,
       notificationsMuted: false,
       unreadBadgeMuted: false,
-      groupBackgroundTheme: "default",
-      usePersonalBackground: false,
+      groupBackgroundTheme: "",
+      usePersonalBackground: true,
       hasUnreadMention: false,
       detail: {
         summary: t("chat.groupSummary"),
@@ -7679,7 +7679,7 @@ function LiveChatsPage({
   );
 
   const personalChatBackgroundTheme = currentUserMe?.chat_background_theme ?? "default";
-  const chatBackgroundTheme = selectedChat?.type === "group" && !selectedChat.usePersonalBackground
+  const chatBackgroundTheme = selectedChat?.type === "group" && selectedChat.groupBackgroundTheme && !selectedChat.usePersonalBackground
     ? selectedChat.groupBackgroundTheme
     : personalChatBackgroundTheme;
   const usesPersonalCustomBackground = chatBackgroundTheme === "custom";
@@ -9038,16 +9038,16 @@ function LiveChatsPage({
                   <SettingRow
                     icon={<span className="material-symbols-outlined" aria-hidden="true">wallpaper</span>}
                     onClick={() => setGroupBackgroundOpen(true)}
-                    description={t("chat.groupBackgroundHint")}
+                    description={selectedChat.groupBackgroundTheme ? t("chat.groupBackgroundHint") : t("chat.groupBackgroundUnsetHint")}
                     title={t("chat.groupBackground")}
-                    trailing={<span className={`chat-group-background-swatch chat-background-choice theme-${selectedChat.groupBackgroundTheme}`} aria-hidden="true"><span /></span>}
+                    trailing={selectedChat.groupBackgroundTheme ? <span className={`chat-group-background-swatch chat-background-choice theme-${selectedChat.groupBackgroundTheme}`} aria-hidden="true"><span /></span> : <span className="chat-group-background-unset">{t("chat.groupBackgroundUnset")}</span>}
                   />
                 ) : null}
                 {selectedChat.type === "group" ? (
                   <SettingRow
                     description={selectedChat.usePersonalBackground ? t("chat.personalBackgroundEnabledHint") : t("chat.personalBackgroundDisabledHint")}
                     title={t("chat.usePersonalBackground")}
-                    trailing={<SettingSwitch checked={selectedChat.usePersonalBackground} disabled={preferenceSaving !== null} label={t("chat.togglePersonalBackground")} onChange={(next) => void updateSelectedChatPreference("background", next)} />}
+                    trailing={<SettingSwitch checked={selectedChat.usePersonalBackground} disabled={preferenceSaving !== null || !selectedChat.groupBackgroundTheme} label={t("chat.togglePersonalBackground")} onChange={(next) => void updateSelectedChatPreference("background", next)} />}
                   />
                 ) : null}
                 <SettingRow title={t("chat.pinConversation")} trailing={<SettingSwitch checked={selectedChat.pinned} disabled={preferenceSaving !== null} label={t("chat.togglePin")} onChange={(next) => void updateSelectedChatPreference("pin", next)} />} />

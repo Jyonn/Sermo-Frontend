@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.8",
+  "id": "2026.09.11.9",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "五夜星旋活动页全面升级",
+      "title": "群聊默认跟随你的聊天背景",
       "items": [
-        "以完整主视觉、五星观测航线和活动时间索引重构五夜星旋活动页",
-        "新增动态聊天实景奖励预览，可直观看到典藏背景的真实旋转效果"
+        "未设置群背景时，每位成员都会看到自己的个人聊天背景",
+        "群主设置系统背景后，成员仍可选择继续使用自己的背景"
       ]
     },
     "en": {
-      "title": "The Five Nights event gets a complete visual upgrade",
+      "title": "Group chats now follow your background by default",
       "items": [
-        "Rebuilt the Five Nights page with a full hero scene, five-star observation route, and event date index",
-        "Added a live chat reward preview that shows the Collector background's true rotating motion"
+        "When no group background is set, every member sees their own personal chat background",
+        "After an owner selects a system background, members can still choose to keep their own"
       ]
     }
   }

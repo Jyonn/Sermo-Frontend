@@ -1820,6 +1820,8 @@
   "chat.pinConversation": "Pin this conversation",
   "chat.groupBackground": "Group background",
   "chat.groupBackgroundHint": "Members use this system background by default",
+  "chat.groupBackgroundUnset": "Not set",
+  "chat.groupBackgroundUnsetHint": "Currently follows each member's personal chat background",
   "chat.groupBackgroundPickerHint": "Choose a system background you own. Custom images cannot be used as group backgrounds.",
   "chat.groupBackgroundUpdated": "Group background updated",
   "chat.usePersonalBackground": "Use my background",

@@ -1806,6 +1806,8 @@
   "chat.pinConversation": "置頂該聊天",
   "chat.groupBackground": "群聊背景",
   "chat.groupBackgroundHint": "群成員預設使用此系統背景",
+  "chat.groupBackgroundUnset": "未設定",
+  "chat.groupBackgroundUnsetHint": "目前跟隨每位成員自己的聊天背景",
   "chat.groupBackgroundPickerHint": "選擇你已擁有的系統背景，自訂圖片不能設為群背景。",
   "chat.groupBackgroundUpdated": "群聊背景已更新",
   "chat.usePersonalBackground": "使用我的背景",
