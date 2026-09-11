@@ -5451,7 +5451,7 @@ function LiveChatsPage({
     }
   };
 
-  const saveGroupBackground = async (theme: Exclude<ChatBackgroundTheme, "custom">) => {
+  const saveGroupBackground = async (theme: Exclude<ChatBackgroundTheme, "custom"> | "") => {
     if (!selectedChat || !selectedChat.isOwner || groupBackgroundSaving) return;
     setGroupBackgroundSaving(true);
     try {
@@ -8899,6 +8899,17 @@ function LiveChatsPage({
         <div className="chat-group-background-picker">
           <p>{t("chat.groupBackgroundPickerHint")}</p>
           <div className="chat-group-background-grid">
+            <button
+              aria-pressed={!selectedChat?.groupBackgroundTheme}
+              className={`chat-group-background-none${!selectedChat?.groupBackgroundTheme ? " is-selected" : ""}`}
+              disabled={groupBackgroundSaving}
+              onClick={() => void saveGroupBackground("")}
+              type="button"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">wallpaper</span>
+              <strong>{t("chat.groupBackgroundUnset")}</strong>
+              <small>{t("chat.groupBackgroundUnsetHint")}</small>
+            </button>
             {availableGroupBackgrounds.map(([theme, label]) => (
               <button
                 aria-pressed={selectedChat?.groupBackgroundTheme === theme}

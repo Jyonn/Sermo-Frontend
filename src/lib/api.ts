@@ -708,7 +708,7 @@ export const api = {
     });
   },
 
-  updateGroupBackground(chat_id: number, background_theme: Exclude<import("../types").ChatBackgroundTheme, "custom">) {
+  updateGroupBackground(chat_id: number, background_theme: Exclude<import("../types").ChatBackgroundTheme, "custom"> | "") {
     return request<ChatDTO>("/chats/group/background", {
       method: "POST",
       auth: true,

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.15",
+  "id": "2026.09.11.16",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "星夜回旋更加舒缓",
+      "title": "群聊背景可恢复未设置",
       "items": [
-        "降低星涡、月涡与星团的旋转速度，观看更加舒缓",
-        "保留各图层之间的速度差与正反转层次"
+        "群主可在群聊背景选择器中清除已经设置的系统背景",
+        "清除后，群成员会继续使用各自的个人聊天背景"
       ]
     },
     "en": {
-      "title": "A calmer Starry Rotation",
+      "title": "Group backgrounds can now be unset",
       "items": [
-        "Slowed the rotating vortices, moon, and star clusters for a calmer experience",
-        "Preserved the layered speed differences and alternating rotation directions"
+        "Group owners can clear an assigned system background from the background picker",
+        "After clearing it, members continue using their own personal chat backgrounds"
       ]
     }
   }
