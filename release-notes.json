@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.1",
+  "id": "2026.09.11.2",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "手绘小屋真正住进了朋友",
+      "title": "手绘小屋以连续画面苏醒",
       "items": [
-        "夜航友间与午后花房取消整幅漂移和随机飘落效果",
-        "动物会探头、呼吸、轻跳和浇水，植物也会沿着根部自然摆动"
+        "夜航友间与午后花房取消整幅漂移、随机飘落与拼贴式动画",
+        "动物和植物现在通过连续画面自然活动，不再出现裁切边或重影"
       ]
     },
     "en": {
-      "title": "The illustrated rooms come alive",
+      "title": "The illustrated rooms wake as one continuous scene",
       "items": [
-        "Rooms at Night and Afternoon Conservatory no longer drift as a whole or use floating particles",
-        "Animals now peek, breathe, hop, and water plants while foliage sways naturally from its roots"
+        "Rooms at Night and Afternoon Conservatory no longer use whole-scene drift, floating particles, or cutout animation",
+        "Animals and plants now move through a continuous image without clipped edges or duplicated artwork"
       ]
     }
   }
