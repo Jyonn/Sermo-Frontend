@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.23",
-  "publishedAt": "2026-09-11",
+  "id": "2026.09.12.1",
+  "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序广场与投稿融为一体",
+      "title": "小程序顶部操作更清晰",
       "items": [
-        "微信小程序现在可从广场标题直接切换投稿，无需离开当前页面",
-        "我的投稿与审批沿用广场页签布局，并汇总展示待处理提醒"
+        "聊天、通讯、广场和菜单现在都在微信胶囊左侧提供一致的主操作",
+        "广场通知、额度与搜索已移至子页签右侧，投稿时会切换为新建投稿"
       ]
     },
     "en": {
-      "title": "Square and Submissions now share one mini program workspace",
+      "title": "Clearer mini program header actions",
       "items": [
-        "The WeChat mini program now switches between Square and Submissions from the shared title without leaving the page",
-        "My Submissions and Review use the same tab layout and surface combined pending alerts"
+        "Chat, Contacts, Square, and Menu now share one consistent primary action beside the WeChat capsule",
+        "Square notifications, quota, and search now sit beside the subtabs, while Submissions switches to a dedicated create action"
       ]
     }
   }
