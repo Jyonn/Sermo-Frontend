@@ -7679,9 +7679,10 @@ function LiveChatsPage({
   );
 
   const personalChatBackgroundTheme = currentUserMe?.chat_background_theme ?? "default";
-  const chatBackgroundTheme = selectedChat?.type === "group" && selectedChat.groupBackgroundTheme && !selectedChat.usePersonalBackground
+  const preferredChatBackgroundTheme = selectedChat?.type === "group" && selectedChat.groupBackgroundTheme && !selectedChat.usePersonalBackground
     ? selectedChat.groupBackgroundTheme
     : personalChatBackgroundTheme;
+  const chatBackgroundTheme = mobileComposerLayout ? preferredChatBackgroundTheme : "default";
   const usesPersonalCustomBackground = chatBackgroundTheme === "custom";
   const chatLayoutStyle = selectedChat
     ? ({
@@ -7896,7 +7897,7 @@ function LiveChatsPage({
                   event.preventDefault();
                 }}
               >
-              <FriendenLivingWallpaper theme={chatBackgroundTheme} />
+              {mobileComposerLayout ? <FriendenLivingWallpaper theme={chatBackgroundTheme} /> : null}
               <div
                 ref={messageScrollRef}
                 className="message-scroll"

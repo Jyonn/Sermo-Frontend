@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.16",
+  "id": "2026.09.11.17",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "群聊背景可恢复未设置",
+      "title": "桌面聊天保持简洁背景",
       "items": [
-        "群主可在群聊背景选择器中清除已经设置的系统背景",
-        "清除后，群成员会继续使用各自的个人聊天背景"
+        "桌面端聊天页始终使用简洁默认背景",
+        "个人背景与群主设置的群聊背景仅在移动端展示"
       ]
     },
     "en": {
-      "title": "Group backgrounds can now be unset",
+      "title": "A clean chat background on desktop",
       "items": [
-        "Group owners can clear an assigned system background from the background picker",
-        "After clearing it, members continue using their own personal chat backgrounds"
+        "Desktop conversations now always use the clean default background",
+        "Personal and group-owner backgrounds remain available on mobile"
       ]
     }
   }
