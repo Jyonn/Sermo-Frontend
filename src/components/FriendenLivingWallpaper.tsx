@@ -107,14 +107,14 @@ export function FriendenLivingWallpaper({ compact = false, theme }: { compact?: 
   }, [theme]);
 
   if (theme === "starry-night") return <svg aria-hidden="true" className={`frienden-starry-wallpaper is-active is-visible${compact ? " is-compact" : ""}`} preserveAspectRatio="xMidYMid slice" viewBox="0 0 941 1672">
-    <defs><clipPath id="starry-sky-boundary"><rect height="820" width="941" x="0" y="0" /></clipPath></defs>
+    <defs><clipPath id="starry-sky-boundary"><rect height={compact ? 820 : 1037} width="941" x="0" y="0" /></clipPath></defs>
     <image height="1672" href="/assets/frienden-wallpapers/layers/starry-night/environment.webp" width="941" />
     <g className="starry-sky-clip" clipPath="url(#starry-sky-boundary)">
       <image className="starry-cloud-current" height="430" href="/assets/frienden-wallpapers/layers/starry-night/cloud-current.webp" width="1450" x="-260" y="120" />
-      <image className="starry-vortex is-main" height={compact ? 480 : 720} href="/assets/frienden-wallpapers/layers/starry-night/vortex-main.webp" width={compact ? 480 : 720} x={compact ? -80 : -220} y={compact ? 190 : 250} />
-      <image className="starry-vortex is-moon" height={compact ? 340 : 540} href="/assets/frienden-wallpapers/layers/starry-night/vortex-moon.webp" width={compact ? 340 : 540} x={compact ? 630 : 560} y={compact ? 20 : -70} />
-      <image className="starry-vortex is-star" height={compact ? 170 : 285} href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width={compact ? 170 : 285} x={compact ? 560 : 500} y={compact ? 390 : 490} />
-      <image className="starry-vortex is-small" height={compact ? 90 : 170} href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width={compact ? 90 : 170} x={compact ? 825 : 820} y={compact ? 560 : 650} />
+      <image className="starry-vortex is-main" height={compact ? 480 : 743} href="/assets/frienden-wallpapers/layers/starry-night/vortex-main.webp" width={compact ? 480 : 743} x={compact ? -80 : -216} y={compact ? 190 : 238} />
+      <image className="starry-vortex is-moon" height={compact ? 340 : 536} href="/assets/frienden-wallpapers/layers/starry-night/vortex-moon.webp" width={compact ? 340 : 536} x={compact ? 630 : 565} y={compact ? 20 : -93} />
+      <image className="starry-vortex is-star" height={compact ? 170 : 292} href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width={compact ? 170 : 292} x={compact ? 560 : 489} y={compact ? 390 : 404} />
+      <image className="starry-vortex is-small" height={compact ? 90 : 169} href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width={compact ? 90 : 169} x={compact ? 825 : 819} y={compact ? 560 : 570} />
     </g>
   </svg>;
   if (theme !== "frienden-night" && theme !== "frienden-garden") return null;

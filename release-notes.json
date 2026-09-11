@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.13",
+  "id": "2026.09.11.14",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "新活动提醒更加醒目",
+      "title": "星夜回旋预览比例修正",
       "items": [
-        "空间新认领活动后，活动横幅会显示醒目的红色“新活动”标签",
-        "首次进入后标签自动消除，待领取奖励仍会继续提醒"
+        "个性化聊天页中的星涡尺寸、中心位置与原始设计保持一致",
+        "修正天空动画的裁切范围，完整呈现星空与村庄之间的构图"
       ]
     },
     "en": {
-      "title": "New event alerts stand out",
+      "title": "Starry Rotation preview proportions corrected",
       "items": [
-        "Newly claimed space events now show a prominent red New tag on their banners",
-        "The tag clears after your first visit while claimable rewards continue to be highlighted"
+        "Star vortex sizes and centers in chat personalization now match the original design",
+        "The animated sky boundary has been corrected to preserve the intended sky and village composition"
       ]
     }
   }
