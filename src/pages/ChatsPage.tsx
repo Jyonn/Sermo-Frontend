@@ -87,6 +87,7 @@ const GROUP_BACKGROUND_OPTIONS: Array<[Exclude<ChatBackgroundTheme, "custom">, T
   ["zen", "menu.themeZen"], ["mosaic", "menu.themeMosaic"], ["newsprint", "menu.themeNewsprint"],
   ["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"],
   ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"],
+  ["starry-night", "menu.themeStarryNight"],
   ["noir-film", "menu.themeNoirFilm"],
 ];
 const CHAT_DETAIL_MEMBER_PAGE_SIZE = 19;

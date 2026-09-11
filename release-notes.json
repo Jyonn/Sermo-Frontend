@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.11.6",
+  "id": "2026.09.11.7",
   "publishedAt": "2026-09-11",
   "locales": {
     "zh-CN": {
-      "title": "午后花房的每个角色都更完整",
+      "title": "连续五夜，让星空住进聊天",
       "items": [
-        "重新裁切午后花房的全部角色与植物图层，清除相邻素材碎片",
-        "升级素材处理流程，自动隔离植物主体并保留完整枝叶"
+        "空间管理员可认领限时 15 天的五夜星旋活动，认领后才会在广场展示",
+        "北京时间连续 5 晚在 20:00–24:00 聊天，可永久解锁典藏动态背景“星夜回旋”"
       ]
     },
     "en": {
-      "title": "Every Afternoon Conservatory character is now clean and complete",
+      "title": "Five nights bring the stars into chat",
       "items": [
-        "Recropped every character and plant layer to remove neighboring atlas fragments",
-        "Upgraded the asset pipeline to isolate plant subjects while preserving complete foliage"
+        "Space admins can claim the 15-day Five Nights event; its Square banner appears only after claiming",
+        "Chat between 20:00 and 24:00 Beijing time for five consecutive evenings to permanently unlock the Collector Starry Rotation background"
       ]
     }
   }

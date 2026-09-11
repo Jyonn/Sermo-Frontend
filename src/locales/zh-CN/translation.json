@@ -439,6 +439,7 @@
   "menu.themeHologram": "幻彩膜",
   "menu.themeFriendenNight": "夜航友间",
   "menu.themeFriendenGarden": "午后花房",
+  "menu.themeStarryNight": "星夜回旋",
   "menu.themeNoirFilm": "黑色电影",
   "menu.styleDefault": "经典",
   "menu.styleComic": "漫画",
@@ -2405,6 +2406,17 @@
   ,"activity.friendly.rule1": "每天首个回复获得 20 点，第二个最多获得 10 点，之后每次 5 点。"
   ,"activity.friendly.rule2": "每天最多获得 25 点；已删除的评论仍计入当天次数和积分记录。"
   ,"activity.friendly.rule3": "达到 75 / 100 点后需手动解锁，领取的奖励永久拥有。"
+  ,"activity.starry.title": "五夜星旋"
+  ,"activity.starry.subtitle": "让五个相连的夜晚，把星空转进你的房间。"
+  ,"activity.starry.currentStreak": "连续星夜"
+  ,"activity.starry.unlocked": "典藏已解锁"
+  ,"activity.starry.nightsLeft": "还差 {{count}} 夜"
+  ,"activity.starry.window": "今日有效时段：北京时间 20:00–24:00"
+  ,"activity.starry.reward": "典藏动态聊天背景"
+  ,"activity.starry.rewardHint": "真实油彩图层围绕星核持续旋转"
+  ,"activity.starry.rules": "观星规则"
+  ,"activity.starry.rule1": "在北京时间每天 20:00–24:00 之间发送任意一条聊天消息，当晚即点亮一颗星。"
+  ,"activity.starry.rule2": "需要连续点亮 5 个夜晚；中断后连续进度重新计算，已解锁奖励永久保留。"
   ,"profile.welcomeMessages": "欢迎消息"
   ,"profile.welcomeAutoSend": "新好友会自动收到"
   ,"profile.welcomeAutoSendHint": "对方接受好友申请后，按这里的顺序发送"

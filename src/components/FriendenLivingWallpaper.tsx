@@ -106,6 +106,17 @@ export function FriendenLivingWallpaper({ theme }: { theme?: ChatBackgroundTheme
     };
   }, [theme]);
 
+  if (theme === "starry-night") return <svg aria-hidden="true" className="frienden-starry-wallpaper is-active is-visible" preserveAspectRatio="xMidYMid slice" viewBox="0 0 941 1672">
+    <defs><clipPath id="starry-sky-boundary"><rect height="820" width="941" x="0" y="0" /></clipPath></defs>
+    <image height="1672" href="/assets/frienden-wallpapers/layers/starry-night/environment.webp" width="941" />
+    <g className="starry-sky-clip" clipPath="url(#starry-sky-boundary)">
+      <image className="starry-cloud-current" height="430" href="/assets/frienden-wallpapers/layers/starry-night/cloud-current.webp" width="1450" x="-260" y="120" />
+      <image className="starry-vortex is-main" height="720" href="/assets/frienden-wallpapers/layers/starry-night/vortex-main.webp" width="720" x="-220" y="250" />
+      <image className="starry-vortex is-moon" height="540" href="/assets/frienden-wallpapers/layers/starry-night/vortex-moon.webp" width="540" x="560" y="-70" />
+      <image className="starry-vortex is-star" height="285" href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width="285" x="500" y="490" />
+      <image className="starry-vortex is-small" height="170" href="/assets/frienden-wallpapers/layers/starry-night/vortex-star.webp" width="170" x="820" y="650" />
+    </g>
+  </svg>;
   if (theme !== "frienden-night" && theme !== "frienden-garden") return null;
   const scene = SCENES[theme];
   return <svg

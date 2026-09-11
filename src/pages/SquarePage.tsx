@@ -11,6 +11,7 @@ import { ContentDatePicker, type DatePickerMode } from "../components/ContentDat
 import { FeedbackState } from "../components/FeedbackState";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { FriendlyNeighborhoodActivity } from "../components/FriendlyNeighborhoodActivity";
+import { StarryNightActivity } from "../components/StarryNightActivity";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
@@ -52,6 +53,7 @@ import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
 import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.webp";
 import spiderMan4PreviewBanner from "../assets/activity/spider-man-4-preview.webp";
+import starryNightBanner from "../assets/activity/starry-night/banner.webp";
 import tieguaiLi from "../assets/activity/immortals/tieguai-li.png";
 import zhongliQuan from "../assets/activity/immortals/zhongli-quan.png";
 import zhangGuolao from "../assets/activity/immortals/zhang-guolao.png";
@@ -865,9 +867,10 @@ export default function SquarePage() {
   }, [feedMode, hasFeedFilters, session?.user.space_id, session?.user.user_id]);
 
   const spiderManActivity = activities.find((activity) => activity.theme === "spider-man-4") ?? null;
-  const regularActivities = activities.filter((activity) => activity.theme !== "spider-man-4");
+  const starryNightActivity = activities.find((activity) => activity.theme === "starry-night") ?? null;
+  const regularActivities = activities.filter((activity) => activity.theme !== "spider-man-4" && activity.theme !== "starry-night");
   const showVipCampaign = Boolean(vipCampaign?.space_activity_active && (vipCampaign.active || vipCampaign.claimed_by_user));
-  const activityBannerCount = regularActivities.length + (spiderManActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
+  const activityBannerCount = regularActivities.length + (spiderManActivity ? 1 : 0) + (starryNightActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
 
   useEffect(() => {
     if (hasFeedFilters || activityBannerCount < 2 || feedMode !== "all") return;
@@ -2310,6 +2313,11 @@ export default function SquarePage() {
               </span>
               <span className="square-spider-man-preview-status"><i />{t("activity.friendly.webPoints")} {spiderManActivity.friendly_neighbor?.web_points ?? 0}</span>
             </button> : null}
+            {starryNightActivity ? <button aria-label={t("activity.starry.title")} className="square-activity-banner is-starry-night" onClick={() => navigate(`/app/square/activities/${starryNightActivity.key}`)} type="button">
+              <img alt="" aria-hidden="true" src={starryNightBanner} />
+              <span className="square-starry-night-copy"><small>{t("growth.rarity.legendary")}</small><strong>{t("activity.starry.title")}</strong><span>{t("activity.starry.subtitle")}</span></span>
+              <span className="square-starry-night-status"><b>{starryNightActivity.starry_night?.streak_days ?? 0}</b> / {starryNightActivity.starry_night?.target_days ?? 5} ★</span>
+            </button> : null}
             {regularActivities.slice(1).map((activity) => {
               const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
@@ -2527,8 +2535,8 @@ export default function SquarePage() {
         </div>
       </SideDrawer>
       {qqProfileUser ? <QqUserDialog onClose={() => setQqProfileUser(null)} user={qqProfileUser} /> : null}
-      <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity?.theme !== "spider-man-4" ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
-        {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity ? <div className="activity-detail">
+      <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}${activeActivity?.theme === "starry-night" ? " is-starry-night" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity && !["spider-man-4", "starry-night"].includes(activeActivity.theme) ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
+        {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=1" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>{/* i18n-ignore: brand name */}
             <div className="activity-detail-index">

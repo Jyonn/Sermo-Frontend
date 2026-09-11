@@ -123,7 +123,7 @@ const chatBackgroundSections: Array<{ label: TranslationKey; items: Array<[Exclu
     items: [["comic", "menu.themeComic"], ["bauhaus", "menu.themeBauhaus"], ["dragon", "menu.themeDragon"]],
   },
   { label: "menu.collectionMaterial", items: [["zen", "menu.themeZen"], ["mosaic", "menu.themeMosaic"], ["newsprint", "menu.themeNewsprint"]] },
-  { label: "menu.collectionAtmosphere", items: [["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"], ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"]] },
+  { label: "menu.collectionAtmosphere", items: [["aurora-sky", "menu.themeAuroraSky"], ["hologram", "menu.themeHologram"], ["frienden-night", "menu.themeFriendenNight"], ["frienden-garden", "menu.themeFriendenGarden"], ["starry-night", "menu.themeStarryNight"]] },
   { label: "menu.collectionFantasy", items: [["noir-film", "menu.themeNoirFilm"]] },
 ];
 
@@ -567,6 +567,7 @@ export default function MenuPage() {
   const rewardLevel = (category: "background" | "bubble" | "frame", assetKey: string) =>
     rewardFor(category, assetKey)?.level ?? 1;
   const rewardRarity = (category: "background" | "bubble" | "frame", assetKey: string): GrowthRewardDTO["rarity"] => {
+    if (category === "background" && assetKey === "starry-night") return "legendary";
     if (category === "bubble") {
       const override = bubbleRarityOverrides[assetKey as ChatBubbleStyle];
       if (override) return override;
