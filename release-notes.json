@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.20",
+  "id": "2026.09.12.21",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序同步成长授章仪式",
+      "title": "小程序成长授章即时出现",
       "items": [
-        "升级后会依次展示等级抵达、本级奖励与下一等级预览",
-        "成长奖励支持轮播回看，并可直接使用已解锁的背景、气泡和头像框"
+        "打开小程序和回到前台时会立即检查成长升级，并在使用期间持续同步",
+        "待领取的升级现在会可靠进入全屏三幕授章仪式"
       ]
     },
     "en": {
-      "title": "Growth medal ceremony now on Mini Program",
+      "title": "Growth ceremonies now appear reliably",
       "items": [
-        "Level-ups now unfold through arrival, current rewards, and a preview of the next level",
-        "Unlocked backgrounds, bubbles, and avatar frames can be replayed and applied during the ceremony"
+        "The Mini Program now checks for level-ups on launch, foreground return, and throughout active use",
+        "Pending upgrades reliably open the full-screen three-act medal ceremony"
       ]
     }
   }
