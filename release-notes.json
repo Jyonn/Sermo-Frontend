@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.5",
+  "id": "2026.09.13.6",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "优化小程序操作提示",
+      "title": "对齐小程序晨报气泡",
       "items": [
-        "小程序操作提示现在更紧凑、清晰，并在离场时平滑收起，减少对页面内容的遮挡"
+        "小程序晨报气泡现已对齐网页端的方形轮廓、等厚上下边框与浅色点阵"
       ]
     },
     "en": {
-      "title": "Refined mini program feedback",
+      "title": "Aligned mini program newspaper bubbles",
       "items": [
-        "Mini program feedback is now more compact and clear, with a smooth exit that obscures less page content"
+        "Mini program newspaper bubbles now match the web style with square corners, even horizontal rules, and a subtle dot pattern"
       ]
     }
   }
