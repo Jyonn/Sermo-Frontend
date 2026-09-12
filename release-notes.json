@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.12.22",
+  "id": "2026.09.12.23",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "优化小程序授章顶部布局",
+      "title": "精细还原小程序成长授章",
       "items": [
-        "成长授章标题与步骤页码下移，为状态栏和设备安全区留出更舒适的间距"
+        "成长授章的标题字体、奖励卡片、换装图标和底部按钮现已与网页版精确对齐"
       ]
     },
     "en": {
-      "title": "Improved Mini Program ceremony header spacing",
+      "title": "Refined the Mini Program growth ceremony",
       "items": [
-        "The ceremony title and step counter now sit lower with more comfortable status bar and safe-area spacing"
+        "Ceremony typography, reward alignment, the equip icon, and footer actions now closely match the web experience"
       ]
     }
   }
