@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.12.27",
+  "id": "2026.09.12.28",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "修正拍立得头像框圆角",
+      "title": "对齐小程序授章顶栏",
       "items": [
-        "拍立得头像框的相纸外框与内部头像现已使用清晰一致的圆角裁切"
+        "成长授章顶栏现会依据微信右上角胶囊的实际位置和高度自动对齐"
       ]
     },
     "en": {
-      "title": "Corrected Polaroid avatar frame corners",
+      "title": "Aligned the mini-program growth header",
       "items": [
-        "The Polaroid paper frame and inner avatar now use clearly aligned rounded clipping"
+        "The growth ceremony header now aligns itself to the actual position and height of WeChat's menu capsule"
       ]
     }
   }
