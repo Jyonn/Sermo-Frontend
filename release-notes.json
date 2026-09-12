@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.6",
+  "id": "2026.09.13.5",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "优化晨报聊天气泡",
+      "title": "优化小程序操作提示",
       "items": [
-        "晨报气泡现采用分组圆角、完整细描边与加重底边，并移除气泡内部的重复点阵纹理"
+        "小程序操作提示现在更紧凑、清晰，并在离场时平滑收起，减少对页面内容的遮挡"
       ]
     },
     "en": {
-      "title": "Refined newspaper chat bubbles",
+      "title": "Refined mini program feedback",
       "items": [
-        "Newspaper bubbles now use grouped corners, a complete fine outline, and a heavier lower rule without repeated dot texture inside the bubble"
+        "Mini program feedback is now more compact and clear, with a smooth exit that obscures less page content"
       ]
     }
   }

@@ -10438,10 +10438,9 @@ html[data-theme="dark"] .personalization-chat-preview-scroll.message-scroll {
   width:43px;
   height:29px;
   border:1px solid #292b28;
-  border-bottom-width:3px;
-  border-radius:9px;
-  background:#f3f0e7;
-  box-shadow:2px 3px 0 rgba(39,40,36,.15);
+  border-radius:1px;
+  background:radial-gradient(circle,rgba(20,20,20,.1) 0 1px,transparent 1.2px) 0 0/4px 4px,#f3f0e7;
+  box-shadow:inset 0 3px 0 #292b28,2px 3px 0 rgba(39,40,36,.15);
 }
 .field-chat_bubble_style .preview-newspaper i span::before {
   position:absolute;
@@ -26790,16 +26789,18 @@ html[data-theme="dark"] .chat-conversation-preview.pinned-message-chat-preview {
   left: 10px;
 }
 
-/* Newspaper: grouped editorial cards with a heavier printed lower rule. */
+/* Newspaper: hard editorial edges, serif typography, and print registration rules. */
 .message-group.bubble-style-newspaper {
-  --bubble-skin-other-radius: 18px;
-  --bubble-skin-self-radius: 18px;
+  --bubble-skin-other-radius: 1px;
+  --bubble-skin-self-radius: 1px;
 }
 .message-group.bubble-style-newspaper .message-bubble {
   font-family: Georgia, "Noto Serif SC", serif;
-  border-width: 1px 1px 3px !important;
-  background: var(--bubble-theme-surface) !important;
-  box-shadow: var(--bubble-theme-shadow) !important;
+  border-width: 1px 0 3px !important;
+  background:
+    radial-gradient(circle, rgba(20,20,20,.07) 0 1px, transparent 1.2px) 0 0/5px 5px,
+    var(--bubble-theme-surface) !important;
+  box-shadow: inset 0 3px 0 currentColor !important;
 }
 
 /* Receipt: thermal stock with perforated sides, serial line, totals rule, and barcode. */
@@ -36999,21 +37000,16 @@ html[data-theme="dark"] .verification-banner-action {
   gap: 8px;
 }
 
-/* Newspaper cards keep the paper texture outside the bubble and join as one run. */
+/* Newspaper cards share one square editorial rule and dotted stock. */
 .message-group.bubble-style-newspaper .message-bubble:not(.is-sticker):not(.is-activity):not(.is-submission-invite) {
   overflow: hidden;
-  border-width: 1px 1px 3px !important;
-  border-radius: 18px !important;
-  background: var(--bubble-theme-surface) !important;
-  box-shadow: var(--bubble-theme-shadow) !important;
+  border-width: 2px 0 !important;
+  border-radius: 0 !important;
+  background:
+    radial-gradient(circle, rgba(20, 20, 20, .08) 0 1px, transparent 1.2px) 0 0 / 5px 5px,
+    var(--bubble-theme-surface) !important;
+  box-shadow: none !important;
 }
-
-.message-group.bubble-style-newspaper .message-bubble.other.group-start:not(.group-end) { border-radius:18px 3px 3px 3px !important; }
-.message-group.bubble-style-newspaper .message-bubble.other:not(.group-start).group-end { border-radius:3px 3px 3px 18px !important; }
-.message-group.bubble-style-newspaper .message-bubble.other:not(.group-start):not(.group-end) { border-radius:3px !important; }
-.message-group.bubble-style-newspaper .message-bubble.self.group-start:not(.group-end) { border-radius:3px 18px 3px 3px !important; }
-.message-group.bubble-style-newspaper .message-bubble.self:not(.group-start).group-end { border-radius:3px 3px 18px 3px !important; }
-.message-group.bubble-style-newspaper .message-bubble.self:not(.group-start):not(.group-end) { border-radius:3px !important; }
 
 .message-group.bubble-style-newspaper :is(
   .message-media-frame,
