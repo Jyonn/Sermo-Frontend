@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.16",
+  "id": "2026.09.12.17",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序通讯与导航视觉优化",
+      "title": "小程序导航图标细节修正",
       "items": [
-        "四个主页面采用更醒目的标题、呼吸灯与统一浅色主操作按钮",
-        "好友申请和群聊页面按桌面端结构重排，通讯头像、入口图标与菜单退出按钮显示更准确"
+        "主页面操作按钮改用更清晰的标准字重图标",
+        "通讯页好友申请与群聊入口的右侧箭头现在可以完整显示"
       ]
     },
     "en": {
-      "title": "Improved mini program navigation and contacts",
+      "title": "Refined mini program navigation icons",
       "items": [
-        "All four main pages now use clearer titles, a larger chat status light, and consistent pale primary actions",
-        "Friend requests and group chats now follow the desktop layout, with cleaner avatars and corrected icon and logout alignment"
+        "Primary actions now use clearer standard-weight icons",
+        "The trailing arrows for friend requests and group chats are now fully visible"
       ]
     }
   }
