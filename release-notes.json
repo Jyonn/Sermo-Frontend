@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.1",
+  "id": "2026.09.13.2",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "精修成长奖励外观",
+      "title": "优化聊天个性化体验",
       "items": [
-        "小程序轨道头像框现完整呈现金色轨道层次，一键换装按钮也换成更轻盈、准确的标准图标"
+        "小程序聊天气泡卡片现以均衡留白完整展示名称，页面提示也统一为应用内 Toast"
       ]
     },
     "en": {
-      "title": "Refined growth reward visuals",
+      "title": "Improved chat personalization",
       "items": [
-        "The mini program now renders the orbit avatar frame with its full layered track and uses a lighter, accurate icon for one-tap reward styling"
+        "Mini program chat bubble cards now use balanced spacing, show names clearly, and display feedback through the unified in-app toast"
       ]
     }
   }
