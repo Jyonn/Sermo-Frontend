@@ -40,6 +40,7 @@ import { MediaResourceGrid, type MediaResourceGridItem } from "../components/Med
 import { RelativeDateSections } from "../components/RelativeDateSections";
 import { ResourceFileRow } from "../components/ResourceFileRow";
 import { SearchAudioTile } from "../components/SearchAudioPlayer";
+import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
@@ -9278,7 +9279,12 @@ function LiveChatsPage({
             </RelativeDateSections>}
             <div aria-hidden="true" className={`message-search-load-sentinel${messageSearchState === "loading-more" ? " is-loading" : ""}`} ref={messageSearchLoadMoreRef}>{messageSearchState === "loading-more" ? <HeaderSyncIndicator syncing /> : null}</div>
           </div>
-          {messageSearchShowScrollTop ? <button aria-label={t("messageSearch.backToTop")} className="message-search-scroll-top" onClick={() => messageSearchPanelRef.current?.closest(".drawer-body")?.scrollTo({ top: 0, behavior: "smooth" })} title={t("messageSearch.backToTop")} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11 12 4l7 7M12 4v16" /></svg></button> : null}
+          <ScrollToTopButton
+            ariaLabel={t("messageSearch.backToTop")}
+            className="message-search-scroll-top"
+            onClick={() => messageSearchPanelRef.current?.closest(".drawer-body")?.scrollTo({ top: 0, behavior: "smooth" })}
+            visible={messageSearchShowScrollTop}
+          />
         </div>
       </SideDrawer>
       {messageSearchPreviewIndex !== null && messageSearchMediaResults.length ? <MediaLightbox

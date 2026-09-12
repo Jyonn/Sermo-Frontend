@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.14",
+  "id": "2026.09.12.15",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "网页版广场回顶按钮修复",
+      "title": "回到顶部动效完善",
       "items": [
-        "广场下滑后会稳定显示圆形回到顶部按钮",
-        "按钮与箭头不再被发言列表或底部导航遮挡"
+        "广场与聊天记录搜索的回顶按钮现在会自然淡入和淡出",
+        "按钮退出时会同步停止点击与键盘聚焦，避免残留误触"
       ]
     },
     "en": {
-      "title": "Fixed the Square back-to-top control on web",
+      "title": "Polished back-to-top transitions",
       "items": [
-        "The circular back-to-top button now remains visible after scrolling through Square",
-        "The button and arrow are no longer clipped by the feed or covered by bottom navigation"
+        "Back-to-top buttons in Square and chat history search now fade in and out smoothly",
+        "Buttons stop accepting pointer and keyboard input while leaving to prevent accidental actions"
       ]
     }
   }

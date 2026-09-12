@@ -19,6 +19,7 @@ import { StatementVideoThumbnail } from "../components/StatementVideoThumbnail";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
@@ -2406,26 +2407,19 @@ export default function SquarePage() {
           )}
           {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
-        {feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace) && typeof document !== "undefined" ? createPortal(
-          <button
-            aria-label={t("square.backToTop")}
-            className="square-feed-scroll-top"
-            onClick={() => {
-              pendingFeedScrollRestoreRef.current = null;
-              feedScrollPositionsRef.current.set(activeFeedCacheKey, 0);
-              writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, 0);
-              squareFeedScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            style={{ "--square-feed-scroll-top-right": `${feedScrollTopRight}px` } as CSSProperties}
-            title={t("square.backToTop")}
-            type="button"
-          >
-            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
-              <path d="M5 11 12 4l7 7M12 4v16" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-            </svg>
-          </button>,
-          document.body,
-        ) : null}
+        <ScrollToTopButton
+          ariaLabel={t("square.backToTop")}
+          className="square-feed-scroll-top"
+          onClick={() => {
+            pendingFeedScrollRestoreRef.current = null;
+            feedScrollPositionsRef.current.set(activeFeedCacheKey, 0);
+            writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, 0);
+            squareFeedScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          portal
+          style={{ "--square-feed-scroll-top-right": `${feedScrollTopRight}px` } as CSSProperties}
+          visible={feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace)}
+        />
         </div> : <div className="square-workspace-surface is-submission">
           <ChatsPage embeddedListOnly onReturnToSquare={closeSubmissionWorkspace} purpose="submission" squareIntegrated />
         </div>}
