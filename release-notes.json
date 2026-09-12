@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.17",
+  "id": "2026.09.12.18",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序导航图标细节修正",
+      "title": "统一抽屉页面背景",
       "items": [
-        "主页面操作按钮改用更清晰的标准字重图标",
-        "通讯页好友申请与群聊入口的右侧箭头现在可以完整显示"
+        "网页端与小程序的默认抽屉现在使用与标题栏一致的纯色背景",
+        "活动、聊天主题、发言主题与地图等自定义抽屉继续保留专属视觉"
       ]
     },
     "en": {
-      "title": "Refined mini program navigation icons",
+      "title": "Unified drawer surfaces",
       "items": [
-        "Primary actions now use clearer standard-weight icons",
-        "The trailing arrows for friend requests and group chats are now fully visible"
+        "Default drawers on web and mini program now use the same solid surface as their headers",
+        "Custom activity, chat, statement, and map drawer themes remain unchanged"
       ]
     }
   }
