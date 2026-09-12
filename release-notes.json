@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.2",
+  "id": "2026.09.13.3",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "优化聊天个性化体验",
+      "title": "统一小程序操作提示",
       "items": [
-        "小程序聊天气泡卡片现以均衡留白完整展示名称，页面提示也统一为应用内 Toast"
+        "小程序成功与失败提示现统一使用清晰的勾选、叉号和状态配色，并覆盖聊天与投稿页面"
       ]
     },
     "en": {
-      "title": "Improved chat personalization",
+      "title": "Unified mini program feedback",
       "items": [
-        "Mini program chat bubble cards now use balanced spacing, show names clearly, and display feedback through the unified in-app toast"
+        "Success and failure feedback now uses consistent check, close, and status colors across the mini program, including chat and submission pages"
       ]
     }
   }
