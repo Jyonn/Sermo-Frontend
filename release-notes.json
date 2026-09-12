@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.18",
+  "id": "2026.09.12.19",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "统一抽屉页面背景",
+      "title": "简化小程序账号安全",
       "items": [
-        "网页端与小程序的默认抽屉现在使用与标题栏一致的纯色背景",
-        "活动、聊天主题、发言主题与地图等自定义抽屉继续保留专属视觉"
+        "小程序已移除手势解锁设置与自动锁屏流程",
+        "账号安全页现在专注于密码、隐私与认证渠道管理"
       ]
     },
     "en": {
-      "title": "Unified drawer surfaces",
+      "title": "Simplified mini program security",
       "items": [
-        "Default drawers on web and mini program now use the same solid surface as their headers",
-        "Custom activity, chat, statement, and map drawer themes remain unchanged"
+        "The mini program no longer includes gesture unlock settings or automatic gesture locking",
+        "Account security now focuses on passwords, privacy, and verified contact methods"
       ]
     }
   }
