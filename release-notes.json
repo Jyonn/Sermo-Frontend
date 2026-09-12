@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.6",
+  "id": "2026.09.13.7",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "对齐小程序晨报气泡",
+      "title": "完善小程序晨报气泡",
       "items": [
-        "小程序晨报气泡现已对齐网页端的方形轮廓、等厚上下边框与浅色点阵"
+        "小程序晨报气泡现已稳定呈现方形轮廓、等厚上下边框与清晰的浅色点阵"
       ]
     },
     "en": {
-      "title": "Aligned mini program newspaper bubbles",
+      "title": "Completed mini program newspaper bubbles",
       "items": [
-        "Mini program newspaper bubbles now match the web style with square corners, even horizontal rules, and a subtle dot pattern"
+        "Mini program newspaper bubbles now consistently show square corners, even horizontal rules, and a visible subtle dot pattern"
       ]
     }
   }
