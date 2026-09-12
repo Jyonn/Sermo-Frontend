@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.12.25",
+  "id": "2026.09.12.26",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "对齐小程序成长奖励预览",
+      "title": "补齐小程序拍立得头像框",
       "items": [
-        "成长奖励现已按稀有度呈现对应配色，并修正图标、聊天背景和头像框的预览效果"
+        "拍立得头像框现已还原相纸留白、顶部胶带、轻微旋转与阴影层次"
       ]
     },
     "en": {
-      "title": "Aligned Mini Program growth reward previews",
+      "title": "Completed the Mini Program Polaroid avatar frame",
       "items": [
-        "Growth rewards now use their rarity colors with corrected icons, chat backgrounds, and avatar-frame preview sizing"
+        "The Polaroid avatar frame now includes its photo-paper border, top tape, subtle rotation, and layered shadow"
       ]
     }
   }
