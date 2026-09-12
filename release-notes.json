@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.12.28",
+  "id": "2026.09.12.29",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "对齐小程序授章顶栏",
+      "title": "统一小程序顶部安全区",
       "items": [
-        "成长授章顶栏现会依据微信右上角胶囊的实际位置和高度自动对齐"
+        "所有页面、抽屉与全屏预览现统一依据微信右上角胶囊的位置和高度布局"
       ]
     },
     "en": {
-      "title": "Aligned the mini-program growth header",
+      "title": "Unified mini-program top safe areas",
       "items": [
-        "The growth ceremony header now aligns itself to the actual position and height of WeChat's menu capsule"
+        "Every page, drawer, and full-screen preview now follows the actual position and height of WeChat's menu capsule"
       ]
     }
   }
