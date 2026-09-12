@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.7",
+  "id": "2026.09.13.8",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "完善小程序晨报气泡",
+      "title": "对齐小程序打字机气泡",
       "items": [
-        "小程序晨报气泡现已稳定呈现方形轮廓、等厚上下边框与清晰的浅色点阵"
+        "小程序打字机气泡现已在文字、媒体和卡片消息中统一使用网页端的小圆角"
       ]
     },
     "en": {
-      "title": "Completed mini program newspaper bubbles",
+      "title": "Aligned mini program typewriter bubbles",
       "items": [
-        "Mini program newspaper bubbles now consistently show square corners, even horizontal rules, and a visible subtle dot pattern"
+        "Mini program typewriter bubbles now use the web-style small corners consistently across text, media, and card messages"
       ]
     }
   }
