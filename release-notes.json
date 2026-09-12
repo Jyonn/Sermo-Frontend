@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.12",
+  "id": "2026.09.12.13",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
       "title": "小程序顶部导航体验优化",
       "items": [
         "四个主页面的顶部导航在首屏保持透明，完整呈现页面背景",
-        "页面下滑后顶部导航会自动切换为不透明底色，避免内容穿透影响阅读"
+        "页面下滑时顶部导航会逐渐显现毛玻璃效果，并以柔和渐隐衔接下方内容"
       ]
     },
     "en": {
       "title": "Improved mini program header behavior",
       "items": [
         "Headers on all four main tabs now stay transparent at the top so page backgrounds remain visible",
-        "Headers automatically become opaque while scrolling to keep content from showing through"
+        "Headers now gradually reveal a frosted-glass surface while scrolling, with a soft fade into the content below"
       ]
     }
   }
