@@ -2406,7 +2406,7 @@ export default function SquarePage() {
           )}
           {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
-        {feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace) ? (
+        {feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace) && typeof document !== "undefined" ? createPortal(
           <button
             aria-label={t("square.backToTop")}
             className="square-feed-scroll-top"
@@ -2423,7 +2423,8 @@ export default function SquarePage() {
             <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
               <path d="M5 11 12 4l7 7M12 4v16" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
             </svg>
-          </button>
+          </button>,
+          document.body,
         ) : null}
         </div> : <div className="square-workspace-surface is-submission">
           <ChatsPage embeddedListOnly onReturnToSquare={closeSubmissionWorkspace} purpose="submission" squareIntegrated />

@@ -28968,7 +28968,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-feed-sentinel.is-loading { min-height: 46px; }
 .square-feed-scroll-top {
   position: fixed;
-  z-index: 8;
+  z-index: 24;
   right: max(var(--square-feed-scroll-top-right, 18px), env(safe-area-inset-right));
   bottom: 30px;
   display: grid;
@@ -28988,6 +28988,9 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
   background: color-mix(in srgb, var(--brand-primary) 88%, #163c31);
   box-shadow: 0 12px 28px rgba(7, 45, 34, .24);
   cursor: pointer;
+  isolation: isolate;
+  line-height: 0;
+  overflow: visible;
   animation: message-search-float-in 180ms ease-out both;
 }
 .square-feed-scroll-top:hover { transform: translateY(-2px); }

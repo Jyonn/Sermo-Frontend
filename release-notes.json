@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.13",
+  "id": "2026.09.12.14",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序顶部导航体验优化",
+      "title": "网页版广场回顶按钮修复",
       "items": [
-        "四个主页面的顶部导航在首屏保持透明，完整呈现页面背景",
-        "页面下滑时顶部导航会逐渐显现毛玻璃效果，并以柔和渐隐衔接下方内容"
+        "广场下滑后会稳定显示圆形回到顶部按钮",
+        "按钮与箭头不再被发言列表或底部导航遮挡"
       ]
     },
     "en": {
-      "title": "Improved mini program header behavior",
+      "title": "Fixed the Square back-to-top control on web",
       "items": [
-        "Headers on all four main tabs now stay transparent at the top so page backgrounds remain visible",
-        "Headers now gradually reveal a frosted-glass surface while scrolling, with a soft fade into the content below"
+        "The circular back-to-top button now remains visible after scrolling through Square",
+        "The button and arrow are no longer clipped by the feed or covered by bottom navigation"
       ]
     }
   }
