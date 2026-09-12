@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.12.29",
-  "publishedAt": "2026-09-12",
+  "id": "2026.09.13.1",
+  "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "统一小程序顶部安全区",
+      "title": "精修成长奖励外观",
       "items": [
-        "所有页面、抽屉与全屏预览现统一依据微信右上角胶囊的位置和高度布局"
+        "小程序轨道头像框现完整呈现金色轨道层次，一键换装按钮也换成更轻盈、准确的标准图标"
       ]
     },
     "en": {
-      "title": "Unified mini-program top safe areas",
+      "title": "Refined growth reward visuals",
       "items": [
-        "Every page, drawer, and full-screen preview now follows the actual position and height of WeChat's menu capsule"
+        "The mini program now renders the orbit avatar frame with its full layered track and uses a lighter, accurate icon for one-tap reward styling"
       ]
     }
   }
