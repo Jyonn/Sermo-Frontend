@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.11",
+  "id": "2026.09.12.12",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序广场阅读体验优化",
+      "title": "小程序顶部导航体验优化",
       "items": [
-        "四个主页面的背景现已固定，滚动长列表时不再重复或漂移",
-        "底部导航改为不透明底色，广场中的合并聊天记录也会直接展开展示"
+        "四个主页面的顶部导航在首屏保持透明，完整呈现页面背景",
+        "页面下滑后顶部导航会自动切换为不透明底色，避免内容穿透影响阅读"
       ]
     },
     "en": {
-      "title": "Improved Square reading on the mini program",
+      "title": "Improved mini program header behavior",
       "items": [
-        "Backgrounds are now fixed across all four main tabs without repeating during long scrolls",
-        "The bottom navigation is now opaque, and merged chat records expand directly inside Square posts"
+        "Headers on all four main tabs now stay transparent at the top so page backgrounds remain visible",
+        "Headers automatically become opaque while scrolling to keep content from showing through"
       ]
     }
   }
