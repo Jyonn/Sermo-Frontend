@@ -15,7 +15,7 @@ import { getActiveLocale, i18n } from "../lib/language";
 import { UserAvatar } from "./UserAvatar";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
-import { mapChatMessageSender } from "../lib/chatMessageSender";
+import { mapChatMessageDTO } from "../lib/chatMessageMapper";
 import { emitAccountStateChanged } from "../lib/accountStateSync";
 import { emitFriendRequestsUpdated } from "../lib/friendRequestBadge";
 import type { Chat, ChatDTO, ChatMessage, ChatMessageDTO, ChatSyncStateDTO, UserDTO } from "../types";
@@ -25,14 +25,6 @@ const MESSAGE_CACHE_PAGE_SIZE = 30;
 const CURSOR_KEY_PREFIX = "sermo-sync-v2-cursor:";
 const STATE_CURSOR_KEY_PREFIX = "sermo-state-events-cursor:";
 const DEBUG_SYNC = false;
-const MESSAGE_TYPE_IMAGE = 1;
-const MESSAGE_TYPE_FILE = 2;
-const MESSAGE_TYPE_SYSTEM = 3;
-const MESSAGE_TYPE_OFFICIAL_NOTICE = 12;
-const MESSAGE_TYPE_SUBMISSION_INVITE = 13;
-const MESSAGE_TYPE_VIDEO = 4;
-const MESSAGE_TYPE_AUDIO = 5;
-const MESSAGE_TYPE_LOCATION = 6;
 
 interface PopupState {
   chatId: number | null;
@@ -74,44 +66,6 @@ function formatPresence(user: UserDTO | null) {
   const minutes = Math.floor(Date.now() / 1000 - user.last_heartbeat) / 60;
   if (minutes < 30) return i18n.t("presence.recentlyActive");
   return i18n.t("presence.offline");
-}
-
-function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
-  const kind =
-    message.payload?.kind ??
-    (message.type === MESSAGE_TYPE_IMAGE
-      ? "image"
-      : message.type === MESSAGE_TYPE_FILE
-        ? "file"
-      : message.type === MESSAGE_TYPE_VIDEO
-        ? "video"
-        : message.type === MESSAGE_TYPE_AUDIO
-          ? "audio"
-          : message.type === MESSAGE_TYPE_LOCATION
-            ? "location"
-          : message.type === MESSAGE_TYPE_SYSTEM
-            ? "system"
-            : message.type === MESSAGE_TYPE_OFFICIAL_NOTICE
-              ? "official_notice"
-              : message.type === MESSAGE_TYPE_SUBMISSION_INVITE
-                ? "submission_invite"
-            : "text");
-  return {
-    id: message.message_id,
-    clientId: message.client_message_id || `server:${message.message_id}`,
-    ...mapChatMessageSender(message, currentUserId),
-    type: message.type,
-    kind,
-    time: "",
-    createdAt: message.created_at,
-    text: kind === "system" || kind === "official_notice" ? message.payload?.text || message.content : message.content,
-    payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
-    replyTo: message.reply_to ?? null,
-    mentions: message.mentions ?? [],
-    status: "sent",
-    submissionRound: message.submission_round,
-    submissionVisible: message.submission_visible,
-  };
 }
 
 function sortMessages(items: ChatMessage[]) {
@@ -308,7 +262,7 @@ function normalizeSyncItems(
 
       return {
         chatId,
-        message: mapChatMessage(messageSource, currentUserId),
+        message: mapChatMessageDTO(messageSource, currentUserId),
       };
     })
     .filter((item): item is SyncedChatMessageItem => Boolean(item));
@@ -531,7 +485,7 @@ export function GlobalMessageSync() {
         try {
           const rows = await api.getMessages({ chat_id: chatId, limit: MESSAGE_CACHE_PAGE_SIZE + 1 });
           const latest = sortMessages(
-            rows.slice(0, MESSAGE_CACHE_PAGE_SIZE).map((message) => mapChatMessage(message, session.user.user_id)),
+            rows.slice(0, MESSAGE_CACHE_PAGE_SIZE).map((message) => mapChatMessageDTO(message, session.user.user_id)),
           );
           const snapshot = {
             messages: mergeMessages([], latestWindowCandidates(existingThread.messages, latest)),

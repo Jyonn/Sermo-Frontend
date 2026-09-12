@@ -72,7 +72,7 @@ import { copyText, formatRelativeTime } from "../lib/presentation";
 import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResourceUri } from "../lib/stableResource";
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
-import { mapChatMessageSender } from "../lib/chatMessageSender";
+import { mapChatMessageDTO, messageKindFromType } from "../lib/chatMessageMapper";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
@@ -867,23 +867,6 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
 
 let activeThreadAudio: HTMLAudioElement | null = null;
 
-function messageKindFromType(type: number): MessageKind {
-  if (type === MESSAGE_TYPE_IMAGE) return "image";
-  if (type === MESSAGE_TYPE_FILE) return "file";
-  if (type === MESSAGE_TYPE_VIDEO) return "video";
-  if (type === MESSAGE_TYPE_AUDIO) return "audio";
-  if (type === MESSAGE_TYPE_LOCATION) return "location";
-  if (type === MESSAGE_TYPE_MAP_ACCESS) return "map_access";
-  if (type === MESSAGE_TYPE_STATEMENT) return "statement";
-  if (type === MESSAGE_TYPE_STICKER) return "sticker";
-  if (type === MESSAGE_TYPE_FORWARD_BUNDLE) return "forward_bundle";
-  if (type === MESSAGE_TYPE_ACTIVITY) return "activity";
-  if (type === MESSAGE_TYPE_SYSTEM) return "system";
-  if (type === MESSAGE_TYPE_OFFICIAL_NOTICE) return "official_notice";
-  if (type === MESSAGE_TYPE_SUBMISSION_INVITE) return "submission_invite";
-  return "text";
-}
-
 function messageTypeFromKind(kind: MessageMediaKind) {
   if (kind === "image") return MESSAGE_TYPE_IMAGE;
   if (kind === "video") return MESSAGE_TYPE_VIDEO;
@@ -944,30 +927,8 @@ function formatPresence(user: UserDTO | null) {
   return i18n.t("presence.offline");
 }
 
-function systemMessageText(message: ChatMessageDTO) {
-  const payload = message.payload;
-  return payload?.text || message.content || i18n.t("message.system.placeholder");
-}
-
 function mapChatMessage(message: ChatMessageDTO, currentUserId: number): ChatMessage {
-  const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const text = kind === "system" || kind === "official_notice" ? systemMessageText(message) : message.payload?.text || message.content;
-  return {
-    id: message.message_id,
-    clientId: message.client_message_id || `server:${message.message_id}`,
-    ...mapChatMessageSender(message, currentUserId),
-    type: message.type,
-    kind,
-    time: formatTime(message.created_at),
-    createdAt: message.created_at,
-    text,
-    payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
-    replyTo: message.reply_to ?? null,
-    mentions: message.mentions ?? [],
-    status: "sent",
-    submissionRound: message.submission_round,
-    submissionVisible: message.submission_visible,
-  };
+  return mapChatMessageDTO(message, currentUserId, formatTime);
 }
 
 function sortMessages(items: ChatMessage[]) {
@@ -1149,7 +1110,7 @@ function previewFromMessage(message: Pick<ChatMessage, "kind" | "text" | "mentio
 function previewFromDto(message: ChatMessageDTO | null) {
   if (!message) return i18n.t("chat.noMessages");
   const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const rawText = kind === "system" || kind === "official_notice" ? systemMessageText(message) : message.payload?.text || message.content;
+  const rawText = message.payload?.text || message.content;
   const text = kind === "text" ? chatPreviewMentionText(rawText, message.mentions ?? []) : rawText;
   return previewFromKind(kind, text);
 }

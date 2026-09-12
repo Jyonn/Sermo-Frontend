@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.3",
+  "id": "2026.09.13.4",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "统一小程序操作提示",
+      "title": "统一消息与外观预览",
       "items": [
-        "小程序成功与失败提示现统一使用清晰的勾选、叉号和状态配色，并覆盖聊天与投稿页面"
+        "小程序的个性化、成长勋章、活动奖励与锁定消息现统一使用真实聊天组件，字体、气泡和消息卡片与会话保持一致"
       ]
     },
     "en": {
-      "title": "Unified mini program feedback",
+      "title": "Consistent messages and previews",
       "items": [
-        "Success and failure feedback now uses consistent check, close, and status colors across the mini program, including chat and submission pages"
+        "Personalization, growth medals, activity rewards, and pinned messages in the mini program now use the real chat components for consistent type, bubbles, and message cards"
       ]
     }
   }
