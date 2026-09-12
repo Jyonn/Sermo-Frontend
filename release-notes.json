@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.12.21",
+  "id": "2026.09.12.22",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序成长授章即时出现",
+      "title": "优化小程序授章顶部布局",
       "items": [
-        "打开小程序和回到前台时会立即检查成长升级，并在使用期间持续同步",
-        "待领取的升级现在会可靠进入全屏三幕授章仪式"
+        "成长授章标题与步骤页码下移，为状态栏和设备安全区留出更舒适的间距"
       ]
     },
     "en": {
-      "title": "Growth ceremonies now appear reliably",
+      "title": "Improved Mini Program ceremony header spacing",
       "items": [
-        "The Mini Program now checks for level-ups on launch, foreground return, and throughout active use",
-        "Pending upgrades reliably open the full-screen three-act medal ceremony"
+        "The ceremony title and step counter now sit lower with more comfortable status bar and safe-area spacing"
       ]
     }
   }
