@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.12.26",
+  "id": "2026.09.12.27",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "补齐小程序拍立得头像框",
+      "title": "修正拍立得头像框圆角",
       "items": [
-        "拍立得头像框现已还原相纸留白、顶部胶带、轻微旋转与阴影层次"
+        "拍立得头像框的相纸外框与内部头像现已使用清晰一致的圆角裁切"
       ]
     },
     "en": {
-      "title": "Completed the Mini Program Polaroid avatar frame",
+      "title": "Corrected Polaroid avatar frame corners",
       "items": [
-        "The Polaroid avatar frame now includes its photo-paper border, top tape, subtle rotation, and layered shadow"
+        "The Polaroid paper frame and inner avatar now use clearly aligned rounded clipping"
       ]
     }
   }
