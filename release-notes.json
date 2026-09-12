@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.12.10",
+  "id": "2026.09.12.11",
   "publishedAt": "2026-09-12",
   "locales": {
     "zh-CN": {
-      "title": "小程序添加好友体验焕新",
+      "title": "小程序广场阅读体验优化",
       "items": [
-        "添加好友现已升级为沉浸式全屏界面，搜索和返回操作更清晰",
-        "空间运营者名单会直接展示本人、好友、已申请与可添加状态"
+        "四个主页面的背景现已固定，滚动长列表时不再重复或漂移",
+        "底部导航改为不透明底色，广场中的合并聊天记录也会直接展开展示"
       ]
     },
     "en": {
-      "title": "A refreshed Add Friend experience on the mini program",
+      "title": "Improved Square reading on the mini program",
       "items": [
-        "Add Friend now opens in an immersive full-screen view with clearer search and navigation",
-        "The space operator directory now shows self, friend, pending, and available states at a glance"
+        "Backgrounds are now fixed across all four main tabs without repeating during long scrolls",
+        "The bottom navigation is now opaque, and merged chat records expand directly inside Square posts"
       ]
     }
   }
