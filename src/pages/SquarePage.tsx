@@ -591,7 +591,6 @@ export default function SquarePage() {
   const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
   const [submissionActionCounts, setSubmissionActionCounts] = useState({ author: 0, reviewer: 0 });
   const [submissionTransitioning, setSubmissionTransitioning] = useState(false);
-  const publishRouteRef = useRef<HTMLDivElement | null>(null);
   const [publishVerificationOpen, setPublishVerificationOpen] = useState(false);
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
@@ -604,16 +603,6 @@ export default function SquarePage() {
     owner: TinyUserDTO;
   } | null>(null);
 
-  useEffect(() => {
-    if (!publishRouteOpen) return;
-    const closePublishRoute = (event: PointerEvent) => {
-      if (publishRouteRef.current?.contains(event.target as Node)) return;
-      setPublishRouteOpen(false);
-      setSubmissionRecipientStep(false);
-    };
-    window.addEventListener("pointerdown", closePublishRoute);
-    return () => window.removeEventListener("pointerdown", closePublishRoute);
-  }, [publishRouteOpen]);
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
   const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; text?: string } } | null;
@@ -1936,12 +1925,16 @@ export default function SquarePage() {
   };
 
   const openPublishRoute = () => {
-    if (!features.submissionEnabled) {
+    if (features.squareFreePostEnabled && !features.submissionEnabled) {
       openComposer();
       return;
     }
+    if (!features.squareFreePostEnabled && features.submissionEnabled) {
+      openNewSubmission();
+      return;
+    }
     setSubmissionRecipientStep(false);
-    setPublishRouteOpen((open) => !open);
+    setPublishRouteOpen(true);
   };
 
   const openSubmissionRecipients = async () => {
@@ -2262,18 +2255,8 @@ export default function SquarePage() {
               <button aria-label={t("square.quotaTitle")} className="square-header-quota" disabled={squareWorkspace !== "square"} onClick={openQuota} type="button"><span className="material-symbols-outlined">data_usage</span></button>
               <button aria-label={t("square.notifications")} className="square-header-notifications" disabled={squareWorkspace !== "square"} onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}</button>
             </div>
-            <div className="square-publish-route" ref={publishRouteRef}>
+            <div className="square-publish-route">
               <button aria-expanded={publishRouteOpen} className="square-header-publish" onClick={squareWorkspace === "square" ? openPublishRoute : openNewSubmission} type="button"><span className="material-symbols-outlined">edit_square</span><span>{squareWorkspace === "square" ? t("square.publish") : t("submission.new")}</span></button>
-              {publishRouteOpen ? <div className={`square-publish-route-menu${submissionRecipientStep ? " is-recipient" : ""}`}>
-                {!submissionRecipientStep && squareWorkspace === "square" ? <>
-                  <button onClick={() => { setPublishRouteOpen(false); openComposer(); }} type="button"><span className="material-symbols-outlined">edit_square</span><span><strong>{t("square.publish")}</strong><small>{t("square.publishToSquare")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-                  <button onClick={() => void openSubmissionRecipients()} type="button"><span className="material-symbols-outlined">outbox</span><span><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-                </> : <>
-                  {squareWorkspace === "square" ? <button className="square-publish-route-back" onClick={() => setSubmissionRecipientStep(false)} type="button"><span className="material-symbols-outlined">arrow_back</span><strong>{t("submission.chooseRecipient")}</strong></button> : null}
-                  {submissionRecipientsLoading ? <div className="square-publish-route-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => beginSubmission(recipient)} type="button"><UserAvatar className="mini-avatar" name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
-                  {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="square-publish-route-empty">{t("submission.noRecipients")}</div> : null}
-                </>}
-              </div> : null}
             </div>
           </div>}
         />
@@ -2529,6 +2512,18 @@ export default function SquarePage() {
         <button disabled={publishing || photos.length >= MAX_PHOTOS} onClick={() => { setContentSheetOpen(false); photoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">image</span><span><strong>{t("square.photo")}</strong><small>{t("square.photoMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
         <button disabled={publishing || !canSendVoice} onClick={() => { setContentSheetOpen(false); setVoiceSheetOpen(true); }} type="button"><span className="material-symbols-outlined">mic</span><span><strong>{t("square.voice")}</strong><small>{canSendVoice ? t("square.voiceMediaHint") : t("square.voiceUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
         <button disabled={publishing || !canSendVideo} onClick={() => { setContentSheetOpen(false); videoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">videocam</span><span><strong>{t("square.video")}</strong><small>{canSendVideo ? t("square.videoMediaHint") : t("square.videoUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+      </BottomSheet>
+      <BottomSheet bodyClassName="square-publish-route-sheet" onClose={() => { setPublishRouteOpen(false); setSubmissionRecipientStep(false); }} open={publishRouteOpen} title={submissionRecipientStep ? t("submission.chooseRecipient") : t("square.choosePublishMode")}>
+        <div className={`square-publish-route-menu${submissionRecipientStep ? " is-recipient" : ""}`}>
+          {!submissionRecipientStep ? <>
+            <button onClick={() => { setPublishRouteOpen(false); openComposer(); }} type="button"><span className="material-symbols-outlined">edit_square</span><span><strong>{t("square.publish")}</strong><small>{t("square.publishToSquare")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+            <button onClick={() => void openSubmissionRecipients()} type="button"><span className="material-symbols-outlined">outbox</span><span><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+          </> : <>
+            {features.squareFreePostEnabled && features.submissionEnabled && squareWorkspace === "square" ? <button className="square-publish-route-back" onClick={() => setSubmissionRecipientStep(false)} type="button"><span className="material-symbols-outlined">arrow_back</span><strong>{t("square.choosePublishMode")}</strong></button> : null}
+            {submissionRecipientsLoading ? <div className="square-publish-route-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => beginSubmission(recipient)} type="button"><UserAvatar className="mini-avatar" name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
+            {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="square-publish-route-empty">{t("submission.noRecipients")}</div> : null}
+          </>}
+        </div>
       </BottomSheet>
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}

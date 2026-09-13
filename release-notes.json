@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.16",
+  "id": "2026.09.13.17",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序个性化聊天页控件对齐",
+      "title": "广场发布方式支持空间配置",
       "items": [
-        "修复聊天页返回箭头与会话名称重叠的问题，并统一消息类型与底部切换按钮的字重和垂直对齐"
+        "空间管理员可分别开启自由发言与投稿；发言入口会根据配置直接进入对应流程，或在双模式下先提供选择"
       ]
     },
     "en": {
-      "title": "Mini program chat personalization control alignment",
+      "title": "Configurable Square publishing modes",
       "items": [
-        "Fixed the overlap between the back arrow and conversation title, with lighter and vertically aligned message and editor controls"
+        "Space administrators can enable free posting and submissions independently, with the publish action routing directly or offering a choice when both are available"
       ]
     }
   }
