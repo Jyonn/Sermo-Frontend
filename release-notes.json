@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.20",
+  "id": "2026.09.13.21",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序确认框与网页端统一",
+      "title": "认证邮箱入口回到会话列表",
       "items": [
-        "确认框现已统一网页端的配色、排版、按钮尺寸与提示文案，重要操作更清晰一致"
+        "未认证时，认证邮箱提示会显示在聊天 Tab 的会话列表上方，不再占用具体会话页面"
       ]
     },
     "en": {
-      "title": "Mini program confirmations now match the web app",
+      "title": "Email verification returns to the conversation list",
       "items": [
-        "Confirmation dialogs now share the web app's colors, typography, button sizing, and guidance copy"
+        "When verification is pending, the email prompt now appears above the Chats tab list instead of inside individual conversations"
       ]
     }
   }
