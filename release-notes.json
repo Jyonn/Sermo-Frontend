@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.37",
+  "id": "2026.09.13.38",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "微信首次登录优化",
+      "title": "微信登录流程优化",
       "items": [
-        "首次使用微信进入空间时，可选择创建新账号或通过昵称和密码关联已有账号"
+        "输入空间后会直接识别微信身份：老用户直接进入，新用户可关联已有友间账号或开启新账号"
       ]
     },
     "en": {
-      "title": "Improved first-time WeChat sign-in",
+      "title": "Improved WeChat sign-in",
       "items": [
-        "First-time WeChat sign-in now lets you create a new account or securely link an existing account with its nickname and password"
+        "After entering a space, returning WeChat users continue directly while new users can link an existing FRIENDEN account or start a new one"
       ]
     }
   }
