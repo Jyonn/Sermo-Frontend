@@ -10,7 +10,7 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
   open: boolean;
   onClose: () => void;
   onSelect: (location: SelectedLocation) => void;
-  presentation?: "drawer" | "chat-panel";
+  presentation?: "drawer" | "mobile-inline" | "chat-modal";
   chatClassName?: string;
   chatStyle?: CSSProperties;
 }) {
@@ -22,6 +22,7 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
   const [locating, setLocating] = useState(false);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const [panelHeight, setPanelHeight] = useState(44);
   const openedRef = useRef(false);
 
   const locate = () => {
@@ -51,6 +52,7 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
     }
     if (openedRef.current) return;
     openedRef.current = true;
+    setPanelHeight(44);
     setCenter(null);
     setOrigin(null);
     setQuery("");
@@ -99,10 +101,28 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
       </div>
     </div>;
   if (!open) return null;
-  if (presentation === "chat-panel") return <div className="chat-location-picker-layer" onClick={onClose} role="presentation">
-    <section aria-label={t("square.locationPickerTitle")} aria-modal="true" className={`chat-location-picker-panel ${chatClassName}`.trim()} onClick={(event) => event.stopPropagation()} role="dialog" style={chatStyle}>
-      <header><i /><strong>{t("square.locationPickerTitle")}</strong><button aria-label={t("common.close")} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button></header>
+  const header = <header><i onPointerDown={(event) => {
+    if (presentation !== "mobile-inline") return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const startY = event.clientY;
+    const startHeight = panelHeight;
+    const move = (moveEvent: PointerEvent) => setPanelHeight(Math.max(40, Math.min(50, startHeight + ((startY - moveEvent.clientY) / window.innerHeight) * 100)));
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+  }} /><strong>{t("square.locationPickerTitle")}</strong><button aria-label={t("common.close")} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button></header>;
+  if (presentation === "mobile-inline") return <section aria-label={t("square.locationPickerTitle")} className={`chat-location-picker-panel is-mobile-inline ${chatClassName}`.trim()} style={{ ...chatStyle, height: `${panelHeight}dvh` }}>
+      {header}
       {content}
+    </section>;
+  if (presentation === "chat-modal") return <div className="chat-location-picker-layer is-modal" onClick={onClose} role="presentation">
+    <section aria-label={t("square.locationPickerTitle")} aria-modal="true" className={`chat-location-picker-panel is-modal ${chatClassName}`.trim()} onClick={(event) => event.stopPropagation()} role="dialog" style={chatStyle}>
+      {header}{content}
     </section>
   </div>;
   return <SideDrawer className="square-location-picker-drawer" historyKey="nearby-location-picker" onClose={onClose} open title={t("square.locationPickerTitle")}>{content}</SideDrawer>;

@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.34",
+  "id": "2026.09.13.35",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "聊天位置面板优化",
+      "title": "聊天位置选择优化",
       "items": [
-        "聊天位置选择改为会话底部展开，保留聊天背景且最多占据半屏"
+        "手机端位置搜索会替换底部输入区并可调节高度，桌面端则使用居中搜索窗口"
       ]
     },
     "en": {
-      "title": "Improved chat location panel",
+      "title": "Improved chat location selection",
       "items": [
-        "Chat location selection now expands from the conversation bottom, preserves its background, and uses at most half the screen"
+        "Location search now replaces the mobile composer with an adjustable panel and opens in a centered dialog on desktop"
       ]
     }
   }
