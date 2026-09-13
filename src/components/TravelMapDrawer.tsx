@@ -334,7 +334,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   useEffect(() => {
     if (!open) return;
     setGeometry(null);
-    setSelectedCountry(null);
+    setSelectedCountry(focusLocation ? null : "CHN");
     setTransform({ x: 0, y: 0, scale: 1 });
     setGlobeRotation(INITIAL_GLOBE_ROTATION);
     setLocationFocusPhase(focusLocation ? "flying" : "idle");
@@ -614,10 +614,13 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   };
   const zoom = (delta: number) => zoomAroundClientPoint((currentScale) => currentScale + delta);
   const resetView = () => {
-    setSelectedCountry(null);
-    setGeometry(null);
     setTransform({ x: 0, y: 0, scale: 1 });
     setGlobeRotation(INITIAL_GLOBE_ROTATION);
+  };
+  const showMapView = (country: string | null) => {
+    setSelectedCountry(country);
+    setGeometry(null);
+    resetView();
   };
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
@@ -776,6 +779,12 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
               <small>{focusLocation ? t("location.focusing") : t("travelMap.regionCount", { count: totalRegions })}</small>
             </span>
           </div>
+          {!focusLocation ? (
+            <div className="travel-map-view-tabs" aria-label={t("travelMap.world")}>
+              <button className={activeCountry === "CHN" ? "is-active" : ""} onClick={() => showMapView("CHN")} type="button">{countryName("CHN", language)}</button>
+              <button className={activeCountry !== "CHN" ? "is-active" : ""} onClick={() => showMapView(null)} type="button">{t("travelMap.world")}</button>
+            </div>
+          ) : null}
         </div>
 
         <div className="travel-map-canvas">
@@ -868,12 +877,7 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
           </div>
         </div>
 
-        {!focusLocation ? activeCountry ? (
-          <button className="travel-map-country-back" onClick={resetView} type="button">
-            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-            <span><strong>{countryName(activeCountry, language)}</strong><small>{t("travelMap.world")}</small></span>
-          </button>
-        ) : <p className="travel-map-hint">{t("travelMap.chooseCountry")}</p> : null}
+        {!focusLocation && !activeCountry ? <p className="travel-map-hint">{t("travelMap.chooseCountry")}</p> : null}
 
         {!focusLocation ? <div className="travel-map-legend">
           <span><i className="is-mine" />{t("travelMap.mine")}</span>
