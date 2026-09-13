@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.12",
+  "id": "2026.09.13.13",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序气泡合并更自然",
+      "title": "小程序气泡风格全面对齐",
       "items": [
-        "统一所有默认消息气泡的合并圆角结构，并修复相册消息无法正常展示的问题"
+        "所有聊天气泡风格现已统一适配文字、媒体、语音、文件、位置、活动、链接与投稿等消息，并修复相册预览"
       ]
     },
     "en": {
-      "title": "More natural grouped bubbles in the mini program",
+      "title": "Consistent bubble themes across the mini program",
       "items": [
-        "Unified grouped-corner behavior across default message bubbles and fixed gallery messages not displaying correctly"
+        "Applied every chat bubble theme consistently across text, media, voice, files, locations, activities, links, submissions, and fixed gallery previews"
       ]
     }
   }
