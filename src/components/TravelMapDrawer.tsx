@@ -7,7 +7,6 @@ import jaCountries from "i18n-iso-countries/langs/ja.json";
 import koCountries from "i18n-iso-countries/langs/ko.json";
 import zhCountries from "i18n-iso-countries/langs/zh.json";
 import { feature } from "topojson-client";
-import worldTopology from "world-atlas/countries-110m.json";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 import { SideDrawer } from "./SideDrawer";
@@ -16,6 +15,7 @@ import { UserAvatar } from "./UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
+import { fetchRemoteJson } from "../lib/remoteAssets";
 import { showToast } from "../lib/toast";
 import type { TinyUserDTO, TravelMapAccessOverviewDTO, TravelMapAccessOverviewEntryDTO, TravelMapRegionDTO } from "../types";
 
@@ -89,6 +89,7 @@ const HEIGHT = 500;
 const INITIAL_GLOBE_ROTATION: [number, number] = [-104, -28];
 const boundaryCache = new Map<string, FeatureCollection<Geometry, RegionProperties>>();
 let countryIndexPromise: Promise<Array<{ code: string; available: boolean; bounds?: [number, number, number, number] }>> | null = null;
+let worldFeaturesPromise: Promise<Feature[]> | null = null;
 
 function mapPointFromClient(svg: SVGSVGElement, clientX: number, clientY: number) {
   const rect = svg.getBoundingClientRect();
@@ -119,9 +120,12 @@ function zoomTransformAroundPoint(current: MapTransform, nextScale: number, anch
   };
 }
 
-function worldFeatures() {
-  const topology = worldTopology as unknown as { objects: { countries: Parameters<typeof feature>[1] } };
-  return (feature(topology as never, topology.objects.countries) as unknown as FeatureCollection).features;
+function loadWorldFeatures() {
+  if (!worldFeaturesPromise) {
+    worldFeaturesPromise = fetchRemoteJson<{ objects: { countries: Parameters<typeof feature>[1] } }>("/maps/world-110m.json")
+      .then((topology) => (feature(topology as never, topology.objects.countries) as unknown as FeatureCollection).features);
+  }
+  return worldFeaturesPromise;
 }
 
 function countryCodeOf(item: Feature) {
@@ -182,17 +186,18 @@ function rewindForD3(collection: FeatureCollection<Geometry, RegionProperties>) 
 async function loadCountryBoundary(code: string) {
   const cached = boundaryCache.get(code);
   if (cached) return cached;
-  const response = await fetch(`/maps/adm1/${code}.json`);
-  if (!response.ok) return null;
-  const collection = rewindForD3(await response.json() as FeatureCollection<Geometry, RegionProperties>);
-  boundaryCache.set(code, collection);
-  return collection;
+  try {
+    const collection = rewindForD3(await fetchRemoteJson<FeatureCollection<Geometry, RegionProperties>>(`/maps/adm1/${code}.json`));
+    boundaryCache.set(code, collection);
+    return collection;
+  } catch {
+    return null;
+  }
 }
 
 async function loadCountryIndex() {
   if (!countryIndexPromise) {
-    countryIndexPromise = fetch("/maps/index.json")
-      .then((response) => response.ok ? response.json() : { countries: [] })
+    countryIndexPromise = fetchRemoteJson<{ countries?: Array<{ code: string; available: boolean; bounds?: [number, number, number, number] }> }>("/maps/index.json")
       .then((payload) => payload.countries ?? [])
       .catch(() => []);
   }
@@ -217,7 +222,7 @@ function accuracySamples(position: CheckInPosition) {
 
 export async function resolveTravelMapCandidates(position: CheckInPosition, language: string) {
   const samples = accuracySamples(position);
-  const world = worldFeatures();
+  const world = await loadWorldFeatures();
   const exactCountries = world
     .filter((item) => samples.some((point) => geoContains(item, point)))
     .map((item) => countryCodeOf(item))
@@ -319,17 +324,24 @@ export function TravelMapDrawer({ open, onClose, backdropClassName, historyKey =
   const [locationFocusPhase, setLocationFocusPhase] = useState<LocationFocusPhase>("idle");
   const [locationFocusCandidate, setLocationFocusCandidate] = useState<CheckInCandidate | null>(null);
   const [locationFlashVisible, setLocationFlashVisible] = useState(false);
+  const [world, setWorld] = useState<Feature[]>([]);
   const gestureRef = useRef<MapGesture>({ pointers: new Map(), center: null, distance: null, moved: false, tapCountryCode: null });
   const mapSvgRef = useRef<SVGSVGElement | null>(null);
   const avatarClipId = `travel-map-avatar-${useId().replace(/:/g, "")}`;
 
-  const world = useMemo(worldFeatures, []);
   const currentUserId = session?.user.user_id;
   const mine = maps.find((item) => item.owner.user_id === currentUserId);
   const others = maps.filter((item) => item.owner.user_id !== currentUserId);
   const myCountries = useMemo(() => new Set((mine?.regions ?? []).map((item) => item.country_code)), [mine]);
   const otherCountries = useMemo(() => new Set(others.flatMap((item) => item.regions.map((region) => region.country_code))), [others]);
   const activeCountry = focusLocation ? null : selectedCountry;
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    loadWorldFeatures().then((features) => { if (!cancelled) setWorld(features); }).catch(() => { if (!cancelled) setWorld([]); });
+    return () => { cancelled = true; };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

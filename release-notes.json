@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.35",
+  "id": "2026.09.13.36",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "聊天位置选择优化",
+      "title": "资源加载优化",
       "items": [
-        "手机端位置搜索会替换底部输入区并可调节高度，桌面端则使用居中搜索窗口"
+        "地图与大型个性化素材改为按需加载，并在主资源站不可用时自动切换备用站"
       ]
     },
     "en": {
-      "title": "Improved chat location selection",
+      "title": "Improved asset loading",
       "items": [
-        "Location search now replaces the mobile composer with an adjustable panel and opens in a centered dialog on desktop"
+        "Maps and large personalization assets now load on demand and automatically switch to a backup host when needed"
       ]
     }
   }
