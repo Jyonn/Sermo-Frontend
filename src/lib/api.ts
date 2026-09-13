@@ -1006,6 +1006,14 @@ export const api = {
     });
   },
 
+  searchNearbySquareLocations(latitude: number, longitude: number, keyword = "", radius = 5000) {
+    return request<{ places: import("../types").NearbyPlaceDTO[]; sort: "distance"; radius: number }>("/square/location/nearby", {
+      method: "POST",
+      auth: true,
+      body: { location: { latitude, longitude }, keyword, radius },
+    });
+  },
+
   getPinnedSquareStatement(signal?: AbortSignal) {
     return request<SquareStatementDTO | null>("/square/statements/pinned", { auth: true, signal });
   },

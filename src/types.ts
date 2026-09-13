@@ -1136,6 +1136,17 @@ export interface VideoMetadataDTO {
   geocoding_status?: number;
 }
 
+export interface NearbyPlaceDTO {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  distance: number;
+  type: string;
+  business_area?: string;
+}
+
 export interface FriendshipRequestDTO {
   request_id: number;
   status: number;

@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.31",
+  "id": "2026.09.13.32",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序媒体双层预览",
+      "title": "附近位置搜索",
       "items": [
-        "照片和视频先进入浅色影像档案页，可横向浏览 EXIF；再切换至黑底沉浸查看模式"
+        "发表发言时可以搜索附近地点，并按距离选择更准确的位置"
       ]
     },
     "en": {
-      "title": "Two-stage Mini Program media preview",
+      "title": "Nearby place search",
       "items": [
-        "Photos and videos now open in a light media archive with horizontally scrollable EXIF details before entering the black immersive viewer"
+        "Search nearby places while composing a statement and choose the most accurate result ordered by distance"
       ]
     }
   }
