@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.18",
+  "id": "2026.09.13.19",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "广场发布选择更贴近入口",
+      "title": "小程序广场发布选择更清晰",
       "items": [
-        "自由发言、投稿方式与投稿对象均改为在发言按钮旁浮动选择，减少视线与操作移动"
+        "修复发布选择框与广场顶部标签重叠的问题，选择内容始终清晰显示在 Header 上方"
       ]
     },
     "en": {
-      "title": "Square publishing choices stay near the action",
+      "title": "Clearer Square publishing choices in the mini program",
       "items": [
-        "Publishing mode and submission recipient choices now open beside the publish button for a faster, more focused flow"
+        "Fixed the publishing popover overlapping Square header tabs so every option remains clear and readable"
       ]
     }
   }
