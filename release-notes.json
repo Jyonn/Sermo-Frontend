@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.9",
+  "id": "2026.09.13.10",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "精细对齐小程序默认气泡",
+      "title": "语音消息更紧凑自然",
       "items": [
-        "小程序默认气泡现已对齐网页端的配色、合并圆角及文字、语音、媒体与卡片消息样式，并支持语音转文字预览"
+        "网页端和小程序的语音气泡会随音频时长自然伸展，音波、时间与转文字操作也更加紧凑清晰"
       ]
     },
     "en": {
-      "title": "Refined mini program default bubbles",
+      "title": "More natural voice messages",
       "items": [
-        "Mini program default bubbles now match web colors, grouped corners, text, voice, media, and card styles, with a speech-to-text preview"
+        "Voice bubbles on web and mini program now grow naturally with audio length, with tighter waveforms, timing, and transcription controls"
       ]
     }
   }

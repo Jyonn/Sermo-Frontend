@@ -540,6 +540,12 @@ function hostnameFromUrl(url: string) {
 
 const AUDIO_WAVE_PATTERN = [0.34, 0.58, 0.44, 0.76, 0.41, 0.66, 0.52, 0.84, 0.49, 0.7, 0.39, 0.62, 0.47, 0.8];
 
+function audioWavePattern(durationSeconds: number) {
+  const duration = Math.max(1, Math.min(60, Math.round(durationSeconds)));
+  const barCount = 8 + Math.floor((duration - 1) / 6);
+  return Array.from({ length: barCount }, (_, index) => AUDIO_WAVE_PATTERN[index % AUDIO_WAVE_PATTERN.length]);
+}
+
 function waitForAudioReady(audio: HTMLAudioElement) {
   if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
     return Promise.resolve();
@@ -695,8 +701,9 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
   }, [messageId, previewTranscript]);
 
   const totalDuration = resolvedDuration > 0 ? resolvedDuration : durationSeconds ?? 0;
+  const wavePattern = audioWavePattern(totalDuration);
   const progress = totalDuration > 0 ? Math.min(1, currentTime / totalDuration) : 0;
-  const activeBars = Math.max(1, Math.round(progress * AUDIO_WAVE_PATTERN.length));
+  const activeBars = Math.max(1, Math.round(progress * wavePattern.length));
 
   const togglePlayback = async () => {
     const audio = audioRef.current;
@@ -804,7 +811,7 @@ const AudioMessagePlayer = memo(function AudioMessagePlayer({
         </button>
         <div className="message-audio-body">
           <div className="message-audio-wave" aria-hidden="true">
-            {AUDIO_WAVE_PATTERN.map((bar, index) => (
+            {wavePattern.map((bar, index) => (
               <span
                 key={`audio-wave-${index}`}
                 className={`message-audio-wave-bar ${index < activeBars ? "is-active" : ""}`}
@@ -10046,7 +10053,10 @@ function previewMessage(kind: MessageKind | "link", from: "self" | "other", inde
   };
   if (kind === "image") return { ...base, type: MESSAGE_TYPE_IMAGE, payload: { kind, uri: CHAT_PREVIEW_IMAGE, thumbnail_uri: CHAT_PREVIEW_IMAGE, image_metadata: { status: 1, pixel_width: 640, pixel_height: 420 } } };
   if (kind === "video") return { ...base, type: MESSAGE_TYPE_VIDEO, payload: { kind, uri: "preview://video", thumbnail_uri: CHAT_PREVIEW_IMAGE, duration_seconds: 28, video_metadata: { status: 1, duration_seconds: 28, pixel_width: 640, pixel_height: 420 } } };
-  if (kind === "audio") return { ...base, type: MESSAGE_TYPE_AUDIO, payload: { kind, uri: "data:audio/wav;base64,UklGRgQAAABXQVZF", duration_seconds: 12 } };
+  if (kind === "audio") {
+    const previewDurations = [3, 20, 60];
+    return { ...base, type: MESSAGE_TYPE_AUDIO, payload: { kind, uri: "data:audio/wav;base64,UklGRgQAAABXQVZF", duration_seconds: previewDurations[index % previewDurations.length] } };
+  }
   if (kind === "file") return { ...base, type: MESSAGE_TYPE_FILE, payload: { kind, uri: "data:text/plain,preview", file_name: i18n.t("menu.bubblePreviewFile"), file_size: 2516582 } };
   if (kind === "location") return { ...base, type: MESSAGE_TYPE_LOCATION, payload: { kind, latitude: 24.4798, longitude: 118.0894, address: i18n.t("menu.bubblePreviewLocation") } };
   if (kind === "map_access") return { ...base, type: MESSAGE_TYPE_MAP_ACCESS, payload: { kind, text: i18n.t("travelMap.messageJoin"), owner: { user_id: 2, name: config.avatarName }, access: { can_view_theirs: true, they_can_view_mine: true } } };

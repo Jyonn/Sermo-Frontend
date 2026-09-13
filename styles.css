@@ -7306,10 +7306,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto auto;
   align-items: center;
   gap: 8px;
-  min-width: min(62vw, 252px);
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
   min-height: 0;
   padding: 7px 9px;
   border-radius: var(--radius-bubble);
@@ -7373,9 +7375,9 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-audio-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -7385,6 +7387,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-audio-wave {
   display: flex;
+  flex: 0 0 auto;
   align-items: flex-end;
   gap: 3px;
   height: 20px;
@@ -9645,7 +9648,7 @@ html[data-theme="dark"] .square-chat-record {
 }
 
 .personalization-chat-preview .message-audio-card {
-  width: min(68vw, 250px);
+  width: fit-content;
 }
 
 .personalization-live-media {
@@ -24294,8 +24297,8 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 }
 
 .message-group[class*="bubble-style-city-"] .message-audio-card {
-  width: min(62vw, 252px);
-  min-width: min(62vw, 252px);
+  width: fit-content;
+  min-width: 0;
   min-height: 0;
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 8px;
@@ -24336,7 +24339,7 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 }
 
 .message-group[class*="bubble-style-city-"] .message-audio-body {
-  gap: 7px;
+  gap: 8px;
 }
 
 .message-group[class*="bubble-style-city-"] .message-audio-wave {
@@ -24699,8 +24702,8 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 }
 
 .message-group.bubble-style-comic .message-audio-card {
-  width: min(62vw, 252px);
-  min-width: min(62vw, 252px);
+  width: fit-content;
+  min-width: 0;
   min-height: 0;
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 9px;
@@ -24722,9 +24725,9 @@ html[data-theme="dark"] body .message-travel-map-copy :is(small, span) {
 
 .message-group.bubble-style-comic .message-audio-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .message-group.bubble-style-comic .message-audio-head {
