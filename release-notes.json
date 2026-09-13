@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.11",
+  "id": "2026.09.13.12",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序消息卡片更统一",
+      "title": "小程序气泡合并更自然",
       "items": [
-        "优化投稿邀请、链接、活动、文件、位置和足迹消息的合并圆角、图标与布局，使小程序聊天更贴近网页端"
+        "统一所有默认消息气泡的合并圆角结构，并修复相册消息无法正常展示的问题"
       ]
     },
     "en": {
-      "title": "More consistent mini program message cards",
+      "title": "More natural grouped bubbles in the mini program",
       "items": [
-        "Improved grouping corners, icons, and layouts for submission invites, links, activities, files, locations, and travel maps in the mini program"
+        "Unified grouped-corner behavior across default message bubbles and fixed gallery messages not displaying correctly"
       ]
     }
   }
