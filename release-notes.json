@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.8",
+  "id": "2026.09.13.9",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "对齐小程序打字机气泡",
+      "title": "精细对齐小程序默认气泡",
       "items": [
-        "小程序打字机气泡现已在文字、媒体和卡片消息中统一使用网页端的小圆角"
+        "小程序默认气泡现已对齐网页端的配色、合并圆角及文字、语音、媒体与卡片消息样式，并支持语音转文字预览"
       ]
     },
     "en": {
-      "title": "Aligned mini program typewriter bubbles",
+      "title": "Refined mini program default bubbles",
       "items": [
-        "Mini program typewriter bubbles now use the web-style small corners consistently across text, media, and card messages"
+        "Mini program default bubbles now match web colors, grouped corners, text, voice, media, and card styles, with a speech-to-text preview"
       ]
     }
   }
