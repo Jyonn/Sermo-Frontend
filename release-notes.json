@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.10",
+  "id": "2026.09.13.11",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "语音消息更紧凑自然",
+      "title": "小程序消息卡片更统一",
       "items": [
-        "网页端和小程序的语音气泡会随音频时长自然伸展，音波、时间与转文字操作也更加紧凑清晰"
+        "优化投稿邀请、链接、活动、文件、位置和足迹消息的合并圆角、图标与布局，使小程序聊天更贴近网页端"
       ]
     },
     "en": {
-      "title": "More natural voice messages",
+      "title": "More consistent mini program message cards",
       "items": [
-        "Voice bubbles on web and mini program now grow naturally with audio length, with tighter waveforms, timing, and transcription controls"
+        "Improved grouping corners, icons, and layouts for submission invites, links, activities, files, locations, and travel maps in the mini program"
       ]
     }
   }
