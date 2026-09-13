@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.13",
+  "id": "2026.09.13.14",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序气泡风格全面对齐",
+      "title": "小程序相册气泡预览修复",
       "items": [
-        "所有聊天气泡风格现已统一适配文字、媒体、语音、文件、位置、活动、链接与投稿等消息，并修复相册预览"
+        "相册与单图消息现在可在个性化页面稳定加载，并继续沿用统一的双方配色、合并圆角与气泡结构"
       ]
     },
     "en": {
-      "title": "Consistent bubble themes across the mini program",
+      "title": "Mini program gallery bubble preview fix",
       "items": [
-        "Applied every chat bubble theme consistently across text, media, voice, files, locations, activities, links, submissions, and fixed gallery previews"
+        "Gallery and single-image messages now load reliably in personalization previews while preserving shared sender colors, grouped corners, and bubble structure"
       ]
     }
   }
