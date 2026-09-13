@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.29",
+  "id": "2026.09.13.30",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "禁言权限与提示优化",
+      "title": "小程序媒体预览修复",
       "items": [
-        "运营无法禁言其他运营，官方可处理运营；广场禁言后的评论失败提示现会显示剩余解锁时间"
+        "照片和视频现在直接进入真正的全屏预览，图片加载失败会自动回退，并展示可用的拍摄信息"
       ]
     },
     "en": {
-      "title": "Mute permissions and feedback improved",
+      "title": "Mini Program media preview fixes",
       "items": [
-        "Operators can no longer mute peers while official accounts can; failed Square comments now show the remaining mute time"
+        "Photos and videos now open directly in a true full-screen viewer, with image fallback loading and available capture details"
       ]
     }
   }
