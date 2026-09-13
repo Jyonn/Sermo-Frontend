@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.21",
+  "id": "2026.09.13.22",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "认证邮箱入口回到会话列表",
+      "title": "小程序认证入口与确认框优化",
       "items": [
-        "未认证时，认证邮箱提示会显示在聊天 Tab 的会话列表上方，不再占用具体会话页面"
+        "聊天 Tab 的认证邮箱提示现已占满会话列表内容区，确认框按钮也会根据文案自适应宽度"
       ]
     },
     "en": {
-      "title": "Email verification returns to the conversation list",
+      "title": "Mini Program verification prompt and dialog refinements",
       "items": [
-        "When verification is pending, the email prompt now appears above the Chats tab list instead of inside individual conversations"
+        "The email verification prompt now fills the Chats list content area, while dialog actions size naturally to their labels"
       ]
     }
   }
