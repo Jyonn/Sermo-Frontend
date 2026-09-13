@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.38",
+  "id": "2026.09.13.39",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "微信登录流程优化",
+      "title": "登录页细节优化",
       "items": [
-        "输入空间后会直接识别微信身份：老用户直接进入，新用户可关联已有友间账号或开启新账号"
+        "修正小程序空间输入按钮中箭头的垂直对齐"
       ]
     },
     "en": {
-      "title": "Improved WeChat sign-in",
+      "title": "Improved sign-in details",
       "items": [
-        "After entering a space, returning WeChat users continue directly while new users can link an existing FRIENDEN account or start a new one"
+        "Fixed the vertical alignment of the arrow in the Mini Program space entry button"
       ]
     }
   }
