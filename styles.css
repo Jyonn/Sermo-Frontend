@@ -24044,6 +24044,34 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   padding: 0 3px;
 }
 
+.travel-map-country-back {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--bg-panel);
+  text-align: left;
+}
+
+.travel-map-country-back > .material-symbols-outlined {
+  color: var(--brand-primary);
+  font-size: 1.1rem;
+}
+
+.travel-map-country-back > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.travel-map-country-back small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
 .message-travel-map-card {
   position: relative;
   display: grid;
