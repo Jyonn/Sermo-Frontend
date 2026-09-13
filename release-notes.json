@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.24",
+  "id": "2026.09.13.25",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序认证横条宽度修复",
+      "title": "小程序菜单下级页面排版统一",
       "items": [
-        "聊天 Tab 的认证邮箱横条现在会稳定占满会话列表内容区"
+        "菜单下级页面的返回按钮与标题现已紧邻排列，操作行使用统一上下留白并根据说明文字自然增高"
       ]
     },
     "en": {
-      "title": "Mini Program verification banner width fix",
+      "title": "Consistent Mini Program menu subpage layout",
       "items": [
-        "The email verification banner now reliably fills the Chats list content area"
+        "Menu subpages now place titles beside the back button and use consistent vertical spacing that grows naturally with descriptions"
       ]
     }
   }
