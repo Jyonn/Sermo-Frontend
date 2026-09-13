@@ -33726,26 +33726,6 @@ html[data-theme="dark"] .submission-status-filters {
   font-size: 17px;
 }
 .square-publish-route-loading,.square-publish-route-empty { padding: 16px 12px; color: var(--text-muted); font-size: 12px; text-align: center; }
-.square-publish-route-sheet { padding: 0 16px calc(18px + env(safe-area-inset-bottom)); }
-.square-publish-route-sheet .square-publish-route-menu {
-  position: static;
-  width: auto;
-  max-height: min(58vh, 460px);
-  overflow-y: auto;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-.square-publish-route-sheet .square-publish-route-menu > button {
-  min-height: 68px;
-  margin-bottom: 8px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  background: var(--surface-soft);
-}
 .square-submission-workspace-tabs {
   display: flex;
   align-items: center;

@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.17",
+  "id": "2026.09.13.18",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "广场发布方式支持空间配置",
+      "title": "广场发布选择更贴近入口",
       "items": [
-        "空间管理员可分别开启自由发言与投稿；发言入口会根据配置直接进入对应流程，或在双模式下先提供选择"
+        "自由发言、投稿方式与投稿对象均改为在发言按钮旁浮动选择，减少视线与操作移动"
       ]
     },
     "en": {
-      "title": "Configurable Square publishing modes",
+      "title": "Square publishing choices stay near the action",
       "items": [
-        "Space administrators can enable free posting and submissions independently, with the publish action routing directly or offering a choice when both are available"
+        "Publishing mode and submission recipient choices now open beside the publish button for a faster, more focused flow"
       ]
     }
   }
