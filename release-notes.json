@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.19",
+  "id": "2026.09.13.20",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序广场发布选择更清晰",
+      "title": "小程序确认框与网页端统一",
       "items": [
-        "修复发布选择框与广场顶部标签重叠的问题，选择内容始终清晰显示在 Header 上方"
+        "确认框现已统一网页端的配色、排版、按钮尺寸与提示文案，重要操作更清晰一致"
       ]
     },
     "en": {
-      "title": "Clearer Square publishing choices in the mini program",
+      "title": "Mini program confirmations now match the web app",
       "items": [
-        "Fixed the publishing popover overlapping Square header tabs so every option remains clear and readable"
+        "Confirmation dialogs now share the web app's colors, typography, button sizing, and guidance copy"
       ]
     }
   }
