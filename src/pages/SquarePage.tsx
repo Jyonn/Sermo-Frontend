@@ -26,7 +26,7 @@ import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserProfilePanel } from "../components/UserProfilePanel";
 import { VirtualDynamicList } from "../components/VirtualDynamicList";
-import { api } from "../lib/api";
+import { ApiError, api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAuth } from "../lib/auth";
 import { useI18n, type TranslationKey } from "../lib/language";
@@ -1664,7 +1664,8 @@ export default function SquarePage() {
       setPendingCommentSticker(null);
       setAnonymousComment(canCommentAnonymously);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("square.commentFailed"));
+      const message = cause instanceof Error ? cause.message : t("square.commentFailed");
+      showToast(`${t("square.commentFailed")}: ${message}`, "error");
     } finally {
       setCommentSending(false);
     }
@@ -1899,7 +1900,11 @@ export default function SquarePage() {
       setComposerOpen(false);
       void refreshActivities();
     } catch (cause) {
-      setError(toMessageUploadError(cause).message);
+      const message = toMessageUploadError(cause).message;
+      setError(message);
+      if (cause instanceof ApiError && cause.identifier.startsWith("SQUARE@MUTED")) {
+        showToast(message, "error");
+      }
     } finally {
       setPublishing(false);
       setUploadProgress(0);

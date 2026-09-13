@@ -7366,7 +7366,7 @@ function LiveChatsPage({
     && !member.isSelf
     && !member.isOwner
     && !member.official
-    && !member.operator
+    && (!member.operator || Boolean(currentUserMe?.official || session?.user.official))
   );
 
   const setGroupMemberMute = async (duration: ChatMuteDuration) => {

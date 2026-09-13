@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.28",
+  "id": "2026.09.13.29",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "足迹地图视图切换优化",
+      "title": "禁言权限与提示优化",
       "items": [
-        "足迹页新增中国与世界视图切换，默认直接展示中国地区地图"
+        "运营无法禁言其他运营，官方可处理运营；广场禁言后的评论失败提示现会显示剩余解锁时间"
       ]
     },
     "en": {
-      "title": "Travel map view switching improved",
+      "title": "Mute permissions and feedback improved",
       "items": [
-        "Travel maps now offer China and World tabs, with the China regional map shown by default"
+        "Operators can no longer mute peers while official accounts can; failed Square comments now show the remaining mute time"
       ]
     }
   }
