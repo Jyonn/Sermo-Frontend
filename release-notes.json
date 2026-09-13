@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.25",
+  "id": "2026.09.13.26",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序菜单下级页面排版统一",
+      "title": "小程序返回按钮与标题修复",
       "items": [
-        "菜单下级页面的返回按钮与标题现已紧邻排列，操作行使用统一上下留白并根据说明文字自然增高"
+        "菜单下级页面的返回按钮宽度现已固定，不再与相邻标题重叠"
       ]
     },
     "en": {
-      "title": "Consistent Mini Program menu subpage layout",
+      "title": "Mini Program back button and title fix",
       "items": [
-        "Menu subpages now place titles beside the back button and use consistent vertical spacing that grows naturally with descriptions"
+        "Menu subpage back buttons now keep a fixed width and no longer overlap adjacent titles"
       ]
     }
   }
