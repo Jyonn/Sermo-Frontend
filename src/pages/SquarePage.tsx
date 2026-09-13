@@ -18,6 +18,7 @@ import { MediaLightbox } from "../components/ImageLightbox";
 import { StatementVideoThumbnail } from "../components/StatementVideoThumbnail";
 import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
+import { NearbyLocationPicker } from "../components/NearbyLocationPicker";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
@@ -48,7 +49,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NearbyPlaceDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -574,13 +575,7 @@ export default function SquarePage() {
   const [recording, setRecording] = useState(false);
   const [contentSheetOpen, setContentSheetOpen] = useState(false);
   const [statementLocation, setStatementLocation] = useState<SquareStatementDTO["location"]>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
-  const [locationCenter, setLocationCenter] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationOrigin, setLocationOrigin] = useState<SquareStatementDTO["location"]>(null);
-  const [locationQuery, setLocationQuery] = useState("");
-  const [nearbyPlaces, setNearbyPlaces] = useState<NearbyPlaceDTO[]>([]);
-  const [locationSearchError, setLocationSearchError] = useState("");
   const [chatRecordDraft, setChatRecordDraft] = useState<SquareChatRecordDraft | null>(null);
 
   useEffect(() => {
@@ -1918,57 +1913,7 @@ export default function SquarePage() {
   };
 
   const locateStatement = () => {
-    if (!navigator.geolocation) {
-      setError(t("square.locationUnsupported"));
-      return;
-    }
-    setLocationLoading(true);
     setLocationPickerOpen(true);
-    setError("");
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const center = { latitude: coords.latitude, longitude: coords.longitude };
-        setLocationCenter(center);
-        void api.resolveSquareLocation(coords.latitude, coords.longitude)
-          .then(setLocationOrigin)
-          .catch(() => setLocationOrigin({ ...center, address: "" }))
-          .finally(() => setLocationLoading(false));
-      },
-      () => {
-        setLocationLoading(false);
-        setError(t("square.locationFailed"));
-        setLocationSearchError(t("square.locationFailed"));
-      },
-      { enableHighAccuracy: true, maximumAge: 60_000, timeout: 12_000 },
-    );
-  };
-
-  useEffect(() => {
-    if (!locationPickerOpen || !locationCenter) return;
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      setLocationLoading(true);
-      setLocationSearchError("");
-      void api.searchNearbySquareLocations(locationCenter.latitude, locationCenter.longitude, locationQuery)
-        .then(({ places }) => { if (!cancelled) setNearbyPlaces(places); })
-        .catch((cause) => {
-          if (cancelled) return;
-          setNearbyPlaces([]);
-          setLocationSearchError(cause instanceof Error ? cause.message : t("square.locationSearchFailed"));
-        })
-        .finally(() => { if (!cancelled) setLocationLoading(false); });
-    }, locationQuery ? 280 : 0);
-    return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [locationCenter, locationPickerOpen, locationQuery, t]);
-
-  const chooseStatementLocation = (place: NearbyPlaceDTO | NonNullable<SquareStatementDTO["location"]>) => {
-    setStatementLocation({
-      latitude: place.latitude,
-      longitude: place.longitude,
-      address: place.address || ("name" in place ? place.name : ""),
-      geocoding_provider: "geocoding_provider" in place ? place.geocoding_provider : "amap",
-    });
-    setLocationPickerOpen(false);
   };
 
   const openComposer = () => {
@@ -2573,25 +2518,7 @@ export default function SquarePage() {
           <input accept="video/*" hidden onChange={(event) => chooseVideo(event.target.files)} ref={videoInputRef} type="file" />
         </div>
       </SideDrawer>
-      <SideDrawer
-        className="square-location-picker-drawer"
-        historyKey="square-location-picker"
-        onClose={() => setLocationPickerOpen(false)}
-        open={locationPickerOpen}
-        title={t("square.locationPickerTitle")}
-      >
-        <div className="square-location-picker">
-          <div className="square-location-search"><span className="material-symbols-outlined">search</span><input autoFocus onChange={(event) => setLocationQuery(event.target.value)} placeholder={t("square.locationSearchPlaceholder")} value={locationQuery} />{locationQuery ? <button aria-label={t("common.clear")} onClick={() => setLocationQuery("")} type="button"><span className="material-symbols-outlined">close</span></button> : null}</div>
-          <div className="square-location-context"><div><span className="material-symbols-outlined">near_me</span><span>{t("square.locationDistanceSort")}</span></div><button disabled={locationLoading} onClick={locateStatement} type="button"><span className={`material-symbols-outlined${locationLoading ? " is-spinning" : ""}`}>my_location</span>{t("square.locationRefresh")}</button></div>
-          <div className="square-location-results">
-            {locationOrigin && !locationQuery ? <button className="square-location-result is-origin" onClick={() => chooseStatementLocation(locationOrigin)} type="button"><span className="square-location-result-mark"><span className="material-symbols-outlined">my_location</span></span><span><strong>{t("square.locationCurrent")}</strong><small>{locationOrigin.address || t("square.locationCurrentHint")}</small></span><i>0 m</i></button> : null}
-            {nearbyPlaces.map((place) => <button className="square-location-result" key={place.id || `${place.longitude},${place.latitude}`} onClick={() => chooseStatementLocation(place)} type="button"><span className="square-location-result-mark"><span className="material-symbols-outlined">location_on</span></span><span><strong>{place.name}</strong><small>{[place.type, place.business_area, place.address].filter(Boolean).join(" · ")}</small></span><i>{place.distance < 1000 ? `${place.distance} m` : `${(place.distance / 1000).toFixed(1)} km`}</i></button>)}
-            {locationLoading && !nearbyPlaces.length ? <div className="square-location-state"><span className="material-symbols-outlined is-spinning">progress_activity</span><strong>{t("square.locationSearching")}</strong><small>{t("square.locationSearchingHint")}</small></div> : null}
-            {!locationLoading && locationSearchError ? <div className="square-location-state is-error"><span className="material-symbols-outlined">location_off</span><strong>{t("square.locationSearchFailed")}</strong><small>{locationSearchError}</small></div> : null}
-            {!locationLoading && !locationSearchError && !nearbyPlaces.length ? <div className="square-location-state"><span className="material-symbols-outlined">search_off</span><strong>{t("square.locationNoResults")}</strong><small>{t("square.locationNoResultsHint")}</small></div> : null}
-          </div>
-        </div>
-      </SideDrawer>
+      <NearbyLocationPicker open={locationPickerOpen} onClose={() => setLocationPickerOpen(false)} onSelect={setStatementLocation} />
       <BottomSheet bodyClassName="square-content-sheet" onClose={() => setContentSheetOpen(false)} open={contentSheetOpen} title={t("square.addToStatement")}>
         <button disabled={publishing || photos.length >= MAX_PHOTOS} onClick={() => { setContentSheetOpen(false); photoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">image</span><span><strong>{t("square.photo")}</strong><small>{t("square.photoMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
         <button disabled={publishing || !canSendVoice} onClick={() => { setContentSheetOpen(false); setVoiceSheetOpen(true); }} type="button"><span className="material-symbols-outlined">mic</span><span><strong>{t("square.voice")}</strong><small>{canSendVoice ? t("square.voiceMediaHint") : t("square.voiceUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>

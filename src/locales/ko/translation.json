@@ -1836,7 +1836,7 @@
   "featureDiscovery.image.description": "도서관에서 하나 또는 여러 이미지를 선택하세요.",
   "featureDiscovery.image.action": "사진 공개",
   "featureDiscovery.location.title": "어디에 있는지 공유하세요",
-  "featureDiscovery.location.description": "정확한 위치 또는 대략적인 위치를 보내서 발자국을 남길 수 있습니다.",
+  "featureDiscovery.location.description": "주변 장소를 검색해 정확한 위치를 보내고 발자국을 남길 수 있습니다.",
   "featureDiscovery.location.action": "위치 테스트",
   "featureDiscovery.video.title": "갤러리는 이제 비디오를 전송합니다",
   "featureDiscovery.video.description": "같은 장소에서 비디오를 선택하고 전송하기 전에 검토하십시오.",

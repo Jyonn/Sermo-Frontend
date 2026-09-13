@@ -1863,7 +1863,7 @@
   "featureDiscovery.image.description": "Choose one or several images from your library.",
   "featureDiscovery.image.action": "Open photos",
   "featureDiscovery.location.title": "Share where you are",
-  "featureDiscovery.location.description": "Send a precise or approximate location and leave a footprint.",
+  "featureDiscovery.location.description": "Search nearby places, send an accurate location, and leave a footprint.",
   "featureDiscovery.location.action": "Try location",
   "featureDiscovery.video.title": "Your gallery now sends video",
   "featureDiscovery.video.description": "Choose a video from the same place and review it before sending.",

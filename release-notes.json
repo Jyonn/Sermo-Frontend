@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.32",
+  "id": "2026.09.13.33",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "附近位置搜索",
+      "title": "聊天位置选择升级",
       "items": [
-        "发表发言时可以搜索附近地点，并按距离选择更准确的位置"
+        "聊天发送位置已改为附近地点搜索与候选选择，不再提供模糊位置"
       ]
     },
     "en": {
-      "title": "Nearby place search",
+      "title": "Chat location picker upgrade",
       "items": [
-        "Search nearby places while composing a statement and choose the most accurate result ordered by distance"
+        "Chat location sharing now uses nearby place search and candidate selection, with approximate locations removed"
       ]
     }
   }

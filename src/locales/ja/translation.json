@@ -1836,7 +1836,7 @@
   "featureDiscovery.image.description": "図書室から一つまたは複数の画像を選択してください.",
   "featureDiscovery.image.action": "写真を開く",
   "featureDiscovery.location.title": "どこにいるか共有する",
-  "featureDiscovery.location.description": "位置を正確に 差して足跡を残す",
+  "featureDiscovery.location.description": "近くの場所を検索して正確な位置を送り、足跡を残せます。",
   "featureDiscovery.location.action": "場所試す",
   "featureDiscovery.video.title": "あなたのギャラリーは今動画を送信します",
   "featureDiscovery.video.description": "同じ場所からビデオを選んで送信する前に見直してください.",

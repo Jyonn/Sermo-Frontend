@@ -1849,7 +1849,7 @@
   "featureDiscovery.image.description": "從相簿選擇圖片，支援一次傳送多張。",
   "featureDiscovery.image.action": "開啟相簿",
   "featureDiscovery.location.title": "分享此刻的位置",
-  "featureDiscovery.location.description": "可以傳送精確或模糊位置，並同步留下足跡。",
+  "featureDiscovery.location.description": "搜尋附近地點並傳送準確位置，同時留下足跡。",
   "featureDiscovery.location.action": "試試位置",
   "featureDiscovery.video.title": "相簿也能傳送影片了",
   "featureDiscovery.video.description": "從同一個入口選擇影片，傳送前可以確認內容。",

@@ -42,6 +42,7 @@ import { ResourceFileRow } from "../components/ResourceFileRow";
 import { SearchAudioTile } from "../components/SearchAudioPlayer";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
+import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -205,15 +206,6 @@ type ClipboardUploadCandidate = {
   files: File[];
   previewUris: Array<string | null>;
   source: "clipboard" | "drop";
-};
-
-type LocationDraft = {
-  phase: "locating" | "ready" | "sending" | "error";
-  latitude?: number;
-  longitude?: number;
-  accuracy?: number;
-  obscure?: boolean;
-  error?: string;
 };
 
 function extractMessageEmojis(text: string) {
@@ -3070,7 +3062,7 @@ function LiveChatsPage({
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [mobileEmojiPanelMounted, setMobileEmojiPanelMounted] = useState(false);
-  const [mobileComposerPanel, setMobileComposerPanel] = useState<"file" | "location" | "footprint" | null>(null);
+  const [mobileComposerPanel, setMobileComposerPanel] = useState<"file" | "footprint" | null>(null);
   const [mobileVoiceReady, setMobileVoiceReady] = useState(false);
   const [mobileMicrophoneSheet, setMobileMicrophoneSheet] = useState<"intro" | "requesting" | "blocked" | null>(null);
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
@@ -3111,7 +3103,8 @@ function LiveChatsPage({
     if (Number.isFinite(userId) && userId > 0) setProfileDrawerUserId(userId);
   }, [location.search]);
   const [stickerDeleteConfirmOpen, setStickerDeleteConfirmOpen] = useState(false);
-  const [locationDraft, setLocationDraft] = useState<LocationDraft | null>(null);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+  const [locationSending, setLocationSending] = useState(false);
   const [locationMessagePreview, setLocationMessagePreview] = useState<{
     location: { latitude: number; longitude: number; address?: string };
     owner: TinyUserDTO;
@@ -3125,7 +3118,7 @@ function LiveChatsPage({
   const [chatTravelMapAccess, setChatTravelMapAccess] = useState<ChatTravelMapAccessDTO | null>(null);
   const [chatTravelMapGrantConfirmOpen, setChatTravelMapGrantConfirmOpen] = useState(false);
   const [chatTravelMapMenuOpen, setChatTravelMapMenuOpen] = useState(false);
-  const [desktopComposerTool, setDesktopComposerTool] = useState<"file" | "location" | "footprint" | "voice" | null>(null);
+  const [desktopComposerTool, setDesktopComposerTool] = useState<"file" | "footprint" | "voice" | null>(null);
   const [clipboardUpload, setClipboardUpload] = useState<ClipboardUploadCandidate | null>(null);
   const [fileDropActive, setFileDropActive] = useState(false);
   const [viewState, setViewState] = useState<AppViewState>("idle");
@@ -3408,7 +3401,7 @@ function LiveChatsPage({
     setDraft(value);
     if (cacheScope && selectedChat) writeChatDraft(cacheScope, selectedChat.id, value);
   };
-  const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationDraft?.phase === "sending";
+  const composerBusy = sendState === "sending" || voiceComposer.phase === "sending" || voiceComposer.phase === "stopping" || locationSending;
   const routeState = location.state as ChatRouteState | null;
   const chatAccessNotice = routeState?.chatAccessError ?? null;
 
@@ -4832,7 +4825,7 @@ function LiveChatsPage({
     return () => document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
   }, [desktopComposerTool, mobileComposerLayout]);
 
-  const toggleDesktopComposerTool = (tool: "file" | "location" | "footprint" | "voice") => {
+  const toggleDesktopComposerTool = (tool: "file" | "footprint" | "voice") => {
     setEmojiPickerOpen(false);
     setComposerMoreOpen(false);
     setDesktopComposerTool((current) => current === tool ? null : tool);
@@ -4843,7 +4836,7 @@ function LiveChatsPage({
     setMentionSearch(null);
   };
 
-  const openMobileComposerPanel = (panel: "file" | "location" | "footprint") => {
+  const openMobileComposerPanel = (panel: "file" | "footprint") => {
     suspendMobileComposerInput();
     setMobileVoiceReady(false);
     setEmojiPickerOpen(false);
@@ -6064,43 +6057,20 @@ function LiveChatsPage({
     galleryInputRef.current?.click();
   };
 
-  const startLocationDraft = (obscure = false, mobileInline = false) => {
-    if (composerBusy) return;
-    if (!requireComposerCapability("chat.message.send.location", 3, t("message.sendLocation"))) return;
+  const openLocationPicker = () => {
+    if (composerBusy || !requireComposerCapability("chat.message.send.location", 3, t("message.sendLocation"))) return;
     setComposerMoreOpen(false);
-    if (mobileInline) setMobileComposerPanel("location");
-    if (!navigator.geolocation) {
-      setLocationDraft({ phase: "error", error: t("location.browserUnsupported") });
-      return;
-    }
-    setLocationDraft({ phase: "locating" });
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationDraft({
-          phase: "ready",
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          obscure,
-        });
-      },
-      (error) => {
-        const message = error.code === error.PERMISSION_DENIED
-          ? t("location.permissionRequired")
-          : t("location.unavailable");
-        setLocationDraft({ phase: "error", error: message });
-      },
-      { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
-    );
+    suspendMobileComposerInput();
+    setMobileComposerPanel(null);
+    setDesktopComposerTool(null);
+    setLocationPickerOpen(true);
   };
 
-  const sendLocationMessage = async (obscureOverride?: boolean) => {
-    if (!selectedChat || locationDraft?.phase !== "ready" || locationDraft.latitude === undefined || locationDraft.longitude === undefined) return;
+  const sendLocationMessage = async (location: SelectedLocation) => {
+    if (!selectedChat) return;
     if (!await moveToLatestMessageWindow()) return;
-    const latitude = locationDraft.latitude;
-    const longitude = locationDraft.longitude;
-    const accuracy = locationDraft.accuracy ?? 100;
-    const obscure = obscureOverride ?? Boolean(locationDraft.obscure);
+    const { latitude, longitude, address, geocoding_provider: geocodingProvider } = location;
+    const accuracy = 100;
     const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -6120,14 +6090,14 @@ function LiveChatsPage({
         kind: "location",
         latitude,
         longitude,
-        obscured: obscure,
-        obscure_radius_km: obscure ? 50 : undefined,
+        address,
+        geocoding_provider: geocodingProvider,
       },
       replyTo: reply,
       status: "pending",
     };
 
-    setLocationDraft((current) => current ? { ...current, phase: "sending" } : current);
+    setLocationSending(true);
     setMessages((current) => ({
       ...current,
       [selectedChat.id]: sortMessages([...(current[selectedChat.id] ?? []), pendingMessage]),
@@ -6143,7 +6113,7 @@ function LiveChatsPage({
       const created = await api.sendMessage(
         selectedChat.id,
         MESSAGE_TYPE_LOCATION,
-        JSON.stringify({ latitude, longitude, obscure }),
+        JSON.stringify({ latitude, longitude, address, geocoding_provider: geocodingProvider }),
         reply?.message_id,
         clientId,
       );
@@ -6156,36 +6126,31 @@ function LiveChatsPage({
       setChats((current) => sortChats(current.map((chat) => (
         chat.id === selectedChat.id ? updateChatSummary(chat, t("message.locationPlaceholder"), deliveredMessage.createdAt) : chat
       ))));
-      setLocationDraft(null);
-      setMobileComposerPanel(null);
-      setDesktopComposerTool(null);
-      if (!obscure) {
-        try {
-          const candidates = await resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale());
-          const candidate = candidates[0];
-          if (candidate) {
-            await api.checkInTravelMap({
-              latitude,
-              longitude,
-              accuracy_meters: accuracy,
-              region_code: candidate.regionCode,
-              region_name: candidate.regionName,
-              country_code: candidate.countryCode,
-              country_name: candidate.countryName,
-            });
-          }
-        } catch (checkInError) {
-          console.warn("[location] automatic footprint check-in failed", checkInError);
+      try {
+        const candidates = await resolveTravelMapCandidates({ latitude, longitude, accuracy }, getActiveLocale());
+        const candidate = candidates[0];
+        if (candidate) {
+          await api.checkInTravelMap({
+            latitude,
+            longitude,
+            accuracy_meters: accuracy,
+            region_code: candidate.regionCode,
+            region_name: candidate.regionName,
+            country_code: candidate.countryCode,
+            country_name: candidate.countryName,
+          });
         }
+      } catch (checkInError) {
+        console.warn("[location] automatic footprint check-in failed", checkInError);
       }
     } catch (error) {
       setMessages((current) => ({
         ...current,
         [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], clientId, "failed"),
       }));
-      setLocationDraft(null);
       setPageError(error instanceof ApiError ? error.message : t("location.sendFailed"));
     } finally {
+      setLocationSending(false);
       finishSendTask(clientId);
     }
   };
@@ -8116,7 +8081,7 @@ function LiveChatsPage({
                       <button aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={toggleMobileEmojiPanel} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setMobileComposerPanel(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
                       <button aria-pressed={mobileComposerPanel === "file"} className={mobileComposerPanel === "file" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
-                      <button aria-pressed={mobileComposerPanel === "location"} className={mobileComposerPanel === "location" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("location")} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
+                      <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
                       <button aria-pressed={mobileComposerPanel === "footprint"} className={mobileComposerPanel === "footprint" ? "is-active" : ""} disabled={composerBusy || travelMapSaving} onClick={() => openMobileComposerPanel("footprint")} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
                     </div>
                   </div>
@@ -8147,17 +8112,7 @@ function LiveChatsPage({
                         </div> : null}
                       </span>
                       {canSendLocation ? <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "location"} className={`desktop-tool-trigger${desktopComposerTool === "location" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { const opening = desktopComposerTool !== "location"; toggleDesktopComposerTool("location"); if (opening && locationDraft?.phase !== "ready" && locationDraft?.phase !== "locating") startLocationDraft(false, false); }} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
-                        {desktopComposerTool === "location" ? <div className="desktop-tool-popover is-location">
-                          {locationDraft ? <div className={`desktop-tool-status is-${locationDraft.phase}`}>
-                            <div className="desktop-location-reading">
-                              <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : "my_location"}</span>
-                              <div><small>{locationDraft.phase === "ready" ? t("location.current") : locationDraft.phase === "locating" ? t("location.locating") : t("location.unavailable")}</small><strong>{locationDraft.phase === "ready" ? <><span>{locationDraft.latitude?.toFixed(5)}</span><span>{locationDraft.longitude?.toFixed(5)}</span></> : locationDraft.error || t("common.pleaseWait")}</strong></div>
-                              {locationDraft.phase === "ready" && locationDraft.accuracy ? <i>±{Math.round(locationDraft.accuracy)}m</i> : null}
-                            </div>
-                            <div className="desktop-tool-status-actions">{locationDraft.phase === "ready" ? <><button onClick={() => void sendLocationMessage(true)} type="button">{t("composer.sendApproximateLocation")}</button><button className="is-primary" onClick={() => void sendLocationMessage(false)} type="button">{t("common.send")}</button></> : locationDraft.phase === "error" ? <button className="is-primary" onClick={() => startLocationDraft(false, false)} type="button">{t("common.retry")}</button> : locationDraft.phase === "sending" ? <span className="desktop-tool-inline-progress"><span className="composer-recording-spinner" />{t("common.sendingPlain")}</span> : null}</div>
-                          </div> : <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("location.locating")}</div>}
-                        </div> : null}
+                        <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
                       </span> : null}
                       {selectedChat ? <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
@@ -8368,36 +8323,6 @@ function LiveChatsPage({
                       <span className="material-symbols-outlined">upload_file</span>
                       <span><strong>{t("cloudResources.chooseLocal")}</strong><small>{t("composer.localFileHint")}</small></span>
                     </button>
-                  </div>
-                    </div>
-                  </div>
-                ) : null}
-                {mobileComposerLayout ? (
-                  <div className={`mobile-composer-reveal${mobileComposerPanel === "location" ? " is-open" : ""}`}>
-                    <div className="mobile-composer-reveal-inner">
-                  <div className="mobile-composer-options is-location" aria-label={t("media.location")}>
-                    {!locationDraft ? (
-                      <>
-                        <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} onClick={() => startLocationDraft(false, true)} type="button">
-                          <span className="material-symbols-outlined">my_location</span>
-                          <span><strong>{t("composer.preciseLocation")}</strong><small>{t("composer.preciseLocationHint")}</small></span>
-                        </button>
-                        <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} onClick={() => startLocationDraft(true, true)} type="button">
-                          <span className="material-symbols-outlined">location_searching</span>
-                          <span><strong>{t("composer.approximateLocation")}</strong><small>{t("composer.approximateLocationHint")}</small></span>
-                        </button>
-                      </>
-                    ) : (
-                      <div className={`mobile-location-status is-${locationDraft.phase}`}>
-                        <span className="material-symbols-outlined">{locationDraft.phase === "error" ? "location_disabled" : locationDraft.obscure ? "location_searching" : "my_location"}</span>
-                        <div>
-                          <strong>{locationDraft.phase === "locating" ? t("location.locating") : locationDraft.phase === "error" ? t("location.unavailable") : locationDraft.obscure ? t("composer.approximateLocation") : t("composer.preciseLocation")}</strong>
-                          <small>{locationDraft.phase === "ready" ? (locationDraft.obscure ? t("location.exactNotStored") : `${locationDraft.latitude?.toFixed(5)}, ${locationDraft.longitude?.toFixed(5)}`) : locationDraft.error || t("common.pleaseWait")}</small>
-                        </div>
-                        {locationDraft.phase !== "locating" ? <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} className="mobile-location-cancel" onClick={() => setLocationDraft(null)} type="button">{t("common.cancel")}</button> : null}
-                        {locationDraft.phase === "ready" ? <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} className="mobile-location-send" onClick={() => void sendLocationMessage()} type="button">{t("common.send")}</button> : locationDraft.phase === "error" ? <button tabIndex={mobileComposerPanel === "location" ? undefined : -1} className="mobile-location-send" onClick={() => startLocationDraft(Boolean(locationDraft.obscure), true)} type="button">{t("common.retry")}</button> : null}
-                      </div>
-                    )}
                   </div>
                     </div>
                   </div>
@@ -9724,6 +9649,7 @@ function LiveChatsPage({
           onIndexChange={() => undefined}
         />
       ) : null}
+      <NearbyLocationPicker open={locationPickerOpen} onClose={() => setLocationPickerOpen(false)} onSelect={(location) => void sendLocationMessage(location)} />
       <TravelMapDrawer
         historyKey="user-travel-map"
         onRouteOpen={() => setTravelMapOpen(true)}

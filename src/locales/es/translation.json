@@ -1836,7 +1836,7 @@
   "featureDiscovery.image.description": "Elija una o varias imágenes de su biblioteca.",
   "featureDiscovery.image.action": "abrir fotos",
   "featureDiscovery.location.title": "Compartir dónde estás",
-  "featureDiscovery.location.description": "Envía una ubicación precisa o aproximada y deja una huella.",
+  "featureDiscovery.location.description": "Busca lugares cercanos, envía una ubicación precisa y deja una huella.",
   "featureDiscovery.location.action": "Prueba ubicación",
   "featureDiscovery.video.title": "su galería ahora envía video",
   "featureDiscovery.video.description": "Elija un video del mismo lugar y revise antes de enviarlo.",

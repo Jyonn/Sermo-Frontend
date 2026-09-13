@@ -1863,7 +1863,7 @@
   "featureDiscovery.image.description": "从相册选择图片，支持一次发送多张。",
   "featureDiscovery.image.action": "打开相册",
   "featureDiscovery.location.title": "分享此刻的位置",
-  "featureDiscovery.location.description": "可以发送精确或模糊位置，并同步留下足迹。",
+  "featureDiscovery.location.description": "搜索附近地点并发送准确位置，同时同步留下足迹。",
   "featureDiscovery.location.action": "试试位置",
   "featureDiscovery.video.title": "相册也能发送视频了",
   "featureDiscovery.video.description": "从同一个入口选择视频，发送前可以确认内容。",
