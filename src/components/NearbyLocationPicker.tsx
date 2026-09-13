@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import type { NearbyPlaceDTO, SquareStatementDTO } from "../types";
@@ -6,10 +6,13 @@ import { SideDrawer } from "./SideDrawer";
 
 export type SelectedLocation = NonNullable<SquareStatementDTO["location"]>;
 
-export function NearbyLocationPicker({ open, onClose, onSelect }: {
+export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "drawer", chatClassName = "", chatStyle }: {
   open: boolean;
   onClose: () => void;
   onSelect: (location: SelectedLocation) => void;
+  presentation?: "drawer" | "chat-panel";
+  chatClassName?: string;
+  chatStyle?: CSSProperties;
 }) {
   const { t } = useI18n();
   const [center, setCenter] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -84,8 +87,7 @@ export function NearbyLocationPicker({ open, onClose, onSelect }: {
   };
 
   const busy = locating || searching;
-  return <SideDrawer className="square-location-picker-drawer" historyKey="nearby-location-picker" onClose={onClose} open={open} title={t("square.locationPickerTitle")}>
-    <div className="square-location-picker">
+  const content = <div className="square-location-picker">
       <div className="square-location-search"><span className="material-symbols-outlined">search</span><input autoFocus onChange={(event) => setQuery(event.target.value)} placeholder={t("square.locationSearchPlaceholder")} value={query} />{query ? <button aria-label={t("common.clear")} onClick={() => setQuery("")} type="button"><span className="material-symbols-outlined">close</span></button> : null}</div>
       <div className="square-location-context"><div><span className="material-symbols-outlined">near_me</span><span>{t("square.locationDistanceSort")}</span></div><button disabled={locating} onClick={locate} type="button"><span className={`material-symbols-outlined${locating ? " is-spinning" : ""}`}>my_location</span>{t("square.locationRefresh")}</button></div>
       <div className="square-location-results">
@@ -95,6 +97,13 @@ export function NearbyLocationPicker({ open, onClose, onSelect }: {
         {!busy && error ? <div className="square-location-state is-error"><span className="material-symbols-outlined">location_off</span><strong>{t("square.locationSearchFailed")}</strong><small>{error}</small></div> : null}
         {!busy && !error && !places.length ? <div className="square-location-state"><span className="material-symbols-outlined">search_off</span><strong>{t("square.locationNoResults")}</strong><small>{t("square.locationNoResultsHint")}</small></div> : null}
       </div>
-    </div>
-  </SideDrawer>;
+    </div>;
+  if (!open) return null;
+  if (presentation === "chat-panel") return <div className="chat-location-picker-layer" onClick={onClose} role="presentation">
+    <section aria-label={t("square.locationPickerTitle")} aria-modal="true" className={`chat-location-picker-panel ${chatClassName}`.trim()} onClick={(event) => event.stopPropagation()} role="dialog" style={chatStyle}>
+      <header><i /><strong>{t("square.locationPickerTitle")}</strong><button aria-label={t("common.close")} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button></header>
+      {content}
+    </section>
+  </div>;
+  return <SideDrawer className="square-location-picker-drawer" historyKey="nearby-location-picker" onClose={onClose} open title={t("square.locationPickerTitle")}>{content}</SideDrawer>;
 }

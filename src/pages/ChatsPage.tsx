@@ -9649,7 +9649,14 @@ function LiveChatsPage({
           onIndexChange={() => undefined}
         />
       ) : null}
-      <NearbyLocationPicker open={locationPickerOpen} onClose={() => setLocationPickerOpen(false)} onSelect={(location) => void sendLocationMessage(location)} />
+      <NearbyLocationPicker
+        chatClassName={`chat-background-${chatBackgroundTheme}${chatWallpaperToneClass}`}
+        chatStyle={chatLayoutStyle}
+        open={locationPickerOpen}
+        onClose={() => setLocationPickerOpen(false)}
+        onSelect={(location) => void sendLocationMessage(location)}
+        presentation="chat-panel"
+      />
       <TravelMapDrawer
         historyKey="user-travel-map"
         onRouteOpen={() => setTravelMapOpen(true)}

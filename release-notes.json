@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.33",
+  "id": "2026.09.13.34",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "聊天位置选择升级",
+      "title": "聊天位置面板优化",
       "items": [
-        "聊天发送位置已改为附近地点搜索与候选选择，不再提供模糊位置"
+        "聊天位置选择改为会话底部展开，保留聊天背景且最多占据半屏"
       ]
     },
     "en": {
-      "title": "Chat location picker upgrade",
+      "title": "Improved chat location panel",
       "items": [
-        "Chat location sharing now uses nearby place search and candidate selection, with approximate locations removed"
+        "Chat location selection now expands from the conversation bottom, preserves its background, and uses at most half the screen"
       ]
     }
   }
