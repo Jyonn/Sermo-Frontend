@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.22",
+  "id": "2026.09.13.23",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序认证入口与确认框优化",
+      "title": "小程序确认框排版优化",
       "items": [
-        "聊天 Tab 的认证邮箱提示现已占满会话列表内容区，确认框按钮也会根据文案自适应宽度"
+        "确认框正文现在保留完整的左右间距，操作按钮按文案自适应并靠右排列"
       ]
     },
     "en": {
-      "title": "Mini Program verification prompt and dialog refinements",
+      "title": "Mini Program dialog layout refinements",
       "items": [
-        "The email verification prompt now fills the Chats list content area, while dialog actions size naturally to their labels"
+        "Dialog copy now keeps balanced horizontal spacing, while naturally sized actions align together on the right"
       ]
     }
   }
