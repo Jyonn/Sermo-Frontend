@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.13.14",
+  "id": "2026.09.13.15",
   "publishedAt": "2026-09-13",
   "locales": {
     "zh-CN": {
-      "title": "小程序相册气泡预览修复",
+      "title": "小程序个性化聊天页 Header 优化",
       "items": [
-        "相册与单图消息现在可在个性化页面稳定加载，并继续沿用统一的双方配色、合并圆角与气泡结构"
+        "重新适配系统胶囊安全区，修复返回、头像标题、预览与保存操作的遮挡和清晰度问题"
       ]
     },
     "en": {
-      "title": "Mini program gallery bubble preview fix",
+      "title": "Mini program chat personalization header polish",
       "items": [
-        "Gallery and single-image messages now load reliably in personalization previews while preserving shared sender colors, grouped corners, and bubble structure"
+        "Updated the header around the system capsule to keep navigation, profile, preview, and save controls clear and unobstructed"
       ]
     }
   }
