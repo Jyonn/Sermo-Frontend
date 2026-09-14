@@ -3330,7 +3330,7 @@ function LiveChatsPage({
   const mobileVoiceSlideStartedRef = useRef(false);
   const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [visualViewportHeight, setVisualViewportHeight] = useState(0);
   const currentUserId = session?.user.user_id ?? 0;
   const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
   const frequentEmojis = emojiUsage.slice(0, 8).map((item) => item.emoji);
@@ -5199,7 +5199,7 @@ function LiveChatsPage({
     if (revealAnimatingRef.current) return;
 
     scrollThreadToBottom(messageScrollRef.current);
-  }, [composerHeight, keyboardOffset, selectedChat]);
+  }, [composerHeight, visualViewportHeight, selectedChat]);
 
   useEffect(() => {
     if (!selectedChat || !selectedMessages.length) return;
@@ -5626,25 +5626,30 @@ function LiveChatsPage({
   }, [selectedChat]);
 
   useEffect(() => {
-    if (!selectedChat || typeof window === "undefined" || !window.visualViewport) {
-      setKeyboardOffset(0);
+    if (!selectedChat || typeof window === "undefined") {
+      setVisualViewportHeight(0);
       return;
     }
 
     const viewport = window.visualViewport;
+    const root = document.documentElement;
 
     const updateViewport = () => {
-      const nextOffset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
-      setKeyboardOffset(nextOffset);
+      const nextHeight = Math.round(viewport?.height ?? window.innerHeight);
+      root.style.setProperty("--app-visual-viewport-height", `${nextHeight}px`);
+      setVisualViewportHeight(nextHeight);
     };
 
     updateViewport();
-    viewport.addEventListener("resize", updateViewport);
-    viewport.addEventListener("scroll", updateViewport);
+    viewport?.addEventListener("resize", updateViewport);
+    viewport?.addEventListener("scroll", updateViewport);
+    window.addEventListener("resize", updateViewport);
 
     return () => {
-      viewport.removeEventListener("resize", updateViewport);
-      viewport.removeEventListener("scroll", updateViewport);
+      viewport?.removeEventListener("resize", updateViewport);
+      viewport?.removeEventListener("scroll", updateViewport);
+      window.removeEventListener("resize", updateViewport);
+      root.style.removeProperty("--app-visual-viewport-height");
     };
   }, [selectedChat]);
 
@@ -7627,7 +7632,6 @@ function LiveChatsPage({
   const usesPersonalCustomBackground = chatBackgroundTheme === "custom";
   const chatLayoutStyle = selectedChat
     ? ({
-        "--chat-keyboard-offset": `${keyboardOffset}px`,
         "--chat-composer-height": `${composerHeight}px`,
         "--chat-background-image": usesPersonalCustomBackground && paintedChatBackgroundUri
           ? `url("${paintedChatBackgroundUri.replace(/"/g, "%22")}")`

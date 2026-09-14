@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.6",
+  "id": "2026.09.14.7",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "移动端全屏布局修复",
+      "title": "iPhone 键盘贴合修复",
       "items": [
-        "修复超高屏 iPhone 展开表情面板后聊天内容高度塌缩的问题",
-        "统一聊天、全屏抽屉与会话编辑页的视口和安全区布局"
+        "修复聊天输入框与 iPhone 输入法之间出现额外空档的问题",
+        "改用真实可视区域适配键盘，并避免输入聚焦时页面意外缩放"
       ]
     },
     "en": {
-      "title": "Mobile full-screen layout fixes",
+      "title": "Improved iPhone keyboard fit",
       "items": [
-        "Fixed collapsed chat content after opening the emoji panel on tall iPhones",
-        "Unified viewport and safe-area behavior across chats, full-screen drawers, and conversation editors"
+        "Removed the extra gap between the chat composer and the iPhone keyboard",
+        "Chat now follows the visible viewport without unexpected focus zoom"
       ]
     }
   }
