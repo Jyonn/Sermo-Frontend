@@ -8127,13 +8127,13 @@ function LiveChatsPage({
                         </div>
                       )}
                     </div>
-                    <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")}>
+                    <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")} style={{ "--mobile-composer-tool-columns": submissionMode ? 5 : 6 } as CSSProperties}>
                       <button aria-pressed={mobileVoiceReady} className={mobileVoiceReady ? "is-active" : ""} disabled={composerBusy || mobileMicrophoneBusy} onClick={() => void prepareMobileVoice()} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
                       <button aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={toggleMobileEmojiPanel} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setMobileComposerPanel(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
                       <button aria-pressed={mobileComposerPanel === "file"} className={mobileComposerPanel === "file" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
                       <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
-                      <button aria-pressed={mobileComposerPanel === "footprint"} className={mobileComposerPanel === "footprint" ? "is-active" : ""} disabled={composerBusy || travelMapSaving} onClick={() => openMobileComposerPanel("footprint")} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
+                      {!submissionMode ? <button aria-pressed={mobileComposerPanel === "footprint"} className={mobileComposerPanel === "footprint" ? "is-active" : ""} disabled={composerBusy || travelMapSaving} onClick={() => openMobileComposerPanel("footprint")} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button> : null}
                     </div>
                   </div>
                 ) : (
@@ -8165,7 +8165,7 @@ function LiveChatsPage({
                       {canSendLocation ? <span className="desktop-tool-anchor">
                         <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
                       </span> : null}
-                      {selectedChat ? <span className="desktop-tool-anchor">
+                      {selectedChat && !submissionMode ? <span className="desktop-tool-anchor">
                         <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
                         {desktopComposerTool === "footprint" ? <div className="desktop-tool-popover is-footprint">
                           <header><strong>{t("travelMap.sharedFootprints")}</strong></header>
@@ -8378,7 +8378,7 @@ function LiveChatsPage({
                     </div>
                   </div>
                 ) : null}
-                {mobileComposerLayout ? (
+                {mobileComposerLayout && !submissionMode ? (
                   <div className={`mobile-composer-reveal${mobileComposerPanel === "footprint" ? " is-open" : ""}`}>
                     <div className="mobile-composer-reveal-inner">
                   <div className="mobile-composer-options" aria-label={t("travelMap.actionShort")}>

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.15",
+  "id": "2026.09.14.16",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿详情操作栏优化",
+      "title": "投稿工具栏优化",
       "items": [
-        "投稿详情标题栏分为身份信息与流程操作两层，信息结构更加清晰",
-        "审批、提交和撤回操作保留独立说明栏，桌面端与手机端体验一致"
+        "投稿会话不再提供足迹共享操作，避免与投稿流程混淆",
+        "手机端投稿工具栏的五个操作现在等距排列"
       ]
     },
     "en": {
-      "title": "Refined submission detail actions",
+      "title": "Refined submission tools",
       "items": [
-        "Split submission detail headers into clear identity and workflow sections",
-        "Kept review, submit, and withdraw actions in a dedicated guidance row on both desktop and mobile"
+        "Removed footprint sharing from submission conversations to keep the workflow focused",
+        "Evenly spaced the five remaining submission tools on mobile"
       ]
     }
   }
