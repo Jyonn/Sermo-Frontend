@@ -3183,6 +3183,8 @@ function LiveChatsPage({
   }, [location.search, messages]);
   const [clearHistoryConfirmOpen, setClearHistoryConfirmOpen] = useState(false);
   const [clearHistorySaving, setClearHistorySaving] = useState(false);
+  const [deleteSubmissionConfirmOpen, setDeleteSubmissionConfirmOpen] = useState(false);
+  const [deleteSubmissionSaving, setDeleteSubmissionSaving] = useState(false);
   const [restoreHistoryConfirmOpen, setRestoreHistoryConfirmOpen] = useState(false);
   const [restoreHistorySaving, setRestoreHistorySaving] = useState(false);
   const [restoreHistoryPassword, setRestoreHistoryPassword] = useState("");
@@ -3669,6 +3671,7 @@ function LiveChatsPage({
   };
 
   const startMessageSelection = (message: ChatMessage) => {
+    if (selectedChat?.purpose === "submission") return;
     if (["system", "official_notice", "submission_invite"].includes(message.kind)) return;
     const fromPinnedDrawer = messageMenu?.origin === "pinned";
     setMessageMenu(null);
@@ -3847,7 +3850,9 @@ function LiveChatsPage({
       && isSubmissionOriginator
       && selectedChat.id > 0,
   );
-  const canInviteSubmissionReviewers = false;
+  const canInviteSubmissionReviewers = Boolean(
+    selectedChat?.purpose === "submission" && submissionRole === "reviewer" && selectedChat.id > 0,
+  );
   const canManageSubmissionMembers = canInviteSubmissionAuthors || canInviteSubmissionReviewers;
   const selectedChatIdRef = useRef<number | null>(selectedChatId);
   selectedChatIdRef.current = selectedChatId;
@@ -7180,7 +7185,7 @@ function LiveChatsPage({
   };
 
   const clearChatHistory = async () => {
-    if (!selectedChat || clearHistorySaving) return;
+    if (!selectedChat || selectedChat.purpose === "submission" || clearHistorySaving) return;
     const chatId = selectedChat.id;
     const clearingMessages = selectedMessages;
     try {
@@ -7206,6 +7211,30 @@ function LiveChatsPage({
       showToast(error instanceof ApiError ? error.message : t("chat.clearHistoryFailed"), "error");
     } finally {
       setClearHistorySaving(false);
+    }
+  };
+
+  const deleteCurrentSubmission = async () => {
+    if (!selectedChat || !isSubmissionOriginator || deleteSubmissionSaving) return;
+    const chatId = selectedChat.id;
+    try {
+      setDeleteSubmissionSaving(true);
+      await api.deleteSubmission(chatId);
+      setChats((current) => current.filter((chat) => chat.id !== chatId));
+      setMessages((current) => {
+        const next = { ...current };
+        delete next[chatId];
+        return next;
+      });
+      if (cacheScope) await chatCache.clearThread(cacheScope, chatId);
+      setDeleteSubmissionConfirmOpen(false);
+      setDetailsSheetOpen(false);
+      navigate(squareIntegrated ? `/app/square?workspace=submissions&view=${submissionView}` : `/app/submissions?view=${submissionView}`, { replace: true });
+      showToast(t("submission.deleteDone"), "success");
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : t("submission.deleteFailed"), "error");
+    } finally {
+      setDeleteSubmissionSaving(false);
     }
   };
 
@@ -9084,7 +9113,7 @@ function LiveChatsPage({
                     </div>
                   </button>
                 ) : null}
-                <button
+                {selectedChat.purpose !== "submission" ? <button
                   className="chat-detail-setting-row danger-row"
                   onClick={() => setClearHistoryConfirmOpen(true)}
                   type="button"
@@ -9093,7 +9122,11 @@ function LiveChatsPage({
                     <strong>{t("chat.clearHistory")}</strong>
                   </div>
                   <span className="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
-                </button>
+                </button> : null}
+                {isSubmissionOriginator ? <button className="chat-detail-setting-row danger-row" onClick={() => setDeleteSubmissionConfirmOpen(true)} type="button">
+                  <div className="row-main"><strong>{t("submission.delete")}</strong></div>
+                  <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+                </button> : null}
                 {selectedChat.purpose !== "submission" ? <button
                   className="chat-detail-setting-row danger-row"
                   onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : setFriendDangerConfirmOpen(true))}
@@ -9437,6 +9470,18 @@ function LiveChatsPage({
           if (!clearHistorySaving) setClearHistoryConfirmOpen(false);
         }}
         onConfirm={() => void clearChatHistory()}
+      />
+      <ConfirmDialog
+        open={deleteSubmissionConfirmOpen}
+        title={t("submission.deleteConfirmTitle")}
+        description={t("submission.deleteConfirmHint")}
+        confirmLabel={t("submission.delete")}
+        busy={deleteSubmissionSaving}
+        danger
+        onClose={() => {
+          if (!deleteSubmissionSaving) setDeleteSubmissionConfirmOpen(false);
+        }}
+        onConfirm={() => void deleteCurrentSubmission()}
       />
       <ConfirmDialog
         open={groupDangerConfirmOpen}
@@ -9893,7 +9938,7 @@ function LiveChatsPage({
                   </button>
                 );
               }
-              secondaryActions.push(
+              if (selectedChat?.purpose !== "submission") secondaryActions.push(
                 <button key="multi-select" className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
                   <span className="material-symbols-outlined" aria-hidden="true">checklist</span>
                   {t("message.multiSelect")}

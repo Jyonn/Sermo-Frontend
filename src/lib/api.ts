@@ -667,6 +667,10 @@ export const api = {
     return request<ChatDTO>("/chats/submissions/withdraw", { method: "POST", auth: true, query: { chat_id } });
   },
 
+  deleteSubmission(chat_id: number) {
+    return request<void>("/chats/submissions/delete", { method: "DELETE", auth: true, query: { chat_id } });
+  },
+
   getSubmissionInvites(chat_id: number, signal?: AbortSignal) {
     return request<import("../types").SubmissionInviteDTO[]>("/chats/submissions/invites", { auth: true, query: { chat_id }, signal });
   },

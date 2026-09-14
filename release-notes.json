@@ -1,19 +1,21 @@
 {
-  "id": "2026.09.14.16",
+  "id": "2026.09.14.17",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿工具栏优化",
+      "title": "投稿协作与管理优化",
       "items": [
-        "投稿会话不再提供足迹共享操作，避免与投稿流程混淆",
-        "手机端投稿工具栏的五个操作现在等距排列"
+        "审批者现在可以邀请其他审批者共同处理投稿",
+        "投稿详情移除了清除记录；首位投稿者可以永久删除投稿",
+        "投稿消息的长按菜单不再提供多选操作"
       ]
     },
     "en": {
-      "title": "Refined submission tools",
+      "title": "Improved submission collaboration",
       "items": [
-        "Removed footprint sharing from submission conversations to keep the workflow focused",
-        "Evenly spaced the five remaining submission tools on mobile"
+        "Reviewers can now invite additional reviewers to collaborate",
+        "Removed history clearing; original authors can permanently delete submissions",
+        "Removed multi-select from submission message menus"
       ]
     }
   }
