@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.18",
+  "id": "2026.09.14.19",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "消息操作定位优化",
+      "title": "投稿列表视觉优化",
       "items": [
-        "修复桌面端投稿消息长按菜单偏离消息和鼠标的问题",
-        "消息操作菜单现在能在不同页面布局中准确定位"
+        "多人投稿和审批会话最多展示两个头像，其余人数以徽标呈现",
+        "统一头像边框与内容比例，并弱化共同投稿和审批人数标签"
       ]
     },
     "en": {
-      "title": "Improved message action positioning",
+      "title": "Refined submission list visuals",
       "items": [
-        "Fixed message action menus appearing away from the message and pointer in desktop submissions",
-        "Message action menus now stay accurately positioned across page layouts"
+        "Submission and review conversations now show up to two avatars with a remaining-count badge",
+        "Balanced avatar framing and softened collaboration count labels"
       ]
     }
   }

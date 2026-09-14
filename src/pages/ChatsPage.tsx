@@ -7569,7 +7569,7 @@ function LiveChatsPage({
     const submissionAuthors = chat.submission?.authors?.length ? chat.submission.authors : chat.submission ? [chat.submission.author] : [];
     const submissionReviewers = chat.submission?.reviewers?.length ? chat.submission.reviewers : chat.submission ? [chat.submission.recipient] : [];
     const counterparts = Array.from(new Map((chat.submissionCounterparts ?? []).map((member) => [member.user_id, member])).values());
-    const visibleCounterparts = counterparts.slice(0, 3);
+    const visibleCounterparts = counterparts.slice(0, 2);
     const collaborators = chat.submissionRole === "reviewer" ? submissionReviewers : submissionAuthors;
     const counterpartNames = visibleCounterparts.map((member) => member.name).join(t("common.nameSeparator"));
     const counterpartOverflow = Math.max(0, counterparts.length - visibleCounterparts.length);
