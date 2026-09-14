@@ -399,34 +399,42 @@
   .square-desktop-workspace.is-submission.has-selection > .square-feed-screen > .tab-sticky-header {
     display: none;
   }
-  .desktop-conversation-header.is-integrated-submission {
+  .desktop-conversation-header.is-embedded-submission {
     display: flex;
     height: 72px;
     min-height: 72px;
+    padding: 0;
+  }
+  .desktop-conversation-header.is-embedded-submission.has-submission-workflow {
+    height: 130px;
+    min-height: 130px;
+  }
+  .desktop-conversation-header.is-embedded-submission .conversation-header-primary {
+    flex-basis: 72px;
     padding: 8px max(12px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left));
   }
-  .desktop-conversation-header.is-integrated-submission .desktop-chat-conversation-topbar {
+  .desktop-conversation-header.is-embedded-submission .desktop-chat-conversation-topbar {
     display: flex;
     min-width: 0;
     align-items: center;
     gap: 8px;
   }
-  .desktop-conversation-header.is-integrated-submission .integrated-submission-back {
+  .desktop-conversation-header.is-embedded-submission .integrated-submission-back {
     display: grid;
     flex: 0 0 40px;
     place-items: center;
   }
-  .desktop-conversation-header.is-integrated-submission .integrated-submission-avatar {
+  .desktop-conversation-header.is-embedded-submission .integrated-submission-avatar {
     display: block;
     width: 40px;
     height: 40px;
     flex: 0 0 40px;
     border-radius: 12px;
   }
-  .desktop-conversation-header.is-integrated-submission .conversation-header-actions {
+  .desktop-conversation-header.is-embedded-submission .conversation-header-actions {
     gap: 5px;
   }
-  .desktop-conversation-header.is-integrated-submission .submission-header-actions > button {
+  .desktop-conversation-header.is-embedded-submission .submission-header-actions > button {
     max-width: 86px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -983,6 +991,39 @@ html[data-theme="dark"] .chat-item.is-submission-item {
   align-items: center;
   gap: 8px;
 }
+.conversation-header-primary {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+}
+.desktop-conversation-header.has-submission-workflow {
+  height: 110px;
+  min-height: 110px;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+}
+.has-submission-workflow > .conversation-header-primary {
+  min-height: 0;
+  flex: 0 0 58px;
+  padding: 0 20px 0 24px;
+}
+.submission-header-workflow {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 6px 24px;
+  border-top: 1px solid color-mix(in srgb, var(--brand-primary) 16%, var(--line-soft));
+  background: color-mix(in srgb, var(--bg-elevated) 92%, var(--brand-primary) 8%);
+}
+.submission-header-workflow-copy { display: grid; min-width: 0; flex: 1; gap: 1px; }
+.submission-header-workflow-copy strong { overflow: hidden; color: var(--text-primary); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.submission-header-workflow-copy small { overflow: hidden; color: var(--text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .submission-header-actions > button {
   display: inline-flex;
   height: 38px;

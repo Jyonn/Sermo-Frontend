@@ -7706,6 +7706,21 @@ function LiveChatsPage({
             : null}
     </div>
   ) : null;
+  const submissionWorkflowCopy = !messageSelectionMode && displayedChat?.purpose === "submission" && submissionHeaderActions
+    ? displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "review"
+      ? { title: t("submission.reviewerActionTitle"), hint: t("submission.reviewerActionHint") }
+      : displayedChat.submissionRole === "reviewer" && displayedChat.submission?.status === "ready"
+        ? { title: t("submission.publishActionTitle"), hint: t("submission.publishActionHint") }
+        : displayedChat.submissionRole === "author" && ["review", "ready"].includes(displayedChat.submission?.status ?? "")
+          ? { title: t("submission.withdrawAvailableTitle"), hint: t("submission.withdrawAvailableHint") }
+          : { title: t("submission.authorActionTitle"), hint: t("submission.authorActionHint") }
+    : null;
+  const submissionWorkflowBar = submissionWorkflowCopy ? (
+    <div className="submission-header-workflow">
+      <div className="submission-header-workflow-copy"><strong>{submissionWorkflowCopy.title}</strong><small>{submissionWorkflowCopy.hint}</small></div>
+      {submissionHeaderActions}
+    </div>
+  ) : null;
 
   return (
     <AppChrome
@@ -7792,7 +7807,8 @@ function LiveChatsPage({
         >
           {displayedChat ? (
             <>
-              <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}${squareIntegrated && submissionMode ? " is-integrated-submission" : ""}`}>
+              <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}${squareIntegrated && submissionMode ? " is-integrated-submission" : ""}${embeddedListOnly && squareIntegrated && submissionMode ? " is-embedded-submission" : ""}${submissionWorkflowBar ? " has-submission-workflow" : ""}`}>
+                <div className="conversation-header-primary">
                 {messageSelectionMode ? (
                   <div className="message-selection-topbar">
                     <button aria-label={t("common.cancel")} className="chat-back-button" onClick={cancelMessageSelection} type="button">
@@ -7801,8 +7817,8 @@ function LiveChatsPage({
                     <strong>{t("message.selectedCount", { count: selectedMessageClientIds.length })}</strong>
                   </div>
                 ) : <div className="chat-conversation-topbar desktop-chat-conversation-topbar">
-                  {squareIntegrated && submissionMode ? <button aria-label={t("common.back")} className="chat-back-button integrated-submission-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button> : null}
-                  {squareIntegrated && submissionMode ? <UserAvatar className="avatar integrated-submission-avatar" frame={displayedChat.avatarFrameStyle} name={displayedChat.title} uri={displayedChat.avatarUri} /> : null}
+                  {embeddedListOnly && squareIntegrated && submissionMode ? <button aria-label={t("common.back")} className="chat-back-button integrated-submission-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button> : null}
+                  {embeddedListOnly && squareIntegrated && submissionMode ? <UserAvatar className="avatar integrated-submission-avatar" frame={displayedChat.avatarFrameStyle} name={displayedChat.title} uri={displayedChat.avatarUri} /> : null}
                   <div className="chat-topbar-meta">
                     <strong className="chat-topbar-name">
                       <span className="chat-topbar-title-text">{displayedChat.title}</span>
@@ -7812,7 +7828,9 @@ function LiveChatsPage({
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <div className="conversation-header-actions">{submissionHeaderActions}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /></div> : null}
+                  : !messageSelectionMode ? <div className="conversation-header-actions"><ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /></div> : null}
+                </div>
+                {submissionWorkflowBar}
                 {sendProgress !== null ? (
                   <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.14",
+  "id": "2026.09.14.15",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿工作台深度优化",
+      "title": "投稿详情操作栏优化",
       "items": [
-        "桌面端切换投稿时不再刷新整个工作台，列表、筛选与详情保持连续",
-        "手机端投稿详情采用独立会话标题栏，审批与投稿操作已合并到标题栏中"
+        "投稿详情标题栏分为身份信息与流程操作两层，信息结构更加清晰",
+        "审批、提交和撤回操作保留独立说明栏，桌面端与手机端体验一致"
       ]
     },
     "en": {
-      "title": "A smoother submission workspace",
+      "title": "Refined submission detail actions",
       "items": [
-        "Switching submissions on desktop now keeps the workspace, list, filters, and detail view in place",
-        "Submission details on mobile now use a dedicated conversation header with workflow actions built in"
+        "Split submission detail headers into clear identity and workflow sections",
+        "Kept review, submit, and withdraw actions in a dedicated guidance row on both desktop and mobile"
       ]
     }
   }
