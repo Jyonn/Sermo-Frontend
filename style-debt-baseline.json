@@ -1,12 +1,12 @@
 {
   "totals": {
-    "rules": 7929,
+    "rules": 7876,
     "important": 169,
     "duplicateDeclarations": 0,
-    "duplicateRuleBlocks": 281,
+    "duplicateRuleBlocks": 238,
     "crossFileDuplicateSelectors": 72,
     "complexSelectors": 57,
-    "longLines": 101,
+    "longLines": 96,
     "compatibilityRules": 0
   },
   "perFile": {
@@ -50,7 +50,7 @@
       "important": 31,
       "duplicateDeclarations": 0,
       "complexSelectors": 1,
-      "longLines": 39
+      "longLines": 34
     },
     "50-chat-settings.css": {
       "important": 0,
