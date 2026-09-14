@@ -2234,7 +2234,7 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome title={t("square.title")} hideMobileNav={submissionDetailActive} hideTopbar shellClassName={`desktop-tab-shell square-community-shell${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
+    <AppChrome title={t("square.title")} hideMobileNav={squareWorkspace === "submission"} hideTopbar shellClassName={`desktop-tab-shell square-community-shell${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
       <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive || submissionDetailActive ? " has-selection" : ""}${submissionDetailActive ? " is-mobile-submission-detail" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
       <main
         className={`list-screen square-feed-screen is-${squareWorkspace}-workspace${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}
