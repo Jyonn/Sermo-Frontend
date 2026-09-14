@@ -1,9 +1,9 @@
 {
   "totals": {
-    "rules": 7849,
+    "rules": 7818,
     "important": 169,
     "duplicateDeclarations": 0,
-    "duplicateRuleBlocks": 212,
+    "duplicateRuleBlocks": 182,
     "crossFileDuplicateSelectors": 72,
     "complexSelectors": 57,
     "longLines": 96,
