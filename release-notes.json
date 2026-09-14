@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.13.39",
-  "publishedAt": "2026-09-13",
+  "id": "2026.09.14.1",
+  "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "登录页细节优化",
+      "title": "微信首次登录页焕新",
       "items": [
-        "修正小程序空间输入按钮中箭头的垂直对齐"
+        "精简首次进入空间的身份选择，并突出新用户入口",
+        "修正小程序空间头像展示和顶部返回操作对齐"
       ]
     },
     "en": {
-      "title": "Improved sign-in details",
+      "title": "Refined first-time WeChat sign-in",
       "items": [
-        "Fixed the vertical alignment of the arrow in the Mini Program space entry button"
+        "Simplified the first-time account choice and made the new-user path clearer",
+        "Fixed space avatar rendering and top navigation alignment in the Mini Program"
       ]
     }
   }
