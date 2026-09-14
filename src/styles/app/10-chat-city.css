@@ -5167,39 +5167,15 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     max-width: none;
   }
 
-  .chat-mobile-layout {
-    grid-template-columns: clamp(220px, 26vw, 350px) minmax(0, 1fr);
-    gap: 14px;
-    min-width: 0;
-    height: 100%;
-    min-height: 0;
-  }
-
   .shell:has(.chat-mobile-layout) {
     height: 100dvh;
     padding-block: 18px;
     overflow: hidden;
   }
 
-  .mobile-chat-list-screen {
-    display: grid;
-    height: 100%;
-    min-height: 0;
-    padding: 18px;
-    overflow: hidden;
-    border: 1px solid rgba(215, 220, 231, 0.72);
-    border-radius: 20px;
-    background: rgba(255, 253, 248, 0.74);
-  }
-
   .mobile-chat-list-screen.is-background {
     pointer-events: auto;
     opacity: 1;
-  }
-
-  .mobile-chat-list-screen .chat-list-screen-body {
-    min-height: 0;
-    overflow-y: auto;
   }
 
   .mobile-chat-list-screen .chat-item.active {
@@ -5430,12 +5406,6 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     display: none;
   }
 
-  .shell {
-    width: calc(100vw - 24px);
-    padding-top: 16px;
-    padding-bottom: calc(92px + env(safe-area-inset-bottom));
-  }
-
   .app-layout {
     grid-template-columns: 1fr;
   }
@@ -5451,12 +5421,6 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   .brand-copy p,
   .page-head {
     display: none;
-  }
-
-  .topbar {
-    width: calc(100vw - 24px);
-    padding: 14px 16px;
-    align-items: center;
   }
 
   .topbar-actions {
@@ -5518,19 +5482,9 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     overflow: visible;
   }
 
-  .chat-detail-active {
-    height: calc(100dvh - 120px);
-  }
-
   .chat-main-pane {
     min-height: 100%;
     height: 100%;
-  }
-
-  .chat-detail-active .chat-main-pane {
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
   }
 
   .chat-main-pane .message-scroll {
@@ -5569,10 +5523,6 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   .mode-pill {
     flex: 1 1 calc(50% - 8px);
     justify-content: center;
-  }
-
-  .message-scroll {
-    padding: 18px 16px 10px;
   }
 
   .composer {
@@ -5618,12 +5568,6 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   }
 }
 
-.topbar {
-  gap: 12px;
-  padding: 12px 18px;
-  background: rgba(245, 244, 239, 0.92);
-}
-
 .topbar.conversation-topbar {
   background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.52));
   border-bottom-color: var(--chat-chrome-border, rgba(232, 235, 242, 0.66));
@@ -5638,18 +5582,6 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
 .page-head-collapsed {
   flex: 0 0 0;
   min-width: 0;
-}
-
-.brand-copy h1 {
-  font-size: 1.08rem;
-}
-
-.topbar-title {
-  font-size: 1.02rem;
-}
-
-.shell {
-  padding-top: 18px;
 }
 
 .shell-no-mobile-nav {

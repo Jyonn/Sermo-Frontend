@@ -418,35 +418,41 @@ html:not([data-theme="dark"]) :is(.user-profile-create-group-icon, .user-profile
 
 /* Social profile v2: a single, full-bleed identity card in both themes. */
 .shell-friend-profile {
+  position: relative;
   width: min(780px, calc(100vw - 24px));
+  max-width: none;
   margin: 14px auto;
   padding: 0;
   overflow: visible;
 }
 
 .friend-profile-header {
-  top: 0;
+  position: absolute !important;
+  top: calc(12px + env(safe-area-inset-top)) !important;
+  left: 14px;
   z-index: 12;
   display: flex;
   align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid rgba(232, 235, 242, 0.92);
-  backdrop-filter: blur(18px);
-  position: relative;
   justify-content: center;
-  color: var(--text-primary);
-  border-color: var(--line-soft);
+  gap: 12px;
   width: 100%;
   min-height: 86px;
   padding: calc(12px + env(safe-area-inset-top)) 30px 12px;
   border: 1px solid var(--profile-line, var(--line-soft));
   border-bottom-color: var(--line-soft);
   border-radius: 34px 34px 0 0;
+  color: var(--text-primary);
   background: color-mix(in srgb, var(--bg-page) 92%, transparent);
+  box-shadow: 0 8px 22px rgba(12, 29, 23, 0.18);
+  backdrop-filter: blur(18px);
 }
 
-.friend-profile-header .chat-back-button { position: absolute;
+.friend-profile-header .chat-back-button {
+  position: absolute;
   left: 22px;
+  width: 100%;
+  height: 100%;
+  color: #183b31;
 }
 
 .friend-profile-page {
@@ -1163,6 +1169,7 @@ html[data-theme="dark"] .user-profile-panel {
 }
 
 .mobile-chat-list-screen {
+  display: none;
   grid-template-rows: auto minmax(0, 1fr);
   height: calc(100vh - 150px);
   min-height: calc(100vh - 150px);
@@ -1185,6 +1192,9 @@ html[data-theme="dark"] .user-profile-panel {
 }
 
 .chat-item {
+  grid-template-columns: 48px 1fr auto;
+  width: 100%;
+  min-width: 0;
   padding: 14px 4px;
   border: 0;
   border-radius: 0;
@@ -1211,6 +1221,18 @@ html[data-theme="dark"] .user-profile-panel {
 }
 
 .message-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overflow-anchor: none;
+  padding: 24px 24px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: transparent;
   border-radius: 24px;
   border: 1px solid rgba(232, 235, 242, 0.9);
 }
@@ -1223,6 +1245,14 @@ html[data-theme="dark"] .user-profile-panel {
 }
 
 .composer {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  margin: 14px 18px 18px;
+  padding: 12px;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(250, 252, 255, 0.88));
+  box-shadow: 0 12px 34px rgba(17, 19, 24, 0.08);
   border-radius: 24px;
 }
 
@@ -4216,6 +4246,9 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   .side-drawer {
     --drawer-width: 100vw;
     width: var(--drawer-width);
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
     border-left: 0;
   }
 }
@@ -4225,6 +4258,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     padding: 10px 16px;
     position: sticky;
     top: 0;
+    align-items: center;
     width: 100%;
     margin: 0;
     border-bottom: 1px solid rgba(232, 235, 242, 0.92);
@@ -4354,6 +4388,9 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     min-height: 0;
     height: 100%;
     position: relative;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
   }
 
   .message-pane.chat-main-pane {
@@ -4740,9 +4777,23 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 
   .chat-mobile-layout {
+    grid-template-columns: clamp(220px, 26vw, 350px) minmax(0, 1fr);
+    gap: 14px;
+    min-width: 0;
     height: calc(100dvh - 32px);
     min-height: 0;
     max-height: none;
+  }
+
+  .mobile-chat-list-screen {
+    display: grid;
+    height: 100%;
+    min-height: 0;
+    padding: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(215, 220, 231, 0.72);
+    border-radius: 20px;
+    background: rgba(255, 253, 248, 0.74);
   }
 
   .chat-mobile-layout > .mobile-chat-list-screen {

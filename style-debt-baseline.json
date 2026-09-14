@@ -1,17 +1,17 @@
 {
   "totals": {
-    "rules": 7647,
+    "rules": 7627,
     "important": 169,
     "duplicateDeclarations": 0,
-    "duplicateRuleBlocks": 20,
-    "crossFileDuplicateSelectors": 20,
+    "duplicateRuleBlocks": 0,
+    "crossFileDuplicateSelectors": 0,
     "complexSelectors": 57,
     "longLines": 96,
     "compatibilityRules": 0
   },
   "perFile": {
     "00-foundation.css": {
-      "important": 5,
+      "important": 3,
       "duplicateDeclarations": 0,
       "complexSelectors": 8,
       "longLines": 28
@@ -23,7 +23,7 @@
       "longLines": 10
     },
     "20-profile-settings.css": {
-      "important": 4,
+      "important": 6,
       "duplicateDeclarations": 0,
       "complexSelectors": 3,
       "longLines": 0

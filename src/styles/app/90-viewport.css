@@ -105,12 +105,6 @@
     min-height: 0;
   }
 
-  .side-drawer {
-    height: 100dvh;
-    max-height: 100dvh;
-    overflow: hidden;
-  }
-
   .side-drawer > .drawer-body {
     flex: 1 1 0;
     overflow-y: auto;

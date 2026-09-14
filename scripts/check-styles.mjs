@@ -22,6 +22,13 @@ const expectedFiles = [
   "90-viewport.css",
 ];
 
+const zeroToleranceMetrics = [
+  "duplicateDeclarations",
+  "duplicateRuleBlocks",
+  "crossFileDuplicateSelectors",
+  "compatibilityRules",
+];
+
 const normalizeSelector = (selector) => selector.replace(/\s+/g, " ").trim();
 
 function isInsideKeyframes(rule) {
@@ -174,6 +181,9 @@ const baseline = JSON.parse(await readFile(baselinePath, "utf8"));
 const errors = [
   ...metrics.missingFiles.map((file) => `Missing stylesheet module: ${file}`),
   ...metrics.unexpectedFiles.map((file) => `Unregistered stylesheet module: ${file}`),
+  ...zeroToleranceMetrics
+    .filter((metric) => metrics.totals[metric] !== 0)
+    .map((metric) => `total ${metric}: expected 0, found ${metrics.totals[metric]}`),
   ...compareBudget(metrics.totals, baseline.totals, "total "),
 ];
 
