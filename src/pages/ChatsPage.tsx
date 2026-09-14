@@ -9841,7 +9841,7 @@ function LiveChatsPage({
         onClose={() => setTravelMapRevokeConfirmOpen(false)}
         onConfirm={() => void revokeTravelMapAccess()}
       />
-      {messageMenu && !messageMenu.confirmDelete ? (
+      {messageMenu && !messageMenu.confirmDelete && typeof document !== "undefined" ? createPortal((
         <div className="message-context-layer" onClick={closeMessageMenu} role="presentation">
           <div
             ref={messageMenuRef}
@@ -10024,7 +10024,7 @@ function LiveChatsPage({
             })()}
           </div>
         </div>
-      ) : null}
+      ), document.body) : null}
       <ConfirmDialog
         open={Boolean(messageMenu?.confirmDelete)}
         title={t("message.deleteConfirmTitle")}

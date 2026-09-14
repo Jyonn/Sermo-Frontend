@@ -1,21 +1,19 @@
 {
-  "id": "2026.09.14.17",
+  "id": "2026.09.14.18",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿协作与管理优化",
+      "title": "消息操作定位优化",
       "items": [
-        "审批者现在可以邀请其他审批者共同处理投稿",
-        "投稿详情移除了清除记录；首位投稿者可以永久删除投稿",
-        "投稿消息的长按菜单不再提供多选操作"
+        "修复桌面端投稿消息长按菜单偏离消息和鼠标的问题",
+        "消息操作菜单现在能在不同页面布局中准确定位"
       ]
     },
     "en": {
-      "title": "Improved submission collaboration",
+      "title": "Improved message action positioning",
       "items": [
-        "Reviewers can now invite additional reviewers to collaborate",
-        "Removed history clearing; original authors can permanently delete submissions",
-        "Removed multi-select from submission message menus"
+        "Fixed message action menus appearing away from the message and pointer in desktop submissions",
+        "Message action menus now stay accurately positioned across page layouts"
       ]
     }
   }
