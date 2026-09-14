@@ -2419,10 +2419,27 @@ export default function SquarePage() {
       </main>
       {squareWorkspace === "square" ? <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
-          <div className="square-desktop-detail-scroll">
-            <div className="square-statement-detail-stage">
-              <StatementCard canInteract={canPublish} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} detail onDelete={() => setDeleteStatementId(activeCommentStatement.statement_id)} onLike={() => void toggleStatementLike(activeCommentStatement)} onMute={() => setMuteStatement(activeCommentStatement)} onOpen={() => undefined} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(activeCommentStatement.statement_id, index)} onOpenLocation={() => activeCommentStatement.location && setChatRecordLocation({ location: activeCommentStatement.location, owner: activeCommentStatement.user })} onOpenProfile={() => openUserProfile(activeCommentStatement.user)} onOpenVideo={() => openStatementVideo(activeCommentStatement.statement_id)} onPin={() => void toggleStatementPinned(activeCommentStatement)} onShare={() => openStatementShare(activeCommentStatement)} statement={activeCommentStatement} />
+          <header className="square-desktop-detail-header">
+            <button
+              aria-label={activeCommentStatement.is_anonymous ? t("square.anonymousUser") : activeCommentStatement.user.name}
+              className="square-desktop-detail-author"
+              disabled={activeCommentStatement.is_anonymous}
+              onClick={() => { if (!activeCommentStatement.is_anonymous) openUserProfile(activeCommentStatement.user); }}
+              type="button"
+            >
+              {activeCommentStatement.is_anonymous ? <span className="square-anonymous-avatar square-desktop-detail-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-desktop-detail-avatar" frame={activeCommentStatement.user.avatar_frame_style} name={activeCommentStatement.user.name} uri={activeCommentStatement.user.avatar_uri} />}
+              <span>
+                <strong>{activeCommentStatement.is_anonymous ? t("square.anonymousUser") : activeCommentStatement.user.name}</strong>
+                <time>{formatRelativeTime(activeCommentStatement.created_at)}</time>
+              </span>
+            </button>
+            <div className="square-desktop-detail-actions">
+              <button aria-label={t("square.like")} className={activeCommentStatement.liked ? "is-liked" : ""} disabled={!canPublish} onClick={() => void toggleStatementLike(activeCommentStatement)} type="button"><span className="material-symbols-outlined">favorite</span></button>
+              <button aria-label={t("square.comment")} onClick={() => commentInputRef.current?.focus()} type="button"><span className="material-symbols-outlined">chat_bubble</span></button>
+              <button aria-label={t("square.share")} onClick={() => openStatementShare(activeCommentStatement)} type="button"><span className="material-symbols-outlined">send</span></button>
             </div>
+          </header>
+          <div className="square-desktop-detail-scroll">
             {discussionContent}
           </div>
           {commentComposer}

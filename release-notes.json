@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.10",
+  "id": "2026.09.14.11",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "桌面聊天工作台焕新",
+      "title": "桌面广场工作台焕新",
       "items": [
-        "会话列表与聊天内容整合为统一的大圆角工作台，减少多层卡片与重复信息",
-        "统一会话标题栏高度，并优化桌面与手机端的聊天详情按钮"
+        "将发言列表与评论详情整合为统一的大圆角工作台，避免重复展示发言正文",
+        "详情区域新增精简作者栏，以纯图标快捷完成点赞、评论与分享"
       ]
     },
     "en": {
-      "title": "Refined desktop chat workspace",
+      "title": "Refined desktop Square workspace",
       "items": [
-        "Combined the conversation list and chat into one spacious rounded workspace with less visual repetition",
-        "Aligned conversation header heights and refined the shared chat details button across desktop and mobile"
+        "Combined the statement feed and discussion into one rounded workspace without repeating statement content",
+        "Added a compact author header with icon-only like, comment, and share actions"
       ]
     }
   }

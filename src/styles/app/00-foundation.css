@@ -2790,14 +2790,20 @@ html[data-theme="dark"] body .growth-level-detail {
   }
 
   .desktop-tab-shell > .square-desktop-workspace {
+    --desktop-square-header-height: 110px;
     display: grid;
     grid-template-columns: minmax(240px, .9fr) minmax(280px, 1.1fr);
-    gap: clamp(10px, 1.2vw, 16px);
+    gap: 0;
     width: min(100%, 1320px);
     min-width: 0;
     height: calc(100dvh - 32px);
     min-height: 0;
     margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
+    border-radius: 26px;
+    background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+    box-shadow: 0 26px 64px rgba(32, 67, 52, .1), inset 0 1px 0 rgba(255, 255, 255, .72);
   }
 
   .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen {
@@ -2809,21 +2815,21 @@ html[data-theme="dark"] body .growth-level-detail {
     padding: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    border: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
-    border-radius: 20px;
-    background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
   }
 
   .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .tab-sticky-header {
     display: grid;
     grid-template-rows: 65px 44px;
     box-sizing: border-box;
-    height: 110px;
+    height: var(--desktop-square-header-height);
     min-height: 65px;
     align-content: start;
     margin: 0;
     padding: 0 20px;
-    border-radius: 20px 20px 0 0;
+    border-radius: 0;
     background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
     -webkit-backdrop-filter: blur(22px) saturate(1.3);
     backdrop-filter: blur(22px) saturate(1.3);
@@ -2866,19 +2872,99 @@ html[data-theme="dark"] body .growth-level-detail {
     display: block;
     min-width: 0;
     min-height: 0;
+    border-left: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
   }
 
   .square-desktop-detail-card {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: var(--desktop-square-header-height) minmax(0, 1fr) auto;
     height: 100%;
     min-height: 0;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
-    border-radius: 20px;
-    background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
-    box-shadow: 0 18px 45px rgba(17, 35, 29, .07);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
   }
+
+  .square-desktop-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-width: 0;
+    padding: 0 20px 0 22px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
+    background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.3);
+    backdrop-filter: blur(22px) saturate(1.3);
+  }
+
+  .square-desktop-detail-author {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 11px;
+    padding: 0;
+    border: 0;
+    color: var(--text-strong);
+    text-align: left;
+    background: transparent;
+  }
+
+  .square-desktop-detail-author > span:last-child {
+    display: grid;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .square-desktop-detail-author strong {
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .square-desktop-detail-author time {
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  .square-desktop-detail-avatar {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 13px;
+  }
+
+  .square-desktop-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .square-desktop-detail-actions > button {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--text-muted) 17%, transparent);
+    border-radius: 14px;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--bg-surface) 84%, var(--brand-primary) 3%);
+    transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
+  }
+
+  .square-desktop-detail-actions > button:hover,
+  .square-desktop-detail-actions > button:focus-visible {
+    color: var(--brand-primary-press);
+    border-color: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+    background: color-mix(in srgb, var(--bg-surface) 76%, var(--brand-primary) 11%);
+  }
+
+  .square-desktop-detail-actions > button:active { transform: scale(.94); }
+  .square-desktop-detail-actions > button.is-liked { color: #d65463; }
+  .square-desktop-detail-actions > button.is-liked .material-symbols-outlined { font-variation-settings: "FILL" 1; }
 
   .square-desktop-detail-scroll {
     min-height: 0;
@@ -2888,9 +2974,7 @@ html[data-theme="dark"] body .growth-level-detail {
     scrollbar-gutter: stable;
   }
 
-  .square-desktop-detail-card .square-statement-detail-stage { padding: 8px 22px 0; }
-  .square-desktop-detail-card .square-statement-card.is-detail { padding-inline: 0; }
-  .square-desktop-detail-card .square-discussion-section { padding: 2px 22px 28px; }
+  .square-desktop-detail-card .square-discussion-section { padding: 22px 22px 28px; }
   .square-desktop-detail-card > .square-comment-composer {
     position: relative;
     inset: auto;
@@ -2911,8 +2995,8 @@ html[data-theme="dark"] body .growth-level-detail {
     place-content: center;
     justify-items: center;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
-    border-radius: 20px;
+    border: 0;
+    border-radius: 0;
     color: var(--text-secondary);
     background:
       radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--brand-primary) 10%, transparent), transparent 14rem),
