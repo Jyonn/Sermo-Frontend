@@ -502,6 +502,10 @@ export default function MenuPage() {
   const [accountDeleteStep, setAccountDeleteStep] = useState<"intro" | "verify" | "final" | null>(null);
   const [accountDeleteInput, setAccountDeleteInput] = useState("");
   const [accountDeleteSaving, setAccountDeleteSaving] = useState(false);
+  const [wechatBound, setWechatBound] = useState(false);
+  const [wechatUnbindStep, setWechatUnbindStep] = useState<"intro" | "verify" | null>(null);
+  const [wechatUnbindPassword, setWechatUnbindPassword] = useState("");
+  const [wechatUnbindSaving, setWechatUnbindSaving] = useState(false);
   const [prefDrawerChannel, setPrefDrawerChannel] = useState<NotificationChannel | null>(null);
   const [prefSaving, setPrefSaving] = useState(false);
   const [prefEditor, setPrefEditor] = useState<PreferenceEditor | null>(null);
@@ -1040,8 +1044,9 @@ export default function MenuPage() {
       api.getWebReminderPrefs(controller.signal).catch(() => null),
       api.getGestureLockPrefs(controller.signal).catch(() => null),
       api.getQQIdentity(controller.signal).catch(() => null),
+      api.getWechatMiniProgramBinding(controller.signal).catch(() => null),
     ])
-      .then(async ([spaceInfo, meInfo, webReminderInfo, gestureInfo, qqIdentityInfo]) => {
+      .then(async ([spaceInfo, meInfo, webReminderInfo, gestureInfo, qqIdentityInfo, wechatBinding]) => {
         const [prefRows, endpointRows] = meInfo.has_password
           ? await Promise.all([
               api.getNotificationPrefs(controller.signal),
@@ -1055,6 +1060,7 @@ export default function MenuPage() {
         setInstantEndpoints(endpointRows);
         setGesturePreference(gestureInfo);
         setQqIdentity(qqIdentityInfo);
+        setWechatBound(Boolean(wechatBinding?.bound));
         setWebReminderPrefs(nextWebReminderPrefs);
         setWebReminderPreferences(nextWebReminderPrefs);
         writeTabCache(cacheScope, "menu", {
@@ -1809,6 +1815,31 @@ export default function MenuPage() {
       setError(apiError instanceof ApiError ? apiError.message : t("account.deleteFailed"));
     } finally {
       setAccountDeleteSaving(false);
+    }
+  };
+
+  const beginWechatUnbind = () => {
+    if (!hasPassword) {
+      showPasswordReminder(t("wechatBinding.passwordRequired"));
+      return;
+    }
+    setWechatUnbindPassword("");
+    setWechatUnbindStep("intro");
+  };
+
+  const unbindWechat = async () => {
+    if (!wechatUnbindPassword.trim()) return;
+    try {
+      setWechatUnbindSaving(true);
+      await api.unbindWechatMiniProgram(wechatUnbindPassword.trim());
+      setWechatBound(false);
+      setWechatUnbindStep(null);
+      setWechatUnbindPassword("");
+      showToast(t("wechatBinding.unbound"));
+    } catch (apiError) {
+      showToast(apiError instanceof ApiError ? apiError.message : t("wechatBinding.unbindFailed"), "error");
+    } finally {
+      setWechatUnbindSaving(false);
     }
   };
 
@@ -2752,6 +2783,13 @@ export default function MenuPage() {
             ) : null}
           </SettingGroup>
           <SettingGroup>
+            {wechatBound ? (
+              <SettingRow
+                description={t("wechatBinding.unbindHint")}
+                onClick={beginWechatUnbind}
+                title={t("wechatBinding.unbind")}
+              />
+            ) : null}
             <SettingRow
               description={t("account.deleteHint")}
               onClick={() => {
@@ -3457,6 +3495,27 @@ export default function MenuPage() {
         }}
         open={welcomeEditorOpen}
         userId={session?.user.user_id ?? -1}
+      />
+      <ConfirmDialog
+        danger
+        open={wechatUnbindStep === "intro"}
+        title={t("wechatBinding.confirmTitle")}
+        description={t("wechatBinding.confirmHint")}
+        confirmLabel={t("wechatBinding.continue")}
+        onClose={() => setWechatUnbindStep(null)}
+        onConfirm={() => setWechatUnbindStep("verify")}
+      />
+      <InputDialog
+        busy={wechatUnbindSaving}
+        confirmLabel={t("wechatBinding.confirm")}
+        onChange={setWechatUnbindPassword}
+        onClose={() => setWechatUnbindStep(null)}
+        onConfirm={() => void unbindWechat()}
+        open={wechatUnbindStep === "verify"}
+        placeholder={t("password.currentPlaceholder")}
+        title={t("password.verifyCurrent")}
+        type="password"
+        value={wechatUnbindPassword}
       />
       <ConfirmDialog
         danger

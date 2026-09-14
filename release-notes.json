@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.3",
+  "id": "2026.09.14.4",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "微信登录页排版优化",
+      "title": "微信账号绑定更安全",
       "items": [
-        "优化首次微信登录页的纵向留白与信息层级",
-        "修正顶部返回操作的左侧定位，并保持操作按钮完整宽度"
+        "账号与安全中新增微信解绑入口，并通过当前密码保护解绑操作",
+        "同一空间账号不再允许同时关联多个微信账户"
       ]
     },
     "en": {
-      "title": "Refined WeChat sign-in layout",
+      "title": "Safer WeChat account linking",
       "items": [
-        "Improved vertical spacing and hierarchy on the first-time WeChat sign-in page",
-        "Fixed the back action's left alignment while preserving full-width actions"
+        "Added password-protected WeChat unlinking under Account & Security",
+        "A space account can no longer be linked to multiple WeChat accounts"
       ]
     }
   }

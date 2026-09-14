@@ -1430,6 +1430,21 @@ export const api = {
     });
   },
 
+  getWechatMiniProgramBinding(signal?: AbortSignal) {
+    return request<{ bound: boolean }>("/users/me/wechat-miniprogram", {
+      auth: true,
+      signal,
+    });
+  },
+
+  unbindWechatMiniProgram(password: string) {
+    return request<{ bound: boolean }>("/users/me/wechat-miniprogram", {
+      method: "DELETE",
+      auth: true,
+      body: { password },
+    });
+  },
+
   getGrowth(signal?: AbortSignal) {
     return request<UserGrowthDTO>("/users/me/growth", {
       auth: true,
