@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.13",
+  "id": "2026.09.14.14",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿双栏标题栏优化",
+      "title": "投稿工作台深度优化",
       "items": [
-        "投稿列表与详情现在拥有各自等高的标题栏，桌面双栏层级更加清晰",
-        "新建投稿入口移至列表标题栏右侧，操作位置更贴近投稿导航"
+        "桌面端切换投稿时不再刷新整个工作台，列表、筛选与详情保持连续",
+        "手机端投稿详情采用独立会话标题栏，审批与投稿操作已合并到标题栏中"
       ]
     },
     "en": {
-      "title": "Refined submission workspace headers",
+      "title": "A smoother submission workspace",
       "items": [
-        "Gave the submission list and detail pane separate, equally sized headers for a clearer desktop layout",
-        "Moved the new submission action to the right side of the list header"
+        "Switching submissions on desktop now keeps the workspace, list, filters, and detail view in place",
+        "Submission details on mobile now use a dedicated conversation header with workflow actions built in"
       ]
     }
   }

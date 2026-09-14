@@ -517,7 +517,7 @@ export default function SquarePage() {
   const { t, language } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { statementId: routeStatementId, activityKey: routeActivityKey } = useParams();
+  const { statementId: routeStatementId, activityKey: routeActivityKey, chatId: legacySubmissionChatId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
@@ -529,11 +529,20 @@ export default function SquarePage() {
   const selectedFeedKeyword = (searchParams.get("keyword") || "").trim().slice(0, 100);
   const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedKeyword);
   const squareWorkspace = features.submissionEnabled && (searchParams.get("workspace") === "submissions" || location.pathname.startsWith("/app/square/submissions/")) ? "submission" : "square";
+  const selectedSubmissionId = Number(searchParams.get("submission"));
+  const submissionDetailActive = squareWorkspace === "submission" && Number.isInteger(selectedSubmissionId) && selectedSubmissionId > 0;
   const canReviewSubmissions = Boolean(session?.user.official || session?.user.operator);
   const requestedSubmissionView = searchParams.get("view");
   const submissionView: "author" | "reviewer" = requestedSubmissionView === "author" || requestedSubmissionView === "reviewer"
     ? requestedSubmissionView
     : canReviewSubmissions ? "reviewer" : "author";
+  useEffect(() => {
+    if (!legacySubmissionChatId || !location.pathname.startsWith("/app/square/submissions/")) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("workspace", "submissions");
+    next.set("submission", legacySubmissionChatId);
+    navigate(`/app/square?${next.toString()}`, { replace: true });
+  }, [legacySubmissionChatId, location.pathname, navigate, searchParams]);
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(profileFeedUserId ? "user" : "all");
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? features.squareExploreEnabled ? "all" : "friends"
@@ -1959,6 +1968,7 @@ export default function SquarePage() {
     const next = new URLSearchParams(searchParams);
     next.set("workspace", "submissions");
     next.set("view", view);
+    next.delete("submission");
     setSearchParams(next);
   };
 
@@ -1990,6 +2000,7 @@ export default function SquarePage() {
     }
     const next = new URLSearchParams(searchParams);
     next.delete("workspace");
+    next.delete("submission");
     setSearchParams(next);
     window.requestAnimationFrame(() => squareFeedScrollRef.current?.scrollTo({
       top: feedScrollPositionsRef.current.get(activeFeedCacheKey) ?? 0,
@@ -2224,7 +2235,7 @@ export default function SquarePage() {
 
   return (
     <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
-      <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive ? " has-selection" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
+      <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive || submissionDetailActive ? " has-selection" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
       <main
         className={`list-screen square-feed-screen is-${squareWorkspace}-workspace`}
         onScroll={(event) => {
