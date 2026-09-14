@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.12",
+  "id": "2026.09.14.13",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿工作台修复",
+      "title": "投稿双栏标题栏优化",
       "items": [
-        "修复广场切换投稿后只显示投稿列表、无法并排查看详情的问题",
-        "桌面投稿列表与详情采用和聊天一致的列宽与连续工作台布局"
+        "投稿列表与详情现在拥有各自等高的标题栏，桌面双栏层级更加清晰",
+        "新建投稿入口移至列表标题栏右侧，操作位置更贴近投稿导航"
       ]
     },
     "en": {
-      "title": "Submission workspace fixes",
+      "title": "Refined submission workspace headers",
       "items": [
-        "Fixed the Square submission view showing only the list without its detail pane",
-        "Aligned desktop submission list and detail widths with the chat workspace"
+        "Gave the submission list and detail pane separate, equally sized headers for a clearer desktop layout",
+        "Moved the new submission action to the right side of the list header"
       ]
     }
   }

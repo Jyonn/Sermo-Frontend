@@ -2821,14 +2821,19 @@ html[data-theme="dark"] body .growth-level-detail {
   }
 
   .desktop-tab-shell > .square-desktop-workspace > .square-feed-screen > .tab-sticky-header {
+    z-index: var(--desktop-square-list-header-z, auto);
     display: grid;
+    grid-column: var(--desktop-square-list-header-column, auto);
+    grid-row: var(--desktop-square-list-header-row, auto);
     grid-template-rows: 65px 44px;
     box-sizing: border-box;
+    width: var(--desktop-square-list-header-width, 100%);
     height: var(--desktop-square-header-height);
     min-height: 65px;
     align-content: start;
     margin: 0;
     padding: 0 20px;
+    border-right: var(--desktop-square-list-header-divider, 0);
     border-radius: 0;
     background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
     -webkit-backdrop-filter: blur(22px) saturate(1.3);
