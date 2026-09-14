@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.2",
+  "id": "2026.09.14.3",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "小程序布局细节修复",
+      "title": "微信登录页排版优化",
       "items": [
-        "修正登录页标题与返回操作的左侧对齐",
-        "恢复主操作按钮的完整宽度，并统一图标垂直居中"
+        "优化首次微信登录页的纵向留白与信息层级",
+        "修正顶部返回操作的左侧定位，并保持操作按钮完整宽度"
       ]
     },
     "en": {
-      "title": "Improved Mini Program layout details",
+      "title": "Refined WeChat sign-in layout",
       "items": [
-        "Fixed left alignment for the sign-in title and back action",
-        "Restored full-width primary actions and consistent vertical icon alignment"
+        "Improved vertical spacing and hierarchy on the first-time WeChat sign-in page",
+        "Fixed the back action's left alignment while preserving full-width actions"
       ]
     }
   }
