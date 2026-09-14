@@ -4773,12 +4773,18 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 
   .chat-mobile-layout {
+    --desktop-chat-header-height: 72px;
     grid-template-columns: clamp(220px, 26vw, 350px) minmax(0, 1fr);
-    gap: 14px;
+    gap: 0;
     min-width: 0;
     height: calc(100dvh - 32px);
     min-height: 0;
     max-height: none;
+    overflow: hidden;
+    border: 1px solid rgba(215, 220, 231, 0.78);
+    border-radius: 26px;
+    background: rgba(255, 253, 248, 0.78);
+    box-shadow: 0 26px 64px rgba(32, 67, 52, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   }
 
   .mobile-chat-list-screen {
@@ -4797,6 +4803,9 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     min-height: 0;
     max-height: none;
     padding-top: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
   }
 
   .chat-mobile-layout > .mobile-chat-list-screen .chat-list-screen-body {
@@ -4846,11 +4855,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
   .chat-mobile-layout > .mobile-chat-list-screen .tab-sticky-header {
     align-self: start;
-    height: 65px;
-    min-height: 65px;
+    height: var(--desktop-chat-header-height);
+    min-height: var(--desktop-chat-header-height);
     margin: 0 -18px;
     padding: 0 18px;
-    border-radius: 20px 20px 0 0;
+    border-radius: 0;
   }
 
   .desktop-tab-shell > .page-stack > .tab-sticky-header .page-toolbar,
@@ -4875,9 +4884,25 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     height: 100%;
     min-height: 0;
     overflow: hidden;
-    border: 1px solid rgba(215, 220, 231, 0.72);
-    border-radius: 20px;
-    background: rgba(255, 253, 248, 0.74);
+    border: 0;
+    border-left: 1px solid rgba(215, 220, 231, 0.78);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .chat-mobile-layout .desktop-conversation-header {
+    height: var(--desktop-chat-header-height);
+    min-height: var(--desktop-chat-header-height);
+    padding: 0 20px 0 24px;
+  }
+
+  .desktop-chat-conversation-topbar .chat-topbar-meta {
+    gap: 5px;
+  }
+
+  .desktop-chat-conversation-topbar .chat-topbar-name {
+    font-size: 1rem;
+    letter-spacing: -0.01em;
   }
 
   .desktop-chat-empty {

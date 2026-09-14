@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.9",
+  "id": "2026.09.14.10",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "移动端聊天输入框修复",
+      "title": "桌面聊天工作台焕新",
       "items": [
-        "修复部分安卓设备和手机模拟模式下输入框工具按钮被裁切的问题",
-        "修复 iOS 键盘弹出后聊天页可滚动、出现纯色空屏及键盘上方留白的问题"
+        "会话列表与聊天内容整合为统一的大圆角工作台，减少多层卡片与重复信息",
+        "统一会话标题栏高度，并优化桌面与手机端的聊天详情按钮"
       ]
     },
     "en": {
-      "title": "Mobile chat composer fixes",
+      "title": "Refined desktop chat workspace",
       "items": [
-        "Fixed composer tool buttons being clipped on some Android devices and mobile emulation",
-        "Fixed iOS page scrolling, blank screens, and gaps above the keyboard while typing"
+        "Combined the conversation list and chat into one spacious rounded workspace with less visual repetition",
+        "Aligned conversation header heights and refined the shared chat details button across desktop and mobile"
       ]
     }
   }

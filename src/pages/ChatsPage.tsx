@@ -135,6 +135,23 @@ interface StickerPageCache<T> {
   frequentIds?: number[];
 }
 
+interface ChatDetailsButtonProps {
+  label: string;
+  onClick: () => void;
+}
+
+function ChatDetailsButton({ label, onClick }: ChatDetailsButtonProps) {
+  return (
+    <button aria-label={label} className="chat-details-button" onClick={onClick} type="button">
+      <span aria-hidden="true" className="chat-details-button-dots">
+        <i />
+        <i />
+        <i />
+      </span>
+    </button>
+  );
+}
+
 function mergeStickerPage<T>(fresh: T[], cached: T[], identify: (item: T) => number) {
   const known = new Set(fresh.map(identify));
   return [...fresh, ...cached.filter((item) => !known.has(identify(item)))];
@@ -7746,7 +7763,7 @@ function LiveChatsPage({
           </button>
         ) : displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
-            <button aria-label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button>
+            <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} />
           </div>
         ) : undefined
       }
@@ -7772,20 +7789,7 @@ function LiveChatsPage({
                     </button>
                     <strong>{t("message.selectedCount", { count: selectedMessageClientIds.length })}</strong>
                   </div>
-                ) : <div className="chat-conversation-topbar">
-                  <div className="avatar-wrap">
-                    <UserAvatar
-                      className={`avatar ${displayedChat.online ? "status-online" : ""}`}
-                      groupMembers={
-                        displayedChat.type === "group" && displayedChat.purpose !== "submission"
-                          ? displayedChat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri }))
-                          : undefined
-                      }
-                      name={displayedChat.title}
-                      uri={displayedChat.avatarUri}
-                      frame={displayedChat.avatarFrameStyle}
-                    />
-                  </div>
+                ) : <div className="chat-conversation-topbar desktop-chat-conversation-topbar">
                   <div className="chat-topbar-meta">
                     <strong className="chat-topbar-name">
                       <span className="chat-topbar-title-text">{displayedChat.title}</span>
@@ -7795,7 +7799,7 @@ function LiveChatsPage({
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <button aria-label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} className="icon-button" onClick={() => setDetailsSheetOpen(true)} type="button"><span className="material-symbols-outlined">more_vert</span></button> : null}
+                  : !messageSelectionMode ? <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /> : null}
                 {sendProgress !== null ? (
                   <div className="topbar-progress" aria-label={t("message.sendProgress", { progress: Math.round(sendProgress * 100) })} role="progressbar">
                     <span style={{ transform: `scaleX(${Math.max(0.02, Math.min(1, sendProgress))})` }} />

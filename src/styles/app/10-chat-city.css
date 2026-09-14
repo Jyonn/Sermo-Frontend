@@ -5573,6 +5573,47 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   border-bottom-color: var(--chat-chrome-border, rgba(232, 235, 242, 0.66));
 }
 
+.chat-details-button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
+  border-radius: 15px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-surface) 82%, var(--brand-primary) 4%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 6px 18px rgba(23, 48, 38, 0.06);
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.chat-details-button:hover,
+.chat-details-button:focus-visible {
+  color: var(--brand-primary);
+  border-color: color-mix(in srgb, var(--brand-primary) 28%, transparent);
+  background: color-mix(in srgb, var(--bg-surface) 78%, var(--brand-primary) 10%);
+}
+
+.chat-details-button:active {
+  transform: scale(0.94);
+}
+
+.chat-details-button-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.chat-details-button-dots > i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 .topbar-leading {
   display: flex;
   align-items: center;
