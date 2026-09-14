@@ -68,15 +68,6 @@
   letter-spacing: .012em;
 }
 
-.message-group.bubble-style-newspaper .message-submission-invite-card {
-  border-width: 1px 0 3px;
-  background:
-    radial-gradient(circle, rgba(20, 20, 20, .07) 0 1px, transparent 1.2px) 0 0 / 5px 5px,
-    var(--invite-surface);
-  box-shadow: inset 0 3px 0 currentColor, var(--invite-shadow);
-  font-family: Georgia, "Noto Serif SC", serif;
-}
-
 .message-group.bubble-style-receipt .message-submission-invite-card {
   border: 0;
   background:
@@ -311,6 +302,10 @@
 }
 
 .message-group.bubble-style-newspaper .message-submission-invite-card {
+  background:
+    radial-gradient(circle, rgba(20, 20, 20, .07) 0 1px, transparent 1.2px) 0 0 / 5px 5px,
+    var(--invite-surface);
+  font-family: Georgia, "Noto Serif SC", serif;
   border-width: 2px 0;
   border-radius: 0;
   box-shadow: none;

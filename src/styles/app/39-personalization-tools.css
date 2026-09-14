@@ -425,12 +425,6 @@ html[data-theme="dark"] .chat-conversation-preview.pinned-message-chat-preview {
   height: 28px;
 }
 
-.message-group.bubble-style-receipt .message-travel-map-card {
-  grid-template-columns: 52px minmax(0, 1fr) auto;
-  gap: 8px;
-  padding: 7px 8px;
-}
-
 .message-group.bubble-style-receipt .message-travel-map-art {
   width: 52px;
   height: 46px;
@@ -996,29 +990,6 @@ html[data-theme="dark"] .personalization-avatar-stage > strong {
   box-shadow:none;
 }
 
-.field-chat_bubble_style .preview-niko > i {
-  overflow:visible;
-}
-
-.field-chat_bubble_style .preview-niko i span {
-  border:1px solid #c2aa94;
-  border-radius:14px 14px 14px 5px;
-  background:linear-gradient(145deg,#fff,#f0e6d9);
-  box-shadow:0 4px 9px rgba(91,61,41,.11);
-}
-
-.field-chat_bubble_style .preview-niko > i::after {
-  position:absolute;
-  top:-9px;
-  left:50%;
-  width:25px;
-  height:25px;
-  background:url("/assets/niko/niko-run-right.webp") center/contain no-repeat;
-  content:"";
-  pointer-events:none;
-  transform:translateX(-50%);
-}
-
 html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-niko,.message-group.bubble-style-niko) {
   --bubble-skin-other-bg:var(--niko-paw-pattern),linear-gradient(145deg,#f1ece4,#ded4c8);
   --bubble-skin-other-color:#3d2c22;
@@ -1455,24 +1426,6 @@ html[data-theme="dark"] :is(.personalization-bubble-stage,.message-group).bubble
   box-shadow:none;
 }
 
-.field-chat_bubble_style .preview-fufu > i { overflow:visible; }
-.field-chat_bubble_style .preview-fufu i span {
-  border:1px solid #725e45;
-  border-radius:13px 13px 13px 4px;
-  background:repeating-radial-gradient(ellipse at -8% 52%,transparent 0 8px,rgba(48,42,31,.13) 9px 11px,transparent 12px 18px),#d8c09c;
-  box-shadow:0 4px 9px rgba(48,40,29,.15);
-}
-.field-chat_bubble_style .preview-fufu > i::after {
-  position:absolute;
-  bottom:-9px;
-  left:-4px;
-  width:28px;
-  height:22px;
-  background:url("/assets/fufu/fufu-run-right.webp") center/contain no-repeat;
-  content:"";
-  pointer-events:none;
-}
-
 /* IP capsules preview the same relationship between character and bubble as live chat. */
 .field-chat_bubble_style .preview-niko > i {
   overflow:visible;
@@ -1879,6 +1832,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
 }
 
 .message-group.bubble-style-receipt .message-travel-map-card {
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   gap: 8px;
   padding: 6px 8px;
 }

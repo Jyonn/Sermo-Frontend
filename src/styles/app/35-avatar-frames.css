@@ -86,13 +86,6 @@
   border-radius: inherit;
 }
 
-.user-avatar.has-avatar-frame > .avatar-frame-clip::before,
-.user-avatar.has-avatar-frame > .avatar-frame-clip::after {
-  box-sizing: border-box;
-  max-width: 100%;
-  max-height: 100%;
-}
-
 /* Every material paints the same proportional frame band. */
 .avatar-frame-orbit {
   --avatar-frame-paint: conic-gradient(from 25deg,#9a7133,#f4e5b6,#315f52,#d1ad63,#9a7133);
@@ -197,10 +190,6 @@
   --avatar-frame-paint: repeating-conic-gradient(#48534f 0 8deg,#d8ddd9 8deg 15deg,#e7a83c 15deg 19deg);
 }
 /* Legacy frame ornaments stay expressive but can no longer escape the component. */
-.user-avatar.has-avatar-frame .avatar-frame-ornament > i {
-  max-width: 28%;
-  max-height: 34%;
-}
 
 .user-avatar.has-avatar-frame .avatar-frame-crown::before,
 .user-avatar.has-avatar-frame .avatar-frame-cat-ears::before,
@@ -215,10 +204,15 @@
 /* Frame identity audit: each title keeps one unmistakable, in-bounds motif. */
 .user-avatar.has-avatar-frame > .avatar-frame-clip::before,
 .user-avatar.has-avatar-frame > .avatar-frame-clip::after {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
   content: none;
 }
 
 .user-avatar.has-avatar-frame .avatar-frame-ornament > i {
+  max-width: 28%;
+  max-height: 34%;
   display: none;
 }
 
@@ -254,17 +248,6 @@
   content: "";
   transform: rotate(-24deg);
 }
-.user-avatar.has-avatar-frame > .avatar-frame-orbit .avatar-frame-ornament > i:first-child {
-  display: block;
-  top: 4%;
-  right: 15%;
-  width: 13%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #f0c65f;
-  box-shadow: 0 0 6px #f0c65f;
-  animation: avatar-orbit-planet 3.2s ease-in-out infinite alternate;
-}
 
 /* 02 Pixel: stepped corner blocks, never a smooth gradient-only ring. */
 .user-avatar.has-avatar-frame > .avatar-frame-pixel {
@@ -281,16 +264,6 @@
 }
 
 /* 03 Aurora: translucent ribbons crossing a moving polar-light band. */
-.user-avatar.has-avatar-frame > .avatar-frame-aurora::before {
-  position: absolute;
-  z-index: 2;
-  inset: -35%;
-  display: block;
-  border-radius: 44%;
-  background: conic-gradient(from 20deg,transparent,#8ad8ff88,#f6cf7288,#2dd4a488,transparent 58%);
-  content: "";
-  animation: avatar-aurora-turn 7s linear infinite;
-}
 .user-avatar.has-avatar-frame > .avatar-frame-aurora .avatar-frame-ornament > i:nth-child(-n+2) {
   display: block;
   width: 34%;
@@ -411,19 +384,6 @@
 }
 
 /* 07 Time portal: rotating segmented gate and a pulsing key light. */
-.user-avatar.has-avatar-frame > .avatar-frame-portal::before {
-  position: absolute;
-  z-index: 2;
-  inset: 1%;
-  display: block;
-  border-radius: inherit;
-  background: repeating-conic-gradient(from 0deg,#175f51 0 13deg,transparent 13deg 23deg,#d9ac50 23deg 29deg,transparent 29deg 42deg);
-  content: "";
-  mask: linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  padding: 6%;
-  animation: avatar-portal-turn 12s linear infinite;
-}
 .user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i:first-child {
   display: block;
   top: 2%;
@@ -558,18 +518,6 @@
 }
 
 /* 12 Moon phase: crescent plus three stars, not a generic navy ring. */
-.user-avatar.has-avatar-frame > .avatar-frame-moon::before {
-  position: absolute;
-  z-index: 2;
-  right: 2%;
-  top: 2%;
-  display: block;
-  width: 28%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 48%,#f5d77c 0 44%,#293b68 47% 66%,transparent 68%);
-  content: "";
-}
 .user-avatar.has-avatar-frame > .avatar-frame-moon .avatar-frame-ornament > i:nth-child(-n+3) {
   display: block;
   width: 6%;
@@ -687,28 +635,6 @@
 }
 
 /* 18 Comet: bright head and a curved three-step tail. */
-.user-avatar.has-avatar-frame > .avatar-frame-comet::before {
-  position: absolute;
-  z-index: 2;
-  inset: 3%;
-  display: block;
-  border: 3px solid transparent;
-  border-top-color: #65d9cb;
-  border-right-color: #f3c75a;
-  border-radius: inherit;
-  content: "";
-  animation: avatar-frame-turn 2.6s linear infinite;
-}
-.user-avatar.has-avatar-frame > .avatar-frame-comet .avatar-frame-ornament > i:first-child {
-  display: block;
-  right: 3%;
-  top: 4%;
-  width: 13%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #fff1a2;
-  box-shadow: -7px 4px 0 -2px #67d5ca,-13px 7px 0 -4px #5984bd;
-}
 
 /* 19 Radar: rotating translucent scan wedge over a calibrated ring. */
 .user-avatar.has-avatar-frame > .avatar-frame-radar::before {
@@ -748,27 +674,6 @@
 }
 
 /* 21 Snowfall: four flakes visibly travel across the portrait. */
-.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i {
-  display: block;
-  top: 0;
-  width: 8%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 5px #7ac3e6;
-  animation: avatar-snow-inset 2.2s linear infinite;
-}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(1) {
-  left: 8%;
-}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(2) {
-  left: 34%;
-  animation-delay: -1.2s;
-}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(3) {
-  right: 25%;
-  animation-delay: -.6s;
-}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(4) {
-  right: 3%;
-  animation-delay: -1.7s;
-}
 
 /* 22 Fireflies: warm bioluminescent dots drift independently. */
 .user-avatar.has-avatar-frame > .avatar-frame-firefly .avatar-frame-ornament > i {
@@ -874,39 +779,9 @@
   content: "";
 }
 
-/* 27 Mechanical ring: gear teeth and four brass rivets. */
-.user-avatar.has-avatar-frame > .avatar-frame-mechanical::before {
-  position: absolute;
-  z-index: 2;
-  inset: 1%;
-  display: block;
-  border-radius: inherit;
-  background: repeating-conic-gradient(#69756f 0 8deg,transparent 8deg 15deg);
-  content: "";
-  mask: linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  padding: 7%;
-  animation: avatar-frame-turn 14s linear infinite;
-}
-.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i {
-  display: block;
-  width: 7%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #e7a83c;
-  box-shadow: inset 0 0 0 1px #6f5428;
-}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(1) {
+/* 27 Mechanical ring: gear teeth and four brass rivets. */.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(1) {
   left: 3%;
   top: 3%;
-}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(2) {
-  right: 3%;
-  top: 3%;
-}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(3) {
-  left: 3%;
-  bottom: 3%;
-}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(4) {
-  right: 3%;
-  bottom: 3%;
 }
 
 @keyframes avatar-orbit-planet { to { transform:translate(-18%,16%) scale(.78);opacity:.72; } }
@@ -924,6 +799,13 @@
 
 /* Motion frames animate ornaments along the rounded perimeter, never the frame box. */
 .user-avatar.has-avatar-frame > .avatar-frame-orbit .avatar-frame-ornament > i:first-child {
+  display: block;
+  right: 15%;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f0c65f;
+  box-shadow: 0 0 6px #f0c65f;
   top: 0;
   left: 0;
   offset-path: inset(7% round 22%);
@@ -932,6 +814,10 @@
 }
 
 .user-avatar.has-avatar-frame > .avatar-frame-aurora::before {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  content: "";
   inset: 1%;
   border-radius: inherit;
   background: linear-gradient(115deg, transparent 12%, rgba(138, 216, 255, .72) 34%, rgba(246, 207, 114, .62) 48%, rgba(45, 212, 164, .7) 64%, transparent 86%);
@@ -941,6 +827,15 @@
 }
 
 .user-avatar.has-avatar-frame > .avatar-frame-portal::before {
+  position: absolute;
+  z-index: 2;
+  inset: 1%;
+  display: block;
+  border-radius: inherit;
+  background: repeating-conic-gradient(from 0deg,#175f51 0 13deg,transparent 13deg 23deg,#d9ac50 23deg 29deg,transparent 29deg 42deg);
+  mask: linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 6%;
   content: none;
   animation: none;
 }
@@ -971,10 +866,25 @@
 }
 
 .user-avatar.has-avatar-frame > .avatar-frame-comet::before {
+  position: absolute;
+  z-index: 2;
+  inset: 3%;
+  display: block;
+  border: 3px solid transparent;
+  border-top-color: #65d9cb;
+  border-right-color: #f3c75a;
+  border-radius: inherit;
   content: none;
   animation: none;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-comet .avatar-frame-ornament > i:first-child {
+  display: block;
+  right: 3%;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff1a2;
+  box-shadow: -7px 4px 0 -2px #67d5ca,-13px 7px 0 -4px #5984bd;
   top: 0;
   left: 0;
   offset-path: inset(5% round 20%);
@@ -983,6 +893,10 @@
 }
 
 .user-avatar.has-avatar-frame > .avatar-frame-mechanical::before {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  mask-composite: exclude;
   inset: 3%;
   border: max(1px, .035em) solid #d8ddd9;
   border-radius: inherit;
@@ -996,15 +910,27 @@
   animation: none;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i {
+  display: block;
+  width: 7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e7a83c;
+  box-shadow: inset 0 0 0 1px #6f5428;
   animation: avatar-mechanical-indicator 1.8s steps(2,end) infinite alternate;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(2) {
+  right: 3%;
+  top: 3%;
   animation-delay: -.45s;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(3) {
+  left: 3%;
+  bottom: 3%;
   animation-delay: -.9s;
 }
 .user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(4) {
+  right: 3%;
+  bottom: 3%;
   animation-delay: -1.35s;
 }
 
@@ -1017,6 +943,12 @@
 
 /* Moon phases: a shadow crosses the moon disc from waxing to waning. */
 .user-avatar.has-avatar-frame > .avatar-frame-moon::before {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  content: "";
   right: 3%;
   top: 3%;
   width: 27%;
@@ -1039,6 +971,9 @@
 
 /* Snowfall: four flakes carry offset satellites to remain visible at every size. */
 .user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
   top: -18%;
   width: 6%;
   min-width: 2px;

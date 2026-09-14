@@ -487,8 +487,6 @@
   gap: 7px;
 }
 
-.chat-name.is-submission .submission-status-badge { flex: 0 0 auto; }
-
 .submission-list-title {
   min-width: 0;
   overflow: hidden;
@@ -637,7 +635,7 @@
 .submission-stacked-avatar.is-1 { top: 0; left: 0; z-index: 1; }
 .submission-stacked-avatar.is-2 { top: 11px; left: 11px; z-index: 2; }
 .submission-stacked-avatar.is-3 { top: 22px; left: 22px; z-index: 3; }
-.chat-name.is-submission .submission-status-badge {
+.chat-name.is-submission .submission-status-badge { flex: 0 0 auto;
   min-height: 0;
   padding: 0;
   border: 0;
@@ -1215,14 +1213,6 @@ html[data-theme="dark"] .verification-banner-action {
     transform: rotate(45deg);
   }
 
-  .desktop-tool-popover.is-footprint,
-  .desktop-tool-popover.is-voice {
-    right: -44px;
-    left: auto;
-    width: min(286px, calc(100vw - 48px));
-    transform: none;
-  }
-
   .desktop-tool-popover.is-footprint {
     right: -70px;
   }
@@ -1569,6 +1559,10 @@ html[data-theme="dark"] .verification-banner-action {
 
   .desktop-tool-popover.is-footprint,
   .desktop-tool-popover.is-voice {
+    right: -44px;
+    left: auto;
+    width: min(286px, calc(100vw - 48px));
+    transform: none;
     animation-name: desktop-tool-popover-left-in;
   }
 
@@ -1645,15 +1639,6 @@ html[data-theme="dark"] .verification-banner-action {
     display: none;
   }
 
-  .composer.is-desktop-writing-desk > .desktop-emoji-reveal .composer-emoji-panel {
-    width: min(480px, calc(100% - 40px));
-    margin: 0;
-    background: #f8f9f5;
-    box-shadow: 0 20px 54px rgba(18, 40, 31, .2);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
   .composer.is-desktop-writing-desk > .desktop-emoji-reveal {
     position: absolute;
     z-index: 60;
@@ -1665,6 +1650,12 @@ html[data-theme="dark"] .verification-banner-action {
   }
 
   .composer.is-desktop-writing-desk > .desktop-emoji-reveal .composer-emoji-panel {
+    width: min(480px, calc(100% - 40px));
+    margin: 0;
+    background: #f8f9f5;
+    box-shadow: 0 20px 54px rgba(18, 40, 31, .2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     pointer-events: auto;
     animation: desktop-composer-popover-in 180ms cubic-bezier(.16, 1, .3, 1) both;
   }
