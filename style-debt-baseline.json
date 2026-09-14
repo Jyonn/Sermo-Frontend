@@ -1,10 +1,10 @@
 {
   "totals": {
-    "rules": 7700,
+    "rules": 7647,
     "important": 169,
     "duplicateDeclarations": 0,
-    "duplicateRuleBlocks": 72,
-    "crossFileDuplicateSelectors": 72,
+    "duplicateRuleBlocks": 20,
+    "crossFileDuplicateSelectors": 20,
     "complexSelectors": 57,
     "longLines": 96,
     "compatibilityRules": 0
@@ -17,7 +17,7 @@
       "longLines": 28
     },
     "10-chat-city.css": {
-      "important": 41,
+      "important": 36,
       "duplicateDeclarations": 0,
       "complexSelectors": 4,
       "longLines": 10
@@ -29,7 +29,7 @@
       "longLines": 0
     },
     "30-personalization.css": {
-      "important": 23,
+      "important": 28,
       "duplicateDeclarations": 0,
       "complexSelectors": 29,
       "longLines": 5
@@ -44,7 +44,7 @@
       "important": 36,
       "duplicateDeclarations": 0,
       "complexSelectors": 6,
-      "longLines": 15
+      "longLines": 14
     },
     "40-square-platform.css": {
       "important": 31,
@@ -68,7 +68,7 @@
       "important": 4,
       "duplicateDeclarations": 0,
       "complexSelectors": 1,
-      "longLines": 0
+      "longLines": 1
     },
     "80-chat-messages.css": {
       "important": 23,

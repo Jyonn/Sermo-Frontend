@@ -847,8 +847,18 @@ html[data-theme="dark"] .chat-item.is-submission-item {
 .submission-detail-member-list small { color: var(--text-muted); font-size: .74rem; }
 .submission-detail-member-list > button > .material-symbols-outlined { color: var(--text-muted); font-size: 18px; }
 
-.submission-invite-review { margin: 0; }
-.submission-invite-review > div { grid-template-columns: 42px minmax(0, 1fr) auto; }
+.submission-invite-review {
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 22px;
+  display: grid;
+  gap: 8px;
+  padding: 16px; margin: 0; }
+.submission-invite-review > div {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  padding-top: 8px; grid-template-columns: 42px minmax(0, 1fr) auto; }
 .submission-invite-pending {
   color: #9b670e;
   font-size: .74rem;
@@ -2280,7 +2290,7 @@ html[data-theme="dark"] .verification-banner-action {
   }
 }
 /* Square comments reuse the chat composer primitives for mentions, emoji, and stickers. */
-.square-comment-composer {
+.square-comment-composer { display: grid; gap: 8px; border-top: 1px solid color-mix(in srgb, var(--line-soft) 80%, transparent);position:relative;z-index:2;right:auto;bottom:auto;flex:0 0 auto;width:calc(100% - 24px);min-height:64px;margin:8px 12px max(12px,env(safe-area-inset-bottom));padding:9px 10px;border:1px solid color-mix(in srgb,var(--line-soft) 84%,transparent);border-radius:20px;background:color-mix(in srgb,var(--bg-elevated) 91%,transparent);box-shadow:0 14px 40px rgba(20,36,30,.14);backdrop-filter:blur(24px);
   grid-template-columns: 36px minmax(0, 1fr);
   align-items: end;
   overflow: visible;

@@ -109,6 +109,9 @@
 }
 
 .user-profile-cover {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -36px;
   height: 150px;
   background:
     repeating-linear-gradient(105deg, transparent 0 28px, rgba(255, 255, 255, 0.12) 29px 32px),
@@ -122,32 +125,66 @@ html:not([data-theme="dark"]) .user-profile-cover {
 }
 
 .user-profile-identity {
+  position: relative;
+  display: grid;
+  padding: 0;
+  align-items: start;
   grid-template-columns: 148px minmax(0, 1fr);
   gap: 24px;
   margin-top: -82px;
 }
 
 .user-profile-avatar-wrap {
+  position: relative;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+  transition: transform 160ms ease;
   width: 148px;
   height: 148px;
   border-radius: 38px;
 }
 
 .user-profile-social-card .user-profile-avatar {
+  box-shadow: none;
   width: 134px;
   height: 134px;
   border-radius: 31px;
 }
 
 .user-profile-copy {
+  min-width: 0;
+  padding-bottom: 7px;
+  align-self: stretch;
+  display: grid;
+  align-content: end;
   padding: 101px 0 9px;
 }
 
 .user-profile-copy h2 {
+  margin: 0;
+  padding-bottom: 0.12em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--profile-ink);
+  line-height: 1.08;
   font-size: clamp(1.75rem, 5.2vw, 2.25rem);
 }
 
 .user-profile-recent-statement {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  overflow: hidden;
+  border: 0;
+  color: #173127;
+  background: var(--profile-card-soft);
+  box-shadow: none;
+  text-align: left;
+  margin-top: 28px;
+  border-radius: 28px;
   isolation: isolate;
   min-height: 124px;
   padding: 22px 116px 22px 28px;
@@ -163,12 +200,20 @@ html:not([data-theme="dark"]) .user-profile-cover {
 }
 
 .user-profile-recent-statement > i {
+  position: absolute;
+  bottom: -21px;
+  color: rgba(23, 104, 78, .08);
+  font-size: 108px;
   z-index: 0;
   right: 18px;
   opacity: 0.72;
 }
 
 .user-profile-reminders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-block: 1px solid var(--profile-line);
   position: relative;
   margin-top: 20px;
   padding: 12px 0;
@@ -186,10 +231,17 @@ html:not([data-theme="dark"]) .user-profile-cover {
 
 .user-profile-reminders button,
 .user-profile-reminders button.is-active {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 0 0 0 22px;
+  border: 0;
+  border-radius: 0;
+  color: var(--profile-ink);
+  background: transparent;
   min-height: 44px;
 }
 
-.user-profile-reminders button:first-child {
+.user-profile-reminders button:first-child { padding-left: 0; padding-right: 22px;
   border-right: 0;
 }
 
@@ -205,7 +257,8 @@ html[data-theme="dark"] body .drawer-body .user-profile-panel .user-profile-grou
     max-height: calc(100dvh - 16px);
   }
 
-  .user-profile-cover { height: 132px; }
+  .user-profile-cover {
+    margin-inline: -20px; height: 132px; }
 
   .user-profile-identity {
     grid-template-columns: 108px minmax(0, 1fr);
@@ -227,8 +280,8 @@ html[data-theme="dark"] body .drawer-body .user-profile-panel .user-profile-grou
 
   .user-profile-copy { padding: 73px 0 5px; }
   .user-profile-copy h2 { font-size: clamp(1.45rem, 6.8vw, 1.8rem); }
-  .user-profile-recent-statement { padding: 18px 88px 18px 18px; }
-  .user-profile-reminders { padding-block: 10px; }
+  .user-profile-recent-statement { min-height: 128px; margin-top: 22px; border-radius: 22px; padding: 18px 88px 18px 18px; }
+  .user-profile-reminders { margin-top: 22px; padding-block: 10px; }
   .user-profile-reminders::after { top: 10px; bottom: 10px; }
 }
 
@@ -1518,16 +1571,6 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
   opacity: .38;
 }
 
-.submission-invite-review {
-  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
-  border-radius: 22px;
-  display: grid;
-  gap: 8px;
-  margin: 16px;
-  padding: 16px;
-}
-
 .submission-invite-review > header {
   display: grid;
   gap: 3px;
@@ -1537,14 +1580,6 @@ html[data-theme="dark"] .shell-friend-profile:has(.user-profile-panel.profile-th
 .submission-invite-review > header small,
 .submission-invite-review > div > span small {
   color: var(--muted);
-}
-
-.submission-invite-review > div {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 42px minmax(0, 1fr) auto auto;
-  padding-top: 8px;
 }
 
 .submission-invite-review > div > span {

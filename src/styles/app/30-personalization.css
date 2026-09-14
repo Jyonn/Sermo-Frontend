@@ -1287,6 +1287,19 @@ html[data-theme="dark"] :is(
 }
 
 .message-link-preview-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: stretch;
+  gap: 9px;
+  padding: 10px 11px;
+  border-radius: var(--radius-bubble);
+  color: #121821;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 253, 0.94)),
+    #fff;
+  border: 1px solid var(--message-card-border);
+  box-shadow: var(--message-card-shadow);
+  text-decoration: none;
   width: min(70vw, 312px);
   max-width: 100%;
   height: 80px;
@@ -1296,6 +1309,7 @@ html[data-theme="dark"] :is(
 }
 
 .message-link-preview-card.no-image {
+  grid-template-columns: minmax(0, 1fr) 42px;
   width: min(70vw, 312px);
   min-width: 0;
   max-width: 100%;
@@ -1314,6 +1328,18 @@ html[data-theme="dark"] :is(
 }
 
 .message-travel-map-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 12px;
+  color: #173c30;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
   width: min(100%, 310px);
   box-sizing: border-box;
 }
@@ -1360,12 +1386,6 @@ html[data-theme="dark"] :is(
 }
 
 /* The shared bubble owns the surface and grouped corners; the map card is content only. */
-.message-bubble.is-travel-map {
-  width: min(100%, 310px);
-  max-width: min(100%, 78vw, 310px);
-  padding: 0;
-  overflow: hidden;
-}
 
 .message-group.bubble-style-vip .message-bubble.is-travel-map {
   overflow: visible;
@@ -1397,6 +1417,13 @@ html[data-theme="dark"] :is(
 }
 
 .personalization-preview-bubble.is-pending {
+  color: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  background:
+    linear-gradient(110deg, #1a3d33 22%, #4a806f 48%, #17372f 72%) !important;
+  background-size: 220% 100% !important;
+  box-shadow: 0 5px 16px rgba(17, 19, 24, 0.12) !important;
+  animation: message-pending-sheen 1.2s linear infinite;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -1413,12 +1440,21 @@ html[data-theme="dark"] :is(
 
 /* The editor mirrors the dimensions and hierarchy of live message cards. */
 .personalization-preview-bubble:is(.type-file, .type-location, .type-travel) {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
   width: min(100%, 310px);
   min-height: 64px;
   box-sizing: border-box;
 }
 
 .personalization-preview-bubble.type-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 66px;
+  gap: 9px;
+  padding: 10px;
   width: min(100%, 330px);
   min-height: 88px;
   box-sizing: border-box;

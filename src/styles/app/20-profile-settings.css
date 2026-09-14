@@ -300,12 +300,6 @@
 
 /* Social profile: one layout, theme-aware surfaces. */
 
-html:not([data-theme="dark"]) .user-profile-cover {
-  background:
-    repeating-linear-gradient(105deg, transparent 0 47px, rgba(255,255,255,.17) 48px 50px),
-    linear-gradient(112deg, #37b983, #d7ccb4);
-}
-
 .user-profile-cover::before,
 .user-profile-cover::after {
   position: absolute;
@@ -355,25 +349,6 @@ html:not([data-theme="dark"]) .user-profile-statements-action {
 }
 .user-profile-recent-statement small { color: #557064; font-size: .72rem; font-weight: 850; }
 .user-profile-recent-statement > span { color: #17684e; font-size: .76rem; font-weight: 850; }
-.user-profile-recent-statement > i {
-  position: absolute;
-  right: 23px;
-  bottom: -21px;
-  color: rgba(23, 104, 78, .08);
-  font-size: 108px;
-}
-.user-profile-reminders button,
-.user-profile-reminders button.is-active {
-  min-height: 54px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  padding: 0 0 0 22px;
-  border: 0;
-  border-radius: 0;
-  color: var(--profile-ink);
-  background: transparent;
-}
-.user-profile-reminders button:first-child { padding-left: 0; padding-right: 22px; border-right: 1px solid var(--profile-line); }
 .user-profile-reminders .material-symbols-outlined { color: var(--brand-primary); font-size: 21px; display: none; }
 .user-profile-reminders button > span:last-child { min-width: 0; gap: 3px; display: contents; }
 .user-profile-reminders strong { align-self: center; font-size: .8rem; }
@@ -524,68 +499,10 @@ html[data-theme="dark"] .user-profile-panel {
   padding: 0 36px 30px;
 }
 
-.user-profile-cover {
-  position: relative;
-  overflow: hidden;
-  background:
-    repeating-linear-gradient(105deg, transparent 0 47px, color-mix(in srgb, var(--profile-line) 48%, transparent) 48px 50px),
-    linear-gradient(112deg, #17604a, #6c5a33);
-  height: 194px;
-  margin: 0 -36px;
-}
-
-.user-profile-identity {
-  position: relative;
-  display: grid;
-  padding: 0;
-  grid-template-columns: 176px minmax(0, 1fr);
-  align-items: start;
-  gap: 28px;
-  margin-top: -102px;
-}
-
-.user-profile-avatar-wrap {
-  position: relative;
-  padding: 0;
-  background: transparent;
-  cursor: zoom-in;
-  transition: transform 160ms ease;
-  width: 176px;
-  height: 176px;
-  border-radius: 44px;
-}
-
 .user-profile-social-card .user-profile-avatar-wrap {
   padding: 7px;
   background: var(--profile-card);
   box-shadow: 0 18px 38px rgba(8, 29, 21, 0.2);
-}
-
-.user-profile-social-card .user-profile-avatar {
-  box-shadow: none;
-  width: 162px;
-  height: 162px;
-  border-radius: 37px;
-}
-
-.user-profile-copy {
-  min-width: 0;
-  padding-bottom: 7px;
-  align-self: stretch;
-  display: grid;
-  align-content: end;
-  padding: 104px 0 11px;
-}
-
-.user-profile-copy h2 {
-  margin: 0;
-  padding-bottom: 0.12em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--profile-ink);
-  line-height: 1.08;
-  font-size: clamp(2rem, 6vw, 2.7rem);
 }
 
 .user-profile-copy p {
@@ -618,27 +535,6 @@ html[data-theme="dark"] .user-profile-panel {
   font-size: 1.04rem;
 }
 
-.user-profile-recent-statement {
-  position: relative;
-  display: grid;
-  align-content: center;
-  gap: 12px;
-  overflow: hidden;
-  border: 0;
-  color: #173127;
-  background: var(--profile-card-soft);
-  box-shadow: none;
-  text-align: left;
-  min-height: 150px;
-  margin-top: 28px;
-  padding: 26px 34% 26px 30px;
-  border-radius: 28px;
-}
-
-.user-profile-recent-statement.is-empty {
-  min-height: 116px;
-}
-
 .user-profile-recent-statement strong {
   display: -webkit-box;
   overflow: hidden;
@@ -646,15 +542,6 @@ html[data-theme="dark"] .user-profile-panel {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   font-size: 1.04rem;
-}
-
-.user-profile-reminders {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-  border-block: 1px solid var(--profile-line);
-  margin-top: 28px;
-  padding: 20px 0;
 }
 
 .user-profile-section {
@@ -751,39 +638,12 @@ html[data-theme="dark"] .user-profile-panel {
     padding: 0 20px 24px;
   }
 
-  .user-profile-cover {
-    height: 126px;
-    margin-inline: -20px;
-  }
-
-  .user-profile-identity {
-    grid-template-columns: 124px minmax(0, 1fr);
-    gap: 18px;
-    margin-top: -70px;
-  }
-
-  .user-profile-avatar-wrap {
-    width: 124px;
-    height: 124px;
-    border-radius: 32px;
-  }
-
   .user-profile-social-card .user-profile-avatar-wrap { padding: 6px; }
-  .user-profile-social-card .user-profile-avatar {
-    width: 112px;
-    height: 112px;
-    border-radius: 26px;
-  }
-
-  .user-profile-copy { padding: 74px 0 6px; }
-  .user-profile-copy h2 { font-size: clamp(1.65rem, 7.5vw, 2.05rem); }
   .user-profile-copy p { margin-top: 9px; font-size: 0.78rem; }
   .user-profile-facts { gap: 7px; margin-top: 20px; }
   .user-profile-facts span { min-height: 30px; padding: 5px 10px; font-size: 0.68rem; }
   .user-profile-primary-actions { gap: 10px; margin-top: 8px; }
   .user-profile-primary-actions .button { min-height: 56px; border-radius: 17px; font-size: 0.9rem; }
-  .user-profile-recent-statement { min-height: 128px; margin-top: 22px; padding: 20px 31% 20px 20px; border-radius: 22px; }
-  .user-profile-reminders { margin-top: 22px; padding-block: 16px; }
   .user-profile-reminders strong { font-size: 0.74rem; }
   .user-profile-reminders small { min-width: 62px; padding: 7px 9px; }
   .user-profile-section { margin-top: 24px; }
@@ -2029,6 +1889,11 @@ html[data-theme="dark"] .user-profile-panel {
 }
 
 .location-share-preview {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(132deg, transparent 45%, rgba(255, 255, 255, 0.9) 46% 53%, transparent 54%),
+    linear-gradient(28deg, #dfeee5 0 28%, #eef4e9 28% 52%, #d9e7ef 52% 68%, #e9eee2 68%);
   height: 156px;
 }
 
@@ -4454,6 +4319,11 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 
   .chat-list-active .mobile-chat-list-screen {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: auto;
+    background: var(--bg-panel-strong);
     grid-template-rows: auto auto;
     overflow: visible;
   }
@@ -6594,7 +6464,7 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 
 .growth-reward-real-preview.reward-frame { overflow: visible; background: linear-gradient(145deg, #edf2ee, #e3ebe5); }
 .growth-reward-real-preview.reward-frame.frame-none { background: linear-gradient(145deg, #f3f5f1, #e7ece8); }
-.growth-reward-avatar { width: clamp(64px, 7vw, 92px); height: clamp(64px, 7vw, 92px); }
+.growth-reward-avatar { border-radius: 10px; width: clamp(64px, 7vw, 92px); height: clamp(64px, 7vw, 92px); }
 .growth-reward-avatar,
 .growth-reward-avatar > .avatar-frame-clip,
 .growth-reward-avatar .avatar-image { aspect-ratio: 1; border-radius: 32%; }
@@ -7409,23 +7279,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   padding: 0 3px;
 }
 
-
-.message-travel-map-card {
-  position: relative;
-  display: grid;
-  width: min(310px, 78vw);
-  grid-template-columns: 72px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 12px;
-  color: #173c30;
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  box-shadow: none;
-  text-align: left;
-}
-
 .message-travel-map-art {
   position: relative;
   display: grid;
@@ -7461,12 +7314,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   left: 66%;
 }
 
-.message-travel-map-copy {
-  display: grid;
-  min-width: 0;
-  gap: 2px;
-}
-
 .message-travel-map-copy small,
 .message-travel-map-copy span {
   overflow: hidden;
@@ -7474,16 +7321,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   font-size: 0.67rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.message-travel-map-copy strong {
-  font-family: var(--font-heading);
-  font-size: 0.88rem;
-}
-
-.message-travel-map-arrow {
-  color: #237657;
-  font-size: 1.15rem;
 }
 
 .travel-map-country-actions,

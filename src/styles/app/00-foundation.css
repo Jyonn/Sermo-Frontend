@@ -2730,7 +2730,6 @@ img {
 .growth-reward-visual .personalization-option::before,
 .growth-reward-visual.chat-background-choice::before { content: none; }
 .growth-reward-visual.is-frame { overflow: visible; }
-.growth-reward-avatar { width: 32px; height: 32px; border-radius: 10px; }
 .growth-reward-visual.is-capability .material-symbols-outlined { color: var(--level-card-accent, var(--growth-accent)); font-size: 22px; }
 
 .growth-level-detail {
@@ -5447,28 +5446,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   opacity: 0.58;
 }
 
-.message-link-preview-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px;
-  align-items: stretch;
-  gap: 9px;
-  width: min(70vw, 312px);
-  height: 80px;
-  padding: 10px 11px;
-  border-radius: var(--radius-bubble);
-  color: #121821;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 253, 0.94)),
-    #fff;
-  border: 1px solid var(--message-card-border);
-  box-shadow: var(--message-card-shadow);
-  text-decoration: none;
-}
-
-.message-link-preview-card.no-image {
-  grid-template-columns: minmax(0, 1fr) 42px;
-}
-
 .message-bubble.self .message-link-preview-card {
   border-color: rgba(157, 177, 168, 0.7);
   box-shadow: 0 6px 18px rgba(20, 48, 39, 0.11);
@@ -7804,14 +7781,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   cursor: pointer;
 }
 
-.location-share-preview {
-  position: relative;
-  overflow: hidden;
-  background:
-    linear-gradient(132deg, transparent 45%, rgba(255, 255, 255, 0.9) 46% 53%, transparent 54%),
-    linear-gradient(28deg, #dfeee5 0 28%, #eef4e9 28% 52%, #d9e7ef 52% 68%, #e9eee2 68%);
-}
-
 .location-share-preview .message-location-road {
   position: absolute;
   height: 5px;
@@ -7860,12 +7829,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   color: #fff;
   filter: drop-shadow(0 5px 7px rgba(20, 71, 52, 0.24));
   transform: translate(-50%, -52%);
-}
-
-.location-share-pin svg {
-  width: 31px;
-  height: 31px;
-  fill: var(--brand-primary);
 }
 
 .message-location-copy {
@@ -7948,27 +7911,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 /* City travel cards keep the shared bubble as the only surface and border. */
-.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map {
-  width: min(76vw, 292px);
-  max-width: min(100%, 76vw, 292px);
-  min-height: 72px;
-  isolation: isolate;
-}
-
-.message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map > .message-travel-map-card {
-  position: relative;
-  display: grid;
-  width: 100%;
-  min-height: 72px;
-  grid-template-columns: 46px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 11px;
-  padding: 11px 12px;
-  overflow: hidden;
-  color: inherit;
-  background: transparent;
-  isolation: isolate;
-}
 
 .message-group[class*="bubble-style-city-"] .message-bubble.is-travel-map > .message-travel-map-card::after {
   position: absolute;
