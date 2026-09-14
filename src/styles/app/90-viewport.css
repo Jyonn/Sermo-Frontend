@@ -38,6 +38,19 @@
     overflow: hidden;
   }
 
+  .is-mobile-submission-detail {
+    display: flex;
+    position: relative;
+    flex: 1 1 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
   body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active,
   body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active .message-pane.chat-main-pane,
   body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active .chat-detail-scene {

@@ -1057,16 +1057,6 @@ html[data-theme="dark"] .chat-item.is-submission-item {
 .integrated-submission-back,
 .integrated-submission-avatar { display: none; }
 
-@media (max-width: 520px) {
-  .submission-header-actions > button {
-    width: 34px;
-    height: 34px;
-    justify-content: center;
-    padding: 0;
-  }
-  .submission-header-actions > button > span:not(.material-symbols-outlined) { display: none; }
-}
-
 .submission-composer-lock {
   display: flex;
   align-items: center;

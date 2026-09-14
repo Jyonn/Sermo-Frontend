@@ -2234,10 +2234,10 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
-      <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive || submissionDetailActive ? " has-selection" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
+    <AppChrome title={t("square.title")} hideMobileNav={submissionDetailActive} hideTopbar shellClassName={`desktop-tab-shell square-community-shell${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
+      <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive || submissionDetailActive ? " has-selection" : ""}${submissionDetailActive ? " is-mobile-submission-detail" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
       <main
-        className={`list-screen square-feed-screen is-${squareWorkspace}-workspace`}
+        className={`list-screen square-feed-screen is-${squareWorkspace}-workspace${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}
         onScroll={(event) => {
           if (squareWorkspace !== "square") return;
           const top = event.currentTarget.scrollTop;
@@ -2429,7 +2429,7 @@ export default function SquarePage() {
           style={{ "--square-feed-scroll-top-right": `${feedScrollTopRight}px` } as CSSProperties}
           visible={feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace)}
         />
-        </div> : <div className="square-workspace-surface is-submission">
+        </div> : <div className={`square-workspace-surface is-submission${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
           <ChatsPage embeddedListOnly onReturnToSquare={closeSubmissionWorkspace} purpose="submission" squareIntegrated />
         </div>}
       </main>

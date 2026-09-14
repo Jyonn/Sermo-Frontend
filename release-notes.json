@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.14.21",
+  "id": "2026.09.14.22",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿人数徽标优化",
+      "title": "手机投稿会话布局优化",
       "items": [
-        "剩余参与者人数徽标现在更紧密地叠放在第二个头像右下角"
+        "手机端投稿输入框现在固定在会话底部，与聊天页保持一致",
+        "投稿操作栏在手机和桌面端统一展示图标与文字说明"
       ]
     },
     "en": {
-      "title": "Refined submission count badge",
+      "title": "Improved mobile submission conversations",
       "items": [
-        "The remaining-participant badge now overlaps the second avatar more tightly"
+        "The submission composer now stays at the bottom on mobile, matching regular chats",
+        "Submission actions now show both icons and labels on mobile and desktop"
       ]
     }
   }
