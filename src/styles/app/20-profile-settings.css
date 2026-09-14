@@ -4225,10 +4225,6 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 }
 
 @media (max-width: 900px) {
-  body[data-chat-detail="true"] {
-    overflow: hidden;
-  }
-
   .brand-copy {
     display: none;
   }

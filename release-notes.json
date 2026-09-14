@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.8",
+  "id": "2026.09.14.9",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "星空背景动效放缓",
+      "title": "移动端聊天输入框修复",
       "items": [
-        "进一步降低星空旋涡与云层的移动速度，让聊天背景更舒缓",
-        "保留不同星层的速度差和方向，减少持续运动带来的视觉干扰"
+        "修复部分安卓设备和手机模拟模式下输入框工具按钮被裁切的问题",
+        "修复 iOS 键盘弹出后聊天页可滚动、出现纯色空屏及键盘上方留白的问题"
       ]
     },
     "en": {
-      "title": "Slower starry background motion",
+      "title": "Mobile chat composer fixes",
       "items": [
-        "Further slowed the starry vortices and drifting clouds for a calmer chat background",
-        "Preserved subtle speed and direction differences while reducing visual distraction"
+        "Fixed composer tool buttons being clipped on some Android devices and mobile emulation",
+        "Fixed iOS page scrolling, blank screens, and gaps above the keyboard while typing"
       ]
     }
   }

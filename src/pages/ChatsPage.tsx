@@ -3331,6 +3331,7 @@ function LiveChatsPage({
   const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [visualViewportHeight, setVisualViewportHeight] = useState(0);
+  const visualViewportBaselineRef = useRef(0);
   const currentUserId = session?.user.user_id ?? 0;
   const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
   const frequentEmojis = emojiUsage.slice(0, 8).map((item) => item.emoji);
@@ -5213,7 +5214,7 @@ function LiveChatsPage({
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const shouldLockViewport = Boolean(selectedChat) && typeof window !== "undefined" && window.innerWidth <= 900;
+    const shouldLockViewport = Boolean(selectedChat) && mobileComposerLayout;
     if (!shouldLockViewport) {
       delete document.body.dataset.chatDetail;
       return;
@@ -5224,7 +5225,7 @@ function LiveChatsPage({
     return () => {
       delete document.body.dataset.chatDetail;
     };
-  }, [selectedChat]);
+  }, [mobileComposerLayout, selectedChat]);
 
   useEffect(() => {
     return () => {
@@ -5633,23 +5634,49 @@ function LiveChatsPage({
 
     const viewport = window.visualViewport;
     const root = document.documentElement;
+    const body = document.body;
 
     const updateViewport = () => {
       const nextHeight = Math.round(viewport?.height ?? window.innerHeight);
+      const nextWidth = Math.round(viewport?.width ?? window.innerWidth);
+      visualViewportBaselineRef.current = Math.max(
+        visualViewportBaselineRef.current,
+        Math.round(window.innerHeight),
+        nextHeight,
+      );
+      const activeElement = document.activeElement;
+      const isTextEntryFocused = activeElement instanceof HTMLInputElement
+        || activeElement instanceof HTMLTextAreaElement
+        || activeElement instanceof HTMLSelectElement
+        || activeElement instanceof HTMLElement && activeElement.isContentEditable;
+      const keyboardOpen = isTextEntryFocused
+        && visualViewportBaselineRef.current - nextHeight > 120;
+
       root.style.setProperty("--app-visual-viewport-height", `${nextHeight}px`);
+      root.style.setProperty("--app-visual-viewport-width", `${nextWidth}px`);
+      if (keyboardOpen) body.dataset.chatKeyboard = "open";
+      else delete body.dataset.chatKeyboard;
       setVisualViewportHeight(nextHeight);
+      if (window.scrollY !== 0) window.scrollTo(0, 0);
     };
 
     updateViewport();
     viewport?.addEventListener("resize", updateViewport);
     viewport?.addEventListener("scroll", updateViewport);
     window.addEventListener("resize", updateViewport);
+    document.addEventListener("focusin", updateViewport);
+    document.addEventListener("focusout", updateViewport);
 
     return () => {
       viewport?.removeEventListener("resize", updateViewport);
       viewport?.removeEventListener("scroll", updateViewport);
       window.removeEventListener("resize", updateViewport);
+      document.removeEventListener("focusin", updateViewport);
+      document.removeEventListener("focusout", updateViewport);
       root.style.removeProperty("--app-visual-viewport-height");
+      root.style.removeProperty("--app-visual-viewport-width");
+      delete body.dataset.chatKeyboard;
+      visualViewportBaselineRef.current = 0;
     };
   }, [selectedChat]);
 

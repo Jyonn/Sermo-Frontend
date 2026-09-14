@@ -2,6 +2,20 @@
    descendants only consume the remaining flex space, so tall iOS viewports and
    expanding composer panels cannot turn a screen into a content-height page. */
 @media (max-width: 900px) {
+  html:has(body[data-chat-detail="true"]) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body[data-chat-detail="true"] {
+    position: fixed;
+    inset: 0;
+    width: var(--app-visual-viewport-width, 100%);
+    height: var(--app-visual-viewport-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+
   body[data-chat-detail="true"],
   body[data-chat-detail="true"] #root {
     height: var(--app-visual-viewport-height, 100dvh);
@@ -53,10 +67,14 @@
 
   body[data-chat-detail="true"] .composer.is-mobile-quiet {
     display: flex;
-    max-height: min(62%, 520px);
     flex: 0 1 auto;
     flex-direction: column;
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
+  }
+
+  body[data-chat-detail="true"][data-chat-keyboard="open"] .composer.is-mobile-quiet {
+    padding-bottom: 8px;
   }
 
   body[data-chat-detail="true"] .chat-detail-active .composer {
