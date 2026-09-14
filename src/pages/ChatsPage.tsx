@@ -7595,6 +7595,7 @@ function LiveChatsPage({
                 frame="none"
               />
             ))}
+            {counterpartOverflow ? <span className="submission-avatar-overflow">+{counterpartOverflow}</span> : null}
           </span>
         ) : (
           <UserAvatar
@@ -7609,7 +7610,6 @@ function LiveChatsPage({
         {chat.unread ? (
           <span className={`small-badge chat-list-unread${chat.submission ? " is-submission-dot" : ""}${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.submission || chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
         ) : null}
-        {chat.submission && counterpartOverflow ? <span className="submission-avatar-overflow">+{counterpartOverflow}</span> : null}
       </div>
       <div className="chat-copy">
         {chat.submission ? (

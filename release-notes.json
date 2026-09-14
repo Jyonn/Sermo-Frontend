@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.19",
+  "id": "2026.09.14.20",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表视觉优化",
+      "title": "投稿参与者头像优化",
       "items": [
-        "多人投稿和审批会话最多展示两个头像，其余人数以徽标呈现",
-        "统一头像边框与内容比例，并弱化共同投稿和审批人数标签"
+        "剩余参与者人数现在以圆形徽标叠放在第二个头像右下角",
+        "多人头像组合更加紧凑，人数信息更易识别"
       ]
     },
     "en": {
-      "title": "Refined submission list visuals",
+      "title": "Refined submission participant avatars",
       "items": [
-        "Submission and review conversations now show up to two avatars with a remaining-count badge",
-        "Balanced avatar framing and softened collaboration count labels"
+        "Remaining participant counts now appear in a circular badge over the second avatar",
+        "Multi-person avatar groups are more compact and easier to scan"
       ]
     }
   }
