@@ -528,7 +528,7 @@ export default function SquarePage() {
   const selectedFeedDate = normalizeFeedDate(searchParams.get("date"));
   const selectedFeedKeyword = (searchParams.get("keyword") || "").trim().slice(0, 100);
   const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedKeyword);
-  const squareWorkspace = features.submissionEnabled && searchParams.get("workspace") === "submissions" ? "submission" : "square";
+  const squareWorkspace = features.submissionEnabled && (searchParams.get("workspace") === "submissions" || location.pathname.startsWith("/app/square/submissions/")) ? "submission" : "square";
   const canReviewSubmissions = Boolean(session?.user.official || session?.user.operator);
   const requestedSubmissionView = searchParams.get("view");
   const submissionView: "author" | "reviewer" = requestedSubmissionView === "author" || requestedSubmissionView === "reviewer"
@@ -1983,6 +1983,11 @@ export default function SquarePage() {
   const closeSubmissionWorkspace = () => {
     if (submissionTransitioning || squareWorkspace === "square") return;
     setSubmissionTransitioning(true);
+    if (location.pathname.startsWith("/app/square/submissions/")) {
+      navigate("/app/square", { replace: true });
+      window.setTimeout(() => setSubmissionTransitioning(false), 320);
+      return;
+    }
     const next = new URLSearchParams(searchParams);
     next.delete("workspace");
     setSearchParams(next);

@@ -2942,7 +2942,9 @@ function LiveChatsPage({
     newSubmissionDraftIdRef.current = `submission-${crypto.randomUUID()}`.slice(0, 64);
   }, [location.key, newSubmissionRoute]);
   const listPath = submissionMode && squareIntegrated ? `/app/square?workspace=submissions&view=${submissionView}` : submissionMode ? "/app/submissions" : "/app/chats";
-  const chatPath = (id: number) => submissionMode ? `/app/submissions/${id}?view=${submissionView}` : `/app/chats/${id}`;
+  const chatPath = (id: number) => submissionMode && squareIntegrated
+    ? `/app/square/submissions/${id}?workspace=submissions&view=${submissionView}`
+    : submissionMode ? `/app/submissions/${id}?view=${submissionView}` : `/app/chats/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
 
   useEffect(() => {
@@ -7688,17 +7690,9 @@ function LiveChatsPage({
       ), 0)
     : 0;
 
-  if (embeddedListOnly && !displayedChat) {
-    return (
-      <section className="square-embedded-submission-list">
-        {renderChatList(true)}
-        <AsyncErrorDialog message={pageError ?? ""} onClose={() => setPageError(null)} open={Boolean(pageError)} />
-      </section>
-    );
-  }
-
   return (
     <AppChrome
+      embedded={embeddedListOnly}
       title={t("chat.title")}
       hideTopbar={!displayedChat}
       hideMobileNav={Boolean(displayedChat)}
@@ -7769,7 +7763,7 @@ function LiveChatsPage({
       }
     >
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
-        <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : !session?.user?.verified ? " has-verification-banner" : ""}${squareIntegrated ? " is-square-integrated" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
+        <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : !session?.user?.verified ? " has-verification-banner" : ""}${squareIntegrated ? " is-square-integrated" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList(embeddedListOnly)}</section>
 
         <section
           ref={chatMainPaneRef}

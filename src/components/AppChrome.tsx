@@ -20,6 +20,7 @@ interface AppChromeProps {
   topbarStyle?: CSSProperties;
   topbarProgress?: number | null;
   shellClassName?: string;
+  embedded?: boolean;
   publicHeader?: boolean;
   guestSpaceBrand?: {
     name: string;
@@ -39,6 +40,7 @@ export function AppChrome({
   topbarStyle,
   topbarProgress,
   shellClassName,
+  embedded = false,
   publicHeader = false,
   guestSpaceBrand,
 }: AppChromeProps) {
@@ -55,6 +57,8 @@ export function AppChrome({
   const visibleSpaceBrand = guestSpaceBrand ?? (sessionSpace
     ? { name: sessionSpace.name, avatarUri: sessionSpace.official_user?.avatar_uri }
     : undefined);
+
+  if (embedded) return <>{children}</>;
 
   return (
     <>

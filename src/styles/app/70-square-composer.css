@@ -439,6 +439,32 @@
   .square-embedded-submission-list .submission-status-filters {
     padding-inline: max(18px, calc((100% - 820px) / 2));
   }
+  .square-feed-screen.is-submission-workspace {
+    overflow: hidden;
+  }
+  .square-workspace-surface.is-submission {
+    height: 100%;
+    min-height: 0;
+  }
+  .square-workspace-surface.is-submission .chat-mobile-layout {
+    grid-template-columns: 350px minmax(0, 1fr);
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .square-workspace-surface.is-submission .mobile-chat-list-screen {
+    padding-top: 0;
+  }
+  .square-workspace-surface.is-submission .mobile-chat-list-screen .chat-list-screen-body {
+    width: calc(100% + 36px);
+    margin-inline: -18px;
+    padding-inline: 18px;
+  }
+  .square-workspace-surface.is-submission .mobile-chat-list-screen .submission-status-filters {
+    padding-inline: 0;
+  }
 }
 .submission-recipient-dropdown {
   position: absolute;

@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.11",
+  "id": "2026.09.14.12",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "桌面广场工作台焕新",
+      "title": "投稿工作台修复",
       "items": [
-        "将发言列表与评论详情整合为统一的大圆角工作台，避免重复展示发言正文",
-        "详情区域新增精简作者栏，以纯图标快捷完成点赞、评论与分享"
+        "修复广场切换投稿后只显示投稿列表、无法并排查看详情的问题",
+        "桌面投稿列表与详情采用和聊天一致的列宽与连续工作台布局"
       ]
     },
     "en": {
-      "title": "Refined desktop Square workspace",
+      "title": "Submission workspace fixes",
       "items": [
-        "Combined the statement feed and discussion into one rounded workspace without repeating statement content",
-        "Added a compact author header with icon-only like, comment, and share actions"
+        "Fixed the Square submission view showing only the list without its detail pane",
+        "Aligned desktop submission list and detail widths with the chat workspace"
       ]
     }
   }

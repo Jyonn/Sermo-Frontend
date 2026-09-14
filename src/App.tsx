@@ -139,6 +139,14 @@ export default function App() {
           }
         />
         <Route
+          path="/app/square/submissions/:chatId"
+          element={
+            <RequireAuth>
+              <RequireSubmissionFeature><SquarePage /></RequireSubmissionFeature>
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/app/square/statements/:statementId"
           element={
             <RequireAuth>
