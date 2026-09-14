@@ -1,19 +1,17 @@
 {
-  "id": "2026.09.14.20",
+  "id": "2026.09.14.21",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "投稿参与者头像优化",
+      "title": "投稿人数徽标优化",
       "items": [
-        "剩余参与者人数现在以圆形徽标叠放在第二个头像右下角",
-        "多人头像组合更加紧凑，人数信息更易识别"
+        "剩余参与者人数徽标现在更紧密地叠放在第二个头像右下角"
       ]
     },
     "en": {
-      "title": "Refined submission participant avatars",
+      "title": "Refined submission count badge",
       "items": [
-        "Remaining participant counts now appear in a circular badge over the second avatar",
-        "Multi-person avatar groups are more compact and easier to scan"
+        "The remaining-participant badge now overlaps the second avatar more tightly"
       ]
     }
   }

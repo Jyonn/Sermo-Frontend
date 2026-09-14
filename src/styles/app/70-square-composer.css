@@ -794,8 +794,8 @@
 .submission-avatar-overflow {
   position: absolute;
   z-index: 3;
-  right: 1px;
-  bottom: 1px;
+  right: 7px;
+  bottom: 7px;
   display: grid;
   width: 20px;
   height: 20px;
