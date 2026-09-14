@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.7",
+  "id": "2026.09.14.8",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "iPhone 键盘贴合修复",
+      "title": "星空背景动效放缓",
       "items": [
-        "修复聊天输入框与 iPhone 输入法之间出现额外空档的问题",
-        "改用真实可视区域适配键盘，并避免输入聚焦时页面意外缩放"
+        "进一步降低星空旋涡与云层的移动速度，让聊天背景更舒缓",
+        "保留不同星层的速度差和方向，减少持续运动带来的视觉干扰"
       ]
     },
     "en": {
-      "title": "Improved iPhone keyboard fit",
+      "title": "Slower starry background motion",
       "items": [
-        "Removed the extra gap between the chat composer and the iPhone keyboard",
-        "Chat now follows the visible viewport without unexpected focus zoom"
+        "Further slowed the starry vortices and drifting clouds for a calmer chat background",
+        "Preserved subtle speed and direction differences while reducing visual distraction"
       ]
     }
   }
