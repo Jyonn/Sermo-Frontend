@@ -1,10 +1,10 @@
 {
   "totals": {
-    "rules": 7995,
+    "rules": 7929,
     "important": 169,
     "duplicateDeclarations": 0,
-    "duplicateRuleBlocks": 311,
-    "crossFileDuplicateSelectors": 104,
+    "duplicateRuleBlocks": 281,
+    "crossFileDuplicateSelectors": 72,
     "complexSelectors": 57,
     "longLines": 101,
     "compatibilityRules": 0
