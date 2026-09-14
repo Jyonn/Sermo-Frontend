@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.4",
+  "id": "2026.09.14.5",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "微信账号绑定更安全",
+      "title": "首次微信登录资料确认",
       "items": [
-        "账号与安全中新增微信解绑入口，并通过当前密码保护解绑操作",
-        "同一空间账号不再允许同时关联多个微信账户"
+        "首次进入空间时会引导获取微信头像和昵称",
+        "头像和昵称完整后才能开启新用户，避免生成无头像的默认身份"
       ]
     },
     "en": {
-      "title": "Safer WeChat account linking",
+      "title": "WeChat profile confirmation for first sign-in",
       "items": [
-        "Added password-protected WeChat unlinking under Account & Security",
-        "A space account can no longer be linked to multiple WeChat accounts"
+        "First-time sign-in now asks for a WeChat avatar and nickname",
+        "A new account can only be created after both profile fields are complete"
       ]
     }
   }
