@@ -2,6 +2,7 @@
   "totals": {
     "rules": 7995,
     "important": 169,
+    "duplicateDeclarations": 0,
     "duplicateRuleBlocks": 311,
     "crossFileDuplicateSelectors": 104,
     "complexSelectors": 57,
@@ -11,66 +12,79 @@
   "perFile": {
     "00-foundation.css": {
       "important": 5,
+      "duplicateDeclarations": 0,
       "complexSelectors": 8,
       "longLines": 28
     },
     "10-chat-city.css": {
       "important": 41,
+      "duplicateDeclarations": 0,
       "complexSelectors": 4,
       "longLines": 10
     },
     "20-profile-settings.css": {
       "important": 4,
+      "duplicateDeclarations": 0,
       "complexSelectors": 3,
       "longLines": 0
     },
     "30-personalization.css": {
       "important": 23,
+      "duplicateDeclarations": 0,
       "complexSelectors": 29,
       "longLines": 5
     },
     "35-avatar-frames.css": {
       "important": 0,
+      "duplicateDeclarations": 0,
       "complexSelectors": 2,
       "longLines": 1
     },
     "39-personalization-tools.css": {
       "important": 36,
+      "duplicateDeclarations": 0,
       "complexSelectors": 6,
       "longLines": 15
     },
     "40-square-platform.css": {
       "important": 31,
+      "duplicateDeclarations": 0,
       "complexSelectors": 1,
       "longLines": 39
     },
     "50-chat-settings.css": {
       "important": 0,
+      "duplicateDeclarations": 0,
       "complexSelectors": 0,
       "longLines": 1
     },
     "60-profile-themes.css": {
       "important": 2,
+      "duplicateDeclarations": 0,
       "complexSelectors": 1,
       "longLines": 2
     },
     "70-square-composer.css": {
       "important": 4,
+      "duplicateDeclarations": 0,
       "complexSelectors": 1,
       "longLines": 0
     },
     "80-chat-messages.css": {
       "important": 23,
+      "duplicateDeclarations": 0,
       "complexSelectors": 2,
       "longLines": 0
     },
     "81-chat-moderation.css": {
       "important": 0,
+      "duplicateDeclarations": 0,
       "complexSelectors": 0,
       "longLines": 0
     },
     "90-viewport.css": {
       "important": 0,
+      "duplicateDeclarations": 0,
       "complexSelectors": 0,
       "longLines": 0
     }

@@ -32,3 +32,7 @@ Do not move a rule between numbered files as part of an unrelated visual fix.
 New shared structure belongs in the owning component file and theme paint stays
 in a theme file. Do not add compatibility or override files: update the
 canonical component rule and its responsive state together.
+
+`npm run styles:check` is part of every production build. It rejects unregistered
+modules, reordered imports and increases in duplicate selectors, duplicate
+declarations, `!important` usage, oversized rules and selector complexity.

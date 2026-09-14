@@ -636,9 +636,7 @@ html.material-symbols-ready .material-symbols-outlined { visibility: visible; }
 
 #root {
   width: 100%;
-  height: 100%;
   height: 100dvh;
-  min-height: 100%;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -1469,11 +1467,9 @@ img {
 
 .verification-banner-copy {
   min-width: 0;
-  display: grid;
   display: flex;
   gap: 7px;
   align-items: baseline;
-  justify-items: start;
   text-align: left;
 }
 
@@ -7138,7 +7134,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .message-image-location strong {
-  display: block;
   color: #171a17;
   font-family: "Noto Serif SC", "Songti SC", serif;
   font-size: clamp(0.92rem, 1.5vw, 1.12rem);

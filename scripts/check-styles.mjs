@@ -61,12 +61,19 @@ async function collectMetrics() {
   const perFile = {};
   let rules = 0;
   let important = 0;
+  let duplicateDeclarations = 0;
   let complexSelectors = 0;
   let longLines = 0;
 
   for (const file of expectedFiles.filter((name) => diskFiles.includes(name))) {
     const source = await readFile(path.join(styleDir, file), "utf8");
-    const fileMetrics = { rules: 0, important: 0, complexSelectors: 0, longLines: 0 };
+    const fileMetrics = {
+      rules: 0,
+      important: 0,
+      duplicateDeclarations: 0,
+      complexSelectors: 0,
+      longLines: 0,
+    };
     fileMetrics.longLines = source.split("\n").filter((line) => line.length > 500).length;
     longLines += fileMetrics.longLines;
     const parsed = postcss.parse(source, { from: file });
@@ -80,6 +87,17 @@ async function collectMetrics() {
       const owners = ruleOwners.get(ruleKey) ?? [];
       owners.push(file);
       ruleOwners.set(ruleKey, owners);
+
+      const declarations = new Set();
+      rule.each((child) => {
+        if (child.type !== "decl") return;
+        const property = child.prop.toLowerCase();
+        if (declarations.has(property)) {
+          duplicateDeclarations += 1;
+          fileMetrics.duplicateDeclarations += 1;
+        }
+        declarations.add(property);
+      });
       if (selectorWeight(selector) > 120) {
         complexSelectors += 1;
         fileMetrics.complexSelectors += 1;
@@ -108,6 +126,7 @@ async function collectMetrics() {
     totals: {
       rules,
       important,
+      duplicateDeclarations,
       duplicateRuleBlocks,
       crossFileDuplicateSelectors,
       complexSelectors,
@@ -139,6 +158,7 @@ if (process.argv.includes("--update-baseline")) {
         file,
         {
           important: values.important,
+          duplicateDeclarations: values.duplicateDeclarations,
           complexSelectors: values.complexSelectors,
           longLines: values.longLines,
         },
