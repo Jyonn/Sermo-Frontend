@@ -2,8 +2,12 @@
 @import "./src/styles/app/10-chat-city.css";
 @import "./src/styles/app/20-profile-settings.css";
 @import "./src/styles/app/30-personalization.css";
+@import "./src/styles/app/35-avatar-frames.css";
+@import "./src/styles/app/39-personalization-tools.css";
 @import "./src/styles/app/40-square-platform.css";
 @import "./src/styles/app/50-chat-settings.css";
 @import "./src/styles/app/60-profile-themes.css";
 @import "./src/styles/app/70-square-composer.css";
-@import "./src/styles/app/80-chat-overrides.css";
+@import "./src/styles/app/80-chat-messages.css";
+@import "./src/styles/app/81-chat-moderation.css";
+@import "./src/styles/app/90-viewport.css";

@@ -1,0 +1,1102 @@
+/* Avatar frame protocol: fixed footprint, proportional inset, shared silhouette. */
+@keyframes avatar-frame-turn { to { transform: rotate(1turn); } }
+@keyframes avatar-blossom { to { transform: rotate(12deg) scale(1.1); } }
+@keyframes avatar-wing { to { scale: .75 1; opacity: .75; } }
+@keyframes avatar-twinkle { to { transform: scale(.45); opacity: .3; } }
+@keyframes avatar-pulse { to { inset: -18px; opacity: 0; } }
+@keyframes avatar-snow { to { top: 108%; transform: translateX(12px); opacity: .2; } }
+@keyframes avatar-firefly { to { transform: translate(8px, -6px) scale(.55); opacity: .45; } }
+@keyframes avatar-aurora-turn { to { transform: rotate(360deg); } }
+@keyframes avatar-aurora-ribbon { to { opacity: .35; transform: translateY(4px) rotate(12deg); } }
+@keyframes avatar-soundwave { to { transform: scaleY(.36); opacity: .6; } }
+@keyframes avatar-lucky-sway { to { transform: rotate(8deg); } }
+@keyframes avatar-portal-turn { to { transform: rotate(360deg); } }
+@keyframes avatar-portal-pulse { to { opacity: .48; transform: scale(.72); } }
+
+.user-avatar {
+  --avatar-frame-inset: 0%;
+  --avatar-frame-paint: transparent;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  contain: layout;
+}
+
+.avatar-frame-clip {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border-radius: inherit;
+  background: inherit;
+}
+
+.user-avatar.has-avatar-frame {
+  --avatar-frame-inset: 6%;
+  overflow: visible;
+  background: transparent;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-clip {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding: var(--avatar-frame-inset);
+  overflow: hidden;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  background: var(--avatar-frame-paint);
+  box-shadow: none;
+  transform: none;
+  isolation: isolate;
+}
+
+.user-avatar.has-avatar-frame .avatar-image,
+.user-avatar.has-avatar-frame .avatar-label,
+.user-avatar.has-avatar-frame .avatar-group-stack {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  border-radius: inherit;
+}
+
+.user-avatar.has-avatar-frame .avatar-image {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.user-avatar.has-avatar-frame .avatar-group-stack {
+  position: absolute;
+  inset: var(--avatar-frame-inset);
+}
+
+.user-avatar.has-avatar-frame .avatar-frame-ornament {
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: inherit;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-clip::before,
+.user-avatar.has-avatar-frame > .avatar-frame-clip::after {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Every material paints the same proportional frame band. */
+.avatar-frame-orbit {
+  --avatar-frame-paint: conic-gradient(from 25deg,#9a7133,#f4e5b6,#315f52,#d1ad63,#9a7133);
+}
+.avatar-frame-pixel {
+  --avatar-frame-paint: linear-gradient(135deg,#1d5a45 0 32%,#e4b14f 32% 62%,#83d3b9 62%);
+}
+.avatar-frame-aurora {
+  --avatar-frame-paint: conic-gradient(from 20deg,#2dd4a4,#8ad8ff,#f6cf72,#42b7a5,#2dd4a4);
+}
+.avatar-frame-polaroid {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: linear-gradient(#fffdf5 0 78%,#eee5ce 78%);
+}
+.avatar-frame-soundwave {
+  --avatar-frame-paint: linear-gradient(145deg,#155d50,#32c99a 48%,#d9fff3);
+}
+.avatar-frame-lucky {
+  --avatar-frame-paint: conic-gradient(from 45deg,#b53d31,#f4c35f,#8e2825,#f5dc8c,#b53d31);
+}
+.avatar-frame-portal {
+  --avatar-frame-paint: linear-gradient(145deg,#173f38,#9ed8c3 48%,#d9ac50);
+}
+.avatar-frame-vine {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: conic-gradient(#4f7c4a,#9ebf72,#6d9b58,#e7dcae,#4f7c4a);
+}
+.avatar-frame-blossom {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: radial-gradient(circle at 18% 16%,#f8d15e 0 5%,transparent 6%),radial-gradient(circle at 80% 76%,#fff0f4 0 8%,transparent 9%),#d98b9c;
+}
+.avatar-frame-butterfly {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: conic-gradient(from 45deg,#7bd9d0,#9b6bc1,#f2b964,#7759a7,#7bd9d0);
+}
+.avatar-frame-coral {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: repeating-linear-gradient(65deg,#e36c55 0 10%,#ffb58e 10% 17%,#fff3ea 17% 22%);
+}
+.avatar-frame-moon {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: radial-gradient(circle at 78% 18%,#f5d77c 0 11%,transparent 12%),linear-gradient(145deg,#293b68,#53699b);
+}
+.avatar-frame-crown {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: linear-gradient(135deg,#ffe491,#d99b27 48%,#fff0b2);
+}
+.avatar-frame-headphones {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: linear-gradient(90deg,#243d41 0 18%,#35bca0 18% 30%,#e7fbf7 30% 70%,#35bca0 70% 82%,#243d41 82%);
+}
+.avatar-frame-cat-ears {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: linear-gradient(145deg,#6a4d49,#efa59f 48%,#7a5550);
+}
+.avatar-frame-ribbon-bow {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: conic-gradient(from 30deg,#d95f8b,#f5c15c,#f5a4be,#d95f8b);
+}
+.avatar-frame-camera {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: linear-gradient(135deg,#263934 0 22%,#e5ad43 22% 28%,#f1ead7 28% 72%,#e5ad43 72% 78%,#263934 78%);
+}
+.avatar-frame-comet {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: conic-gradient(from 210deg,#436ca4,#65d9cb 35%,#f3c75a 43%,transparent 58%,#436ca4);
+}
+.avatar-frame-radar {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: conic-gradient(from 20deg,#197252,#51e1a7 18%,#e8fff7 19% 48%,#197252 49%);
+}
+.avatar-frame-pulse {
+  --avatar-frame-inset: 6%;
+  --avatar-frame-paint: radial-gradient(closest-side,transparent 55%,#25a97b 57% 70%,#9ae5ca 72%);
+}
+.avatar-frame-snowfall {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: radial-gradient(circle at 20% 15%,#fff 0 4%,transparent 5%),radial-gradient(circle at 70% 76%,#fff 0 5%,transparent 6%),#8bb9d3;
+}
+.avatar-frame-firefly {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: radial-gradient(circle at 20% 22%,#e8f26e 0 5%,transparent 8%),radial-gradient(circle at 78% 68%,#e8f26e 0 4%,transparent 8%),#385d3d;
+}
+.avatar-frame-stamp {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: repeating-conic-gradient(#af4a43 0 7deg,#fff8e9 7deg 12deg);
+}
+.avatar-frame-embroidery {
+  --avatar-frame-inset: 7%;
+  --avatar-frame-paint: repeating-linear-gradient(45deg,#285f55 0 8%,#f2be55 8% 12%,#fff8ed 12% 17%);
+}
+.avatar-frame-stainedglass {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: repeating-conic-gradient(#284c67 0 8deg,#e65b60 9deg 22deg,#efc84b 23deg 35deg,#4ab39e 36deg 50deg);
+}
+.avatar-frame-papercut {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: repeating-conic-gradient(#b72e35 0 12deg,#ef665f 12deg 20deg,#fff2df 20deg 24deg);
+}
+.avatar-frame-mechanical {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: repeating-conic-gradient(#48534f 0 8deg,#d8ddd9 8deg 15deg,#e7a83c 15deg 19deg);
+}
+/* Legacy frame ornaments stay expressive but can no longer escape the component. */
+.user-avatar.has-avatar-frame .avatar-frame-ornament > i {
+  max-width: 28%;
+  max-height: 34%;
+}
+
+.user-avatar.has-avatar-frame .avatar-frame-crown::before,
+.user-avatar.has-avatar-frame .avatar-frame-cat-ears::before,
+.user-avatar.has-avatar-frame .avatar-frame-cat-ears::after,
+.user-avatar.has-avatar-frame .avatar-frame-headphones::before,
+.user-avatar.has-avatar-frame .avatar-frame-headphones::after,
+.user-avatar.has-avatar-frame .avatar-frame-ribbon-bow::before {
+  inset-block-start: 0;
+  max-height: 30%;
+}
+
+/* Frame identity audit: each title keeps one unmistakable, in-bounds motif. */
+.user-avatar.has-avatar-frame > .avatar-frame-clip::before,
+.user-avatar.has-avatar-frame > .avatar-frame-clip::after {
+  content: none;
+}
+
+.user-avatar.has-avatar-frame .avatar-frame-ornament > i {
+  display: none;
+}
+
+/* Event frame: keep the portrait clipped, but let the transparent artwork break the avatar edge. */
+.user-avatar.has-avatar-frame > .avatar-frame-spider-web {
+  --avatar-frame-inset: 9%;
+  --avatar-frame-paint: transparent;
+  overflow: visible;
+  background: transparent;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-spider-web::after {
+  position: absolute;
+  z-index: 3;
+  inset: -18%;
+  display: block;
+  max-width: none;
+  max-height: none;
+  background: url("../../assets/activity/friendly-neighborhood/spider-avatar-frame-512.webp") center / contain no-repeat;
+  content: "";
+  filter: drop-shadow(0 2px 3px rgba(5, 18, 31, .2));
+  pointer-events: none;
+}
+
+/* 01 Star orbit: elliptical track and a moving planet. */
+.user-avatar.has-avatar-frame > .avatar-frame-orbit::before {
+  position: absolute;
+  z-index: 2;
+  inset: 8% 1%;
+  display: block;
+  border: max(1px, .018em) solid rgba(255, 244, 202, .9);
+  border-radius: 48%;
+  content: "";
+  transform: rotate(-24deg);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-orbit .avatar-frame-ornament > i:first-child {
+  display: block;
+  top: 4%;
+  right: 15%;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f0c65f;
+  box-shadow: 0 0 6px #f0c65f;
+  animation: avatar-orbit-planet 3.2s ease-in-out infinite alternate;
+}
+
+/* 02 Pixel: stepped corner blocks, never a smooth gradient-only ring. */
+.user-avatar.has-avatar-frame > .avatar-frame-pixel {
+  --avatar-frame-paint: repeating-conic-gradient(from 45deg,#1d5a45 0 12deg,#83d3b9 12deg 24deg,#e4b14f 24deg 36deg);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-pixel::before {
+  position: absolute;
+  z-index: 2;
+  inset: 2%;
+  display: block;
+  border: 2px solid transparent;
+  border-image: repeating-linear-gradient(90deg,#173f33 0 8%,transparent 8% 13%) 4;
+  content: "";
+}
+
+/* 03 Aurora: translucent ribbons crossing a moving polar-light band. */
+.user-avatar.has-avatar-frame > .avatar-frame-aurora::before {
+  position: absolute;
+  z-index: 2;
+  inset: -35%;
+  display: block;
+  border-radius: 44%;
+  background: conic-gradient(from 20deg,transparent,#8ad8ff88,#f6cf7288,#2dd4a488,transparent 58%);
+  content: "";
+  animation: avatar-aurora-turn 7s linear infinite;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-aurora .avatar-frame-ornament > i:nth-child(-n+2) {
+  display: block;
+  width: 34%;
+  height: 7%;
+  border-radius: 999px;
+  background: #e8fff8c7;
+  filter: blur(1px);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-aurora .avatar-frame-ornament > i:nth-child(1) {
+  top: 9%;
+  left: 2%;
+  transform: rotate(-24deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-aurora .avatar-frame-ornament > i:nth-child(2) {
+  right: 1%;
+  bottom: 12%;
+  transform: rotate(58deg);
+}
+
+/* 04 Polaroid: white print stock, weighted lower margin, and tape. */
+.user-avatar.has-avatar-frame > .avatar-frame-polaroid {
+  --avatar-frame-inset: 8%;
+  --avatar-frame-paint: #fffdf5;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-polaroid::after {
+  position: absolute;
+  z-index: 2;
+  right: 5%;
+  bottom: 3%;
+  left: 5%;
+  display: block;
+  height: 12%;
+  border-radius: 0 0 8% 8%;
+  background: #fffdf5;
+  content: "";
+  box-shadow: 0 -1px #776c5724;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-polaroid .avatar-frame-ornament > i:first-child {
+  display: block;
+  top: 1%;
+  left: 30%;
+  width: 40%;
+  height: 9%;
+  border-radius: 2px;
+  background: #e7bd7399;
+  transform: rotate(-4deg);
+}
+
+/* 05 Soundwave: a clean baseline and four animated equalizer bars. */
+.user-avatar.has-avatar-frame > .avatar-frame-soundwave::before {
+  position: absolute;
+  z-index: 2;
+  right: 20%;
+  bottom: 10%;
+  left: 20%;
+  display: block;
+  height: max(1px,.025em);
+  border-radius: 999px;
+  background: #176d59;
+  content: "";
+  opacity: .7;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-soundwave .avatar-frame-ornament > i {
+  display: block;
+  bottom: 3%;
+  width: 7%;
+  border-radius: 999px;
+  background: #32c99a;
+  transform-origin: center bottom;
+  animation: avatar-soundwave 680ms ease-in-out infinite alternate;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(1) {
+  left: 27%;
+  height: 13%;
+}.user-avatar.has-avatar-frame > .avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(2) {
+  left: 40%;
+  height: 24%;
+  animation-delay: -480ms;
+}.user-avatar.has-avatar-frame > .avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(3) {
+  right: 39%;
+  height: 18%;
+  animation-delay: -240ms;
+}.user-avatar.has-avatar-frame > .avatar-frame-soundwave .avatar-frame-ornament > i:nth-child(4) {
+  right: 27%;
+  height: 10%;
+  animation-delay: -600ms;
+}
+
+/* 06 Lucky knot: red diamond seal, gold cord, and tassel. */
+.user-avatar.has-avatar-frame > .avatar-frame-lucky .avatar-frame-ornament > i:nth-child(1) {
+  display: block;
+  top: 2%;
+  right: 2%;
+  width: 22%;
+  aspect-ratio: 1;
+  border: 1px solid #f4c35f;
+  border-radius: 20% 45% 20% 45%;
+  background: #b9302d;
+  transform: rotate(45deg);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-lucky .avatar-frame-ornament > i:nth-child(2) {
+  display: block;
+  top: 20%;
+  right: 10%;
+  width: 3%;
+  height: 25%;
+  border-radius: 999px;
+  background: #d9a83f;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-lucky .avatar-frame-ornament > i:nth-child(3) {
+  display: block;
+  top: 42%;
+  right: 4%;
+  width: 14%;
+  height: 13%;
+  border-radius: 50% 50% 30% 30%;
+  background: linear-gradient(90deg,#ad2d2b 0 40%,#efc35d 41% 59%,#ad2d2b 60%);
+  animation: avatar-lucky-sway 2.4s ease-in-out infinite alternate;
+}
+
+/* 07 Time portal: rotating segmented gate and a pulsing key light. */
+.user-avatar.has-avatar-frame > .avatar-frame-portal::before {
+  position: absolute;
+  z-index: 2;
+  inset: 1%;
+  display: block;
+  border-radius: inherit;
+  background: repeating-conic-gradient(from 0deg,#175f51 0 13deg,transparent 13deg 23deg,#d9ac50 23deg 29deg,transparent 29deg 42deg);
+  content: "";
+  mask: linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 6%;
+  animation: avatar-portal-turn 12s linear infinite;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i:first-child {
+  display: block;
+  top: 2%;
+  left: 45%;
+  width: 11%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e0aa43;
+  box-shadow: 0 0 7px #e0aa43;
+  animation: avatar-portal-pulse 1.8s ease-in-out infinite alternate;
+}
+
+/* 08 Vine: a continuous green stem with four leaves. */
+.user-avatar.has-avatar-frame > .avatar-frame-vine::before {
+  position: absolute;
+  z-index: 2;
+  inset: 3%;
+  display: block;
+  border: 2px dashed #d9e7a8;
+  border-radius: inherit;
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-vine .avatar-frame-ornament > i {
+  display: block;
+  width: 14%;
+  aspect-ratio: 1;
+  border-radius: 80% 0 80% 0;
+  background: #9fca72;
+  box-shadow: inset 0 0 0 1px #4b713a55;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-vine .avatar-frame-ornament > i:nth-child(1) {
+  top: 1%;
+  left: 10%;
+  transform: rotate(-18deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-vine .avatar-frame-ornament > i:nth-child(2) {
+  right: 1%;
+  top: 28%;
+  transform: rotate(40deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-vine .avatar-frame-ornament > i:nth-child(3) {
+  bottom: 1%;
+  left: 25%;
+  transform: rotate(75deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-vine .avatar-frame-ornament > i:nth-child(4) {
+  left: 1%;
+  top: 48%;
+  transform: rotate(120deg);
+}
+
+/* 09 Blossom branch: visible five-petal flowers anchored to the frame. */
+.user-avatar.has-avatar-frame > .avatar-frame-blossom::before {
+  position: absolute;
+  z-index: 2;
+  inset: 8% 4%;
+  display: block;
+  border-top: 2px solid #8e5a4f;
+  border-radius: 50%;
+  content: "";
+  transform: rotate(-18deg);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-blossom .avatar-frame-ornament > i {
+  display: block;
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle,#f8d15e 0 18%,#f4a9ba 20% 55%,transparent 57%);
+  filter: drop-shadow(0 1px 1px #813b5230);
+  animation: avatar-blossom 2.8s ease-in-out infinite alternate;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-blossom .avatar-frame-ornament > i:nth-child(1) {
+  left: 1%;
+  top: 8%;
+}.user-avatar.has-avatar-frame > .avatar-frame-blossom .avatar-frame-ornament > i:nth-child(2) {
+  right: 1%;
+  top: 18%;
+  animation-delay: -1s;
+}.user-avatar.has-avatar-frame > .avatar-frame-blossom .avatar-frame-ornament > i:nth-child(3) {
+  right: 6%;
+  bottom: 1%;
+  animation-delay: -2s;
+}.user-avatar.has-avatar-frame > .avatar-frame-blossom .avatar-frame-ornament > i:nth-child(4) {
+  left: 9%;
+  bottom: 2%;
+  animation-delay: -.5s;
+}
+
+/* 10 Butterfly wings: paired wings stay inside the upper corners. */
+.user-avatar.has-avatar-frame > .avatar-frame-butterfly::before,
+.user-avatar.has-avatar-frame > .avatar-frame-butterfly::after {
+  position: absolute;
+  z-index: 2;
+  top: 1%;
+  display: block;
+  width: 25%;
+  height: 28%;
+  border-radius: 75% 22% 68% 30%;
+  background: linear-gradient(145deg,#7bd9d0,#9b6bc1 60%,#f2b964);
+  content: "";
+  animation: avatar-wing 1.6s ease-in-out infinite alternate;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-butterfly::before {
+  left: 1%;
+  transform: rotate(-20deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-butterfly::after {
+  right: 1%;
+  transform: scaleX(-1) rotate(-20deg);
+}
+
+/* 11 Coral: branching reef silhouettes grow from the lower band. */
+.user-avatar.has-avatar-frame > .avatar-frame-coral .avatar-frame-ornament > i {
+  display: block;
+  bottom: 0;
+  width: 6%;
+  height: 34%;
+  border-radius: 999px 999px 3px 3px;
+  background: #ff9b7e;
+  transform-origin: bottom;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-coral .avatar-frame-ornament > i:nth-child(1) {
+  left: 4%;
+  transform: rotate(-20deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-coral .avatar-frame-ornament > i:nth-child(2) {
+  left: 18%;
+  height: 24%;
+  transform: rotate(14deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-coral .avatar-frame-ornament > i:nth-child(3) {
+  right: 15%;
+  height: 30%;
+  transform: rotate(-12deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-coral .avatar-frame-ornament > i:nth-child(4) {
+  right: 2%;
+  transform: rotate(22deg);
+}
+
+/* 12 Moon phase: crescent plus three stars, not a generic navy ring. */
+.user-avatar.has-avatar-frame > .avatar-frame-moon::before {
+  position: absolute;
+  z-index: 2;
+  right: 2%;
+  top: 2%;
+  display: block;
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 48%,#f5d77c 0 44%,#293b68 47% 66%,transparent 68%);
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-moon .avatar-frame-ornament > i:nth-child(-n+3) {
+  display: block;
+  width: 6%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff0a0;
+  box-shadow: 0 0 6px #fff;
+  animation: avatar-twinkle 1.8s ease-in-out infinite alternate;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-moon .avatar-frame-ornament > i:nth-child(1) {
+  left: 5%;
+  top: 13%;
+}.user-avatar.has-avatar-frame > .avatar-frame-moon .avatar-frame-ornament > i:nth-child(2) {
+  right: 11%;
+  bottom: 7%;
+  animation-delay: -.8s;
+}.user-avatar.has-avatar-frame > .avatar-frame-moon .avatar-frame-ornament > i:nth-child(3) {
+  left: 15%;
+  bottom: 4%;
+  animation-delay: -1.3s;
+}
+
+/* 13 Crown: a compact three-point crown integrated into the top band. */
+.user-avatar.has-avatar-frame > .avatar-frame-crown::before {
+  position: absolute;
+  z-index: 2;
+  left: 22%;
+  top: 0;
+  display: block;
+  width: 56%;
+  height: 25%;
+  clip-path: polygon(0 100%,3% 35%,26% 68%,40% 4%,57% 69%,79% 17%,100% 64%,94% 100%);
+  background: linear-gradient(#fff0a8,#d99b27);
+  content: "";
+  filter: drop-shadow(0 1px 1px #8b5f2745);
+}
+
+/* 14 Headphones: a headband and two unmistakable ear cups. */
+.user-avatar.has-avatar-frame > .avatar-frame-headphones::before {
+  position: absolute;
+  z-index: 2;
+  inset: 1% 7% 38%;
+  display: block;
+  border: max(2px,.09em) solid #243d41;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-headphones::after {
+  position: absolute;
+  z-index: 2;
+  left: 1%;
+  right: 1%;
+  top: 38%;
+  display: block;
+  height: 34%;
+  border-left: max(3px,.16em) solid #35bca0;
+  border-right: max(3px,.16em) solid #35bca0;
+  border-radius: 7px;
+  content: "";
+}
+
+/* 15 Cat ears: two triangular ears visibly overlap the top edge. */
+.user-avatar.has-avatar-frame > .avatar-frame-cat-ears::before,
+.user-avatar.has-avatar-frame > .avatar-frame-cat-ears::after {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  display: block;
+  width: 31%;
+  height: 27%;
+  clip-path: polygon(50% 0,100% 100%,0 100%);
+  background: linear-gradient(145deg,#6a4d49 0 48%,#efa59f 50%);
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-cat-ears::before {
+  left: 4%;
+  transform: rotate(-7deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-cat-ears::after {
+  right: 4%;
+  transform: rotate(7deg);
+}
+
+/* 16 Ribbon bow: two loops and a gold knot sit at the lower-right corner. */
+.user-avatar.has-avatar-frame > .avatar-frame-ribbon-bow::before {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 34%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle,#f5c15c 0 15%,transparent 17%),linear-gradient(35deg,transparent 42%,#e56893 44% 72%,transparent 74%),linear-gradient(-35deg,transparent 42%,#e56893 44% 72%,transparent 74%);
+  content: "";
+  transform: rotate(-8deg);
+}
+
+/* 17 Viewfinder: four angular corner brackets and a focus dot. */
+.user-avatar.has-avatar-frame > .avatar-frame-camera::before {
+  position: absolute;
+  z-index: 2;
+  inset: 3%;
+  display: block;
+  background: linear-gradient(#e5ad43,#e5ad43) left top/28% 3% no-repeat,linear-gradient(#e5ad43,#e5ad43) left top/3% 28% no-repeat,linear-gradient(#e5ad43,#e5ad43) right top/28% 3% no-repeat,linear-gradient(#e5ad43,#e5ad43) right top/3% 28% no-repeat,linear-gradient(#e5ad43,#e5ad43) left bottom/28% 3% no-repeat,linear-gradient(#e5ad43,#e5ad43) left bottom/3% 28% no-repeat,linear-gradient(#e5ad43,#e5ad43) right bottom/28% 3% no-repeat,linear-gradient(#e5ad43,#e5ad43) right bottom/3% 28% no-repeat;
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-camera .avatar-frame-ornament > i:first-child {
+  display: block;
+  top: 46%;
+  left: 46%;
+  width: 8%;
+  aspect-ratio: 1;
+  border: 1px solid #f1d58a;
+  border-radius: 50%;
+}
+
+/* 18 Comet: bright head and a curved three-step tail. */
+.user-avatar.has-avatar-frame > .avatar-frame-comet::before {
+  position: absolute;
+  z-index: 2;
+  inset: 3%;
+  display: block;
+  border: 3px solid transparent;
+  border-top-color: #65d9cb;
+  border-right-color: #f3c75a;
+  border-radius: inherit;
+  content: "";
+  animation: avatar-frame-turn 2.6s linear infinite;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-comet .avatar-frame-ornament > i:first-child {
+  display: block;
+  right: 3%;
+  top: 4%;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff1a2;
+  box-shadow: -7px 4px 0 -2px #67d5ca,-13px 7px 0 -4px #5984bd;
+}
+
+/* 19 Radar: rotating translucent scan wedge over a calibrated ring. */
+.user-avatar.has-avatar-frame > .avatar-frame-radar::before {
+  position: absolute;
+  z-index: 2;
+  inset: 2%;
+  display: block;
+  border: 1px solid #9af2cf;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg,transparent 0 76%,#51e1a766 92%,transparent 100%);
+  content: "";
+  animation: avatar-frame-turn 2.2s linear infinite;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-radar::after {
+  position: absolute;
+  z-index: 2;
+  inset: 18%;
+  display: block;
+  border: 1px solid #9af2cf88;
+  border-radius: inherit;
+  content: "";
+}
+
+/* 20 Pulse: two signal rings expand inside the fixed footprint. */
+.user-avatar.has-avatar-frame > .avatar-frame-pulse::before,
+.user-avatar.has-avatar-frame > .avatar-frame-pulse::after {
+  position: absolute;
+  z-index: 2;
+  inset: 5%;
+  display: block;
+  border: 2px solid #70ddb5;
+  border-radius: inherit;
+  content: "";
+  animation: avatar-pulse-inset 2s ease-out infinite;
+}.user-avatar.has-avatar-frame > .avatar-frame-pulse::after {
+  animation-delay: -1s;
+}
+
+/* 21 Snowfall: four flakes visibly travel across the portrait. */
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i {
+  display: block;
+  top: 0;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px #7ac3e6;
+  animation: avatar-snow-inset 2.2s linear infinite;
+}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(1) {
+  left: 8%;
+}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(2) {
+  left: 34%;
+  animation-delay: -1.2s;
+}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(3) {
+  right: 25%;
+  animation-delay: -.6s;
+}.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(4) {
+  right: 3%;
+  animation-delay: -1.7s;
+}
+
+/* 22 Fireflies: warm bioluminescent dots drift independently. */
+.user-avatar.has-avatar-frame > .avatar-frame-firefly .avatar-frame-ornament > i {
+  display: block;
+  width: 7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e8f26e;
+  box-shadow: 0 0 8px 3px #d9ef5f80;
+  animation: avatar-firefly-inset 2.4s ease-in-out infinite alternate;
+}.user-avatar.has-avatar-frame > .avatar-frame-firefly .avatar-frame-ornament > i:nth-child(1) {
+  left: 2%;
+  top: 16%;
+}.user-avatar.has-avatar-frame > .avatar-frame-firefly .avatar-frame-ornament > i:nth-child(2) {
+  right: 2%;
+  top: 32%;
+  animation-delay: -1s;
+}.user-avatar.has-avatar-frame > .avatar-frame-firefly .avatar-frame-ornament > i:nth-child(3) {
+  left: 12%;
+  bottom: 2%;
+  animation-delay: -1.7s;
+}.user-avatar.has-avatar-frame > .avatar-frame-firefly .avatar-frame-ornament > i:nth-child(4) {
+  right: 14%;
+  top: 2%;
+  animation-delay: -.5s;
+}
+
+/* 23 Stamp: perforated postal edge and cancellation stripes. */
+.user-avatar.has-avatar-frame > .avatar-frame-stamp::before {
+  position: absolute;
+  z-index: 2;
+  inset: 3%;
+  display: block;
+  border: 2px dashed #fff5df;
+  border-radius: inherit;
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-stamp::after {
+  position: absolute;
+  z-index: 2;
+  right: 2%;
+  top: 18%;
+  display: block;
+  width: 34%;
+  height: 24%;
+  background: repeating-linear-gradient(-12deg,transparent 0 12%,#6f2f2d99 13% 17%);
+  content: "";
+}
+
+/* 24 Embroidery: double stitch line plus four cross-stitches. */
+.user-avatar.has-avatar-frame > .avatar-frame-embroidery::before {
+  position: absolute;
+  z-index: 2;
+  inset: 3%;
+  display: block;
+  border: 2px dashed #f2be55;
+  border-radius: inherit;
+  content: "";
+}
+.user-avatar.has-avatar-frame > .avatar-frame-embroidery .avatar-frame-ornament > i {
+  display: block;
+  width: 10%;
+  height: 2%;
+  background: #fff0bd;
+  transform: rotate(45deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-embroidery .avatar-frame-ornament > i:nth-child(1) {
+  left: 5%;
+  top: 12%;
+}.user-avatar.has-avatar-frame > .avatar-frame-embroidery .avatar-frame-ornament > i:nth-child(2) {
+  right: 5%;
+  top: 12%;
+  transform: rotate(-45deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-embroidery .avatar-frame-ornament > i:nth-child(3) {
+  left: 5%;
+  bottom: 12%;
+  transform: rotate(-45deg);
+}.user-avatar.has-avatar-frame > .avatar-frame-embroidery .avatar-frame-ornament > i:nth-child(4) {
+  right: 5%;
+  bottom: 12%;
+  transform: rotate(45deg);
+}
+
+/* 25 Stained glass: lead lines segment jewel-toned panes. */
+.user-avatar.has-avatar-frame > .avatar-frame-stainedglass::before {
+  position: absolute;
+  z-index: 2;
+  inset: 1%;
+  display: block;
+  border: 2px solid #284c67;
+  border-radius: inherit;
+  background: linear-gradient(35deg,transparent 46%,#284c67 47% 51%,transparent 52%),linear-gradient(-35deg,transparent 46%,#284c67 47% 51%,transparent 52%);
+  content: "";
+}
+
+/* 26 Papercut: repeated red paper lace, visibly different from stained glass. */
+.user-avatar.has-avatar-frame > .avatar-frame-papercut::before {
+  position: absolute;
+  z-index: 2;
+  inset: 1%;
+  display: block;
+  border-radius: inherit;
+  background: radial-gradient(circle at 0 0,transparent 0 10%,#d84244 11% 16%,transparent 17%),radial-gradient(circle at 100% 0,transparent 0 10%,#d84244 11% 16%,transparent 17%),radial-gradient(circle at 0 100%,transparent 0 10%,#d84244 11% 16%,transparent 17%),radial-gradient(circle at 100% 100%,transparent 0 10%,#d84244 11% 16%,transparent 17%);
+  content: "";
+}
+
+/* 27 Mechanical ring: gear teeth and four brass rivets. */
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical::before {
+  position: absolute;
+  z-index: 2;
+  inset: 1%;
+  display: block;
+  border-radius: inherit;
+  background: repeating-conic-gradient(#69756f 0 8deg,transparent 8deg 15deg);
+  content: "";
+  mask: linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 7%;
+  animation: avatar-frame-turn 14s linear infinite;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i {
+  display: block;
+  width: 7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e7a83c;
+  box-shadow: inset 0 0 0 1px #6f5428;
+}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(1) {
+  left: 3%;
+  top: 3%;
+}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(2) {
+  right: 3%;
+  top: 3%;
+}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(3) {
+  left: 3%;
+  bottom: 3%;
+}.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(4) {
+  right: 3%;
+  bottom: 3%;
+}
+
+@keyframes avatar-orbit-planet { to { transform:translate(-18%,16%) scale(.78);opacity:.72; } }
+@keyframes avatar-pulse-inset { to { inset:19%;opacity:0; } }
+@keyframes avatar-snow-inset { to { top:92%;transform:translateX(10px);opacity:.25; } }
+@keyframes avatar-firefly-inset { to { transform:translate(6px,-5px) scale(.58);opacity:.45; } }
+
+@media (prefers-reduced-motion:reduce) {
+  .user-avatar.has-avatar-frame > .avatar-frame-clip::before,
+.user-avatar.has-avatar-frame > .avatar-frame-clip::after,
+.user-avatar.has-avatar-frame .avatar-frame-ornament > i {
+  animation: none;
+}
+}
+
+/* Motion frames animate ornaments along the rounded perimeter, never the frame box. */
+.user-avatar.has-avatar-frame > .avatar-frame-orbit .avatar-frame-ornament > i:first-child {
+  top: 0;
+  left: 0;
+  offset-path: inset(7% round 22%);
+  offset-rotate: 0deg;
+  animation: avatar-frame-perimeter 8s linear infinite;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-aurora::before {
+  inset: 1%;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 12%, rgba(138, 216, 255, .72) 34%, rgba(246, 207, 114, .62) 48%, rgba(45, 212, 164, .7) 64%, transparent 86%);
+  background-size: 180% 100%;
+  transform: none;
+  animation: avatar-aurora-drift 4.8s ease-in-out infinite alternate;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-portal::before {
+  content: none;
+  animation: none;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i {
+  display: block;
+  top: 0;
+  left: 0;
+  width: 9%;
+  height: 4%;
+  border-radius: 999px;
+  background: #e0aa43;
+  box-shadow: 0 0 7px rgba(224, 170, 67, .75);
+  offset-path: inset(5% round 20%);
+  offset-rotate: auto;
+  animation: avatar-frame-perimeter 10s linear infinite;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i:nth-child(2) {
+  background: #baf2df;
+  animation-delay: -2.5s;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i:nth-child(3) {
+  animation-delay: -5s;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i:nth-child(4) {
+  background: #baf2df;
+  animation-delay: -7.5s;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-comet::before {
+  content: none;
+  animation: none;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-comet .avatar-frame-ornament > i:first-child {
+  top: 0;
+  left: 0;
+  offset-path: inset(5% round 20%);
+  offset-rotate: auto;
+  animation: avatar-frame-perimeter 4.6s linear infinite;
+}
+
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical::before {
+  inset: 3%;
+  border: max(1px, .035em) solid #d8ddd9;
+  border-radius: inherit;
+  background: linear-gradient(#e7a83c,#e7a83c) 0 0/18% 5% no-repeat,
+    linear-gradient(#e7a83c,#e7a83c) 100% 0/18% 5% no-repeat,
+    linear-gradient(#e7a83c,#e7a83c) 0 100%/18% 5% no-repeat,
+    linear-gradient(#e7a83c,#e7a83c) 100% 100%/18% 5% no-repeat;
+  content: "";
+  mask: none;
+  padding: 0;
+  animation: none;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i {
+  animation: avatar-mechanical-indicator 1.8s steps(2,end) infinite alternate;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(2) {
+  animation-delay: -.45s;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(3) {
+  animation-delay: -.9s;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i:nth-child(4) {
+  animation-delay: -1.35s;
+}
+
+@keyframes avatar-frame-perimeter { to { offset-distance: 100%; } }
+@keyframes avatar-aurora-drift {
+  from { background-position: 100% 50%; opacity: .72; }
+  to { background-position: 0 50%; opacity: 1; }
+}
+@keyframes avatar-mechanical-indicator { to { filter:brightness(1.45);opacity:.58; } }
+
+/* Moon phases: a shadow crosses the moon disc from waxing to waning. */
+.user-avatar.has-avatar-frame > .avatar-frame-moon::before {
+  right: 3%;
+  top: 3%;
+  width: 27%;
+  background: radial-gradient(circle at 36% 32%, #fff4b8 0 12%, #f5d77c 42%, #d9a94d 100%);
+  box-shadow: 0 0 .14em rgba(255, 232, 145, .78);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-moon::after {
+  position: absolute;
+  z-index: 3;
+  top: 3%;
+  right: 3%;
+  display: block;
+  width: 27%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #293b68;
+  content: "";
+  animation: avatar-moon-phase 8s ease-in-out infinite;
+}
+
+/* Snowfall: four flakes carry offset satellites to remain visible at every size. */
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i {
+  top: -18%;
+  width: 6%;
+  min-width: 2px;
+  max-width: none;
+  max-height: none;
+  background: #fff;
+  box-shadow: .12em .28em 0 -.01em rgba(255,255,255,.92),
+    -.08em .54em 0 -.015em rgba(214,241,255,.88),
+    0 0 .1em rgba(122,195,230,.9);
+  opacity: .95;
+  animation: avatar-snowfall-drift 3.2s linear infinite;
+  will-change: transform, opacity;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(1) {
+  left: 8%;
+  animation-duration: 2.7s;
+}
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(2) {
+  left: 34%;
+  animation-delay: -1.9s;
+  animation-duration: 3.6s;
+  transform: scale(.7);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(3) {
+  right: 24%;
+  animation-delay: -.8s;
+  animation-duration: 3s;
+  transform: scale(1.12);
+}
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i:nth-child(4) {
+  right: 5%;
+  animation-delay: -2.5s;
+  animation-duration: 4.1s;
+  transform: scale(.62);
+}
+
+@keyframes avatar-moon-phase {
+  0% { transform: translateX(-108%); }
+  25% { transform: translateX(-48%); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(48%); }
+  100% { transform: translateX(108%); }
+}
+@keyframes avatar-snowfall-drift {
+  0% { opacity: 0; transform: translate3d(-80%, 0, 0) rotate(0deg); }
+  12% { opacity: .95; }
+  88% { opacity: .85; }
+  100% { opacity: 0; transform: translate3d(180%, 1900%, 0) rotate(180deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-avatar.has-avatar-frame > .avatar-frame-orbit .avatar-frame-ornament > i,
+.user-avatar.has-avatar-frame > .avatar-frame-aurora::before,
+.user-avatar.has-avatar-frame > .avatar-frame-portal .avatar-frame-ornament > i,
+.user-avatar.has-avatar-frame > .avatar-frame-comet .avatar-frame-ornament > i,
+.user-avatar.has-avatar-frame > .avatar-frame-mechanical .avatar-frame-ornament > i,
+.user-avatar.has-avatar-frame > .avatar-frame-moon::after,
+.user-avatar.has-avatar-frame > .avatar-frame-snowfall .avatar-frame-ornament > i {
+  animation: none;
+}
+}

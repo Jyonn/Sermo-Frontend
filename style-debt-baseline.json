@@ -1,21 +1,22 @@
 {
   "totals": {
-    "rules": 8136,
-    "important": 247,
-    "crossFileDuplicateSelectors": 186,
-    "complexSelectors": 61,
-    "longLines": 107,
-    "compatibilityRules": 141
+    "rules": 7995,
+    "important": 169,
+    "duplicateRuleBlocks": 311,
+    "crossFileDuplicateSelectors": 104,
+    "complexSelectors": 57,
+    "longLines": 101,
+    "compatibilityRules": 0
   },
   "perFile": {
     "00-foundation.css": {
       "important": 5,
-      "complexSelectors": 9,
-      "longLines": 29
+      "complexSelectors": 8,
+      "longLines": 28
     },
     "10-chat-city.css": {
-      "important": 52,
-      "complexSelectors": 6,
+      "important": 41,
+      "complexSelectors": 4,
       "longLines": 10
     },
     "20-profile-settings.css": {
@@ -24,9 +25,19 @@
       "longLines": 0
     },
     "30-personalization.css": {
-      "important": 126,
-      "complexSelectors": 38,
-      "longLines": 26
+      "important": 23,
+      "complexSelectors": 29,
+      "longLines": 5
+    },
+    "35-avatar-frames.css": {
+      "important": 0,
+      "complexSelectors": 2,
+      "longLines": 1
+    },
+    "39-personalization-tools.css": {
+      "important": 36,
+      "complexSelectors": 6,
+      "longLines": 15
     },
     "40-square-platform.css": {
       "important": 31,
@@ -48,9 +59,19 @@
       "complexSelectors": 1,
       "longLines": 0
     },
-    "80-chat-overrides.css": {
+    "80-chat-messages.css": {
       "important": 23,
       "complexSelectors": 2,
+      "longLines": 0
+    },
+    "81-chat-moderation.css": {
+      "important": 0,
+      "complexSelectors": 0,
+      "longLines": 0
+    },
+    "90-viewport.css": {
+      "important": 0,
+      "complexSelectors": 0,
       "longLines": 0
     }
   }

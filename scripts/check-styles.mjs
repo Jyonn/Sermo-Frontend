@@ -11,11 +11,15 @@ const expectedFiles = [
   "10-chat-city.css",
   "20-profile-settings.css",
   "30-personalization.css",
+  "35-avatar-frames.css",
+  "39-personalization-tools.css",
   "40-square-platform.css",
   "50-chat-settings.css",
   "60-profile-themes.css",
   "70-square-composer.css",
-  "80-chat-overrides.css",
+  "80-chat-messages.css",
+  "81-chat-moderation.css",
+  "90-viewport.css",
 ];
 
 const normalizeSelector = (selector) => selector.replace(/\s+/g, " ").trim();
@@ -27,6 +31,18 @@ function isInsideKeyframes(rule) {
     current = current.parent;
   }
   return false;
+}
+
+function ruleContext(rule) {
+  const context = [];
+  let current = rule.parent;
+  while (current) {
+    if (current.type === "atrule") {
+      context.unshift(`@${current.name} ${current.params}`.trim());
+    }
+    current = current.parent;
+  }
+  return context.join(" > ");
 }
 
 function selectorWeight(selector) {
@@ -41,7 +57,7 @@ async function collectMetrics() {
     .sort();
   const unexpectedFiles = diskFiles.filter((file) => !expectedFiles.includes(file));
   const missingFiles = expectedFiles.filter((file) => !diskFiles.includes(file));
-  const selectorOwners = new Map();
+  const ruleOwners = new Map();
   const perFile = {};
   let rules = 0;
   let important = 0;
@@ -60,9 +76,10 @@ async function collectMetrics() {
       rules += 1;
       fileMetrics.rules += 1;
       const selector = normalizeSelector(rule.selector);
-      const owners = selectorOwners.get(selector) ?? new Set();
-      owners.add(file);
-      selectorOwners.set(selector, owners);
+      const ruleKey = `${ruleContext(rule)}\n${selector}`;
+      const owners = ruleOwners.get(ruleKey) ?? [];
+      owners.push(file);
+      ruleOwners.set(ruleKey, owners);
       if (selectorWeight(selector) > 120) {
         complexSelectors += 1;
         fileMetrics.complexSelectors += 1;
@@ -77,8 +94,11 @@ async function collectMetrics() {
     perFile[file] = fileMetrics;
   }
 
-  const crossFileDuplicateSelectors = [...selectorOwners.values()].filter(
-    (owners) => owners.size > 1,
+  const duplicateRuleBlocks = [...ruleOwners.values()].filter(
+    (owners) => owners.length > 1,
+  ).length;
+  const crossFileDuplicateSelectors = [...ruleOwners.values()].filter(
+    (owners) => new Set(owners).size > 1,
   ).length;
 
   return {
@@ -88,10 +108,11 @@ async function collectMetrics() {
     totals: {
       rules,
       important,
+      duplicateRuleBlocks,
       crossFileDuplicateSelectors,
       complexSelectors,
       longLines,
-      compatibilityRules: perFile["80-chat-overrides.css"]?.rules ?? 0,
+      compatibilityRules: 0,
     },
     perFile,
   };

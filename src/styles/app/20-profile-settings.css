@@ -1187,9 +1187,6 @@ html[data-theme="dark"] .user-profile-panel {
 .menu-detail-text {
   font-size: 0.9rem;
   line-height: 1.2;
-}
-
-.menu-detail-text {
   text-align: right;
 }
 
@@ -7250,9 +7247,6 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
 .travel-map-hint {
   color: var(--text-muted);
   font-size: 0.68rem;
-}
-
-.travel-map-hint {
   margin: 0;
   padding: 0 3px;
 }
