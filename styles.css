@@ -37493,3 +37493,128 @@ html[data-theme="dark"] .submission-round-curtain-head small { color: #9ab9ac; }
   .submission-round-curtain-head { display: grid; gap: 4px; }
   .submission-round-curtain-head small { max-width: none; padding-left: 14px; text-align: left; }
 }
+
+/* Fixed-viewport surfaces calculate the viewport once at the app root. Their
+   descendants only consume the remaining flex space, so tall iOS viewports and
+   expanding composer panels cannot turn a screen into a content-height page. */
+@media (max-width: 900px) {
+  body[data-chat-detail="true"],
+  body[data-chat-detail="true"] #root {
+    height: 100%;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  body[data-chat-detail="true"] .topbar.conversation-topbar {
+    flex: 0 0 auto;
+  }
+
+  body[data-chat-detail="true"] .shell.shell-no-mobile-nav:has(.chat-mobile-layout.chat-detail-active) {
+    display: flex;
+    flex: 1 1 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active,
+  body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active .message-pane.chat-main-pane,
+  body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active .chat-detail-scene {
+    flex: 1 1 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+  }
+
+  body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active {
+    display: flex;
+    position: relative;
+  }
+
+  body[data-chat-detail="true"] .chat-mobile-layout.chat-detail-active .chat-detail-scene {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  body[data-chat-detail="true"] .chat-detail-scene > .message-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  body[data-chat-detail="true"] .composer.is-mobile-quiet {
+    display: flex;
+    max-height: min(62%, 520px);
+    flex: 0 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  body[data-chat-detail="true"] .mobile-composer-reveal.is-open {
+    min-height: 0;
+    max-height: min(48dvh, 420px);
+  }
+
+  body[data-chat-detail="true"] :is(
+    .mobile-composer-reveal-inner,
+    .mobile-composer-reveal .composer-emoji-panel,
+    .mobile-composer-reveal .composer-sticker-pane
+  ) {
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  body[data-chat-detail="true"] :is(
+    .mobile-composer-reveal .composer-sticker-grid,
+    .mobile-composer-reveal .composer-emoji-grid
+  ) {
+    max-height: min(38dvh, 330px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .side-drawer,
+  .side-drawer > .drawer-body,
+  .submission-create-page.is-conversation,
+  .submission-create-page.is-conversation > .submission-draft-conversation {
+    min-height: 0;
+  }
+
+  .side-drawer {
+    height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .side-drawer > .drawer-body {
+    flex: 1 1 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .submission-create-page.is-conversation {
+    display: flex;
+    height: 100dvh;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .submission-create-page.is-conversation > .submission-create-header {
+    flex: 0 0 auto;
+  }
+
+  .submission-create-page.is-conversation > .submission-draft-conversation {
+    flex: 1 1 0;
+    height: auto;
+    overflow: hidden;
+  }
+}

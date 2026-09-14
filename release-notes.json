@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.14.5",
+  "id": "2026.09.14.6",
   "publishedAt": "2026-09-14",
   "locales": {
     "zh-CN": {
-      "title": "首次微信登录资料确认",
+      "title": "移动端全屏布局修复",
       "items": [
-        "首次进入空间时会引导获取微信头像和昵称",
-        "头像和昵称完整后才能开启新用户，避免生成无头像的默认身份"
+        "修复超高屏 iPhone 展开表情面板后聊天内容高度塌缩的问题",
+        "统一聊天、全屏抽屉与会话编辑页的视口和安全区布局"
       ]
     },
     "en": {
-      "title": "WeChat profile confirmation for first sign-in",
+      "title": "Mobile full-screen layout fixes",
       "items": [
-        "First-time sign-in now asks for a WeChat avatar and nickname",
-        "A new account can only be created after both profile fields are complete"
+        "Fixed collapsed chat content after opening the emoji panel on tall iPhones",
+        "Unified viewport and safe-area behavior across chats, full-screen drawers, and conversation editors"
       ]
     }
   }
