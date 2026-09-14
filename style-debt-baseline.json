@@ -1,0 +1,57 @@
+{
+  "totals": {
+    "rules": 8136,
+    "important": 247,
+    "crossFileDuplicateSelectors": 186,
+    "complexSelectors": 61,
+    "longLines": 107,
+    "compatibilityRules": 141
+  },
+  "perFile": {
+    "00-foundation.css": {
+      "important": 5,
+      "complexSelectors": 9,
+      "longLines": 29
+    },
+    "10-chat-city.css": {
+      "important": 52,
+      "complexSelectors": 6,
+      "longLines": 10
+    },
+    "20-profile-settings.css": {
+      "important": 4,
+      "complexSelectors": 3,
+      "longLines": 0
+    },
+    "30-personalization.css": {
+      "important": 126,
+      "complexSelectors": 38,
+      "longLines": 26
+    },
+    "40-square-platform.css": {
+      "important": 31,
+      "complexSelectors": 1,
+      "longLines": 39
+    },
+    "50-chat-settings.css": {
+      "important": 0,
+      "complexSelectors": 0,
+      "longLines": 1
+    },
+    "60-profile-themes.css": {
+      "important": 2,
+      "complexSelectors": 1,
+      "longLines": 2
+    },
+    "70-square-composer.css": {
+      "important": 4,
+      "complexSelectors": 1,
+      "longLines": 0
+    },
+    "80-chat-overrides.css": {
+      "important": 23,
+      "complexSelectors": 2,
+      "longLines": 0
+    }
+  }
+}
