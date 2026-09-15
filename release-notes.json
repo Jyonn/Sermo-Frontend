@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.2",
+  "id": "2026.09.15.3",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "空间大群",
       "items": [
-        "管理员现在可以开启空间大群；新成员加入时群内会显示安静的欢迎提示，成员可主动退出，官方账号始终保留在群内"
+        "管理员现在可以开启空间大群；成员每次加入时群内都会显示安静的欢迎提示，成员可主动退出，官方账号始终保留在群内"
       ]
     },
     "en": {
       "title": "Space-wide groups",
       "items": [
-        "Admins can now enable a space-wide group with quiet in-group welcome messages; members may leave while the official account always remains"
+        "Admins can now enable a space-wide group with a quiet welcome message whenever someone joins; members may leave while the official account always remains"
       ]
     }
   }
