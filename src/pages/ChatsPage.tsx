@@ -9053,7 +9053,7 @@ function LiveChatsPage({
                 {selectedChat.type === "group" && selectedChat.notificationsMuted ? (
                   <SettingRow className="is-dependent" description={t("chat.muteUnreadBadgeHint")} title={t("chat.muteUnreadBadge")} trailing={<SettingSwitch checked={selectedChat.unreadBadgeMuted} disabled={preferenceSaving !== null} label={t("chat.toggleMuteUnreadBadge")} onChange={(next) => void updateSelectedChatPreference("badge", next)} />} />
                 ) : null}
-                {selectedChat.type === "group" && canRenameGroup ? (
+                {selectedChat.type === "group" && canRenameGroup && (!selectedChat.isSpaceGroup || selectedChat.isOwner) ? (
                   <FeatureDiscoveryTarget className="is-setting-row" rewardId="capability.group_name">
                   <div className="chat-detail-setting-row">
                     <div className="row-main chat-detail-title-main"><strong>{t("chat.groupName")}</strong><div className="row-subtle">{selectedChat.title}</div></div>

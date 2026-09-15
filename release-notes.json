@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.8",
+  "id": "2026.09.15.9",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "空间大群",
       "items": [
-        "引用仅随文字消息发送；发送图片、视频、位置、语音或表情包后会继续保留引用"
+        "空间大群的名称仅允许官方账号编辑，普通成员不再显示编辑入口"
       ]
     },
     "en": {
       "title": "Space-wide groups",
       "items": [
-        "Replies now attach only to text; sending media, locations, voice messages, or stickers keeps the reply ready for the next text message"
+        "Only the official account can rename a space-wide group; regular members no longer see the edit control"
       ]
     }
   }
