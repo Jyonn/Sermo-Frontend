@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.12",
+  "id": "2026.09.15.13",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "微信身份设置",
       "items": [
-        "重新整理小程序微信身份设置弹层，让头像与昵称更紧凑、更易确认"
+        "修复小程序微信身份设置中头像与昵称输入框重叠的问题"
       ]
     },
     "en": {
       "title": "WeChat profile setup",
       "items": [
-        "Refined the Mini Program WeChat profile sheet for a clearer, more compact avatar and nickname setup"
+        "Fixed avatar overlap with the nickname field in the Mini Program WeChat profile setup"
       ]
     }
   }
