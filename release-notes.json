@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.6",
+  "id": "2026.09.15.7",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "空间大群",
       "items": [
-        "关闭空间大群现在会解散当前群聊；再次开启将组建全新的空间大群"
+        "空间大群仅对已设置密码的成员开放；首次设置密码后会自动加入"
       ]
     },
     "en": {
       "title": "Space-wide groups",
       "items": [
-        "Disabling a space-wide group now dissolves it, and enabling it again creates a brand-new group"
+        "Space-wide groups are now limited to members with passwords, who join automatically after first setting one"
       ]
     }
   }
