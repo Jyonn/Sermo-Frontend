@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.14",
+  "id": "2026.09.15.15",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "小程序登录布局",
+      "title": "小程序空间入口",
       "items": [
-        "修复最近账号卡片和进入按钮没有铺满登录内容区的问题"
+        "小程序现在默认打开 jzdxq 空间登录页，并修正更换空间按钮的左侧对齐"
       ]
     },
     "en": {
-      "title": "Mini Program sign-in layout",
+      "title": "Mini Program space entry",
       "items": [
-        "Fixed recent account cards and the continue button not filling the sign-in content area"
+        "The Mini Program now opens the jzdxq sign-in page by default and correctly aligns the change-space action"
       ]
     }
   }
