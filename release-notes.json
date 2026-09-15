@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.15",
+  "id": "2026.09.15.16",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "小程序空间入口",
+      "title": "小程序内容安全",
       "items": [
-        "小程序现在默认打开 jzdxq 空间登录页，并修正更换空间按钮的左侧对齐"
+        "小程序发布的昵称、聊天、投稿与广场文字现在会在发送前完成微信内容安全校验"
       ]
     },
     "en": {
-      "title": "Mini Program space entry",
+      "title": "Mini Program content safety",
       "items": [
-        "The Mini Program now opens the jzdxq sign-in page by default and correctly aligns the change-space action"
+        "Nicknames, chats, submissions, and Square text from the Mini Program are now checked before publishing"
       ]
     }
   }
