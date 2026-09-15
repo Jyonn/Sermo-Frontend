@@ -1,17 +1,19 @@
 {
-  "id": "2026.09.15.9",
+  "id": "2026.09.15.10",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "空间大群",
+      "title": "小程序聊天体验",
       "items": [
-        "空间大群的名称仅允许官方账号编辑，普通成员不再显示编辑入口"
+        "小程序中的引用现在只会随文字消息发送，图片、文件等内容不会打断正在编辑的引用",
+        "投稿会话不再提供消息多选操作"
       ]
     },
     "en": {
-      "title": "Space-wide groups",
+      "title": "Mini Program chat experience",
       "items": [
-        "Only the official account can rename a space-wide group; regular members no longer see the edit control"
+        "Replies in the Mini Program are now sent only with text messages, so photos and files no longer clear a pending reply",
+        "Message multi-select is no longer available in submission conversations"
       ]
     }
   }
