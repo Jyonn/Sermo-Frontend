@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.7",
+  "id": "2026.09.15.8",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "空间大群",
       "items": [
-        "空间大群仅对已设置密码的成员开放；首次设置密码后会自动加入"
+        "引用仅随文字消息发送；发送图片、视频、位置、语音或表情包后会继续保留引用"
       ]
     },
     "en": {
       "title": "Space-wide groups",
       "items": [
-        "Space-wide groups are now limited to members with passwords, who join automatically after first setting one"
+        "Replies now attach only to text; sending media, locations, voice messages, or stickers keeps the reply ready for the next text message"
       ]
     }
   }

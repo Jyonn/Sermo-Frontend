@@ -4941,7 +4941,6 @@ function LiveChatsPage({
     if (!await moveToLatestMessageWindow()) return;
     const clientId = `temp:sticker:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     const createdAt = Math.floor(Date.now() / 1000);
-    const reply = consumeReplyTarget();
     const optimisticMessage: ChatMessage = {
       id: clientId,
       clientId,
@@ -4962,7 +4961,6 @@ function LiveChatsPage({
         pixel_width: sticker.pixel_width,
         pixel_height: sticker.pixel_height,
       },
-      replyTo: reply,
       status: "pending",
     };
     setMessages((current) => ({
@@ -4982,7 +4980,7 @@ function LiveChatsPage({
         JSON.stringify("sticker_id" in sticker
           ? { sticker_id: sticker.sticker_id }
           : { asset_id: sticker.sticker_asset_id }),
-        reply?.message_id,
+        undefined,
         clientId,
       );
       updateSendTask(clientId, 0.9);
@@ -5843,6 +5841,7 @@ function LiveChatsPage({
 
     const retryMessage: ChatMessage = {
       ...message,
+      replyTo: message.kind === "text" ? message.replyTo : null,
       status: "pending",
       createdAt: Math.floor(Date.now() / 1000),
       time: formatTime(Math.floor(Date.now() / 1000)),
@@ -5888,7 +5887,7 @@ function LiveChatsPage({
           selectedChat.id,
           messageTypeFromKind(mediaKind),
           "",
-          retryMessage.replyTo?.message_id,
+          undefined,
           retryMessage.clientId,
           [],
           upload.resource?.resource_id,
@@ -5950,7 +5949,6 @@ function LiveChatsPage({
   ) => {
     if (!selectedChat) return;
     if (!await moveToLatestMessageWindow()) return false;
-    const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const objectUrl = URL.createObjectURL(file);
     localObjectUrlsRef.current.add(objectUrl);
@@ -5976,7 +5974,6 @@ function LiveChatsPage({
         file_size: extraPayload.file_size,
       },
       localPreviewUri: objectUrl,
-      replyTo: reply,
       status: "pending",
     };
 
@@ -6003,7 +6000,7 @@ function LiveChatsPage({
         selectedChat.id,
         messageTypeFromKind(kind),
         "",
-        reply?.message_id,
+        undefined,
         pendingMessage.clientId,
         [],
         upload.resource?.resource_id,
@@ -6045,7 +6042,6 @@ function LiveChatsPage({
   const sendCloudFileMessage = async (asset: CloudResourceDTO) => {
     if (!selectedChat) return;
     if (!await moveToLatestMessageWindow()) return;
-    const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const clientId = `temp:cloud-file:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     const pendingMessage: ChatMessage = {
@@ -6067,7 +6063,6 @@ function LiveChatsPage({
         file_name: asset.file_name,
         file_size: asset.file_size,
       },
-      replyTo: reply,
       status: "pending",
     };
 
@@ -6087,7 +6082,7 @@ function LiveChatsPage({
         selectedChat.id,
         MESSAGE_TYPE_FILE,
         "",
-        reply?.message_id,
+        undefined,
         clientId,
         [],
         asset.resource_id,
@@ -6131,7 +6126,6 @@ function LiveChatsPage({
     if (!await moveToLatestMessageWindow()) return;
     const { latitude, longitude, address, geocoding_provider: geocodingProvider } = location;
     const accuracy = 100;
-    const reply = consumeReplyTarget();
     const createdAt = Math.floor(Date.now() / 1000);
     const clientId = `temp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     const pendingMessage: ChatMessage = {
@@ -6153,7 +6147,6 @@ function LiveChatsPage({
         address,
         geocoding_provider: geocodingProvider,
       },
-      replyTo: reply,
       status: "pending",
     };
 
@@ -6174,7 +6167,7 @@ function LiveChatsPage({
         selectedChat.id,
         MESSAGE_TYPE_LOCATION,
         JSON.stringify({ latitude, longitude, address, geocoding_provider: geocodingProvider }),
-        reply?.message_id,
+        undefined,
         clientId,
       );
       const deliveredMessage = mapChatMessage(created, currentUserId);
