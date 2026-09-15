@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.19",
+  "id": "2026.09.15.20",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "投稿列表显示修复",
+      "title": "小程序按钮布局更稳定",
       "items": [
-        "修复小程序投稿卡片被系统按钮样式压窄的问题，投稿信息现在会完整铺满列表"
+        "统一修复小程序原生按钮样式造成的宽度和对齐异常，覆盖导航、列表、弹层与媒体操作"
       ]
     },
     "en": {
-      "title": "Submission list display fix",
+      "title": "More reliable Mini Program buttons",
       "items": [
-        "Fixed Mini Program submission cards being narrowed by native button styles so each item now fills the list correctly"
+        "Standardized native Mini Program button sizing and alignment across navigation, lists, sheets, and media controls"
       ]
     }
   }
