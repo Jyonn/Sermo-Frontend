@@ -1149,6 +1149,8 @@
   "admin.featureAccessTitle": "メンバーのコミュニケーション方法を選択する",
   "admin.featureAccessHint": "メンバーナビゲーションは有効なコア機能のみを表示します.",
   "admin.chatFeatureHint": "会話,メッセージ,グループ",
+  "admin.spaceGroup": "スペース全体グループ",
+  "admin.spaceGroupHint": "メンバーを自動追加し、自主退出した人は再追加しません",
   "admin.squareFeatureHint": "声明,コメント,反応",
   "admin.exploreFeatureHint": "友達以外でも公開投稿を閲覧する",
   "admin.qqBindingFeature": "QQ ID を連携",

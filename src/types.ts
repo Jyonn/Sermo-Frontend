@@ -72,6 +72,7 @@ export interface SpaceDTO {
   official_user?: TinyUserDTO | null;
   group_square_enabled?: boolean;
   chat_enabled?: boolean;
+  space_group_enabled?: boolean;
   square_free_post_enabled?: boolean;
   submission_enabled?: boolean;
   square_explore_enabled?: boolean;

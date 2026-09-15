@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.14.23",
-  "publishedAt": "2026-09-14",
+  "id": "2026.09.15.1",
+  "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "手机投稿导航优化",
+      "title": "空间大群",
       "items": [
-        "手机端投稿列表和投稿详情不再显示底部主导航"
+        "管理员现在可以开启空间大群；成员可主动退出，官方账号始终保留在群内"
       ]
     },
     "en": {
-      "title": "Improved mobile submission navigation",
+      "title": "Space-wide groups",
       "items": [
-        "The bottom navigation is now hidden throughout mobile submission lists and details"
+        "Admins can now enable a space-wide group; members may leave while the official account always remains"
       ]
     }
   }

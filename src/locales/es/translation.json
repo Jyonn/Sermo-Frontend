@@ -1149,6 +1149,8 @@
   "admin.featureAccessTitle": "Elige cómo los miembros se comunican",
   "admin.featureAccessHint": "La navegación de los miembros solo muestra las características básicas habilitadas.",
   "admin.chatFeatureHint": "Conversaciones, mensajes y grupos",
+  "admin.spaceGroup": "Grupo de todo el espacio",
+  "admin.spaceGroupHint": "Incluye automáticamente a los miembros; quienes salgan no volverán a añadirse",
   "admin.squareFeatureHint": "declaraciones, comentarios y reacciones",
   "admin.exploreFeatureHint": "navegar por las publicaciones públicas más allá de los amigos",
   "admin.qqBindingFeature": "Vincular identidad QQ",

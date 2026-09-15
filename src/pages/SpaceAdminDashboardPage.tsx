@@ -118,6 +118,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsName, setSettingsName] = useState("");
   const [settingsSquareEnabled, setSettingsSquareEnabled] = useState(false);
   const [settingsChatEnabled, setSettingsChatEnabled] = useState(true);
+  const [settingsSpaceGroupEnabled, setSettingsSpaceGroupEnabled] = useState(false);
   const [settingsSquareFreePostEnabled, setSettingsSquareFreePostEnabled] = useState(true);
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
@@ -297,6 +298,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsName(dashboard.space.name);
     setSettingsSquareEnabled(Boolean(dashboard.space.group_square_enabled));
     setSettingsChatEnabled(dashboard.space.chat_enabled !== false);
+    setSettingsSpaceGroupEnabled(dashboard.space.space_group_enabled === true);
     setSettingsSquareFreePostEnabled(dashboard.space.square_free_post_enabled !== false);
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
@@ -439,6 +441,7 @@ export default function SpaceAdminDashboardPage() {
         name: settingsName.trim(),
         group_square_enabled: settingsSquareEnabled ? 1 : 0,
         chat_enabled: settingsChatEnabled ? 1 : 0,
+        space_group_enabled: settingsSpaceGroupEnabled ? 1 : 0,
         square_free_post_enabled: settingsSquareFreePostEnabled ? 1 : 0,
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
@@ -920,6 +923,7 @@ export default function SpaceAdminDashboardPage() {
           <section className="admin-policy-intro"><strong>{t("admin.featureAccessTitle")}</strong><p>{t("admin.featureAccessHint")}</p></section>
           <SettingGroup>
             <SettingRow description={t("admin.chatFeatureHint")} title={t("nav.chats")} trailing={<SettingSwitch checked={settingsChatEnabled} label={t("nav.chats")} onChange={() => { if (settingsChatEnabled && !settingsSquareEnabled) return; setSettingsChatEnabled((value) => !value); if (settingsChatEnabled) { setSettingsSubmissionEnabled(false); if (settingsSquareEnabled && !settingsSquareFreePostEnabled) setSettingsSquareFreePostEnabled(true); } }} />} />
+            <SettingRow disabled={!settingsChatEnabled} description={t("admin.spaceGroupHint")} title={t("admin.spaceGroup")} trailing={<SettingSwitch checked={settingsChatEnabled && settingsSpaceGroupEnabled} disabled={!settingsChatEnabled} label={t("admin.spaceGroup")} onChange={() => setSettingsSpaceGroupEnabled((value) => !value)} />} />
             <SettingRow disabled={currentSpace?.verification_tier === "email"} description={currentSpace?.verification_tier === "email" ? t("admin.squareNeedsPhone") : t("admin.squareFeatureHint")} title={t("nav.square")} trailing={<SettingSwitch checked={settingsSquareEnabled} disabled={currentSpace?.verification_tier === "email"} label={t("nav.square")} onChange={() => { if (settingsSquareEnabled && !settingsChatEnabled) return; if (!settingsSquareEnabled && !settingsSquareFreePostEnabled && !settingsSubmissionEnabled) setSettingsSquareFreePostEnabled(true); setSettingsSquareEnabled((value) => !value); }} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.squareFreePostHint")} title={t("admin.squareFreePost")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSquareFreePostEnabled} disabled={!settingsSquareEnabled || !settingsSubmissionEnabled} label={t("admin.squareFreePost")} onChange={() => setSettingsSquareFreePostEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled || !settingsChatEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsChatEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || !settingsChatEnabled || !settingsSquareFreePostEnabled} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />

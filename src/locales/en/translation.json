@@ -1158,6 +1158,8 @@
   "admin.featureAccessTitle": "Choose how members communicate",
   "admin.featureAccessHint": "Member navigation only shows enabled core features.",
   "admin.chatFeatureHint": "Conversations, messages, and groups",
+  "admin.spaceGroup": "Space-wide group",
+  "admin.spaceGroupHint": "Automatically includes space members; people who leave are not added again",
   "admin.squareFeatureHint": "Statements, comments, and reactions",
   "admin.exploreFeatureHint": "Browse public posts beyond friends",
   "admin.qqBindingFeature": "Bind QQ identity",

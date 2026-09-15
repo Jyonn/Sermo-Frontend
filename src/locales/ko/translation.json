@@ -1149,6 +1149,8 @@
   "admin.featureAccessTitle": "회원들이 어떻게 소통하는지 선택",
   "admin.featureAccessHint": "회원 내비게이션은 활성화 된 핵심 기능만 표시합니다.",
   "admin.chatFeatureHint": "대화, 메시지 및 그룹",
+  "admin.spaceGroup": "공간 전체 그룹",
+  "admin.spaceGroupHint": "멤버를 자동 추가하며 직접 나간 사람은 다시 추가하지 않습니다",
   "admin.squareFeatureHint": "진술, 댓글 및 반응",
   "admin.exploreFeatureHint": "친구 이외의 공개 게시물을 탐색하십시오",
   "admin.qqBindingFeature": "QQ 신원 연결",

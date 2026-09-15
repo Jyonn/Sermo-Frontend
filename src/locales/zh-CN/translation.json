@@ -1158,6 +1158,8 @@
   "admin.featureAccessTitle": "选择空间的交流方式",
   "admin.featureAccessHint": "成员端只展示已开放的主功能。",
   "admin.chatFeatureHint": "会话、消息与群聊",
+  "admin.spaceGroup": "空间大群",
+  "admin.spaceGroupHint": "开启后自动加入空间成员；主动退出的成员不会被再次自动加入",
   "admin.squareFeatureHint": "发言、评论与互动",
   "admin.exploreFeatureHint": "浏览非好友公开发言",
   "admin.qqBindingFeature": "绑定 QQ 身份",
