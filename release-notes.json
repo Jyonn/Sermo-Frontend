@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.5",
+  "id": "2026.09.15.6",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "空间大群",
       "items": [
-        "管理员开通空间大群后，会按成员加入空间的先后顺序邀请并显示欢迎消息"
+        "关闭空间大群现在会解散当前群聊；再次开启将组建全新的空间大群"
       ]
     },
     "en": {
       "title": "Space-wide groups",
       "items": [
-        "When admins enable a space-wide group, members are invited and welcomed in the order they joined the space"
+        "Disabling a space-wide group now dissolves it, and enabling it again creates a brand-new group"
       ]
     }
   }

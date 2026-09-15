@@ -2775,6 +2775,7 @@ function mapChat(chat: ChatDTO, currentUserId: number): Chat {
     submissionRole: chat.submission_role,
     submissionCounterparts,
     isOwner,
+    isSpaceGroup: Boolean(chat.is_space_group),
     pinned: Boolean(chat.pinned),
     onlineReminderEnabled: Boolean(chat.online_reminder_enabled),
     notificationsMuted: Boolean(chat.notifications_muted),
@@ -9102,7 +9103,7 @@ function LiveChatsPage({
 
             <section className="chat-detail-danger-section">
               <div className="chat-detail-settings-list">
-                {selectedChat.type === "group" && selectedChat.isOwner && selectedChat.purpose !== "submission" ? (
+                {selectedChat.type === "group" && selectedChat.isOwner && !selectedChat.isSpaceGroup && selectedChat.purpose !== "submission" ? (
                   <button
                     className="chat-detail-setting-row"
                     onClick={openGroupOwnerTransfer}
@@ -9127,7 +9128,7 @@ function LiveChatsPage({
                   <div className="row-main"><strong>{t("submission.delete")}</strong></div>
                   <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
                 </button> : null}
-                {selectedChat.purpose !== "submission" ? <button
+                {selectedChat.purpose !== "submission" && !(selectedChat.type === "group" && selectedChat.isOwner && selectedChat.isSpaceGroup) ? <button
                   className="chat-detail-setting-row danger-row"
                   onClick={() => void (selectedChat.type === "group" ? setGroupDangerConfirmOpen(true) : setFriendDangerConfirmOpen(true))}
                   type="button"

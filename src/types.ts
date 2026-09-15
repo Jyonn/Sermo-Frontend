@@ -1312,6 +1312,7 @@ export interface ChatDTO {
   has_unread_mention?: boolean;
   send_restriction?: ChatMuteState;
   group_background_theme?: Exclude<ChatBackgroundTheme, "custom"> | "";
+  is_space_group?: boolean;
   use_personal_background?: boolean;
   submission?: SubmissionDTO | null;
   submission_role?: SubmissionRole;
@@ -1415,6 +1416,7 @@ export interface Chat {
   submissionRole?: SubmissionRole;
   submissionCounterparts?: TinyUserDTO[];
   isOwner: boolean;
+  isSpaceGroup?: boolean;
   pinned: boolean;
   onlineReminderEnabled: boolean;
   notificationsMuted: boolean;
