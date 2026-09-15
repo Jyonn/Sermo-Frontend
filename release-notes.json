@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.20",
+  "id": "2026.09.15.21",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "小程序按钮布局更稳定",
+      "title": "小程序导航与投稿入口修复",
       "items": [
-        "统一修复小程序原生按钮样式造成的宽度和对齐异常，覆盖导航、列表、弹层与媒体操作"
+        "修复部分空间出现两条底部导航栏，以及关闭聊天后无法进入投稿的问题"
       ]
     },
     "en": {
-      "title": "More reliable Mini Program buttons",
+      "title": "Mini Program navigation and submissions fixed",
       "items": [
-        "Standardized native Mini Program button sizing and alignment across navigation, lists, sheets, and media controls"
+        "Fixed duplicate bottom navigation and restored submission access when chat is disabled"
       ]
     }
   }
