@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.18",
+  "id": "2026.09.15.19",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "小程序导航更清晰",
+      "title": "投稿列表显示修复",
       "items": [
-        "空间关闭聊天或广场后，小程序会自动隐藏对应导航；关闭投稿后，广场不再显示投稿切换入口"
+        "修复小程序投稿卡片被系统按钮样式压窄的问题，投稿信息现在会完整铺满列表"
       ]
     },
     "en": {
-      "title": "Clearer Mini Program navigation",
+      "title": "Submission list display fix",
       "items": [
-        "The Mini Program now hides disabled Chat and Square tabs, and removes the submission switch when submissions are turned off"
+        "Fixed Mini Program submission cards being narrowed by native button styles so each item now fills the list correctly"
       ]
     }
   }
