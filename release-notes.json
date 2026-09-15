@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.21",
+  "id": "2026.09.15.22",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "小程序导航与投稿入口修复",
+      "title": "小程序位置权限调整",
       "items": [
-        "修复部分空间出现两条底部导航栏，以及关闭聊天后无法进入投稿的问题"
+        "移除小程序中的位置采集与地址上传入口，同时保留地图和已有位置内容的查看能力"
       ]
     },
     "en": {
-      "title": "Mini Program navigation and submissions fixed",
+      "title": "Mini Program location permission update",
       "items": [
-        "Fixed duplicate bottom navigation and restored submission access when chat is disabled"
+        "Removed location collection and address uploads while preserving maps and existing location viewing"
       ]
     }
   }
