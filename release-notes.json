@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.17",
+  "id": "2026.09.15.18",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "投稿独立运行",
+      "title": "小程序导航更清晰",
       "items": [
-        "关闭普通聊天后仍可继续使用广场投稿，投稿列表、详情与消息发送不再受聊天开关影响"
+        "空间关闭聊天或广场后，小程序会自动隐藏对应导航；关闭投稿后，广场不再显示投稿切换入口"
       ]
     },
     "en": {
-      "title": "Independent submissions",
+      "title": "Clearer Mini Program navigation",
       "items": [
-        "Square submissions, their details, and messages remain available when regular chat is disabled"
+        "The Mini Program now hides disabled Chat and Square tabs, and removes the submission switch when submissions are turned off"
       ]
     }
   }
