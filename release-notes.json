@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.11",
+  "id": "2026.09.15.12",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
-      "title": "微信登录修复",
+      "title": "微信身份设置",
       "items": [
-        "修复首次使用微信关联已有友间账号时无法完成登录的问题"
+        "重新整理小程序微信身份设置弹层，让头像与昵称更紧凑、更易确认"
       ]
     },
     "en": {
-      "title": "WeChat sign-in fix",
+      "title": "WeChat profile setup",
       "items": [
-        "Fixed an issue that prevented first-time WeChat users from linking an existing FRIENDEN account"
+        "Refined the Mini Program WeChat profile sheet for a clearer, more compact avatar and nickname setup"
       ]
     }
   }
