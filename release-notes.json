@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.4",
+  "id": "2026.09.15.5",
   "publishedAt": "2026-09-15",
   "locales": {
     "zh-CN": {
       "title": "空间大群",
       "items": [
-        "管理员开通空间大群后，群内会依次显示成员欢迎消息和官方账号的创建成功提示"
+        "管理员开通空间大群后，会按成员加入空间的先后顺序邀请并显示欢迎消息"
       ]
     },
     "en": {
       "title": "Space-wide groups",
       "items": [
-        "When admins enable a space-wide group, quiet member welcomes are followed by an official creation confirmation"
+        "When admins enable a space-wide group, members are invited and welcomed in the order they joined the space"
       ]
     }
   }
