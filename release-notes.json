@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.15.22",
-  "publishedAt": "2026-09-15",
+  "id": "2026.09.16.1",
+  "publishedAt": "2026-09-16",
   "locales": {
     "zh-CN": {
-      "title": "小程序位置权限调整",
+      "title": "上传稳定性优化",
       "items": [
-        "移除小程序中的位置采集与地址上传入口，同时保留地图和已有位置内容的查看能力"
+        "前端与小程序统一改用与华东存储空间匹配的上传节点"
       ]
     },
     "en": {
-      "title": "Mini Program location permission update",
+      "title": "More reliable uploads",
       "items": [
-        "Removed location collection and address uploads while preserving maps and existing location viewing"
+        "Web and Mini Program uploads now use the endpoint matching the East China storage region"
       ]
     }
   }
