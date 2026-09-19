@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.16.1",
-  "publishedAt": "2026-09-16",
+  "id": "2026.09.19.1",
+  "publishedAt": "2026-09-19",
   "locales": {
     "zh-CN": {
-      "title": "上传稳定性优化",
+      "title": "主页入口更清晰",
       "items": [
-        "前端与小程序统一改用与华东存储空间匹配的上传节点"
+        "主页不再展示最近访问的空间列表，账号入口统一由 PWA 页面管理"
       ]
     },
     "en": {
-      "title": "More reliable uploads",
+      "title": "A clearer home page",
       "items": [
-        "Web and Mini Program uploads now use the endpoint matching the East China storage region"
+        "Removed the recent-space list from the home page; account entry remains managed by the PWA page"
       ]
     }
   }

@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { InputDialog } from "../components/InputDialog";
 import { buildAdminEntryHref, buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
-import { listRecentSpaces, type RecentSpaceEntry } from "../lib/recentSpaces";
 import { useI18n } from "../lib/language";
 
 export default function LandingPage() {
@@ -11,12 +10,7 @@ export default function LandingPage() {
   const [slugInput, setSlugInput] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  const [recentSpaces, setRecentSpaces] = useState<RecentSpaceEntry[]>([]);
   const normalizedSlug = useMemo(() => normalizeSlug(slugInput), [slugInput]);
-
-  useEffect(() => {
-    setRecentSpaces(listRecentSpaces());
-  }, []);
 
   const joinSpace = () => {
     if (!normalizedSlug) {
@@ -60,27 +54,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
-        {recentSpaces.length ? (
-          <section className="landing-entry-panel">
-            <div className="landing-entry-copy">
-              <p className="landing-eyebrow">{t("landing.myEntrancesEyebrow")}</p>
-              <h2>{t("landing.myEntrances")}</h2>
-              <p>{t("landing.entrancesHint")}</p>
-            </div>
-            <div className="landing-entry-list">
-              {recentSpaces.map((space) => (
-                <a className="landing-entry-item" href={buildJoinHrefForCurrentHost(space.slug)} key={space.slug}>
-                  <div className="landing-entry-main">
-                    <strong>{space.name}</strong>
-                    <span>{space.domain}</span>
-                  </div>
-                  <span className="landing-entry-action">{t("landing.enter")}</span>
-                </a>
-              ))}
-            </div>
-          </section>
-        ) : null}
       </div>
 
       <InputDialog
