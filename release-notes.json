@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.19.1",
+  "id": "2026.09.19.2",
   "publishedAt": "2026-09-19",
   "locales": {
     "zh-CN": {
-      "title": "主页入口更清晰",
+      "title": "友间主页焕新",
       "items": [
-        "主页不再展示最近访问的空间列表，账号入口统一由 PWA 页面管理"
+        "全新来信风格主页上线，支持明暗主题与多语言，进入友间统一前往 PWA 页面"
       ]
     },
     "en": {
-      "title": "A clearer home page",
+      "title": "A new Frienden home page",
       "items": [
-        "Removed the recent-space list from the home page; account entry remains managed by the PWA page"
+        "A letter-inspired home page now supports light and dark themes and multiple languages; entry continues through the PWA page"
       ]
     }
   }

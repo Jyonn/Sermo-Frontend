@@ -20,6 +20,7 @@ const expectedFiles = [
   "80-chat-messages.css",
   "81-chat-moderation.css",
   "90-viewport.css",
+  "95-landing-facade.css",
 ];
 
 const zeroToleranceMetrics = [

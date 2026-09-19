@@ -89,44 +89,6 @@ html[data-site-theme="qixi-2026"] :is(.side-drawer, .bottom-sheet, .app-mobile-n
   background-image: none;
 }
 
-html[data-site-theme="qixi-2026"] :is(.landing-copy, .landing-entry-panel) {
-  color: var(--text-primary);
-  border-color: color-mix(in srgb, var(--qixi-gold) 26%, var(--line-soft));
-  background:
-    radial-gradient(circle at 90% 6%, color-mix(in srgb, var(--qixi-gold) 13%, transparent), transparent 32%),
-    linear-gradient(145deg, color-mix(in srgb, var(--bg-panel-strong) 96%, transparent), color-mix(in srgb, var(--bg-panel) 92%, transparent));
-  box-shadow: 0 22px 54px rgb(23 26 49 / 16%);
-}
-
-html[data-site-theme="qixi-2026"] :is(.landing-copy h1, .landing-entry-copy h2, .landing-entry-main strong) {
-  color: var(--text-primary);
-}
-
-html[data-site-theme="qixi-2026"] :is(.landing-description, .landing-entry-copy p:last-child, .landing-entry-main span) {
-  color: var(--text-secondary);
-}
-
-html[data-site-theme="qixi-2026"] .landing-entry-item {
-  border-color: color-mix(in srgb, var(--qixi-gold) 18%, var(--line-soft));
-  background: color-mix(in srgb, var(--bg-elevated) 62%, transparent);
-}
-
-html[data-site-theme="qixi-2026"] .landing-entry-action {
-  color: var(--brand-primary);
-}
-
-html[data-site-theme="qixi-2026"] .landing-actions > .button {
-  color: var(--qixi-moon);
-  background: linear-gradient(135deg, var(--qixi-cinnabar), var(--qixi-plum));
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--qixi-plum) 22%, transparent);
-}
-
-html[data-site-theme="qixi-2026"] .landing-secondary {
-  color: var(--text-secondary);
-  border-color: color-mix(in srgb, var(--qixi-gold) 28%, var(--line-soft));
-  background: color-mix(in srgb, var(--bg-elevated) 56%, transparent);
-}
-
 html[data-site-theme="qixi-2026"] :is(.drawer-body, .sheet-body) {
   background-color: transparent;
 }

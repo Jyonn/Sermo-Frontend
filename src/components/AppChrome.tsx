@@ -22,6 +22,8 @@ interface AppChromeProps {
   shellClassName?: string;
   embedded?: boolean;
   publicHeader?: boolean;
+  showAppearanceActions?: boolean;
+  appearanceActionsFirst?: boolean;
   guestSpaceBrand?: {
     name: string;
     avatarUri?: string;
@@ -42,6 +44,8 @@ export function AppChrome({
   shellClassName,
   embedded = false,
   publicHeader = false,
+  showAppearanceActions = false,
+  appearanceActionsFirst = false,
   guestSpaceBrand,
 }: AppChromeProps) {
   const { session } = useAuth();
@@ -57,6 +61,34 @@ export function AppChrome({
   const visibleSpaceBrand = guestSpaceBrand ?? (sessionSpace
     ? { name: sessionSpace.name, avatarUri: sessionSpace.official_user?.avatar_uri }
     : undefined);
+  const appearanceActions = !session || showAppearanceActions ? (
+    <div className="guest-appearance-actions" aria-label={t("guest.appearanceAndLanguage")}>
+      <button
+        aria-label={resolvedTheme === "dark" ? t("guest.useLightTheme") : t("guest.useDarkTheme")}
+        className="guest-topbar-tool"
+        onClick={() => setThemePreference(resolvedTheme === "dark" ? "light" : "dark")}
+        title={resolvedTheme === "dark" ? t("guest.useLightTheme") : t("guest.useDarkTheme")}
+        type="button"
+      >
+        <span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span>
+      </button>
+      <label className="guest-language-tool" title={t("menu.language")}>
+        <span className="material-symbols-outlined" aria-hidden="true">translate</span>
+        <select
+          aria-label={t("menu.language")}
+          onChange={(event) => void setLanguagePreference(event.target.value as SupportedLanguage)}
+          value={language}
+        >
+          <option value="zh-CN">简体中文</option>{/* i18n-ignore: language names stay native */}
+          <option value="zh-TW">繁體中文</option>{/* i18n-ignore: language names stay native */}
+          <option value="en">English</option>
+          <option value="ja">日本語</option>{/* i18n-ignore: language names stay native */}
+          <option value="ko">한국어</option>
+          <option value="es">Español</option>
+        </select>
+      </label>
+    </div>
+  ) : null;
 
   if (embedded) return <>{children}</>;
 
@@ -93,35 +125,9 @@ export function AppChrome({
           )}
 
           <div className="topbar-actions">
+            {appearanceActionsFirst ? appearanceActions : null}
             {topbarAction}
-            {!session ? (
-              <div className="guest-appearance-actions" aria-label={t("guest.appearanceAndLanguage")}>
-                <button
-                  aria-label={resolvedTheme === "dark" ? t("guest.useLightTheme") : t("guest.useDarkTheme")}
-                  className="guest-topbar-tool"
-                  onClick={() => setThemePreference(resolvedTheme === "dark" ? "light" : "dark")}
-                  title={resolvedTheme === "dark" ? t("guest.useLightTheme") : t("guest.useDarkTheme")}
-                  type="button"
-                >
-                  <span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span>
-                </button>
-                <label className="guest-language-tool" title={t("menu.language")}>
-                  <span className="material-symbols-outlined" aria-hidden="true">translate</span>
-                  <select
-                    aria-label={t("menu.language")}
-                    onChange={(event) => void setLanguagePreference(event.target.value as SupportedLanguage)}
-                    value={language}
-                  >
-                    <option value="zh-CN">简体中文</option>{/* i18n-ignore: language names stay native */}
-                    <option value="zh-TW">繁體中文</option>{/* i18n-ignore: language names stay native */}
-                    <option value="en">English</option>
-                    <option value="ja">日本語</option>{/* i18n-ignore: language names stay native */}
-                    <option value="ko">한국어</option>
-                    <option value="es">Español</option>
-                  </select>
-                </label>
-              </div>
-            ) : null}
+            {!appearanceActionsFirst ? appearanceActions : null}
             {!hideGuestEntryLink && !session && location.pathname !== "/entry" && !location.pathname.startsWith("/space/") ? (
               <Link className="ghost-chip" to="/entry">
                 {t("nav.returnEntry")}

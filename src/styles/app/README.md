@@ -27,6 +27,8 @@ components.
   transcript controls.
 - `81-chat-moderation.css`: conversation moderation and submission-round state.
 - `90-viewport.css`: shared fixed-viewport and safe-area behavior.
+- `95-landing-facade.css`: the standalone public home page, including its
+  light and dark letter-inspired presentation.
 
 Do not move a rule between numbered files as part of an unrelated visual fix.
 New shared structure belongs in the owning component file and theme paint stays
