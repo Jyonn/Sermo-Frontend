@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useI18n } from "../lib/language";
+import { useMusicPlayer } from "../lib/musicPlayer";
 import type { MusicProviderDataDTO } from "../types";
 import { SideDrawer } from "./SideDrawer";
 
@@ -13,7 +14,6 @@ interface NeteaseMusicPreviewProps {
   music: MusicProviderDataDTO;
 }
 
-const AUDIO_PLAY_EVENT = "sermo:music-preview-play";
 const LRC_TIME_RE = /\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
 
 function parseLrc(value = "") {
@@ -60,13 +60,14 @@ export function isNeteaseMusicData(value: unknown): value is MusicProviderDataDT
 
 export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
   const { t } = useI18n();
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const player = useMusicPlayer();
   const lyricRefs = useRef(new Map<number, HTMLParagraphElement>());
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState((music.duration_ms || 0) / 1000);
-  const [audioUnavailable, setAudioUnavailable] = useState(false);
+  const active = player.music?.song_id === music.song_id;
+  const playing = active && player.playing;
+  const currentTime = active ? player.time : 0;
+  const duration = active ? player.duration : (music.duration_ms || 0) / 1000;
+  const audioUnavailable = active && player.unavailable;
   const lyrics = useMemo(
     () => combineLyrics(music.lyrics?.original, music.lyrics?.translation),
     [music.lyrics?.original, music.lyrics?.translation]
@@ -82,41 +83,12 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
   const artists = music.artists.join(" / ");
 
   useEffect(() => {
-    const stopForAnotherPlayer = (event: Event) => {
-      if ((event as CustomEvent<HTMLAudioElement>).detail === audioRef.current) return;
-      audioRef.current?.pause();
-    };
-    window.addEventListener(AUDIO_PLAY_EVENT, stopForAnotherPlayer);
-    return () => window.removeEventListener(AUDIO_PLAY_EVENT, stopForAnotherPlayer);
-  }, []);
-
-  useEffect(() => {
     if (!drawerOpen || activeLyricIndex < 0) return;
     lyricRefs.current.get(activeLyricIndex)?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [activeLyricIndex, drawerOpen]);
 
-  const togglePlayback = async () => {
-    const audio = audioRef.current;
-    if (!audio || audioUnavailable) return;
-    if (!audio.paused) {
-      audio.pause();
-      return;
-    }
-    window.dispatchEvent(new CustomEvent(AUDIO_PLAY_EVENT, { detail: audio }));
-    try {
-      await audio.play();
-    } catch {
-      setAudioUnavailable(true);
-      setPlaying(false);
-    }
-  };
-
-  const seek = (value: number) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = value;
-    setCurrentTime(value);
-  };
+  const togglePlayback = () => { if (active) player.toggle(); else player.play(music); };
+  const seek = (value: number) => { if (!active) player.play(music); player.seek(value); };
 
   const cover = music.cover_url ? <img alt="" src={music.cover_url} /> : <span className="material-symbols-outlined">music_note</span>;
 
@@ -140,19 +112,6 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
         </button>
         <span className="netease-music-card-progress" style={{ "--music-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as CSSProperties} />
       </article>
-      <audio
-        onDurationChange={(event) => {
-          if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration);
-        }}
-        onEnded={() => setPlaying(false)}
-        onError={() => { setAudioUnavailable(true); setPlaying(false); }}
-        onPause={() => setPlaying(false)}
-        onPlay={() => { setAudioUnavailable(false); setPlaying(true); }}
-        onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-        preload="none"
-        ref={audioRef}
-        src={music.audio_url}
-      />
       <SideDrawer
         className="netease-music-drawer"
         historyKey={`netease-song-${music.song_id}`}

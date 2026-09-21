@@ -16,6 +16,7 @@ import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
 import { PlatformAdminAuthProvider } from "./lib/platformAdminAuth";
 import { initializeScheduledSiteTheme } from "./lib/siteTheme";
 import { isPageActive } from "./lib/pageActivity";
+import { MusicPlayerProvider } from "./lib/musicPlayer";
 
 restoreLastInstalledSpace();
 void setupSpacePwaIdentity();
@@ -56,7 +57,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <PlatformAdminAuthProvider><AuthProvider>
           <ThemeProvider>
             <LanguageProvider>
-              <FeatureDiscoveryProvider><App /></FeatureDiscoveryProvider>
+              <FeatureDiscoveryProvider><MusicPlayerProvider><App /></MusicPlayerProvider></FeatureDiscoveryProvider>
             </LanguageProvider>
           </ThemeProvider>
         </AuthProvider></PlatformAdminAuthProvider>

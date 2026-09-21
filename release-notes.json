@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.21.1",
+  "id": "2026.09.21.2",
   "publishedAt": "2026-09-21",
   "locales": {
     "zh-CN": {
-      "title": "网易云音乐分享焕新",
+      "title": "音乐播放更连贯",
       "items": [
-        "网易云歌曲链接现在会展示可播放音乐卡片，并提供进度、歌词和歌曲详情"
+        "音乐播放现在可跨聊天和页面持续进行，并可随时通过悬浮播放条控制"
       ]
     },
     "en": {
-      "title": "Rich NetEase Music sharing",
+      "title": "Uninterrupted music playback",
       "items": [
-        "NetEase song links now open as playable music cards with progress, lyrics, and song details"
+        "Music keeps playing across chats and pages, with controls available in a floating player"
       ]
     }
   }

@@ -1680,6 +1680,7 @@
   "music.neteaseSource": "From NetEase Cloud Music",
   "music.play": "Play",
   "music.pause": "Pause",
+  "music.closePlayer": "Close player",
   "music.progress": "Playback progress",
   "music.lyrics": "Lyrics",
   "music.noLyrics": "No lyrics available",
