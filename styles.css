@@ -10,5 +10,6 @@
 @import "./src/styles/app/70-square-composer.css";
 @import "./src/styles/app/80-chat-messages.css";
 @import "./src/styles/app/81-chat-moderation.css";
+@import "./src/styles/app/82-social-cards.css";
 @import "./src/styles/app/90-viewport.css";
 @import "./src/styles/app/95-landing-facade.css";

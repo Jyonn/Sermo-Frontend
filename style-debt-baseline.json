@@ -1,6 +1,6 @@
 {
   "totals": {
-    "rules": 7702,
+    "rules": 7744,
     "important": 169,
     "duplicateDeclarations": 0,
     "duplicateRuleBlocks": 0,
@@ -77,6 +77,12 @@
       "longLines": 0
     },
     "81-chat-moderation.css": {
+      "important": 0,
+      "duplicateDeclarations": 0,
+      "complexSelectors": 0,
+      "longLines": 0
+    },
+    "82-social-cards.css": {
       "important": 0,
       "duplicateDeclarations": 0,
       "complexSelectors": 0,

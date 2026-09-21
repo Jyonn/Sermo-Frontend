@@ -19,6 +19,7 @@ const expectedFiles = [
   "70-square-composer.css",
   "80-chat-messages.css",
   "81-chat-moderation.css",
+  "82-social-cards.css",
   "90-viewport.css",
   "95-landing-facade.css",
 ];

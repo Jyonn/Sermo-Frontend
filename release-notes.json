@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.19.2",
-  "publishedAt": "2026-09-19",
+  "id": "2026.09.21.1",
+  "publishedAt": "2026-09-21",
   "locales": {
     "zh-CN": {
-      "title": "友间主页焕新",
+      "title": "网易云音乐分享焕新",
       "items": [
-        "全新来信风格主页上线，支持明暗主题与多语言，进入友间统一前往 PWA 页面"
+        "网易云歌曲链接现在会展示可播放音乐卡片，并提供进度、歌词和歌曲详情"
       ]
     },
     "en": {
-      "title": "A new Frienden home page",
+      "title": "Rich NetEase Music sharing",
       "items": [
-        "A letter-inspired home page now supports light and dark themes and multiple languages; entry continues through the PWA page"
+        "NetEase song links now open as playable music cards with progress, lyrics, and song details"
       ]
     }
   }

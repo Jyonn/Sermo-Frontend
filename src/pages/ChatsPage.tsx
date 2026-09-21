@@ -43,6 +43,7 @@ import { SearchAudioTile } from "../components/SearchAudioPlayer";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
+import { isNeteaseMusicData, NeteaseMusicPreview } from "../components/NeteaseMusicPreview";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -1643,7 +1644,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   useEffect(() => {
     setCurrentPreview(preview ?? null);
-  }, [preview?.url, preview?.status, preview?.title, preview?.description, preview?.image_url, preview?.site_name]);
+  }, [preview?.url, preview?.status, preview?.title, preview?.description, preview?.image_url, preview?.site_name, preview?.provider_data]);
 
   useEffect(() => {
     if (!isPollable || !pageActive) return;
@@ -1706,6 +1707,9 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   }
 
   const hostname = hostnameFromUrl(currentPreview.url || "");
+  if (isNeteaseMusicData(currentPreview.provider_data)) {
+    return <NeteaseMusicPreview music={currentPreview.provider_data} />;
+  }
   const rawTitle = currentPreview.title || hostname || currentPreview.url || i18n.t("link.title");
   const title = hostname && rawTitle.trim().toLowerCase() === hostname.toLowerCase()
     ? hostname.toUpperCase()
@@ -1970,22 +1974,23 @@ function renderMessageContent(
 
   const text = message.payload?.text ?? message.text;
   const linkPreview = message.payload?.link_preview;
-  const previewUrl = linkPreview?.url ?? extractFirstMessageUrl(text) ?? undefined;
+  const rawPreviewUrl = extractFirstMessageUrl(text);
+  const previewUrl = linkPreview?.url ?? rawPreviewUrl ?? undefined;
   if (!previewUrl) {
     return <LinkedMessageText mentions={message.mentions} text={text} />;
   }
 
-  const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, previewUrl);
+  const hasTextBesidePreview = hasMeaningfulTextOutsidePreviewUrl(text, rawPreviewUrl ?? previewUrl);
 
   return (
-    <span className={`message-text-stack has-link-preview ${groupClassName}`.trim()}>
+    <div className={`message-text-stack has-link-preview ${groupClassName}`.trim()}>
       {hasTextBesidePreview ? (
         <span className={`message-bubble message-text-chip ${groupClassName}`.trim()}>
-          <LinkedMessageText hiddenUrl={previewUrl} mentions={message.mentions} text={text} />
+          <LinkedMessageText hiddenUrl={rawPreviewUrl ?? previewUrl} mentions={message.mentions} text={text} />
         </span>
       ) : null}
       <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} url={previewUrl} />
-    </span>
+    </div>
   );
 }
 

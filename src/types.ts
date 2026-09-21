@@ -967,6 +967,26 @@ export interface LinkPreviewDTO {
   image_url?: string;
   site_name?: string;
   favicon_url?: string;
+  provider_data?: MusicProviderDataDTO | Record<string, unknown>;
+}
+
+export interface MusicProviderDataDTO {
+  provider: "netease_music";
+  song_id: number;
+  title: string;
+  artists: string[];
+  album?: string;
+  cover_url?: string;
+  duration_ms?: number;
+  audio_url: string;
+  canonical_url: string;
+  lyrics?: {
+    original?: string;
+    translation?: string;
+    romanization?: string;
+    word?: string;
+    yrc?: string;
+  };
 }
 
 export type AudioTranscriptStatus = "none" | "processing" | "ready" | "failed";

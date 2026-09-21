@@ -26,6 +26,7 @@ components.
 - `80-chat-messages.css`: canonical message grouping, card alignment and
   transcript controls.
 - `81-chat-moderation.css`: conversation moderation and submission-round state.
+- `82-social-cards.css`: rich social-platform cards and their detail players.
 - `90-viewport.css`: shared fixed-viewport and safe-area behavior.
 - `95-landing-facade.css`: the standalone public home page, including its
   light and dark letter-inspired presentation.
