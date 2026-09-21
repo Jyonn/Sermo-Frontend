@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.21.3",
+  "id": "2026.09.21.4",
   "publishedAt": "2026-09-21",
   "locales": {
     "zh-CN": {
-      "title": "音乐播放器更灵活",
+      "title": "音乐播放体验优化",
       "items": [
-        "悬浮播放器现在可拖动、贴边，并在长条与方形之间切换"
+        "歌曲封面播放时旋转；悬浮播放器可长按拖动，方形点击展开，长条实时显示歌词"
       ]
     },
     "en": {
-      "title": "A more flexible music player",
+      "title": "Improved music playback",
       "items": [
-        "Drag and dock the floating player, or switch between bar and compact square views"
+        "Album art spins while playing; long-press to move the floating player and see live lyrics in expanded view"
       ]
     }
   }

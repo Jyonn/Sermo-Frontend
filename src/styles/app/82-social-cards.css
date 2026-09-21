@@ -19,10 +19,10 @@
 
 .netease-music-play,
 .netease-music-summary { margin: 0; padding: 0; border: 0; background: none; color: inherit; }
-.netease-music-play { position: relative; width: 72px; height: 72px; border-radius: 16px; }
+.netease-music-play { position: relative; width: 72px; height: 72px; border-radius: 50%; }
 .netease-music-cover,
 .netease-music-cover img { display: grid; width: 100%; height: 100%; place-items: center; border-radius: inherit; object-fit: cover; }
-.netease-music-cover { overflow: hidden; background: #dfe5df; color: #65716a; }
+.netease-music-cover { overflow: hidden; border-radius: 50%; background: #dfe5df; color: #65716a; }
 .netease-music-play::after { position: absolute; inset: 0; border-radius: inherit; background: rgba(14, 17, 15, .22); content: ""; }
 .netease-music-play-icon {
   position: absolute;
@@ -47,38 +47,32 @@
 .netease-music-summary small i { display: grid; width: 15px; height: 15px; place-items: center; border-radius: 50%; background: var(--netease-red); color: #fff; font-style: normal; }
 .netease-music-card-progress { position: absolute; right: 12px; bottom: 0; left: 12px; height: 2px; background: linear-gradient(90deg, var(--netease-red) var(--music-progress), transparent var(--music-progress)); }
 
-.music-mini-player { position: fixed; z-index: 900; display: flex; width: min(360px, calc(100vw - 24px)); height: 68px; align-items: center; gap: 7px; overflow: hidden; padding: 8px; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--bg-surface); box-shadow: 0 16px 45px rgba(15, 32, 29, .2); color: var(--text-primary); transition: left .24s ease, width .24s ease; }
+.music-mini-player { position: fixed; z-index: 900; display: flex; width: min(360px, calc(100vw - 24px)); height: 68px; align-items: center; gap: 8px; overflow: hidden; padding: 8px; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--bg-surface); box-shadow: 0 16px 45px rgba(15, 32, 29, .2); color: var(--text-primary); transition: left .24s ease, width .24s ease; touch-action: none; user-select: none; -webkit-user-select: none; }
 .music-mini-player.is-dragging { transition: none; }
-.music-mini-player.is-compact { width: 68px; height: 68px; padding: 0; border-radius: 19px; }
+.music-mini-player.is-compact { width: 68px; height: 68px; padding: 4px; border-radius: 19px; }
 .music-mini-player button { display: grid; flex: 0 0 38px; width: 38px; height: 38px; place-items: center; margin: 0; padding: 0; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--text-primary) 6%, var(--bg-surface)); color: var(--text-primary); cursor: pointer; }
-.music-mini-player button.music-mini-drag { flex-basis: 18px; width: 18px; color: var(--text-muted); background: transparent; touch-action: none; cursor: grab; }
-.music-mini-player button.music-mini-drag:active { cursor: grabbing; }
-.music-mini-drag .material-symbols-outlined { font-size: 18px; }
-.music-mini-player:not(.is-compact) button:nth-child(2) { background: #e8453c; color: #fff; }
 .music-mini-player button:disabled { opacity: .45; cursor: not-allowed; }
-.music-mini-cover, .music-mini-cover img { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; border-radius: 10px; object-fit: cover; }
-.music-mini-cover { overflow: hidden; background: var(--line-soft); }
+.music-mini-player button.music-mini-cover { position: relative; flex: 0 0 50px; width: 50px; height: 50px; overflow: hidden; border-radius: 50%; background: var(--line-soft); }
+.music-mini-disc, .music-mini-disc img { display: grid; width: 100%; height: 100%; place-items: center; border-radius: 50%; object-fit: cover; }
+.music-mini-disc { overflow: hidden; background: var(--line-soft); }
+.music-mini-play-icon { position: absolute; z-index: 1; display: grid; width: 27px; height: 27px; place-items: center; border-radius: 50%; background: rgba(255,255,255,.9); color: #17231f; font-size: 19px; }
+.music-mini-player button.music-mini-compact { width: 100%; height: 100%; flex-basis: 100%; border-radius: 50%; overflow: hidden; background: var(--line-soft); }
 .music-mini-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
 .music-mini-player button.music-mini-copy { display: grid; flex: 1; width: auto; height: auto; min-width: 0; justify-items: start; background: transparent; text-align: left; }
 .music-mini-player button.music-mini-collapse { flex-basis: 30px; width: 30px; background: transparent; }
 .music-mini-player button.music-mini-collapse .material-symbols-outlined { font-size: 18px; }
-.music-mini-player.is-compact button.music-mini-drag { position: absolute; z-index: 3; top: 0; left: 0; width: 21px; height: 25px; border-radius: 0 0 10px 0; background: rgba(17, 28, 26, .72); color: #fff; }
-.music-mini-player button.music-mini-compact-play { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; background: var(--line-soft); }
-.music-mini-compact-play img { width: 100%; height: 100%; object-fit: cover; }
-.music-mini-compact-icon { position: absolute; inset: 50% auto auto 50%; display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: rgba(255,255,255,.91); color: #17231f; transform: translate(-50%,-50%); }
-.music-mini-player button.music-mini-expand { position: absolute; z-index: 2; top: 0; right: 0; width: 24px; height: 24px; border-radius: 0 0 0 9px; background: rgba(17, 28, 26, .72); color: #fff; }
-.music-mini-expand .material-symbols-outlined { font-size: 15px; }
 .music-mini-copy strong, .music-mini-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.music-mini-copy strong { font-size: 13px; }.music-mini-copy small { color: var(--text-muted); font-size: 11px; }
+.music-mini-copy strong { width: 100%; font-size: 13px; }.music-mini-copy strong span { color: var(--text-muted); font-weight: 500; }.music-mini-copy small { width: 100%; color: var(--text-muted); font-size: 11px; }
 .music-mini-progress { position: absolute; bottom: 0; left: 0; height: 2px; background: #e8453c; transition: width .2s linear; }
 
 .netease-music-drawer { --netease-red: #e8453c; }
 .netease-music-drawer .drawer-body { padding: 0; }
 .netease-music-drawer-source { padding: 4px 8px; border-radius: 999px; background: color-mix(in srgb, #e8453c 10%, transparent); color: #d94139; font-size: 10px; font-weight: 750; }
 .netease-player { display: grid; grid-template-rows: auto auto auto minmax(210px, 1fr) auto; min-height: 100%; padding: clamp(23px, 5vw, 38px); background: radial-gradient(circle at 50% 3%, color-mix(in srgb, #e8453c 13%, transparent), transparent 30%), var(--bg-surface); }
-.netease-player-cover { width: min(58vw, 230px); aspect-ratio: 1; margin: 0 auto; overflow: hidden; border-radius: 24px; background: #dfe5df; box-shadow: 0 26px 60px rgba(30, 28, 25, .22); }
+.netease-player-cover { width: min(58vw, 230px); aspect-ratio: 1; margin: 0 auto; overflow: hidden; border-radius: 50%; background: #dfe5df; box-shadow: 0 26px 60px rgba(30, 28, 25, .22); }
 .netease-player-cover img { width: 100%; height: 100%; object-fit: cover; }
-.netease-player-cover.is-playing { animation: netease-cover-pulse 3.8s ease-in-out infinite; }
+.music-disc.is-active, .music-mini-disc { animation: music-disc-turn 12s linear infinite paused; }
+.music-disc.is-playing, .music-mini-disc.is-playing { animation-play-state: running; }
 .netease-player-heading { margin: 24px 0 19px; text-align: center; }
 .netease-player-heading h4 { margin: 0; font-size: clamp(23px, 4vw, 31px); letter-spacing: -.04em; }
 .netease-player-heading p { margin: 7px 0 0; color: var(--text-muted); font-size: 14px; }
@@ -95,9 +89,7 @@
 .netease-player-open { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line-soft); color: var(--text-muted); font-size: 12px; font-weight: 700; }
 html[data-theme="dark"] .netease-music-card { background: linear-gradient(135deg, #17201c, #211a19); box-shadow: 0 12px 30px rgba(0, 0, 0, .25); }
 
-@keyframes netease-cover-pulse {
-  50% { transform: scale(1.018); box-shadow: 0 30px 72px rgba(52, 34, 30, .3); }
-}
+@keyframes music-disc-turn { to { transform: rotate(360deg); } }
 
 @media (max-width: 520px) {
   .netease-music-card { grid-template-columns: 64px minmax(0, 1fr); min-height: 86px; border-radius: 18px; }
@@ -107,5 +99,5 @@ html[data-theme="dark"] .netease-music-card { background: linear-gradient(135deg
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .netease-player-cover.is-playing { animation: none; }
+  .music-disc.is-playing, .music-mini-disc.is-playing { animation: none; }
 }

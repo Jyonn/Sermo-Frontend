@@ -102,7 +102,7 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
           onClick={() => void togglePlayback()}
           type="button"
         >
-          <span className="netease-music-cover">{cover}</span>
+          <span className={`netease-music-cover music-disc${active ? " is-active" : ""}${playing ? " is-playing" : ""}`}>{cover}</span>
           <span className="netease-music-play-icon material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
         </button>
         <button className="netease-music-summary" onClick={() => setDrawerOpen(true)} type="button">
@@ -121,7 +121,7 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
         titleAccessory={<span className="netease-music-drawer-source">{t("music.neteaseSource")}</span>}
       >
         <div className="netease-player">
-          <div className={`netease-player-cover${playing ? " is-playing" : ""}`}>{cover}</div>
+          <div className={`netease-player-cover music-disc${active ? " is-active" : ""}${playing ? " is-playing" : ""}`}>{cover}</div>
           <div className="netease-player-heading">
             <h4>{music.title}</h4>
             <p>{artists}</p>
