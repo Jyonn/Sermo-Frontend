@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.21.5",
+  "id": "2026.09.21.6",
   "publishedAt": "2026-09-21",
   "locales": {
     "zh-CN": {
-      "title": "音乐播放器细节优化",
+      "title": "歌曲详情排版优化",
       "items": [
-        "悬浮播放器现在可直接拖动，圆形和长条进度更直观；歌曲详情歌词与播放进度保持同步"
+        "修复桌面端歌曲详情中唱片封面遮挡歌名的问题"
       ]
     },
     "en": {
-      "title": "Music player refinements",
+      "title": "Song detail layout fix",
       "items": [
-        "Drag the floating player directly, follow progress in either shape, and see lyrics stay in sync in song details"
+        "Fixed album artwork overlapping the song title in the desktop song drawer"
       ]
     }
   }
