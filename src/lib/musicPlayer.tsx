@@ -17,7 +17,6 @@ type Player = {
 
 const Context = createContext<Player | null>(null);
 const PLAYER_MARGIN = 12;
-const DRAG_HOLD_MS = 280;
 
 function timedLyrics(value = "") {
   return value.split(/\r?\n/).flatMap((row) => {
@@ -58,16 +57,23 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [edge, setEdge] = useState<"left" | "right">("right");
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const drag = useRef<{ pointerId: number; offsetX: number; offsetY: number } | null>(null);
-  const pendingDrag = useRef<{ pointerId: number; x: number; y: number; left: number; top: number; target: HTMLElement; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const pendingDrag = useRef<{ pointerId: number; x: number; y: number; left: number; top: number; target: HTMLElement } | null>(null);
   const suppressClick = useRef(false);
   const [dragging, setDragging] = useState(false);
+  const lyricRefs = useRef(new Map<number, HTMLParagraphElement>());
   const lyrics = useMemo(() => timedLyrics(music?.lyrics?.original), [music?.lyrics?.original]);
-  const activeLyric = useMemo(() => {
+  const activeLyricIndex = useMemo(() => {
     for (let index = lyrics.length - 1; index >= 0; index -= 1) {
-      if (time + .08 >= lyrics[index].time) return lyrics[index].text;
+      if (time + .08 >= lyrics[index].time) return index;
     }
-    return "";
+    return -1;
   }, [lyrics, time]);
+  const activeLyric = activeLyricIndex >= 0 ? lyrics[activeLyricIndex].text : "";
+
+  useEffect(() => {
+    if (!drawerOpen || activeLyricIndex < 0) return;
+    lyricRefs.current.get(activeLyricIndex)?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [activeLyricIndex, drawerOpen]);
 
   useEffect(() => {
     const reposition = () => setPosition((current) => ({
@@ -82,22 +88,16 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const startDrag = (event: PointerEvent<HTMLElement>) => {
     if (!position) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    const target = event.currentTarget;
-    const timer = setTimeout(() => {
-      const pending = pendingDrag.current;
-      if (!pending || pending.pointerId !== event.pointerId) return;
-      drag.current = { pointerId: pending.pointerId, offsetX: pending.x - pending.left, offsetY: pending.y - pending.top };
-      target.setPointerCapture(pending.pointerId);
-      suppressClick.current = true;
-      setDragging(true);
-    }, DRAG_HOLD_MS);
-    pendingDrag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: position.left, top: position.top, target, timer };
+    pendingDrag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: position.left, top: position.top, target: event.currentTarget };
   };
   const moveDrag = (event: PointerEvent<HTMLElement>) => {
     const pending = pendingDrag.current;
-    if (pending?.pointerId === event.pointerId && !drag.current && Math.hypot(event.clientX - pending.x, event.clientY - pending.y) > 8) {
-      clearTimeout(pending.timer);
+    if (pending?.pointerId === event.pointerId && !drag.current && Math.hypot(event.clientX - pending.x, event.clientY - pending.y) > 5) {
+      drag.current = { pointerId: pending.pointerId, offsetX: pending.x - pending.left, offsetY: pending.y - pending.top };
+      pending.target.setPointerCapture(pending.pointerId);
       pendingDrag.current = null;
+      suppressClick.current = true;
+      setDragging(true);
     }
     if (drag.current?.pointerId !== event.pointerId) return;
     setPosition({
@@ -107,7 +107,6 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   };
   const endDrag = (event: PointerEvent<HTMLElement>) => {
     if (pendingDrag.current?.pointerId === event.pointerId) {
-      clearTimeout(pendingDrag.current.timer);
       pendingDrag.current = null;
     }
     if (drag.current?.pointerId !== event.pointerId) return;
@@ -149,6 +148,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     setTime(next);
   };
   const close = () => { audio.current?.pause(); setMusic(null); setTime(0); setDrawerOpen(false); };
+  const progress = duration > 0 ? Math.min(100, Math.max(0, time / duration * 100)) : 0;
 
   return <Context.Provider value={{ music, playing, time, duration, unavailable, play, toggle, seek, close }}>
     {children}
@@ -157,7 +157,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       onEnded={() => setPlaying(false)} onError={() => { setUnavailable(true); setPlaying(false); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}
       onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} />
-    {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={t("music.neteaseSource")} style={position ? { left: position.left, top: position.top } as CSSProperties : undefined}
+    {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={t("music.neteaseSource")} style={{ ...(position || {}), "--music-progress": `${progress}%`, "--music-angle": `${progress * 3.6}deg` } as CSSProperties}
       onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}
       onClickCapture={(event) => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}
       onContextMenu={(event) => event.preventDefault()}>
@@ -170,16 +170,15 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       </button>
       <button className="music-mini-copy" type="button" onClick={() => setDrawerOpen(true)}><strong>{music.title}<span> · {music.artists.join(" / ")}</span></strong><small>{activeLyric || t("music.noLyrics")}</small></button>
       <button className="music-mini-collapse" type="button" onClick={() => setCompact(true)} aria-label={t("music.collapsePlayer")}><span className="material-symbols-outlined">close_fullscreen</span></button>
-      <button type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
+      <button className="music-mini-close" type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
       </>}
-      <span className="music-mini-progress" style={{ width: `${duration ? Math.min(100, time / duration * 100) : 0}%` }} />
     </aside> : null}
     {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-netease-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} title={music.title} titleAccessory={<span className="netease-music-drawer-source">{t("music.neteaseSource")}</span>}>
       <div className="netease-player">
         <div className={`netease-player-cover music-disc is-active${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</div>
         <div className="netease-player-heading"><h4>{music.title}</h4><p>{music.artists.join(" / ")}</p>{music.album ? <small>{music.album}</small> : null}</div>
         <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" onClick={toggle} disabled={unavailable}><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>{unavailable ? t("music.audioUnavailable") : playing ? t("music.pause") : t("music.play")}</button></div>
-        <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{music.lyrics?.original ? music.lyrics.original.split(/\r?\n/).filter((line) => line.trim()).map((line, index) => { const stamp = line.match(/\[(\d+):(\d+)(?:[.:](\d+))?\]/); const at = stamp ? Number(stamp[1]) * 60 + Number(stamp[2]) + Number(`0.${stamp[3] || 0}`) : 0; return <p key={index} className={time >= at && time < at + 4 ? "is-active" : ""} onClick={() => seek(at)}>{line.replace(/\[[^\]]+\]/g, "").trim()}</p>; }) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
+        <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{lyrics.length ? lyrics.map((line, index) => <p key={`${line.time}:${index}`} className={index === activeLyricIndex ? "is-active" : ""} onClick={() => seek(line.time)} ref={(element) => { if (element) lyricRefs.current.set(index, element); else lyricRefs.current.delete(index); }}>{line.text}</p>) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
         <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">{t("music.openNetease")}<span aria-hidden="true">↗</span></a>
       </div>
     </SideDrawer> : null}

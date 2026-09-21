@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.21.4",
+  "id": "2026.09.21.5",
   "publishedAt": "2026-09-21",
   "locales": {
     "zh-CN": {
-      "title": "音乐播放体验优化",
+      "title": "音乐播放器细节优化",
       "items": [
-        "歌曲封面播放时旋转；悬浮播放器可长按拖动，方形点击展开，长条实时显示歌词"
+        "悬浮播放器现在可直接拖动，圆形和长条进度更直观；歌曲详情歌词与播放进度保持同步"
       ]
     },
     "en": {
-      "title": "Improved music playback",
+      "title": "Music player refinements",
       "items": [
-        "Album art spins while playing; long-press to move the floating player and see live lyrics in expanded view"
+        "Drag the floating player directly, follow progress in either shape, and see lyrics stay in sync in song details"
       ]
     }
   }
