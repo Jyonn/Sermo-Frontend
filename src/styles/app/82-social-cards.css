@@ -47,14 +47,27 @@
 .netease-music-summary small i { display: grid; width: 15px; height: 15px; place-items: center; border-radius: 50%; background: var(--netease-red); color: #fff; font-style: normal; }
 .netease-music-card-progress { position: absolute; right: 12px; bottom: 0; left: 12px; height: 2px; background: linear-gradient(90deg, var(--netease-red) var(--music-progress), transparent var(--music-progress)); }
 
-.music-mini-player { position: fixed; z-index: 900; right: 24px; bottom: calc(20px + env(safe-area-inset-bottom)); display: flex; width: min(360px, calc(100vw - 32px)); min-height: 66px; align-items: center; gap: 10px; overflow: hidden; padding: 9px 12px; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--bg-surface); box-shadow: 0 16px 45px rgba(15, 32, 29, .2); color: var(--text-primary); }
+.music-mini-player { position: fixed; z-index: 900; display: flex; width: min(360px, calc(100vw - 24px)); height: 68px; align-items: center; gap: 7px; overflow: hidden; padding: 8px; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--bg-surface); box-shadow: 0 16px 45px rgba(15, 32, 29, .2); color: var(--text-primary); transition: left .24s ease, width .24s ease; }
+.music-mini-player.is-dragging { transition: none; }
+.music-mini-player.is-compact { width: 68px; height: 68px; padding: 0; border-radius: 19px; }
 .music-mini-player button { display: grid; flex: 0 0 38px; width: 38px; height: 38px; place-items: center; margin: 0; padding: 0; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--text-primary) 6%, var(--bg-surface)); color: var(--text-primary); cursor: pointer; }
-.music-mini-player button:first-child { background: #e8453c; color: #fff; }
+.music-mini-player button.music-mini-drag { flex-basis: 18px; width: 18px; color: var(--text-muted); background: transparent; touch-action: none; cursor: grab; }
+.music-mini-player button.music-mini-drag:active { cursor: grabbing; }
+.music-mini-drag .material-symbols-outlined { font-size: 18px; }
+.music-mini-player:not(.is-compact) button:nth-child(2) { background: #e8453c; color: #fff; }
 .music-mini-player button:disabled { opacity: .45; cursor: not-allowed; }
 .music-mini-cover, .music-mini-cover img { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; border-radius: 10px; object-fit: cover; }
 .music-mini-cover { overflow: hidden; background: var(--line-soft); }
 .music-mini-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
 .music-mini-player button.music-mini-copy { display: grid; flex: 1; width: auto; height: auto; min-width: 0; justify-items: start; background: transparent; text-align: left; }
+.music-mini-player button.music-mini-collapse { flex-basis: 30px; width: 30px; background: transparent; }
+.music-mini-player button.music-mini-collapse .material-symbols-outlined { font-size: 18px; }
+.music-mini-player.is-compact button.music-mini-drag { position: absolute; z-index: 3; top: 0; left: 0; width: 21px; height: 25px; border-radius: 0 0 10px 0; background: rgba(17, 28, 26, .72); color: #fff; }
+.music-mini-player button.music-mini-compact-play { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; background: var(--line-soft); }
+.music-mini-compact-play img { width: 100%; height: 100%; object-fit: cover; }
+.music-mini-compact-icon { position: absolute; inset: 50% auto auto 50%; display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: rgba(255,255,255,.91); color: #17231f; transform: translate(-50%,-50%); }
+.music-mini-player button.music-mini-expand { position: absolute; z-index: 2; top: 0; right: 0; width: 24px; height: 24px; border-radius: 0 0 0 9px; background: rgba(17, 28, 26, .72); color: #fff; }
+.music-mini-expand .material-symbols-outlined { font-size: 15px; }
 .music-mini-copy strong, .music-mini-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .music-mini-copy strong { font-size: 13px; }.music-mini-copy small { color: var(--text-muted); font-size: 11px; }
 .music-mini-progress { position: absolute; bottom: 0; left: 0; height: 2px; background: #e8453c; transition: width .2s linear; }
@@ -87,7 +100,6 @@ html[data-theme="dark"] .netease-music-card { background: linear-gradient(135deg
 }
 
 @media (max-width: 520px) {
-  .music-mini-player { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); width: calc(100vw - 24px); }
   .netease-music-card { grid-template-columns: 64px minmax(0, 1fr); min-height: 86px; border-radius: 18px; }
   .netease-music-play { width: 64px; height: 64px; }
   .netease-player { padding: 24px 20px 28px; }

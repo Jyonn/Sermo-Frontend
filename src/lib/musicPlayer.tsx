@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import type { MusicProviderDataDTO } from "../types";
 import { useI18n } from "./language";
 import { SideDrawer } from "../components/SideDrawer";
@@ -16,6 +16,15 @@ type Player = {
 };
 
 const Context = createContext<Player | null>(null);
+const PLAYER_MARGIN = 12;
+
+function playerWidth(compact: boolean) {
+  return compact ? 68 : Math.min(360, window.innerWidth - PLAYER_MARGIN * 2);
+}
+
+function playerTop(top: number) {
+  return Math.min(Math.max(PLAYER_MARGIN, top), Math.max(PLAYER_MARGIN, window.innerHeight - 80));
+}
 
 export function useMusicPlayer() {
   const value = useContext(Context);
@@ -33,6 +42,44 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [edge, setEdge] = useState<"left" | "right">("right");
+  const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+  const drag = useRef<{ pointerId: number; offsetX: number; offsetY: number } | null>(null);
+
+  useEffect(() => {
+    const reposition = () => setPosition((current) => ({
+      left: edge === "left" ? PLAYER_MARGIN : window.innerWidth - playerWidth(compact) - PLAYER_MARGIN,
+      top: playerTop(current?.top ?? window.innerHeight - (window.innerWidth <= 520 ? 165 : 100)),
+    }));
+    reposition();
+    window.addEventListener("resize", reposition);
+    return () => window.removeEventListener("resize", reposition);
+  }, [compact, edge]);
+
+  const startDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!position) return;
+    drag.current = { pointerId: event.pointerId, offsetX: event.clientX - position.left, offsetY: event.clientY - position.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const moveDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    if (drag.current?.pointerId !== event.pointerId) return;
+    setPosition({
+      left: Math.min(Math.max(0, event.clientX - drag.current.offsetX), window.innerWidth - playerWidth(compact)),
+      top: playerTop(event.clientY - drag.current.offsetY),
+    });
+  };
+  const endDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    if (drag.current?.pointerId !== event.pointerId) return;
+    const releasedLeft = Math.min(Math.max(0, event.clientX - drag.current.offsetX), window.innerWidth - playerWidth(compact));
+    drag.current = null;
+    const nextEdge = releasedLeft + playerWidth(compact) / 2 < window.innerWidth / 2 ? "left" : "right";
+    setEdge(nextEdge);
+    setPosition((current) => ({
+      left: nextEdge === "left" ? PLAYER_MARGIN : window.innerWidth - playerWidth(compact) - PLAYER_MARGIN,
+      top: playerTop(current?.top ?? PLAYER_MARGIN),
+    }));
+  };
 
   useEffect(() => {
     if (!music || !pendingPlay.current) return;
@@ -68,11 +115,21 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       onEnded={() => setPlaying(false)} onError={() => { setUnavailable(true); setPlaying(false); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}
       onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} />
-    {music ? <aside className="music-mini-player" aria-label={t("music.neteaseSource")}>
+    {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${drag.current ? " is-dragging" : ""}`} aria-label={t("music.neteaseSource")} style={position ? { left: position.left, top: position.top } as CSSProperties : undefined}>
+      <button className="music-mini-drag" type="button" aria-label={t("music.movePlayer")} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}><span className="material-symbols-outlined">drag_indicator</span></button>
+      {compact ? <>
+        <button className="music-mini-compact-play" type="button" onClick={toggle} disabled={unavailable} aria-label={playing ? t("music.pause") : t("music.play")}>
+          {music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}
+          <span className="music-mini-compact-icon material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+        </button>
+        <button className="music-mini-expand" type="button" onClick={() => setCompact(false)} aria-label={t("music.expandPlayer")}><span className="material-symbols-outlined">open_in_full</span></button>
+      </> : <>
       <button type="button" onClick={toggle} disabled={unavailable} aria-label={playing ? t("music.pause") : t("music.play")}><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span></button>
       <span className="music-mini-cover">{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</span>
       <button className="music-mini-copy" type="button" onClick={() => setDrawerOpen(true)}><strong>{music.title}</strong><small>{music.artists.join(" / ")}</small></button>
+      <button className="music-mini-collapse" type="button" onClick={() => setCompact(true)} aria-label={t("music.collapsePlayer")}><span className="material-symbols-outlined">close_fullscreen</span></button>
       <button type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
+      </>}
       <span className="music-mini-progress" style={{ width: `${duration ? Math.min(100, time / duration * 100) : 0}%` }} />
     </aside> : null}
     {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-netease-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} title={music.title} titleAccessory={<span className="netease-music-drawer-source">{t("music.neteaseSource")}</span>}>

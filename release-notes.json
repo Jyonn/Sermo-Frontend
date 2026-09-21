@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.21.2",
+  "id": "2026.09.21.3",
   "publishedAt": "2026-09-21",
   "locales": {
     "zh-CN": {
-      "title": "音乐播放更连贯",
+      "title": "音乐播放器更灵活",
       "items": [
-        "音乐播放现在可跨聊天和页面持续进行，并可随时通过悬浮播放条控制"
+        "悬浮播放器现在可拖动、贴边，并在长条与方形之间切换"
       ]
     },
     "en": {
-      "title": "Uninterrupted music playback",
+      "title": "A more flexible music player",
       "items": [
-        "Music keeps playing across chats and pages, with controls available in a floating player"
+        "Drag and dock the floating player, or switch between bar and compact square views"
       ]
     }
   }
