@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.21.6",
-  "publishedAt": "2026-09-21",
+  "id": "2026.09.22.1",
+  "publishedAt": "2026-09-22",
   "locales": {
     "zh-CN": {
-      "title": "歌曲详情排版优化",
+      "title": "抖音视频预览",
       "items": [
-        "修复桌面端歌曲详情中唱片封面遮挡歌名的问题"
+        "聊天中的抖音视频链接现在可直接打开播放器观看"
       ]
     },
     "en": {
-      "title": "Song detail layout fix",
+      "title": "Douyin video previews",
       "items": [
-        "Fixed album artwork overlapping the song title in the desktop song drawer"
+        "Open and watch shared Douyin videos directly from chat"
       ]
     }
   }

@@ -967,7 +967,17 @@ export interface LinkPreviewDTO {
   image_url?: string;
   site_name?: string;
   favicon_url?: string;
-  provider_data?: MusicProviderDataDTO | Record<string, unknown>;
+  provider_data?: MusicProviderDataDTO | DouyinVideoDataDTO | Record<string, unknown>;
+}
+
+export interface DouyinVideoDataDTO {
+  provider: "douyin_video";
+  video_id: string;
+  title: string;
+  embed_url: string;
+  canonical_url: string;
+  width: number;
+  height: number;
 }
 
 export interface MusicProviderDataDTO {
