@@ -974,7 +974,7 @@ export interface DouyinVideoDataDTO {
   provider: "douyin_video";
   video_id: string;
   title: string;
-  embed_url: string;
+  video_url?: string;
   canonical_url: string;
   width: number;
   height: number;

@@ -11,7 +11,7 @@
 .douyin-video-copy strong { display: -webkit-box; overflow: hidden; font-size: 16px; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .douyin-video-drawer .drawer-body { padding: 0; }
 .douyin-video-viewer { display: grid; justify-items: center; align-content: start; gap: 18px; min-height: 100%; padding: 22px; background: #101416; }
-.douyin-video-viewer iframe { display: block; width: min(100%, 440px); height: auto; max-height: 72dvh; border: 0; border-radius: 14px; background: #000; }
+.douyin-video-viewer video { display: block; width: min(100%, 440px); height: auto; max-height: 72dvh; border: 0; border-radius: 14px; background: #000; }
 .douyin-video-viewer a { color: #a7e9e4; font-size: 13px; font-weight: 700; }
 
 .netease-music-card {

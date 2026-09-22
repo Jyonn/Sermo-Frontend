@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.22.1",
-  "publishedAt": "2026-09-22",
+  "id": "2026.09.23.1",
+  "publishedAt": "2026-09-23",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频预览",
+      "title": "抖音视频原生播放",
       "items": [
-        "聊天中的抖音视频链接现在可直接打开播放器观看"
+        "公开分享的视频可在聊天中使用原生播放器观看；无法获取视频时前往抖音观看"
       ]
     },
     "en": {
-      "title": "Douyin video previews",
+      "title": "Native Douyin video playback",
       "items": [
-        "Open and watch shared Douyin videos directly from chat"
+        "Watch available shared videos in the native player, or open Douyin when playback is unavailable"
       ]
     }
   }
