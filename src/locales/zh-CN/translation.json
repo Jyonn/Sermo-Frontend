@@ -1692,6 +1692,7 @@
   "douyin.source": "抖音视频",
   "douyin.video": "观看抖音视频",
   "douyin.openOriginal": "前往抖音观看",
+  "douyin.playbackUnavailable": "视频地址可能已过期，请前往抖音观看",
   "location.generatingApproximate": "正在生成模糊位置",
   "location.resolving": "正在解析位置",
   "location.approximate": "模糊位置",

@@ -12,6 +12,7 @@
 .douyin-video-drawer .drawer-body { padding: 0; }
 .douyin-video-viewer { display: grid; justify-items: center; align-content: start; gap: 18px; min-height: 100%; padding: 22px; background: #101416; }
 .douyin-video-viewer video { display: block; width: min(100%, 440px); height: auto; max-height: 72dvh; border: 0; border-radius: 14px; background: #000; }
+.douyin-video-viewer p { margin: 0; color: #b9c7c5; font-size: 13px; }
 .douyin-video-viewer a { color: #a7e9e4; font-size: 13px; font-weight: 700; }
 
 .netease-music-card {
