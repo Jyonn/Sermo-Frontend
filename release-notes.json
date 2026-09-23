@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.23.2",
+  "id": "2026.09.23.3",
   "publishedAt": "2026-09-23",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频播放增强",
+      "title": "抖音视频站内播放",
       "items": [
-        "提升抖音分享视频的站内播放成功率，并提示过期视频链接"
+        "采用独立解析组件获取抖音视频地址，点击分享卡片即可站内播放"
       ]
     },
     "en": {
-      "title": "Improved Douyin video playback",
+      "title": "In-app Douyin video playback",
       "items": [
-        "Improved in-app playback for shared Douyin videos, with a clear fallback for expired links"
+        "Resolve shared Douyin videos through a dedicated provider and play them in the app"
       ]
     }
   }
