@@ -28,7 +28,7 @@ export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
 function DouyinSource({ video }: { video: DouyinVideoDataDTO }) {
   const { t } = useI18n();
   return <a className="douyin-player-context" href={video.canonical_url} rel="noreferrer" target="_blank" aria-label={t("douyin.openOriginal")}>
-    <span className="douyin-player-context-mark" aria-hidden="true"><span className="material-symbols-outlined" style={{ fontSize: 22 }}>music_note</span></span>
+    <span className="douyin-player-context-mark" aria-hidden="true"><img alt="" src="/icons/douyin-logo.svg" /></span>
     <span className="douyin-player-context-copy">
       <strong>{video.title || t("douyin.video")}</strong>
       <small>@{video.author || t("douyin.creator")} · {t("douyin.source")}</small>
@@ -69,7 +69,7 @@ export function DouyinVideoPreview({ video, imageUrl }: { video: DouyinVideoData
       <span className="douyin-video-play material-symbols-outlined" aria-hidden="true">{playable ? "play_arrow" : "open_in_new"}</span>
       <span className="douyin-video-copy"><small>{t("douyin.source")}</small><strong>{video.title || t("douyin.video")}</strong></span>
     </button>
-    <SideDrawer className="douyin-video-drawer" headerless historyKey={`douyin-video-${video.video_id}`} open={open} onClose={() => setOpen(false)} title={video.title || t("douyin.video")}>
+    <SideDrawer floatingBack={false} fullscreen headerless historyKey={`douyin-video-${video.video_id}`} open={open} onClose={() => setOpen(false)} title={video.title || t("douyin.video")}>
       {open && video.video_url ? <DouyinDrawerPlayer imageUrl={imageUrl} onClose={() => setOpen(false)} video={video} /> : null}
     </SideDrawer>
   </>;

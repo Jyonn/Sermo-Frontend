@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.8",
+  "id": "2026.09.24.9",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
       "title": "统一视频播放体验",
       "items": [
-        "抖音视频现已使用统一的沉浸播放器，并支持循环播放与清晰的作品来源信息"
+        "抖音视频改用标准全屏播放器，并更新为真实品牌标识"
       ]
     },
     "en": {
       "title": "Unified video playback",
       "items": [
-        "Douyin videos now use the shared immersive player with looping and clear source details"
+        "Douyin videos now open in the standard full-screen player with the authentic brand mark"
       ]
     }
   }

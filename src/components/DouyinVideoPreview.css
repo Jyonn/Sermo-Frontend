@@ -1,9 +1,7 @@
-.douyin-video-drawer.side-drawer { --drawer-width: min(100vw, 520px); border-color: rgba(255,255,255,.08); background: #080a0d; }
-.douyin-video-drawer .drawer-body { position: relative; display: block; min-height: 0; padding: 0; overflow: hidden; background: #080a0d; }
-.douyin-video-drawer .drawer-floating-back { display: none; }
 .douyin-player-shell { position: absolute; inset: 0; min-height: 0; background: #080a0d; }
 .douyin-player-context { display: grid; grid-template-columns: 42px minmax(0,1fr) 34px; gap: 11px; align-items: center; max-width: min(100%,620px); padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; color: #f7faf9; background: rgba(10,13,15,.68); text-decoration: none; text-shadow: 0 2px 14px rgba(0,0,0,.5); backdrop-filter: blur(22px) saturate(130%); }
-.douyin-player-context-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 14px; color: #111417; background: linear-gradient(135deg,#2ce5dd 0 45%,#f7faf9 46% 56%,#ff315f 57%); box-shadow: -2px 0 #2ce5dd,2px 0 #ff315f; }
+.douyin-player-context-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 14px; background: #090b0e; }
+.douyin-player-context-mark img { display: block; width: 25px; height: 25px; }
 .douyin-player-context-copy { display: grid; gap: 5px; min-width: 0; }
 .douyin-player-context-copy strong { overflow: hidden; font-family: var(--font-display); font-size: clamp(14px,2.5vw,17px); line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 .douyin-player-context-copy small { overflow: hidden; color: rgba(242,248,245,.64); font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }

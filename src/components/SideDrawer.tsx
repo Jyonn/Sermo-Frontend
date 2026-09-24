@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
@@ -24,6 +24,8 @@ interface SideDrawerProps {
   historyMode?: "stack" | "route";
   onRouteOpen?: () => void;
   headerless?: boolean;
+  fullscreen?: boolean;
+  floatingBack?: boolean;
 }
 
 const DRAWER_QUERY_KEY = "panel";
@@ -61,6 +63,8 @@ export function SideDrawer({
   historyMode = "stack",
   onRouteOpen,
   headerless = false,
+  fullscreen = false,
+  floatingBack = true,
 }: SideDrawerProps) {
   const { t } = useI18n();
   const location = useLocation();
@@ -211,11 +215,18 @@ export function SideDrawer({
 
   return createPortal(
     <div className={`drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} onClick={requestClose} role="presentation">
-      <aside aria-label={title} aria-modal="true" className={`side-drawer${headerless ? " is-headerless" : ""}${className ? ` ${className}` : ""}`} onClick={(event) => event.stopPropagation()} role="dialog">
+      <aside
+        aria-label={title}
+        aria-modal="true"
+        className={`side-drawer${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        style={fullscreen ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : undefined}
+      >
         {headerless ? (
-          <button className="drawer-floating-back" onClick={requestClose} type="button" aria-label={t("common.back")}>
+          floatingBack ? <button className="drawer-floating-back" onClick={requestClose} type="button" aria-label={t("common.back")}>
             <span className="material-symbols-outlined">arrow_back</span>
-          </button>
+          </button> : null
         ) : <header className="drawer-topbar">
           <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
             <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label={t("common.back")}>
