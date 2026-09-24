@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.2",
+  "id": "2026.09.24.3",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频解析更稳定",
+      "title": "抖音视频播放兼容性优化",
       "items": [
-        "升级抖音视频解析服务，并自动选择同清晰度下码率更高的视频"
+        "优化跨站视频请求策略，减少抖音视频在站内播放时被拒绝的情况"
       ]
     },
     "en": {
-      "title": "More reliable Douyin video parsing",
+      "title": "Improved Douyin playback compatibility",
       "items": [
-        "Upgrade Douyin video parsing and prefer the highest bitrate at each resolution"
+        "Improve cross-site media requests to reduce rejected in-app Douyin playback"
       ]
     }
   }
