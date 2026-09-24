@@ -3167,6 +3167,7 @@ function LiveChatsPage({
   const [newerState, setNewerState] = useState<"idle" | "loading">("idle");
   const hasNewerMessagesRef = useRef(false);
   const latestWindowRequestRef = useRef<Promise<boolean> | null>(null);
+  const olderPageRequestRef = useRef(false);
   const newerPageRequestRef = useRef(false);
   const [enteringMessageIds, setEnteringMessageIds] = useState<string[]>([]);
   const [messageMenu, setMessageMenu] = useState<MessageMenuState | null>(null);
@@ -7473,8 +7474,15 @@ function LiveChatsPage({
   };
 
   const loadOlderMessages = async () => {
-    if (!selectedChat || !selectedMessages.length || olderState === "loading" || !cacheScope) return;
+    if (
+      !selectedChat
+      || !selectedMessages.length
+      || olderState === "loading"
+      || olderPageRequestRef.current
+      || !cacheScope
+    ) return;
 
+    const chatId = selectedChat.id;
     const oldestId = Math.min(
       ...selectedMessages.flatMap((message) => typeof message.id === "number" ? [message.id] : [])
     );
@@ -7482,29 +7490,32 @@ function LiveChatsPage({
     const scroller = messageScrollRef.current;
 
     try {
+      olderPageRequestRef.current = true;
       setOlderState("loading");
       const rows = await api.getMessages({
-        chat_id: selectedChat.id,
+        chat_id: chatId,
         limit: MESSAGE_PAGE_SIZE + 1,
         before: oldestId,
       });
+      if (selectedChatIdRef.current !== chatId) return;
       const normalized = sortMessages(rows.slice(0, MESSAGE_PAGE_SIZE).map((row) => mapChatMessage(row, currentUserId)));
 
+      virtualMessageListRef.current?.preserveVisibleAnchor();
       setMessages((current) => ({
         ...current,
-        [selectedChat.id]: mergeMessages(normalized, current[selectedChat.id] ?? []),
+        [chatId]: mergeMessages(normalized, current[chatId] ?? []),
       }));
       const mergedMessages = mergeMessages(normalized, selectedMessages);
       setHasOlderMessages(rows.length > MESSAGE_PAGE_SIZE);
       if (!hasNewerMessagesRef.current) {
-        chatCache.setThread(cacheScope, selectedChat.id, {
+        chatCache.setThread(cacheScope, chatId, {
           messages: mergedMessages,
           hasOlderMessages: rows.length > MESSAGE_PAGE_SIZE,
           hasNewerMessages: false,
           scrollTop: scroller?.scrollTop ?? 0,
           updatedAt: Date.now(),
         });
-        void chatCache.persistThread(cacheScope, selectedChat.id, {
+        void chatCache.persistThread(cacheScope, chatId, {
           messages: mergedMessages,
           hasOlderMessages: rows.length > MESSAGE_PAGE_SIZE,
           hasNewerMessages: false,
@@ -7521,7 +7532,8 @@ function LiveChatsPage({
       const message = apiError instanceof ApiError ? apiError.message : t("message.historyLoadFailed");
       setPageError(message);
     } finally {
-      setOlderState("idle");
+      olderPageRequestRef.current = false;
+      if (selectedChatIdRef.current === chatId) setOlderState("idle");
     }
   };
 
@@ -7549,6 +7561,7 @@ function LiveChatsPage({
       // This extends a historical window, so keep the reader anchored at the
       // previous end instead of treating the appended page as live messages.
       stickToBottomRef.current = false;
+      virtualMessageListRef.current?.preserveVisibleAnchor();
       setMessages((current) => ({
         ...current,
         [chatId]: mergeMessages(current[chatId] ?? [], normalized),

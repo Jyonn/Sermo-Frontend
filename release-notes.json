@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.11",
+  "id": "2026.09.24.12",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "更多音乐平台",
+      "title": "历史消息更稳定",
       "items": [
-        "音乐卡片、全局播放器和详情页现已使用各平台官网的真实品牌图标"
+        "修复从锁定消息进入历史聊天后，向前或向后加载时消息位置跳跃和连续翻页的问题"
       ]
     },
     "en": {
-      "title": "More music platforms",
+      "title": "Stable message history",
       "items": [
-        "Music cards, the global player, and song details now use each platform's official brand icon"
+        "Fix message position jumps and repeated pagination when loading earlier or later history from a pinned message"
       ]
     }
   }

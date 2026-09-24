@@ -13,6 +13,7 @@ import {
 export type VirtualListAlignment = "start" | "center" | "end" | "nearest";
 
 export interface VirtualDynamicListHandle {
+  preserveVisibleAnchor: () => void;
   scrollToEnd: (behavior?: ScrollBehavior) => void;
   scrollToIndex: (index: number, alignment?: VirtualListAlignment, behavior?: ScrollBehavior) => boolean;
 }
@@ -290,17 +291,18 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     observersRef.current.clear();
   }, []);
 
-  const captureAnchor = () => {
+  const captureAnchor = (includeLeadingContent = false) => {
     if (pendingAnchorRef.current) return;
     const scroller = scrollRef.current;
     const spacer = spacerRef.current;
     if (!scroller || !spacer) return;
     // Controls, banners, or pinned content can live before the virtual list.
-    if (scroller.scrollTop < getElementScrollOffsetTop(scroller, spacer)) return;
+    const spacerOffset = getElementScrollOffsetTop(scroller, spacer);
+    if (!includeLeadingContent && scroller.scrollTop < spacerOffset) return;
     const currentLayout = layoutRef.current;
-    const currentViewport = readViewport();
+    const viewportTop = scroller.scrollTop - spacerOffset;
     const anchorIndex = Math.min(
-      Math.max(0, findFirstEndingAfter(currentLayout, currentViewport.top)),
+      Math.max(0, findFirstEndingAfter(currentLayout, viewportTop)),
       Math.max(0, currentLayout.length - 1)
     );
     const anchor = currentLayout[anchorIndex];
@@ -308,7 +310,7 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
     const nearEnd = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 3;
     pendingAnchorRef.current = {
       key: anchor.key,
-      offset: currentViewport.top - anchor.start,
+      offset: viewportTop - anchor.start,
       followEnd: nearEnd && Boolean(followEndRef.current?.()),
     };
   };
@@ -388,6 +390,11 @@ export const VirtualDynamicList = forwardRef(function VirtualDynamicList<T>(
   };
 
   useImperativeHandle(forwardedRef, () => ({
+    preserveVisibleAnchor() {
+      // Pagination controls can sit before the virtual spacer. Preserve the
+      // first existing message even while that leading control is visible.
+      captureAnchor(true);
+    },
     scrollToEnd(behavior: ScrollBehavior = "auto") {
       const scroller = scrollRef.current;
       if (!scroller) return;
