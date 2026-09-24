@@ -381,6 +381,7 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [viewMode, setViewMode] = useState<"fit" | "fill" | "actual">("fit");
   const playbackRates = [0.75, 1, 1.25, 1.5, 2, 3] as const;
 
   useEffect(() => () => videoRef.current?.pause(), []);
@@ -399,8 +400,11 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
     setPlaybackRate(nextRate);
   };
 
+  const remainingTime = Math.max(0, duration - currentTime);
+  const videoFit = viewMode === "fit" ? "contain" : viewMode === "fill" ? "cover" : "none";
+
   return <div
-    className="immersive-video-stage"
+    className={`immersive-video-stage is-${viewMode}`}
     onClick={(event) => {
       event.stopPropagation();
       setControlsVisible((visible) => !visible);
@@ -419,6 +423,7 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
       preload="metadata"
       ref={videoRef}
       src={src}
+      style={{ objectFit: videoFit }}
     />
     <button
       aria-label={playing ? t("media.pause") : t("media.play")}
@@ -429,15 +434,17 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
       <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
     </button>
     <div className={`immersive-image-actionbar immersive-video-actionbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
-      <button aria-label={t("media.playbackSpeed", { speed: playbackRate })} className="immersive-video-play immersive-video-speed" onClick={cyclePlaybackRate} type="button">
-        <span>{playbackRate}x</span>
-      </button>
-      <span className="immersive-video-time">{formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}</span>
+      <div className="immersive-image-view-modes" role="group" aria-label={t("media.viewMode")}>
+        <button className={viewMode === "fit" ? "is-active" : ""} onClick={() => setViewMode("fit")} type="button">{t("media.fitPage")}</button>
+        <button className={viewMode === "fill" ? "is-active" : ""} onClick={() => setViewMode("fill")} type="button">{t("media.fillScreen")}</button>
+        <button className={viewMode === "actual" ? "is-active" : ""} onClick={() => setViewMode("actual")} type="button">{t("media.actualSize")}</button>
+      </div>
       <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
       </button>
     </div>
-    <div className={`immersive-video-timeline${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
+    <div className={`immersive-video-controlbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
+      <time className="immersive-video-remaining">−{formatPlaybackTime(remainingTime)}</time>
       <input
         aria-label={t("media.duration")}
         max={Math.max(duration, 0)}
@@ -450,6 +457,9 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
         type="range"
         value={Math.min(currentTime, duration || 0)}
       />
+      <button aria-label={t("media.playbackSpeed", { speed: playbackRate })} className="immersive-video-speed" onClick={cyclePlaybackRate} type="button">
+        {playbackRate}x
+      </button>
     </div>
   </div>;
 }

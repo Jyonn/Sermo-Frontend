@@ -6425,28 +6425,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 .immersive-video-actionbar {
-  grid-template-columns: minmax(0, 1fr) auto auto;
-}
-
-.immersive-video-play {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  justify-self: start;
-  min-height: 40px;
-  padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.09);
-  font-weight: 750;
-  backdrop-filter: blur(18px);
-}
-
-.immersive-video-time {
-  color: rgba(255, 255, 255, 0.7);
-  font: 700 0.75rem/1 var(--font-mono, monospace);
-  font-variant-numeric: tabular-nums;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .immersive-video-center-control {
@@ -6476,27 +6455,61 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .immersive-video-center-control .material-symbols-outlined { font-size: 34px; }
 
-.immersive-video-timeline {
+.immersive-video-controlbar {
   position: absolute;
-  right: max(18px, env(safe-area-inset-right));
-  bottom: max(16px, env(safe-area-inset-bottom));
-  left: max(18px, env(safe-area-inset-left));
+  right: max(clamp(10px, 2vw, 20px), env(safe-area-inset-right));
+  bottom: max(clamp(10px, 2vw, 18px), env(safe-area-inset-bottom));
+  left: max(clamp(10px, 2vw, 20px), env(safe-area-inset-left));
   z-index: 4;
+  display: grid;
+  grid-template-columns: clamp(52px, 7vw, 58px) minmax(56px, 1fr) clamp(48px, 7vw, 54px);
+  gap: clamp(8px, 2vw, 18px);
+  align-items: center;
+  min-height: 52px;
+  padding: 6px 8px 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 18px;
+  background: rgba(11, 14, 13, 0.66);
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px);
   transition: opacity 180ms ease, transform 220ms cubic-bezier(.22, .8, .3, 1);
+  backdrop-filter: blur(22px) saturate(130%);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
 }
 
-.immersive-video-timeline.is-visible {
+.immersive-video-controlbar.is-visible {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.immersive-video-timeline input {
+.immersive-video-controlbar input {
+  height: 24px;
+  margin: 0;
   width: 100%;
-  accent-color: #43d7ad;
+  accent-color: #24c995;
+  cursor: pointer;
+}
+
+.immersive-video-remaining {
+  color: rgba(244, 249, 247, 0.74);
+  font: 700 0.72rem/1 var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.immersive-video-speed {
+  min-width: 46px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 12px;
+  color: #f6fbf9;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  font-weight: 780;
+  font-variant-numeric: tabular-nums;
 }
 
 .immersive-image-canvas {
