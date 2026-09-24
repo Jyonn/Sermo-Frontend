@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.4",
+  "id": "2026.09.24.5",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "沉浸式抖音视频播放器",
+      "title": "抖音播放器显示修复",
       "items": [
-        "重新设计抖音视频播放界面，支持自定义进度、声音和全屏控制"
+        "修复部分页面中抖音播放器高度折叠、只显示返回按钮的问题"
       ]
     },
     "en": {
-      "title": "Immersive Douyin video player",
+      "title": "Douyin player display fix",
       "items": [
-        "Redesign Douyin playback with custom progress, sound, and full-screen controls"
+        "Fix a collapsed Douyin player that could leave only the back button visible"
       ]
     }
   }
