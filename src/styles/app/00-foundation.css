@@ -8187,40 +8187,55 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   opacity: 0.42;
 }
 
-.forward-mode-switch {
+.forward-route-switch {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.forward-square-destination {
+.forward-route-switch button {
+  position: relative;
+  min-width: 0;
+  min-height: 88px;
+  padding: 13px 14px;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) 24px;
+  grid-template-columns: 36px minmax(0, 1fr) 20px;
   align-items: center;
-  width: 100%;
-  min-height: 76px;
-  margin-bottom: 12px;
-  padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 28%, var(--line-soft));
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 88%, transparent);
   border-radius: 18px;
-  color: var(--text-primary);
-  background: linear-gradient(120deg, color-mix(in srgb, var(--brand-primary) 12%, var(--bg-elevated)), var(--bg-elevated));
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--surface-soft) 90%, transparent);
   text-align: left;
+  transition: transform 160ms cubic-bezier(.22, 1, .36, 1), border-color 160ms ease, background 160ms ease;
 }
-.forward-square-destination > .material-symbols-outlined:first-child {
+.forward-route-switch button.is-square {
+  grid-column: 1 / -1;
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--brand-primary) 15%, transparent), transparent 42%),
+    color-mix(in srgb, var(--brand-primary) 7%, var(--surface));
+}
+.forward-route-switch button.is-active {
+  color: var(--brand-strong);
+  border-color: color-mix(in srgb, var(--brand-primary) 52%, transparent);
+  background: color-mix(in srgb, var(--brand-primary) 11%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 14%, transparent);
+}
+.forward-route-icon {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 13px;
-  color: var(--brand-primary);
-  background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--brand-strong);
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  font-size: 21px;
 }
-.forward-square-destination > span:nth-child(2) { display: grid; gap: 3px; min-width: 0; }
-.forward-square-destination strong { font-size: 15px; }
-.forward-square-destination small { overflow: hidden; color: var(--text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.forward-square-destination > .material-symbols-outlined:last-child { color: var(--text-muted); font-size: 20px; }
-.forward-square-destination:disabled { opacity: .56; }
+.forward-route-switch button > span:nth-child(2) { min-width: 0; display: grid; gap: 4px; }
+.forward-route-switch small { overflow: hidden; color: var(--text-muted); font-size: 10px; font-weight: 650; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.forward-route-check { color: transparent; }
+.forward-route-switch button.is-active .forward-route-check { color: var(--brand-primary); transform: scale(1); }
 
 .square-chat-record {
   width: 100%;
@@ -8289,38 +8304,6 @@ html[data-theme="dark"] .square-chat-record {
   .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview { --square-chat-record-max-height: min(440px, 54vh); }
 }
 
-.forward-mode-switch button {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--line-soft);
-  border-radius: 18px;
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  align-items: center;
-  gap: 9px;
-  color: var(--text-secondary);
-  background: var(--surface-soft);
-  text-align: left;
-}
-
-.forward-mode-switch button.is-active {
-  color: var(--brand-strong);
-  border-color: color-mix(in srgb, var(--brand-primary) 48%, transparent);
-  background: color-mix(in srgb, var(--brand-primary) 10%, var(--surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 18%, transparent);
-}
-
-.forward-mode-switch button > .material-symbols-outlined {
-  font-size: 25px;
-}
-
-.forward-mode-switch button > span:last-child {
-  min-width: 0;
-  display: grid;
-  gap: 3px;
-}
-
-.forward-mode-switch small,
 .chat-target-picker-copy small,
 .forward-bundle-viewer-intro small {
   overflow: hidden;
@@ -8347,6 +8330,8 @@ html[data-theme="dark"] .square-chat-record {
 .chat-target-picker-sheet {
   overflow: hidden;
 }
+
+.chat-target-picker-drawer :is(.drawer-body, .chat-target-picker-body) { height: 100%; overflow: hidden; }
 
 /* Conversation pickers can be opened from focused statements and drawers.
    Keep the whole sheet layer above those surfaces, not just the sheet panel. */
@@ -8525,8 +8510,9 @@ html[data-theme="dark"] .square-chat-record {
 .forward-bundle-sticker { width: min(150px, 42vw); }
 
 @media (max-width: 520px) {
-  .forward-mode-switch button { padding: 11px 9px; grid-template-columns: 28px minmax(0, 1fr); }
-  .forward-mode-switch button > .material-symbols-outlined { font-size: 22px; }
+  .forward-route-switch { grid-template-columns: 1fr; }
+  .forward-route-switch button.is-square { grid-column: auto; }
+  .forward-route-switch button { min-height: 70px; }
   .message-forward-bundle-card { height: 128px; }
   .forward-bundle-viewer { padding: 14px; }
 }

@@ -8750,6 +8750,7 @@ function LiveChatsPage({
 
       <ChatTargetPicker
         open={forwardPickerOpen}
+        presentation="drawer"
         title={t("message.forwardTitle")}
         description={t("message.forwardSourceCount", { count: forwardSourceMessageIds.length })}
         targets={chats.map((chat) => ({
@@ -8776,37 +8777,35 @@ function LiveChatsPage({
           if (!forwardSending) setForwardPickerOpen(false);
         }}
         beforeList={forwardOpenedFromSelection ? (
-          <>
-          {forwardSourceMessageIds.length > 1 && Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? (
-            <button className="forward-square-destination" disabled={forwardSending} onClick={composeForwardBundleForSquare} type="button">
-              <span className="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
-              <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
-              <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-            </button>
-          ) : null}
-          <div className="forward-mode-switch" role="radiogroup" aria-label={t("message.forwardMode")}>
+          <div className="forward-route-switch" role="group" aria-label={t("message.forwardMode")}>
+            {forwardSourceMessageIds.length > 1 && Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? (
+              <button className="is-square" disabled={forwardSending} onClick={composeForwardBundleForSquare} type="button">
+                <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+                <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
+                <span className="forward-route-enter material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              </button>
+            ) : null}
             <button
               className={forwardMode === "individual" ? "is-active" : ""}
               onClick={() => setForwardMode("individual")}
-              role="radio"
-              aria-checked={forwardMode === "individual"}
+              aria-pressed={forwardMode === "individual"}
               type="button"
             >
-              <span className="material-symbols-outlined" aria-hidden="true">view_agenda</span>
+              <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">view_agenda</span>
               <span><strong>{t("message.forwardIndividual")}</strong><small>{t("message.forwardIndividualHint")}</small></span>
+              <span className="forward-route-check material-symbols-outlined" aria-hidden="true">check_circle</span>
             </button>
             <button
               className={forwardMode === "bundle" ? "is-active" : ""}
               onClick={() => setForwardMode("bundle")}
-              role="radio"
-              aria-checked={forwardMode === "bundle"}
+              aria-pressed={forwardMode === "bundle"}
               type="button"
             >
-              <span className="material-symbols-outlined" aria-hidden="true">stacks</span>
+              <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">stacks</span>
               <span><strong>{t("message.forwardBundle")}</strong><small>{t("message.forwardBundleHint")}</small></span>
+              <span className="forward-route-check material-symbols-outlined" aria-hidden="true">check_circle</span>
             </button>
           </div>
-          </>
         ) : null}
       />
 

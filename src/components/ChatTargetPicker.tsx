@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useI18n } from "../lib/language";
 import { BottomSheet } from "./BottomSheet";
 import { ContentLoader, QuietState } from "./BoundaryState";
+import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 
 export interface ChatTargetPickerItem {
@@ -30,6 +31,7 @@ interface ChatTargetPickerProps {
   emptyTitle: string;
   submitLabel?: string;
   beforeList?: ReactNode;
+  presentation?: "sheet" | "drawer";
   onClose: () => void;
   onSelectionChange?: (ids: number[]) => void;
   onLimitReached?: () => void;
@@ -50,6 +52,7 @@ export function ChatTargetPicker({
   emptyTitle,
   submitLabel,
   beforeList,
+  presentation = "sheet",
   onClose,
   onSelectionChange,
   onLimitReached,
@@ -71,8 +74,8 @@ export function ChatTargetPicker({
     onSelectionChange?.(selected ? selectedIds.filter((targetId) => targetId !== id) : [...selectedIds, id]);
   };
 
-  return (
-    <BottomSheet className="chat-target-picker-sheet" bodyClassName="chat-target-picker-body" description={description} onClose={onClose} open={open} title={title}>
+  const content = <>
+      {presentation === "drawer" && description ? <p className="card-subtitle">{description}</p> : null}
       {beforeList}
       {multiple ? <div className="chat-target-picker-heading"><strong>{t("message.chooseForwardChats")}</strong><span>{selectedIds.length}/{maxSelections}</span></div> : null}
       {loading && !targets.length ? <ContentLoader label={t("square.loadingChats")} rows={4} /> : null}
@@ -103,6 +106,15 @@ export function ChatTargetPicker({
         })}
       </div> : null}
       {multiple ? <div className="chat-target-picker-submit"><button className="button" disabled={!selectedIds.length || busy} onClick={() => void onSubmit(selectedIds)} type="button">{busy ? t("common.processing") : submitLabel}</button></div> : null}
-    </BottomSheet>
-  );
+    </>;
+
+  if (presentation === "drawer") {
+    return <SideDrawer className="chat-target-picker-drawer" historyKey="forward-messages" onClose={onClose} open={open} title={title}>
+      <div className="chat-target-picker-body">{content}</div>
+    </SideDrawer>;
+  }
+
+  return <BottomSheet className="chat-target-picker-sheet" bodyClassName="chat-target-picker-body" description={description} onClose={onClose} open={open} title={title}>
+    {content}
+  </BottomSheet>;
 }

@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.12",
+  "id": "2026.09.24.13",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "历史消息更稳定",
+      "title": "转发更清晰",
       "items": [
-        "修复从锁定消息进入历史聊天后，向前或向后加载时消息位置跳跃和连续翻页的问题"
+        "多条消息转发改为抽屉式操作，并统一呈现发布到广场、逐条转发和卡片转发"
       ]
     },
     "en": {
-      "title": "Stable message history",
+      "title": "Clearer forwarding",
       "items": [
-        "Fix message position jumps and repeated pagination when loading earlier or later history from a pinned message"
+        "Forwarding multiple messages now uses a drawer with Square, separate, and card options in one place"
       ]
     }
   }
