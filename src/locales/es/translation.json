@@ -630,7 +630,6 @@
   "pwa.chooseAccount": "Seleccione una cuenta para continuar",
   "pwa.chooseSpace": "Elige un espacio",
   "pwa.cachedSpaces": "Espacios con sesión iniciada",
-  "pwa.accountsInSpace": "{{count}} cuentas",
   "pwa.loginToContinue": "Ingrese a un espacio",
   "pwa.cachedAccounts": "cuentas registradas",
   "pwa.autoLogin": "Ingrese automáticamente la próxima vez",

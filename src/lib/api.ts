@@ -250,6 +250,23 @@ export function refreshAuthSession(currentSession: AuthSession) {
   return refreshSessionSingleFlight(currentSession);
 }
 
+export async function refreshDetachedAuthSession(currentSession: AuthSession, signal?: AbortSignal) {
+  const response = await fetch(`${API_BASE_URL}/users/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refresh: currentSession.refreshToken }),
+    signal,
+  });
+  const body = await parseEnvelope<LoginAuthDTO>(response);
+  return {
+    accessToken: body.auth,
+    refreshToken: body.refresh,
+    user: body.data,
+  } satisfies AuthSession;
+}
+
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal } = options;
   const session = auth ? authConfig.getSession() : null;

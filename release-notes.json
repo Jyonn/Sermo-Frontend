@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.15",
+  "id": "2026.09.24.16",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "PWA 账号入口优化",
+      "title": "PWA 账号识别更准确",
       "items": [
-        "PWA 登录按空间和账户分步选择，自动合并重复账户，并让长列表独立滚动吸附"
+        "PWA 入口会刷新并合并重复账户，空间列表改为展示官方账号头像"
       ]
     },
     "en": {
-      "title": "Improved PWA account entry",
+      "title": "More accurate PWA account identity",
       "items": [
-        "PWA sign-in now groups accounts by space, removes duplicates, and keeps long lists in a snapping scroll area"
+        "PWA entry now refreshes and merges duplicate accounts, while space rows use each space's official avatar"
       ]
     }
   }

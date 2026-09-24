@@ -1,4 +1,4 @@
-import type { SpaceDTO } from "../types";
+import type { SpaceDTO, TinyUserDTO } from "../types";
 import { PUBLIC_HOST } from "./siteConfig";
 
 const RECENT_SPACES_COOKIE = "sermo_recent_spaces";
@@ -10,6 +10,7 @@ export interface RecentSpaceEntry {
   name: string;
   domain: string;
   lastVisitedAt: number;
+  officialUser?: Pick<TinyUserDTO, "user_id" | "name" | "avatar_uri" | "avatar_cache_key" | "avatar_frame_style"> | null;
 }
 
 function looksLikeIp(hostname: string) {
@@ -64,7 +65,7 @@ export function listRecentSpaces() {
   return parseCookieValue(readCookie(RECENT_SPACES_COOKIE)).sort((left, right) => right.lastVisitedAt - left.lastVisitedAt);
 }
 
-export function rememberRecentSpace(space: Pick<SpaceDTO, "slug" | "name">) {
+export function rememberRecentSpace(space: Pick<SpaceDTO, "slug" | "name" | "official_user">) {
   const slug = (space.slug || "").trim().toLowerCase();
   const name = (space.name || "").trim();
   if (!slug || !name) return;
@@ -74,6 +75,13 @@ export function rememberRecentSpace(space: Pick<SpaceDTO, "slug" | "name">) {
     name,
     domain: buildDomainForSlug(slug),
     lastVisitedAt: Date.now(),
+    officialUser: space.official_user ? {
+      user_id: space.official_user.user_id,
+      name: space.official_user.name,
+      avatar_uri: space.official_user.avatar_uri,
+      avatar_cache_key: space.official_user.avatar_cache_key,
+      avatar_frame_style: space.official_user.avatar_frame_style,
+    } : null,
   };
 
   const nextRows = [nextEntry, ...listRecentSpaces().filter((item) => item.slug !== slug)].slice(0, MAX_RECENT_SPACES);

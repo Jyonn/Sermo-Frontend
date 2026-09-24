@@ -1,4 +1,5 @@
 import type { AuthSession } from "../types";
+import { ApiError, refreshDetachedAuthSession } from "./api";
 import { listRecentSpaces } from "./recentSpaces";
 
 const AUTH_STORAGE_PREFIX = "sermo.auth.session:";
@@ -90,6 +91,42 @@ export function listPwaCachedAccounts(): PwaCachedAccount[] {
     ...account,
     spaceName: spaces.get(account.slug)?.name || account.slug,
   })).sort((left, right) => right.lastVisitedAt - left.lastVisitedAt);
+}
+
+export async function refreshPwaCachedAccounts(signal?: AbortSignal): Promise<PwaCachedAccount[]> {
+  const currentAccounts = listPwaCachedAccounts();
+  const refreshed = await Promise.all(currentAccounts.map(async (account) => {
+    try {
+      const session = await refreshDetachedAuthSession(account.session, signal);
+      return { ...account, key: `${account.slug}:${session.user.user_id}`, session };
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      return error instanceof ApiError && error.status === 401 ? null : account;
+    }
+  }));
+
+  const accountMap = new Map<string, PwaCachedAccount>();
+  refreshed.forEach((account) => {
+    if (!account) return;
+    const existing = accountMap.get(account.key);
+    if (!existing || account.lastVisitedAt >= existing.lastVisitedAt) accountMap.set(account.key, account);
+  });
+  const accounts = Array.from(accountMap.values());
+  writeAccountVault(accounts.map(({ key, slug, session, lastVisitedAt }) => ({ key, slug, session, lastVisitedAt })));
+
+  for (const account of accounts) {
+    const storageKey = `${AUTH_STORAGE_PREFIX}${account.slug}`;
+    try {
+      const scopedSession = JSON.parse(window.localStorage.getItem(storageKey) || "null") as AuthSession | null;
+      if (scopedSession?.user.user_id === account.session.user.user_id) {
+        window.localStorage.setItem(storageKey, JSON.stringify(account.session));
+      }
+    } catch {
+      // The refreshed account vault is still valid if an old scoped session is malformed.
+    }
+  }
+
+  return listPwaCachedAccounts();
 }
 
 export function activatePwaCachedAccount(account: PwaCachedAccount) {

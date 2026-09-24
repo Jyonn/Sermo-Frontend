@@ -632,7 +632,6 @@
   "pwa.chooseAccount": "选择一个账户继续",
   "pwa.chooseSpace": "选择空间",
   "pwa.cachedSpaces": "已登录空间",
-  "pwa.accountsInSpace": "{{count}} 个账户",
   "pwa.loginToContinue": "登录一个空间",
   "pwa.cachedAccounts": "已登录账户",
   "pwa.autoLogin": "下次自动进入",
