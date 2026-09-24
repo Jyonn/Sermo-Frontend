@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.6",
+  "id": "2026.09.24.7",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
       "title": "沉浸式视频预览",
       "items": [
-        "重新设计普通视频的全屏预览，支持画面模式、沉浸控制、进度拖动与倍速播放"
+        "完善普通视频全屏预览的画面模式，并在手机和桌面端显示真实缩放比例"
       ]
     },
     "en": {
       "title": "Immersive video preview",
       "items": [
-        "Redesign full-screen video preview with display modes, immersive controls, seeking, and playback speed"
+        "Complete full-screen video display modes and show the true zoom level on mobile and desktop"
       ]
     }
   }

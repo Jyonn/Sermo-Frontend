@@ -375,16 +375,64 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
 
 function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src: string; onClose: () => void }) {
   const { t } = useI18n();
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [viewMode, setViewMode] = useState<"fit" | "fill" | "actual">("fit");
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+  const [scale, setScale] = useState(1);
+  const [viewMode, setViewMode] = useState<"fit" | "fill" | "actual" | "custom">("fit");
   const playbackRates = [0.75, 1, 1.25, 1.5, 2, 3] as const;
 
+  const scales = (() => {
+    if (!naturalSize.width || !naturalSize.height || !viewportSize.width || !viewportSize.height) {
+      return { minimum: 0.01, fit: 1, fill: 1, actual: 1, maximum: 16 };
+    }
+    const widthScale = viewportSize.width / naturalSize.width;
+    const heightScale = viewportSize.height / naturalSize.height;
+    const fit = Math.min(widthScale, heightScale);
+    return {
+      minimum: Math.min(1, fit),
+      fit,
+      fill: Math.max(widthScale, heightScale),
+      actual: 1,
+      maximum: 16,
+    };
+  })();
+
+  const clampScale = (nextScale: number) => Math.max(scales.minimum, Math.min(scales.maximum, nextScale));
+
+  const applyViewMode = (nextMode: "fit" | "fill" | "actual") => {
+    setViewMode(nextMode);
+    setScale(clampScale(scales[nextMode]));
+  };
+
+  const zoomBy = (factor: number) => {
+    setViewMode("custom");
+    setScale((current) => clampScale(current * factor));
+  };
+
   useEffect(() => () => videoRef.current?.pause(), []);
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const updateViewport = () => setViewportSize({ width: stage.clientWidth, height: stage.clientHeight });
+    updateViewport();
+    const observer = new ResizeObserver(updateViewport);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!naturalSize.width || !viewportSize.width) return;
+    setViewMode("fit");
+    setScale(scales.fit);
+  }, [naturalSize.width, naturalSize.height, viewportSize.width, viewportSize.height]);
 
   const togglePlayback = () => {
     const video = videoRef.current;
@@ -401,7 +449,6 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
   };
 
   const remainingTime = Math.max(0, duration - currentTime);
-  const videoFit = viewMode === "fit" ? "contain" : viewMode === "fill" ? "cover" : "none";
 
   return <div
     className={`immersive-video-stage is-${viewMode}`}
@@ -409,12 +456,14 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
       event.stopPropagation();
       setControlsVisible((visible) => !visible);
     }}
+    ref={stageRef}
     role="presentation"
   >
     <video
-      className="immersive-video-canvas"
+      className="immersive-video-canvas immersive-image-canvas"
       onDurationChange={(event) => setDuration(event.currentTarget.duration)}
       onEnded={() => setPlaying(false)}
+      onLoadedMetadata={(event) => setNaturalSize({ width: event.currentTarget.videoWidth, height: event.currentTarget.videoHeight })}
       onPause={() => setPlaying(false)}
       onPlay={() => setPlaying(true)}
       onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
@@ -423,7 +472,11 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
       preload="metadata"
       ref={videoRef}
       src={src}
-      style={{ objectFit: videoFit }}
+      style={{
+        height: naturalSize.height ? `${naturalSize.height}px` : "100%",
+        transform: `translate3d(-50%, -50%, 0) scale(${scale})`,
+        width: naturalSize.width ? `${naturalSize.width}px` : "100%",
+      }}
     />
     <button
       aria-label={playing ? t("media.pause") : t("media.play")}
@@ -435,9 +488,14 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
     </button>
     <div className={`immersive-image-actionbar immersive-video-actionbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
       <div className="immersive-image-view-modes" role="group" aria-label={t("media.viewMode")}>
-        <button className={viewMode === "fit" ? "is-active" : ""} onClick={() => setViewMode("fit")} type="button">{t("media.fitPage")}</button>
-        <button className={viewMode === "fill" ? "is-active" : ""} onClick={() => setViewMode("fill")} type="button">{t("media.fillScreen")}</button>
-        <button className={viewMode === "actual" ? "is-active" : ""} onClick={() => setViewMode("actual")} type="button">{t("media.actualSize")}</button>
+        <button className={viewMode === "fit" ? "is-active" : ""} onClick={() => applyViewMode("fit")} type="button">{t("media.fitPage")}</button>
+        <button className={viewMode === "fill" ? "is-active" : ""} onClick={() => applyViewMode("fill")} type="button">{t("media.fillScreen")}</button>
+        <button className={viewMode === "actual" ? "is-active" : ""} onClick={() => applyViewMode("actual")} type="button">{t("media.actualSize")}</button>
+      </div>
+      <div className="immersive-image-zoom-controls">
+        <button aria-label={t("media.zoomOut")} disabled={scale <= scales.minimum + 0.0001} onClick={() => zoomBy(0.8)} type="button">−</button>
+        <span className="immersive-image-zoom">{Math.round(scale * 100)}%</span>
+        <button aria-label={t("media.zoomIn")} disabled={scale >= scales.maximum - 0.0001} onClick={() => zoomBy(1.25)} type="button">＋</button>
       </div>
       <button aria-label={t("common.close")} className="immersive-image-close" onClick={onClose} type="button">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
