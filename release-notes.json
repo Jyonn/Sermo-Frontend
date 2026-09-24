@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.17",
+  "id": "2026.09.24.18",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "音乐分享支持更多平台",
+      "title": "聊天记录分享预览更清晰",
       "items": [
-        "聊天中的汽水音乐、Apple Music 和酷我链接现在可显示音乐卡片并使用统一播放器，同时补齐更多酷狗分享链接"
+        "将聊天记录发布到广场时，现在可以在编辑页完整预览所选消息"
       ]
     },
     "en": {
-      "title": "Music sharing supports more providers",
+      "title": "Clearer chat record sharing previews",
       "items": [
-        "Qishui Music, Apple Music, and Kuwo links now use rich music cards and the shared player, with broader KuGou link support"
+        "Selected messages are now fully visible in the composer before sharing a chat record to Square"
       ]
     }
   }
