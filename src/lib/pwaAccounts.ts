@@ -55,7 +55,17 @@ export function forgetPwaAccountSession(session: AuthSession | null, slug: strin
 export function listPwaCachedAccounts(): PwaCachedAccount[] {
   if (typeof window === "undefined") return [];
   const spaces = new Map(listRecentSpaces().map((space) => [space.slug, space]));
-  const accountMap = new Map<string, StoredPwaAccount>(readAccountVault().map((account) => [account.key, account]));
+  const accountMap = new Map<string, StoredPwaAccount>();
+  const mergeAccount = (account: StoredPwaAccount) => {
+    const slug = account.slug.trim().toLowerCase();
+    const userId = account.session?.user?.user_id;
+    if (!slug || !userId) return;
+    const key = `${slug}:${userId}`;
+    const normalized = { ...account, key, slug };
+    const existing = accountMap.get(key);
+    if (!existing || normalized.lastVisitedAt >= existing.lastVisitedAt) accountMap.set(key, normalized);
+  };
+  readAccountVault().forEach(mergeAccount);
   for (let index = 0; index < window.localStorage.length; index += 1) {
     const storageKey = window.localStorage.key(index);
     if (!storageKey?.startsWith(AUTH_STORAGE_PREFIX)) continue;
@@ -66,7 +76,7 @@ export function listPwaCachedAccounts(): PwaCachedAccount[] {
       if (!session?.refreshToken || !session.user?.user_id) continue;
       const recent = spaces.get(slug);
       const key = `${slug}:${session.user.user_id}`;
-      accountMap.set(key, {
+      mergeAccount({
         key,
         slug,
         session,

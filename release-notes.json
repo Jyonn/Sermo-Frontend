@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.14",
+  "id": "2026.09.24.15",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "转发路径更清晰",
+      "title": "PWA 账号入口优化",
       "items": [
-        "消息转发先选择广场或聊天；广场发布支持随参与者打码状态实时变化的聊天记录预览"
+        "PWA 登录按空间和账户分步选择，自动合并重复账户，并让长列表独立滚动吸附"
       ]
     },
     "en": {
-      "title": "Clearer forwarding paths",
+      "title": "Improved PWA account entry",
       "items": [
-        "Choose Square or chats first, with a live chat-record preview that responds to participant redaction"
+        "PWA sign-in now groups accounts by space, removes duplicates, and keeps long lists in a snapping scroll area"
       ]
     }
   }
