@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.23.3",
-  "publishedAt": "2026-09-23",
+  "id": "2026.09.24.1",
+  "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频站内播放",
+      "title": "语音发送可靠性提升",
       "items": [
-        "采用独立解析组件获取抖音视频地址，点击分享卡片即可站内播放"
+        "修复少数浏览器录音后生成空音频、看似发送成功却无法播放的问题"
       ]
     },
     "en": {
-      "title": "In-app Douyin video playback",
+      "title": "More reliable voice messages",
       "items": [
-        "Resolve shared Douyin videos through a dedicated provider and play them in the app"
+        "Prevent empty browser recordings from appearing to send successfully"
       ]
     }
   }

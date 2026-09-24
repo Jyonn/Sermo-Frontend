@@ -1004,6 +1004,7 @@
   "media.audio": "Audio",
   "media.file": "archivo",
   "upload.failed": "Carga falló",
+  "upload.audioInvalid": "La grabación está vacía. Vuelve a grabarla",
   "upload.cancelled": "Carga cancelada",
   "webPush.unsupported": "Este navegador no admite notificaciones del sistema",
   "webPush.installFirst": "Agregue esta aplicación a su pantalla de inicio desde Safari primero",

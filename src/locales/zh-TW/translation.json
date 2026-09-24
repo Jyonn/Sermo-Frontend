@@ -1004,6 +1004,7 @@
   "media.audio": "語音",
   "media.file": "檔案",
   "upload.failed": "資源上傳失敗",
+  "upload.audioInvalid": "錄音內容為空，請重新錄製",
   "upload.cancelled": "資源上傳已取消",
   "webPush.unsupported": "當前瀏覽器不支援系統通知",
   "webPush.installFirst": "請先透過 Safari 新增到主螢幕",

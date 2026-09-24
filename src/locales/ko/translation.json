@@ -1004,6 +1004,7 @@
   "media.audio": "오디오",
   "media.file": "파일",
   "upload.failed": "업로드 실패",
+  "upload.audioInvalid": "녹음 내용이 없습니다. 다시 녹음해 주세요",
   "upload.cancelled": "업로드 취소",
   "webPush.unsupported": "이 브라우저는 시스템 알림을 지원하지 않습니다",
   "webPush.installFirst": "이 앱을 먼저 Safari에서 홈 스크린에 추가하십시오",

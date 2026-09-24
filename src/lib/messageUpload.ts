@@ -5,6 +5,7 @@ import type { MessageMediaKind } from "../types";
 const IMAGE_MAX_SIZE = 10 * 1024 * 1024;
 const VIDEO_MAX_SIZE = 500 * 1024 * 1024;
 const AUDIO_MAX_SIZE = 20 * 1024 * 1024;
+export const AUDIO_MIN_SIZE = 1024;
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 export class MessageUploadError extends Error {
@@ -35,6 +36,9 @@ export function resolveMediaKind(file: File): MessageMediaKind {
 }
 
 export function validateMessageMediaFile(file: File, kind: MessageMediaKind) {
+  if (kind === "audio" && file.size < AUDIO_MIN_SIZE) {
+    throw new MessageUploadError(i18n.t("upload.audioInvalid"));
+  }
   const maxSize = maxSizeForKind(kind);
   if (file.size > maxSize) {
     const label = i18n.t(`media.${kind}` as "media.image");

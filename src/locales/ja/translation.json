@@ -1004,6 +1004,7 @@
   "media.audio": "オーディオ",
   "media.file": "ファイル",
   "upload.failed": "アップロード失敗",
+  "upload.audioInvalid": "録音が空です。もう一度録音してください",
   "upload.cancelled": "アップアップ中止",
   "webPush.unsupported": "このブラウザはシステム通知をサポートしていません",
   "webPush.installFirst": "このアプリを最初に Safari からホーム画面に追加する",

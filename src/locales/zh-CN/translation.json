@@ -1013,6 +1013,7 @@
   "media.audio": "语音",
   "media.file": "文件",
   "upload.failed": "资源上传失败",
+  "upload.audioInvalid": "录音内容为空，请重新录制",
   "upload.cancelled": "资源上传已取消",
   "webPush.unsupported": "当前浏览器不支持系统通知",
   "webPush.installFirst": "请先通过 Safari 添加到主屏幕",

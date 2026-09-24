@@ -104,15 +104,17 @@ export async function createNoiseReducedAudioCapture(): Promise<NoiseReducedAudi
     analyser.fftSize = 64;
     analyser.smoothingTimeConstant = 0.72;
 
-    const destination = context.createMediaStreamDestination();
-    source.connect(highPass).connect(lowPass).connect(compressor).connect(analyser).connect(destination);
-    if (!destination.stream.getAudioTracks().length) throw new Error("processed_audio_track_unavailable");
+    const silentOutput = context.createGain();
+    silentOutput.gain.value = 0;
+    source.connect(highPass).connect(lowPass).connect(compressor).connect(analyser).connect(silentOutput).connect(context.destination);
 
     let cleaned = false;
     return {
-      stream: destination.stream,
+      // Record the native microphone stream. Some browsers advertise support for
+      // recording a Web Audio destination but intermittently emit an empty WebM.
+      stream: sourceStream,
       analyser,
-      processed: true,
+      processed: false,
       cleanup: () => {
         if (cleaned) return;
         cleaned = true;
@@ -121,8 +123,7 @@ export async function createNoiseReducedAudioCapture(): Promise<NoiseReducedAudi
         lowPass.disconnect();
         compressor.disconnect();
         analyser.disconnect();
-        destination.disconnect();
-        destination.stream.getTracks().forEach((track) => track.stop());
+        silentOutput.disconnect();
         sourceStream.getTracks().forEach((track) => track.stop());
         void context?.close().catch(() => undefined);
       },

@@ -62,7 +62,7 @@ import { useAuth } from "../lib/auth";
 import { buildChatCacheScope, chatCache } from "../lib/chatCache";
 import { CHAT_SYNC_EVENT, type ChatSyncEventDetail } from "../lib/chatSync";
 import { CHAT_HEALTH_EVENT, getChatHealth, recordChatHealth, resolveChatHealth, type ChatHealthSnapshot } from "../lib/chatHealth";
-import { resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
+import { AUDIO_MIN_SIZE, resolveMediaKind, toMessageUploadError, uploadMessageMedia } from "../lib/messageUpload";
 import { addStickerFile } from "../lib/stickers";
 import { cacheMediaLocally, purgeCachedMedia } from "../lib/mediaCache";
 import {
@@ -6590,7 +6590,7 @@ function LiveChatsPage({
           resetVoiceComposer();
           return;
         }
-        if (blob.size === 0 || durationSeconds < 0.4) {
+        if (blob.size < AUDIO_MIN_SIZE || durationSeconds < 0.4) {
           resetVoiceComposer();
           showToast(t("audio.tooShort"), "error");
           return;

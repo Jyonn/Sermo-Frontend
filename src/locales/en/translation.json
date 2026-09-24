@@ -1013,6 +1013,7 @@
   "media.audio": "Audio",
   "media.file": "File",
   "upload.failed": "Upload failed",
+  "upload.audioInvalid": "The recording is empty. Please record it again",
   "upload.cancelled": "Upload cancelled",
   "webPush.unsupported": "This browser does not support system notifications",
   "webPush.installFirst": "Add this app to your Home Screen from Safari first",
