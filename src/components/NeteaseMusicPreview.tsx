@@ -51,7 +51,7 @@ function formatTime(value: number) {
 export function isMusicData(value: unknown): value is MusicProviderDataDTO {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<MusicProviderDataDTO>;
-  return ["netease_music", "qq_music", "kugou_music"].includes(String(candidate.provider))
+  return ["netease_music", "qq_music", "kugou_music", "qishui_music", "apple_music", "kuwo_music"].includes(String(candidate.provider))
     && ["number", "string"].includes(typeof candidate.song_id)
     && typeof candidate.title === "string"
     && typeof candidate.audio_url === "string"

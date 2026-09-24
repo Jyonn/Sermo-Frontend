@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.16",
+  "id": "2026.09.24.17",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "PWA 账号识别更准确",
+      "title": "音乐分享支持更多平台",
       "items": [
-        "PWA 入口会刷新并合并重复账户，空间列表改为展示官方账号头像"
+        "聊天中的汽水音乐、Apple Music 和酷我链接现在可显示音乐卡片并使用统一播放器，同时补齐更多酷狗分享链接"
       ]
     },
     "en": {
-      "title": "More accurate PWA account identity",
+      "title": "Music sharing supports more providers",
       "items": [
-        "PWA entry now refreshes and merges duplicate accounts, while space rows use each space's official avatar"
+        "Qishui Music, Apple Music, and Kuwo links now use rich music cards and the shared player, with broader KuGou link support"
       ]
     }
   }

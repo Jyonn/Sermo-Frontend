@@ -990,7 +990,7 @@ export interface DouyinVideoDataDTO {
 }
 
 export interface MusicProviderDataDTO {
-  provider: "netease_music" | "qq_music" | "kugou_music";
+  provider: "netease_music" | "qq_music" | "kugou_music" | "qishui_music" | "apple_music" | "kuwo_music";
   song_id: number | string;
   title: string;
   artists: string[];
