@@ -974,10 +974,19 @@ export interface DouyinVideoDataDTO {
   provider: "douyin_video";
   video_id: string;
   title: string;
+  author?: string;
   video_url?: string;
   canonical_url: string;
+  duration_ms?: number;
   width: number;
   height: number;
+  qualities?: Array<{
+    label: string;
+    height: number;
+    width: number;
+    bitrate: number;
+    url: string;
+  }>;
 }
 
 export interface MusicProviderDataDTO {

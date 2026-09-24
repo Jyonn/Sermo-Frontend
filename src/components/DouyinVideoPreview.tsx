@@ -11,7 +11,7 @@ export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
   try {
     const canonical = new URL(data.canonical_url);
     const media = data.video_url ? new URL(data.video_url) : null;
-    const allowedMedia = ["douyinvod.com", "douyincdn.com", "bytecdn.cn", "snssdk.com", "amemv.com"];
+    const allowedMedia = ["douyinvod.com", "douyincdn.com", "bytecdn.cn", "snssdk.com", "amemv.com", "zjcdn.com"];
     return (!media || (media.protocol === "https:"
       && allowedMedia.some((host) => media.hostname === host || media.hostname.endsWith(`.${host}`))
       && media.pathname.length > 1))

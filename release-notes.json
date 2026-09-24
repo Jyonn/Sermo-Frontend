@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.1",
+  "id": "2026.09.24.2",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "语音发送可靠性提升",
+      "title": "抖音视频解析更稳定",
       "items": [
-        "修复少数浏览器录音后生成空音频、看似发送成功却无法播放的问题"
+        "升级抖音视频解析服务，并自动选择同清晰度下码率更高的视频"
       ]
     },
     "en": {
-      "title": "More reliable voice messages",
+      "title": "More reliable Douyin video parsing",
       "items": [
-        "Prevent empty browser recordings from appearing to send successfully"
+        "Upgrade Douyin video parsing and prefer the highest bitrate at each resolution"
       ]
     }
   }
