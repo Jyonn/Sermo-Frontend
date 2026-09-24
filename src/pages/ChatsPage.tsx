@@ -43,7 +43,7 @@ import { SearchAudioTile } from "../components/SearchAudioPlayer";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
-import { isNeteaseMusicData, NeteaseMusicPreview } from "../components/NeteaseMusicPreview";
+import { isMusicData, MusicPreview } from "../components/NeteaseMusicPreview";
 import { DouyinVideoPreview, isDouyinVideoData } from "../components/DouyinVideoPreview";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
@@ -1708,8 +1708,8 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   }
 
   const hostname = hostnameFromUrl(currentPreview.url || "");
-  if (isNeteaseMusicData(currentPreview.provider_data)) {
-    return <NeteaseMusicPreview music={currentPreview.provider_data} />;
+  if (isMusicData(currentPreview.provider_data)) {
+    return <MusicPreview music={currentPreview.provider_data} />;
   }
   if (isDouyinVideoData(currentPreview.provider_data)) {
     return <DouyinVideoPreview video={currentPreview.provider_data} imageUrl={currentPreview.image_url} />;

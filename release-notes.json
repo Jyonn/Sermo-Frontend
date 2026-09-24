@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.9",
+  "id": "2026.09.24.10",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "统一视频播放体验",
+      "title": "更多音乐平台",
       "items": [
-        "抖音视频改用标准全屏播放器，并更新为真实品牌标识"
+        "新增 QQ 音乐与酷狗音乐解析播放，统一品牌标识、全局播放器和音乐详情页"
       ]
     },
     "en": {
-      "title": "Unified video playback",
+      "title": "More music platforms",
       "items": [
-        "Douyin videos now open in the standard full-screen player with the authentic brand mark"
+        "Add QQ Music and KuGou parsing and playback with shared branding, player, and song details"
       ]
     }
   }

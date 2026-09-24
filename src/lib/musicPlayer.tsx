@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import type { MusicProviderDataDTO } from "../types";
+import { musicBrand, sameMusic } from "./musicBrand";
 import { useI18n } from "./language";
 import { SideDrawer } from "../components/SideDrawer";
 
@@ -53,7 +54,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [compact, setCompact] = useState(false);
+  const [compact, setCompact] = useState(true);
   const [edge, setEdge] = useState<"left" | "right">("right");
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const drag = useRef<{ pointerId: number; offsetX: number; offsetY: number } | null>(null);
@@ -134,12 +135,13 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     else audio.current.pause();
   };
   const play = (next: MusicProviderDataDTO) => {
-    if (music?.song_id === next.song_id) { toggle(); return; }
+    if (sameMusic(music, next)) { toggle(); return; }
     audio.current?.pause();
     setTime(0);
     setDuration((next.duration_ms || 0) / 1000);
     setUnavailable(false);
     pendingPlay.current = true;
+    setCompact(true);
     setMusic(next);
   };
   const seek = (next: number) => {
@@ -149,6 +151,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   };
   const close = () => { audio.current?.pause(); setMusic(null); setTime(0); setDrawerOpen(false); };
   const progress = duration > 0 ? Math.min(100, Math.max(0, time / duration * 100)) : 0;
+  const brand = music ? musicBrand(music.provider) : null;
 
   return <Context.Provider value={{ music, playing, time, duration, unavailable, play, toggle, seek, close }}>
     {children}
@@ -157,7 +160,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       onEnded={() => setPlaying(false)} onError={() => { setUnavailable(true); setPlaying(false); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}
       onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} />
-    {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={t("music.neteaseSource")} style={{ ...(position || {}), "--music-progress": `${progress}%`, "--music-angle": `${progress * 3.6}deg` } as CSSProperties}
+    {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={brand?.name} style={{ ...(position || {}), "--music-progress": `${progress}%`, "--music-angle": `${progress * 3.6}deg`, "--netease-red": brand?.color } as CSSProperties}
       onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}
       onClickCapture={(event) => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}
       onContextMenu={(event) => event.preventDefault()}>
@@ -173,13 +176,13 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       <button className="music-mini-close" type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
       </>}
     </aside> : null}
-    {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-netease-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} title={music.title} titleAccessory={<span className="netease-music-drawer-source">{t("music.neteaseSource")}</span>}>
+    {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-${music.provider}-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} title={music.title} titleAccessory={<span className="netease-music-drawer-source"><img alt="" src={brand?.logo} style={{ width: 15, height: 15, borderRadius: "50%" }} />{brand?.name}</span>}>
       <div className="netease-player">
         <div className={`netease-player-cover music-disc is-active${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</div>
         <div className="netease-player-heading"><h4>{music.title}</h4><p>{music.artists.join(" / ")}</p>{music.album ? <small>{music.album}</small> : null}</div>
         <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" onClick={toggle} disabled={unavailable}><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>{unavailable ? t("music.audioUnavailable") : playing ? t("music.pause") : t("music.play")}</button></div>
         <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{lyrics.length ? lyrics.map((line, index) => <p key={`${line.time}:${index}`} className={index === activeLyricIndex ? "is-active" : ""} onClick={() => seek(line.time)} ref={(element) => { if (element) lyricRefs.current.set(index, element); else lyricRefs.current.delete(index); }}>{line.text}</p>) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
-        <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">{t("music.openNetease")}<span aria-hidden="true">↗</span></a>
+        <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">{brand?.name}<span aria-hidden="true">↗</span></a>
       </div>
     </SideDrawer> : null}
   </Context.Provider>;

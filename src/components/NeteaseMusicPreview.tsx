@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useI18n } from "../lib/language";
 import { useMusicPlayer } from "../lib/musicPlayer";
+import { musicBrand, sameMusic } from "../lib/musicBrand";
 import type { MusicProviderDataDTO } from "../types";
 import { SideDrawer } from "./SideDrawer";
 
@@ -47,27 +48,28 @@ function formatTime(value: number) {
   return `${minutes}:${seconds}`;
 }
 
-export function isNeteaseMusicData(value: unknown): value is MusicProviderDataDTO {
+export function isMusicData(value: unknown): value is MusicProviderDataDTO {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<MusicProviderDataDTO>;
-  return candidate.provider === "netease_music"
-    && typeof candidate.song_id === "number"
+  return ["netease_music", "qq_music", "kugou_music"].includes(String(candidate.provider))
+    && ["number", "string"].includes(typeof candidate.song_id)
     && typeof candidate.title === "string"
     && typeof candidate.audio_url === "string"
     && typeof candidate.canonical_url === "string"
     && Array.isArray(candidate.artists);
 }
 
-export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
+export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
   const { t } = useI18n();
   const player = useMusicPlayer();
   const lyricRefs = useRef(new Map<number, HTMLParagraphElement>());
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const active = player.music?.song_id === music.song_id;
+  const brand = musicBrand(music.provider);
+  const active = sameMusic(player.music, music);
   const playing = active && player.playing;
   const currentTime = active ? player.time : 0;
   const duration = active ? player.duration : (music.duration_ms || 0) / 1000;
-  const audioUnavailable = active && player.unavailable;
+  const audioUnavailable = !music.audio_url || (active && player.unavailable);
   const lyrics = useMemo(
     () => combineLyrics(music.lyrics?.original, music.lyrics?.translation),
     [music.lyrics?.original, music.lyrics?.translation]
@@ -94,7 +96,7 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
 
   return (
     <>
-      <article className="netease-music-card" onClick={(event) => event.stopPropagation()}>
+      <article className="netease-music-card" onClick={(event) => event.stopPropagation()} style={{ "--netease-red": brand.color } as CSSProperties}>
         <button
           aria-label={playing ? t("music.pause") : t("music.play")}
           className="netease-music-play"
@@ -108,17 +110,17 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
         <button className="netease-music-summary" onClick={() => setDrawerOpen(true)} type="button">
           <strong>{music.title}</strong>
           <span>{artists}</span>
-          <small><i aria-hidden="true">♫</i>{t("music.neteaseSource")}</small>
+          <small><img alt="" src={brand.logo} />{brand.name}</small>
         </button>
         <span className="netease-music-card-progress" style={{ "--music-progress": `${duration ? (currentTime / duration) * 100 : 0}%` } as CSSProperties} />
       </article>
       <SideDrawer
         className="netease-music-drawer"
-        historyKey={`netease-song-${music.song_id}`}
+        historyKey={`${music.provider}-song-${music.song_id}`}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         title={music.title}
-        titleAccessory={<span className="netease-music-drawer-source">{t("music.neteaseSource")}</span>}
+        titleAccessory={<span className="netease-music-drawer-source"><img alt="" src={brand.logo} style={{ width: 15, height: 15, borderRadius: "50%" }} />{brand.name}</span>}
       >
         <div className="netease-player">
           <div className={`netease-player-cover music-disc${active ? " is-active" : ""}${playing ? " is-playing" : ""}`}>{cover}</div>
@@ -157,7 +159,7 @@ export function NeteaseMusicPreview({ music }: NeteaseMusicPreviewProps) {
             )) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}
           </section>
           <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">
-            {t("music.openNetease")}<span aria-hidden="true">↗</span>
+            {brand.name}<span aria-hidden="true">↗</span>
           </a>
         </div>
       </SideDrawer>
