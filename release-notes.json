@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.7",
+  "id": "2026.09.24.8",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "沉浸式视频预览",
+      "title": "统一视频播放体验",
       "items": [
-        "完善普通视频全屏预览的画面模式，并在手机和桌面端显示真实缩放比例"
+        "抖音视频现已使用统一的沉浸播放器，并支持循环播放与清晰的作品来源信息"
       ]
     },
     "en": {
-      "title": "Immersive video preview",
+      "title": "Unified video playback",
       "items": [
-        "Complete full-screen video display modes and show the true zoom level on mobile and desktop"
+        "Douyin videos now use the shared immersive player with looping and clear source details"
       ]
     }
   }

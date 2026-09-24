@@ -373,7 +373,16 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
   );
 }
 
-function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src: string; onClose: () => void }) {
+interface ImmersiveVideoProps {
+  context?: ReactNode;
+  loop?: boolean;
+  onClose: () => void;
+  onError?: () => void;
+  poster?: string | null;
+  src: string;
+}
+
+export function ImmersiveVideo({ context, loop = false, onClose, onError, poster, src }: ImmersiveVideoProps) {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -437,7 +446,7 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) void video.play(); else video.pause();
+    if (video.paused) void video.play().catch(() => onError?.()); else video.pause();
   };
 
   const cyclePlaybackRate = () => {
@@ -463,10 +472,12 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
       className="immersive-video-canvas immersive-image-canvas"
       onDurationChange={(event) => setDuration(event.currentTarget.duration)}
       onEnded={() => setPlaying(false)}
+      onError={onError}
       onLoadedMetadata={(event) => setNaturalSize({ width: event.currentTarget.videoWidth, height: event.currentTarget.videoHeight })}
       onPause={() => setPlaying(false)}
       onPlay={() => setPlaying(true)}
       onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+      loop={loop}
       playsInline
       poster={poster || undefined}
       preload="metadata"
@@ -501,6 +512,21 @@ function ImmersiveVideo({ poster, src, onClose }: { poster?: string | null; src:
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
       </button>
     </div>
+    {context ? <div
+      className="immersive-video-context"
+      onClick={(event) => event.stopPropagation()}
+      style={{
+        position: "absolute",
+        right: "max(clamp(10px, 2vw, 20px), env(safe-area-inset-right))",
+        bottom: "max(calc(clamp(10px, 2vw, 18px) + 64px), calc(env(safe-area-inset-bottom) + 64px))",
+        left: "max(clamp(10px, 2vw, 20px), env(safe-area-inset-left))",
+        zIndex: 4,
+        opacity: controlsVisible ? 1 : 0,
+        pointerEvents: controlsVisible ? "auto" : "none",
+        transform: controlsVisible ? "translateY(0)" : "translateY(8px)",
+        transition: "opacity 180ms ease, transform 220ms cubic-bezier(.22, .8, .3, 1)",
+      }}
+    >{context}</div> : null}
     <div className={`immersive-video-controlbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
       <time className="immersive-video-remaining">−{formatPlaybackTime(remainingTime)}</time>
       <input

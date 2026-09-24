@@ -1,41 +1,12 @@
 .douyin-video-drawer.side-drawer { --drawer-width: min(100vw, 520px); border-color: rgba(255,255,255,.08); background: #080a0d; }
 .douyin-video-drawer .drawer-body { position: relative; display: block; min-height: 0; padding: 0; overflow: hidden; background: #080a0d; }
-.douyin-video-drawer .drawer-floating-back { z-index: 8; color: #f5f7f6; border-color: rgba(255,255,255,.16); background: rgba(8,10,13,.48); box-shadow: 0 8px 28px rgba(0,0,0,.22); backdrop-filter: blur(14px); }
-.douyin-player-shell { position: absolute; inset: 0; min-height: 0; padding: clamp(0px, 2.4vw, 18px); background: #080a0d; }
-.douyin-player-stage { position: relative; width: 100%; height: 100%; min-height: 0; overflow: hidden; border-radius: clamp(0px, 2.2vw, 24px); color: #f5f7f6; background: #090b0e; isolation: isolate; container-type: inline-size; }
-.douyin-player-atmosphere { position: absolute; z-index: -2; inset: -6%; background-position: center; background-size: cover; filter: blur(34px) saturate(.72) brightness(.3); opacity: .82; transform: scale(1.12); }
-.douyin-player-video { position: absolute; z-index: -1; inset: 0; display: block; width: 100%; height: 100%; border: 0; background: transparent; object-fit: contain; }
-.douyin-player-shade { position: absolute; z-index: 0; inset: 0; pointer-events: none; background: linear-gradient(180deg,rgba(4,6,8,.5),transparent 24%,transparent 51%,rgba(4,6,8,.2) 63%,rgba(4,6,8,.94) 100%); }
-.douyin-player-brand { position: absolute; z-index: 2; top: max(22px,env(safe-area-inset-top)); left: 70px; display: flex; align-items: center; gap: 9px; min-height: 34px; color: #f6f8f7; }
-.douyin-player-note { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; color: #101316; background: linear-gradient(135deg,#29f0df 0 48%,#f8f9f8 49% 58%,#ff315f 59%); font-size: 18px; box-shadow: -2px 0 #2ce5dd,2px 0 #ff315f; }
-.douyin-player-brand>span:last-child { display: grid; gap: 2px; }
-.douyin-player-brand b { font-family: var(--font-display); font-size: 10px; line-height: 1; letter-spacing: .16em; }
-.douyin-player-brand small { color: rgba(245,248,247,.58); font-size: 9px; line-height: 1; }
-.douyin-player-center { position: absolute; z-index: 3; top: 50%; left: 50%; display: grid; width: 66px; height: 66px; padding: 0; place-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; color: #fff; background: rgba(8,11,13,.36); box-shadow: 0 14px 40px rgba(0,0,0,.24); transform: translate(-50%,-50%); backdrop-filter: blur(12px); }
-.douyin-player-center .material-symbols-outlined { margin-left: 3px; font-size: 36px; }
-.douyin-player-rail { position: absolute; z-index: 3; right: clamp(12px,4cqw,20px); bottom: 118px; display: grid; gap: 19px; }
-.douyin-player-rail :is(button,a) { display: grid; width: 48px; min-height: 54px; padding: 0; place-items: center; gap: 4px; border: 0; color: #f5f7f6; background: transparent; text-decoration: none; filter: drop-shadow(0 2px 7px rgba(0,0,0,.65)); }
-.douyin-player-rail .material-symbols-outlined { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; background: rgba(11,14,17,.4); font-size: 22px; backdrop-filter: blur(12px); transition: transform 160ms cubic-bezier(.22,1,.36,1),background 160ms ease; }
-.douyin-player-rail :is(button,a):active .material-symbols-outlined { transform: scale(.9); }
-.douyin-player-rail small { color: rgba(247,249,248,.78); font-size: 9px; font-weight: 720; }
-.douyin-player-copy { position: absolute; z-index: 2; right: 82px; bottom: 65px; left: clamp(18px,5cqw,28px); display: grid; gap: 8px; text-shadow: 0 2px 12px rgba(0,0,0,.64); }
-.douyin-player-author { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 850; }
-.douyin-player-author i { width: 18px; height: 2px; background: linear-gradient(90deg,#2ce5dd 0 48%,#ff315f 50%); }
-.douyin-player-copy h3 { max-width: 33ch; margin: 0; color: #f6f8f7; font-family: var(--font-display); font-size: clamp(18px,5.4cqw,26px); line-height: 1.24; text-wrap: balance; }
-.douyin-player-copy p { display: flex; align-items: center; gap: 5px; margin: 1px 0 0; color: rgba(243,247,245,.62); font-size: 10px; }
-.douyin-player-copy p .material-symbols-outlined { font-size: 13px; }
-.douyin-player-timeline { position: absolute; z-index: 4; right: 16px; bottom: max(14px,env(safe-area-inset-bottom)); left: 16px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px; }
-.douyin-player-timeline input { width: 100%; height: 18px; margin: 0; appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer; }
-.douyin-player-timeline input::-webkit-slider-runnable-track { height: 2px; border-radius: 99px; background: linear-gradient(90deg,#ff315f var(--douyin-progress),rgba(255,255,255,.28) var(--douyin-progress)); }
-.douyin-player-timeline input::-moz-range-track { height: 2px; border-radius: 99px; background: rgba(255,255,255,.28); }
-.douyin-player-timeline input::-moz-range-progress { height: 2px; border-radius: 99px; background: #ff315f; }
-.douyin-player-timeline input::-webkit-slider-thumb { width: 12px; height: 12px; margin-top: -5px; appearance: none; -webkit-appearance: none; border: 2px solid #f7f8f7; border-radius: 50%; background: #ff315f; box-shadow: 0 2px 8px rgba(0,0,0,.36); }
-.douyin-player-timeline input::-moz-range-thumb { width: 9px; height: 9px; border: 2px solid #f7f8f7; border-radius: 50%; background: #ff315f; }
-.douyin-player-timeline time { display: flex; align-items: center; gap: 5px; color: rgba(245,248,247,.62); font: 700 9px/1 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.douyin-player-timeline time i { width: 7px; height: 1px; background: currentColor; }
+.douyin-video-drawer .drawer-floating-back { display: none; }
+.douyin-player-shell { position: absolute; inset: 0; min-height: 0; background: #080a0d; }
+.douyin-player-context { display: grid; grid-template-columns: 42px minmax(0,1fr) 34px; gap: 11px; align-items: center; max-width: min(100%,620px); padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; color: #f7faf9; background: rgba(10,13,15,.68); text-decoration: none; text-shadow: 0 2px 14px rgba(0,0,0,.5); backdrop-filter: blur(22px) saturate(130%); }
+.douyin-player-context-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 14px; color: #111417; background: linear-gradient(135deg,#2ce5dd 0 45%,#f7faf9 46% 56%,#ff315f 57%); box-shadow: -2px 0 #2ce5dd,2px 0 #ff315f; }
+.douyin-player-context-copy { display: grid; gap: 5px; min-width: 0; }
+.douyin-player-context-copy strong { overflow: hidden; font-family: var(--font-display); font-size: clamp(14px,2.5vw,17px); line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.douyin-player-context-copy small { overflow: hidden; color: rgba(242,248,245,.64); font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .douyin-player-error { position: absolute; z-index: 6; inset: 0; display: grid; align-content: center; justify-items: center; gap: 12px; padding: 32px; color: #f4f6f5; background: rgba(7,9,12,.86); text-align: center; backdrop-filter: blur(20px); }
-.douyin-player-error>span { font-size: 38px; color: #ff5676; }
 .douyin-player-error strong { max-width: 28ch; font-size: 13px; line-height: 1.55; }
 .douyin-player-error a { padding: 10px 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 99px; color: #f4f8f6; background: rgba(255,255,255,.08); font-size: 11px; font-weight: 800; text-decoration: none; }
-@media(max-width:600px){.douyin-player-shell{padding:0}.douyin-player-stage{border-radius:0}.douyin-player-brand{top:max(18px,env(safe-area-inset-top));left:64px}.douyin-player-copy{right:72px;bottom:62px;left:18px}.douyin-player-rail{right:9px;bottom:104px;gap:14px}.douyin-player-rail :is(button,a){width:46px}.douyin-player-timeline{right:12px;left:12px}.douyin-player-timeline time{display:none}}
-@media(prefers-reduced-motion:reduce){.douyin-player-rail .material-symbols-outlined{transition:none}}
