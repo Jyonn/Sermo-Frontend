@@ -2550,5 +2550,17 @@
   "qqIdentity.bindFromEmailHint": "使用已認證信箱對應的 QQ {{qq}}，無需再次收取驗證碼",
   "qqIdentity.bindFromEmailConfirmTitle": "綁定這個 QQ 號？",
   "qqIdentity.bindFromEmailConfirmHint": "將使用已認證的數字 QQ 信箱直接綁定 QQ {{qq}}，並認領該身分下的歷史內容。",
-  "qqIdentity.bindFromEmailConfirm": "確認綁定"
+  "qqIdentity.bindFromEmailConfirm": "確認綁定",
+  "douyin.source": "抖音影片",
+  "douyin.video": "觀看抖音影片",
+  "douyin.openOriginal": "前往抖音觀看",
+  "douyin.playbackUnavailable": "影片網址可能已過期，請前往抖音觀看",
+  "douyin.controls": "影片播放控制",
+  "douyin.mute": "關閉聲音",
+  "douyin.unmute": "開啟聲音",
+  "douyin.soundOff": "靜音",
+  "douyin.soundOn": "聲音",
+  "douyin.fullscreen": "全螢幕",
+  "douyin.original": "原影片",
+  "douyin.creator": "抖音創作者"
 }

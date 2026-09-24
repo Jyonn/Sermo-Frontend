@@ -2530,5 +2530,17 @@
   "qqIdentity.bindFromEmailHint": "認証済みメールの QQ {{qq}} を追加認証なしで使用します",
   "qqIdentity.bindFromEmailConfirmTitle": "この QQ 番号を連携しますか？",
   "qqIdentity.bindFromEmailConfirmHint": "認証済みの数字 QQ メールから QQ {{qq}} を直接連携し、過去のコンテンツを引き継ぎます。",
-  "qqIdentity.bindFromEmailConfirm": "連携を確認"
+  "qqIdentity.bindFromEmailConfirm": "連携を確認",
+  "douyin.source": "Douyin動画",
+  "douyin.video": "Douyin動画を見る",
+  "douyin.openOriginal": "Douyinで開く",
+  "douyin.playbackUnavailable": "動画リンクの有効期限が切れている可能性があります",
+  "douyin.controls": "動画コントロール",
+  "douyin.mute": "ミュート",
+  "douyin.unmute": "音声をオン",
+  "douyin.soundOff": "ミュート",
+  "douyin.soundOn": "音声",
+  "douyin.fullscreen": "全画面",
+  "douyin.original": "元の動画",
+  "douyin.creator": "Douyinクリエイター"
 }

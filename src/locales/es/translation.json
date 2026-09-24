@@ -2530,5 +2530,17 @@
   "qqIdentity.bindFromEmailHint": "Usa QQ {{qq}} de tu correo verificado sin otro código",
   "qqIdentity.bindFromEmailConfirmTitle": "¿Vincular este número de QQ?",
   "qqIdentity.bindFromEmailConfirmHint": "El correo numérico verificado vinculará QQ {{qq}} directamente y reclamará su contenido histórico.",
-  "qqIdentity.bindFromEmailConfirm": "Confirmar vinculación"
+  "qqIdentity.bindFromEmailConfirm": "Confirmar vinculación",
+  "douyin.source": "Vídeo de Douyin",
+  "douyin.video": "Ver vídeo de Douyin",
+  "douyin.openOriginal": "Abrir en Douyin",
+  "douyin.playbackUnavailable": "El enlace del vídeo puede haber caducado",
+  "douyin.controls": "Controles de vídeo",
+  "douyin.mute": "Silenciar",
+  "douyin.unmute": "Activar sonido",
+  "douyin.soundOff": "Silenciado",
+  "douyin.soundOn": "Sonido",
+  "douyin.fullscreen": "Pantalla completa",
+  "douyin.original": "Original",
+  "douyin.creator": "Creador de Douyin"
 }

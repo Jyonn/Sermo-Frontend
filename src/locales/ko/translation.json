@@ -2530,5 +2530,17 @@
   "qqIdentity.bindFromEmailHint": "인증된 이메일의 QQ {{qq}}를 추가 코드 없이 사용합니다",
   "qqIdentity.bindFromEmailConfirmTitle": "이 QQ 번호를 연결할까요?",
   "qqIdentity.bindFromEmailConfirmHint": "인증된 숫자 QQ 이메일로 QQ {{qq}}를 바로 연결하고 과거 콘텐츠를 가져옵니다.",
-  "qqIdentity.bindFromEmailConfirm": "연결 확인"
+  "qqIdentity.bindFromEmailConfirm": "연결 확인",
+  "douyin.source": "Douyin 동영상",
+  "douyin.video": "Douyin 동영상 보기",
+  "douyin.openOriginal": "Douyin에서 열기",
+  "douyin.playbackUnavailable": "동영상 링크가 만료되었을 수 있습니다",
+  "douyin.controls": "동영상 제어",
+  "douyin.mute": "음소거",
+  "douyin.unmute": "소리 켜기",
+  "douyin.soundOff": "음소거",
+  "douyin.soundOn": "소리",
+  "douyin.fullscreen": "전체 화면",
+  "douyin.original": "원본",
+  "douyin.creator": "Douyin 크리에이터"
 }

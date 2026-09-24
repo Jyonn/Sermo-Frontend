@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.3",
+  "id": "2026.09.24.4",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频播放兼容性优化",
+      "title": "沉浸式抖音视频播放器",
       "items": [
-        "优化跨站视频请求策略，减少抖音视频在站内播放时被拒绝的情况"
+        "重新设计抖音视频播放界面，支持自定义进度、声音和全屏控制"
       ]
     },
     "en": {
-      "title": "Improved Douyin playback compatibility",
+      "title": "Immersive Douyin video player",
       "items": [
-        "Improve cross-site media requests to reduce rejected in-app Douyin playback"
+        "Redesign Douyin playback with custom progress, sound, and full-screen controls"
       ]
     }
   }
