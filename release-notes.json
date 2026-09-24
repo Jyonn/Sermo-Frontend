@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.10",
+  "id": "2026.09.24.11",
   "publishedAt": "2026-09-24",
   "locales": {
     "zh-CN": {
       "title": "更多音乐平台",
       "items": [
-        "新增 QQ 音乐与酷狗音乐解析播放，统一品牌标识、全局播放器和音乐详情页"
+        "音乐卡片、全局播放器和详情页现已使用各平台官网的真实品牌图标"
       ]
     },
     "en": {
       "title": "More music platforms",
       "items": [
-        "Add QQ Music and KuGou parsing and playback with shared branding, player, and song details"
+        "Music cards, the global player, and song details now use each platform's official brand icon"
       ]
     }
   }

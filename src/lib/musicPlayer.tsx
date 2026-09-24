@@ -171,7 +171,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         <span className={`music-mini-disc${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</span>
         <span className="music-mini-play-icon material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
       </button>
-      <button className="music-mini-copy" type="button" onClick={() => setDrawerOpen(true)}><strong>{music.title}<span> · {music.artists.join(" / ")}</span></strong><small>{activeLyric || t("music.noLyrics")}</small></button>
+      <button className="music-mini-copy" type="button" onClick={() => setDrawerOpen(true)}><strong><img alt="" src={brand?.logo} style={{ width: 14, height: 14, marginRight: 5, borderRadius: "50%", verticalAlign: "-2px" }} />{music.title}<span> · {music.artists.join(" / ")}</span></strong><small>{activeLyric || t("music.noLyrics")}</small></button>
       <button className="music-mini-collapse" type="button" onClick={() => setCompact(true)} aria-label={t("music.collapsePlayer")}><span className="material-symbols-outlined">close_fullscreen</span></button>
       <button className="music-mini-close" type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
       </>}
@@ -182,7 +182,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         <div className="netease-player-heading"><h4>{music.title}</h4><p>{music.artists.join(" / ")}</p>{music.album ? <small>{music.album}</small> : null}</div>
         <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" onClick={toggle} disabled={unavailable}><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>{unavailable ? t("music.audioUnavailable") : playing ? t("music.pause") : t("music.play")}</button></div>
         <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{lyrics.length ? lyrics.map((line, index) => <p key={`${line.time}:${index}`} className={index === activeLyricIndex ? "is-active" : ""} onClick={() => seek(line.time)} ref={(element) => { if (element) lyricRefs.current.set(index, element); else lyricRefs.current.delete(index); }}>{line.text}</p>) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
-        <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">{brand?.name}<span aria-hidden="true">↗</span></a>
+        <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank"><img alt="" src={brand?.logo} style={{ width: 18, height: 18, borderRadius: "50%" }} />{brand?.name}<span aria-hidden="true">↗</span></a>
       </div>
     </SideDrawer> : null}
   </Context.Provider>;

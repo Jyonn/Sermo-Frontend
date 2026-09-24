@@ -159,7 +159,7 @@ export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
             )) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}
           </section>
           <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank">
-            {brand.name}<span aria-hidden="true">↗</span>
+            <img alt="" src={brand.logo} style={{ width: 18, height: 18, borderRadius: "50%" }} />{brand.name}<span aria-hidden="true">↗</span>
           </a>
         </div>
       </SideDrawer>
