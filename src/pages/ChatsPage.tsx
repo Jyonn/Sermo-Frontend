@@ -3178,11 +3178,12 @@ function LiveChatsPage({
   const [messageSelectionAction, setMessageSelectionAction] = useState<MessageSelectionAction | null>(null);
   const [messageSelectionActionPrompt, setMessageSelectionActionPrompt] = useState<MessageSelectionActionPrompt | null>(null);
   const [forwardPickerOpen, setForwardPickerOpen] = useState(false);
+  const [forwardRouteOpen, setForwardRouteOpen] = useState(false);
   const [forwardMode, setForwardMode] = useState<"individual" | "bundle">("bundle");
   const [forwardSourceMessageIds, setForwardSourceMessageIds] = useState<number[]>([]);
+  const [forwardSourcePreviewMessages, setForwardSourcePreviewMessages] = useState<ChatMessageDTO[]>([]);
   const [forwardTargetChatIds, setForwardTargetChatIds] = useState<number[]>([]);
   const [forwardSending, setForwardSending] = useState(false);
-  const [forwardOpenedFromSelection, setForwardOpenedFromSelection] = useState(false);
   const [forwardBundlePreview, setForwardBundlePreview] = useState<ChatMessagePayloadDTO | null>(null);
 
   useEffect(() => {
@@ -6920,6 +6921,31 @@ function LiveChatsPage({
     recall: eligibleSelectionMessages("recall").length > 0,
   };
 
+  const forwardPreviewMessage = (message: ChatMessage): ChatMessageDTO => {
+    const member = selectedChat?.detail.members.find((item) => item.userId === message.userId);
+    return {
+      message_id: message.id as number,
+      client_message_id: message.clientId,
+      user: {
+        user_id: message.userId ?? 0,
+        name: message.name,
+        official: member?.official,
+        operator: member?.operator,
+        anonymous: message.anonymous,
+        avatar_uri: message.avatarUri,
+        is_permanent_vip: message.isPermanentVip,
+        chat_bubble_style: message.chatBubbleStyle,
+        avatar_frame_style: message.avatarFrameStyle,
+      },
+      type: message.type,
+      content: message.text,
+      payload: message.payload,
+      reply_to: message.replyTo,
+      mentions: message.mentions,
+      created_at: message.createdAt,
+    };
+  };
+
   const finishMessageSelection = () => {
     setMessageSelectionMode(false);
     setSelectedMessageClientIds([]);
@@ -7003,7 +7029,8 @@ function LiveChatsPage({
   };
 
   const openForwardPicker = () => {
-    const eligibleIds = eligibleForwardMessages().map((message) => message.id as number);
+    const eligibleMessages = eligibleForwardMessages();
+    const eligibleIds = eligibleMessages.map((message) => message.id as number);
     if (!eligibleIds.length) {
       showToast(t("message.forwardUnavailable"), "error");
       return;
@@ -7012,10 +7039,10 @@ function LiveChatsPage({
       showToast(t("message.forwardPartial", { eligible: eligibleIds.length, total: selectedMessageClientIds.length }));
     }
     setForwardSourceMessageIds(eligibleIds);
+    setForwardSourcePreviewMessages(eligibleMessages.map(forwardPreviewMessage));
     setForwardTargetChatIds([]);
     setForwardMode(eligibleIds.length > 1 ? "bundle" : "individual");
-    setForwardOpenedFromSelection(true);
-    setForwardPickerOpen(true);
+    setForwardRouteOpen(true);
   };
 
   const openSingleMessageForwardPicker = (message: ChatMessage) => {
@@ -7024,10 +7051,10 @@ function LiveChatsPage({
     setMessageMenu(null);
     if (fromPinnedDrawer) setPinnedDrawerOpen(false);
     setForwardSourceMessageIds([message.id as number]);
+    setForwardSourcePreviewMessages([forwardPreviewMessage(message)]);
     setForwardTargetChatIds([]);
     setForwardMode("individual");
-    setForwardOpenedFromSelection(false);
-    setForwardPickerOpen(true);
+    setForwardRouteOpen(true);
   };
 
   const submitForwardMessages = async () => {
@@ -7059,10 +7086,11 @@ function LiveChatsPage({
   const composeForwardBundleForSquare = () => {
     if (!forwardSourceMessageIds.length || forwardSending) return;
     const messageIds = [...forwardSourceMessageIds];
+    setForwardRouteOpen(false);
     setForwardPickerOpen(false);
     finishMessageSelection();
     navigate("/app/square", {
-      state: { squareChatRecordDraft: { messageIds } },
+      state: { squareChatRecordDraft: { messageIds, previewMessages: forwardSourcePreviewMessages, firstPersonUserId: currentUserId } },
     });
   };
 
@@ -8748,6 +8776,27 @@ function LiveChatsPage({
         </div>
       </BottomSheet>
 
+      <BottomSheet
+        bodyClassName="forward-destination-sheet"
+        onClose={() => setForwardRouteOpen(false)}
+        open={forwardRouteOpen}
+        title={t("message.forwardTitle")}
+        description={t("message.forwardSourceCount", { count: forwardSourceMessageIds.length })}
+      >
+        <div className="forward-route-switch" role="group" aria-label={t("message.forwardMode")}>
+          {Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? <button onClick={composeForwardBundleForSquare} type="button">
+            <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+            <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
+            <span className="forward-route-enter material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button> : null}
+          <button onClick={() => { setForwardRouteOpen(false); setForwardPickerOpen(true); }} type="button">
+            <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">forum</span>
+            <span><strong>{t("message.chooseForwardChats")}</strong><small>{t("message.forwardMode")}</small></span>
+            <span className="forward-route-enter material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+        </div>
+      </BottomSheet>
+
       <ChatTargetPicker
         open={forwardPickerOpen}
         presentation="drawer"
@@ -8776,15 +8825,8 @@ function LiveChatsPage({
         onClose={() => {
           if (!forwardSending) setForwardPickerOpen(false);
         }}
-        beforeList={forwardOpenedFromSelection ? (
+        beforeList={(
           <div className="forward-route-switch" role="group" aria-label={t("message.forwardMode")}>
-            {forwardSourceMessageIds.length > 1 && Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator) ? (
-              <button className="is-square" disabled={forwardSending} onClick={composeForwardBundleForSquare} type="button">
-                <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
-                <span><strong>{t("message.forwardToSquare")}</strong><small>{t("message.forwardToSquareHint")}</small></span>
-                <span className="forward-route-enter material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-              </button>
-            ) : null}
             <button
               className={forwardMode === "individual" ? "is-active" : ""}
               onClick={() => setForwardMode("individual")}
@@ -8806,7 +8848,7 @@ function LiveChatsPage({
               <span className="forward-route-check material-symbols-outlined" aria-hidden="true">check_circle</span>
             </button>
           </div>
-        ) : null}
+        )}
       />
 
       <SideDrawer

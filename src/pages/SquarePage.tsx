@@ -49,7 +49,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -76,8 +76,43 @@ type SelectedPhoto = {
 type SelectedVideo = SelectedPhoto & { duration: number };
 type SquareChatRecordDraft = {
   messageIds: number[];
+  previewMessages: ChatMessageDTO[];
+  firstPersonUserId: number | null;
   redacted: boolean;
 };
+
+function chatRecordDraftPreview(draft: SquareChatRecordDraft, officialViewer: boolean) {
+  if (!draft.redacted) return { messages: draft.previewMessages, firstPersonUserId: draft.firstPersonUserId };
+  const preserveOfficialId = officialViewer && draft.previewMessages.some((message) => (
+    message.user.user_id === draft.firstPersonUserId && message.user.official
+  )) ? draft.firstPersonUserId : null;
+  const participantIds = Array.from(new Set(draft.previewMessages
+    .map((message) => message.user.user_id)
+    .filter((userId) => userId !== preserveOfficialId)));
+  const aliases = new Map(participantIds.map((userId, index) => [userId, index + 1]));
+  return {
+    firstPersonUserId: preserveOfficialId,
+    messages: draft.previewMessages.map((message) => {
+      if (message.user.user_id === preserveOfficialId) return message;
+      const number = aliases.get(message.user.user_id) ?? 1;
+      return {
+        ...message,
+        user: {
+          user_id: -number,
+          name: String(number).padStart(2, "0"),
+          official: false,
+          operator: false,
+          anonymous: true,
+          avatar_type: "preset" as const,
+          avatar_uri: "",
+          is_permanent_vip: false,
+          chat_bubble_style: "default" as const,
+          avatar_frame_style: "none" as const,
+        },
+      };
+    }),
+  };
+}
 
 const MAX_TEXT_LENGTH = 140;
 const COMMENT_STICKER_PAGE = -1;
@@ -627,7 +662,7 @@ export default function SquarePage() {
 
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
-  const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; text?: string } } | null;
+  const routeState = location.state as { squareInlineFocus?: boolean; squareChatRecordDraft?: { messageIds?: number[]; previewMessages?: ChatMessageDTO[]; firstPersonUserId?: number | null; text?: string } } | null;
   const inlineRouteActive = routedStatementId !== null && routeState?.squareInlineFocus === true;
   const consumedChatRecordDraftRef = useRef<string | null>(null);
 
@@ -648,7 +683,12 @@ export default function SquarePage() {
     const draftKey = messageIds.join(",");
     if (consumedChatRecordDraftRef.current === draftKey) return;
     consumedChatRecordDraftRef.current = draftKey;
-    setChatRecordDraft({ messageIds, redacted: false });
+    setChatRecordDraft({
+      messageIds,
+      previewMessages: routeState?.squareChatRecordDraft?.previewMessages ?? [],
+      firstPersonUserId: routeState?.squareChatRecordDraft?.firstPersonUserId ?? null,
+      redacted: false,
+    });
     setPhotos([]);
     setVoiceFile(null);
     setVoiceDuration(0);
@@ -755,6 +795,10 @@ export default function SquarePage() {
   const recordingTimerRef = useRef<number | null>(null);
   activeFeedCacheKeyRef.current = activeFeedCacheKey;
   const currentUser = session?.user;
+  const chatRecordPreview = useMemo(
+    () => chatRecordDraft ? chatRecordDraftPreview(chatRecordDraft, Boolean(currentUser?.official)) : null,
+    [chatRecordDraft, currentUser?.official],
+  );
   const canPublish = Boolean(currentUser?.verified);
   const canSendVoice = Boolean(currentUser?.official) || growthLevel >= 6;
   const canSendVideo = Boolean(currentUser?.official) || growthLevel >= 8;
@@ -2523,11 +2567,25 @@ export default function SquarePage() {
               <textarea autoFocus aria-label={t("square.saySomething")} maxLength={MAX_TEXT_LENGTH} onChange={(event) => setText(event.target.value)} placeholder={t("square.saySomething")} value={text} />
               <span className={`square-compose-count${text.length >= MAX_TEXT_LENGTH - 20 ? " is-near-limit" : ""}`}>{text.length}<i>/{MAX_TEXT_LENGTH}</i></span>
             </div>
-            {chatRecordDraft ? <div className="square-compose-chat-record">
-              <span className="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
-              <div><strong>{t("message.forwardBundleTitle")}</strong><small>{t("message.forwardBundleCount", { count: chatRecordDraft.messageIds.length })}</small></div>
-              <button aria-label={t("common.close")} onClick={() => setChatRecordDraft(null)} type="button"><span className="material-symbols-outlined">close</span></button>
-            </div> : null}
+            {chatRecordDraft ? <section className="square-compose-chat-record">
+              <header>
+                <span><strong>{t("message.forwardBundleTitle")}</strong><small>{t("message.forwardBundleCount", { count: chatRecordDraft.messageIds.length })}</small></span>
+                <button aria-label={t("common.close")} onClick={() => setChatRecordDraft(null)} type="button"><span className="material-symbols-outlined">close</span></button>
+              </header>
+              {chatRecordPreview?.messages.length ? <div className="square-chat-record">
+                <ChatPreview
+                  backgroundTheme={chatRecordDraft.redacted ? "default" : currentUser?.chat_background_theme || "default"}
+                  backgroundUri={chatRecordDraft.redacted ? undefined : currentUser?.chat_background_uri}
+                  className="square-chat-record-preview"
+                  firstPersonUserId={chatRecordPreview.firstPersonUserId}
+                  initialScrollToEnd
+                  messages={chatRecordPreview.messages}
+                  onOpenImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })}
+                  onOpenVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })}
+                  showSelfAuthors
+                />
+              </div> : null}
+            </section> : null}
             {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
             {video ? <div className="square-composer-video"><video muted playsInline src={video.preview} /><button onClick={() => { URL.revokeObjectURL(video.preview); setVideo(null); }} type="button"><span className="material-symbols-outlined">close</span></button><span>{video.duration}s</span></div> : null}
             {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><div><strong>{t("square.voiceReady")}</strong>{voicePreview ? <audio controls preload="metadata" src={voicePreview} /> : null}</div><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
