@@ -26,6 +26,7 @@ interface SideDrawerProps {
   headerless?: boolean;
   fullscreen?: boolean;
   floatingBack?: boolean;
+  style?: CSSProperties;
 }
 
 const DRAWER_QUERY_KEY = "panel";
@@ -65,6 +66,7 @@ export function SideDrawer({
   headerless = false,
   fullscreen = false,
   floatingBack = true,
+  style,
 }: SideDrawerProps) {
   const { t } = useI18n();
   const location = useLocation();
@@ -221,7 +223,7 @@ export function SideDrawer({
         className={`side-drawer${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
         onClick={(event) => event.stopPropagation()}
         role="dialog"
-        style={fullscreen ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : undefined}
+        style={{ ...style, ...(fullscreen ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}
       >
         {headerless ? (
           floatingBack ? <button className="drawer-floating-back" onClick={requestClose} type="button" aria-label={t("common.back")}>

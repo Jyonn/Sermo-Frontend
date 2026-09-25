@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.25.1",
+  "id": "2026.09.25.2",
   "publishedAt": "2026-09-25",
   "locales": {
     "zh-CN": {
-      "title": "发送位置体验优化",
+      "title": "音乐播放器视觉优化",
       "items": [
-        "手机端位置选择改为全屏页面，桌面端位置窗口恢复清晰简洁的默认样式"
+        "桌面音乐播放器固定在视口内，并根据音乐平台显示对应主题色和更清晰的外部跳转按钮"
       ]
     },
     "en": {
-      "title": "Improved location sharing",
+      "title": "Refined music player visuals",
       "items": [
-        "Location selection now opens full screen on mobile and uses the standard clean dialog style on desktop"
+        "The desktop music player now stays within the viewport and uses provider-specific colors with a clearer external link button"
       ]
     }
   }

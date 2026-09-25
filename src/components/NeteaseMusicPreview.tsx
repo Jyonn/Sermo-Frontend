@@ -119,6 +119,7 @@ export function MusicPreview({ music }: NeteaseMusicPreviewProps) {
         historyKey={`${music.provider}-song-${music.song_id}`}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
+        style={{ "--netease-red": brand.color } as CSSProperties}
         title={music.title}
         titleAccessory={<span className="netease-music-drawer-source"><img alt="" src={brand.logo} style={{ width: 15, height: 15, borderRadius: "50%" }} />{brand.name}</span>}
       >

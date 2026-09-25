@@ -176,7 +176,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       <button className="music-mini-close" type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
       </>}
     </aside> : null}
-    {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-${music.provider}-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} title={music.title} titleAccessory={<span className="netease-music-drawer-source"><img alt="" src={brand?.logo} style={{ width: 15, height: 15, borderRadius: "50%" }} />{brand?.name}</span>}>
+    {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-${music.provider}-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} style={{ "--netease-red": brand?.color } as CSSProperties} title={music.title} titleAccessory={<span className="netease-music-drawer-source"><img alt="" src={brand?.logo} style={{ width: 15, height: 15, borderRadius: "50%" }} />{brand?.name}</span>}>
       <div className="netease-player">
         <div className={`netease-player-cover music-disc is-active${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</div>
         <div className="netease-player-heading"><h4>{music.title}</h4><p>{music.artists.join(" / ")}</p>{music.album ? <small>{music.album}</small> : null}</div>
