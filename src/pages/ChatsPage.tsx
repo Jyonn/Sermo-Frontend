@@ -8087,15 +8087,6 @@ function LiveChatsPage({
                   <span className="material-symbols-outlined" aria-hidden="true">{submissionStatus === "ready" ? "campaign" : submissionStatus === "published" ? "task_alt" : "lock"}</span>
                   <div><strong>{submissionStatusLabel(submissionStatus)}</strong><small>{t(`submission.locked.${submissionStatus ?? "review"}` as TranslationKey)}</small></div>
                 </div>
-              ) : mobileComposerLayout && locationPickerOpen ? (
-                <NearbyLocationPicker
-                  chatClassName={`chat-background-${chatBackgroundTheme}${chatWallpaperToneClass}`}
-                  chatStyle={chatLayoutStyle}
-                  open
-                  onClose={() => setLocationPickerOpen(false)}
-                  onSelect={(location) => void sendLocationMessage(location)}
-                  presentation="mobile-inline"
-                />
               ) : (
               <form
                 ref={composerRef}
@@ -9803,12 +9794,10 @@ function LiveChatsPage({
         />
       ) : null}
       <NearbyLocationPicker
-        chatClassName={`chat-background-${chatBackgroundTheme}${chatWallpaperToneClass}`}
-        chatStyle={chatLayoutStyle}
-        open={locationPickerOpen && !mobileComposerLayout}
+        open={locationPickerOpen}
         onClose={() => setLocationPickerOpen(false)}
         onSelect={(location) => void sendLocationMessage(location)}
-        presentation="chat-modal"
+        presentation={mobileComposerLayout ? "fullscreen-drawer" : "chat-modal"}
       />
       <TravelMapDrawer
         historyKey="user-travel-map"

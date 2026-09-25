@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.24.18",
-  "publishedAt": "2026-09-24",
+  "id": "2026.09.25.1",
+  "publishedAt": "2026-09-25",
   "locales": {
     "zh-CN": {
-      "title": "聊天记录分享预览更清晰",
+      "title": "发送位置体验优化",
       "items": [
-        "将聊天记录发布到广场时，现在可以在编辑页完整预览所选消息"
+        "手机端位置选择改为全屏页面，桌面端位置窗口恢复清晰简洁的默认样式"
       ]
     },
     "en": {
-      "title": "Clearer chat record sharing previews",
+      "title": "Improved location sharing",
       "items": [
-        "Selected messages are now fully visible in the composer before sharing a chat record to Square"
+        "Location selection now opens full screen on mobile and uses the standard clean dialog style on desktop"
       ]
     }
   }

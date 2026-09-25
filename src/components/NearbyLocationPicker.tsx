@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import type { NearbyPlaceDTO, SquareStatementDTO } from "../types";
@@ -6,13 +6,11 @@ import { SideDrawer } from "./SideDrawer";
 
 export type SelectedLocation = NonNullable<SquareStatementDTO["location"]>;
 
-export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "drawer", chatClassName = "", chatStyle }: {
+export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "drawer" }: {
   open: boolean;
   onClose: () => void;
   onSelect: (location: SelectedLocation) => void;
-  presentation?: "drawer" | "mobile-inline" | "chat-modal";
-  chatClassName?: string;
-  chatStyle?: CSSProperties;
+  presentation?: "drawer" | "fullscreen-drawer" | "chat-modal";
 }) {
   const { t } = useI18n();
   const [center, setCenter] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -22,7 +20,6 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
   const [locating, setLocating] = useState(false);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
-  const [panelHeight, setPanelHeight] = useState(44);
   const openedRef = useRef(false);
 
   const locate = () => {
@@ -52,7 +49,6 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
     }
     if (openedRef.current) return;
     openedRef.current = true;
-    setPanelHeight(44);
     setCenter(null);
     setOrigin(null);
     setQuery("");
@@ -101,29 +97,11 @@ export function NearbyLocationPicker({ open, onClose, onSelect, presentation = "
       </div>
     </div>;
   if (!open) return null;
-  const header = <header><i onPointerDown={(event) => {
-    if (presentation !== "mobile-inline") return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const startY = event.clientY;
-    const startHeight = panelHeight;
-    const move = (moveEvent: PointerEvent) => setPanelHeight(Math.max(40, Math.min(50, startHeight + ((startY - moveEvent.clientY) / window.innerHeight) * 100)));
-    const stop = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", stop);
-      window.removeEventListener("pointercancel", stop);
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", stop);
-    window.addEventListener("pointercancel", stop);
-  }} /><strong>{t("square.locationPickerTitle")}</strong><button aria-label={t("common.close")} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button></header>;
-  if (presentation === "mobile-inline") return <section aria-label={t("square.locationPickerTitle")} className={`chat-location-picker-panel is-mobile-inline ${chatClassName}`.trim()} style={{ ...chatStyle, height: `${panelHeight}dvh` }}>
-      {header}
-      {content}
-    </section>;
-  if (presentation === "chat-modal") return <div className="chat-location-picker-layer is-modal" onClick={onClose} role="presentation">
-    <section aria-label={t("square.locationPickerTitle")} aria-modal="true" className={`chat-location-picker-panel is-modal ${chatClassName}`.trim()} onClick={(event) => event.stopPropagation()} role="dialog" style={chatStyle}>
+  const header = <header><strong>{t("square.locationPickerTitle")}</strong><button aria-label={t("common.close")} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button></header>;
+  if (presentation === "chat-modal") return <div className="dialog-backdrop chat-location-picker-layer is-modal" onClick={onClose} role="presentation">
+    <section aria-label={t("square.locationPickerTitle")} aria-modal="true" className="chat-location-picker-panel is-modal" onClick={(event) => event.stopPropagation()} role="dialog">
       {header}{content}
     </section>
   </div>;
-  return <SideDrawer className="square-location-picker-drawer" historyKey="nearby-location-picker" onClose={onClose} open title={t("square.locationPickerTitle")}>{content}</SideDrawer>;
+  return <SideDrawer className="square-location-picker-drawer" fullscreen={presentation === "fullscreen-drawer"} historyKey="nearby-location-picker" onClose={onClose} open title={t("square.locationPickerTitle")}>{content}</SideDrawer>;
 }
