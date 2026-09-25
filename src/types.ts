@@ -795,6 +795,7 @@ export interface SquareStatementDTO {
     geocoding_provider?: string;
   } | null;
   media: SquareStatementMediaDTO[];
+  external_media?: LinkPreviewDTO | null;
   chat_record?: ChatMessagePayloadDTO | null;
   comment_count: number;
   like_count: number;

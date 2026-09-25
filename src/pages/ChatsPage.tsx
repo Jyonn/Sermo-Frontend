@@ -43,8 +43,7 @@ import { SearchAudioTile } from "../components/SearchAudioPlayer";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
-import { isMusicData, MusicPreview } from "../components/NeteaseMusicPreview";
-import { DouyinVideoPreview, isDouyinVideoData } from "../components/DouyinVideoPreview";
+import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -1708,12 +1707,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   }
 
   const hostname = hostnameFromUrl(currentPreview.url || "");
-  if (isMusicData(currentPreview.provider_data)) {
-    return <MusicPreview music={currentPreview.provider_data} />;
-  }
-  if (isDouyinVideoData(currentPreview.provider_data)) {
-    return <DouyinVideoPreview video={currentPreview.provider_data} imageUrl={currentPreview.image_url} />;
-  }
+  if (isSupportedExternalMedia(currentPreview)) return <ExternalMediaPreview preview={currentPreview} />;
   const rawTitle = currentPreview.title || hostname || currentPreview.url || i18n.t("link.title");
   const title = hostname && rawTitle.trim().toLowerCase() === hostname.toLowerCase()
     ? hostname.toUpperCase()

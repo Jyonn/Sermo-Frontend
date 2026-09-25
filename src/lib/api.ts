@@ -993,6 +993,7 @@ export const api = {
     text: string;
     visibility: "public" | "friends";
     media: SquareStatementDraftMedia[];
+    external_media_url?: string | null;
     location?: { latitude: number; longitude: number; address?: string; geocoding_provider?: string } | null;
     pin?: 0 | 1;
     anonymous?: 0 | 1;
@@ -1262,6 +1263,14 @@ export const api = {
     return request<LinkPreviewDTO>("/messages/link-preview", {
       auth: true,
       query: { message_id },
+    });
+  },
+
+  resolveExternalMedia(text: string) {
+    return request<LinkPreviewDTO & { supported?: boolean }>("/messages/external-media-preview", {
+      method: "POST",
+      auth: true,
+      body: { text },
     });
   },
 

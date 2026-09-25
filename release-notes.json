@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.25.3",
+  "id": "2026.09.25.4",
   "publishedAt": "2026-09-25",
   "locales": {
     "zh-CN": {
-      "title": "足迹授权消息更轻量",
+      "title": "发言支持外部音乐与视频",
       "items": [
-        "在会话中公开足迹地图后，现在以安静的系统消息告知成员，不再发送足迹卡片"
+        "发布发言时可以解析并插入主流音乐平台与抖音链接，预览和播放体验与聊天保持一致"
       ]
     },
     "en": {
-      "title": "Lighter footprint sharing updates",
+      "title": "External music and video in statements",
       "items": [
-        "Sharing a footprint map with a chat now posts a quiet system message instead of an interactive card"
+        "Statements can now include parsed music and Douyin links with the same previews and playback experience as chat"
       ]
     }
   }

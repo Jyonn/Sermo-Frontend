@@ -9,6 +9,7 @@ import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ContentDatePicker, type DatePickerMode } from "../components/ContentDatePicker";
 import { FeedbackState } from "../components/FeedbackState";
+import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { FriendlyNeighborhoodActivity } from "../components/FriendlyNeighborhoodActivity";
 import { StarryNightActivity } from "../components/StarryNightActivity";
@@ -20,6 +21,7 @@ import { MediaMetadataPanel } from "../components/MediaMetadataPanel";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { NearbyLocationPicker } from "../components/NearbyLocationPicker";
 import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
+import { InputDialog } from "../components/InputDialog";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { TabPageHeader } from "../components/TabPageHeader";
@@ -49,7 +51,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -393,6 +395,11 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         {statement.can_pin || statement.can_delete || statement.can_mute ? <button aria-expanded={Boolean(menuPosition)} aria-label={t("common.more")} className="square-statement-menu" onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); const width = 164; setMenuPosition((current) => current ? null : { top: rect.bottom + 6, left: Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width)) }); }} ref={menuButtonRef} type="button"><span className="material-symbols-outlined">more_horiz</span></button> : null}
       </header>
       {statement.text ? <p className="square-statement-text"><InlineRichText emoticons={statement.inline_emoticons} text={statement.text} /></p> : null}
+      {statement.external_media && isSupportedExternalMedia(statement.external_media) ? (
+        <div className="square-external-media" onClick={(event) => event.stopPropagation()}>
+          <ExternalMediaPreview preview={statement.external_media} />
+        </div>
+      ) : null}
       {statement.chat_record?.items?.length ? (
         <div className="square-chat-record" onClick={(event) => event.stopPropagation()}>
           <ChatPreview
@@ -618,6 +625,10 @@ export default function SquarePage() {
   const [voiceDuration, setVoiceDuration] = useState(0);
   const [recording, setRecording] = useState(false);
   const [contentSheetOpen, setContentSheetOpen] = useState(false);
+  const [externalMediaDialogOpen, setExternalMediaDialogOpen] = useState(false);
+  const [externalMediaInput, setExternalMediaInput] = useState("");
+  const [externalMediaResolving, setExternalMediaResolving] = useState(false);
+  const [externalMedia, setExternalMedia] = useState<LinkPreviewDTO | null>(null);
   const [statementLocation, setStatementLocation] = useState<SquareStatementDTO["location"]>(null);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [chatRecordDraft, setChatRecordDraft] = useState<SquareChatRecordDraft | null>(null);
@@ -693,6 +704,7 @@ export default function SquarePage() {
     setVoiceFile(null);
     setVoiceDuration(0);
     setVideo(null);
+    setExternalMedia(null);
     setAnonymousStatement(false);
     setText(routeState?.squareChatRecordDraft?.text?.trim() ?? "");
     setComposerOpen(true);
@@ -1196,8 +1208,8 @@ export default function SquarePage() {
   };
 
   const publishable = useMemo(
-    () => Boolean(text.trim() || photos.length || voiceFile || video || chatRecordDraft) && !publishing && text.length <= MAX_TEXT_LENGTH,
-    [chatRecordDraft, photos.length, publishing, text, video, voiceFile],
+    () => Boolean(text.trim() || photos.length || voiceFile || video || externalMedia || chatRecordDraft) && !publishing && text.length <= MAX_TEXT_LENGTH,
+    [chatRecordDraft, externalMedia, photos.length, publishing, text, video, voiceFile],
   );
 
   useEffect(() => {
@@ -1788,6 +1800,42 @@ export default function SquarePage() {
     else void sendComment();
   };
 
+  useEffect(() => {
+    if (!externalMediaDialogOpen || externalMediaInput) return;
+    void navigator.clipboard?.readText().then((clipboardText) => {
+      if (clipboardText.trim()) setExternalMediaInput(clipboardText.trim());
+    }).catch(() => undefined);
+  }, [externalMediaDialogOpen, externalMediaInput]);
+
+  const resolveExternalMedia = async () => {
+    const candidate = externalMediaInput.trim();
+    if (!candidate || externalMediaResolving) return;
+    setExternalMediaResolving(true);
+    try {
+      let preview = await api.resolveExternalMedia(candidate);
+      for (let attempt = 0; preview.status === "pending" && attempt < 11; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 1000));
+        preview = await api.resolveExternalMedia(candidate);
+      }
+      if (preview.status !== "ready" || !preview.supported || !isSupportedExternalMedia(preview)) {
+        showToast(t("square.externalMediaUnsupported"), "error");
+        return;
+      }
+      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+      setPhotos([]);
+      setVoiceFile(null);
+      setVoiceDuration(0);
+      setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
+      setExternalMedia(preview);
+      setExternalMediaDialogOpen(false);
+      setExternalMediaInput("");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("square.externalMediaUnsupported"), "error");
+    } finally {
+      setExternalMediaResolving(false);
+    }
+  };
+
   const choosePhotos = (files: FileList | null) => {
     if (!files) return;
     const available = MAX_PHOTOS - photos.length;
@@ -1800,6 +1848,7 @@ export default function SquarePage() {
     setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
     setVoiceFile(null);
     setVoiceDuration(0);
+    setExternalMedia(null);
     if (photoInputRef.current) photoInputRef.current.value = "";
   };
 
@@ -1819,6 +1868,7 @@ export default function SquarePage() {
       }
       setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
       setVoiceFile(null);
+      setExternalMedia(null);
       setVideo({ id: crypto.randomUUID(), file, preview, duration });
     };
     if (videoInputRef.current) videoInputRef.current.value = "";
@@ -1856,6 +1906,7 @@ export default function SquarePage() {
         const blob = new Blob(recorderChunksRef.current, { type: resolvedType });
         setPhotos((current) => { current.forEach((photo) => URL.revokeObjectURL(photo.preview)); return []; });
         setVideo((current) => { if (current) URL.revokeObjectURL(current.preview); return null; });
+        setExternalMedia(null);
         setVoiceFile(new File([blob], `statement-${Date.now()}.${audioFileExtension(resolvedType)}`, { type: resolvedType }));
         setVoiceDuration(duration);
         setRecording(false);
@@ -1936,7 +1987,7 @@ export default function SquarePage() {
         });
         media.push({ kind: "video", key: upload.key, mime_type: video.file.type, duration_seconds: video.duration });
       }
-      const statement = await api.createSquareStatement({ text: text.trim(), visibility: anonymousStatement ? "public" : visibility, media, location: statementLocation, pin: pinOnPublish ? 1 : 0, anonymous: anonymousStatement ? 1 : 0 });
+      const statement = await api.createSquareStatement({ text: text.trim(), visibility: anonymousStatement ? "public" : visibility, media, external_media_url: externalMedia?.url ?? null, location: statementLocation, pin: pinOnPublish ? 1 : 0, anonymous: anonymousStatement ? 1 : 0 });
       if (hasFeedFilters) clearFeedSearch();
       else setStatements((current) => [statement, ...current]);
       if (pinOnPublish) setPinnedStatement(statement);
@@ -1945,6 +1996,7 @@ export default function SquarePage() {
       setPhotos([]);
       setVoiceFile(null);
       setVoiceDuration(0);
+      setExternalMedia(null);
       setVisibility("public");
       setAnonymousStatement(false);
       setStatementLocation(null);
@@ -2250,6 +2302,9 @@ export default function SquarePage() {
   const estimateStatementHeight = (statement: SquareStatementDTO) => {
     const media = statement.media ?? [];
     if (statement.chat_record) return 380;
+    if (statement.external_media?.provider_data && "provider" in statement.external_media.provider_data) {
+      return statement.external_media.provider_data.provider === "douyin_video" ? 450 : 310;
+    }
     if (media.some((item) => item.kind === "video")) return 430;
     if (media.length > 1) return 420;
     if (media.length === 1) return 390;
@@ -2589,10 +2644,11 @@ export default function SquarePage() {
             {photos.length ? <div className="square-composer-photos">{photos.map((photo) => <button key={photo.id} onClick={() => removePhoto(photo.id)} type="button"><img alt="" src={photo.preview} /><span className="material-symbols-outlined">close</span></button>)}</div> : null}
             {video ? <div className="square-composer-video"><video muted playsInline src={video.preview} /><button onClick={() => { URL.revokeObjectURL(video.preview); setVideo(null); }} type="button"><span className="material-symbols-outlined">close</span></button><span>{video.duration}s</span></div> : null}
             {voiceFile ? <div className="square-composer-voice"><span className="material-symbols-outlined">graphic_eq</span><div><strong>{t("square.voiceReady")}</strong>{voicePreview ? <audio controls preload="metadata" src={voicePreview} /> : null}</div><span>{voiceDuration}s</span><button onClick={() => { setVoiceFile(null); setVoiceDuration(0); }} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
+            {externalMedia ? <div className="square-composer-external-media"><ExternalMediaPreview preview={externalMedia} /><button aria-label={t("common.close")} onClick={() => setExternalMedia(null)} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
             {statementLocation ? <button className="square-compose-location-pill is-active" onClick={() => setStatementLocation(null)} type="button"><span className="material-symbols-outlined">location_on</span><span>{statementLocation.address || t("square.locationAddedShort")}</span><span className="material-symbols-outlined">close</span></button> : null}
             {publishing ? <div className="square-publish-progress"><i style={{ width: `${Math.round(uploadProgress * 100)}%` }} /></div> : null}
             <div className="square-compose-content-actions">
-              {!chatRecordDraft ? <button onClick={() => setContentSheetOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{photos.length ? t("square.photosAdded", { count: photos.length }) : voiceFile ? t("square.voiceReady") : video ? t("square.videoReady") : t("square.addMedia")}</span></button> : null}
+              {!chatRecordDraft ? <button onClick={() => setContentSheetOpen(true)} type="button"><span className="material-symbols-outlined">add_circle</span><span>{photos.length ? t("square.photosAdded", { count: photos.length }) : voiceFile ? t("square.voiceReady") : video ? t("square.videoReady") : externalMedia ? t("square.externalMediaReady") : t("square.addMedia")}</span></button> : null}
               {!statementLocation ? <button onClick={locateStatement} type="button"><span className="material-symbols-outlined">location_on</span><span>{t("square.location")}</span></button> : null}
             </div>
             <div className="square-compose-settings">
@@ -2614,7 +2670,21 @@ export default function SquarePage() {
         <button disabled={publishing || photos.length >= MAX_PHOTOS} onClick={() => { setContentSheetOpen(false); photoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">image</span><span><strong>{t("square.photo")}</strong><small>{t("square.photoMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
         <button disabled={publishing || !canSendVoice} onClick={() => { setContentSheetOpen(false); setVoiceSheetOpen(true); }} type="button"><span className="material-symbols-outlined">mic</span><span><strong>{t("square.voice")}</strong><small>{canSendVoice ? t("square.voiceMediaHint") : t("square.voiceUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
         <button disabled={publishing || !canSendVideo} onClick={() => { setContentSheetOpen(false); videoInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">videocam</span><span><strong>{t("square.video")}</strong><small>{canSendVideo ? t("square.videoMediaHint") : t("square.videoUnlock")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
+        <button disabled={publishing} onClick={() => { setContentSheetOpen(false); setExternalMediaDialogOpen(true); }} type="button"><span className="material-symbols-outlined">link</span><span><strong>{t("square.externalMedia")}</strong><small>{t("square.externalMediaHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
       </BottomSheet>
+      <InputDialog
+        busy={externalMediaResolving}
+        confirmLabel={t("square.insertExternalMedia")}
+        description={t("square.externalMediaDescription")}
+        maxLength={2048}
+        onChange={setExternalMediaInput}
+        onClose={() => { if (!externalMediaResolving) { setExternalMediaDialogOpen(false); setExternalMediaInput(""); } }}
+        onConfirm={() => void resolveExternalMedia()}
+        open={externalMediaDialogOpen}
+        placeholder={t("square.externalMediaPlaceholder")}
+        title={t("square.externalMedia")}
+        value={externalMediaInput}
+      />
       <BottomSheet bodyClassName="square-choice-sheet" onClose={() => setVisibilitySheetOpen(false)} open={visibilitySheetOpen} title={t("square.visibility")}>
         {(["public", "friends"] as const).map((value) => <button className={visibility === value ? "is-selected" : ""} key={value} onClick={() => { setVisibility(value); setVisibilitySheetOpen(false); }} type="button"><span className="material-symbols-outlined">{value === "public" ? "public" : "group"}</span><div><strong>{value === "public" ? t("square.public") : t("square.friendsOnly")}</strong><small>{value === "public" ? t("square.publicHint") : t("square.friendsHint")}</small></div><span className="material-symbols-outlined">check</span></button>)}
       </BottomSheet>

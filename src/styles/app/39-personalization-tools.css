@@ -2381,6 +2381,9 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-content-sheet > button > .material-symbols-outlined:last-child { color: var(--text-muted); font-size: 20px; }
 .square-content-sheet strong, .square-content-sheet small { display: block; }
 .square-content-sheet small { margin-top: 3px; color: var(--text-muted); font-size: 11px; }
+.square-external-media,
+.square-composer-external-media { position: relative; width: min(100%, 430px); margin: 13px 0 18px; }
+.square-composer-external-media > button { position: absolute; z-index: 3; top: 7px; right: 7px; display: grid; width: 30px; height: 30px; place-items: center; margin: 0; padding: 0; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: rgba(17,25,22,.72); color: #fff; font-size: 18px; backdrop-filter: blur(10px); }
 
 .square-composer-photos,
 .square-statement-images { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 12px; overflow: hidden; border-radius: 14px; }
