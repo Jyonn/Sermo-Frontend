@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.25.2",
+  "id": "2026.09.25.3",
   "publishedAt": "2026-09-25",
   "locales": {
     "zh-CN": {
-      "title": "音乐播放器视觉优化",
+      "title": "足迹授权消息更轻量",
       "items": [
-        "桌面音乐播放器固定在视口内，并根据音乐平台显示对应主题色和更清晰的外部跳转按钮"
+        "在会话中公开足迹地图后，现在以安静的系统消息告知成员，不再发送足迹卡片"
       ]
     },
     "en": {
-      "title": "Refined music player visuals",
+      "title": "Lighter footprint sharing updates",
       "items": [
-        "The desktop music player now stays within the viewport and uses provider-specific colors with a clearer external link button"
+        "Sharing a footprint map with a chat now posts a quiet system message instead of an interactive card"
       ]
     }
   }

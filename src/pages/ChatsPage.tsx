@@ -6251,11 +6251,6 @@ function LiveChatsPage({
           if (existing.some((message) => message.id === delivered.id)) return current;
           return { ...current, [selectedChat.id]: sortMessages([...existing, delivered]) };
         });
-        setChats((current) => sortChats(current.map((chat) => (
-          chat.id === selectedChat.id
-            ? updateChatSummary(chat, t("travelMap.action"), delivered.createdAt)
-            : chat
-        ))));
         stickToBottomRef.current = true;
         triggerMessageEntrance(String(delivered.id));
       }

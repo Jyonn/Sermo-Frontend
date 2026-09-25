@@ -40,8 +40,12 @@ export function mapChatMessageDTO(
   currentUserId: number,
   formatTimestamp: (value: number) => string = () => "",
 ): ChatMessage {
-  const kind = message.payload?.kind ?? messageKindFromType(message.type);
-  const text = message.payload?.text || message.content;
+  const payloadKind = message.payload?.kind ?? messageKindFromType(message.type);
+  const legacyChatGrant = payloadKind === "map_access" && message.payload?.chat_grant === true;
+  const kind = legacyChatGrant ? "system" : payloadKind;
+  const text = legacyChatGrant
+    ? message.payload?.text || message.user.name
+    : message.payload?.text || message.content;
   return {
     id: message.message_id,
     clientId: message.client_message_id || `server:${message.message_id}`,
