@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.25.4",
+  "id": "2026.09.25.5",
   "publishedAt": "2026-09-25",
   "locales": {
     "zh-CN": {
-      "title": "发言支持外部音乐与视频",
+      "title": "抖音视频预览显示正常",
       "items": [
-        "发布发言时可以解析并插入主流音乐平台与抖音链接，预览和播放体验与聊天保持一致"
+        "修复发布发言时抖音视频卡片被压缩的问题，封面、标题和播放入口恢复完整展示"
       ]
     },
     "en": {
-      "title": "External music and video in statements",
+      "title": "Douyin video previews display correctly",
       "items": [
-        "Statements can now include parsed music and Douyin links with the same previews and playback experience as chat"
+        "Fixed compressed Douyin cards in the statement composer so covers, titles, and playback controls display correctly"
       ]
     }
   }
