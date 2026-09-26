@@ -1761,7 +1761,7 @@ export function StickerImage({ alt = "", className = "", height, src, width }: {
   return <img alt={alt} className={className} draggable={false} height={height} loading="lazy" onError={() => setFailed(true)} src={src} width={width} />;
 }
 
-const ExpandForwardBundlesContext = createContext(true);
+const ForwardBundlePreviewDepthContext = createContext(2);
 
 function openForwardBundle(payload?: ChatMessagePayloadDTO | null) {
   if (payload) window.dispatchEvent(new CustomEvent("sermo:forward-bundle", { detail: payload }));
@@ -1788,10 +1788,11 @@ function ForwardBundleCard({ groupClassName, message }: { groupClassName: string
   );
 }
 
-function ForwardBundleInlinePreview({ message, onOpenImage, onOpenVideo }: {
+function ForwardBundleInlinePreview({ message, onOpenImage, onOpenVideo, previewDepth }: {
   message: ChatMessage;
   onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined;
   onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined;
+  previewDepth: number;
 }) {
   const items = message.payload?.items ?? [];
   const open = () => openForwardBundle(message.payload);
@@ -1818,9 +1819,9 @@ function ForwardBundleInlinePreview({ message, onOpenImage, onOpenVideo }: {
         tabIndex={0}
       >
         <ChatPreview
-          bare
           className="message-forward-bundle-inline-scroll"
           firstPersonUserId={message.payload?.first_person_user_id}
+          forwardBundlePreviewDepth={Math.max(0, previewDepth - 1)}
           messages={forwardBundleItemsAsMessages(items)}
           onOpenImage={onOpenImage}
           onOpenVideo={onOpenVideo}
@@ -1842,7 +1843,7 @@ function renderMessageContent(
   onOpenImage: ((uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void) | undefined,
   onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined,
   groupClassName: string,
-  expandForwardBundles: boolean,
+  forwardBundlePreviewDepth: number,
 ) {
   if (message.kind === "sticker") {
     if (!message.payload?.uri || message.payload.unavailable) {
@@ -2012,8 +2013,8 @@ function renderMessageContent(
   }
 
   if (message.kind === "forward_bundle") {
-    return expandForwardBundles
-      ? <ForwardBundleInlinePreview message={message} onOpenImage={onOpenImage} onOpenVideo={onOpenVideo} />
+    return forwardBundlePreviewDepth > 0
+      ? <ForwardBundleInlinePreview message={message} onOpenImage={onOpenImage} onOpenVideo={onOpenVideo} previewDepth={forwardBundlePreviewDepth} />
       : <ForwardBundleCard groupClassName={groupClassName} message={message} />;
   }
 
@@ -2093,7 +2094,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   selected,
   selectionMode,
 }: MessageBubbleRowProps) {
-  const expandForwardBundles = useContext(ExpandForwardBundlesContext);
+  const forwardBundlePreviewDepth = useContext(ForwardBundlePreviewDepthContext);
   const showRetry = from === "self" && message.status === "failed" && ["text", "audio"].includes(message.kind);
   const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
@@ -2224,7 +2225,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
-          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, expandForwardBundles)}
+          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth)}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}
@@ -8910,7 +8911,7 @@ function LiveChatsPage({
           backgroundTheme={currentUserMe?.chat_background_theme ?? "default"}
           backgroundUri={paintedChatBackgroundUri}
           className="forward-bundle-chat-preview"
-          expandForwardBundles
+          forwardBundlePreviewDepth={1}
           firstPersonUserId={forwardBundlePreview?.first_person_user_id}
           messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
           onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
@@ -10423,7 +10424,7 @@ export function ChatPreview({
   backgroundUri,
   bare = false,
   className = "",
-  expandForwardBundles = false,
+  forwardBundlePreviewDepth = 0,
   firstPersonUserId,
   initialScrollToEnd = false,
   wheelScrollMode = "internal",
@@ -10442,7 +10443,7 @@ export function ChatPreview({
   backgroundUri?: string | null;
   bare?: boolean;
   className?: string;
-  expandForwardBundles?: boolean;
+  forwardBundlePreviewDepth?: number;
   firstPersonUserId?: number | null;
   initialScrollToEnd?: boolean;
   wheelScrollMode?: "internal" | "parent";
@@ -10561,7 +10562,7 @@ export function ChatPreview({
     </div>
   );
 
-  if (bare) return <ExpandForwardBundlesContext.Provider value={expandForwardBundles}>{messageList}</ExpandForwardBundlesContext.Provider>;
+  if (bare) return <ForwardBundlePreviewDepthContext.Provider value={forwardBundlePreviewDepth}>{messageList}</ForwardBundlePreviewDepthContext.Provider>;
 
   return (
     <section
@@ -10570,7 +10571,7 @@ export function ChatPreview({
     >
       <div className={`chat-detail-scene chat-background-${backgroundTheme}`} style={backgroundStyle}>
         <FriendenLivingWallpaper theme={backgroundTheme} />
-        <ExpandForwardBundlesContext.Provider value={expandForwardBundles}>{messageList}</ExpandForwardBundlesContext.Provider>
+        <ForwardBundlePreviewDepthContext.Provider value={forwardBundlePreviewDepth}>{messageList}</ForwardBundlePreviewDepthContext.Provider>
       </div>
     </section>
   );

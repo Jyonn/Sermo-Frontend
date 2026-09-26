@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.26.5",
+  "id": "2026.09.26.6",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "合并聊天记录可直接预览",
+      "title": "合并聊天记录预览更直观",
       "items": [
-        "聊天中的一级合并记录改为可滚动的内嵌聊天预览",
-        "进入完整预览后，可继续直接查看其中包含的合并记录",
-        "更深层的合并内容仍以卡片收纳，保持消息流清晰易用"
+        "合并记录改为消息宽度内的聊天视窗，保留发送者头像并支持滚动",
+        "聊天中的内部合并记录可以继续预览一层，更深内容恢复为简洁卡片",
+        "广场聊天记录中的合并内容保持卡片展示，避免预览区域过窄"
       ]
     },
     "en": {
-      "title": "Preview merged chat records inline",
+      "title": "Clearer merged chat previews",
       "items": [
-        "Top-level merged records now appear as scrollable chat previews inside conversations",
-        "Opening the full preview also reveals merged records contained within it",
-        "Deeper nested records stay compact as cards to keep the message flow easy to follow"
+        "Merged records now appear as scrollable chat viewports within normal message width while retaining the sender avatar",
+        "Nested merged records can expand one more level in Chat, with deeper content returning to compact cards",
+        "Merged content inside Square chat previews stays card-based to avoid cramped nested previews"
       ]
     }
   }

@@ -523,3 +523,17 @@
     radial-gradient(circle at right center, transparent 0 2.5px, #000 3px) right / 8px 11px repeat-y;
 }
 
+/* Forwarded previews are message-sized chat viewports, not themed sender bubbles. */
+.message-group .message-bubble.is-forward-bundle {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  clip-path: none;
+  -webkit-mask: none;
+  mask: none;
+}
+.message-group .message-bubble.is-forward-bundle::before,
+.message-group .message-bubble.is-forward-bundle::after { display: none; }
