@@ -1,21 +1,17 @@
 {
-  "id": "2026.09.26.9",
-  "publishedAt": "2026-09-26",
+  "id": "2026.09.27.1",
+  "publishedAt": "2026-09-27",
   "locales": {
     "zh-CN": {
-      "title": "加宽合并聊天预览",
+      "title": "修复桌面广场顶部遮挡",
       "items": [
-        "合并聊天视窗加宽至普通文字消息的可见最大宽度，内部内容更易阅读",
-        "手机端内嵌预览会使用当前生效的聊天背景",
-        "完整预览及其内部嵌套记录保持一致的消息方向和背景"
+        "桌面广场滚动时，顶部标题与筛选栏会完整遮挡经过的发言内容，亮暗主题均适用"
       ]
     },
     "en": {
-      "title": "Wider merged chat previews",
+      "title": "Fixed desktop Square header overlap",
       "items": [
-        "Merged chat viewports now match the visible maximum width of text messages for easier reading",
-        "Inline previews on mobile now use the active chat background",
-        "Full previews and their nested records keep message direction and backgrounds consistent"
+        "The desktop Square header now fully covers scrolling posts in both light and dark themes"
       ]
     }
   }
