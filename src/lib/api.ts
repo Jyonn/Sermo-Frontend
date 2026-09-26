@@ -1274,6 +1274,14 @@ export const api = {
     });
   },
 
+  refreshExternalMedia(preview_id: number, force = false) {
+    return request<LinkPreviewDTO & { supported?: boolean; refreshed?: boolean }>("/messages/external-media-preview/refresh", {
+      method: "POST",
+      auth: true,
+      body: { preview_id, force },
+    });
+  },
+
   getMessageAudioTranscript(message_id: number, signal?: AbortSignal) {
     return request<AudioTranscriptDTO>("/messages/audio-transcript", {
       auth: true,

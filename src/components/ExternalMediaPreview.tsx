@@ -9,7 +9,7 @@ export function isSupportedExternalMedia(preview?: LinkPreviewDTO | null) {
 export function ExternalMediaPreview({ preview }: { preview: LinkPreviewDTO }) {
   if (isMusicData(preview.provider_data)) return <MusicPreview music={preview.provider_data} />;
   if (isDouyinVideoData(preview.provider_data)) {
-    return <DouyinVideoPreview video={preview.provider_data} imageUrl={preview.image_url} />;
+    return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} />;
   }
   return null;
 }

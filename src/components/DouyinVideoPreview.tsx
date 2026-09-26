@@ -4,6 +4,7 @@ import { useI18n } from "../lib/language";
 import type { DouyinVideoDataDTO } from "../types";
 import { ImmersiveVideo } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
+import { api } from "../lib/api";
 
 export function isDouyinVideoData(value: unknown): value is DouyinVideoDataDTO {
   if (!value || typeof value !== "object") return false;
@@ -37,40 +38,79 @@ function DouyinSource({ video }: { video: DouyinVideoDataDTO }) {
   </a>;
 }
 
-function DouyinDrawerPlayer({ imageUrl, onClose, video }: { imageUrl?: string; onClose: () => void; video: DouyinVideoDataDTO }) {
+function DouyinDrawerPlayer({ imageUrl, onClose, onPlaybackError, playbackKey, video }: { imageUrl?: string; onClose: () => void; onPlaybackError: () => void; playbackKey: number; video: DouyinVideoDataDTO }) {
   const { t } = useI18n();
-  const [playbackFailed, setPlaybackFailed] = useState(false);
 
   return <div className="douyin-player-shell">
     <ImmersiveVideo
+      key={playbackKey}
       context={<DouyinSource video={video} />}
       loop
       onClose={onClose}
-      onError={() => setPlaybackFailed(true)}
+      onError={onPlaybackError}
       poster={imageUrl}
       src={video.video_url || ""}
     />
-    {playbackFailed ? <div className="douyin-player-error">
-      <span className="material-symbols-outlined" aria-hidden="true" style={{ color: "#ff5676", fontSize: 38 }}>video_file</span>
-      <strong>{t("douyin.playbackUnavailable")}</strong>
-      <a href={video.canonical_url} rel="noreferrer" target="_blank">{t("douyin.openOriginal")}</a>
-    </div> : null}
   </div>;
 }
 
-export function DouyinVideoPreview({ video, imageUrl }: { video: DouyinVideoDataDTO; imageUrl?: string }) {
+export function DouyinVideoPreview({ previewId, video, imageUrl }: { previewId?: number; video: DouyinVideoDataDTO; imageUrl?: string }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const playable = Boolean(video.video_url);
+  const [currentVideo, setCurrentVideo] = useState(video);
+  const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
+  const [playbackFailed, setPlaybackFailed] = useState(false);
+  const [playbackKey, setPlaybackKey] = useState(0);
+  const [retrying, setRetrying] = useState(false);
+  const [retryAttempted, setRetryAttempted] = useState(false);
+  const playable = Boolean(currentVideo.video_url);
+
+  const refresh = async (force: boolean) => {
+    if (!previewId) return null;
+    const refreshed = await api.refreshExternalMedia(previewId, force);
+    if (!isDouyinVideoData(refreshed.provider_data) || !refreshed.provider_data.video_url) return null;
+    setCurrentVideo(refreshed.provider_data);
+    setCurrentImageUrl(refreshed.image_url || imageUrl);
+    return { video: refreshed.provider_data, refreshed: Boolean(refreshed.refreshed) };
+  };
+
+  const openPlayer = async () => {
+    let refreshedVideo: Awaited<ReturnType<typeof refresh>> = null;
+    try { refreshedVideo = await refresh(false); } catch { /* The cached URL may still be playable. */ }
+    setPlaybackFailed(false);
+    setRetryAttempted(false);
+    if (refreshedVideo?.video.video_url || currentVideo.video_url) setOpen(true);
+    else window.open(currentVideo.canonical_url, "_blank", "noopener,noreferrer");
+  };
+
+  const handlePlaybackError = async () => {
+    if (retrying || retryAttempted || playbackFailed) return;
+    setRetryAttempted(true);
+    setRetrying(true);
+    try {
+      const result = await refresh(true);
+      if (result?.refreshed && result.video.video_url) {
+        setPlaybackKey((value) => value + 1);
+        return;
+      }
+    } catch { /* Show the final fallback below. */ }
+    finally { setRetrying(false); }
+    setPlaybackFailed(true);
+  };
 
   return <>
-    <button className="douyin-video-card" type="button" onClick={(event) => { event.stopPropagation(); if (playable) setOpen(true); else window.open(video.canonical_url, "_blank", "noopener,noreferrer"); }}>
-      {imageUrl ? <img className="douyin-video-poster" src={imageUrl} alt="" loading="lazy" /> : <span className="douyin-video-poster-fallback" aria-hidden="true" />}
+    <button className="douyin-video-card" type="button" onClick={(event) => { event.stopPropagation(); void openPlayer(); }}>
+      {currentImageUrl ? <img className="douyin-video-poster" src={currentImageUrl} alt="" loading="lazy" /> : <span className="douyin-video-poster-fallback" aria-hidden="true" />}
       <span className="douyin-video-play material-symbols-outlined" aria-hidden="true">{playable ? "play_arrow" : "open_in_new"}</span>
-      <span className="douyin-video-copy"><small>{t("douyin.source")}</small><strong>{video.title || t("douyin.video")}</strong></span>
+      <span className="douyin-video-copy"><small>{t("douyin.source")}</small><strong>{currentVideo.title || t("douyin.video")}</strong></span>
     </button>
-    <SideDrawer floatingBack={false} fullscreen headerless historyKey={`douyin-video-${video.video_id}`} open={open} onClose={() => setOpen(false)} title={video.title || t("douyin.video")}>
-      {open && video.video_url ? <DouyinDrawerPlayer imageUrl={imageUrl} onClose={() => setOpen(false)} video={video} /> : null}
+    <SideDrawer floatingBack={false} fullscreen headerless historyKey={`douyin-video-${currentVideo.video_id}`} open={open} onClose={() => setOpen(false)} title={currentVideo.title || t("douyin.video")}>
+      {open && currentVideo.video_url ? <DouyinDrawerPlayer imageUrl={currentImageUrl} onClose={() => setOpen(false)} onPlaybackError={() => void handlePlaybackError()} playbackKey={playbackKey} video={currentVideo} /> : null}
+      {playbackFailed ? <div className="douyin-player-error">
+        <span className="material-symbols-outlined" aria-hidden="true" style={{ color: "#ff5676", fontSize: 38 }}>video_file</span>
+        <strong>{t("douyin.playbackUnavailable")}</strong>
+        <a href={currentVideo.canonical_url} rel="noreferrer" target="_blank">{t("douyin.openOriginal")}</a>
+      </div> : null}
     </SideDrawer>
   </>;
 }

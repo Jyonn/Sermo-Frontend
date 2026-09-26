@@ -961,6 +961,7 @@ export interface ActivityCampaignDTO {
 }
 
 export interface LinkPreviewDTO {
+  preview_id?: number;
   url?: string;
   status: LinkPreviewStatus;
   title?: string;

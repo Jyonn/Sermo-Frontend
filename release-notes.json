@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.25.5",
-  "publishedAt": "2026-09-25",
+  "id": "2026.09.26.1",
+  "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频预览显示正常",
+      "title": "抖音视频播放更稳定",
       "items": [
-        "修复发布发言时抖音视频卡片被压缩的问题，封面、标题和播放入口恢复完整展示"
+        "广场和聊天中的抖音视频会在播放前更新地址，失效时还会自动重试一次"
       ]
     },
     "en": {
-      "title": "Douyin video previews display correctly",
+      "title": "More reliable Douyin playback",
       "items": [
-        "Fixed compressed Douyin cards in the statement composer so covers, titles, and playback controls display correctly"
+        "Douyin videos in Square and chats now refresh their playback links and retry once when a link expires"
       ]
     }
   }
