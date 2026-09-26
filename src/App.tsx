@@ -34,6 +34,7 @@ const SpaceAdminDashboardPage = lazy(() => import("./pages/SpaceAdminDashboardPa
 const SpaceUsersPage = lazy(routeResources["space-users"]);
 const SquarePage = lazy(routeResources.square);
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
+const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -96,6 +97,10 @@ export default function App() {
         <Route
           path="/design/square-composer"
           element={<Suspense fallback={<FeedbackState title="Loading design study" tone="loading" />}><SquareComposerLabPage /></Suspense>}
+        />
+        <Route
+          path="/design/forward-bundle-preview"
+          element={<Suspense fallback={<FeedbackState title="Loading design study" tone="loading" />}><ForwardBundlePreviewLabPage /></Suspense>}
         />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route
