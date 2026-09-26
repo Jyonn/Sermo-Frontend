@@ -1358,7 +1358,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   padding: 18px;
   border: 1px solid rgba(226, 232, 240, 0.96);
   border-radius: 20px;
-  background: rgba(255, 253, 248, 0.98);
+  background: var(--bg-canvas);
   box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
 }
 
@@ -3656,11 +3656,6 @@ html[data-theme="dark"] :is(
   .empty-state,
   .chat-detail-settings-list,
   .message-context-menu,
-  .notification-editor-dialog,
-  .async-dialog,
-  .input-dialog,
-  .confirm-dialog,
-  .request-status-modal,
   .avatar-preset-dialog,
   .admin-auth-card,
   .admin-stat-card,

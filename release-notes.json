@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.26.2",
+  "id": "2026.09.26.3",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "可以主动检查更新了",
+      "title": "模态框背景更加统一",
       "items": [
-        "菜单新增检查更新入口，可同时查看本站和镜像站状态，并在网络异常时提供重试提示"
+        "检查更新、确认、输入等模态框统一使用与 Drawer 相同的默认实色背景"
       ]
     },
     "en": {
-      "title": "Check for updates anytime",
+      "title": "Consistent modal backgrounds",
       "items": [
-        "The Menu now checks both the primary and mirror sites for updates, with clear retry guidance when a network is unavailable"
+        "Update, confirmation, input, and other modals now use the same solid default surface as drawers"
       ]
     }
   }

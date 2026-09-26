@@ -2607,9 +2607,7 @@ html[data-theme="dark"] .verification-banner-action {
   border: 1px solid color-mix(in srgb, #12aee8 20%, var(--line-soft));
   border-radius: 28px;
   color: var(--text-primary);
-  background:
-    radial-gradient(circle at 92% -6%, color-mix(in srgb, #8cddf6 30%, transparent), transparent 42%),
-    color-mix(in srgb, var(--surface) 96%, #eefbff);
+  background: var(--bg-canvas);
   box-shadow: 0 28px 80px rgba(14, 55, 70, .22);
 }
 
