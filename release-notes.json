@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.26.4",
+  "id": "2026.09.26.5",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "打开更快，切换更稳",
+      "title": "合并聊天记录可直接预览",
       "items": [
-        "聊天、广场、菜单等页面改为按需加载，并在切换前智能预载",
-        "语言包仅在需要时下载，切换过程保留原界面并提供加载反馈",
-        "弱网下页面资源加载失败时可以安全重试"
+        "聊天中的一级合并记录改为可滚动的内嵌聊天预览",
+        "进入完整预览后，可继续直接查看其中包含的合并记录",
+        "更深层的合并内容仍以卡片收纳，保持消息流清晰易用"
       ]
     },
     "en": {
-      "title": "Faster starts and smoother switching",
+      "title": "Preview merged chat records inline",
       "items": [
-        "Chat, Square, Menu, and other pages now load on demand with smart preloading",
-        "Language packs download only when needed while the current interface stays visible",
-        "Page resources can now be retried safely when a weak connection interrupts loading"
+        "Top-level merged records now appear as scrollable chat previews inside conversations",
+        "Opening the full preview also reveals merged records contained within it",
+        "Deeper nested records stay compact as cards to keep the message flow easy to follow"
       ]
     }
   }
