@@ -8419,8 +8419,8 @@ html[data-theme="dark"] .square-chat-record {
 }
 
 .message-bubble.is-forward-bundle {
-  width: var(--message-bubble-max-width);
-  max-width: var(--message-bubble-max-width);
+  width: min(calc(68vw + 26px), 346px);
+  max-width: calc(100% + 26px);
   flex: 0 0 auto;
   box-sizing: border-box;
 }

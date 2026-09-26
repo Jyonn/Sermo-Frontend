@@ -1,19 +1,19 @@
 {
-  "id": "2026.09.26.8",
+  "id": "2026.09.26.9",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "修复嵌套聊天消息对齐",
+      "title": "加宽合并聊天预览",
       "items": [
-        "修复自己发送的合并记录中，他方消息被外层布局错误推向右侧的问题",
+        "合并聊天视窗加宽至普通文字消息的可见最大宽度，内部内容更易阅读",
         "手机端内嵌预览会使用当前生效的聊天背景",
         "完整预览及其内部嵌套记录保持一致的消息方向和背景"
       ]
     },
     "en": {
-      "title": "Fixed nested chat alignment",
+      "title": "Wider merged chat previews",
       "items": [
-        "Fixed incoming messages inside outgoing merged records being incorrectly aligned to the right by the outer layout",
+        "Merged chat viewports now match the visible maximum width of text messages for easier reading",
         "Inline previews on mobile now use the active chat background",
         "Full previews and their nested records keep message direction and backgrounds consistent"
       ]
