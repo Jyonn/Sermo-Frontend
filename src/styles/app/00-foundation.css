@@ -5242,7 +5242,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   min-width: 0;
 }
 
-.message-group.self .message-bubbles {
+.message-group.self > .message-bubbles {
   align-items: flex-end;
 }
 
@@ -5885,12 +5885,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   max-width: 100%;
 }
 
-.message-group:has(.message-location-card) .message-bubbles {
+.message-group:has(> .message-bubbles .message-location-card) > .message-bubbles {
   flex: 1 1 auto;
   max-width: 100%;
 }
 
-.message-group.other:has(.message-location-card) .message-bubbles {
+.message-group.other:has(> .message-bubbles .message-location-card) > .message-bubbles {
   max-width: calc(100% - 38px);
 }
 
