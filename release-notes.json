@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.26.1",
+  "id": "2026.09.26.2",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "抖音视频播放更稳定",
+      "title": "可以主动检查更新了",
       "items": [
-        "广场和聊天中的抖音视频会在播放前更新地址，失效时还会自动重试一次"
+        "菜单新增检查更新入口，可同时查看本站和镜像站状态，并在网络异常时提供重试提示"
       ]
     },
     "en": {
-      "title": "More reliable Douyin playback",
+      "title": "Check for updates anytime",
       "items": [
-        "Douyin videos in Square and chats now refresh their playback links and retry once when a link expires"
+        "The Menu now checks both the primary and mirror sites for updates, with clear retry guidance when a network is unavailable"
       ]
     }
   }

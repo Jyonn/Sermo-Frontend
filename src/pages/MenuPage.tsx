@@ -38,6 +38,7 @@ import { ForwardArrowIcon } from "../components/ForwardArrowIcon";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
+import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
 import { isStandalonePwa } from "../lib/pwaInstall";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
@@ -46,6 +47,7 @@ import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPre
 import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
+import { checkForPwaUpdate, CURRENT_RELEASE, type ExplicitUpdateCheckResult } from "../lib/pwaUpdate";
 
 const MAX_NICKNAME_LENGTH = 8;
 const EMAIL_THRESHOLD_OPTIONS = [10, 20, 30, 60, 120, 180, 360, 720, 1440];
@@ -470,6 +472,9 @@ export default function MenuPage() {
   const [webPushState, setWebPushState] = useState<WebPushState>("checking");
   const [webPushSaving, setWebPushSaving] = useState(false);
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
+  const [updateCheckOpen, setUpdateCheckOpen] = useState(false);
+  const [updateChecking, setUpdateChecking] = useState(false);
+  const [updateCheckResult, setUpdateCheckResult] = useState<ExplicitUpdateCheckResult | null>(null);
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
@@ -657,6 +662,21 @@ export default function MenuPage() {
   const deviceFamily = useMemo(() => detectDeviceFamily(), []);
   const allInstantProviders = Object.keys(instantProviderMeta) as InstantNotificationProvider[];
   const standalonePwa = isStandalonePwa();
+
+  const runUpdateCheck = async () => {
+    if (updateChecking) return;
+    setUpdateChecking(true);
+    try {
+      setUpdateCheckResult(await checkForPwaUpdate());
+    } finally {
+      setUpdateChecking(false);
+    }
+  };
+
+  const openUpdateCheck = () => {
+    setUpdateCheckOpen(true);
+    void runUpdateCheck();
+  };
   const boundBindingChannels: BindingChannelKind[] = [
     ...(emailVerified ? ["email" as const] : []),
     ...(phoneVerified ? ["sms" as const] : []),
@@ -2180,6 +2200,30 @@ export default function MenuPage() {
           </section>
         ) : null}
 
+        <section className="list-section menu-update-section">
+          <div className="simple-list">
+            <button className="simple-row menu-link-row menu-update-row" onClick={openUpdateCheck} type="button">
+              <div className="row-main">
+                <strong>{t("update.check")}</strong>
+                <span>
+                  {updateChecking
+                    ? t("update.checking")
+                    : updateCheckResult?.updateAvailable
+                      ? t("update.available")
+                      : updateCheckResult && updateCheckResult.sources.every((source) => source.status === "error")
+                        ? t("update.unavailable")
+                        : updateCheckResult
+                          ? t("update.latest")
+                          : t("update.current", { version: CURRENT_RELEASE.id })}
+                </span>
+              </div>
+              <span className={`material-symbols-outlined${updateChecking ? " is-spinning" : ""}`}>
+                {updateChecking ? "progress_activity" : updateCheckResult?.updateAvailable ? "new_releases" : "system_update"}
+              </span>
+            </button>
+          </div>
+        </section>
+
         <section className="list-section">
           <div className="simple-list">
             <button className="simple-row menu-link-row danger-row menu-danger-row" onClick={() => setLeaveConfirmOpen(true)} type="button">
@@ -2202,6 +2246,13 @@ export default function MenuPage() {
         }}
         open={pwaInstallSheetOpen}
         spaceName={space?.name ?? t("space.current")}
+      />
+      <UpdateCheckDialog
+        checking={updateChecking}
+        onCheck={() => void runUpdateCheck()}
+        onClose={() => setUpdateCheckOpen(false)}
+        open={updateCheckOpen}
+        result={updateCheckResult}
       />
       <CloudResourceDrawer onRouteOpen={() => setCloudResourcesOpen(true)} onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
       <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
