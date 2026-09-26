@@ -1,17 +1,21 @@
 {
-  "id": "2026.09.26.3",
+  "id": "2026.09.26.4",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "模态框背景更加统一",
+      "title": "打开更快，切换更稳",
       "items": [
-        "检查更新、确认、输入等模态框统一使用与 Drawer 相同的默认实色背景"
+        "聊天、广场、菜单等页面改为按需加载，并在切换前智能预载",
+        "语言包仅在需要时下载，切换过程保留原界面并提供加载反馈",
+        "弱网下页面资源加载失败时可以安全重试"
       ]
     },
     "en": {
-      "title": "Consistent modal backgrounds",
+      "title": "Faster starts and smoother switching",
       "items": [
-        "Update, confirmation, input, and other modals now use the same solid default surface as drawers"
+        "Chat, Square, Menu, and other pages now load on demand with smart preloading",
+        "Language packs download only when needed while the current interface stays visible",
+        "Page resources can now be retried safely when a weak connection interrupts loading"
       ]
     }
   }

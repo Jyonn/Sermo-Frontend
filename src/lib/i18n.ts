@@ -1,17 +1,21 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "../locales/en/translation.json";
-import es from "../locales/es/translation.json";
-import ja from "../locales/ja/translation.json";
-import ko from "../locales/ko/translation.json";
-import zhCN from "../locales/zh-CN/translation.json";
-import zhTW from "../locales/zh-TW/translation.json";
 
 export const SUPPORTED_LANGUAGE_CODES = ["en", "zh-CN", "zh-TW", "ja", "ko", "es"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGE_CODES)[number];
 export type TranslationKey = keyof typeof en;
 
 const SUPPORTED_LANGUAGES = new Set<SupportedLanguage>(SUPPORTED_LANGUAGE_CODES);
+type TranslationResource = Record<string, string>;
+const languageLoaders: Record<Exclude<SupportedLanguage, "en">, () => Promise<{ default: TranslationResource }>> = {
+  es: () => import("../locales/es/translation.json"),
+  ja: () => import("../locales/ja/translation.json"),
+  ko: () => import("../locales/ko/translation.json"),
+  "zh-CN": () => import("../locales/zh-CN/translation.json"),
+  "zh-TW": () => import("../locales/zh-TW/translation.json"),
+};
+const languageLoads = new Map<SupportedLanguage, Promise<void>>();
 
 export function isChineseLanguage(language: string) {
   return language === "zh-CN" || language === "zh-TW";
@@ -47,23 +51,49 @@ export function getBrowserJoinLanguage(): SupportedLanguage {
   return resolveJoinLanguage(navigator.language);
 }
 
-void i18n
+export const i18nReady = i18n
   .use(initReactI18next)
   .init({
     resources: {
       en: { translation: en },
-      es: { translation: es },
-      ja: { translation: ja },
-      ko: { translation: ko },
-      "zh-CN": { translation: zhCN },
-      "zh-TW": { translation: zhTW },
     },
-    lng: getBrowserJoinLanguage(),
+    lng: "en",
     fallbackLng: "en",
     supportedLngs: [...SUPPORTED_LANGUAGE_CODES],
     load: "currentOnly",
     interpolation: { escapeValue: false },
     returnNull: false,
   });
+
+export async function ensureLanguageLoaded(language: SupportedLanguage) {
+  await i18nReady;
+  if (i18n.hasResourceBundle(language, "translation")) return;
+  const existing = languageLoads.get(language);
+  if (existing) return existing;
+  if (language === "en") return;
+  const pending = languageLoaders[language]().then((module) => {
+    i18n.addResourceBundle(language, "translation", module.default, true, true);
+  }).catch((error) => {
+    languageLoads.delete(language);
+    throw error;
+  });
+  languageLoads.set(language, pending);
+  return pending;
+}
+
+export async function activateLanguage(language: SupportedLanguage) {
+  await ensureLanguageLoaded(language);
+  await i18n.changeLanguage(language);
+}
+
+export function preloadLanguage(language: SupportedLanguage) {
+  void ensureLanguageLoaded(language).catch(() => undefined);
+}
+
+export function preloadLanguageChoices() {
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  if (connection?.saveData) return;
+  SUPPORTED_LANGUAGE_CODES.forEach(preloadLanguage);
+}
 
 export { i18n };

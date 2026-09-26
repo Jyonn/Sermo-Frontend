@@ -10,6 +10,7 @@ import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
+import { preloadRouteForPath, preloadRouteResource } from "../lib/routeResources";
 
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", labelKey: "nav.chats" },
@@ -195,6 +196,26 @@ export function AppBottomNav() {
     };
   }, [pageActive, sessionAccessToken, sessionUserId]);
 
+  useEffect(() => {
+    if (!session || !features.ready) return;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (connection?.saveData) return;
+    const preload = () => {
+      if (features.chatEnabled) preloadRouteResource("chats");
+      if (features.squareEnabled) preloadRouteResource("square");
+    };
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (idleWindow.requestIdleCallback) {
+      const idleId = idleWindow.requestIdleCallback(preload, { timeout: 2200 });
+      return () => idleWindow.cancelIdleCallback?.(idleId);
+    }
+    const timer = globalThis.setTimeout(preload, 1200);
+    return () => globalThis.clearTimeout(timer);
+  }, [features.chatEnabled, features.ready, features.squareEnabled, session]);
+
   if (!session || !effectivePathname.startsWith("/app/")) return null;
   const isChatDetail = Boolean(
     matchPath("/app/chats/:chatId", effectivePathname)
@@ -244,6 +265,9 @@ export function AppBottomNav() {
             key={route.key}
             aria-label={t(route.labelKey as TranslationKey)}
             className={`nav-button ${current === route.key ? "active" : ""}`}
+            onFocus={() => preloadRouteForPath(route.href)}
+            onMouseEnter={() => preloadRouteForPath(route.href)}
+            onPointerDown={() => preloadRouteForPath(route.href)}
             title={desktopCollapsed ? t(route.labelKey as TranslationKey) : undefined}
             to={route.href}
           >

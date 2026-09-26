@@ -10,6 +10,7 @@ import { AdminAuthProvider } from "./lib/adminAuth";
 import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdentity";
 import { watchPwaUpdates } from "./lib/pwaUpdate";
 import { LanguageProvider } from "./lib/language";
+import { activateLanguage, getBrowserJoinLanguage } from "./lib/i18n";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
 import { getSpaceRouterBasename } from "./lib/spaceEntry";
 import { FeatureDiscoveryProvider } from "./lib/featureDiscovery";
@@ -82,7 +83,9 @@ window.addEventListener("wheel", (event) => {
   if (event.ctrlKey) event.preventDefault();
 }, { passive: false, signal: pageZoomController.signal });
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+async function renderApp() {
+  await activateLanguage(getBrowserJoinLanguage()).catch(() => activateLanguage("en"));
+  ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename={routerBasename}>
       <AdminAuthProvider>
@@ -96,7 +99,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </AdminAuthProvider>
     </BrowserRouter>
   </React.StrictMode>
-);
+  );
+}
+
+void renderApp();
 
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {

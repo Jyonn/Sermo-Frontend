@@ -8,6 +8,8 @@
   "common.retry": "重試",
   "common.save": "儲存",
   "common.loading": "載入中",
+  "common.resourceLoadFailed": "頁面資源載入失敗",
+  "common.resourceLoadFailedHint": "請檢查網路後重試，目前頁面資料不會遺失。",
   "common.processing": "處理中...",
   "common.operationFailed": "操作沒有完成",
   "common.closePanel": "關閉面板",

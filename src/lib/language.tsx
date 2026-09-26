@@ -5,6 +5,7 @@ import { api } from "./api";
 import { useAuth } from "./auth";
 import {
   getBrowserJoinLanguage,
+  activateLanguage,
   i18n,
   localeForLanguage,
   resolveJoinLanguage,
@@ -20,6 +21,7 @@ interface LanguageContextValue {
   preference: LanguagePreference;
   locale: string;
   saving: boolean;
+  loadingLanguage: SupportedLanguage | null;
   setPreference: (preference: LanguagePreference) => Promise<void>;
 }
 
@@ -51,12 +53,25 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     resolveJoinLanguage(session?.user.language ?? (readGuestLanguagePreference() === "system" ? systemLanguage : readGuestLanguagePreference()))
   );
   const [saving, setSaving] = useState(false);
+  const [loadingLanguage, setLoadingLanguage] = useState<SupportedLanguage | null>(null);
+
+  const applyLanguage = async (nextLanguage: SupportedLanguage) => {
+    setLoadingLanguage(nextLanguage);
+    try {
+      await activateLanguage(nextLanguage);
+      activeLanguage = nextLanguage;
+      document.documentElement.lang = nextLanguage;
+      setLanguage(nextLanguage);
+    } finally {
+      setLoadingLanguage(null);
+    }
+  };
 
   useEffect(() => {
     if (!session) {
       const guestPreference = readGuestLanguagePreference();
       setPreferenceState(guestPreference);
-      setLanguage(resolveJoinLanguage(guestPreference === "system" ? systemLanguage : guestPreference));
+      void applyLanguage(resolveJoinLanguage(guestPreference === "system" ? systemLanguage : guestPreference));
       return;
     }
 
@@ -65,61 +80,56 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       const nextPreference = user.language_preference ?? "system";
       setPreferenceState(nextPreference);
-      setLanguage(resolveJoinLanguage(user.language ?? systemLanguage));
+      void applyLanguage(resolveJoinLanguage(user.language ?? systemLanguage));
       patchSessionUser({
         language: user.language,
         language_preference: nextPreference,
       });
     }).catch(() => {
       if (cancelled) return;
-      setLanguage(resolveJoinLanguage(session.user.language ?? systemLanguage));
+      void applyLanguage(resolveJoinLanguage(session.user.language ?? systemLanguage));
     });
     return () => {
       cancelled = true;
     };
   }, [patchSessionUser, session?.accessToken, session?.user.user_id, systemLanguage]);
 
-  useEffect(() => {
-    activeLanguage = language;
-    document.documentElement.lang = language;
-    void i18n.changeLanguage(language);
-  }, [language]);
-
   const value = useMemo<LanguageContextValue>(() => ({
     language,
     preference,
     locale: localeForLanguage(language),
     saving,
+    loadingLanguage,
     async setPreference(nextPreference) {
       if (saving || nextPreference === preference) return;
       const previousPreference = preference;
       const previousLanguage = language;
       const nextLanguage = nextPreference === "system" ? systemLanguage : nextPreference;
-      setPreferenceState(nextPreference);
-      setLanguage(nextLanguage);
-      if (!session) {
-        window.localStorage.setItem(GUEST_LANGUAGE_STORAGE_KEY, nextPreference);
-        return;
-      }
       setSaving(true);
       try {
+        await applyLanguage(nextLanguage);
+        setPreferenceState(nextPreference);
+        if (!session) {
+          window.localStorage.setItem(GUEST_LANGUAGE_STORAGE_KEY, nextPreference);
+          return;
+        }
         const user = await api.setLanguagePreference(nextPreference, systemLanguage);
         const effectiveLanguage = resolveJoinLanguage(user.language ?? nextLanguage);
+        if (effectiveLanguage !== nextLanguage) await applyLanguage(effectiveLanguage);
         setPreferenceState(user.language_preference ?? nextPreference);
-        setLanguage(effectiveLanguage);
         patchSessionUser({
           language: effectiveLanguage,
           language_preference: user.language_preference ?? nextPreference,
         });
       } catch (error) {
         setPreferenceState(previousPreference);
-        setLanguage(previousLanguage);
+        await applyLanguage(previousLanguage);
         throw error;
       } finally {
         setSaving(false);
       }
     },
-  }), [language, patchSessionUser, preference, saving, session, systemLanguage]);
+  }), [language, loadingLanguage, patchSessionUser, preference, saving, session, systemLanguage]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
 import { UserAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
+import { preloadLanguageChoices } from "../lib/i18n";
 import type { SupportedLanguage } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
@@ -51,9 +52,10 @@ export function AppChrome({
   const { session } = useAuth();
   const sessionSpace = useSpaceBrand();
   const location = useLocation();
-  const { t, language, setPreference: setLanguagePreference } = useI18n();
+  const { t, language, loadingLanguage, setPreference: setLanguagePreference } = useI18n();
   const { resolvedTheme, setPreference: setThemePreference } = useTheme();
   const features = useSpaceFeatures();
+  const languageSwitching = Boolean(loadingLanguage && loadingLanguage !== language);
 
   const brandTarget = session ? (!features.ready ? "/app" : features.chatEnabled ? "/app/chats" : "/app/square") : "/entry";
   const hideGuestEntryLink = !session && (location.pathname === "/" || location.pathname === "/entry");
@@ -73,9 +75,12 @@ export function AppChrome({
         <span className="material-symbols-outlined">{resolvedTheme === "dark" ? "light_mode" : "dark_mode"}</span>
       </button>
       <label className="guest-language-tool" title={t("menu.language")}>
-        <span className="material-symbols-outlined" aria-hidden="true">translate</span>
+        <span className={`material-symbols-outlined${languageSwitching ? " is-loading" : ""}`} aria-hidden="true">{languageSwitching ? "progress_activity" : "translate"}</span>
         <select
           aria-label={t("menu.language")}
+          aria-busy={languageSwitching}
+          onFocus={preloadLanguageChoices}
+          onPointerDown={preloadLanguageChoices}
           onChange={(event) => void setLanguagePreference(event.target.value as SupportedLanguage)}
           value={language}
         >

@@ -6,31 +6,33 @@ import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
-import { GrowthLevelCelebration } from "./components/GrowthLevelCelebration";
 import { PwaRecommendation } from "./components/PwaRecommendation";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
+import { RouteResourceBoundary } from "./components/RouteResourceBoundary";
 import { RequireAdminAuth } from "./lib/adminAuth";
 import { RequireAuth, useAuth } from "./lib/auth";
-import AdminSpacePage from "./pages/AdminSpacePage";
-import ChatsPage from "./pages/ChatsPage";
 import FriendInvitePage from "./pages/FriendInvitePage";
-import FriendProfilePage from "./pages/FriendProfilePage";
-import FriendsPage from "./pages/FriendsPage";
 import JoinSpacePage from "./pages/JoinSpacePage";
 import LandingPage from "./pages/LandingPage";
-import MenuPage from "./pages/MenuPage";
-import NotificationsPage from "./pages/NotificationsPage";
 import OfficialLoginPage from "./pages/OfficialLoginPage";
 import AccountSwitchPage from "./pages/AccountSwitchPage";
 import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
-import SpaceAdminDashboardPage from "./pages/SpaceAdminDashboardPage";
-import SpaceUsersPage from "./pages/SpaceUsersPage";
-import SquarePage from "./pages/SquarePage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
-import PlatformAdminPage from "./pages/PlatformAdminPage";
+import { routeResources } from "./lib/routeResources";
 
+const AdminSpacePage = lazy(() => import("./pages/AdminSpacePage"));
+const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebration").then((module) => ({ default: module.GrowthLevelCelebration })));
+const ChatsPage = lazy(routeResources.chats);
+const FriendProfilePage = lazy(() => import("./pages/FriendProfilePage"));
+const FriendsPage = lazy(routeResources.friends);
+const MenuPage = lazy(routeResources.menu);
+const NotificationsPage = lazy(routeResources.notifications);
+const PlatformAdminPage = lazy(() => import("./pages/PlatformAdminPage"));
+const SpaceAdminDashboardPage = lazy(() => import("./pages/SpaceAdminDashboardPage"));
+const SpaceUsersPage = lazy(routeResources["space-users"]);
+const SquarePage = lazy(routeResources.square);
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
 
 function RootEntryRedirect() {
@@ -64,6 +66,7 @@ function RequireSubmissionFeature({ children }: { children: ReactNode }) {
 export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
+  const { t } = useI18n();
   const features = useSpaceFeatures();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
@@ -80,7 +83,9 @@ export default function App() {
 
   return (
     <>
-      <Routes location={routeLocation}>
+      <RouteResourceBoundary>
+        <Suspense fallback={<FeedbackState title={t("common.loading")} tone="loading" />}>
+          <Routes location={routeLocation}>
         <Route path="/" element={<RootEntryRedirect />} />
         <Route path="/entry" element={<RootEntryRedirect />} />
         <Route path="/friend-invite" element={<FriendInvitePage />} />
@@ -219,7 +224,9 @@ export default function App() {
           }
         />
         <Route path="*" element={<RootEntryRedirect />} />
-      </Routes>
+          </Routes>
+        </Suspense>
+      </RouteResourceBoundary>
       {showFriendInviteOverlay ? (
         <Routes>
           <Route path="/friend-invite" element={<FriendInvitePage overlay />} />

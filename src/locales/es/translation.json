@@ -8,6 +8,8 @@
   "common.retry": "Reintentar",
   "common.save": "Guardar",
   "common.loading": "Cargando",
+  "common.resourceLoadFailed": "No se pudo cargar esta página",
+  "common.resourceLoadFailedHint": "Comprueba la conexión e inténtalo de nuevo. Los datos actuales se conservarán.",
   "common.processing": "Procesando...",
   "common.operationFailed": "No pudo completar la acción",
   "common.closePanel": "Panel cerrado",

@@ -8,6 +8,8 @@
   "common.retry": "Retry",
   "common.save": "Save",
   "common.loading": "Loading",
+  "common.resourceLoadFailed": "This page could not be loaded",
+  "common.resourceLoadFailedHint": "Check your connection and try again. Your current page data is safe.",
   "common.processing": "Processing...",
   "common.operationFailed": "Could not complete the action",
   "common.closePanel": "Close panel",

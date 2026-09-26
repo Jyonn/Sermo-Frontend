@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 import { MEDIA_LOCATION_MAP_EVENT, type MediaLocationMapDetail } from "../lib/mediaLocation";
-import { TravelMapDrawer } from "./TravelMapDrawer";
+
+const TravelMapDrawer = lazy(() => import("./TravelMapDrawer").then((module) => ({ default: module.TravelMapDrawer })));
 
 export function GlobalMediaLocationMap() {
   const [preview, setPreview] = useState<MediaLocationMapDetail | null>(null);
@@ -16,14 +17,18 @@ export function GlobalMediaLocationMap() {
     return () => window.removeEventListener(MEDIA_LOCATION_MAP_EVENT, openMap);
   }, []);
 
+  if (!preview) return null;
+
   return (
+    <Suspense fallback={null}>
     <TravelMapDrawer
       backdropClassName="media-location-drawer-backdrop"
       focusLocation={preview?.location}
       focusOwner={preview?.owner}
       historyKey="media-location"
       onClose={() => setPreview(null)}
-      open={Boolean(preview)}
+      open
     />
+    </Suspense>
   );
 }
