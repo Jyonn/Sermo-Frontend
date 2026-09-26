@@ -1762,6 +1762,11 @@ export function StickerImage({ alt = "", className = "", height, src, width }: {
 }
 
 const ForwardBundlePreviewDepthContext = createContext(2);
+const ForwardBundlePresentationContext = createContext<{
+  viewerUserId: number | null;
+  backgroundTheme: ChatBackgroundTheme;
+  backgroundUri: string | null;
+}>({ viewerUserId: null, backgroundTheme: "default", backgroundUri: null });
 
 function openForwardBundle(payload?: ChatMessagePayloadDTO | null) {
   if (payload) window.dispatchEvent(new CustomEvent("sermo:forward-bundle", { detail: payload }));
@@ -1796,6 +1801,7 @@ function ForwardBundleInlinePreview({ message, onOpenImage, onOpenVideo, preview
 }) {
   const items = message.payload?.items ?? [];
   const open = () => openForwardBundle(message.payload);
+  const presentation = useContext(ForwardBundlePresentationContext);
   return (
     <section className="message-forward-bundle-inline">
       <header>
@@ -1819,8 +1825,10 @@ function ForwardBundleInlinePreview({ message, onOpenImage, onOpenVideo, preview
         tabIndex={0}
       >
         <ChatPreview
+          backgroundTheme={presentation.backgroundTheme}
+          backgroundUri={presentation.backgroundUri}
           className="message-forward-bundle-inline-scroll"
-          firstPersonUserId={message.payload?.first_person_user_id}
+          firstPersonUserId={presentation.viewerUserId ?? message.payload?.first_person_user_id}
           forwardBundlePreviewDepth={Math.max(0, previewDepth - 1)}
           messages={forwardBundleItemsAsMessages(items)}
           onOpenImage={onOpenImage}
@@ -8032,6 +8040,11 @@ function LiveChatsPage({
                     </button>
                   </div>
                 ) : null}
+                <ForwardBundlePresentationContext.Provider value={{
+                  viewerUserId: currentUserId || null,
+                  backgroundTheme: chatBackgroundTheme,
+                  backgroundUri: usesPersonalCustomBackground ? paintedChatBackgroundUri : null,
+                }}>
                 <VirtualDynamicList
                   estimateSize={estimateMessageGroupHeight}
                   followEnd={() => shouldFollowLatestWindow(hasNewerMessagesRef.current, stickToBottomRef.current)}
@@ -8078,6 +8091,7 @@ function LiveChatsPage({
                     />
                   )}
                 />
+                </ForwardBundlePresentationContext.Provider>
                 {hasNewerMessages ? (
                   <div className="message-history-actions is-newer">
                     <button className="ghost-button" disabled={newerState === "loading"} onClick={() => void loadNewerMessages()} type="button">
@@ -8907,17 +8921,23 @@ function LiveChatsPage({
         historyKey={`forward-bundle-${forwardBundlePreview?.bundle_id ?? "message"}`}
         onClose={() => setForwardBundlePreview(null)}
       >
-        <ChatPreview
-          backgroundTheme={currentUserMe?.chat_background_theme ?? "default"}
-          backgroundUri={paintedChatBackgroundUri}
-          className="forward-bundle-chat-preview"
-          forwardBundlePreviewDepth={1}
-          firstPersonUserId={forwardBundlePreview?.first_person_user_id}
-          messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
-          onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
-          onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
-          showSelfAuthors
-        />
+        <ForwardBundlePresentationContext.Provider value={{
+          viewerUserId: currentUserId || null,
+          backgroundTheme: currentUserMe?.chat_background_theme ?? "default",
+          backgroundUri: paintedChatBackgroundUri,
+        }}>
+          <ChatPreview
+            backgroundTheme={currentUserMe?.chat_background_theme ?? "default"}
+            backgroundUri={paintedChatBackgroundUri}
+            className="forward-bundle-chat-preview"
+            forwardBundlePreviewDepth={1}
+            firstPersonUserId={currentUserId || null}
+            messages={forwardBundleItemsAsMessages(forwardBundlePreview?.items ?? [])}
+            onOpenImage={(uris, index, metadata = [], messageIds = []) => setImagePreview({ uris, index, metadata, messageIds })}
+            onOpenVideo={(uri, metadata, messageId) => setVideoPreview({ uri, metadata, messageId })}
+            showSelfAuthors
+          />
+        </ForwardBundlePresentationContext.Provider>
       </SideDrawer>
 
       <SideDrawer

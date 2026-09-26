@@ -1,21 +1,21 @@
 {
-  "id": "2026.09.26.6",
+  "id": "2026.09.26.7",
   "publishedAt": "2026-09-26",
   "locales": {
     "zh-CN": {
-      "title": "合并聊天记录预览更直观",
+      "title": "合并聊天预览方向与背景修复",
       "items": [
-        "合并记录改为消息宽度内的聊天视窗，保留发送者头像并支持滚动",
-        "聊天中的内部合并记录可以继续预览一层，更深内容恢复为简洁卡片",
-        "广场聊天记录中的合并内容保持卡片展示，避免预览区域过窄"
+        "合并聊天预览改为按当前查看用户区分左右消息，不再错误沿用转发创建者身份",
+        "手机端内嵌预览会使用当前生效的聊天背景",
+        "完整预览及其内部嵌套记录保持一致的消息方向和背景"
       ]
     },
     "en": {
-      "title": "Clearer merged chat previews",
+      "title": "Fixed merged preview alignment and backgrounds",
       "items": [
-        "Merged records now appear as scrollable chat viewports within normal message width while retaining the sender avatar",
-        "Nested merged records can expand one more level in Chat, with deeper content returning to compact cards",
-        "Merged content inside Square chat previews stays card-based to avoid cramped nested previews"
+        "Merged previews now align messages for the current viewer instead of incorrectly using the bundle creator",
+        "Inline previews on mobile now use the active chat background",
+        "Full previews and their nested records keep message direction and backgrounds consistent"
       ]
     }
   }
