@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.28.2",
+  "id": "2026.09.28.3",
   "publishedAt": "2026-09-28",
   "locales": {
     "zh-CN": {
-      "title": "支持更多社交内容预览",
+      "title": "修复抖音图文分享解析",
       "items": [
-        "抖音图文和小红书图文、视频链接现在可在聊天与广场中预览"
+        "抖音图文分享短链接现在可以正确识别，并展示完整图片列表"
       ]
     },
     "en": {
-      "title": "More social content previews",
+      "title": "Fixed Douyin photo-story links",
       "items": [
-        "Preview Douyin photo stories and Xiaohongshu photo stories or videos in chats and Square"
+        "Douyin photo-story share links now resolve correctly and show the full image gallery"
       ]
     }
   }
