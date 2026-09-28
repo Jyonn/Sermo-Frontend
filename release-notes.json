@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.27.1",
-  "publishedAt": "2026-09-27",
+  "id": "2026.09.28.1",
+  "publishedAt": "2026-09-28",
   "locales": {
     "zh-CN": {
-      "title": "修复桌面广场顶部遮挡",
+      "title": "修复音乐分享发言失败",
       "items": [
-        "桌面广场滚动时，顶部标题与筛选栏会完整遮挡经过的发言内容，亮暗主题均适用"
+        "通过分享链接解析网易云等外部媒体后，发表发言会复用已解析的结果，不再误报链接不可用"
       ]
     },
     "en": {
-      "title": "Fixed desktop Square header overlap",
+      "title": "Fixed music sharing in Square posts",
       "items": [
-        "The desktop Square header now fully covers scrolling posts in both light and dark themes"
+        "Square posts now reuse resolved external media previews instead of incorrectly rejecting shared music links"
       ]
     }
   }
