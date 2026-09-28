@@ -2303,7 +2303,7 @@ export default function SquarePage() {
     const media = statement.media ?? [];
     if (statement.chat_record) return 380;
     if (statement.external_media?.provider_data && "provider" in statement.external_media.provider_data) {
-      return statement.external_media.provider_data.provider === "douyin_video" ? 450 : 310;
+      return ["douyin_video", "douyin_gallery", "xiaohongshu_video", "xiaohongshu_gallery"].includes(String(statement.external_media.provider_data.provider)) ? 450 : 310;
     }
     if (media.some((item) => item.kind === "video")) return 430;
     if (media.length > 1) return 420;

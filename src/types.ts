@@ -969,7 +969,19 @@ export interface LinkPreviewDTO {
   image_url?: string;
   site_name?: string;
   favicon_url?: string;
-  provider_data?: MusicProviderDataDTO | DouyinVideoDataDTO | Record<string, unknown>;
+  provider_data?: MusicProviderDataDTO | DouyinVideoDataDTO | SocialMediaDataDTO | Record<string, unknown>;
+}
+
+export interface SocialMediaDataDTO {
+  provider: "douyin_gallery" | "xiaohongshu_gallery" | "xiaohongshu_video";
+  title: string;
+  author?: string;
+  canonical_url: string;
+  cover_url?: string;
+  images?: string[];
+  description?: string;
+  video_url?: string;
+  duration_ms?: number;
 }
 
 export interface DouyinVideoDataDTO {

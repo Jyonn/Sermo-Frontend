@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.28.1",
+  "id": "2026.09.28.2",
   "publishedAt": "2026-09-28",
   "locales": {
     "zh-CN": {
-      "title": "修复音乐分享发言失败",
+      "title": "支持更多社交内容预览",
       "items": [
-        "通过分享链接解析网易云等外部媒体后，发表发言会复用已解析的结果，不再误报链接不可用"
+        "抖音图文和小红书图文、视频链接现在可在聊天与广场中预览"
       ]
     },
     "en": {
-      "title": "Fixed music sharing in Square posts",
+      "title": "More social content previews",
       "items": [
-        "Square posts now reuse resolved external media previews instead of incorrectly rejecting shared music links"
+        "Preview Douyin photo stories and Xiaohongshu photo stories or videos in chats and Square"
       ]
     }
   }

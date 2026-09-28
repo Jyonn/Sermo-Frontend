@@ -1,9 +1,10 @@
 import type { LinkPreviewDTO } from "../types";
 import { DouyinVideoPreview, isDouyinVideoData } from "./DouyinVideoPreview";
 import { isMusicData, MusicPreview } from "./NeteaseMusicPreview";
+import { isSocialMediaData, SocialMediaPreview } from "./SocialMediaPreview";
 
 export function isSupportedExternalMedia(preview?: LinkPreviewDTO | null) {
-  return isMusicData(preview?.provider_data) || isDouyinVideoData(preview?.provider_data);
+  return isMusicData(preview?.provider_data) || isDouyinVideoData(preview?.provider_data) || isSocialMediaData(preview?.provider_data);
 }
 
 export function ExternalMediaPreview({ preview }: { preview: LinkPreviewDTO }) {
@@ -11,5 +12,6 @@ export function ExternalMediaPreview({ preview }: { preview: LinkPreviewDTO }) {
   if (isDouyinVideoData(preview.provider_data)) {
     return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} />;
   }
+  if (isSocialMediaData(preview.provider_data)) return <SocialMediaPreview media={preview.provider_data} imageUrl={preview.image_url} />;
   return null;
 }
