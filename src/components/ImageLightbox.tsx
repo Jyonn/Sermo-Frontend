@@ -9,6 +9,7 @@ interface ImageLightboxProps {
   details?: ReactNode[];
   downloadLabels?: string[];
   fileNamePrefix?: string;
+  referrerPolicy?: "no-referrer";
   onClose: () => void;
   onIndexChange: (index: number) => void;
 }
@@ -21,6 +22,7 @@ export interface MediaLightboxItem {
   height?: number | null;
   detail?: ReactNode;
   downloadLabel?: string;
+  referrerPolicy?: "no-referrer";
 }
 
 interface MediaLightboxProps {
@@ -60,7 +62,7 @@ interface ImageTransform {
   scale: number;
 }
 
-function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClose: () => void }) {
+function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; src: string; onClose: () => void; referrerPolicy?: "no-referrer" }) {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -267,6 +269,7 @@ function ImmersiveImage({ alt, src, onClose }: { alt: string; src: string; onClo
       alt={alt}
       className="immersive-image-canvas"
       draggable={false}
+      referrerPolicy={referrerPolicy}
       onLoad={(event) => setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
       ref={imageRef}
       src={src}
@@ -608,8 +611,8 @@ export function MediaLightbox({
                     ? <ImmersiveVideo onClose={close} poster={item.posterUri} src={item.uri} />
                     : <ArchiveVideoPlayer active={itemIndex === index} poster={item.posterUri} src={item.uri} />
                   : immersive && itemIndex === index
-                    ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} src={item.uri} />
-                    : <img alt={`${resolvedAltPrefix} ${itemIndex + 1}`} className="message-image-preview" draggable={false} src={item.uri} />}
+                    ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} referrerPolicy={item.referrerPolicy} src={item.uri} />
+                    : <img alt={`${resolvedAltPrefix} ${itemIndex + 1}`} className="message-image-preview" draggable={false} loading={Math.abs(itemIndex - index) > 1 ? "lazy" : "eager"} referrerPolicy={item.referrerPolicy} src={item.uri} />}
               </div>
               {!immersive ? <div>{item.detail ?? null}</div> : null}
             </article>
@@ -639,8 +642,9 @@ export function ImageLightbox({
   details = [],
   downloadLabels = [],
   fileNamePrefix = "sermo-image",
+  referrerPolicy,
   onClose,
   onIndexChange,
 }: ImageLightboxProps) {
-  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex] }))} onClose={onClose} onIndexChange={onIndexChange} />;
+  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} />;
 }

@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.28.5",
-  "publishedAt": "2026-09-28",
+  "id": "2026.09.29.1",
+  "publishedAt": "2026-09-29",
   "locales": {
     "zh-CN": {
-      "title": "完整展示抖音图文",
+      "title": "统一图文浏览体验",
       "items": [
-        "抖音图文现在最多展示完整的 100 张图片，临时解析失败也会更快重试"
+        "抖音和小红书图文现在使用熟悉的多图预览，底部直接展示作品标题与来源"
       ]
     },
     "en": {
-      "title": "Complete Douyin photo stories",
+      "title": "A consistent photo-story viewer",
       "items": [
-        "Douyin photo stories now show up to all 100 images, with faster retries after temporary preview failures"
+        "Douyin and Xiaohongshu photo stories now use the familiar multi-image viewer with title and source details"
       ]
     }
   }
