@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.29.2",
+  "id": "2026.09.29.3",
   "publishedAt": "2026-09-29",
   "locales": {
     "zh-CN": {
-      "title": "优化图文预览",
+      "title": "修复抖音链接解析",
       "items": [
-        "抖音和小红书图文显示真实来源标识，滑动图片时作品信息保持固定"
+        "抖音短链接优先直接解析，减少因网页跳转失败导致的预览错误"
       ]
     },
     "en": {
-      "title": "Improved photo-story previews",
+      "title": "Fixed Douyin link previews",
       "items": [
-        "Douyin and Xiaohongshu previews show their authentic logos, with story details staying in place as you swipe"
+        "Douyin short links now resolve directly, reducing preview failures caused by page redirects"
       ]
     }
   }
