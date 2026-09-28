@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.28.4",
+  "id": "2026.09.28.5",
   "publishedAt": "2026-09-28",
   "locales": {
     "zh-CN": {
-      "title": "修复小红书视频分享解析",
+      "title": "完整展示抖音图文",
       "items": [
-        "小红书视频分享短链接现在可以正确识别，并在站内播放"
+        "抖音图文现在最多展示完整的 100 张图片，临时解析失败也会更快重试"
       ]
     },
     "en": {
-      "title": "Fixed Xiaohongshu video links",
+      "title": "Complete Douyin photo stories",
       "items": [
-        "Xiaohongshu video share links now resolve correctly and play in the app"
+        "Douyin photo stories now show up to all 100 images, with faster retries after temporary preview failures"
       ]
     }
   }
