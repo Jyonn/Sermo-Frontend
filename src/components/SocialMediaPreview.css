@@ -3,7 +3,9 @@
 .social-media-card:after{position:absolute;inset:0;z-index:0;content:"";background:linear-gradient(180deg,rgba(0,0,0,.52),transparent 30%,transparent 40%,rgba(0,0,0,.8))}
 .social-media-card-top,.social-media-card-bottom{position:absolute;z-index:1;right:16px;left:16px;display:flex;color:#fff}
 .social-media-card-top{top:15px;align-items:center;justify-content:space-between;font-size:12px;font-weight:800}
-.social-media-card-top span{padding:4px 8px;border:1px solid rgba(255,255,255,.45);border-radius:20px;background:rgba(0,0,0,.24)}
+.social-media-card-count{padding:4px 8px;border:1px solid rgba(255,255,255,.45);border-radius:20px;background:rgba(0,0,0,.24)}
+.social-media-card-brand,.social-media-brand{display:inline-flex;align-items:center;gap:7px}
+.social-media-card-brand img,.social-media-brand img{display:block;width:20px;height:20px;flex:none;object-fit:contain;border-radius:5px}
 .social-media-card-bottom{bottom:17px;flex-direction:column;gap:4px}
 .social-media-card-bottom strong{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:16px;line-height:1.3}
 .social-media-card-bottom small{opacity:.75;font-size:11px}

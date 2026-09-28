@@ -7,6 +7,7 @@ interface ImageLightboxProps {
   uris: string[];
   altPrefix?: string;
   details?: ReactNode[];
+  sharedDetail?: ReactNode;
   downloadLabels?: string[];
   fileNamePrefix?: string;
   referrerPolicy?: "no-referrer";
@@ -29,6 +30,7 @@ interface MediaLightboxProps {
   index: number;
   items: MediaLightboxItem[];
   altPrefix?: string;
+  sharedDetail?: ReactNode;
   fileNamePrefix?: string;
   onClose: () => void;
   onIndexChange: (index: number) => void;
@@ -555,6 +557,7 @@ export function MediaLightbox({
   index,
   items,
   altPrefix,
+  sharedDetail,
   fileNamePrefix = "sermo-media",
   onClose,
   onIndexChange,
@@ -597,7 +600,7 @@ export function MediaLightbox({
       const gesture = gestureRef.current;
       if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
     }} role="presentation">
-      <section aria-modal="true" className={`message-image-preview-modal${immersive ? " is-immersive" : ""}`} role="dialog">
+      <section aria-modal="true" className={`message-image-preview-modal${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog">
         <div className="message-image-preview-track" onScroll={(event) => {
           const element = event.currentTarget;
           const nextIndex = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
@@ -618,6 +621,7 @@ export function MediaLightbox({
             </article>
           </div>)}
         </div>
+        {!immersive && sharedDetail ? <div className="message-image-preview-shared-detail" onClick={(event) => event.stopPropagation()}>{sharedDetail}</div> : null}
         {!immersive ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
           {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
           {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button> : null}
@@ -640,11 +644,12 @@ export function ImageLightbox({
   uris,
   altPrefix,
   details = [],
+  sharedDetail,
   downloadLabels = [],
   fileNamePrefix = "sermo-image",
   referrerPolicy,
   onClose,
   onIndexChange,
 }: ImageLightboxProps) {
-  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} />;
+  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} />;
 }

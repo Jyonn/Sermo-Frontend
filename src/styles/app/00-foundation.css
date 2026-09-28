@@ -6723,6 +6723,22 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   scroll-snap-stop: always;
 }
 
+.message-image-preview-modal.has-shared-detail .message-image-preview-slide {
+  padding-bottom: min(190px, 35dvh);
+}
+
+.message-image-preview-shared-detail {
+  position: absolute;
+  z-index: 2;
+  right: clamp(22px, 7vw, 104px);
+  bottom: max(30px, calc(18px + env(safe-area-inset-bottom)));
+  left: clamp(22px, 7vw, 104px);
+  width: min(calc(100% - 44px), 1120px);
+  max-height: min(150px, 28dvh);
+  margin-inline: auto;
+  overflow-y: auto;
+}
+
 .message-image-preview-plate {
   width: min(100%, 1120px);
   height: 100%;
@@ -7124,6 +7140,13 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 }
 
 @media (max-width: 900px) {
+  .message-image-preview-shared-detail {
+    right: 18px;
+    bottom: max(22px, calc(14px + env(safe-area-inset-bottom)));
+    left: 18px;
+    width: calc(100% - 36px);
+  }
+
   .message-image-preview-slide {
     padding:
       max(68px, calc(28px + env(safe-area-inset-top)))

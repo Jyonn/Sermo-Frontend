@@ -32,11 +32,12 @@ export function SocialMediaPreview({ media, imageUrl }: { media: SocialMediaData
   const isVideo = media.provider === "xiaohongshu_video";
   const images = media.images || [];
   const source = media.provider === "douyin_gallery" ? t("social.douyin") : t("social.xiaohongshu");
+  const logo = media.provider === "douyin_gallery" ? "/icons/douyin-logo.svg" : "/icons/xiaohongshu-logo.png";
   const cover = media.cover_url || images[0] || imageUrl;
   const title = media.title || t(isVideo ? "social.video" : "social.gallery");
   const galleryDetails = <div className="message-image-archive social-media-archive" onClick={(event) => event.stopPropagation()}>
     <div className="message-image-record">
-      <span className="message-image-archive-label">{source}</span>
+      <span className="message-image-archive-label social-media-brand"><img alt="" src={logo} />{source}</span>
       <strong className="social-media-archive-title">{title}</strong>
       <div className="social-media-archive-foot">
         <span>{media.author || source}</span>
@@ -47,11 +48,11 @@ export function SocialMediaPreview({ media, imageUrl }: { media: SocialMediaData
   return <>
     <button className="social-media-card" type="button" onClick={(event) => { event.stopPropagation(); setIndex(0); setOpen(true); }}>
       {cover ? <img alt="" className="social-media-cover" loading="lazy" referrerPolicy="no-referrer" src={cover} /> : <span className="social-media-cover" />}
-      <span className="social-media-card-top">{source}<span>{isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`}</span></span>
+      <span className="social-media-card-top"><span className="social-media-card-brand"><img alt="" src={logo} />{source}</span><span className="social-media-card-count">{isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`}</span></span>
       <span className="social-media-card-bottom"><strong>{title}</strong><small>{media.author || source}</small></span>
       {isVideo ? <span className="social-media-play material-symbols-outlined" aria-hidden="true">play_arrow</span> : null}
     </button>
-    {open && !isVideo ? <ImageLightbox altPrefix={title} details={images.map(() => galleryDetails)} fileNamePrefix={media.provider} index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" uris={images} /> : null}
+    {open && !isVideo ? <ImageLightbox altPrefix={title} fileNamePrefix={media.provider} index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" sharedDetail={galleryDetails} uris={images} /> : null}
     <SideDrawer floatingBack={false} fullscreen headerless historyKey={`social-${media.canonical_url}`} open={open && isVideo} onClose={() => setOpen(false)} title={title}>
       {open && isVideo ? <div className="social-media-video"><ImmersiveVideo src={media.video_url || ""} poster={cover} onClose={() => setOpen(false)} onError={() => setFailed(true)} context={<a className="social-media-source" href={media.canonical_url} target="_blank" rel="noreferrer"><strong>{title}</strong><span>{media.author ? `${media.author} · ` : ""}{source} ↗</span></a>} />{failed ? <div className="social-media-error">{t("social.playbackUnavailable")} <a href={media.canonical_url} target="_blank" rel="noreferrer">{t("social.openSource")} {source}</a></div> : null}</div> : null}
     </SideDrawer>

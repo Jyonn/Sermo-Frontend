@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.29.1",
+  "id": "2026.09.29.2",
   "publishedAt": "2026-09-29",
   "locales": {
     "zh-CN": {
-      "title": "统一图文浏览体验",
+      "title": "优化图文预览",
       "items": [
-        "抖音和小红书图文现在使用熟悉的多图预览，底部直接展示作品标题与来源"
+        "抖音和小红书图文显示真实来源标识，滑动图片时作品信息保持固定"
       ]
     },
     "en": {
-      "title": "A consistent photo-story viewer",
+      "title": "Improved photo-story previews",
       "items": [
-        "Douyin and Xiaohongshu photo stories now use the familiar multi-image viewer with title and source details"
+        "Douyin and Xiaohongshu previews show their authentic logos, with story details staying in place as you swipe"
       ]
     }
   }
