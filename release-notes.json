@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.29.4",
+  "id": "2026.09.29.5",
   "publishedAt": "2026-09-29",
   "locales": {
     "zh-CN": {
-      "title": "恢复抖音视频和图文预览",
+      "title": "媒体链接解析更稳定",
       "items": [
-        "抖音视频和图文改由抖音公开数据解析，不再依赖第三方解析服务"
+        "抖音、小红书和各音乐平台的链接分别排队解析，减少高峰期同时请求造成的失败"
       ]
     },
     "en": {
-      "title": "Restored Douyin previews",
+      "title": "More reliable media previews",
       "items": [
-        "Douyin videos and photo stories now resolve from Douyin's public data without a third-party parsing service"
+        "Douyin, Xiaohongshu, and music links now resolve in separate queues to reduce failures during busy periods"
       ]
     }
   }
