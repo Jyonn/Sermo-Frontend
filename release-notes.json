@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.29.3",
+  "id": "2026.09.29.4",
   "publishedAt": "2026-09-29",
   "locales": {
     "zh-CN": {
-      "title": "修复抖音链接解析",
+      "title": "恢复抖音视频和图文预览",
       "items": [
-        "抖音短链接优先直接解析，减少因网页跳转失败导致的预览错误"
+        "抖音视频和图文改由抖音公开数据解析，不再依赖第三方解析服务"
       ]
     },
     "en": {
-      "title": "Fixed Douyin link previews",
+      "title": "Restored Douyin previews",
       "items": [
-        "Douyin short links now resolve directly, reducing preview failures caused by page redirects"
+        "Douyin videos and photo stories now resolve from Douyin's public data without a third-party parsing service"
       ]
     }
   }
