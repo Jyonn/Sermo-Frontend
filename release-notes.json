@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.30.3",
+  "id": "2026.09.30.4",
   "publishedAt": "2026-09-30",
   "locales": {
     "zh-CN": {
-      "title": "发表设置间距优化",
+      "title": "新账号先确认昵称",
       "items": [
-        "修正“谁可以看”右侧箭头的样式与留白"
+        "首次进入空间时，确认昵称后才会创建新账号"
       ]
     },
     "en": {
-      "title": "Improved post setting spacing",
+      "title": "Confirm new account nicknames",
       "items": [
-        "Fixed the arrow styling and spacing in the post visibility setting"
+        "When entering a space for the first time, confirm your nickname before the new account is created"
       ]
     }
   }

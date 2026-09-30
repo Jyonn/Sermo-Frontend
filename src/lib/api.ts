@@ -416,7 +416,7 @@ export const api = {
     });
   },
 
-  joinSpace(payload: { slug: string; name: string; password?: string; language: SupportedLanguage }) {
+  joinSpace(payload: { slug: string; name: string; password?: string; language: SupportedLanguage; new_user_intent?: "check" | "create" }) {
     return request<JoinResponseDTO>("/spaces/join", {
       method: "POST",
       body: payload,

@@ -4,6 +4,7 @@ import { AppChrome } from "../components/AppChrome";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -55,6 +56,7 @@ export default function JoinSpacePage() {
   const [lookupState, setLookupState] = useState<"idle" | "loading" | "ready" | "missing" | "error">("loading");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting">("idle");
+  const [pendingNewUserName, setPendingNewUserName] = useState<string | null>(null);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryStep, setRecoveryStep] = useState<"channels" | "code" | "password">("channels");
   const [recoveryChannels, setRecoveryChannels] = useState<Array<{ channel: number; type: "email" | "sms"; masked: string }>>([]);
@@ -206,27 +208,20 @@ export default function JoinSpacePage() {
     }
   };
 
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!nickname.trim()) {
-      setSubmitError(t("join.enterNickname"));
-      return;
-    }
-    if (Array.from(nickname.trim()).length > MAX_NICKNAME_LENGTH) {
-      setSubmitError(t("join.nicknameTooLong", { count: MAX_NICKNAME_LENGTH }));
-      return;
-    }
-
+  const attemptJoin = async (name: string, newUserIntent: "check" | "create") => {
+    if (submitState === "submitting") return;
     setSubmitError(null);
     setPasswordHint(null);
     setSubmitState("submitting");
     try {
       const payload = await api.joinSpace({
         slug,
-        name: nickname.trim(),
+        name,
         password: password.trim() || undefined,
         language: getBrowserJoinLanguage(),
+        new_user_intent: newUserIntent,
       });
+      setPendingNewUserName(null);
       loginFromJoin(payload);
       const pendingInviteToken = readPendingFriendInviteToken();
       if (pendingInviteToken) {
@@ -236,17 +231,38 @@ export default function JoinSpacePage() {
         navigate("/app", { replace: true });
       }
     } catch (error) {
+      if (error instanceof ApiError && error.identifier === "USER@NEW_USER_CONFIRMATION_REQUIRED") {
+        setPendingNewUserName(name);
+        return;
+      }
+      setPendingNewUserName(null);
       if (isPasswordRequiredJoinError(error)) {
         setShowPasswordField(true);
         setPasswordHint(t("join.passwordRequired"));
         return;
       }
 
-      const message = error instanceof ApiError ? error.message : t("join.failed");
+      const message = error instanceof ApiError && error.identifier === "USER@NEW_USER_NAME_TAKEN"
+        ? t("join.nicknameTakenSinceConfirmation")
+        : error instanceof ApiError ? error.message : t("join.failed");
       setSubmitError(message);
     } finally {
       setSubmitState("idle");
     }
+  };
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = nickname.trim();
+    if (!name) {
+      setSubmitError(t("join.enterNickname"));
+      return;
+    }
+    if (Array.from(name).length > MAX_NICKNAME_LENGTH) {
+      setSubmitError(t("join.nicknameTooLong", { count: MAX_NICKNAME_LENGTH }));
+      return;
+    }
+    void attemptJoin(name, "check");
   };
 
   return (
@@ -391,6 +407,16 @@ export default function JoinSpacePage() {
         </div>
       </section>
       <AsyncErrorDialog message={submitError ?? ""} onClose={() => setSubmitError(null)} open={Boolean(submitError)} />
+      <ConfirmDialog
+        busy={submitState === "submitting"}
+        cancelLabel={t("join.editNickname")}
+        confirmLabel={t("join.confirmNewNicknameAction")}
+        description={t("join.confirmNewNicknameHint", { name: pendingNewUserName ?? "", space: space?.name || displaySlug(slug) })}
+        onClose={() => { if (submitState !== "submitting") setPendingNewUserName(null); }}
+        onConfirm={() => { if (pendingNewUserName) void attemptJoin(pendingNewUserName, "create"); }}
+        open={Boolean(pendingNewUserName)}
+        title={t("join.confirmNewNickname")}
+      />
       <BottomSheet open={recoveryOpen} onClose={closeRecovery} title={t("recovery.title")}>
         <div className="password-recovery">
           {recoveryBusy && recoveryStep === "channels" && !recoveryChannels.length ? (
