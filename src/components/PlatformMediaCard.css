@@ -1,0 +1,24 @@
+.platform-media-card { position: relative; display: block; width: min(100%, 280px); height: 260px; overflow: hidden; padding: 0; border: 0; border-radius: 18px; color: #fff; background: #1a2422; text-align: left; cursor: pointer; isolation: isolate; }
+.platform-media-cover { display: block; width: 100%; height: 100%; object-fit: cover; background: #304341; }
+.platform-media-card::after { position: absolute; inset: 0; z-index: 0; content: ""; background: linear-gradient(180deg, rgba(0,0,0,.52), transparent 30%, transparent 40%, rgba(0,0,0,.8)); }
+.platform-media-card-top, .platform-media-card-bottom { position: absolute; z-index: 1; right: 16px; left: 16px; display: flex; color: #fff; }
+.platform-media-card-top { top: 15px; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 800; }
+.platform-media-card-brand { display: inline-flex; min-width: 0; align-items: center; gap: 7px; }
+.platform-media-card-brand img { display: block; width: 20px; height: 20px; flex: none; object-fit: contain; border-radius: 5px; }
+.platform-media-card-kind { flex: none; padding: 4px 8px; border: 1px solid rgba(255,255,255,.45); border-radius: 20px; background: rgba(0,0,0,.24); }
+.platform-media-card-bottom { bottom: 17px; flex-direction: column; gap: 4px; }
+.platform-media-card-bottom strong { display: -webkit-box; overflow: hidden; font-size: 16px; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.platform-media-card-bottom small { overflow: hidden; opacity: .75; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.platform-media-play { position: absolute; z-index: 1; top: 50%; left: 50%; display: grid; width: 50px; height: 50px; place-items: center; border-radius: 50%; background: rgba(0,0,0,.55); font-size: 30px; transform: translate(-50%,-50%); }
+.platform-video-shell { position: absolute; inset: 0; min-height: 0; background: #080a0d; }
+.platform-video-context { display: grid; grid-template-columns: 42px minmax(0,1fr) 34px; gap: 11px; align-items: center; max-width: min(100%,620px); padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; color: #f7faf9; background: rgba(10,13,15,.68); text-decoration: none; text-shadow: 0 2px 14px rgba(0,0,0,.5); backdrop-filter: blur(22px) saturate(130%); }
+.platform-video-context-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 14px; background: #090b0e; }
+.platform-video-context-mark img { display: block; width: 25px; height: 25px; object-fit: contain; }
+.platform-video-context-copy { display: grid; gap: 5px; min-width: 0; }
+.platform-video-context-copy strong { overflow: hidden; font-family: var(--font-display); font-size: clamp(14px,2.5vw,17px); line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.platform-video-context-copy small { overflow: hidden; color: rgba(242,248,245,.64); font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.platform-video-context-open { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #f5faf8; background: rgba(255,255,255,.09); font-size: 18px; }
+.platform-video-error { position: absolute; z-index: 6; inset: 0; display: grid; align-content: center; justify-items: center; gap: 12px; padding: 32px; color: #f4f6f5; background: rgba(7,9,12,.86); text-align: center; backdrop-filter: blur(20px); }
+.platform-video-error > .material-symbols-outlined { color: #ff5676; font-size: 38px; }
+.platform-video-error strong { max-width: 28ch; font-size: 13px; line-height: 1.55; }
+.platform-video-error a { padding: 10px 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 99px; color: #f4f8f6; background: rgba(255,255,255,.08); font-size: 11px; font-weight: 800; text-decoration: none; }

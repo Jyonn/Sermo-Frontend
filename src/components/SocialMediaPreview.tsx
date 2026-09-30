@@ -3,6 +3,7 @@ import type { SocialMediaDataDTO } from "../types";
 import { ImageLightbox, ImmersiveVideo } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { useI18n } from "../lib/language";
+import { PlatformMediaCard, PlatformVideoError, PlatformVideoSource } from "./PlatformMediaCard";
 import "./SocialMediaPreview.css";
 
 const domains = ["douyinpic.com", "byteimg.com", "xhscdn.com", "xhsimg.com"];
@@ -46,15 +47,13 @@ export function SocialMediaPreview({ media, imageUrl }: { media: SocialMediaData
     </div>
   </div>;
   return <>
-    <button className="social-media-card" type="button" onClick={(event) => { event.stopPropagation(); setIndex(0); setOpen(true); }}>
-      {cover ? <img alt="" className="social-media-cover" loading="lazy" referrerPolicy="no-referrer" src={cover} /> : <span className="social-media-cover" />}
-      <span className="social-media-card-top"><span className="social-media-card-brand"><img alt="" src={logo} />{source}</span><span className="social-media-card-count">{isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`}</span></span>
-      <span className="social-media-card-bottom"><strong>{title}</strong><small>{media.author || source}</small></span>
-      {isVideo ? <span className="social-media-play material-symbols-outlined" aria-hidden="true">play_arrow</span> : null}
-    </button>
+    <PlatformMediaCard author={media.author} cover={cover} kindLabel={isVideo ? t("social.video") : `${images.length} ${t("social.photos")}`} logo={logo} onClick={() => { setIndex(0); setFailed(false); setOpen(true); }} playIcon={isVideo ? "play_arrow" : undefined} source={source} title={title} />
     {open && !isVideo ? <ImageLightbox altPrefix={title} fileNamePrefix={media.provider} index={index} onClose={() => setOpen(false)} onIndexChange={setIndex} referrerPolicy="no-referrer" sharedDetail={galleryDetails} uris={images} /> : null}
     <SideDrawer floatingBack={false} fullscreen headerless historyKey={`social-${media.canonical_url}`} open={open && isVideo} onClose={() => setOpen(false)} title={title}>
-      {open && isVideo ? <div className="social-media-video"><ImmersiveVideo src={media.video_url || ""} poster={cover} onClose={() => setOpen(false)} onError={() => setFailed(true)} context={<a className="social-media-source" href={media.canonical_url} target="_blank" rel="noreferrer"><strong>{title}</strong><span>{media.author ? `${media.author} · ` : ""}{source} ↗</span></a>} />{failed ? <div className="social-media-error">{t("social.playbackUnavailable")} <a href={media.canonical_url} target="_blank" rel="noreferrer">{t("social.openSource")} {source}</a></div> : null}</div> : null}
+      {open && isVideo ? <div className="platform-video-shell">
+        <ImmersiveVideo context={<PlatformVideoSource author={media.author} href={media.canonical_url} label={`${t("social.openSource")} ${source}`} logo={logo} source={`${source} · ${t("social.video")}`} title={title} />} loop onClose={() => setOpen(false)} onError={() => setFailed(true)} poster={cover} src={media.video_url || ""} />
+        {failed ? <PlatformVideoError href={media.canonical_url} label={`${t("social.openSource")} ${source}`}>{t("social.playbackUnavailable")}</PlatformVideoError> : null}
+      </div> : null}
     </SideDrawer>
   </>;
 }

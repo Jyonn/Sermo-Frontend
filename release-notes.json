@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.30.5",
+  "id": "2026.09.30.6",
   "publishedAt": "2026-09-30",
   "locales": {
     "zh-CN": {
-      "title": "通讯页面更清爽",
+      "title": "视频分享样式统一",
       "items": [
-        "移除旧的好友与成员页面，旧链接会进入通讯页，好友邀请后可直接查看申请"
+        "抖音和小红书视频使用一致的分享卡片与全屏播放排版"
       ]
     },
     "en": {
-      "title": "A cleaner contacts experience",
+      "title": "Consistent video shares",
       "items": [
-        "Retired old friends and member pages; existing links now lead to Contacts, with requests opening directly after an invite"
+        "Douyin and Xiaohongshu videos now share the same card and fullscreen player layout"
       ]
     }
   }
