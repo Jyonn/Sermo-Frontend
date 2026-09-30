@@ -97,7 +97,7 @@ export default function FriendInvitePage({ overlay = false }: FriendInvitePagePr
       clearPendingFriendInviteToken();
       setRedeemState("success");
       window.setTimeout(() => {
-        navigate("/app/friends/requests", { replace: true });
+        navigate("/app/notifications?panel=friend-requests", { replace: true });
       }, 900);
     } catch (apiError) {
       setRedeemState("idle");

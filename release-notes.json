@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.30.4",
+  "id": "2026.09.30.5",
   "publishedAt": "2026-09-30",
   "locales": {
     "zh-CN": {
-      "title": "新账号先确认昵称",
+      "title": "通讯页面更清爽",
       "items": [
-        "首次进入空间时，确认昵称后才会创建新账号"
+        "移除旧的好友与成员页面，旧链接会进入通讯页，好友邀请后可直接查看申请"
       ]
     },
     "en": {
-      "title": "Confirm new account nicknames",
+      "title": "A cleaner contacts experience",
       "items": [
-        "When entering a space for the first time, confirm your nickname before the new account is created"
+        "Retired old friends and member pages; existing links now lead to Contacts, with requests opening directly after an invite"
       ]
     }
   }

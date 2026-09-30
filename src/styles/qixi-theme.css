@@ -192,7 +192,6 @@ html[data-site-theme="qixi-2026"] ::selection {
   }
 
   html[data-site-theme="qixi-2026"] :is(
-    .desktop-tab-shell > .page-stack,
     .chat-mobile-layout > .mobile-chat-list-screen,
     .mobile-chat-list-screen.is-background,
     .mobile-chat-list-screen.is-active

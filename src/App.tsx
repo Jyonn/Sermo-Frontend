@@ -26,12 +26,10 @@ const AdminSpacePage = lazy(() => import("./pages/AdminSpacePage"));
 const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebration").then((module) => ({ default: module.GrowthLevelCelebration })));
 const ChatsPage = lazy(routeResources.chats);
 const FriendProfilePage = lazy(() => import("./pages/FriendProfilePage"));
-const FriendsPage = lazy(routeResources.friends);
 const MenuPage = lazy(routeResources.menu);
 const NotificationsPage = lazy(routeResources.notifications);
 const PlatformAdminPage = lazy(() => import("./pages/PlatformAdminPage"));
 const SpaceAdminDashboardPage = lazy(() => import("./pages/SpaceAdminDashboardPage"));
-const SpaceUsersPage = lazy(routeResources["space-users"]);
 const SquarePage = lazy(routeResources.square);
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
 const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
@@ -198,35 +196,19 @@ export default function App() {
         />
         <Route
           path="/app/friends"
-          element={
-            <RequireAuth>
-              <FriendsPage />
-            </RequireAuth>
-          }
+          element={<Navigate replace to="/app/notifications" />}
         />
         <Route
           path="/app/friends/requests"
-          element={
-            <RequireAuth>
-              <FriendsPage />
-            </RequireAuth>
-          }
+          element={<Navigate replace to="/app/notifications?panel=friend-requests" />}
         />
         <Route
           path="/app/space-users"
-          element={
-            <RequireAuth>
-              <SpaceUsersPage />
-            </RequireAuth>
-          }
+          element={<Navigate replace to="/app/notifications" />}
         />
         <Route
           path="/app/space-users/online"
-          element={
-            <RequireAuth>
-              <SpaceUsersPage />
-            </RequireAuth>
-          }
+          element={<Navigate replace to="/app/notifications" />}
         />
         <Route path="*" element={<RootEntryRedirect />} />
           </Routes>

@@ -1135,9 +1135,6 @@ html[data-theme="dark"] .drawer-floating-back {
     background: transparent;
   }
 
-  html[data-theme="dark"] body .menu-tab-shell > .page-stack {
-    background: transparent;
-  }
 }
 
 html[data-theme="dark"] .verification-banner {

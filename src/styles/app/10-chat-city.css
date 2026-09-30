@@ -3699,7 +3699,6 @@ html[data-theme="dark"] :is(
 html[data-theme="dark"] :is(
   .mobile-chat-list-screen,
   .chat-mobile-layout > .panel.desktop-pane,
-  .desktop-tab-shell > .page-stack,
   .chat-mobile-layout .message-pane.chat-main-pane
 ) {
   background: rgba(17, 25, 21, 0.76);

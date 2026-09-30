@@ -4626,9 +4626,8 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
     padding: 0 24px 28px;
     overflow-x: hidden;
     overflow-y: auto;
-    border: 1px solid rgba(215, 220, 231, 0.72);
+    border: 1px solid var(--line-soft);
     border-radius: 20px;
-    background: rgba(255, 253, 248, 0.74);
   }
 
   .desktop-tab-shell > .square-plaza-page {
@@ -6006,7 +6005,6 @@ html[data-theme="dark"] body :is(
   .app-mobile-nav,
   .mobile-chat-list-screen,
   .chat-mobile-layout > .panel.desktop-pane,
-  .desktop-tab-shell > .page-stack,
   .chat-mobile-layout .message-pane.chat-main-pane
 ) {
   color: var(--text-primary);
