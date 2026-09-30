@@ -10,7 +10,7 @@ export interface ChatMuteState {
   muted_until: number | null;
   scope?: "group" | "global" | null;
 }
-export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity";
+export type MessageKind = "text" | "image" | "video" | "audio" | "file" | "location" | "map_access" | "statement" | "sticker" | "system" | "official_notice" | "submission_invite" | "forward_bundle" | "activity" | "unsupported";
 export type LinkPreviewStatus = "none" | "pending" | "ready" | "failed";
 
 export interface ApiEnvelope<T> {
@@ -970,6 +970,7 @@ export interface LinkPreviewDTO {
   site_name?: string;
   favicon_url?: string;
   provider_data?: MusicProviderDataDTO | DouyinVideoDataDTO | SocialMediaDataDTO | Record<string, unknown>;
+  min_client_version?: string;
 }
 
 export interface SocialMediaDataDTO {
@@ -1231,6 +1232,7 @@ export interface ChatMessageDTO {
   user: TinyUserDTO;
   type: number;
   content: string;
+  min_client_version?: string;
   payload?: ChatMessagePayloadDTO | null;
   reply_to?: QuotedMessageDTO | null;
   mentions?: TinyUserDTO[];
@@ -1418,6 +1420,7 @@ export interface ChatMessage {
   time: string;
   createdAt: number;
   text: string;
+  minClientVersion?: string;
   payload?: ChatMessagePayloadDTO | null;
   localPreviewUri?: string;
   replyTo?: QuotedMessageDTO | null;

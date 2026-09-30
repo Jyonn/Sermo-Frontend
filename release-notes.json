@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.29.5",
-  "publishedAt": "2026-09-29",
+  "id": "2026.09.30.1",
+  "publishedAt": "2026-09-30",
   "locales": {
     "zh-CN": {
-      "title": "媒体链接解析更稳定",
+      "title": "新内容不再悄悄消失",
       "items": [
-        "抖音、小红书和各音乐平台的链接分别排队解析，减少高峰期同时请求造成的失败"
+        "遇到当前版本暂不支持的分享或消息时，会显示更新提示和可用的原链接"
       ]
     },
     "en": {
-      "title": "More reliable media previews",
+      "title": "Clearer previews for new content",
       "items": [
-        "Douyin, Xiaohongshu, and music links now resolve in separate queues to reduce failures during busy periods"
+        "Shares and messages this version cannot preview now show an update notice and the original link when available"
       ]
     }
   }

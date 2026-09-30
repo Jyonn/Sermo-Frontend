@@ -46,6 +46,7 @@ import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
 import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
 import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
+import { UnsupportedContentNotice } from "../components/UnsupportedContentNotice";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
@@ -1710,6 +1711,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
 
   const hostname = hostnameFromUrl(currentPreview.url || "");
   if (isSupportedExternalMedia(currentPreview)) return <ExternalMediaPreview preview={currentPreview} />;
+  if (currentPreview.min_client_version && currentPreview.provider_data) return <ExternalMediaPreview preview={currentPreview} />;
   const rawTitle = currentPreview.title || hostname || currentPreview.url || i18n.t("link.title");
   const title = hostname && rawTitle.trim().toLowerCase() === hostname.toLowerCase()
     ? hostname.toUpperCase()
@@ -1853,6 +1855,9 @@ function renderMessageContent(
   groupClassName: string,
   forwardBundlePreviewDepth: number,
 ) {
+  if (message.kind === "unsupported") {
+    return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
+  }
   if (message.kind === "sticker") {
     if (!message.payload?.uri || message.payload.unavailable) {
       return <span className="message-sticker-unavailable">{i18n.t("sticker.unavailable")}</span>;

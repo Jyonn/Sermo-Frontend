@@ -16,9 +16,10 @@ const MESSAGE_KIND_BY_TYPE: Record<number, MessageKind> = {
   12: "official_notice",
   13: "submission_invite",
 };
+const KNOWN_KINDS = new Set<MessageKind>(Object.values(MESSAGE_KIND_BY_TYPE));
 
 export function messageKindFromType(type: number): MessageKind {
-  return MESSAGE_KIND_BY_TYPE[type] || "text";
+  return MESSAGE_KIND_BY_TYPE[type] || "unsupported";
 }
 
 function mapChatMessageSender(message: ChatMessageDTO, currentUserId: number) {
@@ -40,7 +41,11 @@ export function mapChatMessageDTO(
   currentUserId: number,
   formatTimestamp: (value: number) => string = () => "",
 ): ChatMessage {
-  const payloadKind = message.payload?.kind ?? messageKindFromType(message.type);
+  const mappedKind = messageKindFromType(message.type);
+  const declaredKind = message.payload?.kind;
+  const payloadKind = mappedKind === "unsupported" || (declaredKind && !KNOWN_KINDS.has(declaredKind))
+    ? "unsupported"
+    : declaredKind ?? mappedKind;
   const legacyChatGrant = payloadKind === "map_access" && message.payload?.chat_grant === true;
   const kind = legacyChatGrant ? "system" : payloadKind;
   const text = legacyChatGrant
@@ -55,6 +60,7 @@ export function mapChatMessageDTO(
     time: formatTimestamp(message.created_at),
     createdAt: message.created_at,
     text,
+    minClientVersion: message.min_client_version,
     payload: message.payload ?? (kind === "text" ? { kind: "text", text: message.content } : null),
     replyTo: message.reply_to ?? null,
     mentions: message.mentions ?? [],

@@ -6,6 +6,8 @@ import { UserAvatar } from "./UserAvatar";
 import { ImageLightbox, MediaLightbox } from "./ImageLightbox";
 import { MediaMetadataPanel } from "./MediaMetadataPanel";
 import { StatementVideoThumbnail } from "./StatementVideoThumbnail";
+import { isSupportedExternalMedia } from "./ExternalMediaPreview";
+import { UnsupportedContentNotice } from "./UnsupportedContentNotice";
 
 function formatDuration(value: number) {
   const seconds = Math.max(0, Math.floor(value || 0));
@@ -71,6 +73,9 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
       </button>
       <div className="message-statement-content">
         {statement.text ? <button className="message-statement-text" onClick={openStatement} type="button">{statement.text}</button> : null}
+        {statement.external_media?.status === "ready" && !isSupportedExternalMedia(statement.external_media) ? (
+          <UnsupportedContentNotice minVersion={statement.external_media.min_client_version} title={statement.external_media.title || statement.external_media.site_name} url={statement.external_media.url} />
+        ) : null}
         {layout.startsWith("image") ? (
           <div className={`message-statement-images count-${visibleImages.length}`}>
             {visibleImages.map((image, index) => (

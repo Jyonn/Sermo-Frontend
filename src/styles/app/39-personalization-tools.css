@@ -2383,6 +2383,12 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-content-sheet small { margin-top: 3px; color: var(--text-muted); font-size: 11px; }
 .square-external-media,
 .square-composer-external-media { position: relative; width: min(100%, 430px); margin: 13px 0 18px; }
+.unsupported-content-notice { display: flex; align-items: flex-start; gap: 10px; width: 100%; max-width: 430px; padding: 13px 14px; border: 1px solid var(--line-soft); border-radius: 16px; color: var(--text-primary); background: var(--bg-elevated); }
+.unsupported-content-notice > .material-symbols-outlined { color: var(--text-muted); font-size: 22px; }
+.unsupported-content-copy { display: grid; min-width: 0; gap: 4px; font-size: 12px; line-height: 1.45; }
+.unsupported-content-copy strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.unsupported-content-copy span { color: var(--text-muted); }
+.unsupported-content-copy a { width: fit-content; color: var(--brand-primary-press); font-weight: 700; text-decoration: none; }
 .square-composer-external-media > .square-external-media-remove { position: absolute; z-index: 3; top: 7px; right: 7px; display: grid; width: 30px; height: 30px; place-items: center; margin: 0; padding: 0; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: rgba(17,25,22,.72); color: #fff; font-size: 18px; backdrop-filter: blur(10px); }
 
 .square-composer-photos,

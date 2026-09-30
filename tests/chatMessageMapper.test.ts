@@ -20,7 +20,7 @@ function message(type = 0): ChatMessageDTO {
 
 test("maps every server message type through one canonical table", () => {
   expectedKinds.forEach((kind, type) => assert.equal(messageKindFromType(type), kind));
-  assert.equal(messageKindFromType(999), "text");
+  assert.equal(messageKindFromType(999), "unsupported");
 });
 
 test("normalizes sender, payload text, and display time consistently", () => {
@@ -36,4 +36,19 @@ test("normalizes sender, payload text, and display time consistently", () => {
 
 test("creates the canonical text payload when an old response has none", () => {
   assert.deepEqual(mapChatMessageDTO(message(), 99).payload, { kind: "text", text: "原始内容" });
+});
+
+test("unknown types retain their upgrade requirement instead of becoming text", () => {
+  const source = message(999);
+  source.min_client_version = "2026.10.01.1";
+  source.payload = { kind: "text", text: "不可当作普通文字" };
+  const mapped = mapChatMessageDTO(source, 99);
+  assert.equal(mapped.kind, "unsupported");
+  assert.equal(mapped.minClientVersion, "2026.10.01.1");
+});
+
+test("unknown payload kinds also use the compatibility placeholder", () => {
+  const source = message();
+  source.payload = { kind: "future_kind" as "text" };
+  assert.equal(mapChatMessageDTO(source, 99).kind, "unsupported");
 });
