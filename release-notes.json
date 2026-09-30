@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.30.6",
-  "publishedAt": "2026-09-30",
+  "id": "2026.10.01.1",
+  "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "视频分享样式统一",
+      "title": "优化抖音分享解析",
       "items": [
-        "抖音和小红书视频使用一致的分享卡片与全屏播放排版"
+        "抖音链接改用普通浏览器方式请求，改善图文和视频分享的解析兼容性"
       ]
     },
     "en": {
-      "title": "Consistent video shares",
+      "title": "Improved Douyin share parsing",
       "items": [
-        "Douyin and Xiaohongshu videos now share the same card and fullscreen player layout"
+        "Douyin links now use regular browser requests for better photo and video share compatibility"
       ]
     }
   }
