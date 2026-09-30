@@ -2373,7 +2373,7 @@ html[data-theme="dark"] .notification-routing-mode .mode-pill.active {
 .square-compose-publish-copy { display: flex; align-items: flex-start; flex-direction: column; line-height: 1.1; }
 .square-compose-publish-copy small { margin-bottom: 3px; opacity: .62; font-size: 8px; font-weight: 750; letter-spacing: .04em; }
 .square-compose-publish-copy strong { font-size: 14px; font-weight: 850; }
-.square-compose-publish-footer .material-symbols-outlined { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 12px; color: inherit; font-size: 20px; background: color-mix(in srgb, white 25%, transparent); }
+.square-compose-publish-footer > button > .material-symbols-outlined { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 12px; color: inherit; font-size: 20px; background: color-mix(in srgb, white 25%, transparent); }
 .square-content-sheet { display: grid; gap: 9px; }
 .square-content-sheet > button { display: grid; grid-template-columns: 44px minmax(0, 1fr) 22px; align-items: center; gap: 12px; width: 100%; min-height: 68px; padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 18px; color: var(--text-primary); font: inherit; text-align: left; background: var(--bg-elevated); }
 .square-content-sheet > button:disabled { opacity: .42; }

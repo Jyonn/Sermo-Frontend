@@ -1,17 +1,17 @@
 {
-  "id": "2026.09.30.2",
+  "id": "2026.09.30.3",
   "publishedAt": "2026-09-30",
   "locales": {
     "zh-CN": {
-      "title": "发表发言更顺手",
+      "title": "发表设置间距优化",
       "items": [
-        "发布设置和按钮固定在底部，添加的照片、视频不再被挤压变形"
+        "修正“谁可以看”右侧箭头的样式与留白"
       ]
     },
     "en": {
-      "title": "A smoother post composer",
+      "title": "Improved post setting spacing",
       "items": [
-        "Publishing controls stay at the bottom, while added photos and videos keep their shape"
+        "Fixed the arrow styling and spacing in the post visibility setting"
       ]
     }
   }
