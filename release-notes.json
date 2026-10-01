@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.2",
+  "id": "2026.10.02.3",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "减少聊天键盘短暂白屏",
+      "title": "修复聊天消息短暂空白",
       "items": [
-        "键盘弹出时若浏览器意外滚动页面，聊天页现在会立即复位，减少短暂空白"
+        "打开或恢复聊天时，消息列表会与滚动位置同步显示，减少短暂空白"
       ]
     },
     "en": {
-      "title": "Reduce brief blank screens in chat",
+      "title": "Fix brief empty chat messages",
       "items": [
-        "Chat now immediately restores the page when the browser unexpectedly scrolls it while the keyboard opens"
+        "Message rendering now stays in sync with the scroll position when opening or restoring a chat"
       ]
     }
   }

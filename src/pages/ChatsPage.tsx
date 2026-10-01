@@ -2878,13 +2878,25 @@ function sortChats(items: Chat[]) {
   return [...items].sort((left, right) => Number(right.pinned) - Number(left.pinned) || right.lastActivity - left.lastActivity);
 }
 
-function scrollThreadToBottom(element: HTMLDivElement | null) {
+function scrollThreadToBottom(
+  element: HTMLDivElement | null,
+  virtualListRef: RefObject<VirtualDynamicListHandle | null>,
+  immediate = false,
+) {
   if (!element) return;
 
-  requestAnimationFrame(() => {
-    const target = element;
-    target.scrollTop = target.scrollHeight;
-  });
+  const scroll = () => {
+    recordChatLayout("action", { kind: 4, scrollTop: Math.round(element.scrollTop), scrollHeight: element.scrollHeight });
+    const virtualList = virtualListRef.current;
+    if (virtualList) {
+      // Commit the virtual range before the browser paints the scrolled position.
+      flushSync(() => virtualList.scrollToEnd());
+    } else {
+      element.scrollTop = element.scrollHeight;
+    }
+  };
+  if (immediate) scroll();
+  else requestAnimationFrame(scroll);
 }
 
 function animateThreadScroll(element: HTMLDivElement, targetTop: number, duration = 220) {
@@ -4542,7 +4554,7 @@ function LiveChatsPage({
       requestAnimationFrame(() => requestAnimationFrame(() => {
         const element = messageScrollRef.current;
         if (!element) return;
-        element.scrollTop = element.scrollHeight;
+        scrollThreadToBottom(element, virtualMessageListRef, true);
         stickToBottomRef.current = true;
         if (releaseAnchor) {
           window.setTimeout(() => {
@@ -4718,7 +4730,7 @@ function LiveChatsPage({
           void chatCache.persistThread(cacheScope, chatId, snapshot);
         }
         stickToBottomRef.current = true;
-        requestAnimationFrame(() => scrollThreadToBottom(messageScrollRef.current));
+        requestAnimationFrame(() => scrollThreadToBottom(messageScrollRef.current, virtualMessageListRef));
         return true;
       } catch (apiError) {
         if (isChatAccessBoundaryError(apiError)) {
@@ -4750,7 +4762,7 @@ function LiveChatsPage({
     if (!selectedMessages.length) return;
     if (initialScrollDoneRef.current === selectedChat.id) return;
 
-    scrollThreadToBottom(messageScrollRef.current);
+    scrollThreadToBottom(messageScrollRef.current, virtualMessageListRef);
     initialScrollDoneRef.current = selectedChat.id;
     stickToBottomRef.current = true;
   }, [selectedChat, selectedMessages.length]);
@@ -5359,7 +5371,7 @@ function LiveChatsPage({
     if (!stickToBottomRef.current) return;
     if (revealAnimatingRef.current) return;
 
-    scrollThreadToBottom(messageScrollRef.current);
+    scrollThreadToBottom(messageScrollRef.current, virtualMessageListRef);
   }, [composerHeight, visualViewportHeight, selectedChat]);
 
   useEffect(() => {
@@ -5368,7 +5380,7 @@ function LiveChatsPage({
       !shouldFollowLatestWindow(hasNewerMessagesRef.current, stickToBottomRef.current)
       || revealAnimatingRef.current
     ) return;
-    scrollThreadToBottom(messageScrollRef.current);
+    scrollThreadToBottom(messageScrollRef.current, virtualMessageListRef);
   }, [selectedChat?.id, selectedMessages[selectedMessages.length - 1]?.clientId]);
 
   useEffect(() => {
