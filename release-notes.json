@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.2",
+  "id": "2026.10.01.3",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "常用表情包排序更准确",
+      "title": "语音消息宽度统一",
       "items": [
-        "发送探索表情包后按使用习惯更新常用排序，不再直接置顶"
+        "语音气泡改为固定宽度，与展开后的转文字内容对齐"
       ]
     },
     "en": {
-      "title": "More accurate favorite stickers",
+      "title": "Consistent voice message width",
       "items": [
-        "Explored stickers now update their favorites ranking based on usage instead of jumping straight to the top"
+        "Voice bubbles now use a consistent width aligned with their expanded transcripts"
       ]
     }
   }

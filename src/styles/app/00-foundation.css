@@ -5626,6 +5626,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   box-sizing: border-box;
 }
 
+.message-bubble.is-audio {
+  width: var(--message-bubble-max-width);
+  box-sizing: border-box;
+}
+
 /* The bubble owns skin, grouping radii and IP/VIP ornaments. The statement
    card only lays out content, so every current and future skin stays valid. */
 .message-bubble.is-statement {
@@ -7178,7 +7183,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   --audio-transcript-overlap: 24px;
   --audio-transcript-radius: var(--radius-bubble);
   position: relative;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -7186,10 +7191,11 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  width: fit-content;
+  width: 100%;
+  box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
   min-height: 0;
@@ -7255,7 +7261,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-audio-body {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   min-width: 0;
@@ -7267,13 +7273,14 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
 
 .message-audio-wave {
   display: flex;
-  flex: 0 0 auto;
   align-items: flex-end;
   gap: 3px;
   height: 20px;
+  overflow: hidden;
 }
 
 .message-audio-wave-bar {
+  flex: 0 0 3px;
   width: 3px;
   height: 100%;
   border-radius: 999px;
@@ -9475,10 +9482,6 @@ html[data-theme="dark"] .square-chat-record {
 ) {
   min-width: 0;
   max-width: min(100%, 270px);
-}
-
-.personalization-chat-preview .message-audio-card {
-  width: fit-content;
 }
 
 .personalization-live-media {
