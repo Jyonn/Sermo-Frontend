@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.4",
+  "id": "2026.10.02.5",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "更灵活的开发者工具",
+      "title": "聊天日期查找更顺畅",
       "items": [
-        "调试图标可常驻显示，布局诊断记录支持随时开始或暂停录制"
+        "按日期查找聊天记录时，可以连续翻过没有消息的月份"
       ]
     },
     "en": {
-      "title": "More flexible developer tools",
+      "title": "Easier date browsing in chats",
       "items": [
-        "Keep the debug icon visible and start or pause layout diagnostics whenever needed"
+        "Browse past months without messages when searching chat history by date"
       ]
     }
   }

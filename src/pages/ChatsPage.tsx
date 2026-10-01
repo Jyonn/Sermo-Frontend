@@ -3140,6 +3140,7 @@ function LiveChatsPage({
   };
   const [messageSearchHighlightId, setMessageSearchHighlightId] = useState<number | null>(null);
   const [messageSearchCalendarOpen, setMessageSearchCalendarOpen] = useState(false);
+  const messageSearchCalendarInitialLoadRef = useRef(false);
   const [messageSearchCalendarMonth, setMessageSearchCalendarMonth] = useState(() => {
     const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit" }).formatToParts(new Date());
     const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
@@ -4371,10 +4372,13 @@ function LiveChatsPage({
     setMessageSearchCalendarLoading(true);
     void api.getMessageSearchCalendar(selectedChat.id, messageSearchCalendarMonth.year, messageSearchCalendarMonth.month, controller.signal)
       .then((data) => {
+        if (controller.signal.aborted) return;
         setMessageSearchCalendar(data);
+        const initialLoad = messageSearchCalendarInitialLoadRef.current;
+        messageSearchCalendarInitialLoadRef.current = false;
         const latest = data.range?.latest_date;
         const viewedMonth = `${messageSearchCalendarMonth.year}-${String(messageSearchCalendarMonth.month).padStart(2, "0")}`;
-        if (!data.days.length && latest && !latest.startsWith(viewedMonth)) {
+        if (initialLoad && !data.days.some((day) => day.date.startsWith(viewedMonth)) && latest && !latest.startsWith(viewedMonth)) {
           const [year, month] = latest.split("-").map(Number);
           setMessageSearchCalendarMonth({ year, month });
         }
@@ -9527,7 +9531,14 @@ function LiveChatsPage({
                 </button>
               ) : null}
             </label>
-            <button className="message-search-date-trigger" onClick={() => setMessageSearchCalendarOpen(true)} type="button">
+            <button className="message-search-date-trigger" onClick={() => {
+              const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit" }).formatToParts(new Date());
+              const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+              messageSearchCalendarInitialLoadRef.current = true;
+              setMessageSearchCalendarMonth({ year: Number(values.year), month: Number(values.month) });
+              setMessageSearchCalendar(null);
+              setMessageSearchCalendarOpen(true);
+            }} type="button">
               <span className="material-symbols-outlined">calendar_month</span>
               <span>{t("messageSearch.byDate")}</span>
               <span className="material-symbols-outlined">chevron_right</span>
@@ -9643,12 +9654,12 @@ function LiveChatsPage({
         }}
         totalCount={messageSearchTotal}
       /> : null}
-      <BottomSheet className="message-search-calendar-sheet" onClose={() => setMessageSearchCalendarOpen(false)} open={messageSearchCalendarOpen} title={t("messageSearch.byDate")}>
+      <BottomSheet className="message-search-calendar-sheet" onClose={() => { messageSearchCalendarInitialLoadRef.current = false; setMessageSearchCalendarOpen(false); }} open={messageSearchCalendarOpen} title={t("messageSearch.byDate")}>
         <ContentDatePicker
           entries={messageSearchCalendar?.days ?? []}
           loading={messageSearchCalendarLoading}
           month={messageSearchCalendarMonth}
-          onMonthChange={setMessageSearchCalendarMonth}
+          onMonthChange={(month) => { messageSearchCalendarInitialLoadRef.current = false; setMessageSearchCalendarMonth(month); }}
           onSelect={(_date, entry) => entry && revealMessageFromSearch(entry.first_message_id)}
           range={messageSearchCalendar?.range}
         />
