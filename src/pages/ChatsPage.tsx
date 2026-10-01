@@ -3171,6 +3171,7 @@ function LiveChatsPage({
   const exploreStickerOffsetRef = useRef(initialExploreStickerCache?.data.nextOffset ?? 0);
   const mineStickerRequestRef = useRef(false);
   const exploreStickerRequestRef = useRef(false);
+  const exploreStickerUsageRefreshRef = useRef(0);
   const [stickerSaving, setStickerSaving] = useState(false);
   const [stickerManagerOpen, setStickerManagerOpen] = useState(false);
   const [stickerManagerSelecting, setStickerManagerSelecting] = useState(false);
@@ -4771,10 +4772,12 @@ function LiveChatsPage({
     const cached = readTabCache<StickerPageCache<StickerAssetDTO>>(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY);
     if (cached && Date.now() - cached.updatedAt < STICKER_CACHE_MAX_AGE) return;
     const controller = new AbortController();
+    const requestId = ++exploreStickerUsageRefreshRef.current;
     exploreStickerRequestRef.current = true;
     setExploreStickersLoading(!cached?.data.items.length);
     void api.exploreStickers(0, STICKER_PAGE_SIZE, controller.signal)
       .then((response) => {
+        if (controller.signal.aborted || requestId !== exploreStickerUsageRefreshRef.current) return;
         const preserveCachedPages = Boolean(cached?.data.items.length && cached.data.nextOffset > response.next_offset);
         const pageItems = preserveCachedPages
           ? mergeStickerPage(response.items, cached!.data.items, (item) => item.sticker_asset_id)
@@ -4876,6 +4879,32 @@ function LiveChatsPage({
       nextOffset: exploreStickerOffsetRef.current,
       frequentIds,
     });
+  };
+
+  const refreshExploreStickerUsage = async () => {
+    if (!stickerCacheScope) return;
+    const requestId = ++exploreStickerUsageRefreshRef.current;
+    try {
+      const response = await api.exploreStickers(0, STICKER_PAGE_SIZE);
+      if (requestId !== exploreStickerUsageRefreshRef.current) return;
+      const frequentItems = response.frequent_items ?? [];
+      const frequentIds = frequentItems.map((item) => item.sticker_asset_id);
+      const cached = readTabCache<StickerPageCache<StickerAssetDTO>>(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY);
+      const preserveCachedPages = Boolean(cached?.data.items.length && cached.data.nextOffset > response.next_offset);
+      const pageItems = preserveCachedPages
+        ? mergeStickerPage(response.items, cached!.data.items, (item) => item.sticker_asset_id)
+        : response.items;
+      const items = mergeStickerPage(frequentItems, pageItems, (item) => item.sticker_asset_id);
+      const hasMore = preserveCachedPages ? cached!.data.hasMore : response.has_more;
+      const nextOffset = preserveCachedPages ? cached!.data.nextOffset : response.next_offset;
+      setExploreStickers(items);
+      setFrequentExploreStickerIds(frequentIds);
+      setExploreStickersHasMore(hasMore);
+      exploreStickerOffsetRef.current = nextOffset;
+      writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, { items, hasMore, nextOffset, frequentIds });
+    } catch {
+      // Sending succeeded; a later panel refresh can recover the ranking.
+    }
   };
 
   useEffect(() => {
@@ -5056,20 +5085,7 @@ function LiveChatsPage({
         ...current,
         [selectedChat.id]: confirmPendingMessage(current[selectedChat.id] ?? [], clientId, delivered),
       }));
-      if (!("sticker_id" in sticker)) {
-        const nextFrequentIds = [sticker.sticker_asset_id, ...frequentExploreStickerIds.filter((id) => id !== sticker.sticker_asset_id)].slice(0, 5);
-        setFrequentExploreStickerIds(nextFrequentIds);
-        setExploreStickers((current) => {
-          const items = [sticker, ...current.filter((item) => item.sticker_asset_id !== sticker.sticker_asset_id)];
-          writeTabCache(stickerCacheScope, STICKER_EXPLORE_CACHE_KEY, {
-            items,
-            hasMore: exploreStickersHasMore,
-            nextOffset: exploreStickerOffsetRef.current,
-            frequentIds: nextFrequentIds,
-          });
-          return items;
-        });
-      }
+      if (!("sticker_id" in sticker)) void refreshExploreStickerUsage();
     } catch {
       setMessages((current) => ({
         ...current,
@@ -8429,7 +8445,7 @@ function LiveChatsPage({
                         {exploreStickers.length ? (
                           <div className="composer-sticker-grid has-frequent-row" onScroll={(event) => handleStickerGridScroll(event, "explore")}>
                             {exploreStickers.map((sticker, index) => (
-                              <div className={`composer-sticker-explore-item${index < 5 ? " is-frequent" : ""}`} key={sticker.sticker_asset_id}>
+                              <div className={`composer-sticker-explore-item${index < frequentExploreStickerIds.length && frequentExploreStickerIds.includes(sticker.sticker_asset_id) ? " is-frequent" : ""}`} key={sticker.sticker_asset_id}>
                                 <button aria-label={t("sticker.send")} className="composer-sticker-item is-explore" disabled={stickerSaving} onClick={() => void sendSticker(sticker)} type="button">
                                   <StickerImage src={resolveStableResourceUri(sticker.uri) ?? sticker.uri} />
                                 </button>

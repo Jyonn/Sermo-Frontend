@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.1",
+  "id": "2026.10.01.2",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "优化抖音分享解析",
+      "title": "常用表情包排序更准确",
       "items": [
-        "抖音链接改用普通浏览器方式请求，改善图文和视频分享的解析兼容性"
+        "发送探索表情包后按使用习惯更新常用排序，不再直接置顶"
       ]
     },
     "en": {
-      "title": "Improved Douyin share parsing",
+      "title": "More accurate favorite stickers",
       "items": [
-        "Douyin links now use regular browser requests for better photo and video share compatibility"
+        "Explored stickers now update their favorites ranking based on usage instead of jumping straight to the top"
       ]
     }
   }
