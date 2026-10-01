@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.10",
+  "id": "2026.10.01.11",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "新增聊天布局诊断",
+      "title": "增强聊天白屏诊断",
       "items": [
-        "账号与安全中可开启聊天键盘白屏诊断，并通过浮动入口复制本机布局记录"
+        "聊天键盘白屏诊断现在可记录页面位移与浏览器滚动，更容易定位短暂空白"
       ]
     },
     "en": {
-      "title": "Chat layout diagnostics",
+      "title": "More precise chat layout diagnostics",
       "items": [
-        "Enable keyboard layout diagnostics in Account & Security and copy local records from the floating button"
+        "Keyboard diagnostics now capture page movement and browser scrolling to help pinpoint brief blank screens"
       ]
     }
   }

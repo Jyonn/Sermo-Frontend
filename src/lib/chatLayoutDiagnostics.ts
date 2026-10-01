@@ -7,7 +7,7 @@ export type ChatLayoutMetric = number | boolean | null;
 export interface ChatLayoutEntry {
   at: number;
   elapsed: number;
-  event: "viewport" | "layout" | "keyboard";
+  event: "viewport" | "layout" | "keyboard" | "windowScroll" | "scrollCorrection";
   metrics: Record<string, ChatLayoutMetric>;
 }
 

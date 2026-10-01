@@ -5797,6 +5797,7 @@ function LiveChatsPage({
       const scroller = messageScrollRef.current;
       if (!scroller) return;
       const bounds = scroller.getBoundingClientRect();
+      const inputBounds = mentionEditorRef.current?.getElement()?.getBoundingClientRect();
       const rows = scroller.querySelectorAll<HTMLElement>(".virtual-dynamic-list-row");
       const visibleRows = Array.from(rows).filter((row) => {
         const rowBounds = row.getBoundingClientRect();
@@ -5804,6 +5805,11 @@ function LiveChatsPage({
       }).length;
       recordChatLayout("layout", {
         viewportHeight: Math.round(viewport?.height ?? window.innerHeight),
+        viewportOffsetTop: Math.round(viewport?.offsetTop ?? 0),
+        viewportPageTop: Math.round(viewport?.pageTop ?? window.scrollY),
+        windowScrollY: Math.round(window.scrollY),
+        bodyTop: Math.round(body.getBoundingClientRect().top),
+        rootTop: Math.round(root.getBoundingClientRect().top),
         bodyHeight: Math.round(body.getBoundingClientRect().height),
         scrollerHeight: scroller.clientHeight,
         scrollerTop: Math.round(bounds.top),
@@ -5811,6 +5817,8 @@ function LiveChatsPage({
         scrollHeight: scroller.scrollHeight,
         renderedRows: rows.length,
         visibleRows,
+        inputTop: inputBounds ? Math.round(inputBounds.top) : null,
+        inputBottom: inputBounds ? Math.round(inputBounds.bottom) : null,
         composerHeight: Math.round(composerRef.current?.getBoundingClientRect().height ?? 0),
       });
     };
@@ -5849,6 +5857,10 @@ function LiveChatsPage({
         height: nextHeight,
         width: nextWidth,
         offsetTop: Math.round(viewport?.offsetTop ?? 0),
+        pageTop: Math.round(viewport?.pageTop ?? window.scrollY),
+        windowScrollY: Math.round(window.scrollY),
+        bodyTop: Math.round(body.getBoundingClientRect().top),
+        inputTop: Math.round(mentionEditorRef.current?.getElement()?.getBoundingClientRect().top ?? 0),
         keyboardOpen,
       });
       if (keyboardOpen !== previousKeyboardOpen) {
@@ -5857,13 +5869,31 @@ function LiveChatsPage({
       }
       scheduleLayout();
       setVisualViewportHeight(nextHeight);
-      if (window.scrollY !== 0) window.scrollTo(0, 0);
+      if (window.scrollY !== 0) {
+        recordChatLayout("scrollCorrection", {
+          windowScrollY: Math.round(window.scrollY),
+          offsetTop: Math.round(viewport?.offsetTop ?? 0),
+          bodyTop: Math.round(body.getBoundingClientRect().top),
+        });
+        window.scrollTo(0, 0);
+      }
+    };
+
+    const recordWindowScroll = () => {
+      recordChatLayout("windowScroll", {
+        windowScrollY: Math.round(window.scrollY),
+        viewportOffsetTop: Math.round(viewport?.offsetTop ?? 0),
+        viewportPageTop: Math.round(viewport?.pageTop ?? window.scrollY),
+        bodyTop: Math.round(body.getBoundingClientRect().top),
+      });
+      scheduleLayout();
     };
 
     updateViewport();
     viewport?.addEventListener("resize", updateViewport);
     viewport?.addEventListener("scroll", updateViewport);
     window.addEventListener("resize", updateViewport);
+    window.addEventListener("scroll", recordWindowScroll, { passive: true });
     document.addEventListener("focusin", updateViewport);
     document.addEventListener("focusout", updateViewport);
 
@@ -5874,6 +5904,7 @@ function LiveChatsPage({
       viewport?.removeEventListener("resize", updateViewport);
       viewport?.removeEventListener("scroll", updateViewport);
       window.removeEventListener("resize", updateViewport);
+      window.removeEventListener("scroll", recordWindowScroll);
       document.removeEventListener("focusin", updateViewport);
       document.removeEventListener("focusout", updateViewport);
       root.style.removeProperty("--app-visual-viewport-height");
