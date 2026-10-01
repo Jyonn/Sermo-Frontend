@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.3",
+  "id": "2026.10.02.4",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "修复聊天消息短暂空白",
+      "title": "更灵活的开发者工具",
       "items": [
-        "打开或恢复聊天时，消息列表会与滚动位置同步显示，减少短暂空白"
+        "调试图标可常驻显示，布局诊断记录支持随时开始或暂停录制"
       ]
     },
     "en": {
-      "title": "Fix brief empty chat messages",
+      "title": "More flexible developer tools",
       "items": [
-        "Message rendering now stays in sync with the scroll position when opening or restoring a chat"
+        "Keep the debug icon visible and start or pause layout diagnostics whenever needed"
       ]
     }
   }

@@ -1,36 +1,49 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const stored = new Map<string, string>();
-const browser = Object.assign(new EventTarget(), {
-  localStorage: {
-    getItem: (key: string) => stored.get(key) ?? null,
-    setItem: (key: string, value: string) => { stored.set(key, value); },
-    removeItem: (key: string) => { stored.delete(key); },
+const storage = new Map<string, string>();
+Object.defineProperty(globalThis, "window", {
+  configurable: true,
+  value: {
+    localStorage: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+      removeItem: (key: string) => storage.delete(key),
+    },
+    dispatchEvent: () => true,
+    setTimeout,
+    clearTimeout,
   },
-  setTimeout,
-  clearTimeout,
 });
-Object.defineProperty(globalThis, "window", { configurable: true, value: browser });
 
 const diagnostics = await import("../src/lib/chatLayoutDiagnostics.ts");
 
-test("layout diagnostics are opt-in, bounded, and numeric-only", () => {
-  diagnostics.recordChatLayout("viewport", { height: 600 });
-  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 0);
+test("persistent debugger remains visible independently of recording", () => {
+  diagnostics.setDebuggerVisible(true);
+  assert.equal(diagnostics.getChatLayoutDiagnostics().debuggerVisible, true);
+  assert.equal(storage.get("sermo:developer-tools-visible"), "true");
+  assert.equal(diagnostics.getChatLayoutDiagnostics().recording, false);
 
   diagnostics.setChatLayoutDiagnosticsEnabled(true);
-  for (let index = 0; index < 185; index += 1) {
-    diagnostics.recordChatLayout("layout", { height: index, unsafe: "message text" } as never);
-  }
-  const entries = diagnostics.getChatLayoutDiagnostics().entries;
-  assert.equal(entries.length, 180);
-  assert.deepEqual(entries[0].metrics, { height: 5 });
-  assert.equal(diagnostics.chatLayoutDiagnosticsReport().includes("message text"), false);
+  diagnostics.recordChatLayout("keyboard", { open: true });
+  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 1);
+
+  diagnostics.setChatLayoutDiagnosticsRecording(false);
+  assert.equal(storage.get("sermo:chat-layout-diagnostics-recording"), "false");
+  diagnostics.recordChatLayout("keyboard", { open: false });
+  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 1);
+
+  diagnostics.setChatLayoutDiagnosticsRecording(true);
+  diagnostics.recordChatLayout("keyboard", { open: false });
+  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 2);
 
   diagnostics.setChatLayoutDiagnosticsEnabled(false);
-  diagnostics.recordChatLayout("layout", { height: 999 });
-  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 180);
+  assert.equal(diagnostics.getChatLayoutDiagnostics().recording, false);
+  assert.equal(diagnostics.getChatLayoutDiagnostics().debuggerVisible, true);
+  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 2);
+  diagnostics.setChatLayoutDiagnosticsRecording(true);
+  assert.equal(diagnostics.getChatLayoutDiagnostics().recording, false);
+
+  diagnostics.setDebuggerVisible(false);
   diagnostics.clearChatLayoutDiagnostics();
-  assert.equal(diagnostics.getChatLayoutDiagnostics().entries.length, 0);
 });

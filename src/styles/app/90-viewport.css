@@ -29,12 +29,82 @@
   font-variant-numeric: tabular-nums;
 }
 
+.chat-diagnostics-fab.is-recording::after {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  content: "";
+}
+
 .chat-diagnostics-panel {
   display: grid;
   align-content: start;
   gap: 16px;
   padding: 20px;
   color: var(--text-primary);
+}
+
+.chat-diagnostics-recorder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.chat-diagnostics-recorder > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: .88rem;
+  font-weight: 700;
+}
+
+.chat-diagnostics-recorder i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.chat-diagnostics-recorder .is-recording i {
+  background: var(--brand-primary);
+}
+
+.chat-diagnostics-recorder button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--brand-primary) 7%, var(--bg-elevated));
+  font-weight: 700;
+}
+
+.chat-diagnostics-recorder button:disabled {
+  opacity: .45;
+}
+
+.chat-diagnostics-recorder button .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.chat-diagnostics-section-label {
+  margin: 2px 18px -8px;
+  color: var(--text-muted);
+  font-size: .76rem;
+  font-weight: 700;
 }
 
 .chat-diagnostics-panel > p,

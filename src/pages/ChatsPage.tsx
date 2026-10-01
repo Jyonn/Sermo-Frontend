@@ -5815,7 +5815,7 @@ function LiveChatsPage({
     let previousKeyboardOpen = false;
 
     const recordLayout = () => {
-      if (!getChatLayoutDiagnostics().enabled) return;
+      if (!getChatLayoutDiagnostics().recording) return;
       const scroller = messageScrollRef.current;
       if (!scroller) return;
       const bounds = scroller.getBoundingClientRect();
@@ -5885,7 +5885,7 @@ function LiveChatsPage({
     };
 
     const scheduleLayout = () => {
-      if (!getChatLayoutDiagnostics().enabled) return;
+      if (!getChatLayoutDiagnostics().recording) return;
       window.cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
       frame = window.requestAnimationFrame(recordLayout);

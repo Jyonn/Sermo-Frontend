@@ -48,7 +48,7 @@ import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 import { checkForPwaUpdate, CURRENT_RELEASE, type ExplicitUpdateCheckResult } from "../lib/pwaUpdate";
-import { getChatLayoutDiagnostics, setChatLayoutDiagnosticsEnabled, subscribeChatLayoutDiagnostics } from "../lib/chatLayoutDiagnostics";
+import { getChatLayoutDiagnostics, setChatLayoutDiagnosticsEnabled, setDebuggerVisible, subscribeChatLayoutDiagnostics } from "../lib/chatLayoutDiagnostics";
 
 const MAX_NICKNAME_LENGTH = 8;
 const EMAIL_THRESHOLD_OPTIONS = [10, 20, 30, 60, 120, 180, 360, 720, 1440];
@@ -2867,6 +2867,15 @@ export default function MenuPage() {
 
       <SideDrawer historyKey="developer-tools" onClose={() => setDeveloperDrawerOpen(false)} open={developerDrawerOpen && Boolean(me?.verified ?? session?.user.verified)} title={t("diagnostics.developerTools")}>
         <div className="detail-list account-security-sections">
+          <SettingGroup>
+            <SettingRow
+              description={t("diagnostics.persistentHint")}
+              icon={<span className="material-symbols-outlined">bug_report</span>}
+              title={t("diagnostics.persistent")}
+              trailing={<SettingSwitch checked={chatDiagnostics.debuggerVisible} label={t("diagnostics.persistent")} onChange={setDebuggerVisible} />}
+            />
+          </SettingGroup>
+          <p className="chat-diagnostics-section-label">{t("diagnostics.events")}</p>
           <SettingGroup>
             <SettingRow
               description={t("diagnostics.toggleHint")}

@@ -10,11 +10,12 @@ import {
   getChatLayoutDiagnostics,
   subscribeChatLayoutDiagnostics,
   setChatLayoutDiagnosticsEnabled,
+  setChatLayoutDiagnosticsRecording,
 } from "../lib/chatLayoutDiagnostics";
 
 export function GlobalChatLayoutDiagnostics() {
   const { t } = useI18n();
-  const { enabled, entries } = useSyncExternalStore(subscribeChatLayoutDiagnostics, getChatLayoutDiagnostics, getChatLayoutDiagnostics);
+  const { debuggerVisible, enabled, recording, entries } = useSyncExternalStore(subscribeChatLayoutDiagnostics, getChatLayoutDiagnostics, getChatLayoutDiagnostics);
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const { session } = useAuth();
@@ -36,15 +37,22 @@ export function GlobalChatLayoutDiagnostics() {
     }
   };
 
-  if (!verified || (!enabled && !open)) return null;
+  if (!verified || (!debuggerVisible && !enabled && !open)) return null;
 
   return <>
-    {enabled && !open ? <button aria-label={t("diagnostics.open")} className="chat-diagnostics-fab" onClick={() => setOpen(true)} type="button">
+    {!open ? <button aria-label={t("diagnostics.open")} className={`chat-diagnostics-fab${enabled && recording ? " is-recording" : ""}`} onClick={() => setOpen(true)} type="button">
       <span className="material-symbols-outlined" aria-hidden="true">bug_report</span>
       <span>{entries.length}</span>
     </button> : null}
     <SideDrawer historyKey="chat-diagnostics" onClose={() => setOpen(false)} open={open} title={t("diagnostics.title")}>
       <div className="chat-diagnostics-panel">
+        <div className="chat-diagnostics-recorder">
+          <span className={enabled && recording ? "is-recording" : ""}><i aria-hidden="true" />{t(!enabled ? "diagnostics.noEvent" : recording ? "diagnostics.recording" : "diagnostics.paused")}</span>
+          <button disabled={!enabled} onClick={() => setChatLayoutDiagnosticsRecording(!recording)} type="button">
+            <span className="material-symbols-outlined" aria-hidden="true">{recording ? "pause" : "fiber_manual_record"}</span>
+            {t(recording ? "diagnostics.pause" : "diagnostics.start")}
+          </button>
+        </div>
         <p>{t("diagnostics.privacy")}</p>
         <div className="chat-diagnostics-actions">
           <button disabled={!entries.length || uploading} onClick={() => void upload()} type="button">{t(uploading ? "diagnostics.uploading" : "diagnostics.upload")}</button>

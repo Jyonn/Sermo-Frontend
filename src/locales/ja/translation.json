@@ -2575,6 +2575,14 @@
   "update.recheck": "再確認",
   "update.current": "現在のバージョン {{version}}",
   "diagnostics.developerTools": "開発者ツール",
+  "diagnostics.persistent": "デバッガーを常に表示",
+  "diagnostics.persistentHint": "診断項目を選んでいなくてもフローティングアイコンを表示します",
+  "diagnostics.events": "診断項目",
+  "diagnostics.recording": "記録中",
+  "diagnostics.paused": "記録を一時停止中",
+  "diagnostics.noEvent": "診断項目が未選択です",
+  "diagnostics.start": "記録を開始",
+  "diagnostics.pause": "記録を一時停止",
   "diagnostics.entryHint": "この端末の表示問題を調べます",
   "diagnostics.keyboard": "チャットのキーボード表示診断",
   "diagnostics.toggleHint": "キーボード表示時の画面とメッセージ一覧のサイズを記録します",
@@ -2585,5 +2593,5 @@
   "diagnostics.uploading": "送信中",
   "diagnostics.uploaded": "レポートを送信しました",
   "diagnostics.uploadFailed": "レポートを送信できませんでした",
-  "diagnostics.empty": "記録はまだありません。チャットでキーボードを開くと記録が始まります。"
+  "diagnostics.empty": "記録はまだありません。診断項目を選び、記録を開始してからチャットで問題を再現してください。"
 }

@@ -1,4 +1,6 @@
 const STORAGE_KEY = "sermo:chat-layout-diagnostics-until";
+const VISIBLE_STORAGE_KEY = "sermo:developer-tools-visible";
+const RECORDING_STORAGE_KEY = "sermo:chat-layout-diagnostics-recording";
 const EVENT = "sermo:chat-layout-diagnostics-change";
 const MAX_ENTRIES = 180;
 const ENABLE_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -13,8 +15,28 @@ export interface ChatLayoutEntry {
 }
 
 interface ChatLayoutDiagnosticsState {
+  debuggerVisible: boolean;
   enabled: boolean;
+  recording: boolean;
   entries: ChatLayoutEntry[];
+}
+
+function readFlag(key: string, defaultValue = false) {
+  if (typeof window === "undefined") return defaultValue;
+  try {
+    const value = window.localStorage.getItem(key);
+    return value === null ? defaultValue : value === "true";
+  } catch {
+    return defaultValue;
+  }
+}
+
+function writeFlag(key: string, value: boolean) {
+  try {
+    window.localStorage.setItem(key, String(value));
+  } catch {
+    // Keep the current session usable when storage is unavailable.
+  }
 }
 
 function readExpiry() {
@@ -27,7 +49,12 @@ function readExpiry() {
 }
 
 let enabledUntil = readExpiry();
-let state: ChatLayoutDiagnosticsState = { enabled: enabledUntil > Date.now(), entries: [] };
+let state: ChatLayoutDiagnosticsState = {
+  debuggerVisible: readFlag(VISIBLE_STORAGE_KEY),
+  enabled: enabledUntil > Date.now(),
+  recording: enabledUntil > Date.now() && readFlag(RECORDING_STORAGE_KEY, true),
+  entries: [],
+};
 let publishTimer: number | null = null;
 let expiryTimer: number | null = null;
 
@@ -68,8 +95,22 @@ export function setChatLayoutDiagnosticsEnabled(enabled: boolean) {
   } catch {
     // Diagnostics remain available in memory when storage is unavailable.
   }
-  state = { ...state, enabled };
+  state = { ...state, enabled, recording: enabled };
+  writeFlag(RECORDING_STORAGE_KEY, enabled);
   scheduleExpiry();
+  publish();
+}
+
+export function setDebuggerVisible(debuggerVisible: boolean) {
+  writeFlag(VISIBLE_STORAGE_KEY, debuggerVisible);
+  state = { ...state, debuggerVisible };
+  publish();
+}
+
+export function setChatLayoutDiagnosticsRecording(recording: boolean) {
+  if (recording && !state.enabled) return;
+  writeFlag(RECORDING_STORAGE_KEY, recording);
+  state = { ...state, recording };
   publish();
 }
 
@@ -79,7 +120,7 @@ export function clearChatLayoutDiagnostics() {
 }
 
 export function recordChatLayout(event: ChatLayoutEntry["event"], metrics: Record<string, ChatLayoutMetric>) {
-  if (!state.enabled) return;
+  if (!state.enabled || !state.recording) return;
   if (enabledUntil <= Date.now()) {
     setChatLayoutDiagnosticsEnabled(false);
     return;

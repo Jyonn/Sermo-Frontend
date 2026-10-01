@@ -2575,6 +2575,14 @@
   "update.recheck": "Comprobar de nuevo",
   "update.current": "Versión actual {{version}}",
   "diagnostics.developerTools": "Herramientas de desarrollo",
+  "diagnostics.persistent": "Mostrar siempre el depurador",
+  "diagnostics.persistentHint": "Muestra el icono flotante aunque no haya un diagnóstico seleccionado",
+  "diagnostics.events": "Diagnósticos",
+  "diagnostics.recording": "Grabando",
+  "diagnostics.paused": "Grabación en pausa",
+  "diagnostics.noEvent": "Ningún diagnóstico seleccionado",
+  "diagnostics.start": "Iniciar grabación",
+  "diagnostics.pause": "Pausar grabación",
   "diagnostics.entryHint": "Diagnosticar problemas de pantalla en este dispositivo",
   "diagnostics.keyboard": "Pantalla en blanco al abrir el teclado",
   "diagnostics.toggleHint": "Registra el tamaño de la pantalla y de la lista de mensajes al abrir el teclado",
@@ -2585,5 +2593,5 @@
   "diagnostics.uploading": "Enviando",
   "diagnostics.uploaded": "Informe enviado",
   "diagnostics.uploadFailed": "No se pudo enviar el informe",
-  "diagnostics.empty": "Aún no hay registros. Abre un chat y muestra el teclado para capturar el problema."
+  "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat."
 }

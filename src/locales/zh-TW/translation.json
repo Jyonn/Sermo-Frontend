@@ -2595,6 +2595,14 @@
   "update.recheck": "重新檢查",
   "update.current": "目前版本 {{version}}",
   "diagnostics.developerTools": "開發者工具",
+  "diagnostics.persistent": "常駐偵錯入口",
+  "diagnostics.persistentHint": "未啟用診斷項目時也顯示浮動偵錯圖示",
+  "diagnostics.events": "診斷項目",
+  "diagnostics.recording": "正在錄製",
+  "diagnostics.paused": "已暫停錄製",
+  "diagnostics.noEvent": "尚未啟用診斷項目",
+  "diagnostics.start": "開始錄製",
+  "diagnostics.pause": "暫停錄製",
   "diagnostics.entryHint": "排查本機的頁面顯示問題",
   "diagnostics.keyboard": "聊天鍵盤白屏診斷",
   "diagnostics.toggleHint": "記錄鍵盤彈出時的視窗與訊息列表版面",
@@ -2605,5 +2613,5 @@
   "diagnostics.uploading": "上傳中",
   "diagnostics.uploaded": "報告已上傳",
   "diagnostics.uploadFailed": "報告上傳失敗",
-  "diagnostics.empty": "尚無記錄。進入聊天並開啟鍵盤後即可擷取。"
+  "diagnostics.empty": "尚無記錄。啟用診斷項目並開始錄製後，再進入聊天重現問題。"
 }

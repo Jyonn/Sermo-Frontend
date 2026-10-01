@@ -2575,6 +2575,14 @@
   "update.recheck": "다시 확인",
   "update.current": "현재 버전 {{version}}",
   "diagnostics.developerTools": "개발자 도구",
+  "diagnostics.persistent": "디버거 항상 표시",
+  "diagnostics.persistentHint": "진단 항목을 선택하지 않아도 플로팅 디버그 아이콘을 표시합니다",
+  "diagnostics.events": "진단 항목",
+  "diagnostics.recording": "기록 중",
+  "diagnostics.paused": "기록 일시 중지",
+  "diagnostics.noEvent": "선택한 진단 항목 없음",
+  "diagnostics.start": "기록 시작",
+  "diagnostics.pause": "기록 일시 중지",
   "diagnostics.entryHint": "이 기기의 화면 문제 진단",
   "diagnostics.keyboard": "채팅 키보드 빈 화면 진단",
   "diagnostics.toggleHint": "키보드가 열릴 때 화면과 메시지 목록 크기를 기록합니다",
@@ -2585,5 +2593,5 @@
   "diagnostics.uploading": "업로드 중",
   "diagnostics.uploaded": "보고서를 업로드했습니다",
   "diagnostics.uploadFailed": "보고서를 업로드하지 못했습니다",
-  "diagnostics.empty": "기록이 없습니다. 채팅에서 키보드를 열면 기록이 시작됩니다."
+  "diagnostics.empty": "기록이 없습니다. 진단 항목을 선택하고 기록을 시작한 뒤 채팅에서 문제를 재현하세요."
 }
