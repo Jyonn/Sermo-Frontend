@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.8",
+  "id": "2026.10.01.9",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "群成员列表支持手势滚动",
+      "title": "修复 @ 成员删除",
       "items": [
-        "在手机上滑动 @ 成员列表时，不会误选成员"
+        "聊天输入框中选中的 @ 成员，现在可以直接用退格键删除"
       ]
     },
     "en": {
-      "title": "Scrollable mention list on mobile",
+      "title": "Fixed deleting @ mentions",
       "items": [
-        "Scrolling the @ member list on mobile no longer selects someone by accident"
+        "Selected @ mentions can now be removed with Backspace in the chat composer"
       ]
     }
   }

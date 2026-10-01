@@ -75,6 +75,19 @@ function placeCaretAfter(node: Node) {
   selection.addRange(range);
 }
 
+function mentionBeforeCaret(range: Range): HTMLElement | null {
+  const container = range.startContainer;
+  const offset = range.startOffset;
+  if (container.nodeType === Node.TEXT_NODE && /[^\u200B]/u.test((container.textContent || "").slice(0, offset))) return null;
+  let previous = container.nodeType === Node.TEXT_NODE
+    ? container.previousSibling
+    : container.childNodes[offset - 1];
+  while (previous?.nodeType === Node.TEXT_NODE && !/[^\u200B]/u.test(previous.textContent || "")) {
+    previous = previous.previousSibling;
+  }
+  return previous instanceof HTMLElement && previous.dataset.mentionUserId ? previous : null;
+}
+
 export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionComposerInputProps>(function MentionComposerInput({
   className,
   members,
@@ -283,6 +296,33 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     appendValue(editor, value, memberNames);
   }, [value, members]);
 
+  const handleMentionBackspace = (preventDefault: () => void) => {
+    const selection = window.getSelection();
+    if (!selection?.isCollapsed || !selection.rangeCount) return false;
+    const range = selection.getRangeAt(0);
+    const chip = mentionBeforeCaret(range);
+    if (!chip || !editorRef.current?.contains(chip)) return false;
+    preventDefault();
+    if (armedChipRef.current === chip) {
+      let next = chip.nextSibling;
+      chip.remove();
+      while (next?.nodeType === Node.TEXT_NODE && !/[^\u200B]/u.test(next.textContent || "")) {
+        const following = next.nextSibling;
+        next.remove();
+        next = following;
+      }
+      armedChipRef.current = null;
+      debugMention("remove");
+      emitChange();
+      return true;
+    }
+    armedChipRef.current?.classList.remove("is-delete-armed");
+    armedChipRef.current = chip;
+    chip.classList.add("is-delete-armed");
+    debugMention("armed");
+    return true;
+  };
+
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Backspace") debugMention("keydown", { keyCode: event.nativeEvent.keyCode, composing: event.nativeEvent.isComposing });
     if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
@@ -296,31 +336,7 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
       armedChipRef.current = null;
       return;
     }
-    const selection = window.getSelection();
-    if (!selection?.isCollapsed || !selection.rangeCount) return;
-    const range = selection.getRangeAt(0);
-    const container = range.startContainer;
-    const previous = container.nodeType === Node.TEXT_NODE && range.startOffset === 0
-      ? container.previousSibling
-      : container.nodeType === Node.ELEMENT_NODE
-        ? container.childNodes[range.startOffset - 1]
-        : null;
-    const chip = previous instanceof HTMLElement && previous.dataset.mentionUserId ? previous : null;
-    if (!chip) return;
-    event.preventDefault();
-    if (armedChipRef.current === chip) {
-      const next = chip.nextSibling;
-      chip.remove();
-      if (next?.textContent === ZERO_WIDTH) next.remove();
-      armedChipRef.current = null;
-      debugMention("remove");
-      emitChange();
-      return;
-    }
-    armedChipRef.current?.classList.remove("is-delete-armed");
-    armedChipRef.current = chip;
-    chip.classList.add("is-delete-armed");
-    debugMention("armed");
+    handleMentionBackspace(() => event.preventDefault());
   };
 
   return (
@@ -332,8 +348,12 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
       onBlur={() => { rememberSelection(); onMentionQueryChange(null); }}
       onFocus={onFocus}
       onBeforeInput={(event) => {
-        const inputType = (event.nativeEvent as InputEvent).inputType;
+        const nativeEvent = event.nativeEvent as InputEvent;
+        const inputType = nativeEvent.inputType;
         if (inputType?.startsWith("delete")) debugMention("beforeinput", { inputType });
+        if (inputType === "deleteContentBackward" && !nativeEvent.isComposing) {
+          handleMentionBackspace(() => event.preventDefault());
+        }
       }}
       onInput={(event) => {
         const inputType = (event.nativeEvent as InputEvent).inputType;
