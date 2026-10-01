@@ -1814,6 +1814,18 @@ export const api = {
       method: "POST", body: { email },
     });
   },
+  uploadDebugReport(report: { generatedAt: string; entries: unknown[] }) {
+    return request<{ report_id: number }>("/platform-admin/debug-reports/upload", { method: "POST", auth: true, body: report });
+  },
+  getPlatformDebugReports() {
+    return request<{ items: Array<{ report_id: number; user_id: number; user_name: string; space: string; created_at: number; entry_count: number }> }>("/platform-admin/debug-reports", { platformAdminAuth: true });
+  },
+  getPlatformDebugReport(reportId: number) {
+    return request<{ report_id: number; report: { generatedAt: string; entries: unknown[] } }>(`/platform-admin/debug-reports/${reportId}`, { platformAdminAuth: true });
+  },
+  deletePlatformDebugReport(reportId: number) {
+    return request<{ deleted: boolean }>(`/platform-admin/debug-reports/${reportId}`, { method: "DELETE", platformAdminAuth: true });
+  },
   loginPlatformAdmin(payload: { email: string; code: string; mfa_code?: string }) {
     return request<{ auth: string; data: Record<string, unknown>; mfa_enabled: boolean }>("/platform-admin/login", {
       method: "POST", body: payload,

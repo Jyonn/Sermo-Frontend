@@ -2598,10 +2598,12 @@
   "diagnostics.entryHint": "排查本機的頁面顯示問題",
   "diagnostics.keyboard": "聊天鍵盤白屏診斷",
   "diagnostics.toggleHint": "記錄鍵盤彈出時的視窗與訊息列表版面",
-  "diagnostics.privacy": "僅在本機保留版面數值，不記錄訊息或帳號資訊；24 小時後自動關閉。",
+  "diagnostics.privacy": "僅記錄版面數值，不記錄訊息內容；手動上傳後，報告最多保留 6 小時。診斷於 24 小時後自動關閉。",
   "diagnostics.open": "開啟版面診斷",
   "diagnostics.title": "版面診斷記錄",
-  "diagnostics.copy": "複製報告",
-  "diagnostics.copied": "報告已複製",
+  "diagnostics.upload": "上傳報告",
+  "diagnostics.uploading": "上傳中",
+  "diagnostics.uploaded": "報告已上傳",
+  "diagnostics.uploadFailed": "報告上傳失敗",
   "diagnostics.empty": "尚無記錄。進入聊天並開啟鍵盤後即可擷取。"
 }

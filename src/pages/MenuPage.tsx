@@ -2836,14 +2836,14 @@ export default function MenuPage() {
               />
             ) : null}
           </SettingGroup>
-          <SettingGroup>
+          {(me?.verified ?? session?.user.verified) ? <SettingGroup>
             <SettingRow
               description={t("diagnostics.entryHint")}
               icon={<span className="material-symbols-outlined">bug_report</span>}
               onClick={() => setDeveloperDrawerOpen(true)}
               title={t("diagnostics.developerTools")}
             />
-          </SettingGroup>
+          </SettingGroup> : null}
           <SettingGroup>
             {wechatBound ? (
               <SettingRow
@@ -2865,7 +2865,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <SideDrawer historyKey="developer-tools" onClose={() => setDeveloperDrawerOpen(false)} open={developerDrawerOpen} title={t("diagnostics.developerTools")}>
+      <SideDrawer historyKey="developer-tools" onClose={() => setDeveloperDrawerOpen(false)} open={developerDrawerOpen && Boolean(me?.verified ?? session?.user.verified)} title={t("diagnostics.developerTools")}>
         <div className="detail-list account-security-sections">
           <SettingGroup>
             <SettingRow

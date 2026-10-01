@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.11",
+  "id": "2026.10.01.12",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "增强聊天白屏诊断",
+      "title": "临时调试报告",
       "items": [
-        "聊天键盘白屏诊断现在可记录页面位移与浏览器滚动，更容易定位短暂空白"
+        "认证用户可手动上传布局诊断报告，帮助排查聊天页面的短暂空白"
       ]
     },
     "en": {
-      "title": "More precise chat layout diagnostics",
+      "title": "Temporary diagnostic reports",
       "items": [
-        "Keyboard diagnostics now capture page movement and browser scrolling to help pinpoint brief blank screens"
+        "Verified members can manually upload layout diagnostics to help investigate brief blank screens in chat"
       ]
     }
   }

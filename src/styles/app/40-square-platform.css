@@ -718,7 +718,64 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
   .platform-main.is-permissions{height:100dvh;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
   .platform-main.is-permissions .platform-header{position:relative;top:auto}
   .platform-main.is-permissions .permission-editor-panel{flex:1;min-height:0}
-  .platform-mobile-nav{position:fixed;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));left:12px;z-index:20;display:grid;padding:7px;border:1px solid rgba(255,255,255,.2);border-radius:21px;background:rgba(23,33,31,.94);box-shadow:0 16px 36px rgba(23,33,31,.22);backdrop-filter:blur(18px);grid-template-columns:repeat(6,minmax(0,1fr))}
+  .platform-mobile-nav{position:fixed;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));left:12px;z-index:20;display:grid;padding:7px;border:1px solid rgba(255,255,255,.2);border-radius:21px;background:rgba(23,33,31,.94);box-shadow:0 16px 36px rgba(23,33,31,.22);backdrop-filter:blur(18px);grid-template-columns:repeat(8,minmax(0,1fr))}
+
+}
+
+.platform-debug-hint {
+  color: var(--pa-muted);
+  font-size: 13px;
+}
+.platform-debug-list {
+  display: grid;
+  gap: 10px;
+}
+.platform-debug-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--pa-line);
+  border-radius: 14px;
+  background: #fff;
+}
+.platform-debug-list article>div:first-child {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.platform-debug-list strong small,
+.platform-debug-list span {
+  color: var(--pa-muted);
+  font-size: 12px;
+}
+.platform-debug-list article>div:last-child {
+  display: flex;
+  gap: 8px;
+}
+.platform-debug-list button {
+  padding: 8px 12px;
+  border: 1px solid var(--pa-line);
+  border-radius: 10px;
+  background: #f2f5f1;
+  color: var(--pa-ink);
+  font-weight: 700;
+}
+.platform-debug-list button.is-danger {
+  color: #a74727;
+}
+@media(max-width:760px) {
+  .platform-debug-list article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .platform-debug-list article>div:last-child {
+    width: 100%;
+  }
+  .platform-debug-list button {
+    flex: 1;
+  }
 }
 
 /* Guest flows are defined late in the cascade so their dark surfaces cannot

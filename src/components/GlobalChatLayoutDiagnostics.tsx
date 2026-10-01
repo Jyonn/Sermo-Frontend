@@ -1,21 +1,42 @@
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { SideDrawer } from "./SideDrawer";
 import { useI18n } from "../lib/language";
-import { copyText } from "../lib/presentation";
+import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { showToast } from "../lib/toast";
 import {
   chatLayoutDiagnosticsReport,
   clearChatLayoutDiagnostics,
   getChatLayoutDiagnostics,
   subscribeChatLayoutDiagnostics,
+  setChatLayoutDiagnosticsEnabled,
 } from "../lib/chatLayoutDiagnostics";
 
 export function GlobalChatLayoutDiagnostics() {
   const { t } = useI18n();
   const { enabled, entries } = useSyncExternalStore(subscribeChatLayoutDiagnostics, getChatLayoutDiagnostics, getChatLayoutDiagnostics);
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { session } = useAuth();
+  const verified = Boolean(session?.user.verified);
 
-  if (!enabled && !open) return null;
+  useEffect(() => {
+    if (!verified && enabled) setChatLayoutDiagnosticsEnabled(false);
+  }, [verified, enabled]);
+
+  const upload = async () => {
+    setUploading(true);
+    try {
+      await api.uploadDebugReport(JSON.parse(chatLayoutDiagnosticsReport()));
+      showToast(t("diagnostics.uploaded"), "success");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : t("diagnostics.uploadFailed"), "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (!verified || (!enabled && !open)) return null;
 
   return <>
     {enabled && !open ? <button aria-label={t("diagnostics.open")} className="chat-diagnostics-fab" onClick={() => setOpen(true)} type="button">
@@ -26,7 +47,7 @@ export function GlobalChatLayoutDiagnostics() {
       <div className="chat-diagnostics-panel">
         <p>{t("diagnostics.privacy")}</p>
         <div className="chat-diagnostics-actions">
-          <button disabled={!entries.length} onClick={() => void copyText(chatLayoutDiagnosticsReport()).then((copied) => showToast(t(copied ? "diagnostics.copied" : "common.copyFailed"), copied ? "success" : "error"))} type="button">{t("diagnostics.copy")}</button>
+          <button disabled={!entries.length || uploading} onClick={() => void upload()} type="button">{t(uploading ? "diagnostics.uploading" : "diagnostics.upload")}</button>
           <button disabled={!entries.length} onClick={clearChatLayoutDiagnostics} type="button">{t("common.clear")}</button>
         </div>
         {entries.length ? <ol className="chat-diagnostics-events">

@@ -7,12 +7,12 @@ import { SideDrawer } from "../components/SideDrawer";
 import { UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { usePlatformAdminAuth } from "../lib/platformAdminAuth";
-import { formatRelativeTime } from "../lib/presentation";
+import { copyText, formatRelativeTime } from "../lib/presentation";
 import { showToast } from "../lib/toast";
 import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformEmailDeliveryDTO, PlatformEmailReviewDetailDTO, PlatformEmailReviewRecordDTO, PlatformEmailReviewStateDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
 import { ChatPreview } from "./ChatsPage";
 
-type Section = "overview" | "spaces" | "permissions" | "reviews" | "emails" | "audit" | "security";
+type Section = "overview" | "spaces" | "permissions" | "reviews" | "emails" | "audit" | "debug" | "security";
 const nav: Array<{ id: Section; icon: string; label: string }> = [
   { id: "overview", icon: "space_dashboard", label: "总览" },
   { id: "spaces", icon: "domain", label: "空间" },
@@ -20,6 +20,7 @@ const nav: Array<{ id: Section; icon: string; label: string }> = [
   { id: "reviews", icon: "verified_user", label: "审核" },
   { id: "emails", icon: "mail", label: "邮件" },
   { id: "audit", icon: "policy", label: "审计" },
+  { id: "debug", icon: "bug_report", label: "调试" },
   { id: "security", icon: "shield_lock", label: "安全" },
 ];
 
@@ -206,6 +207,8 @@ function PlatformAdminConsole() {
   const [dashboard, setDashboard] = useState<PlatformDashboardDTO | null>(null);
   const [spaces, setSpaces] = useState<PlatformAdminSpaceDTO[]>([]);
   const [audit, setAudit] = useState<PlatformAuditDTO[]>([]);
+  const [debugReports, setDebugReports] = useState<Awaited<ReturnType<typeof api.getPlatformDebugReports>>["items"]>([]);
+  const [debugLoading, setDebugLoading] = useState(false);
   const [emailDeliveries, setEmailDeliveries] = useState<PlatformEmailDeliveryDTO[]>([]);
   const [emailCursor, setEmailCursor] = useState<number | null>(null);
   const [emailHasMore, setEmailHasMore] = useState(false);
@@ -242,6 +245,36 @@ function PlatformAdminConsole() {
     setDashboard(nextDashboard); setSpaces(nextSpaces); setAudit(nextAudit);
   };
   useEffect(() => { void load().catch((cause) => showToast(cause instanceof Error ? cause.message : "加载失败", "error")); }, []);
+  const loadDebugReports = async () => {
+    setDebugLoading(true);
+    try {
+      setDebugReports((await api.getPlatformDebugReports()).items);
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : "调试报告加载失败", "error");
+    } finally {
+      setDebugLoading(false);
+    }
+  };
+  useEffect(() => { if (section === "debug") void loadDebugReports(); }, [section]);
+  const copyDebugReport = async (reportId: number) => {
+    try {
+      const result = await api.getPlatformDebugReport(reportId);
+      const copied = await copyText(JSON.stringify(result.report, null, 2));
+      showToast(copied ? "报告已复制" : "复制失败", copied ? "success" : "error");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : "读取报告失败", "error");
+    }
+  };
+  const deleteDebugReport = async (reportId: number) => {
+    if (!window.confirm("确定删除这份调试报告？")) return;
+    try {
+      await api.deletePlatformDebugReport(reportId);
+      setDebugReports((current) => current.filter((item) => item.report_id !== reportId));
+      showToast("报告已删除", "success");
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : "删除失败", "error");
+    }
+  };
   useEffect(() => {
     if (section !== "emails" || emailLoaded || emailLoading) return;
     setEmailLoaded(true);
@@ -293,6 +326,7 @@ function PlatformAdminConsole() {
     {section === "reviews" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IDENTITY QUEUE</span><h3>实名认证</h3></div><small>{pendingReviews.length} 项待处理</small></div>{pendingReviews.length ? pendingReviews.map((space) => <article className="platform-review-card" key={space.space_id}><div><span>{space.name}</span><strong>@{space.slug}</strong><small>提交于 {new Date((space.identity_submitted_at ?? 0) * 1000).toLocaleString()}</small></div><div><button onClick={() => void api.getPlatformIdentityDocument(space.space_id).then((result) => window.open(result.uri, "_blank", "noopener"))} type="button">查看材料</button><button onClick={() => setReviewTarget({ space, approved: false })} type="button">驳回</button><button className="is-approve" onClick={() => setReviewTarget({ space, approved: true })} type="button">通过</button></div></article>) : <div className="platform-empty is-large"><span className="material-symbols-outlined">task_alt</span><strong>审核队列已清空</strong><p>新的实名认证提交会出现在这里。</p></div>}</section> : null}
     {section === "emails" ? <div className="platform-email-workspace"><EmailReviewPanel busy={emailReviewBusy || emailLoading} onOpen={(record) => void openEmailReview(record)} onRefresh={() => void refreshEmailReview()} onToggle={() => void toggleEmailReview()} value={emailReview} /><section className="platform-panel"><div className="platform-section-title"><div><span>DELIVERY HISTORY</span><h3>通知邮件发送记录</h3></div><small>每页 40 条 · 收件地址已脱敏</small></div>{emailDeliveries.length ? <EmailDeliveryList items={emailDeliveries} /> : emailLoading ? <div className="platform-inline-loading"><i />正在读取邮件记录</div> : <div className="platform-empty is-large"><span className="material-symbols-outlined">mail</span><strong>暂无通知邮件</strong><p>后续发送记录会出现在这里。</p></div>}{emailHasMore ? <button className="platform-email-more" disabled={emailLoading} onClick={() => void loadMoreEmailDeliveries()} type="button">{emailLoading ? "正在加载" : "加载更多"}<span className="material-symbols-outlined">expand_more</span></button> : emailDeliveries.length ? <div className="platform-email-end">已显示全部记录</div> : null}</section></div> : null}
     {section === "audit" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IMMUTABLE TRAIL</span><h3>审计日志</h3></div><small>最近 100 条</small></div><AuditList items={audit} /></section> : null}
+    {section === "debug" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>CLIENT DIAGNOSTICS</span><h3>临时调试报告</h3></div><button disabled={debugLoading} onClick={() => void loadDebugReports()} type="button">{debugLoading ? "加载中" : "刷新"}</button></div><p className="platform-debug-hint">仅展示最近 6 小时内的报告，每位用户最多保留 5 份。</p>{debugReports.length ? <div className="platform-debug-list">{debugReports.map((item) => <article key={item.report_id}><div><strong>{item.user_name} <small>#{item.user_id}</small></strong><span>@{item.space} · {new Date(item.created_at * 1000).toLocaleString()} · {item.entry_count} 条记录</span></div><div><button onClick={() => void copyDebugReport(item.report_id)} type="button">复制</button><button className="is-danger" onClick={() => void deleteDebugReport(item.report_id)} type="button">删除</button></div></article>)}</div> : <div className="platform-empty is-large"><span className="material-symbols-outlined">bug_report</span><strong>{debugLoading ? "正在读取报告" : "暂无调试报告"}</strong></div>}</section> : null}
     {section === "security" ? <section className="platform-security-grid"><article className="platform-panel"><span className="platform-security-icon material-symbols-outlined">passkey</span><h3>多因素认证</h3><p>在邮箱验证码后增加动态口令。建议始终开启。</p><div className={`platform-status ${dashboard?.mfa_enabled ? "is-on" : ""}`}><i />{dashboard?.mfa_enabled ? "已启用" : "尚未启用"}</div>{!dashboard?.mfa_enabled ? <button className="platform-primary is-compact" onClick={() => void setupMfa()} type="button">开始设置</button> : null}</article><article className="platform-panel"><span className="platform-security-icon material-symbols-outlined">history</span><h3>会话策略</h3><p>令牌仅保存在当前标签会话，8 小时后自动失效。</p><button className="platform-secondary" onClick={logout} type="button">退出当前会话</button></article></section> : null}
   </main><nav className="platform-mobile-nav">{nav.map((item) => <button className={section === item.id ? "active" : ""} key={item.id} onClick={() => setSection(item.id)} type="button"><span className="material-symbols-outlined">{item.icon}</span><small>{item.label}</small></button>)}</nav>
   <SideDrawer historyKey="platform-space" onClose={() => setSelectedSpace(null)} open={Boolean(selectedSpace)} title={selectedSpace?.name || "空间详情"}>{selectedSpace ? <div className="platform-drawer-stack"><section className="platform-space-summary"><UserAvatar className="platform-profile-avatar" name={selectedSpace.name} uri={selectedSpace.official_user?.avatar_uri} /><div><h2>{selectedSpace.name}</h2><p>@{selectedSpace.slug}</p></div><span className={`platform-tier is-${selectedSpace.verification_tier}`}>{selectedSpace.verification_tier}</span></section><section className="platform-data-grid"><span>成员<strong>{selectedSpace.member_count}</strong></span><span>容量<strong>{selectedSpace.member_limit}</strong></span><span>聊天<strong>{selectedSpace.chat_enabled ? "开启" : "关闭"}</strong></span><span>广场<strong>{selectedSpace.square_enabled ? "开启" : "关闭"}</strong></span></section><button className={`platform-feature-grant${selectedSpace.qq_binding_granted ? " is-granted" : ""}`} disabled={spaceFeatureBusy} onClick={() => void toggleQqBindingGrant()} type="button"><span className="material-symbols-outlined">link</span><div><strong>QQ 身份绑定</strong><small>{selectedSpace.qq_binding_granted ? selectedSpace.qq_binding_enabled ? "空间已获授权，管理员已开启" : "空间已获授权，等待管理员开启" : "默认不可用；授予后由空间管理员决定是否开启"}</small></div><span className="platform-feature-grant-action">{spaceFeatureBusy ? "处理中" : selectedSpace.qq_binding_granted ? "撤销授权" : "授予空间"}<span className="material-symbols-outlined">chevron_right</span></span></button><section className="platform-panel"><h3>成员</h3>{members.length ? members.map((member) => <button className="platform-member-row" key={member.user_id} onClick={() => setSelectedMember(member)} type="button"><UserAvatar className="platform-member-avatar" name={member.name} uri={member.avatar_uri} /><div><strong>{member.name}</strong><small>LV{member.growth_level ?? 1} · {member.verified ? "已认证" : "未认证"}</small></div><span className="material-symbols-outlined">chevron_right</span></button>) : <div className="platform-inline-loading"><i />正在读取成员</div>}</section></div> : null}</SideDrawer>

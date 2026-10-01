@@ -2578,10 +2578,12 @@
   "diagnostics.entryHint": "Diagnosticar problemas de pantalla en este dispositivo",
   "diagnostics.keyboard": "Pantalla en blanco al abrir el teclado",
   "diagnostics.toggleHint": "Registra el tamaño de la pantalla y de la lista de mensajes al abrir el teclado",
-  "diagnostics.privacy": "Solo se guardan cifras de diseño en este dispositivo. No se registran mensajes ni datos de la cuenta. Se desactiva tras 24 horas.",
+  "diagnostics.privacy": "Solo se registran cifras de diseño, nunca mensajes. Los informes enviados se conservan hasta 6 horas. El diagnóstico se desactiva tras 24 horas.",
   "diagnostics.open": "Abrir diagnóstico de diseño",
   "diagnostics.title": "Registro de diseño",
-  "diagnostics.copy": "Copiar informe",
-  "diagnostics.copied": "Informe copiado",
+  "diagnostics.upload": "Enviar informe",
+  "diagnostics.uploading": "Enviando",
+  "diagnostics.uploaded": "Informe enviado",
+  "diagnostics.uploadFailed": "No se pudo enviar el informe",
   "diagnostics.empty": "Aún no hay registros. Abre un chat y muestra el teclado para capturar el problema."
 }
