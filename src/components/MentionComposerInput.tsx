@@ -15,6 +15,7 @@ export interface MentionComposerHandle {
   blur: () => void;
   insertMention: (member: MentionComposerMember) => void;
   insertText: (text: string) => void;
+  openMentionPicker: () => void;
   insertTextWithoutFocus: (text: string) => void;
   moveCaretToEnd: () => void;
 }
@@ -171,7 +172,9 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     const selection = window.getSelection();
     const range = shouldFocus && selection?.rangeCount && editor.contains(selection.getRangeAt(0).commonAncestorContainer)
       ? selection.getRangeAt(0)
-      : lastSelectionRangeRef.current;
+      : lastSelectionRangeRef.current && editor.contains(lastSelectionRangeRef.current.commonAncestorContainer)
+        ? lastSelectionRangeRef.current
+        : null;
     const target = range?.cloneRange() || document.createRange();
     if (!range) {
       target.selectNodeContents(editor);
@@ -194,12 +197,45 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
 
   const insertText = (text: string) => insertTextAtSelection(text, true);
 
+  const openMentionPicker = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const selection = window.getSelection();
+    const currentRange = selection?.rangeCount && editor.contains(selection.getRangeAt(0).commonAncestorContainer)
+      ? selection.getRangeAt(0)
+      : lastSelectionRangeRef.current && editor.contains(lastSelectionRangeRef.current.commonAncestorContainer)
+        ? lastSelectionRangeRef.current
+        : null;
+    const range = currentRange?.cloneRange() || document.createRange();
+    if (!currentRange) {
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+    const beforeRange = document.createRange();
+    beforeRange.selectNodeContents(editor);
+    beforeRange.setEnd(range.startContainer, range.startOffset);
+    const needsSpace = beforeRange.toString().length > 0 && !/[\s，。！？、,.!?]$/u.test(beforeRange.toString());
+    range.deleteContents();
+    const node = document.createTextNode(`${needsSpace ? " " : ""}@`);
+    range.insertNode(node);
+    const mentionRange = document.createRange();
+    mentionRange.setStart(node, node.length - 1);
+    mentionRange.setEnd(node, node.length);
+    activeMentionRangeRef.current = mentionRange;
+    placeCaretAfter(node);
+    lastSelectionRangeRef.current = window.getSelection()?.getRangeAt(0).cloneRange() || null;
+    onChange(serializeEditor(editor));
+    onMentionQueryChange("");
+  };
+
   useImperativeHandle(forwardedRef, () => ({
     getElement: () => editorRef.current,
     focus: () => editorRef.current?.focus(),
     blur: () => editorRef.current?.blur(),
     insertMention,
     insertText,
+    openMentionPicker,
     insertTextWithoutFocus: (text: string) => insertTextAtSelection(text, false),
     moveCaretToEnd: () => {
       const editor = editorRef.current;

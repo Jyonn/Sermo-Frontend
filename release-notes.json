@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.6",
+  "id": "2026.10.01.7",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "手机端提及成员更顺手",
+      "title": "修复手机端群聊提及",
       "items": [
-        "群聊工具栏新增 @ 入口；键盘弹出时成员列表会适应可见空间，避免顶部被遮挡"
+        "点击 @ 会聚焦输入框并展示成员列表；列表不再被聊天顶部栏遮挡"
       ]
     },
     "en": {
-      "title": "Easier mentions on mobile",
+      "title": "Fixed mobile group mentions",
       "items": [
-        "Group chats now have an @ shortcut, and the member list fits above the keyboard"
+        "The @ shortcut now focuses the composer and opens a member list above the chat header"
       ]
     }
   }

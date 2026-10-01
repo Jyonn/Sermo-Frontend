@@ -1815,12 +1815,6 @@ html[data-theme="dark"] .verification-banner-action {
     font-size: .92rem;
   }
 
-  .mobile-quiet-input-wrap .composer-mention-picker {
-    right: 0;
-    left: 0;
-    max-height: var(--mobile-mention-max-height, 260px);
-  }
-
   .mobile-voice-hold {
     justify-content: center;
     padding: 0 16px;
@@ -1863,8 +1857,6 @@ html[data-theme="dark"] .verification-banner-action {
     place-items: center;
     border-radius: 11px;
     color: var(--text-muted);
-    font-size: 21px;
-    font-weight: 700;
     background: transparent;
     transition: color 150ms ease, background 150ms ease, transform 150ms ease;
   }
@@ -1878,9 +1870,10 @@ html[data-theme="dark"] .verification-banner-action {
     background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
   }
 
-  .mobile-quiet-tool-row svg {
+  .mobile-quiet-tool-row :is(svg, .material-symbols-outlined) {
     width: 21px;
     height: 21px;
+    font-size: 21px;
   }
 
   .mobile-composer-reveal {
