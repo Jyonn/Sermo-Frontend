@@ -9,6 +9,7 @@ import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
 import { PwaRecommendation } from "./components/PwaRecommendation";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { RouteResourceBoundary } from "./components/RouteResourceBoundary";
+import { RouteResourceState } from "./components/RouteResourceState";
 import { RequireAdminAuth } from "./lib/adminAuth";
 import { RequireAuth, useAuth } from "./lib/auth";
 import FriendInvitePage from "./pages/FriendInvitePage";
@@ -18,7 +19,6 @@ import OfficialLoginPage from "./pages/OfficialLoginPage";
 import AccountSwitchPage from "./pages/AccountSwitchPage";
 import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
-import { useI18n } from "./lib/language";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import { routeResources } from "./lib/routeResources";
 
@@ -41,23 +41,20 @@ function RootEntryRedirect() {
 
 function AppHomeRedirect() {
   const features = useSpaceFeatures();
-  const { t } = useI18n();
-  if (!features.ready) return <FeedbackState title={t("common.loading")} tone="loading" />;
+  if (!features.ready) return <RouteResourceState status="loading" />;
   return <Navigate replace to={features.chatEnabled ? "/app/chats" : "/app/square"} />;
 }
 
 function RequireChatFeature({ children }: { children: ReactNode }) {
   const features = useSpaceFeatures();
-  const { t } = useI18n();
-  if (!features.ready) return <FeedbackState title={t("common.loading")} tone="loading" />;
+  if (!features.ready) return <RouteResourceState status="loading" />;
   if (!features.chatEnabled) return <Navigate replace to="/app/square" />;
   return children;
 }
 
 function RequireSubmissionFeature({ children }: { children: ReactNode }) {
   const features = useSpaceFeatures();
-  const { t } = useI18n();
-  if (!features.ready) return <FeedbackState title={t("common.loading")} tone="loading" />;
+  if (!features.ready) return <RouteResourceState status="loading" />;
   if (!features.submissionEnabled) return <Navigate replace to="/app/square" />;
   return children;
 }
@@ -65,7 +62,6 @@ function RequireSubmissionFeature({ children }: { children: ReactNode }) {
 export default function App() {
   const location = useLocation();
   const { ready, session } = useAuth();
-  const { t } = useI18n();
   const features = useSpaceFeatures();
   const showFriendInviteOverlay = Boolean(session && location.pathname === "/friend-invite");
   const isPlatformAdmin = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
@@ -83,7 +79,7 @@ export default function App() {
   return (
     <>
       <RouteResourceBoundary>
-        <Suspense fallback={<FeedbackState title={t("common.loading")} tone="loading" />}>
+        <Suspense fallback={<RouteResourceState status="loading" />}>
           <Routes location={routeLocation}>
         <Route path="/" element={<RootEntryRedirect />} />
         <Route path="/entry" element={<RootEntryRedirect />} />

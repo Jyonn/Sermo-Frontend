@@ -3340,6 +3340,47 @@ html[data-theme="dark"] body .growth-level-detail {
   animation: restore-spin .8s linear infinite;
 }
 
+.route-resource-screen.is-app-route {
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+}
+
+.route-resource-error {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 300px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.route-resource-error strong {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 760;
+}
+
+.route-resource-error p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.route-resource-error button {
+  margin-top: 12px;
+  padding: 9px 22px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--brand-primary);
+  background: var(--bg-panel);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.route-resource-error button:hover,
+.route-resource-error button:focus-visible {
+  border-color: var(--brand-primary);
+}
+
 .session-refresh-indicator {
   position: fixed;
   z-index: 1200;

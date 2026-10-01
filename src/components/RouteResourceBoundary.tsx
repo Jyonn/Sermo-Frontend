@@ -1,8 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
-import { useI18n } from "../lib/language";
-import { FeedbackState } from "./FeedbackState";
+import { RouteResourceState } from "./RouteResourceState";
 
 interface BoundaryProps {
   children: ReactNode;
@@ -37,17 +36,9 @@ class RouteResourceErrorBoundary extends Component<BoundaryProps, BoundaryState>
 
 export function RouteResourceBoundary({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { t } = useI18n();
   return (
     <RouteResourceErrorBoundary
-      fallback={(
-        <FeedbackState
-          action={<button className="primary-button" onClick={() => window.location.reload()} type="button">{t("common.retry")}</button>}
-          description={t("common.resourceLoadFailedHint")}
-          title={t("common.resourceLoadFailed")}
-          tone="error"
-        />
-      )}
+      fallback={<RouteResourceState status="error" />}
       resetKey={`${location.pathname}${location.search}`}
     >
       {children}

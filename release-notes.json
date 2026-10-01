@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.3",
+  "id": "2026.10.01.4",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "语音消息宽度统一",
+      "title": "切换页面时提示更清晰",
       "items": [
-        "语音气泡改为固定宽度，与展开后的转文字内容对齐"
+        "首次加载和加载失败的提示改为简洁的居中展示，重试入口也更清楚"
       ]
     },
     "en": {
-      "title": "Consistent voice message width",
+      "title": "Clearer page loading states",
       "items": [
-        "Voice bubbles now use a consistent width aligned with their expanded transcripts"
+        "First-load and error states now appear centered with a clearer retry action"
       ]
     }
   }
