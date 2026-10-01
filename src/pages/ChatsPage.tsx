@@ -3425,6 +3425,8 @@ function LiveChatsPage({
   const [composerHeight, setComposerHeight] = useState(80);
   const [visualViewportHeight, setVisualViewportHeight] = useState(0);
   const mobileMentionAnchorRef = useRef<HTMLDivElement | null>(null);
+  const mentionTouchRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const suppressMentionClickUntilRef = useRef(0);
   const [mobileMentionPosition, setMobileMentionPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 260 });
   const visualViewportBaselineRef = useRef(0);
   const currentUserId = session?.user.user_id ?? 0;
@@ -3968,6 +3970,22 @@ function LiveChatsPage({
   };
   const selectMention = (member: Chat["detail"]["members"][number]) => {
     mentionEditorRef.current?.insertMention(member);
+  };
+  const handleMentionPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== "touch") return;
+    mentionTouchRef.current = { x: event.clientX, y: event.clientY, moved: false };
+  };
+  const handleMentionPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const touch = mentionTouchRef.current;
+    if (!touch || event.pointerType !== "touch") return;
+    if (Math.hypot(event.clientX - touch.x, event.clientY - touch.y) > 8) touch.moved = true;
+  };
+  const handleMentionPointerUp = (event: ReactPointerEvent<HTMLButtonElement>, member: Chat["detail"]["members"][number]) => {
+    if (event.pointerType !== "touch") return;
+    const touch = mentionTouchRef.current;
+    mentionTouchRef.current = null;
+    suppressMentionClickUntilRef.current = performance.now() + 500;
+    if (touch && !touch.moved) selectMention(member);
   };
   const mentionGroupMember = (userId: number) => {
     if (!selectedChat || selectedChat.type !== "group") return;
@@ -8280,7 +8298,7 @@ function LiveChatsPage({
                           {mentionSearch !== null && mentionCandidates.length && mobileMentionPosition.width ? createPortal(
                             <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")} style={{ position: "fixed", zIndex: 2000, top: mobileMentionPosition.top, bottom: "auto", left: mobileMentionPosition.left, right: "auto", width: mobileMentionPosition.width, maxHeight: mobileMentionPosition.maxHeight, transform: "translateY(-100%)" }}>
                               {mentionCandidates.map((member) => (
-                                <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onPointerDown={(event) => { if (event.pointerType === "touch") { event.preventDefault(); selectMention(member); } }} onClick={() => selectMention(member)} role="option" type="button">
+                                <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onPointerDown={handleMentionPointerDown} onPointerMove={handleMentionPointerMove} onPointerUp={(event) => handleMentionPointerUp(event, member)} onPointerCancel={() => { mentionTouchRef.current = null; suppressMentionClickUntilRef.current = performance.now() + 500; }} onClick={() => { if (performance.now() >= suppressMentionClickUntilRef.current) selectMention(member); }} role="option" type="button">
                                   <UserAvatar className="composer-mention-avatar" frame={member.avatarFrameStyle} name={member.name} uri={member.avatarUri} />
                                   <span>{member.name}</span>
                                 </button>

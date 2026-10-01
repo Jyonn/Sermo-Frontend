@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.7",
+  "id": "2026.10.01.8",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "修复手机端群聊提及",
+      "title": "群成员列表支持手势滚动",
       "items": [
-        "点击 @ 会聚焦输入框并展示成员列表；列表不再被聊天顶部栏遮挡"
+        "在手机上滑动 @ 成员列表时，不会误选成员"
       ]
     },
     "en": {
-      "title": "Fixed mobile group mentions",
+      "title": "Scrollable mention list on mobile",
       "items": [
-        "The @ shortcut now focuses the composer and opens a member list above the chat header"
+        "Scrolling the @ member list on mobile no longer selects someone by accident"
       ]
     }
   }

@@ -93,6 +93,33 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
   const armedChipRef = useRef<HTMLElement | null>(null);
   const memberNames = new Map(members.map((member) => [member.userId, member.name]));
 
+  const debugMention = (stage: string, details: Record<string, unknown> = {}) => {
+    if (typeof window === "undefined") return;
+    try {
+      if (window.localStorage.getItem("sermo:debug-mentions") !== "1") return;
+    } catch {
+      return;
+    }
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    const node = selection?.anchorNode;
+    const offset = selection?.anchorOffset ?? -1;
+    const previous = node?.nodeType === Node.TEXT_NODE ? node.previousSibling
+      : node instanceof HTMLElement ? node.childNodes[offset - 1] : null;
+    console.info("[mention]", stage, {
+      focused: document.activeElement === editor,
+      selectionInsideEditor: Boolean(editor && node && editor.contains(node)),
+      nodeType: node?.nodeType ?? null,
+      offset,
+      textLength: node?.nodeType === Node.TEXT_NODE ? node.textContent?.length : null,
+      charBeforeCodePoint: node?.nodeType === Node.TEXT_NODE && offset > 0 ? node.textContent?.codePointAt(offset - 1) : null,
+      previousIsMention: previous instanceof HTMLElement && Boolean(previous.dataset.mentionUserId),
+      chipCount: editor?.querySelectorAll("[data-mention-user-id]").length ?? 0,
+      armed: Boolean(armedChipRef.current),
+      ...details,
+    });
+  };
+
   const rememberSelection = () => {
     const editor = editorRef.current;
     const selection = window.getSelection();
@@ -159,6 +186,7 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
     range.insertNode(caretAnchor);
     range.insertNode(chip);
     placeCaretAfter(caretAnchor);
+    debugMention("insert");
     activeMentionRangeRef.current = null;
     lastSelectionRangeRef.current = null;
     onMentionQueryChange(null);
@@ -256,6 +284,7 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
   }, [value, members]);
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Backspace") debugMention("keydown", { keyCode: event.nativeEvent.keyCode, composing: event.nativeEvent.isComposing });
     if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -284,12 +313,14 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
       chip.remove();
       if (next?.textContent === ZERO_WIDTH) next.remove();
       armedChipRef.current = null;
+      debugMention("remove");
       emitChange();
       return;
     }
     armedChipRef.current?.classList.remove("is-delete-armed");
     armedChipRef.current = chip;
     chip.classList.add("is-delete-armed");
+    debugMention("armed");
   };
 
   return (
@@ -300,7 +331,15 @@ export const MentionComposerInput = forwardRef<MentionComposerHandle, MentionCom
       data-placeholder={placeholder}
       onBlur={() => { rememberSelection(); onMentionQueryChange(null); }}
       onFocus={onFocus}
-      onInput={emitChange}
+      onBeforeInput={(event) => {
+        const inputType = (event.nativeEvent as InputEvent).inputType;
+        if (inputType?.startsWith("delete")) debugMention("beforeinput", { inputType });
+      }}
+      onInput={(event) => {
+        const inputType = (event.nativeEvent as InputEvent).inputType;
+        if (inputType?.startsWith("delete")) debugMention("input", { inputType });
+        emitChange();
+      }}
       onKeyDown={handleKeyDown}
       onKeyUp={updateMentionQuery}
       onPaste={(event) => {
