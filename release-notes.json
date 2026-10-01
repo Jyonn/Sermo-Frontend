@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.5",
+  "id": "2026.10.01.6",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "桌面端提及列表更紧凑",
+      "title": "手机端提及成员更顺手",
       "items": [
-        "桌面聊天输入 @ 后，成员候选列表不再占满整个输入区域"
+        "群聊工具栏新增 @ 入口；键盘弹出时成员列表会适应可见空间，避免顶部被遮挡"
       ]
     },
     "en": {
-      "title": "Compact desktop mention list",
+      "title": "Easier mentions on mobile",
       "items": [
-        "The member list shown after typing @ no longer spans the entire desktop composer"
+        "Group chats now have an @ shortcut, and the member list fits above the keyboard"
       ]
     }
   }

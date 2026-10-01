@@ -1818,6 +1818,7 @@ html[data-theme="dark"] .verification-banner-action {
   .mobile-quiet-input-wrap .composer-mention-picker {
     right: 0;
     left: 0;
+    max-height: var(--mobile-mention-max-height, 260px);
   }
 
   .mobile-voice-hold {
@@ -1862,6 +1863,8 @@ html[data-theme="dark"] .verification-banner-action {
     place-items: center;
     border-radius: 11px;
     color: var(--text-muted);
+    font-size: 21px;
+    font-weight: 700;
     background: transparent;
     transition: color 150ms ease, background 150ms ease, transform 150ms ease;
   }

@@ -3424,6 +3424,8 @@ function LiveChatsPage({
   const mobileMicrophoneConfirmedRef = useRef(false);
   const [composerHeight, setComposerHeight] = useState(80);
   const [visualViewportHeight, setVisualViewportHeight] = useState(0);
+  const mobileMentionAnchorRef = useRef<HTMLDivElement | null>(null);
+  const [mobileMentionMaxHeight, setMobileMentionMaxHeight] = useState(260);
   const visualViewportBaselineRef = useRef(0);
   const currentUserId = session?.user.user_id ?? 0;
   const emojiUsageCacheKey = currentUserId ? `sermo:emoji-usage:v1:${currentUserId}` : "";
@@ -3937,6 +3939,24 @@ function LiveChatsPage({
       .filter((member) => !member.isSelf && (!query || member.name.toLocaleLowerCase(getActiveLocale()).includes(query)))
       .slice(0, 6);
   }, [mentionSearch, selectedChat]);
+  useLayoutEffect(() => {
+    if (mentionSearch === null || !mobileMentionAnchorRef.current) return;
+    const anchor = mobileMentionAnchorRef.current;
+    const updateHeight = () => {
+      const visibleTop = window.visualViewport?.offsetTop ?? 0;
+      setMobileMentionMaxHeight(Math.max(48, Math.min(260, Math.floor(anchor.getBoundingClientRect().top - visibleTop - 18))));
+    };
+    updateHeight();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(updateHeight);
+    observer?.observe(anchor);
+    window.visualViewport?.addEventListener("resize", updateHeight);
+    window.visualViewport?.addEventListener("scroll", updateHeight);
+    return () => {
+      observer?.disconnect();
+      window.visualViewport?.removeEventListener("resize", updateHeight);
+      window.visualViewport?.removeEventListener("scroll", updateHeight);
+    };
+  }, [mentionSearch, composerHeight, visualViewportHeight]);
   const mentionUserIdsForText = (text: string) => {
     return Array.from(text.matchAll(/<@(\d+)>/g), (match) => Number(match[1]));
   };
@@ -8229,7 +8249,7 @@ function LiveChatsPage({
                           {voiceComposer.phase === "requesting" ? t("audio.preparingMicrophone") : t("composer.holdToTalk")}
                         </button>
                       ) : (
-                        <div className="mobile-quiet-input-wrap">
+                        <div className="mobile-quiet-input-wrap" ref={mobileMentionAnchorRef}>
                           <MentionComposerInput
                             ref={mentionEditorRef}
                             className="textarea composer-input composer-rich-input"
@@ -8252,7 +8272,7 @@ function LiveChatsPage({
                             value={draft}
                           />
                           {mentionSearch !== null && mentionCandidates.length ? (
-                            <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
+                            <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")} style={{ "--mobile-mention-max-height": `${mobileMentionMaxHeight}px` } as CSSProperties}>
                               {mentionCandidates.map((member) => (
                                 <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMention(member)} role="option" type="button">
                                   <UserAvatar className="composer-mention-avatar" frame={member.avatarFrameStyle} name={member.name} uri={member.avatarUri} />
@@ -8264,8 +8284,9 @@ function LiveChatsPage({
                         </div>
                       )}
                     </div>
-                    <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")} style={{ "--mobile-composer-tool-columns": submissionMode ? 5 : 6 } as CSSProperties}>
+                    <div className="mobile-quiet-tool-row" role="toolbar" aria-label={t("composer.tools")} style={{ "--mobile-composer-tool-columns": submissionMode ? 5 : selectedChat?.type === "group" ? 7 : 6 } as CSSProperties}>
                       <button aria-pressed={mobileVoiceReady} className={mobileVoiceReady ? "is-active" : ""} disabled={composerBusy || mobileMicrophoneBusy} onClick={() => void prepareMobileVoice()} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
+                      {selectedChat?.type === "group" ? <button aria-label={t("chat.mentionMembers")} aria-pressed={mentionSearch !== null} className={mentionSearch !== null ? "is-active mobile-mention-trigger" : "mobile-mention-trigger"} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => { setMobileVoiceReady(false); mentionEditorRef.current?.insertText("@"); }} title={t("chat.mentionMembers")} type="button">@</button> : null}
                       <button aria-pressed={emojiPickerOpen} className={emojiPickerOpen ? "is-active" : ""} disabled={composerBusy} onClick={toggleMobileEmojiPanel} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
                       <button disabled={composerBusy} onClick={() => { suspendMobileComposerInput(); setEmojiPickerOpen(false); setMobileComposerPanel(null); setMobileVoiceReady(false); openGalleryPicker(); }} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
                       <button aria-pressed={mobileComposerPanel === "file"} className={mobileComposerPanel === "file" ? "is-active" : ""} disabled={composerBusy} onClick={() => openMobileComposerPanel("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
