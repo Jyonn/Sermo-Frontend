@@ -2573,5 +2573,15 @@
   "update.checkFailed": "確認失敗",
   "update.waiting": "未確認",
   "update.recheck": "再確認",
-  "update.current": "現在のバージョン {{version}}"
+  "update.current": "現在のバージョン {{version}}",
+  "diagnostics.developerTools": "開発者ツール",
+  "diagnostics.entryHint": "この端末の表示問題を調べます",
+  "diagnostics.keyboard": "チャットのキーボード表示診断",
+  "diagnostics.toggleHint": "キーボード表示時の画面とメッセージ一覧のサイズを記録します",
+  "diagnostics.privacy": "レイアウトの数値のみ端末内に記録します。メッセージやアカウント情報は記録しません。24時間後に自動停止します。",
+  "diagnostics.open": "レイアウト診断を開く",
+  "diagnostics.title": "レイアウト診断記録",
+  "diagnostics.copy": "レポートをコピー",
+  "diagnostics.copied": "レポートをコピーしました",
+  "diagnostics.empty": "記録はまだありません。チャットでキーボードを開くと記録が始まります。"
 }

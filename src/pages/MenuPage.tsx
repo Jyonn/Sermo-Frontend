@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { BindingSpine, type BindingSpineStep } from "../components/BindingSpine";
@@ -48,6 +48,7 @@ import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
 import { checkForPwaUpdate, CURRENT_RELEASE, type ExplicitUpdateCheckResult } from "../lib/pwaUpdate";
+import { getChatLayoutDiagnostics, setChatLayoutDiagnosticsEnabled, subscribeChatLayoutDiagnostics } from "../lib/chatLayoutDiagnostics";
 
 const MAX_NICKNAME_LENGTH = 8;
 const EMAIL_THRESHOLD_OPTIONS = [10, 20, 30, 60, 120, 180, 360, 720, 1440];
@@ -441,6 +442,8 @@ export default function MenuPage() {
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [basicDrawerOpen, setBasicDrawerOpen] = useState(false);
   const [securityDrawerOpen, setSecurityDrawerOpen] = useState(false);
+  const [developerDrawerOpen, setDeveloperDrawerOpen] = useState(false);
+  const chatDiagnostics = useSyncExternalStore(subscribeChatLayoutDiagnostics, getChatLayoutDiagnostics, getChatLayoutDiagnostics);
   const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
   const [switchAccounts, setSwitchAccounts] = useState<SwitchAccountDTO[]>([]);
   const [accountSwitcherLoading, setAccountSwitcherLoading] = useState(false);
@@ -2834,6 +2837,14 @@ export default function MenuPage() {
             ) : null}
           </SettingGroup>
           <SettingGroup>
+            <SettingRow
+              description={t("diagnostics.entryHint")}
+              icon={<span className="material-symbols-outlined">bug_report</span>}
+              onClick={() => setDeveloperDrawerOpen(true)}
+              title={t("diagnostics.developerTools")}
+            />
+          </SettingGroup>
+          <SettingGroup>
             {wechatBound ? (
               <SettingRow
                 description={t("wechatBinding.unbindHint")}
@@ -2851,6 +2862,19 @@ export default function MenuPage() {
               tone="danger"
             />
           </SettingGroup>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer historyKey="developer-tools" onClose={() => setDeveloperDrawerOpen(false)} open={developerDrawerOpen} title={t("diagnostics.developerTools")}>
+        <div className="detail-list account-security-sections">
+          <SettingGroup>
+            <SettingRow
+              description={t("diagnostics.toggleHint")}
+              title={t("diagnostics.keyboard")}
+              trailing={<SettingSwitch checked={chatDiagnostics.enabled} label={t("diagnostics.keyboard")} onChange={setChatLayoutDiagnosticsEnabled} />}
+            />
+          </SettingGroup>
+          <p className="chat-diagnostics-settings-note">{t("diagnostics.privacy")}</p>
         </div>
       </SideDrawer>
 

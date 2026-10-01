@@ -1,6 +1,106 @@
 /* Fixed-viewport surfaces calculate the viewport once at the app root. Their
    descendants only consume the remaining flex space, so tall iOS viewports and
    expanding composer panels cannot turn a screen into a content-height page. */
+.chat-diagnostics-fab {
+  position: fixed;
+  z-index: 29;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 23px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  box-shadow: 0 8px 24px rgba(11, 40, 30, .18);
+}
+
+.chat-diagnostics-fab .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.chat-diagnostics-fab > span:last-child {
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-diagnostics-panel {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 20px;
+  color: var(--text-primary);
+}
+
+.chat-diagnostics-panel > p,
+.chat-diagnostics-settings-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.chat-diagnostics-settings-note {
+  padding: 0 18px;
+}
+
+.chat-diagnostics-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-diagnostics-actions button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.chat-diagnostics-actions button:disabled {
+  opacity: .45;
+}
+
+.chat-diagnostics-events {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-diagnostics-events li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 10px;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--bg-elevated);
+}
+
+.chat-diagnostics-events time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-diagnostics-events code {
+  grid-column: 1 / -1;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+  font-size: .75rem;
+}
+
+body[data-chat-keyboard="open"] .chat-diagnostics-fab {
+  bottom: 12px;
+}
+
 @media (max-width: 900px) {
   html:has(body[data-chat-detail="true"]) {
     height: 100%;

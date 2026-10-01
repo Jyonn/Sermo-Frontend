@@ -6,6 +6,7 @@ import { DocumentTitle } from "./components/DocumentTitle";
 import { FeedbackState } from "./components/FeedbackState";
 import { GlobalMessageSync } from "./components/GlobalMessageSync";
 import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
+import { GlobalChatLayoutDiagnostics } from "./components/GlobalChatLayoutDiagnostics";
 import { PwaRecommendation } from "./components/PwaRecommendation";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { RouteResourceBoundary } from "./components/RouteResourceBoundary";
@@ -223,6 +224,7 @@ export default function App() {
       {ready && !isPlatformAdmin && !isDesignLab ? <DocumentTitle /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GlobalMessageSync /> : null}
       {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalMediaLocationMap /> : null}
+      {ready && session && !isPlatformAdmin && !isDesignLab ? <GlobalChatLayoutDiagnostics /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <GrowthLevelCelebration /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <AppBottomNav /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}

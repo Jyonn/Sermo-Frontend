@@ -2593,5 +2593,15 @@
   "update.checkFailed": "檢查失敗",
   "update.waiting": "等待檢查",
   "update.recheck": "重新檢查",
-  "update.current": "目前版本 {{version}}"
+  "update.current": "目前版本 {{version}}",
+  "diagnostics.developerTools": "開發者工具",
+  "diagnostics.entryHint": "排查本機的頁面顯示問題",
+  "diagnostics.keyboard": "聊天鍵盤白屏診斷",
+  "diagnostics.toggleHint": "記錄鍵盤彈出時的視窗與訊息列表版面",
+  "diagnostics.privacy": "僅在本機保留版面數值，不記錄訊息或帳號資訊；24 小時後自動關閉。",
+  "diagnostics.open": "開啟版面診斷",
+  "diagnostics.title": "版面診斷記錄",
+  "diagnostics.copy": "複製報告",
+  "diagnostics.copied": "報告已複製",
+  "diagnostics.empty": "尚無記錄。進入聊天並開啟鍵盤後即可擷取。"
 }

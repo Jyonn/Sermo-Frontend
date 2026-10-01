@@ -2573,5 +2573,15 @@
   "update.checkFailed": "확인 실패",
   "update.waiting": "확인 대기",
   "update.recheck": "다시 확인",
-  "update.current": "현재 버전 {{version}}"
+  "update.current": "현재 버전 {{version}}",
+  "diagnostics.developerTools": "개발자 도구",
+  "diagnostics.entryHint": "이 기기의 화면 문제 진단",
+  "diagnostics.keyboard": "채팅 키보드 빈 화면 진단",
+  "diagnostics.toggleHint": "키보드가 열릴 때 화면과 메시지 목록 크기를 기록합니다",
+  "diagnostics.privacy": "레이아웃 수치만 기기에 보관합니다. 메시지나 계정 정보는 기록하지 않으며 24시간 후 자동으로 꺼집니다.",
+  "diagnostics.open": "레이아웃 진단 열기",
+  "diagnostics.title": "레이아웃 진단 기록",
+  "diagnostics.copy": "보고서 복사",
+  "diagnostics.copied": "보고서를 복사했습니다",
+  "diagnostics.empty": "기록이 없습니다. 채팅에서 키보드를 열면 기록이 시작됩니다."
 }

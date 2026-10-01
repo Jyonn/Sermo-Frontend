@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.9",
+  "id": "2026.10.01.10",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "修复 @ 成员删除",
+      "title": "新增聊天布局诊断",
       "items": [
-        "聊天输入框中选中的 @ 成员，现在可以直接用退格键删除"
+        "账号与安全中可开启聊天键盘白屏诊断，并通过浮动入口复制本机布局记录"
       ]
     },
     "en": {
-      "title": "Fixed deleting @ mentions",
+      "title": "Chat layout diagnostics",
       "items": [
-        "Selected @ mentions can now be removed with Backspace in the chat composer"
+        "Enable keyboard layout diagnostics in Account & Security and copy local records from the floating button"
       ]
     }
   }

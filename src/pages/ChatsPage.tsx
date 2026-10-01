@@ -44,6 +44,7 @@ import { ResourceFileRow } from "../components/ResourceFileRow";
 import { SearchAudioTile } from "../components/SearchAudioPlayer";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { MentionComposerInput, type MentionComposerHandle } from "../components/MentionComposerInput";
+import { getChatLayoutDiagnostics, recordChatLayout } from "../lib/chatLayoutDiagnostics";
 import { NearbyLocationPicker, type SelectedLocation } from "../components/NearbyLocationPicker";
 import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
 import { UnsupportedContentNotice } from "../components/UnsupportedContentNotice";
@@ -5788,6 +5789,41 @@ function LiveChatsPage({
     const viewport = window.visualViewport;
     const root = document.documentElement;
     const body = document.body;
+    let frame = 0;
+    let settleTimer = 0;
+    let previousKeyboardOpen = false;
+
+    const recordLayout = () => {
+      const scroller = messageScrollRef.current;
+      if (!scroller) return;
+      const bounds = scroller.getBoundingClientRect();
+      const rows = scroller.querySelectorAll<HTMLElement>(".virtual-dynamic-list-row");
+      const visibleRows = Array.from(rows).filter((row) => {
+        const rowBounds = row.getBoundingClientRect();
+        return rowBounds.bottom > bounds.top && rowBounds.top < bounds.bottom;
+      }).length;
+      recordChatLayout("layout", {
+        viewportHeight: Math.round(viewport?.height ?? window.innerHeight),
+        bodyHeight: Math.round(body.getBoundingClientRect().height),
+        scrollerHeight: scroller.clientHeight,
+        scrollerTop: Math.round(bounds.top),
+        scrollTop: Math.round(scroller.scrollTop),
+        scrollHeight: scroller.scrollHeight,
+        renderedRows: rows.length,
+        visibleRows,
+        composerHeight: Math.round(composerRef.current?.getBoundingClientRect().height ?? 0),
+      });
+    };
+
+    const scheduleLayout = () => {
+      if (!getChatLayoutDiagnostics().enabled) return;
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+      frame = window.requestAnimationFrame(recordLayout);
+      settleTimer = window.setTimeout(recordLayout, 140);
+    };
+    const scrollerObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleLayout);
+    if (messageScrollRef.current) scrollerObserver?.observe(messageScrollRef.current);
 
     const updateViewport = () => {
       const nextHeight = Math.round(viewport?.height ?? window.innerHeight);
@@ -5809,6 +5845,17 @@ function LiveChatsPage({
       root.style.setProperty("--app-visual-viewport-width", `${nextWidth}px`);
       if (keyboardOpen) body.dataset.chatKeyboard = "open";
       else delete body.dataset.chatKeyboard;
+      recordChatLayout("viewport", {
+        height: nextHeight,
+        width: nextWidth,
+        offsetTop: Math.round(viewport?.offsetTop ?? 0),
+        keyboardOpen,
+      });
+      if (keyboardOpen !== previousKeyboardOpen) {
+        recordChatLayout("keyboard", { open: keyboardOpen, viewportHeight: nextHeight });
+        previousKeyboardOpen = keyboardOpen;
+      }
+      scheduleLayout();
       setVisualViewportHeight(nextHeight);
       if (window.scrollY !== 0) window.scrollTo(0, 0);
     };
@@ -5821,6 +5868,9 @@ function LiveChatsPage({
     document.addEventListener("focusout", updateViewport);
 
     return () => {
+      scrollerObserver?.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
       viewport?.removeEventListener("resize", updateViewport);
       viewport?.removeEventListener("scroll", updateViewport);
       window.removeEventListener("resize", updateViewport);

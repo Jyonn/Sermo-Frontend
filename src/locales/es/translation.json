@@ -2573,5 +2573,15 @@
   "update.checkFailed": "Error de comprobación",
   "update.waiting": "Sin comprobar",
   "update.recheck": "Comprobar de nuevo",
-  "update.current": "Versión actual {{version}}"
+  "update.current": "Versión actual {{version}}",
+  "diagnostics.developerTools": "Herramientas de desarrollo",
+  "diagnostics.entryHint": "Diagnosticar problemas de pantalla en este dispositivo",
+  "diagnostics.keyboard": "Pantalla en blanco al abrir el teclado",
+  "diagnostics.toggleHint": "Registra el tamaño de la pantalla y de la lista de mensajes al abrir el teclado",
+  "diagnostics.privacy": "Solo se guardan cifras de diseño en este dispositivo. No se registran mensajes ni datos de la cuenta. Se desactiva tras 24 horas.",
+  "diagnostics.open": "Abrir diagnóstico de diseño",
+  "diagnostics.title": "Registro de diseño",
+  "diagnostics.copy": "Copiar informe",
+  "diagnostics.copied": "Informe copiado",
+  "diagnostics.empty": "Aún no hay registros. Abre un chat y muestra el teclado para capturar el problema."
 }
