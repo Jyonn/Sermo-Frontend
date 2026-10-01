@@ -5893,6 +5893,18 @@ function LiveChatsPage({
     };
     scroller?.addEventListener("scroll", recordListScroll, { passive: true });
 
+    const correctWindowScroll = (trigger: number) => {
+      if (window.scrollY === 0) return;
+      recordChatLayout("scrollCorrection", {
+        trigger,
+        windowScrollY: Math.round(window.scrollY),
+        offsetTop: Math.round(viewport?.offsetTop ?? 0),
+        bodyTop: Math.round(body.getBoundingClientRect().top),
+      });
+      recordChatLayout("action", { kind: 3, trigger, windowScrollY: Math.round(window.scrollY) });
+      window.scrollTo(0, 0);
+    };
+
     const updateViewport = (trigger = 0) => {
       const nextHeight = Math.round(viewport?.height ?? window.innerHeight);
       const nextWidth = Math.round(viewport?.width ?? window.innerWidth);
@@ -5930,15 +5942,7 @@ function LiveChatsPage({
       }
       scheduleLayout();
       setVisualViewportHeight(nextHeight);
-      if (window.scrollY !== 0) {
-        recordChatLayout("scrollCorrection", {
-          windowScrollY: Math.round(window.scrollY),
-          offsetTop: Math.round(viewport?.offsetTop ?? 0),
-          bodyTop: Math.round(body.getBoundingClientRect().top),
-        });
-        recordChatLayout("action", { kind: 3, windowScrollY: Math.round(window.scrollY) });
-        window.scrollTo(0, 0);
-      }
+      correctWindowScroll(1);
     };
 
     const recordFocus = (event: FocusEvent) => {
@@ -5971,6 +5975,7 @@ function LiveChatsPage({
         inputBottom: inputBounds ? Math.round(inputBounds.bottom) : null,
       });
       recordLayout();
+      if (body.dataset.chatKeyboard === "open") correctWindowScroll(2);
       scheduleLayout();
     };
 

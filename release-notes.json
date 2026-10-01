@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.1",
+  "id": "2026.10.02.2",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "更准确的聊天布局诊断",
+      "title": "减少聊天键盘短暂白屏",
       "items": [
-        "聊天键盘诊断新增焦点、屏幕可见消息和短暂位移记录，更容易定位白屏原因"
+        "键盘弹出时若浏览器意外滚动页面，聊天页现在会立即复位，减少短暂空白"
       ]
     },
     "en": {
-      "title": "More precise chat layout diagnostics",
+      "title": "Reduce brief blank screens in chat",
       "items": [
-        "Keyboard diagnostics now capture focus, on-screen messages and brief page shifts to help pinpoint blank screens"
+        "Chat now immediately restores the page when the browser unexpectedly scrolls it while the keyboard opens"
       ]
     }
   }
