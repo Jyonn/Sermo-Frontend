@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.01.4",
+  "id": "2026.10.01.5",
   "publishedAt": "2026-10-01",
   "locales": {
     "zh-CN": {
-      "title": "切换页面时提示更清晰",
+      "title": "桌面端提及列表更紧凑",
       "items": [
-        "首次加载和加载失败的提示改为简洁的居中展示，重试入口也更清楚"
+        "桌面聊天输入 @ 后，成员候选列表不再占满整个输入区域"
       ]
     },
     "en": {
-      "title": "Clearer page loading states",
+      "title": "Compact desktop mention list",
       "items": [
-        "First-load and error states now appear centered with a clearer retry action"
+        "The member list shown after typing @ no longer spans the entire desktop composer"
       ]
     }
   }
