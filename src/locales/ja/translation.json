@@ -2593,5 +2593,21 @@
   "diagnostics.uploading": "送信中",
   "diagnostics.uploaded": "レポートを送信しました",
   "diagnostics.uploadFailed": "レポートを送信できませんでした",
-  "diagnostics.empty": "記録はまだありません。診断項目を選び、記録を開始してからチャットで問題を再現してください。"
+  "diagnostics.empty": "記録はまだありません。診断項目を選び、記録を開始してからチャットで問題を再現してください。",
+  "chat.blockedWordsTitle": "禁止ワード",
+  "chat.blockedWordsMatched": "このチャットの禁止ワードが含まれるため送信できませんでした",
+  "chat.blockedWordsGroupHint": "グループのオーナーが承認すると、本人を含む全員に適用されます。",
+  "chat.blockedWordsDirectHint": "双方がそれぞれ25語まで追加でき、双方の送信に適用されます。",
+  "chat.blockedWordsLoadFailed": "禁止ワードを読み込めませんでした",
+  "chat.blockedWordsSaveFailed": "操作に失敗しました。もう一度お試しください",
+  "chat.blockedWordsInput": "禁止ワードを入力",
+  "chat.blockedWordsRequest": "申請する",
+  "chat.blockedWordsActive": "有効なワード",
+  "chat.blockedWordsEmpty": "禁止ワードはありません",
+  "chat.blockedWordsRequests": "申請履歴",
+  "chat.blockedWordsRequestCard": "禁止ワード申請",
+  "chat.blockedWordsStatus.pending": "承認待ち",
+  "chat.blockedWordsStatus.approved": "承認済み",
+  "chat.blockedWordsStatus.rejected": "却下",
+  "chat.blockedWordsStatus.withdrawn": "取り下げ済み"
 }

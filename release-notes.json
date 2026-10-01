@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.5",
+  "id": "2026.10.02.6",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "聊天日期查找更顺畅",
+      "title": "会话屏蔽词",
       "items": [
-        "按日期查找聊天记录时，可以连续翻过没有消息的月份"
+        "群聊屏蔽词由群主审批；单聊双方可各自设置，对双方发送均生效"
       ]
     },
     "en": {
-      "title": "Easier date browsing in chats",
+      "title": "Chat blocked words",
       "items": [
-        "Browse past months without messages when searching chat history by date"
+        "Group owners approve blocked words; either person can set rules that apply to both in direct chats"
       ]
     }
   }

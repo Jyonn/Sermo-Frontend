@@ -2613,5 +2613,21 @@
   "diagnostics.uploading": "上傳中",
   "diagnostics.uploaded": "報告已上傳",
   "diagnostics.uploadFailed": "報告上傳失敗",
-  "diagnostics.empty": "尚無記錄。啟用診斷項目並開始錄製後，再進入聊天重現問題。"
+  "diagnostics.empty": "尚無記錄。啟用診斷項目並開始錄製後，再進入聊天重現問題。",
+  "chat.blockedWordsTitle": "封鎖詞",
+  "chat.blockedWordsMatched": "訊息包含本會話的封鎖詞，未能送出",
+  "chat.blockedWordsGroupHint": "群主審核後對全群生效，包括群主本人。",
+  "chat.blockedWordsDirectHint": "雙方各可新增25個詞，新增後對雙方發送都生效。",
+  "chat.blockedWordsLoadFailed": "無法載入封鎖詞",
+  "chat.blockedWordsSaveFailed": "操作失敗，請重試",
+  "chat.blockedWordsInput": "輸入封鎖詞",
+  "chat.blockedWordsRequest": "提交申請",
+  "chat.blockedWordsActive": "生效中的詞",
+  "chat.blockedWordsEmpty": "暫無封鎖詞",
+  "chat.blockedWordsRequests": "申請記錄",
+  "chat.blockedWordsRequestCard": "封鎖詞申請",
+  "chat.blockedWordsStatus.pending": "待審核",
+  "chat.blockedWordsStatus.approved": "已同意",
+  "chat.blockedWordsStatus.rejected": "已駁回",
+  "chat.blockedWordsStatus.withdrawn": "已撤銷"
 }

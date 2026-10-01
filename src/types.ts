@@ -1034,6 +1034,7 @@ export interface AudioTranscriptDTO {
 export interface ChatMessagePayloadDTO {
   kind: MessageKind;
   event?: string;
+  blocked_word_request?: { id: number; word: string; status: string; applicant_id: number };
   actor_user_id?: number;
   actor_name?: string;
   invitation?: SubmissionInviteDTO | null;

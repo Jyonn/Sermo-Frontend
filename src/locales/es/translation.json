@@ -2593,5 +2593,21 @@
   "diagnostics.uploading": "Enviando",
   "diagnostics.uploaded": "Informe enviado",
   "diagnostics.uploadFailed": "No se pudo enviar el informe",
-  "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat."
+  "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat.",
+  "chat.blockedWordsTitle": "Palabras bloqueadas",
+  "chat.blockedWordsMatched": "El mensaje contiene una palabra bloqueada en este chat y no se envió",
+  "chat.blockedWordsGroupHint": "El propietario aprueba las reglas para todos, incluido él mismo.",
+  "chat.blockedWordsDirectHint": "Cada persona puede añadir 25 palabras; las reglas se aplican a ambas.",
+  "chat.blockedWordsLoadFailed": "No se pudieron cargar las palabras bloqueadas",
+  "chat.blockedWordsSaveFailed": "No se pudo guardar. Inténtalo de nuevo",
+  "chat.blockedWordsInput": "Escribe una palabra bloqueada",
+  "chat.blockedWordsRequest": "Enviar solicitud",
+  "chat.blockedWordsActive": "Palabras activas",
+  "chat.blockedWordsEmpty": "No hay palabras bloqueadas",
+  "chat.blockedWordsRequests": "Solicitudes",
+  "chat.blockedWordsRequestCard": "Solicitud de palabra bloqueada",
+  "chat.blockedWordsStatus.pending": "Pendiente",
+  "chat.blockedWordsStatus.approved": "Aprobada",
+  "chat.blockedWordsStatus.rejected": "Rechazada",
+  "chat.blockedWordsStatus.withdrawn": "Retirada"
 }

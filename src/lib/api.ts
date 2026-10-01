@@ -815,6 +815,22 @@ export const api = {
     });
   },
 
+  getChatBlockedWords(chat_id: number) {
+    return request<{ group: boolean; is_owner: boolean; words: Array<{ id: number; word: string }>; requests: Array<{ id: number; word: string; status: string; applicant_id: number; applicant_name: string; message_id: number | null }> }>("/chats/blocked-words", {
+      auth: true,
+      query: { chat_id },
+    });
+  },
+
+  changeChatBlockedWords(chat_id: number, payload: { action: "add" | "request" | "remove" | "approve" | "reject" | "withdraw"; word?: string; id?: number }) {
+    return request<{ group: boolean; is_owner: boolean; words: Array<{ id: number; word: string }>; requests: Array<{ id: number; word: string; status: string; applicant_id: number; applicant_name: string; message_id: number | null }> }>("/chats/blocked-words", {
+      method: "POST",
+      auth: true,
+      query: { chat_id },
+      body: payload,
+    });
+  },
+
   getMessages(params: { chat_id: number; limit: number; before?: number; after?: number }, signal?: AbortSignal) {
     return request<ChatMessageDTO[]>("/messages/", {
       auth: true,
