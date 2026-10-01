@@ -3647,7 +3647,10 @@ function LiveChatsPage({
     setReplyTarget(reply);
     setMessageMenu(null);
     if (fromPinnedDrawer) setPinnedDrawerOpen(false);
-    window.setTimeout(() => mentionEditorRef.current?.focus(), fromPinnedDrawer ? 240 : 0);
+    window.setTimeout(() => {
+      recordChatLayout("action", { kind: 1 });
+      mentionEditorRef.current?.focus();
+    }, fromPinnedDrawer ? 240 : 0);
   };
 
   const revealPinnedMessage = (messageId: number) => {
@@ -4403,7 +4406,10 @@ function LiveChatsPage({
     setMessageSearchPreviewIndex(null);
     if (!message) return;
     setMessageSearchHighlightId(message.message_id);
-    window.setTimeout(() => document.querySelector(`[data-resource-id="${message.message_id}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" }), 80);
+    window.setTimeout(() => {
+      recordChatLayout("action", { kind: 2 });
+      document.querySelector(`[data-resource-id="${message.message_id}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 80);
     window.setTimeout(() => setMessageSearchHighlightId((current) => current === message.message_id ? null : current), 1800);
   };
 
@@ -5791,19 +5797,62 @@ function LiveChatsPage({
     const body = document.body;
     let frame = 0;
     let settleTimer = 0;
+    let burstTimer = 0;
+    let burstStopTimer = 0;
+    let anomalyStartedAt = 0;
     let previousKeyboardOpen = false;
 
     const recordLayout = () => {
+      if (!getChatLayoutDiagnostics().enabled) return;
       const scroller = messageScrollRef.current;
       if (!scroller) return;
       const bounds = scroller.getBoundingClientRect();
       const inputBounds = mentionEditorRef.current?.getElement()?.getBoundingClientRect();
-      const rows = scroller.querySelectorAll<HTMLElement>(".virtual-dynamic-list-row");
-      const visibleRows = Array.from(rows).filter((row) => {
-        const rowBounds = row.getBoundingClientRect();
-        return rowBounds.bottom > bounds.top && rowBounds.top < bounds.bottom;
+      const spacer = scroller.querySelector<HTMLElement>(":scope > .virtual-dynamic-list");
+      const rows = spacer?.querySelectorAll<HTMLElement>(":scope > .virtual-dynamic-list-row") ?? [];
+      const spacerBounds = spacer?.getBoundingClientRect();
+      const rowBounds = Array.from(rows, (row) => ({
+        index: Number(row.dataset.virtualIndex),
+        bounds: row.getBoundingClientRect(),
+      }));
+      const visible = rowBounds.filter((row) => {
+        return row.bounds.bottom > bounds.top && row.bounds.top < bounds.bottom;
+      });
+      const screenVisibleRows = rowBounds.filter((row) => {
+        return row.bounds.bottom > 0 && row.bounds.top < (viewport?.height ?? window.innerHeight);
       }).length;
+      const scrollerOnScreen = bounds.bottom > 0 && bounds.top < (viewport?.height ?? window.innerHeight);
+      const anomaly = window.scrollY !== 0 || !scrollerOnScreen
+        || (spacer && spacer.offsetHeight > 0 && visible.length === 0);
+      if (anomaly && !anomalyStartedAt) {
+        anomalyStartedAt = performance.now();
+        recordChatLayout("anomaly", { kind: 1, windowScrollY: Math.round(window.scrollY) });
+        window.clearInterval(burstTimer);
+        window.clearTimeout(burstStopTimer);
+        burstTimer = window.setInterval(recordLayout, 32);
+        burstStopTimer = window.setTimeout(() => {
+          window.clearInterval(burstTimer);
+          burstTimer = 0;
+        }, 500);
+      } else if (!anomaly && anomalyStartedAt) {
+        recordChatLayout("anomaly", { kind: 2, duration: Math.round(performance.now() - anomalyStartedAt) });
+        anomalyStartedAt = 0;
+      }
+      const visibleRows = visible.length;
+      const firstRow = rowBounds[0];
+      const lastRow = rowBounds[rowBounds.length - 1];
       recordChatLayout("layout", {
+        scrollerBottom: Math.round(bounds.bottom),
+        scrollerOnScreen,
+        screenVisibleRows,
+        firstRenderedIndex: firstRow?.index ?? null,
+        lastRenderedIndex: lastRow?.index ?? null,
+        firstVisibleIndex: visible[0]?.index ?? null,
+        lastVisibleIndex: visible[visible.length - 1]?.index ?? null,
+        spacerHeight: spacer ? Math.round(spacer.offsetHeight) : null,
+        spacerTop: spacerBounds ? Math.round(spacerBounds.top) : null,
+        paddingBefore: spacerBounds && firstRow ? Math.round(firstRow.bounds.top - spacerBounds.top) : null,
+        paddingAfter: spacerBounds && lastRow ? Math.round(spacerBounds.bottom - lastRow.bounds.bottom) : null,
         viewportHeight: Math.round(viewport?.height ?? window.innerHeight),
         viewportOffsetTop: Math.round(viewport?.offsetTop ?? 0),
         viewportPageTop: Math.round(viewport?.pageTop ?? window.scrollY),
@@ -5832,8 +5881,19 @@ function LiveChatsPage({
     };
     const scrollerObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleLayout);
     if (messageScrollRef.current) scrollerObserver?.observe(messageScrollRef.current);
+    const scroller = messageScrollRef.current;
+    const recordListScroll = () => {
+      if (!scroller) return;
+      recordChatLayout("listScroll", {
+        scrollTop: Math.round(scroller.scrollTop),
+        scrollHeight: scroller.scrollHeight,
+        scrollerHeight: scroller.clientHeight,
+      });
+      scheduleLayout();
+    };
+    scroller?.addEventListener("scroll", recordListScroll, { passive: true });
 
-    const updateViewport = () => {
+    const updateViewport = (trigger = 0) => {
       const nextHeight = Math.round(viewport?.height ?? window.innerHeight);
       const nextWidth = Math.round(viewport?.width ?? window.innerWidth);
       visualViewportBaselineRef.current = Math.max(
@@ -5854,6 +5914,7 @@ function LiveChatsPage({
       if (keyboardOpen) body.dataset.chatKeyboard = "open";
       else delete body.dataset.chatKeyboard;
       recordChatLayout("viewport", {
+        trigger,
         height: nextHeight,
         width: nextWidth,
         offsetTop: Math.round(viewport?.offsetTop ?? 0),
@@ -5875,38 +5936,65 @@ function LiveChatsPage({
           offsetTop: Math.round(viewport?.offsetTop ?? 0),
           bodyTop: Math.round(body.getBoundingClientRect().top),
         });
+        recordChatLayout("action", { kind: 3, windowScrollY: Math.round(window.scrollY) });
         window.scrollTo(0, 0);
       }
     };
 
+    const recordFocus = (event: FocusEvent) => {
+      const target = event.target;
+      const bounds = target instanceof HTMLElement ? target.getBoundingClientRect() : null;
+      recordChatLayout(event.type === "focusin" ? "focusIn" : "focusOut", {
+        focusKind: target instanceof HTMLTextAreaElement ? 3 : target instanceof HTMLInputElement ? 2
+          : target instanceof HTMLSelectElement ? 4 : target instanceof HTMLElement && target.isContentEditable ? 1 : 0,
+        inputTop: bounds ? Math.round(bounds.top) : null,
+        inputBottom: bounds ? Math.round(bounds.bottom) : null,
+        windowScrollY: Math.round(window.scrollY),
+        viewportHeight: Math.round(viewport?.height ?? window.innerHeight),
+        viewportOffsetTop: Math.round(viewport?.offsetTop ?? 0),
+      });
+      updateViewport(event.type === "focusin" ? 4 : 5);
+    };
+
+    const onViewportResize = () => updateViewport(1);
+    const onViewportScroll = () => updateViewport(2);
+    const onWindowResize = () => updateViewport(3);
+
     const recordWindowScroll = () => {
+      const inputBounds = mentionEditorRef.current?.getElement()?.getBoundingClientRect();
       recordChatLayout("windowScroll", {
         windowScrollY: Math.round(window.scrollY),
         viewportOffsetTop: Math.round(viewport?.offsetTop ?? 0),
         viewportPageTop: Math.round(viewport?.pageTop ?? window.scrollY),
         bodyTop: Math.round(body.getBoundingClientRect().top),
+        inputTop: inputBounds ? Math.round(inputBounds.top) : null,
+        inputBottom: inputBounds ? Math.round(inputBounds.bottom) : null,
       });
+      recordLayout();
       scheduleLayout();
     };
 
     updateViewport();
-    viewport?.addEventListener("resize", updateViewport);
-    viewport?.addEventListener("scroll", updateViewport);
-    window.addEventListener("resize", updateViewport);
+    viewport?.addEventListener("resize", onViewportResize);
+    viewport?.addEventListener("scroll", onViewportScroll);
+    window.addEventListener("resize", onWindowResize);
     window.addEventListener("scroll", recordWindowScroll, { passive: true });
-    document.addEventListener("focusin", updateViewport);
-    document.addEventListener("focusout", updateViewport);
+    document.addEventListener("focusin", recordFocus);
+    document.addEventListener("focusout", recordFocus);
 
     return () => {
       scrollerObserver?.disconnect();
+      scroller?.removeEventListener("scroll", recordListScroll);
       window.cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
-      viewport?.removeEventListener("resize", updateViewport);
-      viewport?.removeEventListener("scroll", updateViewport);
-      window.removeEventListener("resize", updateViewport);
+      window.clearInterval(burstTimer);
+      window.clearTimeout(burstStopTimer);
+      viewport?.removeEventListener("resize", onViewportResize);
+      viewport?.removeEventListener("scroll", onViewportScroll);
+      window.removeEventListener("resize", onWindowResize);
       window.removeEventListener("scroll", recordWindowScroll);
-      document.removeEventListener("focusin", updateViewport);
-      document.removeEventListener("focusout", updateViewport);
+      document.removeEventListener("focusin", recordFocus);
+      document.removeEventListener("focusout", recordFocus);
       root.style.removeProperty("--app-visual-viewport-height");
       root.style.removeProperty("--app-visual-viewport-width");
       delete body.dataset.chatKeyboard;
@@ -9653,7 +9741,10 @@ function LiveChatsPage({
         onConfirm={() => {
           if (!newSubmissionTitle.trim()) return;
           setNewSubmissionTitleOpen(false);
-          window.requestAnimationFrame(() => mentionEditorRef.current?.focus());
+          window.requestAnimationFrame(() => {
+            recordChatLayout("action", { kind: 1 });
+            mentionEditorRef.current?.focus();
+          });
         }}
       />
       <InputDialog
