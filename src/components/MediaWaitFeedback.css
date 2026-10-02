@@ -1,0 +1,76 @@
+.media-wait-feedback {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: calc(100% - 32px);
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 999px;
+  color: #f6f7f5;
+  background: rgba(16, 23, 20, .86);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .22);
+  font-size: .74rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.media-wait-feedback .material-symbols-outlined { font-size: 18px; }
+.media-wait-spinner {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: media-wait-turn 850ms linear infinite;
+}
+.media-wait-feedback button {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(255, 255, 255, .12);
+  font: inherit;
+}
+@keyframes media-wait-turn { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { .media-wait-spinner { animation: none; } }
+
+.media-preview-image-shell {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.media-preview-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.media-preview-image-shell > .message-image-preview { position: relative; }
+.media-preview-image-shell > .message-image-preview.is-failed,
+.immersive-image-canvas.is-failed { visibility: hidden; }
+.message-image-preview-modal.is-immersive .media-preview-image-shell { background: #000; }
+.message-image-preview-toolbar .media-wait-spinner { border-color: color-mix(in srgb, currentColor 25%, transparent); border-top-color: currentColor; }
+.media-download-error { align-self: center; max-width: 160px; color: var(--danger); font-size: .68rem; font-weight: 700; }
+.pwa-recommendation-action .media-wait-spinner,
+.update-check-actions .media-wait-spinner { display: inline-block; margin-right: 7px; vertical-align: -3px; }
+.pwa-update-error { margin: 0; color: var(--danger); font-size: .72rem; }
+.music-mini-compact { position: relative; }
+.music-mini-wait { position: absolute; top: calc(50% - 8px); left: calc(50% - 8px); }
+.statement-video-thumbnail.is-cover-loading { background: var(--surface-soft); }
+.statement-video-thumbnail.is-cover-loading > img { opacity: 0; }

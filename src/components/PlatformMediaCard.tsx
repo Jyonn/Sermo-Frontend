@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { useI18n } from "../lib/language";
+import "./MediaWaitFeedback.css";
 import "./PlatformMediaCard.css";
 
 interface PlatformMediaCardProps {
@@ -7,20 +9,25 @@ interface PlatformMediaCardProps {
   kindLabel: string;
   logo: string;
   onClick: () => void;
+  opening?: boolean;
   playIcon?: "play_arrow" | "open_in_new";
   source: string;
   title: string;
 }
 
-export function PlatformMediaCard({ author, cover, kindLabel, logo, onClick, playIcon, source, title }: PlatformMediaCardProps) {
-  return <button className="platform-media-card" onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
-    {cover ? <img alt="" className="platform-media-cover" loading="lazy" referrerPolicy="no-referrer" src={cover} /> : <span className="platform-media-cover" />}
+export function PlatformMediaCard({ author, cover, kindLabel, logo, onClick, opening = false, playIcon, source, title }: PlatformMediaCardProps) {
+  const { t } = useI18n();
+  const [coverResult, setCoverResult] = useState<{ uri?: string; status: "ready" | "error" } | null>(null);
+  const coverState = coverResult && coverResult.uri === cover ? coverResult.status : cover ? "loading" : "error";
+  return <button aria-busy={opening} className={`platform-media-card${coverState === "loading" ? " is-cover-loading" : ""}`} disabled={opening} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
+    {cover && coverState !== "error" ? <img alt="" className="platform-media-cover" loading="lazy" onError={() => setCoverResult({ uri: cover, status: "error" })} onLoad={() => setCoverResult({ uri: cover, status: "ready" })} referrerPolicy="no-referrer" src={cover} /> : <span className="platform-media-cover is-unavailable"><span aria-hidden="true" className="material-symbols-outlined">image_not_supported</span></span>}
     <span className="platform-media-card-top">
       <span className="platform-media-card-brand"><img alt="" src={logo} />{source}</span>
       <span className="platform-media-card-kind">{kindLabel}</span>
     </span>
     <span className="platform-media-card-bottom"><strong>{title}</strong><small>{author || source}</small></span>
-    {playIcon ? <span aria-hidden="true" className="platform-media-play material-symbols-outlined">{playIcon}</span> : null}
+    {playIcon ? <span aria-hidden="true" className="platform-media-play">{opening ? <span className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playIcon}</span>}</span> : null}
+    {opening ? <span className="platform-media-opening" role="status">{t("media.loadingVideo")}</span> : null}
   </button>;
 }
 

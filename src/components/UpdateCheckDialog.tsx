@@ -1,7 +1,8 @@
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
-import { activatePwaUpdate, type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
+import { type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
+import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 
 interface UpdateCheckDialogProps {
   checking: boolean;
@@ -13,6 +14,8 @@ interface UpdateCheckDialogProps {
 
 export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: UpdateCheckDialogProps) {
   const { language, t } = useI18n();
+  const { phase, install } = usePwaUpdateActivation();
+  const installing = phase !== "idle" && phase !== "error";
   useBodyScrollLock(open);
   if (!open || typeof document === "undefined") return null;
 
@@ -22,15 +25,14 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const release = result?.latestRelease?.id === result?.latestVersion ? result?.latestRelease : null;
   const localizedRelease = release?.locales[language] ?? release?.locales.en;
   const sourceName = (key: UpdateSourceKey) => t(key === "primary" ? "update.primarySite" : "update.mirrorSite");
-  const install = () => { void activatePwaUpdate(); };
 
   return createPortal(
-    <div className="dialog-backdrop update-check-backdrop" onClick={onClose} role="presentation">
+    <div className="dialog-backdrop update-check-backdrop" onClick={() => { if (!installing) onClose(); }} role="presentation">
       <section aria-labelledby="update-check-title" aria-modal="true" className="update-check-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
         <header className="update-check-header">
           <div className="update-check-mark" aria-hidden="true"><span className="material-symbols-outlined">system_update</span></div>
           <div><small>{t("update.versionAndUpdate")}</small><h2 id="update-check-title">{t("update.check")}</h2></div>
-          <button aria-label={t("common.close")} className="icon-button" onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button>
+          <button aria-label={t("common.close")} className="icon-button" disabled={installing} onClick={onClose} type="button"><span className="material-symbols-outlined">close</span></button>
         </header>
 
         <div className="update-check-body">
@@ -65,11 +67,12 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
 
           {result?.updateAvailable && localizedRelease ? <div className="update-release-copy"><strong>{localizedRelease.title}</strong><ul>{localizedRelease.items.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
           {allFailed ? <p className="update-network-advice"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.switchNetworkHint")}</p> : null}
+          {phase === "error" ? <p className="update-network-advice" role="alert"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.installFailed")}</p> : null}
         </div>
 
         <footer className="update-check-actions">
-          <button className="ghost-button" disabled={checking} onClick={onCheck} type="button">{t("update.recheck")}</button>
-          {result?.updateAvailable ? <button className="button" onClick={install} type="button">{t("common.updateNow")}</button> : <button className="button" onClick={onClose} type="button">{t("common.gotIt")}</button>}
+          <button className="ghost-button" disabled={checking || installing} onClick={onCheck} type="button">{t("update.recheck")}</button>
+          {result?.updateAvailable ? <button className="button" disabled={installing} onClick={install} type="button">{installing ? <span aria-hidden="true" className="media-wait-spinner" /> : null}{installing ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}</button> : <button className="button" onClick={onClose} type="button">{t("common.gotIt")}</button>}
         </footer>
       </section>
     </div>,

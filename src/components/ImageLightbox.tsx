@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
+import { MediaWaitFeedback, type MediaWaitPhase } from "./MediaWaitFeedback";
 
 interface ImageLightboxProps {
   index: number;
@@ -11,6 +12,7 @@ interface ImageLightboxProps {
   downloadLabels?: string[];
   fileNamePrefix?: string;
   referrerPolicy?: "no-referrer";
+  posterUris?: Array<string | null | undefined>;
   onClose: () => void;
   onIndexChange: (index: number) => void;
 }
@@ -52,7 +54,7 @@ async function downloadMedia(uri: string, fileNamePrefix: string) {
     anchor.click();
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   } catch {
-    window.open(uri, "_blank", "noopener,noreferrer");
+    if (!window.open(uri, "_blank", "noopener,noreferrer")) throw new Error("download_failed");
   }
 }
 
@@ -64,7 +66,7 @@ interface ImageTransform {
   scale: number;
 }
 
-function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; src: string; onClose: () => void; referrerPolicy?: "no-referrer" }) {
+function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: string; src: string; poster?: string | null; onClose: () => void; referrerPolicy?: "no-referrer" }) {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -84,6 +86,8 @@ function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; sr
   const [transform, setTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1 });
   const [mode, setMode] = useState<ImageViewMode>("default");
   const [controlsVisible, setControlsVisible] = useState(false);
+  const [phase, setPhase] = useState<MediaWaitPhase>("loading");
+  const [attempt, setAttempt] = useState(0);
 
   const scales = (() => {
     if (!naturalSize.width || !naturalSize.height || !viewportSize.width || !viewportSize.height) {
@@ -171,6 +175,8 @@ function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; sr
   useLayoutEffect(() => {
     setControlsVisible(false);
     setNaturalSize({ width: 0, height: 0 });
+    setPhase("loading");
+    setAttempt(0);
     transformRef.current = { x: 0, y: 0, scale: 1 };
     setTransform({ x: 0, y: 0, scale: 1 });
     const image = imageRef.current;
@@ -267,12 +273,15 @@ function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; sr
     ref={stageRef}
     role="presentation"
   >
+    {poster && phase !== "idle" ? <img alt="" aria-hidden="true" className="media-preview-poster" src={poster} /> : null}
     <img
       alt={alt}
-      className="immersive-image-canvas"
+      className={`immersive-image-canvas${phase === "error" ? " is-failed" : ""}`}
       draggable={false}
+      key={`${src}:${attempt}`}
       referrerPolicy={referrerPolicy}
-      onLoad={(event) => setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+      onLoad={(event) => { setNaturalSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight }); setPhase("idle"); }}
+      onError={() => setPhase("error")}
       ref={imageRef}
       src={src}
       style={{
@@ -281,6 +290,7 @@ function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; sr
         width: naturalSize.width ? `${naturalSize.width}px` : "auto",
       }}
     />
+    <MediaWaitFeedback phase={phase} onRetry={() => { setPhase("loading"); setAttempt((value) => value + 1); }} />
     <div
       className={`immersive-image-actionbar${controlsVisible ? " is-visible" : ""}`}
       onClick={(event) => event.stopPropagation()}
@@ -315,6 +325,16 @@ function ImmersiveImage({ alt, src, onClose, referrerPolicy }: { alt: string; sr
   </div>;
 }
 
+function PreviewImage({ alt, item, active }: { alt: string; item: MediaLightboxItem; active: boolean }) {
+  const [phase, setPhase] = useState<MediaWaitPhase>("loading");
+  const [attempt, setAttempt] = useState(0);
+  return <div className="media-preview-image-shell">
+    {item.posterUri && phase !== "idle" ? <img alt="" aria-hidden="true" className="media-preview-poster" src={item.posterUri} /> : null}
+    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={`${item.uri}:${attempt}`} loading={active ? "eager" : "lazy"} onError={() => setPhase("error")} onLoad={() => setPhase("idle")} referrerPolicy={item.referrerPolicy} src={item.uri} />
+    {active ? <MediaWaitFeedback phase={phase} onRetry={() => { setPhase("loading"); setAttempt((value) => value + 1); }} /> : null}
+  </div>;
+}
+
 function formatPlaybackTime(value: number) {
   const seconds = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -326,6 +346,7 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [phase, setPhase] = useState<MediaWaitPhase>("idle");
 
   useEffect(() => {
     if (!active) videoRef.current?.pause();
@@ -336,7 +357,8 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) void video.play(); else video.pause();
+    if (video.paused) { if (phase === "error") video.load(); setPhase("loading"); void video.play().catch(() => setPhase("error")); }
+    else { video.pause(); setPhase("idle"); }
   };
   const progress = duration ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
@@ -346,8 +368,11 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
         className="message-video-preview"
         onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
         onEnded={() => setPlaying(false)}
-        onPause={() => setPlaying(false)}
-        onPlay={() => setPlaying(true)}
+        onError={() => setPhase("error")}
+        onPause={() => { setPlaying(false); setPhase((current) => current === "error" ? current : "idle"); }}
+        onPlaying={() => { setPlaying(true); setPhase("idle"); }}
+        onStalled={() => setPhase("buffering")}
+        onWaiting={() => setPhase("buffering")}
         onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
         playsInline
         poster={poster || undefined}
@@ -355,9 +380,10 @@ function ArchiveVideoPlayer({ active, poster, src }: { active: boolean; poster?:
         ref={videoRef}
         src={src}
       />
+      <MediaWaitFeedback loadingLabel={t("media.loadingVideo")} phase={phase} onRetry={() => { setPhase("loading"); videoRef.current?.load(); void videoRef.current?.play().catch(() => setPhase("error")); }} />
       <div className="message-video-player-controls">
-        <button aria-label={playing ? t("media.pause") : t("media.play")} onClick={togglePlayback} type="button">
-          <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+        <button aria-label={phase === "error" ? t("common.retry") : phase === "buffering" ? t("media.buffering") : playing ? t("media.pause") : t("media.play")} onClick={togglePlayback} type="button">
+          {phase === "buffering" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}
         </button>
         <input
           aria-label={t("media.duration")}
@@ -400,6 +426,7 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const [scale, setScale] = useState(1);
   const [viewMode, setViewMode] = useState<"fit" | "fill" | "actual" | "custom">("fit");
+  const [phase, setPhase] = useState<MediaWaitPhase>("loading");
   const playbackRates = [0.75, 1, 1.25, 1.5, 2, 3] as const;
 
   const scales = (() => {
@@ -451,7 +478,8 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) void video.play().catch(() => onError?.()); else video.pause();
+    if (video.paused) { if (phase === "error") video.load(); setPhase("loading"); void video.play().catch(() => setPhase("error")); }
+    else { video.pause(); setPhase("idle"); }
   };
 
   const cyclePlaybackRate = () => {
@@ -477,10 +505,13 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
       className="immersive-video-canvas immersive-image-canvas"
       onDurationChange={(event) => setDuration(event.currentTarget.duration)}
       onEnded={() => setPlaying(false)}
-      onError={onError}
-      onLoadedMetadata={(event) => setNaturalSize({ width: event.currentTarget.videoWidth, height: event.currentTarget.videoHeight })}
-      onPause={() => setPlaying(false)}
-      onPlay={() => setPlaying(true)}
+      onError={() => { setPhase("error"); onError?.(); }}
+      onCanPlay={() => setPhase("idle")}
+      onLoadedMetadata={(event) => { setNaturalSize({ width: event.currentTarget.videoWidth, height: event.currentTarget.videoHeight }); setPhase("idle"); }}
+      onPause={() => { setPlaying(false); setPhase((current) => current === "error" ? current : "idle"); }}
+      onPlaying={() => { setPlaying(true); setPhase("idle"); }}
+      onStalled={() => setPhase("buffering")}
+      onWaiting={() => setPhase("buffering")}
       onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
       loop={loop}
       playsInline
@@ -494,13 +525,14 @@ export function ImmersiveVideo({ context, loop = false, onClose, onError, poster
         width: naturalSize.width ? `${naturalSize.width}px` : "100%",
       }}
     />
+    <MediaWaitFeedback loadingLabel={t("media.loadingVideo")} phase={phase} onRetry={() => { setPhase("loading"); videoRef.current?.load(); void videoRef.current?.play().catch(() => setPhase("error")); }} />
     <button
-      aria-label={playing ? t("media.pause") : t("media.play")}
+      aria-label={phase === "error" ? t("common.retry") : phase === "buffering" ? t("media.buffering") : playing ? t("media.pause") : t("media.play")}
       className={`immersive-video-center-control${controlsVisible ? " is-visible" : ""}`}
       onClick={(event) => { event.stopPropagation(); togglePlayback(); }}
       type="button"
     >
-      <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+      {phase === "buffering" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}
     </button>
     <div className={`immersive-image-actionbar immersive-video-actionbar${controlsVisible ? " is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
       <div className="immersive-image-view-modes" role="group" aria-label={t("media.viewMode")}>
@@ -571,6 +603,11 @@ export function MediaLightbox({
   const gestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const approachingEndRef = useRef(onApproachingEnd);
   const [immersive, setImmersive] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(false);
+  const activeUri = items[index]?.uri ?? items[0]?.uri;
+
+  useEffect(() => { setDownloadError(false); }, [activeUri]);
 
   useEffect(() => { approachingEndRef.current = onApproachingEnd; }, [onApproachingEnd]);
 
@@ -614,8 +651,8 @@ export function MediaLightbox({
                     ? <ImmersiveVideo onClose={close} poster={item.posterUri} src={item.uri} />
                     : <ArchiveVideoPlayer active={itemIndex === index} poster={item.posterUri} src={item.uri} />
                   : immersive && itemIndex === index
-                    ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} referrerPolicy={item.referrerPolicy} src={item.uri} />
-                    : <img alt={`${resolvedAltPrefix} ${itemIndex + 1}`} className="message-image-preview" draggable={false} loading={Math.abs(itemIndex - index) > 1 ? "lazy" : "eager"} referrerPolicy={item.referrerPolicy} src={item.uri} />}
+                    ? <ImmersiveImage alt={`${resolvedAltPrefix} ${itemIndex + 1}`} onClose={close} poster={item.posterUri} referrerPolicy={item.referrerPolicy} src={item.uri} />
+                    : <PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} />}
               </div>
               {!immersive ? <div>{item.detail ?? null}</div> : null}
             </article>
@@ -628,9 +665,10 @@ export function MediaLightbox({
           <button aria-label={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg>
           </button>
-          <button aria-label={activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} onClick={() => void downloadMedia(activeItem.uri, fileNamePrefix)} type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>
-            {activeItem.downloadLabel ? <span>{activeItem.downloadLabel}</span> : null}
+          {downloadError ? <span className="media-download-error" role="alert">{t("media.downloadFailed")}</span> : null}
+          <button aria-label={downloading ? t("media.downloading") : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
+            {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>}
+            {downloading ? <span>{t("media.downloading")}</span> : activeItem.downloadLabel ? <span>{activeItem.downloadLabel}</span> : null}
           </button>
         </div> : null}
       </section>
@@ -646,10 +684,11 @@ export function ImageLightbox({
   details = [],
   sharedDetail,
   downloadLabels = [],
+  posterUris = [],
   fileNamePrefix = "sermo-image",
   referrerPolicy,
   onClose,
   onIndexChange,
 }: ImageLightboxProps) {
-  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} />;
+  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", posterUri: posterUris[itemIndex], detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} />;
 }

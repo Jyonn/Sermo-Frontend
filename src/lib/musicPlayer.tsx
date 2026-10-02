@@ -3,6 +3,7 @@ import type { MusicProviderDataDTO } from "../types";
 import { musicBrand, sameMusic } from "./musicBrand";
 import { useI18n } from "./language";
 import { SideDrawer } from "../components/SideDrawer";
+import { usePlaybackWait } from "../components/MediaWaitFeedback";
 
 type Player = {
   music: MusicProviderDataDTO | null;
@@ -53,6 +54,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(false);
+  const playbackWait = usePlaybackWait();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [compact, setCompact] = useState(true);
   const [edge, setEdge] = useState<"left" | "right">("right");
@@ -126,12 +128,17 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!music || !pendingPlay.current) return;
     pendingPlay.current = false;
-    void audio.current?.play().catch(() => { setUnavailable(true); setPlaying(false); });
+    playbackWait.start();
+    void audio.current?.play().catch(() => { playbackWait.fail(); setUnavailable(true); setPlaying(false); });
   }, [music]);
 
   const toggle = () => {
-    if (!audio.current || unavailable) return;
-    if (audio.current.paused) void audio.current.play().catch(() => { setUnavailable(true); setPlaying(false); });
+    if (!audio.current) return;
+    if (audio.current.paused || unavailable) {
+      if (unavailable) { setUnavailable(false); audio.current.load(); }
+      playbackWait.start();
+      void audio.current.play().catch(() => { playbackWait.fail(); setUnavailable(true); setPlaying(false); });
+    }
     else audio.current.pause();
   };
   const play = (next: MusicProviderDataDTO) => {
@@ -140,6 +147,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     setTime(0);
     setDuration((next.duration_ms || 0) / 1000);
     setUnavailable(false);
+    playbackWait.start();
     pendingPlay.current = true;
     setCompact(true);
     setMusic(next);
@@ -149,15 +157,16 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     audio.current.currentTime = next;
     setTime(next);
   };
-  const close = () => { audio.current?.pause(); setMusic(null); setTime(0); setDrawerOpen(false); };
+  const close = () => { audio.current?.pause(); playbackWait.ready(); setMusic(null); setTime(0); setDrawerOpen(false); };
   const progress = duration > 0 ? Math.min(100, Math.max(0, time / duration * 100)) : 0;
   const brand = music ? musicBrand(music.provider) : null;
 
   return <Context.Provider value={{ music, playing, time, duration, unavailable, play, toggle, seek, close }}>
     {children}
     <audio ref={audio} src={music?.audio_url || undefined} preload="none"
-      onPlay={() => { setPlaying(true); setUnavailable(false); }} onPause={() => setPlaying(false)}
-      onEnded={() => setPlaying(false)} onError={() => { setUnavailable(true); setPlaying(false); }}
+      onPlay={() => setUnavailable(false)} onPlaying={() => { setPlaying(true); playbackWait.ready(); }}
+      onPause={() => { setPlaying(false); playbackWait.stop(); }} onWaiting={playbackWait.waiting} onStalled={playbackWait.waiting}
+      onEnded={() => { setPlaying(false); playbackWait.ready(); }} onError={() => { playbackWait.fail(); setUnavailable(true); setPlaying(false); }}
       onDurationChange={(event) => { if (Number.isFinite(event.currentTarget.duration)) setDuration(event.currentTarget.duration); }}
       onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} />
     {music ? <aside className={`music-mini-player${compact ? " is-compact" : ""}${dragging ? " is-dragging" : ""}`} aria-label={brand?.name} style={{ ...(position || {}), "--music-progress": `${progress}%`, "--music-angle": `${progress * 3.6}deg`, "--netease-red": brand?.color } as CSSProperties}
@@ -165,22 +174,23 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       onClickCapture={(event) => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}
       onContextMenu={(event) => event.preventDefault()}>
       {compact ? <button className="music-mini-compact" type="button" onClick={() => setCompact(false)} aria-label={t("music.expandPlayer")}>
-        <span className={`music-mini-disc${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</span>
+        <span className={`music-mini-disc${playing && playbackWait.phase === "idle" ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</span>
+        {playbackWait.visible && playbackWait.phase !== "error" ? <span aria-hidden="true" className="media-wait-spinner music-mini-wait" /> : null}
       </button> : <>
-      <button className="music-mini-cover" type="button" onClick={toggle} disabled={unavailable} aria-label={playing ? t("music.pause") : t("music.play")}>
-        <span className={`music-mini-disc${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</span>
-        <span className="music-mini-play-icon material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>
+      <button className="music-mini-cover" type="button" onClick={toggle} aria-label={unavailable ? t("common.retry") : playing ? t("music.pause") : t("music.play")}>
+        <span className={`music-mini-disc${playing && playbackWait.phase === "idle" ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</span>
+        {playbackWait.visible && playbackWait.phase !== "error" ? <span className="media-wait-spinner music-mini-play-icon" aria-hidden="true" /> : <span className="music-mini-play-icon material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}
       </button>
-      <button className="music-mini-copy" type="button" onClick={() => setDrawerOpen(true)}><strong><img alt="" src={brand?.logo} style={{ width: 14, height: 14, marginRight: 5, borderRadius: "50%", verticalAlign: "-2px" }} />{music.title}<span> · {music.artists.join(" / ")}</span></strong><small>{activeLyric || t("music.noLyrics")}</small></button>
+      <button className="music-mini-copy" type="button" onClick={() => setDrawerOpen(true)}><strong><img alt="" src={brand?.logo} style={{ width: 14, height: 14, marginRight: 5, borderRadius: "50%", verticalAlign: "-2px" }} />{music.title}<span> · {music.artists.join(" / ")}</span></strong><small>{playbackWait.visible && playbackWait.phase !== "error" ? t("media.buffering") : activeLyric || t("music.noLyrics")}</small></button>
       <button className="music-mini-collapse" type="button" onClick={() => setCompact(true)} aria-label={t("music.collapsePlayer")}><span className="material-symbols-outlined">close_fullscreen</span></button>
       <button className="music-mini-close" type="button" onClick={close} aria-label={t("music.closePlayer")}><span className="material-symbols-outlined">close</span></button>
       </>}
     </aside> : null}
     {music ? <SideDrawer className="netease-music-drawer" historyKey={`global-${music.provider}-song-${music.song_id}`} onClose={() => setDrawerOpen(false)} open={drawerOpen} style={{ "--netease-red": brand?.color } as CSSProperties} title={music.title} titleAccessory={<span className="netease-music-drawer-source"><img alt="" src={brand?.logo} style={{ width: 15, height: 15, borderRadius: "50%" }} />{brand?.name}</span>}>
       <div className="netease-player">
-        <div className={`netease-player-cover music-disc is-active${playing ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</div>
+        <div className={`netease-player-cover music-disc is-active${playing && playbackWait.phase === "idle" ? " is-playing" : ""}`}>{music.cover_url ? <img src={music.cover_url} alt="" /> : <span className="material-symbols-outlined">music_note</span>}</div>
         <div className="netease-player-heading"><h4>{music.title}</h4><p>{music.artists.join(" / ")}</p>{music.album ? <small>{music.album}</small> : null}</div>
-        <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" onClick={toggle} disabled={unavailable}><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>{unavailable ? t("music.audioUnavailable") : playing ? t("music.pause") : t("music.play")}</button></div>
+        <div className="netease-player-controls"><input type="range" min="0" max={duration || 0} value={Math.min(time, duration || 0)} step="0.1" aria-label={t("music.progress")} onChange={(event) => seek(Number(event.target.value))} /><div><span>{Math.floor(time / 60)}:{Math.floor(time % 60).toString().padStart(2, "0")}</span><span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, "0")}</span></div><button type="button" onClick={toggle}>{playbackWait.visible && playbackWait.phase !== "error" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}{unavailable ? t("common.retry") : playbackWait.visible && playbackWait.phase !== "error" ? t("media.buffering") : playing ? t("music.pause") : t("music.play")}</button></div>
         <section className="netease-player-lyrics" aria-label={t("music.lyrics")}>{lyrics.length ? lyrics.map((line, index) => <p key={`${line.time}:${index}`} className={index === activeLyricIndex ? "is-active" : ""} onClick={() => seek(line.time)} ref={(element) => { if (element) lyricRefs.current.set(index, element); else lyricRefs.current.delete(index); }}>{line.text}</p>) : <div className="netease-player-no-lyrics">{t("music.noLyrics")}</div>}</section>
         <a className="netease-player-open" href={music.canonical_url} rel="noreferrer" target="_blank"><img alt="" src={brand?.logo} style={{ width: 18, height: 18, borderRadius: "50%" }} />{brand?.name}<span aria-hidden="true">↗</span></a>
       </div>

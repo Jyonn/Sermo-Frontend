@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.14",
+  "id": "2026.10.02.15",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "群聊消息锁定额度调整",
+      "title": "等待过程更清楚",
       "items": [
-        "群成员每人可锁定 3 条消息，群主可锁定 20 条并撤销成员的锁定"
+        "更新、原图下载和媒体播放会显示准备或缓冲状态；加载失败可重试"
       ]
     },
     "en": {
-      "title": "Updated group message lock limits",
+      "title": "Clearer loading feedback",
       "items": [
-        "Each group member can lock 3 messages; the owner can lock 20 and remove members' locks"
+        "Updates, full-size images, and media playback now show loading or buffering states with retry options"
       ]
     }
   }

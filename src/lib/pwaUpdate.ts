@@ -144,13 +144,28 @@ function waitForWaitingWorker(registration: ServiceWorkerRegistration): Promise<
   });
 }
 
-export async function activatePwaUpdate() {
+export type UpdateActivationPhase = "preparing" | "installing" | "restarting";
+
+export async function activatePwaUpdate(onPhase?: (phase: UpdateActivationPhase) => void) {
+  onPhase?.("preparing");
   const registration = "serviceWorker" in navigator
     ? await navigator.serviceWorker.getRegistration().catch(() => undefined)
     : undefined;
-  await registration?.update().catch(() => undefined);
+  if (registration) {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        registration.update().catch(() => undefined),
+        new Promise<void>((resolve) => { timeout = globalThis.setTimeout(resolve, 8000); }),
+      ]);
+    } finally {
+      if (timeout) globalThis.clearTimeout(timeout);
+    }
+  }
+  onPhase?.("installing");
   const worker = registration ? await waitForWaitingWorker(registration) : null;
   if (!worker) {
+    onPhase?.("restarting");
     window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
     window.location.reload();
     return;
@@ -159,6 +174,7 @@ export async function activatePwaUpdate() {
   const reload = () => {
     if (reloading) return;
     reloading = true;
+    onPhase?.("restarting");
     window.clearTimeout(fallback);
     navigator.serviceWorker.removeEventListener("controllerchange", reload);
     window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");

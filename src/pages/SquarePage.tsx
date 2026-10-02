@@ -35,6 +35,7 @@ import { useAuth } from "../lib/auth";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { isChineseLanguage, localeForLanguage } from "../lib/i18n";
 import { toMessageUploadError, uploadMessageMediaWith } from "../lib/messageUpload";
+import { usePlaybackWait } from "../components/MediaWaitFeedback";
 import { formatRelativeTime } from "../lib/presentation";
 import {
   mergeSquareFeedRefresh,
@@ -346,6 +347,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
 }) {
   const { t } = useI18n();
   const [playing, setPlaying] = useState(false);
+  const audioWait = usePlaybackWait();
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -434,12 +436,12 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
             event.stopPropagation();
             const player = audioRef.current;
             if (!player) return;
-            if (player.paused) void player.play();
+            if (player.paused) { if (audioWait.phase === "error") player.load(); audioWait.start(); void player.play().catch(audioWait.fail); }
             else player.pause();
-          }} type="button"><span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span></button>
+          }} type="button" aria-label={audioWait.phase === "error" ? t("common.retry") : audioWait.visible ? t("media.buffering") : playing ? t("media.pause") : t("media.play")}>{audioWait.visible && audioWait.phase !== "error" ? <span className="media-wait-spinner" aria-hidden="true" /> : <span className="material-symbols-outlined">{playing ? "pause" : "play_arrow"}</span>}</button>
           <div className="square-audio-wave" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
-          <small>{audio.duration_seconds ? `${audio.duration_seconds}s` : t("square.voice")}</small>
-          <audio hidden onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={audio.uri} />
+          <small>{audioWait.phase === "error" ? t("common.retry") : audio.duration_seconds ? `${audio.duration_seconds}s` : t("square.voice")}</small>
+          <audio hidden onEnded={() => { setPlaying(false); audioWait.ready(); }} onError={audioWait.fail} onPause={() => { setPlaying(false); audioWait.stop(); }} onPlaying={() => { setPlaying(true); audioWait.ready(); }} onStalled={audioWait.waiting} onWaiting={audioWait.waiting} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
       {video ? <StatementVideoThumbnail className="square-statement-video" durationSeconds={video.duration_seconds} onClick={() => onOpenVideo()} thumbnailUri={video.thumbnail_uri} /> : null}
@@ -2842,7 +2844,7 @@ export default function SquarePage() {
           />
         ) : null}
       </SideDrawer>
-      {gallery && galleryImages.length ? <MediaLightbox altPrefix={t("square.photo")} index={gallery.index} items={galleryImages.map((image) => ({ uri: image.uri, kind: "image", width: image.metadata?.pixel_width, height: image.metadata?.pixel_height, detail: <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} owner={galleryStatement?.user} />, downloadLabel: formatImageFileSize(image.metadata?.file_size) }))} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} /> : null}
+      {gallery && galleryImages.length ? <MediaLightbox altPrefix={t("square.photo")} index={gallery.index} items={galleryImages.map((image) => ({ uri: image.uri, kind: "image", posterUri: image.thumbnail_uri, width: image.metadata?.pixel_width, height: image.metadata?.pixel_height, detail: <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} owner={galleryStatement?.user} />, downloadLabel: formatImageFileSize(image.metadata?.file_size) }))} onClose={() => setGallery(null)} onIndexChange={(index) => setGallery((current) => current ? { ...current, index } : null)} /> : null}
       {galleryVideo ? <MediaLightbox index={0} items={[{ uri: galleryVideo.uri, kind: "video", posterUri: galleryVideo.thumbnail_uri, width: galleryVideo.metadata?.pixel_width, height: galleryVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={galleryVideo.metadata} owner={galleryVideoStatement?.user} />, downloadLabel: formatImageFileSize(galleryVideo.metadata?.file_size) }]} onClose={() => setVideoGalleryStatementId(null)} onIndexChange={() => undefined} /> : null}
       {chatRecordGallery ? <MediaLightbox altPrefix={t("square.photo")} index={chatRecordGallery.index} items={chatRecordGallery.uris.map((uri, index) => ({ uri, kind: "image" as const, width: chatRecordGallery.metadata[index]?.pixel_width, height: chatRecordGallery.metadata[index]?.pixel_height, detail: <MediaMetadataPanel key={`${uri}-${index}`} kind="image" metadata={chatRecordGallery.metadata[index]} />, downloadLabel: formatImageFileSize(chatRecordGallery.metadata[index]?.file_size) }))} onClose={() => setChatRecordGallery(null)} onIndexChange={(index) => setChatRecordGallery((current) => current ? { ...current, index } : null)} /> : null}
       {chatRecordVideo ? <MediaLightbox index={0} items={[{ uri: chatRecordVideo.uri, kind: "video", width: chatRecordVideo.metadata?.pixel_width, height: chatRecordVideo.metadata?.pixel_height, detail: <MediaMetadataPanel kind="video" metadata={chatRecordVideo.metadata} />, downloadLabel: formatImageFileSize(chatRecordVideo.metadata?.file_size) }]} onClose={() => setChatRecordVideo(null)} onIndexChange={() => undefined} /> : null}

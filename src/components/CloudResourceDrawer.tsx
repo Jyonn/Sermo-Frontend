@@ -115,13 +115,6 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
     return () => observer.disconnect();
   }, [open, tab, data?.has_more, data?.next_offset, loading, loadingMore]);
 
-  const removeUnavailableResource = (resourceId: number) => {
-    setData((current) => current ? {
-      ...current,
-      items: current.items.filter((item) => item.resource_id !== resourceId),
-    } : current);
-  };
-
   const sendToChat = async (asset: CloudResourceDTO, chatId: number) => {
     setBusyId(asset.resource_id);
     setSendingChatId(chatId);
@@ -269,7 +262,6 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
           {tab === "image" || tab === "video" ? <MediaResourceGrid
             highlightedId={highlightedResourceId}
             items={mediaGridItems}
-            onImageError={(item) => removeUnavailableResource(Number(item.id))}
             onSelect={(item) => setPreviewIndex(mediaItems.findIndex((asset) => asset.resource_id === item.id))}
             renderAction={(item) => moreButton(mediaItems.find((asset) => asset.resource_id === item.id)!)}
           /> : null}

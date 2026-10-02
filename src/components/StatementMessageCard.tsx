@@ -8,6 +8,7 @@ import { MediaMetadataPanel } from "./MediaMetadataPanel";
 import { StatementVideoThumbnail } from "./StatementVideoThumbnail";
 import { isSupportedExternalMedia } from "./ExternalMediaPreview";
 import { UnsupportedContentNotice } from "./UnsupportedContentNotice";
+import { usePlaybackWait } from "./MediaWaitFeedback";
 
 function formatDuration(value: number) {
   const seconds = Math.max(0, Math.floor(value || 0));
@@ -28,6 +29,7 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const audioWait = usePlaybackWait();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const images = useMemo(() => statement?.media.filter((item) => item.kind === "image") ?? [], [statement]);
   const audio = statement?.media.find((item) => item.kind === "audio");
@@ -91,16 +93,20 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
             event.stopPropagation();
             const player = audioRef.current;
             if (!player) return;
-            if (player.paused) void player.play(); else player.pause();
-          }} type="button">
-            <span className="message-statement-audio-control material-symbols-outlined">{audioPlaying ? "pause" : "play_arrow"}</span>
+            if (player.paused) { if (audioWait.phase === "error") player.load(); audioWait.start(); void player.play().catch(audioWait.fail); }
+            else player.pause();
+          }} aria-label={audioWait.phase === "error" ? t("common.retry") : audioWait.visible ? t("media.buffering") : audioPlaying ? t("media.pause") : t("media.play")} type="button">
+            {audioWait.visible && audioWait.phase !== "error" ? <span aria-hidden="true" className="media-wait-spinner" /> : <span className="message-statement-audio-control material-symbols-outlined">{audioPlaying ? "pause" : "play_arrow"}</span>}
             <span className="message-statement-audio-wave" aria-hidden="true">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</span>
-            <time>{formatDuration(audioCurrentTime)} / {formatDuration(audioDuration || audio.duration_seconds || 0)}</time>
+            <time>{audioWait.phase === "error" ? t("common.retry") : `${formatDuration(audioCurrentTime)} / ${formatDuration(audioDuration || audio.duration_seconds || 0)}`}</time>
             <audio
               onDurationChange={(event) => setAudioDuration(event.currentTarget.duration)}
-              onEnded={() => { setAudioPlaying(false); setAudioCurrentTime(0); }}
-              onPause={() => setAudioPlaying(false)}
-              onPlay={() => setAudioPlaying(true)}
+              onEnded={() => { setAudioPlaying(false); setAudioCurrentTime(0); audioWait.ready(); }}
+              onError={audioWait.fail}
+              onPause={() => { setAudioPlaying(false); audioWait.stop(); }}
+              onPlaying={() => { setAudioPlaying(true); audioWait.ready(); }}
+              onWaiting={audioWait.waiting}
+              onStalled={audioWait.waiting}
               onTimeUpdate={(event) => setAudioCurrentTime(event.currentTarget.currentTime)}
               preload="metadata"
               ref={audioRef}
@@ -131,7 +137,7 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
         <span><span className="material-symbols-outlined">chat_bubble</span>{statement.comment_count}</span>
         <strong>{t("message.viewStatement")}</strong>
       </button>
-      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} details={images.map((image) => <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} owner={statement.user} />)} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} uris={images.map((image) => image.uri)} /> : null}
+      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} details={images.map((image) => <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} owner={statement.user} />)} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} posterUris={images.map((image) => image.thumbnail_uri)} uris={images.map((image) => image.uri)} /> : null}
       {videoOpen && video ? <MediaLightbox altPrefix={t("square.video")} index={0} items={[{
         kind: "video",
         uri: video.uri,

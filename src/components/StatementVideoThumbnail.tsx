@@ -1,3 +1,6 @@
+import { useState } from "react";
+import "./MediaWaitFeedback.css";
+
 interface StatementVideoThumbnailProps {
   className?: string;
   durationSeconds?: number | null;
@@ -11,9 +14,11 @@ function formatDuration(value: number) {
 }
 
 export function StatementVideoThumbnail({ className = "", durationSeconds, onClick, thumbnailUri }: StatementVideoThumbnailProps) {
+  const [coverResult, setCoverResult] = useState<{ uri: string; status: "ready" | "error" } | null>(null);
+  const coverState = coverResult && coverResult.uri === thumbnailUri ? coverResult.status : thumbnailUri ? "loading" : "error";
   return (
-    <button className={`statement-video-thumbnail${className ? ` ${className}` : ""}`} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
-      {thumbnailUri ? <img alt="" loading="lazy" src={thumbnailUri} /> : <span className="statement-video-thumbnail-placeholder" />}
+    <button className={`statement-video-thumbnail${className ? ` ${className}` : ""}${coverState === "loading" ? " is-cover-loading" : ""}`} onClick={(event) => { event.stopPropagation(); onClick(); }} type="button">
+      {thumbnailUri && coverState !== "error" ? <img alt="" loading="lazy" onError={() => setCoverResult({ uri: thumbnailUri, status: "error" })} onLoad={() => setCoverResult({ uri: thumbnailUri, status: "ready" })} src={thumbnailUri} /> : <span className="statement-video-thumbnail-placeholder" />}
       <span className="statement-video-thumbnail-play material-symbols-outlined">play_arrow</span>
       {durationSeconds ? <time>{formatDuration(durationSeconds)}</time> : null}
     </button>

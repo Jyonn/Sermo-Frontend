@@ -60,6 +60,7 @@ test("the page reloads only after an explicit update action", async (context) =>
   const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
   let reloads = 0;
   let reason = "";
+  const phases: string[] = [];
   Object.defineProperty(globalThis, "window", {
     configurable: true,
     value: {
@@ -76,7 +77,48 @@ test("the page reloads only after an explicit update action", async (context) =>
   });
 
   assert.equal(reloads, 0);
-  await activatePwaUpdate();
+  await activatePwaUpdate((phase) => phases.push(phase));
   assert.equal(reloads, 1);
   assert.equal(reason, "user-requested-pwa-update");
+  assert.deepEqual(phases, ["preparing", "installing", "restarting"]);
+});
+
+test("an installed service worker reports each stage before reloading", async (context) => {
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  const phases: string[] = [];
+  let reloads = 0;
+  let controllerChanged: (() => void) | null = null;
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      setTimeout,
+      clearTimeout,
+      sessionStorage: { setItem: () => undefined },
+      location: { reload: () => { reloads += 1; } },
+    },
+  });
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: {
+      serviceWorker: {
+        getRegistration: async () => ({
+          update: async () => undefined,
+          waiting: { postMessage: () => controllerChanged?.() },
+        }),
+        addEventListener: (_name: string, callback: () => void) => { controllerChanged = callback; },
+        removeEventListener: () => { controllerChanged = null; },
+      },
+    },
+  });
+  context.after(() => {
+    if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow);
+    else delete (globalThis as { window?: unknown }).window;
+    if (previousNavigator) Object.defineProperty(globalThis, "navigator", previousNavigator);
+    else delete (globalThis as { navigator?: unknown }).navigator;
+  });
+
+  await activatePwaUpdate((phase) => phases.push(phase));
+  assert.deepEqual(phases, ["preparing", "installing", "restarting"]);
+  assert.equal(reloads, 1);
 });

@@ -10202,6 +10202,7 @@ function LiveChatsPage({
           index={imagePreview.index}
           onClose={() => setImagePreview(null)}
           onIndexChange={(index) => setImagePreview((current) => current ? { ...current, index } : current)}
+          posterUris={imagePreview.messageIds.map((id) => id === null ? undefined : selectedMessages.find((message) => message.id === id)?.payload?.thumbnail_uri)}
           uris={imagePreview.uris}
         />
       ) : null}

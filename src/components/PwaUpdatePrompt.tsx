@@ -1,9 +1,9 @@
 import { useState, useSyncExternalStore } from "react";
 import {
-  activatePwaUpdate,
   getPwaUpdateCheckSnapshot,
   subscribePwaUpdateCheck,
 } from "../lib/pwaUpdate";
+import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { useI18n } from "../lib/language";
 
 const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
@@ -12,15 +12,12 @@ export function PwaUpdatePrompt() {
   const { language, t } = useI18n();
   const { result } = useSyncExternalStore(subscribePwaUpdateCheck, getPwaUpdateCheckSnapshot);
   const [dismissedReleaseId, setDismissedReleaseId] = useState(() => window.localStorage.getItem(DISMISSED_UPDATE_KEY));
-  const [updating, setUpdating] = useState(false);
+  const { phase, install } = usePwaUpdateActivation();
+  const updating = phase !== "idle" && phase !== "error";
   const releaseId = result?.latestVersion;
   const release = result?.latestRelease?.id === releaseId ? result?.latestRelease : null;
   if (!result?.updateAvailable || !releaseId || dismissedReleaseId === releaseId) return null;
 
-  const update = () => {
-    setUpdating(true);
-    void activatePwaUpdate();
-  };
   const dismiss = () => {
     window.localStorage.setItem(DISMISSED_UPDATE_KEY, releaseId);
     setDismissedReleaseId(releaseId);
@@ -47,10 +44,12 @@ export function PwaUpdatePrompt() {
       </div>
       <div className="pwa-update-actions">
         <button className="pwa-update-dismiss" disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
-        <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
-          {updating ? t("common.updating") : t("common.updateNow")}
+        <button className="pwa-recommendation-action" disabled={updating} onClick={install} type="button">
+          {updating ? <span aria-hidden="true" className="media-wait-spinner" /> : null}
+          {updating ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}
         </button>
       </div>
+      {phase === "error" ? <p className="pwa-update-error" role="alert">{t("update.installFailed")}</p> : null}
     </aside>
   );
 }
