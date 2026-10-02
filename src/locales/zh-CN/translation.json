@@ -2685,6 +2685,8 @@
   ,"diagnostics.empty": "暂无记录。开启诊断项目并开始录制后，进入聊天触发问题。"
   ,"chat.blockedWordsTitle": "屏蔽词"
   ,"chat.blockedWordsMatched": "消息包含本会话的屏蔽词，未能发送"
+  ,"chat.editFailedText": "编辑未发送的消息"
+  ,"chat.blockedWordsLegacyOwner": "历史规则 · 设置者未记录"
   ,"chat.blockedWordsGroupHint": "群主审批后对全群生效，包括群主本人。"
   ,"chat.blockedWordsDirectHint": "双方各可添加25个词，添加后对双方发送都生效。"
   ,"chat.blockedWordsLoadFailed": "无法加载屏蔽词"

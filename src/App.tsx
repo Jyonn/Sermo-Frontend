@@ -35,6 +35,7 @@ const SquarePage = lazy(routeResources.square);
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
 const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
 const MentionMobileLabPage = lazy(() => import("./pages/MentionMobileLabPage"));
+const BlockedWordsLabPage = lazy(() => import("./pages/BlockedWordsLabPage"));
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -101,6 +102,10 @@ export default function App() {
         <Route
           path="/design/mention-mobile-variants"
           element={<Suspense fallback={<RouteResourceState status="loading" />}><MentionMobileLabPage /></Suspense>}
+        />
+        <Route
+          path="/design/blocked-words-variants"
+          element={<Suspense fallback={<RouteResourceState status="loading" />}><BlockedWordsLabPage /></Suspense>}
         />
         <Route path="/space" element={<AdminSpacePage />} />
         <Route

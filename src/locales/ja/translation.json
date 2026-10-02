@@ -2596,6 +2596,8 @@
   "diagnostics.empty": "記録はまだありません。診断項目を選び、記録を開始してからチャットで問題を再現してください。",
   "chat.blockedWordsTitle": "禁止ワード",
   "chat.blockedWordsMatched": "このチャットの禁止ワードが含まれるため送信できませんでした",
+  "chat.editFailedText": "未送信メッセージを編集",
+  "chat.blockedWordsLegacyOwner": "以前のルール · 作成者の記録なし",
   "chat.blockedWordsGroupHint": "グループのオーナーが承認すると、本人を含む全員に適用されます。",
   "chat.blockedWordsDirectHint": "双方がそれぞれ25語まで追加でき、双方の送信に適用されます。",
   "chat.blockedWordsLoadFailed": "禁止ワードを読み込めませんでした",

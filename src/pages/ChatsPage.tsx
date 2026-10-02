@@ -2170,8 +2170,8 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
       {selectionMode ? <span className="message-selection-check" aria-hidden="true" /> : null}
       <div className={`message-bubble-shell ${from}${isFirst ? " group-start" : ""}${message.kind === "sticker" ? " is-sticker" : ""}`}>
         {showRetry ? (
-          <button aria-label={i18n.t("message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
-            <span className="material-symbols-outlined">refresh</span>
+          <button aria-label={i18n.t(message.kind === "text" ? "chat.editFailedText" : "message.retrySend")} className="message-retry-icon" onClick={() => void onRetry(message)} type="button">
+            <span className="material-symbols-outlined">{message.kind === "text" ? "edit" : "refresh"}</span>
           </button>
         ) : null}
         <div
@@ -6187,10 +6187,9 @@ function LiveChatsPage({
       } else if (apiError instanceof ApiError && apiError.identifier.includes("BLOCKED_WORD_MATCHED")) {
         setMessages((current) => ({
           ...current,
-          [selectedChat.id]: (current[selectedChat.id] ?? []).filter((item) => item.clientId !== optimisticMessage.clientId),
+          [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
         }));
-        updateDraft(message);
-        showToast(t("chat.blockedWordsMatched"), "error");
+        showToast(apiError.message, "error");
       } else {
         setMessages((current) => ({
           ...current,
@@ -6206,11 +6205,20 @@ function LiveChatsPage({
 
   const retryFailedMessage = async (message: ChatMessage) => {
     if (!selectedChat || message.status !== "failed" || !["text", "image", "video", "audio", "file"].includes(message.kind)) return;
+    if (message.kind === "text") {
+      setMessages((current) => ({
+        ...current,
+        [selectedChat.id]: (current[selectedChat.id] ?? []).filter((item) => item.clientId !== message.clientId),
+      }));
+      updateDraft(draft ? `${draft}\n${message.text}` : message.text);
+      window.requestAnimationFrame(() => mentionEditorRef.current?.focus());
+      return;
+    }
     if (!await moveToLatestMessageWindow()) return;
 
     const retryMessage: ChatMessage = {
       ...message,
-      replyTo: message.kind === "text" ? message.replyTo : null,
+      replyTo: null,
       status: "pending",
       createdAt: Math.floor(Date.now() / 1000),
       time: formatTime(Math.floor(Date.now() / 1000)),
@@ -9729,10 +9737,10 @@ function LiveChatsPage({
           {blockedWords ? <>
             <form onSubmit={(event) => { event.preventDefault(); void changeBlockedWords(blockedWords.group && !blockedWords.is_owner ? "request" : "add"); }}>
               <input aria-label={t("chat.blockedWordsInput")} className="input" maxLength={80} onChange={(event) => setBlockedWordInput(event.target.value)} placeholder={t("chat.blockedWordsInput")} value={blockedWordInput} />
-              <button className="button" disabled={blockedWordsBusy || !blockedWordInput.trim() || (blockedWords.group && blockedWords.is_owner ? blockedWords.words.length >= 50 : !blockedWords.group && blockedWords.words.length >= 25)} type="submit">{t(blockedWords.group && !blockedWords.is_owner ? "chat.blockedWordsRequest" : "common.add")}</button>
+              <button className="button" disabled={blockedWordsBusy || !blockedWordInput.trim() || (blockedWords.group && blockedWords.is_owner ? blockedWords.words.length >= 50 : !blockedWords.group && blockedWords.own_count >= 25)} type="submit">{t(blockedWords.group && !blockedWords.is_owner ? "chat.blockedWordsRequest" : "common.add")}</button>
             </form>
-            <h3>{t("chat.blockedWordsActive")} ({blockedWords.words.length}/{blockedWords.group ? 50 : 25})</h3>
-            {blockedWords.words.length ? <div className="chat-blocked-words-list">{blockedWords.words.map((item) => <div className="chat-blocked-word-row" key={item.id}><span>{item.word}</span>{!blockedWords.group || blockedWords.is_owner ? <button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("remove", item.id)} type="button">{t("common.delete")}</button> : null}</div>)}</div> : <p>{t("chat.blockedWordsEmpty")}</p>}
+            <h3>{t("chat.blockedWordsActive")} ({blockedWords.group ? blockedWords.words.length : blockedWords.own_count}/{blockedWords.group ? 50 : 25})</h3>
+            {blockedWords.words.length ? <div className="chat-blocked-words-list">{blockedWords.words.map((item) => <div className="chat-blocked-word-row" key={item.id}><span><strong>{item.word}</strong><small>{item.owner_name || t("chat.blockedWordsLegacyOwner")}</small></span>{(blockedWords.group ? blockedWords.is_owner : item.owner_id === currentUserId) ? <button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("remove", item.id)} type="button">{t("common.delete")}</button> : null}</div>)}</div> : <p>{t("chat.blockedWordsEmpty")}</p>}
             {blockedWords.group ? <><h3>{t("chat.blockedWordsRequests")}</h3><div className="chat-blocked-words-list">{blockedWords.requests.map((item) => <div className="chat-blocked-word-row" key={item.id}><span><strong>{item.word}</strong><small>{item.applicant_name} · {t(`chat.blockedWordsStatus.${item.status}` as TranslationKey)}</small></span>{item.status === "pending" ? <span className="chat-blocked-word-actions">{blockedWords.is_owner ? <><button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("approve", item.id)} type="button">{t("common.approve")}</button><button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("reject", item.id)} type="button">{t("common.reject")}</button></> : item.applicant_id === currentUserId ? <button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("withdraw", item.id)} type="button">{t("common.cancel")}</button> : null}</span> : null}</div>)}</div></> : null}
           </> : <p>{t("common.loading")}</p>}
         </div>

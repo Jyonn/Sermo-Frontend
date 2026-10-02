@@ -2596,6 +2596,8 @@
   "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat.",
   "chat.blockedWordsTitle": "Palabras bloqueadas",
   "chat.blockedWordsMatched": "El mensaje contiene una palabra bloqueada en este chat y no se envió",
+  "chat.editFailedText": "Editar mensaje no enviado",
+  "chat.blockedWordsLegacyOwner": "Regla anterior · autor sin registrar",
   "chat.blockedWordsGroupHint": "El propietario aprueba las reglas para todos, incluido él mismo.",
   "chat.blockedWordsDirectHint": "Cada persona puede añadir 25 palabras; las reglas se aplican a ambas.",
   "chat.blockedWordsLoadFailed": "No se pudieron cargar las palabras bloqueadas",

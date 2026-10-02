@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.6",
+  "id": "2026.10.02.7",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "会话屏蔽词",
+      "title": "屏蔽词反馈更清晰",
       "items": [
-        "群聊屏蔽词由群主审批；单聊双方可各自设置，对双方发送均生效"
+        "消息命中屏蔽词时会提示具体词语，未发送的文字可从气泡重新编辑"
       ]
     },
     "en": {
-      "title": "Chat blocked words",
+      "title": "Clearer blocked-word feedback",
       "items": [
-        "Group owners approve blocked words; either person can set rules that apply to both in direct chats"
+        "See which blocked word prevented sending, then edit the unsent text from its bubble"
       ]
     }
   }
