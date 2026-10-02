@@ -1259,19 +1259,23 @@ const RetryingMediaImage = memo(function RetryingMediaImage({
 });
 
 const MessageMediaImage = memo(function MessageMediaImage({
+  failed,
   groupClassName,
   localPreviewUri,
   metadata,
   messageId,
   onOpenImage,
+  onRetry,
   thumbnailUri,
   uri,
 }: {
+  failed?: boolean;
   groupClassName: string;
   localPreviewUri?: string;
   metadata?: ImageMetadataDTO | null;
   messageId?: number;
   onOpenImage?: (uris: string[], index: number, metadata?: Array<ImageMetadataDTO | null>, messageIds?: Array<number | null>) => void;
+  onRetry?: () => void;
   thumbnailUri?: string;
   uri: string;
 }) {
@@ -1293,8 +1297,9 @@ const MessageMediaImage = memo(function MessageMediaImage({
 
   return (
     <button
+      aria-label={failed ? i18n.t("message.retrySend") : i18n.t("message.image")}
       className={`message-media-frame image-button ${imageAspect ? "has-intrinsic-size" : ""} ${groupClassName} ${loaded ? "is-loaded" : "is-loading"}`.trim()}
-      onClick={() => onOpenImage?.([resolvedUri], 0, [metadata ?? null], [messageId ?? null])}
+      onClick={() => failed ? onRetry?.() : onOpenImage?.([resolvedUri], 0, [metadata ?? null], [messageId ?? null])}
       style={frameStyle}
       type="button"
     >
@@ -1855,6 +1860,7 @@ function renderMessageContent(
   onOpenVideo: ((uri: string, metadata: VideoMetadataDTO | null, messageId: number | null) => void) | undefined,
   groupClassName: string,
   forwardBundlePreviewDepth: number,
+  onRetry?: () => void,
 ) {
   if (message.kind === "unsupported") {
     return <UnsupportedContentNotice minVersion={message.minClientVersion} />;
@@ -1874,7 +1880,7 @@ function renderMessageContent(
   }
 
   if (message.kind === "image" && message.payload?.uri) {
-    return <MessageMediaImage groupClassName={groupClassName} localPreviewUri={message.localPreviewUri} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
+    return <MessageMediaImage failed={message.status === "failed"} groupClassName={groupClassName} localPreviewUri={message.localPreviewUri} messageId={typeof message.id === "number" ? message.id : undefined} metadata={message.payload.image_metadata} onOpenImage={onOpenImage} onRetry={onRetry} thumbnailUri={message.payload.thumbnail_uri} uri={message.payload.uri} />;
   }
 
   if (message.kind === "video" && message.payload?.uri) {
@@ -2109,7 +2115,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
   selectionMode,
 }: MessageBubbleRowProps) {
   const forwardBundlePreviewDepth = useContext(ForwardBundlePreviewDepthContext);
-  const showRetry = from === "self" && message.status === "failed" && ["text", "audio"].includes(message.kind);
+  const showRetry = from === "self" && message.status === "failed" && ["text", "audio", "image"].includes(message.kind);
   const canOpenActions = message.kind !== "submission_invite" && (message.status === "sent" || (message.kind === "image" && Boolean(message.payload?.uri)));
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
@@ -2239,7 +2245,7 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
               <span>{message.replyTo.content}</span>
             </button>
           ) : null}
-          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth)}
+          {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth, () => void onRetry(message))}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
           {isFirst ? <XiaobaiBubbleRunner /> : null}

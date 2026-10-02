@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.15",
+  "id": "2026.10.02.16",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "等待过程更清楚",
+      "title": "单张图片发送失败可重试",
       "items": [
-        "更新、原图下载和媒体播放会显示准备或缓冲状态；加载失败可重试"
+        "发送多张图片时，若只有一张发送失败，也能直接重试"
       ]
     },
     "en": {
-      "title": "Clearer loading feedback",
+      "title": "Retry a failed single image",
       "items": [
-        "Updates, full-size images, and media playback now show loading or buffering states with retry options"
+        "When only one image fails in a batch, you can retry it directly"
       ]
     }
   }
