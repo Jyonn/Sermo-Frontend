@@ -8293,10 +8293,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background: color-mix(in srgb, var(--brand-primary) 11%, var(--surface));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 14%, transparent);
 }
-.forward-route-switch button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
 .forward-route-icon {
   display: grid;
   place-items: center;
@@ -8444,7 +8440,8 @@ html[data-theme="dark"] .square-chat-record {
 .chat-target-picker-list > button:last-child { border-bottom: 0; }
 .chat-target-picker-list > button:not(:disabled):hover,
 .chat-target-picker-list > button.is-selected { border-radius: 13px; background: color-mix(in srgb, var(--brand-primary) 7%, transparent); }
-.chat-target-picker-list > button:disabled { opacity: .58; }
+.forward-route-switch button:disabled,
+.chat-target-picker-list > button:disabled { opacity: .58; cursor: not-allowed; }
 .chat-target-picker-avatar { width: 44px; height: 44px; border-radius: 14px; }
 .chat-target-picker-avatar .avatar-frame-clip,
 .chat-target-picker-avatar .avatar-image,
