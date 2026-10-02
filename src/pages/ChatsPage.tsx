@@ -8555,7 +8555,7 @@ function LiveChatsPage({
                             <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")} style={{ position: "fixed", zIndex: 2000, top: mobileMentionPosition.top, bottom: "auto", left: mobileMentionPosition.left, right: "auto", width: mobileMentionPosition.width, maxHeight: mobileMentionPosition.maxHeight, transform: "translateY(-100%)" }}>
                               {mentionCandidates.map((member) => (
                                 <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onPointerDown={handleMentionPointerDown} onPointerMove={handleMentionPointerMove} onPointerUp={(event) => handleMentionPointerUp(event, member)} onPointerCancel={() => { mentionTouchRef.current = null; suppressMentionClickUntilRef.current = performance.now() + 500; }} onClick={() => { if (performance.now() >= suppressMentionClickUntilRef.current) selectMention(member); }} role="option" type="button">
-                                  <UserAvatar className="composer-mention-avatar" frame={member.avatarFrameStyle} name={member.name} uri={member.avatarUri} />
+                                  <UserAvatar className="composer-mention-avatar" name={member.name} uri={member.avatarUri} />
                                   <span>{member.name}</span>
                                 </button>
                               ))}
@@ -8649,7 +8649,7 @@ function LiveChatsPage({
                         <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
                           {mentionCandidates.map((member) => (
                             <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMention(member)} role="option" type="button">
-                              <UserAvatar className="composer-mention-avatar" frame={member.avatarFrameStyle} name={member.name} uri={member.avatarUri} />
+                              <UserAvatar className="composer-mention-avatar" name={member.name} uri={member.avatarUri} />
                               <span>{member.name}</span>
                             </button>
                           ))}

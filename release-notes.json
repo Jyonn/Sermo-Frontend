@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.10",
+  "id": "2026.10.02.11",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "更新检查更一致",
+      "title": "艾特成员列表更清爽",
       "items": [
-        "自动检查与菜单检查共享版本结果；只有点击立即更新才会刷新页面"
+        "群聊艾特列表中的成员头像不再显示装饰头像框"
       ]
     },
     "en": {
-      "title": "A more consistent update check",
+      "title": "Cleaner mention suggestions",
       "items": [
-        "Automatic and menu checks share version results; the page refreshes only when you choose to update"
+        "Member avatars in group mention suggestions no longer show decorative frames"
       ]
     }
   }
