@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.11",
+  "id": "2026.10.02.12",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "艾特成员列表更清爽",
+      "title": "聊天工具栏保持一致",
       "items": [
-        "群聊艾特列表中的成员头像不再显示装饰头像框"
+        "桌面聊天补上艾特入口，并与手机端统一工具顺序；未解锁的功能保持可见，点击时提示等级要求"
       ]
     },
     "en": {
-      "title": "Cleaner mention suggestions",
+      "title": "Consistent chat tools",
       "items": [
-        "Member avatars in group mention suggestions no longer show decorative frames"
+        "Desktop chat now includes mentions and matches the mobile tool order; locked actions stay visible and explain their level requirement"
       ]
     }
   }

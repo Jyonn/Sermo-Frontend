@@ -3544,14 +3544,9 @@ function LiveChatsPage({
     showToast(t("growth.capabilityRequired", { level: capability.required_level, capability: label }), "error");
     return false;
   };
-  const canSendImage = growthCapability("chat.message.send.image", 2).available;
-  const canSendAudio = growthCapability("chat.message.send.audio", 3).available;
-  const canSendLocation = growthCapability("chat.message.send.location", 3).available;
   const canCreateGroup = growthCapability("chat.group.create", 4).available;
   const canInviteGroupMember = growthCapability("chat.group.invite", 4).available;
   const canRenameGroup = growthCapability("chat.group.rename", 5).available;
-  const canSendVideo = growthCapability("chat.message.send.video", 5).available;
-  const canCreateSticker = growthCapability("menu.sticker.create", 6).available;
   const canUseOnlineReminder = growthCapability("chat.reminder.online", 7).available;
   const canDownloadAudio = growthCapability("chat.message.download.audio", 8).available;
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
@@ -5253,6 +5248,7 @@ function LiveChatsPage({
   };
 
   const openStickerManager = () => {
+    if (!requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) return;
     setEmojiPickerOpen(false);
     setStickerManagerOpen(true);
   };
@@ -5343,6 +5339,10 @@ function LiveChatsPage({
 
   const collectImageAsSticker = async () => {
     if (!messageMenu || messageMenu.message.kind !== "image" || typeof messageMenu.message.id !== "number") return;
+    if (!requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) {
+      setMessageMenu(null);
+      return;
+    }
     const messageId = messageMenu.message.id;
     setMessageMenu(null);
     try {
@@ -8589,32 +8589,8 @@ function LiveChatsPage({
                       </div>
                     ) : undefined}
                     tools={<>
-                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setDesktopComposerTool(null); setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
-                      {canSendImage ? <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button> : null}
                       <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "file"} className={`desktop-tool-trigger${desktopComposerTool === "file" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
-                        {desktopComposerTool === "file" ? <div className="desktop-tool-popover is-file">
-                          <div className="desktop-tool-choice-grid">
-                            <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong></button>
-                            <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong></button>
-                          </div>
-                        </div> : null}
-                      </span>
-                      {canSendLocation ? <span className="desktop-tool-anchor">
-                        <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
-                      </span> : null}
-                      {selectedChat && !submissionMode ? <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
-                        {desktopComposerTool === "footprint" ? <div className="desktop-tool-popover is-footprint">
-                          <header><strong>{t("travelMap.sharedFootprints")}</strong></header>
-                          {travelMapSaving ? <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("common.loading")}</div> : chatTravelMapAccess?.authorized_by_me ? <div className="desktop-tool-stack">
-                            <button className="desktop-tool-wide-action" onClick={() => { setDesktopComposerTool(null); setChatTravelMapOpen(true); }} type="button"><ComposerSvgIcon kind="map" /><span><strong>{t("travelMap.openMap")}</strong><small>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess.shared_members.length })}</small></span></button>
-                            <button className="desktop-tool-text-danger" onClick={() => void revokeChatTravelMap()} type="button">{t("travelMap.stopSharing")}</button>
-                          </div> : <button className="desktop-tool-primary-action is-wide" onClick={() => void grantChatTravelMap()} type="button"><ComposerSvgIcon kind="map" />{t("travelMap.authorize")}</button>}
-                        </div> : null}
-                      </span> : null}
-                      {canSendAudio ? <span className="desktop-tool-anchor">
-                        <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={voiceComposer.phase === "sending"} onClick={() => toggleDesktopComposerTool("voice")} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
+                        <button aria-expanded={desktopComposerTool === "voice"} className={`desktop-tool-trigger${desktopComposerTool === "voice" || voiceComposer.open ? " is-active" : ""}`} disabled={composerBusy || voiceComposer.phase === "sending"} onClick={() => { if (requireComposerCapability("chat.message.send.audio", 3, t("message.sendAudio"))) toggleDesktopComposerTool("voice"); }} title={t("audio.record")} type="button"><ComposerSvgIcon kind="mic" /></button>
                         {desktopComposerTool === "voice" ? <div className="desktop-tool-popover is-voice">
                           <header><strong>{t("audio.record")}</strong></header>
                           <div className={`desktop-voice-studio is-${voiceComposer.phase}`}>
@@ -8624,6 +8600,31 @@ function LiveChatsPage({
                             {voiceComposer.open && voiceComposer.phase !== "sending" ? <button className="desktop-voice-discard" onClick={cancelVoiceRecording} type="button">{t("common.cancel")}</button> : null}
                             <audio ref={voicePreviewAudioRef} hidden onEnded={() => { setVoicePreviewPlaying(false); if (activeThreadAudio === voicePreviewAudioRef.current) activeThreadAudio = null; }} onPause={() => setVoicePreviewPlaying(false)} onPlay={() => setVoicePreviewPlaying(true)} preload="metadata" src={voicePreviewUri} />
                           </div>
+                        </div> : null}
+                      </span>
+                      {selectedChat?.type === "group" ? <button aria-label={t("chat.mentionMembers")} aria-pressed={mentionSearch !== null} className={mentionSearch !== null ? "is-active" : ""} disabled={composerBusy} onMouseDown={(event) => event.preventDefault()} onClick={() => { setDesktopComposerTool(null); setEmojiPickerOpen(false); mentionEditorRef.current?.openMentionPicker(); }} title={t("chat.mentionMembers")} type="button"><span className="material-symbols-outlined" aria-hidden="true">alternate_email</span></button> : null}
+                      <button aria-expanded={emojiPickerOpen} aria-pressed={emojiPickerOpen} className={`desktop-emoji-trigger${emojiPickerOpen ? " is-active" : ""}`} disabled={composerBusy} onClick={() => { setDesktopComposerTool(null); setComposerMoreOpen(false); setEmojiPickerOpen((current) => !current); }} title={t("emoji.choose")} type="button"><ComposerSvgIcon kind="emoji" /></button>
+                      <button disabled={composerBusy} onClick={openGalleryPicker} title={t("media.gallery")} type="button"><ComposerSvgIcon kind="album" /></button>
+                      <span className="desktop-tool-anchor">
+                        <button aria-expanded={desktopComposerTool === "file"} className={`desktop-tool-trigger${desktopComposerTool === "file" ? " is-active" : ""}`} disabled={composerBusy} onClick={() => toggleDesktopComposerTool("file")} title={t("media.file")} type="button"><ComposerSvgIcon kind="file" /></button>
+                        {desktopComposerTool === "file" ? <div className="desktop-tool-popover is-file">
+                          <div className="desktop-tool-choice-grid">
+                            <button onClick={() => { setDesktopComposerTool(null); setCloudFilePickerOpen(true); }} type="button"><span className="material-symbols-outlined">cloud</span><strong>{t("cloudResources.chooseCloud")}</strong></button>
+                            <button onClick={() => { setDesktopComposerTool(null); fileInputRef.current?.click(); }} type="button"><span className="material-symbols-outlined">upload_file</span><strong>{t("cloudResources.chooseLocal")}</strong></button>
+                          </div>
+                        </div> : null}
+                      </span>
+                      <span className="desktop-tool-anchor">
+                        <button disabled={composerBusy} onClick={openLocationPicker} title={t("media.location")} type="button"><ComposerSvgIcon kind="location" /></button>
+                      </span>
+                      {selectedChat && !submissionMode ? <span className="desktop-tool-anchor">
+                        <button aria-expanded={desktopComposerTool === "footprint"} className={`desktop-tool-trigger${desktopComposerTool === "footprint" ? " is-active" : ""}`} disabled={composerBusy || travelMapSaving} onClick={() => { toggleDesktopComposerTool("footprint"); if (desktopComposerTool !== "footprint") void openChatTravelMap(true); }} title={t("travelMap.actionShort")} type="button"><ComposerSvgIcon kind="map" /></button>
+                        {desktopComposerTool === "footprint" ? <div className="desktop-tool-popover is-footprint">
+                          <header><strong>{t("travelMap.sharedFootprints")}</strong></header>
+                          {travelMapSaving ? <div className="desktop-tool-loading"><span className="composer-recording-spinner" />{t("common.loading")}</div> : chatTravelMapAccess?.authorized_by_me ? <div className="desktop-tool-stack">
+                            <button className="desktop-tool-wide-action" onClick={() => { setDesktopComposerTool(null); setChatTravelMapOpen(true); }} type="button"><ComposerSvgIcon kind="map" /><span><strong>{t("travelMap.openMap")}</strong><small>{t("travelMap.sharedMemberCount", { count: chatTravelMapAccess.shared_members.length })}</small></span></button>
+                            <button className="desktop-tool-text-danger" onClick={() => void revokeChatTravelMap()} type="button">{t("travelMap.stopSharing")}</button>
+                          </div> : <button className="desktop-tool-primary-action is-wide" onClick={() => void grantChatTravelMap()} type="button"><ComposerSvgIcon kind="map" />{t("travelMap.authorize")}</button>}
                         </div> : null}
                       </span> : null}
                     </>}
@@ -8707,13 +8708,11 @@ function LiveChatsPage({
                       <div className="composer-sticker-pane" role="tabpanel" aria-label={t("sticker.mine")}>
                         {stickers.length ? (
                           <div className="composer-sticker-grid" onScroll={(event) => handleStickerGridScroll(event, "mine")}>
-                            {canCreateSticker ? (
-                              <FeatureDiscoveryTarget className="is-sticker-entry" rewardId="capability.sticker">
-                                <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
-                                  <span className="material-symbols-outlined">add</span>
-                                </button>
-                              </FeatureDiscoveryTarget>
-                            ) : null}
+                            <FeatureDiscoveryTarget className="is-sticker-entry" rewardId="capability.sticker">
+                              <button className="composer-sticker-add is-manager-entry" disabled={stickerSaving} onClick={openStickerManager} type="button">
+                                <span className="material-symbols-outlined">add</span>
+                              </button>
+                            </FeatureDiscoveryTarget>
                             {stickers.map((sticker) => (
                               <button
                                 className="composer-sticker-item"
@@ -8733,11 +8732,9 @@ function LiveChatsPage({
                           <div className="composer-sticker-empty">
                             <span className="material-symbols-outlined">photo_library</span>
                             <strong>{t("sticker.mineEmpty")}</strong>
-                            {canCreateSticker ? (
-                              <FeatureDiscoveryTarget rewardId="capability.sticker">
-                                <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button>
-                              </FeatureDiscoveryTarget>
-                            ) : null}
+                            <FeatureDiscoveryTarget rewardId="capability.sticker">
+                              <button onClick={openStickerManager} type="button">{t("sticker.addFirst")}</button>
+                            </FeatureDiscoveryTarget>
                           </div>
                         ) : <span className="composer-sticker-loading is-centered" aria-label={t("common.loading")} />}
                       </div>
@@ -9820,13 +9817,11 @@ function LiveChatsPage({
       >
         <div className={`sticker-manager ${stickerManagerSelecting ? "is-selecting" : ""}`}>
           <div className="sticker-manager-grid">
-            {canCreateSticker ? (
-              <FeatureDiscoveryTarget className="is-sticker-manager-entry" rewardId="capability.sticker">
-                <button className="sticker-manager-add" disabled={stickerSaving} onClick={() => stickerInputRef.current?.click()} type="button" aria-label={t("sticker.add")}>
-                  <span className="material-symbols-outlined">add</span>
-                </button>
-              </FeatureDiscoveryTarget>
-            ) : null}
+            <FeatureDiscoveryTarget className="is-sticker-manager-entry" rewardId="capability.sticker">
+              <button className="sticker-manager-add" disabled={stickerSaving} onClick={() => { if (requireComposerCapability("menu.sticker.create", 6, t("sticker.create"))) stickerInputRef.current?.click(); }} type="button" aria-label={t("sticker.add")}>
+                <span className="material-symbols-outlined">add</span>
+              </button>
+            </FeatureDiscoveryTarget>
             {stickers.map((sticker) => {
               const selected = selectedStickerIds.includes(sticker.sticker_id);
               return (
@@ -10175,7 +10170,7 @@ function LiveChatsPage({
       </BottomSheet>
       <input
         ref={galleryInputRef}
-        accept={canSendVideo ? "image/*,video/*" : "image/*"}
+        accept="image/*,video/*"
         hidden
         multiple
         onChange={(event) => void handleMediaSelection(event, "gallery")}
@@ -10392,7 +10387,7 @@ function LiveChatsPage({
                   </button>
                 );
               }
-              if (canCreateSticker && messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number") {
+              if (messageMenu.message.kind === "image" && typeof messageMenu.message.id === "number") {
                 primaryActions.push(
                   <button key="collect-image" className="message-context-button" onClick={() => void collectImageAsSticker()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">add_reaction</span>
