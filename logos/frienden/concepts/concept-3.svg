@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" role="img" aria-labelledby="title desc">
+  <title id="title">友间 FRIENDEN — 开放字间</title>
+  <desc id="desc">A bold F becomes an open room, with a green threshold inviting people inside.</desc>
+  <g id="icon" transform="translate(64 64)">
+    <path fill="#173C31" d="M56 0h286v88H144v68h150v84H144v144H56V0Z"/>
+    <path fill="#00BD78" d="M208 240h134v144H208v-82h-64v-62h64Z"/>
+    <rect x="0" y="0" width="56" height="384" rx="28" fill="#173C31"/>
+  </g>
+  <g id="wordmark" fill="#173C31">
+    <text x="500" y="266" font-family="Avenir Next, Helvetica Neue, sans-serif" font-size="80" font-weight="900" letter-spacing="-3">FRIENDEN</text>
+    <text x="506" y="329" font-family="Songti SC, Noto Serif CJK SC, Georgia, serif" font-size="43" font-weight="700" letter-spacing="6">友间</text>
+  </g>
+  <g id="tagline" fill="#597267">
+    <text x="510" y="374" font-family="Avenir Next, Helvetica Neue, sans-serif" font-size="18" font-weight="600" letter-spacing="2">COME IN. STAY CLOSE.</text>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">友间 FRIENDEN 一桌四方图标</title>
+  <desc id="desc">Four places gather around a shared table.</desc>
+  <rect id="background" width="512" height="512" rx="112" fill="#FFFAF0"/>
+  <g id="icon" transform="translate(64 64)">
+    <path fill="#173C31" d="M0 78C0 34.9 34.9 0 78 0h74v112H92v60H0V78Zm384 0C384 34.9 349.1 0 306 0h-74v112h60v60h92V78ZM0 306c0 43.1 34.9 78 78 78h74V272H92v-60H0v94Zm384 0c0 43.1-34.9 78-78 78h-74V272h60v-60h92v94Z"/>
+    <rect x="124" y="124" width="136" height="136" rx="34" fill="#00BD78"/>
+    <path fill="#FFFAF0" d="M170 166h44v52h46v42h-90v-94Z"/>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">友间 FRIENDEN 开放字间图标</title>
+  <desc id="desc">A bold F becomes an open room.</desc>
+  <rect id="background" width="512" height="512" rx="112" fill="#FFFAF0"/>
+  <g id="icon" transform="translate(64 64)">
+    <path fill="#173C31" d="M56 0h286v88H144v68h150v84H144v144H56V0Z"/>
+    <path fill="#00BD78" d="M208 240h134v144H208v-82h-64v-62h64Z"/>
+    <rect x="0" y="0" width="56" height="384" rx="28" fill="#173C31"/>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" role="img" aria-labelledby="title desc">
+  <title id="title">友间 FRIENDEN — 一桌四方</title>
+  <desc id="desc">Four places gather around a shared square table, forming a room with an open entrance.</desc>
+  <g id="icon" transform="translate(64 64)">
+    <path fill="#173C31" d="M0 78C0 34.9 34.9 0 78 0h74v112H92v60H0V78Zm384 0C384 34.9 349.1 0 306 0h-74v112h60v60h92V78ZM0 306c0 43.1 34.9 78 78 78h74V272H92v-60H0v94Zm384 0c0 43.1-34.9 78-78 78h-74V272h60v-60h92v94Z"/>
+    <rect x="124" y="124" width="136" height="136" rx="34" fill="#00BD78"/>
+    <path fill="#FFFAF0" d="M170 166h44v52h46v42h-90v-94Z"/>
+  </g>
+  <g id="wordmark" fill="#173C31">
+    <text x="510" y="230" font-family="Songti SC, Noto Serif CJK SC, Georgia, serif" font-size="92" font-weight="700" letter-spacing="-7">友间</text>
+    <text x="514" y="304" font-family="Avenir Next, Helvetica Neue, sans-serif" font-size="48" font-weight="800" letter-spacing="4">FRIENDEN</text>
+  </g>
+  <g id="tagline" fill="#597267">
+    <text x="516" y="350" font-family="Avenir Next, Helvetica Neue, sans-serif" font-size="19" font-weight="600" letter-spacing="2">FRIENDS MAKE THE ROOM</text>
+  </g>
+</svg>

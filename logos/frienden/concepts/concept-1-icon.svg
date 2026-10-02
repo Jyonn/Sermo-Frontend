@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">友间 FRIENDEN 相向之门图标</title>
+  <desc id="desc">Two open doors face one another.</desc>
+  <rect id="background" width="512" height="512" rx="112" fill="#FFFAF0"/>
+  <g id="icon" transform="translate(64 64)">
+    <path fill="#00BD78" d="M0 72C0 32.2 32.2 0 72 0h104v92H96a20 20 0 0 0-20 20v160a20 20 0 0 0 20 20h80v92H72c-39.8 0-72-32.2-72-72V72Z"/>
+    <path fill="#173C31" d="M384 72c0-39.8-32.2-72-72-72H208v92h80a20 20 0 0 1 20 20v160a20 20 0 0 1-20 20h-80v92h104c39.8 0 72-32.2 72-72V72Z"/>
+    <circle cx="148" cy="192" r="15" fill="#00BD78"/>
+    <circle cx="236" cy="192" r="15" fill="#173C31"/>
+  </g>
+</svg>

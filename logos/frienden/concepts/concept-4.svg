@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" role="img" aria-labelledby="title desc">
+  <title id="title">友间 FRIENDEN — 折页成间</title>
+  <desc id="desc">Two conversation pages fold toward one another, creating a quiet shared space.</desc>
+  <g id="icon" transform="translate(64 64)">
+    <path fill="#00BD78" d="M0 64C0 28.7 28.7 0 64 0h128v304l-80 80v-80H64c-35.3 0-64-28.7-64-64V64Z"/>
+    <path fill="#173C31" d="M384 64c0-35.3-28.7-64-64-64H224v304l80 80v-80h16c35.3 0 64-28.7 64-64V64Z"/>
+    <path fill="#FFFAF0" d="M104 102h88v34h-88v-34Zm0 64h58v34h-58v-34Zm120-64h72v34h-72v-34Zm0 64h72v34h-72v-34Z"/>
+  </g>
+  <g id="wordmark" fill="#173C31">
+    <text x="510" y="226" font-family="Songti SC, Noto Serif CJK SC, Georgia, serif" font-size="92" font-weight="700" letter-spacing="-7">友间</text>
+    <text x="514" y="302" font-family="Avenir Next, Helvetica Neue, sans-serif" font-size="48" font-weight="800" letter-spacing="4">FRIENDEN</text>
+  </g>
+  <g id="tagline" fill="#597267">
+    <text x="516" y="350" font-family="Avenir Next, Helvetica Neue, sans-serif" font-size="19" font-weight="600" letter-spacing="2">WHERE OUR STORIES STAY</text>
+  </g>
+</svg>
