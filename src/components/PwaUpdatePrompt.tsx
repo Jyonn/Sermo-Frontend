@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import {
   activatePwaUpdate,
-  PWA_UPDATE_AVAILABLE_EVENT,
-  type PwaUpdateAnnouncement,
-  type ReleaseNotes,
+  getPwaUpdateCheckSnapshot,
+  subscribePwaUpdateCheck,
 } from "../lib/pwaUpdate";
 import { useI18n } from "../lib/language";
 
@@ -11,33 +10,20 @@ const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
 
 export function PwaUpdatePrompt() {
   const { language, t } = useI18n();
-  const [available, setAvailable] = useState(false);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const { result } = useSyncExternalStore(subscribePwaUpdateCheck, getPwaUpdateCheckSnapshot);
+  const [dismissedReleaseId, setDismissedReleaseId] = useState(() => window.localStorage.getItem(DISMISSED_UPDATE_KEY));
   const [updating, setUpdating] = useState(false);
-  const [release, setRelease] = useState<ReleaseNotes | null>(null);
-
-  useEffect(() => {
-    const show = (event: Event) => {
-      const announcement = (event as CustomEvent<PwaUpdateAnnouncement>).detail;
-      const nextRelease = announcement.release;
-      if (nextRelease?.id && window.localStorage.getItem(DISMISSED_UPDATE_KEY) === nextRelease.id) return;
-      setRelease(nextRelease);
-      setUpdateAvailable(announcement.updateAvailable);
-      setAvailable(true);
-    };
-    window.addEventListener(PWA_UPDATE_AVAILABLE_EVENT, show);
-    return () => window.removeEventListener(PWA_UPDATE_AVAILABLE_EVENT, show);
-  }, []);
-
-  if (!available) return null;
+  const releaseId = result?.latestVersion;
+  const release = result?.latestRelease?.id === releaseId ? result?.latestRelease : null;
+  if (!result?.updateAvailable || !releaseId || dismissedReleaseId === releaseId) return null;
 
   const update = () => {
     setUpdating(true);
-    if (!activatePwaUpdate()) setUpdating(false);
+    void activatePwaUpdate();
   };
   const dismiss = () => {
-    if (release?.id) window.localStorage.setItem(DISMISSED_UPDATE_KEY, release.id);
-    setAvailable(false);
+    window.localStorage.setItem(DISMISSED_UPDATE_KEY, releaseId);
+    setDismissedReleaseId(releaseId);
   };
   const localizedRelease = release?.locales[language] ?? release?.locales.en;
 
@@ -49,7 +35,7 @@ export function PwaUpdatePrompt() {
       <div className="pwa-recommendation-copy">
         <div className="pwa-update-heading">
           <strong>{localizedRelease?.title ?? t("common.updateAvailable")}</strong>
-          {release?.id ? <span>{release.id}</span> : null}
+          <span>{releaseId}</span>
         </div>
         {localizedRelease ? (
           <ul className="pwa-update-list">
@@ -60,12 +46,10 @@ export function PwaUpdatePrompt() {
         )}
       </div>
       <div className="pwa-update-actions">
-        <button className={updateAvailable ? "pwa-update-dismiss" : "pwa-recommendation-action"} disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
-        {updateAvailable ? (
-          <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
-            {updating ? t("common.updating") : t("common.updateNow")}
-          </button>
-        ) : null}
+        <button className="pwa-update-dismiss" disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
+        <button className="pwa-recommendation-action" disabled={updating} onClick={update} type="button">
+          {updating ? t("common.updating") : t("common.updateNow")}
+        </button>
       </div>
     </aside>
   );

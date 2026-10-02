@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.9",
+  "id": "2026.10.02.10",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "屏蔽词变更同步到会话",
+      "title": "更新检查更一致",
       "items": [
-        "设置或取消屏蔽词时，会在会话中显示对应的系统消息"
+        "自动检查与菜单检查共享版本结果；只有点击立即更新才会刷新页面"
       ]
     },
     "en": {
-      "title": "Blocked-word changes appear in chat",
+      "title": "A more consistent update check",
       "items": [
-        "Adding or removing a blocked word now posts a system message in the conversation"
+        "Automatic and menu checks share version results; the page refreshes only when you choose to update"
       ]
     }
   }

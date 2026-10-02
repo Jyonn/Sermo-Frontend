@@ -47,7 +47,7 @@ import type { AppViewState, ChatBackgroundTheme, ChatBubbleStyle, GestureLockPre
 import ChatsPage, { type ChatPreviewDemoKind } from "./ChatsPage";
 import { getActiveLocale, i18n, useI18n, type LanguagePreference, type TranslationKey } from "../lib/language";
 import { useTheme, type ThemePreference } from "../lib/theme";
-import { checkForPwaUpdate, CURRENT_RELEASE, type ExplicitUpdateCheckResult } from "../lib/pwaUpdate";
+import { checkForPwaUpdate, CURRENT_RELEASE, getPwaUpdateCheckSnapshot, subscribePwaUpdateCheck } from "../lib/pwaUpdate";
 import { getChatLayoutDiagnostics, setChatLayoutDiagnosticsEnabled, setDebuggerVisible, subscribeChatLayoutDiagnostics } from "../lib/chatLayoutDiagnostics";
 
 const MAX_NICKNAME_LENGTH = 8;
@@ -476,8 +476,7 @@ export default function MenuPage() {
   const [webPushSaving, setWebPushSaving] = useState(false);
   const [pwaInstallSheetOpen, setPwaInstallSheetOpen] = useState(false);
   const [updateCheckOpen, setUpdateCheckOpen] = useState(false);
-  const [updateChecking, setUpdateChecking] = useState(false);
-  const [updateCheckResult, setUpdateCheckResult] = useState<ExplicitUpdateCheckResult | null>(null);
+  const { checking: updateChecking, result: updateCheckResult } = useSyncExternalStore(subscribePwaUpdateCheck, getPwaUpdateCheckSnapshot);
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
@@ -668,12 +667,7 @@ export default function MenuPage() {
 
   const runUpdateCheck = async () => {
     if (updateChecking) return;
-    setUpdateChecking(true);
-    try {
-      setUpdateCheckResult(await checkForPwaUpdate());
-    } finally {
-      setUpdateChecking(false);
-    }
+    await checkForPwaUpdate();
   };
 
   const openUpdateCheck = () => {

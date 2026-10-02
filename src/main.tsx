@@ -8,7 +8,7 @@ import "./styles/cloud-resources.css";
 import { AuthProvider } from "./lib/auth";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { restoreLastInstalledSpace, setupSpacePwaIdentity } from "./lib/pwaIdentity";
-import { watchPwaUpdates } from "./lib/pwaUpdate";
+import { checkForPwaUpdate } from "./lib/pwaUpdate";
 import { LanguageProvider } from "./lib/language";
 import { activateLanguage, getBrowserJoinLanguage } from "./lib/i18n";
 import { initializeTheme, ThemeProvider } from "./lib/theme";
@@ -104,46 +104,23 @@ async function renderApp() {
 
 void renderApp();
 
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
+if (import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then((registration) => {
-      console.info("[sermo:pwa-update] registered", {
-        active: registration.active?.scriptURL ?? "none",
-        waiting: registration.waiting?.scriptURL ?? "none",
-        installing: registration.installing?.scriptURL ?? "none",
+    if ("serviceWorker" in navigator) {
+      void navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch((error: unknown) => {
+        console.warn("[sermo:pwa-update] registration-failed", error);
       });
-      watchPwaUpdates(registration);
-      const checkForUpdate = () => {
-        if (!isPageActive()) return;
-        console.info("[sermo:pwa-update] checking", { timestamp: new Date().toISOString() });
-        void registration.update().catch((error: unknown) => {
-          console.warn("[sermo:pwa-update] check-failed", error);
-        });
-      };
-      checkForUpdate();
-      const timer = window.setInterval(checkForUpdate, 3 * 60 * 1000);
-      const checkWhenVisible = () => {
-        if (isPageActive()) checkForUpdate();
-      };
-      document.addEventListener("visibilitychange", checkWhenVisible);
-      window.addEventListener("beforeunload", () => {
-        window.clearInterval(timer);
-        document.removeEventListener("visibilitychange", checkWhenVisible);
-      }, { once: true });
-    });
-  });
-
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.sessionStorage.setItem(PAGE_RELOAD_REASON_KEY, "service-worker-controllerchange");
-    console.warn("[sermo:page-lifecycle] reload-requested", {
-      reason: "service-worker-controllerchange",
-      controller: navigator.serviceWorker.controller?.scriptURL ?? "none",
-      visibilityState: document.visibilityState,
-      timestamp: new Date().toISOString(),
-    });
-    window.location.reload();
+    }
+    const checkForUpdate = () => {
+      if (!isPageActive()) return;
+      void checkForPwaUpdate();
+    };
+    checkForUpdate();
+    const timer = window.setInterval(checkForUpdate, 3 * 60 * 1000);
+    document.addEventListener("visibilitychange", checkForUpdate);
+    window.addEventListener("beforeunload", () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", checkForUpdate);
+    }, { once: true });
   });
 }

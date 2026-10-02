@@ -19,11 +19,10 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const successfulSources = result?.sources.filter((source) => source.status === "ok").length ?? 0;
   const allFailed = Boolean(result && successfulSources === 0);
   const partiallyFailed = Boolean(result && successfulSources > 0 && successfulSources < result.sources.length);
-  const localizedRelease = result?.latestRelease?.locales[language] ?? result?.latestRelease?.locales.en;
+  const release = result?.latestRelease?.id === result?.latestVersion ? result?.latestRelease : null;
+  const localizedRelease = release?.locales[language] ?? release?.locales.en;
   const sourceName = (key: UpdateSourceKey) => t(key === "primary" ? "update.primarySite" : "update.mirrorSite");
-  const install = () => {
-    if (!activatePwaUpdate()) window.location.reload();
-  };
+  const install = () => { void activatePwaUpdate(); };
 
   return createPortal(
     <div className="dialog-backdrop update-check-backdrop" onClick={onClose} role="presentation">

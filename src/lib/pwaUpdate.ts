@@ -1,6 +1,4 @@
-import currentRelease from "../../release-notes.json";
-
-export const PWA_UPDATE_AVAILABLE_EVENT = "sermo:pwa-update-available";
+import currentRelease from "../../release-notes.json" with { type: "json" };
 
 export interface ReleaseNotes {
   id: string;
@@ -10,14 +8,6 @@ export interface ReleaseNotes {
     items: string[];
   }>;
 }
-
-export interface PwaUpdateAnnouncement {
-  release: ReleaseNotes | null;
-  updateAvailable: boolean;
-}
-
-let waitingWorker: ServiceWorker | null = null;
-let releaseScriptQueue: Promise<void> = Promise.resolve();
 
 const UPDATE_SOURCES = [
   { key: "primary" as const, origin: "https://sermo.jyonn.space" },
@@ -40,6 +30,29 @@ export interface ExplicitUpdateCheckResult {
   latestVersion: string | null;
   updateAvailable: boolean;
   sources: UpdateSourceResult[];
+}
+
+interface UpdateCheckSnapshot {
+  checking: boolean;
+  result: ExplicitUpdateCheckResult | null;
+}
+
+let updateCheckSnapshot: UpdateCheckSnapshot = { checking: false, result: null };
+let updateCheckPromise: Promise<ExplicitUpdateCheckResult> | null = null;
+const updateCheckListeners = new Set<() => void>();
+
+export function getPwaUpdateCheckSnapshot() {
+  return updateCheckSnapshot;
+}
+
+export function subscribePwaUpdateCheck(listener: () => void) {
+  updateCheckListeners.add(listener);
+  return () => { updateCheckListeners.delete(listener); };
+}
+
+function publishUpdateCheck(snapshot: UpdateCheckSnapshot) {
+  updateCheckSnapshot = snapshot;
+  updateCheckListeners.forEach((listener) => listener());
 }
 
 export const CURRENT_RELEASE = currentRelease as ReleaseNotes;
@@ -77,131 +90,85 @@ async function fetchReleaseFromSource(source: typeof UPDATE_SOURCES[number]): Pr
     if (!isReleaseNotes(release)) throw new Error("Invalid release metadata");
     return { ...source, release, releaseId: release.id, status: "ok" };
   } catch {
-    const releaseId = await loadReleaseIdScript(source.origin);
-    return { ...source, release: null, releaseId, status: releaseId ? "ok" : "error" };
+    return { ...source, release: null, releaseId: null, status: "error" };
   } finally {
     window.clearTimeout(timeout);
   }
 }
 
-function loadReleaseIdScript(origin: string) {
-  const task = releaseScriptQueue.then(() => loadReleaseIdScriptUnqueued(origin));
-  releaseScriptQueue = task.then(() => undefined, () => undefined);
-  return task;
+export function checkForPwaUpdate(): Promise<ExplicitUpdateCheckResult> {
+  if (updateCheckPromise) return updateCheckPromise;
+  publishUpdateCheck({ ...updateCheckSnapshot, checking: true });
+  updateCheckPromise = (async () => {
+    const sources = await Promise.all(UPDATE_SOURCES.map(fetchReleaseFromSource));
+    const latestVersion = sources.reduce<string | null>((latest, source) => {
+      if (!source.releaseId) return latest;
+      return !latest || compareReleaseIds(source.releaseId, latest) > 0 ? source.releaseId : latest;
+    }, null);
+    const latestRelease = sources.reduce<ReleaseNotes | null>((latest, source) => {
+      if (!source.release) return latest;
+      return !latest || compareReleaseIds(source.release.id, latest.id) > 0 ? source.release : latest;
+    }, null);
+    const result = {
+      currentRelease: CURRENT_RELEASE,
+      latestRelease,
+      latestVersion,
+      updateAvailable: Boolean(latestVersion && compareReleaseIds(latestVersion, CURRENT_RELEASE.id) > 0),
+      sources,
+    };
+    publishUpdateCheck({ checking: false, result });
+    return result;
+  })().finally(() => {
+    updateCheckPromise = null;
+    if (updateCheckSnapshot.checking) publishUpdateCheck({ ...updateCheckSnapshot, checking: false });
+  });
+  return updateCheckPromise;
 }
 
-async function loadReleaseIdScriptUnqueued(origin: string) {
-  const releaseWindow = window as Window & { SERMO_RELEASE_ID?: unknown };
-  const previousValue = releaseWindow.SERMO_RELEASE_ID;
-  delete releaseWindow.SERMO_RELEASE_ID;
-  return new Promise<string | null>((resolve) => {
-    const script = document.createElement("script");
-    const finish = (value: string | null) => {
+function waitForWaitingWorker(registration: ServiceWorkerRegistration): Promise<ServiceWorker | null> {
+  if (registration.waiting) return Promise.resolve(registration.waiting);
+  const installing = registration.installing;
+  if (!installing) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const finish = () => {
       window.clearTimeout(timeout);
-      script.remove();
-      if (previousValue === undefined) delete releaseWindow.SERMO_RELEASE_ID;
-      else releaseWindow.SERMO_RELEASE_ID = previousValue;
-      resolve(value);
+      installing.removeEventListener("statechange", onStateChange);
+      resolve(registration.waiting);
     };
-    const timeout = window.setTimeout(() => finish(null), 8000);
-    script.async = true;
-    script.src = `${origin}/sw-release.js?t=${Date.now()}`;
-    script.onload = () => {
-      const value = releaseWindow.SERMO_RELEASE_ID;
-      finish(typeof value === "string" && /^\d{4}\.\d{2}\.\d{2}\.\d+$/.test(value) ? value : null);
+    const onStateChange = () => {
+      if (installing.state === "installed" || installing.state === "redundant") finish();
     };
-    script.onerror = () => finish(null);
-    document.head.appendChild(script);
+    const timeout = window.setTimeout(finish, 8000);
+    installing.addEventListener("statechange", onStateChange);
+    onStateChange();
   });
 }
 
-export async function checkForPwaUpdate(): Promise<ExplicitUpdateCheckResult> {
+export async function activatePwaUpdate() {
   const registration = "serviceWorker" in navigator
     ? await navigator.serviceWorker.getRegistration().catch(() => undefined)
     : undefined;
   await registration?.update().catch(() => undefined);
-  if (registration?.waiting) waitingWorker = registration.waiting;
-
-  const sources = await Promise.all(UPDATE_SOURCES.map(fetchReleaseFromSource));
-  const latestVersion = sources.reduce<string | null>((latest, source) => {
-    if (!source.releaseId) return latest;
-    return !latest || compareReleaseIds(source.releaseId, latest) > 0 ? source.releaseId : latest;
-  }, null);
-  const latestRelease = sources.reduce<ReleaseNotes | null>((latest, source) => {
-    if (!source.release) return latest;
-    return !latest || compareReleaseIds(source.release.id, latest.id) > 0 ? source.release : latest;
-  }, null);
-  return {
-    currentRelease: CURRENT_RELEASE,
-    latestRelease,
-    latestVersion,
-    updateAvailable: Boolean(latestVersion && compareReleaseIds(latestVersion, CURRENT_RELEASE.id) > 0),
-    sources,
+  const worker = registration ? await waitForWaitingWorker(registration) : null;
+  if (!worker) {
+    window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
+    window.location.reload();
+    return;
+  }
+  let reloading = false;
+  const reload = () => {
+    if (reloading) return;
+    reloading = true;
+    window.clearTimeout(fallback);
+    navigator.serviceWorker.removeEventListener("controllerchange", reload);
+    window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
+    window.location.reload();
   };
-}
-
-async function getReleaseNotes() {
+  navigator.serviceWorker.addEventListener("controllerchange", reload);
+  const fallback = window.setTimeout(reload, 8000);
   try {
-    const response = await fetch(`/release.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) return null;
-    return await response.json() as ReleaseNotes;
+    worker.postMessage({ type: "SKIP_WAITING" });
   } catch {
-    return null;
+    reload();
   }
-}
-
-async function announceUpdate(worker: ServiceWorker) {
-  const release = await getReleaseNotes();
-  const updateAvailable = Boolean(release?.id && compareReleaseIds(release.id, currentRelease.id) > 0);
-  console.info("[sermo:pwa-update] announcement", {
-    currentReleaseId: currentRelease.id,
-    fetchedReleaseId: release?.id ?? "unavailable",
-    updateAvailable,
-    workerState: worker.state,
-    workerScript: worker.scriptURL,
-  });
-  waitingWorker = updateAvailable ? worker : null;
-  window.dispatchEvent(new CustomEvent<PwaUpdateAnnouncement>(PWA_UPDATE_AVAILABLE_EVENT, {
-    detail: { release, updateAvailable },
-  }));
-}
-
-export function watchPwaUpdates(registration: ServiceWorkerRegistration) {
-  if (registration.waiting && navigator.serviceWorker.controller) {
-    console.info("[sermo:pwa-update] waiting-worker-found", {
-      workerScript: registration.waiting.scriptURL,
-    });
-    void announceUpdate(registration.waiting);
-  }
-
-  registration.addEventListener("updatefound", () => {
-    const worker = registration.installing;
-    if (!worker) return;
-    console.info("[sermo:pwa-update] update-found", {
-      workerScript: worker.scriptURL,
-      workerState: worker.state,
-    });
-
-    worker.addEventListener("statechange", () => {
-      console.info("[sermo:pwa-update] worker-statechange", {
-        workerScript: worker.scriptURL,
-        workerState: worker.state,
-        hasController: Boolean(navigator.serviceWorker.controller),
-      });
-      if (worker.state === "installed" && navigator.serviceWorker.controller) {
-        void announceUpdate(worker);
-      }
-    });
-  });
-}
-
-export function activatePwaUpdate() {
-  const worker = waitingWorker;
-  if (!worker) return false;
-  console.info("[sermo:pwa-update] activation-requested", {
-    workerScript: worker.scriptURL,
-    workerState: worker.state,
-  });
-  worker.postMessage({ type: "SKIP_WAITING" });
-  return true;
 }
