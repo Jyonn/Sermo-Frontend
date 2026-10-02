@@ -4397,26 +4397,54 @@ html[data-theme="dark"] .growth-scroll-score strong {
 }
 
 .chat-blocked-words-panel {
-  display: grid;
-  gap: 18px;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   color: var(--text-primary);
 }
 
-.chat-blocked-words-panel > p,
-.chat-blocked-word-row small {
+.chat-blocked-words-drawer .drawer-body { display: flex; min-height: 0; padding: 0; overflow: hidden; }
+.chat-blocked-words-drawer .chat-blocked-words-panel { flex: 1; min-height: 0; }
+.chat-blocked-words-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 22px clamp(18px, 5vw, 34px) 32px; }
+.chat-blocked-words-search { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 13px; border: 1px solid var(--line-soft); border-radius: 13px; color: var(--text-muted); background: var(--bg-panel-strong); }
+.chat-blocked-words-search .material-symbols-outlined { font-size: 19px; }
+.chat-blocked-words-search input { width: 100%; border: 0; outline: 0; color: var(--text-primary); background: transparent; font: inherit; font-size: 14px; }
+.chat-blocked-words-section { margin-top: 30px; }
+.chat-blocked-words-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.chat-blocked-words-heading small { color: var(--accent, #0aa87c); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.chat-blocked-words-heading h3 { margin: 5px 0 0; font-size: 19px; letter-spacing: -.03em; }
+.chat-blocked-words-heading > span { color: var(--text-muted); font-size: 12px; font-weight: 700; }
+.chat-blocked-word-row small,
+.chat-blocked-words-empty,
+.chat-blocked-words-composer small {
   color: var(--text-muted);
 }
 
-.chat-blocked-words-panel form {
+.chat-blocked-words-composer {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: 10px;
+  padding: 18px clamp(18px, 5vw, 34px) max(18px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line-soft);
+  background: var(--bg-panel-strong);
+}
+.chat-blocked-words-composer label { font-size: 13px; font-weight: 800; }
+.chat-blocked-words-composer > div {
   display: flex;
   gap: 10px;
 }
-
-.chat-blocked-words-panel form .input {
+.chat-blocked-words-composer input {
   min-width: 0;
   flex: 1;
+  padding: 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: var(--bg-panel-strong);
+  font: inherit;
 }
+.chat-blocked-words-composer small { line-height: 1.5; }
 
 .chat-blocked-words-list {
   display: grid;
@@ -4426,24 +4454,40 @@ html[data-theme="dark"] .growth-scroll-score strong {
 .chat-blocked-word-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
+  min-height: 70px;
+  padding: 12px;
   border: 1px solid var(--line-soft);
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--bg-panel-strong);
 }
 
-.chat-blocked-word-row span:first-child {
+.chat-blocked-word-symbol,
+.chat-blocked-word-avatar { display: grid; flex: none; place-items: center; width: 39px; height: 39px; border-radius: 11px; color: #079b70; background: color-mix(in srgb, #12b987 15%, var(--bg-panel-strong)); }
+.chat-blocked-word-avatar { border-radius: 50%; font-size: 14px; font-weight: 800; }
+.chat-blocked-word-copy {
   display: grid;
   gap: 3px;
+  flex: 1;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
+.chat-blocked-word-copy strong { font-size: 15px; }
+.chat-blocked-word-copy small { font-size: 11px; }
+.chat-blocked-word-remove { display: grid; flex: none; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 50%; color: var(--text-muted); background: transparent; cursor: pointer; }
+.chat-blocked-word-remove:hover { color: var(--text-primary); background: var(--line-soft); }
+.chat-blocked-word-remove .material-symbols-outlined, .chat-blocked-word-lock { font-size: 18px; }
+.chat-blocked-word-lock { color: var(--text-muted); }
+.chat-blocked-words-empty { margin: 0; padding: 20px 12px; border: 1px dashed var(--line-soft); border-radius: 15px; text-align: center; font-size: 13px; }
 
 .chat-blocked-word-actions {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 6px;
 }
+.chat-blocked-word-actions button { padding: 7px 9px; border: 1px solid var(--line-soft); border-radius: 9px; color: var(--text-primary); background: transparent; font: inherit; font-size: 11px; cursor: pointer; }
+.chat-blocked-word-actions button:first-child { color: #078d65; background: color-mix(in srgb, #12b987 12%, var(--bg-panel-strong)); }
 
 .chat-blocked-word-card {
   display: flex;

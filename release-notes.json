@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.7",
+  "id": "2026.10.02.8",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "屏蔽词反馈更清晰",
+      "title": "会话屏蔽词更易管理",
       "items": [
-        "消息命中屏蔽词时会提示具体词语，未发送的文字可从气泡重新编辑"
+        "屏蔽词可按词语或设置者搜索，申请记录更清楚，添加入口固定在底部"
       ]
     },
     "en": {
-      "title": "Clearer blocked-word feedback",
+      "title": "Easier blocked-word management",
       "items": [
-        "See which blocked word prevented sending, then edit the unsent text from its bubble"
+        "Search blocked words and owners, review requests clearly, and add words from the fixed bottom bar"
       ]
     }
   }

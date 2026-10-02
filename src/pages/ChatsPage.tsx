@@ -3073,6 +3073,8 @@ function LiveChatsPage({
   const [blockedWordsOpen, setBlockedWordsOpen] = useState(false);
   const [blockedWords, setBlockedWords] = useState<Awaited<ReturnType<typeof api.getChatBlockedWords>> | null>(null);
   const [blockedWordInput, setBlockedWordInput] = useState("");
+  const [blockedWordSearch, setBlockedWordSearch] = useState("");
+  const [blockedWordToRemove, setBlockedWordToRemove] = useState<{ id: number; word: string } | null>(null);
   const [blockedWordsBusy, setBlockedWordsBusy] = useState(false);
   const [submissionInvites, setSubmissionInvites] = useState<SubmissionInviteDTO[]>([]);
   const [submissionInviteBusyId, setSubmissionInviteBusyId] = useState<number | null>(null);
@@ -3940,7 +3942,7 @@ function LiveChatsPage({
     return () => window.removeEventListener("sermo:open-chat-blocked-words", open);
   }, []);
   const changeBlockedWords = async (action: "add" | "request" | "remove" | "approve" | "reject" | "withdraw", id?: number) => {
-    if (!selectedChat || blockedWordsBusy) return;
+    if (!selectedChat || blockedWordsBusy) return false;
     setBlockedWordsBusy(true);
     try {
       const next = await api.changeChatBlockedWords(selectedChat.id, { action, id, word: action === "add" || action === "request" ? blockedWordInput : undefined });
@@ -3955,8 +3957,10 @@ function LiveChatsPage({
         }));
       }
       if (action === "add" || action === "request") setBlockedWordInput("");
+      return true;
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("chat.blockedWordsSaveFailed"), "error");
+      return false;
     } finally {
       setBlockedWordsBusy(false);
     }
@@ -9732,20 +9736,40 @@ function LiveChatsPage({
           range={messageSearchCalendar?.range}
         />
       </BottomSheet>
-      <SideDrawer historyKey="chat-blocked-words" open={blockedWordsOpen} onClose={() => setBlockedWordsOpen(false)} title={t("chat.blockedWordsTitle")}>
+      <SideDrawer className="chat-blocked-words-drawer" historyKey="chat-blocked-words" open={blockedWordsOpen} onClose={() => setBlockedWordsOpen(false)} title={t("chat.blockedWordsTitle")}>
         <div className="chat-blocked-words-panel">
-          <p>{t(selectedChat?.type === "group" ? "chat.blockedWordsGroupHint" : "chat.blockedWordsDirectHint")}</p>
           {blockedWords ? <>
-            <form onSubmit={(event) => { event.preventDefault(); void changeBlockedWords(blockedWords.group && !blockedWords.is_owner ? "request" : "add"); }}>
-              <input aria-label={t("chat.blockedWordsInput")} className="input" maxLength={80} onChange={(event) => setBlockedWordInput(event.target.value)} placeholder={t("chat.blockedWordsInput")} value={blockedWordInput} />
-              <button className="button" disabled={blockedWordsBusy || !blockedWordInput.trim() || (blockedWords.group && blockedWords.is_owner ? blockedWords.words.length >= 50 : !blockedWords.group && blockedWords.own_count >= 25)} type="submit">{t(blockedWords.group && !blockedWords.is_owner ? "chat.blockedWordsRequest" : "common.add")}</button>
+            <div className="chat-blocked-words-scroll">
+              <label className="chat-blocked-words-search">
+                <span className="material-symbols-outlined">search</span>
+                <input aria-label={t("chat.blockedWordsSearch")} onChange={(event) => setBlockedWordSearch(event.target.value)} placeholder={t("chat.blockedWordsSearch")} type="search" value={blockedWordSearch} />
+              </label>
+              <section className="chat-blocked-words-section">
+                <div className="chat-blocked-words-heading"><div><small>01</small><h3>{t("chat.blockedWordsActive")}</h3></div><span>{blockedWords.group ? blockedWords.words.length : blockedWords.own_count}/{blockedWords.group ? 50 : 25}</span></div>
+                <div className="chat-blocked-words-list">{blockedWords.words.filter((item) => `${item.word} ${item.owner_name}`.toLocaleLowerCase().includes(blockedWordSearch.trim().toLocaleLowerCase())).map((item) => <div className="chat-blocked-word-row" key={item.id}>
+                  <span className="chat-blocked-word-symbol material-symbols-outlined">block</span>
+                  <span className="chat-blocked-word-copy"><strong>{item.word}</strong><small>{item.owner_name || t("chat.blockedWordsLegacyOwner")}</small></span>
+                  {(blockedWords.group ? blockedWords.is_owner : item.owner_id === currentUserId) ? <button aria-label={`${t("common.delete")} ${item.word}`} className="chat-blocked-word-remove" disabled={blockedWordsBusy} onClick={() => setBlockedWordToRemove({ id: item.id, word: item.word })} type="button"><span className="material-symbols-outlined">close</span></button> : <span aria-hidden="true" className="material-symbols-outlined chat-blocked-word-lock">lock</span>}
+                </div>)}{!blockedWords.words.some((item) => `${item.word} ${item.owner_name}`.toLocaleLowerCase().includes(blockedWordSearch.trim().toLocaleLowerCase())) ? <p className="chat-blocked-words-empty">{t(blockedWordSearch ? "chat.blockedWordsNoResults" : "chat.blockedWordsEmpty")}</p> : null}</div>
+              </section>
+              {blockedWords.group ? <section className="chat-blocked-words-section">
+                <div className="chat-blocked-words-heading"><div><small>02</small><h3>{t("chat.blockedWordsRequests")}</h3></div><span>{blockedWords.requests.filter((item) => item.status === "pending").length}</span></div>
+                <div className="chat-blocked-words-list">{blockedWords.requests.filter((item) => `${item.word} ${item.applicant_name}`.toLocaleLowerCase().includes(blockedWordSearch.trim().toLocaleLowerCase())).map((item) => <div className="chat-blocked-word-row is-request" key={item.id}>
+                  <span aria-hidden="true" className="chat-blocked-word-avatar">{item.applicant_name?.slice(0, 1) || "?"}</span>
+                  <span className="chat-blocked-word-copy"><small>{item.applicant_name} · {t(`chat.blockedWordsStatus.${item.status}` as TranslationKey)}</small><strong>{item.word}</strong></span>
+                  {item.status === "pending" ? <span className="chat-blocked-word-actions">{blockedWords.is_owner ? <><button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("approve", item.id)} type="button">{t("common.approve")}</button><button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("reject", item.id)} type="button">{t("common.reject")}</button></> : item.applicant_id === currentUserId ? <button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("withdraw", item.id)} type="button">{t("common.cancel")}</button> : null}</span> : null}
+                </div>)}{!blockedWords.requests.some((item) => `${item.word} ${item.applicant_name}`.toLocaleLowerCase().includes(blockedWordSearch.trim().toLocaleLowerCase())) ? <p className="chat-blocked-words-empty">{t(blockedWordSearch ? "chat.blockedWordsNoResults" : "chat.blockedWordsNoRequests")}</p> : null}</div>
+              </section> : null}
+            </div>
+            <form className="chat-blocked-words-composer" onSubmit={(event) => { event.preventDefault(); void changeBlockedWords(blockedWords.group && !blockedWords.is_owner ? "request" : "add"); }}>
+              <label htmlFor="chat-blocked-word-entry">{t(blockedWords.group && !blockedWords.is_owner ? "chat.blockedWordsRequest" : "chat.blockedWordsAdd")}</label>
+              <div><input id="chat-blocked-word-entry" maxLength={80} onChange={(event) => setBlockedWordInput(event.target.value)} placeholder={t("chat.blockedWordsInput")} value={blockedWordInput} /><button className="button" disabled={blockedWordsBusy || !blockedWordInput.trim() || (blockedWords.group && blockedWords.is_owner ? blockedWords.words.length >= 50 : blockedWords.group ? blockedWords.requests.filter((item) => item.status === "pending" && item.applicant_id === currentUserId).length >= 3 : blockedWords.own_count >= 25)} type="submit">{t(blockedWords.group && !blockedWords.is_owner ? "chat.blockedWordsRequest" : "common.add")}</button></div>
+              <small>{t(selectedChat?.type === "group" ? "chat.blockedWordsGroupHint" : "chat.blockedWordsDirectHint")}</small>
             </form>
-            <h3>{t("chat.blockedWordsActive")} ({blockedWords.group ? blockedWords.words.length : blockedWords.own_count}/{blockedWords.group ? 50 : 25})</h3>
-            {blockedWords.words.length ? <div className="chat-blocked-words-list">{blockedWords.words.map((item) => <div className="chat-blocked-word-row" key={item.id}><span><strong>{item.word}</strong><small>{item.owner_name || t("chat.blockedWordsLegacyOwner")}</small></span>{(blockedWords.group ? blockedWords.is_owner : item.owner_id === currentUserId) ? <button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("remove", item.id)} type="button">{t("common.delete")}</button> : null}</div>)}</div> : <p>{t("chat.blockedWordsEmpty")}</p>}
-            {blockedWords.group ? <><h3>{t("chat.blockedWordsRequests")}</h3><div className="chat-blocked-words-list">{blockedWords.requests.map((item) => <div className="chat-blocked-word-row" key={item.id}><span><strong>{item.word}</strong><small>{item.applicant_name} · {t(`chat.blockedWordsStatus.${item.status}` as TranslationKey)}</small></span>{item.status === "pending" ? <span className="chat-blocked-word-actions">{blockedWords.is_owner ? <><button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("approve", item.id)} type="button">{t("common.approve")}</button><button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("reject", item.id)} type="button">{t("common.reject")}</button></> : item.applicant_id === currentUserId ? <button disabled={blockedWordsBusy} onClick={() => void changeBlockedWords("withdraw", item.id)} type="button">{t("common.cancel")}</button> : null}</span> : null}</div>)}</div></> : null}
-          </> : <p>{t("common.loading")}</p>}
+          </> : <p className="chat-blocked-words-empty">{t("common.loading")}</p>}
         </div>
       </SideDrawer>
+      <ConfirmDialog open={Boolean(blockedWordToRemove)} title={t("chat.blockedWordsRemoveTitle")} description={t("chat.blockedWordsRemoveDescription", { word: blockedWordToRemove?.word || "" })} confirmLabel={t("common.delete")} danger busy={blockedWordsBusy} onClose={() => setBlockedWordToRemove(null)} onConfirm={() => { if (!blockedWordToRemove) return; void changeBlockedWords("remove", blockedWordToRemove.id).then((removed) => { if (removed) setBlockedWordToRemove(null); }); }} />
       <BottomSheet
         className="chat-member-mute-sheet"
         onClose={() => !groupMuteBusy && setGroupMuteTarget(null)}
