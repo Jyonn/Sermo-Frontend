@@ -6189,7 +6189,8 @@ function LiveChatsPage({
           ...current,
           [selectedChat.id]: updateMessageStatus(current[selectedChat.id] ?? [], optimisticMessage.clientId, "failed"),
         }));
-        showToast(apiError.message, "error");
+        const matchedWord = apiError.message.match(/[“\"]([^”\"]+)[”\"]/)?.[1];
+        showToast(matchedWord ? t("chat.blockedWordsMatchedWithWord", { word: matchedWord }) : apiError.message, "error");
       } else {
         setMessages((current) => ({
           ...current,

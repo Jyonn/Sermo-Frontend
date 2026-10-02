@@ -2598,6 +2598,7 @@
   "chat.blockedWordsMatched": "El mensaje contiene una palabra bloqueada en este chat y no se envió",
   "chat.editFailedText": "Editar mensaje no enviado",
   "chat.blockedWordsLegacyOwner": "Regla anterior · autor sin registrar",
+  "chat.blockedWordsMatchedWithWord": "El mensaje contiene la palabra bloqueada «{{word}}» y no se envió",
   "chat.blockedWordsGroupHint": "El propietario aprueba las reglas para todos, incluido él mismo.",
   "chat.blockedWordsDirectHint": "Cada persona puede añadir 25 palabras; las reglas se aplican a ambas.",
   "chat.blockedWordsLoadFailed": "No se pudieron cargar las palabras bloqueadas",
