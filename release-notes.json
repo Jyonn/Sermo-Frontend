@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.13",
+  "id": "2026.10.02.14",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "头像样式更统一",
+      "title": "群聊消息锁定额度调整",
       "items": [
-        "全站头像统一为圆角矩形；群成员艾特列表不再显示头像框，空间头像保留白色描边"
+        "群成员每人可锁定 3 条消息，群主可锁定 20 条并撤销成员的锁定"
       ]
     },
     "en": {
-      "title": "More consistent avatars",
+      "title": "Updated group message lock limits",
       "items": [
-        "Avatars now use rounded squares throughout; mention suggestions have no frame, while space avatars retain a white rim"
+        "Each group member can lock 3 messages; the owner can lock 20 and remove members' locks"
       ]
     }
   }

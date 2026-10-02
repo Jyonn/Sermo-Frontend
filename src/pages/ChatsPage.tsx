@@ -3682,12 +3682,13 @@ function LiveChatsPage({
     if (typeof message.id !== "number" || !canManagePinnedMessages) return;
     const existing = pinnedMessages.find((pin) => pin.message.message_id === message.id);
     const pinnedByCurrentUser = existing?.pinned_by_users.some((user) => user.user_id === currentUserId) ?? false;
+    const removeAllPins = Boolean(existing && selectedChat?.type === "group" && selectedChat.isOwner);
     setPinSavingMessageId(message.id);
     setMessageMenu(null);
     try {
-      if (existing && pinnedByCurrentUser) {
+      if (existing && (pinnedByCurrentUser || removeAllPins)) {
         await api.unpinMessage(message.id);
-        const remainingUsers = existing.pinned_by_users.filter((user) => user.user_id !== currentUserId);
+        const remainingUsers = removeAllPins ? [] : existing.pinned_by_users.filter((user) => user.user_id !== currentUserId);
         setPinnedMessages((current) =>
           remainingUsers.length
             ? current.map((pin) => pin.message.message_id === message.id ? { ...pin, pinned_by_users: remainingUsers } : pin)
@@ -4084,7 +4085,7 @@ function LiveChatsPage({
     () => [...pinnedMessages].sort((left, right) => right.pinned_at - left.pinned_at || right.pin_id - left.pin_id),
     [pinnedMessages]
   );
-  const canManagePinnedMessages = Boolean(selectedChat && (selectedChat.type === "direct" || selectedChat.isOwner));
+  const canManagePinnedMessages = Boolean(selectedChat);
 
   useEffect(() => {
     if (!selectedChat) {
@@ -10329,7 +10330,8 @@ function LiveChatsPage({
               const secondaryActions: ReactNode[] = [];
               const isPinnedByCurrentUser = pinnedMessages.some((pin) =>
                 pin.message.message_id === messageMenu.message.id
-                && pin.pinned_by_users.some((user) => user.user_id === currentUserId)
+                && (selectedChat?.type === "group" && selectedChat.isOwner
+                  || pin.pinned_by_users.some((user) => user.user_id === currentUserId))
               );
 
               if (messageMenu.origin === "pinned" && typeof messageMenu.message.id === "number") {
