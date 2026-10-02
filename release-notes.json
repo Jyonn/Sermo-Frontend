@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.8",
+  "id": "2026.10.02.9",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "会话屏蔽词更易管理",
+      "title": "屏蔽词变更同步到会话",
       "items": [
-        "屏蔽词可按词语或设置者搜索，申请记录更清楚，添加入口固定在底部"
+        "设置或取消屏蔽词时，会在会话中显示对应的系统消息"
       ]
     },
     "en": {
-      "title": "Easier blocked-word management",
+      "title": "Blocked-word changes appear in chat",
       "items": [
-        "Search blocked words and owners, review requests clearly, and add words from the fixed bottom bar"
+        "Adding or removing a blocked word now posts a system message in the conversation"
       ]
     }
   }
