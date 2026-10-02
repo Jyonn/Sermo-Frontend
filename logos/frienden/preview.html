@@ -7,32 +7,30 @@
   <style>
     :root {
       color-scheme: light;
-      --paper: oklch(97% .016 88);
-      --paper-raised: oklch(99% .01 88);
-      --paper-green: oklch(94% .04 145);
-      --ink: oklch(31% .055 157);
-      --ink-soft: oklch(48% .035 153);
-      --line: oklch(86% .025 124);
-      --mint: oklch(72% .18 155);
-      --mint-deep: oklch(52% .14 155);
-      --apricot: oklch(83% .09 70);
-      --coral: oklch(70% .14 35);
+      --paper: #f5f1e8;
+      --paper-raised: #fffdf8;
+      --paper-tint: #ece5d8;
+      --ink: #171725;
+      --ink-soft: #67626a;
+      --line: #d9d0c2;
+      --accent: #69264f;
+      --accent-soft: #e9b19c;
+      --focus: #e34a37;
       --ease-out: cubic-bezier(.16, 1, .3, 1);
       --font-display: "Songti SC", "Noto Serif CJK SC", Georgia, serif;
       --font-ui: "Avenir Next", "Space Grotesk", "Helvetica Neue", sans-serif;
     }
     html[data-theme="dark"] {
       color-scheme: dark;
-      --paper: oklch(22% .027 151);
-      --paper-raised: oklch(27% .035 153);
-      --paper-green: oklch(32% .06 150);
-      --ink: oklch(95% .02 142);
-      --ink-soft: oklch(76% .03 148);
-      --line: oklch(42% .04 149);
-      --mint: oklch(78% .15 153);
-      --mint-deep: oklch(72% .15 153);
-      --apricot: oklch(75% .08 70);
-      --coral: oklch(75% .12 35);
+      --paper: #171620;
+      --paper-raised: #22202d;
+      --paper-tint: #302b38;
+      --ink: #f8f1e7;
+      --ink-soft: #c0b6b3;
+      --line: #49414b;
+      --accent: #f0a283;
+      --accent-soft: #6d304f;
+      --focus: #ffc438;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -40,7 +38,7 @@
       margin: 0;
       color: var(--ink);
       background:
-        radial-gradient(circle at 84% 9%, color-mix(in oklch, var(--mint) 16%, transparent), transparent 26rem),
+        radial-gradient(circle at 84% 9%, color-mix(in oklch, var(--accent-soft) 28%, transparent), transparent 26rem),
         repeating-linear-gradient(0deg, transparent 0 43px, color-mix(in oklch, var(--line) 45%, transparent) 44px 45px),
         var(--paper);
       font-family: var(--font-ui);
@@ -49,7 +47,7 @@
       min-height: 100svh;
     }
     button { font: inherit; }
-    button:focus-visible, a:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+    button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
     .topbar {
       position: sticky;
       z-index: 10;
@@ -78,16 +76,16 @@
     }
     main { width: min(1440px, 100%); margin: auto; padding: clamp(54px, 8vw, 112px) clamp(20px, 5vw, 76px) 112px; }
     .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 430px); align-items: end; gap: clamp(36px, 8vw, 120px); }
-    .eyebrow { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; color: var(--mint-deep); font-size: .68rem; font-weight: 850; letter-spacing: .22em; }
+    .eyebrow { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; color: var(--accent); font-size: .68rem; font-weight: 850; letter-spacing: .22em; }
     .eyebrow::before { width: 42px; height: 1px; background: currentColor; content: ""; }
     h1 { max-width: 8ch; margin: 0; font-family: var(--font-display); font-size: clamp(4rem, 9vw, 8.6rem); letter-spacing: -.09em; line-height: .88; }
-    h1 em { display: block; margin-top: .2em; color: var(--mint-deep); font-family: var(--font-ui); font-size: .42em; font-style: normal; letter-spacing: -.04em; }
+    h1 em { display: block; margin-top: .2em; color: var(--accent); font-family: var(--font-ui); font-size: .42em; font-style: normal; letter-spacing: -.04em; }
     .hero-copy { max-width: 36ch; margin: 0; color: var(--ink-soft); font-size: 1rem; line-height: 1.9; }
     .hero-copy strong { color: var(--ink); }
     .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
     .meta span { padding: 7px 11px; border: 1px solid var(--line); color: var(--ink-soft); font-size: .68rem; letter-spacing: .08em; }
     .section-head { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 28px; margin: 112px 0 32px; }
-    .section-head b { color: var(--mint-deep); font-size: .7rem; letter-spacing: .18em; }
+    .section-head b { color: var(--accent); font-size: .7rem; letter-spacing: .18em; }
     .section-head h2 { margin: 0; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 4.4rem); letter-spacing: -.06em; line-height: 1; }
     .section-head::after { height: 1px; background: var(--line); content: ""; }
     .concept-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; }
@@ -101,32 +99,38 @@
       transition: transform 280ms var(--ease-out), border-color 180ms linear;
     }
     .concept:nth-child(2), .concept:nth-child(3) { transform: translateY(38px); }
-    .concept:hover { border-color: var(--mint-deep); transform: translateY(-4px); }
+    .concept:hover { border-color: var(--accent); transform: translateY(-4px); }
     .concept:nth-child(2):hover, .concept:nth-child(3):hover { transform: translateY(34px); }
-    .concept.is-selected { border-color: var(--mint-deep); box-shadow: inset 0 0 0 1px var(--mint-deep); }
-    .concept-art { display: grid; min-height: 300px; place-items: center; padding: clamp(24px, 6cqi, 64px); background: color-mix(in oklch, var(--paper) 60%, var(--paper-green)); }
-    .concept:nth-child(even) .concept-art { background: color-mix(in oklch, var(--paper) 72%, var(--apricot)); }
-    .concept-art img { display: block; width: 100%; max-height: 250px; }
+    .concept.is-selected { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .concept-art { display: grid; min-height: 340px; place-items: center; padding: clamp(20px, 4cqi, 48px); background: var(--paper-tint); }
+    .concept:nth-child(1) .concept-art { background: #e7e5eb; }
+    .concept:nth-child(2) .concept-art { background: #f4dfd1; }
+    .concept:nth-child(3) .concept-art { background: #e5dbca; }
+    .concept:nth-child(4) .concept-art { background: #e8e6f2; }
+    .concept-art img { display: block; width: min(100%, 310px); aspect-ratio: 1; object-fit: contain; }
     .concept-info { display: grid; grid-template-columns: 3rem 1fr; gap: 18px; padding: 24px; border-top: 1px solid var(--line); }
-    .concept-number { color: var(--mint-deep); font-size: .75rem; font-weight: 850; letter-spacing: .12em; }
+    .concept-number { color: var(--accent); font-size: .75rem; font-weight: 850; letter-spacing: .12em; }
     .concept h3 { margin: 0 0 7px; font-family: var(--font-display); font-size: 1.55rem; letter-spacing: -.04em; }
     .concept p { margin: 0; color: var(--ink-soft); font-size: .82rem; line-height: 1.75; }
     .concept-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-    .concept-tags span { padding: 4px 8px; background: var(--paper-green); color: var(--ink); font-size: .62rem; font-weight: 750; }
+    .concept-tags span { padding: 4px 8px; background: var(--paper-tint); color: var(--ink); font-size: .62rem; font-weight: 750; }
     .application { display: grid; grid-template-columns: minmax(0, 1.28fr) minmax(300px, .72fr); gap: 18px; }
     .site-stage { min-height: 560px; border: 1px solid var(--line); background: var(--paper-raised); }
     .site-nav { display: flex; align-items: center; justify-content: space-between; height: 74px; padding: 0 28px; border-bottom: 1px solid var(--line); }
-    .site-nav img { width: 180px; height: 64px; object-fit: contain; object-position: left center; }
-    .site-nav div { display: flex; gap: 10px; }
-    .site-nav span { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; }
+    .site-brand { display: flex; align-items: center; gap: 10px; }
+    .site-brand img { width: 42px; height: 42px; object-fit: contain; }
+    .site-brand b { display: grid; font-family: var(--font-display); font-size: 1.05rem; line-height: 1; }
+    .site-brand small { margin-top: 5px; font-family: var(--font-ui); font-size: .47rem; letter-spacing: .16em; }
+    .nav-actions { display: flex; gap: 10px; }
+    .nav-actions span { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; }
     .site-hero { position: relative; display: grid; min-height: 484px; align-content: center; padding: 46px clamp(28px, 6vw, 76px); overflow: hidden; }
-    .site-hero::after { position: absolute; right: -12%; bottom: -38%; width: 62%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: var(--paper-green); content: ""; opacity: .75; }
-    .site-hero small { color: var(--mint-deep); font-size: .64rem; font-weight: 850; letter-spacing: .2em; }
+    .site-hero::after { position: absolute; right: -12%; bottom: -38%; width: 62%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: var(--paper-tint); content: ""; opacity: .75; }
+    .site-hero small { color: var(--accent); font-size: .64rem; font-weight: 850; letter-spacing: .2em; }
     .site-hero h3 { position: relative; z-index: 1; max-width: 6ch; margin: 22px 0 26px; font-family: var(--font-display); font-size: clamp(3.8rem, 8vw, 7.2rem); letter-spacing: -.09em; line-height: .92; }
     .site-hero p { position: relative; z-index: 1; max-width: 30ch; margin: 0; color: var(--ink-soft); font-size: .82rem; line-height: 1.85; }
     .device-column { display: grid; align-content: start; gap: 18px; }
     .app-tile { position: relative; display: grid; min-height: 360px; place-items: center; overflow: hidden; background: var(--ink); }
-    .app-tile::before { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 39px, color-mix(in oklch, var(--mint) 12%, transparent) 40px 41px); content: ""; }
+    .app-tile::before { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 39px, color-mix(in oklch, var(--accent-soft) 16%, transparent) 40px 41px); content: ""; }
     .app-tile img { position: relative; width: 156px; height: 156px; filter: drop-shadow(0 24px 28px color-mix(in oklch, var(--ink) 68%, transparent)); }
     .app-tile strong { position: absolute; bottom: 24px; color: var(--paper); font-size: .72rem; letter-spacing: .14em; }
     .size-check { padding: 24px; border: 1px solid var(--line); background: var(--paper-raised); }
@@ -135,14 +139,14 @@
     .sample { display: grid; flex: 0 0 auto; gap: 8px; justify-items: center; }
     .sample img { width: var(--s); height: var(--s); }
     .sample span { color: var(--ink-soft); font-size: .6rem; }
-    .verdict { margin-top: 18px; padding: 28px; border: 1px solid var(--line); background: var(--paper-green); }
-    .verdict small { color: var(--mint-deep); font-size: .65rem; font-weight: 850; letter-spacing: .14em; }
+    .verdict { margin-top: 18px; padding: 28px; border: 1px solid var(--line); background: var(--paper-tint); }
+    .verdict small { color: var(--accent); font-size: .65rem; font-weight: 850; letter-spacing: .14em; }
     .verdict h3 { margin: 15px 0 8px; font-family: var(--font-display); font-size: 1.7rem; letter-spacing: -.04em; }
     .verdict p { margin: 0; color: var(--ink-soft); font-size: .82rem; line-height: 1.75; }
     .notes { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--line); }
     .note { min-height: 190px; padding: 28px 24px; border-right: 1px solid var(--line); }
     .note:last-child { border-right: 0; }
-    .note b { display: block; margin-bottom: 22px; color: var(--mint-deep); font-size: .68rem; letter-spacing: .12em; }
+    .note b { display: block; margin-bottom: 22px; color: var(--accent); font-size: .68rem; letter-spacing: .12em; }
     .note strong { display: block; margin-bottom: 9px; font-family: var(--font-display); font-size: 1.18rem; }
     .note p { margin: 0; color: var(--ink-soft); font-size: .77rem; line-height: 1.72; }
     footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 72px; color: var(--ink-soft); font-size: .7rem; }
@@ -181,7 +185,7 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <img id="topbarIcon" src="concepts/concept-1-icon.svg" alt="" />
+      <img id="topbarIcon" src="generated/concept-a-threshold.png" alt="" />
       <span>友间<small>FRIENDEN</small></span>
     </div>
     <button class="theme-button" id="themeButton" type="button" aria-label="切换明暗主题">切换明暗</button>
@@ -194,8 +198,8 @@
         <h1>友间<em>FRIENDEN</em></h1>
       </div>
       <div>
-        <p class="hero-copy"><strong>朋友之间，自有一间。</strong><br />四种标志方向围绕“关系有地方继续”展开；保留现有网站的纸张感、新芽绿与深墨色，同时让图标在聊天列表、PWA 和小尺寸通知中仍然成立。</p>
-        <div class="meta"><span>组合标 × 4</span><span>App 图标 × 4</span><span>浅色 / 深色</span><span>16px 验证</span></div>
+        <p class="hero-copy"><strong>朋友之间，自有一间。</strong><br />第二轮由 ImageGen 探索更具情绪和艺术性的品牌图形，摆脱常规社交软件符号与原有绿白配色；中文与英文名称在网页中独立排版，保证实际使用准确。</p>
+        <div class="meta"><span>ImageGen × 4</span><span>新配色 × 4</span><span>浅色 / 深色</span><span>16px 验证</span></div>
       </div>
     </section>
 
@@ -203,20 +207,20 @@
       <div class="section-head"><b>01 / CONCEPTS</b><h2 id="concept-title">四个不同的“间”</h2></div>
       <div class="concept-grid">
         <article class="concept is-selected" data-concept="1" tabindex="0" role="button" aria-pressed="true">
-          <div class="concept-art"><img src="concepts/concept-1.svg" alt="方案一：相向之门组合标" /></div>
-          <div class="concept-info"><span class="concept-number">01</span><div><h3>相向之门</h3><p>两扇开放的门彼此相向，中间留下真正的“间”。最贴近品牌定位，也最容易延续当前绿色资产。</p><div class="concept-tags"><span>首选</span><span>归属</span><span>空间</span></div></div></div>
+          <div class="concept-art"><img src="generated/concept-a-threshold.png" alt="方案一：相逢成间图形" /></div>
+          <div class="concept-info"><span class="concept-number">01</span><div><h3>相逢成间</h3><p>两个人物的轮廓共同围出一扇门。靛蓝与珊瑚红带来鲜明关系感，金色门扉是被共同开启的私人空间。</p><div class="concept-tags"><span>人物</span><span>入口</span><span>高识别</span></div></div></div>
         </article>
         <article class="concept" data-concept="2" tabindex="0" role="button" aria-pressed="false">
-          <div class="concept-art"><img src="concepts/concept-2.svg" alt="方案二：一桌四方组合标" /></div>
-          <div class="concept-info"><span class="concept-number">02</span><div><h3>一桌四方</h3><p>四个位置围绕共同桌面，强调“空间由人组成”。更具社群感，适合多成员与活动场景。</p><div class="concept-tags"><span>社群</span><span>共创</span><span>多成员</span></div></div></div>
+          <div class="concept-art"><img src="generated/concept-b-ribbon.png" alt="方案二：关系之舞图形" /></div>
+          <div class="concept-info"><span class="concept-number">02</span><div><h3>关系之舞</h3><p>两条丝带既像相向而坐的人，也像持续流动的关系。紫与杏色成熟、温暖，气质更偏生活方式品牌。</p><div class="concept-tags"><span>优雅</span><span>亲密</span><span>流动</span></div></div></div>
         </article>
         <article class="concept" data-concept="3" tabindex="0" role="button" aria-pressed="false">
-          <div class="concept-art"><img src="concepts/concept-3.svg" alt="方案三：开放字间组合标" /></div>
-          <div class="concept-info"><span class="concept-number">03</span><div><h3>开放字间</h3><p>把 FRIENDEN 的 F 变成开放房间，绿色门槛邀请进入。更国际、更直接，也最具软件产品感。</p><div class="concept-tags"><span>国际</span><span>有力</span><span>数字优先</span></div></div></div>
+          <div class="concept-art"><img src="generated/concept-c-courtyard.png" alt="方案三：游园入间图形" /></div>
+          <div class="concept-info"><span class="concept-number">03</span><div><h3>游园入间</h3><p>朱砂与矿蓝交叠成一座当代庭院，金线像游园路径。东方气质最强，适合建立更独特的中文品牌资产。</p><div class="concept-tags"><span>东方</span><span>庭院</span><span>文化感</span></div></div></div>
         </article>
         <article class="concept" data-concept="4" tabindex="0" role="button" aria-pressed="false">
-          <div class="concept-art"><img src="concepts/concept-4.svg" alt="方案四：折页成间组合标" /></div>
-          <div class="concept-info"><span class="concept-number">04</span><div><h3>折页成间</h3><p>两段对话像折页般靠拢，既是聊天气泡，也是共同内容的容器。与产品功能联系最直接。</p><div class="concept-tags"><span>聊天</span><span>内容</span><span>记忆</span></div></div></div>
+          <div class="concept-art"><img src="generated/concept-d-constellation.png" alt="方案四：共同星群图形" /></div>
+          <div class="concept-info"><span class="concept-number">04</span><div><h3>共同星群</h3><p>四个有机片段围出中心火花，象征每个人带着不同故事聚到一起。蓝、黄、粉、墨更年轻也更有传播张力。</p><div class="concept-tags"><span>年轻</span><span>故事</span><span>共创</span></div></div></div>
         </article>
       </div>
     </section>
@@ -225,17 +229,17 @@
       <div class="section-head"><b>02 / IN CONTEXT</b><h2 id="application-title">放回网站里看</h2></div>
       <div class="application">
         <div class="site-stage">
-          <div class="site-nav"><img id="navLogo" src="concepts/concept-1.svg" alt="当前方案的页眉组合标" /><div aria-hidden="true"><span></span><span></span></div></div>
+          <div class="site-nav"><div class="site-brand"><img id="navLogo" src="generated/concept-a-threshold.png" alt="当前方案的页眉标志" /><b>友间<small>FRIENDEN</small></b></div><div class="nav-actions" aria-hidden="true"><span></span><span></span></div></div>
           <div class="site-hero"><small>A PLACE FOR YOUR PEOPLE</small><h3>朋友之间，<br />自有一间。</h3><p>把聊天、动态和共同记忆，安放在大家自己的空间里。</p></div>
         </div>
         <div class="device-column">
-          <div class="app-tile"><img id="appIcon" src="concepts/concept-1-icon.svg" alt="当前方案的 App 图标" /><strong>APP ICON / 156 PX</strong></div>
+          <div class="app-tile"><img id="appIcon" src="generated/concept-a-threshold.png" alt="当前方案的 App 图标" /><strong>APP ICON / 156 PX</strong></div>
           <div class="size-check"><small>OPTICAL SIZE CHECK</small><div class="sizes">
-            <div class="sample" style="--s:64px"><img data-size-icon src="concepts/concept-1-icon.svg" alt="64 像素预览" /><span>64</span></div>
-            <div class="sample" style="--s:32px"><img data-size-icon src="concepts/concept-1-icon.svg" alt="32 像素预览" /><span>32</span></div>
-            <div class="sample" style="--s:16px"><img data-size-icon src="concepts/concept-1-icon.svg" alt="16 像素预览" /><span>16</span></div>
+            <div class="sample" style="--s:64px"><img data-size-icon src="generated/concept-a-threshold.png" alt="64 像素预览" /><span>64</span></div>
+            <div class="sample" style="--s:32px"><img data-size-icon src="generated/concept-a-threshold.png" alt="32 像素预览" /><span>32</span></div>
+            <div class="sample" style="--s:16px"><img data-size-icon src="generated/concept-a-threshold.png" alt="16 像素预览" /><span>16</span></div>
           </div></div>
-          <div class="verdict"><small id="verdictLabel">DIRECTION 01</small><h3 id="verdictTitle">最平衡的主品牌方向</h3><p id="verdictBody">中文含义、空间隐喻和现有网站气质衔接最好；图形也能自然拆成 App 图标。</p></div>
+          <div class="verdict"><small id="verdictLabel">DIRECTION 01</small><h3 id="verdictTitle">最直观的人与空间</h3><p id="verdictBody">人物、关系与门扉三层含义能被快速理解，配色成熟醒目；后续可继续收紧人物轮廓与小尺寸细节。</p></div>
         </div>
       </div>
     </section>
@@ -255,10 +259,10 @@
 
   <script>
     const concepts = {
-      1: ["最平衡的主品牌方向", "中文含义、空间隐喻和现有网站气质衔接最好；图形也能自然拆成 App 图标。"],
-      2: ["最具社群感的方向", "把成员共同在场作为第一印象，适合强调活动与共创；但在 16px 时中心细节略紧。"],
-      3: ["最国际化的方向", "英文识别最强，数字产品感明确；中文“友间”的诗意需要通过文案和页面继续补足。"],
-      4: ["最贴近聊天功能的方向", "对话和内容沉淀一眼可见；传播理解成本最低，但与常见聊天品牌的图形距离较近。"]
+      1: ["最直观的人与空间", "人物、关系与门扉三层含义能被快速理解，配色成熟醒目；后续可继续收紧人物轮廓与小尺寸细节。"],
+      2: ["最温暖的生活方式方向", "关系像丝带一样延续，柔软而不幼稚；适合强调长期陪伴，但小尺寸需要做专用简化版。"],
+      3: ["最具文化辨识度的方向", "庭院和游园路径把“间”讲得更含蓄，东方品牌资产最独特；适合作为重点深化候选。"],
+      4: ["最年轻的传播方向", "色彩活跃、轮廓有运动感，容易发展动态标志；与“私人空间”的关联需要文案配合。"]
     };
     const selectConcept = (number) => {
       document.querySelectorAll(".concept").forEach((card) => {
@@ -266,9 +270,9 @@
         card.classList.toggle("is-selected", selected);
         card.setAttribute("aria-pressed", String(selected));
       });
-      const logo = `concepts/concept-${number}.svg`;
-      const icon = `concepts/concept-${number}-icon.svg`;
-      document.querySelector("#navLogo").src = logo;
+      const files = ["concept-a-threshold.png", "concept-b-ribbon.png", "concept-c-courtyard.png", "concept-d-constellation.png"];
+      const icon = `generated/${files[number - 1]}`;
+      document.querySelector("#navLogo").src = icon;
       document.querySelector("#appIcon").src = icon;
       document.querySelector("#topbarIcon").src = icon;
       document.querySelectorAll("[data-size-icon]").forEach((image) => image.src = icon);
