@@ -1749,6 +1749,7 @@
   "message.forwardSourceCount": "{{count}}mensajes seleccionados",
   "message.forwardIndividual": "Envía por separado",
   "message.forwardIndividualHint": "Envía cada mensaje al chat de destino",
+  "message.forwardAudioBundleOnly": "Los mensajes de voz solo se pueden reenviar como tarjeta",
   "message.forwardBundle": "Envía como tarjeta",
   "message.forwardBundleHint": "Envía una tarjeta de historial de chat",
   "message.chooseForwardChats": "Elige chats",

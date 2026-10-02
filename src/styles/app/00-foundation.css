@@ -8293,6 +8293,10 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background: color-mix(in srgb, var(--brand-primary) 11%, var(--surface));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 14%, transparent);
 }
+.forward-route-switch button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .forward-route-icon {
   display: grid;
   place-items: center;

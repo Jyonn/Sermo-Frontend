@@ -3270,6 +3270,7 @@ function LiveChatsPage({
   const [forwardMode, setForwardMode] = useState<"individual" | "bundle">("bundle");
   const [forwardSourceMessageIds, setForwardSourceMessageIds] = useState<number[]>([]);
   const [forwardSourcePreviewMessages, setForwardSourcePreviewMessages] = useState<ChatMessageDTO[]>([]);
+  const forwardContainsAudio = forwardSourcePreviewMessages.some((message) => message.type === MESSAGE_TYPE_AUDIO);
   const [forwardTargetChatIds, setForwardTargetChatIds] = useState<number[]>([]);
   const [forwardSending, setForwardSending] = useState(false);
   const [forwardBundlePreview, setForwardBundlePreview] = useState<ChatMessagePayloadDTO | null>(null);
@@ -7415,7 +7416,7 @@ function LiveChatsPage({
     setForwardSourceMessageIds(eligibleIds);
     setForwardSourcePreviewMessages(eligibleMessages.map(forwardPreviewMessage));
     setForwardTargetChatIds([]);
-    setForwardMode(eligibleIds.length > 1 ? "bundle" : "individual");
+    setForwardMode(eligibleIds.length > 1 || eligibleMessages.some((message) => message.kind === "audio") ? "bundle" : "individual");
     setForwardRouteOpen(true);
   };
 
@@ -7427,12 +7428,16 @@ function LiveChatsPage({
     setForwardSourceMessageIds([message.id as number]);
     setForwardSourcePreviewMessages([forwardPreviewMessage(message)]);
     setForwardTargetChatIds([]);
-    setForwardMode("individual");
+    setForwardMode(message.kind === "audio" ? "bundle" : "individual");
     setForwardRouteOpen(true);
   };
 
   const submitForwardMessages = async () => {
     if (!forwardSourceMessageIds.length || !forwardTargetChatIds.length || forwardSending) return;
+    if (forwardContainsAudio && forwardMode === "individual") {
+      showToast(t("message.forwardAudioBundleOnly"), "error");
+      return;
+    }
     if (selectedChat && forwardTargetChatIds.includes(selectedChat.id) && !await moveToLatestMessageWindow()) return;
     try {
       setForwardSending(true);
@@ -9200,10 +9205,11 @@ function LiveChatsPage({
               className={forwardMode === "individual" ? "is-active" : ""}
               onClick={() => setForwardMode("individual")}
               aria-pressed={forwardMode === "individual"}
+              disabled={forwardContainsAudio}
               type="button"
             >
               <span className="forward-route-icon material-symbols-outlined" aria-hidden="true">view_agenda</span>
-              <span><strong>{t("message.forwardIndividual")}</strong><small>{t("message.forwardIndividualHint")}</small></span>
+              <span><strong>{t("message.forwardIndividual")}</strong><small>{t(forwardContainsAudio ? "message.forwardAudioBundleOnly" : "message.forwardIndividualHint")}</small></span>
               <span className="forward-route-check material-symbols-outlined" aria-hidden="true">check_circle</span>
             </button>
             <button

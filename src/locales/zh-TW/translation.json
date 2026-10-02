@@ -1752,6 +1752,7 @@
   "message.forwardSourceCount": "已選擇 {{count}} 條訊息",
   "message.forwardIndividual": "逐條轉發",
   "message.forwardIndividualHint": "在目標會話中依次傳送",
+  "message.forwardAudioBundleOnly": "語音訊息只能以卡片轉發",
   "message.forwardBundle": "卡片轉發",
   "message.forwardBundleHint": "收進一張聊天記錄卡片",
   "message.chooseForwardChats": "選擇會話",

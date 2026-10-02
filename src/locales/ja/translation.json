@@ -1749,6 +1749,7 @@
   "message.forwardSourceCount": "{{count}}選択されたメッセージ",
   "message.forwardIndividual": "別々に転送",
   "message.forwardIndividualHint": "各メッセージを目的地のチャットに送信する",
+  "message.forwardAudioBundleOnly": "音声メッセージはカードとしてのみ転送できます",
   "message.forwardBundle": "カードとして転送",
   "message.forwardBundleHint": "チャット履歴カードを1枚送信する",
   "message.chooseForwardChats": "チャットを選択",

@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.16",
+  "id": "2026.10.02.17",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "单张图片发送失败可重试",
+      "title": "语音转发更清晰",
       "items": [
-        "发送多张图片时，若只有一张发送失败，也能直接重试"
+        "语音消息仅支持卡片转发，避免逐条转发时产生误解"
       ]
     },
     "en": {
-      "title": "Retry a failed single image",
+      "title": "Clearer voice forwarding",
       "items": [
-        "When only one image fails in a batch, you can retry it directly"
+        "Voice messages can now only be forwarded as a chat history card"
       ]
     }
   }
