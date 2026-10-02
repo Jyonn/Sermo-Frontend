@@ -18,7 +18,7 @@ export default function LandingPage() {
       topbarClassName="landing-facade-topbar"
       topbarLeading={
         <Link aria-label={t("brand.fullName")} className="landing-facade-brand" to="/">
-          <img alt="" src="/icons/frienden-logo.svg" />
+          <img alt="" src="/icons/frienden-512.png?v=2" />
           <span>{t("brand.yanlang")}</span>
         </Link>
       }

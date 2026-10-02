@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.17",
+  "id": "2026.10.02.18",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "语音转发更清晰",
+      "title": "友间启用新标志",
       "items": [
-        "语音消息仅支持卡片转发，避免逐条转发时产生误解"
+        "网站、浏览器标签和安装后的应用图标统一换上新标志"
       ]
     },
     "en": {
-      "title": "Clearer voice forwarding",
+      "title": "A new Frienden mark",
       "items": [
-        "Voice messages can now only be forwarded as a chat history card"
+        "The website, browser tab, and installed app now use the new mark"
       ]
     }
   }

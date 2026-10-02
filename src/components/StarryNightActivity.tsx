@@ -17,7 +17,7 @@ export function StarryNightActivity({ activity, claiming, onClaim, onConfigure }
 
   return <div className="starry-night-activity">
     <section className="starry-night-masthead">
-      <div className="starry-night-brand"><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=1" /></span><i /><b>星夜观测局</b></div>{/* i18n-ignore: campaign identity */}
+      <div className="starry-night-brand"><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=2" /></span><i /><b>星夜观测局</b></div>{/* i18n-ignore: campaign identity */}
       <div className="starry-night-index"><span>{t("activity.starry.rules")}</span><time>{formatDate(activity.starts_at)} — {activity.ends_at ? formatDate(activity.ends_at) : "∞"}</time></div>
     </section>
     <section className="starry-night-hero">

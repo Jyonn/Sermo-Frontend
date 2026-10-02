@@ -70,7 +70,7 @@ export default function PwaAccountEntryPage() {
       <section className="pwa-account-entry-shell">
         <div className="pwa-account-entry-fixed-header">
           <header className="pwa-account-entry-brand">
-            <img alt="" aria-hidden="true" src="/icons/frienden-512.png?v=1" />
+            <img alt="" aria-hidden="true" src="/icons/frienden-512.png?v=2" />
             <div><span>WEB APP</span><strong>{t("brand.fullName")}</strong></div>
           </header>
           <div className="pwa-account-entry-heading">

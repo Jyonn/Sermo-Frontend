@@ -234,7 +234,7 @@ export function AppBottomNav() {
     <nav aria-label={t("nav.main")} className={`mobile-nav app-mobile-nav${isChatDetail ? " is-chat-detail" : ""}${desktopCollapsed ? " is-collapsed" : ""}`}>
       <div className="desktop-nav-head">
         <Link aria-label={t("brand.fullName")} className="desktop-nav-brand" to={!features.ready ? "/app" : features.chatEnabled ? "/app/chats" : "/app/square"}>
-          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/frienden-512.png?v=1" />
+          <img alt="" aria-hidden="true" className="desktop-nav-logo" src="/icons/frienden-512.png?v=2" />
           {space ? (
             <>
               <span aria-hidden="true" className="desktop-brand-collaboration-mark">×</span>
