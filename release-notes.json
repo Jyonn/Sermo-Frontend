@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.1",
+  "id": "2026.10.03.2",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天记录预览更顺畅",
+      "title": "小程序官方通知更清晰",
       "items": [
-        "在合并聊天记录预览中，点击音乐、图片集或语音可顺利查看完整记录，不再触发无效操作"
+        "聊天中的官方通知现在以独立卡片展示，相关投稿通知可直接打开投稿会话"
       ]
     },
     "en": {
-      "title": "Smoother chat record previews in the Mini Program",
+      "title": "Clearer official notices in the Mini Program",
       "items": [
-        "Tap music, galleries, or voice in a merged chat preview to open the full record without inactive controls getting in the way"
+        "Official chat notices now appear as distinct cards, with a direct link to the related submission chat when available"
       ]
     }
   }
