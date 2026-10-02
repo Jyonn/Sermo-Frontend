@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.2",
+  "id": "2026.10.03.3",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序官方通知更清晰",
+      "title": "小程序通知预览更完整",
       "items": [
-        "聊天中的官方通知现在以独立卡片展示，相关投稿通知可直接打开投稿会话"
+        "聊天列表和搜索结果现在直接显示通知正文，不再只显示“官方通知”占位文字"
       ]
     },
     "en": {
-      "title": "Clearer official notices in the Mini Program",
+      "title": "More useful notice previews in the Mini Program",
       "items": [
-        "Official chat notices now appear as distinct cards, with a direct link to the related submission chat when available"
+        "Chat lists and search results now show the notice text instead of a generic label"
       ]
     }
   }
