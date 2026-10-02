@@ -16,6 +16,7 @@ interface UserAvatarProps {
   className: string;
   groupMembers?: GroupAvatarMember[] | null;
   frame?: AvatarFrameStyle;
+  surface?: "person" | "space";
 }
 
 const supportedAvatarFrames = new Set<AvatarFrameStyle>([
@@ -82,7 +83,7 @@ function groupLayoutClass(count: number) {
   return "avatar-group-stack-two";
 }
 
-export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame = "none" }: UserAvatarProps) {
+export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame = "none", surface = "person" }: UserAvatarProps) {
   const normalizedGroupMembers = useMemo(() => normalizeGroupMembers(groupMembers), [groupMembers]);
   const canShowGroup = normalizedGroupMembers.length >= 2;
   const singleSource = normalizedGroupMembers.length === 1 ? normalizedGroupMembers[0] : null;
@@ -95,7 +96,7 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame
   const hasFrame = normalizedFrame !== "none";
 
   return (
-    <div className={`${className} user-avatar ${canShowImage ? "avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
+    <div className={`${className} user-avatar avatar-surface-${surface}${canShowImage ? " avatar-has-image" : ""}${hasFrame ? " has-avatar-frame" : ""}`}>
       <span className={`avatar-frame-clip${hasFrame ? ` avatar-frame-${normalizedFrame}` : ""}`}>
         {canShowGroup ? (
           <span aria-hidden="true" className={`avatar-group-stack ${groupLayoutClass(normalizedGroupMembers.length)}`}>
@@ -124,4 +125,16 @@ export function UserAvatar({ name, uri, cacheKey, className, groupMembers, frame
       </span>
     </div>
   );
+}
+
+export function PlainAvatar(props: Omit<UserAvatarProps, "frame" | "surface">) {
+  return <UserAvatar {...props} frame="none" />;
+}
+
+export function GroupAvatar(props: Omit<UserAvatarProps, "frame" | "surface" | "groupMembers"> & { groupMembers: GroupAvatarMember[] }) {
+  return <UserAvatar {...props} frame="none" />;
+}
+
+export function SpaceAvatar(props: Omit<UserAvatarProps, "surface">) {
+  return <UserAvatar {...props} surface="space" />;
 }

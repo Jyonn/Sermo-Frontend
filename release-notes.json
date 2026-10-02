@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.02.12",
+  "id": "2026.10.02.13",
   "publishedAt": "2026-10-02",
   "locales": {
     "zh-CN": {
-      "title": "聊天工具栏保持一致",
+      "title": "头像样式更统一",
       "items": [
-        "桌面聊天补上艾特入口，并与手机端统一工具顺序；未解锁的功能保持可见，点击时提示等级要求"
+        "全站头像统一为圆角矩形；群成员艾特列表不再显示头像框，空间头像保留白色描边"
       ]
     },
     "en": {
-      "title": "Consistent chat tools",
+      "title": "More consistent avatars",
       "items": [
-        "Desktop chat now includes mentions and matches the mobile tool order; locked actions stay visible and explain their level requirement"
+        "Avatars now use rounded squares throughout; mention suggestions have no frame, while space avatars retain a white rim"
       ]
     }
   }

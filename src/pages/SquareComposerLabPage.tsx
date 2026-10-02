@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import samplePhoto from "../assets/square/plaza-waterfront.jpg";
+import { PlainAvatar } from "../components/UserAvatar";
 
 type MediaMode = "none" | "images" | "audio" | "video";
 type PublishStyle = "solid" | "floating" | "split" | "quiet";
@@ -75,7 +76,7 @@ function ComposerPrototype({ publishStyle }: { publishStyle: PublishStyle }) {
     <div className={`composer-lab-phone variant-canvas text-compact publish-bottom publish-style-${publishStyle}`}>
       <header className="composer-lab-drawer-header"><button aria-label="返回" type="button"><span className="material-symbols-outlined">arrow_back</span></button><strong>发表发言</strong><span /></header>
       <div className="composer-lab-editor">
-        <div className="composer-lab-author"><img alt="Fly" src="/assets/avatars/v2/01.png" /><span><strong>Fly</strong><small>在元梦之星发言</small></span></div>
+        <div className="composer-lab-author"><PlainAvatar className="composer-lab-avatar" name="Fly" uri="/assets/avatars/v2/01.png" /><span><strong>Fly</strong><small>在元梦之星发言</small></span></div>
         <div className="composer-lab-writing-zone"><textarea autoFocus maxLength={140} onChange={(event) => setText(event.target.value)} placeholder="分享此刻想说的" value={text} /><span className="composer-lab-count">{text.length}<i>/140</i></span></div>
         <Attachment imageCount={imageCount} mode={mode} onAddImage={() => setImageCount((count) => Math.min(9, count + 1))} onRemove={() => setImageCount((count) => Math.max(1, count - 1))} onToggleRecording={() => setRecording((value) => !value)} recording={recording} seconds={seconds} />
         {located ? <button className="composer-lab-location-tag is-active" onClick={() => setLocated(false)} type="button"><span className="material-symbols-outlined">location_on</span><span>福建省厦门市思明区</span><span className="material-symbols-outlined">close</span></button> : null}

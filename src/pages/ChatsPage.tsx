@@ -53,7 +53,7 @@ import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/Trave
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
-import { UserAvatar } from "../components/UserAvatar";
+import { PlainAvatar, UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
 import { ActivityMessageCard } from "../components/ActivityMessageCard";
 import { UserProfilePanel } from "../components/UserProfilePanel";
@@ -8555,7 +8555,7 @@ function LiveChatsPage({
                             <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")} style={{ position: "fixed", zIndex: 2000, top: mobileMentionPosition.top, bottom: "auto", left: mobileMentionPosition.left, right: "auto", width: mobileMentionPosition.width, maxHeight: mobileMentionPosition.maxHeight, transform: "translateY(-100%)" }}>
                               {mentionCandidates.map((member) => (
                                 <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onPointerDown={handleMentionPointerDown} onPointerMove={handleMentionPointerMove} onPointerUp={(event) => handleMentionPointerUp(event, member)} onPointerCancel={() => { mentionTouchRef.current = null; suppressMentionClickUntilRef.current = performance.now() + 500; }} onClick={() => { if (performance.now() >= suppressMentionClickUntilRef.current) selectMention(member); }} role="option" type="button">
-                                  <UserAvatar className="composer-mention-avatar" name={member.name} uri={member.avatarUri} />
+                                  <PlainAvatar className="composer-mention-avatar" name={member.name} uri={member.avatarUri} />
                                   <span>{member.name}</span>
                                 </button>
                               ))}
@@ -8650,7 +8650,7 @@ function LiveChatsPage({
                         <div className="composer-mention-picker" role="listbox" aria-label={t("chat.mentionMembers")}>
                           {mentionCandidates.map((member) => (
                             <button key={member.userId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMention(member)} role="option" type="button">
-                              <UserAvatar className="composer-mention-avatar" name={member.name} uri={member.avatarUri} />
+                              <PlainAvatar className="composer-mention-avatar" name={member.name} uri={member.avatarUri} />
                               <span>{member.name}</span>
                             </button>
                           ))}

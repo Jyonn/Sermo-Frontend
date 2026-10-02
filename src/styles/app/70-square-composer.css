@@ -660,7 +660,7 @@
 .chat-item.is-submission-item .avatar {
   width: 52px;
   height: 52px;
-  border-radius: 50%;
+  border-radius: 28%;
   background: var(--bg-surface);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 34%, var(--line-soft));
   transition: box-shadow 180ms ease;
@@ -670,7 +670,7 @@
   background: var(--bg-surface);
 }
 .chat-item.is-submission-item .avatar :is(.avatar-image, .avatar-label) {
-  border-radius: 50%;
+  border-radius: 28%;
 }
 .chat-item.is-submission-item .avatar .avatar-label {
   display: grid;
@@ -691,7 +691,7 @@
   width: 34px;
   height: 34px;
   border: 2px solid var(--bg-surface);
-  border-radius: 50%;
+  border-radius: 28%;
   background: var(--bg-surface);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--submission-flow-color) 44%, var(--line-soft)),
@@ -705,7 +705,7 @@
 
 .submission-stacked-avatar > .avatar-frame-clip,
 .submission-stacked-avatar :is(.avatar-image, .avatar-label) {
-  border-radius: 50%;
+  border-radius: 28%;
 }
 
 .submission-stacked-avatar .avatar-label {

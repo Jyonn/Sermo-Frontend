@@ -44,7 +44,7 @@
   border-bottom: 1px solid var(--line-soft);
 }
 
-.chat-member-mute-person .mini-avatar { width: 48px; height: 48px; border-radius: 50%; }
+.chat-member-mute-person .mini-avatar { width: 48px; height: 48px; border-radius: 28%; }
 .chat-member-mute-person > span { display: grid; gap: 3px; min-width: 0; }
 .chat-member-mute-person strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-member-mute-person small,
@@ -192,4 +192,3 @@ html[data-theme="dark"] .submission-round-curtain-head small { color: #9ab9ac; }
   .submission-round-curtain-head { display: grid; gap: 4px; }
   .submission-round-curtain-head small { max-width: none; padding-left: 14px; text-align: left; }
 }
-

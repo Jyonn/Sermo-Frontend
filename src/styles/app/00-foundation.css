@@ -889,13 +889,11 @@ img {
   height: 46px;
   flex: 0 0 46px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 12px;
   color: var(--text-primary);
   background: var(--avatar-bg);
   font-size: 0.72rem;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(17, 19, 24, 0.12);
 }
 
 .brand-copy h1,

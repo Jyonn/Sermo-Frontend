@@ -1011,7 +1011,7 @@ html[data-theme="dark"] body .activity-drawer.side-drawer .drawer-body{backgroun
 .activity-awakener-node::before{right:100%}.activity-awakener-node::after{left:100%}
 .activity-immortal-track article:first-child .activity-awakener-node::before,.activity-immortal-track article:last-child .activity-awakener-node::after{display:none}
 .activity-immortal-track article.is-awakened .activity-awakener-node{border-color:#aaa0a6;background:#ddd8d4;box-shadow:0 0 0 3px rgba(220,214,210,.08),0 4px 12px rgba(0,0,0,.22)}.activity-immortal-track article.is-unlocked .activity-awakener-node{border-color:#f2c86c;background:#fff3cf;box-shadow:0 0 0 3px rgba(238,190,92,.12),0 4px 12px rgba(0,0,0,.25)}
-.activity-awakener-node .user-avatar{width:100%;height:100%;border-radius:50%}
+.activity-awakener-node .user-avatar{width:100%;height:100%;border-radius:28%}
 .activity-awakening-hint{margin:12px 0 0;color:#9f9485;font-size:12px;text-align:center}
 .sheet-backdrop:has(> .activity-info-sheet){background:rgba(12,8,20,.58);backdrop-filter:blur(12px) saturate(.9)}
 .bottom-sheet.activity-info-sheet{color:#f7efd8;border-color:rgba(237,197,105,.26);background:radial-gradient(circle at 88% 2%,rgba(155,75,132,.28),transparent 38%),linear-gradient(165deg,#34213d,#1b1829 60%,#13131e);box-shadow:0 28px 80px rgba(7,4,14,.46),inset 0 1px rgba(255,243,211,.08)}

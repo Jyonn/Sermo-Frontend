@@ -5,7 +5,7 @@ import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { UserAvatar } from "../components/UserAvatar";
+import { SpaceAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
@@ -337,7 +337,7 @@ export default function JoinSpacePage() {
 
               {space?.official_user ? (
                 <div className="join-space-official-card">
-                  <UserAvatar
+                  <SpaceAvatar
                     className="avatar join-space-official-avatar"
                     name={space.official_user.name}
                     uri={space.official_user.avatar_uri}

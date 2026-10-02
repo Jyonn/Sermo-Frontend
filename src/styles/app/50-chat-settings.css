@@ -318,7 +318,7 @@ html[data-theme="dark"] .chat-personalization-demo-sides button.is-active {
 .chat-personalization-header-avatar {
   width: 38px;
   height: 38px;
-  border-radius: 50%;
+  border-radius: 28%;
   font-size: .7rem;
 }
 

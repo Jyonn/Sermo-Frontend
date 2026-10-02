@@ -10,7 +10,7 @@ import { SideDrawer } from "../components/SideDrawer";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { PermissionWorkspace } from "../components/PermissionWorkspace";
-import { UserAvatar } from "../components/UserAvatar";
+import { SpaceAvatar, UserAvatar } from "../components/UserAvatar";
 import { ApiError, api } from "../lib/api";
 import { audioFileExtension, createNoiseReducedAudioCapture, preferredAudioMimeType, type NoiseReducedAudioCapture } from "../lib/audioCapture";
 import { useAdminAuth } from "../lib/adminAuth";
@@ -800,7 +800,7 @@ export default function SpaceAdminDashboardPage() {
       <section className="admin-app-shell">
         <nav className="admin-app-nav" aria-label={t("admin.dashboardTitle")}>
           <div className="admin-nav-brand">
-            <UserAvatar className="admin-nav-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />
+            <SpaceAvatar className="admin-nav-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />
             <span><strong>{currentSpace?.name}</strong><small>@{currentSpace?.slug}</small></span>
           </div>
           <div className="admin-nav-items">
@@ -853,7 +853,7 @@ export default function SpaceAdminDashboardPage() {
           </section> : null}
 
           {activeTab === "menu" && currentSpace ? <section className="admin-tab-page admin-menu-tab">
-            <section className="admin-menu-profile"><UserAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>{PUBLIC_HOST}/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
+            <section className="admin-menu-profile"><SpaceAvatar className="admin-menu-avatar" name={currentSpace.name} uri={currentSpace.official_user?.avatar_uri} /><span><strong>{currentSpace.name}</strong><small>{PUBLIC_HOST}/{currentSpace.slug}</small></span><b>{dashboard?.stats.members_count ?? 0}/{currentSpace.effective_member_limit ?? currentSpace.tier_member_limit}</b></section>
             <section className="admin-menu-section"><h2>{t("admin.spaceGovernance")}</h2><div className="admin-menu-list">
               <button onClick={() => setBasicSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">settings</span></span><span><strong>{t("admin.basicSettings")}</strong><small>{currentSpace.email}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
               <button onClick={() => setModuleSettingsOpen(true)} type="button"><span className="admin-policy-icon"><span className="material-symbols-outlined">tune</span></span><span><strong>{t("admin.featureAccess")}</strong><small>{settingsChatEnabled ? t("admin.chatOn") : t("admin.chatOff")} · {settingsSquareEnabled ? t("admin.squareOn") : t("admin.squareOff")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>

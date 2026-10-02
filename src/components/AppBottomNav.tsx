@@ -7,7 +7,7 @@ import { FRIEND_REQUESTS_UPDATED_EVENT } from "../lib/friendRequestBadge";
 import { SQUARE_NOTIFICATIONS_UPDATED_EVENT } from "../lib/squareNotifications";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { useSpaceBrand } from "../lib/spaceBrand";
-import { UserAvatar } from "./UserAvatar";
+import { SpaceAvatar, UserAvatar } from "./UserAvatar";
 import { useI18n, type TranslationKey } from "../lib/language";
 import { usePageActive } from "../lib/pageActivity";
 import { preloadRouteForPath, preloadRouteResource } from "../lib/routeResources";
@@ -238,7 +238,7 @@ export function AppBottomNav() {
           {space ? (
             <>
               <span aria-hidden="true" className="desktop-brand-collaboration-mark">×</span>
-              <UserAvatar
+              <SpaceAvatar
                 className="desktop-nav-space-logo"
                 name={space.name}
                 uri={space.official_user?.avatar_uri}

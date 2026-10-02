@@ -704,7 +704,7 @@ html:not([data-theme="dark"]) .user-profile-panel.profile-theme-vip .user-profil
 }
 
 .user-profile-panel.profile-theme-vip .user-profile-group-tile-avatar {
-  border-radius: 50%;
+  border-radius: 28%;
   box-shadow: 0 0 0 1px rgba(190, 137, 54, 0.36), 0 0 0 5px rgba(190, 137, 54, 0.07);
 }
 
@@ -907,7 +907,7 @@ html[data-theme="dark"] .profile-card-preview.profile-theme-vip {
 .composer-lab-drawer-header .composer-lab-publish:disabled { color: #aab5b0; cursor: default; }
 .composer-lab-editor { position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; padding: 20px; overflow-y: auto; }
 .composer-lab-author { display: flex; align-items: center; gap: 11px; }
-.composer-lab-author img { width: 46px; height: 46px; border-radius: 15px; object-fit: cover; box-shadow: 0 5px 14px rgba(16,45,38,.12); }
+.composer-lab-avatar { width: 46px; height: 46px; border-radius: 15px; box-shadow: 0 5px 14px rgba(16,45,38,.12); }
 .composer-lab-author span { display: flex; flex-direction: column; }
 .composer-lab-author strong { font-size: 16px; }
 .composer-lab-author small { margin-top: 2px; color: var(--lab-muted); font-size: 11px; }

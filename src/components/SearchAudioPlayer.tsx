@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../lib/language";
+import { PlainAvatar } from "./UserAvatar";
 
 function durationLabel(seconds: number) {
   const safe = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;
@@ -54,9 +55,9 @@ export function SearchAudioTile({ src, durationSeconds = 0, avatarUri, name, onJ
     if (audio.paused) await audio.play();
     else audio.pause();
   };
-  return <article className={`message-search-audio-tile${playing ? " is-playing" : ""}`} style={avatarUri ? { backgroundImage: `url("${avatarUri.replace(/"/g, "%22")}")` } : undefined}>
+  return <article className={`message-search-audio-tile${playing ? " is-playing" : ""}`}>
     <audio onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : fallbackDuration)} onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} preload="metadata" ref={audioRef} src={src} />
-    {!avatarUri ? <span className="message-search-audio-initial">{name.trim().slice(0, 1).toUpperCase()}</span> : null}
+    <PlainAvatar className="message-search-audio-avatar" name={name} uri={avatarUri} />
     <span className="message-search-audio-shade" />
     <button aria-label={`${name} · ${playing ? t("media.pause") : t("media.play")}`} onClick={() => void toggle()} type="button"><svg aria-hidden="true" viewBox="0 0 24 24">{playing ? <path d="M8 6v12M16 6v12" /> : <path d="m9 6 9 6-9 6Z" />}</svg></button>
     <time>{durationLabel(duration)}</time>

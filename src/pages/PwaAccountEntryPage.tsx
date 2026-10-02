@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { UserAvatar } from "../components/UserAvatar";
+import { SpaceAvatar, UserAvatar } from "../components/UserAvatar";
 import type { SpaceDTO } from "../types";
 import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
@@ -96,7 +96,7 @@ export default function PwaAccountEntryPage() {
               {spaces.map((space) => {
                 const officialUser = spaceDetails.get(space.slug)?.official_user ?? recentSpaces.get(space.slug)?.officialUser;
                 return <button className="pwa-account-card is-space" key={space.slug} onClick={() => openSpace(space)} role="listitem" type="button">
-                  <UserAvatar cacheKey={officialUser?.avatar_cache_key} className="pwa-account-avatar" frame={officialUser?.avatar_frame_style} name={officialUser?.name ?? space.name} uri={officialUser?.avatar_uri} />
+                  <SpaceAvatar cacheKey={officialUser?.avatar_cache_key} className="pwa-account-avatar" name={officialUser?.name ?? space.name} uri={officialUser?.avatar_uri} />
                   <span className="pwa-account-card-copy"><strong>{space.name}</strong><small><b>@{space.slug}</b></small></span>
                   <span className="material-symbols-outlined" aria-hidden="true">{space.accounts.length === 1 ? "arrow_forward" : "chevron_right"}</span>
                 </button>;

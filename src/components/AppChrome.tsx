@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useSpaceBrand } from "../lib/spaceBrand";
-import { UserAvatar } from "./UserAvatar";
+import { SpaceAvatar } from "./UserAvatar";
 import { useI18n } from "../lib/language";
 import { preloadLanguageChoices } from "../lib/i18n";
 import type { SupportedLanguage } from "../lib/i18n";
@@ -113,7 +113,7 @@ export function AppChrome({
                 {visibleSpaceBrand ? (
                   <>
                     <span className="brand-collaboration-mark" aria-hidden="true">×</span>
-                    <UserAvatar className="brand-space-avatar" name={visibleSpaceBrand.name} uri={visibleSpaceBrand.avatarUri} />
+                    <SpaceAvatar className="brand-space-avatar" name={visibleSpaceBrand.name} uri={visibleSpaceBrand.avatarUri} />
                   </>
                 ) : null}
               </Link>
