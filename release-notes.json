@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.9",
+  "id": "2026.10.03.10",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序音乐详情切页修复",
+      "title": "小程序聊天记录翻页更稳",
       "items": [
-        "从广场切回聊天后，点击音乐卡片仍能在当前页面打开歌曲详情"
+        "查看更早或更新的聊天消息时，列表不再因重复调整滚动位置而跳动"
       ]
     },
     "en": {
-      "title": "Mini Program music detail navigation fixed",
+      "title": "Smoother Mini Program chat history paging",
       "items": [
-        "After switching from Square to Chats, music cards now open song details on the current page"
+        "Loading older or newer messages no longer shifts the chat view due to duplicate scroll adjustments"
       ]
     }
   }
