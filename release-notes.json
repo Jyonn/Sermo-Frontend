@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.8",
+  "id": "2026.10.03.9",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序网易云分享解析恢复",
+      "title": "小程序音乐详情切页修复",
       "items": [
-        "在广场发言中添加网易云音乐分享时，不再因请求参数错误而解析失败"
+        "从广场切回聊天后，点击音乐卡片仍能在当前页面打开歌曲详情"
       ]
     },
     "en": {
-      "title": "Netease Music sharing restored in Mini Program",
+      "title": "Mini Program music detail navigation fixed",
       "items": [
-        "Adding a Netease Music share to a Square post no longer fails due to a request error"
+        "After switching from Square to Chats, music cards now open song details on the current page"
       ]
     }
   }
