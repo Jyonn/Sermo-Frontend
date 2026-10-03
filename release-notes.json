@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.6",
+  "id": "2026.10.03.7",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序音乐续播更稳定",
+      "title": "小程序广场图集定位更准确",
       "items": [
-        "音乐恢复播放后即使遇到网络缓冲，也不会跳回先前的播放位置"
+        "点击广场发言中的任一张照片，预览会从所点照片开始"
       ]
     },
     "en": {
-      "title": "More reliable Mini Program music playback",
+      "title": "More accurate Square photo previews in Mini Program",
       "items": [
-        "Resumed songs no longer jump back to an earlier position after network buffering"
+        "Tapping a photo in a Square post now opens the gallery at that photo"
       ]
     }
   }
