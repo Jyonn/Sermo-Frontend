@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.7",
+  "id": "2026.10.03.8",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序广场图集定位更准确",
+      "title": "小程序网易云分享解析恢复",
       "items": [
-        "点击广场发言中的任一张照片，预览会从所点照片开始"
+        "在广场发言中添加网易云音乐分享时，不再因请求参数错误而解析失败"
       ]
     },
     "en": {
-      "title": "More accurate Square photo previews in Mini Program",
+      "title": "Netease Music sharing restored in Mini Program",
       "items": [
-        "Tapping a photo in a Square post now opens the gallery at that photo"
+        "Adding a Netease Music share to a Square post no longer fails due to a request error"
       ]
     }
   }
