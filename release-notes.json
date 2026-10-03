@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.5",
+  "id": "2026.10.03.6",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序图片预览更易退出",
+      "title": "小程序音乐续播更稳定",
       "items": [
-        "图片档案预览新增清晰的关闭入口，避免预览停留在页面上"
+        "音乐恢复播放后即使遇到网络缓冲，也不会跳回先前的播放位置"
       ]
     },
     "en": {
-      "title": "Easier to close Mini Program image previews",
+      "title": "More reliable Mini Program music playback",
       "items": [
-        "Image archive previews now have a clear close button so you can return to the previous page"
+        "Resumed songs no longer jump back to an earlier position after network buffering"
       ]
     }
   }
