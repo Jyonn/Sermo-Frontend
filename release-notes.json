@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.3",
+  "id": "2026.10.03.4",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序通知预览更完整",
+      "title": "小程序聊天预览更一致",
       "items": [
-        "聊天列表和搜索结果现在直接显示通知正文，不再只显示“官方通知”占位文字"
+        "合并聊天记录预览沿用当前聊天背景，聊天列表的通知摘要也与消息正文保持一致"
       ]
     },
     "en": {
-      "title": "More useful notice previews in the Mini Program",
+      "title": "More consistent Mini Program chat previews",
       "items": [
-        "Chat lists and search results now show the notice text instead of a generic label"
+        "Merged chat previews now use the current chat background, and notice summaries in chat lists match the message text"
       ]
     }
   }
