@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.4",
+  "id": "2026.10.03.5",
   "publishedAt": "2026-10-03",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天预览更一致",
+      "title": "小程序图片预览更易退出",
       "items": [
-        "合并聊天记录预览沿用当前聊天背景，聊天列表的通知摘要也与消息正文保持一致"
+        "图片档案预览新增清晰的关闭入口，避免预览停留在页面上"
       ]
     },
     "en": {
-      "title": "More consistent Mini Program chat previews",
+      "title": "Easier to close Mini Program image previews",
       "items": [
-        "Merged chat previews now use the current chat background, and notice summaries in chat lists match the message text"
+        "Image archive previews now have a clear close button so you can return to the previous page"
       ]
     }
   }
