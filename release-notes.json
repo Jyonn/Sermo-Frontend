@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.05.1",
+  "id": "2026.10.05.2",
   "publishedAt": "2026-10-05",
   "locales": {
     "zh-CN": {
-      "title": "小程序投稿提交更稳定",
+      "title": "小程序投稿错误提示更准确",
       "items": [
-        "提交投稿后若暂时无法读取最新状态，会自动重新同步，不再误报为投稿失败"
+        "投稿提交遇到权限问题时，会核对最新状态并清楚提示，不再出现空数据错误"
       ]
     },
     "en": {
-      "title": "More reliable Mini Program submissions",
+      "title": "Clearer Mini Program submission errors",
       "items": [
-        "After submitting, the app refreshes the latest status if needed instead of incorrectly reporting a submission failure"
+        "Submission permission errors now check the latest status and show a clear message instead of a null-data error"
       ]
     }
   }
