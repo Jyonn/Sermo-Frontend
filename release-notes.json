@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.03.10",
-  "publishedAt": "2026-10-03",
+  "id": "2026.10.05.1",
+  "publishedAt": "2026-10-05",
   "locales": {
     "zh-CN": {
-      "title": "小程序聊天记录翻页更稳",
+      "title": "小程序投稿提交更稳定",
       "items": [
-        "查看更早或更新的聊天消息时，列表不再因重复调整滚动位置而跳动"
+        "提交投稿后若暂时无法读取最新状态，会自动重新同步，不再误报为投稿失败"
       ]
     },
     "en": {
-      "title": "Smoother Mini Program chat history paging",
+      "title": "More reliable Mini Program submissions",
       "items": [
-        "Loading older or newer messages no longer shifts the chat view due to duplicate scroll adjustments"
+        "After submitting, the app refreshes the latest status if needed instead of incorrectly reporting a submission failure"
       ]
     }
   }
