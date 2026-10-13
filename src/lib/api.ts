@@ -107,6 +107,7 @@ type RequestOptions = {
   platformAdminAuth?: boolean;
   retryOn401?: boolean;
   signal?: AbortSignal;
+  responseFormat?: "envelope" | "oauth";
 };
 
 export class ApiError extends Error {
@@ -195,6 +196,17 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
   return payload.body;
 }
 
+async function parseOAuthResponse<T>(response: Response): Promise<T> {
+  const payload = await response.json().catch(() => null) as { redirect_uri?: unknown; error?: string; error_description?: string } | null;
+  if (!response.ok) {
+    throw new ApiError(payload?.error_description || payload?.error || `HTTP ${response.status}`, payload?.error || "OAUTH_ERROR", response.status);
+  }
+  if (!payload || typeof payload.redirect_uri !== "string") {
+    throw new ApiError("Invalid authorization response", "OAUTH_INVALID_RESPONSE", response.status);
+  }
+  return payload as T;
+}
+
 async function refreshSession(currentSession: AuthSession) {
   const response = await fetch(`${API_BASE_URL}/users/refresh`, {
     method: "POST",
@@ -268,7 +280,8 @@ export async function refreshDetachedAuthSession(currentSession: AuthSession, si
 }
 
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal } = options;
+  const { method = "GET", body, query, auth = false, adminAuth = false, platformAdminAuth = false, retryOn401 = true, signal, responseFormat = "envelope" } = options;
+  const parseResponse = responseFormat === "oauth" ? parseOAuthResponse<T> : parseEnvelope<T>;
   const session = auth ? authConfig.getSession() : null;
   const adminSession = adminAuth ? adminAuthConfig.getSession() : null;
   const platformAdminSession = platformAdminAuth ? platformAdminAuthConfig.getSession() : null;
@@ -323,7 +336,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
         body: body === undefined ? undefined : JSON.stringify(body),
         signal,
       });
-      return parseEnvelope<T>(retryResponse);
+      return parseResponse(retryResponse);
     } catch (error) {
       const latestSession = authConfig.getSession();
       if (
@@ -337,7 +350,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
     }
   }
 
-  return parseEnvelope<T>(response);
+  return parseResponse(response);
 }
 
 function waitForSharedRequest<T>(shared: Promise<T>, signal?: AbortSignal): Promise<T> {
@@ -397,7 +410,7 @@ export const api = {
     code_challenge_method: "S256";
     response_type: "code";
   }) {
-    return request<{ redirect_uri: string }>("/users/oauth/authorize", { method: "POST", auth: true, body: payload });
+    return request<{ redirect_uri: string }>("/users/oauth/authorize", { method: "POST", auth: true, body: payload, responseFormat: "oauth" });
   },
   getSpaceBySlug(slug: string, signal?: AbortSignal) {
     return request<SpaceDTO>("/spaces/lookup", {

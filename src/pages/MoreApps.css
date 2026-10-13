@@ -26,3 +26,11 @@
 .oauth-authorize-actions{display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%;margin-top:4px}
 .oauth-authorize-actions a{color:var(--text-muted);text-decoration:none}
 .oauth-authorize-actions button{min-height:44px;padding:0 25px;border:0;border-radius:999px;background:var(--brand-primary);color:white;font-weight:700;cursor:pointer}
+.oauth-account-list{display:grid;gap:8px;width:100%;max-height:min(360px,45dvh);overflow-y:auto;overscroll-behavior:contain}
+.oauth-account-list button{display:grid;grid-template-columns:44px minmax(0,1fr) 24px;align-items:center;gap:12px;width:100%;min-height:68px;padding:10px 14px;border:1px solid var(--line-soft);border-radius:16px;background:var(--bg-elevated);color:var(--text-primary);text-align:left;cursor:pointer}
+.oauth-account-list button:disabled{opacity:.6;cursor:wait}
+.oauth-account-avatar{width:44px;height:44px;border-radius:13px}
+.oauth-account-list button>span:nth-child(2){display:grid;gap:3px;min-width:0}
+.oauth-account-list button strong,.oauth-account-list button small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oauth-account-list button small{color:var(--text-muted);font-size:12px}
+.oauth-account-list .material-symbols-outlined{color:var(--text-muted)}

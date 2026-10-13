@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.13.4",
+  "id": "2026.10.13.5",
   "publishedAt": "2026-10-13",
   "locales": {
     "zh-CN": {
-      "title": "留幅现已支持 Sermo 登录",
+      "title": "留幅授权账号选择修复",
       "items": [
-        "从更多应用前往留幅，可使用 Sermo 账号登录并确认资料授权"
+        "修复留幅授权成功后误报失败的问题",
+        "授权时可选择已保存的空间账号；只有一个账号时自动恢复"
       ]
     },
     "en": {
-      "title": "Sign in to Stillfolio with Sermo",
+      "title": "Stillfolio authorization fixes",
       "items": [
-        "Visit Stillfolio from More apps and sign in with your Sermo account after approving access"
+        "Fixed a false error after approving Stillfolio access",
+        "Choose a saved space account, or restore it automatically when there is only one"
       ]
     }
   }

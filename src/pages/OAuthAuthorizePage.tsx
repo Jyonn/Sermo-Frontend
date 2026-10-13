@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { UserAvatar } from "../components/UserAvatar";
 import stillfolioMark from "../assets/stillfolio-mark.svg";
-import { api } from "../lib/api";
+import { api, refreshDetachedAuthSession } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { clearOAuthRequest, rememberOAuthRequest } from "../lib/oauthPending";
+import { activatePwaCachedAccount, listPwaCachedAccounts, type PwaCachedAccount } from "../lib/pwaAccounts";
+import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
 import "./MoreApps.css";
 
 const CALLBACK = String(import.meta.env.VITE_STILLFOLIO_CALLBACK_URI || "https://stillfolio.jyonn.space/auth/sermo/callback");
@@ -17,6 +20,10 @@ export default function OAuthAuthorizePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [spaceName, setSpaceName] = useState("");
+  const [accounts] = useState(listPwaCachedAccounts);
+  const [selectingAccount, setSelectingAccount] = useState("");
+  const [accountError, setAccountError] = useState("");
+  const autoRestoreStarted = useRef(false);
   const query = new URLSearchParams(search);
   const scope = query.get("scope") || "";
   const scopes = scope.split(/\s+/).filter(Boolean);
@@ -30,7 +37,6 @@ export default function OAuthAuthorizePage() {
 
   useEffect(() => {
     if (ready && !session && valid) rememberOAuthRequest(search);
-    if (ready && session) clearOAuthRequest();
   }, [ready, session, valid, search]);
   useEffect(() => {
     if (!session || !valid) return;
@@ -38,6 +44,27 @@ export default function OAuthAuthorizePage() {
     void api.getSpaceMe().then((space) => { if (active) setSpaceName(space.name); }).catch(() => undefined);
     return () => { active = false; };
   }, [session?.user.space_id, valid]);
+
+  const selectAccount = async (account: PwaCachedAccount) => {
+    if (selectingAccount) return;
+    setSelectingAccount(account.key);
+    setAccountError("");
+    try {
+      const refreshed = await refreshDetachedAuthSession(account.session);
+      activatePwaCachedAccount({ ...account, session: refreshed });
+      window.location.replace(buildSpaceHrefForCurrentHost(account.slug, "/oauth/authorize", search));
+    } catch {
+      setAccountError(t("apps.accountRestoreFailed"));
+      setSelectingAccount("");
+    }
+  };
+
+  useEffect(() => {
+    if (ready && valid && !session && accounts.length === 1 && !autoRestoreStarted.current) {
+      autoRestoreStarted.current = true;
+      void selectAccount(accounts[0]);
+    }
+  }, [ready, valid, session, accounts]);
 
   const approve = async () => {
     if (!valid || busy) return;
@@ -54,7 +81,11 @@ export default function OAuthAuthorizePage() {
         response_type: "code",
       });
       const destination = new URL(result.redirect_uri);
-      if (`${destination.origin}${destination.pathname}` !== CALLBACK) throw new Error(t("apps.authorizeFailed"));
+      if (`${destination.origin}${destination.pathname}` !== CALLBACK
+        || !destination.searchParams.get("code")
+        || destination.searchParams.get("state") !== query.get("state")
+        || destination.hash) throw new Error(t("apps.authorizeFailed"));
+      clearOAuthRequest();
       window.location.assign(destination.href);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("apps.authorizeFailed"));
@@ -67,7 +98,18 @@ export default function OAuthAuthorizePage() {
       <img alt="" src={stillfolioMark} />
       <small>SERMO × STILLFOLIO</small>
       <h1>{t("apps.authorizeTitle")}</h1>
-      {!valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !session ? <><p>{t("apps.signInFirst")}</p><Link to="/">{t("apps.backToSermo")}</Link></> : <>
+      {!valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !session ? <>
+        <p>{accounts.length === 1 && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount") : t("apps.signInFirst")}</p>
+        {accounts.length > 1 || accountError && accounts.length ? <div className="oauth-account-list" aria-label={t("apps.chooseAccount")}>
+          {accounts.map((account) => <button disabled={Boolean(selectingAccount)} key={account.key} onClick={() => void selectAccount(account)} type="button">
+            <UserAvatar className="oauth-account-avatar" name={account.session.user.name} uri={account.session.user.avatar_uri} />
+            <span><strong>{account.session.user.name}</strong><small>{account.spaceName} · @{account.slug}</small></span>
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button>)}
+        </div> : null}
+        {accountError ? <p role="alert">{accountError}</p> : null}
+        <Link to="/">{t("apps.backToSermo")}</Link>
+      </> : <>
         <p>{t("apps.authorizeDescription", { name: session.user.name, space: spaceName || `#${session.user.space_id}` })}</p>
         <div className="oauth-authorize-scopes">
           {scopes.map((item) => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}
