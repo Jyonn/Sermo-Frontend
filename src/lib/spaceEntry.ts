@@ -7,6 +7,7 @@ const ROOT_PATH_SEGMENTS = new Set([
   "official-login",
   "account-switch",
   "pwa",
+  "oauth",
   "admin",
   "api",
   "assets",

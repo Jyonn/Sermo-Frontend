@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppBottomNav } from "./components/AppBottomNav";
 import { AppToast } from "./components/AppToast";
@@ -22,6 +22,7 @@ import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import { routeResources } from "./lib/routeResources";
+import { readOAuthRequest } from "./lib/oauthPending";
 
 const AdminSpacePage = lazy(() => import("./pages/AdminSpacePage"));
 const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebration").then((module) => ({ default: module.GrowthLevelCelebration })));
@@ -35,6 +36,7 @@ const SquarePage = lazy(routeResources.square);
 const SquareComposerLabPage = lazy(() => import("./pages/SquareComposerLabPage"));
 const ForwardBundlePreviewLabPage = lazy(() => import("./pages/ForwardBundlePreviewLabPage"));
 const MentionMobileLabPage = lazy(() => import("./pages/MentionMobileLabPage"));
+const OAuthAuthorizePage = lazy(() => import("./pages/OAuthAuthorizePage"));
 
 function RootEntryRedirect() {
   const detectedSlug = getDetectedSpaceSlug();
@@ -43,7 +45,9 @@ function RootEntryRedirect() {
 
 function AppHomeRedirect() {
   const features = useSpaceFeatures();
+  const [oauthRequest] = useState(readOAuthRequest);
   if (!features.ready) return <RouteResourceState status="loading" />;
+  if (oauthRequest) return <Navigate replace to={oauthRequest} />;
   return <Navigate replace to={features.chatEnabled ? "/app/chats" : "/app/square"} />;
 }
 
@@ -89,6 +93,7 @@ export default function App() {
         <Route path="/official-login" element={<OfficialLoginPage />} />
         <Route path="/account-switch" element={<AccountSwitchPage />} />
         <Route path="/pwa" element={<PwaAccountEntryPage />} />
+        <Route path="/oauth/authorize" element={<OAuthAuthorizePage />} />
         <Route path="/admin" element={<PlatformAdminPage />} />
         <Route
           path="/design/square-composer"

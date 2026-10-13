@@ -37,6 +37,8 @@ import { HeaderSyncIndicator } from "../components/HeaderSyncIndicator";
 import { ForwardArrowIcon } from "../components/ForwardArrowIcon";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
+import stillfolioMark from "../assets/stillfolio-mark.svg";
+import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
 import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache";
@@ -479,6 +481,8 @@ export default function MenuPage() {
   const { checking: updateChecking, result: updateCheckResult } = useSyncExternalStore(subscribePwaUpdateCheck, getPwaUpdateCheckSnapshot);
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
+  const [moreAppsOpen, setMoreAppsOpen] = useState(false);
+  const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
   const [activeGrowthGuideLevel, setActiveGrowthGuideLevel] = useState(1);
@@ -2169,15 +2173,9 @@ export default function MenuPage() {
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-            <button className="simple-row menu-link-row" onClick={() => setTravelMapOpen(true)} type="button">
+            <button className="simple-row menu-link-row" onClick={() => setMoreAppsOpen(true)} type="button">
               <div className="row-main">
-                <strong>{t("travelMap.myTitle")}</strong>
-              </div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-            <button className="simple-row menu-link-row" onClick={() => setCloudResourcesOpen(true)} type="button">
-              <div className="row-main">
-                <strong>{t("cloudResources.title")}</strong>
+                <strong>{t("apps.more")}</strong>
               </div>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -2253,6 +2251,45 @@ export default function MenuPage() {
       />
       <CloudResourceDrawer onRouteOpen={() => setCloudResourcesOpen(true)} onClose={() => setCloudResourcesOpen(false)} open={cloudResourcesOpen} />
       <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
+      <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
+        <div className="more-apps-drawer">
+          <section className="more-apps-section">
+            <h2>{t("apps.local")}</h2>
+            <button className="more-apps-row" onClick={() => { setMoreAppsOpen(false); setTravelMapOpen(true); }} type="button">
+              <span className="more-apps-icon material-symbols-outlined">explore</span>
+              <span><strong>{t("travelMap.myTitle")}</strong><small>{t("apps.travelHint")}</small></span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+            <button className="more-apps-row" onClick={() => { setMoreAppsOpen(false); setCloudResourcesOpen(true); }} type="button">
+              <span className="more-apps-icon material-symbols-outlined">cloud</span>
+              <span><strong>{t("cloudResources.title")}</strong><small>{t("apps.cloudHint")}</small></span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          </section>
+          <section className="more-apps-section">
+            <h2>{t("apps.thirdParty")}</h2>
+            <button className="more-apps-row" onClick={() => setStillfolioInfoOpen(true)} type="button">
+              <span className="more-apps-icon is-stillfolio"><img alt="" src={stillfolioMark} /></span>
+              <span><strong>{t("apps.stillfolio")}</strong><small>{t("apps.stillfolioSubtitle")}</small></span>
+              <span className="material-symbols-outlined">north_east</span>
+            </button>
+          </section>
+        </div>
+      </SideDrawer>
+      <ConfirmDialog
+        open={stillfolioInfoOpen}
+        onClose={() => setStillfolioInfoOpen(false)}
+        onConfirm={() => { setStillfolioInfoOpen(false); window.location.assign("https://stillfolio.jyonn.space/"); }}
+        title={t("apps.stillfolio")}
+        description={t("apps.stillfolioDescription")}
+        confirmLabel={t("apps.visit")}
+      >
+        <div className="more-apps-consent">
+          <img alt="" src={stillfolioMark} />
+          <div><strong>{t("apps.permissions")}</strong><span>{t("apps.permissionProfile")}</span><span>{t("apps.permissionPhone")}</span><span>{t("apps.permissionVip")}</span></div>
+          <p>{t("apps.integrationPending")}</p>
+        </div>
+      </ConfirmDialog>
 
       <SideDrawer historyKey="growth" onRouteOpen={() => setGrowthDrawerOpen(true)} open={growthDrawerOpen} onClose={() => setGrowthDrawerOpen(false)} title={t("growth.mine")}>
         <div className={`growth-drawer is-level-${me?.growth?.level ?? 1} growth-stage-${growthStageForLevel(me?.growth?.level ?? 1)}`}>

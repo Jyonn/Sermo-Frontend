@@ -388,6 +388,17 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  authorizeExternalApp(payload: {
+    client_id: string;
+    redirect_uri: string;
+    scope: string;
+    state: string;
+    code_challenge: string;
+    code_challenge_method: "S256";
+    response_type: "code";
+  }) {
+    return request<{ redirect_uri: string }>("/users/oauth/authorize", { method: "POST", auth: true, body: payload });
+  },
   getSpaceBySlug(slug: string, signal?: AbortSignal) {
     return request<SpaceDTO>("/spaces/lookup", {
       query: { slug },

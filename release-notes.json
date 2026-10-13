@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.13.2",
+  "id": "2026.10.13.3",
   "publishedAt": "2026-10-13",
   "locales": {
     "zh-CN": {
-      "title": "修复留幅作品集分享预览",
+      "title": "更多应用与留幅账号授权准备",
       "items": [
-        "修复留幅作品集链接在聊天和广场中无法解析的问题",
-        "作品集照片现在可以在站内正常预览"
+        "足迹与打卡、云端资源已移入菜单的更多应用",
+        "新增留幅应用介绍和账号授权确认入口；留幅完成适配后可使用 Sermo 账号登录"
       ]
     },
     "en": {
-      "title": "Fixed Stillfolio share previews",
+      "title": "More apps and Stillfolio account authorization",
       "items": [
-        "Fixed Stillfolio collection links not resolving in chats and Square",
-        "Collection photos can now be previewed in the app"
+        "Footprints and Cloud Resources now live under More apps",
+        "Added Stillfolio app details and an authorization flow ready for Stillfolio to integrate"
       ]
     }
   }
