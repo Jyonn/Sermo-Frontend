@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.13.1",
+  "id": "2026.10.13.2",
   "publishedAt": "2026-10-13",
   "locales": {
     "zh-CN": {
-      "title": "留幅作品集分享与聊天设置调整",
+      "title": "修复留幅作品集分享预览",
       "items": [
-        "聊天和广场现在可以预览留幅作品集分享，并浏览其中的照片",
-        "屏蔽词功能已下线，历史设置不再影响消息发送"
+        "修复留幅作品集链接在聊天和广场中无法解析的问题",
+        "作品集照片现在可以在站内正常预览"
       ]
     },
     "en": {
-      "title": "Stillfolio sharing and chat settings update",
+      "title": "Fixed Stillfolio share previews",
       "items": [
-        "Preview Stillfolio collection links in chats and Square, and browse their photos",
-        "Blocked words are retired; past rules no longer affect sending messages"
+        "Fixed Stillfolio collection links not resolving in chats and Square",
+        "Collection photos can now be previewed in the app"
       ]
     }
   }

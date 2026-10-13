@@ -12,7 +12,7 @@ export function isStillfolioCollection(value: unknown): value is StillfolioColle
     if (url.protocol !== "https:" || url.hostname !== "stillfolio.jyonn.space" || !/^\/share\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/?$/i.test(url.pathname)) return false;
     return data.provider === "stillfolio_collection" && Array.isArray(data.images)
       && data.images.every((image) => {
-        try { const parsed = new URL(image); return parsed.protocol === "https:" && parsed.hostname === "stillfolio.jyonn.space"; }
+        try { const parsed = new URL(image); return parsed.protocol === "https:" && parsed.hostname === "api.stillfolio.jyonn.space"; }
         catch { return false; }
       });
   } catch { return false; }
