@@ -2707,7 +2707,7 @@
   ,"apps.permissionProfile": "空间账号与昵称"
   ,"apps.permissionPhone": "已验证的中国大陆手机号（如有）"
   ,"apps.permissionVip": "是否为永久 VIP 用户"
-  ,"apps.integrationPending": "留幅尚未适配 Sermo 登录。前往仅打开应用；未来仍需你在 Sermo 授权页确认后才会共享资料。"
+  ,"apps.integrationPending": "留幅现已支持 Sermo 登录。前往留幅后点击“使用 Sermo 登录”，并在 Sermo 授权页确认，才会共享以上资料。"
   ,"apps.visit": "前往"
   ,"apps.authorizeTitle": "授权留幅使用 Sermo 账号"
   ,"apps.invalidRequest": "授权请求无效，请返回留幅重新发起。"

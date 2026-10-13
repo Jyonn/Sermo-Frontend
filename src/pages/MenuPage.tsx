@@ -2279,7 +2279,7 @@ export default function MenuPage() {
       <ConfirmDialog
         open={stillfolioInfoOpen}
         onClose={() => setStillfolioInfoOpen(false)}
-        onConfirm={() => { setStillfolioInfoOpen(false); window.location.assign("https://stillfolio.jyonn.space/"); }}
+        onConfirm={() => { setStillfolioInfoOpen(false); window.open("https://stillfolio.jyonn.space/", "_blank", "noopener,noreferrer"); }}
         title={t("apps.stillfolio")}
         description={t("apps.stillfolioDescription")}
         confirmLabel={t("apps.visit")}

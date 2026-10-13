@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.13.3",
+  "id": "2026.10.13.4",
   "publishedAt": "2026-10-13",
   "locales": {
     "zh-CN": {
-      "title": "更多应用与留幅账号授权准备",
+      "title": "留幅现已支持 Sermo 登录",
       "items": [
-        "足迹与打卡、云端资源已移入菜单的更多应用",
-        "新增留幅应用介绍和账号授权确认入口；留幅完成适配后可使用 Sermo 账号登录"
+        "从更多应用前往留幅，可使用 Sermo 账号登录并确认资料授权"
       ]
     },
     "en": {
-      "title": "More apps and Stillfolio account authorization",
+      "title": "Sign in to Stillfolio with Sermo",
       "items": [
-        "Footprints and Cloud Resources now live under More apps",
-        "Added Stillfolio app details and an authorization flow ready for Stillfolio to integrate"
+        "Visit Stillfolio from More apps and sign in with your Sermo account after approving access"
       ]
     }
   }
