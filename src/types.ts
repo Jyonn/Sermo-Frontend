@@ -969,7 +969,7 @@ export interface LinkPreviewDTO {
   image_url?: string;
   site_name?: string;
   favicon_url?: string;
-  provider_data?: MusicProviderDataDTO | DouyinVideoDataDTO | SocialMediaDataDTO | Record<string, unknown>;
+  provider_data?: MusicProviderDataDTO | DouyinVideoDataDTO | SocialMediaDataDTO | StillfolioCollectionDTO | Record<string, unknown>;
   min_client_version?: string;
 }
 
@@ -983,6 +983,18 @@ export interface SocialMediaDataDTO {
   description?: string;
   video_url?: string;
   duration_ms?: number;
+}
+
+export interface StillfolioCollectionDTO {
+  provider: "stillfolio_collection";
+  collection_id: string;
+  canonical_url: string;
+  title: string;
+  author: string;
+  description: string;
+  cover_url: string;
+  images: string[];
+  photo_count: number;
 }
 
 export interface DouyinVideoDataDTO {
@@ -1034,7 +1046,6 @@ export interface AudioTranscriptDTO {
 export interface ChatMessagePayloadDTO {
   kind: MessageKind;
   event?: string;
-  blocked_word_request?: { id: number; word: string; status: string; applicant_id: number };
   actor_user_id?: number;
   actor_name?: string;
   invitation?: SubmissionInviteDTO | null;
