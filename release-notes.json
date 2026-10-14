@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.14.4",
+  "id": "2026.10.14.5",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "消息撤回与艾特提醒优化",
+      "title": "深色聊天背景表情面板修复",
       "items": [
-        "锁定消息会显示不可撤回提示，成功撤回后会留下系统消息",
-        "新消息横幅中的群成员艾特现在显示昵称"
+        "修复星夜回旋等深色聊天背景下表情包方格出现灰色外圈的问题"
       ]
     },
     "en": {
-      "title": "Recall and mention improvements",
+      "title": "Sticker panel background fix",
       "items": [
-        "Locked messages show why recall is unavailable, and successful recalls leave a system message",
-        "Group mentions in new-message banners now show member names"
+        "Fixed gray surrounds on sticker tiles with dark chat backgrounds such as Starry Rotation"
       ]
     }
   }
