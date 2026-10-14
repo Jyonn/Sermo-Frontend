@@ -1815,6 +1815,7 @@
   "message.deleted": "消息已删除",
   "message.deleteForMe": "删除",
   "message.recallForEveryone": "撤回",
+  "message.cannotRecall": "无法撤回",
   "message.deleteFailed": "删除消息失败",
   "message.multiSelect": "多选",
   "message.selected": "条已选",

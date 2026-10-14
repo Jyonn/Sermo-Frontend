@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.14.3",
+  "id": "2026.10.14.4",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "聊天表情尺寸调整",
+      "title": "消息撤回与艾特提醒优化",
       "items": [
-        "聊天中发送的图片表情缩小至原来的 75%"
+        "锁定消息会显示不可撤回提示，成功撤回后会留下系统消息",
+        "新消息横幅中的群成员艾特现在显示昵称"
       ]
     },
     "en": {
-      "title": "Smaller chat stickers",
+      "title": "Recall and mention improvements",
       "items": [
-        "Image stickers in chat now display at 75% of their previous size"
+        "Locked messages show why recall is unavailable, and successful recalls leave a system message",
+        "Group mentions in new-message banners now show member names"
       ]
     }
   }

@@ -1739,6 +1739,7 @@
   "message.deleted": "メッセージが削除されました",
   "message.deleteForMe": "削除",
   "message.recallForEveryone": "呼び出す",
+  "message.cannotRecall": "取り消せません",
   "message.deleteFailed": "メッセージ削除できなかった",
   "message.multiSelect": "選択",
   "message.selected": "選択",

@@ -1742,6 +1742,7 @@
   "message.deleted": "訊息已刪除",
   "message.deleteForMe": "刪除",
   "message.recallForEveryone": "撤回",
+  "message.cannotRecall": "無法撤回",
   "message.deleteFailed": "刪除訊息失敗",
   "message.multiSelect": "多選",
   "message.selected": "條已選",

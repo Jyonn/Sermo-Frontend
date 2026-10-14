@@ -230,6 +230,7 @@ function previewFromMessage(message: ChatMessage) {
   if (message.kind === "file") return i18n.t("message.filePlaceholder");
   if (message.kind === "location") return i18n.t("message.locationPlaceholder");
   if (message.kind === "activity") return i18n.t("message.activityPlaceholder");
+  if (message.kind === "text") return formatMentionTokens(message.text, message.mentions ?? [], true).replace(/\s{2,}/g, " ").trimEnd() || i18n.t("message.new");
   return message.text || i18n.t("message.new");
 }
 

@@ -7683,6 +7683,12 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   background: rgba(231, 174, 75, 0.14);
 }
 
+.message-context-button.recall:disabled {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-panel) 72%, transparent);
+  cursor: not-allowed;
+}
+
 .message-context-button.danger {
   color: #c73453;
   background: rgba(255, 95, 109, 0.12);

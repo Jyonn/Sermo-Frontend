@@ -3548,15 +3548,16 @@ function LiveChatsPage({
   const currentUserIsPermanentVip = Boolean(currentUserMe?.is_permanent_vip ?? session?.user.is_permanent_vip);
   const canReviewSubmissionInvites = Boolean(currentUserMe?.official || currentUserMe?.operator || session?.user.official || session?.user.operator);
   const currentUserIsOperator = Boolean(currentUserMe?.operator || session?.user.operator);
-  const canRecallMessage = (message: ChatMessage) => {
+  const isWithinRecallWindow = (message: ChatMessage) => {
     if (message.from !== "self" || message.status !== "sent" || typeof message.id !== "number") return false;
-    if (pinnedMessages.some((pin) => pin.message.message_id === message.id)) return false;
     if (selectedChat?.purpose === "submission") {
       return submissionCanSend && message.submissionVisible === false && message.submissionRound === selectedChat.submission?.current_round;
     }
     const recallWindowSeconds = currentUserIsPermanentVip ? 7 * 24 * 60 * 60 : 2 * 60;
     return Math.max(0, Math.floor(Date.now() / 1000) - message.createdAt) <= recallWindowSeconds;
   };
+  const canRecallMessage = (message: ChatMessage) =>
+    isWithinRecallWindow(message) && !pinnedMessages.some((pin) => pin.message.message_id === message.id);
 
   useEffect(() => () => {
     localObjectUrlsRef.current.forEach((uri) => URL.revokeObjectURL(uri));
@@ -10334,11 +10335,12 @@ function LiveChatsPage({
                   {t("message.multiSelect")}
                 </button>
               );
-              if (canRecallMessage(messageMenu.message)) {
+              if (isWithinRecallWindow(messageMenu.message)) {
+                const locked = pinnedMessages.some((pin) => pin.message.message_id === messageMenu.message.id);
                 secondaryActions.push(
-                  <button key="recall" className="message-context-button recall" disabled={messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
+                  <button key="recall" className="message-context-button recall" disabled={locked || messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">undo</span>
-                    {t("message.recallForEveryone")}
+                    {t(locked ? "message.cannotRecall" : "message.recallForEveryone")}
                   </button>
                 );
               }

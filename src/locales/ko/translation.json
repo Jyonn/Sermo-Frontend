@@ -1739,6 +1739,7 @@
   "message.deleted": "삭제된 메시지",
   "message.deleteForMe": "삭제",
   "message.recallForEveryone": "회수",
+  "message.cannotRecall": "회수할 수 없음",
   "message.deleteFailed": "메시지를 삭제할 수 없었습니다",
   "message.multiSelect": "선택",
   "message.selected": "선택",

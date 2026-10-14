@@ -1815,6 +1815,7 @@
   "message.deleted": "Message deleted",
   "message.deleteForMe": "Delete",
   "message.recallForEveryone": "Recall",
+  "message.cannotRecall": "Cannot recall",
   "message.deleteFailed": "Could not delete message",
   "message.multiSelect": "Select",
   "message.selected": "selected",

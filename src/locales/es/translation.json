@@ -1739,6 +1739,7 @@
   "message.deleted": "mensaje eliminado",
   "message.deleteForMe": "borrar",
   "message.recallForEveryone": "Recall",
+  "message.cannotRecall": "No se puede retirar",
   "message.deleteFailed": "no se pudo borrar el mensaje",
   "message.multiSelect": "Seleccione",
   "message.selected": "seleccionado",
