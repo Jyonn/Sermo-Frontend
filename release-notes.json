@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.5",
+  "id": "2026.10.14.6",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "深色聊天背景表情面板修复",
+      "title": "留幅链接展示优化",
       "items": [
-        "修复星夜回旋等深色聊天背景下表情包方格出现灰色外圈的问题"
+        "仅解析留幅作品集分享链接，其他留幅链接直接显示普通链接卡片"
       ]
     },
     "en": {
-      "title": "Sticker panel background fix",
+      "title": "Stillfolio link handling",
       "items": [
-        "Fixed gray surrounds on sticker tiles with dark chat backgrounds such as Starry Rotation"
+        "Only Stillfolio collection share links are parsed; other links display as ordinary link cards"
       ]
     }
   }
