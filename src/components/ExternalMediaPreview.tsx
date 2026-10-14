@@ -19,6 +19,6 @@ export function ExternalMediaPreview({ preview }: { preview: LinkPreviewDTO }) {
     return <DouyinVideoPreview previewId={preview.preview_id} video={preview.provider_data} imageUrl={preview.image_url} />;
   }
   if (isSocialMediaData(preview.provider_data)) return <SocialMediaPreview media={preview.provider_data} imageUrl={preview.image_url} />;
-  if (isStillfolioCollection(preview.provider_data)) return <StillfolioPreview collection={preview.provider_data} />;
+  if (isStillfolioCollection(preview.provider_data)) return <StillfolioPreview collection={preview.provider_data} previewId={preview.preview_id} />;
   return <UnsupportedContentNotice minVersion={preview.min_client_version} title={preview.title || preview.site_name} url={preview.url} />;
 }

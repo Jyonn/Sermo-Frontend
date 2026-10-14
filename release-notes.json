@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.10",
+  "id": "2026.10.14.11",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "图片预览空间与字体优化",
+      "title": "留幅作品集缓存更新修复",
       "items": [
-        "缩小图片预览边距，扩大图片展示区域，并以更精细的字体单行展示拍摄参数"
+        "修复留幅作品集上传照片后，旧分享卡片仍显示 0 图的问题"
       ]
     },
     "en": {
-      "title": "Roomier image previews",
+      "title": "Stillfolio collection cache refresh",
       "items": [
-        "Reduced preview margins and refined smaller typography to keep capture settings on one line"
+        "Stillfolio share cards now refresh stale photo counts after photos are uploaded"
       ]
     }
   }

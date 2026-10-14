@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "../lib/api";
 import type { StillfolioCollectionDTO } from "../types";
 import { ImageLightbox } from "./ImageLightbox";
 import { useI18n } from "../lib/language";
@@ -18,10 +19,36 @@ export function isStillfolioCollection(value: unknown): value is StillfolioColle
   } catch { return false; }
 }
 
-export function StillfolioPreview({ collection }: { collection: StillfolioCollectionDTO }) {
+const collectionChecks = new Map<number, { expiresAt: number; request: Promise<StillfolioCollectionDTO | null> }>();
+
+function revalidateCollection(previewId: number) {
+  const cached = collectionChecks.get(previewId);
+  if (cached && cached.expiresAt > Date.now()) return cached.request;
+  const request = api.refreshExternalMedia(previewId).then((preview) =>
+    isStillfolioCollection(preview.provider_data) ? preview.provider_data : null,
+  ).catch((error) => { collectionChecks.delete(previewId); throw error; });
+  if (collectionChecks.size >= 100) collectionChecks.delete(collectionChecks.keys().next().value!);
+  collectionChecks.set(previewId, { expiresAt: Date.now() + 60_000, request });
+  return request;
+}
+
+export function StillfolioPreview({ collection: initialCollection, previewId }: { collection: StillfolioCollectionDTO; previewId?: number }) {
   const { t } = useI18n();
+  const [collection, setCollection] = useState(initialCollection);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  useEffect(() => {
+    setCollection(initialCollection);
+    if (!previewId) return;
+    let active = true;
+    void revalidateCollection(previewId).then((next) => {
+      if (active && next && next.canonical_url === initialCollection.canonical_url) {
+        setCollection(next);
+        setIndex((current) => Math.max(0, Math.min(current, next.images.length - 1)));
+      }
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [initialCollection, previewId]);
   const title = collection.title || "留幅作品集";
   const images = collection.images;
   return <>
