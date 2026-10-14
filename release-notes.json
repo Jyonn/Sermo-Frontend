@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.6",
+  "id": "2026.10.14.7",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "留幅链接展示优化",
+      "title": "链接卡片跳转优化",
       "items": [
-        "仅解析留幅作品集分享链接，其他留幅链接直接显示普通链接卡片"
+        "链接正在解析或解析失败时，点击卡片也能打开原链接"
       ]
     },
     "en": {
-      "title": "Stillfolio link handling",
+      "title": "Link card navigation",
       "items": [
-        "Only Stillfolio collection share links are parsed; other links display as ordinary link cards"
+        "Link cards now open the original URL while parsing or after parsing fails"
       ]
     }
   }

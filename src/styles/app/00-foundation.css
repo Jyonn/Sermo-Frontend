@@ -5615,10 +5615,6 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   opacity: 0.88;
 }
 
-.message-link-preview-card.is-loading {
-  pointer-events: none;
-}
-
 .shimmer-line,
 .shimmer-block {
   display: block;

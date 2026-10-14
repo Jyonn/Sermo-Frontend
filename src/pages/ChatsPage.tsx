@@ -1685,14 +1685,14 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   if (currentPreview?.status === "pending") {
     const pendingHostname = hostnameFromUrl(previewUrl);
     return (
-      <div className="message-link-preview-card is-loading" aria-label={i18n.t("link.generatingPreview")}>
+      <a className="message-link-preview-card is-loading" aria-label={i18n.t("link.generatingPreview")} href={url || previewUrl} onClick={(event) => event.stopPropagation()} rel="noreferrer" target="_blank">
         <div className="message-link-preview-text">
           <span className="message-link-preview-site">{pendingHostname ? pendingHostname.toUpperCase() : i18n.t("link.preview")}</span>
           <span className="message-link-preview-title shimmer-line" />
           <span className="message-link-preview-desc shimmer-line short" />
         </div>
         <div className="message-link-preview-image shimmer-block" />
-      </div>
+      </a>
     );
   }
 
@@ -1702,7 +1702,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
     return (
       <a
         className="message-link-preview-card no-image is-unavailable"
-        href={previewUrl}
+        href={url || previewUrl}
         onClick={(event) => event.stopPropagation()}
         rel="noreferrer"
         target="_blank"
