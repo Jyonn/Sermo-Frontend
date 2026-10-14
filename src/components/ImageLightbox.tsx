@@ -2,12 +2,16 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 import { MediaWaitFeedback, type MediaWaitPhase } from "./MediaWaitFeedback";
+import { PhotoArchivePlate } from "./PhotoArchivePlate";
+import type { ImageMetadataDTO, TinyUserDTO } from "../types";
 
 interface ImageLightboxProps {
   index: number;
   uris: string[];
   altPrefix?: string;
   details?: ReactNode[];
+  metadata?: Array<ImageMetadataDTO | null | undefined>;
+  owner?: TinyUserDTO | null;
   sharedDetail?: ReactNode;
   downloadLabels?: string[];
   fileNamePrefix?: string;
@@ -24,6 +28,8 @@ export interface MediaLightboxItem {
   width?: number | null;
   height?: number | null;
   detail?: ReactNode;
+  imageMetadata?: ImageMetadataDTO | null;
+  owner?: TinyUserDTO | null;
   downloadLabel?: string;
   referrerPolicy?: "no-referrer";
 }
@@ -325,12 +331,12 @@ function ImmersiveImage({ alt, src, poster, onClose, referrerPolicy }: { alt: st
   </div>;
 }
 
-function PreviewImage({ alt, item, active }: { alt: string; item: MediaLightboxItem; active: boolean }) {
+function PreviewImage({ alt, item, active, onSize }: { alt: string; item: MediaLightboxItem; active: boolean; onSize?: (width: number, height: number) => void }) {
   const [phase, setPhase] = useState<MediaWaitPhase>("loading");
   const [attempt, setAttempt] = useState(0);
   return <div className="media-preview-image-shell">
     {item.posterUri && phase !== "idle" ? <img alt="" aria-hidden="true" className="media-preview-poster" src={item.posterUri} /> : null}
-    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={`${item.uri}:${attempt}`} loading={active ? "eager" : "lazy"} onError={() => setPhase("error")} onLoad={() => setPhase("idle")} referrerPolicy={item.referrerPolicy} src={item.uri} />
+    <img alt={alt} className={`message-image-preview${phase === "error" ? " is-failed" : ""}`} draggable={false} key={`${item.uri}:${attempt}`} loading={active ? "eager" : "lazy"} onError={() => setPhase("error")} onLoad={(event) => { setPhase("idle"); onSize?.(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight); }} referrerPolicy={item.referrerPolicy} src={item.uri} />
     {active ? <MediaWaitFeedback phase={phase} onRetry={() => { setPhase("loading"); setAttempt((value) => value + 1); }} /> : null}
   </div>;
 }
@@ -605,6 +611,7 @@ export function MediaLightbox({
   const [immersive, setImmersive] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
+  const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>({});
   const activeUri = items[index]?.uri ?? items[0]?.uri;
 
   useEffect(() => { setDownloadError(false); }, [activeUri]);
@@ -624,6 +631,14 @@ export function MediaLightbox({
   if (!items.length) return null;
   const activeItem = items[index] ?? items[0];
   const close = () => onClose();
+  const actions = <div className="photo-archive-actions" onClick={(event) => event.stopPropagation()}>
+    {downloadError ? <span className="media-download-error" role="alert">{t("media.downloadFailed")}</span> : null}
+    <button aria-label={downloading ? t("media.downloading") : activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} title={activeItem.downloadLabel ? t("media.downloadImageWithSize", { size: activeItem.downloadLabel }) : t("media.downloadImage")} disabled={downloading} onClick={() => { setDownloadError(false); setDownloading(true); void downloadMedia(activeItem.uri, fileNamePrefix).catch(() => setDownloadError(true)).finally(() => setDownloading(false)); }} type="button">
+      {downloading ? <span aria-hidden="true" className="media-wait-spinner" /> : <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" /></svg>}
+    </button>
+    <button aria-label={t("common.fullscreen")} title={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" /></svg></button>
+    {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} title={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button> : null}
+  </div>;
 
   return createPortal(
     <div className="dialog-backdrop message-image-preview-backdrop" onClick={() => {
@@ -637,14 +652,18 @@ export function MediaLightbox({
       const gesture = gestureRef.current;
       if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
     }} role="presentation">
-      <section aria-modal="true" className={`message-image-preview-modal${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog">
+      <section aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${activeItem.kind === "image" && !immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog">
         <div className="message-image-preview-track" onScroll={(event) => {
           const element = event.currentTarget;
           const nextIndex = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));
           if (nextIndex !== index) onIndexChange(nextIndex);
         }} ref={trackRef}>
-          {items.map((item, itemIndex) => <div className="message-image-preview-slide" key={`${item.uri}:${itemIndex}`}>
-            <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
+          {items.map((item, itemIndex) => <div aria-hidden={itemIndex !== index} className="message-image-preview-slide" key={`${item.uri}:${itemIndex}`}>
+            {item.kind === "image" && !immersive ? <PhotoArchivePlate
+              metadata={item.imageMetadata} owner={item.owner} detail={item.detail}
+              width={item.width || imageSizes[item.uri]?.width} height={item.height || imageSizes[item.uri]?.height}
+              actions={itemIndex === index ? actions : null}
+            ><PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} onSize={(width, height) => setImageSizes((current) => current[item.uri]?.width === width && current[item.uri]?.height === height ? current : { ...current, [item.uri]: { width, height } })} /></PhotoArchivePlate> : <article className={`message-image-preview-plate${item.kind === "video" ? " message-video-preview-plate" : ""}`}>
               <div className={`message-image-preview-frame${item.kind === "video" ? " message-video-preview-frame" : ""}`}>
                 {item.kind === "video"
                   ? immersive && itemIndex === index
@@ -655,11 +674,15 @@ export function MediaLightbox({
                     : <PreviewImage active={Math.abs(itemIndex - index) <= 1} alt={`${resolvedAltPrefix} ${itemIndex + 1}`} item={item} />}
               </div>
               {!immersive ? <div>{item.detail ?? null}</div> : null}
-            </article>
+            </article>}
           </div>)}
         </div>
         {!immersive && sharedDetail ? <div className="message-image-preview-shared-detail" onClick={(event) => event.stopPropagation()}>{sharedDetail}</div> : null}
-        {!immersive ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
+        {!immersive && activeItem.kind === "image" ? <div className="photo-archive-navigation" onClick={(event) => event.stopPropagation()}>
+          {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
+          <button aria-label={t("common.close")} onClick={close} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+        </div> : null}
+        {!immersive && activeItem.kind === "video" ? <div className="message-image-preview-toolbar" onClick={(event) => event.stopPropagation()}>
           {(totalCount ?? items.length) > 1 ? <span className="message-image-preview-count">{String(index + 1).padStart(2, "0")}<i />{String(totalCount ?? items.length).padStart(2, "0")}</span> : null}
           {onJumpToMessage ? <button aria-label={t("messageSearch.jumpToMessage")} onClick={onJumpToMessage} type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg></button> : null}
           <button aria-label={t("common.fullscreen")} onClick={() => setImmersive(true)} type="button">
@@ -682,6 +705,8 @@ export function ImageLightbox({
   uris,
   altPrefix,
   details = [],
+  metadata = [],
+  owner,
   sharedDetail,
   downloadLabels = [],
   posterUris = [],
@@ -690,5 +715,5 @@ export function ImageLightbox({
   onClose,
   onIndexChange,
 }: ImageLightboxProps) {
-  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", posterUri: posterUris[itemIndex], detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} />;
+  return <MediaLightbox altPrefix={altPrefix} fileNamePrefix={fileNamePrefix} index={index} items={uris.map((uri, itemIndex) => ({ uri, kind: "image", posterUri: posterUris[itemIndex], imageMetadata: metadata[itemIndex], owner, detail: details[itemIndex], downloadLabel: downloadLabels[itemIndex], referrerPolicy }))} onClose={onClose} onIndexChange={onIndexChange} sharedDetail={sharedDetail} />;
 }

@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.14.8",
+  "id": "2026.10.14.9",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "链接消息操作优化",
+      "title": "摄影画板式图片预览",
       "items": [
-        "含链接卡片的消息可分别复制文本和链接，锁定操作调整至靠后位置"
+        "图片预览采用米色摄影画板，相机、曝光、位置与完整拍摄时间按需展示",
+        "竖图采用扩展布局，长图可滚动查看，操作集中在右下角"
       ]
     },
     "en": {
-      "title": "Link message actions",
+      "title": "Photography-style image previews",
       "items": [
-        "Link messages offer separate copy-text and copy-link actions, with locking placed later in the menu"
+        "Images use a warm paper layout with camera, exposure, location and full capture time when available",
+        "Portraits use an expanded layout, long images scroll, and actions sit at the lower right"
       ]
     }
   }

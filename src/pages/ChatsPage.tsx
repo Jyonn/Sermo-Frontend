@@ -9665,7 +9665,9 @@ function LiveChatsPage({
           posterUri: message.payload?.thumbnail_uri,
           width: message.payload?.pixel_width,
           height: message.payload?.pixel_height,
-          detail: <MediaMetadataPanel kind={message.type === MESSAGE_TYPE_VIDEO ? "video" : "image"} metadata={message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata} owner={message.user} />,
+          imageMetadata: message.type === MESSAGE_TYPE_VIDEO ? undefined : message.payload?.image_metadata,
+          owner: message.user,
+          detail: message.type === MESSAGE_TYPE_VIDEO ? <MediaMetadataPanel kind="video" metadata={message.payload?.video_metadata} owner={message.user} /> : undefined,
           downloadLabel: formatImageFileSize((message.type === MESSAGE_TYPE_VIDEO ? message.payload?.video_metadata : message.payload?.image_metadata)?.file_size),
         }))}
         onApproachingEnd={() => { if (messageSearchHasMore && messageSearchState !== "loading-more") void loadMoreMessageSearchResults(); }}
@@ -10116,7 +10118,7 @@ function LiveChatsPage({
       />
       {imagePreview ? (
         <ImageLightbox
-          details={imagePreview.metadata.map((metadata, index) => <MediaMetadataPanel key={`metadata:${imagePreview.uris[index]}`} kind="image" metadata={metadata} />)}
+          metadata={imagePreview.metadata}
           downloadLabels={imagePreview.metadata.map((metadata) => formatImageFileSize(metadata?.file_size))}
           index={imagePreview.index}
           onClose={() => setImagePreview(null)}

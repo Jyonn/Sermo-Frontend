@@ -1166,6 +1166,10 @@ export interface TravelMapComparisonDTO {
 
 export interface ImageMetadataDTO {
   status: number;
+  focal_length_mm?: number | null;
+  aperture?: number | null;
+  exposure_seconds?: number | null;
+  iso?: number | null;
   make?: string;
   model?: string;
   lens_model?: string;

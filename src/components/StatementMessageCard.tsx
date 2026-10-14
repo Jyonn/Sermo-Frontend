@@ -137,7 +137,7 @@ export function StatementMessageCard({ statement }: { statement: SquareStatement
         <span><span className="material-symbols-outlined">chat_bubble</span>{statement.comment_count}</span>
         <strong>{t("message.viewStatement")}</strong>
       </button>
-      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} details={images.map((image) => <MediaMetadataPanel key={image.media_id} kind="image" metadata={image.metadata} owner={statement.user} />)} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} posterUris={images.map((image) => image.thumbnail_uri)} uris={images.map((image) => image.uri)} /> : null}
+      {imageIndex !== null && images.length ? <ImageLightbox altPrefix={t("square.photo")} metadata={images.map((image) => image.metadata)} owner={statement.user} downloadLabels={images.map((image) => formatFileSize(image.metadata?.file_size))} index={imageIndex} onClose={() => setImageIndex(null)} onIndexChange={setImageIndex} posterUris={images.map((image) => image.thumbnail_uri)} uris={images.map((image) => image.uri)} /> : null}
       {videoOpen && video ? <MediaLightbox altPrefix={t("square.video")} index={0} items={[{
         kind: "video",
         uri: video.uri,

@@ -327,7 +327,8 @@ export function CloudResourceDrawer({ open, onClose, onRouteOpen, currentChatId,
           posterUri: asset.thumbnail_uri,
           width: asset.pixel_width,
           height: asset.pixel_height,
-          detail: <MediaMetadataPanel kind={asset.kind as "image" | "video"} metadata={asset.metadata} />,
+          imageMetadata: asset.kind === "image" ? asset.metadata : undefined,
+          detail: asset.kind === "video" ? <MediaMetadataPanel kind="video" metadata={asset.metadata} /> : undefined,
           downloadLabel: formatCloudResourceBytes(asset.file_size),
         }))}
         onApproachingEnd={() => { if (data?.has_more && !loadingMore) void load(tab, true); }}
