@@ -7151,10 +7151,13 @@ function LiveChatsPage({
     navigate("/app/square", { state: { squareChatRecordDraft: { messageIds, text: selectedChat.title } } });
   };
 
-  const copyMessageText = async () => {
+  const copyMessageText = async (linkOnly = false) => {
     if (!messageMenu || messageMenu.message.kind !== "text") return;
     try {
-      const copied = await copyText(messageMenu.message.text);
+      const text = messageMenu.message.payload?.text ?? messageMenu.message.text;
+      const value = linkOnly ? extractFirstMessageUrl(text) || messageMenu.message.payload?.link_preview?.url : text;
+      if (!value) return;
+      const copied = await copyText(value);
       if (!copied) throw new Error(t("common.copyFailed"));
       setMessageMenu(null);
     } catch (apiError) {
@@ -10245,6 +10248,10 @@ function LiveChatsPage({
             {(() => {
               const primaryActions: ReactNode[] = [];
               const secondaryActions: ReactNode[] = [];
+              const hasLinkCard = messageMenu.message.kind === "text" && Boolean(
+                extractFirstMessageUrl(messageMenu.message.payload?.text ?? messageMenu.message.text)
+                || messageMenu.message.payload?.link_preview?.url
+              );
               const isPinnedByCurrentUser = pinnedMessages.some((pin) =>
                 pin.message.message_id === messageMenu.message.id
                 && (selectedChat?.type === "group" && selectedChat.isOwner
@@ -10285,7 +10292,13 @@ function LiveChatsPage({
                 primaryActions.push(
                   <button key="copy" className="message-context-button" onClick={() => void copyMessageText()} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">content_copy</span>
-                    {t("common.copy")}
+                    {t(hasLinkCard ? "message.copyText" : "common.copy")}
+                  </button>
+                );
+                if (hasLinkCard) primaryActions.push(
+                  <button key="copy-link" className="message-context-button" onClick={() => void copyMessageText(true)} type="button">
+                    <span className="material-symbols-outlined" aria-hidden="true">link</span>
+                    {t("common.copyLink")}
                   </button>
                 );
               }
@@ -10315,20 +10328,6 @@ function LiveChatsPage({
                 );
               }
 
-              if (messageMenu.message.kind !== "sticker" && typeof messageMenu.message.id === "number" && canManagePinnedMessages) {
-                secondaryActions.push(
-                  <button
-                    key="pin"
-                    className="message-context-button"
-                    disabled={pinSavingMessageId === messageMenu.message.id}
-                    onClick={() => void togglePinnedMessage(messageMenu.message)}
-                    type="button"
-                  >
-                    <ComposerSvgIcon className="message-context-action-icon" kind={isPinnedByCurrentUser ? "pin-off" : "pin"} />
-                    {isPinnedByCurrentUser ? t("pin.remove") : t("pin.label")}
-                  </button>
-                );
-              }
               if (selectedChat?.purpose !== "submission") secondaryActions.push(
                 <button key="multi-select" className="message-context-button" onClick={() => startMessageSelection(messageMenu.message)} type="button">
                   <span className="material-symbols-outlined" aria-hidden="true">checklist</span>
@@ -10341,6 +10340,14 @@ function LiveChatsPage({
                   <button key="recall" className="message-context-button recall" disabled={locked || messageDeleteState === "deleting"} onClick={() => void deleteMessage("everyone")} type="button">
                     <span className="material-symbols-outlined" aria-hidden="true">undo</span>
                     {t(locked ? "message.cannotRecall" : "message.recallForEveryone")}
+                  </button>
+                );
+              }
+              if (messageMenu.message.kind !== "sticker" && typeof messageMenu.message.id === "number" && canManagePinnedMessages) {
+                secondaryActions.push(
+                  <button key="pin" className="message-context-button" disabled={pinSavingMessageId === messageMenu.message.id} onClick={() => void togglePinnedMessage(messageMenu.message)} type="button">
+                    <ComposerSvgIcon className="message-context-action-icon" kind={isPinnedByCurrentUser ? "pin-off" : "pin"} />
+                    {isPinnedByCurrentUser ? t("pin.remove") : t("pin.label")}
                   </button>
                 );
               }

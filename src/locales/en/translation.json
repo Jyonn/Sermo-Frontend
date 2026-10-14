@@ -2034,6 +2034,7 @@
   "common.deleting": "Deleting...",
   "common.confirmDelete": "Confirm delete",
   "message.reply": "Reply",
+  "message.copyText": "Copy text",
   "common.copy": "Copy",
   "common.download": "Download",
   "common.delete": "Delete",

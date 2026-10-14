@@ -1946,6 +1946,7 @@
   "common.deleting": "削除...",
   "common.confirmDelete": "削除を確認",
   "message.reply": "返信",
+  "message.copyText": "テキストをコピー",
   "common.copy": "コピー",
   "common.download": "ダウンロード",
   "common.delete": "削除",

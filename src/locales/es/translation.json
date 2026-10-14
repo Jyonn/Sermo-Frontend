@@ -1946,6 +1946,7 @@
   "common.deleting": "borrar...",
   "common.confirmDelete": "confirma borrar",
   "message.reply": "Respuesta",
+  "message.copyText": "Copiar texto",
   "common.copy": "copia",
   "common.download": "descarga",
   "common.delete": "borrar",

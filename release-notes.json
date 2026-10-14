@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.7",
+  "id": "2026.10.14.8",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "链接卡片跳转优化",
+      "title": "链接消息操作优化",
       "items": [
-        "链接正在解析或解析失败时，点击卡片也能打开原链接"
+        "含链接卡片的消息可分别复制文本和链接，锁定操作调整至靠后位置"
       ]
     },
     "en": {
-      "title": "Link card navigation",
+      "title": "Link message actions",
       "items": [
-        "Link cards now open the original URL while parsing or after parsing fails"
+        "Link messages offer separate copy-text and copy-link actions, with locking placed later in the menu"
       ]
     }
   }

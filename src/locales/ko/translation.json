@@ -1946,6 +1946,7 @@
   "common.deleting": "삭제...",
   "common.confirmDelete": "삭제 확인",
   "message.reply": "응답",
+  "message.copyText": "텍스트 복사",
   "common.copy": "복사",
   "common.download": "다운로드",
   "common.delete": "삭제",

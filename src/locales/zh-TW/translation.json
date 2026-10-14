@@ -1959,6 +1959,7 @@
   "common.deleting": "刪除中...",
   "common.confirmDelete": "確認刪除",
   "message.reply": "引用",
+  "message.copyText": "複製文字",
   "common.copy": "複製",
   "common.download": "下載",
   "common.delete": "刪除",

@@ -2034,6 +2034,7 @@
   "common.deleting": "删除中...",
   "common.confirmDelete": "确认删除",
   "message.reply": "引用",
+  "message.copyText": "复制文本",
   "common.copy": "复制",
   "common.download": "下载",
   "common.delete": "删除",
