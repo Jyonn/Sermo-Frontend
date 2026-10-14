@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.14.9",
+  "id": "2026.10.14.10",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "摄影画板式图片预览",
+      "title": "图片预览空间与字体优化",
       "items": [
-        "图片预览采用米色摄影画板，相机、曝光、位置与完整拍摄时间按需展示",
-        "竖图采用扩展布局，长图可滚动查看，操作集中在右下角"
+        "缩小图片预览边距，扩大图片展示区域，并以更精细的字体单行展示拍摄参数"
       ]
     },
     "en": {
-      "title": "Photography-style image previews",
+      "title": "Roomier image previews",
       "items": [
-        "Images use a warm paper layout with camera, exposure, location and full capture time when available",
-        "Portraits use an expanded layout, long images scroll, and actions sit at the lower right"
+        "Reduced preview margins and refined smaller typography to keep capture settings on one line"
       ]
     }
   }
