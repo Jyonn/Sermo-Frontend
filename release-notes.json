@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.1",
+  "id": "2026.10.14.2",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "登录页视觉优化",
+      "title": "留幅分享卡片适配深色模式",
       "items": [
-        "移除 PWA 账号入口底部的背景遮罩，让页面背景保持连贯"
+        "留幅作品集分享卡片现在会随深色模式调整背景和文字颜色"
       ]
     },
     "en": {
-      "title": "Sign-in page polish",
+      "title": "Stillfolio cards in dark mode",
       "items": [
-        "Removed the background overlay from the bottom of the PWA account entry page"
+        "Stillfolio collection cards now adapt their background and text colors to dark mode"
       ]
     }
   }
