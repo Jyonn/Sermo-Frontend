@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.13.5",
-  "publishedAt": "2026-10-13",
+  "id": "2026.10.14.1",
+  "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "留幅授权账号选择修复",
+      "title": "登录页视觉优化",
       "items": [
-        "修复留幅授权成功后误报失败的问题",
-        "授权时可选择已保存的空间账号；只有一个账号时自动恢复"
+        "移除 PWA 账号入口底部的背景遮罩，让页面背景保持连贯"
       ]
     },
     "en": {
-      "title": "Stillfolio authorization fixes",
+      "title": "Sign-in page polish",
       "items": [
-        "Fixed a false error after approving Stillfolio access",
-        "Choose a saved space account, or restore it automatically when there is only one"
+        "Removed the background overlay from the bottom of the PWA account entry page"
       ]
     }
   }
