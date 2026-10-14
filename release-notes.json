@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.2",
+  "id": "2026.10.14.3",
   "publishedAt": "2026-10-14",
   "locales": {
     "zh-CN": {
-      "title": "留幅分享卡片适配深色模式",
+      "title": "聊天表情尺寸调整",
       "items": [
-        "留幅作品集分享卡片现在会随深色模式调整背景和文字颜色"
+        "聊天中发送的图片表情缩小至原来的 75%"
       ]
     },
     "en": {
-      "title": "Stillfolio cards in dark mode",
+      "title": "Smaller chat stickers",
       "items": [
-        "Stillfolio collection cards now adapt their background and text colors to dark mode"
+        "Image stickers in chat now display at 75% of their previous size"
       ]
     }
   }

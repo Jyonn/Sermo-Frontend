@@ -5266,7 +5266,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
 .message-bubble.is-sticker,
 .message-group:not(.bubble-style-default) .message-bubble.is-sticker {
-  max-width: min(40vw, 148px);
+  max-width: min(30vw, 111px);
   padding: 0;
   overflow: visible;
   border: 0;
@@ -5289,7 +5289,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 148px;
+  max-height: 111px;
   object-fit: contain;
   filter: drop-shadow(0 7px 10px rgba(26, 40, 34, .13));
   -webkit-user-select: none;
@@ -5321,8 +5321,8 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 }
 
 .message-sticker-image.sticker-load-failed {
-  height: 112px;
-  width: 112px;
+  height: 84px;
+  width: 84px;
 }
 
 .composer-sticker-item .sticker-load-failed,
