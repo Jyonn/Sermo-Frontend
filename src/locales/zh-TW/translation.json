@@ -2643,7 +2643,7 @@
   ,"apps.permissionProfile": "Space account and nickname"
   ,"apps.permissionPhone": "Verified mainland China phone number, if available"
   ,"apps.permissionVip": "Permanent VIP status"
-  ,"apps.integrationPending": "Stillfolio has not enabled Sermo sign-in yet. Visit opens the app only. Your data is shared only after you approve a future authorization request."
+  ,"apps.integrationPending": "前往後將自動發起目前空間帳號的 Sermo 登入；在授權頁確認後進入留幅，並分享以上資料。"
   ,"apps.visit": "Visit"
   ,"apps.authorizeTitle": "Authorize Stillfolio with Sermo"
   ,"apps.invalidRequest": "Invalid authorization request. Return to Stillfolio and try again."

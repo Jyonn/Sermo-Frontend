@@ -2712,7 +2712,7 @@
   ,"apps.permissionProfile": "Space account and nickname"
   ,"apps.permissionPhone": "Verified mainland China phone number, if available"
   ,"apps.permissionVip": "Permanent VIP status"
-  ,"apps.integrationPending": "Stillfolio now supports Sermo sign-in. After visiting, choose 'Sign in with Sermo'. Your details are shared only after you approve the request in Sermo."
+  ,"apps.integrationPending": "Continue to start Sermo sign-in with your current space account automatically. Approve access on the authorization page to enter Stillfolio and share these details."
   ,"apps.visit": "Visit"
   ,"apps.authorizeTitle": "Authorize Stillfolio with Sermo"
   ,"apps.invalidRequest": "Invalid authorization request. Return to Stillfolio and try again."

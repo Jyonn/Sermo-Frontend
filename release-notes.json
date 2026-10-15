@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.14.11",
-  "publishedAt": "2026-10-14",
+  "id": "2026.10.15.1",
+  "publishedAt": "2026-10-15",
   "locales": {
     "zh-CN": {
-      "title": "留幅作品集缓存更新修复",
+      "title": "留幅直达登录准备",
       "items": [
-        "修复留幅作品集上传照片后，旧分享卡片仍显示 0 图的问题"
+        "更多应用已对接留幅自动登录入口，并支持优先选择当前空间账号；待留幅上线入口后可直接衔接授权"
       ]
     },
     "en": {
-      "title": "Stillfolio collection cache refresh",
+      "title": "Stillfolio direct sign-in support",
       "items": [
-        "Stillfolio share cards now refresh stale photo counts after photos are uploaded"
+        "Added the Stillfolio automatic sign-in entry and current-account selection hints, ready for Stillfolio to enable its entry page"
       ]
     }
   }

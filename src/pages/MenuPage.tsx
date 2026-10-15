@@ -27,7 +27,8 @@ import { useAuth } from "../lib/auth";
 import { useAdminAuth } from "../lib/adminAuth";
 import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
-import { buildSpaceHrefForCurrentHost } from "../lib/spaceEntry";
+import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
+import { buildStillfolioLoginUrl } from "../lib/stillfolioLogin";
 import { showToast } from "../lib/toast";
 import { growthStageForLevel } from "../lib/growth-stage";
 import { FeatureDiscoveryMarker, useFeatureDiscovery } from "../lib/featureDiscovery";
@@ -2279,7 +2280,7 @@ export default function MenuPage() {
       <ConfirmDialog
         open={stillfolioInfoOpen}
         onClose={() => setStillfolioInfoOpen(false)}
-        onConfirm={() => { setStillfolioInfoOpen(false); window.open("https://stillfolio.jyonn.space/", "_blank", "noopener,noreferrer"); }}
+        onConfirm={() => { setStillfolioInfoOpen(false); window.open(buildStillfolioLoginUrl(space?.slug || getDetectedSpaceSlug() || "", session?.user.user_id), "_blank", "noopener,noreferrer"); }}
         title={t("apps.stillfolio")}
         description={t("apps.stillfolioDescription")}
         confirmLabel={t("apps.visit")}
