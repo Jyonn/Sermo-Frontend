@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.15.1",
-  "publishedAt": "2026-10-15",
+  "id": "2026.10.16.1",
+  "publishedAt": "2026-10-16",
   "locales": {
     "zh-CN": {
-      "title": "留幅直达登录准备",
+      "title": "链接跳转与复制提示修复",
       "items": [
-        "更多应用已对接留幅自动登录入口，并支持优先选择当前空间账号；待留幅上线入口后可直接衔接授权"
+        "修复链接卡片跳转时丢失页面内路由的问题，复制消息文本或链接成功后会显示提示"
       ]
     },
     "en": {
-      "title": "Stillfolio direct sign-in support",
+      "title": "Link navigation and copy feedback fixes",
       "items": [
-        "Added the Stillfolio automatic sign-in entry and current-account selection hints, ready for Stillfolio to enable its entry page"
+        "Link cards now preserve hash routes, and copying message text or links shows a success notification"
       ]
     }
   }

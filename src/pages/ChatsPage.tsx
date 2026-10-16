@@ -1726,7 +1726,7 @@ const MessageLinkPreviewCard = memo(function MessageLinkPreviewCard({ messageId,
   return (
     <a
       className={`message-link-preview-card ${currentPreview.image_url ? "has-image" : "no-image"}`}
-      href={currentPreview.url}
+      href={url || currentPreview.url}
       onClick={(event) => event.stopPropagation()}
       rel="noreferrer"
       target="_blank"
@@ -2055,7 +2055,7 @@ function renderMessageContent(
           <LinkedMessageText hiddenUrl={rawPreviewUrl ?? previewUrl} mentions={message.mentions} text={text} />
         </span>
       ) : null}
-      <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} url={previewUrl} />
+      <MessageLinkPreviewCard messageId={message.id} preview={linkPreview} url={rawPreviewUrl ?? previewUrl} />
     </div>
   );
 }
@@ -7160,6 +7160,7 @@ function LiveChatsPage({
       const copied = await copyText(value);
       if (!copied) throw new Error(t("common.copyFailed"));
       setMessageMenu(null);
+      showToast(linkOnly ? t("common.linkCopied") : t("message.batchCopied", { count: 1 }));
     } catch (apiError) {
       const message = apiError instanceof Error ? apiError.message : t("common.copyFailed");
       setPageError(message);
