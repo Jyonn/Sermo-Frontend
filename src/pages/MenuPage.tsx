@@ -2266,7 +2266,7 @@ export default function MenuPage() {
           </div>
           {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
             <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
-              <span className="more-apps-icon"><img alt="" src={chronelleIcon} /></span>
+              <span className="more-apps-icon is-chronelle"><img alt="" src={chronelleIcon} /></span>
               <span><strong>{t("chronelle.title")}</strong><small>{t(me?.chronelle_calendar_id ? "chronelle.bound" : "chronelle.bind")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>

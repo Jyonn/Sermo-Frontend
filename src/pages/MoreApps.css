@@ -9,6 +9,8 @@
 .more-apps-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;background:var(--line-soft);font-size:27px}
 .more-apps-icon.is-stillfolio{background:#ece8df}
 .more-apps-icon img{width:36px;height:36px}
+.more-apps-icon.is-chronelle{overflow:hidden;background:none}
+.more-apps-icon.is-chronelle img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .more-apps-consent{display:grid;grid-template-columns:56px minmax(0,1fr);gap:16px;align-items:start;margin:0 24px 20px}
 .more-apps-consent>img{width:56px;height:56px;padding:8px;border-radius:16px;background:#ece8df}
 .more-apps-consent>div{display:grid;gap:7px;color:var(--text-primary);font-size:13px}
