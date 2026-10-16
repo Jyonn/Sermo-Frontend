@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { UserAvatar } from "../components/UserAvatar";
 import stillfolioMark from "../assets/stillfolio-mark.svg";
+import chronelleIcon from "../assets/chronelle-icon.png";
+import { oauthClient } from "../lib/oauthClients";
 import { api, refreshDetachedAuthSession } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
@@ -12,7 +14,6 @@ import { parseSermoLoginHint } from "../lib/stillfolioLogin";
 import "./MoreApps.css";
 
 const CALLBACK = String(import.meta.env.VITE_STILLFOLIO_CALLBACK_URI || "https://stillfolio.jyonn.space/auth/sermo/callback");
-const SCOPES = new Set(["profile", "phone", "vip"]);
 
 export default function OAuthAuthorizePage() {
   const { t } = useI18n();
@@ -26,6 +27,8 @@ export default function OAuthAuthorizePage() {
   const [accountError, setAccountError] = useState("");
   const autoRestoreStarted = useRef(false);
   const query = new URLSearchParams(search);
+  const client = oauthClient(query.get("client_id"), CALLBACK);
+  const appName = client ? t(client.nameKey) : "";
   const loginHint = parseSermoLoginHint(query.get("login_hint"));
   const authorizedSession = session && (!loginHint || loginHint.userId === session.user.user_id && loginHint.slug === getDetectedSpaceSlug()) ? session : null;
   const accountToRestore = loginHint
@@ -33,15 +36,16 @@ export default function OAuthAuthorizePage() {
     : accounts.length === 1 ? accounts[0] : undefined;
   const scope = query.get("scope") || "";
   const scopes = scope.split(/\s+/).filter(Boolean);
-  const valid = query.get("client_id") === "stillfolio"
+  const valid = Boolean(client)
     && query.get("response_type") === "code"
-    && query.get("redirect_uri") === CALLBACK
+    && query.get("redirect_uri") === client?.callback
     && query.get("code_challenge_method") === "S256"
     && /^[A-Za-z0-9_-]{43}$/.test(query.get("code_challenge") || "")
     && (query.get("state") || "").length >= 16
+    && (query.get("state") || "").length <= 512
     && query.getAll("login_hint").length <= 1
     && (!query.has("login_hint") || Boolean(loginHint))
-    && scopes.length > 0 && scopes.every((item) => SCOPES.has(item));
+    && scopes.length > 0 && scopes.every((item) => client?.scopes.includes(item));
 
   useEffect(() => {
     if (ready && !authorizedSession && valid) rememberOAuthRequest(search);
@@ -80,13 +84,13 @@ export default function OAuthAuthorizePage() {
   }, [ready, valid, authorizedSession, accountToRestore]);
 
   const approve = async () => {
-    if (!valid || busy || !authorizedSession) return;
+    if (!valid || busy || !authorizedSession || !client) return;
     setBusy(true);
     setError("");
     try {
       const result = await api.authorizeExternalApp({
-        client_id: "stillfolio",
-        redirect_uri: CALLBACK,
+        client_id: client.id,
+        redirect_uri: client.callback,
         scope,
         state: query.get("state") || "",
         code_challenge: query.get("code_challenge") || "",
@@ -94,7 +98,7 @@ export default function OAuthAuthorizePage() {
         response_type: "code",
       });
       const destination = new URL(result.redirect_uri);
-      if (`${destination.origin}${destination.pathname}` !== CALLBACK
+      if (`${destination.origin}${destination.pathname}` !== client.callback
         || !destination.searchParams.get("code")
         || destination.searchParams.get("state") !== query.get("state")
         || destination.hash) throw new Error(t("apps.authorizeFailed"));
@@ -108,9 +112,9 @@ export default function OAuthAuthorizePage() {
 
   return <main className="oauth-authorize-page">
     <section className="oauth-authorize-card">
-      <img alt="" src={stillfolioMark} />
-      <small>SERMO × STILLFOLIO</small>
-      <h1>{t("apps.authorizeTitle")}</h1>
+      <img alt="" src={client?.id === "chronelle" ? chronelleIcon : stillfolioMark} />
+      <small>FRIENDEN{client ? ` × ${client.label}` : ""}</small>
+      <h1>{t("apps.authorizeTitle", { app: appName })}</h1>
       {!valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>
         <p>{accountToRestore && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount") : t("apps.signInFirst")}</p>
         {accounts.length && (!accountToRestore || accountError) || accounts.length > 1 ? <div className="oauth-account-list" aria-label={t("apps.chooseAccount")}>
@@ -123,7 +127,7 @@ export default function OAuthAuthorizePage() {
         {accountError ? <p role="alert">{accountError}</p> : null}
         <Link to="/">{t("apps.backToSermo")}</Link>
       </> : <>
-        <p>{t("apps.authorizeDescription", { name: authorizedSession.user.name, space: spaceName || `#${authorizedSession.user.space_id}` })}</p>
+        <p>{t("apps.authorizeDescription", { app: appName, name: authorizedSession.user.name, space: spaceName || `#${authorizedSession.user.space_id}` })}</p>
         <div className="oauth-authorize-scopes">
           {scopes.map((item) => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}
         </div>
