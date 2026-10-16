@@ -1,11 +1,11 @@
 {
-  "id": "2026.10.16.6",
+  "id": "2026.10.16.7",
   "publishedAt": "2026-10-16",
   "locales": {
     "zh-CN": {
       "title": "Chronelle 日历插件",
       "items": [
-        "修复 Chronelle 授权页面未显示友间应用图标的问题",
+        "Chronelle 授权页使用 Frienden 友间新名称及图标，用途说明跟随用户语言设置",
         "时序日历支持直接跳转授权并自动绑定，无需粘贴链接；恢复应用和插件卡片底色",
         "支持绑定和解绑 Chronelle 公开日历，并在个人名片中直接查看日程",
         "菜单新增应用和插件分类，基础信息支持以好友或陌生人视角预览我的名片",
@@ -15,7 +15,7 @@
     "en": {
       "title": "Chronelle calendar plugin",
       "items": [
-        "Fixed the missing FRIENDEN app icon on Chronelle authorization pages",
+        "Chronelle authorization uses the Frienden 友间 name and icon, with a concise purpose in your preferred language",
         "Authorize on Chronelle and bind automatically without pasting links; restored app and plugin card backgrounds",
         "Bind or unbind a public Chronelle calendar and display its schedule on your profile card",
         "Browse apps and plugins in separate tabs and preview your profile card from a friend or stranger perspective",
