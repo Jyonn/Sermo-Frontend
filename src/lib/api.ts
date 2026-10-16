@@ -1492,6 +1492,14 @@ export const api = {
     });
   },
 
+  bindChronelle(url: string) {
+    return request<{ chronelle_calendar_id: string }>("/users/me/chronelle", { auth: true, method: "POST", body: { url } });
+  },
+
+  unbindChronelle() {
+    return request("/users/me/chronelle", { auth: true, method: "DELETE" });
+  },
+
   getWechatMiniProgramBinding(signal?: AbortSignal) {
     return request<{ bound: boolean }>("/users/me/wechat-miniprogram", {
       auth: true,

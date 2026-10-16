@@ -46,6 +46,7 @@ export interface TinyUserDTO {
 }
 
 export interface UserDTO extends TinyUserDTO {
+  chronelle_calendar_id?: string;
   joined_at?: number;
   submission_role?: SubmissionRole | null;
   is_alive: boolean;

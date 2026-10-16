@@ -1,0 +1,4 @@
+.chronelle-calendar{display:grid;gap:12px;min-width:0;margin-block:20px}
+.chronelle-calendar-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-primary)}
+.chronelle-calendar-heading a{color:var(--text-muted);font-size:12px;text-decoration:none}
+.chronelle-calendar iframe{display:block;width:100%;height:560px;max-height:75dvh;border:1px solid var(--line-soft);border-radius:16px;background:var(--surface)}

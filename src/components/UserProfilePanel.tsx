@@ -10,6 +10,7 @@ import { ImageLightbox } from "./ImageLightbox";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
 import { UserProfileCard } from "./UserProfileCard";
+import { ChronelleCalendar } from "./ChronelleCalendar";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatRelativeTime } from "../lib/presentation";
@@ -32,6 +33,7 @@ export interface UserProfileSeed {
   growth_level_name?: string;
   avatar_frame_style?: UserDTO["avatar_frame_style"];
   profile_card_theme?: UserDTO["profile_card_theme"];
+  chronelle_calendar_id?: string;
 }
 
 interface UserProfilePanelProps {
@@ -349,6 +351,8 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         ) : null}
         <button className="button user-profile-statements-action" onClick={openStatements} type="button">{t("profile.viewStatements")}</button>
       </div>
+
+      <ChronelleCalendar calendarId={user.chronelle_calendar_id} />
 
       <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} onClick={recentStatement ? openRecentStatement : openStatements} type="button">
         <small>

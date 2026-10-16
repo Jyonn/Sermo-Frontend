@@ -11,6 +11,8 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
+import { ChronelleCalendar } from "../components/ChronelleCalendar";
+import { ChronellePluginDrawer } from "../components/ChronellePluginDrawer";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { InputDialog } from "../components/InputDialog";
@@ -484,6 +486,7 @@ export default function MenuPage() {
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
   const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
+  const [chronelleOpen, setChronelleOpen] = useState(false);
   const [myCardOpen, setMyCardOpen] = useState(false);
   const [cardAudience, setCardAudience] = useState<"friend" | "stranger">("friend");
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
@@ -2261,6 +2264,11 @@ export default function MenuPage() {
             {(["apps", "plugins"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={appsTab === tab} className={`mode-pill ${appsTab === tab ? "active" : ""}`} onClick={() => setAppsTab(tab)}>{t(tab === "apps" ? "apps.appTab" : "apps.pluginTab")}</button>)}
           </div>
           {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
+            <button className="more-apps-row" type="button" onClick={() => setChronelleOpen(true)}>
+              <span className="more-apps-icon material-symbols-outlined">calendar_month</span>
+              <span><strong>{t("chronelle.title")}</strong><small>{t(me?.chronelle_calendar_id ? "chronelle.bound" : "chronelle.bind")}</small></span>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
             <button className="more-apps-row" onClick={() => { setMoreAppsOpen(false); setTravelMapOpen(true); }} type="button">
               <span className="more-apps-icon material-symbols-outlined">explore</span>
               <span><strong>{t("travelMap.myTitle")}</strong><small>{t("apps.travelHint")}</small></span>
@@ -2478,6 +2486,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
+      <ChronellePluginDrawer open={chronelleOpen} onClose={() => setChronelleOpen(false)} onRouteOpen={() => setChronelleOpen(true)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} />
       <SideDrawer historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")}>
         <div className="more-apps-drawer">
           <div className="mode-switch" role="tablist" aria-label={t("profile.cardAudience")}>
@@ -2502,6 +2511,7 @@ export default function MenuPage() {
               <button className="button user-profile-statements-action" disabled type="button">{t("profile.viewStatements")}</button>
             </div>
             <p className="row-subtle">{t("profile.cardPreviewHint")}</p>
+            <ChronelleCalendar calendarId={me?.chronelle_calendar_id} />
           </div>
         </div>
       </SideDrawer>
