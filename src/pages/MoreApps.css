@@ -1,7 +1,7 @@
 .more-apps-drawer{display:grid;align-content:start;gap:30px;min-height:100%;padding:24px 20px 48px}
 .more-apps-section{display:grid;gap:10px}
 .more-apps-section h2{margin:0 0 4px;color:var(--text-muted);font-size:12px;font-weight:700;letter-spacing:.12em}
-.more-apps-row{display:grid;grid-template-columns:52px minmax(0,1fr) 24px;align-items:center;gap:14px;min-height:78px;width:100%;padding:12px 16px;border:1px solid var(--line-soft);border-radius:20px;background:var(--surface);color:var(--text-primary);text-align:left;cursor:pointer}
+.more-apps-row{display:grid;grid-template-columns:52px minmax(0,1fr) 24px;align-items:center;gap:14px;min-height:78px;width:100%;padding:12px 16px;border:1px solid var(--line-soft);border-radius:20px;background:var(--bg-surface);color:var(--text-primary);text-align:left;cursor:pointer}
 .more-apps-row>span:nth-child(2){display:grid;gap:4px;min-width:0}
 .more-apps-row strong{font-size:16px}
 .more-apps-row small{color:var(--text-muted);font-size:12px}

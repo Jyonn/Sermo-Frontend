@@ -1492,8 +1492,12 @@ export const api = {
     });
   },
 
-  bindChronelle(url: string) {
-    return request<{ chronelle_calendar_id: string }>("/users/me/chronelle", { auth: true, method: "POST", body: { url } });
+  authorizeChronelle() {
+    return request<{ authorize_url: string }>("/users/me/chronelle/authorize", { auth: true, method: "POST" });
+  },
+
+  claimChronelle() {
+    return request<{ status: "pending" | "approved" | "denied" | "expired"; chronelle_calendar_id?: string }>("/users/me/chronelle/claim", { auth: true, method: "POST" });
   },
 
   unbindChronelle() {

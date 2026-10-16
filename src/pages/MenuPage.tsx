@@ -12,7 +12,7 @@ import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
 import { ChronelleCalendar } from "../components/ChronelleCalendar";
-import { ChronellePluginDrawer } from "../components/ChronellePluginDrawer";
+import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { InputDialog } from "../components/InputDialog";
@@ -487,7 +487,6 @@ export default function MenuPage() {
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
   const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
-  const [chronelleOpen, setChronelleOpen] = useState(false);
   const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [myCardOpen, setMyCardOpen] = useState(false);
   const [cardAudience, setCardAudience] = useState<"friend" | "stranger">("friend");
@@ -2291,19 +2290,6 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
       <ConfirmDialog
-        open={chronelleInfoOpen}
-        onClose={() => setChronelleInfoOpen(false)}
-        onConfirm={() => { setChronelleInfoOpen(false); setChronelleOpen(true); }}
-        title={t("chronelle.title")}
-        description={t("chronelle.introduction")}
-        confirmLabel={t("chronelle.manage")}
-      >
-        <div className="more-apps-consent">
-          <img alt="" src={chronelleIcon} />
-          <div><strong>{t("chronelle.publicOnly")}</strong><span>{t("chronelle.description")}</span></div>
-        </div>
-      </ConfirmDialog>
-      <ConfirmDialog
         open={stillfolioInfoOpen}
         onClose={() => setStillfolioInfoOpen(false)}
         onConfirm={() => { setStillfolioInfoOpen(false); window.open(buildStillfolioLoginUrl(space?.slug || getDetectedSpaceSlug() || "", session?.user.user_id), "_blank", "noopener,noreferrer"); }}
@@ -2501,7 +2487,7 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <ChronellePluginDrawer open={chronelleOpen} onClose={() => setChronelleOpen(false)} onRouteOpen={() => setChronelleOpen(true)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} />
+      {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} /> : null}
       <SideDrawer historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")}>
         <div className="more-apps-drawer">
           <div className="mode-switch" role="tablist" aria-label={t("profile.cardAudience")}>
