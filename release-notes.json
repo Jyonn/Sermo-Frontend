@@ -1,25 +1,17 @@
 {
-  "id": "2026.10.16.9",
-  "publishedAt": "2026-10-16",
+  "id": "2026.10.17.1",
+  "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "图片预览与日历优化",
+      "title": "第三方授权头像支持",
       "items": [
-        "Chronelle 授权页使用 Frienden 友间新名称及图标，用途说明跟随用户语言设置",
-        "时序日历支持直接跳转授权并自动绑定，无需粘贴链接；恢复应用和插件卡片底色",
-        "优化时序插件图标展示，去除灰色外框，使用完整圆角图标",
-        "菜单新增应用和插件分类，基础信息支持以好友或陌生人视角预览我的名片",
-        "图片预览去除画布底色、边框与阴影，仅保留全局米色背景"
+        "授权第三方应用读取个人资料时，可同步当前头像，兼容预设与自定义头像"
       ]
     },
     "en": {
-      "title": "Image preview and calendar improvements",
+      "title": "Avatars for authorized apps",
       "items": [
-        "Chronelle authorization uses the Frienden 友间 name and icon, with a concise purpose in your preferred language",
-        "Authorize on Chronelle and bind automatically without pasting links; restored app and plugin card backgrounds",
-        "Chronelle's rounded icon now fills its tile without a gray frame",
-        "Browse apps and plugins in separate tabs and preview your profile card from a friend or stranger perspective",
-        "Image previews now use a single beige backdrop without a separate canvas background, border or shadow"
+        "Authorized apps with profile access can now receive your current preset or custom avatar"
       ]
     }
   }
