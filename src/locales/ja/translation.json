@@ -2612,7 +2612,9 @@
   "diagnostics.empty": "記録はまだありません。診断項目を選び、記録を開始してからチャットで問題を再現してください。",
  "chat.editFailedText": "未送信メッセージを編集"
   ,"apps.more": "アプリとプラグイン"
-  ,"chronelle.title": "Chronelle calendar"
+  ,"chronelle.title": "Chronelle"
+  ,"chronelle.introduction": "仕事と暮らしのカレンダー。グループごとの公開設定に対応し、公開予定を Sermo のプロフィールに表示できます。"
+  ,"chronelle.manage": "カレンダーを管理"
   ,"chronelle.open": "Open calendar"
   ,"chronelle.loading": "Loading calendar. If it does not appear, open it directly."
   ,"chronelle.publicOnly": "Only public schedules are shown. Visibility is managed in Chronelle."

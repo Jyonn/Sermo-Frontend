@@ -41,6 +41,7 @@ import { ForwardArrowIcon } from "../components/ForwardArrowIcon";
 import { TabPageHeader } from "../components/TabPageHeader";
 import { TravelMapDrawer } from "../components/TravelMapDrawer";
 import stillfolioMark from "../assets/stillfolio-mark.svg";
+import chronelleIcon from "../assets/chronelle-icon.png";
 import "./MoreApps.css";
 import { PwaInstallSheet } from "../components/PwaInstallSheet";
 import { UpdateCheckDialog } from "../components/UpdateCheckDialog";
@@ -487,6 +488,7 @@ export default function MenuPage() {
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
   const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
   const [chronelleOpen, setChronelleOpen] = useState(false);
+  const [chronelleInfoOpen, setChronelleInfoOpen] = useState(false);
   const [myCardOpen, setMyCardOpen] = useState(false);
   const [cardAudience, setCardAudience] = useState<"friend" | "stranger">("friend");
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
@@ -2264,8 +2266,8 @@ export default function MenuPage() {
             {(["apps", "plugins"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={appsTab === tab} className={`mode-pill ${appsTab === tab ? "active" : ""}`} onClick={() => setAppsTab(tab)}>{t(tab === "apps" ? "apps.appTab" : "apps.pluginTab")}</button>)}
           </div>
           {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
-            <button className="more-apps-row" type="button" onClick={() => setChronelleOpen(true)}>
-              <span className="more-apps-icon material-symbols-outlined">calendar_month</span>
+            <button className="more-apps-row" type="button" onClick={() => setChronelleInfoOpen(true)}>
+              <span className="more-apps-icon"><img alt="" src={chronelleIcon} /></span>
               <span><strong>{t("chronelle.title")}</strong><small>{t(me?.chronelle_calendar_id ? "chronelle.bound" : "chronelle.bind")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -2288,6 +2290,19 @@ export default function MenuPage() {
           </section>}
         </div>
       </SideDrawer>
+      <ConfirmDialog
+        open={chronelleInfoOpen}
+        onClose={() => setChronelleInfoOpen(false)}
+        onConfirm={() => { setChronelleInfoOpen(false); setChronelleOpen(true); }}
+        title={t("chronelle.title")}
+        description={t("chronelle.introduction")}
+        confirmLabel={t("chronelle.manage")}
+      >
+        <div className="more-apps-consent">
+          <img alt="" src={chronelleIcon} />
+          <div><strong>{t("chronelle.publicOnly")}</strong><span>{t("chronelle.description")}</span></div>
+        </div>
+      </ConfirmDialog>
       <ConfirmDialog
         open={stillfolioInfoOpen}
         onClose={() => setStillfolioInfoOpen(false)}

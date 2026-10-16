@@ -2612,7 +2612,9 @@
   "diagnostics.empty": "기록이 없습니다. 진단 항목을 선택하고 기록을 시작한 뒤 채팅에서 문제를 재현하세요.",
  "chat.editFailedText": "보내지 못한 메시지 편집"
   ,"apps.more": "앱 및 플러그인"
-  ,"chronelle.title": "Chronelle calendar"
+  ,"chronelle.title": "Chronelle"
+  ,"chronelle.introduction": "업무와 일상을 위한 캘린더입니다. 그룹별 공개 설정을 지원하며 공개 일정을 Sermo 프로필에 표시할 수 있습니다."
+  ,"chronelle.manage": "캘린더 관리"
   ,"chronelle.open": "Open calendar"
   ,"chronelle.loading": "Loading calendar. If it does not appear, open it directly."
   ,"chronelle.publicOnly": "Only public schedules are shown. Visibility is managed in Chronelle."

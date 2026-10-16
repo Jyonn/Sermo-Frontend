@@ -2632,7 +2632,9 @@
   "diagnostics.empty": "尚無記錄。啟用診斷項目並開始錄製後，再進入聊天重現問題。",
  "chat.editFailedText": "編輯未送出的訊息"
   ,"apps.more": "應用和外掛"
-  ,"chronelle.title": "Chronelle calendar"
+  ,"chronelle.title": "Chronelle · 時序"
+  ,"chronelle.introduction": "工作與生活，各有其時。支援分組隱私分享的日曆，在 Sermo 名片中展示公開行程。"
+  ,"chronelle.manage": "管理日曆"
   ,"chronelle.open": "Open calendar"
   ,"chronelle.loading": "Loading calendar. If it does not appear, open it directly."
   ,"chronelle.publicOnly": "Only public schedules are shown. Visibility is managed in Chronelle."

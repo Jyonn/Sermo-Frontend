@@ -1,10 +1,11 @@
 {
-  "id": "2026.10.16.3",
+  "id": "2026.10.16.4",
   "publishedAt": "2026-10-16",
   "locales": {
     "zh-CN": {
       "title": "Chronelle 日历插件",
       "items": [
+        "时序插件使用官方图标并新增介绍弹窗，移除应用与插件页面的额外底色",
         "支持绑定和解绑 Chronelle 公开日历，并在个人名片中直接查看日程",
         "菜单新增应用和插件分类，基础信息支持以好友或陌生人视角预览我的名片",
         "修复链接卡片跳转丢失页面内路由的问题，并补充复制成功提示"
@@ -13,6 +14,7 @@
     "en": {
       "title": "Chronelle calendar plugin",
       "items": [
+        "Chronelle uses its official icon and an introduction dialog; removed the extra apps and plugins background",
         "Bind or unbind a public Chronelle calendar and display its schedule on your profile card",
         "Browse apps and plugins in separate tabs and preview your profile card from a friend or stranger perspective",
         "Link cards preserve hash routes and copying messages or links shows a success notification"

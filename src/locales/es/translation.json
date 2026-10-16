@@ -2612,7 +2612,9 @@
   "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat.",
  "chat.editFailedText": "Editar mensaje no enviado"
   ,"apps.more": "Aplicaciones y complementos"
-  ,"chronelle.title": "Chronelle calendar"
+  ,"chronelle.title": "Chronelle"
+  ,"chronelle.introduction": "Un calendario para el trabajo y la vida, con privacidad por grupos. Muestra tu agenda pública en tu perfil de Sermo."
+  ,"chronelle.manage": "Gestionar calendario"
   ,"chronelle.open": "Open calendar"
   ,"chronelle.loading": "Loading calendar. If it does not appear, open it directly."
   ,"chronelle.publicOnly": "Only public schedules are shown. Visibility is managed in Chronelle."
