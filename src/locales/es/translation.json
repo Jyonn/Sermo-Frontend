@@ -2611,7 +2611,14 @@
   "diagnostics.uploadFailed": "No se pudo enviar el informe",
   "diagnostics.empty": "Aún no hay registros. Selecciona un diagnóstico, inicia la grabación y reproduce el problema en el chat.",
  "chat.editFailedText": "Editar mensaje no enviado"
-  ,"apps.more": "More apps"
+  ,"apps.more": "Aplicaciones y complementos"
+  ,"apps.appTab": "Aplicaciones"
+  ,"apps.pluginTab": "Complementos"
+  ,"profile.myCard": "Mi tarjeta de perfil"
+  ,"profile.cardAudience": "Perspectiva"
+  ,"profile.friendView": "Vista de amigo"
+  ,"profile.strangerView": "Vista de desconocido"
+  ,"profile.cardPreviewHint": "Solo vista previa: no se envían mensajes ni solicitudes de amistad."
   ,"apps.local": "Sermo apps"
   ,"apps.thirdParty": "Third-party apps"
   ,"apps.travelHint": "Keep your footprints and check-ins"

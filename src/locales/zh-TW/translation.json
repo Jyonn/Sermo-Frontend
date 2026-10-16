@@ -2631,7 +2631,14 @@
   "diagnostics.uploadFailed": "報告上傳失敗",
   "diagnostics.empty": "尚無記錄。啟用診斷項目並開始錄製後，再進入聊天重現問題。",
  "chat.editFailedText": "編輯未送出的訊息"
-  ,"apps.more": "More apps"
+  ,"apps.more": "應用和外掛"
+  ,"apps.appTab": "應用"
+  ,"apps.pluginTab": "外掛"
+  ,"profile.myCard": "我的名片"
+  ,"profile.cardAudience": "查看視角"
+  ,"profile.friendView": "好友視角"
+  ,"profile.strangerView": "陌生人視角"
+  ,"profile.cardPreviewHint": "此處僅預覽名片外觀與操作入口，不會傳送訊息或好友申請。"
   ,"apps.local": "Sermo apps"
   ,"apps.thirdParty": "Third-party apps"
   ,"apps.travelHint": "Keep your footprints and check-ins"

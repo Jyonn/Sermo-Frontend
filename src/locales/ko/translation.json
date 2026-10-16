@@ -2611,7 +2611,14 @@
   "diagnostics.uploadFailed": "보고서를 업로드하지 못했습니다",
   "diagnostics.empty": "기록이 없습니다. 진단 항목을 선택하고 기록을 시작한 뒤 채팅에서 문제를 재현하세요.",
  "chat.editFailedText": "보내지 못한 메시지 편집"
-  ,"apps.more": "More apps"
+  ,"apps.more": "앱 및 플러그인"
+  ,"apps.appTab": "앱"
+  ,"apps.pluginTab": "플러그인"
+  ,"profile.myCard": "내 프로필 카드"
+  ,"profile.cardAudience": "보기 관점"
+  ,"profile.friendView": "친구 보기"
+  ,"profile.strangerView": "다른 사용자 보기"
+  ,"profile.cardPreviewHint": "미리보기 전용입니다. 메시지와 친구 요청은 전송되지 않습니다."
   ,"apps.local": "Sermo apps"
   ,"apps.thirdParty": "Third-party apps"
   ,"apps.travelHint": "Keep your footprints and check-ins"

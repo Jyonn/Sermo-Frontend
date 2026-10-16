@@ -483,6 +483,9 @@ export default function MenuPage() {
   const [travelMapOpen, setTravelMapOpen] = useState(false);
   const [cloudResourcesOpen, setCloudResourcesOpen] = useState(false);
   const [moreAppsOpen, setMoreAppsOpen] = useState(false);
+  const [appsTab, setAppsTab] = useState<"apps" | "plugins">("apps");
+  const [myCardOpen, setMyCardOpen] = useState(false);
+  const [cardAudience, setCardAudience] = useState<"friend" | "stranger">("friend");
   const [stillfolioInfoOpen, setStillfolioInfoOpen] = useState(false);
   const [growthDrawerOpen, setGrowthDrawerOpen] = useState(false);
   const [growthLevelsOpen, setGrowthLevelsOpen] = useState(false);
@@ -2254,8 +2257,10 @@ export default function MenuPage() {
       <TravelMapDrawer historyKey="travel-map" onRouteOpen={() => setTravelMapOpen(true)} open={travelMapOpen} onClose={() => setTravelMapOpen(false)} />
       <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
         <div className="more-apps-drawer">
-          <section className="more-apps-section">
-            <h2>{t("apps.local")}</h2>
+          <div className="mode-switch" role="tablist" aria-label={t("apps.more")}>
+            {(["apps", "plugins"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={appsTab === tab} className={`mode-pill ${appsTab === tab ? "active" : ""}`} onClick={() => setAppsTab(tab)}>{t(tab === "apps" ? "apps.appTab" : "apps.pluginTab")}</button>)}
+          </div>
+          {appsTab === "plugins" ? <section className="more-apps-section" role="tabpanel" aria-label={t("apps.pluginTab")}>
             <button className="more-apps-row" onClick={() => { setMoreAppsOpen(false); setTravelMapOpen(true); }} type="button">
               <span className="more-apps-icon material-symbols-outlined">explore</span>
               <span><strong>{t("travelMap.myTitle")}</strong><small>{t("apps.travelHint")}</small></span>
@@ -2266,15 +2271,13 @@ export default function MenuPage() {
               <span><strong>{t("cloudResources.title")}</strong><small>{t("apps.cloudHint")}</small></span>
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
-          </section>
-          <section className="more-apps-section">
-            <h2>{t("apps.thirdParty")}</h2>
+          </section> : <section className="more-apps-section" role="tabpanel" aria-label={t("apps.appTab")}>
             <button className="more-apps-row" onClick={() => setStillfolioInfoOpen(true)} type="button">
               <span className="more-apps-icon is-stillfolio"><img alt="" src={stillfolioMark} /></span>
               <span><strong>{t("apps.stillfolio")}</strong><small>{t("apps.stillfolioSubtitle")}</small></span>
               <span className="material-symbols-outlined">north_east</span>
             </button>
-          </section>
+          </section>}
         </div>
       </SideDrawer>
       <ConfirmDialog
@@ -2433,6 +2436,10 @@ export default function MenuPage() {
       <SideDrawer historyKey="basic-info" onRouteOpen={() => setBasicDrawerOpen(true)} open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
         <div className="detail-list">
           <div className="simple-list">
+            <button className="simple-row menu-link-row" onClick={() => setMyCardOpen(true)} type="button">
+              <div className="row-main menu-key-cell"><strong>{t("profile.myCard")}</strong></div>
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
             <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.avatar", () => setAvatarDialogOpen(true))} type="button">
               <div className="row-main menu-key-cell">
                 <strong>{t("profile.avatar")}</strong>
@@ -2467,6 +2474,34 @@ export default function MenuPage() {
               <div className="menu-detail-value menu-detail-text menu-summary-clamp">{welcomeSummary}</div>
               <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
             </button> : null}
+          </div>
+        </div>
+      </SideDrawer>
+
+      <SideDrawer historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")}>
+        <div className="more-apps-drawer">
+          <div className="mode-switch" role="tablist" aria-label={t("profile.cardAudience")}>
+            {(["friend", "stranger"] as const).map((audience) => <button key={audience} type="button" role="tab" aria-selected={cardAudience === audience} className={`mode-pill ${cardAudience === audience ? "active" : ""}`} onClick={() => setCardAudience(audience)}>{t(audience === "friend" ? "profile.friendView" : "profile.strangerView")}</button>)}
+          </div>
+          <div role="tabpanel" aria-label={t(cardAudience === "friend" ? "profile.friendView" : "profile.strangerView")} className={`user-profile-panel profile-theme-${me?.profile_card_theme ?? "default"}`}>
+            <UserProfileCard
+              avatarFrame={me?.avatar_frame_style}
+              avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
+              growthLevel={growthLevel}
+              isOnline
+              isPermanentVip={permanentVip}
+              name={me?.name ?? session?.user.name ?? t("brand.user")}
+              official={me?.official}
+              operator={me?.operator}
+              permanentVipLabel={me?.permanent_vip_slot ? t("profile.permanentVipRank", { slot: String(me.permanent_vip_slot).padStart(3, "0") }) : t("profile.permanentVip")}
+              presence={t("profile.onlineNow")}
+              relationshipLabel={t(cardAudience === "friend" ? "profile.friend" : "profile.sameSpace")}
+            />
+            <div className="user-profile-primary-actions">
+              <button className="button" disabled type="button">{t(cardAudience === "friend" ? "profile.sendMessage" : "profile.addFriend")}</button>
+              <button className="button user-profile-statements-action" disabled type="button">{t("profile.viewStatements")}</button>
+            </div>
+            <p className="row-subtle">{t("profile.cardPreviewHint")}</p>
           </div>
         </div>
       </SideDrawer>

@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.16.1",
+  "id": "2026.10.16.2",
   "publishedAt": "2026-10-16",
   "locales": {
     "zh-CN": {
-      "title": "链接跳转与复制提示修复",
+      "title": "应用插件分类与名片预览",
       "items": [
-        "修复链接卡片跳转时丢失页面内路由的问题，复制消息文本或链接成功后会显示提示"
+        "菜单新增应用和插件分类，基础信息支持以好友或陌生人视角预览我的名片",
+        "修复链接卡片跳转丢失页面内路由的问题，并补充复制成功提示"
       ]
     },
     "en": {
-      "title": "Link navigation and copy feedback fixes",
+      "title": "Apps, plugins and profile card previews",
       "items": [
-        "Link cards now preserve hash routes, and copying message text or links shows a success notification"
+        "Browse apps and plugins in separate tabs and preview your profile card from a friend or stranger perspective",
+        "Link cards preserve hash routes and copying messages or links shows a success notification"
       ]
     }
   }
