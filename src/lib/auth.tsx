@@ -24,6 +24,7 @@ import type { AuthSession, GestureLockPreferenceDTO, JoinResponseDTO } from "../
 import { i18n } from "./i18n";
 import { reconcileWebPushSubscription } from "./webPush";
 import { usePageActive } from "./pageActivity";
+import { applySessionUserPatch } from "./sessionUser";
 
 interface AuthContextValue {
   ready: boolean;
@@ -83,10 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (entries.every(([key, value]) => current.user[key] === value)) return current;
       const nextSession = {
         ...current,
-        user: {
-          ...current.user,
-          ...patch,
-        },
+        user: applySessionUserPatch(current.user, patch),
       };
       authStorage.set(nextSession);
       return nextSession;
@@ -100,6 +98,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionState(nextSession);
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!ready || !session || session.user.avatar_uri !== undefined) return;
+    const controller = new AbortController();
+    void api.getUserMe(controller.signal).then((user) => {
+      if (controller.signal.aborted || user.user_id !== session.user.user_id) return;
+      patchSessionUser({ avatar_type: user.avatar_type, avatar_uri: user.avatar_uri, avatar_cache_key: user.avatar_cache_key, avatar_frame_style: user.avatar_frame_style });
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [ready, session?.user.user_id, session?.user.space_id, session?.user.avatar_uri, patchSessionUser]);
 
   const logout = useCallback(async () => {
     const current = authStorage.get();

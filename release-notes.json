@@ -1,10 +1,11 @@
 {
-  "id": "2026.10.17.3",
+  "id": "2026.10.17.4",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
       "title": "第三方授权头像支持",
       "items": [
+        "修复侧栏、PWA 与第三方授权账号列表的头像缺失及刷新后退回文字占位的问题",
         "精简时序插件说明，优化解绑按钮的布局与确认交互",
         "支持 Chronelle 使用友间账号授权登录，仅共享个人资料",
         "授权第三方应用读取个人资料时，可同步当前头像，兼容预设与自定义头像"
@@ -13,6 +14,7 @@
     "en": {
       "title": "Avatars for authorized apps",
       "items": [
+        "Fixed missing avatars and text placeholders after session refresh in the sidebar, PWA and authorization account lists",
         "Simplified the Chronelle description and improved the unlink button and confirmation",
         "Chronelle can now request Frienden sign-in with profile-only access",
         "Authorized apps with profile access can now receive your current preset or custom avatar"

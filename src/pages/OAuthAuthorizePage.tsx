@@ -8,7 +8,7 @@ import { api, refreshDetachedAuthSession } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { clearOAuthRequest, rememberOAuthRequest } from "../lib/oauthPending";
-import { activatePwaCachedAccount, listPwaCachedAccounts, type PwaCachedAccount } from "../lib/pwaAccounts";
+import { activatePwaCachedAccount, listPwaCachedAccounts, refreshPwaCachedAccounts, type PwaCachedAccount } from "../lib/pwaAccounts";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { parseSermoLoginHint } from "../lib/stillfolioLogin";
 import "./MoreApps.css";
@@ -22,7 +22,8 @@ export default function OAuthAuthorizePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [spaceName, setSpaceName] = useState("");
-  const [accounts] = useState(listPwaCachedAccounts);
+  const [accounts, setAccounts] = useState(listPwaCachedAccounts);
+  const [accountsRefreshing, setAccountsRefreshing] = useState(false);
   const [selectingAccount, setSelectingAccount] = useState("");
   const [accountError, setAccountError] = useState("");
   const autoRestoreStarted = useRef(false);
@@ -58,7 +59,7 @@ export default function OAuthAuthorizePage() {
   }, [authorizedSession?.user.space_id, valid]);
 
   const selectAccount = async (account: PwaCachedAccount) => {
-    if (selectingAccount) return;
+    if (selectingAccount || accountsRefreshing) return;
     setSelectingAccount(account.key);
     setAccountError("");
     try {
@@ -75,6 +76,15 @@ export default function OAuthAuthorizePage() {
       setSelectingAccount("");
     }
   };
+
+  useEffect(() => {
+    if (!ready || !valid || authorizedSession || accountToRestore) return;
+    let active = true;
+    setAccountsRefreshing(true);
+    void refreshPwaCachedAccounts().then((next) => { if (active) { setAccountsRefreshing(false); setAccounts(next); } })
+      .catch(() => undefined).finally(() => { if (active) setAccountsRefreshing(false); });
+    return () => { active = false; };
+  }, [ready, valid, Boolean(authorizedSession), Boolean(accountToRestore)]);
 
   useEffect(() => {
     if (ready && valid && !authorizedSession && accountToRestore && !autoRestoreStarted.current) {
@@ -116,10 +126,10 @@ export default function OAuthAuthorizePage() {
       <small>FRIENDEN{client ? ` × ${client.label}` : ""}</small>
       <h1>{t("apps.authorizeTitle", { app: appName })}</h1>
       {!valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>
-        <p>{accountToRestore && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount") : t("apps.signInFirst")}</p>
+        <p>{accountsRefreshing || accountToRestore && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount", { app: appName }) : t("apps.signInFirst", { app: appName })}</p>
         {accounts.length && (!accountToRestore || accountError) || accounts.length > 1 ? <div className="oauth-account-list" aria-label={t("apps.chooseAccount")}>
-          {accounts.map((account) => <button disabled={Boolean(selectingAccount)} key={account.key} onClick={() => void selectAccount(account)} type="button">
-            <UserAvatar className="oauth-account-avatar" name={account.session.user.name} uri={account.session.user.avatar_uri} />
+          {accounts.map((account) => <button disabled={Boolean(selectingAccount) || accountsRefreshing} key={account.key} onClick={() => void selectAccount(account)} type="button">
+            <UserAvatar cacheKey={account.session.user.avatar_cache_key} className="oauth-account-avatar" name={account.session.user.name} uri={account.session.user.avatar_uri} />
             <span><strong>{account.session.user.name}</strong><small>{account.spaceName} · @{account.slug}</small></span>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </button>)}

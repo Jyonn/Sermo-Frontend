@@ -93,14 +93,24 @@ export function listPwaCachedAccounts(): PwaCachedAccount[] {
   })).sort((left, right) => right.lastVisitedAt - left.lastVisitedAt);
 }
 
+let refreshAccountsInFlight: Promise<PwaCachedAccount[]> | null = null;
+
 export async function refreshPwaCachedAccounts(signal?: AbortSignal): Promise<PwaCachedAccount[]> {
+  if (!refreshAccountsInFlight) {
+    refreshAccountsInFlight = performAccountRefresh().finally(() => { refreshAccountsInFlight = null; });
+  }
+  const result = await refreshAccountsInFlight;
+  if (signal?.aborted) throw new DOMException("Account refresh cancelled", "AbortError");
+  return result;
+}
+
+async function performAccountRefresh(): Promise<PwaCachedAccount[]> {
   const currentAccounts = listPwaCachedAccounts();
   const refreshed = await Promise.all(currentAccounts.map(async (account) => {
     try {
-      const session = await refreshDetachedAuthSession(account.session, signal);
+      const session = await refreshDetachedAuthSession(account.session);
       return { ...account, key: `${account.slug}:${session.user.user_id}`, session };
     } catch (error) {
-      if (signal?.aborted) throw error;
       return error instanceof ApiError && error.status === 401 ? null : account;
     }
   }));

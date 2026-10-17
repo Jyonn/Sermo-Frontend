@@ -1,3 +1,4 @@
+import { mergeSessionUser } from "./sessionUser";
 import type {
   ApiEnvelope,
   AdminActivityDTO,
@@ -217,11 +218,11 @@ async function refreshSession(currentSession: AuthSession) {
   });
 
   const body = await parseEnvelope<LoginAuthDTO>(response);
-  const nextSession: AuthSession = {
+  const nextSession = await completeSessionAvatar({
     accessToken: body.auth,
     refreshToken: body.refresh,
-    user: body.data,
-  };
+    user: mergeSessionUser(currentSession.user, body.data),
+  });
   const latestSession = authConfig.getSession();
   if (!latestSession) {
     throw new ApiError(i18n.t("auth.sessionExpired"), "UNAUTHORIZED", 401);
@@ -272,11 +273,24 @@ export async function refreshDetachedAuthSession(currentSession: AuthSession, si
     signal,
   });
   const body = await parseEnvelope<LoginAuthDTO>(response);
-  return {
+  return completeSessionAvatar({
     accessToken: body.auth,
     refreshToken: body.refresh,
-    user: body.data,
-  } satisfies AuthSession;
+    user: mergeSessionUser(currentSession.user, body.data),
+  });
+}
+
+async function completeSessionAvatar(session: AuthSession): Promise<AuthSession> {
+  if (session.user.avatar_uri !== undefined) return session;
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/me`, { headers: { Authorization: `Bearer ${session.accessToken}` } });
+    const user = await parseEnvelope<UserMeDTO>(response);
+    if (user.user_id !== session.user.user_id) return session;
+    return { ...session, user: { ...session.user, avatar_type: user.avatar_type, avatar_uri: user.avatar_uri, avatar_cache_key: user.avatar_cache_key, avatar_frame_style: user.avatar_frame_style } };
+  } catch {
+    // Avatar hydration must not prevent restoring a valid login on older servers.
+    return session;
+  }
 }
 
 async function requestCore<T>(path: string, options: RequestOptions = {}): Promise<T> {

@@ -174,6 +174,7 @@ export interface GrowthRewardDTO {
 }
 
 export interface AccessPayload {
+  avatar_cache_key?: string;
   user_id: number;
   name: string;
   space_id: number;

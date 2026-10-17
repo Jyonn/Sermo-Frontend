@@ -85,7 +85,7 @@ export default function PwaAccountEntryPage() {
             <div className="pwa-account-rail" role="list" aria-label={t("pwa.cachedAccounts")}>
               {activeSpace.accounts.map((account) => (
                   <button className="pwa-account-card" key={account.key} onClick={() => openAccount(account)} role="listitem" type="button">
-                    <UserAvatar className="pwa-account-avatar" frame={account.session.user.avatar_frame_style} name={account.session.user.name} uri={account.session.user.avatar_uri} />
+                    <UserAvatar cacheKey={account.session.user.avatar_cache_key} className="pwa-account-avatar" frame={account.session.user.avatar_frame_style} name={account.session.user.name} uri={account.session.user.avatar_uri} />
                     <span className="pwa-account-card-copy"><strong>{account.session.user.name}</strong><small><b>{account.spaceName}</b><span>@{account.slug}</span></small></span>
                     <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
                   </button>
