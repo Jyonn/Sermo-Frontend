@@ -1,6 +1,7 @@
 # Frienden OAuth UI review — local draft 2026.10.17.18
 
-Scope: frontend presentation only. Not pushed or deployed. No backend, endpoint,
+Scope: frontend presentation only. Browser acceptance completed; user-approved release
+is ready for publication. No backend, endpoint,
 database, registry policy, grant or consent behavior is changed. Existing user changes
 in `logos/frienden/preview.html` are excluded.
 
@@ -37,11 +38,31 @@ renders review/disable controls. All mutations retain the existing `version` and
   (4 tests: approved-vs-pending presentation, filters/empty revisions and callback safety).
 - PASS: `npm run build`, including stylesheet architecture checks and TypeScript.
 - PASS: `git diff --check`.
-- NOT RUN: actual desktop/mobile before-after captures, focus/Tab/Escape, dirty-editor
-  cancel, role visibility and failed-save retry in a browser. The supported Chrome
-  automation reports another extension UI is open and blocks page access. The user
-  was asked to dismiss that extension UI. This is a concrete browser-access blocker,
-  not a successful visual/interaction acceptance result.
+- PASS: actual published-source vs new-source desktop and 390px screenshots, using the
+  same four synthetic applications and actual existing platform-console layout.
+- PASS: pending filter, application-name/client search, one detail surface, approve/
+  reject confirmation and rejection disabled until a reason is entered. Cancellation
+  leaves the pending application unchanged; no production application was reviewed.
+- PASS: Tab/Shift+Tab wrap between first and last panel controls; Escape closes detail
+  and restores its originating row. Dirty-editor Escape shows a single discard choice;
+  Keep editing retains client ID/name/callback.
+- PASS: synthetic save error retains all form values. Returning from confirmation to
+  the editor preserves them; retry after synthetic recovery succeeds and restores
+  focus to Add. No production API is used by the fixture.
+- PASS: phone page scroll width equals viewport width (390px); detail is one bottom
+  sheet. Configuration/history/audit tabs render individually, and Escape and the close
+  button return focus to the application row.
+- PASS: actual local preview marker was refreshed and read as `2026.10.17.18`; the
+  initial dev-server marker had cached .17 at startup while HMR displayed the new source.
+  Build output is .18. Production remains unchanged until the approved publication.
+- REVIEWED: member mode keeps inline detail inside its existing member surface and
+  platform review/disable actions remain guarded by the existing `platform` mode.
+  Backend permission enforcement and API contracts are untouched.
+
+Screenshots are saved at `/Users/jyonn/Projects/Apps/Sermo/artifacts/oauth-ui-review/`:
+`before-desktop.png`, `after-desktop.png`, `before-mobile.png`, `after-mobile.png`,
+`after-mobile-sheet.png`. The earlier extension interference was intermittent; the
+critical checks above were actually completed after the user selected the local page.
 
 The currently published source `af88051` was frozen at
 `/tmp/frienden-oauth-before` with the same synthetic fixture so accurate before captures
@@ -51,7 +72,7 @@ These fixtures render the existing App/router/platform console with synthetic re
 and blocked external API requests. They are QA surfaces, not new product websites.
 No production session or online authorization record is used.
 
-## Remaining browser acceptance
+## Acceptance checklist used
 
 1. Capture published baseline and new directory at desktop and 390px, plus new detail
    and mobile bottom sheet. Compare with existing Overview/Spaces/Audit tabs.
@@ -68,6 +89,7 @@ No production session or online authorization record is used.
 Frontend-only release 2026.10.17.18: shared OAuth directory/detail/editor UI, its scoped
 styles, presentation helpers/tests, translations and concise release notes. Existing
 platform page embeds the same shared component. No backend or database release is
-needed. Browser acceptance above must be completed before claiming the design is ready
-to publish. Publishing/push/mirror synchronization requires a separate user instruction;
-none is performed by this local UI task.
+needed. The user has now authorized publication conditional on successful audit UI
+checks; the checks above meet that condition. Only this frontend UI and its review
+record may be pushed/published. No backend reload, migration, registry mutation or
+grant change is part of this release.
