@@ -11,7 +11,7 @@ import { BottomSheet } from "../components/BottomSheet";
 import { ContentLoader, QuietState } from "../components/BoundaryState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { CloudResourceDrawer } from "../components/CloudResourceDrawer";
-import { ChronelleCalendar } from "../components/ChronelleCalendar";
+import { UserProfilePanel } from "../components/UserProfilePanel";
 import { ChronellePluginDialog } from "../components/ChronellePluginDialog";
 import { GestureSetupPanel } from "../components/GestureLock";
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
@@ -2445,10 +2445,6 @@ export default function MenuPage() {
       <SideDrawer historyKey="basic-info" onRouteOpen={() => setBasicDrawerOpen(true)} open={basicDrawerOpen} onClose={() => setBasicDrawerOpen(false)} title={t("menu.basicInfo")}>
         <div className="detail-list">
           <div className="simple-list">
-            <button className="simple-row menu-link-row" onClick={() => setMyCardOpen(true)} type="button">
-              <div className="row-main menu-key-cell"><strong>{t("profile.myCard")}</strong></div>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
             <button className="simple-row menu-link-row" onClick={() => discoverThen("capability.avatar", () => setAvatarDialogOpen(true))} type="button">
               <div className="row-main menu-key-cell">
                 <strong>{t("profile.avatar")}</strong>
@@ -2484,37 +2480,25 @@ export default function MenuPage() {
               <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.welcome" /><span className="material-symbols-outlined">chevron_right</span></span>
             </button> : null}
           </div>
+          <section className="list-section" aria-label={t("profile.myCard")}>
+            <div className="simple-list">
+              <button className="simple-row menu-link-row" onClick={() => setMyCardOpen(true)} type="button">
+                <div className="row-main menu-key-cell"><strong>{t("profile.myCard")}</strong></div>
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          </section>
         </div>
       </SideDrawer>
 
       {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} /> : null}
-      <SideDrawer historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")}>
-        <div className="more-apps-drawer">
-          <div className="mode-switch" role="tablist" aria-label={t("profile.cardAudience")}>
-            {(["friend", "stranger"] as const).map((audience) => <button key={audience} type="button" role="tab" aria-selected={cardAudience === audience} className={`mode-pill ${cardAudience === audience ? "active" : ""}`} onClick={() => setCardAudience(audience)}>{t(audience === "friend" ? "profile.friendView" : "profile.strangerView")}</button>)}
-          </div>
-          <div role="tabpanel" aria-label={t(cardAudience === "friend" ? "profile.friendView" : "profile.strangerView")} className={`user-profile-panel profile-theme-${me?.profile_card_theme ?? "default"}`}>
-            <UserProfileCard
-              avatarFrame={me?.avatar_frame_style}
-              avatarUri={me?.avatar_uri ?? session?.user.avatar_uri}
-              growthLevel={growthLevel}
-              isOnline
-              isPermanentVip={permanentVip}
-              name={me?.name ?? session?.user.name ?? t("brand.user")}
-              official={me?.official}
-              operator={me?.operator}
-              permanentVipLabel={me?.permanent_vip_slot ? t("profile.permanentVipRank", { slot: String(me.permanent_vip_slot).padStart(3, "0") }) : t("profile.permanentVip")}
-              presence={t("profile.onlineNow")}
-              relationshipLabel={t(cardAudience === "friend" ? "profile.friend" : "profile.sameSpace")}
-            />
-            <div className="user-profile-primary-actions">
-              <button className="button" disabled type="button">{t(cardAudience === "friend" ? "profile.sendMessage" : "profile.addFriend")}</button>
-              <button className="button user-profile-statements-action" disabled type="button">{t("profile.viewStatements")}</button>
-            </div>
-            <p className="row-subtle">{t("profile.cardPreviewHint")}</p>
-            <ChronelleCalendar calendarId={me?.chronelle_calendar_id} />
-          </div>
-        </div>
+      <SideDrawer headerless historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")}>
+        {session ? <UserProfilePanel
+          userId={session.user.user_id}
+          initialUser={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }}
+          previewAudience={cardAudience}
+          onPreviewAudienceChange={setCardAudience}
+        /> : null}
       </SideDrawer>
 
       <SideDrawer historyKey="personalization" onRouteOpen={() => setPersonalizationDrawerOpen(true)} open={personalizationDrawerOpen} onClose={() => setPersonalizationDrawerOpen(false)} title={t("menu.personalization")}>

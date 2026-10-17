@@ -37,6 +37,8 @@ export interface UserProfileSeed {
 }
 
 interface UserProfilePanelProps {
+  previewAudience?: "friend" | "stranger";
+  onPreviewAudienceChange?: (audience: "friend" | "stranger") => void;
   userId: number;
   initialUser?: UserProfileSeed | null;
   initialIsFriend?: boolean;
@@ -64,11 +66,13 @@ function friendshipAge(respondedAt?: number | null) {
   return days < 30 ? i18n.t("profile.knownDays", { count: days }) : i18n.t("profile.knownMonths", { count: Math.floor(days / 30) });
 }
 
-export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, friendRequestSource = "direct" }: UserProfilePanelProps) {
+export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, friendRequestSource = "direct", previewAudience, onPreviewAudienceChange }: UserProfilePanelProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
-  const isSelf = session?.user.user_id === userId;
+  const isSelfAccount = session?.user.user_id === userId;
+  const isSelf = isSelfAccount && !previewAudience;
+  const preview = Boolean(previewAudience);
   const cacheScope = buildTabCacheScope(session?.user.space_id, session?.user.user_id);
   const initialCached = useMemo(
     () => readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data ?? null,
@@ -86,7 +90,8 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [groupCandidatesLoading, setGroupCandidatesLoading] = useState(false);
   const [groupSelectedIds, setGroupSelectedIds] = useState<number[]>([]);
   const [groupCreating, setGroupCreating] = useState(false);
-  const [isFriend, setIsFriend] = useState<boolean | null>(initialCached?.isFriend ?? initialIsFriend ?? null);
+  const [friendStatus, setIsFriend] = useState<boolean | null>(initialCached?.isFriend ?? initialIsFriend ?? null);
+  const isFriend = preview ? previewAudience === "friend" : friendStatus;
   const [respondedAt, setRespondedAt] = useState<number | null>(initialCached?.respondedAt ?? null);
   const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
@@ -116,7 +121,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal),
       api.getFriendStatus(userId, controller.signal),
       api.getSquareStatements(
-        isSelf ? { limit: 5, scope: "mine" } : { limit: 5, scope: "all", user_id: userId },
+        isSelfAccount ? { limit: 5, scope: "mine" } : { limit: 5, scope: "all", user_id: userId },
         controller.signal
       ).catch(() => []),
     ])
@@ -170,7 +175,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       controller.abort();
       syncingCallbackRef.current?.(false);
     };
-  }, [cacheScope, isSelf, userId]);
+  }, [cacheScope, isSelfAccount, userId]);
 
   const presence = useMemo(() => {
     if (!user) return "";
@@ -338,14 +343,18 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           ? t("profile.permanentVipRank", { slot: String(user.permanent_vip_slot).padStart(3, "0") })
           : t("profile.permanentVip")}
         presence={presence}
-        relationshipLabel={isSelf ? undefined : isFriend ? friendshipAge(respondedAt) : t("profile.sameSpace")}
+        relationshipLabel={isSelf ? undefined : isFriend ? preview ? t("profile.friend") : friendshipAge(respondedAt) : t("profile.sameSpace")}
       />
+
+      {preview ? <div className="mode-switch" role="tablist" aria-label={t("profile.cardAudience")}>
+        {(["friend", "stranger"] as const).map((audience) => <button key={audience} type="button" role="tab" aria-selected={previewAudience === audience} className={`mode-pill ${previewAudience === audience ? "active" : ""}`} onClick={() => onPreviewAudienceChange?.(audience)}>{t(audience === "friend" ? "profile.friendView" : "profile.strangerView")}</button>)}
+      </div> : null}
 
       <div className="user-profile-primary-actions">
         {!isSelf && isFriend === true ? (
-          <button className="button" onClick={() => void openChat()} type="button">{t("profile.sendMessage")}</button>
+          <button className="button" disabled={preview} onClick={() => void openChat()} type="button">{t("profile.sendMessage")}</button>
         ) : !isSelf && isFriend === false ? (
-          <button className="button" disabled={requestState !== "idle"} onClick={() => void sendRequest()} type="button">
+          <button className="button" disabled={preview || requestState !== "idle"} onClick={() => void sendRequest()} type="button">
             {requestState === "sending" ? t("profile.sending") : requestState === "sent" ? t("profile.sent") : t("profile.addFriend")}
           </button>
         ) : null}
@@ -366,11 +375,11 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
       {isFriend === true ? (
         <section className="user-profile-reminders" aria-label={t("profile.reminders")}>
-          <button className={onlineReminder ? "is-active" : ""} disabled={reminderSaving !== null} onClick={() => void updateReminder("online", !onlineReminder)} type="button">
+          <button className={onlineReminder ? "is-active" : ""} disabled={preview || reminderSaving !== null} onClick={() => void updateReminder("online", !onlineReminder)} type="button">
             <span className="material-symbols-outlined">notifications_active</span>
             <span><strong>{t("profile.onlineReminder")}</strong><small>{t(onlineReminder ? "profile.enabled" : "profile.disabled")}</small></span>
           </button>
-          <button className={statementReminder ? "is-active" : ""} disabled={reminderSaving !== null} onClick={() => void updateReminder("statement", !statementReminder)} type="button">
+          <button className={statementReminder ? "is-active" : ""} disabled={preview || reminderSaving !== null} onClick={() => void updateReminder("statement", !statementReminder)} type="button">
             <span className="material-symbols-outlined">campaign</span>
             <span><strong>{t("profile.statementReminder")}</strong><small>{t(statementReminder ? "profile.enabled" : "profile.disabled")}</small></span>
           </button>
@@ -384,7 +393,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         </div>
         <div className="user-profile-groups">
           {isFriend === true ? (
-            <button className={`user-profile-group-tile user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={!canCreateGroup} onClick={() => void openGroupPicker()} type="button">
+            <button className={`user-profile-group-tile user-profile-create-group${canCreateGroup ? "" : " is-locked"}`} disabled={preview || !canCreateGroup} onClick={() => void openGroupPicker()} type="button">
               <span className="user-profile-group-tile-avatar user-profile-create-group-icon material-symbols-outlined">{canCreateGroup ? "add" : "lock"}</span>
               <strong>{t("profile.newGroup")}</strong>
             </button>
@@ -401,7 +410,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
       {isFriend === true ? (
         <section className="user-profile-relationship-actions">
-          <button className="user-profile-danger-action" onClick={() => setRemoveConfirmOpen(true)} type="button">{t("profile.removeFriend")}</button>
+          <button className="user-profile-danger-action" disabled={preview} onClick={() => setRemoveConfirmOpen(true)} type="button">{t("profile.removeFriend")}</button>
         </section>
       ) : null}
 

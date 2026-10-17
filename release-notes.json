@@ -1,25 +1,19 @@
 {
-  "id": "2026.10.17.5",
+  "id": "2026.10.17.6",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "更可靠的版本更新",
+      "title": "我的名片展示优化",
       "items": [
-        "升级前验证页面资源和服务进程，避免失败后反复刷新；支持上传升级诊断报告",
-        "修复侧栏、PWA 与第三方授权账号列表的头像缺失及刷新后退回文字占位的问题",
-        "精简时序插件说明，优化解绑按钮的布局与确认交互",
-        "支持 Chronelle 使用友间账号授权登录，仅共享个人资料",
-        "授权第三方应用读取个人资料时，可同步当前头像，兼容预设与自定义头像"
+        "我的名片移至基础信息下方的独立分区",
+        "预览复用好友完整名片布局，支持好友与陌生人视角切换"
       ]
     },
     "en": {
-      "title": "More reliable updates",
+      "title": "A complete preview of your profile",
       "items": [
-        "Updates verify resources and service workers before restarting, with diagnostic report uploads on failure",
-        "Fixed missing avatars and text placeholders after session refresh in the sidebar, PWA and authorization account lists",
-        "Simplified the Chronelle description and improved the unlink button and confirmation",
-        "Chronelle can now request Frienden sign-in with profile-only access",
-        "Authorized apps with profile access can now receive your current preset or custom avatar"
+        "Your profile card now has its own section below basic information",
+        "Preview the full shared profile layout from a friend or stranger perspective"
       ]
     }
   }
