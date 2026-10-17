@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.17.8",
+  "id": "2026.10.17.9",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "名片视角切换优化",
+      "title": "会话列表传输优化",
       "items": [
-        "好友与陌生人视角切换移至名片右上角，与返回按钮对齐"
+        "减少会话列表中重复传输的成员资料，保留未读、艾特与群聊信息",
+        "会话列表支持 HTTP 压缩，按压缩后大小选择更省流量的格式"
       ]
     },
     "en": {
-      "title": "Profile preview controls",
+      "title": "Leaner chat list transfers",
       "items": [
-        "Friend and stranger preview controls now sit at the top right, aligned with the back button"
+        "Chat lists transfer less repeated member data while preserving unread counts, mentions and group details",
+        "Chat lists support HTTP compression and select the smaller compressed representation"
       ]
     }
   }

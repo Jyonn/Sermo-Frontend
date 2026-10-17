@@ -1,4 +1,5 @@
 import { mergeSessionUser } from "./sessionUser";
+import { decodeChatList, type CompactChatList } from "./chatListTransport";
 import type {
   ApiEnvelope,
   AdminActivityDTO,
@@ -695,7 +696,7 @@ export const api = {
   },
 
   getChats(signal?: AbortSignal, purpose: "normal" | "submission" = "normal", role?: "author" | "reviewer") {
-    return request<ChatDTO[]>("/chats/", { auth: true, query: purpose === "submission" ? { purpose, ...(role ? { role } : {}) } : undefined, signal });
+    return request<ChatDTO[] | CompactChatList>("/chats/", { auth: true, query: { format: "compact-v1", ...(purpose === "submission" ? { purpose, ...(role ? { role } : {}) } : {}) }, signal }).then(decodeChatList);
   },
 
   getSubmissionRecipients(signal?: AbortSignal) {
