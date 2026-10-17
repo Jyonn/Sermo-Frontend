@@ -4,7 +4,13 @@ import { agendaCenteredDays, agendaDayDistance, agendaDay, agendaBusyRanges, age
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./ChronelleCalendar.css";
 
-export function ChronelleCalendar({ calendarId }: { calendarId?: string }) {
+async function fetchAgenda(params: URLSearchParams, signal: AbortSignal): Promise<unknown> {
+  const response = await fetch(`https://chronelle.jyonn.space/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal });
+  if (!response.ok) throw new Error("Calendar unavailable");
+  return response.json();
+}
+
+export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { calendarId?: string; loadEvents?: (params: URLSearchParams, signal: AbortSignal) => Promise<unknown> }) {
   const { t, language } = useI18n();
   const [selectedDay, setSelectedDay] = useState(() => agendaDay());
   const [queue, setQueue] = useState<(number | Date)[]>([]);
@@ -59,13 +65,13 @@ export function ChronelleCalendar({ calendarId }: { calendarId?: string }) {
     const end = new Date(start);
     end.setDate(end.getDate() + 7);
     const params = new URLSearchParams({ share: calendarId!, start: new Date(start).toISOString(), end: end.toISOString() });
-    void fetch(`https://chronelle.jyonn.space/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal: controller.signal })
-      .then(async (response) => { if (!response.ok) throw new Error("Calendar unavailable"); return normalizeAgenda(await response.json()); })
+    void loadEvents(params, controller.signal)
+      .then(normalizeAgenda)
       .then((rows) => { if (active) { setEvents(rows); setLoadedKey(requestKey); setState("ready"); } })
       .catch(() => { if (active) setState("error"); })
       .finally(() => window.clearTimeout(timeout));
     return () => { active = false; controller.abort(); window.clearTimeout(timeout); };
-  }, [calendarId, valid, start, requestKey, reload]);
+  }, [calendarId, valid, start, requestKey, reload, loadEvents]);
   if (!valid) return null;
   const shareUrl = `https://chronelle.jyonn.space/#/share/${calendarId}`;
   const displayState = loadedKey !== requestKey && state !== "error" ? "loading" : state;
@@ -74,10 +80,9 @@ export function ChronelleCalendar({ calendarId }: { calendarId?: string }) {
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>
     <div className="chronelle-calendar-heading"><div><img src={chronelleIcon} alt="" /><strong>{t("chronelle.title")}</strong></div><a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.open")} ↗</a></div>
     <div className="chronelle-calendar-navigation">
-      <button type="button" aria-label={t("chronelle.previousDay")} onClick={() => setQueue(value => [...value, -1])}>‹</button>
+      <button type="button" aria-label={t("chronelle.previousDay")} onClick={() => setQueue(value => [...value, -1])}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg></button>
       <strong aria-live="polite">{selectedDay.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</strong>
-      <button type="button" aria-label={t("chronelle.nextDay")} onClick={() => setQueue(value => [...value, 1])}>›</button>
-      <button className="chronelle-today" type="button" onClick={() => { setQueue([]); setPhase("idle"); setSelectedDay(agendaDay()); }}>{t("chronelle.today")}</button>
+      <button type="button" aria-label={t("chronelle.nextDay")} onClick={() => setQueue(value => [...value, 1])}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg></button>
     </div>
     <div className="chronelle-strip-viewport" role="group" aria-label={t("chronelle.chooseDay")}>
       <div className={`chronelle-week-strip chronelle-strip-${phase}`} style={{ transform: `translateX(${-(3 + (phase === "slide" ? step : 0)) * 100 / 13}%)` }}>
