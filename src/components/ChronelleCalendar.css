@@ -10,11 +10,14 @@
 .chronelle-calendar-navigation button > svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .chronelle-calendar-navigation button:hover { color: var(--brand-primary); }
 .chronelle-calendar-navigation button:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: -5px; }
-.chronelle-strip-viewport { overflow: hidden; border-radius: 13px; }
-.chronelle-week-strip { position: relative; display: grid; width: calc(100% * 13 / 7); grid-template-columns: repeat(13, minmax(0, 1fr)); }
+.chronelle-strip-viewport { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; border-radius: 13px; overscroll-behavior-x: contain; }
+.chronelle-strip-viewport::-webkit-scrollbar { display: none; }
+.chronelle-week-strip { position: relative; display: grid; width: calc(100% * 41 / 7); grid-template-columns: repeat(41, minmax(0, 1fr)); }
 .chronelle-week-strip > button { position: relative; display: grid; justify-items: center; gap: 6px; min-width: 0; min-height: 68px; padding: 8px 2px; border: 1px solid transparent; border-radius: 13px; color: inherit; background: transparent; }
 .chronelle-week-strip > button:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: -3px; }
-.chronelle-day-highlight { position: absolute; top: 0; bottom: 0; width: calc(100% / 13); border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 13px; background: color-mix(in srgb, var(--brand-primary) 18%, transparent); }
+.chronelle-day-highlight { position: absolute; z-index: 1; pointer-events: none; top: 0; bottom: 0; width: calc(100% / 41); border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 13px; background: color-mix(in srgb, var(--brand-primary) 24%, transparent); }
+.chronelle-week-strip > button.chronelle-past-day:not([aria-pressed="true"]) { background: color-mix(in srgb, currentColor 5%, transparent); }
+.chronelle-week-strip > button > small, .chronelle-week-strip > button > strong, .chronelle-week-strip > button > i { position: relative; z-index: 2; }
 .chronelle-strip-select .chronelle-day-highlight { transition: left 160ms ease; }
 .chronelle-strip-slide { transition: transform 220ms ease; }
 @media (prefers-reduced-motion: reduce) { .chronelle-strip-select .chronelle-day-highlight, .chronelle-strip-slide { transition: none; } }

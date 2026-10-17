@@ -24,6 +24,11 @@ export function agendaDayDistance(from: Date, to: Date) {
   return Math.round((serial(to) - serial(from)) / 86400000);
 }
 
+export function agendaWindowStart(day: Date) {
+  const anchor = new Date(2020, 0, 1);
+  return agendaDay(anchor, Math.floor(agendaDayDistance(anchor, day) / 28) * 28);
+}
+
 export function agendaBusyRanges(events: AgendaEvent[], day: Date) {
   const start = agendaDay(day).getTime();
   const end = agendaDay(day, 1).getTime();

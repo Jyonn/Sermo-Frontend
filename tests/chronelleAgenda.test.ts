@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { agendaCenteredDays, agendaDayDistance, agendaBusyRanges, agendaDay, agendaTimeRange, agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
+import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaBusyRanges, agendaDay, agendaTimeRange, agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
+test("rolling dates stay bounded in DOM while browsing arbitrary historical and future dates", () => {
+  for (const year of [1900, 2026, 2100]) {
+    const selected = new Date(year, 0, 1);
+    const days = agendaCenteredDays(selected, 20);
+    assert.equal(days.length, 41);
+    assert.equal(days[20].getTime(), selected.getTime());
+    const start = agendaWindowStart(selected);
+    assert.ok(agendaDayDistance(start, selected) >= 0);
+    assert.ok(agendaDayDistance(start, selected) < 28);
+    assert.equal(agendaDayDistance(start, agendaWindowStart(agendaDay(start, 28))), 28);
+  }
+});
 test("centered strip keeps selection fourth across month and year boundaries", () => {
   const selected = new Date(2026, 0, 1);
   const days = agendaCenteredDays(selected);

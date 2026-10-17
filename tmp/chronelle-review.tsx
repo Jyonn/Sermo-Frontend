@@ -19,6 +19,9 @@ window.fetch = async (input, init) => {
 };
 async function mockAgenda(_params: URLSearchParams, signal?: AbortSignal) {
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  document.documentElement.dataset.agendaRequestCount = String(Number(document.documentElement.dataset.agendaRequestCount ?? 0) + 1);
+  document.documentElement.dataset.agendaRequestStart = _params.get('start') ?? '';
+  document.documentElement.dataset.agendaRequestEnd = _params.get('end') ?? '';
   const day = new Date(); day.setHours(0, 0, 0, 0);
   const stamp = (offset: number, hour: number, minute = 0) => { const value = new Date(day); value.setDate(value.getDate() + offset); value.setHours(hour, minute); return value.toISOString(); };
   return [

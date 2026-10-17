@@ -5,14 +5,14 @@
     "zh-CN": {
       "title": "按天查看日历",
       "items": [
-        "Chronelle 支持前后一天切换，日期条与当天内容同步",
+        "Chronelle 日期条支持持续横向浏览，日期与当天内容同步，过去日期更易区分",
         "日程显示起止时间和紧凑忙碌条，跨日时间标明日期"
       ]
     },
     "en": {
       "title": "Browse your calendar by day",
       "items": [
-        "Move to the previous or next day with the date strip and agenda in sync",
+        "Scroll through calendar dates with the agenda in sync and past dates clearly distinguished",
         "See time ranges and a compact busy bar, with dates across midnight"
       ]
     }
