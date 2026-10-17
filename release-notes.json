@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.17.9",
+  "id": "2026.10.17.10",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "会话列表传输优化",
+      "title": "个人名片展示修复",
       "items": [
-        "减少会话列表中重复传输的成员资料，保留未读、艾特与群聊信息",
-        "会话列表支持 HTTP 压缩，按压缩后大小选择更省流量的格式"
+        "修复陌生人视角下按钮和最近发言区域被拉高的问题",
+        "最近发言独立加载，不再因其他资料请求失败或超过七天而误显示为空"
       ]
     },
     "en": {
-      "title": "Leaner chat list transfers",
+      "title": "Profile display fixes",
       "items": [
-        "Chat lists transfer less repeated member data while preserving unread counts, mentions and group details",
-        "Chat lists support HTTP compression and select the smaller compressed representation"
+        "Fixed stretched actions and recent-post cards in stranger previews",
+        "Recent posts load independently and no longer disappear due to unrelated requests or a seven-day cutoff"
       ]
     }
   }

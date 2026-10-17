@@ -25,3 +25,15 @@ test("preview relationship controls cannot mutate the current user's friendships
     assert.ok(matching.every((button) => /disabled=\{preview(?:\s*\|\||\})/.test(button)), action);
   }
 });
+test("recent posts load independently, without a seven-day cutoff or anonymous identity", () => {
+  const requestGroup = panel.slice(panel.indexOf("Promise.all(["), panel.indexOf(".then(([friends"));
+  assert.doesNotMatch(requestGroup, /getSquareStatements/);
+  assert.match(panel, /getSquareStatements\(\{ limit: 5, scope: isSelfAccount \? "mine" : "all", user_id: userId \}/);
+  assert.doesNotMatch(panel, /RECENT_STATEMENT_WINDOW_SECONDS/);
+  assert.match(panel, /setRecentState\("error"\)/);
+});
+test("profile rows cannot stretch when the stranger preview has fewer sections", () => {
+  const styles = readFileSync(new URL("../src/styles/app/20-profile-settings.css", import.meta.url), "utf8");
+  const rule = styles.match(/\n\.user-profile-panel \{([^}]+)\}/)?.[1];
+  assert.match(rule ?? "", /align-content: start/);
+});

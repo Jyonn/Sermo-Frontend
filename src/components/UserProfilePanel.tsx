@@ -57,8 +57,6 @@ interface UserProfileCacheSnapshot {
   recentStatement?: SquareStatementDTO | null;
 }
 
-const RECENT_STATEMENT_WINDOW_SECONDS = 7 * 24 * 60 * 60;
-
 function friendshipAge(respondedAt?: number | null) {
   if (!respondedAt) return i18n.t("profile.friend");
   const days = Math.max(1, Math.floor((Date.now() / 1000 - respondedAt) / 86400));
@@ -101,6 +99,9 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
   const [onlineReminder, setOnlineReminder] = useState(Boolean(initialCached?.onlineReminder));
   const [statementReminder, setStatementReminder] = useState(Boolean(initialCached?.statementReminder));
   const [recentStatement, setRecentStatement] = useState<SquareStatementDTO | null>(initialCached?.recentStatement ?? null);
+  const recentStatementRef = useRef(recentStatement);
+  const [recentState, setRecentState] = useState<"loading" | "ready" | "error">("loading");
+  const [recentReload, setRecentReload] = useState(0);
   const [reminderSaving, setReminderSaving] = useState<"online" | "statement" | null>(null);
 
   useEffect(() => {
@@ -110,21 +111,18 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     setGroupChats(cached?.groupChats ?? []);
     setIsFriend(cached?.isFriend ?? initialIsFriend ?? null);
     setRespondedAt(cached?.respondedAt ?? null);
-    setRecentStatement(cached?.recentStatement ?? null);
     setViewState(cached || initialUser ? "ready" : "loading");
     setError(null);
     syncingCallbackRef.current?.(true);
+    const meRequest = api.getUserMe(controller.signal);
     Promise.all([
       api.getFriends(controller.signal),
       api.getChats(controller.signal),
-      api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal),
+      isSelfAccount ? meRequest.then((user) => [user]) : api.getSpaceUsers({ limit: 200, offset: 0 }, controller.signal),
       api.getFriendStatus(userId, controller.signal),
-      api.getSquareStatements(
-        isSelfAccount ? { limit: 5, scope: "mine" } : { limit: 5, scope: "all", user_id: userId },
-        controller.signal
-      ).catch(() => []),
     ])
-      .then(([friends, chats, users, status, statements]) => {
+      .then(([friends, chats, users, status]) => {
+        if (controller.signal.aborted) return;
         const matchedFriend = friends.find((row) => row.user_id === userId) ?? null;
         const matchedSpaceUser = users.find((row) => row.user_id === userId) ?? null;
         const matchedUser = matchedFriend && matchedSpaceUser
@@ -136,15 +134,11 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         const nextRespondedAt = status.friendship?.responded_at ?? matchedFriend?.responded_at ?? null;
         const nextGroupChats = chats.filter((chat) => chat.group && chat.members.some((member) => member.user_id === userId));
         const directChat = chats.find((chat) => !chat.group && chat.members.some((member) => member.user_id === userId));
-        const recentStatement = statements.find(
-          (statement) => statement.created_at >= Date.now() / 1000 - RECENT_STATEMENT_WINDOW_SECONDS
-        ) ?? null;
         setRespondedAt(nextRespondedAt);
         setGroupChats(nextGroupChats);
         setDirectChatId(directChat?.chat_id ?? null);
         setOnlineReminder(Boolean(directChat?.online_reminder_enabled));
         setStatementReminder(Boolean(directChat?.statement_reminder_enabled));
-        setRecentStatement(recentStatement);
         writeTabCache(cacheScope, `user-profile:${userId}`, {
           user: matchedUser,
           groupChats: nextGroupChats,
@@ -153,7 +147,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
           directChatId: directChat?.chat_id ?? null,
           onlineReminder: Boolean(directChat?.online_reminder_enabled),
           statementReminder: Boolean(directChat?.statement_reminder_enabled),
-          recentStatement,
+          recentStatement: recentStatementRef.current,
         });
         setRequestState("idle");
         setViewState("ready");
@@ -161,7 +155,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       .catch((apiError) => {
         if (controller.signal.aborted) return;
         const message = apiError instanceof ApiError || apiError instanceof Error ? apiError.message : t("profile.loadFailed");
-        if (!cached && !initialUser) {
+        if (!cached && !initialUser && !isSelfAccount) {
           setError(message);
           setViewState("error");
         }
@@ -169,12 +163,45 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       .finally(() => {
         if (!controller.signal.aborted) syncingCallbackRef.current?.(false);
       });
-    api.getUserMe(controller.signal).then(setCurrentUserMe).catch(() => undefined);
+    meRequest.then((me) => {
+      if (controller.signal.aborted) return;
+      setCurrentUserMe(me);
+      if (isSelfAccount) {
+        setUser(me);
+        setViewState("ready");
+      }
+    }).catch((cause) => {
+      if (controller.signal.aborted || !isSelfAccount || cached || initialUser) return;
+      setError(cause instanceof Error ? cause.message : t("profile.loadFailed"));
+      setViewState("error");
+    });
     return () => {
       controller.abort();
       syncingCallbackRef.current?.(false);
     };
   }, [cacheScope, isSelfAccount, userId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const cached = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data;
+    recentStatementRef.current = cached?.recentStatement?.is_anonymous ? null : cached?.recentStatement ?? null;
+    setRecentStatement(recentStatementRef.current);
+    setRecentState("loading");
+    // Filter identity on the server before limiting, so anonymous posts cannot
+    // hide the latest named post or be associated with a profile card.
+    void api.getSquareStatements({ limit: 5, scope: isSelfAccount ? "mine" : "all", user_id: userId }, controller.signal)
+      .then((statements) => {
+        if (controller.signal.aborted) return;
+        const latest = statements[0] ?? null;
+        recentStatementRef.current = latest;
+        setRecentStatement(latest);
+        setRecentState("ready");
+        const current = readTabCache<UserProfileCacheSnapshot>(cacheScope, `user-profile:${userId}`)?.data;
+        if (current) writeTabCache(cacheScope, `user-profile:${userId}`, { ...current, recentStatement: latest });
+      })
+      .catch(() => { if (!controller.signal.aborted) setRecentState("error"); });
+    return () => controller.abort();
+  }, [cacheScope, isSelfAccount, userId, recentReload]);
 
   const presence = useMemo(() => {
     if (!user) return "";
@@ -358,13 +385,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
 
       <ChronelleCalendar calendarId={user.chronelle_calendar_id} />
 
-      <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} onClick={recentStatement ? openRecentStatement : openStatements} type="button">
+      <button className={`user-profile-recent-statement${recentStatement ? "" : " is-empty"}`} disabled={recentState === "loading" && !recentStatement} onClick={recentState === "error" ? () => setRecentReload((value) => value + 1) : recentStatement ? openRecentStatement : openStatements} type="button">
         <small>
           {t("profile.recentStatement")}
           {recentStatement ? ` · ${formatRelativeTime(recentStatement.created_at)}` : ""}
         </small>
-        <strong>{recentStatement ? recentStatement.text || t("profile.mediaStatement") : t("profile.noRecentStatement")}</strong>
-        <span>{t(recentStatement ? "profile.enterStatement" : "profile.viewStatements")} ›</span>
+        <strong>{recentStatement ? recentStatement.text || t("profile.mediaStatement") : t(recentState === "loading" ? "common.loading" : recentState === "error" ? "profile.loadFailed" : "profile.noRecentStatement")}</strong>
+        <span>{t(recentState === "error" ? "common.retry" : recentStatement ? "profile.enterStatement" : "profile.viewStatements")} ›</span>
         <i className="material-symbols-outlined" aria-hidden="true">campaign</i>
       </button>
 

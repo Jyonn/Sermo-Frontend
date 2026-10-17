@@ -471,6 +471,7 @@ html:not([data-theme="dark"]) :is(.user-profile-create-group-icon, .user-profile
   --profile-line: rgba(63, 95, 82, 0.16);
   --profile-deep: #123f32;
   display: grid;
+  align-content: start;
   gap: 0;
   min-height: calc(100dvh - 114px);
   padding: 0 36px calc(38px + env(safe-area-inset-bottom));
