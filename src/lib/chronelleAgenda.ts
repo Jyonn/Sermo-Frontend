@@ -8,6 +8,38 @@ export interface AgendaEvent {
   location: string;
 }
 
+export function agendaDay(day = new Date(), delta = 0) {
+  const result = new Date(day);
+  result.setHours(0, 0, 0, 0);
+  result.setDate(result.getDate() + delta);
+  return result;
+}
+
+export function agendaBusyRanges(events: AgendaEvent[], day: Date) {
+  const start = agendaDay(day).getTime();
+  const end = agendaDay(day, 1).getTime();
+  const ranges = agendaEventsOn(events, agendaDay(day)).map(event => ({
+    start: Math.max(start, agendaDate(event.start).getTime()),
+    end: Math.min(end, Math.max(agendaDate(event.start).getTime() + 1, agendaDate(event.end).getTime())),
+  })).sort((a, b) => a.start - b.start);
+  const merged: { start: number; end: number }[] = [];
+  for (const range of ranges) {
+    const last = merged[merged.length - 1];
+    if (last && range.start <= last.end) last.end = Math.max(last.end, range.end);
+    else merged.push({ ...range });
+  }
+  return merged.map(range => ({ start: (range.start - start) / (end - start) * 100, end: (range.end - start) / (end - start) * 100 }));
+}
+
+export function agendaTimeRange(event: AgendaEvent, day: Date, language: string) {
+  const format = (value: string) => {
+    const date = agendaDate(value);
+    const time = date.toLocaleTimeString(language, { hour: "2-digit", minute: "2-digit" });
+    return agendaDay(date).getTime() === agendaDay(day).getTime() ? time : `${date.toLocaleDateString(language, { month: "short", day: "numeric" })} ${time}`;
+  };
+  return `${format(event.start)} – ${format(event.end)}`;
+}
+
 export function agendaWeek(offset: number, today = new Date()) {
   const start = new Date(today);
   start.setHours(0, 0, 0, 0);

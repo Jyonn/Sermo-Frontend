@@ -17,10 +17,21 @@
 .chronelle-agenda { min-height: 72px; border-top: 1px solid var(--profile-line, var(--line-soft)); padding-top: 12px; }
 .chronelle-agenda p { margin: 12px 0; color: var(--profile-muted, var(--text-muted)); font-size: .78rem; line-height: 1.6; }
 .chronelle-agenda ol { display: grid; gap: 16px; margin: 0; padding: 4px 0; list-style: none; }
-.chronelle-agenda li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.chronelle-agenda-date { display: block; margin-bottom: 12px; font-size: .75rem; }
+.chronelle-agenda li { display: grid; grid-template-columns: minmax(76px, 32%) minmax(0, 1fr); gap: 12px; align-items: baseline; }
 .chronelle-agenda time { color: var(--profile-muted, var(--text-muted)); font-size: .7rem; font-variant-numeric: tabular-nums; }
 .chronelle-agenda li > div { display: grid; gap: 4px; min-width: 0; border-left: 2px solid var(--brand-primary); padding-left: 10px; }
 .chronelle-agenda li strong { overflow-wrap: anywhere; font-size: .82rem; line-height: 1.5; }
 .chronelle-agenda li small { color: var(--profile-muted, var(--text-muted)); font-size: .7rem; overflow-wrap: anywhere; }
 .chronelle-agenda-state button { padding: 8px 12px; border: 1px solid var(--line-soft); border-radius: 10px; color: inherit; background: transparent; }
 .chronelle-calendar > small { font-size: .65rem; line-height: 1.6; }
+.chronelle-availability { display: grid; gap: 6px; margin-bottom: 16px; }
+.chronelle-busy-bar { position: relative; height: 12px; border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 6px; overflow: hidden; background: repeating-linear-gradient(135deg, transparent, transparent 3px, color-mix(in srgb, currentColor 6%, transparent) 3px, color-mix(in srgb, currentColor 6%, transparent) 5px); }
+.chronelle-busy-bar > i { position: absolute; height: 100%; background: var(--brand-primary); }
+.chronelle-bar-labels { display: flex; justify-content: space-between; font-size: .6rem; font-variant-numeric: tabular-nums; }
+.chronelle-availability > small { font-size: .65rem; color: var(--profile-muted, var(--text-muted)); line-height: 1.6; }
+.chronelle-timeline-details summary { padding-block: 10px; cursor: pointer; font-size: .72rem; }
+.chronelle-timeline { position: relative; height: 480px; margin: 12px 0 20px; }
+.chronelle-timeline > span { position: absolute; left: 0; font-size: .65rem; transform: translateY(-50%); }
+.chronelle-timeline > i { position: absolute; left: 58px; right: 0; overflow: hidden; border-radius: 4px; background: color-mix(in srgb, var(--brand-primary) 24%, transparent); border-left: 2px solid var(--brand-primary); }
+.chronelle-timeline > i > span { padding: 4px; font-size: .65rem; font-style: normal; }

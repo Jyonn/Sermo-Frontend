@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.17.18",
+  "id": "2026.10.17.19",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的应用管理",
+      "title": "按天查看日历",
       "items": [
-        "应用管理支持搜索和状态筛选，详情与编辑按需打开",
-        "审核操作单独确认，取消编辑前提醒保留未保存内容"
+        "Chronelle 支持前后一天切换，日期条与当天内容同步",
+        "日程显示起止时间、紧凑忙碌条和可展开时间轴，跨日时间标明日期"
       ]
     },
     "en": {
-      "title": "Clearer application management",
+      "title": "Browse your calendar by day",
       "items": [
-        "Search and filter applications, with details and editing available when needed",
-        "Confirm review actions separately and keep unsaved changes when cancelling edits"
+        "Move to the previous or next day with the date strip and agenda in sync",
+        "See time ranges, a compact busy bar and an optional timeline, with dates across midnight"
       ]
     }
   }

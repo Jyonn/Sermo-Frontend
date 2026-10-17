@@ -1,6 +1,38 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
+import { agendaBusyRanges, agendaDay, agendaTimeRange, agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
+test("busy ranges clip to the day, merge overlaps and cover all-day intervals", () => {
+  const rows = normalizeAgenda([
+    {start: "2026-10-16T23:00:00", end: "2026-10-17T03:00:00"},
+    {start: "2026-10-17T02:00:00", end: "2026-10-17T04:00:00"},
+  ]);
+  const ranges = agendaBusyRanges(rows, new Date(2026, 9, 17));
+  assert.equal(ranges.length, 1);
+  assert.equal(ranges[0].start, 0);
+  assert.ok(Math.abs(ranges[0].end - 100 / 6) < 1e-10);
+  assert.deepEqual(agendaBusyRanges(normalizeAgenda([{start: "2026-10-17", end: "2026-10-18", all_day: true}]), new Date(2026, 9, 17)), [{start: 0, end: 100}]);
+});
+test("day navigation follows local dates across weeks, years and DST", () => {
+  const previous = process.env.TZ;
+  process.env.TZ = "America/New_York";
+  try {
+    const day = agendaDay(new Date(2026, 2, 8, 12));
+    const next = agendaDay(day, 1);
+    assert.equal(next.getDate(), 9);
+    assert.equal(next.getTime() - day.getTime(), 23 * 3600000);
+    assert.equal(agendaDay(new Date(2026, 10, 1), 1).getTime() - new Date(2026, 10, 1).getTime(), 25 * 3600000);
+    assert.equal(agendaDay(new Date(2026, 0, 1), -1).getFullYear(), 2025);
+    assert.equal(agendaWeek(0, agendaDay(new Date(2026, 9, 18), 1))[0].getDate(), 19);
+  } finally { if (previous === undefined) delete process.env.TZ; else process.env.TZ = previous; }
+});
+test("time ranges retain both endpoints and distinguish cross-day events", () => {
+  const event = normalizeAgenda([{ id: 1, start: "2026-10-17T23:00:00", end: "2026-10-18T01:30:00", locked: true }])[0];
+  const label = agendaTimeRange(event, new Date(2026, 9, 17), "en-GB");
+  assert.match(label, /23:00/);
+  assert.match(label, /18 Oct/);
+  assert.match(label, /01:30/);
+  assert.equal(agendaEventsOn([event, { ...event, id: "overlap" }], new Date(2026, 9, 18)).length, 2);
+});
 test("weeks start on Monday and navigate across month boundaries", () => {
   const days = agendaWeek(0, new Date(2026, 9, 4, 12));
   assert.equal(days[0].getDay(), 1);
