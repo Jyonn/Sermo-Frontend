@@ -48,6 +48,7 @@ import { buildTabCacheScope, readTabCache, writeTabCache } from "../lib/tabCache
 import { purgeCachedMedia } from "../lib/mediaCache";
 import { announceSquareUnread } from "../lib/squareNotifications";
 import { visibleCommentReplyTarget } from "../lib/squareComments";
+import { animateSquareDetail, prepareDetailImages, type DetailMotionNodes } from "../lib/squareDetailMotion";
 import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
@@ -325,11 +326,12 @@ function shareChatTitle(chat: ChatDTO, currentUserId?: number) {
   return chat.title || shareChatPeer(chat, currentUserId)?.name || "FRIENDEN";
 }
 
-function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, onDelete, onLike, onMute, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
+function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, chatBackgroundUri, detail = false, preserveFeedLayout = false, onDelete, onLike, onMute, onOpen, onOpenChatImage, onOpenChatVideo, onOpenImage, onOpenLocation, onOpenProfile, onOpenVideo, onPin, onShare }: {
   statement: SquareStatementDTO;
   canInteract: boolean;
   cardRef?: (node: HTMLElement | null) => void;
   detail?: boolean;
+  preserveFeedLayout?: boolean;
   chatBackgroundTheme?: ChatBackgroundTheme;
   chatBackgroundUri?: string;
   onDelete: () => void;
@@ -375,7 +377,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
     };
   }, [menuPosition]);
   return (
-    <article className={`square-statement-card${detail ? " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} ref={cardRef} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
+    <article className={`square-statement-card${detail ? preserveFeedLayout ? "" : " is-detail" : " is-clickable"}`} onClick={detail ? undefined : onOpen} onKeyDown={detail ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") onOpen(); }} ref={cardRef} role={detail ? undefined : "button"} tabIndex={detail ? undefined : 0}>
       <header className="square-statement-author">
         <button className={`square-statement-avatar-button${statement.is_anonymous ? " is-anonymous" : ""}`} disabled={statement.is_anonymous} onClick={(event) => { event.stopPropagation(); if (!statement.is_anonymous) onOpenProfile(); }} type="button">
           {statement.is_anonymous ? <span className="square-anonymous-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar
@@ -722,6 +724,11 @@ export default function SquarePage() {
   const [inlineStatementExpanded, setInlineStatementExpanded] = useState(false);
   const [inlineTransitionPhase, setInlineTransitionPhase] = useState<InlineTransitionPhase>("idle");
   const [inlineStatementOrigin, setInlineStatementOrigin] = useState<InlineStatementOrigin | null>(null);
+  const inlineDetailPortalRef = useRef<HTMLElement | null>(null);
+  const inlineDetailDockRef = useRef<HTMLDivElement | null>(null);
+  const inlineDetailMaskRef = useRef<HTMLButtonElement | null>(null);
+  const inlineMotionRef = useRef<ReturnType<typeof animateSquareDetail> | null>(null);
+  const inlinePrepareRef = useRef<AbortController | null>(null);
   const statementCardRefs = useRef(new Map<number, HTMLElement>());
   const squareFeedScrollRef = useRef<HTMLElement | null>(null);
   const activeFeedCacheKeyRef = useRef(activeFeedCacheKey);
@@ -1630,11 +1637,32 @@ export default function SquarePage() {
     }));
   };
 
+  const detailMotionNodes = (): DetailMotionNodes | null => {
+    const surface = inlineDetailPortalRef.current?.querySelector<HTMLElement>(".square-inline-statement");
+    const card = surface?.querySelector<HTMLElement>(".square-statement-card");
+    if (!surface || !card) return null;
+    return { surface, card, header: surface.querySelector(".square-inline-detail-header"), discussion: surface.querySelector(".square-inline-discussion"), dock: inlineDetailDockRef.current, mask: inlineDetailMaskRef.current };
+  };
+
   const startInlineStatementClose = (navigateAfter: boolean) => {
     if (!inlineStatementExpanded || inlineTransitionPhase === "closing") return;
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
     if (!desktopWorkspace) {
-      finishInlineStatementClose(navigateAfter);
+      inlinePrepareRef.current?.abort();
+      const nodes = detailMotionNodes();
+      if (!nodes || inlineTransitionPhase === "preparing") {
+        finishInlineStatementClose(navigateAfter);
+        return;
+      }
+      const source = inlineStatementId === null ? null : statementCardRefs.current.get(inlineStatementId);
+      const rect = source?.getBoundingClientRect();
+      const origin = rect && rect.bottom > 0 && rect.top < window.innerHeight ? rect : null;
+      const previous = inlineMotionRef.current;
+      const motion = animateSquareDetail(nodes, origin, true, inlineTransitionPhase === "opening");
+      previous?.cancel();
+      inlineMotionRef.current = motion;
+      setInlineTransitionPhase("closing");
+      void motion.finished.then(() => finishInlineStatementClose(navigateAfter)).catch(() => undefined);
       return;
     }
     setInlineTransitionPhase("closing");
@@ -1667,10 +1695,10 @@ export default function SquarePage() {
       }));
       return;
     }
-    // Commit one opaque detail surface, without scrolling or morphing the feed.
-    setInlineStatementOrigin(null);
+    const sourceRect = statementCardRefs.current.get(statementId)?.getBoundingClientRect();
+    setInlineStatementOrigin(sourceRect ? { left: sourceRect.left, top: sourceRect.top, width: sourceRect.width, height: sourceRect.height } : null);
     setInlineStatementExpanded(true);
-    setInlineTransitionPhase("open");
+    setInlineTransitionPhase("preparing");
     navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
   };
 
@@ -1680,6 +1708,8 @@ export default function SquarePage() {
 
   useEffect(() => () => {
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
+    inlinePrepareRef.current?.abort();
+    inlineMotionRef.current?.cancel();
   }, []);
 
   useEffect(() => {
@@ -1712,11 +1742,38 @@ export default function SquarePage() {
     }
   }, [inlineRouteActive, inlineStatementExpanded, inlineStatementId, inlineTransitionPhase, routedStatementId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!inlineStatementExpanded || desktopWorkspace) return;
     document.documentElement.classList.add("square-inline-focus-open");
     return () => document.documentElement.classList.remove("square-inline-focus-open");
   }, [desktopWorkspace, inlineStatementExpanded]);
+
+  useLayoutEffect(() => {
+    if (!inlineStatementExpanded || desktopWorkspace || !activeCommentStatement) return;
+    const controller = new AbortController();
+    inlinePrepareRef.current = controller;
+    const nodes = detailMotionNodes();
+    if (!nodes) return;
+    void prepareDetailImages(nodes.surface, controller.signal).then(() => {
+      if (controller.signal.aborted) return;
+      const source = inlineStatementId === null ? null : statementCardRefs.current.get(inlineStatementId);
+      const motion = animateSquareDetail(nodes, source?.getBoundingClientRect() ?? inlineStatementOrigin);
+      inlineMotionRef.current?.cancel();
+      inlineMotionRef.current = motion;
+      setInlineTransitionPhase("opening");
+      void motion.finished.then(() => {
+        if (controller.signal.aborted) return;
+        setInlineTransitionPhase("open");
+        motion.cancel();
+        if (inlineMotionRef.current === motion) inlineMotionRef.current = null;
+      }).catch(() => undefined);
+    });
+    return () => {
+      controller.abort();
+      inlineMotionRef.current?.cancel();
+      inlineMotionRef.current = null;
+    };
+  }, [desktopWorkspace, inlineStatementExpanded, activeCommentStatement?.statement_id]);
 
   const sendComment = async (sticker: StickerAssetDTO | null = null) => {
     const content = commentText.trim();
@@ -2324,21 +2381,14 @@ export default function SquarePage() {
   };
   const renderFeedStatement = (statement: SquareStatementDTO, inDetail = false) => {
     const focused = inlineStatementId === statement.statement_id && (desktopWorkspace || inDetail);
-    const transitionStyle = focused && inlineStatementOrigin ? {
-      "--square-inline-origin-left": `${inlineStatementOrigin.left}px`,
-      "--square-inline-origin-top": `${inlineStatementOrigin.top}px`,
-      "--square-inline-origin-width": `${inlineStatementOrigin.width}px`,
-    } as CSSProperties : undefined;
-    const showInlinePlaceholder = focused && inlineStatementExpanded && !desktopWorkspace && inlineStatementOrigin;
     return <Fragment>
-      {showInlinePlaceholder ? <div aria-hidden="true" className="square-inline-statement-placeholder" style={{ height: inlineStatementOrigin.height }} /> : null}
-      <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`} style={transitionStyle}>
+      <div className={`square-inline-statement${focused ? " is-focused" : ""}${focused && inlineStatementExpanded && !desktopWorkspace ? ` is-expanded is-${inlineTransitionPhase}` : ""}`}>
         {focused && inlineStatementExpanded && !desktopWorkspace ? <header className="square-inline-detail-header" onClick={(event) => event.stopPropagation()}>
           <button aria-label={t("common.back")} onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard detail={inDetail} canInteract={canPublish} cardRef={inDetail ? undefined : (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard detail={inDetail} preserveFeedLayout={inDetail} canInteract={canPublish} cardRef={inDetail ? undefined : (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2578,11 +2628,11 @@ export default function SquarePage() {
       </aside> : null}
       </div>
       {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<>
-        <button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />
-        <section className="square-statement-feed square-inline-detail-portal">
+        <button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} ref={inlineDetailMaskRef} type="button" />
+        <section className="square-statement-feed square-inline-detail-portal" ref={inlineDetailPortalRef}>
           {activeCommentStatement ? <Fragment key={activeCommentStatement.statement_id}>{renderFeedStatement(activeCommentStatement, true)}</Fragment> : <ContentLoader label={t("common.loading")} rows={2} />}
         </section>
-        <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`}>{commentComposer}</div>
+        <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`} ref={inlineDetailDockRef}>{commentComposer}</div>
       </>, document.body) : null}
       <SideDrawer historyKey="square-notifications" onRouteOpen={() => setNotificationDrawerOpen(true)} onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">

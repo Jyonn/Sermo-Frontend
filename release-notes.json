@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.17.13",
+  "id": "2026.10.17.14",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "广场详情切换优化",
+      "title": "广场连续展开动画",
       "items": [
-        "修复手机进入发言详情时的画面闪烁，保持列表位置和媒体展示稳定"
+        "重新设计发言卡片的连续展开与收起动画，保持媒体、列表位置和过渡画面稳定"
       ]
     },
     "en": {
-      "title": "Smoother Square details",
+      "title": "Continuous Square transitions",
       "items": [
-        "Fixed flickering when opening statements on mobile, preserving feed position and stable media display"
+        "Redesigned continuous statement expansion and return animations with stable media and feed positions"
       ]
     }
   }

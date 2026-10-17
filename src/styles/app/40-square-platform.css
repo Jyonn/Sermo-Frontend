@@ -315,13 +315,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
   min-width: 0;
 }
 
-.square-inline-statement-placeholder {
-  width: 100%;
-  min-height: 1px;
-  visibility: hidden;
-  pointer-events: none;
-}
-
 .square-statement-feed > .square-inline-statement > .square-statement-card {
   width: 100%;
   margin: 0;
@@ -458,21 +451,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
 @keyframes square-detail-header-in { from { opacity: 0; transform: translateY(-14px); } }
 @keyframes square-discussion-reveal { from { opacity: 0; clip-path: inset(0 0 100%); transform: translateY(-18px); } to { clip-path: inset(0); } }
 @keyframes square-comment-dock-in { from { opacity: 0; transform: translateY(18px); } }
-@keyframes square-inline-surface-in { from { background-color: transparent; box-shadow: none; } to { background-color: var(--bg-canvas); } }
-@keyframes square-inline-card-expand {
-  from {
-    width: var(--square-inline-origin-width, calc(100vw - 32px));
-    margin-left: var(--square-inline-origin-left, 16px);
-    border-radius: 18px;
-    transform: translateY(calc(var(--square-inline-origin-top, 110px) - 58px - env(safe-area-inset-top)));
-  }
-  to {
-    width: 100vw;
-    margin-left: 0;
-    border-radius: 0;
-    transform: translateY(0);
-  }
-}
 
 .square-statement-feed > .square-statement-card.is-clickable {
   transition: background-color 150ms ease;
@@ -555,19 +533,13 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     -webkit-overflow-scrolling: touch;
   }
 
-  .square-statement-feed > .square-inline-statement.is-expanded.is-opening {
-    animation: square-inline-surface-in 440ms cubic-bezier(.16,.82,.22,1) both;
-  }
-
-  .square-statement-feed > .square-inline-statement.is-expanded.is-preparing {
-    background: transparent;
-    box-shadow: none;
-  }
-
+  .square-statement-feed > .square-inline-statement.is-expanded.is-opening,
   .square-statement-feed > .square-inline-statement.is-expanded.is-closing {
-    animation: square-inline-surface-in 380ms cubic-bezier(.55,.08,.68,.53) reverse both;
-    pointer-events: none;
+    overflow: hidden;
+    will-change: clip-path;
   }
+
+  .square-statement-feed > .square-inline-statement.is-expanded.is-closing { pointer-events: none; }
 
   .square-statement-feed > .square-inline-statement.is-expanded > .square-statement-card {
     width: 100vw;
@@ -575,45 +547,17 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
   }
 
-  .square-statement-feed > .square-inline-statement.is-expanded.is-opening > .square-statement-card {
-    transform-origin: top left;
-    animation: square-inline-card-expand 440ms cubic-bezier(.16,.82,.22,1) both;
-  }
-
-  .square-statement-feed > .square-inline-statement.is-expanded.is-preparing > .square-statement-card {
-    width: var(--square-inline-origin-width, calc(100vw - 32px));
-    margin-left: var(--square-inline-origin-left, 16px);
-    border-radius: 18px;
-    transform: translateY(calc(var(--square-inline-origin-top, 110px) - 58px - env(safe-area-inset-top)));
-  }
-
+  .square-statement-feed > .square-inline-statement.is-expanded.is-opening > .square-statement-card,
   .square-statement-feed > .square-inline-statement.is-expanded.is-closing > .square-statement-card {
     transform-origin: top left;
-    animation: square-inline-card-expand 380ms cubic-bezier(.55,.08,.68,.53) reverse both;
+    will-change: transform;
   }
 
-  .square-inline-statement.is-opening > .square-inline-detail-header {
-    animation-delay: 110ms;
-    animation-duration: 300ms;
-    animation-fill-mode: both;
-  }
-
-  .square-inline-statement.is-preparing > .square-inline-detail-header,
-  .square-inline-statement.is-preparing > .square-inline-discussion,
-  .square-inline-comment-dock.is-preparing .square-comment-composer { opacity: 0; }
-
-  .square-inline-statement.is-closing > .square-inline-detail-header {
-    animation: square-detail-header-in 250ms ease-in reverse both;
-  }
-
-  .square-inline-statement.is-opening > .square-inline-discussion {
-    animation-delay: 170ms;
-    animation-duration: 330ms;
-    animation-fill-mode: both;
-  }
-
-  .square-inline-statement.is-closing > .square-inline-discussion {
-    animation: square-discussion-reveal 250ms ease-in reverse both;
+  .square-inline-statement.is-preparing,
+  .square-inline-comment-dock.is-preparing,
+  .square-inline-focus-mask.is-preparing {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .square-inline-detail-header {
@@ -623,10 +567,11 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     padding-left: max(10px, env(safe-area-inset-left));
   }
 
-  /* Present the detail atomically; separate reveals expose Safari repaint gaps. */
-  .square-inline-statement.is-open > .square-inline-detail-header,
-  .square-inline-statement.is-open > .square-inline-discussion,
-  .square-inline-comment-dock.is-open .square-comment-composer {
+  /* The shared Web Animations clock owns every layer of the mobile transition. */
+  .square-inline-statement.is-expanded > .square-inline-detail-header,
+  .square-inline-statement.is-expanded > .square-inline-discussion,
+  .square-inline-comment-dock .square-comment-composer,
+  .square-inline-focus-mask {
     animation: none;
   }
 
@@ -640,14 +585,6 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     margin-inline: 10px;
   }
 
-  .square-inline-comment-dock.is-opening .square-comment-composer { animation-delay: 210ms; animation-fill-mode: both; }
-  .square-inline-comment-dock.is-closing .square-comment-composer { animation: square-comment-dock-in 220ms ease-in reverse both; }
-  .square-inline-focus-mask.is-closing { animation: square-focus-mask-out 380ms ease-in both; }
-}
-
-@keyframes square-focus-mask-out {
-  0%, 58% { opacity: 1; }
-  100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

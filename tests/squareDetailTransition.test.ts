@@ -3,17 +3,20 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
-test("mobile detail commits once without delayed scrolling or reverse morphs", () => {
-  const mobileOpen = square.slice(square.indexOf("// Commit one opaque detail surface"), square.indexOf("const openStatementDrawer"));
+test("mobile detail captures its origin without scrolling or timer-driven phases", () => {
+  const mobileOpen = square.slice(square.indexOf("const sourceRect = statementCardRefs"), square.indexOf("const openStatementDrawer"));
   assert.match(mobileOpen, /setInlineStatementExpanded\(true\)/);
-  assert.match(mobileOpen, /setInlineTransitionPhase\("open"\)/);
+  assert.match(mobileOpen, /setInlineTransitionPhase\("preparing"\)/);
+  assert.match(mobileOpen, /getBoundingClientRect/);
   assert.doesNotMatch(mobileOpen, /setTimeout|requestAnimationFrame|alignStatementBelowHeader/);
-  assert.match(square, /if \(!desktopWorkspace\) \{\s*finishInlineStatementClose\(navigateAfter\)/);
+  assert.match(square, /animateSquareDetail\(nodes, origin, true/);
+  assert.match(square, /prepareDetailImages\(nodes.surface, controller.signal\)/);
 });
 test("feed remains mounted and detail does not overwrite feed card refs", () => {
   assert.doesNotMatch(square, /inlineStatementExpanded && !desktopWorkspace \? null : \(\s*<VirtualDynamicList/);
   assert.match(square, /cardRef=\{inDetail \? undefined/);
   assert.match(square, /renderFeedStatement\(activeCommentStatement, true\)/);
+  assert.match(square, /preserveFeedLayout=\{inDetail\}/);
 });
 test("detail media loads eagerly and cached video covers are checked before paint", () => {
   assert.match(square, /loading=\{detail \? "eager" : "lazy"\}/);
