@@ -51,6 +51,14 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
     window.clearTimeout(scrollTimer.current);
     setQueue(value => [...value, target]);
   };
+  const returnToday = () => {
+    window.clearTimeout(scrollTimer.current);
+    keyboardFocus.current = false;
+    setQueue([]);
+    setPhase("idle");
+    setSelectedDay(agendaDay());
+    setReload(value => value + 1);
+  };
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -127,7 +135,7 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
     <div className="chronelle-calendar-heading"><div><img src={chronelleIcon} alt="" /><strong>{t("chronelle.title")}</strong></div><a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.open")} ↗</a></div>
     <div className="chronelle-calendar-navigation">
       <button type="button" aria-label={t("chronelle.previousDay")} onClick={() => navigate(-1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg></button>
-      <strong aria-live="polite">{selectedDay.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</strong>
+      <button className="chronelle-selected-date" type="button" title={t("chronelle.returnToday")} aria-label={`${selectedDay.toLocaleDateString(language, { dateStyle: "full" })} · ${t("chronelle.returnToday")}`} onClick={returnToday}><strong aria-live="polite">{selectedDay.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</strong></button>
       <button type="button" aria-label={t("chronelle.nextDay")} onClick={() => navigate(1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg></button>
     </div>
     <div ref={viewport} className="chronelle-strip-viewport" role="group" aria-label={t("chronelle.chooseDay")} onScroll={scrollDates} onKeyDown={event => {

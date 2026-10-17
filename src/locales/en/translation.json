@@ -2793,6 +2793,7 @@
   ,"chronelle.open": "Open calendar"
   ,"chronelle.loading": "Loading events…"
   ,"chronelle.previousDay": "Previous day"
+  ,"chronelle.returnToday": "Return to today"
   ,"chronelle.busyBar": "Reported busy intervals for the selected local day"
   ,"chronelle.availabilityHint": "Red: reported busy. Hatched gaps do not guarantee availability."
   ,"chronelle.nextDay": "Next day"
