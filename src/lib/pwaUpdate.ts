@@ -205,16 +205,21 @@ async function prepareUpdate(target: string, onPhase?: (phase: UpdateActivationP
   recordUpdate(3, { entryVersion });
   if (entryVersion !== target) throw new Error("entry-version-mismatch");
   const scripts = Array.from(page.querySelectorAll('script[type="module"][src], link[rel="modulepreload"][href], link[rel="stylesheet"][href]'));
-  if (!scripts.length) throw new Error("missing-entry-script");
-  recordUpdate(11);
-  await Promise.all(scripts.map(async (node) => {
+  const resources = scripts.flatMap((node) => {
     const url = new URL(node.getAttribute("src") ?? node.getAttribute("href")!, window.location.origin);
-    if (url.origin !== window.location.origin) throw new Error("unexpected-resource-origin");
-    const response = await freshResponse(url.pathname);
+    if (url.origin === window.location.origin) return [url];
+    // Optional external font styles must not block an application upgrade.
+    if (node.tagName === "LINK" && node.getAttribute("rel") === "stylesheet") return [];
+    throw new Error("unexpected-resource-origin");
+  });
+  if (!resources.length) throw new Error("missing-entry-script");
+  recordUpdate(11);
+  // Stop at the first failed dependency so no late probes pollute the report.
+  for (const url of resources) {
+    const response = await freshResponse(`${url.pathname}${url.search}`);
     if (response.headers.get("Content-Type")?.includes("text/html")) throw new Error("invalid-resource");
-    await response.arrayBuffer();
-  }));
-  recordUpdate(4, { resourceCount: scripts.length });
+  }
+  recordUpdate(4, { resourceCount: resources.length });
   const registration = "serviceWorker" in navigator
     ? await navigator.serviceWorker.getRegistration().catch(() => undefined)
     : undefined;

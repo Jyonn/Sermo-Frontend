@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.17.6",
+  "id": "2026.10.17.7",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "我的名片展示优化",
+      "title": "更新校验与提示修复",
       "items": [
-        "我的名片移至基础信息下方的独立分区",
-        "预览复用好友完整名片布局，支持好友与陌生人视角切换"
+        "修复外部字体样式导致更新被错误阻止的问题",
+        "优化更新失败提示与报告上传布局，避免文字挤压和按钮竖排"
       ]
     },
     "en": {
-      "title": "A complete preview of your profile",
+      "title": "Update checks and feedback fixes",
       "items": [
-        "Your profile card now has its own section below basic information",
-        "Preview the full shared profile layout from a friend or stranger perspective"
+        "External font styles no longer incorrectly block app updates",
+        "Improved failed-update and report layouts to prevent cramped text and stacked button labels"
       ]
     }
   }

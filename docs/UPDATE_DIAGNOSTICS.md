@@ -31,3 +31,9 @@ remain valid; no database migration is necessary. Clients predating this change
 cannot gain the diagnostics until they successfully load the updated frontend.
 Only bootstrap dependencies are probed; this is not a full offline installation
 of every lazily loaded page.
+
+Optional cross-origin stylesheet links (such as Google Fonts) are not readiness
+dependencies. Cross-origin module scripts/preloads remain rejected. Local probes
+run sequentially and stop on failure, preserving original URL query parameters.
+Font styles are attached after page startup rather than declared in the bootstrap
+HTML, allowing clients with the older strict validator to upgrade to this fix.

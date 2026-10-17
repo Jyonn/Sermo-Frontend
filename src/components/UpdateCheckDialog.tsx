@@ -3,7 +3,7 @@ import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
-import { UpdateReportButton } from "./UpdateReportButton";
+import { UpdateFailureFeedback } from "./UpdateReportButton";
 
 interface UpdateCheckDialogProps {
   checking: boolean;
@@ -68,10 +68,9 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
 
           {result?.updateAvailable && localizedRelease ? <div className="update-release-copy"><strong>{localizedRelease.title}</strong><ul>{localizedRelease.items.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
           {allFailed ? <p className="update-network-advice"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.switchNetworkHint")}</p> : null}
-          {phase === "error" ? <p className="update-network-advice" role="alert"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.installFailed")}</p> : null}
+          {phase === "error" ? <UpdateFailureFeedback /> : null}
         </div>
 
-        {phase === "error" ? <UpdateReportButton /> : null}
         <footer className="update-check-actions">
           <button className="ghost-button" disabled={checking || installing} onClick={onCheck} type="button">{t("update.recheck")}</button>
           {result?.updateAvailable ? <button className="button" disabled={installing} onClick={install} type="button">{installing ? <span aria-hidden="true" className="media-wait-spinner" /> : null}{installing ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}</button> : <button className="button" onClick={onClose} type="button">{t("common.gotIt")}</button>}

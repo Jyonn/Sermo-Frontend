@@ -198,10 +198,13 @@
 
 .pwa-update-prompt {
   z-index: 80;
+  grid-template-columns: 44px minmax(0, 1fr);
   align-items: start;
   max-width: calc(100vw - 28px);
   min-width: 0;
-  overflow: hidden;
+  max-height: min(70dvh, 640px);
+  overflow-x: hidden;
+  overflow-y: auto;
   width: min(580px, calc(100vw - 28px));
   padding: 16px;
 }
@@ -219,6 +222,7 @@
 
 .pwa-update-heading > strong {
   min-width: 0;
+  white-space: normal;
 }
 
 .pwa-update-heading > span {
@@ -257,6 +261,72 @@
 }
 
 .pwa-update-actions{display:flex;align-self:center;align-items:center;gap:8px}.pwa-update-dismiss{min-height:40px;padding:0 12px;border:0;border-radius:12px;color:var(--text-secondary);font:inherit;font-size:.78rem;font-weight:700;background:transparent}.pwa-update-dismiss:hover{color:var(--text-primary);background:var(--bg-canvas)}
+
+.pwa-update-prompt > .pwa-update-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.pwa-update-prompt > .pwa-update-actions button {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.pwa-update-prompt > .update-failure-feedback {
+  grid-column: 1 / -1;
+}
+
+.update-failure-feedback {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--text-secondary);
+}
+
+.update-failure-feedback > p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: .8rem;
+  line-height: 1.65;
+}
+
+.update-failure-feedback > p > .material-symbols-outlined {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.update-report-control {
+  display: flex;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.update-report-control > .ghost-button {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-soft);
+  color: var(--text-primary);
+  background: var(--bg-canvas);
+  font-size: .78rem;
+  line-height: 1.5;
+  word-break: normal;
+}
+
+.update-report-control > .ghost-button:hover {
+  color: var(--text-primary);
+  background: var(--bg-canvas);
+  border-color: var(--brand-primary);
+}
 
 .pwa-install-guide {
   display: grid;

@@ -71,6 +71,12 @@ function initializeMaterialSymbols(attempt = 0) {
 
 initializeMaterialSymbols();
 
+// Keep optional font CSS outside the bootstrap HTML for legacy update validators.
+const optionalFonts = document.createElement("link");
+optionalFonts.rel = "stylesheet";
+optionalFonts.href = "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap";
+document.head.appendChild(optionalFonts);
+
 const zoomWindow = window as Window & { __sermoPageZoomController?: AbortController };
 zoomWindow.__sermoPageZoomController?.abort();
 const pageZoomController = new AbortController();
