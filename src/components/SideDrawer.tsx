@@ -26,6 +26,7 @@ interface SideDrawerProps {
   headerless?: boolean;
   fullscreen?: boolean;
   floatingBack?: boolean;
+  floatingAccessory?: ReactNode;
   style?: CSSProperties;
 }
 
@@ -66,6 +67,7 @@ export function SideDrawer({
   headerless = false,
   fullscreen = false,
   floatingBack = true,
+  floatingAccessory,
   style,
 }: SideDrawerProps) {
   const { t } = useI18n();
@@ -256,6 +258,7 @@ export function SideDrawer({
             ) : null}
           </div>
         </header>}
+        {headerless && floatingAccessory ? <div className="drawer-floating-accessory">{floatingAccessory}</div> : null}
         <div className="drawer-body">{children}</div>
       </aside>
     </div>,

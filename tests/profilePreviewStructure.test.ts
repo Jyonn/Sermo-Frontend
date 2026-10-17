@@ -10,6 +10,8 @@ test("my card uses the same full-bleed drawer composition as other profiles", ()
   assert.match(content, /<UserProfilePanel/);
   assert.doesNotMatch(content, /more-apps-drawer|<UserProfileCard/);
   assert.match(content, /previewAudience=\{cardAudience\}/);
+  assert.match(content, /floatingAccessory=/);
+  assert.doesNotMatch(panel, /profile\.cardAudience/);
 });
 test("my card entry follows the basic fields in its own section", () => {
   const basic = menu.slice(menu.indexOf('<SideDrawer historyKey="basic-info"'), menu.indexOf('<SideDrawer headerless historyKey="my-profile-card"'));

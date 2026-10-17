@@ -1107,6 +1107,43 @@ html[data-theme="dark"] .chat-item.is-submission-item {
 }
 .drawer-floating-back .material-symbols-outlined { font-size: 25px; font-weight: 400; }
 .drawer-floating-back:active { transform: scale(0.94); }
+.drawer-floating-accessory {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 30;
+  max-width: calc(100% - 88px);
+}
+
+.profile-audience-switch {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 4px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: var(--bg-panel, var(--bg-canvas));
+  box-shadow: 0 8px 24px rgba(14, 31, 26, .12);
+}
+
+.profile-audience-switch > button {
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: .75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profile-audience-switch > button[aria-pressed="true"] {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--brand-primary) 18%, transparent);
+}
 html[data-theme="dark"] .drawer-floating-back {
   border-color: rgba(255, 255, 255, 0.16);
   color: #eff8f4;

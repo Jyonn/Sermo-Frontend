@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.17.7",
+  "id": "2026.10.17.8",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "更新校验与提示修复",
+      "title": "名片视角切换优化",
       "items": [
-        "修复外部字体样式导致更新被错误阻止的问题",
-        "优化更新失败提示与报告上传布局，避免文字挤压和按钮竖排"
+        "好友与陌生人视角切换移至名片右上角，与返回按钮对齐"
       ]
     },
     "en": {
-      "title": "Update checks and feedback fixes",
+      "title": "Profile preview controls",
       "items": [
-        "External font styles no longer incorrectly block app updates",
-        "Improved failed-update and report layouts to prevent cramped text and stacked button labels"
+        "Friend and stranger preview controls now sit at the top right, aligned with the back button"
       ]
     }
   }

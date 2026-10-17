@@ -38,7 +38,6 @@ export interface UserProfileSeed {
 
 interface UserProfilePanelProps {
   previewAudience?: "friend" | "stranger";
-  onPreviewAudienceChange?: (audience: "friend" | "stranger") => void;
   userId: number;
   initialUser?: UserProfileSeed | null;
   initialIsFriend?: boolean;
@@ -66,7 +65,7 @@ function friendshipAge(respondedAt?: number | null) {
   return days < 30 ? i18n.t("profile.knownDays", { count: days }) : i18n.t("profile.knownMonths", { count: Math.floor(days / 30) });
 }
 
-export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, friendRequestSource = "direct", previewAudience, onPreviewAudienceChange }: UserProfilePanelProps) {
+export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSyncingChange, onOpenChat, friendRequestSource = "direct", previewAudience }: UserProfilePanelProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -345,10 +344,6 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
         presence={presence}
         relationshipLabel={isSelf ? undefined : isFriend ? preview ? t("profile.friend") : friendshipAge(respondedAt) : t("profile.sameSpace")}
       />
-
-      {preview ? <div className="mode-switch" role="tablist" aria-label={t("profile.cardAudience")}>
-        {(["friend", "stranger"] as const).map((audience) => <button key={audience} type="button" role="tab" aria-selected={previewAudience === audience} className={`mode-pill ${previewAudience === audience ? "active" : ""}`} onClick={() => onPreviewAudienceChange?.(audience)}>{t(audience === "friend" ? "profile.friendView" : "profile.strangerView")}</button>)}
-      </div> : null}
 
       <div className="user-profile-primary-actions">
         {!isSelf && isFriend === true ? (

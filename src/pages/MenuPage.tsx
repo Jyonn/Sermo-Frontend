@@ -2492,12 +2492,15 @@ export default function MenuPage() {
       </SideDrawer>
 
       {session ? <ChronellePluginDialog key={session.user.user_id} userId={session.user.user_id} open={chronelleInfoOpen} onClose={() => setChronelleInfoOpen(false)} calendarId={me?.chronelle_calendar_id} onChange={(id) => setMe((current) => current ? { ...current, chronelle_calendar_id: id } : current)} /> : null}
-      <SideDrawer headerless historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")}>
+      <SideDrawer headerless historyKey="my-profile-card" onRouteOpen={() => setMyCardOpen(true)} open={myCardOpen} onClose={() => setMyCardOpen(false)} title={t("profile.myCard")} floatingAccessory={
+        <div className="profile-audience-switch" role="group" aria-label={t("profile.cardAudience")}>
+          {(["friend", "stranger"] as const).map((audience) => <button key={audience} type="button" aria-pressed={cardAudience === audience} onClick={() => setCardAudience(audience)}>{t(audience === "friend" ? "profile.friendView" : "profile.strangerView")}</button>)}
+        </div>
+      }>
         {session ? <UserProfilePanel
           userId={session.user.user_id}
           initialUser={{ ...me, user_id: session.user.user_id, name: me?.name ?? session.user.name, avatar_uri: me?.avatar_uri ?? session.user.avatar_uri, growth_level: growthLevel, is_permanent_vip: permanentVip }}
           previewAudience={cardAudience}
-          onPreviewAudienceChange={setCardAudience}
         /> : null}
       </SideDrawer>
 
