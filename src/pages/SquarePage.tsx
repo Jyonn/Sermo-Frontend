@@ -425,7 +425,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
         <div className={`square-statement-images count-${Math.min(images.length, 9)}`}>
           {images.map((image, index) => (
             <button key={image.media_id} onClick={(event) => { event.stopPropagation(); onOpenImage(index); }} type="button">
-              <img alt="" loading="lazy" src={image.thumbnail_uri || image.uri} />
+              <img alt="" loading={detail ? "eager" : "lazy"} src={image.thumbnail_uri || image.uri} />
             </button>
           ))}
         </div>
@@ -444,7 +444,7 @@ function StatementCard({ statement, canInteract, cardRef, chatBackgroundTheme, c
           <audio hidden onEnded={() => { setPlaying(false); audioWait.ready(); }} onError={audioWait.fail} onPause={() => { setPlaying(false); audioWait.stop(); }} onPlaying={() => { setPlaying(true); audioWait.ready(); }} onStalled={audioWait.waiting} onWaiting={audioWait.waiting} preload="metadata" ref={audioRef} src={audio.uri} />
         </div>
       ) : null}
-      {video ? <StatementVideoThumbnail className="square-statement-video" durationSeconds={video.duration_seconds} onClick={() => onOpenVideo()} thumbnailUri={video.thumbnail_uri} /> : null}
+      {video ? <StatementVideoThumbnail className="square-statement-video" durationSeconds={video.duration_seconds} eager={detail} onClick={() => onOpenVideo()} thumbnailUri={video.thumbnail_uri} /> : null}
       {statement.location ? <button aria-label={statement.location.address || t("square.location")} className="square-statement-location" onClick={(event) => { event.stopPropagation(); onOpenLocation(); }} type="button"><span className="material-symbols-outlined">location_on</span><span>{statement.location.address || `${statement.location.latitude.toFixed(4)}, ${statement.location.longitude.toFixed(4)}`}</span><span className="material-symbols-outlined">chevron_right</span></button> : null}
       <footer className="square-statement-footer">
         <button className={statement.liked ? "is-liked" : ""} disabled={!canInteract} onClick={(event) => { event.stopPropagation(); onLike(); }} type="button"><span className="material-symbols-outlined">favorite</span><span>{statement.like_count || t("square.like")}</span></button>
@@ -1633,6 +1633,10 @@ export default function SquarePage() {
   const startInlineStatementClose = (navigateAfter: boolean) => {
     if (!inlineStatementExpanded || inlineTransitionPhase === "closing") return;
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
+    if (!desktopWorkspace) {
+      finishInlineStatementClose(navigateAfter);
+      return;
+    }
     setInlineTransitionPhase("closing");
     inlineExpandTimerRef.current = window.setTimeout(() => {
       inlineExpandTimerRef.current = null;
@@ -1663,31 +1667,11 @@ export default function SquarePage() {
       }));
       return;
     }
-    setInlineStatementExpanded(false);
-    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-      const card = statementCardRefs.current.get(statementId);
-      if (!card) {
-        navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
-        setInlineStatementExpanded(true);
-        setInlineTransitionPhase("open");
-        return;
-      }
-      alignStatementBelowHeader(card, "smooth");
-      inlineExpandTimerRef.current = window.setTimeout(() => {
-        const rect = card.getBoundingClientRect();
-        setInlineStatementOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
-        setInlineTransitionPhase("preparing");
-        navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
-        setInlineStatementExpanded(true);
-        inlineExpandTimerRef.current = window.setTimeout(() => {
-          setInlineTransitionPhase("opening");
-          inlineExpandTimerRef.current = window.setTimeout(() => {
-            setInlineTransitionPhase("open");
-            inlineExpandTimerRef.current = null;
-          }, 440);
-        }, 34);
-      }, 320);
-    }));
+    // Commit one opaque detail surface, without scrolling or morphing the feed.
+    setInlineStatementOrigin(null);
+    setInlineStatementExpanded(true);
+    setInlineTransitionPhase("open");
+    navigate({ pathname: `/app/square/statements/${statementId}`, search: location.search }, { state: { squareInlineFocus: true } });
   };
 
   const openStatementDrawer = (statementId: number) => {
@@ -1706,7 +1690,7 @@ export default function SquarePage() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (inlineRouteActive && routedStatementId !== inlineStatementId) {
       setInlineStatementId(routedStatementId);
       setInlineStatementExpanded(true);
@@ -2338,8 +2322,8 @@ export default function SquarePage() {
     if (media.length === 1) return 390;
     return statement.text.length > 80 ? 250 : 190;
   };
-  const renderFeedStatement = (statement: SquareStatementDTO) => {
-    const focused = inlineStatementId === statement.statement_id;
+  const renderFeedStatement = (statement: SquareStatementDTO, inDetail = false) => {
+    const focused = inlineStatementId === statement.statement_id && (desktopWorkspace || inDetail);
     const transitionStyle = focused && inlineStatementOrigin ? {
       "--square-inline-origin-left": `${inlineStatementOrigin.left}px`,
       "--square-inline-origin-top": `${inlineStatementOrigin.top}px`,
@@ -2354,7 +2338,7 @@ export default function SquarePage() {
           <strong>{t("square.statementDetail")}</strong>
           <span aria-hidden="true" />
         </header> : null}
-        <StatementCard canInteract={canPublish} cardRef={(node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
+        <StatementCard detail={inDetail} canInteract={canPublish} cardRef={inDetail ? undefined : (node) => { if (node) statementCardRefs.current.set(statement.statement_id, node); else statementCardRefs.current.delete(statement.statement_id); }} chatBackgroundTheme={currentUser?.chat_background_theme} chatBackgroundUri={currentUser?.chat_background_uri} onDelete={() => setDeleteStatementId(statement.statement_id)} onLike={() => void toggleStatementLike(statement)} onMute={() => setMuteStatement(statement)} onOpen={() => { if (!focused) openStatement(statement.statement_id); }} onOpenChatImage={(uris, index, metadata = []) => setChatRecordGallery({ uris, index, metadata })} onOpenChatVideo={(uri, metadata) => setChatRecordVideo({ uri, metadata })} onOpenImage={(index) => openStatementImages(statement.statement_id, index)} onOpenLocation={() => statement.location && setChatRecordLocation({ location: statement.location, owner: statement.user })} onOpenProfile={() => openUserProfile(statement.user)} onOpenVideo={() => openStatementVideo(statement.statement_id)} onPin={() => void toggleStatementPinned(statement)} onShare={() => openStatementShare(statement)} statement={statement} />
         {focused && inlineStatementExpanded && !desktopWorkspace ? <div className="square-inline-discussion">{discussionContent}</div> : null}
       </div>
     </Fragment>;
@@ -2529,7 +2513,7 @@ export default function SquarePage() {
               description={hasFeedFilters ? t("square.searchEmptyHint") : feedMode === "user" ? t("square.userFeedEmptyHint") : feedMode === "mine" ? t("square.mineEmptyHint") : t("square.emptyHint")}
             />
           ) : null}
-          {inlineStatementExpanded && !desktopWorkspace ? null : (
+          {
             <VirtualDynamicList
               className="square-statement-feed square-virtual-feed"
               estimateSize={estimateStatementHeight}
@@ -2538,9 +2522,9 @@ export default function SquarePage() {
               key={activeFeedCacheKey}
               overscan={900}
               scrollRef={squareFeedScrollRef}
-              renderItem={renderFeedStatement}
+              renderItem={(statement) => renderFeedStatement(statement)}
             />
-          )}
+          }
           {hasMore && statements.length && !inlineStatementExpanded ? <div aria-label={loadingMore ? t("common.loading") : undefined} className={`square-feed-sentinel${loadingMore ? " is-loading" : ""}`} ref={squareLoadMoreRef}>{loadingMore ? <span className="composer-sticker-loading" /> : null}</div> : null}
         </div>
         <ScrollToTopButton
@@ -2596,7 +2580,7 @@ export default function SquarePage() {
       {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<>
         <button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} type="button" />
         <section className="square-statement-feed square-inline-detail-portal">
-          {activeCommentStatement ? <Fragment key={activeCommentStatement.statement_id}>{renderFeedStatement(activeCommentStatement)}</Fragment> : <ContentLoader label={t("common.loading")} rows={2} />}
+          {activeCommentStatement ? <Fragment key={activeCommentStatement.statement_id}>{renderFeedStatement(activeCommentStatement, true)}</Fragment> : <ContentLoader label={t("common.loading")} rows={2} />}
         </section>
         <div className={`square-inline-comment-dock is-${inlineTransitionPhase}`}>{commentComposer}</div>
       </>, document.body) : null}

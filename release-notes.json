@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.17.12",
+  "id": "2026.10.17.13",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "匿名回复展示修复",
+      "title": "广场详情切换优化",
       "items": [
-        "收件箱中的匿名回复使用与广场一致的匿名头像和名称"
+        "修复手机进入发言详情时的画面闪烁，保持列表位置和媒体展示稳定"
       ]
     },
     "en": {
-      "title": "Anonymous reply display fix",
+      "title": "Smoother Square details",
       "items": [
-        "Anonymous replies in the inbox now use the same anonymous avatar and name as Square"
+        "Fixed flickering when opening statements on mobile, preserving feed position and stable media display"
       ]
     }
   }

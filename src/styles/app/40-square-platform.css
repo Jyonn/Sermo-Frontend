@@ -623,6 +623,13 @@ html[data-theme="dark"] .side-drawer[class*="statement-detail-theme-"] .square-c
     padding-left: max(10px, env(safe-area-inset-left));
   }
 
+  /* Present the detail atomically; separate reveals expose Safari repaint gaps. */
+  .square-inline-statement.is-open > .square-inline-detail-header,
+  .square-inline-statement.is-open > .square-inline-discussion,
+  .square-inline-comment-dock.is-open .square-comment-composer {
+    animation: none;
+  }
+
   .square-inline-discussion .square-discussion-section {
     min-height: 100%;
     padding-inline: 16px;
