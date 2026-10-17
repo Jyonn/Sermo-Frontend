@@ -72,12 +72,12 @@ export function ChronellePluginDialog({ open, onClose, userId, calendarId, onCha
     finally { setBusy(false); }
   };
   return <>
-    <ConfirmDialog open={open} onClose={onClose} onConfirm={() => void authorize()} busy={busy} title={t("chronelle.title")} description={t("chronelle.introduction")} confirmLabel={t(pending ? "chronelle.continue" : "chronelle.manage")}>
+    <ConfirmDialog open={open && !unlinkOpen} onClose={onClose} onConfirm={() => void authorize()} busy={busy} title={t("chronelle.title")} description={t("chronelle.introduction")} confirmLabel={t(pending ? "chronelle.continue" : "chronelle.manage")}>
       <div className="more-apps-consent">
         <img alt="" src={chronelleIcon} />
         <div><strong>{t("chronelle.publicOnly")}</strong><span>{t("chronelle.description")}</span></div>
         {pending ? <p role="status">{t("chronelle.waiting")}</p> : null}
-        {calendarId ? <button className="button danger" type="button" disabled={busy} onClick={() => setUnlinkOpen(true)}>{t("chronelle.unbind")}</button> : null}
+        {calendarId ? <button className="chronelle-unbind" type="button" disabled={busy} onClick={() => setUnlinkOpen(true)}><span className="material-symbols-outlined" aria-hidden="true">link_off</span>{t("chronelle.unbind")}</button> : null}
       </div>
     </ConfirmDialog>
     <ConfirmDialog open={unlinkOpen} title={t("chronelle.unbind")} description={t("chronelle.unlinkHint")} busy={busy} danger onClose={() => setUnlinkOpen(false)} onConfirm={() => void unlink()} />
