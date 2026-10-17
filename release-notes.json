@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.17.19",
+  "id": "2026.10.17.20",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "按天查看日历",
+      "title": "第三方登录认证要求",
       "items": [
-        "Chronelle 日期条支持持续横向浏览，日期与当天内容同步，过去日期更易区分",
-        "日程显示起止时间和紧凑忙碌条，跨日时间标明日期"
+        "使用友间登录第三方应用需同时完成邮箱和手机号认证",
+        "授权页面提示待补齐的认证，并提供账号安全入口"
       ]
     },
     "en": {
-      "title": "Browse your calendar by day",
+      "title": "Verification for third-party sign-in",
       "items": [
-        "Scroll through calendar dates with the agenda in sync and past dates clearly distinguished",
-        "See time ranges and a compact busy bar, with dates across midnight"
+        "Verify both email and phone to sign in to third-party apps with Frienden",
+        "The consent page shows missing verification and links to account security"
       ]
     }
   }

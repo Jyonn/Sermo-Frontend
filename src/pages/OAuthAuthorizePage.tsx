@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { UserAvatar } from "../components/UserAvatar";
 import { validOAuthReturn, type OAuthClientMetadata } from "../lib/oauthClients";
-import { api, refreshDetachedAuthSession } from "../lib/api";
+import { api, ApiError, refreshDetachedAuthSession } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
 import { clearOAuthRequest, rememberOAuthRequest } from "../lib/oauthPending";
@@ -17,6 +17,9 @@ export default function OAuthAuthorizePage() {
   const { ready, session } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [eligibility, setEligibility] = useState<{ userId: number; value: Awaited<ReturnType<typeof api.getOAuthEligibility>> } | null>(null);
+  const [eligibilityError, setEligibilityError] = useState(false);
+  const [eligibilityReload, setEligibilityReload] = useState(0);
   const [spaceName, setSpaceName] = useState("");
   const [accounts, setAccounts] = useState(listPwaCachedAccounts);
   const [accountsRefreshing, setAccountsRefreshing] = useState(false);
@@ -36,6 +39,17 @@ export default function OAuthAuthorizePage() {
   }, [search]);
   const loginHint = parseSermoLoginHint(query.get("login_hint"));
   const authorizedSession = session && (!loginHint || loginHint.userId === session.user.user_id && loginHint.slug === getDetectedSpaceSlug()) ? session : null;
+  const eligibilityValue = eligibility?.userId === authorizedSession?.user.user_id ? eligibility?.value : null;
+  useEffect(() => {
+    if (!authorizedSession) return;
+    const controller = new AbortController();
+    setEligibility(null);
+    setEligibilityError(false);
+    void api.getOAuthEligibility(controller.signal).then(value => {
+      if (!controller.signal.aborted) setEligibility({ userId: authorizedSession.user.user_id, value });
+    }).catch(() => { if (!controller.signal.aborted) setEligibilityError(true); });
+    return () => controller.abort();
+  }, [authorizedSession?.user.user_id, eligibilityReload]);
   const accountToRestore = loginHint
     ? accounts.find((account) => account.slug === loginHint.slug && account.session.user.user_id === loginHint.userId)
     : accounts.length === 1 ? accounts[0] : undefined;
@@ -98,7 +112,7 @@ export default function OAuthAuthorizePage() {
   }, [ready, valid, authorizedSession, accountToRestore]);
 
   const approve = async () => {
-    if (!valid || busy || !authorizedSession || !client) return;
+    if (!valid || busy || !authorizedSession || !client || !eligibilityValue?.eligible) return;
     setBusy(true);
     setError("");
     try {
@@ -116,7 +130,10 @@ export default function OAuthAuthorizePage() {
       clearOAuthRequest();
       window.location.assign(destination.href);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("apps.authorizeFailed"));
+      if (cause instanceof ApiError && cause.identifier === "verification_required") {
+        setEligibilityReload(value => value + 1);
+        setError(t("apps.dualVerificationRequired"));
+      } else setError(cause instanceof Error ? cause.message : t("apps.authorizeFailed"));
       setBusy(false);
     }
   };
@@ -144,8 +161,14 @@ export default function OAuthAuthorizePage() {
           {scopes.map((item) => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}
         </div>
         <p className="oauth-authorize-note">{t("apps.authorizeNote")}</p>
+        {!eligibilityValue ? <p role="status">{eligibilityError ? t("apps.verificationCheckFailed") : t("common.loading")}{eligibilityError ? <button type="button" onClick={() => setEligibilityReload(value => value + 1)}>{t("common.retry")}</button> : null}</p> : !eligibilityValue.eligible ? <div role="alert">
+          <p>{t("apps.dualVerificationRequired")}</p>
+          <p>{eligibilityValue.missing_verifications.includes("email") ? t("apps.verifyEmailRequired") : null}{eligibilityValue.missing_verifications.includes("phone") ? ` ${t("apps.verifyPhoneRequired")}` : null}</p>
+          <Link to="/app/menu?panel=account-security" onClick={() => rememberOAuthRequest(search)}>{t("menu.accountSecurity")}</Link>
+          <button type="button" onClick={() => setEligibilityReload(value => value + 1)}>{t("common.retry")}</button>
+        </div> : null}
         {error ? <p role="alert">{error}</p> : null}
-        <div className="oauth-authorize-actions"><Link onClick={clearOAuthRequest} to="/app/menu">{t("common.cancel")}</Link><button disabled={busy} onClick={() => void approve()} type="button">{busy ? t("common.loading") : t("apps.allow")}</button></div>
+        <div className="oauth-authorize-actions"><Link onClick={clearOAuthRequest} to="/app/menu">{t("common.cancel")}</Link><button disabled={busy || !eligibilityValue?.eligible} onClick={() => void approve()} type="button">{busy ? t("common.loading") : t("apps.allow")}</button></div>
       </>}
     </section>
   </main>;
