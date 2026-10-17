@@ -293,9 +293,13 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
     if (!user || requestState !== "idle") return;
     setRequestState("sending");
     try {
-      await api.createFriendRequest(user.user_id, friendRequestSource);
+      const relation = await api.createFriendRequest(user.user_id, friendRequestSource);
+      if (relation.status === 1) {
+        setIsFriend(true);
+        setRespondedAt(relation.responded_at ?? null);
+      }
       setRequestState("sent");
-      showToast(t("profile.requestSent"));
+      showToast(t(relation.status === 1 ? "friendSearch.alreadyFriend" : "profile.requestSent"));
     } catch (apiError) {
       setRequestState("idle");
       showToast(apiError instanceof ApiError ? apiError.message : t("profile.sendFailed"), "error");

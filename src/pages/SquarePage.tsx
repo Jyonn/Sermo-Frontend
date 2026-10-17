@@ -587,7 +587,12 @@ export default function SquarePage() {
     next.set("submission", legacySubmissionChatId);
     navigate(`/app/square?${next.toString()}`, { replace: true });
   }, [legacySubmissionChatId, location.pathname, navigate, searchParams]);
-  const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(profileFeedUserId ? "user" : "all");
+  const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(() => {
+    if (profileFeedUserId) return "user";
+    const saved = readTabCache<string>(cacheScope, "square:mode")?.data;
+    return saved === "friends" || saved === "mine" ? saved : "all";
+  });
+  useEffect(() => { if (feedMode !== "user") writeTabCache(cacheScope, "square:mode", feedMode); }, [cacheScope, feedMode]);
   const effectiveFeedMode = feedMode === "user" && !profileFeedUserId
     ? features.squareExploreEnabled ? "all" : "friends"
     : feedMode;
@@ -1232,6 +1237,7 @@ export default function SquarePage() {
   const queueFeedScrollRestore = (cacheKey: string, top: number) => {
     cancelFeedScrollRestore();
     pendingFeedScrollRestoreRef.current = { key: cacheKey, top };
+    if (squareFeedScrollRef.current) squareFeedScrollRef.current.scrollTop = top;
     const schedule = (callback: () => void) => {
       const frame = window.requestAnimationFrame(() => {
         feedScrollRestoreFramesRef.current.delete(frame);
@@ -1245,6 +1251,10 @@ export default function SquarePage() {
       if (!pending || pending.key !== cacheKey || activeFeedCacheKeyRef.current !== cacheKey || !scroller) return;
       pendingFeedScrollRestoreRef.current = null;
       scroller.scrollTop = pending.top;
+      const anchor = readTabCache<{ id: number; offset: number }>(cacheScope, `${cacheKey}:anchor`)?.data;
+      const card = anchor ? statementCardRefs.current.get(anchor.id) : null;
+      if (card && anchor) scroller.scrollTop += card.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.offset;
+      if (anchor) writeTabCache(cacheScope, `${cacheKey}:anchor`, null);
       feedScrollPositionsRef.current.set(cacheKey, scroller.scrollTop);
       setFeedScrollTopVisible(scroller.scrollTop > 320);
     }));
@@ -1264,25 +1274,34 @@ export default function SquarePage() {
 
     feedScrollPositionsRef.current.set(cacheKey, savedTop);
     pendingFeedScrollRestoreRef.current = { key: cacheKey, top: savedTop };
-    if (scroller) scroller.scrollTop = 0;
-    setFeedScrollTopVisible(false);
+    if (scroller) scroller.scrollTop = savedTop;
+    setFeedScrollTopVisible(savedTop > 320);
     setStatementsFeedKey(cacheKey);
     setStatements(cached?.items ?? []);
     setHasMore(cached?.hasMore ?? true);
     setLoading(!cached);
     setLoadingMore(false);
     setError("");
-    queueFeedScrollRestore(cacheKey, savedTop);
+    if (!inlineRouteActive && !inlineStatementExpanded) queueFeedScrollRestore(cacheKey, savedTop);
 
     return () => {
       cancelFeedScrollRestore();
       const pending = pendingFeedScrollRestoreRef.current;
-      const top = pending?.key === cacheKey ? pending.top : scroller?.scrollTop ?? savedTop;
+      const top = pending?.key === cacheKey ? pending.top : feedScrollPositionsRef.current.get(cacheKey) ?? scroller?.scrollTop ?? savedTop;
       pendingFeedScrollRestoreRef.current = null;
       feedScrollPositionsRef.current.set(cacheKey, top);
       writeTabCache(cacheScope, `${cacheKey}:scroll`, top);
     };
   }, [activeFeedCacheKey, cacheScope]);
+
+  const feedDetailWasActiveRef = useRef(inlineRouteActive || inlineStatementExpanded);
+  useLayoutEffect(() => {
+    const detailActive = inlineRouteActive || inlineStatementExpanded;
+    if (feedDetailWasActiveRef.current && !detailActive && !desktopWorkspace) {
+      queueFeedScrollRestore(activeFeedCacheKey, feedScrollPositionsRef.current.get(activeFeedCacheKey) ?? readTabCache<number>(cacheScope, `${activeFeedCacheKey}:scroll`)?.data ?? 0);
+    }
+    feedDetailWasActiveRef.current = detailActive;
+  }, [inlineRouteActive, inlineStatementExpanded, activeFeedCacheKey, desktopWorkspace]);
 
   useEffect(() => {
     const scroller = squareFeedScrollRef.current;
@@ -1605,7 +1624,7 @@ export default function SquarePage() {
 
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const card = statementId === null ? null : statementCardRefs.current.get(statementId);
-      if (card) alignStatementBelowHeader(card, "auto");
+      if (desktopWorkspace && card) alignStatementBelowHeader(card, "auto");
       setInlineStatementId(null);
       setInlineStatementOrigin(null);
     }));
@@ -1624,6 +1643,13 @@ export default function SquarePage() {
   const closeInlineStatement = () => startInlineStatementClose(true);
 
   const openStatement = (statementId: number) => {
+    const scroller = squareFeedScrollRef.current;
+    if (scroller) {
+      feedScrollPositionsRef.current.set(activeFeedCacheKey, scroller.scrollTop);
+      writeTabCache(cacheScope, `${activeFeedCacheKey}:scroll`, scroller.scrollTop);
+      const card = statementCardRefs.current.get(statementId);
+      if (card) writeTabCache(cacheScope, `${activeFeedCacheKey}:anchor`, { id: statementId, offset: card.getBoundingClientRect().top - scroller.getBoundingClientRect().top });
+    }
     if (inlineExpandTimerRef.current !== null) window.clearTimeout(inlineExpandTimerRef.current);
     setInlineStatementId(statementId);
     if (desktopWorkspace) {
@@ -2340,7 +2366,7 @@ export default function SquarePage() {
       <main
         className={`list-screen square-feed-screen is-${squareWorkspace}-workspace${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}
         onScroll={(event) => {
-          if (squareWorkspace !== "square") return;
+          if (squareWorkspace !== "square" || inlineStatementId !== null || inlineRouteActive || inlineStatementExpanded) return;
           const top = event.currentTarget.scrollTop;
           setFeedScrollTopVisible(top > 320);
           if (pendingFeedScrollRestoreRef.current?.key === activeFeedCacheKey) return;

@@ -40,9 +40,9 @@ export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean;
   const addOperator = async (operator: FriendOperatorDTO) => {
     try {
       setOperatorBusyId(operator.user.user_id);
-      await api.createOperatorFriendRequest(operator.user.user_id);
-      setOperators((current) => current.map((item) => item.user.user_id === operator.user.user_id ? { ...item, relationship: "pending" } : item));
-      showToast(t("profile.requestSent"));
+      const relation = await api.createOperatorFriendRequest(operator.user.user_id);
+      setOperators((current) => current.map((item) => item.user.user_id === operator.user.user_id ? { ...item, relationship: relation.status === 1 ? "friend" : "pending" } : item));
+      showToast(t(relation.status === 1 ? "friendSearch.alreadyFriend" : "profile.requestSent"));
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("profile.sendFailed"), "error");
     } finally {
@@ -54,9 +54,9 @@ export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean;
     if (!result?.user || busy) return;
     setBusy(true);
     try {
-      await api.createFriendRequest(result.user.user_id, "search");
-      setResult({ ...result, relationship: "pending" });
-      showToast(t("profile.requestSent"));
+      const relation = await api.createFriendRequest(result.user.user_id, "search");
+      setResult({ ...result, relationship: relation.status === 1 ? "friend" : "pending" });
+      showToast(t(relation.status === 1 ? "friendSearch.alreadyFriend" : "profile.requestSent"));
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("profile.sendFailed"), "error");
     } finally {

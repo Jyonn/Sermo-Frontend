@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { HeaderSyncIndicator } from "./HeaderSyncIndicator";
 
 interface TabPageHeaderProps {
@@ -12,7 +12,7 @@ interface TabPageHeaderProps {
 export function TabPageHeader({ title, syncing = false, status, actions, secondary }: TabPageHeaderProps) {
   const headerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!window.matchMedia("(max-width: 900px)").matches) return;
 
     let frame = 0;

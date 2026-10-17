@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.17.10",
+  "id": "2026.10.17.11",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "个人名片展示修复",
+      "title": "日历与广场体验优化",
       "items": [
-        "修复陌生人视角下按钮和最近发言区域被拉高的问题",
-        "最近发言独立加载，不再因其他资料请求失败或超过七天而误显示为空"
+        "添加空间运营者后自动成为好友，无需等待审批",
+        "精简应用与插件的内边距，名片日历改为原生周历和日程列表",
+        "优化广场详情返回时的位置恢复，保持手机 Header 的毛玻璃背景"
       ]
     },
     "en": {
-      "title": "Profile display fixes",
+      "title": "Calendar and Square improvements",
       "items": [
-        "Fixed stretched actions and recent-post cards in stranger previews",
-        "Recent posts load independently and no longer disappear due to unrelated requests or a seven-day cutoff"
+        "Space operator friend requests are now accepted automatically",
+        "Removed extra app drawer padding and replaced embedded calendars with a native weekly agenda",
+        "Improved Square scroll restoration and kept the mobile header backdrop stable on return"
       ]
     }
   }
