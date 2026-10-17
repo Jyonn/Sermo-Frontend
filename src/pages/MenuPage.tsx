@@ -29,6 +29,8 @@ import { useAuth } from "../lib/auth";
 import { useAdminAuth } from "../lib/adminAuth";
 import { usePlatformAdminAuth } from "../lib/platformAdminAuth";
 import { normalizeContactTarget } from "../lib/contactTarget";
+import { oauthVerificationReturn } from "../lib/oauthConsent";
+import { readOAuthRequest } from "../lib/oauthPending";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { buildStillfolioLoginUrl } from "../lib/stillfolioLogin";
@@ -1160,14 +1162,15 @@ export default function MenuPage() {
 
   useEffect(() => {
     const sheet = new URLSearchParams(location.search).get("sheet");
-    if (sheet !== "email-verification" || authSheetChannel === "email") return;
+    const channel = sheet === "email-verification" ? "email" : sheet === "phone-verification" ? "sms" : null;
+    if (!channel || authSheetChannel === channel) return;
     if (!hasPassword) {
       showPasswordReminder();
       return;
     }
     setSecurityDrawerOpen(true);
-    setAuthSheetChannel("email");
-    setAuthTarget(channelTarget(me, "email"));
+    setAuthSheetChannel(channel);
+    setAuthTarget(channelTarget(me, channel));
     setAuthCode("");
     setAuthPending(false);
     setAuthCooldown(0);
@@ -1264,7 +1267,10 @@ export default function MenuPage() {
     setAuthCooldown(0);
     setAuthExpiresIn(0);
     setAuthActionState("idle");
-    if (new URLSearchParams(location.search).get("sheet") === "email-verification") {
+    const oauthReturn = oauthVerificationReturn(location.state, location.search, readOAuthRequest());
+    if (oauthReturn) {
+      navigate(oauthReturn, { replace: true });
+    } else if (["email-verification", "phone-verification"].includes(new URLSearchParams(location.search).get("sheet") || "")) {
       const routeState = location.state as { emailVerificationReturnTo?: string } | null;
       navigate(routeState?.emailVerificationReturnTo || "/app/menu", { replace: true });
     }
@@ -1453,6 +1459,10 @@ export default function MenuPage() {
         language: nextMe.language,
         last_heartbeat: nextMe.last_heartbeat,
       });
+      if (oauthVerificationReturn(location.state, location.search, readOAuthRequest())) {
+        closeAuthSheet();
+        return;
+      }
       const [prefRows, identity] = await Promise.all([
         api.getNotificationPrefs(),
         space?.qq_binding_available ? api.getQQIdentity().catch(() => null) : Promise.resolve(null),

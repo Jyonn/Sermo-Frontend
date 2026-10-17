@@ -8,11 +8,11 @@ import { SideDrawer } from "./SideDrawer";
 import { BottomSheet } from "./BottomSheet";
 import "./OAuthApplicationWorkspace.css";
 
-type Draft = { client_id: string; name: string; description: string; redirects: string; scopes: string[]; loopbacks: string };
+type Draft = { client_id: string; name: string; description: string; icon_url: string; redirects: string; scopes: string[]; loopbacks: string };
 type Action = "approve" | "reject" | "submit" | "disable" | "restore" | "create";
 type Panel = { kind: "detail" | "edit" | "action" | "discard"; appId?: number; revisionId?: number; version?: number; action?: Action };
 type DetailTab = "configuration" | "history" | "audit";
-const emptyDraft = (): Draft => ({ client_id: "", name: "", description: "", redirects: "", scopes: ["profile"], loopbacks: "" });
+const emptyDraft = (): Draft => ({ client_id: "", name: "", description: "", icon_url: "", redirects: "", scopes: ["profile"], loopbacks: "" });
 const lines = (value: string) => value.split("\n").map((line) => line.trim()).filter(Boolean);
 
 export function OAuthApplicationWorkspace({ platform = false }: { platform?: boolean }) {
@@ -88,12 +88,12 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
 
   const detail = (item: OAuthApplication) => { setTab("configuration"); setViewedRevision(null); open({ kind: "detail", appId: item.id, version: item.version }); };
   const edit = (item?: OAuthApplication, rev?: OAuthRevision, existing = false) => {
-    const next = item && rev ? { client_id: item.client_id, name: rev.name, description: rev.description, redirects: rev.redirect_uris.join("\n"), scopes: [...rev.scopes], loopbacks: rev.loopback_uris.join("\n") } : emptyDraft();
+    const next = item && rev ? { client_id: item.client_id, name: rev.name, description: rev.description, icon_url: rev.icon_url ?? "", redirects: rev.redirect_uris.join("\n"), scopes: [...rev.scopes], loopbacks: rev.loopback_uris.join("\n") } : emptyDraft();
     setDraft(next); initialDraft.current = JSON.stringify(next);
     open({ kind: "edit", appId: item?.id, version: item?.version, revisionId: existing ? rev?.id : undefined });
   };
   const action = (name: Action, item = app, rev = revision) => { setNote(""); setLoopbackConfirmed(false); open({ kind: "action", appId: item?.id, version: item?.version, revisionId: rev?.id, action: name }); };
-  const configuration = () => ({ client_id: draft.client_id, name: draft.name, description: draft.description, redirect_uris: lines(draft.redirects), scopes: draft.scopes, loopback_uris: lines(draft.loopbacks) });
+  const configuration = () => ({ client_id: draft.client_id, name: draft.name, description: draft.description, icon_url: draft.icon_url, redirect_uris: lines(draft.redirects), scopes: draft.scopes, loopback_uris: lines(draft.loopbacks) });
   const mutate = async (data: Record<string, unknown>) => {
     if (busy) return;
     setBusy(true); setPanelError("");
@@ -112,6 +112,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
 
   const revisionContent = (rev: OAuthRevision) => <>
     {rev.description ? <p className="oauth-description">{rev.description}</p> : null}
+    <section className="oauth-section"><h4>{t("oauth.iconUrl")}</h4><ul className="oauth-urls"><li><code>{rev.icon_url || t("oauth.noIcon")}</code></li></ul></section>
     <section className="oauth-section"><h4>{t("oauth.scopes")}</h4><div className="oauth-permissions">{rev.scopes.map((scope) => <span key={scope}><span className="material-symbols-outlined" aria-hidden="true">{scope === "email" ? "alternate_email" : scope === "profile" ? "person" : scope === "phone" ? "phone" : "workspace_premium"}</span>{scopeText(scope)}</span>)}</div></section>
     <section className="oauth-section"><h4>{t("oauth.callbacks")}</h4><ul className="oauth-urls">{rev.redirect_uris.map((uri) => <li key={uri}><code>{uri}</code>{rev.loopback_uris.includes(uri) ? <small>{t("oauth.loopbackException")}</small> : null}</li>)}</ul></section>
   </>;
@@ -142,6 +143,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
       <label>{t("oauth.name")}<input data-initial-focus required maxLength={120} value={draft.name} disabled={busy} onChange={(event) => setDraft({ ...draft, name: event.target.value })} /></label>
       <label>{t("oauth.clientId")}<input required disabled={Boolean(panel.appId) || busy} maxLength={80} pattern="[a-z0-9][a-z0-9_-]*" value={draft.client_id} onChange={(event) => setDraft({ ...draft, client_id: event.target.value })} /></label>
       <label>{t("oauth.description")}<textarea maxLength={1000} value={draft.description} disabled={busy} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /></label>
+      <label>{t("oauth.iconUrl")}<input type="url" placeholder="https://" maxLength={512} value={draft.icon_url} disabled={busy} onChange={(event) => setDraft({ ...draft, icon_url: event.target.value })} /></label>
       <label>{t("oauth.redirects")}<textarea required value={draft.redirects} disabled={busy} onChange={(event) => setDraft({ ...draft, redirects: event.target.value })} /></label>
       <fieldset><legend>{t("oauth.scopes")}</legend>{["profile", "phone", "vip", "email"].map((scope) => <label className="oauth-checkbox" key={scope}><input type="checkbox" checked={draft.scopes.includes(scope)} disabled={busy} onChange={(event) => setDraft({ ...draft, scopes: event.target.checked ? [...draft.scopes, scope] : draft.scopes.filter((item) => item !== scope) })} /><span>{scopeText(scope)}</span></label>)}</fieldset>
       <label>{t("oauth.loopbacks")}<textarea value={draft.loopbacks} disabled={busy} onChange={(event) => setDraft({ ...draft, loopbacks: event.target.value })} /></label>

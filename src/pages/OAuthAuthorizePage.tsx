@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { UserAvatar } from "../components/UserAvatar";
+import { OAuthConsentBrand } from "../components/OAuthConsentBrand";
+import { OAuthVerificationCard } from "../components/OAuthVerificationCard";
+import { oauthVerificationTarget } from "../lib/oauthConsent";
 import { validOAuthReturn, type OAuthClientMetadata } from "../lib/oauthClients";
 import { api, ApiError, refreshDetachedAuthSession } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -40,6 +43,7 @@ export default function OAuthAuthorizePage() {
   const loginHint = parseSermoLoginHint(query.get("login_hint"));
   const authorizedSession = session && (!loginHint || loginHint.userId === session.user.user_id && loginHint.slug === getDetectedSpaceSlug()) ? session : null;
   const eligibilityValue = eligibility?.userId === authorizedSession?.user.user_id ? eligibility?.value : null;
+  const nextVerification = eligibilityValue?.missing_verifications[0];
   useEffect(() => {
     if (!authorizedSession) return;
     const controller = new AbortController();
@@ -50,6 +54,13 @@ export default function OAuthAuthorizePage() {
     }).catch(() => { if (!controller.signal.aborted) setEligibilityError(true); });
     return () => controller.abort();
   }, [authorizedSession?.user.user_id, eligibilityReload]);
+  useEffect(() => {
+    if (!authorizedSession) return;
+    const refresh = () => { if (document.visibilityState === "visible") setEligibilityReload(value => value + 1); };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, [authorizedSession?.user.user_id]);
   const accountToRestore = loginHint
     ? accounts.find((account) => account.slug === loginHint.slug && account.session.user.user_id === loginHint.userId)
     : accounts.length === 1 ? accounts[0] : undefined;
@@ -131,8 +142,9 @@ export default function OAuthAuthorizePage() {
       window.location.assign(destination.href);
     } catch (cause) {
       if (cause instanceof ApiError && cause.identifier === "verification_required") {
+        setEligibility(null);
         setEligibilityReload(value => value + 1);
-        setError(t("apps.dualVerificationRequired"));
+        setError("");
       } else setError(cause instanceof Error ? cause.message : t("apps.authorizeFailed"));
       setBusy(false);
     }
@@ -140,9 +152,8 @@ export default function OAuthAuthorizePage() {
 
   return <main className="oauth-authorize-page">
     <section className="oauth-authorize-card">
-      <img alt="" src="/icons/frienden-512.png?v=2" />
-      <small>FRIENDEN{client ? ` × ${client.name}` : ""}</small>
-      <h1>{t("apps.authorizeTitle", { app: appName })}</h1>
+      <OAuthConsentBrand client={client} />
+      <div className="oauth-consent-heading"><small>{t("apps.withFrienden")}</small><h1>{client ? t("apps.continueTo", { app: appName }) : t("apps.signInHeading")}</h1></div>
       {metadata?.search !== search ? <p>{t("common.loading")}</p> : !valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>
         <p>{accountsRefreshing || accountToRestore && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount", { app: appName }) : t("apps.signInFirst", { app: appName })}</p>
         {accounts.length && (!accountToRestore || accountError) || accounts.length > 1 ? <div className="oauth-account-list" aria-label={t("apps.chooseAccount")}>
@@ -155,20 +166,16 @@ export default function OAuthAuthorizePage() {
         {accountError ? <p role="alert">{accountError}</p> : null}
         <Link to="/">{t("apps.backToSermo")}</Link>
       </> : <>
-        <p>{t("apps.authorizeDescription", { app: appName, name: authorizedSession.user.name, space: spaceName || `#${authorizedSession.user.space_id}` })}</p>
-        {client?.description ? <p>{client.description}</p> : null}
-        <div className="oauth-authorize-scopes">
+        <div className="oauth-consent-identity"><UserAvatar className="oauth-account-avatar" name={authorizedSession.user.name} uri={authorizedSession.user.avatar_uri} cacheKey={authorizedSession.user.avatar_cache_key} /><div><strong>{authorizedSession.user.name}</strong><small>{spaceName || `#${authorizedSession.user.space_id}`}</small></div></div>
+        <OAuthVerificationCard eligibility={eligibilityValue} search={search} failed={eligibilityError} onReload={() => setEligibilityReload(value => value + 1)} />
+        <section className="oauth-authorize-scopes" aria-label={t("apps.sharedInformation")}>
+          <small>{t("apps.sharedInformation")}</small>
           {scopes.map((item) => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}
-        </div>
-        <p className="oauth-authorize-note">{t("apps.authorizeNote")}</p>
-        {!eligibilityValue ? <p role="status">{eligibilityError ? t("apps.verificationCheckFailed") : t("common.loading")}{eligibilityError ? <button type="button" onClick={() => setEligibilityReload(value => value + 1)}>{t("common.retry")}</button> : null}</p> : !eligibilityValue.eligible ? <div role="alert">
-          <p>{t("apps.dualVerificationRequired")}</p>
-          <p>{eligibilityValue.missing_verifications.includes("email") ? t("apps.verifyEmailRequired") : null}{eligibilityValue.missing_verifications.includes("phone") ? ` ${t("apps.verifyPhoneRequired")}` : null}</p>
-          <Link to="/app/menu?panel=account-security" onClick={() => rememberOAuthRequest(search)}>{t("menu.accountSecurity")}</Link>
-          <button type="button" onClick={() => setEligibilityReload(value => value + 1)}>{t("common.retry")}</button>
-        </div> : null}
+        </section>
+        {client?.description ? <details className="oauth-app-description"><summary>{t("apps.aboutApplication")}</summary><p>{client.description}</p></details> : null}
+        <p className="oauth-authorize-note">{t("apps.consentPrivacy")}</p>
         {error ? <p role="alert">{error}</p> : null}
-        <div className="oauth-authorize-actions"><Link onClick={clearOAuthRequest} to="/app/menu">{t("common.cancel")}</Link><button disabled={busy || !eligibilityValue?.eligible} onClick={() => void approve()} type="button">{busy ? t("common.loading") : t("apps.allow")}</button></div>
+        <div className="oauth-authorize-actions"><Link className="oauth-cancel" onClick={clearOAuthRequest} to="/app/menu">{t("common.cancel")}</Link>{eligibilityValue?.eligible ? <button className="oauth-primary" disabled={busy} onClick={() => void approve()} type="button">{busy ? t("common.loading") : t("apps.allow")}</button> : nextVerification ? <Link className="oauth-primary" to={oauthVerificationTarget(nextVerification, search).to} state={oauthVerificationTarget(nextVerification, search).state} onClick={() => rememberOAuthRequest(search)}>{t(nextVerification === "email" ? "apps.verifyEmailAction" : "apps.verifyPhoneAction")}</Link> : <button className="oauth-primary" type="button" disabled>{t("apps.checkingVerification")}</button>}</div>
       </>}
     </section>
   </main>;

@@ -1,5 +1,5 @@
-export type OAuthClientMetadata = { id: string; name: string; description: string; callback: string; scopes: string[] };
-export type OAuthRevision = { id: number; name: string; description: string; redirect_uris: string[]; scopes: string[]; loopback_uris: string[]; status: "draft" | "pending" | "approved" | "rejected"; review_note: string; reviewed_by: string; reviewed_at: string | null };
+export type OAuthClientMetadata = { id: string; name: string; description: string; icon_url?: string; callback: string; scopes: string[] };
+export type OAuthRevision = { id: number; name: string; description: string; icon_url?: string; redirect_uris: string[]; scopes: string[]; loopback_uris: string[]; status: "draft" | "pending" | "approved" | "rejected"; review_note: string; reviewed_by: string; reviewed_at: string | null };
 export type OAuthApplication = { id: number; client_id: string; owner_id: number | null; enabled: boolean; version: number; approved_revision_id: number | null; revisions: OAuthRevision[]; audit: { actor: string; action: string; version: number; created_at: string }[] };
 
 export function validOAuthReturn(uri: string, callback: string, state: string) {

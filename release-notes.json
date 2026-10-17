@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.17.20",
+  "id": "2026.10.17.21",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "第三方登录认证要求",
+      "title": "更清晰的第三方登录",
       "items": [
-        "使用友间登录第三方应用需同时完成邮箱和手机号认证",
-        "授权页面提示待补齐的认证，并提供账号安全入口"
+        "授权页展示双方应用图标，身份与权限信息更简洁",
+        "邮箱与手机认证分步引导，完成后回到原登录请求"
       ]
     },
     "en": {
-      "title": "Verification for third-party sign-in",
+      "title": "Clearer third-party sign-in",
       "items": [
-        "Verify both email and phone to sign in to third-party apps with Frienden",
-        "The consent page shows missing verification and links to account security"
+        "See both application icons with a simpler identity and permission summary",
+        "Complete missing email or phone verification and return to your sign-in request"
       ]
     }
   }
