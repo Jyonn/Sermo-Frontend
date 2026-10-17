@@ -122,7 +122,7 @@ export default function OAuthAuthorizePage() {
 
   return <main className="oauth-authorize-page">
     <section className="oauth-authorize-card">
-      <img alt="" src={client?.id === "chronelle" ? chronelleIcon : stillfolioMark} />
+      <img alt="" src={client?.id === "supervision-local" ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='25' fill='%2379917e'/%3E%3Cpath d='M7 32a25 25 0 0 1 50 0Z' fill='%23e9eee7'/%3E%3C/svg%3E" : client?.id === "chronelle" ? chronelleIcon : stillfolioMark} />
       <small>FRIENDEN{client ? ` × ${client.label}` : ""}</small>
       <h1>{t("apps.authorizeTitle", { app: appName })}</h1>
       {!valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>

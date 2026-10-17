@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.17.15",
+  "id": "2026.10.17.16",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "发言详情布局修复",
+      "title": "Supervision 本地登录支持",
       "items": [
-        "发言详情保持满屏高度，评论栏始终可见并保留底部间距，移除多余内边距"
+        "支持授权 Supervision 本地客户端，只读取基本资料并返回本机回调"
       ]
     },
     "en": {
-      "title": "Statement detail layout fix",
+      "title": "Supervision local sign-in",
       "items": [
-        "Statement details now fill the viewport with a persistent, safely spaced comment bar and no extra drawer padding"
+        "Allow the Supervision local client to read basic profile information and return to its exact loopback callback"
       ]
     }
   }
