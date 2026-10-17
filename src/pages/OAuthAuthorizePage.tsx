@@ -124,7 +124,7 @@ export default function OAuthAuthorizePage() {
   return <main className="oauth-authorize-page">
     <section className="oauth-authorize-card">
       <img alt="" src="/icons/frienden-512.png?v=2" />
-      <small>FRIENDOM{client ? ` × ${client.name}` : ""}</small>
+      <small>FRIENDEN{client ? ` × ${client.name}` : ""}</small>
       <h1>{t("apps.authorizeTitle", { app: appName })}</h1>
       {metadata?.search !== search ? <p>{t("common.loading")}</p> : !valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>
         <p>{accountsRefreshing || accountToRestore && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount", { app: appName }) : t("apps.signInFirst", { app: appName })}</p>

@@ -27,6 +27,7 @@ import { AvatarUploadError, uploadCustomAvatar } from "../lib/avatarUpload";
 import { ChatBackgroundUploadError, uploadChatBackground } from "../lib/chatBackgroundUpload";
 import { useAuth } from "../lib/auth";
 import { useAdminAuth } from "../lib/adminAuth";
+import { usePlatformAdminAuth } from "../lib/platformAdminAuth";
 import { normalizeContactTarget } from "../lib/contactTarget";
 import { copyText } from "../lib/presentation";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
@@ -427,6 +428,7 @@ function GrowthRewardVisual({ reward, me, name, uri }: {
 }
 
 export default function MenuPage() {
+  const { session: platformAdminSession } = usePlatformAdminAuth();
   const { t, preference: languagePreference, setPreference: setLanguagePreference, saving: languageSaving } = useI18n();
   const { preference: themePreference, setPreference: setThemePreference } = useTheme();
   const location = useLocation();
@@ -2264,6 +2266,7 @@ export default function MenuPage() {
       <SideDrawer historyKey="more-apps" onRouteOpen={() => setMoreAppsOpen(true)} open={moreAppsOpen} onClose={() => setMoreAppsOpen(false)} title={t("apps.more")}>
         <div className="more-apps-drawer">
           <button className="simple-row menu-link-row" type="button" onClick={() => setOAuthApplicationsOpen(true)}>{t("oauth.manage")}</button>
+          {platformAdminSession ? <button className="simple-row menu-link-row" type="button" onClick={() => navigate("/admin?section=oauth")}>{t("oauth.platformManage")}</button> : null}
           <div className="mode-switch" role="tablist" aria-label={t("apps.more")}>
             {(["apps", "plugins"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={appsTab === tab} className={`mode-pill ${appsTab === tab ? "active" : ""}`} onClick={() => setAppsTab(tab)}>{t(tab === "apps" ? "apps.appTab" : "apps.pluginTab")}</button>)}
           </div>

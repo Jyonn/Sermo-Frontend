@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { useSearchParams } from "react-router-dom";
 import { OAuthApplicationWorkspace } from "../components/OAuthApplicationWorkspace";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { PermissionWorkspace } from "../components/PermissionWorkspace";
@@ -205,7 +206,8 @@ function DeliveryAudit({ value }: { value: PlatformMessageDeliveryAuditDTO | nul
 
 function PlatformAdminConsole() {
   const { session, logout, setSession } = usePlatformAdminAuth();
-  const [section, setSection] = useState<Section>("overview");
+  const [searchParams] = useSearchParams();
+  const [section, setSection] = useState<Section>(() => searchParams.get("section") === "oauth" ? "oauth" : "overview");
   const [dashboard, setDashboard] = useState<PlatformDashboardDTO | null>(null);
   const [spaces, setSpaces] = useState<PlatformAdminSpaceDTO[]>([]);
   const [audit, setAudit] = useState<PlatformAuditDTO[]>([]);

@@ -1,4 +1,5 @@
 {
+  "oauth.platformManage": "Platform OAuth review",
   "oauth.audit": "Change history",
   "oauth.manage": "OAuth applications",
   "oauth.adminHint": "Add approved apps or review developer requests. Pending revisions leave the approved configuration active.",

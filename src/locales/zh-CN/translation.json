@@ -1,4 +1,5 @@
 {
+  "oauth.platformManage": "平台 OAuth 审核",
   "oauth.audit": "变更审计",
   "oauth.manage": "OAuth 应用管理",
   "oauth.adminHint": "直接添加已批准应用，或审核开发者申请。待审修订不影响已批准配置。",
