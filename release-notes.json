@@ -1,21 +1,17 @@
 {
-  "id": "2026.10.17.11",
+  "id": "2026.10.17.12",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "日历与广场体验优化",
+      "title": "匿名回复展示修复",
       "items": [
-        "添加空间运营者后自动成为好友，无需等待审批",
-        "精简应用与插件的内边距，名片日历改为原生周历和日程列表",
-        "优化广场详情返回时的位置恢复，保持手机 Header 的毛玻璃背景"
+        "收件箱中的匿名回复使用与广场一致的匿名头像和名称"
       ]
     },
     "en": {
-      "title": "Calendar and Square improvements",
+      "title": "Anonymous reply display fix",
       "items": [
-        "Space operator friend requests are now accepted automatically",
-        "Removed extra app drawer padding and replaced embedded calendars with a native weekly agenda",
-        "Improved Square scroll restoration and kept the mobile header backdrop stable on return"
+        "Anonymous replies in the inbox now use the same anonymous avatar and name as Square"
       ]
     }
   }

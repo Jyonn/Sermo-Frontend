@@ -2603,7 +2603,8 @@ export default function SquarePage() {
       <SideDrawer historyKey="square-notifications" onRouteOpen={() => setNotificationDrawerOpen(true)} onClose={() => setNotificationDrawerOpen(false)} open={notificationDrawerOpen} title={t("square.notifications")}>
         <div className="square-notification-list">
           {!notificationEvents.length ? <QuietState icon="notifications_none" title={t("square.noNotifications")} /> : notificationEvents.map((event) => {
-            const actor = event.actor?.name || t("square.someone");
+            const anonymousActor = Boolean(event.actor?.anonymous || event.payload.anonymous_actor);
+            const actor = anonymousActor ? t("square.anonymousUser") : event.actor?.name || t("square.someone");
             const removed = event.event_type === 9;
             const label = removed ? t("square.notificationStatementRemoved")
               : event.event_type === 10 ? t("square.notificationMentioned", { name: actor })
@@ -2622,7 +2623,7 @@ export default function SquarePage() {
                 }}
                 type="button"
               >
-                <UserAvatar className="square-notification-avatar" frame={event.actor?.avatar_frame_style} name={actor} uri={event.actor?.avatar_uri} />
+                {anonymousActor ? <span className="square-anonymous-avatar square-notification-avatar"><span className="material-symbols-outlined">person</span></span> : <UserAvatar className="square-notification-avatar" frame={event.actor?.avatar_frame_style} name={actor} uri={event.actor?.avatar_uri} />}
                 <span><strong>{label}</strong>{removed && event.payload.statement_excerpt ? <small className="square-notification-excerpt">“{event.payload.statement_excerpt}”</small> : null}<small>{formatStatementTime(event.created_at, language)}</small></span>
                 <span className="material-symbols-outlined">{removed ? "info" : "chevron_right"}</span>
               </button>
