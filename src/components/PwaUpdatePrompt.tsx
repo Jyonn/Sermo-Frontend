@@ -5,6 +5,7 @@ import {
 } from "../lib/pwaUpdate";
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { useI18n } from "../lib/language";
+import { UpdateReportButton } from "./UpdateReportButton";
 
 const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
 
@@ -50,6 +51,7 @@ export function PwaUpdatePrompt() {
         </button>
       </div>
       {phase === "error" ? <p className="pwa-update-error" role="alert">{t("update.installFailed")}</p> : null}
+      {phase === "error" ? <UpdateReportButton /> : null}
     </aside>
   );
 }

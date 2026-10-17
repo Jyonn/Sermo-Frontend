@@ -1,4 +1,5 @@
 import currentRelease from "../../release-notes.json" with { type: "json" };
+import { beginUpdate, recordUpdate, failUpdate, markUpdateReload, reconcileUpdate, compareVersions } from "./updateDiagnostics.ts";
 
 export interface ReleaseNotes {
   id: string;
@@ -56,6 +57,7 @@ function publishUpdateCheck(snapshot: UpdateCheckSnapshot) {
 }
 
 export const CURRENT_RELEASE = currentRelease as ReleaseNotes;
+reconcileUpdate(CURRENT_RELEASE.id);
 
 function compareReleaseIds(left: string, right: string) {
   const leftParts = left.split(".").map(Number);
@@ -146,45 +148,139 @@ function waitForWaitingWorker(registration: ServiceWorkerRegistration): Promise<
 
 export type UpdateActivationPhase = "preparing" | "installing" | "restarting";
 
-export async function activatePwaUpdate(onPhase?: (phase: UpdateActivationPhase) => void) {
+let activation: Promise<void> | null = null;
+export function activatePwaUpdate(onPhase?: (phase: UpdateActivationPhase) => void) {
+  if (activation) return activation;
+  activation = runUpdate(onPhase).finally(() => { activation = null; });
+  return activation;
+}
+
+async function runUpdate(onPhase?: (phase: UpdateActivationPhase) => void) {
   onPhase?.("preparing");
+  const source = { key: "primary" as const, origin: window.location.origin };
+  const local = await fetchReleaseFromSource(source);
+  beginUpdate(local.releaseId ?? CURRENT_RELEASE.id);
+  recordUpdate(2, { runningVersion: CURRENT_RELEASE.id, site: window.location.hostname === "sermo.6-79.cn" ? 2 : 1, online: navigator.onLine });
+  try {
+    if (!local.releaseId || compareVersions(local.releaseId, CURRENT_RELEASE.id) <= 0) throw new Error("site-not-ready");
+    await prepareUpdate(local.releaseId, onPhase);
+  } catch (error) {
+    const reasons = ["site-not-ready", "resource-unavailable", "entry-version-mismatch", "missing-entry-script", "unexpected-resource-origin", "invalid-resource", "worker-update-timeout", "worker-not-ready", "worker-version-mismatch", "worker-activation-timeout", "worker-message-failed"];
+    recordUpdate(9, { failureCode: error instanceof Error ? reasons.indexOf(error.message) + 1 : 0 });
+    failUpdate();
+    throw error;
+  }
+}
+
+async function freshResponse(path: string) {
+  const url = new URL(path, window.location.origin);
+  url.searchParams.set("frienden_update", String(Date.now()));
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+    recordUpdate(13, { httpStatus: response.status, offlineFallback: Boolean(response.headers.get("X-Frienden-Offline")) });
+    if (!response.ok || response.headers.get("X-Frienden-Offline")) throw new Error("resource-unavailable");
+    const body = await response.arrayBuffer();
+    return new Response(body, { status: response.status, headers: response.headers });
+  } finally { window.clearTimeout(timeout); }
+}
+
+async function workerRelease(worker: ServiceWorker) {
+  return new Promise<string | null>((resolve) => {
+    const channel = new MessageChannel();
+    const finish = (version: string | null) => { clearTimeout(timeout); channel.port1.close(); resolve(version); };
+    const timeout = setTimeout(() => finish(null), 1500);
+    channel.port1.onmessage = (event) => finish(typeof event.data?.release === "string" ? event.data.release : null);
+    try { worker.postMessage({ type: "GET_RELEASE" }, [channel.port2]); } catch { finish(null); }
+  });
+}
+
+async function prepareUpdate(target: string, onPhase?: (phase: UpdateActivationPhase) => void) {
+  onPhase?.("preparing");
+  recordUpdate(10);
+  const html = await (await freshResponse("/index.html")).text();
+  const page = new DOMParser().parseFromString(html, "text/html");
+  const entryVersion = page.querySelector('meta[name="frienden-release"]')?.getAttribute("content") ?? null;
+  recordUpdate(3, { entryVersion });
+  if (entryVersion !== target) throw new Error("entry-version-mismatch");
+  const scripts = Array.from(page.querySelectorAll('script[type="module"][src], link[rel="modulepreload"][href], link[rel="stylesheet"][href]'));
+  if (!scripts.length) throw new Error("missing-entry-script");
+  recordUpdate(11);
+  await Promise.all(scripts.map(async (node) => {
+    const url = new URL(node.getAttribute("src") ?? node.getAttribute("href")!, window.location.origin);
+    if (url.origin !== window.location.origin) throw new Error("unexpected-resource-origin");
+    const response = await freshResponse(url.pathname);
+    if (response.headers.get("Content-Type")?.includes("text/html")) throw new Error("invalid-resource");
+    await response.arrayBuffer();
+  }));
+  recordUpdate(4, { resourceCount: scripts.length });
   const registration = "serviceWorker" in navigator
     ? await navigator.serviceWorker.getRegistration().catch(() => undefined)
     : undefined;
   if (registration) {
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    try {
-      await Promise.race([
-        registration.update().catch(() => undefined),
-        new Promise<void>((resolve) => { timeout = globalThis.setTimeout(resolve, 8000); }),
-      ]);
-    } finally {
-      if (timeout) globalThis.clearTimeout(timeout);
+    recordUpdate(5, { hasWorker: Boolean(registration.waiting), hasController: Boolean(navigator.serviceWorker?.controller) });
+    for (let retry = 0; retry < 2; retry++) {
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      recordUpdate(12, { retry });
+      try {
+        await Promise.race([
+          registration.update(),
+          new Promise<void>((_, reject) => { timeout = globalThis.setTimeout(() => reject(new Error("worker-update-timeout")), 10000); }),
+        ]);
+        break;
+      } catch (error) {
+        if (retry === 1) throw error;
+        await new Promise((resolve) => window.setTimeout(resolve, 600));
+      } finally {
+        if (timeout) globalThis.clearTimeout(timeout);
+      }
     }
   }
   onPhase?.("installing");
   const worker = registration ? await waitForWaitingWorker(registration) : null;
+  recordUpdate(5, { hasWorker: Boolean(worker), hasController: Boolean(navigator.serviceWorker?.controller) });
   if (!worker) {
+    if (registration) {
+      const activeVersion = registration.active ? await workerRelease(registration.active) : null;
+      recordUpdate(6, { workerVersion: activeVersion });
+      if (activeVersion !== target) throw new Error("worker-not-ready");
+    }
     onPhase?.("restarting");
+    markUpdateReload();
     window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
-    window.location.reload();
+    const url = new URL(window.location.href);
+    url.searchParams.set("frienden_updated", target);
+    window.location.replace(url.href);
     return;
   }
-  let reloading = false;
-  const reload = () => {
-    if (reloading) return;
-    reloading = true;
-    onPhase?.("restarting");
-    window.clearTimeout(fallback);
-    navigator.serviceWorker.removeEventListener("controllerchange", reload);
-    window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
-    window.location.reload();
-  };
-  navigator.serviceWorker.addEventListener("controllerchange", reload);
-  const fallback = window.setTimeout(reload, 8000);
-  try {
-    worker.postMessage({ type: "SKIP_WAITING" });
-  } catch {
-    reload();
-  }
+  const version = await workerRelease(worker);
+  recordUpdate(6, { workerVersion: version });
+  if (version !== target) throw new Error("worker-version-mismatch");
+  await new Promise<void>((resolve, reject) => {
+    let reloading = false;
+    const reload = () => {
+      if (reloading) return;
+      reloading = true;
+      onPhase?.("restarting");
+      window.clearTimeout(fallback);
+      navigator.serviceWorker.removeEventListener("controllerchange", reload);
+      window.sessionStorage.setItem("sermo:diagnostics:reload-reason", "user-requested-pwa-update");
+      markUpdateReload();
+      const url = new URL(window.location.href);
+      url.searchParams.set("frienden_updated", target);
+      window.location.replace(url.href);
+      resolve();
+    };
+    navigator.serviceWorker.addEventListener("controllerchange", reload);
+    const fallback = window.setTimeout(() => { navigator.serviceWorker.removeEventListener("controllerchange", reload); reject(new Error("worker-activation-timeout")); }, 8000);
+    try {
+      if (navigator.serviceWorker.controller === worker) reload();
+      else worker.postMessage({ type: "SKIP_WAITING" });
+    } catch {
+      window.clearTimeout(fallback);
+      navigator.serviceWorker.removeEventListener("controllerchange", reload);
+      reject(new Error("worker-message-failed"));
+    }
+  });
 }

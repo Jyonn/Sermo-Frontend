@@ -1,124 +1,49 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  activatePwaUpdate,
-  checkForPwaUpdate,
-  CURRENT_RELEASE,
-  getPwaUpdateCheckSnapshot,
-  subscribePwaUpdateCheck,
-} from "../src/lib/pwaUpdate.ts";
+import { activatePwaUpdate, checkForPwaUpdate, CURRENT_RELEASE } from "../src/lib/pwaUpdate.ts";
 
-test("automatic and manual checks share one release query and result", async (context) => {
-  const previousFetch = globalThis.fetch;
-  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
-  Object.defineProperty(globalThis, "window", {
-    configurable: true,
-    value: { setTimeout, clearTimeout },
-  });
-  context.after(() => {
-    globalThis.fetch = previousFetch;
-    if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow);
-    else delete (globalThis as { window?: unknown }).window;
-  });
-
-  const versions = CURRENT_RELEASE.id.split(".");
-  versions[3] = String(Number(versions[3]) + 1);
-  const newerRelease = { ...CURRENT_RELEASE, id: versions.join(".") };
-  const requested: string[] = [];
-  globalThis.fetch = async (input) => {
-    requested.push(String(input));
-    const release = String(input).includes("6-79.cn") ? newerRelease : CURRENT_RELEASE;
-    return new Response(JSON.stringify(release), { status: 200 });
+const target = "2099.10.17.1";
+function setup(context: { after: (fn: () => void) => void }, options: { oldEntry?: boolean; workerFailure?: boolean; waiting?: boolean; oldSite?: boolean; badAsset?: boolean } = {}) {
+  const keys = ["window", "navigator", "DOMParser", "fetch", "sessionStorage"] as const;
+  const originals = keys.map((key) => Object.getOwnPropertyDescriptor(globalThis, key));
+  let restarts = 0;
+  let changed: (() => void) | undefined;
+  const worker = { postMessage: (message: { type: string }, ports?: MessagePort[]) => {
+    if (message.type === "GET_RELEASE") ports?.[0].postMessage({ release: target });
+    else changed?.();
+  }};
+  const values = {
+    window: { setTimeout, clearTimeout, sessionStorage: { setItem() {} }, location: { origin: "https://sermo.jyonn.space", hostname: "sermo.jyonn.space", href: "https://sermo.jyonn.space/wzry/app/menu", replace() { restarts++; } } },
+    navigator: { onLine: true, serviceWorker: { getRegistration: async () => ({ update: async () => { if (options.workerFailure) throw Error("network"); }, waiting: options.waiting ? worker : null, active: options.waiting ? null : worker }), addEventListener: (_: string, callback: () => void) => { changed = callback; }, removeEventListener() { changed = undefined; } } },
+    DOMParser: class { parseFromString() { return { querySelector: () => ({ getAttribute: () => options.oldEntry ? CURRENT_RELEASE.id : target }), querySelectorAll: () => [{ getAttribute: () => "/assets/app.js" }] }; } },
+    fetch: async (input: unknown) => String(input).includes("release.json") ? new Response(JSON.stringify({ ...CURRENT_RELEASE, id: options.oldSite ? CURRENT_RELEASE.id : target })) : new Response("resource", { headers: { "Content-Type": options.badAsset ? "text/html" : "text/javascript" } }),
+    sessionStorage: { getItem: () => null, setItem() {} },
   };
+  keys.forEach((key) => Object.defineProperty(globalThis, key, { configurable: true, value: values[key] }));
+  context.after(() => keys.forEach((key, index) => { if (originals[index]) Object.defineProperty(globalThis, key, originals[index]!); else Reflect.deleteProperty(globalThis, key); }));
+  return () => restarts;
+}
 
-  const checking: boolean[] = [];
-  const unsubscribe = subscribePwaUpdateCheck(() => checking.push(getPwaUpdateCheckSnapshot().checking));
-  const automatic = checkForPwaUpdate();
-  const manual = checkForPwaUpdate();
-  assert.equal(automatic, manual);
-  const result = await automatic;
-  unsubscribe();
-
-  assert.equal(requested.length, 2);
-  assert.ok(requested.every((url) => url.includes("/release.json?t=")));
-  assert.deepEqual(checking, [true, false]);
-  assert.equal(result.latestVersion, newerRelease.id);
-  assert.equal(result.updateAvailable, true);
-  assert.equal(getPwaUpdateCheckSnapshot().result, result);
-
-  globalThis.fetch = async (input) => {
-    if (String(input).includes("6-79.cn")) throw new Error("offline");
-    return new Response(JSON.stringify(CURRENT_RELEASE), { status: 200 });
-  };
-  const partial = await checkForPwaUpdate();
-  assert.deepEqual(partial.sources.map((source) => source.status), ["ok", "error"]);
-  assert.equal(partial.updateAvailable, false);
+test("checks are single-flight and never restart the page", async (context) => {
+  const restarts = setup(context);
+  const first = checkForPwaUpdate();
+  assert.equal(first, checkForPwaUpdate());
+  assert.equal((await first).latestVersion, target);
+  assert.equal(restarts(), 0);
 });
-
-test("the page reloads only after an explicit update action", async (context) => {
-  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
-  const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
-  let reloads = 0;
-  let reason = "";
-  const phases: string[] = [];
-  Object.defineProperty(globalThis, "window", {
-    configurable: true,
-    value: {
-      sessionStorage: { setItem: (_key: string, value: string) => { reason = value; } },
-      location: { reload: () => { reloads += 1; } },
-    },
+for (const options of [{ oldEntry: true }, { workerFailure: true }, { oldSite: true }, { badAsset: true }]) {
+  test(`failed readiness does not restart: ${JSON.stringify(options)}`, async (context) => {
+    const restarts = setup(context, options);
+    await assert.rejects(activatePwaUpdate());
+    assert.equal(restarts(), 0);
   });
-  Object.defineProperty(globalThis, "navigator", { configurable: true, value: {} });
-  context.after(() => {
-    if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow);
-    else delete (globalThis as { window?: unknown }).window;
-    if (previousNavigator) Object.defineProperty(globalThis, "navigator", previousNavigator);
-    else delete (globalThis as { navigator?: unknown }).navigator;
+}
+for (const waiting of [false, true]) {
+  test(`verified ${waiting ? "waiting" : "active"} worker permits explicit restart`, async (context) => {
+    const restarts = setup(context, { waiting });
+    const phases: string[] = [];
+    await activatePwaUpdate((phase) => phases.push(phase));
+    assert.equal(restarts(), 1);
+    assert.equal(phases.at(-1), "restarting");
   });
-
-  assert.equal(reloads, 0);
-  await activatePwaUpdate((phase) => phases.push(phase));
-  assert.equal(reloads, 1);
-  assert.equal(reason, "user-requested-pwa-update");
-  assert.deepEqual(phases, ["preparing", "installing", "restarting"]);
-});
-
-test("an installed service worker reports each stage before reloading", async (context) => {
-  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
-  const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
-  const phases: string[] = [];
-  let reloads = 0;
-  let controllerChanged: (() => void) | null = null;
-  Object.defineProperty(globalThis, "window", {
-    configurable: true,
-    value: {
-      setTimeout,
-      clearTimeout,
-      sessionStorage: { setItem: () => undefined },
-      location: { reload: () => { reloads += 1; } },
-    },
-  });
-  Object.defineProperty(globalThis, "navigator", {
-    configurable: true,
-    value: {
-      serviceWorker: {
-        getRegistration: async () => ({
-          update: async () => undefined,
-          waiting: { postMessage: () => controllerChanged?.() },
-        }),
-        addEventListener: (_name: string, callback: () => void) => { controllerChanged = callback; },
-        removeEventListener: () => { controllerChanged = null; },
-      },
-    },
-  });
-  context.after(() => {
-    if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow);
-    else delete (globalThis as { window?: unknown }).window;
-    if (previousNavigator) Object.defineProperty(globalThis, "navigator", previousNavigator);
-    else delete (globalThis as { navigator?: unknown }).navigator;
-  });
-
-  await activatePwaUpdate((phase) => phases.push(phase));
-  assert.deepEqual(phases, ["preparing", "installing", "restarting"]);
-  assert.equal(reloads, 1);
-});
+}

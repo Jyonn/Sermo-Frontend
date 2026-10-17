@@ -3,6 +3,7 @@ import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
 import { type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
+import { UpdateReportButton } from "./UpdateReportButton";
 
 interface UpdateCheckDialogProps {
   checking: boolean;
@@ -42,7 +43,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
             </span>
             <div>
               <strong>{checking ? t("update.checking") : result?.updateAvailable ? t("update.available") : allFailed ? t("update.unavailable") : t("update.latest")}</strong>
-              <p>{checking ? t("update.checkingHint") : allFailed ? t("update.networkHint") : partiallyFailed ? t("update.partialHint") : result ? t("update.latestHint") : t("update.readyHint")}</p>
+              <p>{checking ? t("update.checkingHint") : allFailed ? t("update.networkHint") : partiallyFailed ? t("update.partialHint") : result?.updateAvailable ? t("update.availableHint") : result ? t("update.latestHint") : t("update.readyHint")}</p>
             </div>
           </div>
 
@@ -59,7 +60,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
             ]).map((source) => (
               <div className="update-source-row" key={source.key}>
                 <span className="material-symbols-outlined" aria-hidden="true">{source.status === "ok" ? "cloud_done" : source.status === "error" ? "cloud_off" : "cloud_queue"}</span>
-                <div><strong>{sourceName(source.key)}</strong><small>{new URL(source.origin).host}</small></div>
+                <div><strong>{sourceName(source.key)}{source.origin === window.location.origin ? ` · ${t("update.currentSite")}` : ""}</strong><small>{new URL(source.origin).host}</small></div>
                 <em className={`is-${source.status}`}>{source.status === "ok" ? source.releaseId : source.status === "error" ? t("update.checkFailed") : t("update.waiting")}</em>
               </div>
             ))}
@@ -70,6 +71,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
           {phase === "error" ? <p className="update-network-advice" role="alert"><span className="material-symbols-outlined" aria-hidden="true">wifi_find</span>{t("update.installFailed")}</p> : null}
         </div>
 
+        {phase === "error" ? <UpdateReportButton /> : null}
         <footer className="update-check-actions">
           <button className="ghost-button" disabled={checking || installing} onClick={onCheck} type="button">{t("update.recheck")}</button>
           {result?.updateAvailable ? <button className="button" disabled={installing} onClick={install} type="button">{installing ? <span aria-hidden="true" className="media-wait-spinner" /> : null}{installing ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}</button> : <button className="button" onClick={onClose} type="button">{t("common.gotIt")}</button>}

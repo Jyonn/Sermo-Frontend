@@ -188,6 +188,7 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("message", (event) => {
+  if (event.data?.type === "GET_RELEASE") event.ports[0]?.postMessage({ release: self.SERMO_RELEASE_ID });
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
   if (event.data?.type === "PURGE_MEDIA" && Array.isArray(event.data.slugs)) {
     event.data.slugs.forEach((slug) => blockedMediaSlugs.add(slug));
@@ -231,13 +232,19 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: "no-store" })
         .then((response) => {
           const copy = response.clone();
           void caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
           return response;
         })
-        .catch(() => caches.match("/"))
+        .catch(async () => {
+          const cached = await caches.match("/");
+          if (!cached) return Response.error();
+          const headers = new Headers(cached.headers);
+          headers.set("X-Frienden-Offline", "1");
+          return new Response(cached.body, { status: cached.status, headers });
+        })
     );
     return;
   }

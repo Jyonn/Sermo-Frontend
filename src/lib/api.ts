@@ -1868,7 +1868,7 @@ export const api = {
     return request<{ report_id: number }>("/platform-admin/debug-reports/upload", { method: "POST", auth: true, body: report });
   },
   getPlatformDebugReports() {
-    return request<{ items: Array<{ report_id: number; user_id: number; user_name: string; space: string; created_at: number; entry_count: number }> }>("/platform-admin/debug-reports", { platformAdminAuth: true });
+    return request<{ items: Array<{ report_id: number; user_id: number; user_name: string; space: string; created_at: number; entry_count: number; kind?: "update" | "layout" }> }>("/platform-admin/debug-reports", { platformAdminAuth: true });
   },
   getPlatformDebugReport(reportId: number) {
     return request<{ report_id: number; report: { generatedAt: string; entries: unknown[] } }>(`/platform-admin/debug-reports/${reportId}`, { platformAdminAuth: true });

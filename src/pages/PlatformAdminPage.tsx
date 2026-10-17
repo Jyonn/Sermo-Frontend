@@ -209,6 +209,7 @@ function PlatformAdminConsole() {
   const [audit, setAudit] = useState<PlatformAuditDTO[]>([]);
   const [debugReports, setDebugReports] = useState<Awaited<ReturnType<typeof api.getPlatformDebugReports>>["items"]>([]);
   const [debugLoading, setDebugLoading] = useState(false);
+  const [debugDetail, setDebugDetail] = useState<string | null>(null);
   const [emailDeliveries, setEmailDeliveries] = useState<PlatformEmailDeliveryDTO[]>([]);
   const [emailCursor, setEmailCursor] = useState<number | null>(null);
   const [emailHasMore, setEmailHasMore] = useState(false);
@@ -259,6 +260,7 @@ function PlatformAdminConsole() {
   const copyDebugReport = async (reportId: number) => {
     try {
       const result = await api.getPlatformDebugReport(reportId);
+      setDebugDetail(JSON.stringify(result.report, null, 2));
       const copied = await copyText(JSON.stringify(result.report, null, 2));
       showToast(copied ? "报告已复制" : "复制失败", copied ? "success" : "error");
     } catch (cause) {
@@ -323,6 +325,12 @@ function PlatformAdminConsole() {
     {section === "overview" ? <><section className="platform-hero"><div><span>平台状态</span><h2>保持克制，也保持可见。</h2><p>审计只为处理风险，不替用户做决定。</p></div><span className="material-symbols-outlined">radar</span></section><div className="platform-metrics"><Metric label="运行空间" note="全平台累计" value={dashboard?.spaces ?? 0} /><Metric label="有效成员" note="不含官方账号" value={dashboard?.members ?? 0} /><Metric label="待实名审核" note="需要人工判断" value={dashboard?.pending_identity_reviews ?? 0} /></div><section className="platform-panel"><div className="platform-section-title"><div><span>RECENT ACCESS</span><h3>最近敏感操作</h3></div><button onClick={() => setSection("audit")} type="button">查看全部</button></div><AuditList items={dashboard?.recent_audit ?? []} /></section></> : null}
     {section === "spaces" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DIRECTORY</span><h3>空间目录</h3></div><label className="platform-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder="名称、slug 或邮箱" value={query} /></label></div><div className="platform-space-list">{visibleSpaces.map((space) => <SpaceRow key={space.space_id} onClick={() => void selectSpace(space)} space={space} />)}</div></section> : null}
     {section === "permissions" ? <PermissionWorkspace scope="platform" /> : null}
+    {section === "debug" ? <section className="platform-panel"><label>查看报告<select aria-label="查看调试报告" defaultValue="" onChange={(event) => {
+      const id = Number(event.target.value);
+      if (!id) { setDebugDetail(null); return; }
+      setDebugDetail("加载中…");
+      void api.getPlatformDebugReport(id).then((result) => setDebugDetail(JSON.stringify(result.report, null, 2)), () => setDebugDetail("读取失败，请重试"));
+    }}><option value="">选择报告</option>{debugReports.map((item) => <option value={item.report_id} key={item.report_id}>#{item.report_id} · {item.kind === "update" ? "升级诊断" : "布局诊断"} · {item.user_name}</option>)}</select></label>{debugDetail ? <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: "50vh", overflow: "auto" }}>{debugDetail}</pre> : null}</section> : null}
     {section === "reviews" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IDENTITY QUEUE</span><h3>实名认证</h3></div><small>{pendingReviews.length} 项待处理</small></div>{pendingReviews.length ? pendingReviews.map((space) => <article className="platform-review-card" key={space.space_id}><div><span>{space.name}</span><strong>@{space.slug}</strong><small>提交于 {new Date((space.identity_submitted_at ?? 0) * 1000).toLocaleString()}</small></div><div><button onClick={() => void api.getPlatformIdentityDocument(space.space_id).then((result) => window.open(result.uri, "_blank", "noopener"))} type="button">查看材料</button><button onClick={() => setReviewTarget({ space, approved: false })} type="button">驳回</button><button className="is-approve" onClick={() => setReviewTarget({ space, approved: true })} type="button">通过</button></div></article>) : <div className="platform-empty is-large"><span className="material-symbols-outlined">task_alt</span><strong>审核队列已清空</strong><p>新的实名认证提交会出现在这里。</p></div>}</section> : null}
     {section === "emails" ? <div className="platform-email-workspace"><EmailReviewPanel busy={emailReviewBusy || emailLoading} onOpen={(record) => void openEmailReview(record)} onRefresh={() => void refreshEmailReview()} onToggle={() => void toggleEmailReview()} value={emailReview} /><section className="platform-panel"><div className="platform-section-title"><div><span>DELIVERY HISTORY</span><h3>通知邮件发送记录</h3></div><small>每页 40 条 · 收件地址已脱敏</small></div>{emailDeliveries.length ? <EmailDeliveryList items={emailDeliveries} /> : emailLoading ? <div className="platform-inline-loading"><i />正在读取邮件记录</div> : <div className="platform-empty is-large"><span className="material-symbols-outlined">mail</span><strong>暂无通知邮件</strong><p>后续发送记录会出现在这里。</p></div>}{emailHasMore ? <button className="platform-email-more" disabled={emailLoading} onClick={() => void loadMoreEmailDeliveries()} type="button">{emailLoading ? "正在加载" : "加载更多"}<span className="material-symbols-outlined">expand_more</span></button> : emailDeliveries.length ? <div className="platform-email-end">已显示全部记录</div> : null}</section></div> : null}
     {section === "audit" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>IMMUTABLE TRAIL</span><h3>审计日志</h3></div><small>最近 100 条</small></div><AuditList items={audit} /></section> : null}
