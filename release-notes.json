@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.17.17",
+  "id": "2026.10.17.18",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "Frienden 第三方应用授权管理",
+      "title": "更清晰的应用管理",
       "items": [
-        "开发者可提交第三方应用申请，并查看审核结果",
-        "授权页展示已审核的应用与权限；读取邮箱地址需要单独同意",
-        "应用列表恢复加载后自动清除旧错误提示"
+        "应用管理支持搜索和状态筛选，详情与编辑按需打开",
+        "审核操作单独确认，取消编辑前提醒保留未保存内容"
       ]
     },
     "en": {
-      "title": "Frienden application permissions",
+      "title": "Clearer application management",
       "items": [
-        "Developers can submit third-party applications and see review results",
-        "Consent shows reviewed apps and permissions; reading an email address requires separate consent",
-        "Clear previous errors when the application list loads successfully again"
+        "Search and filter applications, with details and editing available when needed",
+        "Confirm review actions separately and keep unsaved changes when cancelling edits"
       ]
     }
   }
