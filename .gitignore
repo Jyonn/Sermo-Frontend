@@ -3,6 +3,8 @@
 .DS_Store
 node_modules
 dist
+.env.deploy.local
+.mirror-deploy.lock
 public/release.json
 public/sw-release.js
 *.tsbuildinfo

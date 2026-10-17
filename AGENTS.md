@@ -8,6 +8,9 @@
 - Run `npm run build` before committing frontend work.
 - Every completed change must be staged, committed with a focused message, and pushed to the remote repository.
 - Retry transient network failures when pushing. If approval is denied, report the unpushed commit clearly instead of bypassing approval.
+- After every frontend release, also deploy the mirror with `npm run deploy:mirror` and verify its release ID. Pushing Git is not a mirror deployment. Report blocked/failed deployment explicitly; never claim synchronization without verification.
+- Mirror SSH settings belong in ignored `.env.deploy.local`, not `VITE_*` variables. The confirmed SSH host is `175.178.125.57`, key `~/Resources/Subscription/Server/tencent`, user `ubuntu`, port `22`, and remote directory `/home/ubuntu/sermo-frontend/dist`. Public mirror: `https://sermo.6-79.cn`. Never commit or print private-key contents.
+- Mirror publication must build with `build:mirror`, upload resources before entry files and publish `release.json` last. Do not use rsync `--delete` or delete old hashed assets; stale clients still need them.
 
 ## User-Facing Releases
 
