@@ -15,6 +15,15 @@ export function agendaDay(day = new Date(), delta = 0) {
   return result;
 }
 
+export function agendaCenteredDays(day: Date, radius = 3) {
+  return Array.from({ length: radius * 2 + 1 }, (_, index) => agendaDay(day, index - radius));
+}
+
+export function agendaDayDistance(from: Date, to: Date) {
+  const serial = (day: Date) => Date.UTC(day.getFullYear(), day.getMonth(), day.getDate());
+  return Math.round((serial(to) - serial(from)) / 86400000);
+}
+
 export function agendaBusyRanges(events: AgendaEvent[], day: Date) {
   const start = agendaDay(day).getTime();
   const end = agendaDay(day, 1).getTime();

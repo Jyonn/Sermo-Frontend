@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { agendaBusyRanges, agendaDay, agendaTimeRange, agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
+import { agendaCenteredDays, agendaDayDistance, agendaBusyRanges, agendaDay, agendaTimeRange, agendaWeek, normalizeAgenda, agendaEventsOn } from "../src/lib/chronelleAgenda.ts";
+test("centered strip keeps selection fourth across month and year boundaries", () => {
+  const selected = new Date(2026, 0, 1);
+  const days = agendaCenteredDays(selected);
+  assert.equal(days.length, 7);
+  assert.equal(days[3].getTime(), selected.getTime());
+  assert.equal(days[0].getFullYear(), 2025);
+  assert.equal(agendaDayDistance(days[0], days[6]), 6);
+  const previous = process.env.TZ;
+  process.env.TZ = "America/New_York";
+  try { assert.equal(agendaDayDistance(new Date(2026, 2, 7), new Date(2026, 2, 9)), 2); }
+  finally { if (previous === undefined) delete process.env.TZ; else process.env.TZ = previous; }
+});
 test("busy ranges clip to the day, merge overlaps and cover all-day intervals", () => {
   const rows = normalizeAgenda([
     {start: "2026-10-16T23:00:00", end: "2026-10-17T03:00:00"},

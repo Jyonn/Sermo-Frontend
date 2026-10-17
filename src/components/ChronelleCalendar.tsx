@@ -1,18 +1,52 @@
 import { useEffect, useState } from "react";
 import { useI18n } from "../lib/language";
-import { agendaWeek, agendaDay, agendaBusyRanges, agendaTimeRange, agendaEventsOn, normalizeAgenda, type AgendaEvent } from "../lib/chronelleAgenda";
+import { agendaCenteredDays, agendaDayDistance, agendaDay, agendaBusyRanges, agendaTimeRange, agendaEventsOn, normalizeAgenda, type AgendaEvent } from "../lib/chronelleAgenda";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./ChronelleCalendar.css";
 
 export function ChronelleCalendar({ calendarId }: { calendarId?: string }) {
   const { t, language } = useI18n();
   const [selectedDay, setSelectedDay] = useState(() => agendaDay());
+  const [queue, setQueue] = useState<(number | Date)[]>([]);
+  const [phase, setPhase] = useState<"idle" | "select" | "slide">("idle");
+  const [step, setStep] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (phase !== "idle" || !queue.length) return;
+    const next = queue[0];
+    const delta = typeof next === "number" ? next : agendaDayDistance(selectedDay, next);
+    if (reducedMotion || Math.abs(delta) > 3 || delta === 0) {
+      setSelectedDay(agendaDay(selectedDay, delta));
+      setQueue(value => value.slice(1));
+    } else {
+      setStep(delta);
+      setPhase("select");
+    }
+  }, [phase, queue, selectedDay, reducedMotion]);
+  useEffect(() => {
+    if (phase === "idle") return;
+    const timer = window.setTimeout(() => {
+      if (phase === "select") setPhase("slide");
+      else {
+        setSelectedDay(value => agendaDay(value, step));
+        setQueue(value => value.slice(1));
+        setPhase("idle");
+      }
+    }, reducedMotion ? 0 : phase === "select" ? 170 : 230);
+    return () => window.clearTimeout(timer);
+  }, [phase, step, reducedMotion]);
   const [events, setEvents] = useState<AgendaEvent[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [reload, setReload] = useState(0);
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
-  const days = agendaWeek(0, selectedDay);
-  const start = days[0].getTime();
+  const days = agendaCenteredDays(selectedDay, 6);
+  const start = agendaDay(selectedDay, -3).getTime();
   const requestKey = `${calendarId}:${start}`;
   const valid = Boolean(calendarId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(calendarId));
   useEffect(() => {
@@ -40,11 +74,16 @@ export function ChronelleCalendar({ calendarId }: { calendarId?: string }) {
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>
     <div className="chronelle-calendar-heading"><div><img src={chronelleIcon} alt="" /><strong>{t("chronelle.title")}</strong></div><a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.open")} ↗</a></div>
     <div className="chronelle-calendar-navigation">
-      <strong>{selectedDay.toLocaleDateString(language, { month: "long", year: "numeric" })}</strong>
-      <div><button type="button" aria-label={t("chronelle.previousDay")} onClick={() => setSelectedDay((value) => agendaDay(value, -1))}>‹</button><button type="button" onClick={() => setSelectedDay(agendaDay())}>{t("chronelle.today")}</button><button type="button" aria-label={t("chronelle.nextDay")} onClick={() => setSelectedDay((value) => agendaDay(value, 1))}>›</button></div>
+      <button type="button" aria-label={t("chronelle.previousDay")} onClick={() => setQueue(value => [...value, -1])}>‹</button>
+      <strong aria-live="polite">{selectedDay.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</strong>
+      <button type="button" aria-label={t("chronelle.nextDay")} onClick={() => setQueue(value => [...value, 1])}>›</button>
+      <button className="chronelle-today" type="button" onClick={() => { setQueue([]); setPhase("idle"); setSelectedDay(agendaDay()); }}>{t("chronelle.today")}</button>
     </div>
-    <div className="chronelle-week-strip" role="group" aria-label={t("chronelle.chooseDay")}>
-      {days.map((day) => <button type="button" key={day.getTime()} aria-pressed={day.getTime() === selectedDay.getTime()} aria-label={day.toLocaleDateString(language, { dateStyle: "full" })} onClick={() => setSelectedDay(day)}><small>{day.toLocaleDateString(language, { weekday: "narrow" })}</small><strong>{day.getDate()}</strong><i className={loadedKey === requestKey && agendaEventsOn(events, day).length ? "has-events" : ""} /></button>)}
+    <div className="chronelle-strip-viewport" role="group" aria-label={t("chronelle.chooseDay")}>
+      <div className={`chronelle-week-strip chronelle-strip-${phase}`} style={{ transform: `translateX(${-(3 + (phase === "slide" ? step : 0)) * 100 / 13}%)` }}>
+        <span className="chronelle-day-highlight" aria-hidden="true" style={{left: `${(6 + (phase === "idle" ? 0 : step)) * 100 / 13}%`}} />
+        {days.map((day, index) => <button type="button" key={day.getTime()} tabIndex={index >= 3 && index <= 9 ? 0 : -1} aria-hidden={index < 3 || index > 9 ? true : undefined} aria-pressed={day.getTime() === selectedDay.getTime()} aria-label={day.toLocaleDateString(language, { dateStyle: "full" })} onClick={() => setQueue(value => [...value, day])}><small>{day.toLocaleDateString(language, { weekday: "narrow" })}</small><strong>{day.getDate()}</strong><i className={loadedKey === requestKey && agendaEventsOn(events, day).length ? "has-events" : ""} /></button>)}
+      </div>
     </div>
     <div className="chronelle-agenda" aria-busy={displayState === "loading"}>
       {displayState === "ready" ? <div className="chronelle-availability">
