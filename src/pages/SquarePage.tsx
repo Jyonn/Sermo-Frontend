@@ -2776,7 +2776,7 @@ export default function SquarePage() {
         {voicePreview && !recording ? <audio className="square-voice-preview" controls preload="metadata" src={voicePreview} /> : null}
         {voiceFile && !recording ? <button className="primary-button" onClick={() => setVoiceSheetOpen(false)} type="button">{t("common.done")}</button> : null}
       </BottomSheet>
-      <SideDrawer historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive} title={t("square.statementDetail")}>
+      <SideDrawer className="square-statement-detail-drawer" historyMode="route" onClose={() => { setReplyTarget(null); if (window.history.length > 1) navigate(-1); else navigate("/app/square", { replace: true }); }} open={routedStatementId !== null && !inlineRouteActive} title={t("square.statementDetail")}>
         <div className="square-comments-drawer">
           <div className="square-comments-scroll">
             <div className="square-statement-detail-stage">

@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.17.14",
+  "id": "2026.10.17.15",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "广场连续展开动画",
+      "title": "发言详情布局修复",
       "items": [
-        "重新设计发言卡片的连续展开与收起动画，保持媒体、列表位置和过渡画面稳定"
+        "发言详情保持满屏高度，评论栏始终可见并保留底部间距，移除多余内边距"
       ]
     },
     "en": {
-      "title": "Continuous Square transitions",
+      "title": "Statement detail layout fix",
       "items": [
-        "Redesigned continuous statement expansion and return animations with stable media and feed positions"
+        "Statement details now fill the viewport with a persistent, safely spaced comment bar and no extra drawer padding"
       ]
     }
   }

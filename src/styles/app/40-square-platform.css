@@ -180,6 +180,51 @@
 @media(max-width:900px){.square-comment-composer{width:calc(100% - 20px);margin:8px 10px max(8px,env(safe-area-inset-bottom))}.square-statement-detail-stage>.square-statement-card{padding:17px 18px 22px;border-radius:0}.square-discussion-section{padding:18px 18px 24px}}
 
 /* Statement collection v2: one visual language from feed card to detail drawer. */
+.square-statement-detail-drawer.side-drawer {
+  display: flex;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.square-statement-detail-drawer > .drawer-topbar { flex: 0 0 auto; }
+
+.square-statement-detail-drawer.side-drawer > .drawer-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 0;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.square-statement-detail-drawer .square-comments-drawer {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 0;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  scroll-padding-bottom: 0;
+}
+
+.square-statement-detail-drawer .square-comments-scroll {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.square-statement-detail-drawer .square-comments-drawer > .square-comment-composer {
+  flex: 0 0 auto;
+  width: calc(100% - 24px);
+  margin: 8px 12px max(12px, env(safe-area-inset-bottom));
+}
+
 .square-statement-card:not(.is-detail) .square-statement-images.count-1 {
   width: min(100%, 340px);
 }
