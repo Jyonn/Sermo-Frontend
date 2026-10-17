@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { OAuthApplicationWorkspace } from "../components/OAuthApplicationWorkspace";
 import { VerificationCodeInput } from "../components/VerificationCodeInput";
 import { PermissionWorkspace } from "../components/PermissionWorkspace";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,8 +13,9 @@ import { showToast } from "../lib/toast";
 import type { ChatDTO, ChatMessageDTO, PlatformAdminMemberDTO, PlatformAdminSpaceDTO, PlatformAuditDTO, PlatformDashboardDTO, PlatformEmailDeliveryDTO, PlatformEmailReviewDetailDTO, PlatformEmailReviewRecordDTO, PlatformEmailReviewStateDTO, PlatformMessageDeliveryAuditDTO, PlatformMessageDeliveryDTO } from "../types";
 import { ChatPreview } from "./ChatsPage";
 
-type Section = "overview" | "spaces" | "permissions" | "reviews" | "emails" | "audit" | "debug" | "security";
+type Section = "overview" | "spaces" | "permissions" | "reviews" | "emails" | "audit" | "debug" | "security" | "oauth";
 const nav: Array<{ id: Section; icon: string; label: string }> = [
+  { id: "oauth", icon: "apps", label: "OAuth" },
   { id: "overview", icon: "space_dashboard", label: "总览" },
   { id: "spaces", icon: "domain", label: "空间" },
   { id: "permissions", icon: "account_tree", label: "权限" },
@@ -325,6 +327,7 @@ function PlatformAdminConsole() {
     {section === "overview" ? <><section className="platform-hero"><div><span>平台状态</span><h2>保持克制，也保持可见。</h2><p>审计只为处理风险，不替用户做决定。</p></div><span className="material-symbols-outlined">radar</span></section><div className="platform-metrics"><Metric label="运行空间" note="全平台累计" value={dashboard?.spaces ?? 0} /><Metric label="有效成员" note="不含官方账号" value={dashboard?.members ?? 0} /><Metric label="待实名审核" note="需要人工判断" value={dashboard?.pending_identity_reviews ?? 0} /></div><section className="platform-panel"><div className="platform-section-title"><div><span>RECENT ACCESS</span><h3>最近敏感操作</h3></div><button onClick={() => setSection("audit")} type="button">查看全部</button></div><AuditList items={dashboard?.recent_audit ?? []} /></section></> : null}
     {section === "spaces" ? <section className="platform-panel is-fill"><div className="platform-section-title"><div><span>DIRECTORY</span><h3>空间目录</h3></div><label className="platform-search"><span className="material-symbols-outlined">search</span><input onChange={(event) => setQuery(event.target.value)} placeholder="名称、slug 或邮箱" value={query} /></label></div><div className="platform-space-list">{visibleSpaces.map((space) => <SpaceRow key={space.space_id} onClick={() => void selectSpace(space)} space={space} />)}</div></section> : null}
     {section === "permissions" ? <PermissionWorkspace scope="platform" /> : null}
+    {section === "oauth" ? <section className="platform-panel"><OAuthApplicationWorkspace platform /></section> : null}
     {section === "debug" ? <section className="platform-panel"><label>查看报告<select aria-label="查看调试报告" defaultValue="" onChange={(event) => {
       const id = Number(event.target.value);
       if (!id) { setDebugDetail(null); return; }

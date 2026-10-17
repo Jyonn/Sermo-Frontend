@@ -1,26 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { oauthClient } from "../src/lib/oauthClients.ts";
+import { validOAuthReturn } from "../src/lib/oauthClients.ts";
 
-test("Supervision local has its own exact loopback callback and profile-only scope", () => {
-  const client = oauthClient("supervision-local", "https://stillfolio.example/callback");
-  assert.equal(client?.callback, "http://127.0.0.1:8001/api/auth/friendom/callback/");
-  assert.deepEqual(client?.scopes, ["profile"]);
-  assert.equal(client?.nameKey, "apps.supervision");
-  assert.equal(client?.label, "SUPERVISION");
+test("accept exact registered callbacks including loopback and existing query", () => {
+  for (const callback of ["https://example.com/cb", "https://example.com/cb?tenant=a", "http://127.0.0.1:8001/api/auth/friendom/callback/"]) {
+    const url = new URL(callback);
+    url.searchParams.append("code", "c".repeat(43));
+    url.searchParams.append("state", "s".repeat(32));
+    assert.equal(validOAuthReturn(url.href, callback, "s".repeat(32)), true);
+  }
 });
 
-test("Chronelle has an exact callback and profile-only scopes", () => {
-  const client = oauthClient("chronelle", "https://stillfolio.example/callback");
-  assert.equal(client?.callback, "https://chronelle.jyonn.space/api/profile/sermo/callback/");
-  assert.deepEqual(client?.scopes, ["profile"]);
-  assert.equal(client?.nameKey, "chronelle.title");
-});
-
-test("StillFolio retains its callback override and scopes; unknown clients are rejected", () => {
-  const client = oauthClient("stillfolio", "https://stillfolio.example/callback");
-  assert.equal(client?.callback, "https://stillfolio.example/callback");
-  assert.deepEqual(client?.scopes, ["profile", "phone", "vip"]);
-  assert.equal(oauthClient("unknown", ""), null);
-  assert.equal(oauthClient(null, ""), null);
+test("reject changed host, path, query, state, fragment, duplicate parameters", () => {
+  const callback = "https://example.com/cb?tenant=a";
+  const valid = `${callback}&code=abc&state=state`;
+  for (const uri of [valid.replace("example.com", "evil.com"), valid.replace("/cb", "/other"), valid.replace("tenant=a", "tenant=b"), valid.replace("state=state", "state=other"), `${valid}#fragment`, `${valid}&code=second`, `${valid}&state=state`, `${valid}&extra=yes`, `${callback}&state=state`]) {
+    assert.equal(validOAuthReturn(uri, callback, "state"), false);
+  }
 });

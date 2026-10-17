@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { UserAvatar } from "../components/UserAvatar";
-import stillfolioMark from "../assets/stillfolio-mark.svg";
-import chronelleIcon from "../assets/chronelle-icon.png";
-import { oauthClient } from "../lib/oauthClients";
+import { validOAuthReturn, type OAuthClientMetadata } from "../lib/oauthClients";
 import { api, refreshDetachedAuthSession } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
@@ -12,8 +10,6 @@ import { activatePwaCachedAccount, listPwaCachedAccounts, refreshPwaCachedAccoun
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { parseSermoLoginHint } from "../lib/stillfolioLogin";
 import "./MoreApps.css";
-
-const CALLBACK = String(import.meta.env.VITE_STILLFOLIO_CALLBACK_URI || "https://stillfolio.jyonn.space/auth/sermo/callback");
 
 export default function OAuthAuthorizePage() {
   const { t } = useI18n();
@@ -28,8 +24,16 @@ export default function OAuthAuthorizePage() {
   const [accountError, setAccountError] = useState("");
   const autoRestoreStarted = useRef(false);
   const query = new URLSearchParams(search);
-  const client = oauthClient(query.get("client_id"), CALLBACK);
-  const appName = client ? t(client.nameKey) : "";
+  const [metadata, setMetadata] = useState<{ search: string; client: OAuthClientMetadata | null } | null>(null);
+  const client = metadata?.search === search ? metadata.client : null;
+  const appName = client?.name || "";
+  useEffect(() => {
+    let active = true;
+    void api.getOAuthMetadata(Object.fromEntries(new URLSearchParams(search))).then((value) => {
+      if (active) setMetadata({ search, client: value });
+    }).catch(() => { if (active) setMetadata({ search, client: null }); });
+    return () => { active = false; };
+  }, [search]);
   const loginHint = parseSermoLoginHint(query.get("login_hint"));
   const authorizedSession = session && (!loginHint || loginHint.userId === session.user.user_id && loginHint.slug === getDetectedSpaceSlug()) ? session : null;
   const accountToRestore = loginHint
@@ -108,10 +112,7 @@ export default function OAuthAuthorizePage() {
         response_type: "code",
       });
       const destination = new URL(result.redirect_uri);
-      if (`${destination.origin}${destination.pathname}` !== client.callback
-        || !destination.searchParams.get("code")
-        || destination.searchParams.get("state") !== query.get("state")
-        || destination.hash) throw new Error(t("apps.authorizeFailed"));
+      if (!validOAuthReturn(destination.href, client.callback, query.get("state") || "")) throw new Error(t("apps.authorizeFailed"));
       clearOAuthRequest();
       window.location.assign(destination.href);
     } catch (cause) {
@@ -122,10 +123,10 @@ export default function OAuthAuthorizePage() {
 
   return <main className="oauth-authorize-page">
     <section className="oauth-authorize-card">
-      <img alt="" src={client?.id === "supervision-local" ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='25' fill='%2379917e'/%3E%3Cpath d='M7 32a25 25 0 0 1 50 0Z' fill='%23e9eee7'/%3E%3C/svg%3E" : client?.id === "chronelle" ? chronelleIcon : stillfolioMark} />
-      <small>FRIENDEN{client ? ` × ${client.label}` : ""}</small>
+      <img alt="" src="/icons/frienden-512.png?v=2" />
+      <small>FRIENDOM{client ? ` × ${client.name}` : ""}</small>
       <h1>{t("apps.authorizeTitle", { app: appName })}</h1>
-      {!valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>
+      {metadata?.search !== search ? <p>{t("common.loading")}</p> : !valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : !authorizedSession ? <>
         <p>{accountsRefreshing || accountToRestore && !accountError ? t("apps.restoringAccount") : accounts.length ? t("apps.chooseAccount", { app: appName }) : t("apps.signInFirst", { app: appName })}</p>
         {accounts.length && (!accountToRestore || accountError) || accounts.length > 1 ? <div className="oauth-account-list" aria-label={t("apps.chooseAccount")}>
           {accounts.map((account) => <button disabled={Boolean(selectingAccount) || accountsRefreshing} key={account.key} onClick={() => void selectAccount(account)} type="button">
@@ -138,6 +139,7 @@ export default function OAuthAuthorizePage() {
         <Link to="/">{t("apps.backToSermo")}</Link>
       </> : <>
         <p>{t("apps.authorizeDescription", { app: appName, name: authorizedSession.user.name, space: spaceName || `#${authorizedSession.user.space_id}` })}</p>
+        {client?.description ? <p>{client.description}</p> : null}
         <div className="oauth-authorize-scopes">
           {scopes.map((item) => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}
         </div>

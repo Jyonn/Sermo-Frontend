@@ -203,7 +203,7 @@ async function parseOAuthResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw new ApiError(payload?.error_description || payload?.error || `HTTP ${response.status}`, payload?.error || "OAUTH_ERROR", response.status);
   }
-  if (!payload || typeof payload.redirect_uri !== "string") {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     throw new ApiError("Invalid authorization response", "OAUTH_INVALID_RESPONSE", response.status);
   }
   return payload as T;
@@ -416,6 +416,16 @@ function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
 }
 
 export const api = {
+  getOAuthMetadata(query: Record<string, string>) {
+    return request<import("./oauthClients").OAuthClientMetadata>("/users/oauth/metadata", { query, responseFormat: "oauth" });
+  },
+  getOAuthApplications(platform = false) {
+    return request<{ applications: import("./oauthClients").OAuthApplication[] }>(platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications", { auth: !platform, platformAdminAuth: platform, responseFormat: "oauth" });
+  },
+  saveOAuthApplication(platform: boolean, id: number | null, body: Record<string, unknown>) {
+    const base = platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications";
+    return request<import("./oauthClients").OAuthApplication>(id === null ? base : `${base}/${id}`, { method: "POST", auth: !platform, platformAdminAuth: platform, body, responseFormat: "oauth" });
+  },
   authorizeExternalApp(payload: {
     client_id: string;
     redirect_uri: string;

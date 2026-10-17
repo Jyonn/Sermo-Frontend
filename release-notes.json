@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.17.16",
+  "id": "2026.10.17.17",
   "publishedAt": "2026-10-17",
   "locales": {
     "zh-CN": {
-      "title": "Supervision 本地登录支持",
+      "title": "第三方应用授权管理",
       "items": [
-        "支持授权 Supervision 本地客户端，只读取基本资料并返回本机回调"
+        "开发者可提交第三方应用申请，并查看审核结果",
+        "授权页展示已审核的应用与权限；读取邮箱地址需要单独同意"
       ]
     },
     "en": {
-      "title": "Supervision local sign-in",
+      "title": "Third-party application permissions",
       "items": [
-        "Allow the Supervision local client to read basic profile information and return to its exact loopback callback"
+        "Developers can submit third-party applications and see review results",
+        "Consent shows reviewed apps and permissions; reading an email address requires separate consent"
       ]
     }
   }

@@ -1,0 +1,13 @@
+.oauth-workspace { display: grid; gap: 16px; min-width: 0; padding-bottom: env(safe-area-inset-bottom); }
+.oauth-workspace form, .oauth-workspace article { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line-soft); border-radius: 16px; }
+.oauth-workspace label { display: grid; gap: 6px; }
+.oauth-workspace input, .oauth-workspace textarea { color: inherit; background: transparent; border: 1px solid var(--line-soft); border-radius: 8px; padding: 10px; min-width: 0; width: 100%; box-sizing: border-box; }
+.oauth-workspace textarea { min-height: 80px; resize: vertical; }
+.oauth-workspace input[type="checkbox"] { width: auto; }
+.oauth-workspace fieldset { display: flex; flex-wrap: wrap; gap: 12px; border: 1px solid var(--line-soft); }
+.oauth-workspace fieldset label, .oauth-workspace label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; }
+.oauth-workspace button { color: inherit; background: transparent; border: 1px solid var(--line-soft); border-radius: 8px; padding: 10px 14px; cursor: pointer; }
+.oauth-workspace button:disabled { opacity: .5; cursor: default; }
+.oauth-workspace section { display: grid; gap: 10px; min-width: 0; }
+.oauth-workspace code, .oauth-workspace p { overflow-wrap: anywhere; }
+.oauth-workspace-actions { display: flex; gap: 8px; flex-wrap: wrap; }
