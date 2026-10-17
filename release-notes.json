@@ -6,14 +6,16 @@
       "title": "Frienden 第三方应用授权管理",
       "items": [
         "开发者可提交第三方应用申请，并查看审核结果",
-        "授权页展示已审核的应用与权限；读取邮箱地址需要单独同意"
+        "授权页展示已审核的应用与权限；读取邮箱地址需要单独同意",
+        "应用列表恢复加载后自动清除旧错误提示"
       ]
     },
     "en": {
       "title": "Frienden application permissions",
       "items": [
         "Developers can submit third-party applications and see review results",
-        "Consent shows reviewed apps and permissions; reading an email address requires separate consent"
+        "Consent shows reviewed apps and permissions; reading an email address requires separate consent",
+        "Clear previous errors when the application list loads successfully again"
       ]
     }
   }

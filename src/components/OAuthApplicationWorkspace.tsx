@@ -16,7 +16,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
   const [error, setError] = useState("");
   const [notes, setNotes] = useState<Record<number, string>>({});
   const [loopbackApproval, setLoopbackApproval] = useState<Record<number, boolean>>({});
-  const load = async () => { const result = await api.getOAuthApplications(platform); setApps(result.applications); setLoaded(true); };
+  const load = async (preserveError = false) => { if (!preserveError) setError(""); const result = await api.getOAuthApplications(platform); setApps(result.applications); setLoaded(true); };
   useEffect(() => { void load().catch((e: Error) => setError(e.message)); }, [platform]);
   const save = async (id: number | null, data: Record<string, unknown>) => {
     if (busy) return;
@@ -25,7 +25,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
       await api.saveOAuthApplication(platform, id, data);
       setTarget(null); setForm(empty); setLoopbackApproval({});
       await load();
-    } catch (e) { setError(e instanceof Error ? e.message : t("apps.authorizeFailed")); await load().catch(() => undefined); }
+    } catch (e) { setError(e instanceof Error ? e.message : t("apps.authorizeFailed")); await load(true).catch(() => undefined); }
     finally { setBusy(false); }
   };
   const edit = (app: OAuthApplication, rev: OAuthRevision, draft: boolean) => {
