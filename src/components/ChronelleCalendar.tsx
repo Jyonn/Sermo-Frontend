@@ -47,19 +47,11 @@ export function ChronelleCalendar({ calendarId }: { calendarId?: string }) {
       {days.map((day) => <button type="button" key={day.getTime()} aria-pressed={day.getTime() === selectedDay.getTime()} aria-label={day.toLocaleDateString(language, { dateStyle: "full" })} onClick={() => setSelectedDay(day)}><small>{day.toLocaleDateString(language, { weekday: "narrow" })}</small><strong>{day.getDate()}</strong><i className={loadedKey === requestKey && agendaEventsOn(events, day).length ? "has-events" : ""} /></button>)}
     </div>
     <div className="chronelle-agenda" aria-busy={displayState === "loading"}>
-      <strong className="chronelle-agenda-date">{selectedDay.toLocaleDateString(language, { dateStyle: "full" })}</strong>
       {displayState === "ready" ? <div className="chronelle-availability">
-        <div className="chronelle-busy-bar" role="img" aria-label={t("chronelle.busyBar")}>
+        <div className="chronelle-busy-bar" role="img" aria-label={`${selectedDay.toLocaleDateString(language, { dateStyle: "full" })} · ${t("chronelle.busyBar")} · ${t("chronelle.availabilityHint")}`} title={t("chronelle.availabilityHint")}>
           {ranges.map((range, index) => <i key={index} style={{ left: `${range.start}%`, width: `${range.end - range.start}%` }} />)}
         </div>
         <div className="chronelle-bar-labels"><span>00:00</span><span>12:00</span><span>24:00</span></div>
-        <small>{t("chronelle.availabilityHint")}</small>
-        <details key={selectedDay.getTime()} className="chronelle-timeline-details"><summary>{t("chronelle.expandTimeline")}</summary>
-          <div className="chronelle-timeline" aria-label={t("chronelle.busyBar")}>
-            {Array.from({length: 9}, (_, index) => { const boundary = new Date(selectedDay.getTime() + (agendaDay(selectedDay, 1).getTime() - selectedDay.getTime()) * index / 8); return <span key={index} style={{top: `${index / 8 * 100}%`}}>{boundary.toLocaleTimeString(language, {hour: "2-digit", minute: "2-digit"})}</span>; })}
-            {ranges.map((range, index) => <i key={index} style={{ top: `${range.start}%`, height: `${Math.max(range.end - range.start, .2)}%` }}><span>{t("chronelle.busy")}</span></i>)}
-          </div>
-        </details>
       </div> : null}
       {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => setReload((value) => value + 1)}>{t("common.retry")}</button></div> : !items.length ? <p>{t("chronelle.noEvents")}</p> : <ol>{items.slice(0, 5).map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
       {displayState === "ready" && items.length > 5 ? <a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.moreEvents", { count: items.length - 5 })} ↗</a> : null}

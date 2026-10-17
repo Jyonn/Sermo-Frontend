@@ -6,14 +6,14 @@
       "title": "按天查看日历",
       "items": [
         "Chronelle 支持前后一天切换，日期条与当天内容同步",
-        "日程显示起止时间、紧凑忙碌条和可展开时间轴，跨日时间标明日期"
+        "日程显示起止时间和紧凑忙碌条，跨日时间标明日期"
       ]
     },
     "en": {
       "title": "Browse your calendar by day",
       "items": [
         "Move to the previous or next day with the date strip and agenda in sync",
-        "See time ranges, a compact busy bar and an optional timeline, with dates across midnight"
+        "See time ranges and a compact busy bar, with dates across midnight"
       ]
     }
   }
