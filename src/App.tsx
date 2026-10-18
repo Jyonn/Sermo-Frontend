@@ -23,7 +23,7 @@ import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
 import { routeResources } from "./lib/routeResources";
-import { readOAuthRequest } from "./lib/oauthPending";
+import { readOAuthRequest, isOAuthLoginPending } from "./lib/oauthPending";
 
 const AdminSpacePage = lazy(() => import("./pages/AdminSpacePage"));
 const GrowthLevelCelebration = lazy(() => import("./components/GrowthLevelCelebration").then((module) => ({ default: module.GrowthLevelCelebration })));
@@ -48,7 +48,7 @@ function AppHomeRedirect() {
   const features = useSpaceFeatures();
   const [oauthRequest] = useState(readOAuthRequest);
   if (!features.ready) return <RouteResourceState status="loading" />;
-  if (oauthRequest) return <Navigate replace to={oauthRequest} />;
+  if (oauthRequest) return <Navigate replace to={isOAuthLoginPending() ? "/pwa?oauth_login=1" : oauthRequest} />;
   return <Navigate replace to={features.chatEnabled ? "/app/chats" : "/app/square"} />;
 }
 

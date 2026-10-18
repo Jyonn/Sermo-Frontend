@@ -14,6 +14,7 @@ import { buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from
 import type { SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
 import { PUBLIC_HOST } from "../lib/siteConfig";
+import { isOAuthLoginPending, completeOAuthLogin, readOAuthRequest, oauthReturnForAccount } from "../lib/oauthPending";
 
 const MAX_NICKNAME_LENGTH = 8;
 
@@ -70,7 +71,7 @@ export default function JoinSpacePage() {
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || isOAuthLoginPending()) return;
     const pendingInviteToken = readPendingFriendInviteToken();
     if (pendingInviteToken) {
       navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
@@ -222,7 +223,13 @@ export default function JoinSpacePage() {
         new_user_intent: newUserIntent,
       });
       setPendingNewUserName(null);
+      completeOAuthLogin();
       loginFromJoin(payload);
+      const oauthReturn = readOAuthRequest();
+      if (oauthReturn) {
+        navigate(oauthReturnForAccount(oauthReturn, slug, payload.auth.data.user_id), { replace: true });
+        return;
+      }
       const pendingInviteToken = readPendingFriendInviteToken();
       if (pendingInviteToken) {
         navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });

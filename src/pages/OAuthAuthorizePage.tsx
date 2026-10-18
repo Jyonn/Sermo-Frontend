@@ -8,7 +8,7 @@ import { validOAuthReturn, type OAuthClientMetadata } from "../lib/oauthClients"
 import { api, ApiError, refreshDetachedAuthSession, getDetachedOAuthAdminStatus } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/language";
-import { clearOAuthRequest, rememberOAuthRequest, rememberAdminOAuthRequest } from "../lib/oauthPending";
+import { clearOAuthRequest, rememberOAuthRequest, rememberAdminOAuthRequest, beginOAuthLogin, isOAuthLoginPending, completeOAuthLogin } from "../lib/oauthPending";
 import { activatePwaCachedAccount, listPwaCachedAccounts, refreshPwaCachedAccounts, type PwaCachedAccount } from "../lib/pwaAccounts";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { parseSermoLoginHint } from "../lib/stillfolioLogin";
@@ -17,7 +17,7 @@ import "./MoreApps.css";
 export default function OAuthAuthorizePage() {
   const { t } = useI18n();
   const { search } = useLocation();
-  const { ready, session, setSession } = useAuth();
+  const { ready, session } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [eligibility, setEligibility] = useState<{ userId: number; value: Awaited<ReturnType<typeof api.getOAuthEligibility>> } | null>(null);
@@ -50,6 +50,7 @@ export default function OAuthAuthorizePage() {
   const eligibilityValue = eligibility?.userId === authorizedSession?.user.user_id ? eligibility?.value : null;
   const nextVerification = eligibilityValue?.missing_verifications[0];
   const adminProof = client?.purpose === "space_admin";
+  const loginPending = isOAuthLoginPending();
   const adminAllowed = !adminProof || eligibilityValue?.space_admin === true;
   useEffect(() => {
     if (!authorizedSession) return;
@@ -86,7 +87,7 @@ export default function OAuthAuthorizePage() {
   const matchingAccounts = accounts.filter(account => (!targetSpace || account.session.user.space_id === targetSpace.id) && (!adminProof || adminAccounts.has(account.key)));
   const accountToRestore = loginHint
     ? matchingAccounts.find((account) => account.slug === loginHint.slug && account.session.user.user_id === loginHint.userId)
-    : !adminProof && matchingAccounts.length === 1 ? matchingAccounts[0] : undefined;
+    : !adminProof && !loginPending && matchingAccounts.length === 1 ? matchingAccounts[0] : undefined;
   const scope = query.get("scope") || "";
   const scopes = scope.split(/\s+/).filter(Boolean);
   const valid = Boolean(client)
@@ -122,6 +123,7 @@ export default function OAuthAuthorizePage() {
       if (targetSpace && refreshed.user.space_id !== targetSpace.id) throw new Error("Wrong space");
       if (adminProof && !await getDetachedOAuthAdminStatus(refreshed)) throw new Error("Administrator required");
       activatePwaCachedAccount({ ...account, session: refreshed });
+      completeOAuthLogin();
       const nextQuery = new URLSearchParams(search);
       if (!requestId) nextQuery.set("login_hint", `${account.slug}:${refreshed.user.user_id}`);
       window.location.replace(buildSpaceHrefForCurrentHost(account.slug, "/oauth/authorize", `?${nextQuery}`));
@@ -141,7 +143,7 @@ export default function OAuthAuthorizePage() {
   }, [ready, valid, Boolean(authorizedSession), Boolean(accountToRestore)]);
 
   useEffect(() => {
-    if (ready && valid && !authorizedSession && accountToRestore && !autoRestoreStarted.current) {
+    if (ready && valid && !loginPending && !authorizedSession && accountToRestore && !autoRestoreStarted.current) {
       autoRestoreStarted.current = true;
       void selectAccount(accountToRestore);
     }
@@ -180,7 +182,7 @@ export default function OAuthAuthorizePage() {
     if (requestId) void api.cancelOAuthRequest(requestId).catch(() => undefined);
   };
 
-  const showChooser = !authorizedSession || choosingAccount || adminProof && !adminAllowed;
+  const showChooser = !authorizedSession || choosingAccount || loginPending || adminProof && !adminAllowed;
   const checkingAccounts = accountsRefreshing || adminProof && adminAccountsLoading;
   const adminLogin = <Link className="oauth-secondary" onClick={() => rememberAdminOAuthRequest(search)} to="/space?mode=login&oauth_switch=1">{t("apps.adminLoginShort")}</Link>;
 
@@ -189,18 +191,18 @@ export default function OAuthAuthorizePage() {
       <OAuthConsentBrand client={client} />
       <div className="oauth-consent-heading"><small>{t("apps.withFrienden")}</small><h1>{client ? t("apps.continueTo", { app: appName }) : t("apps.signInHeading")}</h1></div>
       {metadata?.search !== search ? <p>{t("common.loading")}</p> : !valid ? <p>{t("apps.invalidRequest")}</p> : !ready ? <p>{t("auth.restoring")}</p> : showChooser ? <>
-        <p>{t(adminProof ? "apps.chooseAdminShort" : "apps.chooseAccount", { app: appName })}</p>
+        {checkingAccounts || matchingAccounts.length ? <p>{t(adminProof ? "apps.chooseAdminShort" : "apps.chooseAccount")}</p> : null}
         {checkingAccounts ? <p role="status">{t("common.loading")}</p> : matchingAccounts.length ? <div className="oauth-account-list" aria-label={t("apps.chooseAccount")}>
           {matchingAccounts.map(account => <button disabled={Boolean(selectingAccount)} key={account.key} onClick={() => void selectAccount(account)} type="button">
             <UserAvatar cacheKey={account.session.user.avatar_cache_key} className="oauth-account-avatar" name={account.session.user.name} uri={account.session.user.avatar_uri} />
             <span><strong>{account.session.user.name}</strong><small>{account.spaceName} · @{account.slug}</small></span>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </button>)}
-        </div> : <p>{t(adminProof ? "apps.noAdminShort" : "apps.signInFirst", { app: appName })}</p>}
+        </div> : <p>{t(adminProof ? "apps.noAdminShort" : "apps.signInFirst")}</p>}
         {accountError ? <p role="alert">{accountError}</p> : null}
         {eligibilityError ? <button className="oauth-text-button" type="button" onClick={() => setEligibilityReload(value => value + 1)}>{t("common.retry")}</button> : null}
         <div className="oauth-entry-actions">
-          {adminProof ? adminLogin : <Link className="oauth-secondary" onClick={() => { rememberOAuthRequest(search); if (targetSpace && session?.user.space_id !== targetSpace.id) setSession(null); }} to={targetSpace ? buildSpaceHrefForCurrentHost(targetSpace.slug, "/") : "/"}>{t("apps.backToSermo")}</Link>}
+          {adminProof ? adminLogin : <Link className="oauth-secondary" onClick={() => beginOAuthLogin(search)} to={targetSpace ? buildSpaceHrefForCurrentHost(targetSpace.slug, "/", "?oauth_login=1") : "/pwa?oauth_login=1"}>{t("apps.backToSermo")}</Link>}
           <Link className="oauth-quiet" onClick={cancel} to="/">{t("common.cancel")}</Link>
         </div>
       </> : <>

@@ -6,6 +6,7 @@ import { useI18n } from "../lib/language";
 import { activatePwaCachedAccount, listPwaCachedAccounts, refreshPwaCachedAccounts, setDefaultPwaAccountKey } from "../lib/pwaAccounts";
 import { listRecentSpaces, rememberRecentSpace } from "../lib/recentSpaces";
 import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
+import { isOAuthLoginPending, completeOAuthLogin, readOAuthRequest, oauthReturnForAccount } from "../lib/oauthPending";
 
 function launchDestination(slug: string) {
   const shortcut = new URLSearchParams(window.location.search).get("shortcut");
@@ -49,6 +50,15 @@ export default function PwaAccountEntryPage() {
     setLaunching(true);
     setDefaultPwaAccountKey(account.key);
     activatePwaCachedAccount(account);
+    if (isOAuthLoginPending()) {
+      const pending = readOAuthRequest();
+      completeOAuthLogin();
+      if (pending) {
+        const destination = oauthReturnForAccount(pending, account.slug, account.session.user.user_id);
+        window.location.replace(buildSpaceHrefForCurrentHost(account.slug, "/oauth/authorize", destination.slice("/oauth/authorize".length)));
+        return;
+      }
+    }
     window.location.replace(launchDestination(account.slug));
   };
 

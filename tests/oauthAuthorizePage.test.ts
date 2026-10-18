@@ -15,9 +15,10 @@ const admin={key:'jyonn:2',slug:'jyonn',spaceName:'Jyonn Space',session:{user:{u
 const member={key:'wzry:1',slug:'wzry',spaceName:'其他空间',session:{user:{user_id:1,space_id:1,name:'非管理员测试账号'},accessToken:'fixture'}};
 const client={id:'fixture',name:'板凳 · Abandon',description:'不应重复展示的长说明',callback:'https://example.test/callback',scopes:['profile','email'],purpose:'space_admin',target_space:null,parameters:{response_type:'code',redirect_uri:'https://example.test/callback',scope:'profile email',state:'s'.repeat(32),code_challenge:'a'.repeat(43),code_challenge_method:'S256'}};
 
-function render(scene:'chooser'|'selected'|'member') {
-  const session=scene==='chooser'?null:(scene==='selected'?admin:member).session;
-  const states=[false,'',session?{userId:session.user.user_id,value:{eligible:true,missing_verifications:[],space_admin:scene==='selected'}}:null,false,0,'Jyonn Space',[member,admin],false,'','',new Set(scene==='member'?[]:[admin.key]),false,false,{search,client}];
+function render(scene:'chooser'|'selected'|'member'|'general'|'empty'|'login-pending') {
+  const session=scene==='selected'||scene==='login-pending'?admin.session:scene==='member'?member.session:null;
+  const effectiveClient=['general','empty','login-pending'].includes(scene)?{...client,purpose:'join'}:client;
+  const states=[false,'',session?{userId:session.user.user_id,value:{eligible:true,missing_verifications:[],space_admin:scene==='selected'}}:null,false,0,'Jyonn Space',scene==='empty'?[]:[member,admin],false,'','',new Set(scene==='member'?[]:[admin.key]),false,false,{search,client:effectiveClient}];
   let index=0;
   const exports:Record<string,any>={};
   const mockReact={...React,useState:()=>[states[index++],()=>{}],useEffect:()=>{},useRef:()=>({current:false})};
@@ -29,6 +30,7 @@ function render(scene:'chooser'|'selected'|'member') {
       if(name==='../lib/language')return {useI18n:()=>({t:(key:string)=>copy[key]||key})};
       if(name==='../lib/pwaAccounts')return {listPwaCachedAccounts:()=>[member,admin]};
       if(name==='../lib/stillfolioLogin')return {parseSermoLoginHint:()=>null};
+      if(name==='../lib/oauthPending')return {isOAuthLoginPending:()=>scene==='login-pending'};
       if(name==='../lib/spaceEntry')return {getDetectedSpaceSlug:()=>'',buildSpaceHrefForCurrentHost:()=>'/'};
       if(name==='../components/UserAvatar')return {UserAvatar:(props:any)=>React.createElement('span',{className:props.className,'aria-hidden':true},'友')};
       if(name==='../components/OAuthConsentBrand')return {OAuthConsentBrand:()=>React.createElement('div',{className:'oauth-brand-pair'},React.createElement('span',{className:'oauth-brand-icon'},'友'),React.createElement('span',{},'→'),React.createElement('span',{className:'oauth-brand-icon'},'板'))};
@@ -58,6 +60,21 @@ test('current non-admin identity is not presented as consent identity',()=>{
   const html=render('member');
   assert.doesNotMatch(html,/非管理员测试账号|oauth-consent-identity|oauth-primary/);
   assert.match(html,/暂无可用/);
+});
+
+test('general chooser copy omits the app name and empty state does not repeat it',()=>{
+  const html=render('general');
+  assert.match(html,/<p>选择用于授权的空间账号<\/p>/);
+  assert.doesNotMatch(html,/选择用于授权板凳/);
+  const empty=render('empty');
+  assert.match(empty,/暂无可用的空间账号/);
+  assert.doesNotMatch(empty,/<p>选择用于授权的空间账号<\/p>/);
+});
+
+test('explicit login intent keeps an existing session on the chooser with a real login destination',()=>{
+  const html=render('login-pending');
+  assert.doesNotMatch(html,/oauth-selected-account|oauth-primary/);
+  assert.match(html,/href="\/pwa\?oauth_login=1"/);
 });
 
 if(process.env.OAUTH_REVIEW_DIR){

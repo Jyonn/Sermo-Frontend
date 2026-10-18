@@ -1,5 +1,26 @@
 const KEY = "sermo:oauth-pending";
 const ADMIN_KEY = "sermo:oauth-admin-pending";
+const LOGIN_KEY = "sermo:oauth-login-pending";
+
+export function beginOAuthLogin(search: string) {
+  rememberOAuthRequest(search);
+  try { sessionStorage.setItem(LOGIN_KEY, `/oauth/authorize${search}`); } catch { /* Optional recovery. */ }
+}
+
+export function isOAuthLoginPending() {
+  try { const pending = readOAuthRequest(); return Boolean(pending && sessionStorage.getItem(LOGIN_KEY) === pending); } catch { return false; }
+}
+
+export function completeOAuthLogin() {
+  try { sessionStorage.removeItem(LOGIN_KEY); } catch { /* Optional recovery. */ }
+}
+
+export function oauthReturnForAccount(pending: string, slug: string, userId: number) {
+  const query = new URLSearchParams(pending.slice("/oauth/authorize".length));
+  if (query.has("request_id")) return pending;
+  query.set("login_hint", `${slug}:${userId}`);
+  return `/oauth/authorize?${query}`;
+}
 
 export function rememberAdminOAuthRequest(search: string) {
   rememberOAuthRequest(search);
@@ -33,5 +54,5 @@ export function readOAuthRequest(): string | null {
 }
 
 export function clearOAuthRequest() {
-  try { sessionStorage.removeItem(KEY); sessionStorage.removeItem(ADMIN_KEY); } catch { /* Storage may be unavailable. */ }
+  try { sessionStorage.removeItem(KEY); sessionStorage.removeItem(ADMIN_KEY); sessionStorage.removeItem(LOGIN_KEY); } catch { /* Storage may be unavailable. */ }
 }

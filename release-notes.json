@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.9",
+  "id": "2026.10.18.10",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的管理员登录",
+      "title": "更顺畅的授权登录",
       "items": [
-        "管理员授权仅展示经核验的管理员账号，选定后专注当前空间",
-        "精简授权说明，统一登录、取消和切换账号的操作样式"
+        "返回登录时可重新选择空间或账号，不再自动跳回授权页",
+        "精简账号选择和空态说明，保留原授权请求"
       ]
     },
     "en": {
-      "title": "Clearer administrator sign-in",
+      "title": "Smoother authorization sign-in",
       "items": [
-        "Administrator consent shows verified administrator accounts and focuses on the selected space",
-        "Shorter explanations and consistent sign-in, cancel and account-switch controls"
+        "Choose a space or account when returning to sign-in without jumping back automatically",
+        "Simpler chooser and empty-state copy while preserving the original authorization request"
       ]
     }
   }
