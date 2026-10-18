@@ -429,7 +429,10 @@ export const api = {
     const base = platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications";
     return request<import("./oauthClients").OAuthApplication>(id === null ? base : `${base}/${id}`, { method: "POST", auth: !platform, platformAdminAuth: platform, body, responseFormat: "oauth" });
   },
-  authorizeExternalApp(payload: {
+  cancelOAuthRequest(requestId: string) {
+    return request<{ cancelled: boolean }>("/users/oauth/requests/cancel", { method: "POST", body: { request_id: requestId }, responseFormat: "oauth" });
+  },
+  authorizeExternalApp(payload: { request_id: string } | {
     client_id: string;
     redirect_uri: string;
     scope: string;

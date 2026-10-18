@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.6",
+  "id": "2026.10.18.7",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "更可靠的第三方登录入口",
+      "title": "更清晰的空间授权",
       "items": [
-        "第三方登录授权入口可直接正常打开，不再依赖错误页回退",
-        "保留原登录请求、认证引导和回调地址"
+        "第三方应用可指定空间登录，注册和认证后继续原授权流程",
+        "授权页区分个人资料、空间身份和管理员证明"
       ]
     },
     "en": {
-      "title": "A more reliable sign-in entry",
+      "title": "Clearer space authorization",
       "items": [
-        "Open the authorization entry directly without relying on an error-page fallback",
-        "Keep the original sign-in request, verification guide and callback address"
+        "Apps can request sign-in to a specific space and resume after registration and verification",
+        "Consent separates personal information, space identity and administrator proof"
       ]
     }
   }

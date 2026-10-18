@@ -13,7 +13,9 @@ export function readOAuthRequest(): string | null {
     const saved = sessionStorage.getItem(KEY);
     if (!saved) return null;
     const value = JSON.parse(saved) as { search?: string; at?: number };
-    if (typeof value.search !== "string" || !value.search.startsWith("?") || typeof value.at !== "number" || Date.now() - value.at > 10 * 60_000) return null;
+    if (typeof value.search !== "string" || !value.search.startsWith("?") || typeof value.at !== "number") return null;
+    const lifetime = new URLSearchParams(value.search).has("request_id") ? 30 * 60_000 : 10 * 60_000;
+    if (Date.now() < value.at || Date.now() - value.at > lifetime) return null;
     return `/oauth/authorize${value.search}`;
   } catch {
     return null;
