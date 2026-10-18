@@ -1,5 +1,6 @@
 import currentRelease from "../../release-notes.json" with { type: "json" };
 import { beginUpdate, recordUpdate, failUpdate, markUpdateReload, reconcileUpdate, compareVersions } from "./updateDiagnostics.ts";
+import { SITE_ORIGINS } from "./siteOrigins.ts";
 
 export interface ReleaseNotes {
   id: string;
@@ -10,10 +11,7 @@ export interface ReleaseNotes {
   }>;
 }
 
-const UPDATE_SOURCES = [
-  { key: "primary" as const, origin: "https://sermo.jyonn.space" },
-  { key: "mirror" as const, origin: "https://sermo.6-79.cn" },
-];
+export const UPDATE_SOURCES = SITE_ORIGINS;
 
 export type UpdateSourceKey = typeof UPDATE_SOURCES[number]["key"];
 
@@ -78,7 +76,7 @@ function isReleaseNotes(value: unknown): value is ReleaseNotes {
     && Boolean(release.locales && typeof release.locales === "object");
 }
 
-async function fetchReleaseFromSource(source: typeof UPDATE_SOURCES[number]): Promise<UpdateSourceResult> {
+async function fetchReleaseFromSource(source: { key: UpdateSourceKey; origin: string }): Promise<UpdateSourceResult> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8000);
   try {
@@ -160,7 +158,7 @@ async function runUpdate(onPhase?: (phase: UpdateActivationPhase) => void) {
   const source = { key: "primary" as const, origin: window.location.origin };
   const local = await fetchReleaseFromSource(source);
   beginUpdate(local.releaseId ?? CURRENT_RELEASE.id);
-  recordUpdate(2, { runningVersion: CURRENT_RELEASE.id, site: window.location.hostname === "sermo.6-79.cn" ? 2 : 1, online: navigator.onLine });
+  recordUpdate(2, { runningVersion: CURRENT_RELEASE.id, site: UPDATE_SOURCES.findIndex((site) => site.origin === window.location.origin) + 1, online: navigator.onLine });
   try {
     if (!local.releaseId || compareVersions(local.releaseId, CURRENT_RELEASE.id) <= 0) throw new Error("site-not-ready");
     await prepareUpdate(local.releaseId, onPhase);

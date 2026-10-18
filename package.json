@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "deploy:mirror": "node scripts/deploy-mirror.mjs",
+    "deploy:frienden-pages": "node scripts/deploy-frienden-pages.mjs",
+    "build:frienden": "SERMO_CNAME=frienden.jyonn.space VITE_PUBLIC_ORIGIN=https://frienden.jyonn.space npm run build",
+    "build:frienden-mirror": "VITE_PUBLIC_ORIGIN=https://frienden.6-79.cn npm run build:mirror",
     "release:prepare": "node scripts/prepare-release.mjs",
     "dev": "npm run release:prepare && vite",
     "build": "npm run styles:check && npm run release:prepare && tsc -b && vite build && node scripts/prepare-github-pages.mjs",

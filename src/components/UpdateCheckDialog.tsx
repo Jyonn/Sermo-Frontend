@@ -4,6 +4,7 @@ import { useI18n } from "../lib/language";
 import { type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwaUpdate";
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { UpdateFailureFeedback } from "./UpdateReportButton";
+import { SITE_ORIGINS, updateSiteLabel } from "../lib/siteOrigins";
 
 interface UpdateCheckDialogProps {
   checking: boolean;
@@ -25,7 +26,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const partiallyFailed = Boolean(result && successfulSources > 0 && successfulSources < result.sources.length);
   const release = result?.latestRelease?.id === result?.latestVersion ? result?.latestRelease : null;
   const localizedRelease = release?.locales[language] ?? release?.locales.en;
-  const sourceName = (key: UpdateSourceKey) => t(key === "primary" ? "update.primarySite" : "update.mirrorSite");
+  const sourceName = (key: UpdateSourceKey) => t(updateSiteLabel(key));
 
   return createPortal(
     <div className="dialog-backdrop update-check-backdrop" onClick={() => { if (!installing) onClose(); }} role="presentation">
@@ -54,13 +55,10 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
           </div>
 
           <div className="update-source-list">
-            {(result?.sources ?? [
-              { key: "primary" as const, origin: "https://sermo.jyonn.space", release: null, releaseId: null, status: "idle" as const },
-              { key: "mirror" as const, origin: "https://sermo.6-79.cn", release: null, releaseId: null, status: "idle" as const },
-            ]).map((source) => (
+            {(result?.sources ?? SITE_ORIGINS.map((site) => ({ ...site, release: null, releaseId: null, status: "idle" as const }))).map((source) => (
               <div className="update-source-row" key={source.key}>
                 <span className="material-symbols-outlined" aria-hidden="true">{source.status === "ok" ? "cloud_done" : source.status === "error" ? "cloud_off" : "cloud_queue"}</span>
-                <div><strong>{sourceName(source.key)}{source.origin === window.location.origin ? ` · ${t("update.currentSite")}` : ""}</strong><small>{new URL(source.origin).host}</small></div>
+                <div><strong>{sourceName(source.key)}{source.origin === window.location.origin ? ` · ${t("update.currentSite")}` : ""}</strong><a href={`${source.origin}/`} referrerPolicy="no-referrer" rel="noreferrer"><small>{new URL(source.origin).host}</small></a></div>
                 <em className={`is-${source.status}`}>{source.status === "ok" ? source.releaseId : source.status === "error" ? t("update.checkFailed") : t("update.waiting")}</em>
               </div>
             ))}

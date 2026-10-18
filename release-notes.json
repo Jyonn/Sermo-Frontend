@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.1",
+  "id": "2026.10.18.2",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的第三方登录",
+      "title": "四站更新与迁移指引",
       "items": [
-        "授权页展示双方应用图标，身份与权限信息更简洁",
-        "邮箱与手机认证分步引导，完成后回到原登录请求"
+        "检查更新可查看 Frienden 与 Sermo 四个站点的实际版本",
+        "旧域名保留使用，新站通过检查后每周提示迁移，账号与数据不变"
       ]
     },
     "en": {
-      "title": "Clearer third-party sign-in",
+      "title": "Frienden site migration",
       "items": [
-        "See both application icons with a simpler identity and permission summary",
-        "Complete missing email or phone verification and return to your sign-in request"
+        "Check actual versions across all four Frienden and Sermo sites",
+        "Keep using existing sites, with weekly migration reminders once the new sites are verified; your account and data stay the same"
       ]
     }
   }

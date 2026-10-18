@@ -43,6 +43,7 @@ test("checks are single-flight and never restart the page", async (context) => {
   const first = checkForPwaUpdate();
   assert.equal(first, checkForPwaUpdate());
   assert.equal((await first).latestVersion, target);
+  assert.deepEqual((await first).sources.map((source) => source.origin), ["https://frienden.jyonn.space", "https://frienden.6-79.cn", "https://sermo.jyonn.space", "https://sermo.6-79.cn"]);
   assert.equal(restarts(), 0);
 });
 for (const options of [{ oldEntry: true }, { workerFailure: true }, { oldSite: true }, { badAsset: true }, { externalScript: true }]) {
@@ -52,6 +53,18 @@ for (const options of [{ oldEntry: true }, { workerFailure: true }, { oldSite: t
     assert.equal(restarts(), 0);
   });
 }
+test("unavailable new sites remain visible as failed checks alongside working legacy sites", async (context) => {
+  setup(context);
+  const previousFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    if (String(input).includes("frienden.")) throw Error("not live yet");
+    return previousFetch(input, init);
+  };
+  const result = await checkForPwaUpdate();
+  assert.equal(result.sources.length, 4);
+  assert.deepEqual(result.sources.map((source) => source.status), ["error", "error", "ok", "ok"]);
+  assert.equal(result.latestVersion, target);
+});
 test("external font CSS does not block verified local resources", async (context) => {
   const restarts = setup(context, { externalStyle: true });
   await activatePwaUpdate();

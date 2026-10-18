@@ -32,7 +32,12 @@ try {
   if (origin.protocol !== "https:" || origin.username || origin.password || origin.pathname !== "/" || origin.search || origin.hash) throw new Error("MIRROR_PUBLIC_ORIGIN must be an HTTPS origin");
   fs.mkdirSync(lock);
   locked = true;
-  run("npm", ["run", "build:mirror"]);
+  const buildScript = env.MIRROR_BUILD_SCRIPT || "build:mirror";
+  if (!["build:mirror", "build:frienden-mirror"].includes(buildScript)) throw new Error("Unsupported mirror build script");
+  if (origin.origin === "https://frienden.6-79.cn" && buildScript !== "build:frienden-mirror") throw new Error("Frienden mirror requires its matching build");
+  if (buildScript === "build:frienden-mirror" && origin.origin !== "https://frienden.6-79.cn") throw new Error("Frienden build requires its own mirror origin");
+  if (buildScript === "build:frienden-mirror" && !env.MIRROR_DIRECTORY?.endsWith("/frienden-frontend/dist")) throw new Error("Frienden build requires its own mirror directory");
+  run("npm", ["run", buildScript]);
   const expected = JSON.parse(fs.readFileSync("dist/release.json", "utf8")).id;
   console.log(`${dryRun ? "Preview" : "Deploy"} mirror release ${expected}`);
   run("rsync", [...plan.resources, plan.destination]);

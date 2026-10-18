@@ -9,6 +9,7 @@ import { GlobalMediaLocationMap } from "./components/GlobalMediaLocationMap";
 import { GlobalChatLayoutDiagnostics } from "./components/GlobalChatLayoutDiagnostics";
 import { PwaRecommendation } from "./components/PwaRecommendation";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
+import { SiteMigrationNotice } from "./components/SiteMigrationNotice";
 import { RouteResourceBoundary } from "./components/RouteResourceBoundary";
 import { RouteResourceState } from "./components/RouteResourceState";
 import { RequireAdminAuth } from "./lib/adminAuth";
@@ -234,6 +235,7 @@ export default function App() {
       {ready && !isPlatformAdmin && !isDesignLab ? <AppBottomNav /> : null}
       {ready && !isPlatformAdmin && !isDesignLab ? <PwaRecommendation /> : null}
       {!isPlatformAdmin && !isDesignLab ? <PwaUpdatePrompt /> : null}
+      {ready && !isPlatformAdmin && !isDesignLab && location.pathname !== "/oauth/authorize" ? <SiteMigrationNotice /> : null}
       <AppToast />
     </>
   );

@@ -1,0 +1,22 @@
+.site-migration-notice {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: max(14px, env(safe-area-inset-right, 0px));
+  z-index: 78;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  width: min(430px, calc(100vw - 28px));
+  padding: 16px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px #0002;
+}
+.site-migration-notice > div { grid-column: 1; padding-right: 16px; }
+.site-migration-notice strong { display: block; font-size: 15px; }
+.site-migration-notice p { margin: 8px 0; font-size: 13px; line-height: 1.6; }
+.site-migration-notice small { color: var(--text-muted); font-size: 12px; line-height: 1.5; }
+.site-migration-notice > a { grid-column: 1; justify-self: start; text-decoration: none; }
+.site-migration-notice > button { position: absolute; top: 8px; right: 8px; }
