@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { deploymentPlan, ENTRY_FILES } from "./mirror-deploy-plan.mjs";
+import { deploymentPlan, ENTRY_FILES, entryFileArguments } from "./mirror-deploy-plan.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 process.chdir(root);
@@ -18,8 +18,8 @@ if (fs.existsSync(config)) {
     if (env[match[1]] === undefined) env[match[1]] = match[2].trim();
   }
 }
-const run = (command, args) => {
-  const result = spawnSync(command, args, { stdio: "inherit" });
+const run = (command, args, cwd = root) => {
+  const result = spawnSync(command, args, { stdio: "inherit", cwd });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`${command} failed (${result.status})`);
 };
@@ -41,8 +41,8 @@ try {
   const expected = JSON.parse(fs.readFileSync("dist/release.json", "utf8")).id;
   console.log(`${dryRun ? "Preview" : "Deploy"} mirror release ${expected}`);
   run("rsync", [...plan.resources, plan.destination]);
-  const entries = ENTRY_FILES.filter((name) => fs.existsSync(`dist/${name}`)).map((name) => `dist/${name}`);
-  run("rsync", [...plan.common, ...entries, plan.destination]);
+  const entries = ENTRY_FILES.filter((name) => fs.existsSync(`dist/${name}`));
+  run("rsync", [...plan.common, ...entryFileArguments(entries), plan.destination], path.join(root, "dist"));
   run("rsync", [...plan.common, "dist/release.json", plan.destination]);
   if (dryRun) console.log("Dry run finished; no remote files changed.");
   else {

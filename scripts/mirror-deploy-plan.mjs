@@ -1,7 +1,11 @@
 import path from "node:path";
 import os from "node:os";
 
-export const ENTRY_FILES = ["index.html", "404.html", "sw.js", "sw-release.js"];
+export const ENTRY_FILES = ["index.html", "404.html", "sw.js", "sw-release.js", "oauth/authorize.html"];
+
+export function entryFileArguments(files) {
+  return ["--relative", ...files];
+}
 
 export function deploymentPlan(env, dryRun = false) {
   const host = env.MIRROR_HOST || "";
