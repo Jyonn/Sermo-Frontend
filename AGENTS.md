@@ -14,6 +14,7 @@
 - Keep all four sites on the same release: the existing master workflow publishes `sermo.jyonn.space`; also run `npm run deploy:frienden-pages` for the separate artifact-only `Jyonn/Frienden-Frontend` Pages site, and deploy both mirrors. For the new mirror, run `npm run deploy:mirror` with `MIRROR_BUILD_SCRIPT=build:frienden-mirror`, `MIRROR_DIRECTORY=/home/ubuntu/frienden-frontend/dist`, and `MIRROR_PUBLIC_ORIGIN=https://frienden.6-79.cn`. Verify all four public HTTPS release IDs. Builds share `dist`; run deployment commands sequentially.
 - Never replace the existing Sermo Pages custom domain with Frienden. Preserve both old sites through the announced maintenance end date of December 31, 2026; do not infer permission to redirect, remove DNS, stop service, or schedule shutdown from that date.
 - Enable `public/site-migration.json` only after both new Frienden origins pass HTTPS and functional checks. Migration links must stay free of OAuth parameters, tokens and fragments. No database, credential or OAuth registration changes are needed for parallel frontend domains.
+- In migration notices, site labels and related release copy, display the full brand pairs `Sermo 言浪` and `Frienden 友间`. Preserve technical domain names, client IDs, paths and unrelated historical records.
 
 ## User-Facing Releases
 

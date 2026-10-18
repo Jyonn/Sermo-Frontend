@@ -35,6 +35,8 @@ test("actual migration card states the maintenance date and uses a clean destina
   const { MigrationNoticeCard } = load("SiteMigrationNotice");
   const html = renderToStaticMarkup(React.createElement(MigrationNoticeCard, { destination: "https://frienden.6-79.cn", onClose() {} }));
   assert.match(html, /2026 年 12 月 31 日/);
+  assert.match(html, /Sermo 言浪旧域名/);
+  assert.match(html, /迁移至 Frienden 友间/);
   assert.match(html, /href="https:\/\/frienden\.6-79\.cn\/"/);
   assert.match(html, /referrerPolicy="no-referrer"/i);
   assert.match(html, /aria-label="关闭"/);
@@ -48,5 +50,7 @@ test("actual update dialog lists four labeled sites with clean links even before
     assert.ok(html.includes(messages[site.labelKey]));
   }
   assert.equal((html.match(/referrerPolicy="no-referrer"/gi) || []).length, 4);
+  assert.equal((html.match(/Frienden 友间 · 新/g) || []).length, 2);
+  assert.equal((html.match(/Sermo 言浪 · 旧/g) || []).length, 2);
   assert.doesNotMatch(html, /state=|code=|token=|redirect_uri=/);
 });
