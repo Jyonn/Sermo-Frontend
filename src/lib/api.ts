@@ -431,7 +431,7 @@ export const api = {
     return request<{ eligible: boolean; missing_verifications: ("email" | "phone")[]; verification_path: string; space_admin: boolean }>("/users/oauth/eligibility", { auth: true, signal, responseFormat: "oauth" });
   },
   getOAuthApplications(platform = false) {
-    return request<{ applications: import("./oauthClients").OAuthApplication[] }>(platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications", { auth: !platform, platformAdminAuth: platform, responseFormat: "oauth" });
+    return request<{ applications: import("./oauthClients").OAuthApplication[]; scope_catalog?: import("./oauthScopes").OAuthScopeCatalogEntry[] }>(platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications", { auth: !platform, platformAdminAuth: platform, responseFormat: "oauth" });
   },
   saveOAuthApplication(platform: boolean, id: number | null, body: Record<string, unknown>) {
     const base = platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications";

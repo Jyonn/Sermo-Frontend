@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
+import * as scopePolicy from "../src/lib/oauthScopes.ts";
 
 const require=createRequire(import.meta.url);
 const { StaticRouter }=require("react-router-dom/server");
@@ -15,9 +16,9 @@ const admin={key:'jyonn:2',slug:'jyonn',spaceName:'Jyonn Space',session:{user:{u
 const member={key:'wzry:1',slug:'wzry',spaceName:'其他空间',session:{user:{user_id:1,space_id:1,name:'非管理员测试账号'},accessToken:'fixture'}};
 const client={id:'fixture',name:'板凳 · Abandon',description:'不应重复展示的长说明',callback:'https://example.test/callback',scopes:['profile','email'],purpose:'space_admin',target_space:null,parameters:{response_type:'code',redirect_uri:'https://example.test/callback',scope:'profile email',state:'s'.repeat(32),code_challenge:'a'.repeat(43),code_challenge_method:'S256'}};
 
-function render(scene:'chooser'|'selected'|'member'|'general'|'empty'|'login-pending') {
-  const session=scene==='selected'||scene==='login-pending'?admin.session:scene==='member'?member.session:null;
-  const effectiveClient=['general','empty','login-pending'].includes(scene)?{...client,purpose:'join'}:client;
+function render(scene:'chooser'|'selected'|'member'|'general'|'empty'|'login-pending'|'chat-selected') {
+  const session=scene==='selected'||scene==='login-pending'||scene==='chat-selected'?admin.session:scene==='member'?member.session:null;
+  const effectiveClient=scene==='chat-selected'?{...client,purpose:'join',scopes:['profile','email','chat.read','chat.write','chat.modify'],permission_groups:[{key:'chat',scopes:['chat.read','chat.write','chat.modify']},{key:'personal',scopes:['profile','email']}],parameters:{...client.parameters,scope:'profile email chat.read chat.write chat.modify'}}:['general','empty','login-pending'].includes(scene)?{...client,purpose:'join'}:client;
   const states=[false,'',session?{userId:session.user.user_id,value:{eligible:true,missing_verifications:[],space_admin:scene==='selected'}}:null,false,0,'Jyonn Space',scene==='empty'?[]:[member,admin],false,'','',new Set(scene==='member'?[]:[admin.key]),false,false,{search,client:effectiveClient}];
   let index=0;
   const exports:Record<string,any>={};
@@ -31,6 +32,7 @@ function render(scene:'chooser'|'selected'|'member'|'general'|'empty'|'login-pen
       if(name==='../lib/pwaAccounts')return {listPwaCachedAccounts:()=>[member,admin]};
       if(name==='../lib/stillfolioLogin')return {parseSermoLoginHint:()=>null};
       if(name==='../lib/oauthPending')return {isOAuthLoginPending:()=>scene==='login-pending'};
+      if(name==='../lib/oauthScopes')return scopePolicy;
       if(name==='../lib/spaceEntry')return {getDetectedSpaceSlug:()=>'',buildSpaceHrefForCurrentHost:()=>'/'};
       if(name==='../components/UserAvatar')return {UserAvatar:(props:any)=>React.createElement('span',{className:props.className,'aria-hidden':true},'友')};
       if(name==='../components/OAuthConsentBrand')return {OAuthConsentBrand:()=>React.createElement('div',{className:'oauth-brand-pair'},React.createElement('span',{className:'oauth-brand-icon'},'友'),React.createElement('span',{},'→'),React.createElement('span',{className:'oauth-brand-icon'},'板'))};
@@ -75,6 +77,15 @@ test('explicit login intent keeps an existing session on the chooser with a real
   const html=render('login-pending');
   assert.doesNotMatch(html,/oauth-selected-account|oauth-primary/);
   assert.match(html,/href="\/pwa\?oauth_login=1"/);
+});
+
+test('chat consent distinguishes history, synchronization and sending without administrator proof',()=>{
+  const html=render('chat-selected');
+  assert.match(html,/文字历史/);
+  assert.match(html,/消息变更/);
+  assert.match(html,/以你的身份/);
+  assert.match(html,/仅修改自己的会话置顶/);
+  assert.doesNotMatch(html,/空间管理员身份/);
 });
 
 if(process.env.OAUTH_REVIEW_DIR){

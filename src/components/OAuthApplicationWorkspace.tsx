@@ -5,6 +5,7 @@ import { showToast } from "../lib/toast";
 import type { OAuthApplication, OAuthRevision } from "../lib/oauthClients";
 import { currentOAuthRevision, filterOAuthApplications, oauthApplicationName, oauthApplicationStatus, pendingOAuthRevision, type OAuthApplicationFilter } from "../lib/oauthApplicationPresentation";
 import { SideDrawer } from "./SideDrawer";
+import { oauthDomains, legacyScopeCatalog, updateOAuthScopes, type OAuthScopeCatalogEntry } from "../lib/oauthScopes";
 import { BottomSheet } from "./BottomSheet";
 import "./OAuthApplicationWorkspace.css";
 
@@ -18,6 +19,7 @@ const lines = (value: string) => value.split("\n").map((line) => line.trim()).fi
 export function OAuthApplicationWorkspace({ platform = false }: { platform?: boolean }) {
   const { t } = useI18n();
   const [apps, setApps] = useState<OAuthApplication[]>([]);
+  const [scopeCatalog, setScopeCatalog] = useState<OAuthScopeCatalogEntry[]>(legacyScopeCatalog);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
   const [query, setQuery] = useState("");
@@ -49,7 +51,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
   const load = async () => {
     const request = ++requestNumber.current;
     setLoading(true); setListError("");
-    try { const result = await api.getOAuthApplications(platform); if (request === requestNumber.current) setApps(result.applications); }
+    try { const result = await api.getOAuthApplications(platform); if (request === requestNumber.current) { setApps(result.applications); setScopeCatalog(result.scope_catalog ?? legacyScopeCatalog); } }
     catch (error) { if (request === requestNumber.current) setListError(error instanceof Error ? error.message : t("apps.authorizeFailed")); }
     finally { if (request === requestNumber.current) setLoading(false); }
   };
@@ -145,7 +147,7 @@ export function OAuthApplicationWorkspace({ platform = false }: { platform?: boo
       <label>{t("oauth.description")}<textarea maxLength={1000} value={draft.description} disabled={busy} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /></label>
       <label>{t("oauth.iconUrl")}<input type="url" placeholder="https://" maxLength={512} value={draft.icon_url} disabled={busy} onChange={(event) => setDraft({ ...draft, icon_url: event.target.value })} /></label>
       <label>{t("oauth.redirects")}<textarea required value={draft.redirects} disabled={busy} onChange={(event) => setDraft({ ...draft, redirects: event.target.value })} /></label>
-      <fieldset><legend>{t("oauth.scopes")}</legend>{["profile", "phone", "vip", "email"].map((scope) => <label className="oauth-checkbox" key={scope}><input type="checkbox" checked={draft.scopes.includes(scope)} disabled={busy} onChange={(event) => setDraft({ ...draft, scopes: event.target.checked ? [...draft.scopes, scope] : draft.scopes.filter((item) => item !== scope) })} /><span>{scopeText(scope)}</span></label>)}</fieldset>
+      {oauthDomains.filter(domain => scopeCatalog.some(entry => entry.domain === domain)).map(domain => <fieldset key={domain}><legend>{t(`oauth.permissionGroup.${domain}`)}</legend>{scopeCatalog.filter(entry => entry.domain === domain).map(entry => <label className="oauth-checkbox" key={entry.scope}><input type="checkbox" checked={draft.scopes.includes(entry.scope)} disabled={busy || !entry.available && !draft.scopes.includes(entry.scope)} onChange={event => setDraft({ ...draft, scopes: updateOAuthScopes(draft.scopes, entry.scope, event.target.checked, scopeCatalog) })} /><span>{entry.available ? scopeText(entry.scope) : `${t(`oauth.action.${entry.action}`)} · ${t(`oauth.scopeStatus.${entry.status}`)}`}</span></label>)}</fieldset>)}
       <label>{t("oauth.loopbacks")}<textarea value={draft.loopbacks} disabled={busy} onChange={(event) => setDraft({ ...draft, loopbacks: event.target.value })} /></label>
       <footer className="oauth-panel-actions"><button className="oauth-button is-primary" disabled={busy || !draft.scopes.length} type="submit">{busy ? t("common.loading") : t(platform && !panel.appId ? "common.continue" : "common.save")}</button><button className="oauth-button" disabled={busy} type="button" onClick={() => close()}>{t("common.cancel")}</button></footer>
     </form> : null}

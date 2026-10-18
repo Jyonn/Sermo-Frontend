@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.10",
+  "id": "2026.10.18.11",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "更顺畅的授权登录",
+      "title": "更清晰的应用权限",
       "items": [
-        "返回登录时可重新选择空间或账号，不再自动跳回授权页",
-        "精简账号选择和空态说明，保留原授权请求"
+        "应用权限按聊天、广场、投稿、通讯和个人分组展示",
+        "明确标注尚未开放的操作，现有授权不会自动增加权限"
       ]
     },
     "en": {
-      "title": "Smoother authorization sign-in",
+      "title": "Clearer application permissions",
       "items": [
-        "Choose a space or account when returning to sign-in without jumping back automatically",
-        "Simpler chooser and empty-state copy while preserving the original authorization request"
+        "Permissions are grouped into Chat, Square, Submissions, Contacts and Personal",
+        "Unavailable actions are clearly marked; existing grants never gain permissions automatically"
       ]
     }
   }

@@ -85,3 +85,7 @@
 .oauth-secondary:hover,.oauth-switch-account:hover{border-color:var(--brand-primary)}
 .oauth-quiet:hover{background:var(--bg-elevated);color:var(--text-primary)}
 .oauth-primary:disabled{opacity:.55;cursor:not-allowed}
+.oauth-scope-group{display:grid;gap:8px;width:100%}
+.oauth-scope-group>small{font-size:11px;color:var(--text-muted)}
+.oauth-scope-group>span{font-size:13px;line-height:1.5}
+.oauth-scope-group>span::before{content:"✓";margin-right:10px;color:var(--brand-primary)}

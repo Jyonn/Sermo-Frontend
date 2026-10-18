@@ -12,6 +12,7 @@ import { clearOAuthRequest, rememberOAuthRequest, rememberAdminOAuthRequest, beg
 import { activatePwaCachedAccount, listPwaCachedAccounts, refreshPwaCachedAccounts, type PwaCachedAccount } from "../lib/pwaAccounts";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { parseSermoLoginHint } from "../lib/stillfolioLogin";
+import { consentPermissionGroups } from "../lib/oauthScopes";
 import "./MoreApps.css";
 
 export default function OAuthAuthorizePage() {
@@ -90,6 +91,7 @@ export default function OAuthAuthorizePage() {
     : !adminProof && !loginPending && matchingAccounts.length === 1 ? matchingAccounts[0] : undefined;
   const scope = query.get("scope") || "";
   const scopes = scope.split(/\s+/).filter(Boolean);
+  const permissionGroups = consentPermissionGroups(client?.scopes ?? [], client?.permission_groups);
   const valid = Boolean(client)
     && query.get("response_type") === "code"
     && query.get("redirect_uri") === client?.callback
@@ -99,7 +101,7 @@ export default function OAuthAuthorizePage() {
     && (query.get("state") || "").length <= 512
     && query.getAll("login_hint").length <= 1
     && (!query.has("login_hint") || Boolean(loginHint))
-    && scopes.length > 0 && scopes.every((item) => client?.scopes.includes(item));
+    && Boolean(permissionGroups) && scopes.length > 0 && scopes.length === client?.scopes.length && scopes.every((item) => client?.scopes.includes(item));
 
   useEffect(() => {
     if (ready && !authorizedSession && valid) rememberOAuthRequest(search);
@@ -213,7 +215,10 @@ export default function OAuthAuthorizePage() {
         <OAuthVerificationCard eligibility={eligibilityValue} search={search} failed={eligibilityError} onReload={() => setEligibilityReload(value => value + 1)} />
         <section className="oauth-authorize-scopes" aria-label={t("apps.sharedInformation")}>
           <small>{t("apps.sharedInformation")}</small>
-          {scopes.map(item => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}
+          {permissionGroups?.map(group => {
+            const requested = group.scopes.filter(scope => scopes.includes(scope));
+            return requested.length ? <div className="oauth-scope-group" key={group.key}>{scopes.some(scope => scope.includes(".")) ? <small>{t(`oauth.permissionGroup.${group.key}`)}</small> : null}{requested.map(item => <span key={item}>{t(`apps.scope.${item}` as "apps.scope.profile")}</span>)}</div> : null;
+          })}
           {adminProof ? <span>{t("apps.adminProofShort")}</span> : null}
         </section>
         {error ? <p role="alert">{error}</p> : null}
