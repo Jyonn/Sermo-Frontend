@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.8",
+  "id": "2026.10.18.9",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "更顺畅的管理员授权",
+      "title": "更清晰的管理员登录",
       "items": [
-        "管理员可在友间选择空间并确认身份，无需先在第三方填写空间信息",
-        "支持切换空间账号，并在管理员登录后返回原授权流程"
+        "管理员授权仅展示经核验的管理员账号，选定后专注当前空间",
+        "精简授权说明，统一登录、取消和切换账号的操作样式"
       ]
     },
     "en": {
-      "title": "Simpler administrator authorization",
+      "title": "Clearer administrator sign-in",
       "items": [
-        "Choose and confirm your administrator space in Frienden without entering space details in the requesting app",
-        "Switch space accounts and return to consent after administrator sign-in"
+        "Administrator consent shows verified administrator accounts and focuses on the selected space",
+        "Shorter explanations and consistent sign-in, cancel and account-switch controls"
       ]
     }
   }

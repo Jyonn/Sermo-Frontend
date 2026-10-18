@@ -281,6 +281,14 @@ export async function refreshDetachedAuthSession(currentSession: AuthSession, si
   });
 }
 
+export async function getDetachedOAuthAdminStatus(session: AuthSession, signal?: AbortSignal) {
+  const response = await fetch(`${API_BASE_URL}/users/oauth/eligibility`, {
+    headers: { Authorization: `Bearer ${session.accessToken}` }, signal, cache: "no-store",
+  });
+  const result = await parseOAuthResponse<{ space_admin: boolean }>(response);
+  return result.space_admin === true;
+}
+
 async function completeSessionAvatar(session: AuthSession): Promise<AuthSession> {
   if (session.user.avatar_uri !== undefined) return session;
   try {

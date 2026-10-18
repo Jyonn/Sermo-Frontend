@@ -75,3 +75,13 @@
 .oauth-account-list button strong,.oauth-account-list button small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oauth-account-list button small{color:var(--text-muted);font-size:12px}
 .oauth-account-list .material-symbols-outlined{color:var(--text-muted)}
+.oauth-entry-actions{display:flex;align-items:center;gap:12px;width:100%;padding-top:4px}
+.oauth-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border:1px solid var(--line-soft);border-radius:13px;background:var(--bg-elevated);color:var(--text-primary);font-size:13px;font-weight:600;text-decoration:none;text-align:center}
+.oauth-entry-actions>.oauth-secondary{flex:1}
+.oauth-quiet{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 12px;border-radius:12px;color:var(--text-muted);font-size:13px;text-decoration:none;white-space:nowrap}
+.oauth-selected-account{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--line-soft);border-radius:16px;background:var(--bg-elevated)}
+.oauth-selected-account>.oauth-consent-identity{flex:1}
+.oauth-switch-account{flex-shrink:0;min-height:36px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:10px;background:var(--bg-surface);color:var(--text-secondary);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+.oauth-secondary:hover,.oauth-switch-account:hover{border-color:var(--brand-primary)}
+.oauth-quiet:hover{background:var(--bg-elevated);color:var(--text-primary)}
+.oauth-primary:disabled{opacity:.55;cursor:not-allowed}
