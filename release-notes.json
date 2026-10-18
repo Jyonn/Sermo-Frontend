@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.11",
+  "id": "2026.10.18.12",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的应用权限",
+      "title": "更完整的协作权限",
       "items": [
-        "应用权限按聊天、广场、投稿、通讯和个人分组展示",
-        "明确标注尚未开放的操作，现有授权不会自动增加权限"
+        "明确说明应用申请的私聊、建群和群管理能力",
+        "管理操作仍受原有角色限制，已有授权不会自动扩权"
       ]
     },
     "en": {
-      "title": "Clearer application permissions",
+      "title": "More complete collaboration permissions",
       "items": [
-        "Permissions are grouped into Chat, Square, Submissions, Contacts and Personal",
-        "Unavailable actions are clearly marked; existing grants never gain permissions automatically"
+        "Clearly describe direct conversations, group creation and group management",
+        "Management keeps existing role restrictions; old grants never gain scopes automatically"
       ]
     }
   }

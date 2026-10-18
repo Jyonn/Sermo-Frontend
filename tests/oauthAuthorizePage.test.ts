@@ -84,7 +84,7 @@ test('chat consent distinguishes history, synchronization and sending without ad
   assert.match(html,/文字历史/);
   assert.match(html,/消息变更/);
   assert.match(html,/以你的身份/);
-  assert.match(html,/仅修改自己的会话置顶/);
+  assert.match(html,/按你的现有角色管理群聊/);
   assert.doesNotMatch(html,/空间管理员身份/);
 });
 
