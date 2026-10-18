@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
@@ -7,7 +7,8 @@ import { ApiError, api } from "../lib/api";
 import { useAdminAuth } from "../lib/adminAuth";
 import { useAuth } from "../lib/auth";
 import { getBrowserJoinLanguage, useI18n } from "../lib/language";
-import { buildJoinHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
+import { buildJoinHrefForCurrentHost, buildSpaceHrefForCurrentHost, normalizeSlug } from "../lib/spaceEntry";
+import { readAdminOAuthRequest } from "../lib/oauthPending";
 import { showToast } from "../lib/toast";
 
 type AdminMode = "create" | "login";
@@ -32,10 +33,24 @@ export default function AdminSpacePage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "code">("idle");
+  const oauthResumeStarted = useRef(false);
 
   useEffect(() => {
-    if (adminSession) navigate("/space/dashboard", { replace: true });
-  }, [adminSession, navigate]);
+    if (!adminSession) return;
+    if (readAdminOAuthRequest()) {
+      if (searchParams.get("oauth_switch") === "1") return;
+      if (oauthResumeStarted.current) return;
+      oauthResumeStarted.current = true;
+      void api.createOfficialLoginTicket().then(payload => {
+        window.location.assign(buildSpaceHrefForCurrentHost(adminSession.space.slug, "/official-login", "", `ticket=${encodeURIComponent(payload.token)}`));
+      }).catch(error => {
+        setSubmitError(error instanceof ApiError ? error.message : t("admin.requestFailed"));
+        oauthResumeStarted.current = false;
+      });
+      return;
+    }
+    navigate("/space/dashboard", { replace: true });
+  }, [adminSession, navigate, searchParams]);
 
   useEffect(() => {
     setMode(routeMode(searchParams.get("mode")));
@@ -124,7 +139,12 @@ export default function AdminSpacePage() {
         loginAdmin(payload.space, payload.auth);
       }
 
-      navigate("/space/dashboard", { replace: true });
+      if (!readAdminOAuthRequest()) navigate("/space/dashboard", { replace: true });
+      else {
+        const params = new URLSearchParams(searchParams);
+        params.delete("oauth_switch");
+        setSearchParams(params, { replace: true });
+      }
     } catch (error) {
       const message = error instanceof ApiError ? error.message : t("admin.requestFailed");
       setSubmitError(message);

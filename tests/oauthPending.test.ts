@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { rememberOAuthRequest, readOAuthRequest, clearOAuthRequest } from "../src/lib/oauthPending.ts";
+import { rememberOAuthRequest, readOAuthRequest, clearOAuthRequest, rememberAdminOAuthRequest, readAdminOAuthRequest } from "../src/lib/oauthPending.ts";
 import { oauthVerificationReturn, oauthVerificationTarget } from "../src/lib/oauthConsent.ts";
 
 test("space request survives registration and both verification returns without rebuilding OAuth parameters", () => {
@@ -11,7 +11,8 @@ test("space request survives registration and both verification returns without 
   const start=now();
   try {
     const search="?request_id="+"a".repeat(43);
-    rememberOAuthRequest(search);
+    rememberAdminOAuthRequest(search);
+    assert.equal(readAdminOAuthRequest(),`/oauth/authorize${search}`);
     Date.now=()=>start+20*60_000;
     assert.equal(readOAuthRequest(),`/oauth/authorize${search}`);
     for (const channel of ["email","phone"] as const) {
@@ -24,7 +25,9 @@ test("space request survives registration and both verification returns without 
     rememberOAuthRequest(search);
     clearOAuthRequest();
     assert.equal(readOAuthRequest(),null);
+    assert.equal(readAdminOAuthRequest(),null);
     rememberOAuthRequest("?client_id=legacy");
+    assert.equal(readAdminOAuthRequest(),null);
     Date.now=()=>start+11*60_000;
     assert.equal(readOAuthRequest(),null);
   } finally {

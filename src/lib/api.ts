@@ -420,7 +420,7 @@ export const api = {
     return request<import("./oauthClients").OAuthClientMetadata>("/users/oauth/metadata", { query, responseFormat: "oauth" });
   },
   getOAuthEligibility(signal?: AbortSignal) {
-    return request<{ eligible: boolean; missing_verifications: ("email" | "phone")[]; verification_path: string }>("/users/oauth/eligibility", { auth: true, signal, responseFormat: "oauth" });
+    return request<{ eligible: boolean; missing_verifications: ("email" | "phone")[]; verification_path: string; space_admin: boolean }>("/users/oauth/eligibility", { auth: true, signal, responseFormat: "oauth" });
   },
   getOAuthApplications(platform = false) {
     return request<{ applications: import("./oauthClients").OAuthApplication[] }>(platform ? "/platform-admin/oauth/applications" : "/users/oauth/applications", { auth: !platform, platformAdminAuth: platform, responseFormat: "oauth" });

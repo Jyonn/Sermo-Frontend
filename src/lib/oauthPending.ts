@@ -1,4 +1,14 @@
 const KEY = "sermo:oauth-pending";
+const ADMIN_KEY = "sermo:oauth-admin-pending";
+
+export function rememberAdminOAuthRequest(search: string) {
+  rememberOAuthRequest(search);
+  try { sessionStorage.setItem(ADMIN_KEY, `/oauth/authorize${search}`); } catch { /* Optional recovery. */ }
+}
+
+export function readAdminOAuthRequest(): string | null {
+  try { const pending = readOAuthRequest(); return pending && sessionStorage.getItem(ADMIN_KEY) === pending ? pending : null; } catch { return null; }
+}
 
 export function rememberOAuthRequest(search: string) {
   try {
@@ -23,5 +33,5 @@ export function readOAuthRequest(): string | null {
 }
 
 export function clearOAuthRequest() {
-  try { sessionStorage.removeItem(KEY); } catch { /* Storage may be unavailable. */ }
+  try { sessionStorage.removeItem(KEY); sessionStorage.removeItem(ADMIN_KEY); } catch { /* Storage may be unavailable. */ }
 }
