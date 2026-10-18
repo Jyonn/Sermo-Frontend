@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "../lib/language";
 import { approvedMigrationDestination, claimMigrationNotice, MIGRATION_NOTICE_KEY } from "../lib/siteMigration";
 import { migrationDestination } from "../lib/siteOrigins";
+import { BrandIcon } from "./OAuthConsentBrand";
 import "../styles/site-migration.css";
 
 export function SiteMigrationNotice() {
@@ -34,9 +35,18 @@ export function SiteMigrationNotice() {
 
 export function MigrationNoticeCard({ destination, onClose }: { destination: string; onClose: () => void }) {
   const { t } = useI18n();
+  const oldBrand = t("migration.oldBrand");
+  const newBrand = t("migration.newBrand");
   return (
     <aside aria-label={t("migration.title")} className="site-migration-notice">
-      <div><strong>{t("migration.title")}</strong><p>{t("migration.message")}</p><small>{t("migration.accountHint")}</small></div>
+      <div>
+        <div className="migration-brand-transition">
+          <div className="migration-brand"><BrandIcon className="migration-brand-icon" src="/icons/sermo-192.png" name={oldBrand} /><span>{oldBrand}</span></div>
+          <svg className="migration-brand-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-5-5 5 5-5 5" /></svg>
+          <div className="migration-brand"><BrandIcon className="migration-brand-icon" src="/icons/frienden-192.png?v=2" name={newBrand} /><span>{newBrand}</span></div>
+        </div>
+        <strong>{t("migration.title")}</strong><p>{t("migration.message")}</p><small>{t("migration.accountHint")}</small>
+      </div>
       <a className="button" href={`${destination}/`} referrerPolicy="no-referrer" rel="noreferrer">{t("migration.visit")}</a>
       <button aria-label={t("common.close")} className="icon-button" onClick={onClose} type="button"><span aria-hidden="true" className="material-symbols-outlined">close</span></button>
     </aside>

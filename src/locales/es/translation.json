@@ -2670,6 +2670,8 @@
   "update.legacyPrimary": "Sermo 言浪 · principal anterior",
   "update.legacyMirror": "Sermo 言浪 · espejo anterior",
   "migration.title": "Pásate a Frienden 友间",
+  "migration.oldBrand": "Sermo 言浪",
+  "migration.newBrand": "Frienden 友间",
   "migration.message": "El mantenimiento de los dominios anteriores de Sermo 言浪 termina el 31 de diciembre de 2026. Pásate a Frienden 友间.",
   "migration.accountHint": "Tu cuenta y tus datos se mantienen. Inicia sesión de nuevo en el sitio nuevo.",
   "migration.visit": "Abrir Frienden 友间",

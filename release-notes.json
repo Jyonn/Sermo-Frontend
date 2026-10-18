@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.4",
+  "id": "2026.10.18.5",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "Frienden 友间新站上线",
+      "title": "更直观的品牌迁移指引",
       "items": [
-        "Frienden 友间主站和镜像现已可用，检查更新可查看四站版本",
-        "Sermo 言浪旧域名每周提示迁移，维护将于 2026 年 12 月 31 日结束，账号与数据不变"
+        "迁移公告展示 Sermo 言浪旧 Logo → Frienden 友间新 Logo，更容易辨认新站",
+        "保留每周提示频率、维护截止日期和现有账号数据"
       ]
     },
     "en": {
-      "title": "Frienden 友间 sites are live",
+      "title": "A clearer brand migration guide",
       "items": [
-        "The Frienden 友间 primary and mirror sites are ready; check versions across all four sites",
-        "Sermo 言浪 legacy domains show weekly migration reminders and end maintenance on December 31, 2026; your account and data stay the same"
+        "See the original Sermo 言浪 logo → current Frienden 友间 logo in migration notices",
+        "Weekly reminder timing, the maintenance deadline and your existing account data stay unchanged"
       ]
     }
   }

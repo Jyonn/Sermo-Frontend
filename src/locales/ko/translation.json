@@ -2670,6 +2670,8 @@
   "update.legacyPrimary": "Sermo 言浪 · 기존 기본",
   "update.legacyMirror": "Sermo 言浪 · 기존 미러",
   "migration.title": "Frienden 友间으로 이동",
+  "migration.oldBrand": "Sermo 言浪",
+  "migration.newBrand": "Frienden 友间",
   "migration.message": "Sermo 言浪의 기존 도메인 유지보수는 2026년 12월 31일에 종료됩니다. Frienden 友间으로 이동해 주세요.",
   "migration.accountHint": "계정과 데이터는 그대로 유지됩니다. 새 사이트에서 다시 로그인해 주세요.",
   "migration.visit": "Frienden 友间 열기",

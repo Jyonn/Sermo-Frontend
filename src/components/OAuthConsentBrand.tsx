@@ -3,10 +3,10 @@ import { useI18n } from "../lib/language";
 import { oauthIconUrl } from "../lib/oauthConsent";
 import type { OAuthClientMetadata } from "../lib/oauthClients";
 
-function BrandIcon({ src, name }: { src: string | null; name: string }) {
+export function BrandIcon({ src, name, className = "oauth-brand-icon" }: { src: string | null; name: string; className?: string }) {
   const { t } = useI18n();
   const [failed, setFailed] = useState(false);
-  return <span className="oauth-brand-icon">
+  return <span className={className}>
     {src && !failed ? <img alt={name} src={src} referrerPolicy="no-referrer" onError={() => setFailed(true)} /> : <span role="img" aria-label={t("apps.iconUnavailable", { app: name })}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5" /><rect x="14" y="4" width="6" height="6" rx="1.5" /><rect x="4" y="14" width="6" height="6" rx="1.5" /><rect x="14" y="14" width="6" height="6" rx="1.5" /></svg></span>}
   </span>;
 }

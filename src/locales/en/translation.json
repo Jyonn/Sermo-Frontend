@@ -1844,6 +1844,8 @@
   "update.legacyPrimary": "Sermo 言浪 · legacy primary",
   "update.legacyMirror": "Sermo 言浪 · legacy mirror",
   "migration.title": "Move to Frienden 友间",
+  "migration.oldBrand": "Sermo 言浪",
+  "migration.newBrand": "Frienden 友间",
   "migration.message": "Maintenance for the Sermo 言浪 legacy domains ends on December 31, 2026. Please move to Frienden 友间.",
   "migration.accountHint": "Your account and data stay the same. Sign in again on the new site.",
   "migration.visit": "Open Frienden 友间",

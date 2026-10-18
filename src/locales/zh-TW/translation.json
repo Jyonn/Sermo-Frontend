@@ -2690,6 +2690,8 @@
   "update.legacyPrimary": "Sermo 言浪 · 舊主站",
   "update.legacyMirror": "Sermo 言浪 · 舊鏡像",
   "migration.title": "遷移至 Frienden 友间",
+  "migration.oldBrand": "Sermo 言浪",
+  "migration.newBrand": "Frienden 友间",
   "migration.message": "Sermo 言浪舊網域將於 2026 年 12 月 31 日結束維護，請遷移至 Frienden 友间。",
   "migration.accountHint": "帳號與資料保持不變，在新站重新登入即可。",
   "migration.visit": "前往 Frienden 友间",

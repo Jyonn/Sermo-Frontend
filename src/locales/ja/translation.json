@@ -2670,6 +2670,8 @@
   "update.legacyPrimary": "Sermo 言浪 · 旧メイン",
   "update.legacyMirror": "Sermo 言浪 · 旧ミラー",
   "migration.title": "Frienden 友间へ移行",
+  "migration.oldBrand": "Sermo 言浪",
+  "migration.newBrand": "Frienden 友间",
   "migration.message": "Sermo 言浪の旧ドメインの保守は2026年12月31日に終了します。Frienden 友间へ移行してください。",
   "migration.accountHint": "アカウントとデータは引き継がれます。新サイトで再度ログインしてください。",
   "migration.visit": "Frienden 友间を開く",

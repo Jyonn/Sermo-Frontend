@@ -1844,6 +1844,8 @@
   "update.legacyPrimary": "Sermo 言浪 · 旧主站",
   "update.legacyMirror": "Sermo 言浪 · 旧镜像",
   "migration.title": "迁移至 Frienden 友间",
+  "migration.oldBrand": "Sermo 言浪",
+  "migration.newBrand": "Frienden 友间",
   "migration.message": "Sermo 言浪旧域名将于 2026 年 12 月 31 日结束维护，请迁移至 Frienden 友间。",
   "migration.accountHint": "账号与数据保持不变，在新站重新登录即可。",
   "migration.visit": "前往 Frienden 友间",
