@@ -1,4 +1,7 @@
 {
-  "enabled": false,
-  "readyOrigins": []
+  "enabled": true,
+  "readyOrigins": [
+    "https://frienden.jyonn.space",
+    "https://frienden.6-79.cn"
+  ]
 }

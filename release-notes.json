@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.2",
+  "id": "2026.10.18.3",
   "publishedAt": "2026-10-18",
   "locales": {
     "zh-CN": {
-      "title": "四站更新与迁移指引",
+      "title": "Frienden 新站上线",
       "items": [
-        "检查更新可查看 Frienden 与 Sermo 四个站点的实际版本",
-        "旧域名保留使用，新站通过检查后每周提示迁移，账号与数据不变"
+        "Frienden 主站和镜像现已可用，检查更新可查看四站版本",
+        "旧域名每周提示迁移，维护将于 2026 年 12 月 31 日结束，账号与数据不变"
       ]
     },
     "en": {
-      "title": "Frienden site migration",
+      "title": "Frienden sites are live",
       "items": [
-        "Check actual versions across all four Frienden and Sermo sites",
-        "Keep using existing sites, with weekly migration reminders once the new sites are verified; your account and data stay the same"
+        "The Frienden primary and mirror sites are ready; check versions across all four sites",
+        "Legacy domains show weekly migration reminders and end maintenance on December 31, 2026; your account and data stay the same"
       ]
     }
   }

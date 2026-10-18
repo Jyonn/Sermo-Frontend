@@ -11,6 +11,9 @@
 - After every frontend release, also deploy the mirror with `npm run deploy:mirror` and verify its release ID. Pushing Git is not a mirror deployment. Report blocked/failed deployment explicitly; never claim synchronization without verification.
 - Mirror SSH settings belong in ignored `.env.deploy.local`, not `VITE_*` variables. The confirmed SSH host is `175.178.125.57`, key `~/Resources/Subscription/Server/tencent`, user `ubuntu`, port `22`, and remote directory `/home/ubuntu/sermo-frontend/dist`. Public mirror: `https://sermo.6-79.cn`. Never commit or print private-key contents.
 - Mirror publication must build with `build:mirror`, upload resources before entry files and publish `release.json` last. Do not use rsync `--delete` or delete old hashed assets; stale clients still need them.
+- Keep all four sites on the same release: the existing master workflow publishes `sermo.jyonn.space`; also run `npm run deploy:frienden-pages` for the separate artifact-only `Jyonn/Frienden-Frontend` Pages site, and deploy both mirrors. For the new mirror, run `npm run deploy:mirror` with `MIRROR_BUILD_SCRIPT=build:frienden-mirror`, `MIRROR_DIRECTORY=/home/ubuntu/frienden-frontend/dist`, and `MIRROR_PUBLIC_ORIGIN=https://frienden.6-79.cn`. Verify all four public HTTPS release IDs. Builds share `dist`; run deployment commands sequentially.
+- Never replace the existing Sermo Pages custom domain with Frienden. Preserve both old sites through the announced maintenance end date of December 31, 2026; do not infer permission to redirect, remove DNS, stop service, or schedule shutdown from that date.
+- Enable `public/site-migration.json` only after both new Frienden origins pass HTTPS and functional checks. Migration links must stay free of OAuth parameters, tokens and fragments. No database, credential or OAuth registration changes are needed for parallel frontend domains.
 
 ## User-Facing Releases
 
