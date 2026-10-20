@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.20.8",
+  "id": "2026.10.20.9",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "登场音效，更自然地融入聊天",
+      "title": "更简洁的登场提示",
       "items": [
-        "自动播放他人的新登场 BGM，播放图标融入系统消息末尾",
-        "登场设置改为自定义下拉框，分别校准蓝粉按键的位置"
+        "登场消息简化为用户名与进入聊天提示，保留末尾播放图标"
       ]
     },
     "en": {
-      "title": "Entrance sounds, right in the conversation",
+      "title": "Simpler entrance messages",
       "items": [
-        "New entrance BGMs play automatically, with a replay icon inside the system message",
-        "Custom dropdowns for entrance settings and separately aligned blue and pink keychain buttons"
+        "Entrance messages now show just the name and entry notice, with the play icon at the end"
       ]
     }
   }
