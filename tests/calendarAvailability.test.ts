@@ -11,6 +11,12 @@ test("elapsed time is clipped and the live marker only belongs to today", () => 
   assert.deepEqual(agendaDayProgress(day, new Date(2026, 9, 19)), { today: false, elapsed: 0 });
   assert.deepEqual(agendaBusyRanges([], day), []);
 });
+test("enabling a paused calendar clock synchronizes immediately rather than waiting for the next interval", () => {
+  const bar = readFileSync(new URL("../src/components/CalendarAvailabilityBar.tsx", import.meta.url), "utf8");
+  const update = bar.indexOf("    update();");
+  assert.ok(update > bar.indexOf("if (!enabled) return"));
+  assert.ok(update < bar.indexOf("window.setInterval(update"));
+});
 test("elapsed fraction follows the real duration of daylight-saving days", () => {
   const previous = process.env.TZ;
   process.env.TZ = "America/New_York";

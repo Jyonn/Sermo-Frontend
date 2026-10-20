@@ -1,19 +1,21 @@
 {
-  "id": "2026.10.20.2",
+  "id": "2026.10.20.3",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
       "title": "更轻盈的好友日历",
       "items": [
         "名片忙闲条收细为 8px，仅用竖线标记当前时刻，移除条纹和多余分隔线",
-        "私聊改用日历按钮，图形与颜色概括今日安排，浮动框显示当前状态、下一空闲时段和完整日历"
+        "私聊改用日历按钮，图形与颜色概括今日安排，浮动框显示当前状态、下一空闲时段和完整日历",
+        "进入会话或返回页面时立即同步时间和忙闲状态"
       ]
     },
     "en": {
       "title": "A lighter friend calendar",
       "items": [
         "Profile timelines are now 8px thin, with a simple now marker and no hatching or extra divider",
-        "A calendar button in direct chats summarizes today's load and opens current status, upcoming availability and the full calendar"
+        "A calendar button in direct chats summarizes today's load and opens current status, upcoming availability and the full calendar",
+        "Time and availability refresh immediately when entering a conversation or returning to the page"
       ]
     }
   }

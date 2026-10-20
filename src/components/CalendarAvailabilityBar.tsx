@@ -8,6 +8,7 @@ export function useCalendarClock(enabled = true) {
   useEffect(() => {
     if (!enabled) return;
     const update = () => { if (!document.hidden) setNow(new Date()); };
+    update();
     const timer = window.setInterval(update, 30000);
     window.addEventListener("focus", update);
     document.addEventListener("visibilitychange", update);
