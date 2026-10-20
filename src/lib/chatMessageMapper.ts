@@ -47,7 +47,7 @@ export function mapChatMessageDTO(
     ? "unsupported"
     : declaredKind ?? mappedKind;
   const legacyChatGrant = payloadKind === "map_access" && message.payload?.chat_grant === true;
-  const kind = legacyChatGrant ? "system" : payloadKind;
+  const kind = legacyChatGrant || (payloadKind === "audio" && message.payload?.bgm_entrance === true) ? "system" : payloadKind;
   const text = legacyChatGrant
     ? message.payload?.text || message.user.name
     : message.payload?.text || message.content;

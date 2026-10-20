@@ -912,6 +912,13 @@ export interface ActivityMilestoneDTO {
 }
 
 export interface ActivityCampaignDTO {
+  bgm?: {
+    joined: boolean; style: "blue" | "pink" | null; slots: string[];
+    mode: "off" | "auto" | "manual"; track: string; receive_audio: boolean;
+    points: number; active_days: number; today_points: number; ready: boolean;
+    tasks: Array<{ kind: "publish" | "comment" | "like"; count: number; limit: number; points: number }>;
+    tracks: Array<{ key: string; title: string; author: string; days: number; points: number; owned: boolean; duration: number; uri: string | null }>;
+  };
   key: string;
   title: string;
   title_en: string;
@@ -1046,6 +1053,10 @@ export interface AudioTranscriptDTO {
 }
 
 export interface ChatMessagePayloadDTO {
+  bgm_entrance?: boolean;
+  song_title?: string;
+  song_author?: string;
+  system_message_id?: number;
   kind: MessageKind;
   event?: string;
   actor_user_id?: number;

@@ -52,3 +52,14 @@ test("unknown payload kinds also use the compatibility placeholder", () => {
   source.payload = { kind: "future_kind" as "text" };
   assert.equal(mapChatMessageDTO(source, 99).kind, "unsupported");
 });
+
+test("entrance music preserves legacy audio transport but uses the compact system presentation", () => {
+  const source = message(5);
+  source.payload = { kind: "audio", bgm_entrance: true, uri: "https://example.test/music.mp3", song_title: "囚笼", system_message_id: 41 };
+  const mapped = mapChatMessageDTO(source, 99);
+  assert.equal(mapped.kind, "system");
+  assert.equal(mapped.type, 5);
+  assert.equal(mapped.payload?.song_title, "囚笼");
+  source.payload.bgm_entrance = false;
+  assert.equal(mapChatMessageDTO(source, 99).kind, "audio");
+});

@@ -1,0 +1,86 @@
+[
+  {
+    "file": "01.mp3",
+    "title": "囚笼",
+    "author": "",
+    "duration": 12.62,
+    "sha256": "610b595cb8d6accb7a4a547edd49c9a68922a7ec2d36624b33e8cd1d871cdb10"
+  },
+  {
+    "file": "02.mp3",
+    "title": "伏黑甚尔进行曲",
+    "author": "",
+    "duration": 19.6,
+    "sha256": "b7745222d05dbd875654fc2321636fc693215b8124ee9606bc0e8c818fd62b77"
+  },
+  {
+    "file": "03.mp3",
+    "title": "Amazon",
+    "author": "",
+    "duration": 16.7,
+    "sha256": "9cbef444c2edc1f54a835e17b072a2bd27d9ecd17db199eba1bec60c6d10539b"
+  },
+  {
+    "file": "04.mp3",
+    "title": "撕咬进行曲",
+    "author": "",
+    "duration": 16.5,
+    "sha256": "de672251f82bcfc1f41a70e9039f6f1a670e48e0ec9aa3620b74cf30acce620e"
+  },
+  {
+    "file": "05.mp3",
+    "title": "Try",
+    "author": "",
+    "duration": 12.7,
+    "sha256": "69b565fca6f465783f4ecdc1f80e6de7e73289d406a72baab7f72c5f9cbd0224"
+  },
+  {
+    "file": "06.mp3",
+    "title": "Overturn",
+    "author": "",
+    "duration": 19.6,
+    "sha256": "95d6ac18830ed5e6e4530adc2bf5d6635de923df0012fd961df93edf9f5e07dc"
+  },
+  {
+    "file": "07.mp3",
+    "title": "反派烧气救场",
+    "author": "",
+    "duration": 18,
+    "sha256": "0175e6fc25c78a894d514ffc8587ce3372f291bd3e62fee07aa9df5df81bf2ab"
+  },
+  {
+    "file": "08.mp3",
+    "title": "Sub Title",
+    "author": "",
+    "duration": 19.6,
+    "sha256": "2413d3f3cba8b1255ce31f8142510ff93d82d7321b921ff74474a026bdd94bcd"
+  },
+  {
+    "file": "09.mp3",
+    "title": "苦恼的旋律",
+    "author": "",
+    "duration": 19.6,
+    "sha256": "bb96fc19a7bc67bbd253e9a3f60db23ba24204c9201ee46096b8925fbfff99b8"
+  },
+  {
+    "file": "10.mp3",
+    "title": "My Sunset",
+    "author": "",
+    "duration": 15.9,
+    "sha256": "1d57062d2f90b27aa01883765db73905d81b827fe399a84567a4c84d8ea2f38a"
+  },
+  {
+    "file": "11.mp3",
+    "title": "命运的时间",
+    "author": "",
+    "duration": 19.6,
+    "sha256": "acd7415d9b811d6f7f474927c6c175e43c2ae51aeafa62750438e4b94f6f8854"
+  },
+  {
+    "file": "12.mp3",
+    "title": "毁灭Destroy",
+    "author": "",
+    "duration": 17.7,
+    "sha256": "70e4e02ae2de201bfeb76eba997db3aeaa78bbf30c51e5290bad5fcd59795731"
+  }
+]

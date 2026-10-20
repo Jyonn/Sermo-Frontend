@@ -1020,6 +1020,22 @@ export const api = {
     return request<ActivityCampaignDTO>(`/activities/${key}`, { auth: true, signal });
   },
 
+  configureBgm(key: string, style: "blue" | "pink", slots?: string[], preferences?: { mode?: "off" | "auto" | "manual"; track?: string; receive_audio?: boolean }) {
+    return request<ActivityCampaignDTO>(`/activities/${key}/bgm`, {
+      method: "POST", auth: true, body: { style, ...(slots ? { slots } : {}), ...preferences },
+    });
+  },
+
+  getMyBgm(signal?: AbortSignal) {
+    return request<ActivityCampaignDTO | null>("/activities/bgm/me", { auth: true, signal });
+  },
+
+  enterWithBgm(key: string, chatId: number, requestId: string, track?: string) {
+    return request<{ sent: boolean; reason?: string; audio_message_id?: number; uri?: string; title?: string; duration?: number }>(`/activities/${key}/bgm/enter`, {
+      method: "POST", auth: true, body: { chat_id: chatId, request_id: requestId, ...(track ? { track } : {}) },
+    });
+  },
+
   markActivitySeen(key: string) {
     return request<ActivityCampaignDTO>(`/activities/${key}/seen`, { method: "POST", auth: true });
   },

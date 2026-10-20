@@ -1,21 +1,21 @@
 {
-  "id": "2026.10.20.4",
+  "id": "2026.10.20.5",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "好友日历文案修复",
+      "title": "主角登场，收集你的 BGM",
       "items": [
-        "名片忙闲条收细为 8px，仅用竖线标记当前时刻，移除条纹和多余分隔线",
-        "私聊改用日历按钮，图形与颜色概括今日安排，浮动框显示当前状态、下一空闲时段和完整日历",
-        "修复好友日历中的时间、忙碌占比和空闲时长未正确显示的问题"
+        "空间管理员可申领一个月的主角登场活动，广场横幅直达专属按键器",
+        "通过公开发言、评论和点赞收集 12 首 BGM，最快需 15 个活跃日集齐",
+        "支持六键装配和自动／手动登场，音效默认关闭，保留旧版音频展示"
       ]
     },
     "en": {
-      "title": "Friend calendar text fix",
+      "title": "Make an entrance with your BGM",
       "items": [
-        "Profile timelines are now 8px thin, with a simple now marker and no hatching or extra divider",
-        "A calendar button in direct chats summarizes today's load and opens current status, upcoming availability and the full calendar",
-        "Fixed unresolved time, busy percentage and free-duration placeholders in friend calendars"
+        "Space administrators can launch a month-long event with a Square banner and personal music keychain",
+        "Collect 12 tracks through public posts, comments and likes, with at least 15 active days to complete",
+        "Equip six keys and choose automatic or manual entrances; sounds are off by default and legacy audio remains supported"
       ]
     }
   }

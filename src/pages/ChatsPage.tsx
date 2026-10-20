@@ -26,6 +26,7 @@ import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
 import { ChatCalendarAvailability, useChatCalendarAvailability } from "../components/ChatCalendarAvailability";
+import { BgmAudioPill, BgmChatEntrance } from "../components/BgmChatEntrance";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
@@ -2350,7 +2351,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
         <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
-          <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>
+          {systemMessage.payload?.bgm_entrance && systemMessage.payload.uri ? <BgmAudioPill title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>}
         </div>
       </div>
     );
@@ -8386,6 +8387,7 @@ function LiveChatsPage({
                 ) : null}
               </div>
 
+              {selectedChat?.purpose === "normal" && !messageSelectionMode ? <BgmChatEntrance active={pageActive} chatId={Number(selectedChat.id)} key={`${session?.user.space_id}:${currentUserId}:${selectedChat.id}`} messages={selectedMessages} /> : null}
               {messageSelectionMode && submissionPublishSelection ? null : messageSelectionMode ? (
                 <div className="composer message-selection-toolbar">
                   <button disabled={!selectionActionAvailability.forward || Boolean(messageSelectionAction)} onClick={openForwardPicker} type="button">

@@ -13,6 +13,7 @@ import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/Ex
 import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { FriendlyNeighborhoodActivity } from "../components/FriendlyNeighborhoodActivity";
 import { StarryNightActivity } from "../components/StarryNightActivity";
+import { BgmActivity, BgmBanner } from "../components/BgmActivity";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
@@ -951,9 +952,10 @@ export default function SquarePage() {
 
   const spiderManActivity = activities.find((activity) => activity.theme === "spider-man-4") ?? null;
   const starryNightActivity = activities.find((activity) => activity.theme === "starry-night") ?? null;
-  const regularActivities = activities.filter((activity) => activity.theme !== "spider-man-4" && activity.theme !== "starry-night");
+  const bgmActivity = activities.find((activity) => activity.theme === "bgm") ?? null;
+  const regularActivities = activities.filter((activity) => !["spider-man-4", "starry-night", "bgm"].includes(activity.theme));
   const showVipCampaign = Boolean(vipCampaign?.space_activity_active && (vipCampaign.active || vipCampaign.claimed_by_user));
-  const activityBannerCount = regularActivities.length + (spiderManActivity ? 1 : 0) + (starryNightActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
+  const activityBannerCount = regularActivities.length + (spiderManActivity ? 1 : 0) + (starryNightActivity ? 1 : 0) + (bgmActivity ? 1 : 0) + (showVipCampaign ? 1 : 0);
 
   useEffect(() => {
     if (hasFeedFilters || activityBannerCount < 2 || feedMode !== "all") return;
@@ -2477,6 +2479,7 @@ export default function SquarePage() {
             const nearest = slides.reduce((best, slide, index) => Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft) < Math.abs(slides[best].offsetLeft - track.offsetLeft - track.scrollLeft) ? index : best, 0);
             setActivityBannerSlide(nearest);
           }} ref={activityBannerTrackRef}>
+            {bgmActivity ? <BgmBanner onClick={() => navigate(`/app/square/activities/${bgmActivity.key}`)} /> : null}
             {regularActivities.slice(0, 1).map((activity) => {
               const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
@@ -2789,7 +2792,7 @@ export default function SquarePage() {
       </SideDrawer>
       {qqProfileUser ? <QqUserDialog onClose={() => setQqProfileUser(null)} user={qqProfileUser} /> : null}
       <SideDrawer className={`activity-drawer${activeActivity?.theme === "spider-man-4" ? " is-friendly-neighbor" : ""}${activeActivity?.theme === "starry-night" ? " is-starry-night" : ""}`} headerAction={activeActivity ? <button aria-label={t("square.share")} className="activity-drawer-share" onClick={() => openActivityShare(activeActivity)} type="button"><span className="material-symbols-outlined">share</span></button> : null} historyMode="route" onClose={() => navigate("/app/square")} open={Boolean(routeActivityKey)} title={activeActivity ? (isChineseLanguage(language) ? activeActivity.title : activeActivity.title_en || activeActivity.title) : t("activity.title")} titleAccessory={activeActivity && !["spider-man-4", "starry-night"].includes(activeActivity.theme) ? <img alt="" className="activity-drawer-title-art" src={baxianActivityTitle} /> : null}>
-        {activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} claiming={starryRewardClaiming} onClaim={() => void claimStarryNightReward()} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity ? <div className="activity-detail">
+        {activeActivity?.theme === "bgm" ? <BgmActivity activity={activeActivity} onUpdate={(updated) => setActivities((items) => items.map((item) => item.key === updated.key ? updated : item))} onTask={(kind) => { navigate("/app/square"); if (kind === "publish") openComposer(); }} /> : activeActivity?.theme === "spider-man-4" ? <FriendlyNeighborhoodActivity activity={activeActivity} claiming={milestoneRewardClaiming} onClaim={(key) => void claimMilestoneActivityReward(key)} /> : activeActivity?.theme === "starry-night" ? <StarryNightActivity activity={activeActivity} claiming={starryRewardClaiming} onClaim={() => void claimStarryNightReward()} onConfigure={() => navigate("/app/menu?panel=personalization/chat-page&section=backgrounds")} /> : activeActivity ? <div className="activity-detail">
           <div className="activity-detail-masthead">
             <div className="activity-brand-lockup" aria-label={t("activity.coBranding")}><span><img alt="FRIENDEN 友间" src="/icons/frienden-512.png?v=2" /></span><b aria-hidden="true">×</b><img alt={t("activity.baxian")} src={baxianActivityLogo} /></div>{/* i18n-ignore: brand name */}
             <div className="activity-detail-index">

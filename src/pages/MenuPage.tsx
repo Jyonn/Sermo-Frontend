@@ -19,6 +19,7 @@ import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
 import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../components/SettingRow";
 import { UserAvatar } from "../components/UserAvatar";
+import { BgmIcon } from "../components/BgmIcon";
 import { UserProfileCard } from "../components/UserProfileCard";
 import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
 import { RarityIcon } from "../components/RarityIcon";
@@ -509,6 +510,16 @@ export default function MenuPage() {
   const [avatarFrameDrawerOpen, setAvatarFrameDrawerOpen] = useState(false);
   const [profileCardDrawerOpen, setProfileCardDrawerOpen] = useState(false);
   const [personalizationDrawerOpen, setPersonalizationDrawerOpen] = useState(false);
+  const [bgmCollection, setBgmCollection] = useState<{ scope: string; key: string } | null>(null);
+  useEffect(() => {
+    if (!personalizationDrawerOpen || !session) return;
+    const controller = new AbortController();
+    const scope = `${session.user.space_id}:${session.user.user_id}`;
+    void api.getMyBgm(controller.signal).then((activity) => {
+      if (!controller.signal.aborted) setBgmCollection(activity ? { scope, key: activity.key } : null);
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [personalizationDrawerOpen, session?.user.space_id, session?.user.user_id]);
   const [personalizationSaving, setPersonalizationSaving] = useState(false);
   const [chatBackgroundSaving, setChatBackgroundSaving] = useState(false);
   const [chatBackgroundDraft, setChatBackgroundDraft] = useState<ChatBackgroundTheme>("default");
@@ -2573,6 +2584,7 @@ export default function MenuPage() {
             <span><strong>{t("menu.chatPage")}</strong><small>{t("menu.chatPageHint")}</small></span>
             <span className="menu-feature-trailing"><FeatureDiscoveryMarker rewardId="capability.custom_background" /><span className="material-symbols-outlined">chevron_right</span></span>
           </button>
+          {bgmCollection?.scope === `${session?.user.space_id}:${session?.user.user_id}` ? <button className="personalization-background-entry personalization-feature-entry" onClick={() => { setPersonalizationDrawerOpen(false); navigate(`/app/square/activities/${bgmCollection.key}`); }} type="button"><span className="personalization-entry-preview"><BgmIcon name="music_note" /></span><span><strong>{t("bgm.myKeychain")}</strong><small>{t("bgm.manageKeychain")}</small></span><BgmIcon name="arrow_forward" /></button> : null}
           <button className={`personalization-background-entry personalization-feature-entry rarity-${rewardRarity("frame", me?.avatar_frame_style ?? "none")}`} onClick={() => setAvatarFrameDrawerOpen(true)} type="button">
             <span className="personalization-entry-preview avatar-frame-preview">
               <UserAvatar
