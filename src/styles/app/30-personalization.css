@@ -1610,7 +1610,7 @@ html[data-theme="dark"] :is(
   border:1px solid color-mix(in srgb,var(--line,#dfe7e2) 88%,transparent);
   border-radius:14px;
   color:var(--text-muted);
-  background:color-mix(in srgb,var(--surface,#fff) 88%,#edf5f0);
+  background:color-mix(in srgb,var(--bg-elevated) 94%,var(--brand-primary) 6%);
   transition:border-color 160ms ease,box-shadow 160ms ease;
 }
 .message-search-input-wrap:focus-within { border-color:rgba(0,168,107,.42);box-shadow:0 0 0 3px rgba(0,168,107,.08); }

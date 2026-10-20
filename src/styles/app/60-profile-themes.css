@@ -179,7 +179,7 @@ html:not([data-theme="dark"]) .user-profile-cover {
   gap: 12px;
   overflow: hidden;
   border: 0;
-  color: #173127;
+  color: var(--profile-ink);
   background: var(--profile-card-soft);
   box-shadow: none;
   text-align: left;
@@ -192,6 +192,13 @@ html:not([data-theme="dark"]) .user-profile-cover {
 
 .user-profile-recent-statement.is-empty {
   min-height: 112px;
+}
+
+.user-profile-panel .user-profile-recent-statement small { color: var(--profile-muted); }
+.user-profile-panel .user-profile-recent-statement > span { color: var(--profile-action, #17684e); }
+.user-profile-panel .user-profile-create-group-icon {
+  color: var(--profile-action, #17684e);
+  background: color-mix(in srgb, var(--profile-action, #17684e) 12%, var(--profile-card));
 }
 
 .user-profile-recent-statement :is(small, strong, span) {

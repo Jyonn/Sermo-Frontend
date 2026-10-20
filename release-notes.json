@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.20.12",
+  "id": "2026.10.20.13",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "更轻松集齐登场音乐",
+      "title": "更协调的深色外观",
       "items": [
-        "每天发言，累计 15 天集齐 12 首；评论、点赞可加速至最快 10 天，已有进度保留"
+        "统一聊天、评论和弹窗的深色边框，优化取消、关闭、搜索及个人名片的文字与背景对比"
       ]
     },
     "en": {
-      "title": "An easier soundtrack collection",
+      "title": "A more balanced dark appearance",
       "items": [
-        "Collect all 12 tracks with 15 daily posts, or as few as 10 active days with comments and likes. Existing progress is kept"
+        "Unified dark borders across chats, comments and dialogs, with clearer controls, search and profile cards"
       ]
     }
   }

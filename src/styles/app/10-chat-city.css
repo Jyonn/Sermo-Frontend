@@ -1048,11 +1048,11 @@ html[data-theme="dark"] .personalization-bubble-stage {
   min-height: 46px;
   padding: 0 54px 0 16px;
   border-radius: 999px;
-  border: 1px solid var(--chat-chrome-border, rgba(224, 230, 240, 0.88));
-  background: var(--chat-input-surface, rgba(255, 255, 255, 0.82));
+  border: 1px solid var(--chat-chrome-border, var(--line-soft));
+  background: var(--chat-input-surface, var(--bg-elevated));
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 1px 0 var(--control-highlight);
 }
 
 .chat-detail-scene > .composer {
@@ -1241,7 +1241,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   height: 48px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(215, 220, 231, 0.78);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
   border-radius: 16px;
   color: var(--text-secondary);
   background: var(--chat-input-surface, rgba(247, 249, 252, 0.82));
@@ -1356,7 +1356,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   display: grid;
   gap: 16px;
   padding: 18px;
-  border: 1px solid rgba(226, 232, 240, 0.96);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 96%, transparent);
   border-radius: 20px;
   background: var(--bg-canvas);
   box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
@@ -1418,7 +1418,7 @@ html[data-theme="dark"] .personalization-bubble-stage {
   align-items: center;
   gap: 10px;
   padding: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 90%, transparent);
   border-radius: 14px;
   background: rgba(248, 250, 252, 0.82);
 }
@@ -3490,7 +3490,7 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
   width: 100%;
   margin: 0;
   padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid rgba(215, 220, 231, 0.9);
+  border-top: 1px solid color-mix(in srgb, var(--line-soft) 90%, transparent);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
   box-shadow: none;
@@ -3515,7 +3515,7 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
   padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
   border-radius: 28px 28px 0 0;
   background: rgba(255, 253, 248, 0.98);
-  border-top: 1px solid rgba(232, 235, 242, 0.96);
+  border-top: 1px solid var(--line-soft);
   box-shadow: var(--shadow-lg);
   animation: sheet-up 220ms ease-out;
   transition: transform 220ms ease-out;
@@ -3537,7 +3537,7 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
   padding: 0;
   border-radius: 999px;
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--control-surface);
   border: 1px solid var(--line-soft);
 }
 
@@ -3564,7 +3564,7 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
 
 .sheet-header {
   padding: 8px 0 16px;
-  border-bottom: 1px solid rgba(232, 235, 242, 0.9);
+  border-bottom: 1px solid var(--line-soft);
   touch-action: none;
 }
 
@@ -3598,7 +3598,7 @@ html[data-theme="dark"] :is(.chat-background-frienden-night, .chat-background-fr
     width: min(600px, calc(100vw - 64px));
     max-height: min(82dvh, 760px);
     padding: 24px;
-    border: 1px solid rgba(215, 220, 231, 0.9);
+    border: 1px solid var(--line-soft);
     border-radius: 22px;
     box-shadow: 0 28px 80px rgba(17, 19, 24, 0.2);
     animation: modal-enter 180ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -3818,8 +3818,8 @@ html[data-theme="dark"] .composer-input {
 html[data-theme="dark"] .composer-input-wrap,
 html[data-theme="dark"] .composer-recording-bar {
   color: var(--text-primary);
-  border-color: var(--chat-chrome-border);
-  background: var(--chat-input-surface);
+  border-color: var(--chat-chrome-border, var(--line-soft));
+  background: var(--chat-input-surface, var(--bg-elevated));
   box-shadow: inset 0 1px 0 rgba(232, 246, 238, 0.06);
 }
 
@@ -3835,8 +3835,8 @@ html[data-theme="dark"] :is(.composer-plus.is-open, .composer-emoji-button.is-op
 
 html[data-theme="dark"] .composer-action-tile-icon {
   color: var(--text-secondary);
-  border-color: var(--chat-chrome-border);
-  background: var(--chat-input-surface);
+  border-color: var(--chat-chrome-border, var(--line-soft));
+  background: var(--chat-input-surface, var(--bg-elevated));
 }
 
 html[data-theme="dark"] .composer-reply-preview {
@@ -3896,7 +3896,7 @@ html[data-theme="dark"] .message-link-preview-site {
   height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  border-left: 1px solid rgba(232, 235, 242, 0.96);
+  border-left: 1px solid color-mix(in srgb, var(--line-soft) 96%, transparent);
   background: var(--drawer-surface);
   box-shadow: var(--shadow-lg);
   animation: drawer-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -3905,7 +3905,7 @@ html[data-theme="dark"] .message-link-preview-site {
 .drawer-topbar {
   z-index: 2;
   padding: calc(10px + env(safe-area-inset-top)) 0 10px;
-  border-bottom: 1px solid rgba(232, 235, 242, 0.92);
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 92%, transparent);
   background: var(--drawer-surface);
 }
 
@@ -4256,7 +4256,7 @@ html[data-theme="dark"] .growth-scroll-score strong {
 .drawer-body .user-profile-groups,
 .drawer-body .user-profile-empty {
   overflow: hidden;
-  border: 1px solid rgba(215, 220, 231, 0.72);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.56);
 }
@@ -4345,7 +4345,7 @@ html[data-theme="dark"] .growth-scroll-score strong {
   place-items: center;
   color: var(--text-muted);
   background: rgba(244, 246, 251, 0.94);
-  border: 1px dashed rgba(215, 220, 231, 0.9);
+  border: 1px dashed color-mix(in srgb, var(--line-soft) 90%, transparent);
 }
 
 .chat-detail-member-avatar-add .material-symbols-outlined {
@@ -4398,7 +4398,7 @@ html[data-theme="dark"] .growth-scroll-score strong {
 
 .chat-detail-settings-list {
   overflow: hidden;
-  border-block: 1px solid rgba(215, 220, 231, 0.78);
+  border-block: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
   background: rgba(255, 255, 255, 0.42);
 }
 
@@ -4445,7 +4445,7 @@ html[data-theme="dark"] .growth-scroll-score strong {
   gap: 14px;
   padding: 12px 4px;
   border: 0;
-  border-bottom: 1px solid rgba(215, 220, 231, 0.58);
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 58%, transparent);
   background: transparent;
   box-shadow: none;
   text-align: left;
@@ -4959,7 +4959,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     align-items: stretch;
     justify-content: flex-start;
     gap: 22px;
-    border: 1px solid rgba(215, 220, 231, 0.82);
+    border: 1px solid color-mix(in srgb, var(--line-soft) 82%, transparent);
     border-radius: 22px;
     background: rgba(255, 253, 248, 0.9);
     box-shadow: 0 18px 48px rgba(31, 43, 50, 0.08);
@@ -5185,7 +5185,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     height: 100%;
     min-height: 0;
     overflow: hidden;
-    border: 1px solid rgba(215, 220, 231, 0.72);
+    border: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
     border-radius: 20px;
     background: rgba(255, 253, 248, 0.74);
   }
@@ -5205,7 +5205,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     justify-content: space-between;
     min-height: 70px;
     padding: 10px 14px;
-    border-bottom: 1px solid var(--chat-chrome-border, rgba(215, 220, 231, 0.72));
+    border-bottom: 1px solid var(--chat-chrome-border, color-mix(in srgb, var(--line-soft) 72%, transparent));
     background: var(--chat-chrome-surface, rgba(255, 253, 248, 0.82));
   }
 
@@ -5563,7 +5563,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
 
 .topbar.conversation-topbar {
   background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.52));
-  border-bottom-color: var(--chat-chrome-border, rgba(232, 235, 242, 0.66));
+  border-bottom-color: var(--chat-chrome-border, color-mix(in srgb, var(--line-soft) 66%, transparent));
 }
 
 .chat-details-button {
@@ -5700,7 +5700,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   top: 0;
   z-index: 8;
   padding: 10px 0 12px;
-  border-bottom: 1px solid rgba(215, 220, 231, 0.72);
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);
   background: rgba(248, 247, 242, 0.76);
   -webkit-backdrop-filter: blur(18px) saturate(1.35);
   backdrop-filter: blur(18px) saturate(1.35);

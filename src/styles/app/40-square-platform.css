@@ -15,7 +15,7 @@
 .square-comment-list article>div>button{display:inline-flex;align-items:center;gap:4px;min-height:28px;margin-top:5px;padding:0 5px;border:0;color:var(--text-muted);font:inherit;font-size:11px;background:transparent}.square-comment-list article>div>button .material-symbols-outlined{font-size:15px}
 .square-delete-sheet{display:grid;gap:16px}.square-delete-sheet p{margin:0;color:var(--text-secondary);font-size:13px}.square-delete-sheet .danger-button{width:100%;min-height:48px;border:0;border-radius:14px;color:white;font:inherit;font-weight:800;background:var(--danger)}
 @media(max-width:900px){.square-readonly-notice{border-radius:16px}}
-@media(min-width:901px){.desktop-tab-shell>.square-feed-screen{width:min(100%,960px);height:calc(100dvh - 32px);min-height:0;margin-inline:auto;padding:0 24px 28px;overflow-x:hidden;overflow-y:auto;border:1px solid rgba(215,220,231,.72);border-radius:20px;background:rgba(255,253,248,.74)}.desktop-tab-shell>.square-feed-screen>.tab-sticky-header{margin:0 -24px;padding:0 24px;border-radius:20px 20px 0 0}}
+@media(min-width:901px){.desktop-tab-shell>.square-feed-screen{width:min(100%,960px);height:calc(100dvh - 32px);min-height:0;margin-inline:auto;padding:0 24px 28px;overflow-x:hidden;overflow-y:auto;border:1px solid color-mix(in srgb, var(--line-soft) 72%, transparent);border-radius:20px;background:rgba(255,253,248,.74)}.desktop-tab-shell>.square-feed-screen>.tab-sticky-header{margin:0 -24px;padding:0 24px;border-radius:20px 20px 0 0}}
 
 /* Square feed: chronological stream, focused composer, and threaded detail. */
 .page-toolbar-actions{display:flex;align-items:center;gap:8px;margin-left:auto}

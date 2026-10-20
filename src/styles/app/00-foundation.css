@@ -72,7 +72,7 @@
   padding: 13px 14px;
   color: var(--text-primary);
   background: rgba(255, 253, 248, 0.97);
-  border: 1px solid rgba(215, 220, 231, 0.92);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 92%, transparent);
   border-radius: 18px;
   box-shadow: 0 18px 52px rgba(34, 45, 51, 0.18);
   transform: translateX(-50%);
@@ -528,6 +528,23 @@
   --line-soft: #e8ebf2;
   --line-strong: #d7dce7;
 
+  /* Shared semantic aliases must resolve in both themes, including portals. */
+  --surface: var(--bg-surface);
+  --surface-elevated: var(--bg-elevated);
+  --surface-card: var(--bg-elevated);
+  --surface-panel: var(--bg-panel-strong);
+  --surface-soft: var(--bg-panel);
+  --surface-muted: var(--bg-elevated);
+  --surface-subtle: var(--bg-canvas);
+  --border: var(--line-soft);
+  --border-subtle: var(--line-soft);
+  --line: var(--line-soft);
+  --text-main: var(--text-primary);
+  --text-strong: var(--text-primary);
+  --control-surface: rgba(255, 255, 255, 0.62);
+  --control-hover: rgba(255, 255, 255, 0.92);
+  --control-highlight: rgba(255, 255, 255, 0.65);
+
   --success: #16c47f;
   --warning: #ffb020;
   --danger: #ff4d6d;
@@ -568,6 +585,9 @@ html[data-theme="dark"] {
   --brand-primary-press: #22bc83;
   --line-soft: #29352f;
   --line-strong: #3a4941;
+  --control-surface: #202d26;
+  --control-hover: #2a3a31;
+  --control-highlight: rgba(232, 246, 238, 0.06);
 
   --chat-self: #2d795e;
   --chat-self-text: #f5fffa;
@@ -800,7 +820,7 @@ img {
   width: min(1440px, calc(100vw - 32px));
   backdrop-filter: blur(18px);
   background: rgba(245, 244, 239, 0.92);
-  border-bottom: 1px solid rgba(232, 235, 242, 0.84);
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 84%, transparent);
 }
 
 .topbar-progress {
@@ -1143,7 +1163,7 @@ img {
 
 .route-chip {
   color: var(--text-secondary);
-  border: 1px solid rgba(215, 220, 231, 0.9);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 90%, transparent);
   background: rgba(255, 255, 255, 0.82);
 }
 
@@ -1180,7 +1200,7 @@ img {
 .detail-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(232, 235, 242, 0.96);
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius-card);
   background: var(--bg-panel);
   backdrop-filter: blur(14px);
@@ -1419,7 +1439,7 @@ img {
 .ghost-button,
 .icon-button {
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--control-surface);
   border: 1px solid var(--line-soft);
 }
 
@@ -1429,7 +1449,7 @@ img {
 .mode-pill:hover,
 .settings-nav-item:hover {
   border-color: rgba(0, 166, 255, 0.18);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--control-hover);
 }
 
 .icon-button {
@@ -3637,7 +3657,7 @@ html[data-theme="dark"] .pwa-other-login input { color: var(--entry-ink); }
 .panel-header,
 .settings-header {
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(232, 235, 242, 0.9);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .sidebar-scroll,
@@ -4708,7 +4728,7 @@ html[data-theme="dark"] .chat-background-custom {
 .topbar.conversation-topbar,
 .desktop-conversation-header {
   background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.68));
-  border-bottom-color: var(--chat-chrome-border, rgba(232, 235, 242, 0.72));
+  border-bottom-color: var(--chat-chrome-border, color-mix(in srgb, var(--line-soft) 72%, transparent));
   -webkit-backdrop-filter: blur(22px) saturate(1.12);
   backdrop-filter: blur(22px) saturate(1.12);
 }
@@ -8758,7 +8778,7 @@ html[data-theme="dark"] .square-chat-record {
   margin: 0;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   border: 0;
-  border-top: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.92));
+  border-top: 1px solid var(--chat-chrome-border, color-mix(in srgb, var(--line-soft) 92%, transparent));
   border-radius: 0;
   background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.76));
   -webkit-backdrop-filter: blur(22px) saturate(1.12);
@@ -9504,7 +9524,7 @@ html[data-theme="dark"] .square-chat-record {
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.9));
+  border-bottom: 1px solid var(--chat-chrome-border, color-mix(in srgb, var(--line-soft) 90%, transparent));
   background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.88));
   backdrop-filter: blur(18px);
 }
@@ -9661,7 +9681,7 @@ html[data-theme="dark"] .square-chat-record {
   margin: 0;
   padding: 9px 12px;
   border: 0;
-  border-top: 1px solid var(--chat-chrome-border, rgba(232, 235, 242, 0.9));
+  border-top: 1px solid var(--chat-chrome-border, color-mix(in srgb, var(--line-soft) 90%, transparent));
   border-radius: 0;
   background: var(--chat-chrome-surface, rgba(255, 255, 255, 0.86));
   box-shadow: none;
