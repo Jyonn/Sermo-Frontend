@@ -1,14 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useI18n } from "../lib/language";
-import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaDay, agendaBusyRanges, agendaTimeRange, agendaEventsOn, normalizeAgenda, type AgendaEvent } from "../lib/chronelleAgenda";
+import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaDay, agendaTimeRange, agendaEventsOn, normalizeAgenda, fetchAgenda, type AgendaEvent } from "../lib/chronelleAgenda";
+import { CalendarAvailabilityBar } from "./CalendarAvailabilityBar";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./ChronelleCalendar.css";
-
-async function fetchAgenda(params: URLSearchParams, signal: AbortSignal): Promise<unknown> {
-  const response = await fetch(`https://chronelle.jyonn.space/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal });
-  if (!response.ok) throw new Error("Calendar unavailable");
-  return response.json();
-}
 
 export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { calendarId?: string; loadEvents?: (params: URLSearchParams, signal: AbortSignal) => Promise<unknown> }) {
   const { t, language } = useI18n();
@@ -130,7 +125,6 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
   const shareUrl = `https://chronelle.jyonn.space/#/share/${calendarId}`;
   const displayState = loadedKey !== requestKey && state !== "error" ? "loading" : state;
   const items = loadedKey === requestKey ? agendaEventsOn(events, selectedDay) : [];
-  const ranges = agendaBusyRanges(items, selectedDay);
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>
     <div className="chronelle-calendar-heading"><div><img src={chronelleIcon} alt="" /><strong>{t("chronelle.title")}</strong></div><a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.open")} ↗</a></div>
     <div className="chronelle-calendar-navigation">
@@ -148,10 +142,7 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
     </div>
     <div className="chronelle-agenda" aria-busy={displayState === "loading"}>
       {displayState === "ready" ? <div className="chronelle-availability">
-        <div className="chronelle-busy-bar" role="img" aria-label={`${selectedDay.toLocaleDateString(language, { dateStyle: "full" })} · ${t("chronelle.busyBar")} · ${t("chronelle.availabilityHint")}`} title={t("chronelle.availabilityHint")}>
-          {ranges.map((range, index) => <i key={index} style={{ left: `${range.start}%`, width: `${range.end - range.start}%` }} />)}
-        </div>
-        <div className="chronelle-bar-labels"><span>00:00</span><span>12:00</span><span>24:00</span></div>
+        <CalendarAvailabilityBar events={items} day={selectedDay} />
       </div> : null}
       {displayState === "loading" ? <p role="status">{t("chronelle.loading")}</p> : displayState === "error" ? <div className="chronelle-agenda-state"><p>{t("chronelle.loadFailed")}</p><button type="button" onClick={() => { cache.current.delete(requestKey); setReload((value) => value + 1); }}>{t("common.retry")}</button></div> : !items.length ? <p>{t("chronelle.noEvents")}</p> : <ol>{items.slice(0, 5).map((event) => <li key={`${event.id}:${event.start}`}><time>{event.all_day ? t("chronelle.allDay") : agendaTimeRange(event, selectedDay, language)}</time><div><strong>{event.locked ? t("chronelle.busy") : event.title || t("chronelle.untitled")}</strong>{event.location ? <small>{event.location}</small> : null}</div></li>)}</ol>}
       {displayState === "ready" && items.length > 5 ? <a href={shareUrl} target="_blank" rel="noopener noreferrer">{t("chronelle.moreEvents", { count: items.length - 5 })} ↗</a> : null}

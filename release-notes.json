@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.18.12",
-  "publishedAt": "2026-10-18",
+  "id": "2026.10.20.1",
+  "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "更完整的协作权限",
+      "title": "更直观的日历忙闲条",
       "items": [
-        "明确说明应用申请的私聊、建群和群管理能力",
-        "管理操作仍受原有角色限制，已有授权不会自动扩权"
+        "忙闲条采用柔和配色，今日显示当前时间，过去时段用淡色斜纹区分",
+        "好友绑定日历后，私聊顶部展示无圆角细忙闲条；名片与私聊统一将没有忙碌记录的时段显示为空闲"
       ]
     },
     "en": {
-      "title": "More complete collaboration permissions",
+      "title": "Clearer calendar availability",
       "items": [
-        "Clearly describe direct conversations, group creation and group management",
-        "Management keeps existing role restrictions; old grants never gain scopes automatically"
+        "Softer availability colors with a live time marker and faded hatching for elapsed hours",
+        "Friends with linked calendars show a slim square-edged strip in direct chats; profiles and chats treat gaps between returned busy periods as free"
       ]
     }
   }

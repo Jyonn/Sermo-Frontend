@@ -8,6 +8,26 @@ export interface AgendaEvent {
   location: string;
 }
 
+export function agendaDayProgress(day: Date, now: Date) {
+  const start = agendaDay(day).getTime();
+  const end = agendaDay(day, 1).getTime();
+  return {
+    today: agendaDay(now).getTime() === start,
+    elapsed: Math.max(0, Math.min(100, (now.getTime() - start) / (end - start) * 100)),
+  };
+}
+
+export function publicCalendarForFriend(friends: Array<{ user_id: number; chronelle_calendar_id?: string }>, peerId: number) {
+  const id = friends.find((friend) => friend.user_id === peerId)?.chronelle_calendar_id;
+  return id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : null;
+}
+
+export async function fetchAgenda(params: URLSearchParams, signal: AbortSignal): Promise<unknown> {
+  const response = await fetch(`https://chronelle.jyonn.space/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal });
+  if (!response.ok) throw new Error("Calendar unavailable");
+  return response.json();
+}
+
 export function agendaDay(day = new Date(), delta = 0) {
   const result = new Date(day);
   result.setHours(0, 0, 0, 0);

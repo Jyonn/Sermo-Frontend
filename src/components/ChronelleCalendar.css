@@ -36,6 +36,3 @@
 .chronelle-agenda-state button { padding: 8px 12px; border: 1px solid var(--line-soft); border-radius: 10px; color: inherit; background: transparent; }
 .chronelle-calendar > small { font-size: .65rem; line-height: 1.6; }
 .chronelle-availability { display: grid; gap: 6px; margin-bottom: 16px; }
-.chronelle-busy-bar { position: relative; height: 12px; border: 1px solid var(--profile-line, var(--line-soft)); border-radius: 6px; overflow: hidden; background: repeating-linear-gradient(135deg, transparent, transparent 3px, color-mix(in srgb, currentColor 6%, transparent) 3px, color-mix(in srgb, currentColor 6%, transparent) 5px); }
-.chronelle-busy-bar > i { position: absolute; height: 100%; background: #d9363e; outline: 1px solid color-mix(in srgb, currentColor 35%, transparent); outline-offset: -1px; }
-.chronelle-bar-labels { display: flex; justify-content: space-between; font-size: .6rem; font-variant-numeric: tabular-nums; }

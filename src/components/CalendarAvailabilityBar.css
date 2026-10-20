@@ -1,0 +1,46 @@
+.calendar-availability {
+  --calendar-busy: #688e80;
+  --calendar-paper: var(--profile-card, var(--bg-canvas));
+  --calendar-ink: var(--profile-ink, var(--text-primary));
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--calendar-ink);
+}
+html[data-theme="dark"] .calendar-availability { --calendar-busy: #82a998; }
+.calendar-availability-track {
+  position: relative;
+  height: 18px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--calendar-busy) 12%, var(--calendar-paper));
+}
+.calendar-availability-busy { position: absolute; inset-block: 0; background: var(--calendar-busy); }
+.calendar-availability-elapsed {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 0;
+  background: repeating-linear-gradient(135deg, transparent 0 3px, color-mix(in srgb, var(--calendar-ink) 14%, transparent) 3px 4px), color-mix(in srgb, var(--calendar-paper) 56%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--calendar-ink) 16%, transparent);
+}
+.calendar-availability-now { position: absolute; z-index: 2; inset-block: 0; width: 2px; background: var(--calendar-ink); transform: translateX(-1px); }
+.calendar-availability-time {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: clamp(23px, var(--calendar-now), calc(100% - 23px));
+  transform: translate(-50%, -50%);
+  padding-inline: 3px;
+  color: var(--calendar-ink);
+  background: color-mix(in srgb, var(--calendar-paper) 93%, transparent);
+  font-size: 10px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 14px;
+  white-space: nowrap;
+}
+.calendar-availability-labels { display: flex; justify-content: space-between; color: var(--profile-muted, var(--text-muted)); font-size: .6rem; font-variant-numeric: tabular-nums; }
+.calendar-availability.is-compact { flex: 0 0 auto; gap: 0; width: 100%; }
+.calendar-availability.is-compact .calendar-availability-track { height: 10px; border-radius: 0; }
+.calendar-availability.is-compact .calendar-availability-time { left: clamp(18px, var(--calendar-now), calc(100% - 18px)); padding-inline: 2px; font-size: 8px; line-height: 10px; }
+.calendar-availability.is-compact .calendar-availability-now { width: 1px; }

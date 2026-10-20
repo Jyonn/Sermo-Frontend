@@ -25,6 +25,7 @@ import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
+import { ChatCalendarAvailability } from "../components/ChatCalendarAvailability";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
@@ -4031,6 +4032,7 @@ function LiveChatsPage({
   }, [chats, profileDrawerUserId]);
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
+  const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
   const routeChatId = useMemo(() => {
     if (!activeChatRouteValue) return null;
     const numericChatId = Number(activeChatRouteValue);
@@ -8237,6 +8239,7 @@ function LiveChatsPage({
                   </div>
                 ) : null}
               </header>
+              {displayedChat.type === "direct" && displayedChat.purpose === "normal" && displayedDirectPeerId ? <ChatCalendarAvailability key={`${currentUserId}:${displayedDirectPeerId}`} peerId={displayedDirectPeerId} /> : null}
               {orderedPinnedMessages.length ? (
                 <div className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
                   <button
