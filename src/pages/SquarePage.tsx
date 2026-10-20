@@ -14,6 +14,7 @@ import { GrowthLevelBadge } from "../components/GrowthLevelBadge";
 import { FriendlyNeighborhoodActivity } from "../components/FriendlyNeighborhoodActivity";
 import { StarryNightActivity } from "../components/StarryNightActivity";
 import { BgmActivity, BgmBanner } from "../components/BgmActivity";
+import { ActivityCampaignCard } from "../components/ActivityCampaignCard";
 import { OperatorBadge } from "../components/OperatorBadge";
 import { OfficialBadge } from "../components/OfficialBadge";
 import { MediaLightbox } from "../components/ImageLightbox";
@@ -2482,6 +2483,7 @@ export default function SquarePage() {
             {bgmActivity ? <BgmBanner activity={bgmActivity} onClick={() => navigate(`/app/square/activities/${bgmActivity.key}`)} /> : null}
             {regularActivities.slice(0, 1).map((activity) => {
               const title = isChineseLanguage(language) ? activity.title : activity.title_en || activity.title;
+              if (activity.presentation || activity.theme !== "baxian") return <ActivityCampaignCard key={activity.key} activity={activity} title={title} eyebrow={t("message.activityEyebrow")} hint={isChineseLanguage(language) ? activity.summary : activity.summary_en || activity.summary} className="square-activity-banner" onClick={() => navigate(`/app/square/activities/${activity.key}`)} />;
               const days = activity.ends_at ? Math.max(1, Math.ceil((activity.ends_at * 1000 - Date.now()) / 86400000)) : null;
               const litFormation = Math.min(8, Math.floor((activity.space_total / Math.max(1, activity.target)) * 8));
               return <button className="square-activity-banner" key={activity.key} onClick={() => navigate(`/app/square/activities/${activity.key}`)} type="button">
