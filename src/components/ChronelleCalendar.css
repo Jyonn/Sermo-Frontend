@@ -25,7 +25,7 @@
 .chronelle-week-strip strong { font-size: .88rem; }
 .chronelle-week-strip i { width: 4px; height: 4px; border-radius: 50%; }
 .chronelle-week-strip .has-events { background: var(--brand-primary); }
-.chronelle-agenda { min-height: 72px; border-top: 1px solid var(--profile-line, var(--line-soft)); padding-top: 12px; }
+.chronelle-agenda { min-height: 72px; }
 .chronelle-agenda p { margin: 12px 0; color: var(--profile-muted, var(--text-muted)); font-size: .78rem; line-height: 1.6; }
 .chronelle-agenda ol { display: grid; gap: 16px; margin: 0; padding: 4px 0; list-style: none; }
 .chronelle-agenda li { display: grid; grid-template-columns: minmax(76px, 32%) minmax(0, 1fr); gap: 12px; align-items: baseline; }

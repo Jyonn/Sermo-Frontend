@@ -17,6 +17,36 @@ export function agendaDayProgress(day: Date, now: Date) {
   };
 }
 
+export function agendaAvailability(events: AgendaEvent[], now: Date) {
+  const instant = now.getTime();
+  const day = agendaDay(now);
+  const dayEnd = agendaDay(day, 1).getTime();
+  const rows = events.map((event) => ({ start: agendaDate(event.start).getTime(), end: agendaDate(event.end).getTime() }))
+    .filter((event) => event.end > event.start).sort((a, b) => a.start - b.start);
+  const merged: Array<{ start: number; end: number }> = [];
+  for (const event of rows) {
+    const last = merged[merged.length - 1];
+    if (last && event.start <= last.end) last.end = Math.max(last.end, event.end);
+    else merged.push({ ...event });
+  }
+  const current = merged.find((event) => event.start <= instant && event.end > instant);
+  const next = merged.find((event) => event.start > (current?.end ?? instant));
+  const busyRatio = agendaBusyRanges(events, day).reduce((sum, range) => sum + (range.end - range.start) / 100, 0);
+  const busyMinutes = Math.round(busyRatio * (dayEnd - day.getTime()) / 60000);
+  return {
+    busy: Boolean(current),
+    busyUntil: current?.end ?? null,
+    nextBusy: next?.start ?? null,
+    nextBusyUntil: next?.end ?? null,
+    freeMinutes: current && next ? Math.floor((next.start - current.end) / 60000) : null,
+    changeMinutes: Math.max(1, Math.ceil(((current?.end ?? next?.start ?? dayEnd) - instant) / 60000)),
+    restOfDayFree: !current && (!next || next.start >= dayEnd),
+    busyRatio,
+    busyMinutes,
+    tone: busyMinutes >= 480 ? "full" as const : busyMinutes >= 180 ? "balanced" as const : "light" as const,
+  };
+}
+
 export function publicCalendarForFriend(friends: Array<{ user_id: number; chronelle_calendar_id?: string }>, peerId: number) {
   const id = friends.find((friend) => friend.user_id === peerId)?.chronelle_calendar_id;
   return id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : null;

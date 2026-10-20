@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.20.1",
+  "id": "2026.10.20.2",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "更直观的日历忙闲条",
+      "title": "更轻盈的好友日历",
       "items": [
-        "忙闲条采用柔和配色，今日显示当前时间，过去时段用淡色斜纹区分",
-        "好友绑定日历后，私聊顶部展示无圆角细忙闲条；名片与私聊统一将没有忙碌记录的时段显示为空闲"
+        "名片忙闲条收细为 8px，仅用竖线标记当前时刻，移除条纹和多余分隔线",
+        "私聊改用日历按钮，图形与颜色概括今日安排，浮动框显示当前状态、下一空闲时段和完整日历"
       ]
     },
     "en": {
-      "title": "Clearer calendar availability",
+      "title": "A lighter friend calendar",
       "items": [
-        "Softer availability colors with a live time marker and faded hatching for elapsed hours",
-        "Friends with linked calendars show a slim square-edged strip in direct chats; profiles and chats treat gaps between returned busy periods as free"
+        "Profile timelines are now 8px thin, with a simple now marker and no hatching or extra divider",
+        "A calendar button in direct chats summarizes today's load and opens current status, upcoming availability and the full calendar"
       ]
     }
   }

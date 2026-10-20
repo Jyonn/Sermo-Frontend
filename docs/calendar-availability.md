@@ -1,29 +1,46 @@
 # Shared calendar availability
 
-The profile calendar and the direct-chat header use `CalendarAvailabilityBar`.
+The profile calendar and the direct-chat calendar popover use `CalendarAvailabilityBar`.
 Busy intervals are normalized, clipped to the selected local day and merged.
 Per the product decision on October 20, 2026, gaps between returned intervals
 are displayed as free in both contexts. This is a display convention over the
 existing public API, not a change to Chronelle's visibility or authorization.
 
-Busy periods use muted green. Past time has a faded hatched overlay; hatching
-no longer represents unknown availability. Today's track includes an HH:mm
-marker, refreshed every 30 seconds and when the page becomes visible. Day
+Busy periods use muted green on an 8px track. Past time is gently faded without
+hatching. Today's track has a single 1px vertical now marker with no visible
+time label, refreshed every 30 seconds and when the page becomes visible. Day
 fractions use actual midnight boundaries, including 23/25-hour DST days.
 
-The direct-chat variant is 10px tall, square-edged and placed between the
-conversation header and the pin bar, without outer padding or margin. It is
-only mounted for ordinary direct chats. The authenticated friends list must
+Direct chats no longer render a strip between the header and pins. A calendar
+button matching the adjacent details button appears to its left on both mobile
+and desktop. Its six calendar cells and sage/ochre/clay color summarize today's
+busy fraction (light below 3 occupied hours, balanced below 8 hours, full from
+8 hours onward). The ring and percentage use the actual local-day duration.
+A status dot supplements
+the accessible label; the popover also uses explicit text and a clock/check glyph.
+Only ordinary direct chats qualify. The authenticated friends list must
 contain the peer and a valid public calendar ID before a public calendar read
 is attempted. An existing conversation alone does not grant eligibility.
 
-While visible, the chat strip refreshes friendship, binding and today's events
+While visible, a single resource shared by both header buttons refreshes friendship,
+binding and the next three local days' events
 once per minute. Hidden pages stop requests. Returning to the page revalidates;
 changing account, peer or local date cannot display the preceding scope's data.
-Unbound/non-friend/error results remove the strip. A failed request is never
-rendered as an empty/free day. Public calendar reads use `credentials: omit`
+Unbound/non-friend results remove the button; a confirmed binding with a failed
+calendar read shows a neutral unavailable state, never an empty/free day.
+Public calendar reads use `credentials: omit`
 and no authorization headers or read keys. Locked event titles and locations
 remain stripped. No backend schema, OAuth scopes or plugin permissions change.
+
+The popover shows the current busy/free state, merged busy interval end and next
+real free window. Adjacent and overlapping periods are merged before forecasting.
+All-day and overnight intervals retain their actual endpoints. A free period
+with no further busy record today is described as free for the rest of today,
+not indefinitely. The full shared `ChronelleCalendar` expands inside the same
+popover; it is not a second calendar implementation. Escape, outside pointer/
+focus and a close button dismiss the panel. Position and maximum scroll height
+follow the visual viewport, including mobile keyboards. Account, peer, calendar
+or local-day changes close the existing popover before paint.
 
 Focused validation:
 

@@ -25,7 +25,7 @@ import { AddFriendDrawer } from "../components/AddFriendDrawer";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatTargetPicker } from "../components/ChatTargetPicker";
-import { ChatCalendarAvailability } from "../components/ChatCalendarAvailability";
+import { ChatCalendarAvailability, useChatCalendarAvailability } from "../components/ChatCalendarAvailability";
 import { DesktopChatComposerDesk } from "../components/DesktopChatComposerDesk";
 import { ChatMuteControls } from "../components/ChatMuteControls";
 import { QuietState } from "../components/BoundaryState";
@@ -4033,6 +4033,7 @@ function LiveChatsPage({
 
   const displayedChat = selectedChat ?? (isClosingChatView ? closingChatSnapshot : null);
   const displayedDirectPeerId = displayedChat?.type === "direct" ? displayedChat.detail.members.find((member) => !member.isSelf)?.userId : undefined;
+  const chatCalendar = useChatCalendarAvailability(displayedChat?.purpose === "normal" ? displayedDirectPeerId : undefined);
   const routeChatId = useMemo(() => {
     if (!activeChatRouteValue) return null;
     const numericChatId = Number(activeChatRouteValue);
@@ -8191,6 +8192,7 @@ function LiveChatsPage({
           </button>
         ) : displayedChat && !messageSelectionMode ? (
           <div className="button-row message-actions">
+            {chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}
             <ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} />
           </div>
         ) : undefined
@@ -8230,7 +8232,7 @@ function LiveChatsPage({
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <div className="conversation-header-actions"><ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /></div> : null}
+                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /></div> : null}
                 </div>
                 {submissionWorkflowBar}
                 {sendProgress !== null ? (
@@ -8239,7 +8241,6 @@ function LiveChatsPage({
                   </div>
                 ) : null}
               </header>
-              {displayedChat.type === "direct" && displayedChat.purpose === "normal" && displayedDirectPeerId ? <ChatCalendarAvailability key={`${currentUserId}:${displayedDirectPeerId}`} peerId={displayedDirectPeerId} /> : null}
               {orderedPinnedMessages.length ? (
                 <div className={`chat-pinned-bar${isClosingChatView ? " is-closing" : ""}`}>
                   <button
