@@ -13,6 +13,19 @@ test("public clips stay on the user's current mirror without rewriting API or th
   assert.equal(localBgmUri(external, "https://frienden.6-79.cn"), external);
 });
 
+test("generated device assets share geometry and preserve transparent alpha", () => {
+  const sizes = ["blue", "pink"].map((style) => {
+    const png = readFileSync(new URL(`../public/activity/bgm/device-${style}-v2.png`, import.meta.url));
+    assert.equal(png.subarray(1, 4).toString(), "PNG");
+    assert.equal(png[25], 6);
+    return [png.readUInt32BE(16), png.readUInt32BE(20)];
+  });
+  assert.deepEqual(sizes[0], sizes[1]);
+  const activity = readFileSync(new URL("../src/components/BgmActivity.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(activity, /SettingSelect|bgm-style-switch|bgm-event-title/);
+  assert.match(activity, /<BottomSheet/);
+});
+
 test("the twelve supplied clips match the manifest, are short and have distinct content", () => {
   const rows = JSON.parse(readFileSync(new URL("../public/activity/bgm/catalog.json", import.meta.url), "utf8"));
   assert.equal(rows.length, 12);

@@ -47,6 +47,8 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
   const [seconds, setSeconds] = useState(3);
   const [dock, setDock] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [pressedTrack, setPressedTrack] = useState<string | null>(null);
+  const dockCloseTimer = useRef<number | null>(null);
   const [error, setError] = useState("");
   const alive = useRef(true);
   const attempted = useRef(false);
@@ -64,11 +66,11 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     }).catch(() => undefined);
     const stopWhenHidden = () => { if (document.hidden) { activeBgm?.pause(); setDock(false); } };
     document.addEventListener("visibilitychange", stopWhenHidden);
-    return () => { alive.current = false; controller.abort(); activeBgm?.pause(); document.removeEventListener("visibilitychange", stopWhenHidden); };
+    return () => { alive.current = false; controller.abort(); activeBgm?.pause(); if (dockCloseTimer.current !== null) window.clearTimeout(dockCloseTimer.current); document.removeEventListener("visibilitychange", stopWhenHidden); };
   }, [chatId, userId, session?.user.space_id]);
 
   useEffect(() => {
-    if (!dock || !active || document.hidden) return;
+    if (!dock || !active || busy || pressedTrack || document.hidden) return;
     const start = performance.now();
     const timer = window.setInterval(() => {
       const remaining = Math.max(0, 3 - Math.floor((performance.now() - start) / 1000));
@@ -76,16 +78,22 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
       if (!remaining) { setDock(false); window.clearInterval(timer); }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [dock, active]);
+  }, [dock, active, busy, pressedTrack]);
 
   async function enter(track?: string) {
     if (!activity || busy || !active || document.hidden) return;
-    setBusy(true); setDock(false); setError("");
+    setBusy(true); setError("");
     try {
       const response = await api.enterWithBgm(activity.key, chatId, crypto.randomUUID(), track);
-      if (!alive.current || !response.sent || !response.uri || !response.title) return;
-      await playBgm(response.uri);
-    } catch { if (alive.current) setError(t("bgm.entranceFailed")); }
+      if (!alive.current) return;
+      if (!response.sent || !response.uri || !response.title) { setDock(false); return; }
+      const played = await playBgm(response.uri);
+      if (!alive.current) return;
+      if (track && played) {
+        setPressedTrack(track);
+        dockCloseTimer.current = window.setTimeout(() => { if (alive.current) { setDock(false); setPressedTrack(null); } }, 900);
+      } else setDock(false);
+    } catch { if (alive.current) { setDock(false); setError(t("bgm.entranceFailed")); } }
     finally { if (alive.current) setBusy(false); }
   }
 
@@ -109,7 +117,7 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
   useEffect(() => { if (!active) { setDock(false); activeBgm?.pause(); } }, [active]);
   const data = activity?.bgm;
   return <>
-    {dock && data?.style ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><header><strong>{t("bgm.pressToEnter")}</strong><span>{seconds}s</span><button aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button></header><BgmKeychain onPress={(key) => void enter(key)} slots={data.slots} style={data.style} tracks={data.tracks} /><small>{t("bgm.autoDismiss")}</small></aside> : null}
+    {dock && data?.style ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><header><strong>{t("bgm.pressToEnter")}</strong><span>{pressedTrack ? t("bgm.keyPlaying") : `${seconds}s`}</span><button aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button></header><BgmKeychain disabled={busy || Boolean(pressedTrack)} playingKey={pressedTrack} onPress={(key) => void enter(key)} slots={data.slots} style={data.style} tracks={data.tracks} /><small>{t(pressedTrack ? "bgm.keyPlaying" : "bgm.autoDismiss")}</small></aside> : null}
     {error ? <aside className="bgm-chat-fallback" role="status"><span>{error}</span><button onClick={() => setError("")} type="button">{t("common.close")}</button></aside> : null}
   </>;
 }

@@ -1,10 +1,14 @@
 import type { ChatMessage } from "../types";
 
-// Measured independently on each half of the 1983 x 793 sprite.
+// Both generated housings share the same geometry; buttons are real UI controls.
 export const BGM_KEY_CENTERS = {
-  blue: [[39.5, 38], [58.2, 36.8], [76.6, 38.1], [44.3, 72.8], [62.6, 73.2], [79.6, 71.5]],
-  pink: [[37.6, 38], [55.8, 37.4], [74.1, 38.2], [36.8, 71.8], [53.6, 73.1], [71.7, 73]],
+  blue: [[44, 36], [63, 36], [82, 36], [44, 68], [63, 68], [82, 68]],
+  pink: [[44, 36], [63, 36], [82, 36], [44, 68], [63, 68], [82, 68]],
 } as const;
+
+export function bgmKeyState(track: { key: string; owned: boolean; uri: string | null } | undefined, playingKey?: string | null) {
+  return !track?.owned || !track.uri ? "inactive" : track.key === playingKey ? "playing" : "ready";
+}
 
 export function mergeBgmEntranceMessages(messages: ChatMessage[]): ChatMessage[] {
   const systems = new Map(messages.filter((message) => message.kind === "system" && message.payload?.event === "bgm_entrance").map((message) => [message.id, message]));

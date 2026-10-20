@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BGM_KEY_CENTERS, mergeBgmEntranceMessages, newBgmEntrances } from "../src/lib/bgmEntrance.ts";
+import { BGM_KEY_CENTERS, bgmKeyState, mergeBgmEntranceMessages, newBgmEntrances } from "../src/lib/bgmEntrance.ts";
 import { mapChatMessageDTO } from "../src/lib/chatMessageMapper.ts";
 
 const system = () => mapChatMessageDTO({ message_id: 11, type: 3, created_at: 101, user: { user_id: 7, name: "Alice" }, content: "Alice entered with Track", payload: { kind: "system", event: "bgm_entrance", text: "Alice entered with Track" } }, 1);
@@ -28,12 +28,21 @@ test("new peer sounds need neither participation nor an opt-in preference", () =
   assert.equal(newBgmEntrances([audio()], new Set(), 100, 120, 1).length, 0);
   assert.equal(newBgmEntrances([audio()], new Set(), 100, 102, 7).length, 0);
 });
-test("each keychain style has six independently calibrated hit targets", () => {
+test("both generated housings share six aligned physical button targets", () => {
   for (const centers of Object.values(BGM_KEY_CENTERS)) {
     assert.equal(centers.length, 6);
     assert.equal(new Set(centers.map((point) => point.join(','))).size, 6);
     for (const [x, y] of centers) assert.ok(x > 25 && x < 90 && y > 25 && y < 85);
   }
-  assert.notDeepEqual(BGM_KEY_CENTERS.blue, BGM_KEY_CENTERS.pink);
-  assert.ok(BGM_KEY_CENTERS.blue[3][0] > BGM_KEY_CENTERS.blue[0][0]);
+  assert.deepEqual(BGM_KEY_CENTERS.blue, BGM_KEY_CENTERS.pink);
+  assert.equal(BGM_KEY_CENTERS.blue[3][0], BGM_KEY_CENTERS.blue[0][0]);
+});
+test("keys distinguish inactive, ready, and actually playing audio", () => {
+  const track = { key: "1", owned: true, uri: "/activity/bgm/01.mp3" };
+  assert.equal(bgmKeyState(undefined), "inactive");
+  assert.equal(bgmKeyState({ ...track, owned: false }), "inactive");
+  assert.equal(bgmKeyState({ ...track, uri: null }), "inactive");
+  assert.equal(bgmKeyState(track, null), "ready");
+  assert.equal(bgmKeyState(track, "2"), "ready");
+  assert.equal(bgmKeyState(track, "1"), "playing");
 });

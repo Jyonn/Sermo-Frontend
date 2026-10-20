@@ -1,17 +1,21 @@
 {
-  "id": "2026.10.20.9",
+  "id": "2026.10.20.10",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "更简洁的登场提示",
+      "title": "你的主角声场，全新陈列",
       "items": [
-        "登场消息简化为用户名与进入聊天提示，保留末尾播放图标"
+        "专属活动背景与精简标题，曲库、任务和规则收纳进二级菜单",
+        "全新实体感按键器，区分未激活、待播放与播放中状态",
+        "登场方式移至语言与个性化，男主／女主款式确认后不可更换"
       ]
     },
     "en": {
-      "title": "Simpler entrance messages",
+      "title": "A new stage for your music keychain",
       "items": [
-        "Entrance messages now show just the name and entry notice, with the play icon at the end"
+        "Dedicated event artwork, compact header and secondary menus for tracks, tasks and rules",
+        "Tactile keychain controls with inactive, ready and playing states",
+        "Entrance settings now live in Language & Personalization; character editions are permanent once confirmed"
       ]
     }
   }
