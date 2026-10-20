@@ -1,5 +1,13 @@
 # Entrance audio behavior
 
+## Collection pace
+
+- The first track is a joining gift. One qualifying public post earns 6 inspiration per Beijing calendar date; 15 posting days earn the final 90-point threshold.
+- Comments on distinct other users' posts earn 3 points each (three daily); likes for distinct authors earn 1 each (five daily). One post, comment and like daily earns 100 points across ten active dates, completing the collection on day ten. No amount of points bypasses the ten-active-date minimum.
+- Server-owned cumulative gates `(active days, inspiration)` are `(0,0), (1,6), (2,12), (3,18), (4,24), (5,30), (6,36), (7,42), (8,54), (9,66), (10,78), (10,90)`. Dates need not be consecutive. Existing interaction records are unchanged and every threshold is lower than before, preserving all previously earned tracks.
+
+## Playback
+
 - A foreground conversation attempts to play new peer entrance clips, regardless of participation or entrance mode. Existing history, self echoes, duplicates and background arrivals do not replay.
 - The legacy `receive_audio` request boolean remains accepted for client compatibility. The backend reports and saves `true`; new clients do not use it as an opt-in gate.
 - Browser autoplay restrictions still apply. Playing voice/video is not interrupted. Users can replay from the icon at the end of the system message.

@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.20.11",
+  "id": "2026.10.20.12",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "更紧凑的登场消息",
+      "title": "更轻松集齐登场音乐",
       "items": [
-        "修正登场消息播放图标尺寸，与文字垂直居中，不再撑高消息"
+        "每天发言，累计 15 天集齐 12 首；评论、点赞可加速至最快 10 天，已有进度保留"
       ]
     },
     "en": {
-      "title": "More compact entrance messages",
+      "title": "An easier soundtrack collection",
       "items": [
-        "Fixed the entrance playback icon size and vertical alignment without inflating message height"
+        "Collect all 12 tracks with 15 daily posts, or as few as 10 active days with comments and likes. Existing progress is kept"
       ]
     }
   }
