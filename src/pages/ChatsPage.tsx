@@ -2352,7 +2352,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
         <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
-          {systemMessage.payload?.bgm_entrance || systemMessage.payload?.event === "bgm_entrance" ? <span className="bgm-entrance-message">{i18n.t("bgm.entranceMessage", { actor: systemMessage.payload.actor_name || systemMessage.name })}{systemMessage.payload.uri ? <BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : null}</span> : <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>}
+          {systemMessage.payload?.bgm_entrance || systemMessage.payload?.event === "bgm_entrance" ? <span className="bgm-entrance-message"><span className="bgm-entrance-copy">{i18n.t("bgm.entranceMessage", { actor: systemMessage.payload.actor_name || systemMessage.name })}</span>{systemMessage.payload.uri ? <BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : null}</span> : <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>}
         </div>
       </div>
     );

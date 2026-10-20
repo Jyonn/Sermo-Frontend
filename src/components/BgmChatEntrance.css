@@ -13,8 +13,12 @@
 .bgm-audio-inline > button > span:last-child { overflow-wrap: anywhere; }
 .bgm-audio-inline .material-symbols-outlined { font-size: 18px; }
 .bgm-audio-inline > small { font-size: 10px; }
-.bgm-entrance-message .bgm-audio-inline.is-compact { display:inline; vertical-align:middle; margin-left:4px; }
-.bgm-audio-inline.is-compact > button { display:inline-flex; min-height:28px; width:28px; padding:3px; justify-content:center; vertical-align:middle; background:transparent; border-radius:50%; pointer-events:auto; }
+.message-system-row > .bgm-entrance-message { display:inline-flex; align-items:center; justify-content:center; gap:4px; }
+.bgm-entrance-copy { min-width:0; }
+.bgm-entrance-message .bgm-audio-inline.is-compact { display:inline-flex; align-items:center; flex:0 0 auto; vertical-align:middle; }
+.bgm-audio-inline.is-compact > button { position:relative; display:inline-flex; align-items:center; justify-content:center; flex:0 0 20px; width:20px; min-width:20px; max-width:20px; height:20px; min-height:20px; max-height:20px; padding:0; box-sizing:border-box; line-height:1; vertical-align:middle; background:transparent; border-radius:50%; pointer-events:auto; }
+.bgm-audio-inline.is-compact > button::before { content:""; position:absolute; inset:-5px; }
+.bgm-audio-inline.is-compact > button > .bgm-icon { display:block; flex:0 0 14px; width:14px; height:14px; max-width:14px; max-height:14px; }
 .bgm-audio-inline.is-compact > button:hover { background:color-mix(in srgb,#6db992 18%,transparent); }
 .bgm-audio-inline.is-compact > small { display:block; }
 @keyframes bgm-dock-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
