@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.20.7",
+  "id": "2026.10.20.8",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "主角登场，全新活动陈列",
+      "title": "登场音效，更自然地融入聊天",
       "items": [
-        "专属艺术标题与蓝粉按键器，统一广场横幅、分享卡片与活动页面",
-        "修复横幅文字溢出和活动误用八仙背景，支持活动独立视觉配置"
+        "自动播放他人的新登场 BGM，播放图标融入系统消息末尾",
+        "登场设置改为自定义下拉框，分别校准蓝粉按键的位置"
       ]
     },
     "en": {
-      "title": "A fresh stage for your BGM",
+      "title": "Entrance sounds, right in the conversation",
       "items": [
-        "New title artwork and coordinated keychain displays across banners, shared cards and the activity page",
-        "Fixed clipped banner text and incorrect event backgrounds; campaigns now support custom presentation"
+        "New entrance BGMs play automatically, with a replay icon inside the system message",
+        "Custom dropdowns for entrance settings and separately aligned blue and pink keychain buttons"
       ]
     }
   }

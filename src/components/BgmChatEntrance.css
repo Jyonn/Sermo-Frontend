@@ -13,5 +13,9 @@
 .bgm-audio-inline > button > span:last-child { overflow-wrap: anywhere; }
 .bgm-audio-inline .material-symbols-outlined { font-size: 18px; }
 .bgm-audio-inline > small { font-size: 10px; }
+.bgm-entrance-message .bgm-audio-inline.is-compact { display:inline; vertical-align:middle; margin-left:4px; }
+.bgm-audio-inline.is-compact > button { display:inline-flex; min-height:28px; width:28px; padding:3px; justify-content:center; vertical-align:middle; background:transparent; border-radius:50%; pointer-events:auto; }
+.bgm-audio-inline.is-compact > button:hover { background:color-mix(in srgb,#6db992 18%,transparent); }
+.bgm-audio-inline.is-compact > small { display:block; }
 @keyframes bgm-dock-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .bgm-chat-dock { animation: none; } }

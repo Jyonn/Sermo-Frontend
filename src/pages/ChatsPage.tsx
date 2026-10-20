@@ -81,6 +81,7 @@ import { forgetStableResourceUri, normalizeStableResourceUri, resolveStableResou
 import { useGroupSquareEnabled } from "../lib/spaceFeatures";
 import { usePageActive } from "../lib/pageActivity";
 import { mapChatMessageDTO, messageKindFromType } from "../lib/chatMessageMapper";
+import { mergeBgmEntranceMessages } from "../lib/bgmEntrance";
 import { showToast } from "../lib/toast";
 import { readTabCache, writeTabCache } from "../lib/tabCache";
 import { FeatureDiscoveryMarker, FeatureDiscoveryTarget, useFeatureDiscovery } from "../lib/featureDiscovery";
@@ -2351,7 +2352,7 @@ const MessageGroupBlock = memo(function MessageGroupBlock({
       <div>
         {group.dividerLabel ? <div className="day-divider">{group.dividerLabel}</div> : null}
         <div className="message-system-row" data-message-id={typeof systemMessage.id === "number" ? systemMessage.id : undefined}>
-          {systemMessage.payload?.bgm_entrance && systemMessage.payload.uri ? <BgmAudioPill title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /> : <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>}
+          {systemMessage.payload?.bgm_entrance && systemMessage.payload.uri ? <span className="bgm-entrance-message">{systemMessage.type === 5 ? i18n.t("bgm.entranceMessage", { actor: systemMessage.name, title: systemMessage.payload.song_title ?? "BGM" }) : systemMessage.text}<BgmAudioPill compact title={systemMessage.payload.song_title ?? "BGM"} uri={systemMessage.payload.uri} /></span> : <span>{systemMessage.text || i18n.t("message.system.placeholder")}</span>}
         </div>
       </div>
     );
@@ -2549,7 +2550,8 @@ interface MessageGroup {
   messages: ChatMessage[];
 }
 
-function buildMessageGroups(messages: ChatMessage[], separateMessages = false): MessageGroup[] {
+function buildMessageGroups(sourceMessages: ChatMessage[], separateMessages = false): MessageGroup[] {
+  const messages = mergeBgmEntranceMessages(sourceMessages);
   const groups: MessageGroup[] = [];
   messages.forEach((message, index) => {
     const previous = messages[index - 1];

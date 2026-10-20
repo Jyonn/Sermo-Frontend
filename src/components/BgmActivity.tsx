@@ -6,6 +6,8 @@ import "./BgmActivity.css";
 import { BgmIcon } from "./BgmIcon";
 import { localBgmUri } from "../lib/bgmMedia";
 import { ActivityCampaignCard, ActivityTitle } from "./ActivityCampaignCard";
+import { SettingSelect } from "./SettingRow";
+import { BGM_KEY_CENTERS } from "../lib/bgmEntrance";
 
 export function BgmKeychain({ style, slots = [], tracks = [], onPress }: {
   style: "blue" | "pink";
@@ -18,7 +20,8 @@ export function BgmKeychain({ style, slots = [], tracks = [], onPress }: {
     {Array.from({ length: 6 }, (_, index) => {
       const track = tracks.find((item) => item.key === slots[index]);
       if (!onPress) return null;
-      return <button aria-label={track ? t("bgm.playTrack", { title: track.title }) : t("bgm.emptySlot", { number: index + 1 })} className={`bgm-key${track ? " is-filled" : ""}`} disabled={!track} key={index} onClick={() => track && onPress?.(track.key)} style={{ left: `${[39, 58, 77, 39, 58, 77][index]}%`, top: `${index < 3 ? 38 : 73}%` }} type="button">{track ? index + 1 : <BgmIcon name={"add"} />}</button>;
+      const [left, top] = BGM_KEY_CENTERS[style][index];
+      return <button aria-label={track ? t("bgm.playTrack", { title: track.title }) : t("bgm.emptySlot", { number: index + 1 })} className={`bgm-key${track ? " is-filled" : ""}`} disabled={!track} key={index} onClick={() => track && onPress?.(track.key)} style={{ left: `${left}%`, top: `${top}%` }} type="button">{track ? index + 1 : <BgmIcon name={"add"} />}</button>;
     })}
   </div>;
 }
@@ -39,7 +42,6 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
   const [playing, setPlaying] = useState<string | null>(null);
   const [mode, setMode] = useState(data?.mode ?? "off");
   const [track, setTrack] = useState(data?.track ?? "1");
-  const [receive, setReceive] = useState(data?.receive_audio ?? false);
   const audio = useRef<HTMLAudioElement | null>(null);
   const playRequest = useRef(0);
   const version = useRef(0);
@@ -62,7 +64,7 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
   async function configure(slots?: string[], savePreferences = false) {
     if (busy) return;
     version.current++; setBusy(true); setError("");
-    try { onUpdate(await api.configureBgm(activity.key, style, slots, savePreferences ? { mode, track, receive_audio: receive } : undefined)); }
+    try { onUpdate(await api.configureBgm(activity.key, style, slots, savePreferences ? { mode, track, receive_audio: true } : undefined)); }
     catch { setError(t("bgm.saveFailed")); }
     finally { setBusy(false); }
   }
@@ -90,7 +92,7 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
       <button className="primary-button bgm-join" disabled={busy || !activity.active || !activity.verified} onClick={() => void configure()} type="button">{busy ? t("common.processing") : !activity.verified ? t("bgm.verifyFirst") : !activity.active ? t("bgm.ended") : t("bgm.join")}</button><p className="bgm-footnote">{t("bgm.sharedProgress")}</p>
     </> : <>
       <section className="bgm-device-stage"><div className="bgm-style-switch" aria-label={t("bgm.switchStyle")}>{(["blue", "pink"] as const).map((value) => <button aria-label={t(`bgm.style.${value}`)} aria-pressed={style === value} className={`is-${value}`} disabled={busy} key={value} onClick={() => setStyle(value)} type="button" />)}{style !== data.style ? <button disabled={busy} onClick={() => void configure()} type="button">{t("common.save")}</button> : null}</div><BgmKeychain onPress={(key) => void play(key)} slots={data.slots} style={style} tracks={data.tracks} /><div className="bgm-owned"><strong>{t("bgm.collected", { count: owned.length })}</strong><span>{t("bgm.journey", { days: data.active_days, points: data.points })}</span></div><progress aria-label={t("bgm.collectionProgress")} max={12} value={owned.length} /></section>
-      <details className="bgm-settings"><summary>{t("bgm.settings")}</summary><label>{t("bgm.entranceMode")}<select onChange={(event) => setMode(event.target.value as typeof mode)} value={mode}>{(["off", "auto", "manual"] as const).map((value) => <option key={value} value={value}>{t(`bgm.mode.${value}`)}</option>)}</select></label>{mode === "auto" ? <label>{t("bgm.entranceTrack")}<select onChange={(event) => setTrack(event.target.value)} value={track}><option value="random">{t("bgm.random")}</option>{owned.map((item) => <option key={item.key} value={item.key}>{item.title}</option>)}</select></label> : null}<label className="bgm-receive"><input checked={receive} onChange={(event) => setReceive(event.target.checked)} type="checkbox" />{t("bgm.receiveAudio")}</label><p>{t("bgm.playbackHint")}</p><button className="primary-button" disabled={busy || (mode === "manual" && !data.slots.length)} onClick={() => void configure(undefined, true)} type="button">{busy ? t("common.processing") : t("common.save")}</button></details>
+      <details className="bgm-settings"><summary>{t("bgm.settings")}</summary><SettingSelect label={t("bgm.entranceMode")} disabled={busy} value={mode} onChange={setMode} options={(["off", "auto", "manual"] as const).map((value) => ({ value, label: t(`bgm.mode.${value}`) }))} />{mode === "auto" ? <SettingSelect label={t("bgm.entranceTrack")} disabled={busy} value={track} onChange={setTrack} options={[{ value: "random", label: t("bgm.random") }, ...owned.map((item) => ({ value: item.key, label: item.title }))]} /> : null}<p>{t("bgm.playbackHint")}</p><button className="primary-button" disabled={busy || (mode === "manual" && !data.slots.length)} onClick={() => void configure(undefined, true)} type="button">{busy ? t("common.processing") : t("common.save")}</button></details>
       <nav className="bgm-tabs" aria-label={t("bgm.sections")}>{(["tracks", "tasks"] as const).map((value) => <button aria-pressed={tab === value} className={tab === value ? "is-active" : ""} key={value} onClick={() => setTab(value)} type="button">{t(`bgm.${value}`)}</button>)}</nav>
       {tab === "tracks" ? <section className="bgm-tracks">{data.tracks.map((track, index) => <article className={`bgm-track${track.owned ? " is-owned" : ""}`} key={track.key}><span className={`bgm-track-art tone-${index % 4}`}><BgmIcon name={track.owned ? "music_note" : "lock"} /><small>{String(index + 1).padStart(2, "0")}</small></span><div><strong>{track.title}</strong><small>{track.author ? `${track.author} · ` : ""}{Math.ceil(track.duration)}s</small>{!track.owned ? <span>{t("bgm.gate", { days: track.days, points: track.points })}</span> : null}</div>{track.owned ? <div className="bgm-track-actions"><button aria-label={t("bgm.playTrack", { title: track.title })} onClick={() => void play(track.key)} type="button"><BgmIcon name={playing === track.key ? "pause" : "play_arrow"} /></button><button disabled={busy || (!data.slots.includes(track.key) && data.slots.length >= 6)} onClick={() => void configure(data.slots.includes(track.key) ? data.slots.filter((key) => key !== track.key) : [...data.slots, track.key])} type="button">{t(data.slots.includes(track.key) ? "bgm.remove" : "bgm.equip")}</button></div> : <span className="bgm-track-lock"><BgmIcon name="lock" /></span>}</article>)}</section> : <section className="bgm-task-list"><header><strong>{t("bgm.todayPoints", { points: data.today_points })}</strong><small>{t(activity.today_earned ? "bgm.activeToday" : "bgm.activeHint")}</small></header>{data.tasks.map((task) => <article key={task.kind}><BgmIcon name={({ publish: "edit_square", comment: "chat_bubble", like: "favorite" })[task.kind]} /><div><strong>{t(`bgm.task.${task.kind}`)}</strong><small>{t("bgm.taskReward", { count: task.limit, points: task.points })}</small></div><button disabled={!activity.active || task.count >= task.limit} onClick={() => onTask(task.kind)} type="button">{task.count >= task.limit ? t("bgm.done") : `${task.count} / ${task.limit}`}<BgmIcon name="arrow_forward" /></button></article>)}</section>}
       {next ? <aside className="bgm-next"><BgmIcon name="auto_awesome" /><div><strong>{t("bgm.nextTrack", { title: next.title })}</strong><span>{t("bgm.remaining", { days: Math.max(0, next.days - data.active_days), points: Math.max(0, next.points - data.points) })}</span></div></aside> : <p className="bgm-complete">{t("bgm.complete")}</p>}

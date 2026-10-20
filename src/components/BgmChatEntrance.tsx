@@ -7,6 +7,7 @@ import { BgmKeychain } from "./BgmActivity";
 import "./BgmChatEntrance.css";
 import { BgmIcon } from "./BgmIcon";
 import { localBgmUri } from "../lib/bgmMedia";
+import { newBgmEntrances } from "../lib/bgmEntrance";
 
 let activeBgm: HTMLAudioElement | null = null;
 const listeners = new Set<() => void>();
@@ -27,16 +28,16 @@ async function playBgm(uri: string) {
   catch { announce(); return false; }
 }
 
-export function BgmAudioPill({ uri, title }: { uri: string; title: string }) {
+export function BgmAudioPill({ uri, title, compact = false }: { uri: string; title: string; compact?: boolean }) {
   const { t } = useI18n();
   const [, refresh] = useState(0);
   const [error, setError] = useState(false);
   useEffect(() => { const update = () => refresh((value) => value + 1); listeners.add(update); return () => { listeners.delete(update); }; }, []);
-  const playing = activeBgm?.src === localBgmUri(uri, window.location.origin) && !activeBgm.paused;
-  return <span className="bgm-audio-inline"><button aria-label={t(playing ? "bgm.stopPlayback" : "bgm.playTrack", { title })} onClick={() => {
+  const playing = activeBgm?.src === new URL(localBgmUri(uri, window.location.origin), window.location.origin).href && !activeBgm.paused;
+  return <span className={`bgm-audio-inline${compact ? " is-compact" : ""}`}><button aria-label={t(playing ? "bgm.stopPlayback" : "bgm.playTrack", { title })} onClick={() => {
     if (playing) { activeBgm?.pause(); return; }
     void playBgm(uri).then((played) => setError(!played));
-  }} type="button"><BgmIcon name={playing ? "pause" : "play_arrow"} /><span>{title}</span></button>{error ? <small role="status">{t("bgm.playFailed")}</small> : null}</span>;
+  }} type="button"><BgmIcon name={playing ? "pause" : "play_arrow"} />{!compact ? <span>{title}</span> : null}</button>{error ? <small role="status">{t("bgm.playFailed")}</small> : null}</span>;
 }
 
 export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; messages: ChatMessage[]; active: boolean }) {
@@ -47,10 +48,9 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
   const [dock, setDock] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [fallback, setFallback] = useState<{ uri: string; title: string } | null>(null);
   const alive = useRef(true);
   const attempted = useRef(false);
-  const seen = useRef<Set<string> | null>(null);
+  const seen = useRef(new Set<string>());
   const mountedAt = useRef(Date.now() / 1000);
   const userId = session?.user.user_id;
 
@@ -84,7 +84,7 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     try {
       const response = await api.enterWithBgm(activity.key, chatId, crypto.randomUUID(), track);
       if (!alive.current || !response.sent || !response.uri || !response.title) return;
-      if (!(await playBgm(response.uri)) && alive.current) setFallback({ uri: response.uri, title: response.title });
+      await playBgm(response.uri);
     } catch { if (alive.current) setError(t("bgm.entranceFailed")); }
     finally { if (alive.current) setBusy(false); }
   }
@@ -98,22 +98,18 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
   useEffect(() => {
     if (!messages.length) return;
     const ids = new Set(messages.map((message) => String(message.id)));
-    if (!seen.current) { seen.current = ids; return; }
     const previous = seen.current;
     seen.current = new Set([...previous, ...ids]);
-    if (!active || document.hidden || !activity?.bgm?.receive_audio) return;
-    const incoming = messages.filter((message) => message.payload?.bgm_entrance && message.userId !== userId
-      && !previous.has(String(message.id)) && message.createdAt > mountedAt.current
-      && Date.now() / 1000 - message.createdAt >= 0 && Date.now() / 1000 - message.createdAt < 15 && message.payload?.uri);
+    if (!active || document.hidden) return;
+    const incoming = newBgmEntrances(messages, previous, mountedAt.current, Date.now() / 1000, userId);
     const latest = incoming[incoming.length - 1];
     if (latest?.payload?.uri) void playBgm(latest.payload.uri);
-  }, [messages, active, activity?.bgm?.receive_audio, userId]);
+  }, [messages, active, userId]);
 
   useEffect(() => { if (!active) { setDock(false); activeBgm?.pause(); } }, [active]);
   const data = activity?.bgm;
   return <>
     {dock && data?.style ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><header><strong>{t("bgm.pressToEnter")}</strong><span>{seconds}s</span><button aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button></header><BgmKeychain onPress={(key) => void enter(key)} slots={data.slots} style={data.style} tracks={data.tracks} /><small>{t("bgm.autoDismiss")}</small></aside> : null}
-    {fallback ? <aside className="bgm-chat-fallback"><BgmAudioPill title={fallback.title} uri={fallback.uri} /><button aria-label={t("common.close")} onClick={() => setFallback(null)} type="button">×</button></aside> : null}
     {error ? <aside className="bgm-chat-fallback" role="status"><span>{error}</span><button onClick={() => setError("")} type="button">{t("common.close")}</button></aside> : null}
   </>;
 }
