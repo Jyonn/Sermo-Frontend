@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import baxianActivityBanner from "../assets/activity/event-baxian-juli-banner.webp";
 import { getActiveLocale, useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
+import { ActivityCampaignCard } from "./ActivityCampaignCard";
 
 interface ActivityMessageCardProps {
   activity?: ActivityCampaignDTO | null;
@@ -17,6 +18,10 @@ export function ActivityMessageCard({ activity, activityKey, className, title }:
   const displayTitle = activity
     ? (getActiveLocale().startsWith("zh") ? activity.title : activity.title_en || activity.title)
     : title || t("message.activityUnavailable");
+
+  if (activity?.theme !== "baxian" || activity?.presentation) {
+    return <ActivityCampaignCard activity={activity ?? { key, theme: "" }} title={displayTitle} eyebrow={t("message.activityEyebrow")} hint={activity?.active ? t("message.activityOpen") : t("message.activityEnded")} className={`message-activity-card ${className ?? ""}`} disabled={!key} onClick={() => navigate(`/app/square/activities/${key}`)} />;
+  }
 
   return (
     <button

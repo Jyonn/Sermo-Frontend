@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.20.5",
+  "id": "2026.10.20.6",
   "publishedAt": "2026-10-20",
   "locales": {
     "zh-CN": {
-      "title": "主角登场，收集你的 BGM",
+      "title": "主角登场，全新活动陈列",
       "items": [
-        "空间管理员可申领一个月的主角登场活动，广场横幅直达专属按键器",
-        "通过公开发言、评论和点赞收集 12 首 BGM，最快需 15 个活跃日集齐",
-        "支持六键装配和自动／手动登场，音效默认关闭，保留旧版音频展示"
+        "专属艺术标题与蓝粉按键器，统一广场横幅、分享卡片与活动页面",
+        "修复横幅文字溢出和活动误用八仙背景，支持活动独立视觉配置"
       ]
     },
     "en": {
-      "title": "Make an entrance with your BGM",
+      "title": "A fresh stage for your BGM",
       "items": [
-        "Space administrators can launch a month-long event with a Square banner and personal music keychain",
-        "Collect 12 tracks through public posts, comments and likes, with at least 15 active days to complete",
-        "Equip six keys and choose automatic or manual entrances; sounds are off by default and legacy audio remains supported"
+        "New title artwork and coordinated keychain displays across banners, shared cards and the activity page",
+        "Fixed clipped banner text and incorrect event backgrounds; campaigns now support custom presentation"
       ]
     }
   }

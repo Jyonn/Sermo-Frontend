@@ -5,6 +5,7 @@ import type { ActivityCampaignDTO } from "../types";
 import "./BgmActivity.css";
 import { BgmIcon } from "./BgmIcon";
 import { localBgmUri } from "../lib/bgmMedia";
+import { ActivityCampaignCard, ActivityTitle } from "./ActivityCampaignCard";
 
 export function BgmKeychain({ style, slots = [], tracks = [], onPress }: {
   style: "blue" | "pink";
@@ -22,9 +23,10 @@ export function BgmKeychain({ style, slots = [], tracks = [], onPress }: {
   </div>;
 }
 
-export function BgmBanner({ onClick }: { onClick: () => void }) {
-  const { t } = useI18n();
-  return <button className="square-activity-banner bgm-banner" onClick={onClick} type="button"><span className="bgm-banner-copy"><small>{t("bgm.limited")}</small><strong>{t("bgm.bannerTitle")}</strong><span>{t("bgm.bannerHint")}</span></span><span className="bgm-banner-art" aria-hidden="true" /><span className="bgm-banner-arrow"><BgmIcon name="arrow_forward" /></span></button>;
+export function BgmBanner({ onClick, activity }: { onClick: () => void; activity?: ActivityCampaignDTO }) {
+  const { t, language } = useI18n();
+  const title = activity ? (language.startsWith("zh") ? activity.title : activity.title_en || activity.title) : t("bgm.bannerTitle");
+  return <ActivityCampaignCard activity={activity ?? { key: "main-character-bgm-2026", theme: "bgm" }} title={title} eyebrow={t("bgm.limited")} hint={t("bgm.bannerHint")} className="square-activity-banner" onClick={onClick} />;
 }
 
 export function BgmActivity({ activity, onUpdate, onTask }: { activity: ActivityCampaignDTO; onUpdate: (activity: ActivityCampaignDTO) => void; onTask: (kind: string) => void }) {
@@ -82,7 +84,7 @@ export function BgmActivity({ activity, onUpdate, onTask }: { activity: Activity
 
   return <div className="bgm-activity">
     <header className="bgm-masthead"><span>{t("bgm.limited")}</span><time>{date(activity.starts_at)} — {activity.ends_at ? date(activity.ends_at) : "—"}</time></header>
-    <section className="bgm-intro"><small>YOUR MOMENT, YOUR SOUND</small><h2>{t(data.joined ? "bgm.homeTitle" : "bgm.chooseTitle")}</h2><p>{t(data.joined ? "bgm.homeHint" : "bgm.chooseHint")}</p></section>
+    <section className="bgm-intro"><small>YOUR MOMENT, YOUR SOUND</small><div className="bgm-event-title"><ActivityTitle activity={activity} title={language.startsWith("zh") ? activity.title : activity.title_en || activity.title} /></div><h2>{t(data.joined ? "bgm.homeTitle" : "bgm.chooseTitle")}</h2><p>{t(data.joined ? "bgm.homeHint" : "bgm.chooseHint")}</p></section>
     {!data.ready ? <p className="bgm-feedback" role="status">{t("bgm.preparing")}</p> : !data.joined ? <>
       <div className="bgm-style-options">{(["blue", "pink"] as const).map((value) => <button aria-pressed={style === value} className={`bgm-style-option is-${value}${style === value ? " is-selected" : ""}`} key={value} onClick={() => setStyle(value)} type="button"><BgmKeychain style={value} /><span><strong>{t(`bgm.style.${value}`)}</strong><small>{t(`bgm.styleHint.${value}`)}</small></span><BgmIcon name={style === value ? "check_circle" : "radio_button_unchecked"} /></button>)}</div>
       <button className="primary-button bgm-join" disabled={busy || !activity.active || !activity.verified} onClick={() => void configure()} type="button">{busy ? t("common.processing") : !activity.verified ? t("bgm.verifyFirst") : !activity.active ? t("bgm.ended") : t("bgm.join")}</button><p className="bgm-footnote">{t("bgm.sharedProgress")}</p>

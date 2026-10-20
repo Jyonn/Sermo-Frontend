@@ -912,6 +912,7 @@ export interface ActivityMilestoneDTO {
 }
 
 export interface ActivityCampaignDTO {
+  presentation?: import("./lib/activityPresentation").ActivityPresentation;
   bgm?: {
     joined: boolean; style: "blue" | "pink" | null; slots: string[];
     mode: "off" | "auto" | "manual"; track: string; receive_audio: boolean;
