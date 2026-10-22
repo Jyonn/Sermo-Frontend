@@ -1026,12 +1026,12 @@ export const api = {
     });
   },
 
-  getMyBgm(signal?: AbortSignal) {
-    return request<ActivityCampaignDTO | null>("/activities/bgm/me", { auth: true, signal });
+  getMyBgm(signal?: AbortSignal, chatId?: number) {
+    return request<ActivityCampaignDTO | null>(`/activities/bgm/me${chatId === undefined ? "" : `?chat_id=${chatId}`}`, { auth: true, signal });
   },
 
   enterWithBgm(key: string, chatId: number, requestId: string, track?: string) {
-    return request<{ sent: boolean; reason?: string; audio_message_id?: number; uri?: string; title?: string; duration?: number }>(`/activities/${key}/bgm/enter`, {
+    return request<{ sent: boolean; reason?: string; retry_after_seconds?: number; audio_message_id?: number; uri?: string; title?: string; duration?: number }>(`/activities/${key}/bgm/enter`, {
       method: "POST", auth: true, body: { chat_id: chatId, request_id: requestId, ...(track ? { track } : {}) },
     });
   },

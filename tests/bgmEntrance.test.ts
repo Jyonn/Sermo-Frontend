@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BGM_KEY_CENTERS, bgmKeyState, mergeBgmEntranceMessages, newBgmEntrances } from "../src/lib/bgmEntrance.ts";
+import { BGM_KEY_CENTERS, bgmKeyState, bgmSilentMinutes, mergeBgmEntranceMessages, newBgmEntrances } from "../src/lib/bgmEntrance.ts";
 import { mapChatMessageDTO } from "../src/lib/chatMessageMapper.ts";
 
 const system = () => mapChatMessageDTO({ message_id: 11, type: 3, created_at: 101, user: { user_id: 7, name: "Alice" }, content: "Alice entered with Track", payload: { kind: "system", event: "bgm_entrance", text: "Alice entered with Track" } }, 1);
@@ -21,12 +21,19 @@ test("pairing handles out-of-order delivery and paginated orphan audio safely", 
   assert.equal(mergeBgmEntranceMessages([{ ...system(), userId: 8 }, audio()]).length, 2);
   assert.equal(mergeBgmEntranceMessages([{ ...system(), payload: { kind: "system", event: "other" } }, audio()]).length, 2);
 });
-test("new peer sounds need neither participation nor an opt-in preference", () => {
+test("member autoplay respects preferences and never replays history or self echoes", () => {
+  assert.equal(newBgmEntrances([audio()], new Set(), 100, 102, 1, false).length, 0);
   assert.equal(newBgmEntrances([audio()], new Set(), 100, 102, 1).length, 1);
   assert.equal(newBgmEntrances([audio()], new Set(["12"]), 100, 102, 1).length, 0);
   assert.equal(newBgmEntrances([audio()], new Set(), 102, 103, 1).length, 0);
   assert.equal(newBgmEntrances([audio()], new Set(), 100, 120, 1).length, 0);
   assert.equal(newBgmEntrances([audio()], new Set(), 100, 102, 7).length, 0);
+});
+test("silent entry minutes round up the server countdown", () => {
+  assert.equal(bgmSilentMinutes(180), 3);
+  assert.equal(bgmSilentMinutes(121), 3);
+  assert.equal(bgmSilentMinutes(120), 2);
+  assert.equal(bgmSilentMinutes(1), 1);
 });
 test("both generated housings share six aligned physical button targets", () => {
   for (const centers of Object.values(BGM_KEY_CENTERS)) {

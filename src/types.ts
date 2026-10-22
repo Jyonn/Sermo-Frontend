@@ -916,6 +916,7 @@ export interface ActivityCampaignDTO {
   bgm?: {
     joined: boolean; style: "blue" | "pink" | null; slots: string[];
     mode: "off" | "auto" | "manual"; track: string; receive_audio: boolean;
+    entrance?: { allowed: boolean; reason: string | null; retry_after_seconds: number };
     points: number; active_days: number; today_points: number; ready: boolean;
     tasks: Array<{ kind: "publish" | "comment" | "like"; count: number; limit: number; points: number }>;
     tracks: Array<{ key: string; title: string; author: string; days: number; points: number; owned: boolean; duration: number; uri: string | null }>;

@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.20.13",
-  "publishedAt": "2026-10-20",
+  "id": "2026.10.22.1",
+  "publishedAt": "2026-10-22",
   "locales": {
     "zh-CN": {
-      "title": "更协调的深色外观",
+      "title": "更自在的主角登场",
       "items": [
-        "统一聊天、评论和弹窗的深色边框，优化取消、关闭、搜索及个人名片的文字与背景对比"
+        "登场冷却改为每人每会话独立 3 分钟，冷却中不展示手动按键并提示静默进入",
+        "个性化中统一通过主角按键设置成员音效自动播放、登场方式和自动选曲"
       ]
     },
     "en": {
-      "title": "A more balanced dark appearance",
+      "title": "More flexible entrances",
       "items": [
-        "Unified dark borders across chats, comments and dialogs, with clearer controls, search and profile cards"
+        "Independent 3-minute cooldowns per user and conversation, with silent-entry notices and no unavailable manual keys",
+        "One personalization entry for member autoplay, entrance mode and automatic track selection"
       ]
     }
   }

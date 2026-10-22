@@ -44,7 +44,7 @@ for (const language of ["zh-CN", "en"]) {
     const i18n = createInstance();
     await i18n.init({ lng: language, resources: { [language]: { translation } }, interpolation: { escapeValue: false } });
     for (const key of Object.keys(translation).filter((key) => key.startsWith("bgm."))) {
-      assert.doesNotMatch(String(i18n.t(key, { count: 3, days: 15, points: 240, title: "囚笼", actor: "Alice", number: 1 })), /[{}]/, key);
+      assert.doesNotMatch(String(i18n.t(key, { count: 3, minutes: 3, days: 15, points: 90, title: "囚笼", actor: "Alice", number: 1 })), /[{}]/, key);
     }
     assert.equal(translation["bgm.authorUnknown"], undefined);
     assert.equal(i18n.t("bgm.entranceMessage", { actor: "Alice", title: "Track" }), language === "zh-CN" ? "Alice 进入聊天" : "Alice entered the chat");

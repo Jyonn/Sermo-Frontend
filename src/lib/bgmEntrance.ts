@@ -25,7 +25,12 @@ export function mergeBgmEntranceMessages(messages: ChatMessage[]): ChatMessage[]
   });
 }
 
-export function newBgmEntrances(messages: ChatMessage[], seen: Set<string>, mountedAt: number, now: number, userId?: number) {
+export function bgmSilentMinutes(seconds: number) {
+  return Math.max(1, Math.ceil(seconds / 60));
+}
+
+export function newBgmEntrances(messages: ChatMessage[], seen: Set<string>, mountedAt: number, now: number, userId?: number, receiveAudio = true) {
+  if (!receiveAudio) return [];
   return messages.filter((message) => message.payload?.bgm_entrance && message.payload.uri && message.userId !== userId
     && !seen.has(String(message.id)) && message.createdAt > mountedAt && now >= message.createdAt && now - message.createdAt < 15);
 }

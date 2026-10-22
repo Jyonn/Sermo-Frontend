@@ -7,7 +7,8 @@ import { BgmKeychain } from "./BgmActivity";
 import "./BgmChatEntrance.css";
 import { BgmIcon } from "./BgmIcon";
 import { localBgmUri } from "../lib/bgmMedia";
-import { newBgmEntrances } from "../lib/bgmEntrance";
+import { bgmSilentMinutes, newBgmEntrances } from "../lib/bgmEntrance";
+import { showToast } from "../lib/toast";
 
 let activeBgm: HTMLAudioElement | null = null;
 const listeners = new Set<() => void>();
@@ -47,27 +48,41 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
   const [seconds, setSeconds] = useState(3);
   const [dock, setDock] = useState(false);
   const [busy, setBusy] = useState(false);
+  const sending = useRef(false);
   const [pressedTrack, setPressedTrack] = useState<string | null>(null);
   const dockCloseTimer = useRef<number | null>(null);
   const [error, setError] = useState("");
   const alive = useRef(true);
-  const attempted = useRef(false);
+  const visit = useRef(0);
+  const requestId = useRef("");
+  const [receiveAudio, setReceiveAudio] = useState(false);
   const seen = useRef(new Set<string>());
   const mountedAt = useRef(Date.now() / 1000);
   const userId = session?.user.user_id;
 
   useEffect(() => {
     alive.current = true;
+    const currentVisit = ++visit.current;
+    requestId.current = crypto.randomUUID();
+    setDock(false); setActivity(null); setReceiveAudio(false);
+    setSeconds(3); setPressedTrack(null); setBusy(false); setError("");
+    sending.current = false;
     const controller = new AbortController();
-    void api.getMyBgm(controller.signal).then((result) => {
+    if (active && !document.hidden) void api.getMyBgm(controller.signal, chatId).then((result) => {
       if (controller.signal.aborted) return;
       setActivity(result);
-      if (result?.bgm?.mode === "manual") setDock(true);
+      setReceiveAudio(result?.bgm?.receive_audio ?? true);
+      const data = result?.bgm;
+      if (!result || !data || data.mode === "off" || document.hidden) return;
+      if (data.entrance?.reason === "cooldown") { silent(data.entrance.retry_after_seconds); return; }
+      if (!data.entrance?.allowed) return;
+      if (data.mode === "manual") setDock(true);
+      else if (data.mode === "auto") void enter(result, undefined, currentVisit);
     }).catch(() => undefined);
     const stopWhenHidden = () => { if (document.hidden) { activeBgm?.pause(); setDock(false); } };
     document.addEventListener("visibilitychange", stopWhenHidden);
     return () => { alive.current = false; controller.abort(); activeBgm?.pause(); if (dockCloseTimer.current !== null) window.clearTimeout(dockCloseTimer.current); document.removeEventListener("visibilitychange", stopWhenHidden); };
-  }, [chatId, userId, session?.user.space_id]);
+  }, [chatId, userId, session?.user.space_id, active]);
 
   useEffect(() => {
     if (!dock || !active || busy || pressedTrack || document.hidden) return;
@@ -80,28 +95,30 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     return () => window.clearInterval(timer);
   }, [dock, active, busy, pressedTrack]);
 
-  async function enter(track?: string) {
-    if (!activity || busy || !active || document.hidden) return;
+  function silent(seconds: number) {
+    setDock(false);
+    showToast(t("bgm.silentEntry", { minutes: bgmSilentMinutes(seconds) }), "info", 3000);
+  }
+
+  async function enter(selectedActivity: ActivityCampaignDTO, track?: string, currentVisit = visit.current) {
+    if (sending.current || !active || document.hidden) return;
+    const isCurrent = () => alive.current && visit.current === currentVisit;
+    sending.current = true;
     setBusy(true); setError("");
     try {
-      const response = await api.enterWithBgm(activity.key, chatId, crypto.randomUUID(), track);
-      if (!alive.current) return;
+      const response = await api.enterWithBgm(selectedActivity.key, chatId, requestId.current, track);
+      if (!isCurrent()) return;
+      if (response.reason === "cooldown") { silent(response.retry_after_seconds ?? 180); return; }
       if (!response.sent || !response.uri || !response.title) { setDock(false); return; }
       const played = await playBgm(response.uri);
-      if (!alive.current) return;
+      if (!isCurrent()) { activeBgm?.pause(); return; }
       if (track && played) {
         setPressedTrack(track);
         dockCloseTimer.current = window.setTimeout(() => { if (alive.current) { setDock(false); setPressedTrack(null); } }, 900);
       } else setDock(false);
-    } catch { if (alive.current) { setDock(false); setError(t("bgm.entranceFailed")); } }
-    finally { if (alive.current) setBusy(false); }
+    } catch { if (isCurrent()) { setDock(false); setError(t("bgm.entranceFailed")); } }
+    finally { if (isCurrent()) { sending.current = false; setBusy(false); } }
   }
-
-  useEffect(() => {
-    if (!active || activity?.bgm?.mode !== "auto" || attempted.current) return;
-    attempted.current = true;
-    void enter();
-  }, [activity, active]);
 
   useEffect(() => {
     if (!messages.length) return;
@@ -109,15 +126,15 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     const previous = seen.current;
     seen.current = new Set([...previous, ...ids]);
     if (!active || document.hidden) return;
-    const incoming = newBgmEntrances(messages, previous, mountedAt.current, Date.now() / 1000, userId);
+    const incoming = newBgmEntrances(messages, previous, mountedAt.current, Date.now() / 1000, userId, receiveAudio);
     const latest = incoming[incoming.length - 1];
     if (latest?.payload?.uri) void playBgm(latest.payload.uri);
-  }, [messages, active, userId]);
+  }, [messages, active, userId, receiveAudio]);
 
   useEffect(() => { if (!active) { setDock(false); activeBgm?.pause(); } }, [active]);
   const data = activity?.bgm;
   return <>
-    {dock && data?.style ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><header><strong>{t("bgm.pressToEnter")}</strong><span>{pressedTrack ? t("bgm.keyPlaying") : `${seconds}s`}</span><button aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button></header><BgmKeychain disabled={busy || Boolean(pressedTrack)} playingKey={pressedTrack} onPress={(key) => void enter(key)} slots={data.slots} style={data.style} tracks={data.tracks} /><small>{t(pressedTrack ? "bgm.keyPlaying" : "bgm.autoDismiss")}</small></aside> : null}
+    {dock && data?.style && activity ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><header><strong>{t("bgm.pressToEnter")}</strong><span>{pressedTrack ? t("bgm.keyPlaying") : `${seconds}s`}</span><button aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button></header><BgmKeychain disabled={busy || Boolean(pressedTrack)} playingKey={pressedTrack} onPress={(key) => void enter(activity, key)} slots={data.slots} style={data.style} tracks={data.tracks} /><small>{t(pressedTrack ? "bgm.keyPlaying" : "bgm.autoDismiss")}</small></aside> : null}
     {error ? <aside className="bgm-chat-fallback" role="status"><span>{error}</span><button onClick={() => setError("")} type="button">{t("common.close")}</button></aside> : null}
   </>;
 }

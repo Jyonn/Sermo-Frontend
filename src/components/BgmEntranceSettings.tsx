@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { useI18n } from "../lib/language";
 import type { ActivityCampaignDTO } from "../types";
-import { SettingSelect } from "./SettingRow";
+import { SettingRow, SettingSelect, SettingSwitch } from "./SettingRow";
 import "./BgmActivity.css";
 
 export function BgmEntranceSettings({ activity, onUpdate }: { activity: ActivityCampaignDTO; onUpdate: (activity: ActivityCampaignDTO) => void }) {
@@ -10,6 +10,7 @@ export function BgmEntranceSettings({ activity, onUpdate }: { activity: Activity
   const data = activity.bgm;
   const [mode, setMode] = useState(data?.mode ?? "off");
   const [track, setTrack] = useState(data?.track ?? "random");
+  const [receiveAudio, setReceiveAudio] = useState(data?.receive_audio ?? true);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const alive = useRef(true);
@@ -20,12 +21,13 @@ export function BgmEntranceSettings({ activity, onUpdate }: { activity: Activity
     if (busy || !data?.style) return;
     setBusy(true); setStatus("");
     try {
-      const result = await api.configureBgm(activity.key, data.style, undefined, { mode, track, receive_audio: true });
+      const result = await api.configureBgm(activity.key, data.style, undefined, { mode, track, receive_audio: receiveAudio });
       if (alive.current) { onUpdate(result); setStatus(t("bgm.settingsSaved")); }
     } catch { if (alive.current) setStatus(t("bgm.saveFailed")); }
     finally { if (alive.current) setBusy(false); }
   }
   return <section className="bgm-settings">
+    <SettingRow title={t("bgm.receiveAudio")} trailing={<SettingSwitch checked={receiveAudio} disabled={busy} label={t("bgm.receiveAudio")} onChange={setReceiveAudio} />} />
     <SettingSelect label={t("bgm.entranceMode")} value={mode} onChange={setMode} disabled={busy} options={(["off", "auto", "manual"] as const).map((value) => ({ value, label: t(`bgm.mode.${value}`) }))} />
     {mode === "auto" ? <SettingSelect label={t("bgm.entranceTrack")} value={track} onChange={setTrack} disabled={busy} options={[{ value: "random", label: t("bgm.random") }, ...owned.map((item) => ({ value: item.key, label: item.title }))]} /> : null}
     <p>{t("bgm.playbackHint")}</p>
