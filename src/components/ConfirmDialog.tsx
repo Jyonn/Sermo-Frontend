@@ -1,7 +1,8 @@
-import { useEffect, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
+import { useModalFocus } from "../lib/modalFocus";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -15,6 +16,8 @@ interface ConfirmDialogProps {
   warning?: boolean;
   showCancelButton?: boolean;
   children?: ReactNode;
+  kind?: "modal" | "alert";
+  dismissible?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -31,34 +34,26 @@ export function ConfirmDialog({
   warning = false,
   showCancelButton = true,
   children,
+  kind = "modal",
+  dismissible = true,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
   const { t } = useI18n();
+  const root = useRef<HTMLElement | null>(null);
+  const titleId = useId();
+  const descriptionId = useId();
   useBodyScrollLock(open);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-      if (event.key === "Enter") {
-        event.preventDefault();
-        onConfirm();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, onConfirm, open]);
+  useModalFocus(root, open, () => { if (dismissible && !busy) onClose(); });
 
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="dialog-backdrop confirm-dialog-backdrop" onClick={onClose} role="presentation">
-      <section aria-modal="true" className="confirm-dialog" onClick={(event) => event.stopPropagation()} role="dialog">
+    <div className="dialog-backdrop confirm-dialog-backdrop" onClick={() => { if (dismissible && !busy) onClose(); }} role="presentation">
+      <section ref={root} tabIndex={-1} aria-labelledby={titleId} aria-describedby={descriptionId} aria-modal="true" className="confirm-dialog" onClick={(event) => event.stopPropagation()} role={kind === "alert" ? "alertdialog" : "dialog"}>
         <div className="confirm-dialog-copy">
-          <h2>{title}</h2>
-          <p>{description}</p>
+          <h2 id={titleId}>{title}</h2>
+          <p id={descriptionId}>{description}</p>
         </div>
         {children}
         <div className="confirm-dialog-actions">

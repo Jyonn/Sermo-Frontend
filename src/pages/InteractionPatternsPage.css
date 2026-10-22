@@ -1,0 +1,71 @@
+.patterns-page { --atlas-accent: #167855; min-height: 100dvh; padding: clamp(22px,5vw,72px); color: var(--text-primary); background: radial-gradient(ellipse at 92% 0%,color-mix(in srgb,var(--brand-primary) 10%,transparent),transparent 42%),var(--bg-canvas); font-family: var(--font-body); }
+html[data-theme="dark"] .patterns-page { --atlas-accent: #8cddbb; }
+.patterns-heading { display: flex; align-items: end; justify-content: space-between; gap: 30px; max-width: 1200px; margin: 0 auto 40px; }
+.patterns-heading > div > span,.patterns-mapping header > small { color: var(--atlas-accent); font: 700 10px/1.5 var(--font-mono); letter-spacing: .16em; }
+.patterns-heading h1 { margin: 16px 0 14px; font-size: clamp(34px,4.5vw,64px); font-weight: 650; line-height: 1.18; letter-spacing: -.05em; }
+.patterns-heading p { max-width: 650px; margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.9; }
+.patterns-controls { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: 8px; }
+.patterns-controls button { min-height: 36px; padding-inline: 10px; font-size: 11px; }
+.patterns-controls .material-symbols-outlined { font-size: 18px; }
+.patterns-controls a { margin-left: 10px; color: var(--atlas-accent); font-size: 12px; text-decoration: none; }
+.patterns-workspace { display: grid; grid-template-columns: 255px minmax(0,1fr); gap: 40px; max-width: 1200px; margin: auto; align-items: start; }
+.patterns-nav { display: grid; gap: 4px; }
+.patterns-nav > button { display: flex; align-items: center; gap: 17px; min-height: 76px; padding: 14px 16px; border-radius: 16px; color: var(--text-secondary); background: transparent; text-align: left; }
+.patterns-nav > button[aria-pressed="true"] { color: var(--atlas-accent); background: color-mix(in srgb,var(--brand-primary) 10%,var(--bg-elevated)); }
+.patterns-nav > button > small { align-self: start; padding-top: 3px; font: 600 10px var(--font-mono); opacity: .65; }
+.patterns-nav > button > span { display: grid; gap: 5px; }
+.patterns-nav strong { font-size: 14px; }
+.patterns-nav span small { color: var(--text-muted); font: 500 10px var(--font-mono); }
+.patterns-nav i { margin-left: auto; font-style: normal; }
+.patterns-study { min-width: 0; }
+.patterns-study > header { padding: 4px 0 22px; border-bottom: 1px solid var(--line-soft); }
+.patterns-study > header > small { color: var(--text-muted); font: 500 11px var(--font-mono); }
+.patterns-study h2 { margin: 8px 0 10px; font-size: 26px; letter-spacing: -.03em; }
+.patterns-study > header p,.patterns-study > footer p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
+.patterns-stage { display: flex; justify-content: center; align-items: center; min-height: 355px; margin: 24px 0; padding: clamp(20px,3vw,36px); border: 1px solid var(--line-soft); border-radius: 24px; background: repeating-linear-gradient(0deg,transparent 0 23px,color-mix(in srgb,var(--atlas-accent) 3%,transparent) 24px 25px),var(--bg-elevated); }
+.patterns-stage h3 { font-size: 21px; line-height: 1.4; }
+.patterns-stage p { color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
+.patterns-stage .button,.patterns-stage .ghost-button,.patterns-stage .danger-button { min-height: 42px; font-size: 12px; }
+.patterns-study > footer { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 15px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+.patterns-study > footer strong { color: var(--atlas-accent); font-size: 11px; }
+.patterns-calendar { display: grid; grid-template-columns: 64px minmax(0,1fr); align-items: start; gap: 22px; max-width: 440px; }
+.patterns-date { display: grid; justify-items: center; padding: 12px 5px; border-top: 3px solid var(--atlas-accent); color: var(--atlas-accent); background: color-mix(in srgb,var(--brand-primary) 8%,var(--bg-canvas)); font: 550 32px var(--font-display); }
+.patterns-date > span { margin-top: 2px; font: 650 9px var(--font-mono); letter-spacing: .15em; }
+.patterns-calendar h3 { margin: 6px 0 8px; }
+.patterns-calendar small { color: var(--text-muted); font-size: 11px; }
+.patterns-calendar > button { grid-column: 2; justify-self: start; }
+.patterns-actions-demo,.patterns-alert-demo { max-width: 330px; text-align: center; }
+.patterns-avatar { display: grid; place-items: center; width: 70px; height: 70px; margin: auto; border-radius: 24px; color: #ebfff5; background: #287355; font: 650 36px var(--font-display); }
+.patterns-alert-demo > .material-symbols-outlined { color: var(--atlas-accent); font-size: 40px; }
+.patterns-inbox { width: min(100%,430px); }
+.patterns-inbox > small { color: var(--text-muted); font-size: 10px; }
+.patterns-inbox h3 { margin: 6px 0 18px; }
+.patterns-inbox article { display: flex; align-items: center; gap: 16px; padding: 17px 0; border-top: 1px solid var(--line-soft); font-size: 13px; }
+.patterns-inbox article i { color: var(--text-muted); font: 11px var(--font-mono); }
+.patterns-inbox > button { margin: 16px 8px 0 0; }
+.patterns-tour-demo { width: min(100%,460px); }
+.patterns-tour-demo > header { display: flex; align-items: center; gap: 8px; }
+.patterns-tour-demo > header > strong { flex: 1; font-size: 21px; }
+.patterns-demo-post { margin: 25px 0; padding: 24px; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--bg-canvas); }
+.patterns-demo-post small { color: var(--atlas-accent); font: 10px var(--font-mono); letter-spacing: .12em; }
+.patterns-photo { position: relative; width: 100%; height: 275px; padding: 0; overflow: hidden; border-radius: 15px; background: var(--bg-canvas); }
+.patterns-photo img { width: 100%; height: 100%; object-fit: cover; }
+.patterns-photo > span { position: absolute; right: 12px; bottom: 12px; padding: 9px 13px; border-radius: 999px; color: #effaf4; background: #17362b; font-size: 12px; }
+.patterns-inline-form { display: grid; gap: 12px; width: min(100%,380px); }
+.patterns-inline-form label { font-size: 13px; font-weight: 700; }
+.patterns-inline-form input[aria-invalid="true"] { border-color: var(--danger); }
+.patterns-inline-form > button { justify-self: start; }
+.patterns-stops { padding: 9px 12px; border-radius: 10px; color: var(--text-secondary); background: var(--bg-canvas); font-size: 12px; }
+.patterns-agenda-row { display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--line-soft); }
+.patterns-agenda-row time { color: var(--text-muted); font: 11px var(--font-mono); }
+.patterns-agenda-row > div { display: grid; gap: 7px; font-size: 13px; }
+.patterns-agenda-row small { color: var(--text-muted); font-size: 11px; }
+.patterns-mapping { max-width: 1200px; margin: 80px auto 0; padding-top: 30px; border-top: 1px solid var(--line-strong); scroll-margin-top: 24px; }
+.patterns-mapping h2 { font-size: 30px; letter-spacing: -.04em; }
+.patterns-mapping header p { color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
+.patterns-mapping article { display: grid; grid-template-columns: 35px minmax(0,1fr) 80px; gap: 20px; align-items: start; padding: 22px 0; border-top: 1px solid var(--line-soft); }
+.patterns-mapping article > span { color: var(--text-muted); font: 11px var(--font-mono); padding-top: 4px; }
+.patterns-mapping article h3 { margin: 0; font: 600 16px var(--font-display); }
+.patterns-mapping article p { margin: 9px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.8; }
+.patterns-mapping article > small { color: var(--atlas-accent); font-size: 10px; text-align: right; padding-top: 5px; }
+@media (max-width: 700px) { .patterns-heading { align-items: start; flex-direction: column; gap: 22px; margin-bottom: 24px; } .patterns-workspace { grid-template-columns: minmax(0,1fr); gap: 20px; } .patterns-nav { display: flex; overflow-x: auto; padding-bottom: 8px; } .patterns-nav > button { min-width: 158px; min-height: 64px; gap: 10px; padding: 10px; } .patterns-nav i { display: none; } .patterns-study > footer { grid-template-columns: 1fr; gap: 8px; } .patterns-stage { min-height: 330px; } .patterns-mapping { margin-top: 48px; } .patterns-mapping article { grid-template-columns: 20px minmax(0,1fr); gap: 12px; } .patterns-mapping article > small { grid-column: 2; text-align: left; } }

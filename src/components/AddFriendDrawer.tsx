@@ -7,6 +7,7 @@ import type { FriendOperatorDTO, UserDTO } from "../types";
 import { QuietState } from "./BoundaryState";
 import { SideDrawer } from "./SideDrawer";
 import { UserAvatar } from "./UserAvatar";
+import { InlineAlert } from "./InlineAlert";
 
 export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean; onClose: () => void; onRouteOpen?: () => void }) {
   const { t } = useI18n();
@@ -14,6 +15,7 @@ export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean;
   const [name, setName] = useState("");
   const [result, setResult] = useState<{ user: UserDTO | null; relationship: "none" | "pending" | "friend" } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const [operators, setOperators] = useState<FriendOperatorDTO[]>([]);
   const [operatorBusyId, setOperatorBusyId] = useState<number | null>(null);
 
@@ -28,10 +30,11 @@ export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean;
     const normalized = name.trim();
     if (!normalized || busy) return;
     setBusy(true);
+    setSearchError("");
     try {
       setResult(await api.searchFriendExact(normalized));
     } catch (error) {
-      showToast(error instanceof ApiError ? error.message : t("friendSearch.failed"), "error");
+      setSearchError(error instanceof ApiError ? error.message : t("friendSearch.failed"));
     } finally {
       setBusy(false);
     }
@@ -74,12 +77,13 @@ export function AddFriendDrawer({ open, onClose, onRouteOpen }: { open: boolean;
             {session?.user.verified ? <form className="friend-search-form" onSubmit={(event) => { event.preventDefault(); void search(); }}>
               <label>
                 <span className="material-symbols-outlined">person_search</span>
-                <input autoComplete="off" onChange={(event) => { setName(event.target.value); setResult(null); }} placeholder={t("friendSearch.placeholder")} value={name} />
+                <input aria-label={t("friendSearch.placeholder")} aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "friend-search-error" : undefined} autoComplete="off" onChange={(event) => { setName(event.target.value); setResult(null); setSearchError(""); }} placeholder={t("friendSearch.placeholder")} value={name} />
               </label>
               <button aria-label={t("friendSearch.search")} disabled={!name.trim() || busy} type="submit">
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
             </form> : null}
+            {searchError ? <InlineAlert id="friend-search-error">{searchError}</InlineAlert> : null}
             {result ? result.user ? (
               <div className="friend-search-result">
                 <UserAvatar className="friend-search-avatar" frame={result.user.avatar_frame_style} name={result.user.name} uri={result.user.avatar_uri} />

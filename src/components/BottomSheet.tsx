@@ -1,7 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
+import { useModalFocus } from "../lib/modalFocus";
+import { sheetRelease, sheetStops } from "../lib/interactionPatterns";
+import "./InteractionPatterns.css";
 
 interface BottomSheetProps {
   open: boolean;
@@ -14,6 +17,8 @@ interface BottomSheetProps {
   showCloseButton?: boolean;
   className?: string;
   bodyClassName?: string;
+  snapPoints?: number[];
+  initialSnap?: number;
 }
 
 export function BottomSheet({
@@ -27,8 +32,15 @@ export function BottomSheet({
   showCloseButton = true,
   className,
   bodyClassName,
+  snapPoints,
+  initialSnap = 1,
 }: BottomSheetProps) {
   const { t } = useI18n();
+  const root = useRef<HTMLElement | null>(null);
+  const titleId = useId();
+  const dragged = useRef(false);
+  const stops = sheetStops(snapPoints ?? []);
+  const [stop, setStop] = useState(Math.max(0, Math.min(initialSnap, stops.length - 1)));
   const [desktopModal, setDesktopModal] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches
   );
@@ -37,6 +49,7 @@ export function BottomSheet({
   const [startY, setStartY] = useState<number | null>(null);
 
   useBodyScrollLock(open);
+  useModalFocus(root, open, onClose);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 901px)");
@@ -51,34 +64,32 @@ export function BottomSheet({
       setDragY(0);
       setDragging(false);
       setStartY(null);
+      setStop(Math.max(0, Math.min(initialSnap, stops.length - 1)));
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, open]);
-
   const startDrag = (clientY: number) => {
     if (desktopModal) return;
+    dragged.current = false;
     setDragging(true);
     setStartY(clientY);
   };
 
   const moveDrag = (clientY: number) => {
     if (desktopModal || !dragging || startY === null) return;
-    setDragY(Math.max(0, clientY - startY));
+    const delta = clientY - startY;
+    if (Math.abs(delta) > 6) dragged.current = true;
+    setDragY(snapPoints ? delta * (delta < 0 && stop === stops.length - 1 ? 0.25 : 1) : Math.max(0, delta));
   };
 
   const endDrag = () => {
     if (desktopModal || !dragging) return;
-    if (dragY > 120) {
+    if (snapPoints) {
+      const next = sheetRelease(stops, stop, dragY, window.innerHeight);
+      if (next === null) onClose();
+      else setStop(next);
+      setDragY(0);
+    } else if (dragY > 120) {
       onClose();
     } else {
       setDragY(0);
@@ -92,13 +103,15 @@ export function BottomSheet({
   return createPortal(
     <div className="sheet-backdrop" onClick={onClose} role="presentation">
       <section
-        className={`bottom-sheet ${dragging ? "dragging" : ""} ${className ?? ""}`.trim()}
+        ref={root}
+        tabIndex={-1}
+        className={`bottom-sheet ${snapPoints && !desktopModal ? "has-detents" : ""} ${dragging ? "dragging" : ""} ${className ?? ""}`.trim()}
         onClick={(event) => event.stopPropagation()}
-        onMouseMove={desktopModal ? undefined : (event) => moveDrag(event.clientY)}
-        onMouseUp={desktopModal ? undefined : endDrag}
-        onTouchEnd={desktopModal ? undefined : endDrag}
-        onTouchMove={desktopModal ? undefined : (event) => moveDrag(event.touches[0]?.clientY ?? 0)}
-        style={desktopModal ? undefined : { transform: `translateY(${dragY}px)` }}
+        onPointerMove={desktopModal ? undefined : (event) => moveDrag(event.clientY)}
+        onPointerUp={desktopModal ? undefined : endDrag}
+        onPointerCancel={() => { setDragging(false); setStartY(null); setDragY(0); }}
+        style={desktopModal ? undefined : { transform: `translateY(${dragY}px)`, ...(snapPoints ? { height: `${stops[stop] * 100}dvh`, maxHeight: "90dvh" } : {}) }}
+        aria-label={title}
         aria-modal="true"
         role="dialog"
       >
@@ -110,10 +123,10 @@ export function BottomSheet({
         {!desktopModal ? (
           <button
             className="sheet-drag-zone"
-            onMouseDown={(event) => startDrag(event.clientY)}
-            onTouchStart={(event) => startDrag(event.touches[0]?.clientY ?? 0)}
+            onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); startDrag(event.clientY); }}
             type="button"
-            aria-label={t("common.dragToClose")}
+            onClick={() => { if (snapPoints && !dragged.current) setStop((current) => (current + 1) % stops.length); }}
+            aria-label={t(snapPoints ? "patterns.resizeSheet" : "common.dragToClose")}
           >
             <div className="sheet-handle" />
           </button>
@@ -123,11 +136,10 @@ export function BottomSheet({
         ) : (
           <div
             className="sheet-header"
-            onMouseDown={desktopModal ? undefined : (event) => startDrag(event.clientY)}
-            onTouchStart={desktopModal ? undefined : (event) => startDrag(event.touches[0]?.clientY ?? 0)}
+            onPointerDown={desktopModal ? undefined : (event) => { if ((event.target as HTMLElement).closest('button,input,a,select,textarea')) return; event.currentTarget.setPointerCapture(event.pointerId); startDrag(event.clientY); }}
           >
             <div className="sheet-title-row">
-              <h3 className="panel-title">{title}</h3>
+              <h3 id={titleId} className="panel-title">{title}</h3>
               {titleAccessory}
             </div>
             {description ? <p className="card-subtitle">{description}</p> : null}

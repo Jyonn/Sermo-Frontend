@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { useI18n } from "../lib/language";
 import { MediaWaitFeedback, type MediaWaitPhase } from "./MediaWaitFeedback";
 import { PhotoArchivePlate } from "./PhotoArchivePlate";
+import { useBodyScrollLock } from "../lib/bodyLock";
+import { useModalFocus } from "../lib/modalFocus";
 import type { ImageMetadataDTO, TinyUserDTO } from "../types";
 
 interface ImageLightboxProps {
@@ -605,6 +607,9 @@ export function MediaLightbox({
 }: MediaLightboxProps) {
   const { t } = useI18n();
   const resolvedAltPrefix = altPrefix || t("media.imagePreview");
+  const modalRef = useRef<HTMLElement | null>(null);
+  useBodyScrollLock(items.length > 0);
+  useModalFocus(modalRef, items.length > 0, onClose);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const gestureRef = useRef<{ moved: boolean; x: number } | null>(null);
   const approachingEndRef = useRef(onApproachingEnd);
@@ -652,7 +657,7 @@ export function MediaLightbox({
       const gesture = gestureRef.current;
       if (gesture && Math.abs(event.clientX - gesture.x) > 8) gesture.moved = true;
     }} role="presentation">
-      <section aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${activeItem.kind === "image" && !immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog">
+      <section ref={modalRef} tabIndex={-1} aria-label={resolvedAltPrefix} aria-modal="true" className={`message-image-preview-modal${activeItem.kind === "image" && !immersive ? " is-photo-archive" : ""}${immersive ? " is-immersive" : ""}${sharedDetail ? " has-shared-detail" : ""}`} role="dialog">
         <div className="message-image-preview-track" onScroll={(event) => {
           const element = event.currentTarget;
           const nextIndex = Math.round(element.scrollLeft / Math.max(element.clientWidth, 1));

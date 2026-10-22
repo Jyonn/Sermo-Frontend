@@ -21,6 +21,8 @@ import { SettingGroup, SettingRow, SettingSelect, SettingSwitch } from "../compo
 import { UserAvatar } from "../components/UserAvatar";
 import { BgmIcon } from "../components/BgmIcon";
 import { BgmEntranceSettings } from "../components/BgmEntranceSettings";
+import { ActionSheet } from "../components/ActionSheet";
+import { AlertDialog } from "../components/AlertDialog";
 import type { ActivityCampaignDTO } from "../types";
 import { UserProfileCard } from "../components/UserProfileCard";
 import { WelcomeMessageEditor } from "../components/WelcomeMessageEditor";
@@ -2986,26 +2988,12 @@ export default function MenuPage() {
         </div>
       </SideDrawer>
 
-      <BottomSheet
-        bodyClassName="binding-channel-sheet-body"
-        className="binding-channel-sheet"
+      <ActionSheet
         open={bindMoreOpen}
         title={t("contact.bindMore")}
         onClose={() => setBindMoreOpen(false)}
-      >
-        <div className="binding-channel-list">
-          {availableBindingChannels.map((kind) => (
-            <button className="binding-channel-option" key={kind} onClick={() => openBindingChannel(kind)} type="button">
-              <ContactChannelIcon kind={kind} />
-              <span>
-                <strong>{bindingChannelName(kind)}</strong>
-                <small>{bindingChannelPurpose(kind)}</small>
-              </span>
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          ))}
-        </div>
-      </BottomSheet>
+        actions={availableBindingChannels.map((kind) => ({ key: kind, label: bindingChannelName(kind), description: bindingChannelPurpose(kind), icon: <ContactChannelIcon kind={kind} />, onSelect: () => openBindingChannel(kind) }))}
+      />
 
       {space?.qq_binding_available ? (
         <SideDrawer
@@ -3724,7 +3712,7 @@ export default function MenuPage() {
         type={hasPassword ? "password" : "text"}
         value={accountDeleteInput}
       />
-      <ConfirmDialog
+      <AlertDialog
         danger
         busy={accountDeleteSaving}
         open={accountDeleteStep === "final"}

@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.22.2",
+  "id": "2026.10.22.3",
   "publishedAt": "2026-10-22",
   "locales": {
     "zh-CN": {
-      "title": "更简洁的登场消息",
+      "title": "更恰当的交互反馈",
       "items": [
-        "登场音效仅发送一条可播放的系统消息，不再额外生成语音消息，历史记录保持兼容"
+        "新增七类交互的组件预览，支持分档面板、动作选择、可撤销反馈和分步引导",
+        "优化联系方式选择、注销最终确认与好友搜索错误提示，增强弹层键盘操作"
       ]
     },
     "en": {
-      "title": "Simpler entrance messages",
+      "title": "More intentional interactions",
       "items": [
-        "Entrance sounds now use one playable system message without a separate audio message; existing history remains compatible"
+        "Explore seven interaction patterns including detented sheets, actions, undo feedback and guided tours",
+        "Improved contact-method selection, final account confirmation, persistent search errors and overlay keyboard access"
       ]
     }
   }
