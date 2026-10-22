@@ -9,6 +9,7 @@ import ts from "typescript";
 import * as sites from "../src/lib/siteOrigins.ts";
 import * as migration from "../src/lib/siteMigration.ts";
 import * as consent from "../src/lib/oauthConsent.ts";
+import * as destination from "../src/lib/updateDestination.ts";
 
 const require = createRequire(import.meta.url);
 const messages = JSON.parse(fs.readFileSync(new URL("../src/locales/zh-CN/translation.json", import.meta.url), "utf8"));
@@ -26,6 +27,7 @@ function load(name: string, iconState?: { value: boolean }) {
       if (name === "../lib/usePwaUpdateActivation") return { usePwaUpdateActivation: () => ({ phase: "idle", install() {} }) };
       if (name === "./UpdateReportButton") return { UpdateFailureFeedback: () => null };
       if (name === "../lib/siteOrigins") return sites;
+      if (name === "../lib/updateDestination") return destination;
       if (name === "../lib/siteMigration") return migration;
       if (name === "../lib/oauthConsent") return consent;
       if (name === "./OAuthConsentBrand") return load("OAuthConsentBrand", iconState);
@@ -84,4 +86,20 @@ test("actual update dialog lists four labeled sites with clean links even before
   assert.equal((html.match(/Frienden 友间 · 新/g) || []).length, 2);
   assert.equal((html.match(/Sermo 言浪 · 旧/g) || []).length, 2);
   assert.doesNotMatch(html, /state=|code=|token=|redirect_uri=/);
+});
+test("cross-site update dialog offers navigation and waiting instead of installation", () => {
+  const { UpdateCheckDialog } = load("UpdateCheckDialog");
+  const result = {
+    currentRelease: { id: "2026.10.22.3" }, latestVersion: "2026.10.22.4", updateAvailable: true,
+    sources: sites.SITE_ORIGINS.map((site) => ({ ...site, status: "ok", releaseId: site.key === "primary" ? "2026.10.22.3" : "2026.10.22.4" })),
+  };
+  const props = { open: true, checking: false, result, onCheck() {}, onClose() {} };
+  const crossSite = renderToStaticMarkup(React.createElement(UpdateCheckDialog, props));
+  assert.match(crossSite, /前往新站点/);
+  assert.match(crossSite, /再等等/);
+  assert.doesNotMatch(crossSite, /立即更新/);
+  result.sources.forEach((source) => { source.releaseId = "2026.10.22.4"; });
+  const local = renderToStaticMarkup(React.createElement(UpdateCheckDialog, props));
+  assert.match(local, /立即更新/);
+  assert.doesNotMatch(local, /前往新站点|再等等/);
 });
