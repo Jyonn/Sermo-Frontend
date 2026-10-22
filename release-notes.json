@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.22.1",
+  "id": "2026.10.22.2",
   "publishedAt": "2026-10-22",
   "locales": {
     "zh-CN": {
-      "title": "更自在的主角登场",
+      "title": "更简洁的登场消息",
       "items": [
-        "登场冷却改为每人每会话独立 3 分钟，冷却中不展示手动按键并提示静默进入",
-        "个性化中统一通过主角按键设置成员音效自动播放、登场方式和自动选曲"
+        "登场音效仅发送一条可播放的系统消息，不再额外生成语音消息，历史记录保持兼容"
       ]
     },
     "en": {
-      "title": "More flexible entrances",
+      "title": "Simpler entrance messages",
       "items": [
-        "Independent 3-minute cooldowns per user and conversation, with silent-entry notices and no unavailable manual keys",
-        "One personalization entry for member autoplay, entrance mode and automatic track selection"
+        "Entrance sounds now use one playable system message without a separate audio message; existing history remains compatible"
       ]
     }
   }

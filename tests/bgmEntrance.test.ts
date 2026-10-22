@@ -6,6 +6,18 @@ import { mapChatMessageDTO } from "../src/lib/chatMessageMapper.ts";
 const system = () => mapChatMessageDTO({ message_id: 11, type: 3, created_at: 101, user: { user_id: 7, name: "Alice" }, content: "Alice entered with Track", payload: { kind: "system", event: "bgm_entrance", text: "Alice entered with Track" } }, 1);
 const audio = () => mapChatMessageDTO({ message_id: 12, type: 5, created_at: 101, user: { user_id: 7, name: "Alice" }, content: "", payload: { kind: "audio", bgm_entrance: true, uri: "https://example.test/a.mp3", song_title: "Track", system_message_id: 11 } }, 1);
 
+test("a standalone entrance system message carries playback and autoplays without an audio message", () => {
+  const message = mapChatMessageDTO({ message_id: 21, type: 3, created_at: 101, user: { user_id: 7, name: "Alice" }, content: "Alice entered", payload: { kind: "system", event: "bgm_entrance", bgm_entrance: true, uri: "https://example.test/a.mp3", song_title: "Track", duration_seconds: 12 } }, 1);
+  const merged = mergeBgmEntranceMessages([message]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].kind, "system");
+  assert.equal(merged[0].payload?.uri, "https://example.test/a.mp3");
+  assert.equal(merged[0].payload?.duration_seconds, 12);
+  assert.equal(newBgmEntrances(merged, new Set(), 100, 102, 1, true).length, 1);
+  assert.equal(newBgmEntrances(merged, new Set(), 100, 102, 1, false).length, 0);
+  assert.equal(newBgmEntrances(merged, new Set(["21"]), 100, 102, 1).length, 0);
+});
+
 test("legacy system/audio pair becomes one system message with inline playback", () => {
   const first = system();
   const result = mergeBgmEntranceMessages([first, audio()]);
