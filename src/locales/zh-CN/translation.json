@@ -1,4 +1,6 @@
 {
+  "update.goToNewSite": "前往新站点",
+  "update.wait": "再等等",
   "patterns.title": "恰到好处的打扰",
   "patterns.intro": "七种交互，七种分寸。不是所有内容都需要抽屉，也不是每一次操作都值得一个确认框。",
   "patterns.library": "交互组件库",

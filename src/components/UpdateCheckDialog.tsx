@@ -5,6 +5,7 @@ import { type ExplicitUpdateCheckResult, type UpdateSourceKey } from "../lib/pwa
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { UpdateFailureFeedback } from "./UpdateReportButton";
 import { SITE_ORIGINS, updateSiteLabel } from "../lib/siteOrigins";
+import { updateDestination } from "../lib/updateDestination";
 
 interface UpdateCheckDialogProps {
   checking: boolean;
@@ -27,6 +28,7 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
   const release = result?.latestRelease?.id === result?.latestVersion ? result?.latestRelease : null;
   const localizedRelease = release?.locales[language] ?? release?.locales.en;
   const sourceName = (key: UpdateSourceKey) => t(updateSiteLabel(key));
+  const destination = updateDestination(result, window.location.origin);
 
   return createPortal(
     <div className="dialog-backdrop update-check-backdrop" onClick={() => { if (!installing) onClose(); }} role="presentation">
@@ -70,8 +72,8 @@ export function UpdateCheckDialog({ checking, onCheck, onClose, open, result }: 
         </div>
 
         <footer className="update-check-actions">
-          <button className="ghost-button" disabled={checking || installing} onClick={onCheck} type="button">{t("update.recheck")}</button>
-          {result?.updateAvailable ? <button className="button" disabled={installing} onClick={install} type="button">{installing ? <span aria-hidden="true" className="media-wait-spinner" /> : null}{installing ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}</button> : <button className="button" onClick={onClose} type="button">{t("common.gotIt")}</button>}
+          <button className="ghost-button" disabled={checking || installing} onClick={destination ? () => window.location.assign(destination) : onCheck} type="button">{t(destination ? "update.goToNewSite" : "update.recheck")}</button>
+          {destination ? <button className="button" disabled={installing} onClick={onClose} type="button">{t("update.wait")}</button> : result?.updateAvailable ? <button className="button" disabled={installing} onClick={install} type="button">{installing ? <span aria-hidden="true" className="media-wait-spinner" /> : null}{installing ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}</button> : <button className="button" onClick={onClose} type="button">{t("common.gotIt")}</button>}
         </footer>
       </section>
     </div>,

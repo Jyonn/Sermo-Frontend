@@ -6,6 +6,7 @@ import {
 import { usePwaUpdateActivation } from "../lib/usePwaUpdateActivation";
 import { useI18n } from "../lib/language";
 import { UpdateFailureFeedback } from "./UpdateReportButton";
+import { updateDestination } from "../lib/updateDestination";
 
 const DISMISSED_UPDATE_KEY = "sermo:pwa-update-dismissed";
 
@@ -17,6 +18,7 @@ export function PwaUpdatePrompt() {
   const updating = phase !== "idle" && phase !== "error";
   const releaseId = result?.latestVersion;
   const release = result?.latestRelease?.id === releaseId ? result?.latestRelease : null;
+  const destination = updateDestination(result, window.location.origin);
   if (!result?.updateAvailable || !releaseId || dismissedReleaseId === releaseId) return null;
 
   const dismiss = () => {
@@ -44,10 +46,10 @@ export function PwaUpdatePrompt() {
         )}
       </div>
       <div className="pwa-update-actions">
-        <button className="pwa-update-dismiss" disabled={updating} onClick={dismiss} type="button">{t("common.gotIt")}</button>
-        <button className="pwa-recommendation-action" disabled={updating} onClick={install} type="button">
+        <button className="pwa-update-dismiss" disabled={updating} onClick={destination ? () => window.location.assign(destination) : dismiss} type="button">{t(destination ? "update.goToNewSite" : "common.gotIt")}</button>
+        <button className="pwa-recommendation-action" disabled={updating} onClick={destination ? dismiss : install} type="button">
           {updating ? <span aria-hidden="true" className="media-wait-spinner" /> : null}
-          {updating ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t("common.updateNow")}
+          {updating ? t(`update.${phase}` as "update.preparing" | "update.installing" | "update.restarting") : t(destination ? "update.wait" : "common.updateNow")}
         </button>
       </div>
       {phase === "error" ? <UpdateFailureFeedback /> : null}
