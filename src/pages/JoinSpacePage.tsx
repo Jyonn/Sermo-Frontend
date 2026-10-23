@@ -11,7 +11,7 @@ import { useAuth } from "../lib/auth";
 import { clearPendingFriendInviteToken, readPendingFriendInviteToken } from "../lib/friendInvite";
 import { getBrowserJoinLanguage, useI18n } from "../lib/language";
 import { buildHomeHrefForCurrentHost, getDetectedSpaceSlug, normalizeSlug } from "../lib/spaceEntry";
-import type { SpaceDTO } from "../types";
+import type { JoinResponseDTO, SpaceDTO } from "../types";
 import { showToast } from "../lib/toast";
 import { PUBLIC_HOST } from "../lib/siteConfig";
 import { isOAuthLoginPending, completeOAuthLogin, readOAuthRequest, oauthReturnForAccount } from "../lib/oauthPending";
@@ -35,13 +35,21 @@ function isPasswordRequiredJoinError(error: unknown) {
   return error.identifier === "USER@PASSWORD_REQUIRED";
 }
 
-export default function JoinSpacePage() {
+interface JoinSpacePageProps {
+  embedded?: boolean;
+  spaceSlug?: string;
+  onJoined?: (payload: JoinResponseDTO) => void;
+  onBusyChange?: (busy: boolean) => void;
+}
+
+export default function JoinSpacePage({ embedded = false, spaceSlug, onJoined, onBusyChange }: JoinSpacePageProps = {}) {
   const { t } = useI18n();
   const { slug: routeSlug = "" } = useParams();
   const navigate = useNavigate();
   const { loginFromJoin, session } = useAuth();
   const detectedSlug = getDetectedSpaceSlug();
-  const slug = useMemo(() => normalizeSlug(routeSlug || detectedSlug || ""), [detectedSlug, routeSlug]);
+  const slug = useMemo(() => normalizeSlug(spaceSlug || routeSlug || detectedSlug || ""), [detectedSlug, routeSlug, spaceSlug]);
+  const alive = useRef(true);
   const spaceDomainLabel = useMemo(() => {
     if (typeof window !== "undefined" && window.location.host) {
       return slug ? `${window.location.host}/${slug}` : window.location.host;
@@ -70,15 +78,21 @@ export default function JoinSpacePage() {
   const [recoveryBusy, setRecoveryBusy] = useState(false);
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   useEffect(() => {
-    if (!session || isOAuthLoginPending()) return;
+    onBusyChange?.(submitState === "submitting" || recoveryBusy);
+    return () => onBusyChange?.(false);
+  }, [submitState, recoveryBusy, onBusyChange]);
+
+  useEffect(() => {
+    if (embedded || !session || isOAuthLoginPending()) return;
     const pendingInviteToken = readPendingFriendInviteToken();
     if (pendingInviteToken) {
       navigate(`/friend-invite#token=${encodeURIComponent(pendingInviteToken)}`, { replace: true });
       return;
     }
     navigate("/app", { replace: true });
-  }, [navigate, session]);
+  }, [embedded, navigate, session]);
 
   useEffect(() => {
     if (!slug) navigate("/space", { replace: true });
@@ -222,7 +236,9 @@ export default function JoinSpacePage() {
         language: getBrowserJoinLanguage(),
         new_user_intent: newUserIntent,
       });
+      if (!alive.current) return;
       setPendingNewUserName(null);
+      if (onJoined) { onJoined(payload); return; }
       completeOAuthLogin();
       loginFromJoin(payload);
       const oauthReturn = readOAuthRequest();
@@ -238,6 +254,7 @@ export default function JoinSpacePage() {
         navigate("/app", { replace: true });
       }
     } catch (error) {
+      if (!alive.current) return;
       if (error instanceof ApiError && error.identifier === "USER@NEW_USER_CONFIRMATION_REQUIRED") {
         setPendingNewUserName(name);
         return;
@@ -274,6 +291,7 @@ export default function JoinSpacePage() {
 
   return (
     <AppChrome
+      embedded={embedded}
       guestSpaceBrand={{
         name: space?.name || displaySlug(slug) || slug,
         avatarUri: space?.official_user?.avatar_uri,
@@ -282,7 +300,7 @@ export default function JoinSpacePage() {
       publicHeader
       title={space?.name || displaySlug(slug) || slug}
     >
-      <section className="auth-shell">
+      <section className={`auth-shell${embedded ? " pwa-space-login" : ""}`}>
         <div className={`auth-card ${lookupState !== "ready" ? "is-space-state" : ""}`}>
           {lookupState === "loading" ? (
             <div className="join-space-state loading">
@@ -337,12 +355,12 @@ export default function JoinSpacePage() {
 
           {lookupState === "ready" ? (
             <form className="auth-form" onSubmit={(event) => void submit(event)}>
-              <div className="join-space-head">
+              {!embedded ? <div className="join-space-head">
                 <p className="join-space-kicker">{t("join.welcome", { name: space?.name || displaySlug(slug) })}</p>
                 <h2>{t("join.nicknamePrompt")}</h2>
-              </div>
+              </div> : null}
 
-              {space?.official_user ? (
+              {!embedded && space?.official_user ? (
                 <div className="join-space-official-card">
                   <SpaceAvatar
                     className="avatar join-space-official-avatar"
@@ -360,6 +378,8 @@ export default function JoinSpacePage() {
                 <label className="field-label">{t("join.nickname")}</label>
                 <input
                   className="input"
+                  aria-label={t("join.nickname")}
+                  autoComplete="username"
                   placeholder={t("join.nicknamePlaceholder")}
                   value={nickname}
                   onChange={(event) => {
@@ -391,6 +411,8 @@ export default function JoinSpacePage() {
                     autoFocus
                     className="input"
                     type="password"
+                    aria-label={t("join.password")}
+                    autoComplete="current-password"
                     value={password}
                     onChange={(event) => {
                       setPassword(event.target.value);
@@ -404,11 +426,11 @@ export default function JoinSpacePage() {
               <button className="button auth-submit" disabled={submitState === "submitting"} type="submit">
                 {submitState === "submitting" ? t("join.entering") : t("join.enter")}
               </button>
-              <div className="join-login-divider"><i /><span>{t("join.or")}</span><i /></div>
+              {!embedded ? <><div className="join-login-divider"><i /><span>{t("join.or")}</span><i /></div>
               <button className="ghost-button join-wechat-login" onClick={() => showToast(t("join.wechatMiniProgramHint"))} type="button">
                 <span className="material-symbols-outlined">chat</span>
                 {t("join.wechatLogin")}
-              </button>
+              </button></> : null}
             </form>
           ) : null}
         </div>

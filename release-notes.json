@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.23.1",
+  "id": "2026.10.23.2",
   "publishedAt": "2026-10-23",
   "locales": {
     "zh-CN": {
-      "title": "更轻量的会话与成长信息",
+      "title": "更顺畅的 PWA 账户登录",
       "items": [
-        "精简消息与成长信息的传输，保留完整内容与功能",
-        "主角 BGM 登场间隔调整为每人每会话 10 分钟"
+        "已选空间可直接用昵称和可选访问密码登录其他账户，无需重复输入空间名",
+        "主动登录其他账户时保留账户列表并展开登录表单，不再自动进入已有账户"
       ]
     },
     "en": {
-      "title": "Lighter messages and growth updates",
+      "title": "Smoother PWA account sign-in",
       "items": [
-        "Reduced message and growth transfer sizes without losing content or features",
-        "BGM entrances now have a 10-minute cooldown per user and conversation"
+        "Sign in to another account in the selected space with a nickname and optional password",
+        "Explicitly adding an account keeps the account list visible and opens sign-in instead of automatically entering an existing account"
       ]
     }
   }

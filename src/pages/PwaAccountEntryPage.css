@@ -1,0 +1,17 @@
+.pwa-space-login.auth-shell { display: block; padding: 0; margin: 0; min-height: 0; }
+.pwa-space-login .auth-card { width: 100%; padding: 4px 0 0; margin: 0; border: 0; box-shadow: none; background: transparent; }
+.pwa-space-login .auth-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.pwa-space-login .auth-form .input { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--entry-muted) 25%, transparent); border-radius: 15px; color: var(--entry-ink); background: color-mix(in srgb, var(--entry-ink) 4%, transparent); font-family: inherit; }
+.pwa-space-login .auth-form button { width: auto; height: auto; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+.pwa-space-login .auth-form .auth-submit { width: 100%; min-height: 48px; border-radius: 15px; color: #f5fff9; background: var(--entry-accent); }
+.pwa-space-login .auth-form .auth-toggle,
+.pwa-space-login .auth-form .auth-forgot-button { padding: 0; justify-content: flex-start; color: var(--entry-accent); background: transparent; }
+.pwa-space-login .field-label { color: var(--entry-ink); }
+html[data-theme="dark"] .pwa-space-login .auth-form { border: 0; background: transparent; }
+html[data-theme="dark"] .pwa-space-login .auth-form .auth-submit { color: #123c2e; }
+.pwa-account-entry-shell { grid-template-rows: auto minmax(0, 1fr); }
+.pwa-account-entry-content { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.pwa-account-entry-content.is-login-open { display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; }
+.pwa-account-entry-content.is-login-open > .pwa-account-entry-scroll { flex: none; overflow: visible; }
+.pwa-account-entry-content.is-login-open > .pwa-account-entry-fixed-footer { flex: none; margin-top: auto; }
+@media (prefers-reduced-motion: reduce) { .pwa-other-login-panel { transition: none; } }
