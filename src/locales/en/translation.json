@@ -3092,7 +3092,7 @@
   ,"bgm.random": "Random owned track"
   ,"bgm.receiveAudio": "Autoplay conversation members' sounds"
   ,"bgm.silentEntry": "Entering silently for the next {{minutes}} min"
-  ,"bgm.playbackHint": "Each user can make an entrance once every 3 minutes per conversation, independently. With member autoplay off, tap the message icon to play manually. Autoplay never interrupts voice or video and remains subject to browser restrictions."
+  ,"bgm.playbackHint": "Each user can make an entrance once every 10 minutes per conversation, independently. With member autoplay off, tap the message icon to play manually. Autoplay never interrupts voice or video and remains subject to browser restrictions."
   ,"bgm.entranceMessage": "{{actor}} entered the chat"
   ,"bgm.pressToEnter": "Press your entrance key"
   ,"bgm.autoDismiss": "Closes without sending if no key is chosen"

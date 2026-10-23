@@ -108,7 +108,7 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     try {
       const response = await api.enterWithBgm(selectedActivity.key, chatId, requestId.current, track);
       if (!isCurrent()) return;
-      if (response.reason === "cooldown") { silent(response.retry_after_seconds ?? 180); return; }
+      if (response.reason === "cooldown") { silent(response.retry_after_seconds ?? 600); return; }
       if (!response.sent || !response.uri || !response.title) { setDock(false); return; }
       const played = await playBgm(response.uri);
       if (!isCurrent()) { activeBgm?.pause(); return; }

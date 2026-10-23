@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.22.4",
-  "publishedAt": "2026-10-22",
+  "id": "2026.10.23.1",
+  "publishedAt": "2026-10-23",
   "locales": {
     "zh-CN": {
-      "title": "更清晰的跨站更新提示",
+      "title": "更轻量的会话与成长信息",
       "items": [
-        "新版尚未同步到本站时，可前往已更新站点或选择再等等，不再提示无效刷新"
+        "精简消息与成长信息的传输，保留完整内容与功能",
+        "主角 BGM 登场间隔调整为每人每会话 10 分钟"
       ]
     },
     "en": {
-      "title": "Clearer cross-site update choices",
+      "title": "Lighter messages and growth updates",
       "items": [
-        "When the latest release is only available elsewhere, visit the updated site or wait instead of reloading an outdated site"
+        "Reduced message and growth transfer sizes without losing content or features",
+        "BGM entrances now have a 10-minute cooldown per user and conversation"
       ]
     }
   }

@@ -1,5 +1,6 @@
 import { mergeSessionUser } from "./sessionUser";
 import { decodeChatList, type CompactChatList } from "./chatListTransport";
+import { decodeCompact, type CompactPayload } from "./compactTransport";
 import type {
   ApiEnvelope,
   AdminActivityDTO,
@@ -879,11 +880,11 @@ export const api = {
   },
 
   getMessages(params: { chat_id: number; limit: number; before?: number; after?: number }, signal?: AbortSignal) {
-    return request<ChatMessageDTO[]>("/messages/", {
+    return request<ChatMessageDTO[] | CompactPayload>("/messages/", {
       auth: true,
-      query: params,
+      query: { ...params, format: "compact-v1" },
       signal,
-    });
+    }).then((payload) => decodeCompact<ChatMessageDTO[]>(payload, "messages"));
   },
 
   searchMessages(params: { chat_id: number; limit: number; keyword?: string; type?: number; before?: number }, signal?: AbortSignal) {
@@ -1575,20 +1576,22 @@ export const api = {
   },
 
   getGrowth(signal?: AbortSignal) {
-    return request<UserGrowthDTO>("/users/me/growth", {
+    return request<UserGrowthDTO | CompactPayload>("/users/me/growth", {
       auth: true,
+      query: { format: "compact-v1" },
       signal,
-    });
+    }).then((payload) => decodeCompact<UserGrowthDTO>(payload, "growth"));
   },
 
   acknowledgeGrowthLevel(level: number) {
-    return request<UserGrowthDTO>("/users/me/growth", {
+    return request<UserGrowthDTO | CompactPayload>("/users/me/growth", {
       method: "POST",
       auth: true,
+      query: { format: "compact-v1" },
       body: { level },
     }).then((growth) => {
       window.dispatchEvent(new CustomEvent("sermo:feature-discoveries-refresh"));
-      return growth;
+      return decodeCompact<UserGrowthDTO>(growth, "growth");
     });
   },
 

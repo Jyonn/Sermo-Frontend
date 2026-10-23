@@ -3092,7 +3092,7 @@
   ,"bgm.random": "从已拥有歌曲中随机"
   ,"bgm.receiveAudio": "自动播放会话成员音效"
   ,"bgm.silentEntry": "{{minutes}} 分钟内静默进入会话"
-  ,"bgm.playbackHint": "每位用户在每个会话中，每 3 分钟可登场一次，互不影响。关闭成员音效自动播放后，仍可点击消息末尾的图标播放；自动播放不会打断语音和视频，并受浏览器限制。"
+  ,"bgm.playbackHint": "每位用户在每个会话中，每 10 分钟可登场一次，互不影响。关闭成员音效自动播放后，仍可点击消息末尾的图标播放；自动播放不会打断语音和视频，并受浏览器限制。"
   ,"bgm.entranceMessage": "{{actor}} 进入聊天"
   ,"bgm.pressToEnter": "按下你的登场 BGM"
   ,"bgm.autoDismiss": "未选择将自动收起，不发送消息"
