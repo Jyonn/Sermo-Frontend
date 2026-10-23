@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.23.2",
+  "id": "2026.10.23.3",
   "publishedAt": "2026-10-23",
   "locales": {
     "zh-CN": {
-      "title": "更顺畅的 PWA 账户登录",
+      "title": "更轻盈清晰的状态提示",
       "items": [
-        "已选空间可直接用昵称和可选访问密码登录其他账户，无需重复输入空间名",
-        "主动登录其他账户时保留账户列表并展开登录表单，不再自动进入已有账户"
+        "统一优化信息提示与空状态，去除虚线框并适配深浅色模式",
+        "更清楚地区分加载、空内容和读取失败，互动额度读取失败后可直接重试"
       ]
     },
     "en": {
-      "title": "Smoother PWA account sign-in",
+      "title": "Lighter, clearer status feedback",
       "items": [
-        "Sign in to another account in the selected space with a nickname and optional password",
-        "Explicitly adding an account keeps the account list visible and opens sign-in instead of automatically entering an existing account"
+        "Refined information and empty states without dashed boxes, in light and dark themes",
+        "Clearer loading, empty and failure states, with a direct retry for interaction quotas"
       ]
     }
   }

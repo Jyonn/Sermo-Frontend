@@ -3652,8 +3652,6 @@ html[data-theme="dark"] :is(
   .simple-list,
   .menu-pref-list,
   .detail-card,
-  .feedback-state,
-  .empty-state,
   .chat-detail-settings-list,
   .message-context-menu,
   .avatar-preset-dialog,
@@ -4915,9 +4913,10 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
   padding: 28px 22px;
   text-align: center;
   color: var(--text-muted);
-  border: 1px dashed var(--line-strong);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.52);
+  border: 0;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--text-muted) 5%, var(--bg-panel));
+  overflow-wrap: anywhere;
 }
 
 .footer-note {

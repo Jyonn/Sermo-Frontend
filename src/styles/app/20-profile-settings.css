@@ -5310,7 +5310,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 .sticker-load-failed {
   align-items: center;
   background: color-mix(in srgb, var(--text-muted) 9%, transparent);
-  border: 1px dashed color-mix(in srgb, var(--text-muted) 38%, transparent);
+  border: 0;
   border-radius: 14px;
   color: var(--text-muted);
   display: flex;
@@ -6735,8 +6735,9 @@ html[data-theme="dark"] body :is(.growth-reward-row, .growth-celebration-unlocks
   margin: 0;
   padding: 12px 14px;
   color: var(--text-muted);
-  border: 1px dashed var(--line-soft);
+  border: 0;
   border-radius: 12px;
+  background: color-mix(in srgb, var(--text-muted) 5%, var(--bg-panel));
   font-size: 0.72rem;
 }
 

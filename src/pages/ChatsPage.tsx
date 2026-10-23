@@ -8971,7 +8971,7 @@ function LiveChatsPage({
               </div>
             </>
           ) : (
-            <FeedbackState title={t("chat.conversationInfo")} description={t("chat.selectToView")} />
+            <FeedbackState tone="empty" icon="forum" title={t("chat.conversationInfo")} description={t("chat.selectToView")} />
           )}
         </aside>
       </section>
@@ -9048,7 +9048,7 @@ function LiveChatsPage({
               </button>
             ) : null}
           </div>
-        ) : submissionInviteDetailLoading ? <FeedbackState title={t("common.loading")} description={t("submission.inviteLoadingHint")} /> : <FeedbackState title={t("submission.inviteUnavailable")} description={t("submission.inviteUnavailableHint")} />}
+        ) : submissionInviteDetailLoading ? <FeedbackState tone="loading" title={t("common.loading")} description={t("submission.inviteLoadingHint")} /> : <FeedbackState tone="error" icon="link_off" title={t("submission.inviteUnavailable")} description={t("submission.inviteUnavailableHint")} />}
       </BottomSheet>
 
       <BottomSheet open={submissionReviewSheetOpen} title={t("submission.reviewNext")} onClose={() => !submissionActionBusy && setSubmissionReviewSheetOpen(false)}>
@@ -9073,7 +9073,7 @@ function LiveChatsPage({
           <label className="field-label">{t("chat.selectMembers")}</label>
           <div className="row-subtle">{t("chat.groupVerificationHint")}</div>
           {currentUserVerified === false ? (
-            <FeedbackState title={t("chat.verifyBeforeCreate")} description={t("chat.creatorVerificationRequired")} />
+            <FeedbackState icon="verified_user" title={t("chat.verifyBeforeCreate")} description={t("chat.creatorVerificationRequired")} />
           ) : (
             <>
               <input className="input" placeholder={t("friends.search")} value={groupQuery} onChange={(event) => setGroupQuery(event.target.value)} />

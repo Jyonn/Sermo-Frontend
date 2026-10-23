@@ -354,7 +354,7 @@ export function UserProfilePanel({ userId, initialUser, initialIsFriend, onSynci
       </div>
     );
   }
-  if (!user || viewState === "error") return <FeedbackState title={t("profile.unavailable")} description={error ?? t("profile.tryLater")} />;
+  if (!user || viewState === "error") return <FeedbackState tone="error" title={t("profile.unavailable")} description={error ?? t("profile.tryLater")} />;
 
   return (
     <div className={`user-profile-panel profile-theme-${user.profile_card_theme ?? "default"}${isSelf ? " is-self" : ""}`}>

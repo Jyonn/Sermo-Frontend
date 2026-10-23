@@ -831,7 +831,7 @@ export default function SpaceAdminDashboardPage() {
                 <span className="admin-member-main"><span><strong>{user.name}</strong><b>LV.{user.growth_level ?? 1}</b>{user.verified ? <em>{t("admin.verified")}</em> : null}</span><small>{user.is_deleted ? t("admin.historicalResidual") : `${user.friend_count ?? 0} ${t("admin.friends")} · ${user.statement_count ?? 0} ${t("admin.statements")}`}</small></span>
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>)}
-              {!members.length && memberState === "ready" ? <FeedbackState title={t("admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : ""} /> : null}
+              {!members.length && memberState === "ready" ? <FeedbackState tone="empty" icon={query.trim() ? "search_off" : "group"} title={t("admin.noMembers")} description={query.trim() ? t("common.tryAnotherKeyword") : ""} /> : null}
             </div>
           </section> : null}
 
@@ -844,7 +844,7 @@ export default function SpaceAdminDashboardPage() {
                 {statement.media.length ? <div className="admin-statement-media">{statement.media.slice(0, 3).map((media) => media.kind === "image" ? <img alt="" key={media.media_id} src={media.thumbnail_uri || media.uri} /> : <span key={media.media_id}><span className="material-symbols-outlined">{media.kind === "video" ? "videocam" : "mic"}</span>{media.kind === "video" ? t("media.video") : t("media.audio")}</span>)}</div> : null}
                 <footer><span>{statement.like_count} {t("square.like")}</span><span>{statement.comment_count} {t("square.comments")}</span></footer>
               </article>)}
-              {!squareStatements.length && squareState === "ready" ? <FeedbackState title={t("square.empty")} /> : null}
+              {!squareStatements.length && squareState === "ready" ? <FeedbackState tone="empty" icon="forum" title={t("square.empty")} /> : null}
             </div>
           </section> : null}
 
@@ -902,7 +902,7 @@ export default function SpaceAdminDashboardPage() {
             </article>;
           })}
           {activitiesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
-          {activitiesState === "error" ? <FeedbackState title={t("admin.activityLoadFailed")} /> : null}
+          {activitiesState === "error" ? <FeedbackState tone="error" title={t("admin.activityLoadFailed")} /> : null}
         </div>
       </SideDrawer>
 
@@ -914,7 +914,7 @@ export default function SpaceAdminDashboardPage() {
             <footer><span>{mute.created_by ? t("admin.mutedBy", { name: mute.created_by.name }) : ""}</span><div><button onClick={() => editSquareMute(mute)} type="button">{t("admin.adjustMute")}</button><button className="is-danger" onClick={() => setUnmuteTarget(mute)} type="button">{t("admin.unmute")}</button></div></footer>
           </article>)}
           {squareMutesState === "loading" ? <FeedbackState tone="loading" title={t("common.loading")} /> : null}
-          {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState description={t("admin.noSquareMutesHint")} title={t("admin.noSquareMutes")} /> : null}
+          {squareMutesState === "ready" && !squareMutes.length ? <FeedbackState tone="empty" icon="verified_user" description={t("admin.noSquareMutesHint")} title={t("admin.noSquareMutes")} /> : null}
         </div>
       </SideDrawer>
 

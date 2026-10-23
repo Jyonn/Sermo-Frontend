@@ -244,7 +244,7 @@ function formatActivityDateRange(startsAt: number, endsAt: number | null, langua
   return `${formatter.format(new Date(startsAt * 1000))} - ${formatter.format(new Date(endsAt * 1000))}`;
 }
 
-function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQuotaDTO | null }) {
+function SquareQuotaPanel({ loading, quota, onRetry }: { loading: boolean; quota: SquareQuotaDTO | null; onRetry: () => void }) {
   const { t } = useI18n();
   const levelDeckRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -252,8 +252,8 @@ function SquareQuotaPanel({ loading, quota }: { loading: boolean; quota: SquareQ
     const current = levelDeckRef.current?.querySelector<HTMLElement>(".is-current");
     requestAnimationFrame(() => current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }));
   }, [quota?.level, quota?.unlimited, quota?.vip]);
-  if (loading && !quota) return <div className="square-quota-loading"><span className="material-symbols-outlined">progress_activity</span></div>;
-  if (!quota) return <FeedbackState title={t("square.quotaLoadFailed")} />;
+  if (loading && !quota) return <FeedbackState tone="loading" title={t("common.loading")} />;
+  if (!quota) return <FeedbackState tone="error" icon="cloud_off" title={t("square.quotaLoadFailed")} action={<button className="ghost-button" onClick={onRetry} type="button">{t("common.retry")}</button>} />;
   const remaining = (used: number, limit: number | null) => limit === null ? null : Math.max(0, limit - used);
   const statementRemaining = remaining(quota.statements.daily_used, quota.statements.daily_limit);
   const commentRemaining = remaining(quota.comments.daily_used, quota.comments.daily_limit);
@@ -2940,7 +2940,7 @@ export default function SquarePage() {
         />
       </BottomSheet>
       <BottomSheet bodyClassName="square-quota-sheet" onClose={() => setQuotaOpen(false)} open={quotaOpen} title={t("square.quotaTitle")}>
-        <SquareQuotaPanel loading={quotaLoading} quota={quota} />
+        <SquareQuotaPanel loading={quotaLoading} quota={quota} onRetry={openQuota} />
       </BottomSheet>
     </AppChrome>
   );
