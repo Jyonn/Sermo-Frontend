@@ -16,6 +16,7 @@ const expectedFiles = [
   "40-square-platform.css",
   "50-chat-settings.css",
   "60-profile-themes.css",
+  "61-spider-profile.css",
   "70-square-composer.css",
   "80-chat-messages.css",
   "81-chat-moderation.css",

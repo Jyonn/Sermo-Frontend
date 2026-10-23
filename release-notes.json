@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.1",
+  "id": "2026.10.24.2",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "主角按键，轻盈随行",
+      "title": "蛛丝相连，友好邻居",
       "items": [
-        "登场按键以透明面板展示，三秒后自动收起为可拖拽、吸附边缘的浮钮",
-        "浮钮展示十分钟冷却倒计时，冷却结束后可再次展开"
+        "友好邻居名片焕新：织物红封面、面罩眼形与银白蛛丝细节",
+        "主题预览与实际名片同步呈现，适配深浅色模式"
       ]
     },
     "en": {
-      "title": "Entrance keys, always within reach",
+      "title": "A friendly neighborhood, woven together",
       "items": [
-        "Transparent entrance keys fold into a draggable, edge-snapping control after three seconds",
-        "The floating control shows the ten-minute cooldown and reopens when ready"
+        "Redesigned the Friendly Neighborhood profile with woven red, mask lenses and silk-web details",
+        "Theme previews now match the real card in light and dark modes"
       ]
     }
   }

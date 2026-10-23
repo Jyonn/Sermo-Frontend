@@ -1,0 +1,95 @@
+/* One artwork and palette for the real card, live preview and catalog swatches. */
+.user-profile-panel.profile-theme-spider-city {
+  --profile-page:#f5f1e9;
+  --profile-card:#fffcf5;
+  --profile-card-soft:#e6edf1;
+  --profile-ink:#1b2f43;
+  --profile-muted:#657586;
+  --profile-line:#27485e24;
+  --profile-deep:#1d3b54;
+  --profile-action:#ac3040;
+  --spider-accent:#b53040;
+  --spider-soft:#f3e0dc;
+  --spider-atmosphere:#dfe8ed85;
+  position:relative;
+  isolation:isolate;
+  color:var(--profile-ink);
+  background:radial-gradient(ellipse at 100% 36%,var(--spider-atmosphere),transparent 58%),var(--profile-page);
+}
+html[data-theme="dark"] .user-profile-panel.profile-theme-spider-city {
+  --profile-page:#101e2d;
+  --profile-card:#16293b;
+  --profile-card-soft:#1b3146;
+  --profile-ink:#edf1f3;
+  --profile-muted:#afbecb;
+  --profile-line:#9ab7cb30;
+  --profile-deep:#d8e6ed;
+  --profile-action:#f59a9c;
+  --spider-accent:#e66e78;
+  --spider-soft:#412735;
+  --spider-atmosphere:#24466235;
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-cover,
+.profile-card-entry-swatch.theme-spider-city,
+.profile-card-theme-option.theme-spider-city > span {
+  background:#b53040 url("../../assets/activity/friendly-neighborhood/profile-web-cover.svg") right center/cover no-repeat;
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-social-card { background:transparent; box-shadow:none; }
+.user-profile-panel.profile-theme-spider-city .user-profile-avatar-wrap {
+  background:var(--profile-page);
+  box-shadow:0 0 0 1px var(--profile-line),4px 5px 0 var(--spider-accent);
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-copy h2 { color:var(--profile-ink); letter-spacing:-.045em; }
+.user-profile-panel.profile-theme-spider-city .user-profile-copy p { color:var(--profile-muted); }
+.user-profile-panel.profile-theme-spider-city .user-profile-copy p.is-online { color:var(--profile-action); }
+.user-profile-panel.profile-theme-spider-city .user-profile-facts .is-relationship {
+  color:var(--profile-deep);
+  border-color:var(--profile-line);
+  background:var(--profile-card);
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-primary-actions .button {
+  border:1px solid var(--spider-accent);
+  color:#fff8f1;
+  background:#ad2f40;
+  box-shadow:0 4px 0 #6f2033;
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-primary-actions .user-profile-statements-action {
+  border-color:var(--profile-line);
+  color:var(--profile-deep);
+  background:var(--profile-card-soft);
+  box-shadow:0 4px 0 color-mix(in srgb,var(--profile-deep) 20%,transparent);
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-primary-actions .button:disabled { opacity:.65; }
+.user-profile-panel.profile-theme-spider-city .user-profile-recent-statement {
+  border:1px solid var(--profile-line);
+  color:var(--profile-ink);
+  background:var(--profile-card);
+  box-shadow:inset 3px 0 0 var(--spider-accent);
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-recent-statement::after {
+  content:"";
+  position:absolute;
+  inset:0 0 0 auto;
+  width:42%;
+  background:url("../../assets/activity/friendly-neighborhood/profile-silk.svg") right top/auto 100% no-repeat;
+  pointer-events:none;
+  opacity:.75;
+}
+.user-profile-panel.profile-theme-spider-city .user-profile-recent-statement > i { display:none; }
+.user-profile-panel.profile-theme-spider-city .user-profile-reminders { border-color:var(--profile-line); background:transparent; }
+.user-profile-panel.profile-theme-spider-city .user-profile-reminders small { color:var(--profile-muted); background:var(--profile-card-soft); }
+.user-profile-panel.profile-theme-spider-city .user-profile-reminders .is-active small { color:var(--profile-action); background:var(--spider-soft); }
+.user-profile-panel.profile-theme-spider-city .user-profile-section .section-label { color:var(--profile-muted); }
+.user-profile-panel.profile-theme-spider-city .user-profile-create-group-icon { color:var(--profile-action); background:var(--spider-soft); }
+.profile-card-entry-swatch.theme-spider-city::before,
+.profile-card-theme-option.theme-spider-city > span::before,
+.profile-card-entry-swatch.theme-spider-city :is(i,b),
+.profile-card-theme-option.theme-spider-city > span :is(i,b) { display:none; }
+.side-drawer:has(.user-profile-panel.profile-theme-spider-city) .drawer-topbar,
+.shell-friend-profile:has(.user-profile-panel.profile-theme-spider-city) .friend-profile-header {
+  color:#f7f3eb;
+  border-bottom-color:#ffffff18;
+  background:#182e43;
+}
+.side-drawer:has(.user-profile-panel.profile-theme-spider-city) .drawer-topbar :is(button,h2),
+.shell-friend-profile:has(.user-profile-panel.profile-theme-spider-city) .friend-profile-header button { color:inherit; }
