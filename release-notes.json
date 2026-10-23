@@ -1,21 +1,19 @@
 {
-  "id": "2026.10.23.5",
-  "publishedAt": "2026-10-23",
+  "id": "2026.10.24.1",
+  "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "找回空间管理入口",
+      "title": "主角按键，轻盈随行",
       "items": [
-        "首页和 PWA 登录页恢复创建新空间、空间管理员登录入口",
-        "在已选空间中进入管理员登录时，自动带入当前空间名",
-        "开放 dev 作为空间标识，仍需通过正常验证"
+        "登场按键以透明面板展示，三秒后自动收起为可拖拽、吸附边缘的浮钮",
+        "浮钮展示十分钟冷却倒计时，冷却结束后可再次展开"
       ]
     },
     "en": {
-      "title": "Space management, easy to find again",
+      "title": "Entrance keys, always within reach",
       "items": [
-        "Restored new-space creation and space admin sign-in on the homepage and PWA entry",
-        "Admin sign-in automatically uses the selected space when available",
-        "The dev space identifier is now available, subject to normal validation"
+        "Transparent entrance keys fold into a draggable, edge-snapping control after three seconds",
+        "The floating control shows the ten-minute cooldown and reopens when ready"
       ]
     }
   }

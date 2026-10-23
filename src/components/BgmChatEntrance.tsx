@@ -9,6 +9,7 @@ import { BgmIcon } from "./BgmIcon";
 import { localBgmUri } from "../lib/bgmMedia";
 import { bgmSilentMinutes, newBgmEntrances } from "../lib/bgmEntrance";
 import { showToast } from "../lib/toast";
+import { BgmFloatingControl } from "./BgmFloatingControl";
 
 let activeBgm: HTMLAudioElement | null = null;
 const listeners = new Set<() => void>();
@@ -45,7 +46,8 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
   const { session } = useAuth();
   const { t } = useI18n();
   const [activity, setActivity] = useState<ActivityCampaignDTO | null>(null);
-  const [seconds, setSeconds] = useState(3);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [now, setNow] = useState(Date.now());
   const [dock, setDock] = useState(false);
   const [busy, setBusy] = useState(false);
   const sending = useRef(false);
@@ -65,7 +67,7 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     const currentVisit = ++visit.current;
     requestId.current = crypto.randomUUID();
     setDock(false); setActivity(null); setReceiveAudio(false);
-    setSeconds(3); setPressedTrack(null); setBusy(false); setError("");
+    setCooldownUntil(0); setPressedTrack(null); setBusy(false); setError("");
     sending.current = false;
     const controller = new AbortController();
     if (active && !document.hidden) void api.getMyBgm(controller.signal, chatId).then((result) => {
@@ -89,14 +91,23 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
     const start = performance.now();
     const timer = window.setInterval(() => {
       const remaining = Math.max(0, 3 - Math.floor((performance.now() - start) / 1000));
-      setSeconds(remaining);
       if (!remaining) { setDock(false); window.clearInterval(timer); }
     }, 100);
     return () => window.clearInterval(timer);
   }, [dock, active, busy, pressedTrack]);
 
+  useEffect(() => {
+    if (!active || !cooldownUntil) return;
+    const tick = () => setNow(Date.now());
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    window.addEventListener("visibilitychange", tick);
+    return () => { window.clearInterval(timer); window.removeEventListener("visibilitychange", tick); };
+  }, [active, cooldownUntil]);
+
   function silent(seconds: number) {
     setDock(false);
+    setNow(Date.now()); setCooldownUntil(Date.now() + seconds * 1000);
     showToast(t("bgm.silentEntry", { minutes: bgmSilentMinutes(seconds) }), "info", 3000);
   }
 
@@ -110,6 +121,8 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
       if (!isCurrent()) return;
       if (response.reason === "cooldown") { silent(response.retry_after_seconds ?? 600); return; }
       if (!response.sent || !response.uri || !response.title) { setDock(false); return; }
+      setNow(Date.now()); setCooldownUntil(Date.now() + (response.retry_after_seconds ?? 600) * 1000);
+      requestId.current = crypto.randomUUID();
       const played = await playBgm(response.uri);
       if (!isCurrent()) { activeBgm?.pause(); return; }
       if (track && played) {
@@ -133,8 +146,10 @@ export function BgmChatEntrance({ chatId, messages, active }: { chatId: number; 
 
   useEffect(() => { if (!active) { setDock(false); activeBgm?.pause(); } }, [active]);
   const data = activity?.bgm;
+  const remaining = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
   return <>
-    {dock && data?.style && activity ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><header><strong>{t("bgm.pressToEnter")}</strong><span>{pressedTrack ? t("bgm.keyPlaying") : `${seconds}s`}</span><button aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button></header><BgmKeychain disabled={busy || Boolean(pressedTrack)} playingKey={pressedTrack} onPress={(key) => void enter(activity, key)} slots={data.slots} style={data.style} tracks={data.tracks} /><small>{t(pressedTrack ? "bgm.keyPlaying" : "bgm.autoDismiss")}</small></aside> : null}
+    {active && dock && data?.style && activity ? <aside className="bgm-chat-dock" aria-label={t("bgm.pressToEnter")}><button className="bgm-dock-close" aria-label={t("common.close")} onClick={() => setDock(false)} type="button"><BgmIcon name="close" /></button><BgmKeychain disabled={busy || Boolean(pressedTrack) || remaining > 0} playingKey={pressedTrack} onPress={(key) => void enter(activity, data.mode === "manual" ? key : undefined)} slots={data.slots} style={data.style} tracks={data.tracks} /></aside> : null}
+    {active && data?.style && data.mode !== "off" ? <BgmFloatingControl hidden={dock} remaining={remaining} busy={busy} onOpen={() => { setPressedTrack(null); setDock(true); }} /> : null}
     {error ? <aside className="bgm-chat-fallback" role="status"><span>{error}</span><button onClick={() => setError("")} type="button">{t("common.close")}</button></aside> : null}
   </>;
 }
