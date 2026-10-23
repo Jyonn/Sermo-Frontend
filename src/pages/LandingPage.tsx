@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { AppChrome } from "../components/AppChrome";
 import { useI18n } from "../lib/language";
+import { SpaceManagementLinks } from "../components/SpaceManagementLinks";
 
 export default function LandingPage() {
   const { t } = useI18n();
@@ -36,6 +37,7 @@ export default function LandingPage() {
               {t("landing.letterEnter")}
               <span aria-hidden="true">↗</span>
             </Link>
+            <SpaceManagementLinks />
             <p className="landing-facade-fineprint">{t("landing.letterFineprint")}</p>
           </div>
           <div className="landing-facade-art" aria-hidden="true">

@@ -29,6 +29,7 @@ function harness(accounts = [account('solo', 1), account('multi', 2), account('m
       if (name === '../lib/oauthPending') return { isOAuthLoginPending: () => false };
       if (name === '../lib/spaceEntry') return { normalizeSlug, buildJoinHrefForCurrentHost: (slug: string) => `/${slug}/`, buildSpaceHrefForCurrentHost: (slug: string, path: string, query: string) => `/${slug}${path}${query}` };
       if (name === '../components/UserAvatar') return { UserAvatar: () => null, SpaceAvatar: () => null };
+      if (name === '../components/SpaceManagementLinks') return { SpaceManagementLinks: () => null };
       if (name === '../lib/api' || name.endsWith('.css')) return {};
       return require(name);
     },

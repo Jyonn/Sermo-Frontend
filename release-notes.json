@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.23.3",
+  "id": "2026.10.23.4",
   "publishedAt": "2026-10-23",
   "locales": {
     "zh-CN": {
-      "title": "更轻盈清晰的状态提示",
+      "title": "找回空间管理入口",
       "items": [
-        "统一优化信息提示与空状态，去除虚线框并适配深浅色模式",
-        "更清楚地区分加载、空内容和读取失败，互动额度读取失败后可直接重试"
+        "首页和 PWA 登录页恢复创建新空间、空间管理员登录入口",
+        "在已选空间中进入管理员登录时，自动带入当前空间名"
       ]
     },
     "en": {
-      "title": "Lighter, clearer status feedback",
+      "title": "Space management, easy to find again",
       "items": [
-        "Refined information and empty states without dashed boxes, in light and dark themes",
-        "Clearer loading, empty and failure states, with a direct retry for interaction quotas"
+        "Restored new-space creation and space admin sign-in on the homepage and PWA entry",
+        "Admin sign-in automatically uses the selected space when available"
       ]
     }
   }

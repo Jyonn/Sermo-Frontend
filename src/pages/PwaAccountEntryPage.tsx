@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { SpaceAvatar, UserAvatar } from "../components/UserAvatar";
+import { SpaceManagementLinks } from "../components/SpaceManagementLinks";
 import type { JoinResponseDTO, SpaceDTO } from "../types";
 import JoinSpacePage from "./JoinSpacePage";
 import "./PwaAccountEntryPage.css";
@@ -153,6 +154,7 @@ export default function PwaAccountEntryPage() {
             </div>
           </div>
         </div>
+        <SpaceManagementLinks slug={activeSpace?.slug} disabled={launching || loginBusy} />
         <footer>{t("landing.slogan")}</footer>
         </div>
         </div>

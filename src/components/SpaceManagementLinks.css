@@ -1,0 +1,6 @@
+.space-management-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px; margin-top: 12px; }
+.space-management-links a { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; color: var(--entry-muted, var(--text-secondary)); font-size: 12px; font-weight: 600; line-height: 1.5; text-decoration: none; }
+.space-management-links a:hover { color: var(--entry-accent, var(--brand-primary)); }
+.space-management-links a[aria-disabled="true"] { opacity: .45; cursor: default; }
+.space-management-links .material-symbols-outlined { flex: none; font-size: 18px; }
+.pwa-account-entry .space-management-links { justify-content: center; margin-top: 10px; }

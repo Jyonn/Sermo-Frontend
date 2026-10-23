@@ -1,4 +1,7 @@
 {
+  "landing.spaceManagement": "Space management",
+  "landing.createNewSpace": "Create a new space",
+  "landing.adminLogin": "Space admin sign-in",
   "update.goToNewSite": "Go to updated site",
   "update.wait": "Not yet",
   "patterns.title": "The right amount of interruption",
