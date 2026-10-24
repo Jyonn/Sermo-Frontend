@@ -1,19 +1,17 @@
 {
-  "id": "2026.10.24.7",
+  "id": "2026.10.24.8",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "更安心地修改密码",
+      "title": "按空间开放应用管理",
       "items": [
-        "修改密码分为身份验证和设置新密码两步，页面更简洁",
-        "官方账户密码调整为 10–32 位，仅在不满足规则时提示"
+        "OAuth 应用管理仅在开发者空间由管理员开启后展示，其他空间不再显示此入口"
       ]
     },
     "en": {
-      "title": "Safer password changes",
+      "title": "Space-specific application management",
       "items": [
-        "Password changes now separate identity verification from setting a new password",
-        "Official passwords use 10–32 characters, with requirements shown only when needed"
+        "OAuth application management appears only in the developer space after its administrator enables it"
       ]
     }
   }

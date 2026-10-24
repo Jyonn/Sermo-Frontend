@@ -123,6 +123,7 @@ export default function SpaceAdminDashboardPage() {
   const [settingsSubmissionEnabled, setSettingsSubmissionEnabled] = useState(false);
   const [settingsExploreEnabled, setSettingsExploreEnabled] = useState(true);
   const [settingsQqBindingEnabled, setSettingsQqBindingEnabled] = useState(false);
+  const [settingsOauthDeveloperEnabled, setSettingsOauthDeveloperEnabled] = useState(false);
   const [settingsUnverifiedGroupPolicy, setSettingsUnverifiedGroupPolicy] = useState<0 | 1 | 2>(2);
   const [basicSettingsOpen, setBasicSettingsOpen] = useState(false);
   const [moduleSettingsOpen, setModuleSettingsOpen] = useState(false);
@@ -303,6 +304,7 @@ export default function SpaceAdminDashboardPage() {
     setSettingsSubmissionEnabled(dashboard.space.submission_enabled === true);
     setSettingsExploreEnabled(dashboard.space.square_explore_enabled !== false);
     setSettingsQqBindingEnabled(dashboard.space.qq_binding_enabled === true);
+    setSettingsOauthDeveloperEnabled(dashboard.space.oauth_developer_enabled === true);
     setSettingsUnverifiedGroupPolicy(dashboard.space.unverified_group_policy ?? 2);
     setSettingsMemberLimit(dashboard.space.member_limit ? String(dashboard.space.member_limit) : "");
     setSettingsLevelNames(dashboard.space.level_names?.length === 18 ? dashboard.space.level_names : defaultLevelNames);
@@ -446,6 +448,7 @@ export default function SpaceAdminDashboardPage() {
         submission_enabled: settingsSubmissionEnabled ? 1 : 0,
         square_explore_enabled: settingsExploreEnabled ? 1 : 0,
         qq_binding_enabled: settingsQqBindingEnabled ? 1 : 0,
+        ...(currentSpace.oauth_developer_eligible ? { oauth_developer_enabled: settingsOauthDeveloperEnabled ? 1 as const : 0 as const } : {}),
         unverified_group_policy: settingsUnverifiedGroupPolicy,
         member_limit: settingsMemberLimit.trim() ? Number(settingsMemberLimit.trim()) : null,
         level_names: settingsLevelNames.map((name) => name.trim()),
@@ -929,6 +932,7 @@ export default function SpaceAdminDashboardPage() {
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.submissionFeatureHint")} title={t("nav.submissions")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsSubmissionEnabled} disabled={!settingsSquareEnabled || (settingsSubmissionEnabled && !settingsSquareFreePostEnabled)} label={t("nav.submissions")} onChange={() => setSettingsSubmissionEnabled((value) => !value)} />} />
             <SettingRow disabled={!settingsSquareEnabled} description={t("admin.exploreFeatureHint")} title={t("square.feedAll")} trailing={<SettingSwitch checked={settingsSquareEnabled && settingsExploreEnabled} disabled={!settingsSquareEnabled} label={t("square.feedAll")} onChange={() => setSettingsExploreEnabled((value) => !value)} />} />
             {currentSpace?.qq_binding_granted ? <SettingRow description={t("admin.qqBindingFeatureHint")} title={t("admin.qqBindingFeature")} trailing={<SettingSwitch checked={settingsQqBindingEnabled} label={t("admin.qqBindingFeature")} onChange={() => setSettingsQqBindingEnabled((value) => !value)} />} /> : null}
+            {currentSpace?.slug === "dev" && currentSpace.oauth_developer_eligible ? <SettingRow title={t("oauth.manage")} trailing={<SettingSwitch checked={settingsOauthDeveloperEnabled} label={t("oauth.manage")} onChange={setSettingsOauthDeveloperEnabled} />} /> : null}
           </SettingGroup>
           <p className="admin-policy-footnote">{t("admin.moduleSafetyHint")}</p>
         </div>

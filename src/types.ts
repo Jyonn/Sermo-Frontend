@@ -80,6 +80,9 @@ export interface SpaceDTO {
   qq_binding_granted?: boolean;
   qq_binding_enabled?: boolean;
   qq_binding_available?: boolean;
+  oauth_developer_available?: boolean;
+  oauth_developer_eligible?: boolean;
+  oauth_developer_enabled?: boolean;
   unverified_group_policy?: 0 | 1 | 2;
   member_limit?: number | null;
   verification_tier?: "email" | "phone" | "identity";
