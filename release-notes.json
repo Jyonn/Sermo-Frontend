@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.2",
+  "id": "2026.10.24.3",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "蛛丝相连，友好邻居",
+      "title": "轻装上阵",
       "items": [
-        "友好邻居名片焕新：织物红封面、面罩眼形与银白蛛丝细节",
-        "主题预览与实际名片同步呈现，适配深浅色模式"
+        "清理已下线的小白主题及旧活动、旧标识素材，减轻发布包体积",
+        "旧主题配置安全回退，当前主题与活动资源保持完整"
       ]
     },
     "en": {
-      "title": "A friendly neighborhood, woven together",
+      "title": "Travel lighter",
       "items": [
-        "Redesigned the Friendly Neighborhood profile with woven red, mask lenses and silk-web details",
-        "Theme previews now match the real card in light and dark modes"
+        "Removed the discontinued Xiaobai theme and obsolete event and logo assets to slim down releases",
+        "Legacy theme settings fall back safely while current themes and activities stay intact"
       ]
     }
   }

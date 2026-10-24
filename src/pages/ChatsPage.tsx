@@ -326,7 +326,7 @@ function avatarLabel(name: string) {
 function visibleBubbleStyle(style?: string) {
   return [
     "comic", "vip", "zen", "hero", "dragon", "bauhaus", "mosaic",
-    "typewriter", "newspaper", "receipt", "niko", "fufu", "xiaobai",
+    "typewriter", "newspaper", "receipt", "niko", "fufu",
     "baxian-lv", "baxian-zhongli", "baxian-he",
     "city-jdz", "city-shanghai", "city-nyc", "city-beijing",
   ].includes(style ?? "") ? style as ChatBubbleStyle : "default";
@@ -338,7 +338,6 @@ const MENTION_SELECTION_ACCENTS: Record<ChatBubbleStyle, string> = {
   vip: "#b67b22",
   niko: "#916846",
   fufu: "#747a28",
-  xiaobai: "#7657a8",
   "baxian-lv": "#2f78ad",
   "baxian-zhongli": "#b34f39",
   "baxian-he": "#ad3e78",
@@ -510,9 +509,6 @@ function NikoBubbleRunner() {
   return <span aria-hidden="true" className="niko-bubble-runner" />;
 }
 
-function XiaobaiBubbleRunner() {
-  return <span aria-hidden="true" className="xiaobai-bubble-runner" />;
-}
 
 function formatTime(value: number) {
   return new Date(value * 1000).toLocaleTimeString(getActiveLocale(), {
@@ -1556,7 +1552,6 @@ const MessageImageGallery = memo(function MessageImageGallery({
             })}
           </div>
           {isFirst ? <NikoBubbleRunner /> : null}
-          {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={messages[0]?.chatBubbleStyle} /> : null}
           <BaxianBubbleTransition animate={!isLast} style={messages[0]?.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
@@ -2251,7 +2246,6 @@ const MessageBubbleRow = memo(function MessageBubbleRow({
           {renderMessageContent(message, onOpenImage, onOpenVideo, groupClassName, forwardBundlePreviewDepth, () => void onRetry(message))}
           {message.status === "pending" ? <span aria-hidden="true" className="message-send-state-overlay" /> : null}
           {isFirst ? <NikoBubbleRunner /> : null}
-          {isFirst ? <XiaobaiBubbleRunner /> : null}
           {isFirst ? <BaxianCharacterRunner style={message.chatBubbleStyle} /> : null}
           <BaxianBubbleTransition animate={!isLast} style={message.chatBubbleStyle} />
           {isLast ? <FufuBubbleRunner /> : null}
