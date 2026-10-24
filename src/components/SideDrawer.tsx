@@ -231,7 +231,15 @@ export function SideDrawer({
 
   if (!visible || typeof document === "undefined") return null;
 
-  return createPortal(
+  const desktopClose = desktopPanel && !panels?.single;
+  const dismissLabel = t(desktopClose ? "common.close" : "common.back");
+  const dismissIcon = desktopClose ? "close" : "arrow_back";
+  return <>
+    {desktopPanel && panels?.topId === drawerId ? createPortal(
+      <div className="desktop-panel-dismiss-mask" onClick={requestClose} aria-hidden="true" />,
+      document.body
+    ) : null}
+    {createPortal(
     <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
       <aside
         aria-label={title}
@@ -242,13 +250,13 @@ export function SideDrawer({
         style={{ ...style, ...(fullscreen && !desktopPanel ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}
       >
         {headerless ? (
-          floatingBack ? <button className="drawer-floating-back" onClick={requestClose} type="button" aria-label={t("common.back")}>
-            <span className="material-symbols-outlined">arrow_back</span>
+          floatingBack || desktopPanel ? <button className={`drawer-floating-back${desktopClose ? " desktop-panel-close" : ""}`} onClick={requestClose} type="button" aria-label={dismissLabel}>
+            <span className="material-symbols-outlined">{dismissIcon}</span>
           </button> : null
         ) : <header className="drawer-topbar">
           <div className="chat-conversation-topbar drawer-topbar-shell is-title-only">
-            <button className="chat-back-button drawer-back-button" onClick={requestClose} type="button" aria-label={t("common.back")}>
-              <span className="material-symbols-outlined">arrow_back</span>
+            <button className={`chat-back-button drawer-back-button${desktopClose ? " desktop-panel-close" : ""}`} onClick={requestClose} type="button" aria-label={dismissLabel}>
+              <span className="material-symbols-outlined">{dismissIcon}</span>
             </button>
             {titleLeading ? <div className="drawer-title-leading">{titleLeading}</div> : null}
             <div className="drawer-topbar-copy">
@@ -277,5 +285,5 @@ export function SideDrawer({
       </aside>
     </div>,
     desktopPanel && panels?.host ? panels.host : document.body
-  );
+  )}</>;
 }

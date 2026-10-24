@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.10",
+  "id": "2026.10.24.11",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "桌面面板，更少打断",
+      "title": "面板宽度，随空间而变",
       "items": [
-        "桌面聊天与广场详情改用无蒙层浮动面板，可继续操作原页面",
-        "通讯与菜单详情改用左右分栏，多级内容在同一面板内切换；手机端保持原样"
+        "桌面面板可点击外部关闭，关闭按钮移至右侧，背景保持清晰",
+        "通讯与菜单平滑调整分栏宽度，随导航展开折叠自适应；空间不足时仅展示详情并提供返回"
       ]
     },
     "en": {
-      "title": "Desktop panels, fewer interruptions",
+      "title": "Panels that fit your workspace",
       "items": [
-        "Desktop chat and Square details now float without blocking the page underneath",
-        "Contacts and menu details open alongside their lists; nested pages reuse one panel. Mobile is unchanged"
+        "Click outside desktop panels to dismiss them, with a right-hand close button and no blurred backdrop",
+        "Contacts and menu panels resize smoothly with navigation changes; narrower workspaces show details with a back button"
       ]
     }
   }

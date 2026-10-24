@@ -8,6 +8,18 @@ export function desktopPanelMode(pathname: string): DesktopPanelMode {
 
 export interface DesktopPanelLayer { id: string; depth: number; wide: boolean }
 
+export const panelSizing = { phone: 390, primaryMax: 960, gap: 16 } as const;
+
+export function desktopPanelLayout(available: number) {
+  const { phone, primaryMax, gap } = panelSizing;
+  const dual = available >= phone * 2 + gap;
+  return {
+    presentation: dual ? "dual" as const : "single" as const,
+    primary: dual ? Math.min(primaryMax, available - phone - gap) : 0,
+    secondary: Math.min(phone, Math.max(0, available)),
+  };
+}
+
 export function topDesktopPanel(layers: DesktopPanelLayer[]) {
   return layers.reduce<DesktopPanelLayer | undefined>((top, layer) => !top || layer.depth >= top.depth ? layer : top, undefined);
 }
