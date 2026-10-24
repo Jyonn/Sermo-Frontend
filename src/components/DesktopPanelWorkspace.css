@@ -1,0 +1,112 @@
+/* The slot owns geometry; existing drawer content and history keep their state. */
+.desktop-panel-slot[hidden],
+.desktop-panel-layer[hidden] { display: none; }
+
+@media (min-width: 901px) {
+  .desktop-panel-slot {
+    position: fixed;
+    z-index: 29;
+    top: 96px;
+    right: max(24px, calc((100vw - 1440px) / 2 + 16px));
+    bottom: 164px;
+    width: min(460px, calc(100vw - 120px));
+    min-height: 240px;
+    pointer-events: none;
+  }
+
+  .desktop-panel-slot.is-wide {
+    width: min(900px, calc(100vw - 128px));
+    bottom: 32px;
+  }
+
+  .desktop-panel-layer {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    pointer-events: none;
+  }
+
+  .desktop-panel-slot .desktop-panel-layer > .side-drawer {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--line-soft);
+    border-radius: 20px;
+    box-shadow: 0 20px 64px rgba(20, 41, 31, .18), 0 3px 12px rgba(20, 41, 31, .06);
+    pointer-events: auto;
+    animation: desktop-panel-enter 200ms cubic-bezier(.16, 1, .3, 1);
+  }
+
+  .desktop-panel-layer .drawer-topbar {
+    padding-top: 12px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .desktop-panel-slot .desktop-panel-layer > .side-drawer > .drawer-body {
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+
+  .desktop-panel-workspace.panel-mode-split {
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .desktop-panel-workspace.panel-mode-split > .page-stack {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    margin-inline: 0;
+    padding-inline: 16px;
+  }
+
+  .desktop-panel-workspace.panel-mode-split > .page-stack > .tab-sticky-header {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+
+  .panel-mode-split > .desktop-panel-slot {
+    position: relative;
+    inset: auto;
+    z-index: 10;
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .panel-mode-split .desktop-panel-layer > .side-drawer {
+    box-shadow: none;
+  }
+
+  .panel-mode-split .menu-profile-card {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .panel-mode-split .menu-profile-avatar .avatar-large {
+    width: 56px;
+    height: 56px;
+  }
+
+  .panel-mode-split .menu-profile-heading {
+    flex-wrap: wrap;
+  }
+
+  @keyframes desktop-panel-enter {
+    from { opacity: 0; transform: translateY(10px) scale(.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-panel-slot .desktop-panel-layer > .side-drawer { animation: none; }
+}

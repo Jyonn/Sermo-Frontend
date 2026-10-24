@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useId, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import { useBodyScrollLock } from "../lib/bodyLock";
 import { useI18n } from "../lib/language";
+import { useDesktopPanels } from "./DesktopPanelWorkspace";
 
 const activeDrawerIds = new Set<string>();
 
@@ -73,6 +74,10 @@ export function SideDrawer({
   const { t } = useI18n();
   const location = useLocation();
   const drawerId = useId();
+  const panels = useDesktopPanels();
+  const desktopPanel = Boolean(panels?.enabled && panels.host);
+  const registerPanel = panels?.register;
+  const unregisterPanel = panels?.unregister;
   const routeKey = useMemo(() => normalizeDrawerKey(historyKey), [historyKey]);
   const routePath = useMemo(() => drawerPathFromSearch(location.search), [location.search]);
   const routeIndex = routePath.findIndex((item) => item === routeKey || item === title);
@@ -83,7 +88,13 @@ export function SideDrawer({
   const onRouteOpenRef = useRef(onRouteOpen);
   onCloseRef.current = onClose;
   onRouteOpenRef.current = onRouteOpen;
-  useBodyScrollLock(visible);
+  useBodyScrollLock(visible && !desktopPanel);
+  useLayoutEffect(() => {
+    if (!visible || !desktopPanel || !registerPanel || !unregisterPanel) return;
+    registerPanel({ id: drawerId, depth: routeIndex >= 0 ? routeIndex : (window.history.state?.sermoDrawerStack?.length ?? 0), wide: fullscreen });
+    return () => unregisterPanel(drawerId);
+  }, [visible, desktopPanel, drawerId, routeIndex, fullscreen, registerPanel, unregisterPanel]);
+  useEffect(() => () => { activeDrawerIds.delete(drawerId); }, [drawerId]);
 
   const getDrawerStack = () => {
     const value = window.history.state?.sermoDrawerStack;
@@ -208,24 +219,27 @@ export function SideDrawer({
     if (!visible) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") requestClose();
+      if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing && (!desktopPanel || panels?.topId === drawerId)) {
+        if (desktopPanel) event.stopImmediatePropagation();
+        requestClose();
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [requestClose, visible]);
+  }, [requestClose, visible, desktopPanel, panels?.topId, drawerId]);
 
   if (!visible || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={`drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} onClick={requestClose} role="presentation">
+    <div className={desktopPanel ? "desktop-panel-layer" : `drawer-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`} hidden={desktopPanel && panels?.topId !== drawerId} onClick={desktopPanel ? undefined : requestClose} role="presentation">
       <aside
         aria-label={title}
-        aria-modal="true"
+        aria-modal={desktopPanel ? undefined : true}
         className={`side-drawer${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
         onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        style={{ ...style, ...(fullscreen ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}
+        role={desktopPanel ? "region" : "dialog"}
+        style={{ ...style, ...(fullscreen && !desktopPanel ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}
       >
         {headerless ? (
           floatingBack ? <button className="drawer-floating-back" onClick={requestClose} type="button" aria-label={t("common.back")}>
@@ -262,6 +276,6 @@ export function SideDrawer({
         <div className="drawer-body">{children}</div>
       </aside>
     </div>,
-    document.body
+    desktopPanel && panels?.host ? panels.host : document.body
   );
 }

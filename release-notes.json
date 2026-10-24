@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.24.9",
+  "id": "2026.10.24.10",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "日历镜像联动",
+      "title": "桌面面板，更少打断",
       "items": [
-        "在 6-79.cn 镜像站授权 Chronelle、查看日程和打开日历时，统一使用 Chronelle 镜像"
+        "桌面聊天与广场详情改用无蒙层浮动面板，可继续操作原页面",
+        "通讯与菜单详情改用左右分栏，多级内容在同一面板内切换；手机端保持原样"
       ]
     },
     "en": {
-      "title": "Calendar mirror integration",
+      "title": "Desktop panels, fewer interruptions",
       "items": [
-        "Chronelle authorization, schedules and calendar links now use the Chronelle mirror on both 6-79.cn sites"
+        "Desktop chat and Square details now float without blocking the page underneath",
+        "Contacts and menu details open alongside their lists; nested pages reuse one panel. Mobile is unchanged"
       ]
     }
   }
