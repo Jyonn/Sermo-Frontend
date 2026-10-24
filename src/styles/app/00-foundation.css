@@ -111,7 +111,7 @@
 .message-group.bubble-style-doodle .message-bubble { border-width:2px;border-radius:18px 13px 20px 11px; }
 .message-group.bubble-style-plush .message-bubble { border-width:2px;border-radius:25px; }
 
-@media (min-width:901px) {
+@media (min-width: 720px) {
   [class*="chat-background-"] { --chat-chrome-surface:rgba(246,248,245,.88);--chat-chrome-border:rgba(55,82,72,.12);--chat-chrome-text:#17362d; }
   .chat-detail-scene[class*="chat-background-"]::before { background:linear-gradient(145deg,#f7f8f5,#eef3ef); }
   html[data-theme="dark"] [class*="chat-background-"] { --chat-chrome-surface:rgba(17,31,27,.9);--chat-chrome-border:rgba(192,224,212,.12);--chat-chrome-text:#effbf6; }
@@ -432,7 +432,7 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .message-video-preview-modal {
     padding:
       max(68px, calc(28px + env(safe-area-inset-top)))
@@ -2863,7 +2863,7 @@ html[data-theme="dark"] body .growth-level-detail {
 .square-desktop-workspace { display: contents; }
 .square-desktop-detail-pane { display: none; }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .chat-detail-scene {
     overflow-x: visible;
   }
@@ -7253,7 +7253,7 @@ html[data-theme="dark"] .chat-detail-scene.chat-background-custom::before {
   font-size: 0.78rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .message-image-preview-shared-detail {
     right: 18px;
     bottom: max(22px, calc(14px + env(safe-area-inset-bottom)));
@@ -8446,7 +8446,7 @@ html[data-theme="dark"] .square-chat-record {
   background: var(--bg-surface);
   box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
 }
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .square-chat-record-preview.chat-conversation-preview { --square-chat-record-max-height: min(390px, 48vh); }
   .square-statement-card.is-detail .square-chat-record-preview.chat-conversation-preview { --square-chat-record-max-height: min(440px, 54vh); }
 }
@@ -8541,7 +8541,7 @@ html[data-theme="dark"] .square-chat-record {
 }
 .chat-target-picker-submit .button { width: 100%; min-height: 50px; }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .chat-target-picker-body {
     height: calc(min(82dvh, 760px) - 104px);
   }

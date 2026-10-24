@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.11",
+  "id": "2026.10.24.12",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "面板宽度，随空间而变",
+      "title": "四个页面，同一套自适应面板",
       "items": [
-        "桌面面板可点击外部关闭，关闭按钮移至右侧，背景保持清晰",
-        "通讯与菜单平滑调整分栏宽度，随导航展开折叠自适应；空间不足时仅展示详情并提供返回"
+        "聊天、广场、通讯与菜单统一按可用空间调整面板，单面板不再限制手机宽度",
+        "平板使用紧凑左侧导航，分栏面板不再遮挡其他区域；广场单面板完整展示正文与评论"
       ]
     },
     "en": {
-      "title": "Panels that fit your workspace",
+      "title": "One adaptive workspace across four tabs",
       "items": [
-        "Click outside desktop panels to dismiss them, with a right-hand close button and no blurred backdrop",
-        "Contacts and menu panels resize smoothly with navigation changes; narrower workspaces show details with a back button"
+        "Chats, Square, contacts and menu now share adaptive panels; single panels expand beyond phone width",
+        "Tablets use compact side navigation, docked panels no longer mask other content, and single-pane Square details include the full post"
       ]
     }
   }

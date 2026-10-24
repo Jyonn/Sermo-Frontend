@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type UIEvent as ReactUIEvent } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { NativeSinglePanelContent } from "../components/DesktopPanelWorkspace";
 import { createPortal } from "react-dom";
 import { AppChrome } from "../components/AppChrome";
 import { BottomSheet } from "../components/BottomSheet";
@@ -721,7 +722,7 @@ export default function SquarePage() {
     setComposerOpen(true);
     navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
   }, [location.pathname, location.search, navigate, routeState?.squareChatRecordDraft]);
-  const [desktopWorkspace, setDesktopWorkspace] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 901px)").matches);
+  const [desktopWorkspace, setDesktopWorkspace] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 720px)").matches);
   const [inlineStatementId, setInlineStatementId] = useState<number | null>(null);
   const [inlineStatementExpanded, setInlineStatementExpanded] = useState(false);
   const [inlineTransitionPhase, setInlineTransitionPhase] = useState<InlineTransitionPhase>("idle");
@@ -1716,7 +1717,7 @@ export default function SquarePage() {
   }, []);
 
   useEffect(() => {
-    const query = window.matchMedia("(min-width: 901px)");
+    const query = window.matchMedia("(min-width: 720px)");
     const update = () => setDesktopWorkspace(query.matches);
     update();
     query.addEventListener("change", update);
@@ -2398,7 +2399,7 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome title={t("square.title")} hideMobileNav={squareWorkspace === "submission"} hideTopbar shellClassName={`desktop-tab-shell square-community-shell${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
+    <AppChrome workspaceSelected={inlineRouteActive || submissionDetailActive} title={t("square.title")} hideMobileNav={squareWorkspace === "submission"} hideTopbar shellClassName={`desktop-tab-shell square-community-shell${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
       <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive || submissionDetailActive ? " has-selection" : ""}${submissionDetailActive ? " is-mobile-submission-detail" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
       <main
         className={`list-screen square-feed-screen is-${squareWorkspace}-workspace${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}
@@ -2602,6 +2603,8 @@ export default function SquarePage() {
       {squareWorkspace === "square" ? <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <header className="square-desktop-detail-header">
+            <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
+            <strong className="native-panel-title">{t("square.statementDetail")}</strong>
             <button
               aria-label={activeCommentStatement.is_anonymous ? t("square.anonymousUser") : activeCommentStatement.user.name}
               className="square-desktop-detail-author"
@@ -2616,12 +2619,14 @@ export default function SquarePage() {
               </span>
             </button>
             <div className="square-desktop-detail-actions">
+              <button aria-label={t("common.close")} className="native-panel-close" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">close</span></button>
               <button aria-label={t("square.like")} className={activeCommentStatement.liked ? "is-liked" : ""} disabled={!canPublish} onClick={() => void toggleStatementLike(activeCommentStatement)} type="button"><span className="material-symbols-outlined">favorite</span></button>
               <button aria-label={t("square.comment")} onClick={() => commentInputRef.current?.focus()} type="button"><span className="material-symbols-outlined">chat_bubble</span></button>
               <button aria-label={t("square.share")} onClick={() => openStatementShare(activeCommentStatement)} type="button"><span className="material-symbols-outlined">send</span></button>
             </div>
           </header>
           <div className="square-desktop-detail-scroll">
+            <NativeSinglePanelContent><div className="native-current-statement">{renderFeedStatement(activeCommentStatement, true)}</div></NativeSinglePanelContent>
             {discussionContent}
           </div>
           {commentComposer}

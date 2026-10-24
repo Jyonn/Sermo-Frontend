@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { desktopPanelLayout, desktopPanelMode, panelSizing, topDesktopPanel, type DesktopPanelLayer } from "../lib/desktopPanels";
 import "./DesktopPanelWorkspace.css";
 
-const query = "(min-width: 901px)";
+const query = "(min-width: 720px)";
 const subscribe = (listener: () => void) => {
   const media = window.matchMedia(query);
   media.addEventListener("change", listener);
@@ -17,13 +17,19 @@ interface PanelContext {
   host: HTMLDivElement | null;
   topId?: string;
   single: boolean;
+  floating: boolean;
+  nativeSingle: boolean;
   register: (layer: DesktopPanelLayer) => void;
   unregister: (id: string) => void;
 }
 const DesktopPanels = createContext<PanelContext | null>(null);
 export const useDesktopPanels = () => useContext(DesktopPanels);
 
-export function DesktopPanelWorkspace({ children, className }: { children: ReactNode; className: string }) {
+export function NativeSinglePanelContent({ children }: { children: ReactNode }) {
+  return useDesktopPanels()?.nativeSingle ? children : null;
+}
+
+export function DesktopPanelWorkspace({ children, className, selected = false }: { children: ReactNode; className: string; selected?: boolean }) {
   const { pathname } = useLocation();
   const desktop = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const mode = desktopPanelMode(pathname);
@@ -31,12 +37,10 @@ export function DesktopPanelWorkspace({ children, className }: { children: React
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [workspace, setWorkspace] = useState<HTMLElement | null>(null);
   const [available, setAvailable] = useState(0);
-  const [rightInset, setRightInset] = useState(24);
   useLayoutEffect(() => {
     if (!workspace) return;
     const measure = () => {
       setAvailable(workspace.clientWidth);
-      setRightInset(Math.max(16, window.innerWidth - workspace.getBoundingClientRect().right + 16));
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -54,19 +58,21 @@ export function DesktopPanelWorkspace({ children, className }: { children: React
   const top = topDesktopPanel(layers);
   const active = enabled && layers.length > 0;
   const layout = desktopPanelLayout(available);
-  const split = enabled && mode === "split";
+  const floating = enabled && mode === "floating" && selected && layout.presentation === "dual";
+  const split = enabled && !floating && (mode === "split" || active);
   const single = split && active && layout.presentation === "single";
   const sizing = {
-    "--panel-float-right": `${rightInset}px`,
     "--panel-available-width": `${Math.max(0, available - 32)}px`,
+    "--native-primary-width": `${selected ? layout.primary : Math.min(panelSizing.primaryMax, available)}px`,
+    "--native-secondary-width": `${selected ? layout.secondary : 0}px`,
     ...(split ? {
       "--panel-primary-width": `${active ? layout.primary : Math.min(panelSizing.primaryMax, available)}px`,
       "--panel-secondary-width": `${active ? layout.secondary : 0}px`,
       "--panel-gap": active && !single ? `${panelSizing.gap}px` : "0px",
     } : {}),
   } as CSSProperties;
-  return <DesktopPanels.Provider value={{ enabled, host, topId: top?.id, single, register, unregister }}>
-    <main ref={setWorkspace} style={sizing} className={`${className} desktop-panel-workspace${enabled ? ` panel-mode-${mode}` : ""}${active ? " has-desktop-panel" : ""}${single ? " panel-single" : ""}`}>
+  return <DesktopPanels.Provider value={{ enabled, host, topId: top?.id, single, floating, nativeSingle: enabled && selected && layout.presentation === "single", register, unregister }}>
+    <main ref={setWorkspace} style={sizing} className={`${className} desktop-panel-workspace${enabled ? ` panel-mode-${split ? "split" : "floating"}` : ""}${active ? " has-desktop-panel" : ""}${single ? " panel-single" : ""}${selected && layout.presentation === "single" ? " native-detail-single" : ""}`}>
       {children}
       <div className={`desktop-panel-slot${top?.wide ? " is-wide" : ""}`} ref={setHost} hidden={!active} />
     </main>

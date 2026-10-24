@@ -16,7 +16,7 @@ export function desktopPanelLayout(available: number) {
   return {
     presentation: dual ? "dual" as const : "single" as const,
     primary: dual ? Math.min(primaryMax, available - phone - gap) : 0,
-    secondary: Math.min(phone, Math.max(0, available)),
+    secondary: Math.min(dual ? phone : primaryMax, Math.max(0, available)),
   };
 }
 

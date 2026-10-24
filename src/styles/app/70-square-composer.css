@@ -395,7 +395,7 @@
   .square-feed-filter.is-submission-transitioning .square-submission-switch { animation: none; }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .square-desktop-workspace.is-submission.has-selection > .square-feed-screen > .tab-sticky-header {
     display: none;
   }
@@ -452,7 +452,7 @@
   }
 }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .desktop-tab-shell > .square-desktop-workspace.is-submission {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -815,7 +815,7 @@ html[data-theme="dark"] .chat-item.is-submission-item {
   --submission-role-color: #69c5a3;
 }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .mobile-chat-list-screen .chat-item.is-submission-item.active {
     background: linear-gradient(
       90deg,
@@ -1157,7 +1157,7 @@ html[data-theme="dark"] .drawer-floating-back {
 }
 
 /* Mobile feed screens should inherit the page canvas instead of painting a second surface. */
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .list-screen,
   .square-feed-screen,
   .mobile-chat-list-screen,
@@ -1197,7 +1197,7 @@ html[data-theme="dark"] .verification-banner-action {
 }
 
 /* Desktop wide writing desk: a resizable toolbar and uninterrupted writing canvas. */
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .chat-detail-active .composer.is-desktop-writing-desk {
     min-height: 180px;
     padding: 0 20px 10px;
@@ -1808,7 +1808,7 @@ html[data-theme="dark"] .verification-banner-action {
 }
 
 /* Mobile conversations use a quiet two-row composer; desktop keeps the established layout. */
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .chat-detail-active .composer.is-mobile-quiet {
     padding: 9px 12px calc(8px + env(safe-area-inset-bottom));
   }
@@ -2387,7 +2387,7 @@ html[data-theme="dark"] .verification-banner-action {
 
 }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .mobile-chat-list-screen.has-verification-banner {
     grid-template-rows: auto auto minmax(0, 1fr);
   }

@@ -11,6 +11,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { DesktopPanelWorkspace } from "./DesktopPanelWorkspace";
 
 interface AppChromeProps {
+  workspaceSelected?: boolean;
   children: ReactNode;
   title: string;
   topbarAction?: ReactNode;
@@ -33,6 +34,7 @@ interface AppChromeProps {
 }
 
 export function AppChrome({
+  workspaceSelected,
   children,
   title,
   topbarAction,
@@ -148,7 +150,7 @@ export function AppChrome({
         </header>
       ) : null}
 
-      <DesktopPanelWorkspace className={`shell page ${session ? "shell-authenticated" : "shell-guest"} ${hideTopbar ? "shell-no-topbar" : ""} ${hideMobileNav ? "shell-no-mobile-nav" : ""} ${shellClassName ?? ""}`.trim()}>
+      <DesktopPanelWorkspace selected={workspaceSelected} className={`shell page ${session ? "shell-authenticated" : "shell-guest"} ${hideTopbar ? "shell-no-topbar" : ""} ${hideMobileNav ? "shell-no-mobile-nav" : ""} ${shellClassName ?? ""}`.trim()}>
         {children}
       </DesktopPanelWorkspace>
     </>

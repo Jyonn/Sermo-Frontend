@@ -235,7 +235,7 @@ export function SideDrawer({
   const dismissLabel = t(desktopClose ? "common.close" : "common.back");
   const dismissIcon = desktopClose ? "close" : "arrow_back";
   return <>
-    {desktopPanel && panels?.topId === drawerId ? createPortal(
+    {desktopPanel && panels?.floating && panels.topId === drawerId ? createPortal(
       <div className="desktop-panel-dismiss-mask" onClick={requestClose} aria-hidden="true" />,
       document.body
     ) : null}

@@ -671,7 +671,7 @@ html[data-theme="dark"] .user-profile-panel {
   grid-template-columns: 1fr 1fr;
   gap: 4px;
   padding: 4px;
-  background: rgba(226, 231, 237, 0.66);
+  background: color-mix(in srgb, var(--line-soft) 45%, var(--bg-page));
   border-radius: 13px;
 }
 
@@ -2525,7 +2525,7 @@ html[data-theme="dark"] .warning-button {
   }
 }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .app-toast-viewport {
     right: 28px;
     bottom: 28px;
@@ -4060,7 +4060,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 }
 
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .brand-copy {
     display: none;
   }
@@ -4080,7 +4080,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .topbar {
     padding: 10px 16px;
     position: sticky;
@@ -4377,7 +4377,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
 
 }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .chat-background-paper,
   .chat-background-mint,
   .chat-background-dusk,
@@ -4946,7 +4946,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   pointer-events: none;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .composer-emoji-grid.has-frequent-row > button.is-frequent:first-child { border-radius: 12px 8px 8px 12px; }
   .composer-emoji-grid.has-frequent-row > button.is-frequent:nth-child(8) { border-radius: 8px 12px 12px 8px; }
 }
@@ -5007,7 +5007,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   82%, 100% { transform: translateX(calc(-100% + 58px)); }
 }
 
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   .composer-sticker-pane[aria-label] .composer-sticker-explore-item {
     aspect-ratio: .92;
   }
@@ -5341,7 +5341,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   width: 100%;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .composer-sticker-collect {
     display: none;
   }
@@ -5449,7 +5449,7 @@ html[data-theme="dark"] .avatar-preset-upload-row.is-locked {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 719px) {
   .shell-no-topbar {
     width: calc(100vw - 24px);
     min-height: 100dvh;

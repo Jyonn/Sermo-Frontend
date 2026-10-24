@@ -26,6 +26,7 @@ test("desktop container keeps scroll unlocked, uses a transparent dismiss layer 
   assert.match(source, /panels\?\.topId === drawerId/);
   assert.match(source, /className="desktop-panel-dismiss-mask" onClick=\{requestClose\}/);
   assert.match(source, /desktopPanel && !panels\?\.single/);
+  assert.match(source, /desktopPanel && panels\?\.floating && panels.topId === drawerId/);
   const css = readFileSync(new URL("../src/components/DesktopPanelWorkspace.css", import.meta.url), "utf8");
   assert.match(css, /background: transparent/);
   assert.match(css, /transition: grid-template-columns/);
@@ -35,9 +36,23 @@ test("two panels respect phone minimum, fixed detail width and original primary 
   assert.deepEqual(desktopPanelLayout(1440), { presentation: "dual", primary: 960, secondary: 390 });
   assert.deepEqual(desktopPanelLayout(1000), { presentation: "dual", primary: 594, secondary: 390 });
   assert.deepEqual(desktopPanelLayout(796), { presentation: "dual", primary: 390, secondary: 390 });
-  assert.deepEqual(desktopPanelLayout(795), { presentation: "single", primary: 0, secondary: 390 });
+  assert.deepEqual(desktopPanelLayout(795), { presentation: "single", primary: 0, secondary: 795 });
+  assert.equal(desktopPanelLayout(660).secondary, 660);
   assert.equal(desktopPanelLayout(320).secondary, 320);
   assert.equal(desktopPanelLayout(0).secondary, 0);
+});
+
+test("all four tabs use the same tablet boundary and native details retain complete content", () => {
+  const workspace = readFileSync(new URL("../src/components/DesktopPanelWorkspace.tsx", import.meta.url), "utf8");
+  const chats = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
+  const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
+  assert.match(workspace, /min-width: 720px/);
+  assert.match(workspace, /mode === "floating" && selected && layout.presentation === "dual"/);
+  assert.match(chats, /workspaceSelected=\{Boolean\(displayedChat\)\}/);
+  assert.match(chats, /max-width: 719px/);
+  assert.match(square, /min-width: 720px/);
+  assert.match(square, /className="native-current-statement">\{renderFeedStatement\(activeCommentStatement, true\)\}/);
+  assert.match(square, /className="native-panel-close" onClick=\{closeInlineStatement\}/);
 });
 
 test("navigation expansion can switch the same desktop from dual panels to a single detail", () => {

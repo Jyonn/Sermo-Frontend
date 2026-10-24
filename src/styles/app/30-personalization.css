@@ -1504,7 +1504,7 @@ html[data-theme="dark"] :is(
 }
 
 /* Desktop dark chrome: keep navigation and tab headers in the same green-neutral family. */
-@media (min-width: 901px) {
+@media (min-width: 720px) {
   html[data-theme="dark"] body .tab-sticky-header,
   html[data-theme="dark"] body .tab-sticky-header.is-scrolled {
     color: var(--text-primary);

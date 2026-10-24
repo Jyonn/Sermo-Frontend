@@ -3174,7 +3174,7 @@ function LiveChatsPage({
   const [mobileMicrophoneBusy, setMobileMicrophoneBusy] = useState(false);
   const [mobileVoiceGesture, setMobileVoiceGesture] = useState<"idle" | "recording" | "sliding" | "cancel">("idle");
   const [mobileComposerLayout, setMobileComposerLayout] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches,
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 719px)").matches,
   );
   const [emojiPage, setEmojiPage] = useState(STICKER_MY_PAGE);
   const [emojiUsage, setEmojiUsage] = useState<EmojiUsageDTO[]>([]);
@@ -3196,7 +3196,7 @@ function LiveChatsPage({
   const [selectedStickerIds, setSelectedStickerIds] = useState<number[]>([]);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 900px)");
+    const media = window.matchMedia("(max-width: 719px)");
     const sync = () => setMobileComposerLayout(media.matches);
     sync();
     media.addEventListener("change", sync);
@@ -6774,7 +6774,7 @@ function LiveChatsPage({
     Boolean(displayedChat)
     && !composerBusy
     && typeof window !== "undefined"
-    && window.matchMedia("(min-width: 900px)").matches
+    && window.matchMedia("(min-width: 720px)").matches
   );
 
   const handleFileDragEnter = (event: ReactDragEvent<HTMLElement>) => {
@@ -8124,6 +8124,7 @@ function LiveChatsPage({
 
   return (
     <AppChrome
+      workspaceSelected={Boolean(displayedChat)}
       embedded={embeddedListOnly}
       title={t("chat.title")}
       hideTopbar={!displayedChat}
@@ -8218,6 +8219,7 @@ function LiveChatsPage({
                     <strong>{t("message.selectedCount", { count: selectedMessageClientIds.length })}</strong>
                   </div>
                 ) : <div className="chat-conversation-topbar desktop-chat-conversation-topbar">
+                  {!embeddedListOnly ? <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button> : null}
                   {embeddedListOnly && squareIntegrated && submissionMode ? <button aria-label={t("common.back")} className="chat-back-button integrated-submission-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button> : null}
                   {embeddedListOnly && squareIntegrated && submissionMode ? <UserAvatar className="avatar integrated-submission-avatar" frame={displayedChat.avatarFrameStyle} name={displayedChat.title} uri={displayedChat.avatarUri} /> : null}
                   <div className="chat-topbar-meta">
@@ -8229,7 +8231,7 @@ function LiveChatsPage({
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /></div> : null}
+                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} />{!embeddedListOnly ? <button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button> : null}</div> : null}
                 </div>
                 {submissionWorkflowBar}
                 {sendProgress !== null ? (
