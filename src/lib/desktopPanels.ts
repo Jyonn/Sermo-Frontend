@@ -12,14 +12,16 @@ export const panelSizing = { phone: 390, primaryMax: 960, gap: 16 } as const;
 
 export const conversationPanelSizing = { listMin: 280, listMax: 340, detailMin: 480, detailMax: 960, gap: 16 } as const;
 
-export function conversationPanelLayout(available: number) {
-  const { listMin, listMax, detailMin, detailMax, gap } = conversationPanelSizing;
+export const squarePanelSizing = { ...conversationPanelSizing, listMin: 360, listMax: 420 } as const;
+
+export function conversationPanelLayout(available: number, square = false) {
+  const { listMin, listMax, detailMin, detailMax, gap } = square ? squarePanelSizing : conversationPanelSizing;
   const width = Math.max(0, available);
   if (width < listMin + detailMin + gap) {
     return { presentation: "single" as const, primary: 0, secondary: Math.min(detailMax, width) };
   }
   const total = Math.min(width, listMax + detailMax + gap);
-  const primary = Math.min(listMax, Math.max(listMin, total * .28), total - detailMin - gap);
+  const primary = Math.min(listMax, Math.max(listMin, total * (square ? .32 : .28)), total - detailMin - gap);
   return { presentation: "dual" as const, primary, secondary: total - primary - gap };
 }
 

@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.13",
+  "id": "2026.10.24.14",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "列表收窄，内容展开",
+      "title": "浮动查看，内容不挤",
       "items": [
-        "聊天和广场改为窄列表、宽详情，把更多空间留给会话与发言内容",
-        "广场右侧完整展示正文和评论；空间不足时，当前详情仍可充分展开"
+        "聊天详情、个人名片等在聊天和广场中以浮动框打开，不再挤压当前内容",
+        "广场列表保留更舒适的宽度，窄面板中的发表按钮不再换行"
       ]
     },
     "en": {
-      "title": "Slim lists, roomier content",
+      "title": "Floating views, undisturbed content",
       "items": [
-        "Chats and Square now use narrow lists and wider details, giving conversations and posts more room",
-        "Square details include the full post and comments; single-pane details still expand to the available space"
+        "Chat details, profile cards and other secondary views float above Chats and Square without squeezing the current content",
+        "Square lists have more breathing room, with compact publish buttons that stay on one line"
       ]
     }
   }

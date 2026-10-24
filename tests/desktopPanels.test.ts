@@ -47,13 +47,30 @@ test("all four tabs use the same tablet boundary and native details retain compl
   const chats = readFileSync(new URL("../src/pages/ChatsPage.tsx", import.meta.url), "utf8");
   const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
   assert.match(workspace, /min-width: 720px/);
-  assert.match(workspace, /mode === "floating" && selected && layout.presentation === "dual"/);
+  assert.match(workspace, /const floating = enabled && mode === "floating";/);
+  assert.match(workspace, /const split = enabled && mode === "split";/);
   assert.match(chats, /workspaceSelected=\{Boolean\(displayedChat\)\}/);
   assert.match(chats, /max-width: 719px/);
   assert.match(square, /min-width: 720px/);
   assert.match(square, /className="native-current-statement">\{desktopWorkspace \? renderFeedStatement\(activeCommentStatement, true\) : null\}/);
-  assert.match(workspace, /mode === "floating" \? conversationPanelLayout\(available\) : desktopPanelLayout\(available\)/);
+  assert.match(workspace, /mode === "floating" \? conversationPanelLayout\(available,/);
   assert.match(square, /className="native-panel-close" onClick=\{closeInlineStatement\}/);
+});
+
+test("Square keeps readable cards and adapts actions to the panel rather than the viewport", () => {
+  assert.deepEqual(conversationPanelLayout(856, true), { presentation: "dual", primary: 360, secondary: 480 });
+  assert.deepEqual(conversationPanelLayout(855, true), { presentation: "single", primary: 0, secondary: 855 });
+  for (let width = 856; width <= 2000; width++) {
+    const layout = conversationPanelLayout(width, true);
+    assert.ok(layout.primary >= 360 && layout.primary <= 420);
+    assert.ok(layout.secondary >= 480 && layout.secondary <= 960);
+    assert.ok(layout.secondary > layout.primary);
+    assert.ok(layout.primary + layout.secondary + 16 <= width + 1e-9);
+  }
+  const css = readFileSync(new URL("../src/styles/app/10-chat-city.css", import.meta.url), "utf8");
+  assert.match(css, /@container square-feed \(max-width: 440px\)/);
+  const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
+  assert.match(square, /aria-label=\{squareWorkspace === "square" \? t\("square.publish"\) : t\("submission.new"\)\}/);
 });
 
 test("chat and Square reserve a narrow list and prioritize detail space", () => {

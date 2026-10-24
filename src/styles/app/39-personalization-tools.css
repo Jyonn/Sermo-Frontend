@@ -1800,7 +1800,7 @@ html[data-theme="dark"] :is(.personalization-bubble-stage.bubble-style-fufu,.mes
   background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
 }
 
-.square-header-publish { display: inline-flex; align-items: center; gap: 6px; margin-left: 7px; padding: 7px 11px 7px 9px; border: 0; border-radius: 999px; color: var(--brand-primary-press); font: inherit; font-size: 12px; font-weight: 800; background: color-mix(in srgb, var(--brand-primary) 15%, transparent); }
+.square-header-publish { display: inline-flex; flex-shrink: 0; align-items: center; gap: 6px; margin-left: 7px; padding: 7px 11px 7px 9px; border: 0; border-radius: 999px; color: var(--brand-primary-press); font: inherit; font-size: 12px; font-weight: 800; white-space: nowrap; background: color-mix(in srgb, var(--brand-primary) 15%, transparent); }
 .square-header-publish .material-symbols-outlined { font-size: 17px; }
 .square-header-actions { display: inline-flex; align-items: center; gap: 5px; }
 .square-header-notifications { position: relative; display: grid; width: 34px; height: 34px; padding: 0; place-items: center; border: 0; border-radius: 999px; color: var(--text-primary); background: transparent; }

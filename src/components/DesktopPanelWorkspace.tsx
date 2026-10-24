@@ -52,9 +52,9 @@ export function DesktopPanelWorkspace({ children, className, selected = false }:
   const unregister = useCallback((id: string) => setLayers((current) => current.some((item) => item.id === id) ? current.filter((item) => item.id !== id) : current), []);
   const top = topDesktopPanel(layers);
   const active = enabled && layers.length > 0;
-  const layout = mode === "floating" ? conversationPanelLayout(available) : desktopPanelLayout(available);
-  const floating = enabled && mode === "floating" && selected && layout.presentation === "dual";
-  const split = enabled && !floating && (mode === "split" || active);
+  const layout = mode === "floating" ? conversationPanelLayout(available, /^\/app\/(square|submissions)(?:\/|$)/.test(pathname)) : desktopPanelLayout(available);
+  const floating = enabled && mode === "floating";
+  const split = enabled && mode === "split";
   const single = split && active && layout.presentation === "single";
   const sizing = {
     "--panel-available-width": `${Math.max(0, available - 32)}px`,

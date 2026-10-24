@@ -4342,8 +4342,8 @@ html[data-theme="dark"] .growth-scroll-score strong {
   display: grid;
   place-items: center;
   color: var(--text-muted);
-  background: rgba(244, 246, 251, 0.94);
-  border: 1px dashed color-mix(in srgb, var(--line-soft) 90%, transparent);
+  background: var(--bg-canvas);
+  border: 1px solid var(--line-soft);
 }
 
 .chat-detail-member-avatar-add .material-symbols-outlined {
@@ -4352,8 +4352,8 @@ html[data-theme="dark"] .growth-scroll-score strong {
 
 .chat-detail-member-avatar-remove {
   color: #c86658;
-  background: rgba(252, 244, 242, 0.96);
-  border-color: rgba(220, 159, 149, 0.82);
+  background: color-mix(in srgb, #c86658 10%, var(--bg-elevated));
+  border-color: color-mix(in srgb, #c86658 30%, var(--line-soft));
 }
 
 .chat-detail-member-remove-icon {
@@ -5379,7 +5379,10 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     padding-inline: 12px;
   }
 
-  .square-desktop-workspace .square-header-publish {
+}
+
+@container square-feed (max-width: 440px) {
+  .square-header-publish {
     display: grid;
     width: 34px;
     height: 34px;
@@ -5388,7 +5391,7 @@ html[data-theme="dark"] .submission-member-picker-body .member-picker-status-loc
     place-items: center;
   }
 
-  .square-desktop-workspace .square-header-publish > span:last-child {
+  .square-header-publish > span:last-child {
     display: none;
   }
 }
