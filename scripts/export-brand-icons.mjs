@@ -16,5 +16,5 @@ for (const number of [1,2,3]) {
   const svg = (await fs.readFile(path.join(root, `logos/dev/concept-${number}.svg`), "utf8")).replace('../../public/icons/frienden-512.png', `data:image/png;base64,${mark.toString("base64")}`);
   await sharp(Buffer.from(svg)).resize(512,512).flatten({ background }).removeAlpha().png().toFile(path.join(root,`logos/dev/concept-${number}.png`));
 }
-await fs.copyFile(path.join(root,"logos/dev/concept-1.png"),path.join(root,"public/icons/frienden-dev-512.png"));
+await fs.copyFile(path.join(root,"logos/dev/concept-3.png"),path.join(root,"public/icons/frienden-dev-512.png"));
 console.log("Exported opaque PWA icons and three DEV avatar concepts.");

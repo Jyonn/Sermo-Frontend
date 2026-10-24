@@ -42,6 +42,7 @@ test("install brand is space-independent across prompts, guides and OS metadata"
 });
 test("developer avatar retains the original brand and a separate editable DEV tag", () => {
   opaquePng("/icons/frienden-dev-512.png", 512);
+  assert.deepEqual(fs.readFileSync(new URL("../public/icons/frienden-dev-512.png", import.meta.url)), fs.readFileSync(new URL("../logos/dev/concept-3.png", import.meta.url)));
   for (const number of [1,2,3]) {
     const svg = read(`logos/dev/concept-${number}.svg`);
     assert.match(svg, /viewBox="0 0 512 512"/);

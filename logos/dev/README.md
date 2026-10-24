@@ -2,8 +2,8 @@
 
 This identity belongs to the official account in the `dev` space, not the OAuth
 application management interface. It retains the current four-color textured
-Frienden mark. Three square directions are included in preview.html; concept 1
-is the recommended, light-background DEV/code-bracket lockup and is exported as
+Frienden mark. Three square directions are included in preview.html; concept 3
+is the user-selected DEV terminal-badge lockup and is exported as
 `public/icons/frienden-dev-512.png`. The PNG is ready to upload as the account
 avatar. No account identity or server avatar has been changed automatically.
 
