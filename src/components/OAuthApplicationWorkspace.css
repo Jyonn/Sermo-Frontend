@@ -1,5 +1,5 @@
 .oauth-surface { --oauth-ink:var(--text-primary);--oauth-muted:var(--text-muted);--oauth-line:var(--line-soft);--oauth-paper:var(--bg-surface);--oauth-soft:var(--bg-elevated);--oauth-accent:var(--accent);color:var(--oauth-ink);font-family:inherit; }
-.oauth-surface.is-platform { --oauth-ink:#17211f;--oauth-muted:#6e7773;--oauth-line:#d9ddd8;--oauth-paper:#fffefb;--oauth-soft:#f3f4ef;--oauth-accent:#b65332;color-scheme:light;font-family:"Noto Sans SC",sans-serif; }
+.oauth-surface.is-platform { --oauth-ink:var(--text-primary);--oauth-muted:var(--text-muted);--oauth-line:var(--line-soft);--oauth-paper:var(--bg-elevated);--oauth-soft:var(--bg-canvas);--oauth-accent:var(--brand-accent);color-scheme:inherit;font-family:inherit; }
 .oauth-workspace { min-width:0; }
 .oauth-list-heading { display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px; }
 .oauth-eyebrow { color:var(--oauth-accent);font:700 10px/1.2 "JetBrains Mono",monospace;letter-spacing:.15em; }

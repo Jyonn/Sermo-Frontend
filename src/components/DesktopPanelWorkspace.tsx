@@ -13,6 +13,7 @@ const snapshot = () => window.matchMedia(query).matches;
 const serverSnapshot = () => false;
 
 interface PanelContext {
+  surfaceClassName?: string;
   enabled: boolean;
   host: HTMLDivElement | null;
   topId?: string;
@@ -24,7 +25,7 @@ interface PanelContext {
 const DesktopPanels = createContext<PanelContext | null>(null);
 export const useDesktopPanels = () => useContext(DesktopPanels);
 
-export function DesktopPanelWorkspace({ children, className, selected = false }: { children: ReactNode; className: string; selected?: boolean }) {
+export function DesktopPanelWorkspace({ children, className, selected = false, surfaceClassName }: { children: ReactNode; className: string; selected?: boolean; surfaceClassName?: string }) {
   const { pathname } = useLocation();
   const desktop = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const mode = desktopPanelMode(pathname);
@@ -66,7 +67,7 @@ export function DesktopPanelWorkspace({ children, className, selected = false }:
       "--panel-gap": active && !single ? `${panelSizing.gap}px` : "0px",
     } : {}),
   } as CSSProperties;
-  return <DesktopPanels.Provider value={{ enabled, host, topId: top?.id, single, floating, register, unregister }}>
+  return <DesktopPanels.Provider value={{ enabled, host, topId: top?.id, single, floating, register, unregister, surfaceClassName }}>
     <main ref={setWorkspace} style={sizing} className={`${className} desktop-panel-workspace${enabled ? ` panel-mode-${split ? "split" : "floating"}` : ""}${active ? " has-desktop-panel" : ""}${single ? " panel-single" : ""}${selected && layout.presentation === "single" ? " native-detail-single" : ""}`}>
       {children}
       <div className={`desktop-panel-slot${top?.wide ? " is-wide" : ""}`} ref={setHost} hidden={!active} />

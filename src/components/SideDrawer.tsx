@@ -244,7 +244,7 @@ export function SideDrawer({
       <aside
         aria-label={title}
         aria-modal={desktopPanel ? undefined : true}
-        className={`side-drawer${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
+        className={`side-drawer${panels?.surfaceClassName ? ` ${panels.surfaceClassName}` : ""}${headerless ? " is-headerless" : ""}${fullscreen ? " is-fullscreen" : ""}${className ? ` ${className}` : ""}`}
         onClick={(event) => event.stopPropagation()}
         role={desktopPanel ? "region" : "dialog"}
         style={{ ...style, ...(fullscreen && !desktopPanel ? ({ "--drawer-width": "100vw", borderLeft: 0 } as CSSProperties) : {}) }}

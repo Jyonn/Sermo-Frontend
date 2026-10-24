@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { conversationPanelLayout, desktopPanelLayout, desktopPanelMode, topDesktopPanel } from "../src/lib/desktopPanels.ts";
 
-test("desktop modes are limited to the four application workspaces", () => {
+test("desktop modes distinguish member panels and management floating surfaces", () => {
   for (const path of ["/app/menu", "/app/notifications", "/app/notifications/friends/42"]) assert.equal(desktopPanelMode(path), "split");
-  for (const path of ["/app/chats/2", "/app/square", "/app/square/statements/3", "/app/submissions/new"]) assert.equal(desktopPanelMode(path), "floating");
-  for (const path of ["/admin", "/space/dashboard", "/app/menufake", "/oauth/authorize", "/"]) assert.equal(desktopPanelMode(path), null);
+  for (const path of ["/app/chats/2", "/app/square", "/app/square/statements/3", "/app/submissions/new", "/admin", "/space/dashboard"]) assert.equal(desktopPanelMode(path), "floating");
+  for (const path of ["/administrator", "/space", "/space/dashboardfake", "/app/menufake", "/oauth/authorize", "/"]) assert.equal(desktopPanelMode(path), null);
 });
 
 test("deep links and nested views expose only the deepest active layer", () => {

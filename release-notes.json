@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.24.14",
-  "publishedAt": "2026-10-24",
+  "id": "2026.10.25.1",
+  "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "浮动查看，内容不挤",
+      "title": "管理工作台，横竖皆宜",
       "items": [
-        "聊天详情、个人名片等在聊天和广场中以浮动框打开，不再挤压当前内容",
-        "广场列表保留更舒适的宽度，窄面板中的发表按钮不再换行"
+        "空间管理与平台管理适配宽屏、平板和手机竖屏，导航不再挤作一团",
+        "权限编辑、成员详情及管理表单优化横屏布局与深色外观"
       ]
     },
     "en": {
-      "title": "Floating views, undisturbed content",
+      "title": "Administration in every orientation",
       "items": [
-        "Chat details, profile cards and other secondary views float above Chats and Square without squeezing the current content",
-        "Square lists have more breathing room, with compact publish buttons that stay on one line"
+        "Space and platform administration adapt to desktop, tablet and portrait phone screens with clearer navigation",
+        "Permission editors, member details and management forms have improved landscape layouts and dark appearance"
       ]
     }
   }

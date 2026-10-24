@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { AppChrome } from "../components/AppChrome";
+import { ManagementWorkspace } from "../components/ManagementWorkspace";
 import { AsyncErrorDialog } from "../components/AsyncErrorDialog";
 import { BottomSheet } from "../components/BottomSheet";
 import { ChatMuteControls } from "../components/ChatMuteControls";
@@ -782,41 +782,18 @@ export default function SpaceAdminDashboardPage() {
   };
 
   return (
-    <AppChrome
-      guestSpaceBrand={
-        currentSpace
-          ? {
-              name: currentSpace.name,
-              avatarUri: currentSpace.official_user?.avatar_uri,
-            }
-          : undefined
-      }
-      hidePageTitle
-      publicHeader
+    <ManagementWorkspace
+      avatar={<SpaceAvatar className="management-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />}
+      identity={currentSpace?.name ?? "FRIENDEN"}
       title={t("admin.dashboardTitle")}
-      topbarAction={
-        <button className="ghost-chip" onClick={() => logout()} type="button">
-          {t("auth.logout")}
-        </button>
-      }
+      items={adminTabs.map((item) => ({ ...item, id: item.key }))}
+      activeId={activeTab}
+      onSelect={(id) => setActiveTab(id as AdminTab)}
+      onLogout={logout}
+      fill={activeTab === "permissions"}
+      status={<HeaderSyncIndicator syncing={dashboardState === "loading" || memberState === "loading" || squareState === "loading"} />}
     >
-      <section className="admin-app-shell">
-        <nav className="admin-app-nav" aria-label={t("admin.dashboardTitle")}>
-          <div className="admin-nav-brand">
-            <SpaceAvatar className="admin-nav-space-avatar" name={currentSpace?.name ?? "FRIENDEN"} uri={currentSpace?.official_user?.avatar_uri} />
-            <span><strong>{currentSpace?.name}</strong><small>@{currentSpace?.slug}</small></span>
-          </div>
-          <div className="admin-nav-items">
-            {adminTabs.map((item) => <button aria-current={activeTab === item.key ? "page" : undefined} className={activeTab === item.key ? "is-active" : ""} key={item.key} onClick={() => setActiveTab(item.key)} type="button"><span className="material-symbols-outlined">{item.icon}</span><span>{item.label}</span></button>)}
-          </div>
-          <button className="admin-nav-logout" onClick={() => logout()} type="button"><span className="material-symbols-outlined">logout</span><span>{t("auth.logout")}</span></button>
-        </nav>
-
         <div className={`admin-app-content ${activeTab === "permissions" ? "is-permissions" : ""}`}>
-          <header className="admin-app-header">
-            <div><h1>{adminTabs.find((item) => item.key === activeTab)?.label}</h1><span>{currentSpace?.name}</span></div>
-            <HeaderSyncIndicator syncing={dashboardState === "loading" || memberState === "loading" || squareState === "loading"} />
-          </header>
 
           {activeTab === "members" ? <section className="admin-tab-page admin-members-tab">
             <div className="admin-members-overview">
@@ -871,8 +848,6 @@ export default function SpaceAdminDashboardPage() {
           </section> : null}
         </div>
 
-        <nav className="admin-mobile-nav">{adminTabs.map((item) => <button aria-current={activeTab === item.key ? "page" : undefined} className={activeTab === item.key ? "is-active" : ""} key={item.key} onClick={() => setActiveTab(item.key)} type="button"><span className="material-symbols-outlined">{item.icon}</span><span>{item.label}</span></button>)}</nav>
-      </section>
 
       <SideDrawer historyKey="admin-member-detail" onClose={() => setSelectedMember(null)} open={Boolean(selectedMember)} title={t("admin.memberDetail")}>
         {selectedMember ? <div className="admin-member-drawer">
@@ -1130,6 +1105,6 @@ export default function SpaceAdminDashboardPage() {
         <div className="square-mute-form"><div className="square-mute-duration">{(["1d", "3d", "7d", "30d", "permanent"] as const).map((duration) => <button aria-pressed={muteDuration === duration} className={muteDuration === duration ? "is-selected" : ""} key={duration} onClick={() => setMuteDuration(duration)} type="button">{t(`square.muteDuration.${duration}` as TranslationKey)}</button>)}</div><label><span>{t("square.muteReason")}</span><textarea maxLength={240} onChange={(event) => setMuteReason(event.target.value)} placeholder={t("square.muteReasonPlaceholder")} value={muteReason} /></label></div>
       </ConfirmDialog>
       <ConfirmDialog busy={muteBusy} confirmLabel={t("admin.unmute")} description={unmuteTarget ? t("admin.unmuteHint", { name: unmuteTarget.user.name }) : ""} onClose={() => setUnmuteTarget(null)} onConfirm={() => void removeSquareMute()} open={Boolean(unmuteTarget)} title={t("admin.unmuteTitle")} warning />
-    </AppChrome>
+    </ManagementWorkspace>
   );
 }

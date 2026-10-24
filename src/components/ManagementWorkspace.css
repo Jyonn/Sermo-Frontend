@@ -1,0 +1,193 @@
+/* One navigation model for space governance and platform operations. */
+.management-workspace,
+.management-workspace.platform-console {
+  --management-rail: 224px;
+  --pa-ink: var(--text-primary);
+  --pa-muted: var(--text-muted);
+  --pa-line: var(--line-soft);
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--management-rail) minmax(0, 1fr);
+  grid-template-rows: 88px minmax(0, 1fr);
+  width: 100%;
+  height: 100dvh;
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+  min-height: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: radial-gradient(ellipse at 85% 0, color-mix(in srgb, var(--brand-primary) 8%, transparent), transparent 45%), var(--bg-page);
+}
+.management-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  border-right: 1px solid var(--line-soft);
+  background: var(--bg-elevated);
+}
+.management-brand > :first-child { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px; object-fit: contain; }
+.management-brand > span { display: grid; gap: 5px; min-width: 0; }
+.management-brand small { color: var(--text-muted); font-size: 10px; letter-spacing: .04em; }
+.management-brand strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.management-nav {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 14px max(20px, env(safe-area-inset-bottom));
+  border-right: 1px solid var(--line-soft);
+  background: var(--bg-elevated);
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.management-nav > button {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: left;
+  white-space: nowrap;
+}
+.management-nav > button:hover { background: color-mix(in srgb, var(--brand-primary) 6%, transparent); }
+.management-nav > button[aria-current="page"] { color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 13%, transparent); }
+.management-nav .material-symbols-outlined { font-size: 22px; }
+.management-nav b { margin-left: auto; padding: 2px 5px; border-radius: 6px; color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 15%, transparent); font-size: 10px; }
+.management-content { grid-column: 2; grid-row: 1 / -1; display: grid; grid-template-rows: 88px minmax(0, 1fr); min-width: 0; min-height: 0; }
+.management-page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px clamp(18px, 3vw, 40px); border-bottom: 1px solid var(--line-soft); }
+.management-page-header > div:first-child { min-width: 0; display: grid; gap: 4px; }
+.management-page-header small { color: var(--text-muted); font-size: 10px; letter-spacing: .06em; }
+.management-page-header h1 { margin: 0; font-family: var(--font-heading); font-size: 24px; line-height: 1.2; }
+.management-header-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.management-header-actions > button, .management-language-control { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line-soft); border-radius: 12px; color: var(--text-secondary); background: var(--bg-elevated); }
+.management-header-actions > button > span, .management-language-control > span { font-size: 19px; }
+.management-language-control { position: relative; }
+.management-language-control select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.management-language-control:focus-within { outline: 2px solid var(--brand-accent); outline-offset: 3px; }
+.management-body { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px clamp(18px, 3vw, 40px) max(28px, env(safe-area-inset-bottom)); scrollbar-gutter: stable; }
+.management-body.is-fill { overflow: hidden; padding-bottom: 18px; }
+.management-workspace .admin-app-content,
+.management-workspace .platform-main { width: 100%; max-width: 1280px; min-height: 0; margin: 0 auto; padding: 0; }
+.management-workspace .admin-tab-page { padding-top: 0; }
+.management-workspace :is(.admin-app-content, .platform-main).is-permissions { display: block; height: 100%; padding: 0; }
+.management-workspace .admin-permissions-tab { padding: 0; }
+.management-workspace .platform-panel.is-fill { min-height: 0; }
+.management-workspace .platform-header { display: none; }
+.management-workspace .platform-section-title { flex-wrap: wrap; }
+.management-workspace .platform-search { flex: 1 1 200px; max-width: 340px; width: auto; }
+.management-workspace .platform-hero { min-height: 200px; }
+.management-workspace .platform-hero > .material-symbols-outlined { flex: 0 0 auto; font-family: "Material Symbols Outlined"; letter-spacing: normal; }
+.management-workspace .material-symbols-outlined { font-family: "Material Symbols Outlined"; font-weight: normal; font-style: normal; letter-spacing: normal; text-transform: none; }
+.management-workspace .platform-metrics { margin-block: 18px; }
+.management-workspace .platform-space-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.management-workspace .platform-space-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.management-workspace :is(.platform-audit-list small, .platform-debug-list span, .platform-email-copy p) { overflow-wrap: anywhere; }
+.management-workspace .platform-debug-list article { flex-wrap: wrap; }
+.management-workspace .platform-debug-list article > div:last-child { flex: 0 0 auto; }
+.management-workspace .platform-review-card { gap: 14px; flex-wrap: wrap; }
+.management-workspace .platform-review-card > div:last-child { display: flex; flex-wrap: wrap; gap: 6px; }
+.management-workspace .platform-review-card button { margin: 0; padding-inline: 10px; font-size: 13px; white-space: nowrap; }
+.management-workspace .platform-audit-list article { border-color: var(--line-soft); }
+.management-workspace .oauth-list-heading { flex-wrap: wrap; }
+.management-workspace .oauth-toolbar-actions { flex-wrap: nowrap; }
+.management-workspace .platform-secure-pill { color: var(--brand-accent); border-color: var(--line-soft); background: var(--bg-elevated); white-space: nowrap; }
+.management-workspace :is(.platform-panel, .platform-metric, .platform-space-row, .platform-member-row, .platform-chat-row, .platform-debug-list article) { color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-elevated); }
+.management-workspace :is(.platform-metric span, .platform-metric small, .platform-section-title span, .platform-section-title small, .platform-space-row small, .platform-audit-list small, .platform-security-grid p) { color: var(--text-muted); }
+.management-workspace .platform-metric strong { color: var(--text-primary); }
+.management-workspace :is(.platform-search, .platform-debug-list button, .platform-review-card button, .platform-secondary) { color: var(--text-secondary); border-color: var(--line-soft); background: var(--bg-canvas); }
+.management-workspace .platform-review-card button.is-approve { color: var(--bg-elevated); background: var(--text-primary); }
+.management-workspace .permission-workspace { container: management-permissions / inline-size; height: 100%; min-height: 0; color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-elevated); }
+.management-workspace .permission-tree-panel { background: var(--bg-canvas); border-color: var(--line-soft); }
+.management-workspace :is(.permission-editor-header, .permission-search, .permission-rule-row, .permission-matrix, .permission-inherited-summary, .permission-limit-list label) { border-color: var(--line-soft); background: var(--bg-elevated); }
+.management-workspace :is(.permission-editor-header button, .permission-matrix-section header button, .permission-rule-row select, .permission-rule-row input, .permission-limit-presets button, .permission-limit-list input, .permission-not) { color: var(--text-secondary); border-color: var(--line-soft); background: var(--bg-canvas); }
+.management-workspace :is(.permission-tree-row.is-selected, .permission-segmented button.is-active, .permission-boolean button.is-active) { color: var(--brand-accent); background: var(--bg-elevated); }
+.management-workspace :is(.permission-inheritance, .permission-inherited-summary article, .permission-segmented, .permission-boolean, .permission-empty-rules, .permission-matrix-placeholder, .permission-space-preview, .permission-matrix-head) { color: var(--text-secondary); background: var(--bg-canvas); }
+.management-workspace .permission-editor-header button.is-primary { color: var(--bg-elevated); background: var(--brand-accent); }
+.management-workspace :is(.permission-rule-editor, .permission-rule-list, .permission-limit-editor) { min-width: 0; }
+.management-workspace .permission-workspace-loading { min-height: 200px; }
+.management-detail { --pa-ink: var(--text-primary); --pa-muted: var(--text-muted); --pa-line: var(--line-soft); --pa-accent: var(--brand-accent); }
+.management-detail .material-symbols-outlined { font-family: "Material Symbols Outlined"; letter-spacing: normal; }
+.management-detail :is(.platform-panel, .platform-member-row, .platform-chat-row, .platform-data-grid, .platform-email-review-facts > div) { color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-elevated); }
+.management-detail :is(.platform-data-grid strong, .platform-panel h3, .platform-profile h2, .platform-space-summary h2) { color: var(--text-primary); }
+.management-detail :is(.platform-profile, .platform-space-summary, .platform-contact-strip span, .platform-email-review-body, .platform-email-review-detail-head, .platform-mfa code, .platform-recovery code) { color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-canvas); }
+.management-detail :is(.platform-data-grid span, .platform-profile p, .platform-space-summary p, .platform-mfa p, .platform-recovery p) { color: var(--text-muted); border-color: var(--line-soft); }
+.management-detail .platform-feature-grant { grid-template-columns: auto minmax(0, 1fr); color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-canvas); }
+.management-detail .platform-feature-grant-action { grid-column: 2; justify-self: start; color: var(--bg-elevated); background: var(--text-primary); }
+.management-detail .platform-feature-grant.is-granted .platform-feature-grant-action { color: var(--text-primary); border-color: var(--line-soft); background: var(--bg-elevated); }
+.management-detail .platform-feature-grant > .material-symbols-outlined { color: var(--brand-accent); background: color-mix(in srgb, var(--brand-primary) 12%, var(--bg-elevated)); }
+.management-detail .platform-conversation-notice { width: fit-content; max-width: 100%; flex-wrap: wrap; overflow-wrap: anywhere; }
+.management-detail .platform-space-summary { flex-wrap: wrap; }
+.management-detail .platform-space-summary > div { min-width: 0; }
+.management-detail :is(.platform-profile h2, .platform-space-summary h2, .platform-email-review-facts strong) { overflow-wrap: anywhere; }
+.management-detail .platform-data-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.management-detail .platform-data-grid > span { padding: 12px; }
+.management-detail .platform-data-grid > span:nth-child(n) { border-color: var(--line-soft); }
+@container management-permissions (max-width: 1050px) {
+  .permission-editor-header { grid-template-columns: 42px minmax(0, 1fr); }
+  .permission-editor-header > div { grid-column: 1 / -1; justify-content: flex-end; }
+  .permission-editor-section { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .permission-limit-list { grid-template-columns: minmax(0, 1fr); }
+  .permission-rule-row { grid-template-columns: 42px minmax(0, 1fr) 34px; }
+  .permission-rule-row > label:nth-of-type(2), .permission-rule-row > .permission-boolean, .permission-rule-row > .permission-rule-value { grid-column: 2; }
+  .permission-remove-rule { grid-column: 3; grid-row: 1; }
+}
+@media (min-width: 720px) {
+  .management-workspace > .desktop-panel-slot { position: absolute; top: 88px; bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
+  .management-workspace .permission-workspace { display: grid; grid-template-columns: minmax(180px, 26%) minmax(0, 1fr); }
+  .management-workspace .permission-tree-panel { max-height: none; border-right: 1px solid var(--line-soft); border-bottom: 0; }
+}
+@media (min-width: 720px) and (max-width: 1179px) {
+  .management-workspace, .management-workspace.platform-console { --management-rail: 88px; }
+  .management-brand { justify-content: center; padding-inline: 12px; }
+  .management-brand > span { display: none; }
+  .management-nav { padding-inline: 12px; }
+  .management-nav > button { flex-direction: column; justify-content: center; gap: 5px; min-height: 58px; padding: 8px 2px; font-size: 10px; }
+  .management-nav b { position: absolute; top: 3px; right: 1px; }
+  .management-nav-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 719px) {
+  .management-workspace, .management-workspace.platform-console { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); padding-top: env(safe-area-inset-top); }
+  .management-brand { display: none; }
+  .management-content { display: contents; }
+  .management-page-header { grid-row: 1; padding: 14px 16px; min-height: 72px; }
+  .management-page-header h1 { font-size: 21px; }
+  .management-header-actions { gap: 7px; }
+  .management-header-actions .platform-secure-pill { display: none; }
+  .management-nav { grid-row: 2; flex-direction: row; gap: 6px; padding: 7px 12px; border-right: 0; border-bottom: 1px solid var(--line-soft); scrollbar-width: none; }
+  .management-nav > button { min-height: 40px; padding: 8px 12px; gap: 6px; font-size: 12px; }
+  .management-nav .material-symbols-outlined { font-size: 19px; }
+  .management-body { grid-row: 3; padding: 16px 14px max(22px, env(safe-area-inset-bottom)); }
+  .management-body.is-fill { padding: 12px 10px max(10px, env(safe-area-inset-bottom)); }
+  .management-workspace .platform-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .management-workspace .platform-metric { min-height: 110px; padding: 13px 9px; }
+  .management-workspace .platform-metric strong { font-size: clamp(21px, 6vw, 27px); }
+  .management-workspace .platform-panel { padding: 16px; }
+  .management-workspace .platform-hero { min-height: 180px; }
+  .management-workspace .platform-hero h2 { font-size: clamp(25px, 7vw, 34px); }
+  .management-workspace .permission-tree-panel { flex: 0 0 auto; max-height: min(190px, 30dvh); padding: 10px 8px; }
+  .management-workspace .permission-search { flex: 0 0 38px; height: 38px; margin-bottom: 8px; }
+  .management-workspace .permission-editor-panel { flex: 1; min-height: 0; }
+  .management-workspace .permission-matrix { overflow-x: auto; }
+}
+@media (min-width: 720px) and (max-height: 560px) {
+  .management-workspace, .management-workspace.platform-console { grid-template-rows: 64px minmax(0, 1fr); }
+  .management-content { grid-template-rows: 64px minmax(0, 1fr); }
+  .management-brand { padding-block: 10px; }
+  .management-page-header { padding-block: 8px; }
+  .management-body { padding-top: 16px; }
+  .management-workspace > .desktop-panel-slot { top: 72px; bottom: max(12px, env(safe-area-inset-bottom)); min-height: 0; }
+  .management-workspace .permission-tree-panel { max-height: none; }
+}
