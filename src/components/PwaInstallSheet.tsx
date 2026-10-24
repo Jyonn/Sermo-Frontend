@@ -14,18 +14,17 @@ import { useI18n, type TranslationKey } from "../lib/language";
 
 interface PwaInstallSheetProps {
   open: boolean;
-  spaceName: string;
   onClose: () => void;
   onInstalled?: () => void;
 }
 
-export function PwaInstallSheet({ open, spaceName, onClose, onInstalled }: PwaInstallSheetProps) {
+export function PwaInstallSheet({ open, onClose, onInstalled }: PwaInstallSheetProps) {
   const { t } = useI18n();
   const ios = isIosDevice();
   const android = isAndroidDevice();
   const desktopChrome = isDesktopChrome();
   const detectedBrand = detectAndroidInstallBrand();
-  const appName = `${spaceName} - ${t("brand.yanlang")}`;
+  const appName = t("pwa.appName");
   const [promptAvailable, setPromptAvailable] = useState(canPromptPwaInstall());
   const [manualGuide, setManualGuide] = useState(false);
   const [guideBrand, setGuideBrand] = useState<AndroidInstallBrand>(detectedBrand);

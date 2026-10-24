@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f7f4ec"/>
+  <g id="brand-mark"><image href="../../public/icons/frienden-512.png" x="8" y="8" width="440" height="440"/></g>
+  <rect id="terminal-tile" x="276" y="332" width="212" height="156" rx="22" fill="#173c32"/>
+  <g id="developer-tag" fill="none" stroke="#f7f4ec" stroke-width="9" stroke-linejoin="round"><path d="M302 366v40h11q15 0 15-20t-15-20Zm49 0v40m0-40h25m-25 20h21m-21 20h25m19-40 14 40 14-40"/><path d="m306 438 15 11-15 11m38 0h32" stroke="#a5d5b7"/></g>
+</svg>

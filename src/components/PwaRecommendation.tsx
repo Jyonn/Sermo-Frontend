@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import {
   isStandalonePwa,
@@ -20,21 +19,16 @@ export function PwaRecommendation() {
   const { t } = useI18n();
   const { session } = useAuth();
   const location = useLocation();
-  const [spaceName, setSpaceName] = useState(() => t("pwa.currentSpace"));
   const [kind, setKind] = useState<RecommendationKind | null>(null);
   const [installGuideOpen, setInstallGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const appName = `${spaceName} - ${t("brand.yanlang")}`;
+  const appName = t("pwa.appName");
 
   useEffect(() => {
     if (!session || !location.pathname.startsWith("/app")) return;
     let active = true;
     const slug = getDetectedSpaceSlug() || String(session.user.space_id);
-
-    void api.getSpaceMe().then((space) => {
-      if (active) setSpaceName(space.name);
-    }).catch(() => undefined);
 
     const timer = window.setTimeout(() => {
       void (async () => {
@@ -86,7 +80,7 @@ export function PwaRecommendation() {
     }
   };
 
-  if (!kind) return <PwaInstallSheet onClose={() => setInstallGuideOpen(false)} open={installGuideOpen} spaceName={spaceName} />;
+  if (!kind) return <PwaInstallSheet onClose={() => setInstallGuideOpen(false)} open={installGuideOpen} />;
 
   return (
     <>
@@ -106,7 +100,7 @@ export function PwaRecommendation() {
           {busy ? t("pwa.wait") : kind === "install" ? t("pwa.install") : t("pwa.enable")}
         </button>
       </aside>
-      <PwaInstallSheet onClose={() => setInstallGuideOpen(false)} open={installGuideOpen} spaceName={spaceName} />
+      <PwaInstallSheet onClose={() => setInstallGuideOpen(false)} open={installGuideOpen} />
     </>
   );
 }

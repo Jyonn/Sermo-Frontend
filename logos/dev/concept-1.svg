@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f7f4ec"/>
+  <g id="brand-mark"><image href="../../public/icons/frienden-512.png" x="64" y="32" width="384" height="384"/></g>
+  <g id="developer-tag" fill="none" stroke="#22312e" stroke-width="12" stroke-linejoin="round" stroke-linecap="square">
+    <path d="m132 421-26 23 26 23m248-46 26 23-26 23"/>
+    <path d="M172 422v44h14q18 0 18-22t-18-22Zm66 0v44m0-44h32m-32 22h26m-26 22h32m24-44 16 44 16-44"/>
+  </g>
+</svg>

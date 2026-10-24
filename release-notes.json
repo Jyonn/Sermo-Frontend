@@ -1,17 +1,19 @@
 {
-  "id": "2026.10.24.4",
+  "id": "2026.10.24.5",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "登录细节更舒适",
+      "title": "桌面上的友间",
       "items": [
-        "优化 PWA 登录其他账户时的访问密码按钮，宽度随文字收拢并增加内边距"
+        "桌面安装图标改用不透明浅色底，避免出现黑色背景",
+        "安装提示与桌面应用名称统一为 Frienden 友间，不再附带空间名"
       ]
     },
     "en": {
-      "title": "A more comfortable sign-in",
+      "title": "Frienden on your desktop",
       "items": [
-        "The optional password button in PWA account sign-in now fits its label with comfortable padding"
+        "Desktop installation now uses opaque light-background icons instead of transparent artwork",
+        "Install prompts and app names consistently use Frienden 友间 without a space name"
       ]
     }
   }

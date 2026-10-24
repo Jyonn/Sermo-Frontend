@@ -1,5 +1,9 @@
 {
   "retired": [
+    "public/icons/frienden-32.png",
+    "public/icons/frienden-180.png",
+    "public/icons/frienden-maskable-192.png",
+    "public/icons/frienden-maskable-512.png",
     "public/assets/xiaobai",
     "public/miniprogram-assets/assets/xiaobai",
     "public/assets/baxian/he-xiangu-48-v2-sheet.webp",

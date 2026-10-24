@@ -1,12 +1,12 @@
 importScripts("/sw-release.js");
 
-const CACHE_NAME = "sermo-shell-v10";
+const CACHE_NAME = "sermo-shell-v11";
 const MEDIA_CACHE_NAME = "sermo-media-v1";
 const MEDIA_DB_NAME = "sermo-media-metadata";
 const MEDIA_DB_STORE = "entries";
 const MEDIA_MAX_BYTES = 256 * 1024 * 1024;
 const MEDIA_MAX_ITEM_BYTES = 128 * 1024 * 1024;
-const SHELL = ["/", "/manifest.json", "/icons/frienden-192.png?v=2", "/icons/frienden-512.png?v=2", "/fonts/material-symbols-outlined.woff2?v=1"];
+const SHELL = ["/", "/manifest.json", "/icons/frienden-app-180-v3.png", "/icons/frienden-app-192-v3.png", "/icons/frienden-app-512-v3.png", "/fonts/material-symbols-outlined.woff2?v=1"];
 const blockedMediaSlugs = new Set();
 
 function mediaIdentity(value) {

@@ -1,4 +1,5 @@
 {
+  "pwa.appName": "Frienden 友间",
   "bgm.floatingCooldown": "主角按键冷却中，剩余 {{time}}；可拖动调整位置",
   "landing.spaceManagement": "空间管理",
   "landing.createNewSpace": "创建新空间",

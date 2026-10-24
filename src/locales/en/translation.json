@@ -1,4 +1,5 @@
 {
+  "pwa.appName": "Frienden 友间",
   "bgm.floatingCooldown": "Entrance keys cooling down: {{time}} remaining. Drag to reposition.",
   "landing.spaceManagement": "Space management",
   "landing.createNewSpace": "Create a new space",

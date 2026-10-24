@@ -2278,7 +2278,6 @@ export default function MenuPage() {
           });
         }}
         open={pwaInstallSheetOpen}
-        spaceName={space?.name ?? t("space.current")}
       />
       <UpdateCheckDialog
         checking={updateChecking}
