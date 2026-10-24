@@ -51,10 +51,12 @@ import { NearbyLocationPicker, type SelectedLocation } from "../components/Nearb
 import { ExternalMediaPreview, isSupportedExternalMedia } from "../components/ExternalMediaPreview";
 import { UnsupportedContentNotice } from "../components/UnsupportedContentNotice";
 import { TabPageHeader } from "../components/TabPageHeader";
+import { PageTabs } from "../components/PageTabs";
+import "../styles/submission-workspace.css";
 import { resolveTravelMapCandidates, TravelMapDrawer } from "../components/TravelMapDrawer";
 import { InputDialog } from "../components/InputDialog";
 import { SideDrawer, drawerPathFromSearch } from "../components/SideDrawer";
-import { SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
+import { SelectControl, SettingGroup, SettingRow, SettingSwitch } from "../components/SettingRow";
 import { PlainAvatar, UserAvatar } from "../components/UserAvatar";
 import { StatementMessageCard } from "../components/StatementMessageCard";
 import { ActivityMessageCard } from "../components/ActivityMessageCard";
@@ -2973,14 +2975,8 @@ function writeChatDraft(scope: string, chatId: number, value: string) {
 
 function LiveChatsPage({
   purpose = "normal",
-  squareIntegrated = false,
-  embeddedListOnly = false,
-  onReturnToSquare,
 }: {
   purpose?: "normal" | "submission";
-  squareIntegrated?: boolean;
-  embeddedListOnly?: boolean;
-  onReturnToSquare?: () => void;
 }) {
   const { t } = useI18n();
   const pageActive = usePageActive();
@@ -2992,8 +2988,7 @@ function LiveChatsPage({
   const submissionMode = purpose === "submission";
   const routeSearchParams = new URLSearchParams(location.search);
   const requestedSubmissionView = routeSearchParams.get("view");
-  const integratedSubmissionId = squareIntegrated ? routeSearchParams.get("submission") : null;
-  const activeChatRouteValue = integratedSubmissionId ?? chatId;
+  const activeChatRouteValue = chatId;
   const [submissionView, setSubmissionView] = useState<"author" | "reviewer">(
     requestedSubmissionView === "author" || requestedSubmissionView === "reviewer"
       ? requestedSubmissionView
@@ -3007,7 +3002,6 @@ function LiveChatsPage({
   const [submissionCreateMenuOpen, setSubmissionCreateMenuOpen] = useState(false);
   const [submissionRecipients, setSubmissionRecipients] = useState<SubmissionRecipientDTO[]>([]);
   const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
-  const [submissionViewActionCounts, setSubmissionViewActionCounts] = useState({ author: 0, reviewer: 0 });
   const submissionCreateMenuRef = useRef<HTMLDivElement | null>(null);
   const newSubmissionRoute = submissionMode && location.pathname === "/app/submissions/new";
   const initialSubmissionRecipient = (location.state as ChatRouteState | null)?.recipient ?? null;
@@ -3027,32 +3021,14 @@ function LiveChatsPage({
     setNewSubmissionTitleOpen(true);
     newSubmissionDraftIdRef.current = `submission-${crypto.randomUUID()}`.slice(0, 64);
   }, [location.key, newSubmissionRoute]);
-  const listPath = submissionMode && squareIntegrated ? `/app/square?workspace=submissions&view=${submissionView}` : submissionMode ? "/app/submissions" : "/app/chats";
-  const chatPath = (id: number) => submissionMode && squareIntegrated
-    ? `/app/square?workspace=submissions&view=${submissionView}&submission=${id}`
-    : submissionMode ? `/app/submissions/${id}?view=${submissionView}` : `/app/chats/${id}`;
+  const listPath = submissionMode ? `/app/submissions?view=${submissionView}` : "/app/chats";
+  const chatPath = (id: number) => submissionMode ? `/app/submissions/${id}?view=${submissionView}` : `/app/chats/${id}`;
   const stickerCacheScope = session ? `${session.user.space_id}:${session.user.user_id}` : null;
 
   useEffect(() => {
     if (!submissionMode || (requestedSubmissionView !== "author" && requestedSubmissionView !== "reviewer")) return;
     setSubmissionView(requestedSubmissionView);
   }, [requestedSubmissionView, submissionMode]);
-
-  useEffect(() => {
-    if (!submissionMode || !squareIntegrated) return;
-    let cancelled = false;
-    void Promise.all([
-      api.getChats(undefined, "submission", "author"),
-      api.getChats(undefined, "submission", "reviewer"),
-    ]).then(([authored, reviewed]) => {
-      if (cancelled) return;
-      setSubmissionViewActionCounts({
-        author: authored.filter((chat) => chat.submission?.action_required).length,
-        reviewer: reviewed.filter((chat) => chat.submission?.action_required).length,
-      });
-    }).catch(() => undefined);
-    return () => { cancelled = true; };
-  }, [submissionMode, squareIntegrated, session?.accessToken, submissionView]);
 
   useEffect(() => {
     setSubmissionStatusFilter("all");
@@ -7088,7 +7064,7 @@ function LiveChatsPage({
   const chooseSubmissionView = (role: "author" | "reviewer") => {
     setSubmissionStatusFilter("all");
     setSubmissionView(role);
-    if (activeChatRouteValue) navigate(squareIntegrated ? `/app/square?workspace=submissions&view=${role}` : `/app/submissions?view=${role}`);
+    navigate(`/app/submissions?view=${role}`);
   };
 
   const submitCurrentSubmission = async () => {
@@ -7588,7 +7564,7 @@ function LiveChatsPage({
       if (cacheScope) await chatCache.clearThread(cacheScope, chatId);
       setDeleteSubmissionConfirmOpen(false);
       setDetailsSheetOpen(false);
-      navigate(squareIntegrated ? `/app/square?workspace=submissions&view=${submissionView}` : `/app/submissions?view=${submissionView}`, { replace: true });
+      navigate(`/app/submissions?view=${submissionView}`, { replace: true });
       showToast(t("submission.deleteDone"), "success");
     } catch (error) {
       showToast(error instanceof ApiError ? error.message : t("submission.deleteFailed"), "error");
@@ -7937,68 +7913,37 @@ function LiveChatsPage({
   };
 
   const renderChatItem = (chat: Chat, active: boolean) => {
-    const submissionAuthors = chat.submission?.authors?.length ? chat.submission.authors : chat.submission ? [chat.submission.author] : [];
-    const submissionReviewers = chat.submission?.reviewers?.length ? chat.submission.reviewers : chat.submission ? [chat.submission.recipient] : [];
-    const counterparts = Array.from(new Map((chat.submissionCounterparts ?? []).map((member) => [member.user_id, member])).values());
-    const visibleCounterparts = counterparts.slice(0, 2);
-    const collaborators = chat.submissionRole === "reviewer" ? submissionReviewers : submissionAuthors;
-    const counterpartNames = visibleCounterparts.map((member) => member.name).join(t("common.nameSeparator"));
-    const counterpartOverflow = Math.max(0, counterparts.length - visibleCounterparts.length);
-    const avatarGroupMembers = chat.type === "group" && chat.purpose !== "submission"
+    const counterparts = chat.submissionCounterparts ?? [];
+    const counterpartNames = counterparts.map((member) => member.name).join(t("common.nameSeparator"));
+    const avatarGroupMembers = chat.submission && counterparts.length > 1
+      ? counterparts.map((member) => ({ name: member.name, uri: member.avatar_uri, cacheKey: member.avatar_cache_key }))
+      : chat.type === "group" && chat.purpose !== "submission"
         ? chat.detail.members.map((member) => ({ name: member.name, uri: member.avatarUri, cacheKey: member.avatarCacheKey }))
         : undefined;
     return <button
       key={chat.id}
-      className={`chat-item${chat.submission ? ` is-submission-item is-status-${chat.submission.status}` : ""}${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
+      className={`chat-item${chat.submission ? " submission-thread-row" : ""}${chat.pinned ? " is-pinned" : ""}${active ? " active" : ""}`}
       onClick={() => navigate(chatPath(chat.id))}
       type="button"
     >
       <div className="avatar-wrap">
-        {chat.submission && visibleCounterparts.length > 1 ? (
-          <span aria-label={counterpartNames} className={`submission-avatar-stack has-${visibleCounterparts.length}`}>
-            {visibleCounterparts.map((member, index) => (
-              <UserAvatar
-                key={member.user_id}
-                className={`submission-stacked-avatar is-${index + 1}`}
-                name={member.name}
-                uri={member.avatar_uri}
-                cacheKey={member.avatar_cache_key}
-                frame="none"
-              />
-            ))}
-            {counterpartOverflow ? <span className="submission-avatar-overflow">+{counterpartOverflow}</span> : null}
-          </span>
-        ) : (
-          <UserAvatar
-            className={`avatar${chat.submission ? " submission-list-avatar is-single" : chat.online ? " status-online" : ""}`}
-            groupMembers={avatarGroupMembers}
-            name={chat.submission ? visibleCounterparts[0]?.name ?? chat.title : chat.title}
-            uri={chat.submission ? visibleCounterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}
-            cacheKey={chat.submission ? visibleCounterparts[0]?.avatar_cache_key ?? chat.avatarCacheKey : chat.avatarCacheKey}
-            frame={chat.submission ? "none" : chat.avatarFrameStyle}
-          />
-        )}
-        {chat.unread ? (
-          <span className={`small-badge chat-list-unread${chat.submission ? " is-submission-dot" : ""}${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.submission || chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span>
-        ) : null}
+        <UserAvatar
+          className={`avatar${!chat.submission && chat.online ? " status-online" : ""}`}
+          groupMembers={avatarGroupMembers}
+          name={chat.submission ? counterparts[0]?.name ?? chat.title : chat.title}
+          uri={chat.submission ? counterparts[0]?.avatar_uri ?? chat.avatarUri : chat.avatarUri}
+          cacheKey={chat.submission ? counterparts[0]?.avatar_cache_key ?? chat.avatarCacheKey : chat.avatarCacheKey}
+          frame={chat.submission ? "none" : chat.avatarFrameStyle}
+        />
+        {chat.unread ? <span className={`small-badge chat-list-unread${chat.submission ? " is-submission-dot" : ""}${chat.unreadBadgeMuted ? " is-muted" : ""}`}>{chat.submission || chat.unreadBadgeMuted ? "" : chat.unread > 99 ? "99+" : chat.unread}</span> : null}
       </div>
       <div className="chat-copy">
-        {chat.submission ? (
-          <>
-            <p className="chat-name is-submission"><span className={`submission-status-badge is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span><span className="submission-list-title">{chat.title}</span></p>
-            <div className="submission-list-people">
-              <span className="submission-list-role">{t(chat.submissionRole === "reviewer" ? "submission.authorsShort" : "submission.reviewersShort")}</span>
-              <span className="submission-list-names">{counterpartNames || t("common.unknown")}</span>
-              {collaborators.length > 1 ? <span className="submission-list-collaboration">{t(chat.submissionRole === "reviewer" ? "submission.coReviewing" : "submission.coAuthoring", { count: collaborators.length })}</span> : null}
-            </div>
-          </>
-        ) : (
-          <p className="chat-name"><span>{chat.title}</span>{chat.official ? <OfficialBadge /> : null}{chat.operator ? <OperatorBadge /> : null}</p>
-        )}
-        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.preview}</span></div>
+        <p className="chat-name"><span>{chat.title}</span>{!chat.submission && chat.official ? <OfficialBadge /> : null}{!chat.submission && chat.operator ? <OperatorBadge /> : null}</p>
+        <div className="chat-preview">{chat.hasUnreadMention ? <span className="chat-mention-label">{t("chat.mentioned")}</span> : null}<span>{chat.submission && counterpartNames ? `${counterpartNames} · ` : ""}{chat.preview}</span></div>
       </div>
       <div className="chat-meta">
         <div className="chat-time">{chat.time}</div>
+        {chat.submission ? <span className={`submission-thread-status is-${chat.submission.status}`}>{submissionStatusLabel(chat.submission.status)}</span> : null}
         {chat.pinned ? <span className="chat-pin-label">{t("chat.pinned")}</span> : null}
       </div>
     </button>;
@@ -8007,16 +7952,11 @@ function LiveChatsPage({
   const renderChatList = (hideHeader = false) => (
     <>
       {!hideHeader ? <TabPageHeader
-        title={submissionMode ? <span className="submission-header-title"><span>{t("submission.title")}</span>{!squareIntegrated && canReviewSubmissionInvites ? <button aria-label={t("submission.switchView")} className="submission-view-switch" onClick={() => chooseSubmissionView(submissionView === "author" ? "reviewer" : "author")} type="button"><svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><path d="M6.5 7.5h11m0 0-3-3m3 3-3 3M17.5 16.5h-11m0 0 3 3m-3-3 3-3" /></svg><span>{submissionView === "author" ? t("submission.viewMine") : t("submission.viewReview")}</span></button> : null}</span> : t("chat.title")}
+        title={t(submissionMode ? "submission.title" : "chat.title")}
         syncing={viewState === "loading"}
-        secondary={submissionMode && squareIntegrated ? <nav className="square-submission-workspace-tabs">
-          <button className="square-submission-return" onClick={() => onReturnToSquare ? onReturnToSquare() : navigate("/app/square")} type="button"><span className="material-symbols-outlined">explore</span><span>{t("square.title")}</span></button>
-          <span className="square-submission-workspace-spacer" />
-          <button aria-selected={submissionView === "author"} className={submissionView === "author" ? "is-active" : ""} onClick={() => chooseSubmissionView("author")} type="button"><span>{t("submission.viewMine")}</span>{submissionViewActionCounts.author ? <i>{submissionViewActionCounts.author > 99 ? "99+" : submissionViewActionCounts.author}</i> : null}</button>
-          {canReviewSubmissionInvites ? <button aria-selected={submissionView === "reviewer"} className={submissionView === "reviewer" ? "is-active" : ""} onClick={() => chooseSubmissionView("reviewer")} type="button"><span>{t("submission.viewReview")}</span>{submissionViewActionCounts.reviewer ? <i>{submissionViewActionCounts.reviewer > 99 ? "99+" : submissionViewActionCounts.reviewer}</i> : null}</button> : null}
-        </nav> : undefined}
-        actions={submissionMode && (squareIntegrated || submissionView === "author") ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
-          <button aria-expanded={submissionCreateMenuOpen} aria-label={t("submission.new")} className="square-header-publish submission-header-create" onClick={() => void toggleSubmissionCreateMenu()} type="button"><span className="material-symbols-outlined">edit_square</span><span>{t("submission.new")}</span></button>
+        secondary={submissionMode ? <PageTabs label={t("submission.switchView")} value={submissionView} onChange={chooseSubmissionView} items={[{ value: "author", label: t("submission.viewMine") }, ...(canReviewSubmissionInvites ? [{ value: "reviewer" as const, label: t("submission.viewReview") }] : [])]} trailing={<SelectControl label={t("submission.filterLabel")} value={submissionStatusFilter} onChange={setSubmissionStatusFilter} options={[{ value: "all", label: t("submission.filterAll") }, ...visibleSubmissionFilterStatuses.map((status) => ({ value: status, label: `${submissionStatusLabel(status)} · ${submissionStatusCounts[status] ?? 0}` }))]} />} /> : undefined}
+        actions={submissionMode && submissionView === "author" ? <div className="submission-create-menu" ref={submissionCreateMenuRef}>
+          <button aria-expanded={submissionCreateMenuOpen} aria-label={t("submission.new")} className="tab-header-action" onClick={() => void toggleSubmissionCreateMenu()} type="button"><span className="material-symbols-outlined">edit_square</span></button>
           {submissionCreateMenuOpen ? <div className="submission-recipient-dropdown">
             {submissionRecipientsLoading ? <div className="submission-recipient-dropdown-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => void beginSubmissionWith(recipient)} type="button"><UserAvatar className="mini-avatar" frame={recipient.user.avatar_frame_style} name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
             {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="submission-recipient-dropdown-empty">{t("submission.noRecipients")}</div> : null}
@@ -8034,18 +7974,6 @@ function LiveChatsPage({
       /> : null}
       {!submissionMode ? <AddFriendDrawer onRouteOpen={() => setAddFriendOpen(true)} onClose={() => setAddFriendOpen(false)} open={addFriendOpen} /> : null}
       {!submissionMode ? <VerificationBanner hasPassword={Boolean(session?.user?.has_password)} verified={Boolean(session?.user?.verified)} /> : null}
-      {submissionMode && chats.length ? (
-        <nav aria-label={t("submission.filterLabel")} className="submission-status-filters">
-          <button aria-pressed={submissionStatusFilter === "all"} className={submissionStatusFilter === "all" ? "is-active" : ""} onClick={() => setSubmissionStatusFilter("all")} type="button">
-            <span>{t("submission.filterAll")}</span><b>{chats.length}</b>
-          </button>
-          {visibleSubmissionFilterStatuses.map((status) => (
-            <button aria-pressed={submissionStatusFilter === status} className={submissionStatusFilter === status ? "is-active" : ""} key={status} onClick={() => setSubmissionStatusFilter(status)} type="button">
-              <span>{submissionStatusLabel(status)}</span><b>{submissionStatusCounts[status] ?? 0}</b>
-            </button>
-          ))}
-        </nav>
-      ) : null}
 
       <div className="chat-list-screen-body">
         <div className="chat-list">
@@ -8125,8 +8053,7 @@ function LiveChatsPage({
   return (
     <AppChrome
       workspaceSelected={Boolean(displayedChat)}
-      embedded={embeddedListOnly}
-      title={t("chat.title")}
+      title={t(submissionMode ? "submission.title" : "chat.title")}
       hideTopbar={!displayedChat}
       hideMobileNav={Boolean(displayedChat)}
       hidePageTitle={Boolean(displayedChat)}
@@ -8197,7 +8124,7 @@ function LiveChatsPage({
       }
     >
       <section ref={chatLayoutRef} className={`app-layout chat-mobile-layout chat-background-${chatBackgroundTheme}${hasDecorativeChatBackground ? ` has-chat-wallpaper${chatWallpaperToneClass}` : ""} ${displayedChat ? "chat-detail-active" : "chat-list-active"}`} style={chatLayoutStyle}>
-        <section className={`list-screen mobile-chat-list-screen${submissionMode ? " has-submission-filters" : !session?.user?.verified ? " has-verification-banner" : ""}${squareIntegrated ? " is-square-integrated" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList(embeddedListOnly)}</section>
+        <section className={`list-screen mobile-chat-list-screen${submissionMode ? " is-submission-list" : !session?.user?.verified ? " has-verification-banner" : ""} ${displayedChat ? "is-background" : "is-active"}`}>{renderChatList()}</section>
 
         <section
           ref={chatMainPaneRef}
@@ -8209,7 +8136,7 @@ function LiveChatsPage({
         >
           {displayedChat ? (
             <>
-              <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}${squareIntegrated && submissionMode ? " is-integrated-submission" : ""}${embeddedListOnly && squareIntegrated && submissionMode ? " is-embedded-submission" : ""}${submissionWorkflowBar ? " has-submission-workflow" : ""}`}>
+              <header className={`desktop-conversation-header chat-background-${chatBackgroundTheme}${submissionWorkflowBar ? " has-submission-workflow" : ""}`}>
                 <div className="conversation-header-primary">
                 {messageSelectionMode ? (
                   <div className="message-selection-topbar">
@@ -8219,9 +8146,7 @@ function LiveChatsPage({
                     <strong>{t("message.selectedCount", { count: selectedMessageClientIds.length })}</strong>
                   </div>
                 ) : <div className="chat-conversation-topbar desktop-chat-conversation-topbar">
-                  {!embeddedListOnly ? <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button> : null}
-                  {embeddedListOnly && squareIntegrated && submissionMode ? <button aria-label={t("common.back")} className="chat-back-button integrated-submission-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button> : null}
-                  {embeddedListOnly && squareIntegrated && submissionMode ? <UserAvatar className="avatar integrated-submission-avatar" frame={displayedChat.avatarFrameStyle} name={displayedChat.title} uri={displayedChat.avatarUri} /> : null}
+                  <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeChatView} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
                   <div className="chat-topbar-meta">
                     <strong className="chat-topbar-name">
                       <span className="chat-topbar-title-text">{displayedChat.title}</span>
@@ -8231,7 +8156,7 @@ function LiveChatsPage({
                   </div>
                 </div>}
                 {messageSelectionMode && submissionPublishSelection ? <button aria-label={t("common.next")} className="icon-button submission-next-button" disabled={!selectedMessageClientIds.length} onClick={composeSubmissionForSquare} type="button"><span className="material-symbols-outlined">arrow_forward</span></button>
-                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} />{!embeddedListOnly ? <button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button> : null}</div> : null}
+                  : !messageSelectionMode ? <div className="conversation-header-actions">{chatCalendar ? <ChatCalendarAvailability data={chatCalendar} /> : null}<ChatDetailsButton label={displayedChat.purpose === "submission" ? t("submission.detailsTitle") : t("chat.details")} onClick={() => setDetailsSheetOpen(true)} /><button aria-label={t("common.close")} className="chat-back-button native-panel-close" onClick={closeChatView} type="button"><span className="material-symbols-outlined">close</span></button></div> : null}
                 </div>
                 {submissionWorkflowBar}
                 {sendProgress !== null ? (
@@ -10898,7 +10823,7 @@ export function ChatPreview({
   );
 }
 
-export default function ChatsPage({ preview, purpose, squareIntegrated, embeddedListOnly, onReturnToSquare }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission"; squareIntegrated?: boolean; embeddedListOnly?: boolean; onReturnToSquare?: () => void }) {
+export default function ChatsPage({ preview, purpose }: { preview?: ChatsPagePreviewConfig; purpose?: "normal" | "submission" }) {
   if (preview) return <PreviewChatConversation config={preview} />;
-  return <LiveChatsPage embeddedListOnly={embeddedListOnly} onReturnToSquare={onReturnToSquare} purpose={purpose} squareIntegrated={squareIntegrated} />;
+  return <LiveChatsPage purpose={purpose} />;
 }

@@ -1,0 +1,9 @@
+.app-page-tabs { display: flex; align-items: stretch; justify-content: space-between; gap: 12px; min-width: 0; min-height: 44px; }
+.app-page-tabs-items { display: flex; align-items: stretch; gap: 22px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.app-page-tabs-items > button { position: relative; flex: 0 0 auto; padding: 10px 0 12px; border: 0; border-radius: 0; color: var(--text-muted); background: transparent; font: inherit; font-size: 13px; font-weight: 750; white-space: nowrap; }
+.app-page-tabs-items > button[aria-selected="true"] { color: var(--text-primary); }
+.app-page-tabs-items > button[aria-selected="true"]::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; border-radius: 2px; background: var(--brand-primary); content: ""; }
+.app-page-tabs-trailing { display: flex; flex: 0 1 auto; align-items: center; min-width: 0; max-width: 50%; }
+.app-page-tabs-trailing .setting-select > summary { gap: 4px; min-height: 32px; padding: 5px 7px; font-size: 12px; }
+.app-page-tabs-trailing .setting-select-options { right: 0; left: auto; min-width: 160px; }
+.app-page-tabs-trailing .setting-select > summary > span:first-child { overflow: hidden; max-width: 12ch; text-overflow: ellipsis; white-space: nowrap; }

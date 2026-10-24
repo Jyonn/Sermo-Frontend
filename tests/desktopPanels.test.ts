@@ -70,7 +70,7 @@ test("Square keeps readable cards and adapts actions to the panel rather than th
   const css = readFileSync(new URL("../src/styles/app/10-chat-city.css", import.meta.url), "utf8");
   assert.match(css, /@container square-feed \(max-width: 440px\)/);
   const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
-  assert.match(square, /aria-label=\{squareWorkspace === "square" \? t\("square.publish"\) : t\("submission.new"\)\}/);
+  assert.match(square, /aria-label=\{t\("square.publish"\)\}/);
 });
 
 test("chat and Square reserve a narrow list and prioritize detail space", () => {

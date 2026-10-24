@@ -1,19 +1,19 @@
 {
-  "id": "2026.10.25.1",
+  "id": "2026.10.25.2",
   "publishedAt": "2026-10-25",
   "locales": {
     "zh-CN": {
-      "title": "管理工作台，横竖皆宜",
+      "title": "投稿，独立又简洁",
       "items": [
-        "空间管理与平台管理适配宽屏、平板和手机竖屏，导航不再挤作一团",
-        "权限编辑、成员详情及管理表单优化横屏布局与深色外观"
+        "投稿拥有独立导航入口，不再与广场混合，旧链接仍可正常打开",
+        "列表采用简洁聊天样式，重新整理我的、审批和状态筛选"
       ]
     },
     "en": {
-      "title": "Administration in every orientation",
+      "title": "A simpler home for submissions",
       "items": [
-        "Space and platform administration adapt to desktop, tablet and portrait phone screens with clearer navigation",
-        "Permission editors, member details and management forms have improved landscape layouts and dark appearance"
+        "Submissions now have their own navigation tab, separate from Square, with support for existing links",
+        "A clean chat-style list with refreshed My submissions, Reviews and status filtering"
       ]
     }
   }

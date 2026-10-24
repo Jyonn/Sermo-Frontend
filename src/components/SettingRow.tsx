@@ -46,7 +46,7 @@ export function SettingRow({
   return onClick ? <button className={classes} disabled={disabled} onClick={onClick} type="button">{content}</button> : <div className={classes}>{content}</div>;
 }
 
-export function SettingSelect<T extends string>({ disabled = false, label, onChange, options, value }: {
+export function SelectControl<T extends string>({ disabled = false, label, onChange, options, value }: {
   disabled?: boolean;
   label: string;
   onChange: (value: T) => void | Promise<void>;
@@ -62,10 +62,22 @@ export function SettingSelect<T extends string>({ disabled = false, label, onCha
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, []);
-  return <SettingRow title={label} trailing={
-    <details className={`setting-select${disabled ? " is-disabled" : ""}`} ref={menuRef}>
+  return <details className={`setting-select${disabled ? " is-disabled" : ""}`} ref={menuRef} onKeyDown={(event) => {
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); menuRef.current?.removeAttribute("open"); menuRef.current?.querySelector("summary")?.focus(); }
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    if (disabled) return;
+    menuRef.current?.setAttribute("open", "");
+    const items = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? []);
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : index < 0 ? (event.key === "ArrowUp" ? items.length - 1 : 0) : (index + (event.key === "ArrowUp" ? -1 : 1) + items.length) % items.length;
+    items[next]?.focus();
+  }}>
       <summary aria-disabled={disabled} aria-label={`${label}: ${selected.label}`} onClick={(event) => { if (disabled) event.preventDefault(); }}><span>{selected.label}</span><span className="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
-      <div className="setting-select-options" role="listbox" aria-label={label}>{options.map((option) => <button aria-selected={option.value === value} key={option.value} onClick={() => { menuRef.current?.removeAttribute("open"); if (option.value !== value) void onChange(option.value); }} role="option" type="button"><span>{option.label}</span><i aria-hidden="true">{option.value === value ? "✓" : ""}</i></button>)}</div>
-    </details>
-  } />;
+      <div className="setting-select-options" role="listbox" aria-label={label}>{options.map((option) => <button aria-selected={option.value === value} key={option.value} onClick={() => { menuRef.current?.removeAttribute("open"); menuRef.current?.querySelector("summary")?.focus(); if (option.value !== value) void onChange(option.value); }} role="option" type="button"><span>{option.label}</span><i aria-hidden="true">{option.value === value ? "✓" : ""}</i></button>)}</div>
+    </details>;
+}
+
+export function SettingSelect<T extends string>(props: Parameters<typeof SelectControl<T>>[0]) {
+  return <SettingRow title={props.label} trailing={<SelectControl {...props} />} />;
 }

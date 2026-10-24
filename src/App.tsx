@@ -22,6 +22,7 @@ import AccountSwitchPage from "./pages/AccountSwitchPage";
 import PwaAccountEntryPage from "./pages/PwaAccountEntryPage";
 import { getDetectedSpaceSlug } from "./lib/spaceEntry";
 import { useSpaceFeatures } from "./lib/spaceFeatures";
+import { legacySubmissionDestination } from "./lib/submissionRouting";
 import { routeResources } from "./lib/routeResources";
 import { readOAuthRequest, isOAuthLoginPending } from "./lib/oauthPending";
 
@@ -65,6 +66,12 @@ function RequireSubmissionFeature({ children }: { children: ReactNode }) {
   if (!features.ready) return <RouteResourceState status="loading" />;
   if (!features.submissionEnabled) return <Navigate replace to="/app/square" />;
   return children;
+}
+
+function SquareEntry() {
+  const location = useLocation();
+  const destination = legacySubmissionDestination(location.pathname, location.search);
+  return destination ? <Navigate replace to={destination} /> : <SquarePage />;
 }
 
 export default function App() {
@@ -138,21 +145,21 @@ export default function App() {
         />
         <Route
           path="/app/submissions"
-          element={<RequireAuth><RequireSubmissionFeature><Navigate replace to="/app/square?workspace=submissions" /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions/new"
-          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" squareIntegrated /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/submissions/:chatId"
-          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" squareIntegrated /></RequireSubmissionFeature></RequireAuth>}
+          element={<RequireAuth><RequireSubmissionFeature><ChatsPage purpose="submission" /></RequireSubmissionFeature></RequireAuth>}
         />
         <Route
           path="/app/square"
           element={
             <RequireAuth>
-              <SquarePage />
+              <SquareEntry />
             </RequireAuth>
           }
         />
@@ -160,7 +167,7 @@ export default function App() {
           path="/app/square/submissions/:chatId"
           element={
             <RequireAuth>
-              <RequireSubmissionFeature><SquarePage /></RequireSubmissionFeature>
+              <RequireSubmissionFeature><SquareEntry /></RequireSubmissionFeature>
             </RequireAuth>
           }
         />

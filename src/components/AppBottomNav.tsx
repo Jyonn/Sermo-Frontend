@@ -15,13 +15,14 @@ import { preloadRouteForPath, preloadRouteResource } from "../lib/routeResources
 const mobileRoutes = [
   { key: "chats", href: "/app/chats", icon: "chat", labelKey: "nav.chats" },
   { key: "square", href: "/app/square", icon: "explore", labelKey: "nav.square" },
+  { key: "submissions", href: "/app/submissions", icon: "outbox", labelKey: "submission.title" },
   { key: "notifications", href: "/app/notifications", icon: "forum", labelKey: "nav.contacts" },
   { key: "menu", href: "/app/menu", icon: "menu", labelKey: "nav.menu" },
 ] as const;
 
 function activeKey(pathname: string) {
   if (pathname.startsWith("/app/chats")) return "chats";
-  if (pathname.startsWith("/app/submissions")) return "square";
+  if (pathname.startsWith("/app/submissions")) return "submissions";
   if (pathname.startsWith("/app/square")) return "square";
   if (pathname.startsWith("/app/notifications")) return "notifications";
   if (pathname.startsWith("/app/menu")) return "menu";
@@ -226,6 +227,7 @@ export function AppBottomNav() {
   const current = activeKey(effectivePathname);
   const visibleRoutes = mobileRoutes.filter((route) => {
     if (route.key === "square") return features.squareEnabled;
+    if (route.key === "submissions") return features.ready && features.submissionEnabled;
     if (route.key === "chats") return features.ready && features.chatEnabled;
     return true;
   });

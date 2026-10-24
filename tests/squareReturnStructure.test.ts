@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 const square = readFileSync(new URL("../src/pages/SquarePage.tsx", import.meta.url), "utf8");
 test("detail transitions cannot overwrite feed scroll history", () => {
-  assert.match(square, /if \(squareWorkspace !== "square" \|\| inlineStatementId !== null \|\| inlineRouteActive \|\| inlineStatementExpanded\) return/);
+  assert.match(square, /if \(inlineStatementId !== null \|\| inlineRouteActive \|\| inlineStatementExpanded\) return/);
   assert.match(square, /feedDetailWasActiveRef\.current && !detailActive/);
   assert.match(square, /\$\{activeFeedCacheKey\}:anchor/);
 });

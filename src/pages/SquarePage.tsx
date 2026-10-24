@@ -55,7 +55,7 @@ import { useSpaceFeatures } from "../lib/spaceFeatures";
 import { buildSpaceHrefForCurrentHost, getDetectedSpaceSlug } from "../lib/spaceEntry";
 import { showToast } from "../lib/toast";
 import { resolveStableResourceUri } from "../lib/stableResource";
-import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, SubmissionRecipientDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
+import type { ActivityCampaignDTO, ChatBackgroundTheme, ChatDTO, ChatMessageDTO, ImageMetadataDTO, InlineEmoticonDTO, LinkPreviewDTO, NotificationEventDTO, PermanentVipCampaignDTO, SquareCalendarDTO, SquareQuotaDTO, SquareStatementCommentDTO, SquareStatementDTO, SquareStatementDraftMedia, SquareStatusDTO, StickerAssetDTO, TinyUserDTO, UserDTO, VideoMetadataDTO } from "../types";
 import ChatsPage, { ChatPreview, ComposerSvgIcon, EMOJI_PAGES, StickerImage, forwardBundleItemsAsMessages } from "./ChatsPage";
 import baxianActivityLogo from "../assets/activity/baxian-logo-gold.png";
 import baxianActivityTitle from "../assets/activity/title-baxian-juli.png";
@@ -565,7 +565,7 @@ export default function SquarePage() {
   const { t, language } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { statementId: routeStatementId, activityKey: routeActivityKey, chatId: legacySubmissionChatId } = useParams();
+  const { statementId: routeStatementId, activityKey: routeActivityKey } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { patchSessionUser, session } = useAuth();
   const features = useSpaceFeatures();
@@ -576,21 +576,6 @@ export default function SquarePage() {
   const selectedFeedDate = normalizeFeedDate(searchParams.get("date"));
   const selectedFeedKeyword = (searchParams.get("keyword") || "").trim().slice(0, 100);
   const hasFeedFilters = Boolean(selectedFeedDate || selectedFeedKeyword);
-  const squareWorkspace = features.submissionEnabled && (searchParams.get("workspace") === "submissions" || location.pathname.startsWith("/app/square/submissions/")) ? "submission" : "square";
-  const selectedSubmissionId = Number(searchParams.get("submission"));
-  const submissionDetailActive = squareWorkspace === "submission" && Number.isInteger(selectedSubmissionId) && selectedSubmissionId > 0;
-  const canReviewSubmissions = Boolean(session?.user.official || session?.user.operator);
-  const requestedSubmissionView = searchParams.get("view");
-  const submissionView: "author" | "reviewer" = requestedSubmissionView === "author" || requestedSubmissionView === "reviewer"
-    ? requestedSubmissionView
-    : canReviewSubmissions ? "reviewer" : "author";
-  useEffect(() => {
-    if (!legacySubmissionChatId || !location.pathname.startsWith("/app/square/submissions/")) return;
-    const next = new URLSearchParams(searchParams);
-    next.set("workspace", "submissions");
-    next.set("submission", legacySubmissionChatId);
-    navigate(`/app/square?${next.toString()}`, { replace: true });
-  }, [legacySubmissionChatId, location.pathname, navigate, searchParams]);
   const [feedMode, setFeedMode] = useState<"all" | "friends" | "mine" | "user">(() => {
     if (profileFeedUserId) return "user";
     const saved = readTabCache<string>(cacheScope, "square:mode")?.data;
@@ -652,13 +637,6 @@ export default function SquarePage() {
   const [publishing, setPublishing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
-  const [publishRouteOpen, setPublishRouteOpen] = useState(false);
-  const [submissionRecipientStep, setSubmissionRecipientStep] = useState(false);
-  const [submissionRecipients, setSubmissionRecipients] = useState<SubmissionRecipientDTO[]>([]);
-  const [submissionRecipientsLoading, setSubmissionRecipientsLoading] = useState(false);
-  const [submissionActionCounts, setSubmissionActionCounts] = useState({ author: 0, reviewer: 0 });
-  const [submissionTransitioning, setSubmissionTransitioning] = useState(false);
-  const publishRouteRef = useRef<HTMLDivElement | null>(null);
   const [publishVerificationOpen, setPublishVerificationOpen] = useState(false);
   const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
   const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
@@ -671,16 +649,6 @@ export default function SquarePage() {
     owner: TinyUserDTO;
   } | null>(null);
 
-  useEffect(() => {
-    if (!publishRouteOpen) return;
-    const closePublishRoute = (event: PointerEvent) => {
-      if (publishRouteRef.current?.contains(event.target as Node)) return;
-      setPublishRouteOpen(false);
-      setSubmissionRecipientStep(false);
-    };
-    window.addEventListener("pointerdown", closePublishRoute);
-    return () => window.removeEventListener("pointerdown", closePublishRoute);
-  }, [publishRouteOpen]);
 
   const parsedRouteStatementId = Number(routeStatementId);
   const routedStatementId = Number.isFinite(parsedRouteStatementId) && parsedRouteStatementId > 0 ? parsedRouteStatementId : null;
@@ -838,29 +806,6 @@ export default function SquarePage() {
   const galleryVideo = galleryVideoStatement?.media.find((item) => item.kind === "video") ?? null;
   const profileSeed = statements.find((statement) => statement.user.user_id === profileDrawerUserId)?.user ?? null;
 
-  useEffect(() => {
-    if (!session || !features.submissionEnabled) {
-      setSubmissionActionCounts({ author: 0, reviewer: 0 });
-      return;
-    }
-    let cancelled = false;
-    const sync = () => void Promise.all([
-      api.getChats(undefined, "submission", "author"),
-      api.getChats(undefined, "submission", "reviewer"),
-    ]).then(([authored, reviewed]) => {
-      if (cancelled) return;
-      setSubmissionActionCounts({
-        author: authored.filter((chat) => chat.submission?.action_required).length,
-        reviewer: reviewed.filter((chat) => chat.submission?.action_required).length,
-      });
-    }).catch(() => undefined);
-    sync();
-    const timer = window.setInterval(sync, 15_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, [features.submissionEnabled, session?.accessToken, session?.user.user_id]);
   const openUserProfile = (user: TinyUserDTO) => {
     if (isUnclaimedQqUser(user)) {
       setQqProfileUser(user);
@@ -2101,81 +2046,6 @@ export default function SquarePage() {
     setComposerOpen(true);
   };
 
-  const openPublishRoute = () => {
-    if (features.squareFreePostEnabled && !features.submissionEnabled) {
-      openComposer();
-      return;
-    }
-    if (!features.squareFreePostEnabled && features.submissionEnabled) {
-      openNewSubmission();
-      return;
-    }
-    setSubmissionRecipientStep(false);
-    setPublishRouteOpen(true);
-  };
-
-  const openSubmissionRecipients = async () => {
-    setSubmissionRecipientStep(true);
-    if (submissionRecipients.length || submissionRecipientsLoading) return;
-    setSubmissionRecipientsLoading(true);
-    try {
-      setSubmissionRecipients(await api.getSubmissionRecipients());
-    } catch {
-      setSubmissionRecipients([]);
-    } finally {
-      setSubmissionRecipientsLoading(false);
-    }
-  };
-
-  const openNewSubmission = () => {
-    setPublishRouteOpen(true);
-    void openSubmissionRecipients();
-  };
-
-  const chooseSubmissionView = (view: "author" | "reviewer") => {
-    const next = new URLSearchParams(searchParams);
-    next.set("workspace", "submissions");
-    next.set("view", view);
-    next.delete("submission");
-    setSearchParams(next);
-  };
-
-  const beginSubmission = (recipient: SubmissionRecipientDTO) => {
-    setPublishRouteOpen(false);
-    setSubmissionRecipientStep(false);
-    navigate("/app/submissions/new", { state: { recipient } });
-  };
-
-  const openSubmissionWorkspace = () => {
-    if (submissionTransitioning || squareWorkspace === "submission") return;
-    setSubmissionTransitioning(true);
-    setPublishRouteOpen(false);
-    feedScrollPositionsRef.current.set(activeFeedCacheKey, squareFeedScrollRef.current?.scrollTop ?? 0);
-    const next = new URLSearchParams(searchParams);
-    next.set("workspace", "submissions");
-    setSearchParams(next);
-    window.requestAnimationFrame(() => squareFeedScrollRef.current?.scrollTo({ top: 0 }));
-    window.setTimeout(() => setSubmissionTransitioning(false), 320);
-  };
-
-  const closeSubmissionWorkspace = () => {
-    if (submissionTransitioning || squareWorkspace === "square") return;
-    setSubmissionTransitioning(true);
-    if (location.pathname.startsWith("/app/square/submissions/")) {
-      navigate("/app/square", { replace: true });
-      window.setTimeout(() => setSubmissionTransitioning(false), 320);
-      return;
-    }
-    const next = new URLSearchParams(searchParams);
-    next.delete("workspace");
-    next.delete("submission");
-    setSearchParams(next);
-    window.requestAnimationFrame(() => squareFeedScrollRef.current?.scrollTo({
-      top: feedScrollPositionsRef.current.get(activeFeedCacheKey) ?? 0,
-    }));
-    window.setTimeout(() => setSubmissionTransitioning(false), 320);
-  };
-
   const continueToVerification = () => {
     setPublishVerificationOpen(false);
     if (!currentUser?.has_password) {
@@ -2398,12 +2268,12 @@ export default function SquarePage() {
   };
 
   return (
-    <AppChrome workspaceSelected={inlineRouteActive || submissionDetailActive} title={t("square.title")} hideMobileNav={squareWorkspace === "submission"} hideTopbar shellClassName={`desktop-tab-shell square-community-shell${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
-      <div className={`square-desktop-workspace is-${squareWorkspace}${inlineRouteActive || submissionDetailActive ? " has-selection" : ""}${submissionDetailActive ? " is-mobile-submission-detail" : ""}${submissionTransitioning ? " is-workspace-transitioning" : ""}`}>
+    <AppChrome workspaceSelected={inlineRouteActive} title={t("square.title")} hideTopbar shellClassName="desktop-tab-shell square-community-shell">
+      <div className={`square-desktop-workspace is-square${inlineRouteActive ? " has-selection" : ""}`}>
       <main
-        className={`list-screen square-feed-screen is-${squareWorkspace}-workspace${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}
+        className="list-screen square-feed-screen is-square-workspace"
         onScroll={(event) => {
-          if (squareWorkspace !== "square" || inlineStatementId !== null || inlineRouteActive || inlineStatementExpanded) return;
+          if (inlineStatementId !== null || inlineRouteActive || inlineStatementExpanded) return;
           const top = event.currentTarget.scrollTop;
           setFeedScrollTopVisible(top > 320);
           if (pendingFeedScrollRestoreRef.current?.key === activeFeedCacheKey) return;
@@ -2412,45 +2282,26 @@ export default function SquarePage() {
         ref={squareFeedScrollRef}
       >
         <TabPageHeader
-          syncing={squareWorkspace === "square" ? syncing : false}
-          title={features.submissionEnabled ? <span aria-label={`${t("square.title")} / ${t("submission.title")}`} className={`square-workspace-title is-${squareWorkspace}`} role="tablist">
-            <button aria-selected={squareWorkspace === "square"} className={squareWorkspace === "square" ? "is-active" : ""} onClick={closeSubmissionWorkspace} role="tab" type="button">{t("square.title")}</button>
-            <button aria-selected={squareWorkspace === "submission"} className={squareWorkspace === "submission" ? "is-active" : ""} onClick={openSubmissionWorkspace} role="tab" type="button"><span>{t("submission.title")}</span>{submissionActionCounts.author + submissionActionCounts.reviewer ? <i>{submissionActionCounts.author + submissionActionCounts.reviewer > 99 ? "99+" : submissionActionCounts.author + submissionActionCounts.reviewer}</i> : null}</button>
-          </span> : t("square.title")}
-          secondary={<div className={`square-workspace-tabs is-${squareWorkspace}${submissionTransitioning ? " is-transitioning" : ""}`} role="tablist">
-            <div aria-hidden={squareWorkspace !== "square"} className="square-workspace-tab-group is-square-channels">
-              {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <i className="square-fresh-dot" /> : null}</button> : null}
-              <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && feedMode !== "friends" ? <i className="square-fresh-dot" /> : null}</button>
-              <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
-              {profileFeedUserId ? <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}><button aria-selected={feedMode === "user"} disabled={squareWorkspace !== "square"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" disabled={squareWorkspace !== "square"} onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode("mine"); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
-            </div>
-            <div aria-hidden={squareWorkspace !== "submission"} className="square-workspace-tab-group is-submission-views">
-              <button aria-selected={submissionView === "author"} className={submissionView === "author" ? "is-active" : ""} disabled={squareWorkspace !== "submission"} onClick={() => chooseSubmissionView("author")} role="tab" type="button"><span>{t("submission.viewMine")}</span>{submissionActionCounts.author ? <i>{submissionActionCounts.author > 99 ? "99+" : submissionActionCounts.author}</i> : null}</button>
-              {canReviewSubmissions ? <button aria-selected={submissionView === "reviewer"} className={submissionView === "reviewer" ? "is-active" : ""} disabled={squareWorkspace !== "submission"} onClick={() => chooseSubmissionView("reviewer")} role="tab" type="button"><span>{t("submission.viewReview")}</span>{submissionActionCounts.reviewer ? <i>{submissionActionCounts.reviewer > 99 ? "99+" : submissionActionCounts.reviewer}</i> : null}</button> : null}
+          syncing={syncing}
+          title={t("square.title")}
+          secondary={<div className="square-workspace-tabs is-square" role="tablist">
+            <div className="square-workspace-tab-group is-square-channels">
+              {features.squareExploreEnabled ? <button aria-selected={feedMode === "all"} className={feedMode === "all" ? "is-active" : ""} onClick={() => setFeedMode("all")} role="tab" type="button">{t("square.feedAll")}{feedFresh.all && feedMode !== "all" ? <i className="square-fresh-dot" /> : null}</button> : null}
+              <button aria-selected={feedMode === "friends"} className={feedMode === "friends" ? "is-active" : ""} onClick={() => setFeedMode("friends")} role="tab" type="button">{t("square.feedFriends")}{feedFresh.friends && feedMode !== "friends" ? <i className="square-fresh-dot" /> : null}</button>
+              <button aria-selected={feedMode === "mine"} className={feedMode === "mine" ? "is-active" : ""} onClick={() => setFeedMode("mine")} role="tab" type="button">{t("square.feedMine")}</button>
+              {profileFeedUserId ? <span className={`square-feed-user-tab${feedMode === "user" ? " is-active" : ""}`}><button aria-selected={feedMode === "user"} onClick={() => setFeedMode("user")} role="tab" title={profileFeedUserName} type="button">{profileFeedUserName}</button><button aria-label={t("square.closeUserFeed", { name: profileFeedUserName })} className="square-feed-user-close" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("user_id"); next.delete("user_name"); setSearchParams(next, { replace: true }); setFeedMode("mine"); }} type="button"><span className="material-symbols-outlined">close</span></button></span> : null}
             </div>
           </div>}
-          actions={<div className={`square-header-actions is-${squareWorkspace}`}>
-            <div className="square-header-square-tools" aria-hidden={squareWorkspace !== "square"}>
-              <button aria-expanded={feedSearchOpen} aria-label={t("square.search")} aria-pressed={hasFeedFilters} className={`square-header-date${feedSearchOpen || hasFeedFilters ? " is-active" : ""}`} disabled={squareWorkspace !== "square"} onClick={() => setFeedSearchOpen((open) => !open)} type="button"><span className="material-symbols-outlined">search</span></button>
-              <button aria-label={t("square.quotaTitle")} className="square-header-quota" disabled={squareWorkspace !== "square"} onClick={openQuota} type="button"><span className="material-symbols-outlined">data_usage</span></button>
-              <button aria-label={t("square.notifications")} className="square-header-notifications" disabled={squareWorkspace !== "square"} onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}</button>
+          actions={<div className="square-header-actions is-square">
+            <div className="square-header-square-tools">
+              <button aria-expanded={feedSearchOpen} aria-label={t("square.search")} aria-pressed={hasFeedFilters} className={`square-header-date${feedSearchOpen || hasFeedFilters ? " is-active" : ""}`} onClick={() => setFeedSearchOpen((open) => !open)} type="button"><span className="material-symbols-outlined">search</span></button>
+              <button aria-label={t("square.quotaTitle")} className="square-header-quota" onClick={openQuota} type="button"><span className="material-symbols-outlined">data_usage</span></button>
+              <button aria-label={t("square.notifications")} className="square-header-notifications" onClick={openNotificationDrawer} type="button"><span className="material-symbols-outlined">notifications</span>{notificationUnread ? <i>{notificationUnread > 99 ? "99+" : notificationUnread}</i> : null}</button>
             </div>
-            <div className="square-publish-route" ref={publishRouteRef}>
-              <button aria-expanded={publishRouteOpen} aria-label={squareWorkspace === "square" ? t("square.publish") : t("submission.new")} title={squareWorkspace === "square" ? t("square.publish") : t("submission.new")} className="square-header-publish" onClick={squareWorkspace === "square" ? openPublishRoute : openNewSubmission} type="button"><span className="material-symbols-outlined">edit_square</span><span>{squareWorkspace === "square" ? t("square.publish") : t("submission.new")}</span></button>
-              {publishRouteOpen ? <div className={`square-publish-route-menu${submissionRecipientStep ? " is-recipient" : ""}`}>
-                {!submissionRecipientStep ? <>
-                  <button onClick={() => { setPublishRouteOpen(false); openComposer(); }} type="button"><span className="material-symbols-outlined">edit_square</span><span><strong>{t("square.publish")}</strong><small>{t("square.publishToSquare")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-                  <button onClick={() => void openSubmissionRecipients()} type="button"><span className="material-symbols-outlined">outbox</span><span><strong>{t("submission.new")}</strong><small>{t("submission.newHint")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>
-                </> : <>
-                  {features.squareFreePostEnabled && features.submissionEnabled && squareWorkspace === "square" ? <button className="square-publish-route-back" onClick={() => setSubmissionRecipientStep(false)} type="button"><span className="material-symbols-outlined">arrow_back</span><strong>{t("square.choosePublishMode")}</strong></button> : null}
-                  {submissionRecipientsLoading ? <div className="square-publish-route-loading"><HeaderSyncIndicator syncing /><span>{t("common.loading")}</span></div> : submissionRecipients.map((recipient) => <button key={recipient.user.user_id} onClick={() => beginSubmission(recipient)} type="button"><UserAvatar className="mini-avatar" name={recipient.user.name} uri={recipient.user.avatar_uri} /><span><strong>{recipient.user.name}</strong><small>{recipient.role === "official" ? t("profile.official") : t("profile.operator")}</small></span><span className="material-symbols-outlined">chevron_right</span></button>)}
-                  {!submissionRecipientsLoading && !submissionRecipients.length ? <div className="square-publish-route-empty">{t("submission.noRecipients")}</div> : null}
-                </>}
-              </div> : null}
-            </div>
+            {features.squareFreePostEnabled ? <button aria-label={t("square.publish")} title={t("square.publish")} className="square-header-publish" onClick={openComposer} type="button"><span className="material-symbols-outlined">edit_square</span><span>{t("square.publish")}</span></button> : null}
           </div>}
         />
-        {squareWorkspace === "square" ? <div className="square-workspace-surface is-square">
+        <div className="square-workspace-surface is-square">
         <div className="square-feed-column">
           {feedSearchOpen ? <div className="square-search-reveal is-open">
             <form className="square-search-panel" onSubmit={(event) => { event.preventDefault(); applyFeedSearch(); }}>
@@ -2595,11 +2446,9 @@ export default function SquarePage() {
           style={{ "--square-feed-scroll-top-right": `${feedScrollTopRight}px` } as CSSProperties}
           visible={feedScrollTopVisible && (!inlineStatementExpanded || desktopWorkspace)}
         />
-        </div> : <div className={`square-workspace-surface is-submission${submissionDetailActive ? " is-mobile-submission-detail" : ""}`}>
-          <ChatsPage embeddedListOnly onReturnToSquare={closeSubmissionWorkspace} purpose="submission" squareIntegrated />
-        </div>}
+        </div>
       </main>
-      {squareWorkspace === "square" ? <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
+      <aside className="square-desktop-detail-pane" aria-label={t("square.statementDetail")}>
         {inlineRouteActive && activeCommentStatement ? <section className="square-desktop-detail-card">
           <header className="square-desktop-detail-header">
             <button aria-label={t("common.back")} className="chat-back-button native-panel-back" onClick={closeInlineStatement} type="button"><span className="material-symbols-outlined">arrow_back</span></button>
@@ -2618,7 +2467,7 @@ export default function SquarePage() {
           <strong>{t("square.desktopSelectStatement")}</strong>
           <p>{t("square.desktopSelectStatementHint")}</p>
         </section>}
-      </aside> : null}
+      </aside>
       </div>
       {inlineStatementExpanded && !desktopWorkspace && typeof document !== "undefined" ? createPortal(<>
         <button aria-label={t("common.close")} className={`square-inline-focus-mask is-${inlineTransitionPhase}`} onClick={closeInlineStatement} ref={inlineDetailMaskRef} type="button" />
