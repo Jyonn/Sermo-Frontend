@@ -1,17 +1,17 @@
 {
-  "id": "2026.10.24.8",
+  "id": "2026.10.24.9",
   "publishedAt": "2026-10-24",
   "locales": {
     "zh-CN": {
-      "title": "按空间开放应用管理",
+      "title": "日历镜像联动",
       "items": [
-        "OAuth 应用管理仅在开发者空间由管理员开启后展示，其他空间不再显示此入口"
+        "在 6-79.cn 镜像站授权 Chronelle、查看日程和打开日历时，统一使用 Chronelle 镜像"
       ]
     },
     "en": {
-      "title": "Space-specific application management",
+      "title": "Calendar mirror integration",
       "items": [
-        "OAuth application management appears only in the developer space after its administrator enables it"
+        "Chronelle authorization, schedules and calendar links now use the Chronelle mirror on both 6-79.cn sites"
       ]
     }
   }

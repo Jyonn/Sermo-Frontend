@@ -4,6 +4,7 @@ import { useI18n } from "../lib/language";
 import { showToast } from "../lib/toast";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { chronelleOrigin } from "../lib/chronelleOrigin";
 
 export function ChronellePluginDialog({ open, onClose, userId, calendarId, onChange }: {
   open: boolean; onClose: () => void; userId: number; calendarId?: string; onChange: (id: string) => void;
@@ -49,7 +50,7 @@ export function ChronellePluginDialog({ open, onClose, userId, calendarId, onCha
     try {
       const result = await api.authorizeChronelle();
       const target = new URL(result.authorize_url);
-      if (target.origin !== "https://chronelle.jyonn.space" || !target.hash.startsWith("#/authorize/")) throw new Error(t("chronelle.failed"));
+      if (target.origin !== chronelleOrigin() || !target.hash.startsWith("#/authorize/")) throw new Error(t("chronelle.failed"));
       sessionStorage.setItem(storageKey, "1");
       setPending(true);
       if (popup) popup.location.replace(target.href);

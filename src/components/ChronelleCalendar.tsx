@@ -4,6 +4,7 @@ import { agendaWindowStart, agendaCenteredDays, agendaDayDistance, agendaDay, ag
 import { CalendarAvailabilityBar } from "./CalendarAvailabilityBar";
 import chronelleIcon from "../assets/chronelle-icon.png";
 import "./ChronelleCalendar.css";
+import { chronelleOrigin } from "../lib/chronelleOrigin";
 
 export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { calendarId?: string; loadEvents?: (params: URLSearchParams, signal: AbortSignal) => Promise<unknown> }) {
   const { t, language } = useI18n();
@@ -122,7 +123,7 @@ export function ChronelleCalendar({ calendarId, loadEvents = fetchAgenda }: { ca
     return () => { active = false; controller.abort(); window.clearTimeout(timeout); window.clearTimeout(debounce); };
   }, [calendarId, valid, start, requestKey, reload, loadEvents]);
   if (!valid) return null;
-  const shareUrl = `https://chronelle.jyonn.space/#/share/${calendarId}`;
+  const shareUrl = `${chronelleOrigin()}/#/share/${calendarId}`;
   const displayState = loadedKey !== requestKey && state !== "error" ? "loading" : state;
   const items = loadedKey === requestKey ? agendaEventsOn(events, selectedDay) : [];
   return <section className="chronelle-calendar" aria-label={t("chronelle.title")}>

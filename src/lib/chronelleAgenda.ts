@@ -1,3 +1,5 @@
+import { chronelleOrigin } from "./chronelleOrigin.ts";
+
 export interface AgendaEvent {
   id: string;
   start: string;
@@ -53,7 +55,7 @@ export function publicCalendarForFriend(friends: Array<{ user_id: number; chrone
 }
 
 export async function fetchAgenda(params: URLSearchParams, signal: AbortSignal): Promise<unknown> {
-  const response = await fetch(`https://chronelle.jyonn.space/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal });
+  const response = await fetch(`${chronelleOrigin()}/api/events/?${params}`, { credentials: "omit", referrerPolicy: "no-referrer", signal });
   if (!response.ok) throw new Error("Calendar unavailable");
   return response.json();
 }
